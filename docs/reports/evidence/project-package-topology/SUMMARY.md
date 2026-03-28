@@ -6,7 +6,7 @@
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
 
-> Это summary — internal-published evidence layer для package-topology
+> Это summary — repo-only evidence layer для package-topology
 > интерпретации. Он помогает калибровать structural observations, но не
 > заменяет canonical architecture guidance в `docs/00-project/` и
 > `docs/02-architecture/`.

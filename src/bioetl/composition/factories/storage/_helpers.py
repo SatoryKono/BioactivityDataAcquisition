@@ -110,6 +110,69 @@ def resolve_storage_paths(
     )
 
 
+def _has_provider_entity_suffix(
+    path: Path,
+    *,
+    provider: str,
+    entity_type: str,
+) -> bool:
+    """Return True when a path already ends with provider/entity segments."""
+    parts = Path(str(path).replace("\\", "/")).parts
+    if len(parts) < 2:
+        return False
+    return parts[-2:] == (provider, entity_type)
+
+
+def resolve_delta_writer_base_path(
+    resolved_path: Path,
+    *,
+    provider: str,
+    entity_type: str,
+    flat_structure: bool,
+) -> Path:
+    """Normalize Delta writer base_path to the layer root when path is entity-scoped.
+
+    Storage contexts still expose the fully resolved per-pipeline target path for
+    observability and report generation. Delta writers, however, must keep a
+    layer-root base path so downstream maintenance helpers can append the logical
+    table id exactly once.
+    """
+    runtime_path = Path(str(resolved_path).replace("\\", "/"))
+    if flat_structure:
+        return runtime_path
+    if _has_provider_entity_suffix(
+        runtime_path,
+        provider=provider,
+        entity_type=entity_type,
+    ):
+        return runtime_path.parent.parent
+    return runtime_path
+
+
+def resolve_delta_writer_flat_structure(
+    resolved_path: Path,
+    *,
+    provider: str,
+    entity_type: str,
+    flat_structure: bool,
+) -> bool:
+    """Downgrade entity-scoped flat Delta paths to layer-root/table-name mode.
+
+    When configuration normalization already materializes a path like
+    ``data/output/silver/provider/entity``, keeping ``flat_structure=True`` would
+    collapse all Delta writes onto that single directory and break maintenance
+    helpers that work with logical table ids. In that case we switch writers back
+    to the canonical layer-root + logical-table contract.
+    """
+    if not flat_structure:
+        return False
+    return not _has_provider_entity_suffix(
+        resolved_path,
+        provider=provider,
+        entity_type=entity_type,
+    )
+
+
 def create_layer_exporters(
     *,
     settings: Settings,
@@ -289,6 +352,18 @@ def create_storage_adapter(
     """Create StorageAdapter with Bronze/Silver/Gold writers."""
     metadata_atomic_retry_policy = create_silver_atomic_retry_policy(settings)
     merge_resilience_policy = create_silver_merge_resilience_policy(settings)
+    silver_writer_flat = resolve_delta_writer_flat_structure(
+        ctx.silver_path,
+        provider=config.provider,
+        entity_type=config.entity_type,
+        flat_structure=ctx.silver_flat,
+    )
+    gold_writer_flat = resolve_delta_writer_flat_structure(
+        ctx.gold_path,
+        provider=config.provider,
+        entity_type=config.entity_type,
+        flat_structure=ctx.gold_flat,
+    )
 
     bronze_writer = create_bronze_writer(
         writer_cls=bronze_writer_cls,
@@ -302,7 +377,12 @@ def create_storage_adapter(
     )
     silver_writer = create_silver_writer(
         writer_cls=silver_writer_cls,
-        base_path=ctx.silver_path,
+        base_path=resolve_delta_writer_base_path(
+            ctx.silver_path,
+            provider=config.provider,
+            entity_type=config.entity_type,
+            flat_structure=silver_writer_flat,
+        ),
         config=ctx.silver_config,
         logger=logger,
         tracing=tracing,
@@ -310,7 +390,7 @@ def create_storage_adapter(
         metadata_coordinator=metadata_coordinator,
         transform_version=config.transform.version,
         transform_steps=tuple(config.transform.steps),
-        flat_structure=ctx.silver_flat,
+        flat_structure=silver_writer_flat,
         silver_validator=silver_validator,
         metrics=metrics,
         metadata_atomic_retry_policy=metadata_atomic_retry_policy,
@@ -318,7 +398,12 @@ def create_storage_adapter(
     )
     gold_writer = create_gold_writer(
         writer_cls=gold_writer_cls,
-        base_path=ctx.gold_path,
+        base_path=resolve_delta_writer_base_path(
+            ctx.gold_path,
+            provider=config.provider,
+            entity_type=config.entity_type,
+            flat_structure=gold_writer_flat,
+        ),
         config=ctx.gold_config,
         logger=logger,
         tracing=tracing,
@@ -326,7 +411,7 @@ def create_storage_adapter(
         metadata_coordinator=metadata_coordinator,
         transform_version=config.transform.version,
         transform_steps=tuple(config.transform.steps),
-        flat_structure=ctx.gold_flat,
+        flat_structure=gold_writer_flat,
         metrics=metrics,
     )
     return StorageAdapter(

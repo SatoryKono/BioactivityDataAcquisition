@@ -1,11 +1,11 @@
 %% BioETL — Locking, Checkpoint, and Graceful Shutdown
-%% Distinguishes general pipeline lifecycle from composite runtime specifics.
+%% Distinguishes general pipeline lifecycle from the newer composite checkpoint facade and resume semantics.
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-03-28
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   20
+%% @nodes   22
 %% @reference  Decomposed into 18a-lock-system, 18b-checkpoint-shutdown
 
 %%{init: {
@@ -40,7 +40,10 @@ graph TB
 
     subgraph AppCheckpoint["Application: Checkpoint Services"]
         CM["CheckpointManagerService<br/>standard pipeline checkpoints"]:::size-lg
-        CCS["CompositeCheckpointService<br/>current run-id checkpoint file<br/>or latest matching resume file"]:::size-lg
+        CCS["CompositeCheckpointService<br/>thin facade for composite persistence"]:::size-lg
+        CLOAD["CompositeCheckpointLoadService<br/>current run-id or latest matching<br/>checkpoint + stale resume guard"]:::size-lg
+        CPERSIST["CompositeCheckpointPersistenceService<br/>atomic save/list/delete/orphan cleanup"]:::size-lg
+        CCTX["Expected checkpoint context<br/>effective-config + contract anchors"]:::size-lg
     end
 
     subgraph AppShutdown["Application: Shutdown"]
@@ -84,6 +87,11 @@ graph TB
     LM --> LTYPE
     CM --> CKP
     CCS --> CCP
+    CCS --> CLOAD
+    CCS --> CPERSIST
+    CCS --> CCTX
+    CLOAD --> CCP
+    CPERSIST --> CCP
     CPR --> LKP
     CPR --> CCS
     CPR -.-> NOTE
@@ -103,7 +111,7 @@ graph TB
 
     class LKP,CKP,CCP,SHP port
     class LTYPE domain
-    class LM,HB,CM,CCS,SHUT,CPR app
+    class LM,HB,CM,CCS,CLOAD,CPERSIST,CCTX,SHUT,CPR app
     class ML,LCP infra
     class SG,NOTE safety
     class START,RUN,STOP,END lifecycle

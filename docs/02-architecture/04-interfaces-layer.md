@@ -47,18 +47,6 @@
 
 | Модуль                          | Назначение                              |
 | ------------------------------- | --------------------------------------- |
-| `execution_policy.py`           | Retained support seam; canonical implementation lives in `domains/shared/execution_policy.py` |
-| `run_all_command_policy.py`     | Retained support seam; canonical implementation lives in `domains/run_all/command_policy.py` |
-| `run_helpers.py`                | Retained support seam; canonical implementation lives in `domains/run/support.py` |
-| `run_all_helpers.py`            | Retained support seam; canonical implementation lives in `domains/run_all/support.py` |
-| `run_command_policy.py`         | Retained support seam; canonical implementation lives in `domains/run/command_policy.py` |
-| `run_runtime_helpers.py`        | Retained support seam; canonical implementation lives in `domains/run/runtime_helpers.py` |
-| `run_result_flow_helpers.py`    | Retained support seam; canonical implementation lives in `domains/run/result_flow.py` |
-| `run_service_access.py`         | Retained support seam; canonical implementation lives in `domains/run/service_access.py` |
-| `run_all_execution.py`          | Retained support seam; canonical implementation lives in `domains/run_all/execution.py` |
-| `run_composite_helpers.py`      | Retained support seam; canonical implementation lives in `domains/composite/support.py` |
-| `run_composite_runtime.py`      | Retained support seam; canonical implementation lives in `domains/composite/runtime.py` |
-| `run_composite_execution.py`    | Retained support seam; canonical implementation lives in `domains/composite/execution.py` |
 | `run_result_presenter.py`       | Retained support seam; canonical implementation lives in `domains/run/result_presenter.py` |
 | `health_rendering.py`           | Retained support seam; canonical implementation lives in `domains/health/rendering.py` |
 | `health_server_integration.py`  | Retained support seam; canonical implementation lives in `domains/health/server_integration.py` |

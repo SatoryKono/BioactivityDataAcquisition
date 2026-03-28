@@ -210,6 +210,8 @@ def build_delta_write_request(
         arrow_data=payload.arrow_data,
         primary_keys=ctx.primary_keys,
         partition_cols=ctx.partition_cols,
+        schema_mode=payload.schema_mode,
+        merge_schema=payload.merge_schema,
     )
 
 

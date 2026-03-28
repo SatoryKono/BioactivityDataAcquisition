@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.composition.builders import FilterConfigBuilder
@@ -94,6 +95,35 @@ __all__ = [
 ]
 
 _DEFAULT_HEALTH_CHECK_MODE: Literal["strict", "probe"] = "strict"
+
+
+def _apply_tracing_override(
+    *,
+    settings: Settings,
+    enabled: bool | None,
+) -> Settings:
+    """Return settings with an optional runtime tracing override applied."""
+    if enabled is None:
+        return settings
+
+    observability = getattr(settings, "observability", None)
+    if observability is None:
+        return settings
+
+    if hasattr(settings, "model_copy") and hasattr(observability, "model_copy"):
+        updated_observability = observability.model_copy(
+            update={"tracing_enabled": enabled}
+        )
+        return cast(
+            "Settings",
+            settings.model_copy(update={"observability": updated_observability}),
+        )
+
+    updated_settings = SimpleNamespace(**vars(settings))
+    updated_observability = SimpleNamespace(**vars(observability))
+    updated_observability.tracing_enabled = enabled
+    updated_settings.observability = updated_observability
+    return cast("Settings", updated_settings)
 
 
 def assemble_vacuum_settings(
@@ -243,7 +273,10 @@ def prepare_runner_inputs(
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> RunnerInputs:
     """Resolve runtime settings/config/observability into runner constructor inputs."""
-    settings = get_settings_fn()
+    settings = _apply_tracing_override(
+        settings=get_settings_fn(),
+        enabled=getattr(ctx, "tracing_enabled_override", None),
+    )
     yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
     validate_pk_contract(yaml_config)
     observability = build_observability_bundle_fn(

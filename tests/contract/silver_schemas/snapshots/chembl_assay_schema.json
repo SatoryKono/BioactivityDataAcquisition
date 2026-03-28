@@ -228,8 +228,8 @@
     "coerce": false,
     "description": "Assay type.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "assay_type_description": {
@@ -319,8 +319,8 @@
     "coerce": false,
     "description": "Assay description.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "entity_id": {
@@ -406,8 +406,8 @@
     "coerce": false,
     "description": "Target ChEMBL ID.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "tissue_id": {

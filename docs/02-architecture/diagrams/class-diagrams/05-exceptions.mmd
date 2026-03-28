@@ -46,18 +46,6 @@ classDiagram
         
     }
 
-    class MissingRequiredFieldError {
-        +field: str
-        +record_id: str
-        
-    }
-
-    class InvalidDataFormatError {
-        +field: str
-        +value: Any
-        +expected_format: str
-    }
-
     class DataQualityThresholdError {
         +error_rate: float
         +threshold: float
@@ -141,8 +129,6 @@ classDiagram
     DataQualityError <|-- DataQualityThresholdError
 
     ValidationError <|-- SchemaViolationError
-    ValidationError <|-- MissingRequiredFieldError
-    ValidationError <|-- InvalidDataFormatError
 
     AdapterError <|-- StorageError
     StorageError <|-- AtomicWriteError
@@ -154,8 +140,6 @@ classDiagram
     style DataQualityError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style ValidationError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style SchemaViolationError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style MissingRequiredFieldError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style InvalidDataFormatError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style DataQualityThresholdError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style LockNotHeldError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style PipelineConfigError fill:#fefce8,stroke:#ca8a04,stroke-width:2px

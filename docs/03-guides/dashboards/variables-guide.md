@@ -7,9 +7,9 @@
 
 | Dashboard UID | Переменные |
 |---|---|
-| `bioetl-simple` | `$pipeline`, `$run_type` |
 | `bioetl-overview-v2` | `$pipeline`, `$run_type` |
 | `bioetl-dq-v2` | `$pipeline`, `$run_type` |
+| `bioetl-runtime` | `$pipeline`, `$run_type` |
 | `bioetl-provider-health-v2` | `$provider` |
 
 ## Определения переменных
@@ -40,5 +40,6 @@ histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_b
 
 ## Зависимости
 
-- Для `simple/overview/dq`: `$run_type` зависит от `$pipeline`.
+- Для `overview/dq/runtime`: `$run_type` зависит от `$pipeline`.
+- Для `runtime`: `$run_type` зависит от `$pipeline`; Loki panels используют `$pipeline`, а alert-condition panels используют оба фильтра.
 - Для `provider-health-v2`: `$provider` управляет и timeseries, и summary/gauge панелями; pipeline filter не используется.

@@ -13,8 +13,13 @@ import pytest
 from bioetl.application.pipelines.chembl.activity_transformer import (
     ActivityTransformer,
 )
+from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.filtering import SilverFilterConfig
+from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.types import RunType
+from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_ACTIVITY_SCHEMA
+from bioetl.infrastructure.validation.pandera_validator import PanderaSilverValidator
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
@@ -375,3 +380,98 @@ class TestActivityTransformerActionType:
         assert result["action_type"] is None
         assert result["action_type_description"] is None
         assert result["action_type_parent_type"] is None
+
+
+@pytest.mark.unit
+class TestActivityTransformerSilverContract:
+    """Regression tests for the tightened chembl_activity Silver contract."""
+
+    @staticmethod
+    def _valid_contract_record() -> dict[str, object]:
+        """Return a chembl_activity record satisfying the stricter Silver contract."""
+        return {
+            "activity_id": 12345,
+            "molecule_chembl_id": "CHEMBL25",
+            "target_chembl_id": "CHEMBL1862",
+            "assay_chembl_id": "CHEMBL1234567",
+            "document_chembl_id": "CHEMBL998877",
+            "record_id": 100,
+            "src_id": 1,
+            "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
+            "target_organism": "Homo sapiens",
+            "target_tax_id": 9606,
+            "assay_type": "B",
+            "assay_description": "Binding assay",
+            "bao_endpoint": "BAO_0000019",
+            "bao_format": "BAO_0000219",
+            "bao_label": "single protein format",
+            "relation": "=",
+            "value": 10.5,
+            "units": "nM",
+            "standard_type": "IC50",
+            "standard_relation": "=",
+            "standard_value": 10.5,
+            "standard_units": "nM",
+            "standard_flag": 1,
+            "pchembl_value": 8.0,
+            "uo_units": "UO_0000065",
+            "document_journal": "Journal of Testing",
+            "document_year": 2024,
+            "potential_duplicate": 0,
+        }
+
+    @pytest.mark.asyncio
+    async def test_transform_applies_required_field_filter_for_contract_fields(
+        self,
+        mock_context,
+    ) -> None:
+        """Transformer should drop records missing fields required by Silver filters."""
+        transformer = ActivityTransformer(
+            provider="chembl",
+            silver_filters=SilverFilterConfig(required_fields=("canonical_smiles",)),
+            dependencies=build_test_transformer_dependencies(),
+        )
+        record = self._valid_contract_record()
+        record.pop("canonical_smiles")
+
+        with pytest.raises(FilteredOutError):
+            await transformer.transform(mock_context, record, index=0)
+
+    @pytest.mark.asyncio
+    async def test_transform_output_validates_with_stateful_activity_schema(
+        self,
+        transformer,
+        mock_context,
+    ) -> None:
+        """Silver validation should now accept and require _state metadata."""
+        result = await transformer.transform(
+            mock_context,
+            self._valid_contract_record(),
+            index=0,
+        )
+
+        assert result is not None
+        result["_source_batch_id"] = "batch-001"
+
+        validator = PanderaSilverValidator(ActivitySchema.to_schema(), strict=True)
+        validation_result = validator.validate([result])
+
+        assert result["_state"] == "validated"
+        assert validation_result.valid, validation_result.errors
+
+    def test_activity_arrow_schema_marks_contract_fields_non_nullable(self) -> None:
+        """Committed Arrow schema should reflect the stricter Silver nullability."""
+        expected_non_nullable = (
+            "_source_batch_id",
+            "_state",
+            "assay_id",
+            "target_id",
+            "publication_id",
+            "record_id",
+            "canonical_smiles",
+            "publication_year",
+            "standard_value",
+        )
+
+        for field_name in expected_non_nullable:
+            assert CHEMBL_ACTIVITY_SCHEMA.field(field_name).nullable is False

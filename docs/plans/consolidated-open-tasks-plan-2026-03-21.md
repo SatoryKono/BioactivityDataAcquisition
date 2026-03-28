@@ -4,7 +4,7 @@
 Статус: active consolidated plan  
 Язык: русский
 
-> Этот документ — internal-published planning surface. Он описывает текущую
+> Этот документ — repo-only planning surface. Он описывает текущую
 > очередь исполнения и sequencing, но не заменяет canonical project guidance в
 > `docs/00-project/`, `docs/01-requirements/`, `docs/02-architecture/` и active
 > guides under `docs/03-guides/`.

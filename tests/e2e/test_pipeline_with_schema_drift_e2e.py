@@ -260,6 +260,7 @@ class TestSchemaEvolutionEvolveMode:
         dt = DeltaTable(str(table_path))
         final_count = len(dt.to_pyarrow_table())
         assert final_count == 3  # 2 original + 1 new
+        assert "new_field" in dt.schema().to_arrow().names
 
     async def test_schema_evolve_mode_logs_warning(
         self,
@@ -308,7 +309,24 @@ class TestSchemaEvolutionEvolveMode:
             for call in mock_logger.warning.call_args_list
             if "Schema drift" in str(call)
         ]
-        assert len(warning_calls) >= 1
+        assert len(warning_calls) == 1
+
+        # Third write with the same evolved schema should not trigger drift again.
+        await writer.write_silver(
+            table_name=table_name,
+            records=evolved_records,
+            primary_keys=["entity_id"],
+            schema=evolved_schema,
+            mode="merge",
+            on_schema_mismatch="evolve",
+        )
+
+        repeated_warning_calls = [
+            call
+            for call in mock_logger.warning.call_args_list
+            if "Schema drift" in str(call)
+        ]
+        assert len(repeated_warning_calls) == 1
 
 
 @pytest.mark.e2e

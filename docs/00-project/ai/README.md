@@ -1,6 +1,6 @@
 # AI Documentation Surface
 
-*Статус: internal-published (Internal / Extended)*
+*Статус: internal (repo-only entrypoint; excluded from MkDocs)*
 
 Этот каталог собирает AI-related documentation surfaces для BioETL:
 runtime-facing guides, published mirrors, prompts, skills, memory notes и
@@ -28,7 +28,7 @@ supporting internal artifacts.
    - `docs/00-project/RULES.md`
    - `docs/01-requirements/REQUIREMENTS.md`
    - accepted ADRs in `docs/02-architecture/decisions/`
-3. internal-published AI docs under `docs/00-project/ai/`
+3. AI docs under `docs/00-project/ai/` and their published/internal mirrors
 
 Если published AI docs расходятся с runtime source или canonical governance,
 приоритет у runtime source и canonical governance.
@@ -46,8 +46,8 @@ supporting internal artifacts.
 
 ## Notes
 
-- This directory is intentionally **internal-published**, not a canonical
-  runtime registry.
+- This directory is intentionally **repo-only** and excluded from MkDocs; use
+  repository-path links for discoverability.
 - Different runtimes may keep intentionally divergent orchestration docs.
 - Prompts, memory sheets and skill mirrors are support artifacts; they do not
   redefine project rules by themselves.

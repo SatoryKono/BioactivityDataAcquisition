@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from enum import Enum
 
@@ -81,34 +81,21 @@ class PreflightGovernanceService:
         """Apply severity overrides from configuration."""
         if not config.issue_code_overrides:
             return report
-        structural_issues = self._apply_overrides_to_issues(
-            report.structural_result.issues,
-            config,
-        )
-        deep_issues = self._apply_overrides_to_issues(
-            report.deep_preflight_result.issues,
-            config,
-        )
-
-        runtime_result = self._runtime_result_with_overrides(
-            report.runtime_guard_result,
-            config,
-        )
-
         return CompositeValidationReport(
-            structural_result=ValidationResult(
-                issues=structural_issues,
-                validation_layer=ValidationLayer.STRUCTURAL,
-                execution_context=report.structural_result.execution_context,
-                timestamp=report.structural_result.timestamp,
+            structural_result=self._rebuild_validation_result(
+                report.structural_result,
+                ValidationLayer.STRUCTURAL,
+                config,
             ),
-            deep_preflight_result=ValidationResult(
-                issues=deep_issues,
-                validation_layer=ValidationLayer.DEEP_PREFLIGHT,
-                execution_context=report.deep_preflight_result.execution_context,
-                timestamp=report.deep_preflight_result.timestamp,
+            deep_preflight_result=self._rebuild_validation_result(
+                report.deep_preflight_result,
+                ValidationLayer.DEEP_PREFLIGHT,
+                config,
             ),
-            runtime_guard_result=runtime_result,
+            runtime_guard_result=self._runtime_result_with_overrides(
+                report.runtime_guard_result,
+                config,
+            ),
         )
 
     def _runtime_result_with_overrides(
@@ -119,11 +106,24 @@ class PreflightGovernanceService:
         """Apply overrides to runtime-guard result when present."""
         if runtime_result is None:
             return None
+        return self._rebuild_validation_result(
+            runtime_result,
+            ValidationLayer.RUNTIME_GUARD,
+            config,
+        )
+
+    def _rebuild_validation_result(
+        self,
+        result: ValidationResult,
+        layer: ValidationLayer,
+        config: PreflightGovernanceConfig,
+    ) -> ValidationResult:
+        """Rebuild one validation result after applying issue overrides."""
         return ValidationResult(
-            issues=self._apply_overrides_to_issues(runtime_result.issues, config),
-            validation_layer=ValidationLayer.RUNTIME_GUARD,
-            execution_context=runtime_result.execution_context,
-            timestamp=runtime_result.timestamp,
+            issues=self._apply_overrides_to_issues(result.issues, config),
+            validation_layer=layer,
+            execution_context=result.execution_context,
+            timestamp=result.timestamp,
         )
 
     def _apply_overrides_to_issues(
@@ -138,20 +138,19 @@ class PreflightGovernanceService:
         overridden_issues: list[ValidationIssue] = []
         for issue in issues:
             override = config.issue_code_overrides.get(issue.code.value)
-            if override:
-                overridden_issue = ValidationIssue(
-                    code=issue.code,
-                    severity=override,
-                    layer=issue.layer,
-                    message=issue.message,
-                    details=issue.details,
-                    location=issue.location,
-                )
-                overridden_issues.append(overridden_issue)
-            else:
-                overridden_issues.append(issue)
+            overridden_issues.append(self._apply_issue_override(issue, override))
 
         return overridden_issues
+
+    def _apply_issue_override(
+        self,
+        issue: ValidationIssue,
+        override: ValidationSeverity | None,
+    ) -> ValidationIssue:
+        """Return issue with overridden severity when configuration requires it."""
+        if override is None:
+            return issue
+        return replace(issue, severity=override)
 
     def _determine_execution_decision(
         self,

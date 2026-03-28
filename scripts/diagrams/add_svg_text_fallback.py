@@ -302,14 +302,23 @@ def _build_fallback_text(fo: ET.Element, label_kind: str = "generic") -> ET.Elem
 
     center_x = x + width / 2.0
     font_size = 14.0
-    max_chars = _estimate_wrap_chars(width=width, font_size=font_size)
     if label_kind == "methods":
-        max_chars = max(max_chars, 48)
-    wrapped_lines = _wrap_label_lines(
-        text_lines,
-        max_chars=max_chars,
-        label_kind=label_kind,
-    )
+        # Keep classDiagram method signatures on a single fallback line.
+        # Mermaid already sized the original foreignObject for the unwrapped
+        # method text, and post-wrap fallback labels cause vertical overlap
+        # because sibling method slots keep Mermaid's original 24px spacing.
+        wrapped_lines = [
+            _sanitize_label_line(line, label_kind=label_kind)
+            for line in text_lines
+            if _sanitize_label_line(line, label_kind=label_kind)
+        ]
+    else:
+        max_chars = _estimate_wrap_chars(width=width, font_size=font_size)
+        wrapped_lines = _wrap_label_lines(
+            text_lines,
+            max_chars=max_chars,
+            label_kind=label_kind,
+        )
     if not wrapped_lines:
         return None
 

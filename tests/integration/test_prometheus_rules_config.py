@@ -25,6 +25,33 @@ def _build_rule_map(payload: dict) -> dict[str, dict]:
     return rule_map
 
 
+def _classify_quarantine_rate(*, bronze_records: int, quarantine_rate: float) -> str | None:
+    """Return expected alert severity for quarantine-rate thresholds."""
+    if bronze_records < 20 or quarantine_rate <= 0.05:
+        return None
+    if quarantine_rate <= 0.2:
+        return "warning"
+    return "critical"
+
+
+def _classify_freshness(seconds: int) -> str | None:
+    """Return expected alert severity for freshness-lag thresholds."""
+    if seconds <= 86400:
+        return None
+    if seconds <= 259200:
+        return "warning"
+    return "critical"
+
+
+def _classify_retry_exhaustions(exhaustions_per_hour: int) -> str | None:
+    """Return expected alert severity for retry-exhaustion thresholds."""
+    if exhaustions_per_hour <= 0:
+        return None
+    if exhaustions_per_hour < 3:
+        return "warning"
+    return "critical"
+
+
 def test_rules_file_contains_control_plane_traceability_group() -> None:
     payload = _load_rules()
     group_names = [group.get("name") for group in payload.get("groups", [])]
@@ -144,8 +171,15 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
     expected_expr_fragments = {
         "BioETLDQQuarantineRateHigh": ["> 0.05", "<= 0.2", ">= 20", "[30m]"],
         "BioETLDQQuarantineRateCritical": ["> 0.2", ">= 20", "[15m]"],
-        "BioETLDataFreshnessLagHigh": ["> 86400", "<= 259200"],
-        "BioETLDataFreshnessLagCritical": ["> 259200"],
+        "BioETLDataFreshnessLagHigh": [
+            "clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)",
+            "> 86400",
+            "<= 259200",
+        ],
+        "BioETLDataFreshnessLagCritical": [
+            "clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)",
+            "> 259200",
+        ],
         "BioETLProviderRetriesExhausted": ["> 0", "< 3", "[1h]"],
         "BioETLProviderRetriesExhaustedPersistent": [">= 3", "[1h]"],
     }
@@ -167,3 +201,44 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
             assert fragment in expr, (
                 f"{alert_name} expression missing expected fragment: {fragment}"
             )
+
+
+def test_threshold_smoke_examples_cover_warning_and_critical_boundaries() -> None:
+    """Smoke representative threshold scenarios to guard boundary regressions."""
+    quarantine_cases = [
+        {"bronze_records": 19, "quarantine_rate": 0.30, "expected": None},
+        {"bronze_records": 20, "quarantine_rate": 0.05, "expected": None},
+        {"bronze_records": 20, "quarantine_rate": 0.051, "expected": "warning"},
+        {"bronze_records": 20, "quarantine_rate": 0.20, "expected": "warning"},
+        {"bronze_records": 20, "quarantine_rate": 0.201, "expected": "critical"},
+    ]
+    freshness_cases = [
+        {"seconds": 86400, "expected": None},
+        {"seconds": 86401, "expected": "warning"},
+        {"seconds": 259200, "expected": "warning"},
+        {"seconds": 259201, "expected": "critical"},
+    ]
+    retry_cases = [
+        {"exhaustions_per_hour": 0, "expected": None},
+        {"exhaustions_per_hour": 1, "expected": "warning"},
+        {"exhaustions_per_hour": 2, "expected": "warning"},
+        {"exhaustions_per_hour": 3, "expected": "critical"},
+    ]
+
+    for case in quarantine_cases:
+        assert (
+            _classify_quarantine_rate(
+                bronze_records=case["bronze_records"],
+                quarantine_rate=case["quarantine_rate"],
+            )
+            == case["expected"]
+        )
+
+    for case in freshness_cases:
+        assert _classify_freshness(case["seconds"]) == case["expected"]
+
+    for case in retry_cases:
+        assert (
+            _classify_retry_exhaustions(case["exhaustions_per_hour"])
+            == case["expected"]
+        )

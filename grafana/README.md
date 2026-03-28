@@ -15,13 +15,11 @@
 4. [Конфигурация инфраструктуры](#4-конфигурация-инфраструктуры)
 5. [Полный каталог метрик BioETL](#5-полный-каталог-метрик-bioetl)
 6. [Переменные фильтрации (Template Variables)](#6-переменные-фильтрации-template-variables)
-7. [Дашборд: BioETL Simple](#7-дашборд-bioetl-simple)
-8. [Дашборд: BioETL Overview v1](#8-дашборд-bioetl-overview-v1)
-9. [Дашборд: BioETL Overview v2](#9-дашборд-bioetl-overview-v2)
-10. [Дашборд: BioETL Data Quality v1](#10-дашборд-bioetl-data-quality-v1)
-11. [Дашборд: BioETL Data Quality v2](#11-дашборд-bioetl-data-quality-v2)
-12. [Дашборд: BioETL Provider Health v1](#12-дашборд-bioetl-provider-health-v1)
-13. [Дашборд: BioETL Provider Health v2](#13-дашборд-bioetl-provider-health-v2)
+8. [Архив: Overview/Data Quality/Provider Health v1](#8-архив-overviewdata-qualityprovider-health-v1)
+9. [Дашборд: 1. Overview](#9-дашборд-1-overview)
+11. [Дашборд: 4. Data Quality](#11-дашборд-4-data-quality)
+13. [Дашборд: 3. Provider Health](#13-дашборд-3-provider-health)
+13.1. [Дашборд: 2. Runtime](#131-дашборд-2-runtime)
 14. [Справочник PromQL-паттернов](#14-справочник-promql-паттернов)
 15. [Устранение неполадок](#15-устранение-неполадок)
 16. [Архитектурные решения и обоснования](#16-архитектурные-решения-и-обоснования)
@@ -41,8 +39,8 @@
 
 ---
 
-> Примечание: в репозитории сейчас поставляются только `bioetl-simple.json` и `*-v2.json` дашборды.
-> Разделы про v1 ниже сохранены как историческая/справочная документация.
+> Примечание: в репозитории сейчас поставляются `bioetl-runtime.json` и `*-v2.json` дашборды.
+> Исторические v1 surfaces ниже сведены к краткой archival note, без подробного operator walkthrough.
 >
 > Роль этого документа: setup/reference для monitoring stack.
 > Для operator quick-start используйте сначала
@@ -116,10 +114,10 @@
 │  └──────────────────────────────────────────────────────────┘    │
 │                                                                   │
 │  Дашборды (shipped):                                             │
-│  - BioETL Simple (bioetl-simple)                                 │
-│  - BioETL Overview v2 (bioetl-overview-v2)                       │
-│  - BioETL Data Quality v2 (bioetl-dq-v2)                         │
-│  - BioETL Provider Health v2 (bioetl-provider-health-v2)         │
+│  - 1. Overview (bioetl-overview-v2)                              │
+│  - 4. Data Quality (bioetl-dq-v2)                                │
+│  - 2. Runtime (bioetl-runtime)                                   │
+│  - 3. Provider Health (bioetl-provider-health-v2)                │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -152,9 +150,9 @@ grafana/
 │   └── dashboards/
 │       └── bioetl.yaml                # Dashboard provisioning config
 └── dashboards/
-    ├── bioetl-simple.json             # Минимальный live-дашборд
     ├── bioetl-overview-v2.json        # Обзор для последнего запуска (v2)
     ├── bioetl-dq-v2.json              # Data Quality для последнего запуска (v2)
+    ├── bioetl-runtime.json            # Runtime triage: log hygiene + alert conditions
     └── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)
 
 docker-compose.monitoring.yml          # Docker Compose для стека мониторинга
@@ -452,6 +450,18 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 - `Tempo` на `:3200` и OTLP gRPC `:4317` для trace storage
 - дополнительные Grafana datasources `Loki` и `Tempo`
 
+В shipped Loki config уже включено:
+
+```yaml
+limits_config:
+  allow_structured_metadata: true
+  volume_enabled: true
+```
+
+`volume_enabled: true` держим включённым как baseline для Grafana Explore и
+live log-volume inspection. Это не влияет напрямую на Prometheus panels, но
+полезно для Loki-side triage и runtime validation.
+
 ### 4.2 Сетевая топология
 
 ```
@@ -519,7 +529,7 @@ Host Machine (Windows/macOS/Linux)
 |---|---|---|---|
 | `bioetl_dq_records_quarantined_total` | Counter | `pipeline`, `error_type`, `run_type` | Количество записей, отправленных на карантин из-за проблем качества. |
 | `bioetl_dq_validation_score` | Gauge | `pipeline`, `entity` | Оценка качества данных (0.0-1.0, где 1.0 = все записи валидны). |
-| `bioetl_data_freshness_seconds` | Gauge | `pipeline`, `entity` | Секунды с момента последнего успешного ingestion для pipeline/entity. |
+| `bioetl_data_freshness_seconds` | Gauge | `pipeline`, `entity` | Unix timestamp последнего успешного ingestion для pipeline/entity; lag считается как `time() - metric`. |
 | `bioetl_dq_anomaly_detected` | Counter | `pipeline`, `metric`, `severity`, `anomaly_type` | Количество обнаруженных аномалий качества данных. |
 | `bioetl_dq_check_duration_ms` | Histogram | `pipeline` | Длительность проверок качества данных в миллисекундах. |
 | `bioetl_dq_baseline_updated` | Counter | `pipeline`, `metric` | Количество обновлений baseline для DQ монитора. |
@@ -641,55 +651,24 @@ Host Machine (Windows/macOS/Linux)
 - `bioetl_adapter_request_duration_seconds` — фильтруется по `provider`
 - `bioetl_http_request_errors_total` — фильтруется по `provider`
 
----
+## 8. Архив: Overview/Data Quality/Provider Health v1
 
-## 7. Дашборд: BioETL Simple
+v1 dashboards (`bioetl-overview.json`, `bioetl-dq.json`, `bioetl-provider-health.json`)
+сохраняются только как historical reference для сравнения evolution surface и старых
+скриншотов/обсуждений. Они не считаются operator entrypoints и не входят в текущий
+shipped pack.
 
-**Файл:** `grafana/dashboards/bioetl-simple.json`
-**UID:** `bioetl-simple`
-**Refresh:** 5 секунд (live)
-**Time range:** Последний час
-**Назначение:** Минимальный live-дашборд для быстрого мониторинга текущего запуска пайплайна. Показывает только основные счётчики записей по стадиям Medallion Architecture (Bronze → Silver → Gold).
+Если нужно быстро понять старую структуру:
+- `bioetl-overview.json`: broad trend overview по throughput/errors/duration/freshness;
+- `bioetl-dq.json`: ранний DQ surface вокруг duration/rate/gold-vs-bronze/batch size;
+- `bioetl-provider-health.json`: legacy provider surface на pipeline counters, до перехода к dedicated health-check metrics.
 
-### Панели
-
-| ID | Название | Тип | PromQL | Описание |
-|---|---|---|---|---|
-| 1 | Bronze Records | Stat | `sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="bronze"})` | Общее количество записей в Bronze-слое (raw data). Зелёный цвет. |
-| 2 | Silver Records | Stat | `sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="silver"})` | Количество записей после валидации и дедупликации (Silver). |
-| 3 | Gold Records | Stat | `sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="gold"})` | Количество финальных чистых записей (Gold). |
-| 4 | Quality Ratio | Gauge | `sum(...stage="gold") / sum(...stage="bronze")` | Соотношение Gold/Bronze. Пороги: <80% красный, 80-95% оранжевый, >95% зелёный. |
-| 5 | Records by Stage (Live) | Timeseries | `bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}` | Временная серия по стадиям с легендой `{{stage}}`. |
-
-**Используемые метрики:** Только `bioetl_records_processed_total`.
+Для реальной эксплуатации используйте разделы `v2` ниже и quick-start цепочку из
+`docs/03-guides/dashboards/monitoring-index.md`.
 
 ---
 
-## 8. Дашборд: BioETL Overview v1
-
-**Файл:** `grafana/dashboards/bioetl-overview.json`
-**UID:** `bioetl-overview`
-**Refresh:** 30 секунд
-**Time range:** Последние 6 часов
-**Назначение:** Полный обзор пайплайнов: производительность, ошибки, длительность, размеры батчей, свежесть данных, входные фильтры.
-
-### Панели
-
-| ID | Название | Тип | PromQL | Описание |
-|---|---|---|---|---|
-| 2 | Records Processed Rate | Timeseries | `rate(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[5m])` | Скорость обработки записей (записей/сек) за скользящее 5-минутное окно. Группировка по `{{stage}}`. |
-| 3 | Error Rate | Timeseries | `rate(bioetl_errors_total{pipeline=~"$pipeline"}[5m])` | Скорость возникновения ошибок за 5 минут. Фильтр `run_type` не применяется (метрика не имеет этого label). |
-| 4 | Pipeline Duration (p50/p95/p99) | Timeseries | `histogram_quantile(0.50/0.95/0.99, rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~"$pipeline", run_type=~"$run_type"}[5m]))` | Перцентили длительности пайплайна. Три линии: p50 (медиана), p95, p99. Единица: секунды. |
-| 5 | Batch Size Percentiles | Timeseries | `histogram_quantile(0.50/0.95, rate(bioetl_batch_size_records_bucket{pipeline=~"$pipeline"}[5m]))` | Перцентили размеров батчей (p50, p95). Фильтр `run_type` не применяется. |
-| 6 | Data Freshness | Timeseries | `time() - bioetl_data_freshness_seconds{pipeline=~"$pipeline"}` | Секунды с момента последнего ingestion. Чем меньше, тем свежее данные. |
-| 7 | Filter IDs Loaded | Timeseries | `sum(bioetl_filter_ids_loaded_total{pipeline=~"$pipeline"}) by (pipeline)` | Количество загруженных ID из входных фильтров. |
-| 8 | Filter IDs Duplicates | Timeseries | `sum(bioetl_filter_ids_duplicates_total{pipeline=~"$pipeline"}) by (pipeline)` | Количество обнаруженных дубликатов во входных фильтрах. |
-
-**Используемые метрики:** `records_processed_total`, `errors_total`, `pipeline_duration_seconds`, `batch_size_records`, `data_freshness_seconds`, `filter_ids_loaded_total`, `filter_ids_duplicates_total`.
-
----
-
-## 9. Дашборд: BioETL Overview v2
+## 9. Дашборд: 1. Overview
 
 **Файл:** `grafana/dashboards/bioetl-overview-v2.json`
 **UID:** `bioetl-overview-v2`
@@ -717,28 +696,7 @@ handoff через data links для быстрого перехода в Grafan
 
 ---
 
-## 10. Дашборд: BioETL Data Quality v1
-
-**Файл:** `grafana/dashboards/bioetl-dq.json`
-**UID:** `bioetl-dq`
-**Refresh:** 30 секунд
-**Time range:** Последние 6 часов
-**Назначение:** Детальный мониторинг качества данных: длительность пайплайна, скорость обработки, качественное соотношение Gold/Bronze, распределение батчей.
-
-### Панели
-
-| ID | Название | Тип | PromQL | Описание |
-|---|---|---|---|---|
-| 1 | Pipeline Duration (p50/p95/p99) | Timeseries | `histogram_quantile(0.50/0.95/0.99, rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~"$pipeline", run_type=~"$run_type"}[5m]))` | Перцентили длительности. Три линии. Ось Y: секунды. |
-| 2 | Processing Rate by Stage | Timeseries | `rate(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[5m])` | Скорость обработки (записей/сек) с группировкой по `{{stage}}`. |
-| 3 | Data Quality Ratio | Gauge | `sum(...stage="gold") / sum(...stage="bronze")` | Gauge соотношения Gold/Bronze. Пороги: <80% красный, 80-95% оранжевый, >95% зелёный. |
-| 4 | Batch Size Percentiles | Timeseries | `histogram_quantile(0.50/0.95/0.99, bioetl_batch_size_records_bucket{pipeline=~"$pipeline"})` | Перцентили размеров батчей. Фильтр `run_type` не применяется. |
-
-**Используемые метрики:** `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records`.
-
----
-
-## 11. Дашборд: BioETL Data Quality v2
+## 11. Дашборд: 4. Data Quality
 
 **Файл:** `grafana/dashboards/bioetl-dq-v2.json`
 **UID:** `bioetl-dq-v2`
@@ -762,30 +720,7 @@ handoff через data links для быстрого перехода в Grafan
 
 ---
 
-## 12. Дашборд: BioETL Provider Health v1
-
-**Файл:** `grafana/dashboards/bioetl-provider-health.json`
-**UID:** `bioetl-provider-health`
-**Refresh:** 30 секунд
-**Time range:** Последние 6 часов
-**Назначение:** Мониторинг здоровья внешних API-провайдеров. Показывает пропускную способность по стадиям Medallion и распределение батчей.
-
-### Панели
-
-| ID | Название | Тип | PromQL | Описание |
-|---|---|---|---|---|
-| 1 | Bronze Records | Stat | `sum(bioetl_records_processed_total{...stage="bronze"})` | Счётчик Bronze. |
-| 2 | Silver Records | Stat | `sum(bioetl_records_processed_total{...stage="silver"})` | Счётчик Silver. |
-| 3 | Gold Records | Stat | `sum(bioetl_records_processed_total{...stage="gold"})` | Счётчик Gold. |
-| 4 | Quarantined Records | Stat | `sum(bioetl_records_processed_total{...stage="quarantined"})` | Счётчик карантинных записей. Пороги: >10 жёлтый, >100 красный. |
-| 5 | Records by Stage Over Time | Timeseries | `bioetl_records_processed_total{...}` | Временная серия записей по стадиям. |
-| 6 | Batch Size Distribution | Timeseries (bars) | `histogram_quantile(0.50/0.95, bioetl_batch_size_records_bucket{pipeline=~"$pipeline"})` | Гистограмма распределения размеров батчей (p50, p95). |
-
-**Используемые метрики:** `records_processed_total`, `batch_size_records`.
-
----
-
-## 13. Дашборд: BioETL Provider Health v2
+## 13. Дашборд: 3. Provider Health
 
 **Файл:** `grafana/dashboards/bioetl-provider-health-v2.json`
 **UID:** `bioetl-provider-health-v2`
@@ -809,9 +744,37 @@ handoff через data links для быстрого перехода в Grafan
 
 **Drilldown:** dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)`
 плюс data links у latency-панели открывают Grafana Explore в том же time range.
-Loki drilldown стартует с `{job="bioetl"}` и regex filter по JSON-полю
-`provider`, а
-trace correlation идёт через `trace_id` / `span_id`.
+Loki drilldown стартует с безопасного `{job="bioetl"}` entrypoint без encoded
+dashboard-variable interpolation. Дополнительное сужение по `provider` или
+`pipeline` оператор делает уже в Explore, а trace correlation идёт через
+`trace_id` / `span_id`.
+
+---
+
+## 13.1. Дашборд: 2. Runtime
+
+**Файл:** `grafana/dashboards/bioetl-runtime.json`
+**UID:** `bioetl-runtime`
+**Refresh:** 30 секунд
+**Time range:** Последние 12 часов
+**Назначение:** Отдельный runtime/ops surface для triage log hygiene и alert-condition сигналов. Не заменяет `Overview v2`, а собирает warnings, unstructured logs и Prometheus-backed alert conditions в одном месте.
+
+### Панели
+
+| ID | Название | Тип | Query | Описание |
+|---|---|---|---|---|
+| 2 | Warnings (1h) | Stat | Loki `count_over_time(... level=\"warning\" ...)` | Количество structured warning logs за последний час по `$pipeline`. |
+| 3 | Unstructured Logs (1h) | Stat | Loki `count_over_time(... | json | __error__!=\"\" ...)` | Объём строк, не соответствующих shipped JSON log contract. |
+| 4 | DQ Alert Conditions (1h) | Stat | Prometheus | Суммарный triage-signal по soft-threshold, critical validation/anomaly и silver validation failures. |
+| 5 | Control-plane Alert Conditions (1h) | Stat | Prometheus | Failures по manifest writes, ledger appends, checkpoint incompatibility и missing lineage refs. |
+| 6 | Provider Alert Conditions (1h) | Stat | Prometheus | Provider failure-rate и retry-exhaustion conditions. |
+| 7 | Freshness Alert Conditions | Stat | Prometheus | Количество freshness conditions старше 24h. |
+| 8 | Top Warning Events (1h) | Bar gauge | Loki | Наиболее частые warning events за последний час. |
+| 9 | Log Hygiene Trend (5m) | Timeseries | Loki | Короткий тренд warnings против unstructured rows. |
+
+**Фильтрация:** `$pipeline`, `$run_type`.
+
+**Drilldown:** dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)` плюс data links у `Log Hygiene Trend (5m)` ведут в Explore с тем же time range. Как и в остальных shipped dashboards, Loki handoff стартует с безопасного `{job="bioetl"}` entrypoint.
 
 ---
 
@@ -1661,13 +1624,13 @@ open http://localhost:9090/alerts
 
 | Дашборд | UID | Версия | Panels | Refresh | Time Range | Метрики | Назначение |
 |---|---|---|---|---|---|---|---|
-| BioETL Simple | `bioetl-simple` | 1 | 5 | 5s | 1h | `records_processed_total` | Live-мониторинг текущего запуска |
 | BioETL Overview | `bioetl-overview` | 1 | 8 | 30s | 6h | `records_processed_total`, `errors_total`, `pipeline_duration_seconds`, `batch_size_records`, `data_freshness_seconds`, `filter_ids_*` | Полный обзор пайплайнов |
-| BioETL Overview v2 | `bioetl-overview-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | Обзор конкретного запуска |
+| 1. Overview | `bioetl-overview-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | Обзор конкретного запуска |
 | BioETL Data Quality | `bioetl-dq` | 1 | 4 | 30s | 6h | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records` | DQ мониторинг с перцентилями |
-| BioETL Data Quality v2 | `bioetl-dq-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | DQ для конкретного запуска |
+| 4. Data Quality | `bioetl-dq-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | DQ для конкретного запуска |
+| 2. Runtime | `bioetl-runtime` | 1 | 9 | 30s | 12h | `control_plane_*`, `dq_*`, `health_check_*`, `data_source_retry_exhausted_total` + Loki log hygiene queries | Runtime triage: warnings, unstructured logs, alert conditions |
 | BioETL Provider Health | `bioetl-provider-health` | 1 | 6 | 30s | 6h | `records_processed_total`, `batch_size_records` | Пропускная способность по стадиям |
-| BioETL Provider Health v2 | `bioetl-provider-health-v2` | 2 | 5 | 30s | 12h | `health_check_latency_seconds`, `health_check_success_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам |
+| 3. Provider Health | `bioetl-provider-health-v2` | 2 | 5 | 30s | 12h | `health_check_latency_seconds`, `health_check_success_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам |
 
 ---
 

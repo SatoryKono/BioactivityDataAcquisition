@@ -764,6 +764,38 @@ class TestTargetTransformer:
         assert result is not None
         assert result["organism_class"] == "multicellular"
 
+    @pytest.mark.asyncio
+    async def test_transform_preserves_valid_taxonomy_id(
+        self, transformer, mock_context
+    ):
+        """Test taxonomy_id is preserved when tax_id is valid."""
+        record = {
+            "target_id": "CHEMBL6000",
+            "organism": "Homo sapiens",
+            "tax_id": "9606",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["taxonomy_id"] == 9606
+
+    @pytest.mark.asyncio
+    async def test_transform_invalid_taxonomy_id_becomes_none(
+        self, transformer, mock_context
+    ):
+        """Test invalid tax_id is normalized to None rather than failing."""
+        record = {
+            "target_id": "CHEMBL7000",
+            "organism": "Homo sapiens",
+            "tax_id": "invalid-tax-id",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["taxonomy_id"] is None
+
 
 @pytest.mark.unit
 class TestTargetComponentTransformer:

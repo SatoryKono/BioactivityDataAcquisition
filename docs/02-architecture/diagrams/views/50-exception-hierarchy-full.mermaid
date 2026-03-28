@@ -86,8 +86,6 @@ flowchart TD
     DQ_ERROR --> VALIDATION["ValidationError<br/>field, message, record_id"]
 
     VALIDATION --> SCHEMA_VIOL["SchemaViolationError<br/>schema_name, violations: list"]
-    VALIDATION --> MISSING_FIELD["MissingRequiredFieldError<br/>field, entity_type"]
-    VALIDATION --> INVALID_FORMAT["InvalidDataFormatError<br/>field, expected, actual"]
 
     BIOETL --> DQ_THRESHOLD["DataQualityThresholdError<br/>pipeline, ratio, threshold"]
 

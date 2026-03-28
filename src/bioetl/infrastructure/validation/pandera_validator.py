@@ -10,8 +10,6 @@ from __future__ import annotations
 
 __all__ = [
     "BasePanderaValidator",
-    "NoOpGoldValidator",
-    "NoOpSilverValidator",
     "NoOpValidator",
     "PanderaGoldValidator",
     "PanderaSilverValidator",
@@ -258,11 +256,3 @@ class NoOpValidator:
         """
         del records  # Unused - NoOp always returns valid
         return ValidationResult(valid=True)
-
-
-# Backward compatibility aliases
-NoOpSilverValidator = NoOpValidator
-"""Alias for NoOpValidator. Use NoOpValidator directly for new code."""
-
-NoOpGoldValidator = NoOpValidator
-"""Alias for NoOpValidator. Use NoOpValidator directly for new code."""

@@ -106,6 +106,36 @@ def test_prepare_runner_inputs_projects_probe_mode_and_sink_disabled_skip_gold()
 
 
 @pytest.mark.unit
+def test_prepare_runner_inputs_applies_tracing_override_before_bundle_build() -> None:
+    logger = SimpleNamespace(info=lambda *_, **__: None)
+    settings = SimpleNamespace(
+        test_mode=False,
+        pipeline=SimpleNamespace(heartbeat_interval=30, health_check_mode="strict"),
+        observability=SimpleNamespace(tracing_enabled=False),
+    )
+    yaml_config = _make_yaml_config()
+    observed: dict[str, object] = {}
+
+    def _build_observability_bundle(**kwargs: object) -> SimpleNamespace:
+        observed["tracing_enabled"] = kwargs["settings"].observability.tracing_enabled
+        return SimpleNamespace(logger=logger)
+
+    result = inputs_resolver.prepare_runner_inputs(
+        ctx=_make_context(tracing_enabled_override=True),
+        get_settings_fn=lambda: settings,
+        load_pipeline_config_fn=lambda _pipeline: yaml_config,
+        build_observability_bundle_fn=_build_observability_bundle,
+        assemble_vacuum_settings_fn=inputs_resolver.assemble_vacuum_settings,
+        assemble_runtime_config_fn=inputs_resolver.assemble_runtime_config,
+        assemble_filter_config_fn=inputs_resolver.assemble_filter_config,
+        assemble_cached_bronze_context_fn=inputs_resolver.assemble_cached_bronze_context,
+    )
+
+    assert observed["tracing_enabled"] is True
+    assert result.settings.observability.tracing_enabled is True
+
+
+@pytest.mark.unit
 def test_resolve_health_check_mode_defaults_to_strict_when_pipeline_mode_missing() -> (
     None
 ):

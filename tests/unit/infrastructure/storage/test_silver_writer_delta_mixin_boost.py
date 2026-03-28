@@ -179,6 +179,37 @@ class TestWriteDeleteLines:
         assert write_calls[0]["partition_by"] == ["date"]
         assert "schema_mode" not in write_calls[0]
 
+    @pytest.mark.asyncio
+    async def test_write_append_forwards_schema_mode_when_requested(self) -> None:
+        """Append evolve writes should pass schema_mode through to Delta."""
+        mixin = _ConcreteDeltaMixin()
+        data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.APPEND,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=[],
+            partition_cols=None,
+            schema_mode="merge",
+        )
+
+        write_calls: list[dict] = []
+
+        def fake_write_deltalake(**kwargs: object) -> None:
+            write_calls.append(kwargs)
+
+        mock_module = MagicMock()
+        mock_module.write_deltalake = fake_write_deltalake
+
+        with patch.object(
+            mixin, "_load_silver_writer_module", return_value=mock_module
+        ):
+            await mixin._write_append(request)
+
+        assert len(write_calls) == 1
+        assert write_calls[0]["mode"] == "append"
+        assert write_calls[0]["schema_mode"] == "merge"
+
 
 @pytest.mark.unit
 class TestWriteMergeRetrySuccess:
@@ -210,6 +241,7 @@ class TestWriteMergeRetrySuccess:
             predicate="target.id = source.id AND target.value = source.value",
             source_alias="source",
             target_alias="target",
+            merge_schema=False,
         )
         merge_builder.when_matched_update_all.assert_called_once()
         matched_kwargs = merge_builder.when_matched_update_all.call_args.kwargs
@@ -217,6 +249,34 @@ class TestWriteMergeRetrySuccess:
         assert "target._run_type = 'backfill'" in matched_kwargs["predicate"]
         merge_builder.when_not_matched_insert_all.assert_called_once()
         merge_builder.execute.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_merge_records_enables_merge_schema_when_requested(self) -> None:
+        """Merge path should opt into Delta schema evolution when payload requests it."""
+        mixin = _ConcreteDeltaMixin()
+        data = _make_arrow_table()
+        dt = MagicMock()
+        merge_builder = MagicMock()
+        dt.merge.return_value = merge_builder
+        merge_builder.when_matched_update_all.return_value = merge_builder
+        merge_builder.when_not_matched_insert_all.return_value = merge_builder
+
+        await mixin._merge_records(
+            dt,
+            data,
+            ["id"],
+            "path/table",
+            timeout_seconds=5.0,
+            merge_schema=True,
+        )
+
+        dt.merge.assert_called_once_with(
+            source=data,
+            predicate="target.id = source.id",
+            source_alias="source",
+            target_alias="target",
+            merge_schema=True,
+        )
 
     @pytest.mark.asyncio
     async def test_write_merge_logs_recovery_after_retry(self) -> None:
@@ -368,8 +428,9 @@ class TestWriteMergeRetrySuccess:
 
         # Directly mock _merge_records to raise _MergeExecutionTimeoutError
         async def always_timeout(
-            dt, records, primary_keys, table_path, *, timeout_seconds
+            dt, records, primary_keys, table_path, *, timeout_seconds, merge_schema
         ):
+            _ = merge_schema
             raise _MergeExecutionTimeoutError(timeout_seconds)
 
         mock_module = MagicMock()

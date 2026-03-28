@@ -72,6 +72,7 @@ class SilverWriterDeltaMixin:
             load_module=self._load_silver_writer_module,
             request=request,
             mode="append",
+            schema_mode=request.schema_mode,
         )
 
     async def _write_merge(
@@ -116,6 +117,7 @@ class SilverWriterDeltaMixin:
         table_path: str,
         *,
         timeout_seconds: float,
+        merge_schema: bool = False,
     ) -> None:
         """Merge records into an existing Delta table."""
         await _merge_records_with_timeout(
@@ -125,6 +127,7 @@ class SilverWriterDeltaMixin:
             primary_keys=primary_keys,
             table_path=table_path,
             timeout_seconds=timeout_seconds,
+            merge_schema=merge_schema,
         )
 
     def _emit_merge_retry_telemetry(

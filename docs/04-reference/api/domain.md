@@ -436,8 +436,6 @@ BioETLError (base)
 |   +-- DataQualityThresholdError
 +-- ValidationError
 |   +-- SchemaViolationError
-|   +-- MissingRequiredFieldError
-|   +-- InvalidDataFormatError
 +-- NetworkError
 |   +-- ApiError
 |   +-- TimeoutError

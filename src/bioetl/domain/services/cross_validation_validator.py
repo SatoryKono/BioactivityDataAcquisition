@@ -12,6 +12,9 @@ from bioetl.domain.services.cross_validation_helpers import (
     _validate_pairs,
     _validate_rules,
 )
+from bioetl.domain.services.validation_result_envelopes import (
+    build_validation_result,
+)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import ValidationIssue, ValidationResult
 from bioetl.domain.types.validation_severity import (
@@ -54,7 +57,7 @@ class CrossValidationValidator:
     ) -> ValidationResult:
         """Validate cross-source comparison rules before runtime execution."""
         issues = _collect_validation_issues(config, source_names)
-        return ValidationResult(
+        return build_validation_result(
             issues=issues,
             validation_layer=ValidationLayer.DEEP_PREFLIGHT,
             execution_context=execution_context or {},
@@ -73,7 +76,7 @@ class CrossValidationValidator:
         )
         if issues == validation_result.issues and runtime_context is None:
             return validation_result
-        return ValidationResult(
+        return build_validation_result(
             issues=issues,
             validation_layer=validation_result.validation_layer,
             execution_context=runtime_context or validation_result.execution_context,

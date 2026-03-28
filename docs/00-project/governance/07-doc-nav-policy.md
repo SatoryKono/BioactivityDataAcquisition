@@ -1,6 +1,6 @@
 # Documentation Navigation Policy
 
-*Version: 1.7 (2026-03-13)*
+*Version: 1.8 (2026-03-28)*
 
 ----------------------------------------------------------------------
 
@@ -23,11 +23,11 @@ traceability, but they are not normative for current project behavior.
 |---|---|---|---|
 | `docs/00-project/**`, `docs/01-requirements/**`, `docs/02-architecture/**`, `docs/03-guides/**`, `docs/04-reference/**`, `docs/05-operations/**` | `published` | MUST be represented in primary nav (except explicit internal/archived subsections) | Section index page in nav |
 | `docs/00-project/ai/agents/**` | `internal-published` + `internal` | Curated entrypoints MAY be shown only under `Internal / Extended -> Agents`; bulk profiles/aliases MAY remain non-nav | [docs/00-project/ai/agents/README.md](../ai/agents/README.md) |
-| `docs/00-project/ai/memory/**` | `internal-published` + `internal` | Shared entrypoints MAY be shown under `Internal / Extended`; specialized memory docs MAY remain non-nav | [docs/00-project/ai/memory/agent-memory.md](../ai/memory/agent-memory.md) |
-| `docs/00-project/ai/prompts/**` | `internal-published` + `internal-generated` | Curated prompt indexes MAY be shown under `Internal / Extended`; collected/raw prompt copies MAY remain non-nav | [docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md](../ai/prompts/COLLECTED_PROMPTS_INDEX.md) |
+| `docs/00-project/ai/memory/**` | `internal-published` + `internal` + `repo-only` | Shared entrypoints MAY be shown under `Internal / Extended`; excluded README pages and specialized memory docs MAY remain repo-only/non-nav | [docs/00-project/ai/memory/agent-memory.md](../ai/memory/agent-memory.md) |
+| `docs/00-project/ai/prompts/**` | `internal-published` + `internal-generated` + `repo-only` | Curated prompt indexes MAY be shown under `Internal / Extended`; collected/raw prompt copies and excluded overview pages MAY remain repo-only/non-nav | [docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md](../ai/prompts/COLLECTED_PROMPTS_INDEX.md) |
 | `docs/00-project/ai/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/00-project/ai/skills/README.md](../ai/skills/README.md) |
-| `plans/**` | `internal` + `repo-only` | Working plans MAY remain outside MkDocs publication; surface them from published docs only as repository paths or curated summaries when needed | Repository path `plans/README.md` |
-| `reports/**` | `internal` + `repo-only` | Curated evidence/report artifacts MAY stay outside MkDocs publication; published docs SHOULD reference them as repository paths or summarized findings rather than nav pages | Repository path `reports/README.md` |
+| `docs/plans/**` | `internal` + `repo-only` | Working plans MAY remain outside MkDocs publication; surface them from published docs only as repository paths or curated summaries when needed | Repository path `docs/plans/README.md` |
+| `docs/reports/**` | `internal` + `repo-only` | Curated evidence/report artifacts MAY stay outside MkDocs publication; published docs SHOULD reference them as repository paths or summarized findings rather than nav pages | Repository path `docs/reports/index.md` |
 | `docs/99-archive/**` | `archive` | SHOULD remain non-nav by default; curated archive entrypoints MAY appear in nav with explicit historical labeling | Repository path `docs/99-archive/README.md` (or equivalent archive index) |
 
 Notes:
@@ -40,9 +40,9 @@ Notes:
 
 ## 2. Mandatory Rules
 
-1. Every new document MUST be classified as `published`, `internal-published`, `internal`, `archive`, or `internal-generated`.
+1. Every new document MUST be classified as `published`, `internal-published`, `internal`, `repo-only`, `archive`, or `internal-generated`.
 2. `published` documents MUST have a stable nav path in `mkdocs.yml`.
-3. `internal-published` documents MUST be grouped under `Internal / Extended`.
+3. `internal-published` documents SHOULD be grouped under `Internal / Extended` when they are intentionally published in MkDocs.
 4. `archive` documents MUST include an explicit historical/superseded disclaimer.
 5. Any intentional growth of non-nav documents MUST update the baseline file `scripts/baselines/not_in_nav_baseline.txt`.
 
@@ -113,7 +113,8 @@ Failure policy:
 | Class | Typical Paths | Default Action |
 |---|---|---|
 | `published` | policy, requirements, active runbooks | MUST be in primary nav |
-| `internal-published` | selected `plans/**`, evidence-style `reports/**`, `00-project/ai/{agents,memory,prompts,skills}/**`, architecture extras | SHOULD be in `Internal / Extended` |
+| `internal-published` | curated `docs/00-project/ai/{agents,memory,prompts,skills}/**`, architecture extras, other stable internal mirrors | SHOULD be in `Internal / Extended` |
+| `repo-only` | `docs/plans/**`, `docs/reports/**`, excluded AI entrypoints | SHOULD stay outside MkDocs and be referenced as repository paths |
 | `internal-generated` | generated indexes/variants (for example some diagram artifact indexes) | MAY stay outside nav, but MUST be linked from an index |
 | `archive` | `99-archive/**` | SHOULD stay outside nav by default; curated archive entrypoints MAY appear with explicit historical labeling |
 
@@ -130,7 +131,7 @@ A document SHOULD be promoted when at least two criteria are true:
 
 1. Compute current state:
    - `./.venv/Scripts/python.exe scripts/docs/report_docs_kpi.py`
-2. Classify each outside-nav cluster (`archive`, `internal-generated`, `internal-published`).
+2. Classify each outside-nav cluster (`archive`, `internal-generated`, `internal-published`, `repo-only`).
 3. Promote a small curated batch to nav (`Internal / Extended` first).
 4. Ensure every non-promoted cluster has a discoverable index entrypoint.
 5. Re-run:
@@ -138,12 +139,18 @@ A document SHOULD be promoted when at least two criteria are true:
    - `bash scripts/docs/build_docs_site.sh --strict`
 6. Update baseline only when growth is intentional and justified.
 
-### 6.4 Current Backlog Snapshot (2026-03-03, wave-7)
+### 6.4 Historical Backlog Snapshot (2026-03-03, wave-7)
 
 - `outside nav`: `36`
 - dominant buckets:
   - `99-archive`: `33` (`archive`, intentional)
   - `skills`: `3` (system skill docs)
+
+Freshness note (2026-03-28):
+- This snapshot is retained for wave-7 traceability only and is not the current
+  KPI baseline.
+- Use the live output of `scripts.docs report-kpi` (or the current CI artifact)
+  for present-state counts before making nav decisions.
 
 Interpretation:
 - further reduction SHOULD focus on explicit policy decisions for remaining `00-project/ai/skills/global/.system/**`;

@@ -38,10 +38,37 @@ INFRASTRUCTURE_CONFIG_PUBLIC_MODULE = "bioetl.infrastructure.config"
 SERVICES_CREATION_API_COMPAT_MODULE = (
     "bioetl.composition.factories.services.creation_api"
 )
+SERVICES_CREATION_API_COMPAT_MODULE_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "factories"
+    / "services"
+    / "creation_api.py"
+)
 PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE = (
     "bioetl.composition.factories.pipeline.config_resolution"
 )
+PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "factories"
+    / "pipeline"
+    / "config_resolution.py"
+)
 PIPELINE_CONFIGS_COMPAT_MODULE = "bioetl.composition.factories.pipeline.configs"
+PIPELINE_CONFIGS_COMPAT_MODULE_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "factories"
+    / "pipeline"
+    / "configs.py"
+)
 PIPELINE_CREATION_API_COMPAT_MODULE = (
     "bioetl.composition.factories.pipeline.creation_api"
 )
@@ -70,28 +97,11 @@ VACUUM_COMMAND_INTERNAL_MODULE = (
 )
 TEST_FACING_RUN_HELPER_SEAM_MODULES = frozenset(
     {
-        "bioetl.interfaces.cli.commands.run_command_policy",
-        "bioetl.interfaces.cli.commands.run_helpers",
-        "bioetl.interfaces.cli.commands.run_result_flow_helpers",
         "bioetl.interfaces.cli.commands.run_result_presenter",
-        "bioetl.interfaces.cli.commands.run_runtime_helpers",
-        "bioetl.interfaces.cli.commands.run_service_access",
     }
 )
-TEST_FACING_RUN_ALL_HELPER_SEAM_MODULES = frozenset(
-    {
-        "bioetl.interfaces.cli.commands.run_all_command_policy",
-        "bioetl.interfaces.cli.commands.run_all_execution",
-        "bioetl.interfaces.cli.commands.run_all_helpers",
-    }
-)
-TEST_FACING_RUN_COMPOSITE_HELPER_SEAM_MODULES = frozenset(
-    {
-        "bioetl.interfaces.cli.commands.run_composite_execution",
-        "bioetl.interfaces.cli.commands.run_composite_helpers",
-        "bioetl.interfaces.cli.commands.run_composite_runtime",
-    }
-)
+TEST_FACING_RUN_ALL_HELPER_SEAM_MODULES = frozenset()
+TEST_FACING_RUN_COMPOSITE_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_QUARANTINE_HELPER_SEAM_MODULES = frozenset(
     {
         "bioetl.interfaces.cli.commands.quarantine_execution",
@@ -106,11 +116,7 @@ TEST_FACING_HEALTH_HELPER_SEAM_MODULES = frozenset(
         "bioetl.interfaces.cli.commands.metrics_server_integration",
     }
 )
-TEST_FACING_SHARED_CLI_POLICY_SEAM_MODULES = frozenset(
-    {
-        "bioetl.interfaces.cli.commands.execution_policy",
-    }
-)
+TEST_FACING_SHARED_CLI_POLICY_SEAM_MODULES: frozenset[str] = frozenset()
 PIPELINE_RUNNER_SERVICE_MODULE = "bioetl.application.services.pipeline_runner_service"
 LEGACY_MERGE_SERVICE_KEYWORDS = frozenset(
     {
@@ -290,11 +296,6 @@ SANCTIONED_DEAD_CODE_EXCLUSION_MODULE_PATHS = frozenset(
     }
 )
 ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES: frozenset[Path] = frozenset()
-ALLOWED_SERVICES_CREATION_API_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
-    }
-)
 ALLOWED_PIPELINE_CREATION_API_TEST_FILES = frozenset(
     {
         ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
@@ -515,8 +516,24 @@ ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "__init__.py",
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "main.py",
-        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_helpers.py",
-        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_all.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "run"
+        / "support.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "run_all"
+        / "command.py",
         ROOT
         / "src"
         / "bioetl"
@@ -557,16 +574,7 @@ ALLOWED_CONFIG_LOAD_API_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_CONFIG_LOAD_API_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_INFRASTRUCTURE_CONFIG_LOADER_SYMBOL_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_PIPELINE_CONFIG_RESOLUTION_SRC_FILES: frozenset[Path] = frozenset()
-ALLOWED_PIPELINE_CONFIG_RESOLUTION_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
-    }
-)
-ALLOWED_PIPELINE_CONFIGS_COMPAT_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
-    }
-)
+ALLOWED_PIPELINE_CONFIG_RESOLUTION_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_METADATA_BUILDER_COMPAT_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_MERGE_SERVICE_SRC_FILES = frozenset(
     {

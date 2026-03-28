@@ -4,15 +4,15 @@
 
 ## Проверенные дашборды
 
-- `bioetl-simple`
 - `bioetl-overview-v2`
 - `bioetl-dq-v2`
 - `bioetl-provider-health-v2`
+- `bioetl-runtime`
 
 ## Подтверждено по JSON
 
 - Все 4 дашборда используют `refresh: 30s`, `time.from: now-12h`.
-- Переменные `simple/overview/dq`: `$pipeline`, `$run_type`.
+- Переменные `overview/dq/runtime`: `$pipeline`, `$run_type`.
 - Переменные `provider-health-v2`: `$provider`.
 - В JSON отсутствуют `$run_id` и `execution`.
 
@@ -49,11 +49,20 @@ histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_b
 - Tempo links сохраняют текущее time range и открывают trace search без попытки
   вводить high-cardinality trace filters.
 
+7. Добавлен отдельный runtime dashboard:
+
+- `bioetl-runtime` собирает Loki-backed `Warnings (1h)` и `Unstructured Logs (1h)`;
+- Prometheus-backed панели `Alert Conditions` показывают условия из shipped rule pack,
+  а не реальный firing-state alert engine;
+- runtime dashboard содержит быстрые links обратно в `overview`, `dq`,
+  `provider-health` и Explore surfaces.
+
 ## Актуальные ключевые панели
 
 - `bioetl-overview-v2`: `id=99`, `id=101`, `id=1..4`, `id=110..115`
 - `bioetl-dq-v2`: `id=99`, `id=101`, `id=1..12`, `id=116`
 - `bioetl-provider-health-v2`: row `id=91` + панели `1,2,104,7,102`
+- `bioetl-runtime`: `id=1..8`, links в `Overview`, `DQ`, `Provider Health`, `Explore`
 
 ## Примечание по старым гайдам
 

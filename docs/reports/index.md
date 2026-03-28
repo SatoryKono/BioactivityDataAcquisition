@@ -1,6 +1,6 @@
 # Reports Index (Non-Normative)
 
-This directory now serves as the curated internal reports surface. It is
+This directory now serves as the curated repo-only reports surface. It is
 **non-normative**: authoritative guidance lives in the canonical documentation
 sets.
 
@@ -11,7 +11,7 @@ Canonical sources:
 
 ## Publication Hygiene Note
 
-- `docs/reports/` is an **internal-published** surface.
+- `docs/reports/` is a **repo-only** surface and is excluded from MkDocs.
 - Reports, evidence packs, and derived summaries are intended for situational
   analysis and decision support.
 - They may be more detailed or more current about a local investigation, but
@@ -23,7 +23,7 @@ Canonical sources:
 
 ## Main Entry Points
 
-- this index page — short orientation note for the published reports directory surface
+- this index page — short orientation note for the repo-only reports surface
 - [`evidence/INDEX.md`](evidence/INDEX.md) — curated evidence, synthesis, decisions, risks, and roadmaps
 - [`docs/plans/README.md`](../plans/README.md) — active planning artifacts
 - [`docs/99-archive/README.md`](../99-archive/README.md) — archive index for historical/superseded plans and baselines

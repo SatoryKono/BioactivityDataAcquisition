@@ -1,13 +1,13 @@
 %% BioETL — CLI: Command Structure
 %% Terminal entrypoint, main group, and the current command families registered in cli.main.
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-03-28
 %% @type    flowchart
 %% @level   System / Component
 %% @view    cli-commands
 %% @parent  14-cli-interface-layer.mmd
-%% @nodes   12
+%% @nodes   13
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -26,7 +26,8 @@ graph LR
         MAIN["bioetl group"]:::size-sm
         RUN["run / run-all"]:::size-sm
         RC["run-composite"]:::size-sm
-        ADM["health / export / quarantine<br/>checkpoint / config / lock"]:::size-sm
+        INS["run-manifest / lineage"]:::size-sm
+        OPS["checkpoint / config / dq<br/>health / export / quarantine / lock"]:::size-md
         MAINT["maintenance<br/>vacuum / vacuum-all / archive<br/>bronze-cleanup / cleanup-preview"]:::size-md
         AUX["adr / debug"]:::size-sm
     end
@@ -36,7 +37,8 @@ graph LR
     TERM --> MAIN
     MAIN --> RUN
     MAIN --> RC
-    MAIN --> ADM
+    MAIN --> INS
+    MAIN --> OPS
     MAIN --> MAINT
     MAIN --> AUX
     MAIN -.-> NOTE
@@ -45,4 +47,4 @@ graph LR
     classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
 
     class TERM user
-    class MAIN,RUN,RC,ADM,MAINT,AUX,NOTE cli
+    class MAIN,RUN,RC,INS,OPS,MAINT,AUX,NOTE cli

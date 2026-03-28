@@ -1,4 +1,4 @@
-"""Unit tests for run_all_helpers.py helper functions.
+"""Unit tests for canonical run-all support helper functions.
 
 Tests batch run utilities including registry resolution, provider filtering,
 execution plan creation, result recording, and summary output.
@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.application.services import PipelineRunResult, RunResult
-from bioetl.interfaces.cli.commands.run_all_helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,
     create_run_all_options,
     echo_batch_summary,

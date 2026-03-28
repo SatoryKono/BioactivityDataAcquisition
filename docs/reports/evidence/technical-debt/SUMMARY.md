@@ -6,7 +6,7 @@
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
 
-> This summary is an internal-published evidence surface for technical-debt
+> This summary is a repo-only evidence surface for technical-debt
 > interpretation and prioritization. It should guide investigation and
 > sequencing, but it does not replace canonical architecture or governance
 > documents in `docs/00-05`.

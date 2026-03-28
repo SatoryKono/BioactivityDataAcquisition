@@ -177,8 +177,8 @@
     "coerce": false,
     "description": "Organism.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "organism_class": {
@@ -209,8 +209,8 @@
     "coerce": false,
     "description": "Preferred name.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "primary_component_id": {

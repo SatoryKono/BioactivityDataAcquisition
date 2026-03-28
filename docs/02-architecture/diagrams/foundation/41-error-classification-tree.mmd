@@ -37,8 +37,8 @@ flowchart TB
 
     %% Domain errors
     DOMAIN -->|"schema"| SCHEMA["[E] SchemaViolationError\n(DataQualityError → ValidationError)\n→ Route to Quarantine"]
-    DOMAIN -->|"missing"| MISSING["[E] MissingRequiredFieldError\n(ValidationError)\n→ Route to Quarantine"]
-    DOMAIN -->|"format"| FORMAT["[E] InvalidDataFormatError\n(ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|"missing"| MISSING["[E] ValidationError\n(error_type=MISSING_REQUIRED_FIELD)\n→ Route to Quarantine"]
+    DOMAIN -->|"format"| FORMAT["[E] ValidationError\n(error_type=INVALID_DATA)\n→ Route to Quarantine"]
     DOMAIN -->|"dq"| DQTHRESH["[E] DataQualityThresholdError\n→ error_rate > 20%\n→ FAIL entire batch"]
 
     %% Infrastructure errors

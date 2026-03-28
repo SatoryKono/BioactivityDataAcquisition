@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-03-28T15:32:29
+- Generated: 2026-03-28T19:29:23
 - Diagram count: 55
 
 ## Table of Contents
@@ -47,7 +47,7 @@
 - [34-batch-processing-flow — Batch Processing Flow — BatchProcessingService choreography](#34-batch-processing-flow)
 - [35-bootstrap-sequence — Composition Layer Bootstrap Sequence](#35-bootstrap-sequence)
 - [36-architecture-principles-mindmap — Architecture Principles Mind Map](#36-architecture-principles-mindmap)
-- [37-cli-entry-full-chain — CLI Entry Point to Pipeline Execution Full Chain](#37-cli-entry-full-chain)
+- [37-cli-entry-full-chain — CLI Entry Point to Pipeline and Inspection Chains](#37-cli-entry-full-chain)
 - [38-runtime-assembly-sequence — Runtime Assembly Sequence — build_pipeline_runner to PipelineRunner](#38-runtime-assembly-sequence)
 - [39-medallion-invariants — Medallion Architecture Invariants (ARCH-007)](#39-medallion-invariants)
 - [40-application-core-collaboration — Application Core Component Collaboration](#40-application-core-collaboration)
@@ -72,13 +72,13 @@
 ![01-full-system-component](../foundation/svg/01-full-system-component.svg)
 
 ### Описание
-Диаграмма «Full System Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters), composition/runtime_builders, application/core. Схема имеет плотность порядка 31 узлов и 38 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Interfaces Layer, Composition Layer, Application Layer, Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: Bioactivity APIs, Publication APIs, CLI run / health / debug, Signal orchestration, build_pipeline_runner, PipelineRegistry. Связанный ADR: ADR-040.
+Диаграмма «Full System Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters), composition/runtime_builders, application/core. Схема имеет плотность порядка 35 узлов и 49 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Interfaces Layer, Composition Layer, Application Layer, Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: Bioactivity APIs, Publication APIs, CLI run / run-all / run-composite, CLI run-manifest / lineage / checkpoint, Signal orchestration, execution_api. Связанный ADR: ADR-040.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-24`
-- Узлы (metadata): `31`
+- Дата: `2026-03-28`
+- Узлы (metadata): `35`
 - ADR: `ADR-040`
 
 \newpage
@@ -225,13 +225,13 @@
 ![06-application-layer-class-diagram](../foundation/svg/06-application-layer-class-diagram.svg)
 
 ### Описание
-Диаграмма «Application Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Component / Class». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/, application/services/, application/observability/. Схема имеет плотность порядка 18 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineRunnerDependencies, BatchExecutor, BatchProcessingService, BatchTransformer.
+Диаграмма «Application Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Component / Class». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/, application/services/, application/observability/. Схема имеет плотность порядка 25 узлов и 27 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Core, Services, ControlPlane, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineRunnerDependencies, BatchExecutor, BatchProcessingService, BatchTransformer.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
-- Узлы (metadata): `18`
+- Дата: `2026-03-28`
+- Узлы (metadata): `25`
 
 \newpage
 
@@ -700,13 +700,13 @@
 ![28-composition-root-di-graph](../foundation/svg/28-composition-root-di-graph.svg)
 
 ### Описание
-Диаграмма «Composition Root Wiring — Public APIs and Assembly» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Module)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Layer), ADR-005, RF-011. Схема имеет плотность порядка 19 узлов и 22 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces, Public composition APIs, Composition assembly, Created runtime objects. Показательные узлы для быстрого чтения: CLI / interfaces layer, execution_api runner creation + metrics flush, services_api service accessors, resources_api cleanup / checkpoint / archive helpers, creation_api compat shim → creation_support, entrypoints.py retained broad facade.
+Диаграмма «Composition Root Wiring — Public APIs and Assembly» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Module)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Layer), ADR-005, RF-011. Схема имеет плотность порядка 23 узлов и 28 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces, Public composition APIs, Composition assembly, Created runtime objects. Показательные узлы для быстрого чтения: CLI / interfaces layer, execution_api runner creation + metrics flush, services_api service accessors, resources_api cleanup / checkpoint / archive helpers, creation_api compat shim → creation_support, entrypoints.py retained broad facade.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Module)`
-- Дата: `2026-03-24`
-- Узлы (metadata): `19`
+- Дата: `2026-03-28`
+- Узлы (metadata): `23`
 
 \newpage
 
@@ -866,18 +866,18 @@
 
 ## 37-cli-entry-full-chain
 
-**CLI Entry Point to Pipeline Execution Full Chain**
+**CLI Entry Point to Pipeline and Inspection Chains**
 
 ![37-cli-entry-full-chain](../foundation/svg/37-cli-entry-full-chain.svg)
 
 ### Описание
-Диаграмма «CLI Entry Point to Pipeline Execution Full Chain» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Component / Class». В комментариях исходника зафиксирован фокус диаграммы: interfaces/cli/commands/domains/run/{command,command_policy,runtime_helpers}.py, application/services/{cli_run_orchestration_service,pipeline_runner_service}.py. Схема имеет плотность порядка 20 узлов и 15 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces Layer (Click), CLI Policy / App Service, Async Runtime Helper, Composition Layer, Application Runtime, Result & Exit. Показательные узлы для быстрого чтения: bioetl run ..., build_run_command_input() normalized RunCommandInput, run_command_flow(), handle_destructive_step() preview / confirm rebuilds, CliRunOrchestrationService prepare_execution_request(), CliRunOrchestrationService execute_pipeline().
+Диаграмма «CLI Entry Point to Pipeline and Inspection Chains» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Component / Class». В комментариях исходника зафиксирован фокус диаграммы: interfaces/cli/main.py, interfaces/cli/commands/domains/run/{command,command_policy,runtime_helpers}.py, interfaces/cli/commands/{run_manifest,lineage,checkpoint}.py, application/services/{cli_run_orchestration_service,pipeline_runner_service}.py. Схема имеет плотность порядка 23 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces Layer (Click), Run command path, CLI Policy / App Service, Async Runtime Helper, Composition Layer, Application Runtime. Показательные узлы для быстрого чтения: bioetl main group, bioetl run / run-all / run-composite, bioetl run-manifest / lineage, bioetl checkpoint / health / export / quarantine, build_run_command_input() normalized RunCommandInput, run_command_flow().
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
-- Узлы (metadata): `20`
+- Дата: `2026-03-28`
+- Узлы (metadata): `23`
 
 \newpage
 
@@ -1080,13 +1080,13 @@
 ![49-composite-runner-class](../foundation/svg/49-composite-runner-class.svg)
 
 ### Описание
-Диаграмма «CompositePipelineRunner — Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite/ (runner, coordinator, merger, checkpoint, etc.). Схема имеет плотность порядка 13 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: CompositePipelineRunner, CompositeConfig, CompositeRuntimeConfig, FSMStateHelper, KeyExtractorService, DependencyCoordinator.
+Диаграмма «CompositePipelineRunner — Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite/ (runner facade, dependency group, checkpoint facade, coordinators). Схема имеет плотность порядка 16 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: CompositePipelineRunner, CompositeRunnerDependencyGroup, CompositeConfig, CompositeRuntimeConfig, FSMStateHelperService, KeyExtractorService.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
-- Узлы (metadata): `13`
+- Дата: `2026-03-28`
+- Узлы (metadata): `16`
 
 \newpage
 

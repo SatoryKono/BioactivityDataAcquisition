@@ -90,7 +90,7 @@ class TestCliRunDryRun:
         mock_preview.total_files = 15
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
@@ -129,7 +129,7 @@ class TestCliRunDryRun:
         mock_preview.total_files = 10
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
@@ -169,7 +169,7 @@ class TestCliRunDryRun:
         mock_preview.total_files = 0
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
@@ -209,7 +209,7 @@ class TestCliRunDryRun:
         mock_preview.total_files = 59
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
@@ -246,7 +246,7 @@ class TestCliDryRunErrorHandling:
     ):
         """Test that --dry-run handles preview errors gracefully."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
             new=AsyncMock(side_effect=RuntimeError("Preview failed")),
         ):
             result = cli_runner.invoke(

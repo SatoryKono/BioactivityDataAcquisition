@@ -16,11 +16,9 @@ from bioetl.domain.exceptions import (
     DataQualityThresholdError,
     DataValidationError,
     ExternalServiceError,
-    InvalidDataFormatError,
     LockAcquisitionError,
     LockLostError,
     MergeConflictError,
-    MissingRequiredFieldError,
     NetworkError,
     RateLimitError,
     RateLimitExceededError,
@@ -32,8 +30,39 @@ from bioetl.domain.exceptions import (
     StorageError,
     TableNotFoundError,
     UploadError,
+    ValidationError,
 )
 from bioetl.domain.types import ErrorType
+
+
+def _build_missing_required_field_error(
+    field: str,
+    record_id: str | None = None,
+) -> ValidationError:
+    message = f"Missing required field: {field}"
+    if record_id is not None:
+        message += f" (record_id={record_id})"
+    error = ValidationError(message, field=field).with_context(record_id=record_id)
+    setattr(error, "error_type_override", ErrorType.MISSING_REQUIRED_FIELD)
+    return error
+
+
+def _build_invalid_data_format_error(
+    field: str,
+    value: str,
+    expected_format: str,
+    record_id: str | None = None,
+) -> ValidationError:
+    error = ValidationError(
+        f"Invalid format for '{field}': got '{value}', expected {expected_format}",
+        record_id=record_id,
+        field=field,
+    ).with_context(
+        value=value,
+        expected_format=expected_format,
+    )
+    setattr(error, "error_type_override", ErrorType.INVALID_DATA)
+    return error
 
 
 class TestExceptions:
@@ -75,8 +104,8 @@ class TestExceptions:
         assert "Exhausted 5 retry attempts" in str(e)
 
     def test_missing_required_field_without_record_id(self) -> None:
-        """Test MissingRequiredFieldError without record_id."""
-        e = MissingRequiredFieldError("activity_id")
+        """Test ValidationError for missing required field without record_id."""
+        e = _build_missing_required_field_error("activity_id")
         assert e.field == "activity_id"
         assert e.record_id is None
         assert "Missing required field: activity_id" in str(e)
@@ -202,10 +231,10 @@ class TestExceptions:
         e1 = SchemaViolationError("t1", ["e1", "e2"])
         assert "Schema validation failed for 't1': ['e1', 'e2']" in str(e1)
 
-        e2 = MissingRequiredFieldError("f1", "r1")
+        e2 = _build_missing_required_field_error("f1", "r1")
         assert "Missing required field: f1 (record_id=r1)" in str(e2)
 
-        e3 = InvalidDataFormatError("f1", "val", "fmt")
+        e3 = _build_invalid_data_format_error("f1", "val", "fmt")
         assert "Invalid format for 'f1': got 'val', expected fmt" in str(e3)
 
 
@@ -232,8 +261,11 @@ class TestErrorClassifier:
             ),  # Fallback hierarchy -> RecoverableError -> NETWORK_ERROR
             # Data Quality
             (SchemaViolationError("t", []), ErrorType.SCHEMA_VIOLATION),
-            (MissingRequiredFieldError("f"), ErrorType.MISSING_REQUIRED_FIELD),
-            (InvalidDataFormatError("f", "v", "e"), ErrorType.INVALID_DATA),
+            (
+                _build_missing_required_field_error("f"),
+                ErrorType.MISSING_REQUIRED_FIELD,
+            ),
+            (_build_invalid_data_format_error("f", "v", "e"), ErrorType.INVALID_DATA),
         ],
     )
     def test_classify_domain_errors(

@@ -24,8 +24,7 @@ Historical planning/baseline material should live in:
 - [`docs/99-archive/README.md`](../99-archive/README.md)
 
 Difference from top-level [`reports/`](../../reports/README.md):
-- `docs/reports/` contains curated internal-published artifacts kept for
-  traceability.
+- `docs/reports/` contains curated repo-only artifacts kept for traceability.
 - top-level `reports/` contains generated or working outputs that do not
   automatically become part of the retained documentation surface.
 

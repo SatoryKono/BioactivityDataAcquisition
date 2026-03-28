@@ -1,4 +1,4 @@
-"""Unit tests for run_command_policy.py.
+"""Unit tests for canonical run command policy helpers.
 
 Covers handle_cli_failure, map_status_to_exit_code, handle_destructive_step,
 execute_run_step, and finalize_run_step.
@@ -26,7 +26,7 @@ from bioetl.application.services.cli_run_orchestration_service import (
     CliRunOrchestrationService,
 )
 from bioetl.domain.exceptions import NetworkError
-from bioetl.interfaces.cli.commands.run_command_policy import (
+from bioetl.interfaces.cli.commands.domains.run.command_policy import (
     execute_run_step,
     finalize_run_step,
     handle_cli_failure,
@@ -158,6 +158,7 @@ class TestPrepareRunRequest:
             debug=False,
             health_server=True,
             health_port=8081,
+            enable_tracing=None,
             use_cached_bronze=False,
             cached_bronze_date=None,
             cached_bronze_path=None,
@@ -176,7 +177,7 @@ class TestPrepareRunRequest:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_command_policy.echo_error"
+                "bioetl.interfaces.cli.commands.domains.run.command_policy.echo_error"
             ) as mock_error,
             pytest.raises(SystemExit),
         ):
@@ -196,6 +197,7 @@ class TestPrepareRunRequest:
                 debug=False,
                 health_server=True,
                 health_port=8081,
+                enable_tracing=None,
                 use_cached_bronze=False,
                 cached_bronze_date=None,
                 cached_bronze_path=None,
@@ -255,7 +257,7 @@ class TestHandleDestructiveStep:
         """click.Abort from handle_destructive_run_confirmation is re-raised (line 141)."""
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_run_confirmation",
+                "bioetl.interfaces.cli.commands.domains.run.command_policy.handle_destructive_run_confirmation",
                 side_effect=click.Abort(),
             ),
             pytest.raises(click.Abort),
@@ -272,7 +274,7 @@ class TestHandleDestructiveStep:
     ) -> None:
         """BioETLError is caught, handle_cli_failure called, returns False (lines 142-148)."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_run_confirmation",
+            "bioetl.interfaces.cli.commands.domains.run.command_policy.handle_destructive_run_confirmation",
             side_effect=NetworkError("network down"),
         ):
             result = handle_destructive_step(
@@ -290,7 +292,7 @@ class TestHandleDestructiveStep:
     ) -> None:
         """OSError (member of CLI_ENTRYPOINT_TYPED_ERRORS) is caught, returns False (lines 149-155)."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_run_confirmation",
+            "bioetl.interfaces.cli.commands.domains.run.command_policy.handle_destructive_run_confirmation",
             side_effect=OSError("permission denied"),
         ):
             result = handle_destructive_step(
@@ -311,7 +313,7 @@ class TestHandleDestructiveStep:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_run_confirmation",
+                "bioetl.interfaces.cli.commands.domains.run.command_policy.handle_destructive_run_confirmation",
                 side_effect=_WeirdError("weird"),
             ),
             pytest.raises(_WeirdError, match="weird"),
@@ -340,7 +342,7 @@ class TestRunCommandFlow:
         exit_func = MagicMock()
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_step",
+            "bioetl.interfaces.cli.commands.domains.run.command_policy.handle_destructive_step",
             return_value=False,
         ) as mock_handle_destructive:
             run_command_flow(
@@ -360,6 +362,7 @@ class TestRunCommandFlow:
                     debug=False,
                     health_server=True,
                     health_port=8081,
+                    enable_tracing=None,
                     use_cached_bronze=False,
                     cached_bronze_date=None,
                     cached_bronze_path=None,
@@ -392,7 +395,7 @@ class TestRunCommandFlow:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_step",
+                "bioetl.interfaces.cli.commands.domains.run.command_policy.handle_destructive_step",
                 return_value=True,
             ) as mock_handle_destructive,
             pytest.raises(SystemExit) as exc_info,
@@ -414,6 +417,7 @@ class TestRunCommandFlow:
                     debug=False,
                     health_server=True,
                     health_port=9090,
+                    enable_tracing=True,
                     use_cached_bronze=False,
                     cached_bronze_date=None,
                     cached_bronze_path=None,

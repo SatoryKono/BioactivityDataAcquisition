@@ -7,15 +7,13 @@ for different validation strategies.
 from __future__ import annotations
 
 from bioetl.infrastructure.validation.pandera_validator import (
-    NoOpGoldValidator,
-    NoOpSilverValidator,
+    NoOpValidator,
     PanderaGoldValidator,
     PanderaSilverValidator,
 )
 
 __all__ = [
-    "NoOpGoldValidator",
-    "NoOpSilverValidator",
+    "NoOpValidator",
     "PanderaGoldValidator",
     "PanderaSilverValidator",
 ]

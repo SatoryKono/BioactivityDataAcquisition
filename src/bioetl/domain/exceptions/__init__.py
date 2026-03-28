@@ -118,8 +118,6 @@ from bioetl.domain.exceptions.pipeline_shutdown import (
 # ValidationErrors - Schema and data format validation
 # =============================================================================
 from bioetl.domain.exceptions.validation import (
-    InvalidDataFormatError,
-    MissingRequiredFieldError,
     SchemaViolationError,
     ValidationError,
 )
@@ -144,13 +142,11 @@ __all__ = [
     "DomainExceptionContext",
     "ExternalServiceError",
     "InfrastructureError",
-    "InvalidDataFormatError",
     "InvalidStateError",
     "LockAcquisitionError",
     "LockLostError",
     "MergeConflictError",
     "MetricsServerError",
-    "MissingRequiredFieldError",
     "NetworkError",
     "PipelineShutdownError",
     "PolicyViolationError",

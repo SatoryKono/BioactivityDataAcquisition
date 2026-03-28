@@ -87,6 +87,7 @@ class CliRunOrchestrationService:
         vacuum_after_run: bool | None,
         vacuum_retention_days: int | None,
         debug: bool,
+        enable_tracing: bool | None,
         use_cached_bronze: bool,
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
@@ -127,6 +128,7 @@ class CliRunOrchestrationService:
             use_cached_bronze=use_cached_bronze,
             cached_bronze_path=cached_bronze_path,
             cached_bronze_date=cached_bronze_date,
+            enable_tracing=enable_tracing,
         )
 
     def prepare_execution_request(
@@ -146,6 +148,7 @@ class CliRunOrchestrationService:
         debug: bool,
         health_server: bool,
         health_port: int,
+        enable_tracing: bool | None,
         use_cached_bronze: bool,
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
@@ -174,6 +177,7 @@ class CliRunOrchestrationService:
                     vacuum_after_run=vacuum_after_run,
                     vacuum_retention_days=vacuum_retention_days,
                     debug=debug,
+                    enable_tracing=enable_tracing,
                     use_cached_bronze=use_cached_bronze,
                     cached_bronze_date=cached_bronze_date,
                     cached_bronze_path=cached_bronze_path,

@@ -40,11 +40,11 @@ class AssaySchema(ETLRecordSchema):
     )
 
     # === Description & Classification ===
-    description: Series[str] | None = pa.Field(
-        nullable=True, description="Assay description."
+    description: Series[str] = pa.Field(
+        nullable=False, description="Assay description."
     )
-    assay_type: Series[str] | None = pa.Field(
-        nullable=True,
+    assay_type: Series[str] = pa.Field(
+        nullable=False,
         isin=list(ASSAY_TYPES),
         description="Assay type.",
     )
@@ -83,8 +83,8 @@ class AssaySchema(ETLRecordSchema):
     )
 
     # === Target & Relationship ===
-    target_id: Series[str] | None = pa.Field(
-        nullable=True,
+    target_id: Series[str] = pa.Field(
+        nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="Target ChEMBL ID.",
     )

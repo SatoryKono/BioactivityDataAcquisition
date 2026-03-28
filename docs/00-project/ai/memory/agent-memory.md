@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.6 | Дата: 2026-03-20 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v5.24*
+*Версия: 1.0.7 | Дата: 2026-03-28 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v5.24*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; Claude сохраняет отдельную runtime-specific copy в `.claude/agents/ORCHESTRATION.md` и может оставаться на другой версии без automatic drift claim.
 
@@ -25,7 +25,7 @@
 | Архитектура | Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD |
 | Deployment | Local-Only (ADR-010) — без Docker/Redis в runtime |
 | Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.) |
-| ADR | 43 файла (ADR-001..ADR-043), исторически superseded: ADR-008 |
+| ADR | 45 файлов (ADR-001..ADR-045), исторически superseded: ADR-008 |
 | Coverage target | ≥85% overall, ≥90% domain |
 | RULES.md | v5.24 (2026-03-13) |
 

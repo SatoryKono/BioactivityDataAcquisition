@@ -55,7 +55,7 @@ class TestSilverWriterInit:
             DEFAULT_SILVER_MERGE_POLICY,
         )
         from bioetl.infrastructure.validation.pandera_validator import (
-            NoOpSilverValidator,
+            NoOpValidator,
         )
 
         (
@@ -76,7 +76,7 @@ class TestSilverWriterInit:
 
         assert isinstance(tracing, NoOpTracing)
         assert isinstance(write_policy, WriteModePolicy)
-        assert isinstance(silver_validator, NoOpSilverValidator)
+        assert isinstance(silver_validator, NoOpValidator)
         assert isinstance(metadata_writer, NoOpMetadataWriter)
         assert isinstance(dq_calculator, DQMetricsCalculator)
         assert merge_resilience_policy is DEFAULT_SILVER_MERGE_POLICY

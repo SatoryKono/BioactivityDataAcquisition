@@ -35,36 +35,6 @@ CLI_ALIAS_MODULE_CASES = (
         ("build_quarantine_stats_lines", "build_purge_preview_lines"),
     ),
     (
-        "bioetl.interfaces.cli.commands.run_all_execution",
-        "bioetl.interfaces.cli.commands.domains.run_all.execution",
-        ("RunAllBatchExecutionRequest", "run_all_pipelines_async"),
-    ),
-    (
-        "bioetl.interfaces.cli.commands.run_composite_execution",
-        "bioetl.interfaces.cli.commands.domains.composite.execution",
-        ("load_composite_config", "run_composite_async"),
-    ),
-    (
-        "bioetl.interfaces.cli.commands.run_composite_helpers",
-        "bioetl.interfaces.cli.commands.domains.composite.support",
-        ("emit_composite_startup", "run_composite_with_cli_policy"),
-    ),
-    (
-        "bioetl.interfaces.cli.commands.run_result_flow_helpers",
-        "bioetl.interfaces.cli.commands.domains.run.result_flow",
-        ("finalize_run_result", "present_run_health_info"),
-    ),
-    (
-        "bioetl.interfaces.cli.commands.run_runtime_helpers",
-        "bioetl.interfaces.cli.commands.domains.run.runtime_helpers",
-        ("build_run_command_input", "run_prepared_request_async"),
-    ),
-    (
-        "bioetl.interfaces.cli.commands.run_service_access",
-        "bioetl.interfaces.cli.commands.domains.run.service_access",
-        ("get_cli_run_orchestration_service",),
-    ),
-    (
         "bioetl.interfaces.cli.commands.vacuum",
         "bioetl.interfaces.cli.commands.domains.maintenance.vacuum",
         ("vacuum_command", "get_vacuum_service"),

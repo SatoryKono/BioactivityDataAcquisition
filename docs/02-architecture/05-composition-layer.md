@@ -119,7 +119,7 @@ import paths.
 
 Часть модулей в `composition/factories/`, `composition/services/` и `composition/runtime_builders/`
 сохраняет compatibility facade / shim роль ради стабильности import-paths во время рефакторинга.
-Новый first-party код должен предпочитать canonical owners напрямую, а не добавлять новые multi-hop imports через compat modules вроде `pipeline/config_resolution.py` или `pipeline/creation_api.py`.
+Новый first-party код должен предпочитать canonical owners напрямую, а не добавлять новые multi-hop imports через compat modules вроде `pipeline/creation_api.py`.
 Курируемый список таких модулей, их status-модель и exit criteria ведутся в
 [Compatibility Facade Inventory](07-compatibility-facade-inventory.md).
 

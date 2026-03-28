@@ -6,10 +6,6 @@ Canonical import paths::
     PIPELINE_CONFIGS       : from bioetl.composition.factories.pipeline.registry_manifest import PIPELINE_CONFIGS
     register_all_pipelines : from bioetl.composition.factories.pipeline.registry import register_all_pipelines
     PipelineRegistry       : from bioetl.composition import PipelineRegistry
-
-Deprecated compatibility path::
-
-    PIPELINE_CONFIGS       : from bioetl.composition.factories.pipeline.configs import PIPELINE_CONFIGS
 """
 
 from __future__ import annotations

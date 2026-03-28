@@ -1,39 +1,48 @@
 %% Title: CompositePipelineRunner — Component Diagram
-%% Covers: application/composite/ (runner, coordinator, merger, checkpoint, etc.)
+%% Covers: application/composite/ (runner facade, dependency group, checkpoint facade, coordinators)
 %% Rank: 24 (Score 7.31) — Central orchestrator for multi-source pipelines
-%% Updated: 2026-02-17
+%% Updated: 2026-03-28
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-28
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
-%% @nodes   13
+%% @nodes   16
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform class width=256 height=240 max_title_len=27 max_desc_lines=22
 classDiagram
     class CompositePipelineRunner {
         -_config: CompositeConfig
         -_runtime: CompositeRuntimeConfig
-        -_seed_runner_factory: Callable[[], PipelineRunner]
-        -_enricher_runner_factory: Callable[[str, DataFrame], PipelineRunner]
-        -_dependencies_runner_factory: Callable[[str, DataFrame], PipelineRunner]
-        -_key_extractor: KeyExtractorService
-        -_dependency_coordinator: DependencyCoordinator
-        -_coordinator: EnrichmentCoordinator
-        -_merger: MergeService
+        -deps: CompositeRunnerDependencyGroup
         -_checkpoint_manager: CompositeCheckpointService
-        -_logger: LoggerPort
         -_lock: LockPort
-        -_fsm: FSMStateHelper
-        -_dq_report_service: DQReportService
-        -_preflight_validator: CompositePreflightValidator
-        -_quarantine_port: QuarantinePort
+        -_logger: LoggerPort
         -_run_id: RunID
+        -_original_run_id: str | None
+        -_started_at: datetime | None
         +run() CompositeResult
-        -_run_seed() SeedResult
-        -_run_dependencies(keys_df) list~DependencyResult~
-        -_run_enrichers(keys_df) list~EnrichmentResult~
-        -_run_merge(seed, enrichments) MergeResult
+        -_prepare_run_state() CompositeCheckpointState
+        -_run_with_managed_lock() CompositeResult
+        -_run_with_lock() CompositeResult
+    }
+
+    class CompositeRunnerDependencyGroup {
+        +seed_runner_factory
+        +enricher_runner_factory
+        +dependencies_runner_factory
+        +key_extractor
+        +coordinator
+        +dependency_coordinator
+        +merger
+        +checkpoint_manager
+        +logger
+        +lock
+        +fsm_state_helper
+        +dq_report_service
+        +preflight_validator
+        +quarantine_port
+        +metrics
     }
 
     class CompositeConfig {
@@ -46,19 +55,6 @@ classDiagram
         +lineage: LineageConfig
         +cross_validation: CrossValidationConfig
         +dq: CompositeDQConfig
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     }
 
     class CompositeRuntimeConfig {
@@ -69,24 +65,15 @@ classDiagram
         +force_enricher: str | None
         +seed_limit: int | None
         +use_cached_bronze: bool
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        +cached_bronze_path: str | None
+        +cached_bronze_date: str | None
+        +cached_bronze_enrichers: bool | None
+        +cached_bronze_dependencies: bool
+        +heartbeat_interval_seconds: int
+        +lock_ttl_seconds: int
     }
 
-    class FSMStateHelper {
+    class FSMStateHelperService {
         -_config: CompositeConfig
         -_logger: LoggerPort
         -_run_id: str
@@ -94,96 +81,25 @@ classDiagram
         +transition(target) None
         +validate_transition(target) None
         +current_state CompositePipelineState
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     }
 
     class KeyExtractorService {
         -_delta_reader: DeltaReaderPort
         -_logger: LoggerPort
         +extract_keys(silver_path, join_keys) DataFrame
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     }
 
-    class DependencyCoordinator {
+    class DependencyCoordinatorService {
         -_logger: LoggerPort
         -_config: CompositeConfig
         +run(keys_df, runner_factory) list~DependencyResult~
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     }
 
-    class EnrichmentCoordinator {
+    class EnrichmentCoordinatorService {
         -_logger: LoggerPort
         -_config: CompositeConfig
         +run_enrichers(keys_df, runner_factory) list~EnrichmentResult~
         -_filter_enrichers(enrichers) list~EnricherConfig~
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     }
 
     class MergeService {
@@ -192,162 +108,57 @@ classDiagram
         -_logger: LoggerPort
         -_config: CompositeConfig
         +merge(seed_result, enrichment_results) MergeResult
-        -_read_silver_tables() dict~str DataFrame~
+        -_read_silver_tables() dict~str, DataFrame~
         -_resolve_composite_join_keys() list~str~
         -_resolve_conflicts(merged_df) DataFrame
-        -_resolve_join_key_names() list~str~
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     }
 
     class CompositeCheckpointService {
-        -_checkpoint_dir: Path
+        -_storage: CompositeCheckpointPort
         -_logger: LoggerPort
-        +save(state) None
+        -_expected_checkpoint_context
+        -_load_service: CompositeCheckpointLoadService
+        -_persistence_service: CompositeCheckpointPersistenceService
+        +expected_effective_config_hash: str
+        +expected_contract_ref: str
+        +expected_contract_version: str
         +load() CompositeCheckpointState
-        +clear() None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        +save(state) None
+        +delete() None
+        +delete_orphaned() int
+        +list_all() list~str~
+    }
+
+    class CompositeCheckpointLoadService {
+        -_expected_context
+        -_resume: bool
+        +load() CompositeCheckpointState
+    }
+
+    class CompositeCheckpointPersistenceService {
+        -_checkpoint_filename: str
+        -_glob_pattern: str
+        +save(state) None
+        +delete() None
+        +delete_orphaned() int
+        +list_all() list~str~
     }
 
     class CompositePreflightValidator {
         -_delta_reader: DeltaReaderPort
         -_logger: LoggerPort
         +validate(config) list~str~
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     }
 
-    class EnrichmentCrossValidator {
-        -_logger: LoggerPort
-        -_config: CrossValidationConfig
-        +validate(merged_df) CrossValidationReport
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    }
-
-    class CompositePipelineState {
-        <<enumeration>>
-        NOT_STARTED
-        SEED_RUNNING
-        SEED_COMPLETED
-        DEPENDENCIES_RUNNING
-        DEPENDENCIES_COMPLETED
-        ENRICHING
-        ENRICHMENT_COMPLETED
-        MERGING
-        COMPLETED
-        FAILED
-        +is_terminal bool
-        +is_active bool
-        +is_resumable bool
-        +can_transition_to(target) bool
-        
-        
-        
-        
-        
-        
-        
-    }
-
-    class CompositeResult {
-        +run_id: RunID
-        +state: CompositePipelineState
-        +seed: SeedResult
-        +dependencies: list~DependencyResult~
-        +enrichments: list~EnrichmentResult~
-        +merge: MergeResult | None
-        +started_at: datetime
-        +finished_at: datetime
-        +had_warnings: bool
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    }
-
-    %% Relationships
-    CompositePipelineRunner --> CompositeConfig : configured by
-    CompositePipelineRunner --> CompositeRuntimeConfig : runtime options
-    CompositePipelineRunner --> FSMStateHelper : state transitions
-    CompositePipelineRunner --> KeyExtractorService : extract join keys
-    CompositePipelineRunner --> DependencyCoordinator : run dependencies
-    CompositePipelineRunner --> EnrichmentCoordinator : fan-out enrichers
-    CompositePipelineRunner --> MergeService : merge → Gold
-    CompositePipelineRunner --> CompositeCheckpointService : checkpoint/resume
-    CompositePipelineRunner --> CompositePreflightValidator : pre-run validation
-    CompositePipelineRunner ..> CompositeResult : produces
-    FSMStateHelper --> CompositePipelineState : manages
-    MergeService ..> EnrichmentCrossValidator : optional validation
-
-    note for CompositePipelineRunner "ADR-026 service<br/>no business logic<br/>delegates to helpers<br/>constructor DI"
+    CompositePipelineRunner --> CompositeRunnerDependencyGroup
+    CompositePipelineRunner --> CompositeConfig
+    CompositePipelineRunner --> CompositeRuntimeConfig
+    CompositePipelineRunner --> CompositeCheckpointService
+    CompositeRunnerDependencyGroup --> KeyExtractorService
+    CompositeRunnerDependencyGroup --> DependencyCoordinatorService
+    CompositeRunnerDependencyGroup --> EnrichmentCoordinatorService
+    CompositeRunnerDependencyGroup --> MergeService
+    CompositeRunnerDependencyGroup --> FSMStateHelperService
+    CompositeRunnerDependencyGroup --> CompositePreflightValidator
+    CompositeCheckpointService --> CompositeCheckpointLoadService
+    CompositeCheckpointService --> CompositeCheckpointPersistenceService

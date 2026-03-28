@@ -4,7 +4,9 @@ Ensures that dashboards are synchronized with the application metrics
 and follow the project's observability standards.
 """
 
+import io
 import json
+import logging
 from collections import Counter
 from functools import cache
 from pathlib import Path
@@ -15,6 +17,8 @@ import pytest
 
 # Import metrics module to get all defined metric names
 from bioetl.infrastructure.observability import metrics
+from bioetl.infrastructure.observability.logging_config import configure_logging
+from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 
 @cache
@@ -97,6 +101,30 @@ def _collect_dashboard_links(dashboard: dict) -> list[dict]:
     return links
 
 
+def _emit_sample_structured_log(*, pipeline: str, provider: str) -> str:
+    """Emit one JSON log line through the shipped structlog pipeline."""
+    configure_logging(json_format=True, force=True)
+    stream = io.StringIO()
+    root = logging.getLogger()
+    for handler in root.handlers:
+        try:
+            handler.setStream(stream)
+        except AttributeError:
+            continue
+
+    logger = UnifiedLogger(
+        pipeline=pipeline,
+        run_id="123e4567-e89b-12d3-a456-426614174000",
+    )
+    logger.info(
+        "sample-event",
+        stage="extract",
+        provider=provider,
+        operation="health_check",
+    )
+    return stream.getvalue().strip().splitlines()[-1]
+
+
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_is_valid_json(dashboard_path):
     """L1: Verify that the dashboard file is a valid JSON."""
@@ -142,9 +170,9 @@ def test_dashboard_metrics_contract(dashboard_path):
 def test_dashboard_has_required_variables(dashboard_path):
     """Check dashboard variables match the current contract."""
     expected_vars_by_dashboard = {
-        "bioetl-simple.json": {"pipeline", "run_type"},
         "bioetl-overview-v2.json": {"pipeline", "run_type"},
         "bioetl-dq-v2.json": {"pipeline", "run_type"},
+        "bioetl-runtime.json": {"pipeline", "run_type"},
         "bioetl-provider-health-v2.json": {"provider"},
     }
     dashboard = load_dashboard(dashboard_path)
@@ -242,7 +270,6 @@ def test_variable_query_sources(dashboard_path):
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-simple.json", "Quality Ratio"),
         ("bioetl-dq-v2.json", "Data Quality Score"),
     ],
 )
@@ -286,6 +313,26 @@ def test_dq_dashboard_contains_core_dq_metrics():
     assert not missing, f"DQ dashboard missing metrics: {missing}"
 
 
+def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
+    """Guard against rendering raw Unix timestamps as freshness lag."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Data Freshness Lag (seconds)"
+        ),
+        None,
+    )
+    assert panel is not None, "Freshness lag panel not found in bioetl-dq-v2.json"
+
+    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
+    assert any(
+        "clamp_min(time() - max(bioetl_data_freshness_seconds" in expr
+        for expr in expressions
+    ), "Freshness panel must derive lag from the last-ingestion timestamp metric"
+
+
 def test_overview_dashboard_contains_control_plane_and_lineage_metrics():
     """Ensure overview dashboard exposes control-plane and lineage health signals."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
@@ -309,6 +356,42 @@ def test_provider_dashboard_uses_pipeline_filters():
     all_expressions = get_panel_expressions(dashboard)
     assert all("$provider_.*" not in expr for expr in all_expressions), (
         "Provider dashboard still uses fragile $provider_.* regex in panel queries"
+    )
+
+
+def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics():
+    """Ensure runtime dashboard stays anchored to log hygiene and alert-condition metrics."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    all_expressions = "\n".join(get_panel_expressions(dashboard))
+
+    required_metrics = [
+        "bioetl_dq_soft_threshold_exceeded",
+        "bioetl_dq_validation_failures_total",
+        "bioetl_dq_anomaly_detected",
+        "bioetl_silver_validation_failures_total",
+        "bioetl_data_freshness_seconds",
+        "bioetl_control_plane_manifest_writes_total",
+        "bioetl_control_plane_ledger_appends_total",
+        "bioetl_checkpoint_compatibility_events_total",
+        "bioetl_lineage_refs_missing_total",
+        "bioetl_health_check_failures_total",
+        "bioetl_health_check_success_total",
+        "bioetl_data_source_retry_exhausted_total",
+    ]
+    missing = [metric for metric in required_metrics if metric not in all_expressions]
+    assert not missing, f"Runtime dashboard missing metrics: {missing}"
+
+    loki_exprs = [
+        target.get("expr", "")
+        for panel in get_dashboard_panels(dashboard)
+        for target in panel.get("targets", [])
+        if panel.get("datasource") == "Loki"
+    ]
+    assert any("| json" in expr for expr in loki_exprs), (
+        "Runtime dashboard Loki panels must parse structured JSON logs"
+    )
+    assert any("__error__!=\"\"" in expr for expr in loki_exprs), (
+        "Runtime dashboard must expose unstructured-log hygiene signal"
     )
 
 
@@ -343,13 +426,14 @@ def test_dashboard_queries_do_not_filter_by_run_id_label(dashboard_path):
 
 def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> None:
     """Operational dashboards should offer Loki and Tempo drilldown."""
-    expectations = {
-        "bioetl-overview-v2.json": "pipeline",
-        "bioetl-dq-v2.json": "pipeline",
-        "bioetl-provider-health-v2.json": "provider",
-    }
+    expectations = (
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-provider-health-v2.json",
+    )
 
-    for dashboard_name, token in expectations.items():
+    for dashboard_name in expectations:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         links = _collect_dashboard_links(dashboard)
         titles = {link.get("title") for link in links if link.get("title")}
@@ -367,8 +451,8 @@ def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> No
         assert any("/explore" in url and "tempo" in url for url in urls), (
             f"{dashboard_name} must point traces drilldown to Tempo Explore"
         )
-        assert any(token in url for url in urls if "/explore" in url and "loki" in url), (
-            f"{dashboard_name} Loki drilldown should preserve {token}-level context"
+        assert any("/explore?left=" in url and "loki" in url for url in urls), (
+            f"{dashboard_name} Loki drilldown must use a Loki Explore payload"
         )
 
 
@@ -377,6 +461,7 @@ def test_explore_links_decode_to_valid_queries() -> None:
     expectations = {
         "bioetl-overview-v2.json": ("pipeline", "loki"),
         "bioetl-dq-v2.json": ("pipeline", "loki"),
+        "bioetl-runtime.json": ("pipeline", "loki"),
         "bioetl-provider-health-v2.json": ("provider", "loki"),
     }
 
@@ -393,9 +478,35 @@ def test_explore_links_decode_to_valid_queries() -> None:
             assert payload["range"]["to"] == "${__to}"
             if payload["datasource"] == "loki":
                 expr = payload["queries"][0]["expr"]
-                assert "{job=\"bioetl\"}" in expr
-                assert "|~" in expr
-                assert f"\\\"{token}\\\":\\\"($" in expr
-                assert f'""{token}' not in expr, (
-                    f"{dashboard_name} contains malformed doubled quotes before {token} in Loki expr"
-                )
+                assert expr == '{job="bioetl"}'
+
+def test_loki_drilldown_uses_safe_generic_entrypoint() -> None:
+    """Loki drilldown should avoid broken variable interpolation inside Explore."""
+    sample_line = _emit_sample_structured_log(
+        pipeline="chembl_activity",
+        provider="chembl",
+    )
+    assert re.search(r'"pipeline"\s*:\s*"chembl_activity"', sample_line)
+    assert re.search(r'"provider"\s*:\s*"chembl"', sample_line)
+    assert re.search(r'"stage"\s*:\s*"extract"', sample_line)
+
+    expectations = (
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-provider-health-v2.json",
+    )
+
+    for dashboard_name in expectations:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        loki_links = [
+            link
+            for link in _collect_dashboard_links(dashboard)
+            if "/explore?left=" in link.get("url", "") and "loki" in link.get("url", "")
+        ]
+        assert loki_links, f"{dashboard_name} must expose at least one Loki drilldown link"
+
+        for link in loki_links:
+            payload = json.loads(unquote(link["url"].split("left=", 1)[1]))
+            expr = payload["queries"][0]["expr"]
+            assert expr == '{job="bioetl"}'

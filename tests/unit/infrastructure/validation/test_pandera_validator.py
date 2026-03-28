@@ -1,6 +1,6 @@
 """Unit tests for Pandera validators.
 
-Tests for PanderaSilverValidator, PanderaGoldValidator, and their NoOp counterparts.
+Tests for PanderaSilverValidator, PanderaGoldValidator, and NoOpValidator.
 Includes property-based tests using Hypothesis for robustness validation.
 """
 
@@ -14,8 +14,7 @@ from hypothesis import strategies as st
 
 from bioetl.domain.types import ValidationResult
 from bioetl.infrastructure.validation.pandera_validator import (
-    NoOpGoldValidator,
-    NoOpSilverValidator,
+    NoOpValidator,
     PanderaGoldValidator,
     PanderaSilverValidator,
 )
@@ -153,12 +152,12 @@ class TestPanderaSilverValidator:
 
 
 @pytest.mark.unit
-class TestNoOpSilverValidator:
-    """Tests for NoOpSilverValidator."""
+class TestNoOpValidator:
+    """Tests for the shared NoOpValidator."""
 
     def test_validate_always_returns_valid(self):
-        """Test that NoOpSilverValidator always returns valid."""
-        validator = NoOpSilverValidator()
+        """Test that NoOpValidator always returns valid."""
+        validator = NoOpValidator()
         records = [{"entity_id": "CHEMBL123", "invalid_field": "xyz"}]
         result = validator.validate(records)
         assert result.valid is True
@@ -166,14 +165,14 @@ class TestNoOpSilverValidator:
 
     def test_validate_empty_records_returns_valid(self):
         """Test that empty records also returns valid."""
-        validator = NoOpSilverValidator()
+        validator = NoOpValidator()
         result = validator.validate([])
         assert result.valid is True
         assert result.errors == []
 
     def test_implements_validation_result_protocol(self):
         """Test that validate returns ValidationResult type."""
-        validator = NoOpSilverValidator()
+        validator = NoOpValidator()
         result = validator.validate([{"test": "data"}])
         assert isinstance(result, ValidationResult)
 
@@ -226,25 +225,6 @@ class TestPanderaGoldValidator:
 
 
 @pytest.mark.unit
-class TestNoOpGoldValidator:
-    """Tests for NoOpGoldValidator."""
-
-    def test_validate_always_returns_valid(self):
-        """Test that NoOpGoldValidator always returns valid."""
-        validator = NoOpGoldValidator()
-        records = [{"entity_id": "CHEMBL123", "invalid_field": "xyz"}]
-        result = validator.validate(records)
-        assert result.valid is True
-        assert result.errors == []
-
-    def test_implements_validation_result_protocol(self):
-        """Test that validate returns ValidationResult type."""
-        validator = NoOpGoldValidator()
-        result = validator.validate([{"test": "data"}])
-        assert isinstance(result, ValidationResult)
-
-
-@pytest.mark.unit
 class TestSilverValidatorPortProtocol:
     """Tests for SilverValidatorPort protocol compliance."""
 
@@ -256,10 +236,10 @@ class TestSilverValidatorPortProtocol:
         assert isinstance(validator, SilverValidatorPort)
 
     def test_noop_silver_validator_is_runtime_checkable(self):
-        """Test that NoOpSilverValidator can be runtime checked."""
+        """Test that NoOpValidator can be runtime checked as SilverValidatorPort."""
         from bioetl.domain.ports import SilverValidatorPort
 
-        validator = NoOpSilverValidator()
+        validator = NoOpValidator()
         assert isinstance(validator, SilverValidatorPort)
 
 
@@ -275,10 +255,10 @@ class TestGoldValidatorPortProtocol:
         assert isinstance(validator, GoldValidatorPort)
 
     def test_noop_gold_validator_is_runtime_checkable(self):
-        """Test that NoOpGoldValidator can be runtime checked."""
+        """Test that NoOpValidator can be runtime checked as GoldValidatorPort."""
         from bioetl.domain.ports import GoldValidatorPort
 
-        validator = NoOpGoldValidator()
+        validator = NoOpValidator()
         assert isinstance(validator, GoldValidatorPort)
 
 
@@ -372,8 +352,8 @@ class TestPanderaValidatorPropertyBased:
     )
     def test_noop_validators_always_return_valid(self, records: list[dict]):
         """Property: NoOp validators always return valid=True for any input."""
-        silver_validator = NoOpSilverValidator()
-        gold_validator = NoOpGoldValidator()
+        silver_validator = NoOpValidator()
+        gold_validator = NoOpValidator()
 
         silver_result = silver_validator.validate(records)
         gold_result = gold_validator.validate(records)

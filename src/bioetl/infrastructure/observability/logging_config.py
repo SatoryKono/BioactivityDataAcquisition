@@ -21,9 +21,11 @@ Requirements:
 from __future__ import annotations
 
 import logging
+import os
 import re
 import sys
 import threading
+from pathlib import Path
 from typing import Any
 
 import structlog
@@ -34,6 +36,7 @@ from bioetl.domain.types import JsonDict
 _config_lock = threading.Lock()
 _configured = False
 _current_format: bool | None = None  # True = JSON, False = Console
+_DEFAULT_LOG_FILE = Path("logs") / "bioetl.log"
 
 # Patterns for secret detection in log values
 _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
@@ -182,6 +185,42 @@ def trace_context_processor(
     return event_dict
 
 
+def _resolve_log_file_path() -> Path | None:
+    """Resolve the effective file sink path for runtime logging.
+
+    Resolution order:
+    1. ``BIOETL_LOG_FILE`` explicit override
+    2. no default file sink during pytest runs
+    3. repository-local ``logs/bioetl.log`` for normal runtime usage
+    """
+    configured_path = os.getenv("BIOETL_LOG_FILE")
+    if configured_path is not None:
+        normalized = configured_path.strip()
+        if not normalized:
+            return None
+        return Path(normalized)
+
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        return None
+
+    return _DEFAULT_LOG_FILE
+
+
+def _build_shared_processors() -> list[Any]:
+    """Build processors shared by structlog and foreign stdlib loggers."""
+    return [
+        structlog.contextvars.merge_contextvars,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.UnicodeDecoder(),
+        trace_context_processor,
+        secret_filter_processor,
+    ]
+
+
 def configure_logging(
     json_format: bool = True,
     log_level: str = "INFO",
@@ -199,36 +238,43 @@ def configure_logging(
         if _configured and not force:
             return False
 
-        processors: list[
-            Any  # Any: structlog processor chain has heterogeneous callables
-        ] = [
-            structlog.contextvars.merge_contextvars,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.add_log_level,
-            structlog.stdlib.PositionalArgumentsFormatter(),
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.UnicodeDecoder(),
-            trace_context_processor,
-            secret_filter_processor,
-        ]
-
-        if json_format:
-            processors.append(structlog.processors.JSONRenderer())
-        else:
-            processors.append(structlog.dev.ConsoleRenderer())
+        shared_processors = _build_shared_processors()
+        renderer: Any = (
+            structlog.processors.JSONRenderer()
+            if json_format
+            else structlog.dev.ConsoleRenderer()
+        )
 
         structlog.configure(
-            processors=processors,
+            processors=[
+                *shared_processors,
+                structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+            ],
             logger_factory=structlog.stdlib.LoggerFactory(),
             wrapper_class=structlog.stdlib.BoundLogger,
             cache_logger_on_first_use=True,
         )
 
+        formatter = structlog.stdlib.ProcessorFormatter(
+            foreign_pre_chain=shared_processors,
+            processors=[
+                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                renderer,
+            ],
+        )
+
+        handlers = [logging.StreamHandler(sys.stdout)]
+        log_path = _resolve_log_file_path()
+        if log_path is not None:
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            handlers.append(logging.FileHandler(log_path, encoding="utf-8"))
+        for handler in handlers:
+            handler.setFormatter(formatter)
+
         logging.basicConfig(
             level=log_level.upper(),
-            stream=sys.stdout,
             format="%(message)s",
+            handlers=handlers,
             force=True,
         )
 
@@ -256,6 +302,10 @@ def reset_logging_config() -> None:
     """
     global _configured, _current_format
     with _config_lock:
+        logging.shutdown()
+        root_logger = logging.getLogger()
+        for handler in list(root_logger.handlers):
+            root_logger.removeHandler(handler)
         _configured = False
         _current_format = None
 

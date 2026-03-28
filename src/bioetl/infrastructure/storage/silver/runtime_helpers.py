@@ -24,7 +24,7 @@ from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
     SilverMergeResiliencePolicy,
 )
-from bioetl.infrastructure.validation.pandera_validator import NoOpSilverValidator
+from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,7 +64,7 @@ def resolve_silver_writer_runtime(
     return (
         tracing or NoOpTracing(),
         write_policy or WriteModePolicy(),
-        silver_validator or NoOpSilverValidator(),
+        silver_validator or NoOpValidator(),
         metadata_writer or NoOpMetadataWriter(),
         dq_calculator or DQMetricsCalculator(),
         merge_resilience_policy or DEFAULT_SILVER_MERGE_POLICY,

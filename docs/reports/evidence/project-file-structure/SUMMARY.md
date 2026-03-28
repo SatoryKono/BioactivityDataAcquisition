@@ -11,7 +11,7 @@ working docs и перевела merged export artifacts в generated-on-demand 
 Это слегка упростило repo surface, но не изменило базовую интерпретацию пакета:
 верхнеуровневое дерево всё так же читается через стабильные primary zones.
 
-> Это summary — internal-published evidence layer для file-structure
+> Это summary — repo-only evidence layer для file-structure
 > interpretation. Он полезен для repo-shape calibration и traceability, но не
 > заменяет canonical project guidance в `docs/00-project/` и active
 > architecture/reference docs.

@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-03-28T15:34:03+03:00_
+_Generated: 2026-03-28T19:27:48+03:00_
 
 ## High Level Hexagonal
 
@@ -317,6 +317,30 @@ _Generated: 2026-03-28T15:34:03+03:00_
 ## Control Plane Artifacts
 
 ![19-control-plane-artifacts](./19-control-plane-artifacts.png)
+
+---
+
+## Data Traceability Runtime
+
+![20-data-traceability-runtime](./20-data-traceability-runtime.png)
+
+---
+
+## Idempotent Processing Guards
+
+![21-idempotent-processing-guards](./21-idempotent-processing-guards.png)
+
+---
+
+## Data Operations Observability
+
+![22-data-operations-observability](./22-data-operations-observability.png)
+
+---
+
+## Reproducible Run Contract
+
+![23-reproducible-run-contract](./23-reproducible-run-contract.png)
 
 ---
 

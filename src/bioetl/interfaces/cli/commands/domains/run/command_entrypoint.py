@@ -6,6 +6,15 @@ from collections.abc import Callable
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    with_debug_option,
+    with_dry_run_option,
+    with_health_server_options,
+    with_limit_option,
+    with_run_type_option,
+    with_yes_option,
+)
+
 
 def build_run_click_command(
     *,
@@ -22,12 +31,7 @@ def build_run_click_command(
         required=True,
         help="Pipeline to run",
     )
-    @click.option(
-        "--run-type",
-        type=click.Choice(["incremental", "backfill", "rebuild"]),
-        default="incremental",
-        help="Type of run",
-    )
+    @with_run_type_option("Type of run")
     @click.option("--resume", is_flag=True, help="Resume from last checkpoint")
     @click.option(
         "--start-offset",
@@ -36,7 +40,7 @@ def build_run_click_command(
         help="Start extraction from specific record offset (skips checkpoint). "
         "Use after crash to resume from known position.",
     )
-    @click.option("--limit", type=int, help="Maximum number of records to process")
+    @with_limit_option("Maximum number of records to process")
     @click.option(
         "--input-csv",
         type=click.Path(exists=True),
@@ -52,17 +56,8 @@ def build_run_click_command(
         type=str,
         help="API field name to filter by (default: 'molecule_chembl_id')",
     )
-    @click.option(
-        "--dry-run",
-        is_flag=True,
-        help="Preview cleanup without execution (for rebuild/backfill)",
-    )
-    @click.option(
-        "--yes",
-        "-y",
-        is_flag=True,
-        help="Skip confirmation prompt for rebuild/backfill",
-    )
+    @with_dry_run_option("Preview cleanup without execution (for rebuild/backfill)")
+    @with_yes_option("Skip confirmation prompt for rebuild/backfill")
     @click.option(
         "--vacuum-after-run",
         is_flag=True,
@@ -75,24 +70,13 @@ def build_run_click_command(
         default=None,
         help="Minimum age of files to remove during VACUUM (days, overrides YAML config)",
     )
+    @with_debug_option()
+    @with_health_server_options(default_health_server_port)
     @click.option(
-        "--debug",
-        is_flag=True,
-        help="Enable DEBUG level logging for detailed output",
-    )
-    @click.option(
-        "--health-server/--no-health-server",
-        "health_server",
-        default=True,
-        help="Enable/disable HTTP health server during execution.",
-        show_default=True,
-    )
-    @click.option(
-        "--health-port",
-        type=int,
-        default=default_health_server_port,
-        help="Port for the HTTP health server.",
-        show_default=True,
+        "--tracing/--no-tracing",
+        "enable_tracing",
+        default=None,
+        help="Override distributed tracing for this run",
     )
     @click.option(
         "--use-cached-bronze/--no-cached-bronze",
@@ -131,6 +115,7 @@ def build_run_click_command(
         debug: bool,
         health_server: bool,
         health_port: int,
+        enable_tracing: bool | None,
         use_cached_bronze: bool,
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
@@ -153,6 +138,7 @@ def build_run_click_command(
             debug=debug,
             health_server=health_server,
             health_port=health_port,
+            enable_tracing=enable_tracing,
             use_cached_bronze=use_cached_bronze,
             cached_bronze_date=cached_bronze_date,
             cached_bronze_path=cached_bronze_path,

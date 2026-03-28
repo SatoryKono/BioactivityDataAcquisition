@@ -29,8 +29,9 @@ Use the repository docs with the following priority:
 
 Useful entry points for non-normative surfaces:
 
-- Repository path `plans/README.md` — active and retained planning artifacts (repo-only working surface, not published in MkDocs)
-- Repository path `reports/README.md` — curated internal reports and evidence (repo-only working surface, not published in MkDocs)
+- Repository path `docs/plans/README.md` — active and retained planning artifacts (repo-only working surface, not published in MkDocs)
+- Repository path `docs/reports/index.md` — curated evidence and internal reports (repo-only working surface, not published in MkDocs)
+- Repository path `reports/README.md` — generated or working analysis outputs before curation
 - Repository path `docs/00-project/ai/README.md` — top-level AI docs map for agents, memory, prompts, and skills
 - Repository path `docs/00-project/ai/agents/README.md` — runtime-specific agent guidance
 - Repository path `docs/00-project/ai/skills/README.md` — skills mirror and indexes

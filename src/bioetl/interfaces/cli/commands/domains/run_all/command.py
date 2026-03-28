@@ -19,7 +19,11 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     health_server_context,
 )
 from bioetl.interfaces.cli.commands.domains.run.support import resolve_context_registry
+from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (
+    dispatch_cli_callback,
+)
 from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
+    RunAllCommandInput,
     build_run_all_command_input,
     exit_with_code,
     handle_run_all_cli_failure,
@@ -219,18 +223,29 @@ def _run_all_callback(
     health_port: int,
 ) -> None:
     """Canonical callback implementation for the run-all Click command."""
-    registry = resolve_context_registry(click_context)
-    cli_input = build_run_all_command_input(
-        source=source,
-        run_type=run_type,
-        limit=limit,
-        dry_run=dry_run,
-        yes=yes,
-        list_only=list_only,
-        debug=debug,
-        health_server=health_server,
-        health_port=health_port,
+    dispatch_cli_callback(
+        click_context,
+        build_cli_input=lambda: build_run_all_command_input(
+            source=source,
+            run_type=run_type,
+            limit=limit,
+            dry_run=dry_run,
+            yes=yes,
+            list_only=list_only,
+            debug=debug,
+            health_server=health_server,
+            health_port=health_port,
+        ),
+        run_with_cli_policy=_run_all_with_cli_policy,
     )
+
+
+def _run_all_with_cli_policy(
+    click_context: click.Context,
+    cli_input: RunAllCommandInput,
+) -> None:
+    """Resolve registry and execute the prepared run-all policy flow."""
+    registry = resolve_context_registry(click_context)
     run_all_command_flow(
         cli_input=cli_input,
         registry=registry,

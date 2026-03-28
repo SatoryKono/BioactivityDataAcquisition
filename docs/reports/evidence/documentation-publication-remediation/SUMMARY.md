@@ -10,7 +10,9 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 
 - Repo-level docs guards уже зелёные: `check_doc_links.py` проходит, `report_docs_kpi.py` находится в состоянии `on_track`.
 - Оставшийся publication noise в `mkdocs build --strict` сосредоточен не в code-doc contradictions, а в markdown-ссылках из active docs на `configs/`, `tests/`, `src/` и `scripts`, которые не публикуются как site docs.
-- Внутренние evidence/backlog docs формируют отдельную internal-published поверхность и не должны диктовать wording для active published guides.
+- Repo-only evidence/backlog docs и internal-published mirrors формируют
+  отдельные non-normative surfaces и не должны диктовать wording для active
+  published guides.
 - Runtime-specific orchestration copies для Codex и Claude являются intentional split, но это должно быть явно сказано в onboarding memory.
 
 ## Рекомендуемая политика

@@ -6,6 +6,15 @@ from collections.abc import Callable
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    with_debug_option,
+    with_dry_run_option,
+    with_health_server_options,
+    with_limit_option,
+    with_run_type_option,
+    with_yes_option,
+)
+
 
 def build_run_all_click_command(
     *,
@@ -20,44 +29,17 @@ def build_run_all_click_command(
         required=True,
         help="Provider name (e.g., chembl, pubchem, uniprot)",
     )
-    @click.option(
-        "--run-type",
-        type=click.Choice(["incremental", "backfill", "rebuild"]),
-        default="incremental",
-        help="Type of run for all pipelines",
-    )
-    @click.option("--limit", type=int, help="Maximum records per pipeline")
-    @click.option(
-        "--dry-run",
-        is_flag=True,
-        help="Preview mode - show pipelines without execution",
-    )
-    @click.option(
-        "--yes",
-        "-y",
-        is_flag=True,
-        help="Skip confirmation prompt for rebuild/backfill",
-    )
+    @with_run_type_option("Type of run for all pipelines")
+    @with_limit_option("Maximum records per pipeline")
+    @with_dry_run_option("Preview mode - show pipelines without execution")
+    @with_yes_option("Skip confirmation prompt for rebuild/backfill")
     @click.option(
         "--list-only",
         is_flag=True,
         help="List pipelines for the source without running them",
     )
-    @click.option("--debug", is_flag=True, help="Enable DEBUG level logging")
-    @click.option(
-        "--health-server/--no-health-server",
-        "health_server",
-        default=True,
-        help="Enable/disable HTTP health server during execution.",
-        show_default=True,
-    )
-    @click.option(
-        "--health-port",
-        type=int,
-        default=default_health_server_port,
-        help="Port for the HTTP health server.",
-        show_default=True,
-    )
+    @with_debug_option("Enable DEBUG level logging")
+    @with_health_server_options(default_health_server_port)
     @click.pass_context
     def run_all_command(
         click_context: click.Context,

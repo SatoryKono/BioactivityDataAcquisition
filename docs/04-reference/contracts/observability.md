@@ -97,7 +97,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 | `bioetl_provider_health_status` | Gauge | `provider` | см. mapping ниже |
 | `bioetl_circuit_breaker_state` | Gauge | `adapter` | 0/1/2 mapping |
 | `bioetl_dq_validation_score` | Gauge | `pipeline,entity` | 0..1 |
-| `bioetl_data_freshness_seconds` | Gauge | `pipeline,entity` | unix ts последнего успеха |
+| `bioetl_data_freshness_seconds` | Gauge | `pipeline,entity` | unix timestamp последнего успешного ingestion; age считается как `time() - metric` |
 
 Guardrail для новых метрик control-plane/traceability:
 
@@ -127,6 +127,9 @@ Guardrail для новых метрик control-plane/traceability:
 - Exporter:
   - OTLP exporter при установленном OTLP пакете
   - fallback: Console exporter
+  - для локальных OTLP endpoints (`localhost`, `127.0.0.1`, `host.docker.internal`,
+    `tempo`) insecure/plaintext включается автоматически, если explicit
+    `OTEL_EXPORTER_OTLP_INSECURE` override не задан
 
 Текущее состояние:
 
@@ -165,8 +168,8 @@ Guardrail для новых метрик control-plane/traceability:
 | `bioetl_dq_validation_score` | `< 0.80` на запуск | P2 | `docs/05-operations/runbooks/pipeline-failure-dq.md` |
 | `bioetl_dq_records_quarantined_total` | `>5%` и `<=20%` за `30m` при `bronze>=20` | P2 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
 | `bioetl_dq_records_quarantined_total` | `>20%` за `15m` при `bronze>=20` | P1 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
-| `bioetl_data_freshness_seconds` | `>24h` и `<=72h` | P2 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
-| `bioetl_data_freshness_seconds` | `>72h` | P1 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
+| `time() - bioetl_data_freshness_seconds` | `>24h` и `<=72h` | P2 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
+| `time() - bioetl_data_freshness_seconds` | `>72h` | P1 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
 | `bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}` | `increase(...) > 0` за `30m` | P2 | `docs/05-operations/runbooks/checkpoint-debugging.md` |
 | `bioetl_lineage_fragments_emitted_total{status="failed"}` | `increase(...) > 0` за `15m` | P2 | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
 | `bioetl_data_source_retry_exhausted_total` | `1-2` exhaustions за `1h` | P2 | `docs/05-operations/runbooks/incident-response.md` |

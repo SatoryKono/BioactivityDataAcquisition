@@ -43,7 +43,7 @@ These artifacts are intentionally outside primary nav but linked here for discov
 
 ---
 
-## Architecture Diagrams (19 core)
+## Architecture Diagrams (23 core)
 
 | # | Diagram | File | Description |
 |---|---------|------|-------------|
@@ -66,6 +66,10 @@ These artifacts are intentionally outside primary nav but linked here for discov
 | 17 | Security, PII & Audit | `architecture/17-security-pii-audit.mmd` | PII hashing, salt rotation, audit trail |
 | 18 | Lock, Checkpoint & Shutdown | `architecture/18-lock-checkpoint-shutdown.mmd` | General lifecycle vs composite-specific lock/checkpoint semantics |
 | 19 | Control-Plane Artifacts & Traceability | `architecture/19-control-plane-artifacts.mmd` | Manifest/effective-config/ledger publication and lineage inspection surface |
+| 20 | Data Traceability Runtime Path | `architecture/20-data-traceability-runtime.mmd` | End-to-end traceability anchors from caller to artifact inspection |
+| 21 | Idempotent Processing Guards | `architecture/21-idempotent-processing-guards.mmd` | Lock ownership, checkpoint identity, resume policy, and safe rerun guards |
+| 22 | Data Operations Observability | `architecture/22-data-operations-observability.mmd` | Logs, metrics, tracing, and low-cardinality control-plane signals |
+| 23 | Reproducible Run Contract | `architecture/23-reproducible-run-contract.mmd` | Config resolution, effective-config artifacts, and execution fingerprint identity |
 
 ## Decomposed Architecture Diagrams
 
@@ -87,6 +91,8 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 | `architecture/14-cli-interface-layer.mmd` | `architecture/14a-cli-commands.mmd`, `architecture/14b-cli-routing.mmd` |
 | `architecture/16-transformer-hierarchy.mmd` | `architecture/16a-transformer-base.mmd`, `architecture/16b-transformer-pub-other.mmd` |
 | `architecture/18-lock-checkpoint-shutdown.mmd` | `architecture/18a-lock-system.mmd`, `architecture/18b-checkpoint-shutdown.mmd` |
+| `architecture/21-idempotent-processing-guards.mmd` | `views/21-idempotent-processing-guards-overview.mermaid` |
+| `architecture/23-reproducible-run-contract.mmd` | `views/23-reproducible-run-contract-overview.mermaid` |
 
 > `13a/13b/13c` have two parallel decomposition tracks by design:
 > `port-contracts-*` = contract-centric views, `*-ports` = operational slices.
