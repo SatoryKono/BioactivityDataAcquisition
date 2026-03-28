@@ -1,7 +1,7 @@
 # BioETL Architecture Diagrams Bundle
 
-- Generated: 2026-03-27T22:05:36
-- Diagram count: 52
+- Generated: 2026-03-28T15:32:30
+- Diagram count: 53
 
 ## Table of Contents
 
@@ -35,7 +35,7 @@
 - [11b-config-domain — Configuration: Domain & Application Config](#11b-config-domain)
 - [12-bootstrap-di-container — Bootstrap / DI Container (Composition Root)](#12-bootstrap-di-container)
 - [12a-bootstrap-factories — Bootstrap: Registries, Public APIs, and Factory Seams](#12a-bootstrap-factories)
-- [12b-bootstrap-wiring — Bootstrap: Runtime and Admin Wiring](#12b-bootstrap-wiring)
+- [12b-bootstrap-wiring — Bootstrap: Runtime, Control-Plane, and Admin Wiring](#12b-bootstrap-wiring)
 - [13-port-protocol-contracts — Port/Protocol Contracts (Full Map)](#13-port-protocol-contracts)
 - [13a-data-storage-ports — DataSource and Storage Ports](#13a-data-storage-ports)
 - [13a-port-contracts-data-sources — Port Contracts: Data Sources](#13a-port-contracts-data-sources)
@@ -57,6 +57,7 @@
 - [18-lock-checkpoint-shutdown — Locking, Checkpoint, and Graceful Shutdown](#18-lock-checkpoint-shutdown)
 - [18a-lock-system — Lock System](#18a-lock-system)
 - [18b-checkpoint-shutdown — Checkpoint and Shutdown System](#18b-checkpoint-shutdown)
+- [19-control-plane-artifacts — Control-Plane Artifacts and Traceability](#19-control-plane-artifacts)
 
 \newpage
 
@@ -602,13 +603,13 @@
 ![12-bootstrap-di-container](../architecture/svg/12-bootstrap-di-container.svg)
 
 ### Описание
-Диаграмма «Bootstrap / DI Container (Composition Root)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: current entrypoints/bootstrap seams and the runtime/admin assembly path they drive today.. Схема имеет плотность порядка 20 узлов и 30 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Public composition seams, Internal composition modules, Registries + factories, Runtime bootstrap, CLI/bootstrap services, Created collaborators. Показательные узлы для быстрого чтения: Entry callers CLI + tests/scripts + programmatic integrations, composition.entrypoints run/build + service getters, composition.bootstrap lower-level runtime / cli seam, ProviderRegistry provider configs + creators, PipelineRegistry pipeline definitions, DataSourceFactory canonical provider adapter path. Примечание: Decomposed into 12a, 12b sub-diagrams.
+Диаграмма «Bootstrap / DI Container (Composition Root)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: current public composition seams, runtime assembly, and control-plane artifact wiring.. Схема имеет плотность порядка 25 узлов и 39 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Public composition seams, Registries + factories, Runtime assembly path, Admin / support bootstrap, Created services + artifacts. Показательные узлы для быстрого чтения: Entry callers CLI + tests/scripts + programmatic integrations, composition.entrypoints broad retained facade, execution_api / services_api / resources_api narrow command-facing seams, composition.bootstrap lower-level runtime / cli seam, ProviderRegistry provider creators + source defaults, PipelineRegistry pipeline factory lookup. Примечание: Decomposed into 12a, 12b sub-diagrams; complements 19-control-plane-artifacts.mmd.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-24`
-- Узлы (metadata): `20`
+- Дата: `2026-03-28`
+- Узлы (metadata): `25`
 
 \newpage
 
@@ -635,18 +636,18 @@
 
 ## 12b-bootstrap-wiring
 
-**Bootstrap: Runtime and Admin Wiring**
+**Bootstrap: Runtime, Control-Plane, and Admin Wiring**
 
 ![12b-bootstrap-wiring](../architecture/svg/12b-bootstrap-wiring.svg)
 
 ### Описание
-Диаграмма «Bootstrap: Runtime and Admin Wiring» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers how current entrypoints/bootstrap seams expose runtime and admin assembly outputs.. Схема имеет плотность порядка 19 узлов и 22 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Public composition APIs, Composition bootstrap, Infrastructure collaborators, Created services. Показательные узлы для быстрого чтения: composition.entrypoints, composition.bootstrap lower-level seam, bootstrap_pipeline_runner, bootstrap_pipeline_runner_service, build_pipeline_runner, bootstrap.cli + bootstrap.assembly.
+Диаграмма «Bootstrap: Runtime, Control-Plane, and Admin Wiring» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers how current entrypoints/bootstrap seams expose runtime, control-plane, and admin assembly outputs.. Схема имеет плотность порядка 23 узлов и 31 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Public composition APIs, Composition bootstrap, Infrastructure collaborators, Created services, Control-plane artifacts. Показательные узлы для быстрого чтения: composition.entrypoints, execution_api / services_api / resources_api, composition.bootstrap lower-level seam, bootstrap_pipeline_runner, bootstrap_pipeline_runner_service, build_pipeline_runner.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-24`
-- Узлы (metadata): `19`
+- Дата: `2026-03-28`
+- Узлы (metadata): `23`
 
 \newpage
 
@@ -1046,3 +1047,22 @@
 - Уровень: `System / Component`
 - Дата: `2026-03-16`
 - Узлы (metadata): `12`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 19-control-plane-artifacts
+
+**Control-Plane Artifacts and Traceability**
+
+*SVG/PNG не найдены: `../architecture/svg/19-control-plane-artifacts.svg`, `../architecture/png/19-control-plane-artifacts.png`*
+
+### Описание
+Диаграмма «Control-Plane Artifacts and Traceability» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how runtime assembly publishes immutable run metadata, ledger events, and lineage fragments.. Схема имеет плотность порядка 19 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Composition runtime builders, Application services, Domain ports, Infrastructure stores, Published artifacts, Runtime publishers. Показательные узлы для быстрого чтения: build_pipeline_runner / pipeline start, run-manifest / lineage CLI, create_run_manifest_with_effective_config control-plane orchestration, attach_control_plane_collaborators ledger event hook-up, EffectiveConfigService, RunManifestService. Примечание: Complements 12-bootstrap-di-container, 13-port-protocol-contracts, and 18-lock-checkpoint-shutdown.
+
+### Метаданные
+- Тип: `flowchart`
+- Уровень: `System / Component`
+- Дата: `2026-03-28`
+- Узлы (metadata): `19`

@@ -139,23 +139,23 @@ groups:
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDQQuarantineRateHigh
-        expr: (sum by (pipeline, run_type) (increase(bioetl_dq_records_quarantined_total[30m])) / clamp_min(sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) > 0.05
+        expr: (((sum by (pipeline, run_type) (increase(bioetl_dq_records_quarantined_total[30m])) / clamp_min(sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) > 0.05) and ((sum by (pipeline, run_type) (increase(bioetl_dq_records_quarantined_total[30m])) / clamp_min(sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) <= 0.2)) and (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[30m])) >= 20)
         for: 10m
         labels:
           severity: warning
         annotations:
           summary: "DQ quarantine rate is elevated"
-          description: "Quarantine rate exceeded 5% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 30m."
+          description: "Quarantine rate stayed between 5% and 20% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 30m, with at least 20 bronze records observed."
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDQQuarantineRateCritical
-        expr: (sum by (pipeline, run_type) (increase(bioetl_dq_records_quarantined_total[15m])) / clamp_min(sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[15m])), 1)) > 0.2
+        expr: ((sum by (pipeline, run_type) (increase(bioetl_dq_records_quarantined_total[15m])) / clamp_min(sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[15m])), 1)) > 0.2) and (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[15m])) >= 20)
         for: 5m
         labels:
           severity: critical
         annotations:
           summary: "DQ quarantine rate reached hard-fail territory"
-          description: "Quarantine rate exceeded 20% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 15m."
+          description: "Quarantine rate exceeded 20% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 15m, with at least 20 bronze records observed."
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDQValidationFailuresCritical
@@ -189,13 +189,13 @@ groups:
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDataFreshnessLagHigh
-        expr: max by (pipeline, entity) (bioetl_data_freshness_seconds) > 86400
+        expr: (max by (pipeline, entity) (bioetl_data_freshness_seconds) > 86400) and (max by (pipeline, entity) (bioetl_data_freshness_seconds) <= 259200)
         for: 15m
         labels:
           severity: warning
         annotations:
           summary: "Data freshness lag is elevated"
-          description: "bioetl_data_freshness_seconds exceeded 24h for pipeline={{ $labels.pipeline }} entity={{ $labels.entity }}."
+          description: "bioetl_data_freshness_seconds stayed between 24h and 72h for pipeline={{ $labels.pipeline }} entity={{ $labels.entity }}."
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDataFreshnessLagCritical
@@ -221,11 +221,21 @@ groups:
           runbook: "docs/05-operations/runbooks/incident-response.md"
 
       - alert: BioETLProviderRetriesExhausted
-        expr: sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[15m])) > 0
-        for: 2m
+        expr: ((sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[1h])) > 0) and (sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[1h])) < 3))
+        for: 5m
         labels:
           severity: warning
         annotations:
           summary: "Provider retries exhausted"
-          description: "bioetl_data_source_retry_exhausted_total increased for provider={{ $labels.provider }} operation={{ $labels.operation }} in the last 15m."
+          description: "bioetl_data_source_retry_exhausted_total increased 1-2 times for provider={{ $labels.provider }} operation={{ $labels.operation }} in the last 1h."
+          runbook: "docs/05-operations/runbooks/incident-response.md"
+
+      - alert: BioETLProviderRetriesExhaustedPersistent
+        expr: sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[1h])) >= 3
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Provider retries are repeatedly exhausted"
+          description: "bioetl_data_source_retry_exhausted_total increased at least 3 times for provider={{ $labels.provider }} operation={{ $labels.operation }} in the last 1h."
           runbook: "docs/05-operations/runbooks/incident-response.md"

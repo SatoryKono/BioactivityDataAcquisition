@@ -45,6 +45,9 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 - **Data Quality Score**: `(gold + quarantined) / clamp-min(bronze, 1)`.
 - **Quarantine / Soft Threshold / Validation Failures**: контроль деградаций по окнам времени.
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы.
+- **Drilldown**: dashboard links `Explore Logs (Loki)` / `Explore Traces (Tempo)`
+  и data links у `Data Flow: Bronze -> Silver -> Gold` переводят расследование
+  DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
 
 #### 3. BioETL Provider Health v2
 Технический мониторинг состояния внешних API (ChEMBL, UniProt и др.).
@@ -68,13 +71,16 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 - **DQ / freshness**
   - `BioETLDQSoftThresholdExceeded` -> `dq-failure-investigation.md`
   - `BioETLDQQuarantineRateHigh` / `BioETLDQQuarantineRateCritical` -> `dq-failure-investigation.md`
+    (`5-20%` warning / `>20%` critical, только при `bronze>=20`)
   - `BioETLDQValidationFailuresCritical` -> `dq-failure-investigation.md`
   - `BioETLDQCriticalAnomaliesDetected` -> `dq-failure-investigation.md`
   - `BioETLSilverValidationFailuresDetected` -> `dq-failure-investigation.md`
   - `BioETLDataFreshnessLagHigh` / `BioETLDataFreshnessLagCritical` -> `dq-failure-investigation.md`
+    (`24-72h` warning / `>72h` critical)
 - **Provider health**
   - `BioETLProviderFailureRateHigh` -> `incident-response.md`
-  - `BioETLProviderRetriesExhausted` -> `incident-response.md`
+  - `BioETLProviderRetriesExhausted` / `BioETLProviderRetriesExhaustedPersistent` -> `incident-response.md`
+    (`1-2` exhaustions per `1h` warning / `>=3` critical)
 
 ## 4. Гарантии качества мониторинга
 

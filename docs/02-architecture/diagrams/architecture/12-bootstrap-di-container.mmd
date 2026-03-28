@@ -1,12 +1,12 @@
 %% BioETL — Bootstrap / DI Container (Composition Root)
-%% Shows current entrypoints/bootstrap seams and the runtime/admin assembly path they drive today.
+%% Shows current public composition seams, runtime assembly, and control-plane artifact wiring.
 
-%% @version 1.3.0
-%% @date    2026-03-24
+%% @version 1.4.0
+%% @date    2026-03-28
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   20
-%% @reference  Decomposed into 12a, 12b sub-diagrams
+%% @nodes   25
+%% @reference  Decomposed into 12a, 12b sub-diagrams; complements 19-control-plane-artifacts.mmd
 
 %%{init: {
   'flowchart': {
@@ -19,79 +19,93 @@
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
-%% @uniform width=192 height=108 max_title_len=20 max_desc_lines=4
+%% @uniform width=208 height=108 max_title_len=22 max_desc_lines=4
 graph TB
     CALLERS["Entry callers<br/>CLI + tests/scripts<br/>+ programmatic integrations"]:::size-md
 
     subgraph Public["Public composition seams"]
-        ENTRY["composition.entrypoints<br/>run/build + service getters"]:::size-md
+        ENTRY["composition.entrypoints<br/>broad retained facade"]:::size-md
+        APIS["execution_api / services_api / resources_api<br/>narrow command-facing seams"]:::size-md
         BOOT["composition.bootstrap<br/>lower-level runtime / cli seam"]:::size-md
     end
 
-    subgraph Composition["Internal composition modules"]
-        subgraph Registries["Registries + factories"]
-            PR["ProviderRegistry<br/>provider configs + creators"]:::size-md
-            PIPE["PipelineRegistry<br/>pipeline definitions"]:::size-md
-            DSF["DataSourceFactory<br/>canonical provider adapter path"]:::size-md
-            PF["GenericPipelineFactory / RunnerFactory<br/>pipeline creation seams"]:::size-md
-            SF["StorageFactory<br/>storage creation seam"]:::size-md
-        end
-
-        subgraph Runtime["Runtime bootstrap"]
-            BPR["bootstrap_pipeline_runner<br/>runtime bootstrap entry"]:::size-md
-            BUILDER["build_pipeline_runner<br/>runtime assembly leaf"]:::size-md
-            RH["Composite runtime helpers<br/>RunnerFactoryBuilderService +<br/>CompositeSupportServicesFactory"]:::size-md
-        end
-
-        subgraph Admin["CLI/bootstrap services"]
-            SUPPORT["bootstrap.cli + bootstrap.assembly<br/>admin commands + shared ports"]:::size-md
-        end
+    subgraph Factories["Registries + factories"]
+        PR["ProviderRegistry<br/>provider creators + source defaults"]:::size-md
+        PIPE["PipelineRegistry<br/>pipeline factory lookup"]:::size-md
+        DSF["DataSourceFactory<br/>provider adapter creation"]:::size-md
+        GPF["GenericPipelineFactory / RunnerFactory<br/>pipeline + runner construction seam"]:::size-md
+        STF["StorageFactory<br/>Bronze / Silver / Gold seam"]:::size-md
     end
 
-    subgraph Created["Created collaborators"]
+    subgraph Runtime["Runtime assembly path"]
+        INPUTS["prepare_runner_inputs<br/>settings + yaml + runtime/filter + cached bronze"]:::size-md
+        OBSB["build_observability_bundle<br/>logger + metrics + tracer"]:::size-md
+        BUILDER["build_pipeline_runner<br/>runtime assembly leaf"]:::size-md
+        CTRL["runtime_builders.control_plane<br/>manifest + effective-config orchestration"]:::size-md
+        LCOL["ledger_collaborator<br/>attach control-plane collaborators"]:::size-md
+        CH["Composite runtime helpers<br/>runner builders + support factories"]:::size-md
+    end
+
+    subgraph Admin["Admin / support bootstrap"]
+        SUPPORT["bootstrap.cli + bootstrap.assembly<br/>admin services + resource helpers"]:::size-md
+    end
+
+    subgraph Created["Created services + artifacts"]
         ADAPTER["Provider adapter<br/>DataSourcePort"]:::size-md
-        STORAGE["StorageContext / StorageAdapter<br/>Bronze / Silver / Gold"]:::size-md
-        OBS["Observability bundle<br/>logger / metrics / tracer"]:::size-md
-        LOCK["LockPort + checkpoint / quarantine ports"]:::size-md
-        RUNNER["PipelineRunner /<br/>PipelineRunnerService"]:::size-md
+        STORAGE["Storage stack<br/>Bronze / Silver / Gold + metadata"]:::size-md
+        STATE["Lock / checkpoint / quarantine<br/>ports + stores"]:::size-md
+        OBS["Observability bundle"]:::size-md
+        RUNNER["PipelineRunner"]:::size-md
+        PSVC["PipelineRunnerService"]:::size-md
         COMPOSITE["CompositePipelineRunnerService"]:::size-md
-        ADMINSVC["Admin services<br/>health / export / vacuum / checkpoint"]:::size-md
+        ADMINSVC["Admin services<br/>health / export / checkpoint / lineage"]:::size-md
+        MANIFEST["Run manifest"]:::size-md
+        ECFG["Effective-config artifact"]:::size-md
+        LEDGER["Run-ledger collaborator"]:::size-md
     end
 
     CALLERS ==> ENTRY
-    CALLERS -.->|"lower-level / tests"| BOOT
+    CALLERS -.->|"CLI/tests / low-level access"| BOOT
 
-    ENTRY --> BPR
-    ENTRY --> SUPPORT
-    BOOT -.->|"lower-level access"| BPR
-    BOOT -.->|"lower-level access"| SUPPORT
+    ENTRY --> APIS
+    ENTRY -.->|"legacy broad callers"| BOOT
+    APIS --> BUILDER
+    APIS --> SUPPORT
+    BOOT -.->|"direct bootstrap"| BUILDER
+    BOOT -.->|"admin bootstrap"| SUPPORT
 
-    BPR --> PR
-    BPR --> PIPE
-    BPR --> DSF
-    BPR --> PF
-    BPR --> SF
-    BPR --> BUILDER
-    BPR --> RH
+    BUILDER --> PR
+    BUILDER --> PIPE
+    BUILDER --> DSF
+    BUILDER --> GPF
+    BUILDER --> STF
+    BUILDER --> INPUTS
+    BUILDER --> CTRL
+    BUILDER --> LCOL
+    BUILDER --> CH
 
+    INPUTS --> OBSB
     PR --> DSF
-    PIPE --> PF
-    PF --> BUILDER
-
+    PIPE --> GPF
     DSF -->|creates| ADAPTER
-    SF -->|creates| STORAGE
+    STF -->|creates| STORAGE
     SUPPORT -->|creates| STORAGE
-    SUPPORT -->|creates| LOCK
-    BPR -->|creates| OBS
-    BUILDER -->|creates| RUNNER
-    RH -->|creates| COMPOSITE
+    SUPPORT -->|creates| STATE
+    SUPPORT -->|creates| PSVC
     SUPPORT -->|creates| ADMINSVC
+    OBSB -->|creates| OBS
+    GPF -->|creates| RUNNER
+    CH -->|creates| COMPOSITE
+    CTRL -->|creates| MANIFEST
+    CTRL -->|creates| ECFG
+    LCOL -->|attaches| LEDGER
 
     ADAPTER --> RUNNER
     STORAGE --> RUNNER
     OBS --> RUNNER
-    LOCK --> COMPOSITE
+    LEDGER --> RUNNER
     STORAGE --> COMPOSITE
+    STATE --> COMPOSITE
     OBS --> COMPOSITE
 
     classDef entry fill:#eff6ff,stroke:#2563eb,stroke-width:2px
@@ -101,7 +115,7 @@ graph TB
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     class CALLERS entry
-    class ENTRY,BOOT public
-    class PR,PIPE,DSF,PF,SF,BPR,BUILDER,RH,SUPPORT comp
-    class ADAPTER,STORAGE,OBS,LOCK infra
-    class RUNNER,COMPOSITE,ADMINSVC app
+    class ENTRY,APIS,BOOT public
+    class PR,PIPE,DSF,GPF,STF,INPUTS,OBSB,BUILDER,CTRL,LCOL,CH,SUPPORT comp
+    class ADAPTER,STORAGE,STATE,MANIFEST,ECFG infra
+    class OBS,RUNNER,PSVC,COMPOSITE,ADMINSVC,LEDGER app

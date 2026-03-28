@@ -1,7 +1,7 @@
 # BioETL Мониторинг: Prometheus + Grafana
 
 **Версия документа:** 2.0.0
-**Дата обновления:** 2026-02-22
+**Дата обновления:** 2026-03-28
 **Статус:** Production Ready
 **Совместимость:** BioETL v5.21+, Grafana 9+, Prometheus 2.40+
 
@@ -43,6 +43,12 @@
 
 > Примечание: в репозитории сейчас поставляются только `bioetl-simple.json` и `*-v2.json` дашборды.
 > Разделы про v1 ниже сохранены как историческая/справочная документация.
+>
+> Роль этого документа: setup/reference для monitoring stack.
+> Для operator quick-start используйте сначала
+> `docs/03-guides/dashboards/monitoring-index.md`,
+> `docs/03-guides/dashboards/dashboard-v2-usage.md` и
+> `docs/05-operations/01-monitoring-guide.md`.
 
 ## 1. Архитектура мониторинга
 
@@ -803,7 +809,8 @@ handoff через data links для быстрого перехода в Grafan
 
 **Drilldown:** dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)`
 плюс data links у latency-панели открывают Grafana Explore в том же time range.
-Loki drilldown стартует с `{job="bioetl"}` и text filter по `provider`, а
+Loki drilldown стартует с `{job="bioetl"}` и regex filter по JSON-полю
+`provider`, а
 trace correlation идёт через `trace_id` / `span_id`.
 
 ---
@@ -1922,4 +1929,4 @@ print(f\"Grafana: {data['database']}\" )
 
 **Конец документа.**
 
-*Версия 2.0.0. Обновлена 2026-02-22. Синхронизирована с RULES.md v5.24 и текущим состоянием дашбордов.*
+*Версия 2.0.0. Обновлена 2026-03-28. Синхронизирована с RULES.md v5.24 и текущим состоянием shipped dashboards.*

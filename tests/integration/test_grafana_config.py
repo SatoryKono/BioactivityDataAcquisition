@@ -9,6 +9,7 @@ from collections import Counter
 from functools import cache
 from pathlib import Path
 import re
+from urllib.parse import unquote
 
 import pytest
 
@@ -341,9 +342,10 @@ def test_dashboard_queries_do_not_filter_by_run_id_label(dashboard_path):
 
 
 def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> None:
-    """Overview/provider dashboards should offer Loki and Tempo drilldown."""
+    """Operational dashboards should offer Loki and Tempo drilldown."""
     expectations = {
         "bioetl-overview-v2.json": "pipeline",
+        "bioetl-dq-v2.json": "pipeline",
         "bioetl-provider-health-v2.json": "provider",
     }
 
@@ -368,3 +370,32 @@ def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> No
         assert any(token in url for url in urls if "/explore" in url and "loki" in url), (
             f"{dashboard_name} Loki drilldown should preserve {token}-level context"
         )
+
+
+def test_explore_links_decode_to_valid_queries() -> None:
+    """Explore links should decode to valid Loki/Tempo query payloads."""
+    expectations = {
+        "bioetl-overview-v2.json": ("pipeline", "loki"),
+        "bioetl-dq-v2.json": ("pipeline", "loki"),
+        "bioetl-provider-health-v2.json": ("provider", "loki"),
+    }
+
+    for dashboard_name, (token, datasource_uid) in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        for link in _collect_dashboard_links(dashboard):
+            url = link.get("url", "")
+            if "/explore?left=" not in url or datasource_uid not in url:
+                continue
+            encoded = url.split("left=", 1)[1]
+            payload = json.loads(unquote(encoded))
+            assert payload["datasource"] in {"loki", "tempo"}
+            assert payload["range"]["from"] == "${__from}"
+            assert payload["range"]["to"] == "${__to}"
+            if payload["datasource"] == "loki":
+                expr = payload["queries"][0]["expr"]
+                assert "{job=\"bioetl\"}" in expr
+                assert "|~" in expr
+                assert f"\\\"{token}\\\":\\\"($" in expr
+                assert f'""{token}' not in expr, (
+                    f"{dashboard_name} contains malformed doubled quotes before {token} in Loki expr"
+                )

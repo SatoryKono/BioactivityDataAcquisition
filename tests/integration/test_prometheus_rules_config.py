@@ -112,6 +112,10 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
             "bioetl_data_source_retry_exhausted_total",
             "docs/05-operations/runbooks/incident-response.md",
         ),
+        "BioETLProviderRetriesExhaustedPersistent": (
+            "bioetl_data_source_retry_exhausted_total",
+            "docs/05-operations/runbooks/incident-response.md",
+        ),
     }
 
     missing = [name for name in expected if name not in rule_map]
@@ -123,3 +127,43 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
         annotations = rule.get("annotations", {})
         assert metric_name in expr
         assert annotations.get("runbook") == runbook_path
+
+
+def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
+    payload = _load_rules()
+    rule_map = _build_rule_map(payload)
+
+    expected_labels = {
+        "BioETLDQQuarantineRateHigh": "warning",
+        "BioETLDQQuarantineRateCritical": "critical",
+        "BioETLDataFreshnessLagHigh": "warning",
+        "BioETLDataFreshnessLagCritical": "critical",
+        "BioETLProviderRetriesExhausted": "warning",
+        "BioETLProviderRetriesExhaustedPersistent": "critical",
+    }
+    expected_expr_fragments = {
+        "BioETLDQQuarantineRateHigh": ["> 0.05", "<= 0.2", ">= 20", "[30m]"],
+        "BioETLDQQuarantineRateCritical": ["> 0.2", ">= 20", "[15m]"],
+        "BioETLDataFreshnessLagHigh": ["> 86400", "<= 259200"],
+        "BioETLDataFreshnessLagCritical": ["> 259200"],
+        "BioETLProviderRetriesExhausted": ["> 0", "< 3", "[1h]"],
+        "BioETLProviderRetriesExhaustedPersistent": [">= 3", "[1h]"],
+    }
+    expected_for = {
+        "BioETLDQQuarantineRateHigh": "10m",
+        "BioETLDQQuarantineRateCritical": "5m",
+        "BioETLDataFreshnessLagHigh": "15m",
+        "BioETLDataFreshnessLagCritical": "15m",
+        "BioETLProviderRetriesExhausted": "5m",
+        "BioETLProviderRetriesExhaustedPersistent": "10m",
+    }
+
+    for alert_name, severity in expected_labels.items():
+        rule = rule_map[alert_name]
+        expr = rule.get("expr", "")
+        assert rule.get("labels", {}).get("severity") == severity
+        assert rule.get("for") == expected_for[alert_name]
+        for fragment in expected_expr_fragments[alert_name]:
+            assert fragment in expr, (
+                f"{alert_name} expression missing expected fragment: {fragment}"
+            )

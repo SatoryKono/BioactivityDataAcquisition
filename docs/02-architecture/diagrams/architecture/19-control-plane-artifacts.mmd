@@ -1,0 +1,99 @@
+%% BioETL — Control-Plane Artifacts and Traceability
+%% Shows how runtime assembly publishes immutable run metadata, ledger events, and lineage fragments.
+
+%% @version 1.0.0
+%% @date    2026-03-28
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   19
+%% @reference  Complements 12-bootstrap-di-container, 13-port-protocol-contracts, and 18-lock-checkpoint-shutdown
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=220 height=108 max_title_len=22 max_desc_lines=4
+flowchart LR
+    CALLER["build_pipeline_runner / pipeline start"]:::size-md
+    CLI["run-manifest / lineage CLI"]:::size-md
+
+    subgraph Composition["Composition runtime builders"]
+        CTRL["create_run_manifest_with_effective_config<br/>control-plane orchestration"]:::size-md
+        LCOL["attach_control_plane_collaborators<br/>ledger event hook-up"]:::size-md
+    end
+
+    subgraph Application["Application services"]
+        ECS["EffectiveConfigService"]:::size-md
+        RMS["RunManifestService"]:::size-md
+        RLS["RunLedgerService"]:::size-md
+        INS["RunManifestInspection +<br/>LineageInspection services"]:::size-md
+    end
+
+    subgraph Ports["Domain ports"]
+        RMP["RunManifestPort"]:::size-md
+        RLP["RunLedgerPort"]:::size-md
+        LSP["LineageStorePort"]:::size-md
+    end
+
+    subgraph Infra["Infrastructure stores"]
+        EFS["FileEffectiveConfigArtifactStore"]:::size-md
+        MFS["FileRunManifestStore"]:::size-md
+        LGS["FileRunLedgerStore"]:::size-md
+        LNS["FileLineageStore"]:::size-md
+    end
+
+    subgraph Artifacts["Published artifacts"]
+        ECFG["Effective-config artifact"]:::size-md
+        MAN["Run manifest"]:::size-md
+        LED["Run-ledger entries"]:::size-md
+        FRAG["Lineage graph fragments"]:::size-md
+    end
+
+    subgraph Runtime["Runtime publishers"]
+        RUNNER["PipelineRunner"]:::size-md
+        WRITERS["SilverWriter / GoldWriter"]:::size-md
+    end
+
+    CALLER --> CTRL
+    CTRL --> ECS
+    CTRL --> RMS
+    CTRL --> RLS
+    CTRL --> LCOL
+
+    ECS --> ECFG
+    ECS --> EFS
+    RMS --> MAN
+    RMS --> RMP
+    RLS --> LED
+    RLS --> RLP
+    LCOL --> RUNNER
+    RUNNER -->|"lifecycle + status events"| RLS
+    WRITERS -->|"publish lineage refs"| LSP
+
+    RMP -.-> MFS
+    RLP -.-> LGS
+    LSP -.-> LNS
+    LSP --> FRAG
+    CLI --> INS
+    INS --> RMP
+    INS --> LSP
+
+    classDef comp fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef artifact fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+
+    class CALLER,CLI artifact
+    class CTRL,LCOL comp
+    class ECS,RMS,RLS,INS,RUNNER,WRITERS app
+    class RMP,RLP,LSP port
+    class EFS,MFS,LGS,LNS infra
+    class ECFG,MAN,LED,FRAG artifact
