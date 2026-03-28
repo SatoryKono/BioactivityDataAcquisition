@@ -7,11 +7,11 @@
 ## Sub-review Summary
 | Sub-sector | Files | Score | Status | CRIT | HIGH |
 |------------|-------|-------|--------|------|------|
-| S4.1 — Bootstrap & Factories | 48 | 7.5 | WARN | 0 | 1 |
-| S4.2 — Providers & DQ | 48 | 7.5 | WARN | 0 | 0 |
-| S4.3 — Storage & Data Sources | 48 | 7.5 | WARN | 0 | 0 |
-| S4.4 — Runtimes | 48 | 7.5 | WARN | 0 | 0 |
-| S4.5 — CLI Interfaces | 48 | 7.5 | WARN | 0 | 0 |
+| S4.1 — Bootstrap & Factories | 109 | 7.5 | WARN | 0 | 1 |
+| S4.2 — Providers & DQ | 19 | 7.5 | WARN | 0 | 0 |
+| S4.3 — Storage & Data Sources | 24 | 7.5 | WARN | 0 | 0 |
+| S4.4 — CLI Interfaces | 79 | 7.5 | WARN | 0 | 0 |
+| S4.5 — Root Interfaces | 2 | 7.5 | WARN | 0 | 0 |
 
 ## Aggregated Issues
 

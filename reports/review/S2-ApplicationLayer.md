@@ -7,11 +7,11 @@
 ## Sub-review Summary
 | Sub-sector | Files | Score | Status | CRIT | HIGH |
 |------------|-------|-------|--------|------|------|
-| S2.1 — Pipelines (ChEMBL & Common) | 58 | 10.0 | PASS | 0 | 0 |
-| S2.2 — Pipelines (PubMed & CrossRef) | 58 | 10.0 | PASS | 0 | 0 |
-| S2.3 — Pipelines (PubChem & UniProt) | 58 | 10.0 | PASS | 0 | 0 |
-| S2.4 — Core Transformers | 58 | 10.0 | PASS | 0 | 0 |
-| S2.5 — Composite Services | 58 | 10.0 | PASS | 0 | 0 |
+| S2.1 — Pipelines (ChEMBL & Common) | 23 | 10.0 | PASS | 0 | 0 |
+| S2.2 — Pipelines (PubMed & CrossRef) | 27 | 10.0 | PASS | 0 | 0 |
+| S2.3 — Pipelines (PubChem & UniProt) | 25 | 10.0 | PASS | 0 | 0 |
+| S2.4 — Core Transformers | 92 | 10.0 | PASS | 0 | 0 |
+| S2.5 — Composite Services | 120 | 10.0 | PASS | 0 | 0 |
 
 ## Aggregated Issues
 

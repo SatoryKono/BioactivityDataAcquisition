@@ -44,7 +44,6 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 )
 
 import sys
-from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 

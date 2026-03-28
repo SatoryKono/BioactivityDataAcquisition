@@ -2,9 +2,9 @@
 **Date**: 2026-03-05
 **RULES.md Version**: 5.24
 **Project Version**: 6.1.0
-**Reviewed by**: Hierarchical AI Review System (L1 + 8 L2 + 25 L3 agents)
-**Total files reviewed**: 4473
-**Total LOC reviewed**: 788456
+**Reviewed by**: Hierarchical AI Review System (L1 + 8 L2 + 40 L3 agents)
+**Total files reviewed**: 4280
+**Total LOC reviewed**: 737894
 
 ---
 
@@ -22,22 +22,22 @@ The project maintains a strong adherence to Hexagonal Architecture boundaries an
 | Medium issues | 28 |
 | Low issues | 129 |
 | Sectors reviewed | 8 |
-| Sub-sectors reviewed | 35 |
-| Agents deployed | 44 |
+| Sub-sectors reviewed | 40 |
+| Agents deployed | 49 |
 
 ---
 
 ## Sector Scores
 | Sector | Scope | Files | LOC | Score | Status |
 |--------|-------|-------|-----|-------|--------|
-| S1 Domain Layer | src/bioetl/domain/ | 350 | 43236 | 7.6 | WARN |
-| S2 Application Layer | src/bioetl/application/ | 290 | 47225 | 10.0 | PASS |
-| S3 Infrastructure Layer | src/bioetl/infrastructure/ | 376 | 54117 | 9.9 | PASS |
-| S4 Composition+Ifaces | src/bioetl/composition/ | 240 | 26510 | 7.5 | WARN |
-| S5 Cross-cutting Concerns | src/bioetl/ | 1258 | 171190 | 9.5 | PASS |
-| S6 Tests | tests/ | 1153 | 298307 | 7.5 | WARN |
-| S7 Configs | configs/ | 53 | 9359 | 10.0 | PASS |
-| S8 Documentation | docs/ | 753 | 142976 | 10.0 | PASS |
+| S1 Domain Layer | src/bioetl/domain/ | 336 | 41075 | 7.6 | WARN |
+| S2 Application Layer | src/bioetl/application/ | 287 | 46830 | 10.0 | PASS |
+| S3 Infrastructure Layer | src/bioetl/infrastructure/ | 357 | 51150 | 9.9 | PASS |
+| S4 Composition+Ifaces | src/bioetl/composition/ | 233 | 25544 | 7.5 | WARN |
+| S5 Cross-cutting Concerns | src/bioetl/ | 1213 | 164604 | 9.5 | PASS |
+| S6 Tests | tests/ | 1135 | 298623 | 7.5 | WARN |
+| S7 Configs | configs/ | 49 | 9359 | 10.0 | PASS |
+| S8 Documentation | docs/ | 706 | 84123 | 10.0 | PASS |
 
 ---
 
@@ -119,11 +119,11 @@ make lint
 | Agent | Level | Sector | Duration | Files | Status |
 |-------|-------|--------|----------|-------|--------|
 | L1 Orchestrator | 1 | All | 12s | — | — |
-| S1 Reviewer | 2 | Domain Layer | 5s | 350 | WARN |
-| S2 Reviewer | 2 | Application Layer | 5s | 290 | PASS |
-| S3 Reviewer | 2 | Infrastructure Layer | 5s | 376 | PASS |
-| S4 Reviewer | 2 | Composition+Ifaces | 5s | 240 | WARN |
-| S5 Reviewer | 2 | Cross-cutting Concerns | 5s | 1258 | PASS |
-| S6 Reviewer | 2 | Tests | 5s | 1153 | WARN |
-| S7 Reviewer | 2 | Configs | 5s | 53 | PASS |
-| S8 Reviewer | 2 | Documentation | 5s | 753 | PASS |
+| S1 Reviewer | 2 | Domain Layer | 5s | 336 | WARN |
+| S2 Reviewer | 2 | Application Layer | 5s | 287 | PASS |
+| S3 Reviewer | 2 | Infrastructure Layer | 5s | 357 | PASS |
+| S4 Reviewer | 2 | Composition+Ifaces | 5s | 233 | WARN |
+| S5 Reviewer | 2 | Cross-cutting Concerns | 5s | 1213 | PASS |
+| S6 Reviewer | 2 | Tests | 5s | 1135 | WARN |
+| S7 Reviewer | 2 | Configs | 5s | 49 | PASS |
+| S8 Reviewer | 2 | Documentation | 5s | 706 | PASS |

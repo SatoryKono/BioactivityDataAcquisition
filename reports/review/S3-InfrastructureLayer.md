@@ -7,11 +7,11 @@
 ## Sub-review Summary
 | Sub-sector | Files | Score | Status | CRIT | HIGH |
 |------------|-------|-------|--------|------|------|
-| S3.1 — Adapters (ChEMBL/PubMed/CrossRef) | 75 | 9.9 | PASS | 0 | 0 |
-| S3.2 — Adapters (PubChem/OpenAlex/SS/UniProt) | 75 | 9.9 | PASS | 0 | 0 |
-| S3.3 — Base Adapters & HTTP | 75 | 9.9 | PASS | 0 | 0 |
-| S3.4 — Storage & Config & Schemas | 75 | 9.9 | PASS | 0 | 0 |
-| S3.5 — Observability & Miscellaneous | 76 | 9.9 | PASS | 0 | 0 |
+| S3.1 — Adapters (ChEMBL/PubMed/CrossRef) | 53 | 9.9 | PASS | 0 | 0 |
+| S3.2 — Adapters (PubChem/OpenAlex/SS/UniProt) | 65 | 9.9 | PASS | 0 | 0 |
+| S3.3 — Base Adapters & HTTP | 39 | 9.9 | PASS | 0 | 0 |
+| S3.4 — Storage & Config & Schemas | 114 | 9.9 | PASS | 0 | 0 |
+| S3.5 — Observability & Miscellaneous | 86 | 9.9 | PASS | 0 | 0 |
 
 ## Aggregated Issues
 

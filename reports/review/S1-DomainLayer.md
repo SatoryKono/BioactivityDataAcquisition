@@ -7,11 +7,11 @@
 ## Sub-review Summary
 | Sub-sector | Files | Score | Status | CRIT | HIGH |
 |------------|-------|-------|--------|------|------|
-| S1.1 — Ports & Contracts | 70 | 7.6 | WARN | 0 | 0 |
-| S1.2 — Entities & Value Objects | 70 | 7.6 | WARN | 0 | 0 |
-| S1.3 — Schemas | 70 | 7.6 | WARN | 0 | 0 |
-| S1.4 — Services & Filtering | 70 | 7.6 | WARN | 0 | 0 |
-| S1.5 — Config & Aggregates | 70 | 7.6 | WARN | 0 | 0 |
+| S1.1 — Ports & Contracts | 78 | 7.6 | WARN | 0 | 0 |
+| S1.2 — Entities & Value Objects | 65 | 7.6 | WARN | 0 | 0 |
+| S1.3 — Schemas | 41 | 7.6 | WARN | 0 | 0 |
+| S1.4 — Services & Filtering | 50 | 7.6 | WARN | 0 | 0 |
+| S1.5 — Config & Aggregates | 102 | 7.6 | WARN | 0 | 0 |
 
 ## Aggregated Issues
 

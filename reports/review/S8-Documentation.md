@@ -7,11 +7,11 @@
 ## Sub-review Summary
 | Sub-sector | Files | Score | Status | CRIT | HIGH |
 |------------|-------|-------|--------|------|------|
-| S8.1 — ADRs & Policy | 150 | 10.0 | PASS | 0 | 0 |
-| S8.2 — Architecture Runbooks | 150 | 10.0 | PASS | 0 | 0 |
-| S8.3 — Orchestration & Context | 150 | 10.0 | PASS | 0 | 0 |
-| S8.4 — Guides & Models | 150 | 10.0 | PASS | 0 | 0 |
-| S8.5 — References & CI | 153 | 10.0 | PASS | 0 | 0 |
+| S8.1 — Requirements | 183 | 10.0 | PASS | 0 | 0 |
+| S8.2 — Architecture Runbooks | 380 | 10.0 | PASS | 0 | 0 |
+| S8.3 — References | 86 | 10.0 | PASS | 0 | 0 |
+| S8.4 — Guides | 57 | 10.0 | PASS | 0 | 0 |
+| S8.5 — Data Models | 47 | 10.0 | PASS | 0 | 0 |
 
 ## Aggregated Issues
 

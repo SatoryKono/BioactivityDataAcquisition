@@ -7,11 +7,11 @@
 ## Sub-review Summary
 | Sub-sector | Files | Score | Status | CRIT | HIGH |
 |------------|-------|-------|--------|------|------|
-| S6.1 — Unit Tests (Domain) | 230 | 7.5 | WARN | 0 | 0 |
-| S6.2 — Unit Tests (Application) | 230 | 7.5 | WARN | 0 | 0 |
-| S6.3 — Unit Tests (Infrastructure) | 230 | 7.5 | WARN | 0 | 0 |
-| S6.4 — Architecture & Integration | 230 | 7.5 | WARN | 0 | 0 |
-| S6.5 — E2E & Benchmarks | 233 | 7.5 | WARN | 0 | 0 |
+| S6.1 — Architecture Tests | 167 | 7.5 | WARN | 0 | 0 |
+| S6.2 — Unit Tests (Domain) | 170 | 7.5 | WARN | 0 | 0 |
+| S6.3 — Unit Tests (Application) | 234 | 7.5 | WARN | 0 | 0 |
+| S6.4 — Unit Tests (Infrastructure) | 253 | 7.5 | WARN | 0 | 0 |
+| S6.5 — Integration & E2E | 311 | 7.5 | WARN | 0 | 0 |
 
 ## Aggregated Issues
 
