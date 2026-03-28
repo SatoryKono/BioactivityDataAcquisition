@@ -135,7 +135,7 @@ def test_dashboard_has_required_variables(dashboard_path):
         "bioetl-simple.json": {"pipeline", "run_type"},
         "bioetl-overview-v2.json": {"pipeline", "run_type"},
         "bioetl-dq-v2.json": {"pipeline", "run_type"},
-        "bioetl-provider-health-v2.json": {"pipeline", "provider"},
+        "bioetl-provider-health-v2.json": {"provider"},
     }
     dashboard = load_dashboard(dashboard_path)
     variables = {
@@ -183,19 +183,6 @@ def test_variable_query_sources(dashboard_path):
         f"Dashboard {dashboard_path.name} must not define deprecated 'run_id' variable"
     )
 
-    pipeline_var = variable_map.get("pipeline")
-    assert pipeline_var is not None, (
-        f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
-    )
-    pipeline_query = pipeline_var.get("query", {})
-    pipeline_query_text = (
-        pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
-    )
-    assert "bioetl_records_processed_total" in pipeline_query_text, (
-        f"Dashboard {dashboard_path.name} 'pipeline' query must use "
-        "bioetl_records_processed_total"
-    )
-
     if dashboard_path.name == "bioetl-provider-health-v2.json":
         provider_var = variable_map.get("provider")
         assert provider_var is not None, (
@@ -209,7 +196,22 @@ def test_variable_query_sources(dashboard_path):
             f"Dashboard {dashboard_path.name} 'provider' query must use "
             "bioetl_health_check_success_total"
         )
+        assert "pipeline" not in variable_map, (
+            f"Dashboard {dashboard_path.name} must not expose misleading 'pipeline' variable"
+        )
     else:
+        pipeline_var = variable_map.get("pipeline")
+        assert pipeline_var is not None, (
+            f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
+        )
+        pipeline_query = pipeline_var.get("query", {})
+        pipeline_query_text = (
+            pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
+        )
+        assert "bioetl_records_processed_total" in pipeline_query_text, (
+            f"Dashboard {dashboard_path.name} 'pipeline' query must use "
+            "bioetl_records_processed_total"
+        )
         run_type_var = variable_map.get("run_type")
         assert run_type_var is not None, (
             f"Dashboard {dashboard_path.name} must define 'run_type' variable"
@@ -319,6 +321,6 @@ def test_dashboard_queries_do_not_filter_by_run_id_label(dashboard_path):
     variables = [
         var.get("name") for var in dashboard.get("templating", {}).get("list", [])
     ]
-    assert "pipeline" in variables, (
-        "Provider dashboard must define 'pipeline' template variable"
+    assert "provider" in variables, (
+        "Provider dashboard must define 'provider' template variable"
     )

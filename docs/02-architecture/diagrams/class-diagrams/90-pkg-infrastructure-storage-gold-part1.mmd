@@ -1,21 +1,20 @@
 %% Title: Package Family: infrastructure/storage/gold (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 1/2; modules: io_delta_mixins, io_mixin, pipeline_helpers, metadata_operations, metadata_audit.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 1/2; modules: io_delta_runtime, io_mixin, pipeline_helpers, metadata_operations, io_delta_mixins.
 %% Components: top-level classes grouped by source module.
+%% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-24
+%% @date    2026-03-27
 %% @level   Package Family / Inventory Slice
-%% @nodes   30
+%% @nodes   29
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
-    namespace io_delta_mixins {
+    namespace io_delta_runtime {
         class _GoldWriteAsyncioProtocol
         class _GoldWriteRetryModuleProtocol
         class _GoldWriterDeltaModuleProtocol
-        class _GoldWriterExecutorArrowMixin
-        class _GoldWriterScd2MergeMixin
+        class _GoldWriterScd2HostProtocol
         class _GoldWriterSimpleDeltaHostProtocol
-        class _GoldWriterSimpleDeltaMixin
         class _PreparedScd2GoldWrite
         class _PreparedSimpleGoldWrite
         class _SimpleGoldWriteRequest
@@ -48,9 +47,10 @@ classDiagram
         class _PreparedGoldMetadataWrite
     }
 
-    namespace metadata_audit {
-        class _GoldAuditWriteRequest
-        class _GoldMetadataAuditHostProtocol
+    namespace io_delta_mixins {
+        class _GoldWriterExecutorArrowMixin
+        class _GoldWriterScd2MergeMixin
+        class _GoldWriterSimpleDeltaMixin
     }
 
     _GoldMetadataWriteHostProtocol <|-- _GoldMergedMetadataWriteHostProtocol
