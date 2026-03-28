@@ -1,0 +1,28 @@
+# Consolidated Review — S1: Domain Layer
+**Date**: 2026-03-05
+**Sub-reviews**: 5 agents
+**Status**: WARN
+**Consolidated Score**: 7.6
+
+## Sub-review Summary
+| Sub-sector | Files | Score | Status | CRIT | HIGH |
+|------------|-------|-------|--------|------|------|
+| S1.1 — Ports & Contracts | 70 | 7.6 | WARN | 0 | 0 |
+| S1.2 — Entities & Value Objects | 70 | 7.6 | WARN | 0 | 0 |
+| S1.3 — Schemas | 70 | 7.6 | WARN | 0 | 0 |
+| S1.4 — Services & Filtering | 70 | 7.6 | WARN | 0 | 0 |
+| S1.5 — Config & Aggregates | 70 | 7.6 | WARN | 0 | 0 |
+
+## Aggregated Issues
+
+### High
+None
+
+## Cross-subzone Observations
+- Naming conventions for domain ports are inconsistent; several `NoOp` implementations in `src/bioetl/domain/ports/noop` omit the `*Port` suffix.
+- A minor violation of ADR-014 was observed, specifically the absence of `from __future__ import annotations` in some module initialization files.
+
+## Top 5 Recommendations
+1. Ensure all port implementations conform strictly to `NAME-001` with explicit `*Port` or `*Exception` suffixes (e.g., rename `NoOpDebug` to `NoOpDebugPort`).
+2. Implement project-wide linter enforcement for `from __future__ import annotations` in `__init__.py` files.
+3. Review NoOp implementations in `_memory_metadata.py` to correctly align with interface naming rules.
