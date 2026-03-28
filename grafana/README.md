@@ -705,6 +705,10 @@ Host Machine (Windows/macOS/Linux)
 
 **Используемые метрики:** `records_processed_total`, `records_processed_created`.
 
+**Drilldown:** dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)`
+используют текущее временное окно. Panel `Processing Pipeline` дублирует этот
+handoff через data links для быстрого перехода в Grafana Explore.
+
 ---
 
 ## 10. Дашборд: BioETL Data Quality v1
@@ -796,6 +800,11 @@ Host Machine (Windows/macOS/Linux)
 **Используемые метрики:** `health_check_latency_seconds`, `health_check_success_total`, `health_check_failures_total`.
 
 **Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
+
+**Drilldown:** dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)`
+плюс data links у latency-панели открывают Grafana Explore в том же time range.
+Loki drilldown стартует с `{job="bioetl"}` и text filter по `provider`, а
+trace correlation идёт через `trace_id` / `span_id`.
 
 ---
 
@@ -1571,7 +1580,7 @@ groups:
           summary: "Data quality ratio below 80%"
 ```
 
-### 24.4 Встроенные правила наблюдения для `chembl_assay`
+### 24.4 Встроенные правила наблюдения
 
 В репозитории добавлен файл правил:
 
@@ -1579,11 +1588,16 @@ groups:
 
 Правила покрывают:
 
-- деградацию health-check провайдера ChEMBL;
-- падение preflight data source проверки;
-- `infrastructure_validated=0` для `chembl_assay`;
-- неуспешные запуски `chembl_assay`;
-- исчерпание retry для провайдера `chembl`.
+- targeted `chembl_assay` baseline для preflight/run-failure smoke coverage;
+- reusable control-plane и traceability сигналы:
+  `manifest_writes_total`, `ledger_appends_total`,
+  `checkpoint_compatibility_events_total`, `lineage_*`;
+- reusable DQ/freshness сигналы:
+  `dq_soft_threshold_exceeded`, quarantine-rate, critical
+  `dq_validation_failures_total`, `dq_anomaly_detected`,
+  `silver_validation_failures_total`, `data_freshness_seconds`;
+- reusable provider сигналы:
+  `health_check_*` failure ratio и `data_source_retry_exhausted_total`.
 
 Эти rules автоматически загружаются через:
 
