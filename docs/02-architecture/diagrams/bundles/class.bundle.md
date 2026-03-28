@@ -1,7 +1,7 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-03-28T15:32:30
-- Diagram count: 93
+- Generated: 2026-03-28T19:29:23
+- Diagram count: 94
 
 ## Table of Contents
 
@@ -12,6 +12,7 @@
 - [04-types-enums — Class Diagram: Types & Enums](#04-types-enums)
 - [05-exceptions — Class Diagram: Exception Hierarchy](#05-exceptions)
 - [06-config-classes — Class Diagram: Configuration Classes](#06-config-classes)
+- [07-application-core-services-frontmatter-sandbox — 07 Application Core Services Frontmatter Sandbox](#07-application-core-services-frontmatter-sandbox)
 - [07-application-core-services — Class Diagram: Application Core Services](#07-application-core-services)
 - [08-application-services — Class Diagram: Application Services](#08-application-services)
 - [08a-application-services-operation-catalog — Class Diagram: Application Service Operation Catalog (L2)](#08a-application-services-operation-catalog)
@@ -231,6 +232,22 @@
 - Уровень: `Class / Interface`
 - Дата: `2026-02-26`
 - Узлы (metadata): `14`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 07-application-core-services-frontmatter-sandbox
+
+**07 Application Core Services Frontmatter Sandbox**
+
+![07-application-core-services-frontmatter-sandbox](../class-diagrams/svg/07-application-core-services-frontmatter-sandbox.svg)
+
+### Описание
+Диаграмма «07 Application Core Services Frontmatter Sandbox» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram). Схема имеет плотность порядка 18 узлов и 20 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Runner Core, Batch Processing, Execution Managers, Support Services. Показательные узлы для быстрого чтения: PipelineRunner, PipelineService, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManagerService.
+
+### Метаданные
+- Тип: `classdiagram`
 
 \newpage
 

@@ -15,6 +15,7 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
     resolve_run_all_execution_plan,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
+    finalize_cli_execution,
     handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
@@ -24,6 +25,7 @@ __all__ = [
     "RunAllCommandInput",
     "build_run_all_command_input",
     "exit_with_code",
+    "finalize_batch_step",
     "handle_run_all_cli_failure",
     "prepare_run_all_execution_plan",
     "run_all_command_flow",
@@ -181,6 +183,19 @@ def prepare_run_all_execution_plan(
     raise RuntimeError("unreachable: exit_func is expected to terminate")
 
 
+def finalize_batch_step(
+    *,
+    batch_result: BatchRunResult,
+    dry_run: bool,
+    summary_presenter: BatchSummaryPresenterCallable,
+    determine_exit_code: BatchExitCodeCallable,
+    exit_func: ExitCallable,
+) -> None:
+    """Present the completed batch result and terminate with its exit code."""
+    summary_presenter(batch_result, dry_run)
+    exit_func(determine_exit_code(batch_result))
+
+
 def run_all_command_flow(
     *,
     cli_input: RunAllCommandInput,
@@ -217,18 +232,24 @@ def run_all_command_flow(
         pipelines=pipelines,
         dry_run=cli_input.dry_run,
     )
-    health_info_presenter(cli_input.health_server, cli_input.health_port)
-
-    batch_result = execute_batch(
-        source=cli_input.source,
-        pipelines=pipelines,
-        options=execution_plan.options,
-        health_server=cli_input.health_server,
-        health_port=cli_input.health_port,
-        registry=registry,
+    finalize_cli_execution(
+        health_info_presenter=lambda: health_info_presenter(
+            cli_input.health_server,
+            cli_input.health_port,
+        ),
+        execute=lambda: execute_batch(
+            source=cli_input.source,
+            pipelines=pipelines,
+            options=execution_plan.options,
+            health_server=cli_input.health_server,
+            health_port=cli_input.health_port,
+            registry=registry,
+        ),
+        result_finalizer=lambda batch_result: finalize_batch_step(
+            batch_result=batch_result,
+            dry_run=cli_input.dry_run,
+            summary_presenter=summary_presenter,
+            determine_exit_code=determine_exit_code,
+            exit_func=exit_func,
+        ),
     )
-    if batch_result is None:
-        return
-
-    summary_presenter(batch_result, cli_input.dry_run)
-    exit_func(determine_exit_code(batch_result))

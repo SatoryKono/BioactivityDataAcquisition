@@ -78,6 +78,7 @@ class RunOptions:
     use_cached_bronze: bool = False
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
+    enable_tracing: bool | None = None
 
 
 class PipelineNotFoundError(ValueError):

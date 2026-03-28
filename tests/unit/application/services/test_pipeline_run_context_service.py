@@ -120,3 +120,14 @@ class TestBuildContext:
         assert context.vacuum_enabled_override is None
         assert context.vacuum.retention_days == 7
         assert context.log_level == "INFO"
+
+    def test_build_context_propagates_tracing_override(self) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="chembl_activity",
+            run_id=RunID(uuid4()),
+            options=RunOptions(enable_tracing=True),
+        )
+
+        assert context.tracing_enabled_override is True

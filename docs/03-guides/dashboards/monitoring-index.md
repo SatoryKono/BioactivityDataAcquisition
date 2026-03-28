@@ -24,6 +24,12 @@
 control-plane и lineage health: manifest writes, ledger appends, checkpoint
 compatibility и lineage fragment outcomes.
 
+`bioetl-runtime` считается канонической triage-точкой для runtime hygiene:
+warnings, unstructured logs и Prometheus-backed alert conditions. Он не
+заменяет `overview`/`dq`/`provider-health`, а собирает log+alert surface в одном
+месте для быстрого расследования.
+
 Для incident drilldown канонический handoff теперь идёт через shipped Explore
-links в `bioetl-overview-v2`, `bioetl-dq-v2` и `bioetl-provider-health-v2`:
-Loki для logs, Tempo для traces, с сохранением текущего time range.
+links в `bioetl-overview-v2`, `bioetl-dq-v2`, `bioetl-runtime` и
+`bioetl-provider-health-v2`: Loki для logs, Tempo для traces, с сохранением
+текущего time range.

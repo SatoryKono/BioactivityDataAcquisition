@@ -1,4 +1,4 @@
-"""Unit tests for run_composite_runtime.py helper module.
+"""Unit tests for canonical run-composite runtime helper module.
 
 Tests parse_enrich_only, build_runtime_config, and echo_composite_startup.
 """
@@ -10,7 +10,7 @@ from unittest.mock import patch
 import pytest
 
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
-from bioetl.interfaces.cli.commands.run_composite_runtime import (
+from bioetl.interfaces.cli.commands.domains.composite.runtime import (
     build_runtime_config,
     echo_composite_startup,
     parse_enrich_only,
@@ -117,7 +117,7 @@ class TestEchoCompositeStartup:
     ) -> None:
         """Starting message is always printed (line 96)."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"
+            "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
         ):
             echo_composite_startup(
                 composite="publication",
@@ -135,7 +135,7 @@ class TestEchoCompositeStartup:
     ) -> None:
         """Dry-run warning is printed when dry_run=True (line 97-98)."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"
+            "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
         ):
             echo_composite_startup(
                 composite="publication",
@@ -151,7 +151,7 @@ class TestEchoCompositeStartup:
     def test_dry_run_false_no_warning(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Dry-run warning is NOT printed when dry_run=False."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"
+            "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
         ):
             echo_composite_startup(
                 composite="publication",
@@ -167,7 +167,7 @@ class TestEchoCompositeStartup:
     def test_resume_true_echoes_info(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Resume message is printed when resume=True (line 99-100)."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"
+            "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
         ):
             echo_composite_startup(
                 composite="publication",
@@ -183,7 +183,7 @@ class TestEchoCompositeStartup:
     def test_resume_false_no_info(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Resume message is NOT printed when resume=False."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"
+            "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
         ):
             echo_composite_startup(
                 composite="publication",
@@ -199,7 +199,7 @@ class TestEchoCompositeStartup:
     def test_calls_echo_health_server_info(self) -> None:
         """echo_health_server_info is called with correct args (line 101)."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"
+            "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
         ) as mock_echo:
             echo_composite_startup(
                 composite="publication",
@@ -216,7 +216,7 @@ class TestEchoCompositeStartup:
     ) -> None:
         """Both dry-run warning and resume message appear when both flags are True."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"
+            "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
         ):
             echo_composite_startup(
                 composite="publication",

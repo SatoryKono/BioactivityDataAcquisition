@@ -8,8 +8,11 @@ import pytest
 
 from bioetl.application.services import PipelineNotFoundError, PipelineRunResult
 from bioetl.domain.exceptions import NetworkError
-from bioetl.interfaces.cli.commands.execution_policy import (
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
+    ExecutionFailureReasonCodes,
     build_failure_context,
+    execute_with_cli_failure_policy,
+    finalize_cli_execution,
     handle_cli_failure,
     map_batch_run_result_to_exit_code,
     map_run_status_to_exit_code,
@@ -93,6 +96,81 @@ def test_map_batch_run_result_to_exit_code_shutdown() -> None:
 def test_map_success_flag_to_exit_code_matrix() -> None:
     assert map_success_flag_to_exit_code(True) == ExitCode.OK
     assert map_success_flag_to_exit_code(False) == ExitCode.PIPELINE_ERROR
+
+
+@pytest.mark.unit
+def test_execute_with_cli_failure_policy_returns_action_result() -> None:
+    result = execute_with_cli_failure_policy(
+        lambda: "ok",
+        subject="chembl_activity",
+        reason_codes=ExecutionFailureReasonCodes(
+            config="CFG",
+            domain="DOM",
+            interrupted="INT",
+            unexpected="UNX",
+        ),
+        failure_handler=lambda exc, subject, reason_code: (_ for _ in ()).throw(exc),
+    )
+
+    assert result == "ok"
+
+
+@pytest.mark.unit
+def test_execute_with_cli_failure_policy_delegates_failure_and_returns_none() -> None:
+    seen: list[tuple[str, str, str]] = []
+
+    result = execute_with_cli_failure_policy(
+        lambda: (_ for _ in ()).throw(RuntimeError("boom")),
+        subject="chembl_activity",
+        reason_codes=ExecutionFailureReasonCodes(
+            config="CFG",
+            domain="DOM",
+            interrupted="INT",
+            unexpected="UNX",
+        ),
+        failure_handler=lambda exc, subject, reason_code: seen.append(
+            (type(exc).__name__, subject, reason_code)
+        ),
+    )
+
+    assert result is None
+    assert seen == [("RuntimeError", "chembl_activity", "UNX")]
+
+
+@pytest.mark.unit
+def test_finalize_cli_execution_runs_health_execute_and_finalizer_in_order() -> None:
+    calls: list[str] = []
+
+    def _health() -> None:
+        calls.append("health")
+
+    def _execute() -> str:
+        calls.append("execute")
+        return "done"
+
+    def _finalize(result: str) -> None:
+        calls.append(f"finalize:{result}")
+
+    finalize_cli_execution(
+        health_info_presenter=_health,
+        execute=_execute,
+        result_finalizer=_finalize,
+    )
+
+    assert calls == ["health", "execute", "finalize:done"]
+
+
+@pytest.mark.unit
+def test_finalize_cli_execution_skips_finalizer_when_execution_is_handled() -> None:
+    calls: list[str] = []
+
+    finalize_cli_execution(
+        health_info_presenter=lambda: calls.append("health"),
+        execute=lambda: calls.append("execute") or None,
+        result_finalizer=lambda result: calls.append(f"finalize:{result}"),
+    )
+
+    assert calls == ["health", "execute"]
 
 
 @pytest.mark.unit

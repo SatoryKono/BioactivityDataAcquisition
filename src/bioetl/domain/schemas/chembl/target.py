@@ -45,13 +45,11 @@ class TargetSchema(ETLRecordSchema):
     # )
 
     # === Metadata ===
-    pref_name: Series[str] | None = pa.Field(
-        nullable=True, description="Preferred name."
-    )
+    pref_name: Series[str] = pa.Field(nullable=False, description="Preferred name.")
     taxonomy_id: Series[float] | None = pa.Field(
         nullable=True, description="NCBI Taxonomy ID (float for nullable int)."
     )
-    organism: Series[str] | None = pa.Field(nullable=True, description="Organism.")
+    organism: Series[str] = pa.Field(nullable=False, description="Organism.")
     organism_class: Series[str] | None = pa.Field(
         nullable=True,
         isin=["acellular", "unicellular", "multicellular"],

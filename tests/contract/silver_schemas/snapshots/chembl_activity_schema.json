@@ -73,8 +73,22 @@
     "coerce": false,
     "description": "Batch context ID from the source.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_state": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Processing state for the activity record.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "action_type": {
@@ -136,8 +150,8 @@
     "coerce": false,
     "description": "Assay description text.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "assay_id": {
@@ -159,8 +173,8 @@
     "coerce": false,
     "description": "Assay type (B/F/A/T/P/U).",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "assay_variant_accession": {
@@ -191,8 +205,8 @@
     "coerce": false,
     "description": "BAO ID.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "bao_format": {
@@ -200,8 +214,8 @@
     "coerce": false,
     "description": "BioAssay Ontology format ID.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "bao_label": {
@@ -209,8 +223,8 @@
     "coerce": false,
     "description": "BioAssay Ontology label.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "canonical_smiles": {
@@ -218,8 +232,8 @@
     "coerce": false,
     "description": "Canonical SMILES of molecule.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "content_hash": {
@@ -273,8 +287,8 @@
     "coerce": false,
     "description": "Publication journal name.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "ligand_efficiency_bei": {
@@ -382,8 +396,8 @@
     "coerce": false,
     "description": "-log10 of molar activity.",
     "dtype": "float64",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "potential_duplicate": {
@@ -396,8 +410,8 @@
     "coerce": false,
     "description": "Duplicate flag.",
     "dtype": "int64",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "publication_doi": {
@@ -419,8 +433,8 @@
     "coerce": false,
     "description": "Foreign key to document.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "publication_pmc_id": {
@@ -454,9 +468,9 @@
     ],
     "coerce": false,
     "description": "Publication year.",
-    "dtype": "Int64",
-    "nullable": true,
-    "required": false,
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "qudt_units": {
@@ -473,8 +487,8 @@
     "coerce": false,
     "description": "FK to compound_record.",
     "dtype": "int64",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "relation": {
@@ -482,8 +496,8 @@
     "coerce": false,
     "description": "Original operator.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "src_id": {
@@ -491,8 +505,8 @@
     "coerce": false,
     "description": "Source ID.",
     "dtype": "int64",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "standard_flag": {
@@ -505,8 +519,8 @@
     "coerce": false,
     "description": "Standardization flag.",
     "dtype": "int64",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "standard_relation": {
@@ -519,8 +533,8 @@
     "coerce": false,
     "description": "Standardized operator.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "standard_text_value": {
@@ -542,8 +556,8 @@
     "coerce": false,
     "description": "Standardized measurement type.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "standard_units": {
@@ -551,8 +565,8 @@
     "coerce": false,
     "description": "Standardized units.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "standard_upper_value": {
@@ -574,8 +588,8 @@
     "coerce": false,
     "description": "Standardized value.",
     "dtype": "float64",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "target_id": {
@@ -588,8 +602,8 @@
     "coerce": false,
     "description": "Foreign key to target.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "target_organism": {
@@ -597,8 +611,8 @@
     "coerce": false,
     "description": "Target organism.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "target_pref_name": {
@@ -615,8 +629,8 @@
     "coerce": false,
     "description": "Target taxonomy ID (nullable int pattern).",
     "dtype": "float64",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "text_value": {
@@ -651,8 +665,8 @@
     "coerce": false,
     "description": "Original units.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "uo_units": {
@@ -665,8 +679,8 @@
     "coerce": false,
     "description": "Units Ontology ID.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "upper_value": {
@@ -683,8 +697,8 @@
     "coerce": false,
     "description": "Original value.",
     "dtype": "float64",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   }
 }

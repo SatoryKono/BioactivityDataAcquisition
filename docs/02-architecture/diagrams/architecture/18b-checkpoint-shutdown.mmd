@@ -1,13 +1,13 @@
 %% BioETL — Checkpoint and Shutdown System
-%% Separates general checkpoint/shutdown services from the composite checkpoint path.
+%% Separates general checkpoint/shutdown services from the composite checkpoint facade and resume helpers.
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-03-28
 %% @type    flowchart
 %% @level   System / Component
 %% @view    checkpoint-shutdown
 %% @parent  18-lock-checkpoint-shutdown.mmd
-%% @nodes   12
+%% @nodes   15
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -28,7 +28,10 @@ graph TB
 
     subgraph Application["Application services"]
         CMS["CheckpointManagerService"]:::size-sm
-        CCS["CompositeCheckpointService"]:::size-sm
+        CCS["CompositeCheckpointService<br/>thin facade"]:::size-sm
+        CLOAD["CompositeCheckpointLoadService"]:::size-sm
+        CPERSIST["CompositeCheckpointPersistenceService"]:::size-sm
+        CCTX["Expected checkpoint context<br/>config + contract anchors"]:::size-sm
         SS["ShutdownSignal / ShutdownReason"]:::size-sm
     end
 
@@ -46,6 +49,11 @@ graph TB
     CCP -.-> LCP
     CMS --> CKP
     CCS --> CCP
+    CCS --> CLOAD
+    CCS --> CPERSIST
+    CCS --> CCTX
+    CLOAD --> CCP
+    CPERSIST --> CCP
     SS --> SHP
     PIPE --> CMS
     PIPE --> SS
@@ -58,6 +66,6 @@ graph TB
     classDef lifecycle fill:#f1f5f9,stroke:#64748b
 
     class CKP,CCP,SHP port
-    class CMS,CCS,SS app
+    class CMS,CCS,CLOAD,CPERSIST,CCTX,SS app
     class LCP infra
     class PIPE,CPR,NOTE lifecycle

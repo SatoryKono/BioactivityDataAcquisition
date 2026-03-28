@@ -23,9 +23,9 @@ Plans in this folder must not override normative documents.
 
 ## Publication Hygiene Note
 
-- This folder is intentionally **internal-published**, not canonical.
-- Plans may be linked from the docs site for discoverability, but they remain
-  working materials rather than normative guidance.
+- This folder is intentionally **repo-only**, not a MkDocs-published surface.
+- Plans may be referenced from canonical docs for discoverability, but they
+  remain working materials rather than normative guidance.
 - When a plan conflicts with active docs under `docs/00-05`, active docs win.
 - Historical or completed plans should move to `docs/99-archive/` rather than
   accumulate as competing active surfaces.
@@ -70,7 +70,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
 `project-briefing-capability-discovery-2026-03-20.md` are no longer retained as
-published plan pages in this workspace snapshot.
+active repo entrypoints in this workspace snapshot.
 
 The architecture review plan was refreshed on `2026-03-23` with the current
 integral score, updated category table, and RF-style roadmap. It remains a

@@ -189,23 +189,23 @@ groups:
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDataFreshnessLagHigh
-        expr: (max by (pipeline, entity) (bioetl_data_freshness_seconds) > 86400) and (max by (pipeline, entity) (bioetl_data_freshness_seconds) <= 259200)
+        expr: (clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0) > 86400) and (clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0) <= 259200)
         for: 15m
         labels:
           severity: warning
         annotations:
           summary: "Data freshness lag is elevated"
-          description: "bioetl_data_freshness_seconds stayed between 24h and 72h for pipeline={{ $labels.pipeline }} entity={{ $labels.entity }}."
+          description: "time() - bioetl_data_freshness_seconds stayed between 24h and 72h for pipeline={{ $labels.pipeline }} entity={{ $labels.entity }}."
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDataFreshnessLagCritical
-        expr: max by (pipeline, entity) (bioetl_data_freshness_seconds) > 259200
+        expr: clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0) > 259200
         for: 15m
         labels:
           severity: critical
         annotations:
           summary: "Data freshness lag is critical"
-          description: "bioetl_data_freshness_seconds exceeded 72h for pipeline={{ $labels.pipeline }} entity={{ $labels.entity }}."
+          description: "time() - bioetl_data_freshness_seconds exceeded 72h for pipeline={{ $labels.pipeline }} entity={{ $labels.entity }}."
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
   - name: bioetl_provider_health_observability

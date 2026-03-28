@@ -1,4 +1,4 @@
-"""Unit tests for run_helpers.py CLI helper functions.
+"""Unit tests for canonical run support helper functions.
 
 Tests validation, registry resolution, confirmation, and cleanup preview helpers.
 """
@@ -12,7 +12,7 @@ import pytest
 
 from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.composition import PipelineRegistry
-from bioetl.interfaces.cli.commands.run_helpers import (
+from bioetl.interfaces.cli.commands.domains.run.support import (
     get_runner_logger,
     handle_destructive_run_confirmation,
     resolve_context_registry,
@@ -62,7 +62,7 @@ class TestValidatePipelineName:
     def test_valid_pipeline_returns_value(self, mock_registry: MagicMock) -> None:
         """Test that a valid pipeline name is returned unchanged."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
             return_value=mock_registry,
         ):
             result = validate_pipeline_name(None, None, "chembl_activity")
@@ -74,7 +74,7 @@ class TestValidatePipelineName:
     ) -> None:
         """Test that unknown pipeline raises click.BadParameter."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
             return_value=mock_registry,
         ):
             with pytest.raises(click.BadParameter) as exc_info:
@@ -87,7 +87,7 @@ class TestValidatePipelineName:
     ) -> None:
         """Test that error includes list of available pipelines."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
             return_value=mock_registry,
         ):
             with pytest.raises(click.BadParameter) as exc_info:
@@ -151,11 +151,11 @@ class TestHandleDestructiveRunConfirmation:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.asyncio.run"
+            "bioetl.interfaces.cli.commands.domains.run.support.asyncio.run"
         ) as mock_run:
             mock_run.return_value = None
             with patch(
-                "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+                "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
                 new=AsyncMock(return_value=preview),
             ):
                 result = handle_destructive_run_confirmation(
@@ -194,7 +194,7 @@ class TestShowCleanupPreview:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
             new=AsyncMock(return_value=preview),
         ):
             # Should not raise

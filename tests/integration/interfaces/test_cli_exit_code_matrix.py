@@ -32,7 +32,7 @@ class TestCliExitCodeMatrix:
         with (
             patch("bioetl.interfaces.cli.main.register_all_pipelines"),
             patch(
-                "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+                "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
                 return_value=registry,
             ),
             patch(
@@ -152,10 +152,10 @@ class TestCliExitCodeMatrix:
     def test_run_composite_exit_code_matrix(self, cli_runner) -> None:
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_composite_helpers.asyncio.run"
+                "bioetl.interfaces.cli.commands.domains.composite.support.asyncio.run"
             ) as mock_run,
             patch(
-                "bioetl.interfaces.cli.commands.run_composite_helpers.push_metrics_to_gateway",
+                "bioetl.interfaces.cli.commands.domains.composite.support.push_metrics_to_gateway",
                 return_value=True,
             ),
         ):

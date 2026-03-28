@@ -5,6 +5,9 @@ Tests the centralized structlog configuration.
 
 from __future__ import annotations
 
+import json
+import logging
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -83,6 +86,68 @@ class TestConfigureLogging:
             reset_logging_config()
             result = configure_logging(log_level=level)
             assert result is True
+
+    def test_configure_writes_logs_to_file_when_env_set(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        """Test that BIOETL_LOG_FILE adds a file sink alongside stdout."""
+        from bioetl.infrastructure.observability.logging_config import configure_logging
+
+        log_path = tmp_path / "runtime" / "bioetl.log"
+        monkeypatch.setenv("BIOETL_LOG_FILE", str(log_path))
+
+        result = configure_logging(json_format=False, force=True)
+
+        assert result is True
+        logging.getLogger("bioetl.test").info("file sink smoke")
+
+        assert log_path.exists()
+        assert "file sink smoke" in log_path.read_text(encoding="utf-8")
+
+    def test_configure_uses_default_runtime_log_file_outside_pytest(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        """Test that normal runtime defaults to logs/bioetl.log."""
+        from bioetl.infrastructure.observability.logging_config import configure_logging
+
+        monkeypatch.delenv("BIOETL_LOG_FILE", raising=False)
+        monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+        monkeypatch.chdir(tmp_path)
+
+        result = configure_logging(json_format=False, force=True)
+
+        assert result is True
+        logging.getLogger("bioetl.test").info("default file sink smoke")
+
+        log_path = tmp_path / "logs" / "bioetl.log"
+        assert log_path.exists()
+        assert "default file sink smoke" in log_path.read_text(encoding="utf-8")
+
+    def test_configure_formats_foreign_stdlib_logs_as_json(
+        self,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        """Test that foreign stdlib loggers are rendered as structured JSON."""
+        from bioetl.infrastructure.observability.logging_config import configure_logging
+
+        result = configure_logging(json_format=True, log_level="INFO", force=True)
+
+        assert result is True
+        logging.getLogger("httpx").info(
+            'HTTP Request: GET https://example.test "HTTP/1.1 200 OK"'
+        )
+
+        captured = capsys.readouterr()
+        payload = json.loads(captured.out.strip())
+
+        assert payload["event"].startswith("HTTP Request: GET https://example.test")
+        assert payload["logger"] == "httpx"
+        assert payload["level"] == "info"
+        assert "timestamp" in payload
 
 
 @pytest.mark.unit

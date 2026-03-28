@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-03-27T21:55:17+03:00_
+_Generated: 2026-03-28T18:56:28+03:00_
 
 ## Domain Ports
 
@@ -41,6 +41,18 @@ _Generated: 2026-03-27T21:55:17+03:00_
 ## Config Classes
 
 ![06-config-classes](./06-config-classes.svg)
+
+---
+
+## Application Core Services Frontmatter Sandbox Raw
+
+![07-application-core-services-frontmatter-sandbox-raw](./07-application-core-services-frontmatter-sandbox-raw.svg)
+
+---
+
+## Application Core Services Frontmatter Sandbox
+
+![07-application-core-services-frontmatter-sandbox](./07-application-core-services-frontmatter-sandbox.svg)
 
 ---
 

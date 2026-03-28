@@ -4,8 +4,6 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 """
 
 from __future__ import annotations
-
-import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -28,6 +26,18 @@ __all__ = [
 class ActivitySchema(ETLRecordSchema):
     """Activity validation schema for Silver layer."""
 
+    source_batch_id: Series[str] = pa.Field(
+        alias="_source_batch_id",
+        nullable=False,
+        description="Batch context ID from the source.",
+    )
+    state: Series[str] = pa.Field(
+        alias="_state",
+        nullable=False,
+        isin=["raw", "normalized", "validated"],
+        description="Processing state for the activity record.",
+    )
+
     # === Primary Key ===
     activity_id: Series[str] = pa.Field(nullable=False, description="Primary key.")
 
@@ -42,45 +52,45 @@ class ActivitySchema(ETLRecordSchema):
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to molecule.",
     )
-    target_id: Series[str] | None = pa.Field(
-        nullable=True,
+    target_id: Series[str] = pa.Field(
+        nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to target.",
     )
-    publication_id: Series[str] | None = pa.Field(
-        nullable=True,
+    publication_id: Series[str] = pa.Field(
+        nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to document.",
     )
 
     # === Standardized Values ===
-    standard_relation: Series[str] | None = pa.Field(
-        nullable=True,
+    standard_relation: Series[str] = pa.Field(
+        nullable=False,
         isin=list(STANDARD_RELATIONS),
         description="Standardized operator.",
     )
-    standard_value: Series[float] | None = pa.Field(
-        nullable=True,
+    standard_value: Series[float] = pa.Field(
+        nullable=False,
         ge=0,
         description="Standardized value.",
     )
-    standard_units: Series[str] | None = pa.Field(
-        nullable=True, description="Standardized units."
+    standard_units: Series[str] = pa.Field(
+        nullable=False, description="Standardized units."
     )
-    standard_type: Series[str] | None = pa.Field(
-        nullable=True,
+    standard_type: Series[str] = pa.Field(
+        nullable=False,
         isin=list(ACTIVITY_STANDARD_TYPES),
         description="Standardized measurement type.",
     )
-    standard_flag: Series[int] | None = pa.Field(
-        nullable=True,
+    standard_flag: Series[int] = pa.Field(
+        nullable=False,
         isin=[0, 1],
         description="Standardization flag.",
     )
 
     # === Derived Metrics ===
-    pchembl_value: Series[float] | None = pa.Field(
-        nullable=True,
+    pchembl_value: Series[float] = pa.Field(
+        nullable=False,
         ge=0,
         le=14,
         description="-log10 of molar activity.",
@@ -95,36 +105,36 @@ class ActivitySchema(ETLRecordSchema):
     activity_comment: Series[str] | None = pa.Field(
         nullable=True, description="Textual comment."
     )
-    potential_duplicate: Series[int] | None = pa.Field(
-        nullable=True,
+    potential_duplicate: Series[int] = pa.Field(
+        nullable=False,
         isin=[0, 1],
         description="Duplicate flag.",
     )
 
     # === Ontologies ===
-    bao_endpoint: Series[str] | None = pa.Field(
-        nullable=True,
+    bao_endpoint: Series[str] = pa.Field(
+        nullable=False,
         str_matches=BAO_ID_PATTERN,
         description="BAO ID.",
     )
-    uo_units: Series[str] | None = pa.Field(
-        nullable=True,
+    uo_units: Series[str] = pa.Field(
+        nullable=False,
         str_matches=UO_ID_PATTERN,
         description="Units Ontology ID.",
     )
     qudt_units: Series[str] | None = pa.Field(nullable=True, description="QUDT unit.")
 
     # === Original Values & Other Fields ===
-    src_id: Series[int] | None = pa.Field(nullable=True, description="Source ID.")
-    record_id: Series[int] | None = pa.Field(
-        nullable=True, description="FK to compound_record."
+    src_id: Series[int] = pa.Field(nullable=False, description="Source ID.")
+    record_id: Series[int] = pa.Field(
+        nullable=False, description="FK to compound_record."
     )
     type: Series[str] | None = pa.Field(nullable=True, description="Original type.")
-    relation: Series[str] | None = pa.Field(
-        nullable=True, description="Original operator."
+    relation: Series[str] = pa.Field(
+        nullable=False, description="Original operator."
     )
-    value: Series[float] | None = pa.Field(nullable=True, description="Original value.")
-    units: Series[str] | None = pa.Field(nullable=True, description="Original units.")
+    value: Series[float] = pa.Field(nullable=False, description="Original value.")
+    units: Series[str] = pa.Field(nullable=False, description="Original units.")
     text_value: Series[str] | None = pa.Field(nullable=True, description="Text value.")
     standard_text_value: Series[str] | None = pa.Field(
         nullable=True, description="Standardized text value."
@@ -179,8 +189,8 @@ class ActivitySchema(ETLRecordSchema):
     )
 
     # === Additional Fields from Silver Schema ===
-    canonical_smiles: Series[str] | None = pa.Field(
-        nullable=True, description="Canonical SMILES of molecule."
+    canonical_smiles: Series[str] = pa.Field(
+        nullable=False, description="Canonical SMILES of molecule."
     )
     molecule_pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Molecule preferred name."
@@ -191,18 +201,18 @@ class ActivitySchema(ETLRecordSchema):
     target_pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Target preferred name."
     )
-    target_organism: Series[str] | None = pa.Field(
-        nullable=True, description="Target organism."
+    target_organism: Series[str] = pa.Field(
+        nullable=False, description="Target organism."
     )
-    target_taxonomy_id: Series[float] | None = pa.Field(
-        nullable=True,
+    target_taxonomy_id: Series[float] = pa.Field(
+        nullable=False,
         description="Target taxonomy ID (nullable int pattern).",
     )
-    assay_type: Series[str] | None = pa.Field(
-        nullable=True, description="Assay type (B/F/A/T/P/U)."
+    assay_type: Series[str] = pa.Field(
+        nullable=False, description="Assay type (B/F/A/T/P/U)."
     )
-    assay_description: Series[str] | None = pa.Field(
-        nullable=True, description="Assay description text."
+    assay_description: Series[str] = pa.Field(
+        nullable=False, description="Assay description text."
     )
     assay_variant_accession: Series[str] | None = pa.Field(
         nullable=True, description="Assay variant protein accession."
@@ -210,14 +220,14 @@ class ActivitySchema(ETLRecordSchema):
     assay_variant_mutation: Series[str] | None = pa.Field(
         nullable=True, description="Assay variant mutation description."
     )
-    bao_format: Series[str] | None = pa.Field(
-        nullable=True, description="BioAssay Ontology format ID."
+    bao_format: Series[str] = pa.Field(
+        nullable=False, description="BioAssay Ontology format ID."
     )
-    bao_label: Series[str] | None = pa.Field(
-        nullable=True, description="BioAssay Ontology label."
+    bao_label: Series[str] = pa.Field(
+        nullable=False, description="BioAssay Ontology label."
     )
-    journal: Series[str] | None = pa.Field(
-        nullable=True, description="Publication journal name."
+    journal: Series[str] = pa.Field(
+        nullable=False, description="Publication journal name."
     )
     publication_doi: Series[str] | None = pa.Field(
         nullable=True, description="Publication DOI."
@@ -228,8 +238,8 @@ class ActivitySchema(ETLRecordSchema):
     publication_pmc_id: Series[str] | None = pa.Field(
         nullable=True, description="Publication PubMed Central ID."
     )
-    publication_year: Series[pd.Int64Dtype] | None = pa.Field(
-        nullable=True,
+    publication_year: Series[int] = pa.Field(
+        nullable=False,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
         description="Publication year.",

@@ -1,6 +1,6 @@
 # AI Prompts Surface
 
-*Статус: internal-published (Internal / Extended)*
+*Статус: internal (repo-only entrypoint; excluded from MkDocs)*
 
 This directory stores prompt artifacts used for AI-oriented workflow support in
 BioETL.
@@ -32,3 +32,9 @@ BioETL.
 - Historical prompts in this folder explicitly marked `internal-only
   (historical prompt)` should be treated as reference material, not as current
   workflow policy
+
+## Notes
+
+- This overview page is **repo-only** and excluded from MkDocs.
+- Published discoverability for this surface goes through
+  `COLLECTED_PROMPTS_INDEX.md`, not through this README.

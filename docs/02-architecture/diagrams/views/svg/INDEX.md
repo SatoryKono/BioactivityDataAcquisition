@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-03-24T10:18:13+03:00_
+_Generated: 2026-03-28T19:11:02+03:00_
 
 ## Legend
 
@@ -491,6 +491,24 @@ _Generated: 2026-03-24T10:18:13+03:00_
 ## Activity Entity Data Flow Overview
 
 ![21-activity-entity-data-flow-overview](./21-activity-entity-data-flow-overview.svg)
+
+---
+
+## Idempotent Processing Guards Overview
+
+![21-idempotent-processing-guards-overview](./21-idempotent-processing-guards-overview.svg)
+
+---
+
+## Reproducible Run Contract Overview
+
+![23-reproducible-run-contract-overview](./23-reproducible-run-contract-overview.svg)
+
+---
+
+## Data Runtime Quality Map Overview
+
+![24-data-runtime-quality-map-overview](./24-data-runtime-quality-map-overview.svg)
 
 ---
 

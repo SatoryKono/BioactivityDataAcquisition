@@ -75,6 +75,8 @@ def mock_settings(tmp_path):
 def mock_config_minimal():
     """Minimal pipeline config without export options."""
     config = MagicMock()
+    config.provider = "chembl"
+    config.entity_type = "activity"
     config.sink = {
         "bronze": MagicMock(save_json=False, path=None),
         "silver": MagicMock(csv_export=MagicMock(enabled=False), path=None),
@@ -87,6 +89,8 @@ def mock_config_minimal():
 def mock_config_with_exports():
     """Pipeline config with CSV and JSON exports enabled."""
     config = MagicMock()
+    config.provider = "chembl"
+    config.entity_type = "activity"
 
     bronze_config = MagicMock()
     bronze_config.save_json = True
@@ -126,6 +130,8 @@ def mock_config_with_exports():
 def mock_config_empty_sink():
     """Pipeline config with empty sink."""
     config = MagicMock()
+    config.provider = "chembl"
+    config.entity_type = "activity"
     config.sink = {}
     return config
 
@@ -204,6 +210,8 @@ class TestStorageFactoryLocal:
     ):
         """Test that YAML paths override settings paths when specified."""
         config = MagicMock()
+        config.provider = "chembl"
+        config.entity_type = "activity"
         config.sink = {
             "bronze": MagicMock(save_json=False, path="custom/bronze"),
             "silver": MagicMock(

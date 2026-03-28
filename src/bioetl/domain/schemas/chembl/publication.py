@@ -47,12 +47,17 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         description="ChEMBL Document ID.",
     )
 
+    title: Series[str] = pa.Field(
+        nullable=False,
+        description="Publication title",
+    )
+
     # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Unified field names (ChEMBL-specific overrides) ===
     # Note: old fields 'year' and 'doc_type' removed - replaced by unified names
     publication_type: Series[str] = pa.Field(
-        nullable=True,
+        nullable=False,
         isin=list(PUBLICATION_TYPES),
         description="Document type (unified field name).",
     )

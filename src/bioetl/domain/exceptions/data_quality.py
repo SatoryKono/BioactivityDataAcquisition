@@ -9,8 +9,9 @@ Category: DataQualityErrors - data quality errors at the content integrity level
 data quarantine cases).
 
 Note:
-    Individual record validation errors (SchemaViolationError, MissingRequiredFieldError,
-    InvalidDataFormatError) are in the `validation` module.
+    Individual record validation errors (for example `SchemaViolationError` or
+    `ValidationError` instances classified as missing-field / invalid-format
+    cases) are in the `validation` module.
 """
 
 from __future__ import annotations

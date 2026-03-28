@@ -1,13 +1,13 @@
 %% BioETL — Configuration System
-%% Shows how YAML configs are loaded, validated, and used across the system.
+%% Shows how YAML configs are loaded, validated, and published as effective-config and manifest provenance artifacts.
 
-%% @version 1.0.0
-%% @date    2026-02-27
+%% @version 1.1.0
+%% @date    2026-03-28
 %% @type    flowchart
 %% @level   System / Component
 %% @png-scale 6
 %% @png-dpi   600
-%% @nodes   27
+%% @nodes   31
 %% @reference  Decomposed into 11a-config-loading, 11b-config-domain
 
 %%{init: {
@@ -70,6 +70,8 @@ flowchart LR
         direction TB
         RPC["RecordProcessorConfig<br/>table + schemas + dq"]:::size-lg
         LC["LockConfig<br/>timeout + heartbeat + retries"]:::size-lg
+        ECS["EffectiveConfigService<br/>build + hash + compare artifact"]:::size-lg
+        RMS["RunManifestService<br/>attach artifact refs into provenance"]:::size-lg
     end
 
     subgraph InfraSettings["Infrastructure Settings"]
@@ -77,6 +79,12 @@ flowchart LR
         SETTINGS["Settings<br/>BaseSettings from YAML + ENV"]:::size-lg
         OBS_SET["ObservabilitySettings"]:::size-lg
         PIPE_SET["PipelineSettings"]:::size-lg
+    end
+
+    subgraph ControlPlane["Control-plane artifacts"]
+        direction TB
+        ECA["EffectiveConfigArtifact<br/>resolved + overrides + effective snapshot"]:::size-lg
+        RMA["RunManifest provenance<br/>config hash + contract refs + artifact id"]:::size-lg
     end
 
     %% YAML → Loaders
@@ -115,6 +123,12 @@ flowchart LR
     %% Application uses domain config
     PIPE --> RPC
     RT --> LC
+    PIPE --> ECS
+    DQC --> ECS
+    SETTINGS --> ECS
+    ECS --> ECA
+    ECA --> RMS
+    RMS --> RMA
 
     classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
     classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
@@ -123,10 +137,12 @@ flowchart LR
     classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     classDef schema fill:#ffe4e6,stroke:#dc2626
     classDef settings fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+    classDef artifact fill:#ecfccb,stroke:#65a30d,stroke-width:2px
 
     class BASE_YAML,PROV_YAML,PC_YAML,COMP_YAML storage
     class PCL,DQCL,FCL,BCL adapter
     class PYC,APC,SRC,CBC,DQF,FFG,PCP schema
     class RT,PIPE,TC,DQC,SFC,GFC,CCFG port
-    class RPC,LC service
+    class RPC,LC,ECS,RMS service
     class SETTINGS,OBS_SET,PIPE_SET settings
+    class ECA,RMA artifact

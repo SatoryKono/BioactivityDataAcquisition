@@ -17,7 +17,7 @@ from bioetl.interfaces.cli.commands.run_all import (
     _get_available_providers,
     _validate_provider,
 )
-from bioetl.interfaces.cli.commands.run_all_helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     RunAllExecutionPlan,
     create_run_all_options,
     emit_run_all_listing,
@@ -74,7 +74,7 @@ def mock_registry_main():
     ]
     with (
         patch(
-            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
             return_value=mock,
         ),
         patch(
@@ -257,7 +257,7 @@ class TestRunAllHelpers:
         assert error is not None
         assert "No pipelines found for provider 'missing'" in error
 
-    @patch("bioetl.interfaces.cli.commands.run_all_helpers.echo_warning")
+    @patch("bioetl.interfaces.cli.commands.domains.run_all.support.echo_warning")
     def test_record_pipeline_result_shutdown_requests_stop(
         self,
         mock_echo_warning,
@@ -282,7 +282,7 @@ class TestRunAllHelpers:
         assert batch_result.results == [result]
         mock_echo_warning.assert_called_once()
 
-    @patch("bioetl.interfaces.cli.commands.run_all_helpers.echo_error")
+    @patch("bioetl.interfaces.cli.commands.domains.run_all.support.echo_error")
     def test_record_pipeline_failure_tracks_failed_pipeline(
         self,
         mock_echo_error,
@@ -323,7 +323,7 @@ class TestRunAllHelpers:
             is False
         )
 
-    @patch("bioetl.interfaces.cli.commands.run_all_helpers.echo_info")
+    @patch("bioetl.interfaces.cli.commands.domains.run_all.support.echo_info")
     def test_emit_run_all_listing_prints_header_and_total(
         self,
         mock_echo_info,

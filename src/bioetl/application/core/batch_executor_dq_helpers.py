@@ -92,14 +92,17 @@ def build_dataframe_from_records(
     try:
         import polars as pl
 
-        return pl.DataFrame(records)
+        return pl.DataFrame(records, infer_schema_length=None)
     except dataframe_error_types() as dataframe_error:
         normalized_records = normalize_records_for_polars(records)
         if normalized_records is not None:
             try:
                 import polars as pl
 
-                return pl.DataFrame(normalized_records)
+                return pl.DataFrame(
+                    normalized_records,
+                    infer_schema_length=None,
+                )
             except dataframe_error_types():
                 pass
         logger.warning(

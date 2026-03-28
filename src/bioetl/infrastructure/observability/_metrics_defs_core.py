@@ -145,7 +145,8 @@ DQ_VALIDATION_SCORE = Gauge(
 
 DATA_FRESHNESS_SECONDS = Gauge(
     "bioetl_data_freshness_seconds",
-    "Seconds since last successful data ingestion for pipeline/entity",
+    "Unix timestamp in seconds for the last successful data ingestion "
+    "for pipeline/entity; consumers derive lag via time() - metric",
     ["pipeline", "entity"],
 )
 

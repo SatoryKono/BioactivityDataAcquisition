@@ -8,20 +8,7 @@ from pathlib import Path
 import pytest
 
 
-RUN_COMPOSITE_SUPPORT_SEAMS = (
-    (
-        "src/bioetl/interfaces/cli/commands/run_composite_helpers.py",
-        "bioetl.interfaces.cli.commands.domains.composite.support",
-    ),
-    (
-        "src/bioetl/interfaces/cli/commands/run_composite_runtime.py",
-        "bioetl.interfaces.cli.commands.domains.composite.runtime",
-    ),
-    (
-        "src/bioetl/interfaces/cli/commands/run_composite_execution.py",
-        "bioetl.interfaces.cli.commands.domains.composite.execution",
-    ),
-)
+RUN_COMPOSITE_SUPPORT_SEAMS = ()
 
 
 def _extract_alias_targets(path: Path) -> set[str]:

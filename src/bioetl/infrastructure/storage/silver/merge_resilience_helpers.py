@@ -67,6 +67,7 @@ async def _execute_merge_write_request(
                 request.primary_keys,
                 request.table_path,
                 timeout_seconds=policy.execution_timeout_seconds,
+                merge_schema=request.merge_schema,
             )
             _emit_merge_recovered_after_retry(
                 logger=logger,

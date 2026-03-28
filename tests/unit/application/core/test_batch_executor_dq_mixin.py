@@ -115,6 +115,27 @@ def test_normalize_records_for_polars_stringifies_mixed_nested_columns() -> None
     assert isinstance(normalized[1]["payload"], str)
 
 
+def test_build_dataframe_from_records_handles_null_then_string_columns() -> None:
+    try:
+        import polars as pl
+    except ImportError:
+        pytest.skip("polars not installed")
+
+    harness = _BatchExecutorDQHarness()
+    records: list[dict[str, object]] = [
+        {"entity_id": "1", "assay_test_type": None} for _ in range(150)
+    ]
+    records.append({"entity_id": "151", "assay_test_type": "In vitro"})
+
+    df = harness._build_dataframe_from_records(records)
+
+    assert df is not None
+    assert isinstance(df, pl.DataFrame)
+    assert df.shape == (151, 2)
+    assert df["assay_test_type"].to_list()[-1] == "In vitro"
+    assert harness._logger.warning_calls == []
+
+
 def test_extract_dq_entity_prefers_suffix_from_table_name() -> None:
     harness = _BatchExecutorDQHarness()
     harness._config.table_config.silver_table = "silver_activity"  # type: ignore[misc]

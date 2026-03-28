@@ -1520,7 +1520,9 @@ def test_finalize_run_result_presents_and_exits() -> None:
 def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
     """CLI policy helper should resolve registry and inject canonical run seams."""
     from bioetl.interfaces.cli.commands import run as run_module
-    from bioetl.interfaces.cli.commands.run_command_policy import RunCommandInput
+    from bioetl.interfaces.cli.commands.domains.run.command_policy import (
+        RunCommandInput,
+    )
 
     ctx = MagicMock(name="click_context")
     registry = MagicMock(name="registry")
@@ -1540,6 +1542,7 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
         debug=False,
         health_server=True,
         health_port=8081,
+        enable_tracing=True,
         use_cached_bronze=False,
         cached_bronze_date=None,
         cached_bronze_path=None,
@@ -1604,6 +1607,7 @@ def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
             debug=False,
             health_server=True,
             health_port=8081,
+            enable_tracing=True,
             use_cached_bronze=False,
             cached_bronze_date=None,
             cached_bronze_path=None,
@@ -1625,9 +1629,103 @@ def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
         debug=False,
         health_server=True,
         health_port=8081,
+        enable_tracing=True,
         use_cached_bronze=False,
         cached_bronze_date=None,
         cached_bronze_path=None,
+    )
+    mock_run_with_policy.assert_called_once_with(ctx, cli_input)
+
+
+@pytest.mark.unit
+def test_run_all_with_cli_policy_wires_registry_and_cli_seams() -> None:
+    """Run-all policy helper should resolve registry and inject canonical seams."""
+    from bioetl.interfaces.cli.commands import run_all as run_all_module
+    from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
+        RunAllCommandInput,
+    )
+
+    ctx = MagicMock(name="click_context")
+    registry = MagicMock(name="registry")
+    cli_input = RunAllCommandInput(
+        source="chembl",
+        run_type="incremental",
+        limit=None,
+        dry_run=False,
+        yes=True,
+        list_only=False,
+        debug=False,
+        health_server=True,
+        health_port=8081,
+    )
+
+    with (
+        patch.object(
+            run_all_module,
+            "resolve_context_registry",
+            return_value=registry,
+        ) as mock_resolve_registry,
+        patch.object(run_all_module, "run_all_command_flow") as mock_run_all_command_flow,
+    ):
+        run_all_module._run_all_with_cli_policy(ctx, cli_input)
+
+    mock_resolve_registry.assert_called_once_with(ctx)
+    assert mock_run_all_command_flow.call_count == 1
+    kwargs = mock_run_all_command_flow.call_args.kwargs
+    assert kwargs["cli_input"] is cli_input
+    assert kwargs["registry"] is registry
+    assert kwargs["destructive_confirmation"] is run_all_module._handle_destructive_confirmation
+    assert kwargs["listing_emitter"] is run_all_module.emit_run_all_listing
+    assert kwargs["preview_emitter"] is run_all_module.emit_run_all_preview
+    assert kwargs["health_info_presenter"] is run_all_module.echo_health_server_info
+    assert kwargs["execute_batch"] is run_all_module._run_batch_with_policy
+    assert kwargs["summary_presenter"] is run_all_module._echo_batch_summary
+    assert kwargs["determine_exit_code"] is run_all_module._determine_exit_code
+    assert kwargs["exit_func"] is run_all_module.exit_with_code
+
+
+@pytest.mark.unit
+def test_run_all_callback_delegates_to_input_builder_and_cli_policy() -> None:
+    """Run-all Click callback should stay a thin entrypoint over policy seams."""
+    from bioetl.interfaces.cli.commands import run_all as run_all_module
+
+    ctx = MagicMock(name="click_context")
+    cli_input = MagicMock(name="cli_input")
+
+    with (
+        patch.object(
+            run_all_module,
+            "build_run_all_command_input",
+            return_value=cli_input,
+        ) as mock_build_input,
+        patch.object(
+            run_all_module,
+            "_run_all_with_cli_policy",
+        ) as mock_run_with_policy,
+    ):
+        run_all_module.run_all.callback.__wrapped__(
+            ctx,
+            source="chembl",
+            run_type="incremental",
+            limit=10,
+            dry_run=False,
+            yes=True,
+            list_only=False,
+            debug=False,
+            health_server=True,
+            health_port=8081,
+        )
+
+    mock_build_input.assert_called_once_with(
+        source="chembl",
+        run_type="incremental",
+        limit=10,
+        dry_run=False,
+        yes=True,
+        list_only=False,
+        debug=False,
+        health_server=True,
+        health_port=8081,
     )
     mock_run_with_policy.assert_called_once_with(ctx, cli_input)
 
@@ -1661,7 +1759,7 @@ class TestRunCommandExceptionHandlers:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry"
+                "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry"
             ) as mock_registry,
             patch(
                 "bioetl.interfaces.cli.main.build_cli_registry"
@@ -1689,7 +1787,7 @@ class TestRunCommandExceptionHandlers:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry"
+                "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry"
             ) as mock_registry,
             patch(
                 "bioetl.interfaces.cli.main.build_cli_registry"
@@ -1712,7 +1810,7 @@ class TestRunCommandExceptionHandlers:
 
 
 # =============================================================================
-# run_helpers.py Tests - show_cleanup_preview error handling
+# canonical run support Tests - show_cleanup_preview error handling
 # =============================================================================
 
 
@@ -1722,7 +1820,9 @@ class TestShowCleanupPreview:
 
     def test_show_cleanup_preview_success(self, capsys):
         """Test show_cleanup_preview success path."""
-        from bioetl.interfaces.cli.commands.run_helpers import show_cleanup_preview
+        from bioetl.interfaces.cli.commands.domains.run.support import (
+            show_cleanup_preview,
+        )
 
         mock_preview = MagicMock()
         mock_preview.bronze_files = 10
@@ -1730,22 +1830,24 @@ class TestShowCleanupPreview:
         mock_preview.gold_rows = 500
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
             return_value=mock_preview,
         ):
             # Need to make preview_cleanup an async mock
             with patch(
-                "bioetl.interfaces.cli.commands.run_helpers._preview_cleanup_async",
+                "bioetl.interfaces.cli.commands.domains.run.support._preview_cleanup_async",
                 new_callable=AsyncMock,
             ):
                 show_cleanup_preview("chembl_activity")
 
     def test_show_cleanup_preview_error(self, capsys):
         """Test show_cleanup_preview handles errors."""
-        from bioetl.interfaces.cli.commands.run_helpers import show_cleanup_preview
+        from bioetl.interfaces.cli.commands.domains.run.support import (
+            show_cleanup_preview,
+        )
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
             side_effect=RuntimeError("Preview failed"),
         ):
             show_cleanup_preview("chembl_activity")

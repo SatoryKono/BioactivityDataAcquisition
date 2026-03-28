@@ -6,9 +6,11 @@ import json
 from typing import TYPE_CHECKING
 
 import click
-import yaml
 
-from bioetl.interfaces.cli.formatters import echo_error, echo_info
+from bioetl.interfaces.cli.commands._inspection_output import (
+    emit_inspection_payload,
+)
+from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
     from bioetl.application.services.lineage_inspection_service import (
@@ -29,17 +31,6 @@ def get_lineage_service() -> LineageInspectionService:
     from bioetl.composition.services_api import get_lineage_service as _impl
 
     return _impl()
-
-
-def _emit_payload(payload: dict[str, object], output_format: str) -> None:
-    """Serialize CLI payload to the requested output format."""
-    if output_format == "json":
-        echo_info(json.dumps(payload, indent=2, default=str))
-        return
-    if output_format == "yaml":
-        echo_info(yaml.dump(payload, default_flow_style=False, sort_keys=False))
-        return
-    echo_info(_render_text_payload(payload))
 
 
 def _render_node_lines(nodes: list[object]) -> list[str]:
@@ -215,7 +206,11 @@ def show_fragment_command(fragment_id: str, output_format: str) -> None:
     except ValueError as exc:
         echo_error("Lineage fragment not found", str(exc))
         return
-    _emit_payload(result.to_dict(), output_format)
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=_render_text_payload,
+    )
 
 
 @lineage.command("trace")
@@ -239,7 +234,11 @@ def trace_command(dataset_ref: str, output_format: str) -> None:
     except ValueError as exc:
         echo_error("Lineage trace not found", str(exc))
         return
-    _emit_payload(result.to_dict(), output_format)
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=_render_text_payload,
+    )
 
 
 @lineage.command("explain")
@@ -272,7 +271,11 @@ def explain_command(
     except ValueError as exc:
         echo_error("Lineage run explanation not found", str(exc))
         return
-    _emit_payload(result.to_dict(), output_format)
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=_render_text_payload,
+    )
 
 
 COMMANDS = (

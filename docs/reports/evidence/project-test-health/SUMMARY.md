@@ -6,7 +6,7 @@
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
 
-> Этот summary — internal-published evidence layer для test-health решений.
+> Этот summary — repo-only evidence layer для test-health решений.
 > Для canonical test policy и active runtime expectations приоритет остаётся у
 > `configs/quality/test_matrix.yaml`, `configs/quality/test_health_reporting.yaml`
 > и active guides under `docs/03-guides/`.

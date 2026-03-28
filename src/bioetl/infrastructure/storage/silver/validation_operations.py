@@ -64,6 +64,8 @@ class _PreparedSilverWritePayload:
     validated_mode: SilverWriteMode
     table_path: str
     arrow_data: pa.Table
+    schema_mode: str | None
+    merge_schema: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -183,6 +185,18 @@ def _build_prepared_silver_write_payload(
         validated_mode=schema_request.validated_mode,
         table_path=table_path,
         arrow_data=schema_request.arrow_data,
+        schema_mode=(
+            "merge"
+            if (
+                schema_request.on_schema_mismatch == "evolve"
+                and schema_request.validated_mode == SilverWriteMode.APPEND
+            )
+            else None
+        ),
+        merge_schema=(
+            schema_request.on_schema_mismatch == "evolve"
+            and schema_request.validated_mode == SilverWriteMode.MERGE
+        ),
     )
 
 
@@ -275,10 +289,14 @@ def _validate_silver_pandera(
     table_name: str,
 ) -> None:
     """Validate records using Pandera schema before writing to Silver."""
-    cleaned_records = [
-        {key: value for key, value in record.items() if key != "_state"}
-        for record in records
-    ]
+    schema = getattr(host._silver_validator, "_schema", None)
+    schema_columns = getattr(schema, "columns", {})
+    preserve_state = "_state" in schema_columns
+    cleaned_records = (
+        records
+        if preserve_state
+        else [{key: value for key, value in record.items() if key != "_state"} for record in records]
+    )
 
     result = host._silver_validator.validate(cleaned_records)
     if not result.valid:

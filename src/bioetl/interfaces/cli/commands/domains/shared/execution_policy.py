@@ -9,8 +9,9 @@ Centralizes command-level error handling and exit-code mapping for:
 from __future__ import annotations
 
 import sys
-from collections.abc import Mapping, Sequence
-from typing import Protocol
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
+from typing import Protocol, TypeVar
 
 from bioetl.application.services import PipelineNotFoundError, PipelineRunResult
 from bioetl.domain.exceptions import BioETLError
@@ -20,13 +21,18 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_warning
 __all__ = [
     "CLI_ENTRYPOINT_TYPED_ERRORS",
     "BatchRunResultProtocol",
+    "ExecutionFailureReasonCodes",
     "build_failure_context",
+    "execute_with_cli_failure_policy",
+    "finalize_cli_execution",
     "handle_cli_failure",
     "map_batch_run_result_to_exit_code",
     "map_run_status_to_exit_code",
     "map_success_flag_to_exit_code",
     "render_failure_context",
 ]
+
+_ResultT = TypeVar("_ResultT")
 
 CLI_ENTRYPOINT_TYPED_ERRORS = (
     OSError,
@@ -70,6 +76,29 @@ class BatchRunResultProtocol(Protocol):
     def results(self) -> Sequence[object]:
         """Return the individual run results."""
         ...
+
+
+class CliFailureHandler(Protocol):
+    """Callable contract for structured CLI failure handling."""
+
+    def __call__(
+        self,
+        exc: BaseException,
+        subject: str,
+        reason_code: str,
+    ) -> None:
+        """Handle one exception for one logical command subject."""
+        ...
+
+
+@dataclass(frozen=True, slots=True)
+class ExecutionFailureReasonCodes:
+    """Reason-code bundle for typed CLI exception handling."""
+
+    config: str
+    domain: str
+    interrupted: str
+    unexpected: str
 
 
 def map_run_status_to_exit_code(
@@ -135,6 +164,41 @@ def map_success_flag_to_exit_code(
     if success:
         return ExitCode.OK
     return failure_exit_code
+
+
+def execute_with_cli_failure_policy(
+    action: Callable[[], _ResultT],
+    *,
+    subject: str,
+    reason_codes: ExecutionFailureReasonCodes,
+    failure_handler: CliFailureHandler,
+) -> _ResultT | None:
+    """Execute one command action with the canonical typed-failure ladder."""
+    try:
+        return action()
+    except PipelineNotFoundError as exc:
+        failure_handler(exc, subject, reason_codes.config)
+    except BioETLError as exc:
+        failure_handler(exc, subject, reason_codes.domain)
+    except KeyboardInterrupt as exc:
+        failure_handler(exc, subject, reason_codes.interrupted)
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        failure_handler(exc, subject, reason_codes.unexpected)
+    return None
+
+
+def finalize_cli_execution(
+    *,
+    health_info_presenter: Callable[[], None],
+    execute: Callable[[], _ResultT | None],
+    result_finalizer: Callable[[_ResultT], None],
+) -> None:
+    """Run the prepared health -> execute -> finalize command shell."""
+    health_info_presenter()
+    result = execute()
+    if result is None:
+        return
+    result_finalizer(result)
 
 
 def build_failure_context(

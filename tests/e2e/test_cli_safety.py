@@ -27,7 +27,7 @@ def mock_registry():
             return_value=mock,
         ),
         patch(
-            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
             return_value=mock,
         ),
     ):
@@ -41,7 +41,7 @@ def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
             "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"
         ) as mock_get_service,
         patch(
-            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
             return_value=mock_registry,
         ),
     ):
@@ -64,7 +64,7 @@ def test_cli_rebuild_with_yes(cli_runner, mock_registry):
         patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"),
         patch("bioetl.interfaces.cli.commands.run.asyncio.run") as mock_asyncio_run,
         patch(
-            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
             return_value=mock_registry,
         ),
     ):
@@ -90,10 +90,10 @@ def test_cli_dry_run_flag(cli_runner, mock_registry):
             "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"
         ) as mock_get_service,
         patch(
-            "bioetl.interfaces.cli.commands.run_helpers.show_cleanup_preview"
+            "bioetl.interfaces.cli.commands.domains.run.support.show_cleanup_preview"
         ) as mock_preview,
         patch(
-            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
             return_value=mock_registry,
         ),
     ):

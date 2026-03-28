@@ -37,7 +37,7 @@ def mock_registry():
         "uniprot_protein",
     ]
     with patch(
-        "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
+        "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
         return_value=mock,
     ):
         yield mock
@@ -93,7 +93,7 @@ class TestHandleDestructiveRunConfirmation:
         )
         assert result is True
 
-    @patch("bioetl.interfaces.cli.commands.run_helpers.show_cleanup_preview")
+    @patch("bioetl.interfaces.cli.commands.domains.run.support.show_cleanup_preview")
     def test_rebuild_dry_run_shows_preview_returns_false(self, mock_preview):
         """Test that rebuild with dry-run shows preview and returns False."""
         result = _handle_destructive_run_confirmation(
@@ -106,7 +106,7 @@ class TestHandleDestructiveRunConfirmation:
         assert result is False
         mock_preview.assert_called_once_with("chembl_activity")
 
-    @patch("bioetl.interfaces.cli.commands.run_helpers.show_cleanup_preview")
+    @patch("bioetl.interfaces.cli.commands.domains.run.support.show_cleanup_preview")
     def test_backfill_dry_run_shows_preview_returns_false(self, mock_preview):
         """Test that backfill with dry-run shows preview and returns False."""
         result = _handle_destructive_run_confirmation(
@@ -120,7 +120,7 @@ class TestHandleDestructiveRunConfirmation:
         mock_preview.assert_called_once_with("pubchem_compound")
 
     @patch(
-        "bioetl.interfaces.cli.commands.run_helpers.click.confirm", return_value=True
+        "bioetl.interfaces.cli.commands.domains.run.support.click.confirm", return_value=True
     )
     def test_rebuild_with_confirmation_returns_true(self, mock_confirm):
         """Test that rebuild with user confirmation returns True."""
@@ -135,9 +135,9 @@ class TestHandleDestructiveRunConfirmation:
         mock_confirm.assert_called_once()
 
     @patch(
-        "bioetl.interfaces.cli.commands.run_helpers.click.confirm", return_value=False
+        "bioetl.interfaces.cli.commands.domains.run.support.click.confirm", return_value=False
     )
-    @patch("bioetl.interfaces.cli.commands.run_helpers.sys.exit")
+    @patch("bioetl.interfaces.cli.commands.domains.run.support.sys.exit")
     def test_rebuild_cancelled_exits(self, mock_exit, mock_confirm):
         """Test that cancelled rebuild exits."""
         _handle_destructive_run_confirmation(

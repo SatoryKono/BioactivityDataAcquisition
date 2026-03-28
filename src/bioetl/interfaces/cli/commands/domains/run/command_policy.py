@@ -24,6 +24,9 @@ from bioetl.interfaces.cli.commands.domains.run.support import (
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
+    ExecutionFailureReasonCodes,
+    execute_with_cli_failure_policy,
+    finalize_cli_execution,
     map_run_status_to_exit_code,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
@@ -93,6 +96,7 @@ class RunCommandInput:
     debug: bool
     health_server: bool
     health_port: int
+    enable_tracing: bool | None
     use_cached_bronze: bool
     cached_bronze_date: str | None
     cached_bronze_path: str | None
@@ -115,6 +119,7 @@ def prepare_run_request(
     debug: bool,
     health_server: bool,
     health_port: int,
+    enable_tracing: bool | None,
     use_cached_bronze: bool,
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
@@ -136,6 +141,7 @@ def prepare_run_request(
         debug=debug,
         health_server=health_server,
         health_port=health_port,
+        enable_tracing=enable_tracing,
         use_cached_bronze=use_cached_bronze,
         cached_bronze_date=cached_bronze_date,
         cached_bronze_path=cached_bronze_path,
@@ -278,18 +284,18 @@ def run_command_flow(
         debug=cli_input.debug,
         health_server=cli_input.health_server,
         health_port=cli_input.health_port,
+        enable_tracing=cli_input.enable_tracing,
         use_cached_bronze=cli_input.use_cached_bronze,
         cached_bronze_date=cli_input.cached_bronze_date,
         cached_bronze_path=cli_input.cached_bronze_path,
         exit_func=exit_func,
     )
-    health_info_presenter(request)
-    run_result = execute_run_step(
-        request=request,
-        execute_run=execute_run,
-    )
-    finalize_run_step(
-        run_result=run_result,
+    finalize_cli_execution(
+        health_info_presenter=lambda: health_info_presenter(request),
+        execute=lambda: execute_run_step(
+            request=request,
+            execute_run=execute_run,
+        ),
         result_finalizer=result_finalizer,
     )
 
@@ -311,32 +317,23 @@ def execute_run_step(
     Returns:
         RunResult with pipeline execution status and metrics.
     """
-    try:
-        return execute_run(request)
-    except PipelineNotFoundError as exc:
-        handle_cli_failure(
+    result = execute_with_cli_failure_policy(
+        lambda: execute_run(request),
+        subject=request.pipeline,
+        reason_codes=ExecutionFailureReasonCodes(
+            config="CLI_RUN_CONFIG_ERROR",
+            domain="CLI_RUN_DOMAIN_ERROR",
+            interrupted="CLI_RUN_SIGINT",
+            unexpected="CLI_RUN_UNEXPECTED_ERROR",
+        ),
+        failure_handler=lambda exc, subject, reason_code: handle_cli_failure(
             exc,
-            pipeline=request.pipeline,
-            reason_code="CLI_RUN_CONFIG_ERROR",
-        )
-    except BioETLError as exc:
-        handle_cli_failure(
-            exc,
-            pipeline=request.pipeline,
-            reason_code="CLI_RUN_DOMAIN_ERROR",
-        )
-    except KeyboardInterrupt as exc:
-        handle_cli_failure(
-            exc,
-            pipeline=request.pipeline,
-            reason_code="CLI_RUN_SIGINT",
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        handle_cli_failure(
-            exc,
-            pipeline=request.pipeline,
-            reason_code="CLI_RUN_UNEXPECTED_ERROR",
-        )
+            pipeline=subject,
+            reason_code=reason_code,
+        ),
+    )
+    if result is not None:
+        return result
     raise RuntimeError("unreachable: handle_cli_failure is expected to terminate")
 
 

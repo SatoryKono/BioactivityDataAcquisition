@@ -10,14 +10,10 @@ missing fields, etc.).
 
 from __future__ import annotations
 
-from typing import cast
-
 from bioetl.domain.exceptions.base import DataQualityError
 from bioetl.domain.types import ErrorType
 
 __all__ = [
-    "InvalidDataFormatError",
-    "MissingRequiredFieldError",
     "SchemaViolationError",
     "ValidationError",
 ]
@@ -93,53 +89,3 @@ class SchemaViolationError(ValidationError):
             f"Schema validation failed for '{table}': {errors}",
             record_id=record_id,
         )
-
-
-def MissingRequiredFieldError(
-    field: str,
-    record_id: str | None = None,
-) -> ValidationError:
-    """Compatibility constructor for legacy MissingRequiredFieldError.
-
-    Args:
-        field: Name of the missing required field.
-        record_id: Optional ID of the affected record.
-
-    Returns:
-        ValidationError configured with MISSING_REQUIRED_FIELD error type.
-    """
-    msg = f"Missing required field: {field}"
-    if record_id:
-        msg += f" (record_id={record_id})"
-    error = ValidationError(msg, field=field).with_context(record_id=record_id)
-    error.error_type = ErrorType.MISSING_REQUIRED_FIELD  # type: ignore[misc]  # instance override of ClassVar
-    return cast(ValidationError, error)
-
-
-def InvalidDataFormatError(
-    field: str,
-    value: str,
-    expected_format: str,
-    record_id: str | None = None,
-) -> ValidationError:
-    """Compatibility constructor for legacy InvalidDataFormatError.
-
-    Args:
-        field: Name of the field with the invalid format.
-        value: The invalid value that was provided.
-        expected_format: Description of the expected format (e.g., 'YYYY-MM-DD').
-        record_id: Optional ID of the affected record.
-
-    Returns:
-        ValidationError configured with INVALID_DATA error type.
-    """
-    error = ValidationError(
-        f"Invalid format for '{field}': got '{value}', expected {expected_format}",
-        record_id=record_id,
-        field=field,
-    ).with_context(
-        value=value,
-        expected_format=expected_format,
-    )
-    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
-    return cast(ValidationError, error)

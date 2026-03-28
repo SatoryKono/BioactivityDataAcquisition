@@ -105,13 +105,14 @@ class TestTitleBaseValidation:
         """PASS: valid title value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_title_null_allowed(
+    def test_title_null_fails(
         self, minimal_chembl_publication_df: pd.DataFrame
     ) -> None:
-        """SKIP: title is nullable."""
+        """FAIL: title is non-nullable for ChemblPublicationSchema."""
         df = minimal_chembl_publication_df.copy()
         df["title"] = None
-        ChemblPublicationSchema.validate(df)
+        with pytest.raises(pa.errors.SchemaError, match="title"):
+            ChemblPublicationSchema.validate(df)
 
 
 @pytest.mark.unit
@@ -232,13 +233,14 @@ class TestPublicationTypeBaseValidation:
         """PASS: valid publication_type value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_publication_type_null_allowed(
+    def test_publication_type_null_fails(
         self, minimal_chembl_publication_df: pd.DataFrame
     ) -> None:
-        """SKIP: publication_type is nullable."""
+        """FAIL: publication_type is non-nullable for ChemblPublicationSchema."""
         df = minimal_chembl_publication_df.copy()
         df["publication_type"] = None
-        ChemblPublicationSchema.validate(df)
+        with pytest.raises(pa.errors.SchemaError, match="publication_type"):
+            ChemblPublicationSchema.validate(df)
 
 
 @pytest.mark.unit

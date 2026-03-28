@@ -40,7 +40,7 @@
       "title": "Explore Logs (Loki)",
       "tooltip": "",
       "type": "link",
-      "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%7D%20%7C~%20%5C%22%5C%5C%5C%22pipeline%5C%5C%5C%22%3A%5C%5C%5C%22%28%24pipeline%29%5C%5C%5C%22%5C%22%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
+      "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
     },
     {
       "asDropdown": false,
@@ -134,7 +134,7 @@
         "dataLinks": [
           {
             "title": "Open Logs in Loki Explore",
-            "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%7D%20%7C~%20%5C%22%5C%5C%5C%22pipeline%5C%5C%5C%22%3A%5C%5C%5C%22%28%24pipeline%29%5C%5C%5C%22%5C%22%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
+            "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
           },
           {
             "title": "Open Traces in Tempo Explore",
@@ -518,11 +518,11 @@
               },
               {
                 "color": "yellow",
-                "value": 3600
+                "value": 86400
               },
               {
                 "color": "red",
-                "value": 21600
+                "value": 259200
               }
             ]
           },
@@ -551,12 +551,12 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"})",
+          "expr": "clamp_min(time() - max(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0)",
           "legendFormat": "Freshness",
           "refId": "A"
         }
       ],
-      "title": "Data Freshness (seconds)",
+      "title": "Data Freshness Lag (seconds)",
       "type": "gauge"
     },
     {
@@ -1025,7 +1025,7 @@
     ]
   },
   "timezone": "",
-  "title": "BioETL Data Quality v2",
+  "title": "4. Data Quality",
   "uid": "bioetl-dq-v2",
   "version": 4
 }

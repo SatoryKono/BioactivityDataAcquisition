@@ -1,7 +1,7 @@
 # BioETL Views Diagrams Bundle
 
-- Generated: 2026-03-28T15:32:30
-- Diagram count: 162
+- Generated: 2026-03-28T19:29:23
+- Diagram count: 165
 
 ## Table of Contents
 
@@ -24,6 +24,9 @@
 - [15-dq-check-workflow — Data Quality Check Workflow](#15-dq-check-workflow-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [16-transformer-hierarchy — 16 Transformer Hierarchy](#16-transformer-hierarchy-full) — 2 views: full, overview
 - [21-activity-entity-data-flow — Activity Entity Data Flow (Extract → Transform → Load)](#21-activity-entity-data-flow-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
+- [21-idempotent-processing-guards-overview — 21 Idempotent Processing Guards](#21-idempotent-processing-guards-overview)
+- [23-reproducible-run-contract-overview — 23 Reproducible Run Contract](#23-reproducible-run-contract-overview)
+- [24-data-runtime-quality-map-overview — 24 Data Runtime Quality Map](#24-data-runtime-quality-map-overview)
 - [26-hexagonal-ports-adapters — Hexagonal Architecture — Ports and Adapters Overview](#26-hexagonal-ports-adapters-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [28-composition-root-di-graph — Composition Root Wiring — Full DI Graph](#28-composition-root-di-graph-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [29-composite-pipeline-workflow — Composite Pipeline Full Workflow — Seed to Gold (ADR-026)](#29-composite-pipeline-workflow-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
@@ -1461,6 +1464,57 @@
 
 ### Описание
 Диаграмма «21 Activity Entity Data Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `21-activity-entity-data-flow-full.mermaid`. Схема имеет плотность порядка 15 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Fetch Activity Batch, Fetch Related IDs, Write Bronze, Record Lineage, Normalize Units, Add Metadata.
+
+### Метаданные
+- Тип: `flowchart`
+- Представление: `Overview`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 21-idempotent-processing-guards-overview
+
+**21 Idempotent Processing Guards**
+
+![21-idempotent-processing-guards-overview](../views/svg/21-idempotent-processing-guards-overview.svg)
+
+### Описание
+Диаграмма «21 Idempotent Processing Guards» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `../architecture/21-idempotent-processing-guards.mmd`. Схема имеет плотность порядка 1 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Run / resume request.
+
+### Метаданные
+- Тип: `flowchart`
+- Представление: `Overview`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 23-reproducible-run-contract-overview
+
+**23 Reproducible Run Contract**
+
+![23-reproducible-run-contract-overview](../views/svg/23-reproducible-run-contract-overview.svg)
+
+### Описание
+Диаграмма «23 Reproducible Run Contract» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `../architecture/23-reproducible-run-contract.mmd`. Схема имеет плотность порядка 1 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Config inputs + source refs.
+
+### Метаданные
+- Тип: `flowchart`
+- Представление: `Overview`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 24-data-runtime-quality-map-overview
+
+**24 Data Runtime Quality Map**
+
+![24-data-runtime-quality-map-overview](../views/svg/24-data-runtime-quality-map-overview.svg)
+
+### Описание
+Диаграмма «24 Data Runtime Quality Map» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `quality-runtime-views`. Схема имеет плотность порядка 9 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Shared runtime anchors. Показательные узлы для быстрого чтения: run_id, manifest_id, effective_config_hash, execution_fingerprint, dataset_ref, Traceability.
 
 ### Метаданные
 - Тип: `flowchart`

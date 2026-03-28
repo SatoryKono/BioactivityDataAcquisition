@@ -132,6 +132,46 @@ class TestOpenTelemetryTracerClose:
             pytest.skip("OpenTelemetry is not available")
 
 
+class TestOpenTelemetryTracerSpanAdapter:
+    """Tests for span-handle compatibility returned by get_tracer()."""
+
+    def test_start_as_current_span_returns_span_like_handle(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Returned handle should support set_attribute/record_exception/__exit__."""
+        from bioetl.infrastructure.observability import tracing
+
+        if not tracing.OTEL_AVAILABLE:
+            pytest.skip("OpenTelemetry is not available")
+
+        entered_span = MagicMock()
+        context_manager = MagicMock()
+        context_manager.__enter__.return_value = entered_span
+        context_manager.__exit__.return_value = None
+        otel_tracer = MagicMock()
+        otel_tracer.start_as_current_span.return_value = context_manager
+        monkeypatch.setattr(tracing.trace, "get_tracer", MagicMock(return_value=otel_tracer))
+
+        tracer = tracing.OpenTelemetryTracer("test_service")
+        span = tracer.get_tracer("bioetl.test").start_as_current_span(
+            "demo",
+            attributes={"bioetl.pipeline": "chembl_activity"},
+        )
+        span.__enter__()
+        span.set_attribute("bioetl.status", "success")
+        span.record_exception(RuntimeError("boom"))
+        span.__exit__(None, None, None)
+
+        entered_span.set_attribute.assert_called_once_with(
+            "bioetl.status",
+            "success",
+        )
+        entered_span.record_exception.assert_called_once()
+        context_manager.__exit__.assert_called_once_with(None, None, None)
+        tracer.close()
+
+
 class TestModuleAll:
     """Tests for __all__ exports."""
 
@@ -193,6 +233,59 @@ class TestOTLPAvailability:
             # When OTLP is not available, _OtlpExporterClass might be None
             # depending on whether the base OTEL is available
             pass
+
+
+@pytest.mark.unit
+class TestTelemetryExporterResolution:
+    """Tests for OTLP exporter resolution helpers."""
+
+    def test_prefers_insecure_for_local_tempo_when_env_unspecified(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Local Tempo endpoints should default to insecure OTLP."""
+        from bioetl.infrastructure.observability import tracing
+
+        if not tracing.OTEL_AVAILABLE:
+            pytest.skip("OpenTelemetry is not available")
+
+        exporter_factory = MagicMock(return_value=MagicMock())
+        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_INSECURE", raising=False)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_INSECURE", raising=False)
+
+        tracing._build_telemetry_exporter()
+
+        exporter_factory.assert_called_once_with(
+            endpoint="localhost:4317",
+            insecure=True,
+        )
+
+    def test_respects_explicit_insecure_override(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Explicit insecure env values should win over local defaults."""
+        from bioetl.infrastructure.observability import tracing
+
+        if not tracing.OTEL_AVAILABLE:
+            pytest.skip("OpenTelemetry is not available")
+
+        exporter_factory = MagicMock(return_value=MagicMock())
+        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_INSECURE", "false")
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_INSECURE", raising=False)
+
+        tracing._build_telemetry_exporter()
+
+        exporter_factory.assert_called_once_with(
+            endpoint="localhost:4317",
+            insecure=False,
+        )
 
 
 @pytest.mark.unit

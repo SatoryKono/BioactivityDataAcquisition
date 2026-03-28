@@ -4,7 +4,7 @@
 Статус: supporting assessment and refactor roadmap  
 Язык: русский
 
-> Этот документ — internal-published assessment surface. Он помогает
+> Этот документ — repo-only assessment surface. Он помогает
 > интерпретировать текущее архитектурное состояние и выбирать bounded refactor
 > waves, но не заменяет canonical project guidance в `docs/00-project/`,
 > `docs/01-requirements/`, `docs/02-architecture/` и active guides under

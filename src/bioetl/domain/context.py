@@ -159,6 +159,7 @@ class PipelineRunContext:
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
     skip_gold: bool = False
+    tracing_enabled_override: bool | None = None
     execution_context: ExecutionContext = ExecutionContext.ISOLATED
 
     @property

@@ -1,4 +1,4 @@
-"""Unit tests for run_all_command_policy.py."""
+"""Unit tests for canonical run-all command policy helpers."""
 
 from __future__ import annotations
 
@@ -8,14 +8,14 @@ import pytest
 
 from bioetl.application.services import RunOptions
 from bioetl.domain.exceptions import NetworkError
-from bioetl.interfaces.cli.commands.run_all_command_policy import (
+from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     RunAllCommandInput,
     build_run_all_command_input,
     handle_run_all_cli_failure,
     prepare_run_all_execution_plan,
     run_all_command_flow,
 )
-from bioetl.interfaces.cli.commands.run_all_helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,
     RunAllExecutionPlan,
 )
@@ -110,7 +110,7 @@ class TestPrepareRunAllExecutionPlan:
         expected_plan = _make_plan()
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_all_command_policy.resolve_run_all_execution_plan",
+            "bioetl.interfaces.cli.commands.domains.run_all.command_policy.resolve_run_all_execution_plan",
             return_value=(expected_plan, None),
         ):
             result = prepare_run_all_execution_plan(
@@ -124,11 +124,11 @@ class TestPrepareRunAllExecutionPlan:
     def test_invalid_provider_echoes_error_and_exits(self) -> None:
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all_command_policy.resolve_run_all_execution_plan",
+                "bioetl.interfaces.cli.commands.domains.run_all.command_policy.resolve_run_all_execution_plan",
                 return_value=(None, "bad provider"),
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_all_command_policy.echo_error"
+                "bioetl.interfaces.cli.commands.domains.run_all.command_policy.echo_error"
             ) as mock_error,
             pytest.raises(SystemExit) as exc_info,
         ):
@@ -157,7 +157,7 @@ class TestRunAllCommandFlow:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all_command_policy.prepare_run_all_execution_plan",
+                "bioetl.interfaces.cli.commands.domains.run_all.command_policy.prepare_run_all_execution_plan",
                 return_value=plan,
             ),
             pytest.raises(SystemExit) as exc_info,
@@ -200,7 +200,7 @@ class TestRunAllCommandFlow:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all_command_policy.prepare_run_all_execution_plan",
+                "bioetl.interfaces.cli.commands.domains.run_all.command_policy.prepare_run_all_execution_plan",
                 return_value=plan,
             ),
             pytest.raises(SystemExit) as exc_info,
@@ -254,7 +254,7 @@ class TestRunAllCommandFlow:
         exit_func = MagicMock()
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_all_command_policy.prepare_run_all_execution_plan",
+            "bioetl.interfaces.cli.commands.domains.run_all.command_policy.prepare_run_all_execution_plan",
             return_value=plan,
         ):
             run_all_command_flow(

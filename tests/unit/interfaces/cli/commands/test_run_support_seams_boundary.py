@@ -10,28 +10,8 @@ import pytest
 
 RUN_SUPPORT_SEAMS = (
     (
-        "src/bioetl/interfaces/cli/commands/run_helpers.py",
-        "bioetl.interfaces.cli.commands.domains.run.support",
-    ),
-    (
-        "src/bioetl/interfaces/cli/commands/run_runtime_helpers.py",
-        "bioetl.interfaces.cli.commands.domains.run.runtime_helpers",
-    ),
-    (
         "src/bioetl/interfaces/cli/commands/run_result_presenter.py",
         "bioetl.interfaces.cli.commands.domains.run.result_presenter",
-    ),
-    (
-        "src/bioetl/interfaces/cli/commands/run_result_flow_helpers.py",
-        "bioetl.interfaces.cli.commands.domains.run.result_flow",
-    ),
-    (
-        "src/bioetl/interfaces/cli/commands/run_service_access.py",
-        "bioetl.interfaces.cli.commands.domains.run.service_access",
-    ),
-    (
-        "src/bioetl/interfaces/cli/commands/run_command_policy.py",
-        "bioetl.interfaces.cli.commands.domains.run.command_policy",
     ),
 )
 

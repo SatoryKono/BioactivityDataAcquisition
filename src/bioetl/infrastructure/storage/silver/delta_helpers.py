@@ -39,6 +39,8 @@ class _DeltaWriteRequest:
     arrow_data: pa.Table
     primary_keys: list[str]
     partition_cols: list[str] | None
+    schema_mode: str | None = None
+    merge_schema: bool = False
 
 
 _DeltaWriteHandler = Callable[[_DeltaWriteRequest], Awaitable[None]]
@@ -75,6 +77,7 @@ def _build_merge_execute_callable(
     dt: DeltaTableType,
     records: pa.Table | pa.RecordBatchReader,
     merge_condition: str,
+    merge_schema: bool,
 ) -> Callable[[], Any]:  # Any: Delta merge returns heterogeneous result
     """Build the blocking Delta merge callable for ``run_in_executor``."""
 
@@ -85,6 +88,7 @@ def _build_merge_execute_callable(
                 predicate=merge_condition,
                 source_alias="source",
                 target_alias="target",
+                merge_schema=merge_schema,
             )
             .when_matched_update_all(predicate=_RUN_TYPE_PRECEDENCE_PREDICATE)
             .when_not_matched_insert_all()
@@ -219,6 +223,7 @@ async def _merge_records_with_timeout(
     primary_keys: list[str],
     table_path: str,
     timeout_seconds: float,
+    merge_schema: bool = False,
 ) -> None:
     """Execute Delta merge with timeout handling and structured timeout telemetry."""
     merge_condition = _build_merge_condition(primary_keys)
@@ -229,6 +234,7 @@ async def _merge_records_with_timeout(
             dt=dt,
             records=records,
             merge_condition=merge_condition,
+            merge_schema=merge_schema,
         ),
     )
     try:

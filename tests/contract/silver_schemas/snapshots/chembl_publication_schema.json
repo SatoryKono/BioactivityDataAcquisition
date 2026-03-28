@@ -381,7 +381,7 @@
     "coerce": false,
     "description": "Document type (unified field name).",
     "dtype": "str",
-    "nullable": true,
+    "nullable": false,
     "required": true,
     "unique": false
   },
@@ -426,7 +426,7 @@
     "coerce": false,
     "description": "Publication title",
     "dtype": "str",
-    "nullable": true,
+    "nullable": false,
     "required": true,
     "unique": false
   },

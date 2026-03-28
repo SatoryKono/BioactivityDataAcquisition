@@ -24,12 +24,14 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
     record_pipeline_result,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
+    CliFailureHandler,
+    ExecutionFailureReasonCodes,
+    execute_with_cli_failure_policy,
 )
 
 _EnsureMetricsServerStartedFn = Callable[[], object]
 _HealthServerContextFactory = Callable[..., AbstractAsyncContextManager[object]]
-_RunAllFailureHandler = Callable[[BaseException, str, str], None]
+_RunAllFailureHandler = CliFailureHandler
 _RunAllCoroutineRunner = Callable[
     [Coroutine[object, object, BatchRunResult]],
     BatchRunResult,
@@ -150,16 +152,17 @@ def run_batch_with_policy(
         health_server_context_factory=health_server_context_factory,
     )
     try:
-        return run_coro(coro)
-    except PipelineNotFoundError as exc:
-        handle_failure(exc, request.source, "CLI_RUN_ALL_CONFIG_ERROR")
-    except BioETLError as exc:
-        handle_failure(exc, request.source, "CLI_RUN_ALL_DOMAIN_ERROR")
-    except KeyboardInterrupt as exc:
-        handle_failure(exc, request.source, "CLI_RUN_ALL_SIGINT")
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        handle_failure(exc, request.source, "CLI_RUN_ALL_UNEXPECTED_ERROR")
+        return execute_with_cli_failure_policy(
+            lambda: run_coro(coro),
+            subject=request.source,
+            reason_codes=ExecutionFailureReasonCodes(
+                config="CLI_RUN_ALL_CONFIG_ERROR",
+                domain="CLI_RUN_ALL_DOMAIN_ERROR",
+                interrupted="CLI_RUN_ALL_SIGINT",
+                unexpected="CLI_RUN_ALL_UNEXPECTED_ERROR",
+            ),
+            failure_handler=handle_failure,
+        )
     finally:
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
-    return None

@@ -19,7 +19,7 @@ from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.validation.pandera_validator import (
-    NoOpSilverValidator,
+    NoOpValidator,
     PanderaSilverValidator,
 )
 
@@ -60,11 +60,11 @@ class TestSilverWriterSilverValidatorInit:
     """Tests for SilverWriter initialization with Silver validator."""
 
     def test_init_with_default_validator(self, noop_logger):
-        """Test SilverWriter creates NoOpSilverValidator when not provided."""
+        """Test SilverWriter creates NoOpValidator when not provided."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
-        assert isinstance(writer._silver_validator, NoOpSilverValidator)
+        assert isinstance(writer._silver_validator, NoOpValidator)
 
     def test_init_with_custom_validator(self, noop_logger):
         """Test SilverWriter accepts custom SilverValidatorPort."""
@@ -110,7 +110,7 @@ class TestSilverWriterValidateSilverPandera:
         writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
-            silver_validator=NoOpSilverValidator(),
+            silver_validator=NoOpValidator(),
         )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
         # Should not raise

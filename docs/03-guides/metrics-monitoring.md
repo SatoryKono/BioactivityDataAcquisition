@@ -120,7 +120,7 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_dq_validation_failures_total` | Counter | pipeline, stage, severity | Превышения DQ порогов |
 | `bioetl_dq_validation_score` | Gauge | pipeline, entity | Оценка валидности (0.0-1.0) |
 | `bioetl_dq_anomaly_detected` | Counter | pipeline, metric, severity, anomaly_type | Обнаруженные аномалии |
-| `bioetl_data_freshness_seconds` | Gauge | pipeline, entity | Timestamp последнего ingestion |
+| `bioetl_data_freshness_seconds` | Gauge | pipeline, entity | Unix timestamp последнего successful ingestion; lag вычисляется как `time() - metric` |
 | `bioetl_dq_baseline_updated` | Counter | pipeline, metric | Обновления baseline |
 | `bioetl_dq_baseline_samples` | Gauge | pipeline, metric | Семплы в baseline |
 
@@ -345,6 +345,11 @@ pipeline-execution
 # Production (OTLP)
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
 
+# Local Tempo over plaintext gRPC
+export OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317
+# OTEL_EXPORTER_OTLP_INSECURE=true выставляется автоматически,
+# если endpoint указывает на локальный Tempo и override не задан.
+
 # Development (Console)
 # Настраивается автоматически при отсутствии OTLP endpoint
 ```
@@ -412,10 +417,14 @@ bioetl health check --json
 | `bioetl_dq_records_quarantined_total` rate | > 20% of processed, with >=20 bronze records | Critical |
 | `bioetl_pipeline_duration_seconds` | > 95th percentile + 50% | Warning |
 | `bioetl_health_check_status == 0` | > 1 min | Critical |
-| `bioetl_data_freshness_seconds` | > 24h and <=72h | Warning |
-| `bioetl_data_freshness_seconds` | > 72h | Critical |
+| `time() - bioetl_data_freshness_seconds` | > 24h and <=72h | Warning |
+| `time() - bioetl_data_freshness_seconds` | > 72h | Critical |
 | `bioetl_data_source_retry_exhausted_total` | 1-2 exhaustions in 1h | Warning |
 | `bioetl_data_source_retry_exhausted_total` | >=3 exhaustions in 1h | Critical |
+
+Smoke baseline для этих границ закреплён в
+`tests/integration/test_prometheus_rules_config.py`, чтобы warning/critical окна
+не начинали перекрываться при последующих правках rule pack.
 
 ### Пример Alertmanager правил
 

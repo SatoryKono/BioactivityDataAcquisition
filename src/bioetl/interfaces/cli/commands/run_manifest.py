@@ -7,9 +7,11 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 import click
-import yaml
 
-from bioetl.interfaces.cli.formatters import echo_error, echo_info
+from bioetl.interfaces.cli.commands._inspection_output import (
+    emit_inspection_payload,
+)
+from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
     from bioetl.application.services.run_manifest_inspection_service import (
@@ -29,17 +31,6 @@ def get_run_manifest_service() -> RunManifestInspectionService:
     from bioetl.composition.services_api import get_run_manifest_service as _impl
 
     return _impl()
-
-
-def _emit_payload(payload: dict[str, object], output_format: str) -> None:
-    """Serialize CLI payload to the requested output format."""
-    if output_format == "json":
-        echo_info(json.dumps(payload, indent=2, default=str))
-        return
-    if output_format == "yaml":
-        echo_info(yaml.dump(payload, default_flow_style=False, sort_keys=False))
-        return
-    echo_info(_render_text_payload(payload))
 
 
 def _format_scalar(value: object) -> str:
@@ -265,7 +256,11 @@ def show_command(identifier: str, output_format: str) -> None:
     except ValueError as exc:
         echo_error("Run manifest not found", str(exc))
         return
-    _emit_payload(result.to_dict(), output_format)
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=_render_text_payload,
+    )
 
 
 @run_manifest.command("diff")
@@ -290,7 +285,11 @@ def diff_command(
     except ValueError as exc:
         echo_error("Run manifest diff failed", str(exc))
         return
-    _emit_payload(result.to_dict(), output_format)
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=_render_text_payload,
+    )
 
 
 COMMANDS = (

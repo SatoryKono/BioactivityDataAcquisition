@@ -21,6 +21,9 @@ from bioetl.domain.services.preflight_governance import (
     PreflightGovernanceConfig,
     PreflightGovernanceService,
 )
+from bioetl.domain.services.validation_result_envelopes import (
+    build_validation_result,
+)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import (
     CompositeValidationReport,
@@ -115,7 +118,7 @@ class CompositeValidationService:
                     {"missing_field": required_field},
                 )
             )
-        return ValidationResult(
+        return build_validation_result(
             issues=issues,
             validation_layer=ValidationLayer.STRUCTURAL,
             execution_context={"pipeline_name": config.pipeline_name},
@@ -126,7 +129,7 @@ class CompositeValidationService:
         config: CompositeValidationConfig,
     ) -> ValidationResult:
         issues = self._deep_preflight_issues(config.composite_config)
-        return ValidationResult(
+        return build_validation_result(
             issues=issues,
             validation_layer=ValidationLayer.DEEP_PREFLIGHT,
             execution_context={"pipeline_name": config.pipeline_name},

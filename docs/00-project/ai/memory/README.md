@@ -1,6 +1,6 @@
 # AI Memory Surface
 
-*Статус: internal-published (Internal / Extended)*
+*Статус: internal (repo-only entrypoint; excluded from MkDocs)*
 
 Этот каталог хранит memory-артефакты для AI-рантаймов и role-specific agent
 profiles в BioETL.
@@ -45,7 +45,10 @@ runtime source и canonical governance docs:
 
 ## Notes
 
-- This folder is **internal-published**, not a canonical runtime registry.
+- This overview page is **repo-only** and excluded from MkDocs.
+- `agent-memory.md` may still be published as a shared entrypoint under
+  `Internal / Extended`, but role-specific memory sheets remain repo-only by
+  default.
 - Role-specific memory docs are retained for onboarding speed and task focus.
 - When a memory note becomes stale, fix the note instead of silently treating it
   as normative truth.

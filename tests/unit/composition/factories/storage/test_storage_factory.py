@@ -71,6 +71,8 @@ def _make_config(
     gold_layer: SimpleNamespace,
 ) -> SimpleNamespace:
     return SimpleNamespace(
+        provider="chembl",
+        entity_type="activity",
         sink={
             "bronze": bronze_layer,
             "silver": silver_layer,
@@ -116,8 +118,8 @@ def test_create_uses_canonical_yaml_paths_and_returns_storage_context(
     assert result.gold_path == gold_path
     assert result.checkpoints_path == settings.checkpoint_path
     assert Path(result.adapter.bronze.base_path) == bronze_path
-    assert Path(result.adapter.silver.base_path) == silver_path
-    assert Path(result.adapter.gold.base_path) == gold_path
+    assert Path(result.adapter.silver.base_path) == silver_path.parent.parent
+    assert Path(result.adapter.gold.base_path) == gold_path.parent.parent
     assert result.adapter.silver.csv_exporter is None
     assert result.adapter.gold.csv_exporter is None
     logger.info.assert_any_call(
@@ -168,6 +170,82 @@ def test_create_uses_test_mode_paths_and_overrides_csv_export_targets(
     assert result.adapter.gold.csv_exporter is not None
     assert Path(result.adapter.silver.csv_exporter.base_path) == settings.silver_path
     assert Path(result.adapter.gold.csv_exporter.base_path) == settings.gold_path
+
+
+@pytest.mark.unit
+def test_create_normalizes_delta_writer_base_paths_for_entity_scoped_yaml_paths(
+    tmp_path: Path,
+) -> None:
+    """Delta writers should keep layer-root base paths even when context paths are scoped."""
+    settings = _make_settings(
+        test_mode=False,
+        bronze_path=tmp_path / "default" / "bronze",
+        silver_path=tmp_path / "default" / "silver",
+        gold_path=tmp_path / "default" / "gold",
+        checkpoint_path=tmp_path / "checkpoints",
+    )
+    config = _make_config(
+        bronze_layer=_make_sink_layer(tmp_path / "custom" / "bronze" / "chembl" / "activity"),
+        silver_layer=_make_sink_layer(tmp_path / "custom" / "silver" / "chembl" / "activity"),
+        gold_layer=_make_sink_layer(tmp_path / "custom" / "gold" / "chembl" / "activity"),
+    )
+
+    result = StorageFactory.create(
+        settings=settings,
+        config=config,
+        logger=MagicMock(),
+        metrics=MagicMock(),
+    )
+
+    assert result.silver_path == tmp_path / "custom" / "silver" / "chembl" / "activity"
+    assert result.gold_path == tmp_path / "custom" / "gold" / "chembl" / "activity"
+    assert Path(result.adapter.silver.base_path) == tmp_path / "custom" / "silver"
+    assert Path(result.adapter.gold.base_path) == tmp_path / "custom" / "gold"
+
+
+@pytest.mark.unit
+def test_create_normalizes_windows_style_entity_scoped_delta_paths() -> None:
+    """Writer base paths should normalize Windows-style scoped paths to layer roots."""
+    settings = _make_settings(
+        test_mode=False,
+        bronze_path=Path("data/default/bronze"),
+        silver_path=Path("data/default/silver"),
+        gold_path=Path("data/default/gold"),
+        checkpoint_path=Path("data/default/checkpoints"),
+    )
+    config = _make_config(
+        bronze_layer=SimpleNamespace(
+            path=r"data\output\bronze\chembl\activity",
+            csv_export=_make_csv_config(r"data\output\bronze\csv", enabled=False),
+            save_json=False,
+            save_metadata=False,
+            flat_structure=False,
+        ),
+        silver_layer=SimpleNamespace(
+            path=r"data\output\silver\chembl\activity",
+            csv_export=_make_csv_config(r"data\output\silver\csv", enabled=False),
+            save_json=False,
+            save_metadata=False,
+            flat_structure=False,
+        ),
+        gold_layer=SimpleNamespace(
+            path=r"data\output\gold\chembl\activity",
+            csv_export=_make_csv_config(r"data\output\gold\csv", enabled=False),
+            save_json=False,
+            save_metadata=False,
+            flat_structure=False,
+        ),
+    )
+
+    result = StorageFactory.create(
+        settings=settings,
+        config=config,
+        logger=MagicMock(),
+        metrics=MagicMock(),
+    )
+
+    assert Path(result.adapter.silver.base_path) == Path("data/output/silver")
+    assert Path(result.adapter.gold.base_path) == Path("data/output/gold")
 
 
 @pytest.mark.unit

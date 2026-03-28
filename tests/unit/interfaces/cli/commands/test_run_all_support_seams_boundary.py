@@ -8,20 +8,7 @@ from pathlib import Path
 import pytest
 
 
-RUN_ALL_SUPPORT_SEAMS = (
-    (
-        "src/bioetl/interfaces/cli/commands/run_all_helpers.py",
-        "bioetl.interfaces.cli.commands.domains.run_all.support",
-    ),
-    (
-        "src/bioetl/interfaces/cli/commands/run_all_command_policy.py",
-        "bioetl.interfaces.cli.commands.domains.run_all.command_policy",
-    ),
-    (
-        "src/bioetl/interfaces/cli/commands/run_all_execution.py",
-        "bioetl.interfaces.cli.commands.domains.run_all.execution",
-    ),
-)
+RUN_ALL_SUPPORT_SEAMS = ()
 
 
 def _extract_alias_targets(path: Path) -> set[str]:
