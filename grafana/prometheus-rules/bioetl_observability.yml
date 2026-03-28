@@ -126,6 +126,88 @@ groups:
           description: "Run-ledger append failure ratio exceeded 10% for pipeline={{ $labels.pipeline }} event_type={{ $labels.event_type }} in the last 30m."
           runbook: "docs/05-operations/runbooks/run-manifest-inspection.md"
 
+  - name: bioetl_dq_observability
+    rules:
+      - alert: BioETLDQSoftThresholdExceeded
+        expr: sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded[15m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "DQ soft threshold exceeded"
+          description: "bioetl_dq_soft_threshold_exceeded increased for pipeline={{ $labels.pipeline }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
+
+      - alert: BioETLDQQuarantineRateHigh
+        expr: (sum by (pipeline, run_type) (increase(bioetl_dq_records_quarantined_total[30m])) / clamp_min(sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "DQ quarantine rate is elevated"
+          description: "Quarantine rate exceeded 5% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 30m."
+          runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
+
+      - alert: BioETLDQQuarantineRateCritical
+        expr: (sum by (pipeline, run_type) (increase(bioetl_dq_records_quarantined_total[15m])) / clamp_min(sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[15m])), 1)) > 0.2
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "DQ quarantine rate reached hard-fail territory"
+          description: "Quarantine rate exceeded 20% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 15m."
+          runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
+
+      - alert: BioETLDQValidationFailuresCritical
+        expr: sum by (pipeline, stage) (increase(bioetl_dq_validation_failures_total{severity="critical"}[15m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical DQ validation failures detected"
+          description: "bioetl_dq_validation_failures_total increased with severity=critical for pipeline={{ $labels.pipeline }} stage={{ $labels.stage }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
+
+      - alert: BioETLDQCriticalAnomaliesDetected
+        expr: sum by (pipeline, metric, anomaly_type) (increase(bioetl_dq_anomaly_detected{severity="critical"}[30m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical DQ anomalies detected"
+          description: "bioetl_dq_anomaly_detected increased with severity=critical for pipeline={{ $labels.pipeline }} metric={{ $labels.metric }} anomaly_type={{ $labels.anomaly_type }} in the last 30m."
+          runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
+
+      - alert: BioETLSilverValidationFailuresDetected
+        expr: sum by (table) (increase(bioetl_silver_validation_failures_total[30m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Silver schema validation failures detected"
+          description: "bioetl_silver_validation_failures_total increased for table={{ $labels.table }} in the last 30m."
+          runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
+
+      - alert: BioETLDataFreshnessLagHigh
+        expr: max by (pipeline, entity) (bioetl_data_freshness_seconds) > 86400
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Data freshness lag is elevated"
+          description: "bioetl_data_freshness_seconds exceeded 24h for pipeline={{ $labels.pipeline }} entity={{ $labels.entity }}."
+          runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
+
+      - alert: BioETLDataFreshnessLagCritical
+        expr: max by (pipeline, entity) (bioetl_data_freshness_seconds) > 259200
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Data freshness lag is critical"
+          description: "bioetl_data_freshness_seconds exceeded 72h for pipeline={{ $labels.pipeline }} entity={{ $labels.entity }}."
+          runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
+
   - name: bioetl_provider_health_observability
     rules:
       - alert: BioETLProviderFailureRateHigh
@@ -136,4 +218,14 @@ groups:
         annotations:
           summary: "Provider health-check failure ratio is elevated"
           description: "Health-check failure ratio exceeded 20% for provider={{ $labels.provider }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/incident-response.md"
+
+      - alert: BioETLProviderRetriesExhausted
+        expr: sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[15m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Provider retries exhausted"
+          description: "bioetl_data_source_retry_exhausted_total increased for provider={{ $labels.provider }} operation={{ $labels.operation }} in the last 15m."
           runbook: "docs/05-operations/runbooks/incident-response.md"

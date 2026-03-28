@@ -1,6 +1,6 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-03-27T22:05:36
+- Generated: 2026-03-28T15:22:52
 - Diagram count: 93
 
 ## Table of Contents
@@ -775,13 +775,13 @@
 ![90-pkg-composition-factories-datasource](../class-diagrams/svg/90-pkg-composition-factories-datasource.svg)
 
 ### Описание
-Диаграмма «Package Family: composition/factories/datasource» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/datasource; modules: adapter_helpers, data_source_factory, http_client, pubchem.. Схема имеет плотность порядка 8 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: adapter helpers, data source factory, http client, pubchem. Показательные узлы для быстрого чтения: AdapterHelperServices, AdapterHelpersFactory, SyncAdapterHelperServices, DataSourceFactory, DataSourceRegistry, HttpClientFactory. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: composition/factories/datasource» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/datasource; modules: adapter_helpers, data_source_factory, http_client, pubchem.. Схема имеет плотность порядка 7 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: adapter helpers, data source factory, http client, pubchem. Показательные узлы для быстрого чтения: AdapterHelperServices, AdapterHelpersFactory, SyncAdapterHelperServices, DataSourceFactory, HttpClientFactory, ResolvedHttpConfig. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
 - Дата: `2026-03-27`
-- Узлы (metadata): `8`
+- Узлы (metadata): `7`
 
 \newpage
 

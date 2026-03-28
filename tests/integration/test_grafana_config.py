@@ -87,6 +87,15 @@ def get_panel_expressions(dashboard: dict) -> list[str]:
     return expressions
 
 
+def _collect_dashboard_links(dashboard: dict) -> list[dict]:
+    """Collect top-level dashboard links and panel data links."""
+    links = list(dashboard.get("links", []))
+    for panel in get_dashboard_panels(dashboard):
+        options = panel.get("options", {})
+        links.extend(options.get("dataLinks", []))
+    return links
+
+
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_is_valid_json(dashboard_path):
     """L1: Verify that the dashboard file is a valid JSON."""
@@ -321,6 +330,41 @@ def test_dashboard_queries_do_not_filter_by_run_id_label(dashboard_path):
     variables = [
         var.get("name") for var in dashboard.get("templating", {}).get("list", [])
     ]
-    assert "provider" in variables, (
-        "Provider dashboard must define 'provider' template variable"
-    )
+    if dashboard_path.name == "bioetl-provider-health-v2.json":
+        assert "provider" in variables, (
+            "Provider dashboard must define 'provider' template variable"
+        )
+    else:
+        assert "pipeline" in variables, (
+            f"Dashboard {dashboard_path.name} must define 'pipeline' template variable"
+        )
+
+
+def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> None:
+    """Overview/provider dashboards should offer Loki and Tempo drilldown."""
+    expectations = {
+        "bioetl-overview-v2.json": "pipeline",
+        "bioetl-provider-health-v2.json": "provider",
+    }
+
+    for dashboard_name, token in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        links = _collect_dashboard_links(dashboard)
+        titles = {link.get("title") for link in links if link.get("title")}
+        urls = [link.get("url", "") for link in links]
+
+        assert any("Logs" in title for title in titles), (
+            f"{dashboard_name} must expose a logs drilldown link"
+        )
+        assert any("Traces" in title for title in titles), (
+            f"{dashboard_name} must expose a traces drilldown link"
+        )
+        assert any("/explore" in url and "loki" in url for url in urls), (
+            f"{dashboard_name} must point logs drilldown to Loki Explore"
+        )
+        assert any("/explore" in url and "tempo" in url for url in urls), (
+            f"{dashboard_name} must point traces drilldown to Tempo Explore"
+        )
+        assert any(token in url for url in urls if "/explore" in url and "loki" in url), (
+            f"{dashboard_name} Loki drilldown should preserve {token}-level context"
+        )

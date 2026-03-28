@@ -41,6 +41,30 @@
       "tooltip": "",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2"
+    },
+    {
+      "asDropdown": false,
+      "icon": "logs",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Explore Logs (Loki)",
+      "tooltip": "",
+      "type": "link",
+      "url": "/explore?left=%7B%22datasource%22:%22loki%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22%7Bjob%3D%5C%22bioetl%5C%22%7D%20%7C%3D%20%5C%22%5C%22pipeline%5C%22%3A%5C%22$pipeline%5C%22%5C%22%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D"
+    },
+    {
+      "asDropdown": false,
+      "icon": "share-alt",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Explore Traces (Tempo)",
+      "tooltip": "",
+      "type": "link",
+      "url": "/explore?left=%7B%22datasource%22:%22tempo%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22queryType%22:%22traceqlSearch%22,%22query%22:%22%7B%7D%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D"
     }
   ],
   "panels": [
@@ -124,7 +148,15 @@
           },
           {
             "title": "Open Provider Health Dashboard",
-            "url": "/d/bioetl-provider-health-v2?var-pipeline=$pipeline&${__url_time_range}"
+            "url": "/d/bioetl-provider-health-v2?${__url_time_range}"
+          },
+          {
+            "title": "Open Logs in Loki Explore",
+            "url": "/explore?left=%7B%22datasource%22:%22loki%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22%7Bjob%3D%5C%22bioetl%5C%22%7D%20%7C%3D%20%5C%22%5C%22pipeline%5C%22%3A%5C%22$pipeline%5C%22%5C%22%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D"
+          },
+          {
+            "title": "Open Traces in Tempo Explore",
+            "url": "/explore?left=%7B%22datasource%22:%22tempo%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22queryType%22:%22traceqlSearch%22,%22query%22:%22%7B%7D%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D"
           }
         ]
       },

@@ -36,6 +36,9 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
   `Lineage Fragment Failures (24h)`.
 - **Lineage Fragment Outcomes (1h)**: тренд публикации lineage fragments по
   `layer/status` без использования high-cardinality labels.
+- **Drilldown**: dashboard links `Explore Logs (Loki)` / `Explore Traces (Tempo)`
+  и data links у `Processing Pipeline` переводят оператора в Grafana Explore с тем
+  же временным окном.
 
 #### 2. BioETL Data Quality v2
 Сфокусирован на чистоте данных и аномалиях.
@@ -48,19 +51,30 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 - **Health Check Latency by Provider (p95)**: тренд латентности провайдеров.
 - **Health Check Successes (15m) / Health Checks (15m)**: текущий объём и стабильность health_check без lifetime-counter шума.
 - **Per-provider gauge (102)**: повторяемая p95-панель по `$provider`.
+- **Drilldown**: dashboard links `Explore Logs (Loki)` / `Explore Traces (Tempo)`
+  и data links у latency-панели открывают correlation path для выбранного
+  провайдера.
 
 ## 3. Alert-backed сигналы
 
-Для control-plane и traceability baseline дополнительно отслеживаются:
+Для shipped observability baseline дополнительно отслеживаются:
 
-- `BioETLControlPlaneManifestWriteFailed` -> смотреть
-  `run-manifest-inspection.md`
-- `BioETLRunLedgerAppendFailed` -> смотреть
-  `run-manifest-inspection.md`
-- `BioETLCheckpointCompatibilityBlocked` -> смотреть
-  `checkpoint-debugging.md`
-- `BioETLLineageFragmentPersistenceFailed` -> смотреть
-  `traceability-signal-ownership.md`
+- **Control plane / traceability**
+  - `BioETLControlPlaneManifestWriteFailed` -> `run-manifest-inspection.md`
+  - `BioETLRunLedgerAppendFailed` -> `run-manifest-inspection.md`
+  - `BioETLCheckpointCompatibilityBlocked` -> `checkpoint-debugging.md`
+  - `BioETLLineageFragmentPersistenceFailed` -> `traceability-signal-ownership.md`
+  - `BioETLLineageRefsMissing` -> `traceability-signal-ownership.md`
+- **DQ / freshness**
+  - `BioETLDQSoftThresholdExceeded` -> `dq-failure-investigation.md`
+  - `BioETLDQQuarantineRateHigh` / `BioETLDQQuarantineRateCritical` -> `dq-failure-investigation.md`
+  - `BioETLDQValidationFailuresCritical` -> `dq-failure-investigation.md`
+  - `BioETLDQCriticalAnomaliesDetected` -> `dq-failure-investigation.md`
+  - `BioETLSilverValidationFailuresDetected` -> `dq-failure-investigation.md`
+  - `BioETLDataFreshnessLagHigh` / `BioETLDataFreshnessLagCritical` -> `dq-failure-investigation.md`
+- **Provider health**
+  - `BioETLProviderFailureRateHigh` -> `incident-response.md`
+  - `BioETLProviderRetriesExhausted` -> `incident-response.md`
 
 ## 4. Гарантии качества мониторинга
 
