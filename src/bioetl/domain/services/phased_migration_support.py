@@ -118,7 +118,7 @@ class PhasedMigrationSupportService:
 
     def check_backward_compatibility(
         self,
-        config: JsonDict,
+        _config: JsonDict,
         target_phase: str | None = None,
     ) -> dict[str, str]:
         """Report backward-compatibility issues for the target migration phase."""

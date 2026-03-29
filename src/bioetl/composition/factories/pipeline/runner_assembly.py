@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
@@ -12,10 +11,6 @@ from bioetl.application.core.preflight.medallion_validator import (
     MedallionConfigValidator,
 )
 from bioetl.application.core.preflight.service import PreflightService
-from bioetl.application.core.runner import (
-    PipelineRunner,
-    PipelineRunnerDependencies,
-)
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
@@ -34,7 +29,10 @@ from bioetl.composition.factories.pipeline.checkpoint_policy_helpers import (
 from bioetl.composition.factories.pipeline.postrun_assembly import (
     build_postrun_service,
 )
-from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
+from bioetl.composition.factories.pipeline.runner_constructor import (
+    RunnerAssemblyParts,
+    create_pipeline_runner,
+)
 from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy, WriteModePolicy
@@ -49,6 +47,7 @@ if TYPE_CHECKING:
         CheckpointManagerService,
     )
     from bioetl.application.core.postrun.service import PostrunService
+    from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldSchemaType
@@ -57,19 +56,6 @@ if TYPE_CHECKING:
 __all__ = [
     "assemble_runner_impl",
 ]
-
-
-@dataclass(frozen=True, slots=True)
-class _RunnerAssemblyParts:
-    """Concrete runner collaborators assembled before PipelineRunner creation."""
-
-    checkpoint_manager: CheckpointManagerService
-    lifecycle_service: MedallionLifecycleService
-    lock_manager: LockCoordinator
-    preflight_service: PreflightService
-    postrun_service: PostrunService
-    observer: PipelineObserver
-    batch_executor: BatchExecutor
 
 
 def _build_checkpoint_manager(
@@ -218,25 +204,17 @@ def _create_pipeline_runner(
     lifecycle_service: MedallionLifecycleService,
     observer: PipelineObserver,
 ) -> PipelineRunner:
-    resolved_tracer = resolve_tracer(observability.tracer)
-    dependencies = PipelineRunnerDependencies(
+    """Backward-compatible seam for unit tests that patch runner creation."""
+    return create_pipeline_runner(
+        pipeline=pipeline,
+        observability=observability,
         executor=executor,
         checkpoint_manager=checkpoint_manager,
         lock_manager=lock_manager,
-        preflight=preflight_service,
-        postrun=postrun_service,
+        preflight_service=preflight_service,
+        postrun_service=postrun_service,
         lifecycle_service=lifecycle_service,
         observer=observer,
-        shutdown_signal=pipeline.shutdown_signal,
-    )
-    return PipelineRunner(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        services=pipeline.services,
-        context=pipeline.context,
-        dependencies=dependencies,
-        pipeline=pipeline,
-        tracer=resolved_tracer,
     )
 
 
@@ -253,7 +231,7 @@ def _assemble_runner_parts(
         [PipelineYamlConfig | None],
         DQConfigsContext,
     ],
-) -> _RunnerAssemblyParts:
+) -> RunnerAssemblyParts:
     """Assemble runner collaborators before creating the PipelineRunner shell."""
     checkpoint_manager = _build_checkpoint_manager(
         pipeline=pipeline,
@@ -296,7 +274,7 @@ def _assemble_runner_parts(
         lock_manager=lock_manager,
         observability=observability,
     )
-    return _RunnerAssemblyParts(
+    return RunnerAssemblyParts(
         checkpoint_manager=checkpoint_manager,
         lifecycle_service=lifecycle_service,
         lock_manager=lock_manager,

@@ -8,18 +8,16 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 import pyarrow as pa
 
-from bioetl.infrastructure.storage.gold.io_helpers import (
-    load_gold_writer_module as _load_gold_writer_module,
-)
 from bioetl.infrastructure.storage.gold.io_delta_runtime import (
-    _SimpleGoldWriteRequest,
-    _GoldWriterDeltaModuleProtocol,
     _build_simple_gold_write,
     _execute_prepared_scd2_gold_write,
     _execute_prepared_simple_gold_write,
-    _gold_write_retry_delay,
+    _GoldWriterDeltaModuleProtocol,
     _prepare_scd2_gold_write,
-    _run_gold_write_with_retry,
+    _SimpleGoldWriteRequest,
+)
+from bioetl.infrastructure.storage.gold.io_helpers import (
+    load_gold_writer_module as _load_gold_writer_module,
 )
 
 T = TypeVar("T")
@@ -180,8 +178,37 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         )
 
 
+def _gold_write_retry_delay(attempt: int) -> float:
+    """Return the deterministic retry delay used by Gold write helpers."""
+    return (0.5 * (2**attempt)) + 0.05
+
+
+async def _run_gold_write_with_retry(
+    module: object,
+    operation: Callable[[], object],
+    max_attempts: int = 3,
+) -> None:
+    """Run a retryable async gold write operation using the legacy helper API."""
+    retry_errors = tuple(getattr(module, "GOLD_WRITE_RETRY_ERRORS", (OSError,)))
+    sleep_module = getattr(module, "asyncio", asyncio)
+
+    for attempt in range(max_attempts):
+        try:
+            await operation()
+            return
+        except retry_errors:
+            if attempt >= max_attempts - 1:
+                raise
+            await sleep_module.sleep(_gold_write_retry_delay(attempt))
+
+
 __all__ = [
     "_GoldWriterExecutorArrowMixin",
     "_GoldWriterScd2MergeMixin",
     "_GoldWriterSimpleDeltaMixin",
+    "_SimpleGoldWriteRequest",
+    "_build_simple_gold_write",
+    "_gold_write_retry_delay",
+    "_prepare_scd2_gold_write",
+    "_run_gold_write_with_retry",
 ]

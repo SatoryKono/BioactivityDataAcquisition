@@ -414,6 +414,15 @@
     "required": true,
     "unique": false
   },
+  "publication_doi": {
+    "checks": [],
+    "coerce": false,
+    "description": "Publication DOI.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "publication_id": {
     "checks": [
       {
@@ -426,6 +435,24 @@
     "dtype": "str",
     "nullable": false,
     "required": true,
+    "unique": false
+  },
+  "publication_pmc_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Publication PMC ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "publication_pmid": {
+    "checks": [],
+    "coerce": false,
+    "description": "Publication PMID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
     "unique": false
   },
   "publication_year": {

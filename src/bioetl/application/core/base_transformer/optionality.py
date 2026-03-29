@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from typing import Literal
 
 OptionalitySource = Literal[
+    "field_policy_optional_false",
+    "field_policy_optional_true",
     "silver_required_fields",
     "dq_required_validation",
     "dq_not_null_validation",
@@ -35,7 +37,7 @@ FRAMEWORK_MANAGED_FIELDS = frozenset(
 
 
 @dataclass(frozen=True, slots=True)
-class ResolvedOptionality:
+class ResolvedOptionalityResult:
     """Resolved optionality and its source tags for one field."""
 
     optional: bool
@@ -46,6 +48,7 @@ class ResolvedOptionality:
 class ConfigSurfaceOptionalityResolver:
     """Resolve field optionality from current config and DQ semantics."""
 
+    explicit_optional_overrides: dict[str, bool]
     silver_required_fields: frozenset[str]
     dq_required_fields: frozenset[str]
     dq_not_null_fields: frozenset[str]
@@ -56,45 +59,36 @@ class ConfigSurfaceOptionalityResolver:
         cls, domain_config: object
     ) -> ConfigSurfaceOptionalityResolver:
         """Build resolver from current pipeline domain config."""
-        silver_required_fields: set[str] = set()
-        dq_required_fields: set[str] = set()
-        dq_not_null_fields: set[str] = set()
-        dq_key_nonnullable_fields: set[str] = set()
-
-        silver_filters = getattr(domain_config, "silver_filters", None)
-        if silver_filters is not None:
-            silver_required_fields.update(
-                getattr(silver_filters, "required_fields", ())
-            )
-
-        dq_config = getattr(domain_config, "dq", None)
-        if dq_config is not None:
-            for validation in getattr(dq_config, "field_validations", ()):
-                field_name = getattr(validation, "field", None)
-                if not field_name:
-                    continue
-                validation_type = getattr(validation, "validation_type", None)
-                if validation_type == "required":
-                    dq_required_fields.add(field_name)
-                elif validation_type == "not_null":
-                    dq_not_null_fields.add(field_name)
-
-            for key_rule in getattr(dq_config, "key_nullability_rules", ()):
-                if getattr(key_rule, "nullable", True):
-                    continue
-                field_name = getattr(key_rule, "field", None)
-                if field_name:
-                    dq_key_nonnullable_fields.add(field_name)
-
         return cls(
-            silver_required_fields=frozenset(silver_required_fields),
-            dq_required_fields=frozenset(dq_required_fields),
-            dq_not_null_fields=frozenset(dq_not_null_fields),
-            dq_key_nonnullable_fields=frozenset(dq_key_nonnullable_fields),
+            explicit_optional_overrides=_collect_explicit_optional_overrides(
+                domain_config
+            ),
+            silver_required_fields=_collect_silver_required_fields(domain_config),
+            dq_required_fields=_collect_dq_fields(
+                domain_config,
+                validation_type="required",
+            ),
+            dq_not_null_fields=_collect_dq_fields(
+                domain_config,
+                validation_type="not_null",
+            ),
+            dq_key_nonnullable_fields=_collect_nonnullable_key_fields(domain_config),
         )
 
-    def resolve(self, field_name: str) -> ResolvedOptionality:
+    def resolve(self, field_name: str) -> ResolvedOptionalityResult:
         """Resolve effective optionality for one business field."""
+        explicit_override = self.explicit_optional_overrides.get(field_name)
+        if explicit_override is not None:
+            source: OptionalitySource = (
+                "field_policy_optional_true"
+                if explicit_override
+                else "field_policy_optional_false"
+            )
+            return ResolvedOptionalityResult(
+                optional=explicit_override,
+                sources=(source,),
+            )
+
         sources: list[OptionalitySource] = []
         if field_name in self.silver_required_fields:
             sources.append("silver_required_fields")
@@ -106,8 +100,75 @@ class ConfigSurfaceOptionalityResolver:
             sources.append("dq_key_nullability")
 
         if sources:
-            return ResolvedOptionality(optional=False, sources=tuple(sources))
-        return ResolvedOptionality(optional=True, sources=("default_optional",))
+            return ResolvedOptionalityResult(optional=False, sources=tuple(sources))
+        return ResolvedOptionalityResult(optional=True, sources=("default_optional",))
+
+
+# Backward-compatible alias retained for existing imports/tests.
+ResolvedOptionality = ResolvedOptionalityResult
+
+
+def _collect_explicit_optional_overrides(domain_config: object) -> dict[str, bool]:
+    """Collect field-level optionality overrides from domain config."""
+    overrides: dict[str, bool] = {}
+    for policy in getattr(domain_config, "field_policy", ()):
+        field_name = getattr(policy, "field", None)
+        optional = getattr(policy, "optional", None)
+        if (
+            isinstance(field_name, str)
+            and not is_framework_managed_field(field_name)
+            and isinstance(optional, bool)
+        ):
+            overrides[field_name] = optional
+    return overrides
+
+
+def _collect_silver_required_fields(domain_config: object) -> frozenset[str]:
+    """Collect required fields explicitly declared in silver filters."""
+    silver_filters = getattr(domain_config, "silver_filters", None)
+    if silver_filters is None:
+        return frozenset()
+    return frozenset(getattr(silver_filters, "required_fields", ()))
+
+
+def _iter_dq_field_validations(domain_config: object) -> tuple[object, ...]:
+    """Return DQ field validations as a stable iterable."""
+    dq_config = getattr(domain_config, "dq", None)
+    if dq_config is None:
+        return ()
+    return tuple(getattr(dq_config, "field_validations", ()))
+
+
+def _collect_dq_fields(
+    domain_config: object,
+    *,
+    validation_type: str,
+) -> frozenset[str]:
+    """Collect DQ fields for one validation type."""
+    fields: set[str] = set()
+    for validation in _iter_dq_field_validations(domain_config):
+        field_name = getattr(validation, "field", None)
+        if not field_name:
+            continue
+        if getattr(validation, "validation_type", None) == validation_type:
+            fields.add(field_name)
+    return frozenset(fields)
+
+
+def _collect_nonnullable_key_fields(domain_config: object) -> frozenset[str]:
+    """Collect DQ key fields explicitly marked as non-nullable."""
+    dq_config = getattr(domain_config, "dq", None)
+    if dq_config is None:
+        return frozenset()
+
+    fields: set[str] = set()
+    for key_rule in getattr(dq_config, "key_nullability_rules", ()):
+        if getattr(key_rule, "nullable", True):
+            continue
+        field_name = getattr(key_rule, "field", None)
+        if field_name:
+            fields.add(field_name)
+    return frozenset(fields)
 
 
 def is_framework_managed_field(field_name: str) -> bool:
@@ -116,9 +177,10 @@ def is_framework_managed_field(field_name: str) -> bool:
 
 
 __all__ = [
-    "ConfigSurfaceOptionalityResolver",
     "FRAMEWORK_MANAGED_FIELDS",
+    "ConfigSurfaceOptionalityResolver",
     "OptionalitySource",
     "ResolvedOptionality",
+    "ResolvedOptionalityResult",
     "is_framework_managed_field",
 ]

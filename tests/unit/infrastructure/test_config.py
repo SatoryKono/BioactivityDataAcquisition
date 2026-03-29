@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import FieldPolicyConfig, PipelineConfig
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.config import yaml_config_to_domain
 from bioetl.infrastructure.schemas.pipeline_config import DQYamlConfig as YamlDQConfig
 from bioetl.infrastructure.schemas.pipeline_config import (
+    FieldPolicyConfigSchema,
     MaintenanceConfig,
     PipelineYamlConfig,
     SinkLayerConfig,
@@ -51,6 +52,125 @@ def test_yaml_config_to_domain_default_mode():
     domain_config = yaml_config_to_domain(yaml_config)
 
     assert domain_config.table.silver_write_mode is SilverWriteMode.MERGE
+
+
+def test_pipeline_yaml_config_accepts_field_policy() -> None:
+    """field_policy key must parse explicit field-level overrides."""
+    yaml_config = PipelineYamlConfig(
+        pipeline_name="test_pipeline",
+        provider="test",
+        entity_type="entity",
+        business_primary_keys=["id"],
+        silver_table="silver.test",
+        field_policy={
+            "curation_flag": FieldPolicyConfigSchema(optional=False),
+            "notes": FieldPolicyConfigSchema(optional=True),
+        },
+    )
+
+    assert yaml_config.field_policy["curation_flag"].optional is False
+    assert yaml_config.field_policy["notes"].optional is True
+
+
+def test_pipeline_yaml_config_accepts_extended_field_policy() -> None:
+    """Extended field_policy settings must parse from YAML."""
+    yaml_config = PipelineYamlConfig(
+        pipeline_name="test_pipeline",
+        provider="test",
+        entity_type="entity",
+        business_primary_keys=["id"],
+        silver_table="silver.test",
+        field_policy={
+            "reviewed": FieldPolicyConfigSchema(
+                optional=False,
+                empty_as_missing=True,
+                coercion_policy="no_string_coercion",
+                boolean_true_values=["Yes", "ДА"],
+                boolean_false_values=["No", "НЕТ"],
+            ),
+        },
+    )
+
+    reviewed = yaml_config.field_policy["reviewed"]
+
+    assert reviewed.optional is False
+    assert reviewed.empty_as_missing is True
+    assert reviewed.coercion_policy == "no_string_coercion"
+    assert reviewed.boolean_true_values == ["Yes", "ДА"]
+    assert reviewed.boolean_false_values == ["No", "НЕТ"]
+
+
+def test_pipeline_yaml_config_rejects_overlapping_boolean_vocabularies() -> None:
+    """Overlapping boolean vocabularies must be rejected after normalization."""
+    with pytest.raises(ValueError, match="must not overlap"):
+        PipelineYamlConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="entity",
+            business_primary_keys=["id"],
+            silver_table="silver.test",
+            field_policy={
+                "reviewed": FieldPolicyConfigSchema(
+                    boolean_true_values=["Yes"],
+                    boolean_false_values=[" yes "],
+                ),
+            },
+        )
+
+
+def test_yaml_config_to_domain_maps_field_policy() -> None:
+    """Explicit field_policy overrides must be preserved in domain config."""
+    yaml_config = PipelineYamlConfig(
+        pipeline_name="test_pipeline",
+        provider="test",
+        entity_type="entity",
+        business_primary_keys=["id"],
+        silver_table="silver.test",
+        field_policy={
+            "curation_flag": FieldPolicyConfigSchema(optional=False),
+            "notes": FieldPolicyConfigSchema(optional=True),
+        },
+    )
+
+    domain_config = yaml_config_to_domain(yaml_config)
+
+    assert tuple((policy.field, policy.optional) for policy in domain_config.field_policy) == (
+        ("curation_flag", False),
+        ("notes", True),
+    )
+
+
+def test_yaml_config_to_domain_maps_extended_field_policy() -> None:
+    """Extended field_policy values must be normalized into domain config."""
+    yaml_config = PipelineYamlConfig(
+        pipeline_name="test_pipeline",
+        provider="test",
+        entity_type="entity",
+        business_primary_keys=["id"],
+        silver_table="silver.test",
+        field_policy={
+            "reviewed": FieldPolicyConfigSchema(
+                optional=False,
+                empty_as_missing=True,
+                coercion_policy="no_string_coercion",
+                boolean_true_values=["Yes", "ДА", " yes "],
+                boolean_false_values=["No", "НЕТ"],
+            ),
+        },
+    )
+
+    domain_config = yaml_config_to_domain(yaml_config)
+
+    assert domain_config.field_policy == (
+        FieldPolicyConfig(
+            field="reviewed",
+            optional=False,
+            empty_as_missing=True,
+            coercion_policy="no_string_coercion",
+            boolean_true_values=("yes", "да"),
+            boolean_false_values=("no", "нет"),
+        ),
+    )
 
 
 def test_pipeline_yaml_config_accepts_dq_overrides_key() -> None:

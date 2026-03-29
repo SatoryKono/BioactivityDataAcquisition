@@ -6,8 +6,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
-from deltalake.exceptions import DeltaError
-from deltalake.exceptions import CommitFailedError
+from deltalake.exceptions import CommitFailedError, DeltaError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import DeltaTransactionError
@@ -84,6 +83,17 @@ async def _execute_merge_write_request(
         except DeltaTableNotFoundError:
             await write_append(active_request)
             return
+        except CommitFailedError:
+            next_commit_retry_count = await _handle_commit_retry(
+                table_path=active_request.table_path,
+                policy=policy,
+                retry_count=commit_retry_count,
+                emit_final=emit_final,
+                emit_retry=emit_retry,
+            )
+            if next_commit_retry_count is None:
+                raise
+            commit_retry_count = next_commit_retry_count
         except DeltaError as exc:
             if (
                 active_request.merge_schema
@@ -97,17 +107,6 @@ async def _execute_merge_write_request(
                 schema_pre_evolved = True
                 continue
             raise
-        except CommitFailedError:
-            next_commit_retry_count = await _handle_commit_retry(
-                table_path=active_request.table_path,
-                policy=policy,
-                retry_count=commit_retry_count,
-                emit_final=emit_final,
-                emit_retry=emit_retry,
-            )
-            if next_commit_retry_count is None:
-                raise
-            commit_retry_count = next_commit_retry_count
         except _MergeExecutionTimeoutError as exc:
             timeout_retry_count = await _handle_timeout_retry(
                 table_path=active_request.table_path,

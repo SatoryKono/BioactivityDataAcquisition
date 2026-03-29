@@ -26,6 +26,14 @@ from bioetl.application.core._span_helpers import (
     start_current_span,
 )
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
+from bioetl.application.core.runner_execution_flow import (
+    execute_pipeline,
+    prepare_medallion_layers,
+    run_execution_cycle,
+    run_managed_pipeline,
+    run_postrun_phase,
+    validate_infrastructure,
+)
 from bioetl.application.core.runner_flow import (
     emit_pipeline_completion,
     emit_pipeline_start,
@@ -36,14 +44,6 @@ from bioetl.application.core.runner_flow import (
     record_run_started,
     record_stage_completed,
     resolve_execution_offset,
-)
-from bioetl.application.core.runner_execution_flow import (
-    execute_pipeline,
-    prepare_medallion_layers,
-    run_execution_cycle,
-    run_managed_pipeline,
-    run_postrun_phase,
-    validate_infrastructure,
 )
 
 if TYPE_CHECKING:

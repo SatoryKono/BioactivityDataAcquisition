@@ -67,7 +67,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 81
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 83
 
 
 @pytest.mark.unit
@@ -78,6 +78,8 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "control_plane_reads_total" in COUNTERS
     assert "traced_runs_total" in COUNTERS
     assert "checkpoint_compatibility_events_total" in COUNTERS
+    assert "structural_policy_events_total" in COUNTERS
+    assert "structural_policy_shadow_comparisons_total" in COUNTERS
     assert "control_plane_read_duration_seconds" in HISTOGRAMS
     assert "lineage_fragments_emitted_total" in COUNTERS
     assert "lineage_refs_missing_total" in COUNTERS

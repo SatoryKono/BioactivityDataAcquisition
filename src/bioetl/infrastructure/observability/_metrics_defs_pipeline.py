@@ -7,10 +7,10 @@ from prometheus_client import Counter, Histogram
 __all__ = [
     "CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL",
     "COMPOSITE_SOURCE_SELECTION_TOTAL",
-    "CONTROL_PLANE_READ_DURATION_SECONDS",
-    "CONTROL_PLANE_READS_TOTAL",
     "CONTROL_PLANE_LEDGER_APPENDS_TOTAL",
     "CONTROL_PLANE_MANIFEST_WRITES_TOTAL",
+    "CONTROL_PLANE_READS_TOTAL",
+    "CONTROL_PLANE_READ_DURATION_SECONDS",
     "DQ_CONTEXT_BUILD_FAILURES_TOTAL",
     "DQ_REPORT_GENERATED_TOTAL",
     "DQ_REPORT_SKIPPED_TOTAL",
@@ -24,6 +24,8 @@ __all__ = [
     "SHUTDOWN_COMPLETED",
     "SHUTDOWN_INITIATED",
     "STORAGE_OPTIMIZATION_TOTAL",
+    "STRUCTURAL_POLICY_EVENTS_TOTAL",
+    "STRUCTURAL_POLICY_SHADOW_COMPARISONS_TOTAL",
     "TRACED_RUNS_TOTAL",
     "TRANSFORM_DURATION_SECONDS",
     "TRANSFORM_ERRORS_TOTAL",
@@ -59,6 +61,18 @@ TRANSFORM_ERRORS_TOTAL = Counter(
     "bioetl_transform_errors_total",
     "Total transformation errors",
     ["provider", "entity_type", "error_type"],
+)
+
+STRUCTURAL_POLICY_EVENTS_TOTAL = Counter(
+    "bioetl_structural_policy_events_total",
+    "Total structural-policy events emitted by transformer structural enforcement",
+    ["provider", "entity_type", "action"],
+)
+
+STRUCTURAL_POLICY_SHADOW_COMPARISONS_TOTAL = Counter(
+    "bioetl_structural_policy_shadow_comparisons_total",
+    "Total shadow comparisons between structural policy and semantic silver filters",
+    ["provider", "entity_type", "comparison"],
 )
 
 DQ_SOFT_THRESHOLD_EXCEEDED = Counter(

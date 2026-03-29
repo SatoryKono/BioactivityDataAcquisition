@@ -30,6 +30,7 @@ Implements TracingPort (OTel facade).
 from __future__ import annotations
 
 import os
+from contextlib import suppress
 from typing import Any, cast
 from urllib.parse import urlparse
 
@@ -254,11 +255,8 @@ class OpenTelemetryTracer:
         """Force-flush pending spans without shutting down the provider."""
         if self._closed:
             return
-        try:
+        with suppress(RuntimeError, OSError, ValueError, TypeError, AttributeError):
             self._provider.force_flush(timeout_millis=5000)
-        except (RuntimeError, OSError, ValueError, TypeError, AttributeError):  # nosec B110
-            # Best effort - tracing flush must never fail the pipeline.
-            pass
 
     def close(self) -> None:
         """Flush pending spans and shutdown provider. Idempotent."""

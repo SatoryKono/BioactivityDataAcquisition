@@ -52,7 +52,8 @@
 ### 2.2. Схема и Валидация
 Валидация происходит **перед** записью в Silver. Используется библиотека `pandera`.
 
-*   **Контракты**: Определены в `src/bioetl/domain/schemas/{provider}.py`.
+*   **Контракты**: Определены в provider-specific subpackages под `src/bioetl/domain/schemas/`
+    (например, `domain/schemas/chembl/`, `domain/schemas/pubmed/`, `domain/schemas/crossref/`).
 *   **Обработка ошибок валидации**:
     *   **Info/Warning** (например, новые поля или отсутствие необязательных): Данные пропускаются, но метаданные дрейфа схемы логируются.
     *   **Data Quality Error** (нарушение типов, провал check-ов):
@@ -104,9 +105,9 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 При переходе из Silver в Gold выполняется трансформация данных:
 
-*   **Фильтрация полей**: Метод `BaseTransformer.transform_for_gold()` (`base_transformer/base.py`) использует `GOLD_EXCLUDE_FIELDS` для фильтрации полей. В текущей версии `GOLD_EXCLUDE_FIELDS = frozenset()` (пустое множество) — все Silver-поля проходят в Gold без исключения.
+*   **Фильтрация полей**: Public surface `BaseTransformer.transform_for_gold()` использует `GOLD_EXCLUDE_FIELDS` для фильтрации полей. В текущей версии `GOLD_EXCLUDE_FIELDS = frozenset()` (пустое множество) — все Silver-поля проходят в Gold без исключения.
 *   **Плоская структура**: Gold содержит только плоские (scalar) поля для оптимизации аналитических запросов.
-*   **Реализация**: `BaseTransformer.transform_for_gold()` метод с константой `GOLD_EXCLUDE_FIELDS` в `src/bioetl/application/core/base_transformer/base.py`.
+*   **Реализация**: Константа `GOLD_EXCLUDE_FIELDS` объявлена в `src/bioetl/application/core/base_transformer/base.py`, а реализация `transform_for_gold()` вынесена в `src/bioetl/application/core/base_transformer_dependency_helpers_mixin.py`.
 
 #### Пример: ChEMBL Molecule
 

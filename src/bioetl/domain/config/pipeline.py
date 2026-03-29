@@ -7,7 +7,7 @@ configuration for a single ETL pipeline run.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config._converters import freeze_sequences, resolve_loading_strategy
@@ -21,8 +21,36 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 
 __all__ = [
+    "FieldCoercionPolicy",
+    "FieldPolicyConfig",
     "PipelineConfig",
 ]
+
+FieldCoercionPolicy = Literal["default", "no_string_coercion"]
+
+
+@dataclass(frozen=True, slots=True)
+class FieldPolicyConfig:
+    """Explicit field-level policy override for pipeline runtime behavior."""
+
+    field: str
+    optional: bool | None = None
+    empty_as_missing: bool | None = None
+    coercion_policy: FieldCoercionPolicy | None = None
+    boolean_true_values: tuple[str, ...] = ()
+    boolean_false_values: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Validate normalized field-level policy settings."""
+        true_values = {value.strip().lower() for value in self.boolean_true_values}
+        false_values = {value.strip().lower() for value in self.boolean_false_values}
+        overlap = true_values & false_values
+        if overlap:
+            overlap_values = ", ".join(sorted(overlap))
+            raise ValueError(
+                "boolean_true_values and boolean_false_values must not overlap; "
+                f"got: {overlap_values}"
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +85,7 @@ class PipelineConfig:
     checkpoint_interval: int = DEFAULT_CHECKPOINT_INTERVAL
     fields: tuple[str, ...] = ()
     column_groups: tuple[ColumnGroupConfig, ...] = ()
+    field_policy: tuple[FieldPolicyConfig, ...] = ()
 
     # Data Quality
     dq: DQConfig = field(default_factory=DQConfig)
@@ -80,7 +109,7 @@ class PipelineConfig:
         """Convert lists to tuples and validate configuration on creation."""
         freeze_sequences(
             self,
-            ("fields", "column_groups", "transform_steps"),
+            ("fields", "column_groups", "field_policy", "transform_steps"),
         )
         self._resolve_loading_strategy()
         self._validate_config()

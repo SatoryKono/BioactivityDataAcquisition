@@ -6,13 +6,10 @@ from collections.abc import Mapping
 from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING, cast
+from typing import cast
 from uuid import UUID
 
 from bioetl.domain.types import RunID, RunType
-
-if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
 
 __all__ = [
     "RunArtifactRef",

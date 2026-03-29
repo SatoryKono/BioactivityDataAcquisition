@@ -230,9 +230,11 @@ def test_variable_query_sources(dashboard_path):
         provider_query_text = (
             provider_query.get("query", "") if isinstance(provider_query, dict) else ""
         )
-        assert "bioetl_provider_health_status" in provider_query_text, (
+        assert "bioetl_health_check_(success|degraded|failures)_total" in (
+            provider_query_text
+        ), (
             f"Dashboard {dashboard_path.name} 'provider' query must use "
-            "bioetl_provider_health_status"
+            "the union of health-check outcome counters"
         )
         assert "pipeline" not in variable_map, (
             f"Dashboard {dashboard_path.name} must not expose misleading 'pipeline' variable"

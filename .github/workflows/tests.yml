@@ -208,6 +208,15 @@ jobs:
             -   name: Validate silver required_fields coverage (blocking)
                 run: uv run python -m scripts.schema check-required-fields --verbose
 
+            -   name: Validate effective_optional_v1 resolution (blocking)
+                run: uv run python -m scripts.schema audit-optionality --check
+
+            -   name: Check matrix structural contract export freshness (blocking)
+                run: uv run python -m scripts.docs export-matrix-structural-contract --check
+
+            -   name: Check matrix structural workbook sync freshness (blocking)
+                run: uv run python -m scripts.docs sync-matrix-structural-policy --check
+
             -   name: Check generated config schemas are up to date
                 run: uv run python scripts/schema/generate_pipeline_schema.py --check
 

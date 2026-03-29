@@ -39,7 +39,15 @@
 
 **Расположение:** `src/bioetl/application/core/`
 
-Содержит базовые классы и общие компоненты, используемые пайплайнами (44 .py файла + 4 подпакета: `lifecycle/`, `postrun/`, `preflight/`, `base_transformer/`):
+Содержит базовые классы и общие компоненты, используемые пайплайнами. Документ intentionally описывает family-level topology вместо жёстких file counts, потому что `application/core/` активно развивается и сейчас включает несколько устойчивых подпакетов:
+
+- `lifecycle/`
+- `postrun/`
+- `preflight/`
+- `base_transformer/`
+- `batch_execution/`
+- `field_transforms/`
+- `transformer_runtime/`
 
 **Базовые классы:**
 
@@ -69,6 +77,11 @@
 - **`BatchMetricsRecorderService`** (`batch_metrics.py`) — Метрики per batch
 - **`BatchTracingManagerService`** (`batch_tracing.py`) — Tracing span management
 - **`HeartbeatTask`** (`lifecycle/heartbeat.py`) — Heartbeat мониторинг
+
+**Дополнительные application families:**
+
+- **`application/observability/`** — application-level observability facade (`PipelineObserver`, lifecycle events, tracing helpers). Этот пакет описывает, какие execution events испускает application-слой, а concrete metrics/logging adapters остаются в infrastructure.
+- **`application/services/dq/`** — DQ-oriented application services и orchestration seams, используемые postrun/preflight и quality workflows.
 
 Канонические имена для новых imports и документации используют суффикс `Service`.
 Короткие имена `CheckpointManager` и `BatchMetricsRecorder` сохраняются только как

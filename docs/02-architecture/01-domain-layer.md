@@ -184,10 +184,10 @@ portable execution context contract.
 - вычисление и сериализация DQ-метрик,
 - классификация и валидация доменных значений.
 
-### 2.7. Конфигурационные модели (`config/` и `configs/`)
+### 2.7. Конфигурационные модели (`config/`)
 
-- `src/bioetl/domain/config/` — целевой пакет dataclass-конфигов.
-- `src/bioetl/domain/configs/` — backward-compatibility shim (re-export).
+- `src/bioetl/domain/config/` — канонический пакет dataclass-конфигов доменного уровня.
+- Документация domain-слоя должна ссылаться только на физически существующие import surfaces; исторические compatibility shims не описываются как отдельный живой package family, если соответствующий каталог больше не существует.
 
 ### 2.8. Дополнительные поддиректории
 
@@ -195,13 +195,16 @@ portable execution context contract.
 
 - `composite/`
 - `contracts/`
+- `control_plane/`
 - `exceptions/`
 - `filtering/`
+- `lineage/`
 - `mapping/`
 - `models/`
 - `registry/`
 - `schemas/`
 - `transformations/`
+- `types/`
 - `validation/`
 
 ## 3. Глобальные Инварианты Слоя

@@ -16,6 +16,8 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     finalize_cli_execution,
+)
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode

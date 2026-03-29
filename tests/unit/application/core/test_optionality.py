@@ -10,7 +10,12 @@ from bioetl.application.core.base_transformer.optionality import (
     ConfigSurfaceOptionalityResolver,
     is_framework_managed_field,
 )
-from bioetl.domain.config import DQConfig, FieldValidation, KeyNullabilityRule
+from bioetl.domain.config import (
+    DQConfig,
+    FieldPolicyConfig,
+    FieldValidation,
+    KeyNullabilityRule,
+)
 from bioetl.domain.filtering import SilverFilterConfig
 
 
@@ -116,6 +121,50 @@ def test_optionality_resolver_accumulates_multiple_sources() -> None:
         "dq_not_null_validation",
         "dq_key_nullability",
     )
+
+
+@pytest.mark.unit
+def test_optionality_resolver_explicit_optional_false_overrides_default_optional() -> None:
+    resolver = ConfigSurfaceOptionalityResolver.from_domain_config(
+        SimpleNamespace(
+            field_policy=(FieldPolicyConfig(field="curation_flag", optional=False),),
+            silver_filters=SilverFilterConfig(required_fields=()),
+            dq=DQConfig(),
+        )
+    )
+
+    result = resolver.resolve("curation_flag")
+
+    assert result.optional is False
+    assert result.sources == ("field_policy_optional_false",)
+
+
+@pytest.mark.unit
+def test_optionality_resolver_explicit_optional_true_overrides_required_signals() -> None:
+    resolver = ConfigSurfaceOptionalityResolver.from_domain_config(
+        SimpleNamespace(
+            field_policy=(FieldPolicyConfig(field="activity_id", optional=True),),
+            silver_filters=SilverFilterConfig(required_fields=("activity_id",)),
+            dq=DQConfig(
+                field_validations=(
+                    FieldValidation(field="activity_id", validation_type="required"),
+                    FieldValidation(field="activity_id", validation_type="not_null"),
+                ),
+                key_nullability_rules=(
+                    KeyNullabilityRule(
+                        field="activity_id",
+                        key_type="merge",
+                        nullable=False,
+                    ),
+                ),
+            ),
+        )
+    )
+
+    result = resolver.resolve("activity_id")
+
+    assert result.optional is True
+    assert result.sources == ("field_policy_optional_true",)
 
 
 @pytest.mark.unit

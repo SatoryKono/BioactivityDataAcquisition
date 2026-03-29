@@ -43,6 +43,7 @@ from bioetl.infrastructure.config.config_ci_contract import (
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
+from scripts.schema import audit_effective_optionality as optionality_audit_script
 from scripts.schema import check_config_invariants as invariant_script
 from scripts.schema import check_required_filter_fields as required_filter_script
 from scripts.schema.validate_pipeline_configs import _canonical_script
@@ -369,6 +370,12 @@ class TestConfigContractSourceOfTruth:
         test_paths = _collect_pipeline_configs()
         assert script_paths == test_paths
 
+    def test_optionality_audit_script_targets_real_entity_configs(self) -> None:
+        """Optionality audit gate must inspect the same entity config set."""
+        script_paths = optionality_audit_script._entity_configs()
+        test_paths = _collect_pipeline_configs()
+        assert script_paths == test_paths
+
 
 # ---------------------------------------------------------------------------
 # INV-CFG-007: Explicit YAML requiredness must be mirrored in silver filters
@@ -378,6 +385,19 @@ class TestSilverRequiredFieldsCoverage:
 
     def test_explicit_required_fields_are_covered_by_silver_filters(self) -> None:
         violations = required_filter_script.collect_required_field_coverage_violations(
+            _collect_pipeline_configs()
+        )
+        assert not violations, "\n".join(violations)
+
+
+# ---------------------------------------------------------------------------
+# INV-CFG-008: effective_optional_v1 must match current config surface
+# ---------------------------------------------------------------------------
+class TestEffectiveOptionalityResolution:
+    """INV-CFG-008: resolved optionality mirrors current YAML config signals."""
+
+    def test_resolved_optionality_matches_current_config_surface(self) -> None:
+        violations = optionality_audit_script.collect_optionality_resolution_violations(
             _collect_pipeline_configs()
         )
         assert not violations, "\n".join(violations)

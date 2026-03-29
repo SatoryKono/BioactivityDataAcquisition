@@ -11,9 +11,8 @@ from bioetl.application.core.preflight.medallion_validator_runtime import (
     validate_path_uniqueness,
     validate_single_write_mode,
 )
-from bioetl.domain.exceptions import PolicyViolationError
-from bioetl.domain.medallion import Layer, MedallionPolicy, WriteMode, WriteModePolicy
-from bioetl.domain.types import ConfigValidationError, RunType
+from bioetl.domain.medallion import Layer, MedallionPolicy, WriteModePolicy
+from bioetl.domain.types import ConfigValidationError
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig

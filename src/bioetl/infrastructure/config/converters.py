@@ -11,7 +11,12 @@ __all__ = ["dq_overrides_to_domain", "yaml_config_to_domain"]
 from typing import Literal
 
 from bioetl.domain.composite.config import ColumnGroupConfig
-from bioetl.domain.config import DQConfig, PipelineConfig, TableConfig
+from bioetl.domain.config import (
+    DQConfig,
+    FieldPolicyConfig,
+    PipelineConfig,
+    TableConfig,
+)
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -84,6 +89,38 @@ def dq_overrides_to_domain(yaml_config: PipelineYamlConfig) -> DQConfig:
     return yaml_config.dq_overrides.to_domain()
 
 
+def _build_field_policy(
+    yaml_config: PipelineYamlConfig,
+) -> tuple[FieldPolicyConfig, ...]:
+    """Build explicit field-level policy overrides from YAML config."""
+    def _normalize_boolean_vocabulary(values: list[str]) -> tuple[str, ...]:
+        normalized: list[str] = []
+        seen: set[str] = set()
+        for value in values:
+            token = value.strip().lower()
+            if not token or token in seen:
+                continue
+            seen.add(token)
+            normalized.append(token)
+        return tuple(normalized)
+
+    return tuple(
+        FieldPolicyConfig(
+            field=field_name,
+            optional=policy.optional,
+            empty_as_missing=policy.empty_as_missing,
+            coercion_policy=policy.coercion_policy,
+            boolean_true_values=_normalize_boolean_vocabulary(
+                policy.boolean_true_values
+            ),
+            boolean_false_values=_normalize_boolean_vocabulary(
+                policy.boolean_false_values
+            ),
+        )
+        for field_name, policy in sorted(yaml_config.field_policy.items())
+    )
+
+
 def yaml_config_to_domain(
     yaml_config: PipelineYamlConfig,
     resolved_dq_config: DQConfig | None = None,
@@ -104,6 +141,7 @@ def yaml_config_to_domain(
     dq_config = resolved_dq_config or dq_overrides_to_domain(yaml_config)
     transform_version = yaml_config.transform.version
     transform_steps = tuple(yaml_config.transform.steps)
+    field_policy = _build_field_policy(yaml_config)
     column_groups = tuple(
         ColumnGroupConfig(**group.model_dump()) for group in yaml_config.column_groups
     )
@@ -137,6 +175,7 @@ def yaml_config_to_domain(
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=tuple(source_fields),
         column_groups=column_groups,
+        field_policy=field_policy,
         dq=dq_config,
         transform_version=transform_version,
         transform_steps=transform_steps,

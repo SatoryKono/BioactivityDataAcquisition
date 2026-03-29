@@ -12,7 +12,6 @@ from bioetl.application.composite.checkpoint.persistence_service import (
     CompositeCheckpointPersistenceService,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
-from bioetl.domain.exceptions import StorageError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
