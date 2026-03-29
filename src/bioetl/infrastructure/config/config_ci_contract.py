@@ -41,6 +41,7 @@ PIPELINE_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "filter_batch_size",
         "checkpoint_interval",
         "business_primary_keys",
+        "field_policy",
         "technical_primary_key",
         "silver_table",
         "gold_table",

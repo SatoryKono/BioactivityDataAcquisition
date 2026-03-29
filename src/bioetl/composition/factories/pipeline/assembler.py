@@ -54,15 +54,11 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
-# Backward-compatible helper alias retained for unit tests and historical imports.
 _extract_entity_type = extract_entity_type
-_extract_dq_configs = extract_dq_configs
-_assemble_runner_impl = assemble_runner_impl
+_extract_dq_configs, _assemble_runner_impl = extract_dq_configs, assemble_runner_impl
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
-    """Build pipeline components and runners for a provider-specific pipeline."""
-
     def __init__(
         self,
         pipeline_name: str,
@@ -114,7 +110,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> BaseTransformer | None:
-        """Create the configured transformer instance for this pipeline."""
         return create_transformer_instance(
             transformer_class=self.transformer_class,
             provider=self.provider,
@@ -138,7 +133,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
-        """Create the data source adapter for the configured provider."""
         return create_factory_data_source(
             create_data_source_fn=self._create_data_source,
             settings=settings,
@@ -157,7 +151,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
-        """Build the service bundle required by the pipeline implementation."""
         return build_factory_services(
             factory_context=self._build_factory_context(),
             request=_BuildFactoryServicesRequest(
@@ -187,7 +180,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         metrics: MetricsPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
-        """Instantiate the pipeline using the assembled runtime services."""
         return cast(
             TPipeline,
             create_pipeline_instance_with_services(
@@ -225,7 +217,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
-        """Create the fully assembled runner for the configured pipeline."""
         return create_factory_runner(
             pipeline_name=self.pipeline_name,
             silver_schema=self.silver_schema,
@@ -284,13 +275,5 @@ def assemble_runner(
         yaml_config=yaml_config,
         dq_configs_extractor=_extract_dq_configs,
     )
-
-
-__all__ = [
-    "GenericPipelineFactory",
-    "_assemble_runner_impl",
-    "_extract_dq_configs",
-    "_extract_entity_type",
-    "assemble_runner",
-    "create_pipeline_factory",
-]
+__all__ = ["GenericPipelineFactory", "_assemble_runner_impl", "_extract_dq_configs"]
+__all__ += ["_extract_entity_type", "assemble_runner", "create_pipeline_factory"]

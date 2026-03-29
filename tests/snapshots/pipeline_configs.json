@@ -445,7 +445,22 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "molecule",
-    "field_policy": [],
+    "field_policy": [
+      {
+        "boolean_false_values": [
+          "false",
+          "non_therapeutic"
+        ],
+        "boolean_true_values": [
+          "true",
+          "therapeutic"
+        ],
+        "coercion_policy": null,
+        "empty_as_missing": null,
+        "field": "therapeutic_flag",
+        "optional": null
+      }
+    ],
     "fields": [],
     "gold_filters": {
       "column_filters": [
