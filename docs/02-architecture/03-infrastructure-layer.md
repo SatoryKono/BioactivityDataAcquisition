@@ -18,6 +18,19 @@
 
 ## 2. Ключевые Компоненты
 
+### 2.0. Additional Infrastructure Families
+
+Помимо adapters/storage/validation, текущий infrastructure-слой включает несколько
+устойчивых package families, которые полезно явно учитывать при навигации по коду:
+
+- `control_plane/` — file-backed stores для run manifest, run ledger, lineage и effective-config artifacts.
+- `adr/` — ADR-related infrastructure helpers и read models.
+- `audit/` — audit/report support utilities.
+- `export/` — export adapters и supporting services для Gold-facing outputs.
+- `serialization/` — canonical serialization helpers и schema-aligned payload shaping.
+- `system/` — system/runtime environment helpers.
+- `time/` — time abstractions и runtime clock helpers.
+
 ### 2.1. `adapters/` — Адаптеры к Внешним API
 
 **Расположение:** `src/bioetl/infrastructure/adapters/`

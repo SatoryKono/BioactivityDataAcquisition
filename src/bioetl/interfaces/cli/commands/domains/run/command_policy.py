@@ -8,7 +8,6 @@ from typing import NoReturn, Protocol
 import click
 
 from bioetl.application.services import (
-    PipelineNotFoundError,
     PipelineRunResult,
     RunResult,
 )

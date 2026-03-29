@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
-from datetime import datetime
-from enum import Enum
-
 from bioetl.domain.services.preflight_governance_reporting import (
     build_validation_summary,
+)
+from bioetl.domain.services._preflight_governance_types import (
+    GovernancePolicy,
+    PreflightGovernanceConfig,
+)
+from bioetl.domain.services._preflight_governance_helpers import (
+    BLOCKING_POLICIES,
+    apply_overrides_to_issues,
+    build_governance_metadata,
+    format_issue,
+    rebuild_validation_result,
+    resolve_policy_block_state,
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import (
@@ -15,40 +23,7 @@ from bioetl.domain.types.validation_result import (
     ValidationIssue,
     ValidationResult,
 )
-from bioetl.domain.types.validation_severity import (
-    ValidationLayer,
-    ValidationSeverity,
-)
-
-
-class GovernancePolicy(Enum):
-    """Execution governance policies."""
-
-    BLOCK_ON_ANY_ISSUE = "block_on_any_issue"
-    BLOCK_ON_BLOCKERS_ONLY = "block_on_blockers_only"
-    WARNING_ONLY = "warning_only"
-    CI_STRICT = "ci_strict"
-    CI_RELAXED = "ci_relaxed"
-
-
-_BLOCKING_POLICIES: frozenset[GovernancePolicy] = frozenset(
-    {
-        GovernancePolicy.BLOCK_ON_ANY_ISSUE,
-        GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY,
-        GovernancePolicy.CI_STRICT,
-        GovernancePolicy.CI_RELAXED,
-    }
-)
-
-
-@dataclass(frozen=True)
-class PreflightGovernanceConfig:
-    """Configuration for preflight governance."""
-
-    policy: GovernancePolicy
-    ci_integration: bool = False
-    fail_fast: bool = True
-    issue_code_overrides: dict[str, ValidationSeverity] | None = None
+from bioetl.domain.types.validation_severity import ValidationLayer, ValidationSeverity
 
 
 class PreflightGovernanceService:
@@ -116,10 +91,10 @@ class PreflightGovernanceService:
         """Apply overrides to runtime-guard result when present."""
         if runtime_result is None:
             return None
-        return self._rebuild_validation_result(
+        return rebuild_validation_result(
             runtime_result,
-            ValidationLayer.RUNTIME_GUARD,
-            config,
+            layer=ValidationLayer.RUNTIME_GUARD,
+            config=config,
         )
 
     def _rebuild_validation_result(
@@ -129,11 +104,10 @@ class PreflightGovernanceService:
         config: PreflightGovernanceConfig,
     ) -> ValidationResult:
         """Rebuild one validation result after applying issue overrides."""
-        return ValidationResult(
-            issues=self._apply_overrides_to_issues(result.issues, config),
-            validation_layer=layer,
-            execution_context=result.execution_context,
-            timestamp=result.timestamp,
+        return rebuild_validation_result(
+            result,
+            layer=layer,
+            config=config,
         )
 
     def _apply_overrides_to_issues(
@@ -142,25 +116,7 @@ class PreflightGovernanceService:
         config: PreflightGovernanceConfig,
     ) -> list[ValidationIssue]:
         """Apply severity overrides to individual issues."""
-        if not config.issue_code_overrides:
-            return issues
-
-        overridden_issues: list[ValidationIssue] = []
-        for issue in issues:
-            override = config.issue_code_overrides.get(issue.code.value)
-            overridden_issues.append(self._apply_issue_override(issue, override))
-
-        return overridden_issues
-
-    def _apply_issue_override(
-        self,
-        issue: ValidationIssue,
-        override: ValidationSeverity | None,
-    ) -> ValidationIssue:
-        """Return issue with overridden severity when configuration requires it."""
-        if override is None:
-            return issue
-        return replace(issue, severity=override)
+        return apply_overrides_to_issues(issues, config)
 
     def _determine_execution_decision(
         self,
@@ -200,25 +156,11 @@ class PreflightGovernanceService:
         policy: GovernancePolicy,
     ) -> tuple[bool, str]:
         """Resolve whether a policy blocks execution and why."""
-        checks: dict[GovernancePolicy, tuple[bool, str]] = {
-            GovernancePolicy.BLOCK_ON_ANY_ISSUE: (
-                report.has_any_issues(),
-                "any_issue_found",
-            ),
-            GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY: (
-                self._has_effective_blockers(report),
-                "blocker_issues_found",
-            ),
-            GovernancePolicy.CI_STRICT: (
-                report.has_any_issues(),
-                "ci_strict_mode_violation",
-            ),
-            GovernancePolicy.CI_RELAXED: (
-                self._has_effective_blockers(report),
-                "ci_relaxed_blockers_found",
-            ),
-        }
-        return checks.get(policy, (False, "no_blocking_issues"))
+        return resolve_policy_block_state(
+            report_has_any_issues=report.has_any_issues(),
+            has_effective_blockers=self._has_effective_blockers(report),
+            policy=policy,
+        )
 
     def _generate_governance_report(
         self,
@@ -239,12 +181,7 @@ class PreflightGovernanceService:
     @staticmethod
     def _build_governance_metadata(config: PreflightGovernanceConfig) -> JsonDict:
         """Build governance metadata for reporting."""
-        return {
-            "policy": config.policy.value,
-            "ci_integration": config.ci_integration,
-            "fail_fast": config.fail_fast,
-            "execution_timestamp": datetime.now().isoformat(),
-        }
+        return build_governance_metadata(config)
 
     def _format_detailed_issues(
         self,
@@ -261,16 +198,11 @@ class PreflightGovernanceService:
         config: PreflightGovernanceConfig,
     ) -> JsonDict:
         """Format one issue for governance output."""
-        return {
-            "code": issue.code.value,
-            "severity": issue.severity.value,
-            "layer": issue.layer.value,
-            "message": issue.message,
-            "details": issue.details,
-            "location": issue.location or "",
-            "is_blocker": self._is_effective_blocker(issue),
-            "governance_impact": self._determine_governance_impact(issue, config),
-        }
+        return format_issue(
+            issue=issue,
+            config=config,
+            is_effective_blocker=self._is_effective_blocker(issue),
+        )
 
     def _is_effective_blocker(self, issue: ValidationIssue) -> bool:
         """Determine if an issue is effectively a blocker after considering overrides."""
@@ -285,7 +217,7 @@ class PreflightGovernanceService:
     ) -> str:
         """Determine governance impact of an issue."""
         if issue.is_blocker():
-            if config.policy in _BLOCKING_POLICIES:
+            if config.policy in BLOCKING_POLICIES:
                 return "execution_blocker"
             return "warning_with_blocker_severity"
         return "informational"

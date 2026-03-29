@@ -42,7 +42,11 @@ from bioetl.domain.config.base_provider import (
 )
 from bioetl.domain.config.dq import DQConfig, DQReportConfig, KeyNullabilityRule
 from bioetl.domain.config.memory import MemoryConfig
-from bioetl.domain.config.pipeline import PipelineConfig
+from bioetl.domain.config.pipeline import (
+    FieldCoercionPolicy,
+    FieldPolicyConfig,
+    PipelineConfig,
+)
 from bioetl.domain.config.runtime import RuntimeConfig
 from bioetl.domain.config.table import TableConfig
 from bioetl.domain.config.validation import (
@@ -61,6 +65,8 @@ __all__ = [
     "CrossFieldValidation",
     "DQConfig",
     "DQReportConfig",
+    "FieldCoercionPolicy",
+    "FieldPolicyConfig",
     "FieldValidation",
     "KeyNullabilityRule",
     "MemoryConfig",

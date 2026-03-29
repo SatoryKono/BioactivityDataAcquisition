@@ -15,6 +15,7 @@ ALLOWED_FIELDS = {
     "pii_hasher",
     "data_normalizer",
     "contract_policy",
+    "structural_policy",
 }
 
 

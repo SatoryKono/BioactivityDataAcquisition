@@ -1,0 +1,70 @@
+"""Runner construction helpers for pipeline factory assembly."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.lifecycle.checkpoint_manager import (
+    CheckpointManagerService,
+)
+from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+from bioetl.application.core.postrun.service import PostrunService
+from bioetl.application.core.preflight.service import PreflightService
+from bioetl.application.core.runner import (
+    PipelineRunner,
+    PipelineRunnerDependencies,
+)
+from bioetl.application.observability.observer import PipelineObserver
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
+from bioetl.composition.observability import ObservabilityBundle
+
+
+@dataclass(frozen=True, slots=True)
+class RunnerAssemblyParts:
+    """Concrete runner collaborators assembled before PipelineRunner creation."""
+
+    checkpoint_manager: CheckpointManagerService
+    lifecycle_service: MedallionLifecycleService
+    lock_manager: LockCoordinator
+    preflight_service: PreflightService
+    postrun_service: PostrunService
+    observer: PipelineObserver
+    batch_executor: BatchExecutor
+
+
+def create_pipeline_runner(
+    *,
+    pipeline: BasePipeline,
+    observability: ObservabilityBundle,
+    executor: BatchExecutor,
+    checkpoint_manager: CheckpointManagerService,
+    lock_manager: LockCoordinator,
+    preflight_service: PreflightService,
+    postrun_service: PostrunService,
+    lifecycle_service: MedallionLifecycleService,
+    observer: PipelineObserver,
+) -> PipelineRunner:
+    """Build the fully wired runtime PipelineRunner instance."""
+    resolved_tracer = resolve_tracer(observability.tracer)
+    dependencies = PipelineRunnerDependencies(
+        executor=executor,
+        checkpoint_manager=checkpoint_manager,
+        lock_manager=lock_manager,
+        preflight=preflight_service,
+        postrun=postrun_service,
+        lifecycle_service=lifecycle_service,
+        observer=observer,
+        shutdown_signal=pipeline.shutdown_signal,
+    )
+    return PipelineRunner(
+        config=pipeline.config,
+        runtime=pipeline.runtime,
+        services=pipeline.services,
+        context=pipeline.context,
+        dependencies=dependencies,
+        pipeline=pipeline,
+        tracer=resolved_tracer,
+    )

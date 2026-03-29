@@ -10,6 +10,7 @@ Commands:
     check-drift        Check documentation drift (ports, classes, runtime mirrors, freshness)
     check-docstrings   Check docstring coverage
     check-kpi          Report documentation KPI metrics
+    export-matrix-structural-contract Export canonical runtime structural contract for ChEMBL matrix sync
     build-matrix-dicts Generate ChEMBL matrix inventory and sheet dictionaries
     filter-matrix-rows Remove rows from ChEMBL matrix workbook by column value
     normalize-matrix-values Normalize controlled values in ChEMBL matrix workbook
@@ -30,6 +31,7 @@ COMMANDS: dict[str, str] = {
     "check-drift": "check_doc_drift.py",
     "check-docstrings": "check_docstring_coverage.py",
     "check-kpi": "report_docs_kpi.py",
+    "export-matrix-structural-contract": "export_chembl_matrix_structural_contract.py",
     "build-matrix-dicts": "generate_chembl_matrix_dictionaries.py",
     "filter-matrix-rows": "filter_chembl_matrix_rows.py",
     "normalize-matrix-values": "normalize_chembl_matrix_workbook.py",

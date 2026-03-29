@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import json
+from dataclasses import dataclass, field
 from uuid import UUID
 
 from bioetl.application.services.run_manifest_diagnostics import (

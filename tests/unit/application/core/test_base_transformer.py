@@ -49,7 +49,7 @@ class _FakeStructuralPolicy:
         self.outcome = outcome
         self.calls: list[dict[str, object]] = []
 
-    def apply(self, record):  # noqa: ANN001 - test double
+    def apply(self, record):
         self.calls.append(dict(record))
         return self.outcome
 
@@ -358,6 +358,87 @@ class TestTemplateMethodPattern:
 
         assert result == {"id": "123", "value": "test", "must_exist": 1}
         assert structural_policy.calls == [{"id": "123", "value": "test"}]
+
+    @pytest.mark.asyncio
+    async def test_transform_records_shadow_comparison_for_semantic_reject(
+        self, mock_context: PipelineContext
+    ) -> None:
+        metrics = MagicMock()
+        structural_policy = _FakeStructuralPolicy(
+            StructuralPolicyOutcome(record={"id": "123", "value": "test"})
+        )
+        transformer = ConcreteTransformer(
+            provider="test",
+            silver_filters=SilverFilterConfig(required_fields=("must_exist",)),
+            dependencies=build_test_transformer_dependencies(
+                structural_policy=structural_policy,
+                metrics=metrics,
+            ),
+        )
+
+        with pytest.raises(FilteredOutError):
+            await transformer.transform(
+                mock_context,
+                {"id": "123", "value": "test"},
+                index=0,
+            )
+
+        metrics.increment_counter.assert_any_call(
+            "structural_policy_shadow_comparisons_total",
+            1,
+            labels={
+                "provider": "test",
+                "entity_type": "unknown",
+                "comparison": "structural_pass_semantic_reject",
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def test_transform_records_structural_event_metrics_for_nullable_remediation(
+        self, mock_context: PipelineContext
+    ) -> None:
+        metrics = MagicMock()
+        structural_policy = _FakeStructuralPolicy(
+            StructuralPolicyOutcome(
+                record={
+                    "id": "123",
+                    "value": None,
+                    "_dq_warn": True,
+                    "_dq_error": False,
+                },
+                events=(
+                    StructuralPolicyEvent(
+                        level="warning",
+                        event="silver_structural_type_coerced_to_null",
+                        details={"field": "value"},
+                    ),
+                ),
+            )
+        )
+        transformer = ConcreteTransformer(
+            provider="test",
+            dependencies=build_test_transformer_dependencies(
+                structural_policy=structural_policy,
+                metrics=metrics,
+            ),
+        )
+
+        result = await transformer.transform(
+            mock_context,
+            {"id": "123", "value": "bad-float"},
+            index=0,
+        )
+
+        assert result is not None
+        metrics.increment_counter.assert_any_call(
+            "structural_policy_events_total",
+            1,
+            labels={
+                "provider": "test",
+                "entity_type": "unknown",
+                "action": "nullable_type_to_null",
+            },
+        )
 
     @pytest.mark.asyncio
     async def test_transform_raises_filtered_out_error_from_structural_policy(

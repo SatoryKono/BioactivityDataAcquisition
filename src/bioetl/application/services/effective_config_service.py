@@ -8,7 +8,7 @@ import json
 import uuid
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
@@ -24,9 +24,6 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
-
-if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
 
 
 def _dataclass_to_dict(value: object) -> JsonDict | None:

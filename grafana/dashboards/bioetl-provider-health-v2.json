@@ -460,7 +460,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_provider_health_status, provider)",
+        "definition": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
         "hide": 0,
         "includeAll": true,
         "label": "Provider",
@@ -468,7 +468,7 @@
         "name": "provider",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_provider_health_status, provider)",
+          "query": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

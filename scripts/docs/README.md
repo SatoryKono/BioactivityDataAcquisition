@@ -17,6 +17,7 @@ python -m scripts.docs <command> [args...]
 | `check-drift` | `check_doc_drift.py` | Check documentation drift (ports, classes, runtime mirrors, freshness) |
 | `check-docstrings` | `check_docstring_coverage.py` | Check docstring coverage |
 | `check-kpi` | `report_docs_kpi.py` | Report documentation KPI metrics |
+| `export-matrix-structural-contract` | `export_chembl_matrix_structural_contract.py` | Export the canonical runtime structural contract for ChEMBL workbook sync |
 | `build-matrix-dicts` | `generate_chembl_matrix_dictionaries.py` | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook |
 | `filter-matrix-rows` | `filter_chembl_matrix_rows.py` | Remove rows from the canonical ChEMBL matrix workbook by column value |
 | `normalize-matrix-values` | `normalize_chembl_matrix_workbook.py` | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook |
@@ -34,10 +35,11 @@ python -m scripts.docs <command> [args...]
 | `check-drift` | After renaming classes, moving modules, changing ports, or updating active runtime docs; detects doc/code desync, runtime mirror drift, and freshness conflicts | CI gate (`architecture.yml`) |
 | `check-docstrings` | After adding new modules/classes/functions; enforces coverage thresholds (modules 100%, classes 95%, functions 90%) | CI gate (`architecture.yml`) |
 | `check-kpi` | Weekly documentation health tracking; generates coverage, links, and drift metrics | Scheduled weekly (Monday 4:00 UTC) |
+| `export-matrix-structural-contract` | After changing runtime structural policy, optionality precedence, explicit `field_policy` overlays, or schema-derived contract semantics; refreshes the canonical export consumed by workbook sync | Manual, after structural contract changes; CI freshness gate via `--check` |
 | `build-matrix-dicts` | After any workbook edit; refreshes inventory and dictionary artifacts for the canonical matrix | Manual, after workbook changes |
 | `filter-matrix-rows` | When removing obsolete rows such as `not_mapped` fields from the canonical matrix | Manual, on-demand |
 | `normalize-matrix-values` | After any workbook edit that touches controlled vocabularies; normalizes values in-place for the canonical matrix | Manual, after workbook changes |
-| `sync-matrix-structural-policy` | After changing runtime structural Silver policy semantics; updates workbook policy columns from current `Type`/`Nullable`/`Required` contracts | Manual, after structural policy changes |
+| `sync-matrix-structural-policy` | After changing runtime structural Silver policy semantics or workbook-relevant `field_policy` overlays; updates workbook policy columns from the canonical runtime contract export | Manual, after structural policy changes; CI freshness gate via `--check` |
 | `fix-links-auto` | After bulk renames or restructuring; auto-rewrites broken doc links | Manual, after refactoring |
 | `fix-links-explicit` | When specific broken links need targeted fixes with explicit rules | Manual, on-demand |
 | `fix-link-warnings` | After `check-links` reports warnings; fixes link format issues in specified files | Manual, on-demand |
@@ -54,31 +56,48 @@ Older `v2`-`v11` files are historical snapshots only and should not be edited.
 ## Canonical Workbook Update Workflow
 
 1. Edit only [chembl_pipeline_silver_matrices_v12.xlsx](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/chembl_pipeline_silver_matrices_v12.xlsx).
-2. If runtime structural Silver policy changed, sync the workbook policy columns first:
+2. Export the canonical runtime structural contract:
+
+```bash
+uv run python -m scripts.docs export-matrix-structural-contract
+uv run python -m scripts.docs export-matrix-structural-contract --check
+```
+
+3. If runtime structural Silver policy changed, sync the workbook policy columns from that export:
 
 ```bash
 uv run python -m scripts.docs sync-matrix-structural-policy
+uv run python -m scripts.docs sync-matrix-structural-policy --check
 ```
 
-3. Normalize controlled vocabularies in place:
+4. Normalize controlled vocabularies in place:
 
 ```bash
 uv run python -m scripts.docs normalize-matrix-values
 ```
 
-4. Rebuild dictionary artifacts from the canonical workbook:
+5. Rebuild dictionary artifacts from the canonical workbook:
 
 ```bash
 uv run python -m scripts.docs build-matrix-dicts
 ```
 
-5. If the change intentionally removes obsolete rows, apply the row filter in place:
+6. If the change intentionally removes obsolete rows, apply the row filter in place:
 
 ```bash
 uv run python -m scripts.docs filter-matrix-rows
 ```
 
-6. Review the regenerated YAML artifacts in [docs/reports/dictionaries](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/dictionaries).
+7. Review the runtime contract export and regenerated YAML artifacts:
+
+- [docs/reports/generated/chembl_matrix_structural_contract_v1.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/generated/chembl_matrix_structural_contract_v1.json)
+- [docs/reports/dictionaries](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/dictionaries)
+
+The exported contract now includes runtime-resolved `field_policy` overlays such as:
+- `empty_as_missing`
+- `coercion_policy`
+- `boolean_true_values`
+- `boolean_false_values`
 
 ## Other Files
 

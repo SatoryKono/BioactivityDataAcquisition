@@ -78,6 +78,9 @@
           "bao_format",
           "bao_label",
           "journal",
+          "publication_doi",
+          "publication_pmid",
+          "publication_pmc_id",
           "publication_year"
         ],
         "name": "business",
@@ -127,6 +130,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "activity",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [
@@ -441,6 +445,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "molecule",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [
@@ -515,7 +520,8 @@
       "list_length_filters": [],
       "range_filters": [],
       "required_fields": [
-        "molecule_id"
+        "molecule_id",
+        "molecule_type"
       ]
     },
     "table": {
@@ -611,6 +617,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication_term",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [
@@ -651,7 +658,11 @@
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "publication_id",
+        "term",
+        "term_type"
+      ]
     },
     "table": {
       "gold_table": "chembl.publication_term",
@@ -957,6 +968,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [],
@@ -995,7 +1007,10 @@
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "doi",
+        "title"
+      ]
     },
     "table": {
       "gold_table": "crossref.publication",
@@ -1347,6 +1362,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [],
@@ -1385,7 +1401,10 @@
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "openalex_id",
+        "title"
+      ]
     },
     "table": {
       "gold_table": "openalex.publication",
@@ -1515,6 +1534,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "compound",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [],
@@ -1545,7 +1565,10 @@
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "batch_date",
+        "molecule_id"
+      ]
     },
     "table": {
       "gold_table": "pubchem.compound",
@@ -1881,6 +1904,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [],
@@ -1919,7 +1943,10 @@
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "pmid",
+        "title"
+      ]
     },
     "table": {
       "gold_table": "pubmed.publication",
@@ -2201,6 +2228,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [],
@@ -2239,7 +2267,10 @@
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "paper_id",
+        "title"
+      ]
     },
     "table": {
       "gold_table": "semanticscholar.publication",
@@ -2343,6 +2374,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "idmapping",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [],
@@ -2373,7 +2405,10 @@
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "target_id",
+        "mapping_status"
+      ]
     },
     "table": {
       "gold_table": "uniprot.idmapping",
@@ -2545,6 +2580,7 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "protein",
+    "field_policy": [],
     "fields": [],
     "gold_filters": {
       "column_filters": [
@@ -2584,7 +2620,10 @@
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "accession",
+        "organism"
+      ]
     },
     "table": {
       "gold_table": "uniprot.protein",

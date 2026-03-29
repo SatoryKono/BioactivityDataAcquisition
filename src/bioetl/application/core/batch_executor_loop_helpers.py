@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
 from dataclasses import dataclass, field
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Awaitable, Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.batch_executor_loop_flow import (
     build_start_index as build_start_index_from_flow,

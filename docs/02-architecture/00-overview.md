@@ -13,8 +13,8 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 | **Domain**         | [01-domain-layer.md](01-domain-layer.md)                 | Ports, Models, Schemas, Pure logic  |
 | **Application**    | [02-application-layer.md](02-application-layer.md)       | Pipelines, Use Cases, Orchestration |
 | **Infrastructure** | [03-infrastructure-layer.md](03-infrastructure-layer.md) | Adapters, HTTP clients, Storage     |
-| **Interfaces**     | [04-interfaces-layer.md](04-interfaces-layer.md)         | CLI, API endpoints                  |
-| **Composition**    | [05-composition-layer.md](05-composition-layer.md)       | DI container, Bootstrap, Factories  |
+| **Interfaces**     | [04-interfaces-layer.md](04-interfaces-layer.md)         | CLI, HTTP health server, orchestration entry surfaces |
+| **Composition**    | [05-composition-layer.md](05-composition-layer.md)       | DI wiring, bootstrap, factories, runtime builders |
 
 ### System Views
 
@@ -106,7 +106,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 
 1. **Dependency Injection**: Dependencies injected via constructor
 1. **Ports & Adapters**: Interfaces in `domain/ports/`, implementations in `infrastructure/`
-1. **Composition Root**: Single assembly point in `composition/bootstrap/`
+1. **Composition Root**: Assembly layer centered on `composition/` with `bootstrap/`, `factories/`, `providers/`, `runtime_builders/`, and service APIs
 1. **Medallion Architecture**: Bronze (raw) → Silver (normalized) → Gold (curated)
 1. **Composite Pipeline** (ADR-026): Multi-source data enrichment with seed → enrich (fan-out) → merge workflow
 

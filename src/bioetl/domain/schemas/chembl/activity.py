@@ -4,6 +4,7 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 """
 
 from __future__ import annotations
+
 import pandera.pandas as pa
 from pandera.typing import Series
 

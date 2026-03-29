@@ -8,6 +8,7 @@ Usage:
 Commands:
     check-invariants       Validate config CI invariants (naming, schemas, auth, keys)
     check-required-fields  Validate silver required_fields cover YAML requiredness
+    audit-optionality      Audit/check effective_optional_v1 resolved from config surface
     check-config-paths     Check for legacy dq/filter config path references
     generate-pipeline      Generate pipeline JSON schema
     generate-artifacts     Generate schema artifacts
@@ -25,6 +26,7 @@ from pathlib import Path
 COMMANDS: dict[str, str] = {
     "check-invariants": "check_config_invariants.py",
     "check-required-fields": "check_required_filter_fields.py",
+    "audit-optionality": "audit_effective_optionality.py",
     "check-config-paths": "lint_config_paths.py",
     "generate-pipeline": "generate_pipeline_schema.py",
     "generate-artifacts": "generate_schema_artifacts.py",

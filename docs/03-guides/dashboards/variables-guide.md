@@ -18,7 +18,7 @@
 |---|---|---|---|---|
 | `$pipeline` | `label_values(bioetl_records_processed_total, pipeline)` | Yes | Yes | On dashboard load (`1`) |
 | `$run_type` | `label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)` | Yes | Yes | On dashboard load (`1`) |
-| `$provider` | `label_values(bioetl_provider_health_status, provider)` | Yes | Yes | On dashboard load (`1`) |
+| `$provider` | `label_values({__name__=~"bioetl_health_check_(success\|degraded\|failures)_total"}, provider)` | Yes | Yes | On dashboard load (`1`) |
 
 ## Важно
 

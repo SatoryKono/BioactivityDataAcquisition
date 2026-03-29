@@ -10,7 +10,7 @@
 
 **Ключевые характеристики:**
 
-- **Точка входа:** Содержит код, который запускается напрямую (например, CLI-команды).
+- **Точка входа:** Содержит driving adapters, которые запускаются напрямую или принимают внешние сигналы (CLI, HTTP health probes, retained orchestration seams).
 - **Адаптация ввода/вывода:** Преобразует внешние запросы (например, аргументы командной строки) в вызовы методов слоя `Application`.
 - **Минимальная логика:** Не содержит логики сборки или бизнес-логики.
 
@@ -77,14 +77,17 @@ python -m bioetl health --provider chembl
 
 **Расположение:** `src/bioetl/interfaces/http/`
 
-Содержит HTTP health endpoint (`health_server.py`) с интеграцией Prometheus metrics.
+Содержит HTTP health server с entrypoint `health_server.py` и mixin-based decomposition:
+`health_server_http_mixin.py`, `health_server_routing_mixin.py`,
+`health_server_state_mixin.py`, `types.py`.
 Endpoints: `/health`, `/health/live`, `/health/ready`.
 
 ### 2.3. `orchestration/` — Оркестрация (Driving Adapters)
 
 **Расположение:** `src/bioetl/interfaces/orchestration/`
 
-`orchestration/` — модуль пуст. Signal handlers были удалены 2025-12-31.
+`orchestration/` сейчас является минимальным retained package seam без активных
+signal-handler implementations. Signal handlers были удалены 2025-12-31.
 Graceful shutdown обрабатывается непосредственно в canonical domain command modules:
 
 - `interfaces/cli/commands/domains/run/command.py`

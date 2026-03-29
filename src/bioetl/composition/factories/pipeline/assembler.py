@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import Generic, TypeVar, cast
 
+import pyarrow as pa
+
+from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.base_transformer.types import TransformerDependencyContext
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
@@ -22,38 +28,37 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type,
 )
 from bioetl.composition.factories.pipeline.runner_assembly import assemble_runner_impl
+from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.filtering import (
+    GoldFilterConfig,
+    InputFilterConfig,
+    SilverFilterConfig,
+)
+from bioetl.domain.ports import (
+    ContractPolicyPort,
+    DataNormalizationPort,
+    DataSourcePort,
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
+    PiiHasherPort,
+    TracingPort,
+)
 from bioetl.domain.services import IdentityService
-
-if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.base_transformer.types import TransformerDependencyContext
-    from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.domain.config import RuntimeConfig
-    from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import (
-        ContractPolicyPort,
-        DataNormalizationPort,
-        DataSourcePort,
-        DQMonitorPort,
-        LoggerPort,
-        MetricsPort,
-        PiiHasherPort,
-        TracingPort,
-    )
-    from bioetl.domain.types import GoldSchemaType, RunID
-    from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.domain.types import GoldSchemaType, RunID
+from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
+
+# Backward-compatible helper alias retained for unit tests and historical imports.
 _extract_entity_type = extract_entity_type
 _extract_dq_configs = extract_dq_configs
 _assemble_runner_impl = assemble_runner_impl
+
 
 class GenericPipelineFactory(Generic[TPipeline]):
     """Build pipeline components and runners for a provider-specific pipeline."""
@@ -71,7 +76,10 @@ class GenericPipelineFactory(Generic[TPipeline]):
         provider_registry: ProviderRegistry | None = None,
     ) -> None:
         if gold_schema is None:
-            raise ValueError(f"gold_schema is required for pipeline '{pipeline_name}'. All Gold layer writes must have schema validation.")
+            raise ValueError(
+                f"gold_schema is required for pipeline '{pipeline_name}' "
+                "to enforce Gold validation."
+            )
         self.pipeline_name = pipeline_name
         self.pipeline_class = pipeline_class
         self.provider = provider
@@ -247,7 +255,6 @@ def create_pipeline_factory(
     transformer_class: type[BaseTransformer] | None = None,
     provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
-    """Create a generic pipeline factory for a provider/entity pair."""
     return GenericPipelineFactory(
         pipeline_name=pipeline_name,
         pipeline_class=pipeline_class,
@@ -259,6 +266,7 @@ def create_pipeline_factory(
         provider_registry=provider_registry,
     )
 
+
 def assemble_runner(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
@@ -267,7 +275,6 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    """Assemble the concrete runner around an initialized pipeline instance."""
     return _assemble_runner_impl(
         pipeline=pipeline,
         observability=observability,
@@ -277,3 +284,13 @@ def assemble_runner(
         yaml_config=yaml_config,
         dq_configs_extractor=_extract_dq_configs,
     )
+
+
+__all__ = [
+    "GenericPipelineFactory",
+    "_assemble_runner_impl",
+    "_extract_dq_configs",
+    "_extract_entity_type",
+    "assemble_runner",
+    "create_pipeline_factory",
+]

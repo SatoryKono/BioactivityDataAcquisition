@@ -8,6 +8,14 @@ pipeline:
     description: Extract molecules/compounds from ChEMBL API
     business_primary_keys:
         - molecule_id
+    field_policy:
+        therapeutic_flag:
+            boolean_true_values:
+                - 'true'
+                - therapeutic
+            boolean_false_values:
+                - 'false'
+                - non_therapeutic
     sink:
         silver:
             partition_by:

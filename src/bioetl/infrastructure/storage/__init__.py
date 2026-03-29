@@ -20,10 +20,6 @@ from __future__ import annotations
 
 from importlib import import_module
 
-# Backward-compatible package alias for tests/tools that patch
-# `bioetl.infrastructure.storage.delta.*` via string import paths.
-from . import delta as delta
-
 from bioetl.domain.exceptions import (
     BucketNotFoundError,
     MergeConflictError,
@@ -41,6 +37,10 @@ from bioetl.infrastructure.storage.atomic import (
 from bioetl.infrastructure.storage.bronze_write_result_helpers import (
     is_bronze_write_result_persisted,
 )
+
+# Backward-compatible package alias for tests/tools that patch
+# `bioetl.infrastructure.storage.delta.*` via string import paths.
+from . import delta as delta
 
 _LAZY_EXPORTS = {
     "BronzeWriter": "bioetl.infrastructure.storage.bronze_writer",

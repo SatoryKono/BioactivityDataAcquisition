@@ -11,6 +11,7 @@ from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 
+
 def _resolve_identity_data(registry_entry: JsonDict) -> JsonDict:
     """Extract normalized identity payload from registry entry."""
     identity_data = registry_entry.get("identity", {})

@@ -40,7 +40,7 @@ class MergedMetadataExplainabilityService:
     def generate_field_explanation(
         self,
         field_name: str,
-        record_data: JsonDict,
+        _record_data: JsonDict,
         composite_metadata: CompositeOutputExt,
         field_priorities: dict[str, JsonDict] | None = None,
     ) -> MergedFieldExplanation:

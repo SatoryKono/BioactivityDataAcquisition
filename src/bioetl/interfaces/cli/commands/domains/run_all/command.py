@@ -19,8 +19,8 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     health_server_context,
 )
 from bioetl.interfaces.cli.commands.domains.run.support import resolve_context_registry
-from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (
-    dispatch_cli_callback,
+from bioetl.interfaces.cli.commands.domains.run_all.command_entrypoint import (
+    build_run_all_click_command,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     RunAllCommandInput,
@@ -28,9 +28,6 @@ from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     exit_with_code,
     handle_run_all_cli_failure,
     run_all_command_flow,
-)
-from bioetl.interfaces.cli.commands.domains.run_all.command_entrypoint import (
-    build_run_all_click_command,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.execution import (
     RunAllBatchExecutionRequest,
@@ -65,6 +62,9 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
 )
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
     validate_provider as _validate_provider,
+)
+from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (
+    dispatch_cli_callback,
 )
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 from bioetl.interfaces.cli.registry_helpers import build_cli_registry

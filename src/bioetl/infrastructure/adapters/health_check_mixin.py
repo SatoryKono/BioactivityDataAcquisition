@@ -30,8 +30,8 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters._health_check_observability import (
-    handle_health_check_result,
     handle_health_check_failure,
+    handle_health_check_result,
     resolve_metrics,
     start_health_check,
 )

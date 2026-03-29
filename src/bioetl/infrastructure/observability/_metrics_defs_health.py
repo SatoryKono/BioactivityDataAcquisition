@@ -5,8 +5,8 @@ from __future__ import annotations
 from prometheus_client import Counter, Gauge, Histogram
 
 __all__ = [
-    "HEALTH_CHECK_DURATION_SECONDS",
     "HEALTH_CHECK_DEGRADED_TOTAL",
+    "HEALTH_CHECK_DURATION_SECONDS",
     "HEALTH_CHECK_FAILURES_TOTAL",
     "HEALTH_CHECK_LATENCY_MS",
     "HEALTH_CHECK_LATENCY_SECONDS",

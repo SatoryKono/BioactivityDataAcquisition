@@ -58,6 +58,7 @@ manifest/ledger failures, checkpoint incompatibilities, missing lineage refs и 
 1. `No data`:
 проверьте `http://localhost:8000/metrics`, затем `http://localhost:9090/targets`.
 2. Пустой `$provider`:
-нет серии `bioetl_provider_health_status` в metrics endpoint.
+нет ни одной серии `bioetl_health_check_success_total`, `bioetl_health_check_degraded_total`
+или `bioetl_health_check_failures_total` в metrics endpoint.
 3. Пустой `$run_type`:
 нет метрик `bioetl_records_processed_total` для выбранного `$pipeline`.

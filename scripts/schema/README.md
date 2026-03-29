@@ -22,6 +22,7 @@ python -m scripts.schema <command> [args...]
 |---------|--------|-------------|
 | `check-invariants` | `check_config_invariants.py` | Validate config CI invariants (naming, schemas, auth, keys) |
 | `check-required-fields` | `check_required_filter_fields.py` | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |
+| `audit-optionality` | `audit_effective_optionality.py` | Audit or validate `effective_optional_v1` derived from current config surface |
 | `check-config-paths` | `lint_config_paths.py` | Check for legacy dq/filter config path references |
 | `generate-pipeline` | `generate_pipeline_schema.py` | Generate pipeline JSON schema |
 | `generate-artifacts` | `generate_schema_artifacts.py` | Generate schema artifacts |
@@ -36,6 +37,7 @@ python -m scripts.schema <command> [args...]
 |---------|------|---------|
 | `check-invariants` | After modifying any YAML config under `configs/`; validates naming, entity sections, auth, unknown keys | Pre-commit hook (on config changes) |
 | `check-required-fields` | After modifying entity YAML quality/filter sections; ensures explicit required/not-null YAML fields are listed in `silver_filters.required_fields` | CI/config regression gate |
+| `audit-optionality` | After changing config semantics or structural policy; audits and validates how `effective_optional_v1` resolves from current YAML/config signals | CI/config regression gate, local contract audit |
 | `check-config-paths` | After modifying configs, source code, or docs; detects legacy `dq/`/`filter/` path references | Pre-commit hook |
 | `generate-pipeline` | After changing `PipelineYamlConfig` or `CompositeConfigFileSchema` Pydantic models; use `--check` to verify freshness | Manual, after model changes |
 | `generate-artifacts` | After changing domain models (enums, lookup tables) | Manual, after model changes |
@@ -43,3 +45,18 @@ python -m scripts.schema <command> [args...]
 | `generate-contracts` | Before release; auto-generates JSON contracts from Pandera DataFrameModel schemas | Manual, pre-release |
 | `validate-configs` | After editing any entity YAML config; validates against JSON Schema | Pre-commit hook (on config changes) |
 | `analyze-gaps` | When adding new pipelines; identifies missing entity configs or inconsistencies | Manual, on-demand |
+
+## `effective_optional_v1` Precedence
+
+Runtime optionality currently resolves in this order:
+
+1. Explicit `field_policy.<field>.optional`
+2. Derived required signals from current config surface:
+   - `silver_filters.required_fields`
+   - DQ `required`
+   - DQ `not_null`
+   - DQ `key_nullability(nullable=false)`
+3. Default optional
+
+This keeps structural policy compatible with today's configs while allowing
+incremental migration toward explicit field-level policy overlays.

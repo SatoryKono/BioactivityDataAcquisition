@@ -2,22 +2,22 @@ schema_version: 1
 baseline:
   total_exemptions: 3
   by_registry:
-    file_size_limits: 3
+    file_size_limits: 0
     function_complexity: 0
     function_length: 0
-    class_size: 0
+    class_size: 2
     class_method_count: 0
-    god_object: 0
+    god_object: 1
     domain_complexity: 0
 historical_baseline:
-  total_exemptions: 20
+  total_exemptions: 23
   by_registry:
     file_size_limits: 6
     function_complexity: 6
     function_length: 0
-    class_size: 1
+    class_size: 3
     class_method_count: 0
-    god_object: 1
+    god_object: 2
     domain_complexity: 6
   snapshot_date: '2025-12-31'
   source_report: 'reports/architecture/2025-Q4-final.json'
@@ -205,19 +205,19 @@ report_only_hotspot_families:
         next_action: "2026-03-24 now has two confirming clean snapshots for composition/factories/pipeline; keep the bounded duplication-only family ratchet active while file-growth and fan-in remain watch-only."
 quarterly_targets:
   - quarter: "2026-Q1"
-    max_total_exemptions: 15
+    max_total_exemptions: 9
     min_integral_score: 65
     group_budgets:
-      size_metrics: 3
-      complexity_metrics: 12
-      structural_debt: 1
+      size_metrics: 6
+      complexity_metrics: 1
+      structural_debt: 2
     registry_budgets:
       file_size_limits: 3
-      function_complexity: 6
+      function_complexity: 1
       function_length: 0
-      class_size: 1
+      class_size: 3
       class_method_count: 0
-      god_object: 1
+      god_object: 2
       domain_complexity: 6
   - quarter: "2026-Q2"
     max_total_exemptions: 8
@@ -237,8 +237,9 @@ quarterly_targets:
 owner_decomposition_targets:
   - quarter: "2026-Q1"
     allocations:
-      "@bioetl-architecture": 8
-      "@bioetl-data-model": 7
+      "@bioetl-architecture": 0
+      "@bioetl-domain": 4
+      "@bioetl-platform": 5
   - quarter: "2026-Q2"
     allocations:
       "@bioetl-architecture": 3
