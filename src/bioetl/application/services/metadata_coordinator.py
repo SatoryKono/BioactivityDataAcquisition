@@ -22,12 +22,18 @@ import platform
 import socket
 from datetime import datetime
 from functools import cached_property
-from typing import TYPE_CHECKING, ClassVar, Final, TypeVar
+from typing import ClassVar, Final
 
 from bioetl import __version__ as BIOETL_VERSION
 from bioetl.application.services.metadata_assemblers import (
     GoldMetadataAssembler,
     SilverMetadataAssembler,
+)
+from bioetl.application.services._metadata_coordinator_helpers import (
+    build_bronze_file_output_metadata,
+    build_bronze_source_metadata,
+    create_metadata_bundle,
+    validate_records_present,
 )
 from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
 from bioetl.application.services.metadata_lineage_fragments import (
@@ -40,13 +46,11 @@ from bioetl.domain.models.metadata import (
     BronzeMetadata,
     BronzeOutputExt,
     EnvironmentMetadata,
-    FileOutputMetadata,
     GoldMetadata,
     PipelineMetadata,
     RuntimeMetadata,
     RunTypeEnum,
     SilverMetadata,
-    SourceMetadata,
 )
 from bioetl.domain.ports import (
     BronzeMetadataInput,
@@ -57,9 +61,6 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
 
-if TYPE_CHECKING:
-    from bioetl.domain.lineage import LineageGraphFragment
-
 __all__ = [
     "MetadataCoordinator",
 ]
@@ -69,9 +70,6 @@ _RUN_TYPE_TO_ENUM: Final[dict[RunType, RunTypeEnum]] = {
     RunType.BACKFILL: RunTypeEnum.BACKFILL,
     RunType.REBUILD: RunTypeEnum.REBUILD,
 }
-
-_MetadataT = TypeVar("_MetadataT", BronzeMetadata, SilverMetadata, GoldMetadata)
-
 
 class MetadataCoordinator(MetadataCoordinatorPort):
     """Centralized coordinator for metadata creation across Medallion layers.
@@ -171,56 +169,6 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             rule_bundle_version=self._context.rule_bundle_version,
         )
 
-    @staticmethod
-    def _validate_records_present(
-        *,
-        records: object,
-        total_records: object,
-        layer_name: str,
-    ) -> None:
-        """Reject sidecar creation when neither records nor total count are present."""
-        if not records and total_records is None:
-            raise ValueError(f"Cannot create {layer_name} metadata without records")
-
-    @staticmethod
-    def _create_metadata_bundle(
-        *,
-        metadata: _MetadataT,
-        lineage_fragment: LineageGraphFragment,
-    ) -> MetadataLineageBundle[_MetadataT]:
-        """Bundle sidecar metadata with its canonical lineage fragment."""
-        return MetadataLineageBundle(
-            metadata=metadata,
-            lineage_fragment=lineage_fragment,
-        )
-
-    @staticmethod
-    def _build_bronze_source_metadata(
-        input_data: BronzeMetadataInput,
-    ) -> SourceMetadata:
-        """Build Bronze source metadata, injecting query_string when needed."""
-        if input_data.source_metadata is not None:
-            source = input_data.source_metadata
-            if input_data.query_string and source.query_string is None:
-                return source.model_copy(update={"query_string": input_data.query_string})
-            return source
-
-        return SourceMetadata(
-            type="api",
-            query_string=input_data.query_string,
-        )
-
-    @staticmethod
-    def _build_bronze_file_output_metadata(
-        input_data: BronzeMetadataInput,
-    ) -> FileOutputMetadata:
-        """Build Bronze file metadata for output_ext."""
-        return FileOutputMetadata(
-            path=input_data.output_path,
-            size_bytes=input_data.compressed_size,
-            record_count=input_data.record_count,
-        )
-
     @cached_property
     def _silver_assembler(self) -> SilverMetadataAssembler:
         """Build Silver metadata assembler once per coordinator instance."""
@@ -251,8 +199,8 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             Complete BronzeMetadata for sidecar file.
         """
         duration = (input_data.completed_at - input_data.started_at).total_seconds()
-        source = self._build_bronze_source_metadata(input_data)
-        file_metadata = self._build_bronze_file_output_metadata(input_data)
+        source = build_bronze_source_metadata(input_data)
+        file_metadata = build_bronze_file_output_metadata(input_data)
 
         return BronzeMetadata(
             runtime=self._build_runtime_metadata(
@@ -290,7 +238,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: BronzeMetadataInput,
     ) -> MetadataLineageBundle[BronzeMetadata]:
         """Create Bronze sidecar metadata bundled with canonical lineage fragment."""
-        return self._create_metadata_bundle(
+        return create_metadata_bundle(
             metadata=self.create_bronze_metadata(input_data),
             lineage_fragment=self.build_bronze_lineage_fragment(input_data),
         )
@@ -304,7 +252,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         Returns:
             Complete SilverMetadata for sidecar file.
         """
-        self._validate_records_present(
+        validate_records_present(
             records=input_data.records,
             total_records=input_data.total_records,
             layer_name="Silver",
@@ -316,7 +264,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: SilverMetadataInput,
     ) -> LineageGraphFragment:
         """Build canonical Silver lineage fragment without changing sidecar API."""
-        self._validate_records_present(
+        validate_records_present(
             records=input_data.records,
             total_records=input_data.total_records,
             layer_name="Silver",
@@ -331,7 +279,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: SilverMetadataInput,
     ) -> MetadataLineageBundle[SilverMetadata]:
         """Create Silver sidecar metadata bundled with canonical lineage fragment."""
-        return self._create_metadata_bundle(
+        return create_metadata_bundle(
             metadata=self.create_silver_metadata(input_data),
             lineage_fragment=self.build_silver_lineage_fragment(input_data),
         )
@@ -345,7 +293,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         Returns:
             Complete GoldMetadata for sidecar file.
         """
-        self._validate_records_present(
+        validate_records_present(
             records=input_data.records,
             total_records=input_data.total_records,
             layer_name="Gold",
@@ -357,7 +305,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: GoldMetadataInput,
     ) -> LineageGraphFragment:
         """Build canonical Gold lineage fragment without changing sidecar API."""
-        self._validate_records_present(
+        validate_records_present(
             records=input_data.records,
             total_records=input_data.total_records,
             layer_name="Gold",
@@ -372,7 +320,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: GoldMetadataInput,
     ) -> MetadataLineageBundle[GoldMetadata]:
         """Create Gold sidecar metadata bundled with canonical lineage fragment."""
-        return self._create_metadata_bundle(
+        return create_metadata_bundle(
             metadata=self.create_gold_metadata(input_data),
             lineage_fragment=self.build_gold_lineage_fragment(input_data),
         )
