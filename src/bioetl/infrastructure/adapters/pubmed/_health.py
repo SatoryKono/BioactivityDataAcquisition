@@ -88,17 +88,7 @@ class PubMedHealthMixin:
             elapsed = time.monotonic() - start_time
 
             if response.status_code != 200:
-                status = classify_health_probe_status(response.status_code)
-                self._logger.warning(
-                    (
-                        "pubmed_health_check_degraded"
-                        if status == HealthStatus.DEGRADED
-                        else "pubmed_health_check_failed"
-                    ),
-                    status_code=response.status_code,
-                    classified_status=status.value,
-                )
-                return status
+                return classify_health_probe_status(response.status_code)
 
             if is_slow_health_probe(elapsed_seconds=elapsed):
                 self._logger.warning(

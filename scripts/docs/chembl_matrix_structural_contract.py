@@ -155,8 +155,9 @@ def build_structural_workbook_semantics(
             )
         return StructuralWorkbookSemantics(
             silver_filter_tokens=filter_tokens,
-            silver_validation_tokens=tuple(
-                [*validation_tokens, *overlay_validation_tokens]
+            silver_validation_tokens=(
+                *validation_tokens,
+                *overlay_validation_tokens,
             ),
             silver_normalisation_tokens=(),
             validation_fail_action_prefixes=(QUARANTINE_FILTER_REJECTION,),
@@ -166,11 +167,9 @@ def build_structural_workbook_semantics(
     if logical_type in BUSINESS_TYPED_FIELDS and nullable:
         return StructuralWorkbookSemantics(
             silver_filter_tokens=(STRUCTURAL_TYPE_GUARD,),
-            silver_validation_tokens=tuple(
-                [
-                    STRUCTURAL_TYPE_TO_NULL_WARN_VALIDATION,
-                    *overlay_validation_tokens,
-                ]
+            silver_validation_tokens=(
+                STRUCTURAL_TYPE_TO_NULL_WARN_VALIDATION,
+                *overlay_validation_tokens,
             ),
             silver_normalisation_tokens=(INVALID_TYPE_TO_NULL,),
             validation_fail_action_prefixes=(SET_NULL_AND_WARN,),
@@ -180,11 +179,9 @@ def build_structural_workbook_semantics(
     if logical_type in BUSINESS_TYPED_FIELDS and optional and not nullable:
         return StructuralWorkbookSemantics(
             silver_filter_tokens=(STRUCTURAL_TYPE_GUARD,),
-            silver_validation_tokens=tuple(
-                [
-                    STRUCTURAL_OPTIONAL_NONNULLABLE_VALIDATION,
-                    *overlay_validation_tokens,
-                ]
+            silver_validation_tokens=(
+                STRUCTURAL_OPTIONAL_NONNULLABLE_VALIDATION,
+                *overlay_validation_tokens,
             ),
             silver_normalisation_tokens=(PROPOSED_NULL_THEN_QUARANTINE,),
             validation_fail_action_prefixes=(
