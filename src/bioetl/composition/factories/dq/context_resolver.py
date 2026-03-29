@@ -20,6 +20,7 @@ if TYPE_CHECKING:
         BronzeDQConfigPort,
         GoldDQConfigPort,
         LoggerPort,
+        MetricsPort,
         SilverDQConfigPort,
     )
     from bioetl.domain.types import JsonDict
@@ -273,6 +274,7 @@ def create_dq_services(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
+    metrics: MetricsPort | None = None,
 ) -> JsonDict:  # Any: heterogeneous DQ service instances
     """Create DQ analyzers/writer/services when DQ reporting is enabled.
 
@@ -310,6 +312,7 @@ def create_dq_services(
         silver_analyzer=silver_analyzer,
         gold_analyzer=gold_analyzer,
         report_writer=report_writer,
+        metrics=metrics,
     )
 
     return {

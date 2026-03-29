@@ -273,6 +273,22 @@ def _validate_records(
     if missing_fields := required_fields - set(records[0].keys()):
         raise ValueError(f"Records missing required metadata fields: {missing_fields}")
 
+    invalid_metadata: list[str] = []
+    for index, record in enumerate(records):
+        for field in required_fields:
+            value = record.get(field)
+            if value is None:
+                invalid_metadata.append(f"record[{index}].{field}=None")
+                continue
+            if isinstance(value, str) and not value.strip():
+                invalid_metadata.append(f"record[{index}].{field}=blank")
+
+    if invalid_metadata:
+        raise ValueError(
+            "Records contain invalid required metadata values: "
+            + ", ".join(invalid_metadata)
+        )
+
     keys = set(records[0].keys())
     optional_missing = [key for key in schema.names if key not in keys]
     if optional_missing:

@@ -43,6 +43,13 @@ runtime source и canonical governance docs:
 2. relevant `memory-py-*.md` file for the current role
 3. `docs/00-project/ai/agents/` for guides and runtime-facing mirrors
 
+### Dashboard work
+
+Если задача связана с `grafana/dashboards/*.json`, links, Grafana Explore,
+Loki/Tempo drilldown или operator navigation между shipped dashboards, используй:
+
+- [../../../03-guides/dashboards/dashboard-extension-llm.md](../../../03-guides/dashboards/dashboard-extension-llm.md)
+
 ## Notes
 
 - This overview page is **repo-only** and excluded from MkDocs.

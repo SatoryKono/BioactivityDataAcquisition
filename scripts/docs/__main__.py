@@ -10,6 +10,9 @@ Commands:
     check-drift        Check documentation drift (ports, classes, runtime mirrors, freshness)
     check-docstrings   Check docstring coverage
     check-kpi          Report documentation KPI metrics
+    build-matrix-dicts Generate ChEMBL matrix inventory and sheet dictionaries
+    filter-matrix-rows Remove rows from ChEMBL matrix workbook by column value
+    normalize-matrix-values Normalize controlled values in ChEMBL matrix workbook
     fix-links-auto     Auto-fix broken documentation links
     fix-links-explicit Fix documentation links with explicit rules
     fix-link-warnings  Fix link warnings in specified files
@@ -26,6 +29,9 @@ COMMANDS: dict[str, str] = {
     "check-drift": "check_doc_drift.py",
     "check-docstrings": "check_docstring_coverage.py",
     "check-kpi": "report_docs_kpi.py",
+    "build-matrix-dicts": "generate_chembl_matrix_dictionaries.py",
+    "filter-matrix-rows": "filter_chembl_matrix_rows.py",
+    "normalize-matrix-values": "normalize_chembl_matrix_workbook.py",
     "fix-links-auto": "fix_doc_links_auto.py",
     "fix-links-explicit": "fix_doc_links_explicit.py",
     "fix-link-warnings": "fix_link_warnings.py",

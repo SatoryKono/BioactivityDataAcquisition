@@ -1,6 +1,6 @@
 # Variables Guide (Grafana Dashboards)
 
-Дата сверки: **2026-03-28**  
+Дата сверки: **2026-03-29**  
 Источник истины: `grafana/dashboards/*.json`
 
 ## Переменные по дашбордам
@@ -28,7 +28,7 @@
 ## Примеры PromQL с переменными
 
 ```promql
-# DQ/Overview/Simple
+# Overview/Data Quality/Runtime
 sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="bronze"})
 
 # Provider Health p95

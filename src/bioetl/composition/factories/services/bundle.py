@@ -45,6 +45,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
+        DataSourcePort,
         DQMonitorPort,
         LoggerPort,
         MetricsPort,
@@ -64,15 +65,6 @@ __all__ = [
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
-    """Load pipeline YAML configuration from disk.
-
-    Args:
-        pipeline_name: Pipeline identifier used to locate the YAML file
-            (e.g., 'chembl_activity' maps to configs/entities/chembl/activity.yaml).
-
-    Returns:
-        Parsed and validated PipelineYamlConfig instance.
-    """
     return _load_pipeline_config_direct(pipeline_name)
 
 
@@ -80,16 +72,6 @@ def yaml_config_to_domain(
     yaml_config: PipelineYamlConfig,
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
-    """Map YAML configuration to the domain PipelineConfig model.
-
-    Args:
-        yaml_config: Validated YAML configuration loaded from disk.
-        resolved_dq_config: Optional pre-resolved DQ configuration; if None,
-            DQ settings are derived from the YAML config directly.
-
-    Returns:
-        Immutable PipelineConfig domain object.
-    """
     return _yaml_config_to_domain_direct(
         yaml_config=yaml_config,
         resolved_dq_config=resolved_dq_config,
@@ -97,20 +79,12 @@ def yaml_config_to_domain(
 
 
 def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
-    """Compute SHA256 hash of pipeline configuration for change detection.
-
-    Args:
-        config: Pipeline configuration as a PipelineYamlConfig instance or raw dict.
-
-    Returns:
-        SHA256 hex-digest string (64 characters).
-    """
     return _compute_config_hash_direct(config)
 
 
 @dataclass(frozen=True, slots=True)
 class ServiceBundleDependencies:
-    """Explicit dependencies for service bundle wiring."""
+    """Explicit dependency set for service-bundle wiring."""
 
     load_pipeline_config: Callable[[str], PipelineYamlConfig]
     yaml_config_to_domain: Callable[
@@ -123,7 +97,7 @@ class ServiceBundleDependencies:
 def _resolve_service_bundle_dependencies(
     override: ServiceBundleDependencies | None = None,
 ) -> ServiceBundleDependencies:
-    """Resolve runtime dependencies with optional override."""
+    """Resolve runtime dependencies with an optional test override."""
     if override is not None:
         return override
     return ServiceBundleDependencies(
@@ -135,12 +109,49 @@ def _resolve_service_bundle_dependencies(
 
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
-    """Extract trailing entity from `<provider>_<entity>` pipeline names."""
+    """Extract the trailing entity from `<provider>_<entity>` pipeline names."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
 _create_data_source = _create_data_source_impl
 _create_cached_bronze_data_source = _create_cached_bronze_data_source_impl
+
+
+def _create_pipeline_data_source(
+    *,
+    pipeline_name: str,
+    pipeline_config: PipelineYamlConfig,
+    create_data_source_fn: DataSourceCreatorProtocol,
+    settings: Settings,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None,
+    metrics: MetricsPort,
+    cached_bronze: CachedBronzeContext | None,
+) -> DataSourcePort:
+    """Resolve live-vs-cached data source construction for one pipeline run."""
+    if cached_bronze is not None and cached_bronze.enabled:
+        data_source = _create_cached_bronze_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            cached_bronze=cached_bronze,
+        )
+        logger.info(
+            "using_cached_bronze_mode",
+            pipeline=pipeline_name,
+            bronze_path=cached_bronze.bronze_path,
+            bronze_date=cached_bronze.bronze_date,
+        )
+        return data_source
+    return _create_data_source(
+        create_data_source_fn=create_data_source_fn,
+        settings=settings,
+        pipeline_config=pipeline_config,
+        logger=logger,
+        filter_config=filter_config,
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+    )
 
 
 def build_pipeline_services(
@@ -157,60 +168,24 @@ def build_pipeline_services(
     silver_validator: SilverValidatorPort | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> PipelineService:
-    """Build shared pipeline services for one pipeline run.
-
-    Resolves data source (live API or cached Bronze), wires storage, metrics,
-    tracing, DQ monitoring, and checkpoint dependencies into a PipelineService.
-
-    Args:
-        pipeline_name: Name of the pipeline (e.g., 'chembl_activity').
-        create_data_source_fn: Callable that creates the provider data source.
-        settings: Application settings for infrastructure wiring.
-        logger: LoggerPort for structured logging.
-        config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
-        filter_config: Optional input filter configuration; disables filtering if None.
-        tracer: Optional TracingPort for distributed tracing.
-        dq_monitor: Optional DQMonitorPort for data quality monitoring.
-        metadata_coordinator: Optional coordinator for pipeline metadata writes.
-        cached_bronze: Optional cached Bronze context; uses live API if None or disabled.
-        silver_validator: Optional Silver layer validator (required in production).
-        _deps: Optional dependency overrides for testing; resolved from defaults if None.
-
-    Returns:
-        Fully wired PipelineService bundle.
-    """
+    """Build the shared pipeline service bundle for one pipeline run."""
     deps = _resolve_service_bundle_dependencies(_deps)
     pipeline_config = config or deps.load_pipeline_config(pipeline_name)
-    base_services_factory = deps.base_services_factory
     shared_metrics = create_shared_metrics(
         settings=settings,
-        base_services_factory=base_services_factory,
+        base_services_factory=deps.base_services_factory,
     )
-    if cached_bronze is not None and cached_bronze.enabled:
-        data_source = _create_cached_bronze_data_source(
-            settings=settings,
-            pipeline_config=pipeline_config,
-            logger=logger,
-            cached_bronze=cached_bronze,
-        )
-        logger.info(
-            "using_cached_bronze_mode",
-            pipeline=pipeline_name,
-            bronze_path=cached_bronze.bronze_path,
-            bronze_date=cached_bronze.bronze_date,
-        )
-    else:
-        data_source = _create_data_source(
-            create_data_source_fn=create_data_source_fn,
-            settings=settings,
-            pipeline_config=pipeline_config,
-            logger=logger,
-            filter_config=filter_config,
-            metrics=shared_metrics,
-            pipeline_name=pipeline_name,
-        )
-
-    return base_services_factory.create_common_services(
+    data_source = _create_pipeline_data_source(
+        pipeline_name=pipeline_name,
+        pipeline_config=pipeline_config,
+        create_data_source_fn=create_data_source_fn,
+        settings=settings,
+        logger=logger,
+        filter_config=filter_config,
+        metrics=shared_metrics,
+        cached_bronze=cached_bronze,
+    )
+    return deps.base_services_factory.create_common_services(
         settings=settings,
         logger=logger,
         data_source=data_source,
@@ -220,6 +195,56 @@ def build_pipeline_services(
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
         silver_validator=silver_validator,
+    )
+
+
+def _build_pipeline_creation_inputs(
+    *,
+    pipeline_name: str,
+    pipeline_class: type[BasePipeline],
+    provider: str,
+    create_data_source_fn: DataSourceCreatorProtocol,
+    transformer_class: type[BaseTransformer] | None,
+    run_id: RunID,
+    runtime: RuntimeConfig,
+    settings: Settings,
+    logger: LoggerPort,
+    manifest_id: str | None,
+    config_hash: str | None,
+    dq_contract_compatibility_hash: str | None,
+    effective_config_artifact_id: str | None,
+    config: PipelineYamlConfig | None,
+    filter_config: InputFilterConfig | None,
+    tracer: TracingPort | None,
+    dq_monitor: DQMonitorPort | None,
+    metrics: MetricsPort | None,
+    cached_bronze: CachedBronzeContext | None,
+    pandera_silver_schema: object | None,
+) -> _PipelineCreationInputs:
+    """Build the delegated pipeline-creation envelope."""
+    return _PipelineCreationInputs(
+        pipeline_name=pipeline_name,
+        pipeline_class=pipeline_class,
+        provider=provider,
+        create_data_source_fn=create_data_source_fn,
+        transformer_class=transformer_class,
+        request=_PipelineCreationRequest(
+            run_id=run_id,
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            manifest_id=manifest_id,
+            config_hash=config_hash,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metrics=metrics,
+            cached_bronze=cached_bronze,
+        ),
+        pandera_silver_schema=pandera_silver_schema,
     )
 
 
@@ -246,63 +271,38 @@ def create_pipeline_with_services(
     pandera_silver_schema: object | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> BasePipeline:
-    """Create pipeline instance with services and optional transformer.
-
-    Args:
-        pipeline_name: Name of the pipeline (e.g., 'chembl_activity').
-        pipeline_class: Concrete pipeline class to instantiate.
-        provider: Provider name (e.g., 'chembl').
-        create_data_source_fn: Callable that creates the provider data source.
-        transformer_class: Optional transformer class; no transformer used if None.
-        run_id: Unique identifier for this pipeline run.
-        runtime: Runtime configuration (run type, limits, vacuum settings).
-        settings: Application settings for infrastructure wiring.
-        logger: LoggerPort for structured logging.
-        manifest_id: Optional immutable run-manifest identifier.
-        config_hash: Optional canonical execution config hash override.
-        dq_contract_compatibility_hash: Optional DQ compatibility hash for run context.
-        effective_config_artifact_id: Optional effective-config artifact identifier.
-        config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
-        filter_config: Optional input filter configuration; disables filtering if None.
-        tracer: Optional TracingPort for distributed tracing.
-        dq_monitor: Optional DQMonitorPort for data quality monitoring.
-        metrics: Optional MetricsPort for metrics collection.
-        cached_bronze: Optional cached Bronze context; uses live API if None or disabled.
-        pandera_silver_schema: Optional Pandera DataFrameModel for Silver validation.
-        _deps: Optional dependency overrides for testing; resolved from defaults if None.
-
-    Returns:
-        Configured BasePipeline instance ready for execution.
-    """
+    """Create a pipeline instance with its resolved service bundle."""
     # Compatibility markers for architecture static checks:
     # transformer_class(...) happens inside the delegated builder path.
     # transformer=transformer is preserved at the pipeline constructor boundary.
+    resolved_deps = cast(
+        _ServiceBundleDeps,
+        _resolve_service_bundle_dependencies(_deps),
+    )
     return _create_pipeline_with_services_impl(
-        _PipelineCreationInputs(
+        _build_pipeline_creation_inputs(
             pipeline_name=pipeline_name,
             pipeline_class=pipeline_class,
             provider=provider,
             create_data_source_fn=create_data_source_fn,
             transformer_class=transformer_class,
-            request=_PipelineCreationRequest(
-                run_id=run_id,
-                runtime=runtime,
-                settings=settings,
-                logger=logger,
-                manifest_id=manifest_id,
-                config_hash=config_hash,
-                dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-                effective_config_artifact_id=effective_config_artifact_id,
-                config=config,
-                filter_config=filter_config,
-                tracer=tracer,
-                dq_monitor=dq_monitor,
-                metrics=metrics,
-                cached_bronze=cached_bronze,
-            ),
+            run_id=run_id,
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            manifest_id=manifest_id,
+            config_hash=config_hash,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metrics=metrics,
+            cached_bronze=cached_bronze,
             pandera_silver_schema=pandera_silver_schema,
         ),
-        deps=cast(_ServiceBundleDeps, _resolve_service_bundle_dependencies(_deps)),
+        deps=resolved_deps,
         extract_entity_type=_extract_entity_type,
         build_pipeline_services_fn=cast(
             _BuildPipelineServicesFn,

@@ -11,7 +11,8 @@
           "_run_type",
           "_source_batch_id",
           "_ingestion_ts",
-          "_index"
+          "_index",
+          "_state"
         ],
         "name": "system",
         "pattern": null,
@@ -77,9 +78,6 @@
           "bao_format",
           "bao_label",
           "journal",
-          "publication_doi",
-          "publication_pmid",
-          "publication_pmc_id",
           "publication_year"
         ],
         "name": "business",
@@ -279,10 +277,28 @@
       "required_fields": [
         "activity_id",
         "molecule_id",
+        "assay_id",
         "target_id",
         "publication_id",
+        "record_id",
+        "src_id",
+        "canonical_smiles",
+        "target_organism",
+        "target_taxonomy_id",
+        "assay_description",
+        "bao_endpoint",
+        "bao_format",
+        "bao_label",
+        "relation",
+        "value",
+        "units",
         "standard_value",
-        "pchembl_value"
+        "standard_flag",
+        "pchembl_value",
+        "uo_units",
+        "journal",
+        "publication_year",
+        "_state"
       ]
     },
     "table": {

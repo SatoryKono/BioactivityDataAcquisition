@@ -223,6 +223,25 @@ class TestPushMetricsToGateway:
         call_kwargs = mock_push.call_args[1]
         assert call_kwargs["grouping_key"] == {"pipeline": "chembl_activity"}
 
+    def test_push_success_with_multiple_grouping_labels(self):
+        """Should preserve all low-cardinality grouping labels."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+        ) as mock_push:
+            push_metrics_to_gateway(
+                gateway="localhost:9091",
+                grouping_key={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                },
+            )
+
+        call_kwargs = mock_push.call_args[1]
+        assert call_kwargs["grouping_key"] == {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+        }
+
     def test_push_default_gateway(self):
         """Should use localhost:9091 when gateway is None."""
         with patch(

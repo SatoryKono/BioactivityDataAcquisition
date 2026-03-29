@@ -78,6 +78,7 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 ## 7. Documentation
 *   **`docs/00-project/RULES.md`**: The Project Constitution. Read before major changes.
 *   **`AGENT.md`**: Specialized instructions for AI agents.
+*   **`docs/03-guides/dashboards/dashboard-extension-llm.md`**: Read before changing `grafana/dashboards/*.json`, dashboard navigation, or Loki/Tempo drilldown behavior.
 
 ## 8. Operational Policies (CRITICAL)
 *   **Loading Strategy**: `full_scan_only` is strictly for publications. All other high-volume entities MUST use `null` (default incremental) to enable checkpointing.

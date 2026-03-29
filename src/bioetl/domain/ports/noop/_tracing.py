@@ -97,3 +97,7 @@ class NoOpTracing:
     def close(self) -> None:
         """No-op implementation — no spans to flush or resources to release."""
         return None
+
+    def flush(self) -> None:
+        """No-op implementation — no spans to flush."""
+        return None

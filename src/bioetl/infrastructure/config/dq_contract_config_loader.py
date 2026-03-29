@@ -11,16 +11,6 @@ from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 
-_CONTRACT_FIELDS = (
-    "contract_ref",
-    "contract_version",
-    "rule_bundle_version",
-    "default_disposition_policy",
-    "disposition_overrides",
-    "strictness_mode",
-)
-
-
 def _resolve_identity_data(registry_entry: JsonDict) -> JsonDict:
     """Extract normalized identity payload from registry entry."""
     identity_data = registry_entry.get("identity", {})
@@ -54,55 +44,6 @@ def _resolve_threshold(
     if isinstance(nested, dict) and threshold_name in nested:
         return float(nested[threshold_name])
     return default
-
-
-def _build_legacy_contract_fields(raw_config: JsonDict) -> JsonDict:
-    """Extract contract-aware fields from legacy DQ config payload."""
-    contract_fields = {
-        field: raw_config[field] for field in _CONTRACT_FIELDS if field in raw_config
-    }
-    if not contract_fields:
-        return {}
-
-    thresholds = raw_config.get("thresholds", {})
-    threshold_map = thresholds if isinstance(thresholds, dict) else {}
-    contract_fields.update(
-        {
-            "soft_fail_threshold": threshold_map.get("soft_fail", 0.05),
-            "hard_fail_threshold": threshold_map.get("hard_fail", 0.20),
-            "strict_validation": raw_config.get("strict_validation", False),
-            "invalid_record_policy": raw_config.get(
-                "invalid_record_policy", "quarantine"
-            ),
-        }
-    )
-    return contract_fields
-
-
-def _try_load_legacy_dq_config_with_contracts(
-    *,
-    configs_root: Path,
-    provider: str,
-    entity: str,
-) -> JsonDict | None:
-    """Try to load contract fields from legacy entity/provider DQ config files."""
-    entity_dq_path = configs_root / "entities" / provider / f"{entity}_dq.yaml"
-    if entity_dq_path.exists():
-        entity_dq_config = _load_yaml_file(entity_dq_path)
-        contract_fields = _build_legacy_contract_fields(entity_dq_config)
-        if contract_fields:
-            return contract_fields
-
-    provider_dq_path = configs_root / "providers" / f"{provider}_dq.yaml"
-    if provider_dq_path.exists():
-        provider_dq_config = _load_yaml_file(provider_dq_path)
-        contract_fields = _build_legacy_contract_fields(provider_dq_config)
-        if contract_fields:
-            return contract_fields
-
-    return None
-
-
 def _parse_disposition_overrides(
     overrides: dict[str, str] | None,
 ) -> dict[str, DQDisposition]:
@@ -279,7 +220,7 @@ class DQContractConfigLoader:
         entity: str,
         pipeline_name: str,
     ) -> JsonDict:
-        """Load contract configuration from file with legacy fallback."""
+        """Load contract configuration from contract files only."""
         patterns = _build_contract_patterns(
             contracts_dir=self._contracts_dir,
             provider=provider,
@@ -289,14 +230,6 @@ class DQContractConfigLoader:
         for pattern in patterns:
             if pattern.exists():
                 return _load_contract_payload(pattern)
-
-        legacy_config = _try_load_legacy_dq_config_with_contracts(
-            configs_root=self._configs_root,
-            provider=provider,
-            entity=entity,
-        )
-        if legacy_config:
-            return legacy_config
 
         raise FileNotFoundError(
             f"DQ contract config not found for {pipeline_name}. "

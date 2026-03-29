@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import pytest
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.source_normalizers.source import (
     _apply_batch_to_pagination,
     _copy_keys,
     _get_dict_or_empty,
     _normalize_health_check,
     _normalize_rate_limit,
+    _reject_retired_source_pagination_aliases,
     _sync_timeout_aliases,
     normalize_source_config,
 )
@@ -48,25 +50,25 @@ class TestNormalizeRateLimit:
 
     def test_with_api_key_to_authenticated(self) -> None:
         """Should copy with_api_key to authenticated."""
-        source: dict = {"rate_limit": {"with_api_key": {"rate": 10}}}
+        source: JsonDict = {"rate_limit": {"with_api_key": {"rate": 10}}}
         _normalize_rate_limit(source)
         assert source["rate_limit"]["authenticated"] == {"rate": 10}
 
     def test_authenticated_to_with_api_key(self) -> None:
         """Should copy authenticated to with_api_key."""
-        source: dict = {"rate_limit": {"authenticated": {"rate": 5}}}
+        source: JsonDict = {"rate_limit": {"authenticated": {"rate": 5}}}
         _normalize_rate_limit(source)
         assert source["rate_limit"]["with_api_key"] == {"rate": 5}
 
     def test_no_rate_limit_key(self) -> None:
         """Should be a no-op when rate_limit is absent."""
-        source: dict = {"other": "val"}
+        source: JsonDict = {"other": "val"}
         _normalize_rate_limit(source)
         assert "rate_limit" not in source
 
     def test_rate_limit_not_dict(self) -> None:
         """Should be a no-op when rate_limit is not a dict."""
-        source: dict = {"rate_limit": "invalid"}
+        source: JsonDict = {"rate_limit": "invalid"}
         _normalize_rate_limit(source)
         assert source["rate_limit"] == "invalid"
 
@@ -76,18 +78,18 @@ class TestNormalizeHealthCheck:
 
     def test_syncs_timeout_in_health_check(self) -> None:
         """Should sync timeout aliases in health_check."""
-        source: dict = {"health_check": {"timeout": 10}}
+        source: JsonDict = {"health_check": {"timeout": 10}}
         _normalize_health_check(source)
         assert source["health_check"]["timeout_sec"] == 10
 
     def test_no_health_check(self) -> None:
         """Should be a no-op when health_check is absent."""
-        source: dict = {"other": "val"}
+        source: JsonDict = {"other": "val"}
         _normalize_health_check(source)
 
     def test_health_check_not_dict(self) -> None:
         """Should be a no-op when health_check is not a dict."""
-        source: dict = {"health_check": "invalid"}
+        source: JsonDict = {"health_check": "invalid"}
         _normalize_health_check(source)
         assert source["health_check"] == "invalid"
 
@@ -114,7 +116,7 @@ class TestCopyKeys:
     def test_copies_existing_keys(self) -> None:
         """Should copy keys from src to dst via setdefault."""
         src = {"a": 1, "b": 2}
-        dst: dict = {}
+        dst: JsonDict = {}
         _copy_keys(src, dst, ("a", "b"))
         assert dst == {"a": 1, "b": 2}
 
@@ -128,7 +130,7 @@ class TestCopyKeys:
     def test_skips_missing_keys(self) -> None:
         """Should skip keys not in src."""
         src = {"a": 1}
-        dst: dict = {}
+        dst: JsonDict = {}
         _copy_keys(src, dst, ("a", "b"))
         assert dst == {"a": 1}
 
@@ -138,45 +140,79 @@ class TestApplyBatchToPagination:
 
     def test_batch_dict_with_batch_size(self) -> None:
         """Should extract batch_size from dict."""
-        pagination: dict = {}
+        pagination: JsonDict = {}
         _apply_batch_to_pagination({"batch_size": 500}, pagination)
         assert pagination.get("id_batch_size") == 500
 
     def test_batch_dict_with_size_alias(self) -> None:
         """Should use 'size' as alias for batch_size."""
-        pagination: dict = {}
+        pagination: JsonDict = {}
         _apply_batch_to_pagination({"size": 200}, pagination)
         assert pagination.get("id_batch_size") == 200
 
     def test_batch_dict_with_api_batch_size(self) -> None:
         """Should use 'api_batch_size' as alias."""
-        pagination: dict = {}
+        pagination: JsonDict = {}
         _apply_batch_to_pagination({"api_batch_size": 100}, pagination)
         assert pagination.get("id_batch_size") == 100
 
     def test_batch_dict_with_page_size(self) -> None:
         """Should extract page_size."""
-        pagination: dict = {}
+        pagination: JsonDict = {}
         _apply_batch_to_pagination({"page_size": 50}, pagination)
         assert pagination.get("page_size") == 50
 
     def test_batch_dict_with_max_url_length(self) -> None:
         """Should extract max_url_length."""
-        pagination: dict = {}
+        pagination: JsonDict = {}
         _apply_batch_to_pagination({"max_url_length": 2000}, pagination)
         assert pagination.get("max_url_length") == 2000
 
     def test_batch_int(self) -> None:
         """Should use int batch as batch_size and id_batch_size."""
-        pagination: dict = {}
+        pagination: JsonDict = {}
         _apply_batch_to_pagination(300, pagination)
         assert pagination.get("id_batch_size") == 300
 
     def test_batch_none(self) -> None:
         """Should be a no-op when batch is None."""
-        pagination: dict = {}
+        pagination: JsonDict = {}
         _apply_batch_to_pagination(None, pagination)
         assert pagination == {}
+
+
+class TestRejectRetiredSourcePaginationAliases:
+    """Tests for explicit retired pagination alias rejection."""
+
+    def test_rejects_retired_provider_pagination_aliases(self) -> None:
+        """Provider-level retired pagination aliases should fail fast."""
+        source: JsonDict = {}
+        provider_config = {
+            "batch_size": 25,
+            "page_size": 250,
+            "cursor_pagination": True,
+        }
+
+        with pytest.raises(
+            ValueError, match="Retired source provider pagination aliases"
+        ) as exc_info:
+            _reject_retired_source_pagination_aliases(source, provider_config)
+
+        assert "batch_size" in str(exc_info.value)
+        assert "page_size" in str(exc_info.value)
+        assert "cursor_pagination" in str(exc_info.value)
+
+    def test_rejects_retired_source_root_pagination_aliases(self) -> None:
+        """Source-root retired pagination aliases should fail fast."""
+        source: JsonDict = {"batch_size": 25}
+        provider_config: JsonDict = {}
+
+        with pytest.raises(
+            ValueError, match="Retired source root pagination aliases"
+        ) as exc_info:
+            _reject_retired_source_pagination_aliases(source, provider_config)
+
+        assert "batch_size" in str(exc_info.value)
 
 
 class TestNormalizeSourceConfig:

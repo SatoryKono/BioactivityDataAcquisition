@@ -9,8 +9,9 @@ Use this checklist when reviewing new or modified pipelines.
 ## 1. Architecture & Structure (RULES.md §1)
 
 - [ ] Pipeline follows Ports & Adapters pattern
-- [ ] Code located in `src/bioetl/application/pipelines/{provider}/{entity}/`
-- [ ] Stage files present: `extract.py`, `transform.py`, `validate.py`, `export.py`
+- [ ] Transformer and provider-specific helpers located under `src/bioetl/application/pipelines/{provider}/`
+- [ ] Pipeline exposes the current module layout (`{entity}_transformer.py` or `transformer.py`) instead of legacy stage files
+- [ ] Pipeline registration/factory wiring updated for the new entity
 - [ ] Interfaces defined via `typing.Protocol` in `domain/ports/` package (import from facade)
 - [ ] No I/O operations in domain layer
 
@@ -152,7 +153,8 @@ Use this checklist when reviewing new or modified pipelines.
 
 ## 15. Documentation
 
-- [ ] Pipeline docs in `docs/application/pipelines/{provider}/{entity}/`
+- [ ] Provider reference doc exists in `docs/04-reference/providers/{provider}/{entity}.md`
+- [ ] Detailed pipeline spec/xwalk docs updated in `docs/04-reference/pipelines/` when they exist for this entity
 - [ ] README with overview
 - [ ] Schema documentation
 - [ ] Error handling notes

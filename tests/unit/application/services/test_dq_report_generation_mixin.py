@@ -50,7 +50,10 @@ def _make_context(**overrides: object) -> DQReportContext:
 
 @pytest.fixture
 def service() -> DQReportService:
-    return DQReportService(logger=MagicMock())
+    return DQReportService(
+        logger=MagicMock(),
+        metrics=MagicMock(),
+    )
 
 
 @pytest.fixture
@@ -125,6 +128,15 @@ async def test_generate_bronze_report_skips_when_analyzer_or_writer_missing(
         reason="analyzer or writer not available",
         run_id=context.run_id,
     )
+    service._metrics.increment_counter.assert_called_once_with(
+        "dq_report_skipped_total",
+        1,
+        {
+            "pipeline": context.pipeline_name,
+            "stage": "bronze",
+            "reason": "analyzer_or_writer_unavailable",
+        },
+    )
 
 
 @pytest.mark.unit
@@ -144,6 +156,42 @@ async def test_generate_bronze_report_skips_when_data_missing(
         "bronze_dq_report_skipped",
         reason="no bronze data available",
         run_id=context.run_id,
+    )
+    service._metrics.increment_counter.assert_called_once_with(
+        "dq_report_skipped_total",
+        1,
+        {
+            "pipeline": context.pipeline_name,
+            "stage": "bronze",
+            "reason": "no_bronze_data",
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generate_silver_report_emits_generated_metric(
+    service: DQReportService,
+    silver_config: MagicMock,
+    tmp_path: Path,
+) -> None:
+    service._silver_analyzer = MagicMock()
+    service._silver_analyzer.analyze.return_value = _make_report("PASS")
+    service._report_writer = AsyncMock()
+    expected_path = tmp_path / "silver-report.json"
+    service._report_writer.write_silver_report.return_value = expected_path
+    context = _make_context()
+
+    result = await service._generate_silver_report(context, silver_config)
+
+    assert result == expected_path
+    service._metrics.increment_counter.assert_called_once_with(
+        "dq_report_generated_total",
+        1,
+        {
+            "pipeline": context.pipeline_name,
+            "stage": "silver",
+        },
     )
 
 

@@ -65,7 +65,7 @@ def build_common_service_ports(
     metadata_coordinator: MetadataCoordinator | None = None,
     silver_validator: SilverValidatorPort | None = None,
     create_dq_services_fn: Callable[
-        [Settings, PipelineYamlConfig, LoggerPort],
+        [Settings, PipelineYamlConfig, LoggerPort, MetricsPort | None],
         JsonDict,
     ],
     create_metrics_fn: Callable[[Settings], MetricsPort] = create_metrics,
@@ -93,7 +93,12 @@ def build_common_service_ports(
         quarantine=create_quarantine_fn(settings),
         metrics_port=metrics_port,
         tracer=resolve_tracer(tracer),
-        dq_services=create_dq_services_fn(settings, pipeline_config, logger),
+        dq_services=create_dq_services_fn(
+            settings,
+            pipeline_config,
+            logger,
+            metrics_port,
+        ),
     )
 
 

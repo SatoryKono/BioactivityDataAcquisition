@@ -222,7 +222,9 @@ def test_not_in_nav_growth_detects_increase_against_reduced_baseline(
 ) -> None:
     module = _load_module()
 
-    current_not_in_nav = module.get_not_in_nav_docs()
+    current_not_in_nav = sorted(
+        module._filter_not_in_nav_growth_scope(set(module.get_not_in_nav_docs()))
+    )
     assert current_not_in_nav, "Expected non-empty not-in-nav set for this test"
 
     reduced_baseline = tmp_path / "not_in_nav_baseline.txt"

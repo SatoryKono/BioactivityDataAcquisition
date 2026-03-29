@@ -23,29 +23,9 @@
       "includeVars": true,
       "keepTime": true,
       "targetBlank": false,
-      "title": "1. Overview",
+      "title": "Back to Overview",
       "type": "link",
       "url": "/d/bioetl-overview-v2"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "4. Data Quality",
-      "type": "link",
-      "url": "/d/bioetl-dq-v2"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "3. Provider Health",
-      "type": "link",
-      "url": "/d/bioetl-provider-health-v2"
     },
     {
       "asDropdown": false,
@@ -195,7 +175,7 @@
       },
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [1h]))",
+          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [1h])) or vector(0)",
           "refId": "A"
         }
       ],
@@ -254,7 +234,7 @@
       },
       "targets": [
         {
-          "expr": "sum(max_over_time(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[1h])) + sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\",severity=\"critical\"}[1h])) + sum(increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\",severity=\"critical\"}[1h])) + sum(increase(bioetl_silver_validation_failures_total[1h]))",
+          "expr": "((sum(max_over_time(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[1h])) > bool 0) or vector(0)) + ((sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\",severity=\"critical\"}[1h])) > bool 0) or vector(0)) + ((sum(increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\",severity=\"critical\"}[1h])) > bool 0) or vector(0)) + ((sum(increase(bioetl_silver_validation_failures_total[1h])) > bool 0) or vector(0))",
           "refId": "A"
         }
       ],
@@ -313,7 +293,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[1h])) + sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\",status=\"failed\"}[1h])) + sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\",disposition=~\".*_incompatible\"}[1h])) + sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[1h]))",
+          "expr": "((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[1h])) > bool 0) or vector(0)) + ((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\",status=\"failed\"}[1h])) > bool 0) or vector(0)) + ((sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\",disposition=~\".*_incompatible\"}[1h])) > bool 0) or vector(0)) + ((sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[1h])) > bool 0) or vector(0))",
           "refId": "A"
         }
       ],
@@ -372,7 +352,7 @@
       },
       "targets": [
         {
-          "expr": "sum((sum by (provider) (increase(bioetl_health_check_failures_total[15m])) / clamp_min(sum by (provider) (increase(bioetl_health_check_success_total[15m]) + increase(bioetl_health_check_failures_total[15m])), 1)) > bool 0.2) + sum((sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[1h])) > bool 0))",
+          "expr": "(sum((sum by (provider) (increase(bioetl_health_check_failures_total[15m])) / clamp_min(sum by (provider) (increase(bioetl_health_check_success_total[15m]) + increase(bioetl_health_check_failures_total[15m])), 1)) > bool 0.2) or vector(0)) + (sum((sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[1h])) > bool 0)) or vector(0))",
           "refId": "A"
         }
       ],
@@ -431,11 +411,317 @@
       },
       "targets": [
         {
-          "expr": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > bool 86400)",
+          "expr": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > bool 86400) or vector(0)",
           "refId": "A"
         }
       ],
       "title": "Freshness Alert Conditions",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 23
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_dq_context_build_failures_total{pipeline=~\"$pipeline\"}[24h])) or vector(0))",
+          "refId": "A"
+        }
+      ],
+      "title": "DQ Context Failures (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 23
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_dq_report_skipped_total{pipeline=~\"$pipeline\"}[24h])) or vector(0))",
+          "refId": "A"
+        }
+      ],
+      "title": "DQ Reports Skipped (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 23
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_dq_report_generated_total{pipeline=~\"$pipeline\"}[24h])) or vector(0))",
+          "refId": "A"
+        }
+      ],
+      "title": "DQ Reports Generated (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(bioetl_control_plane_reads_total[1h])) by (store, status)",
+          "legendFormat": "{{store}} / {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Control-plane Lookup Outcomes (1h)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[1h]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Control-plane Lookup p95 (1h)",
       "type": "stat"
     },
     {
@@ -559,12 +845,12 @@
       },
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [5m]))",
+          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [5m])) or vector(0)",
           "legendFormat": "warnings",
           "refId": "A"
         },
         {
-          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [5m]))",
+          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [5m])) or vector(0)",
           "legendFormat": "unstructured",
           "refId": "B"
         }

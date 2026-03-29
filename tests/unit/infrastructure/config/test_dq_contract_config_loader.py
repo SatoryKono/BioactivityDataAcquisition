@@ -104,3 +104,53 @@ def test_loader_supports_flat_threshold_fields(temp_contract_root: Path) -> None
     dq_config = loader.load_dq_config_for_pipeline("chembl_activity")
     assert dq_config.soft_fail_threshold == 0.04
     assert dq_config.hard_fail_threshold == 0.31
+
+
+def test_loader_does_not_fallback_to_legacy_dq_files(tmp_path: Path) -> None:
+    """Missing contract files should fail fast without consulting legacy *_dq files."""
+    registry_payload = {
+        "version": "1.0",
+        "entries": {
+            "chembl.activity": {
+                "identity": {
+                    "contract_version": "1.0.0",
+                    "compatibility_level": "major",
+                    "schema_hash": "a" * 64,
+                    "dq_policy_ref": "chembl.dq.v1",
+                    "rule_bundle_version": "dq-rules.v1.0",
+                },
+                "status": "active",
+                "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
+                "published_artifacts": [
+                    "../../docs/04-reference/contracts/gold/chembl_activity_v1.0.json"
+                ],
+                "supported_versions": ["1.0.0"],
+                "migration_guides": {},
+                "last_updated": "2026-03-25T00:00:00Z",
+                "owners": ["chembl-team"],
+                "dq_policy_ref": "chembl.dq.v1",
+                "rule_bundle_version": "dq-rules.v1.0",
+            }
+        },
+    }
+    _write_yaml(tmp_path / "base" / "contract_registry.yaml", registry_payload)
+    _write_yaml(
+        tmp_path / "entities" / "chembl" / "activity_dq.yaml",
+        {
+            "contract_ref": "chembl.activity",
+            "default_disposition_policy": "warn",
+            "strictness_mode": "moderate",
+        },
+    )
+    _write_yaml(
+        tmp_path / "providers" / "chembl_dq.yaml",
+        {
+            "contract_ref": "chembl.activity",
+            "default_disposition_policy": "warn",
+            "strictness_mode": "moderate",
+        },
+    )
+
+    loader = DQContractConfigLoader(tmp_path)
+    with pytest.raises(FileNotFoundError, match="DQ contract config not found"):
+        _ = loader.load_dq_config_for_pipeline("chembl_activity")

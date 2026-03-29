@@ -5,19 +5,15 @@ from __future__ import annotations
 from bioetl.domain.types import JsonDict
 
 
-def _merge_data_schema_into_config(
+def _project_schema_fields_into_config(
     config: JsonDict,  # Any: YAML config has heterogeneous values
     data_schema: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> None:
-    """Merge loaded data schema (column_groups, silver, gold) into config."""
+    """Project runtime-relevant schema fields into pipeline config."""
     if "column_groups" in data_schema:
         config["column_groups"] = data_schema["column_groups"]
     if "content_hash" in data_schema:
         config["content_hash"] = data_schema["content_hash"]
-    if "silver" in data_schema:
-        config.setdefault("data_schema", {})["silver"] = data_schema["silver"]
-    if "gold" in data_schema:
-        config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
 
 
 def _validate_column_groups(
@@ -93,12 +89,12 @@ def apply_pipeline_schema_normalization(
     config_path: object,
     unified_schema: JsonDict | None = None,  # Any: YAML values are heterogeneous
 ) -> None:
-    """Normalize pipeline schema from canonical `unified_schema`."""
+    """Validate and project canonical `unified_schema` into pipeline config."""
     _ = entity_config, config_path
 
     if unified_schema:
         _validate_schema_config(unified_schema, "entities/*/*:schema")
-        _merge_data_schema_into_config(config, unified_schema)
+        _project_schema_fields_into_config(config, unified_schema)
         return
 
 

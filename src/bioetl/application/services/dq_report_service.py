@@ -21,6 +21,7 @@ if TYPE_CHECKING:
         GoldDQAnalyzerPort,
         GoldDQConfigPort,
         LoggerPort,
+        MetricsPort,
         SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
@@ -30,6 +31,7 @@ class DQReportService(DQReportGenerationMixin):
     """Orchestrate DQ report generation across Medallion layers."""
 
     _logger: LoggerPort
+    _metrics: MetricsPort | None
     _bronze_analyzer: BronzeDQAnalyzerPort | None
     _silver_analyzer: SilverDQAnalyzerPort | None
     _gold_analyzer: GoldDQAnalyzerPort | None
@@ -42,8 +44,10 @@ class DQReportService(DQReportGenerationMixin):
         silver_analyzer: SilverDQAnalyzerPort | None = None,
         gold_analyzer: GoldDQAnalyzerPort | None = None,
         report_writer: DQReportWriterPort | None = None,
+        metrics: MetricsPort | None = None,
     ) -> None:
         self._logger = logger
+        self._metrics = metrics
         self._bronze_analyzer = bronze_analyzer
         self._silver_analyzer = silver_analyzer
         self._gold_analyzer = gold_analyzer

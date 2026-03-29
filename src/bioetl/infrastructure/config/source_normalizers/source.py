@@ -153,11 +153,11 @@ def _apply_batch_to_pagination(
         pagination.setdefault("id_batch_size", batch)
 
 
-def _normalize_source_pagination(
+def _reject_retired_source_pagination_aliases(
     source: JsonDict,  # Any: normalizer; input types vary
     provider_config: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
-    """Normalize pagination and batch configuration."""
+    """Reject retired source pagination aliases before normalization."""
     retired_root_keys = [key for key in _RETIRED_SOURCE_ROOT_KEYS if key in source]
     if retired_root_keys:
         raise ValueError(
@@ -176,6 +176,14 @@ def _normalize_source_pagination(
             "Use source.provider_config.pagination.* instead."
         )
 
+
+def _normalize_source_pagination(
+    source: JsonDict,  # Any: normalizer; input types vary
+    provider_config: JsonDict,  # Any: normalizer; input types vary
+) -> None:
+    """Normalize pagination and batch configuration."""
+    _reject_retired_source_pagination_aliases(source, provider_config)
+
     pagination: JsonDict = _get_dict_or_empty(  # Any: values are heterogeneous
         provider_config, "pagination"
     )  # Any: normalizer; input types vary
@@ -185,6 +193,58 @@ def _normalize_source_pagination(
 
     if pagination:
         provider_config["pagination"] = pagination
+
+
+def _prepare_source_transport_sections(
+    source: JsonDict,  # Any: normalizer; input types vary
+) -> tuple[
+    JsonDict,  # Any: normalizer; input types vary
+    JsonDict,  # Any: normalizer; input types vary
+    JsonDict,  # Any: normalizer; input types vary
+]:
+    """Split source payload into mutable source, provider_config, and api sections."""
+    source_norm = source.copy()
+
+    provider_config = source_norm.get("provider_config")
+    if not isinstance(provider_config, dict):
+        provider_config = {}
+
+    api_norm = _get_dict_or_empty(source_norm, "api")
+    if provider_config:
+        _copy_keys(provider_config, api_norm, (*_ENDPOINT_KEYS, *_AUTH_KEYS))
+    if api_norm:
+        source_norm["api"] = api_norm
+
+    api = source_norm.pop("api", None)
+    if not isinstance(api, dict):
+        api = {}
+
+    return source_norm, provider_config, api
+
+
+def _normalize_source_transport(
+    source: JsonDict,  # Any: normalizer; input types vary
+    provider_config: JsonDict,  # Any: normalizer; input types vary
+    api: JsonDict,  # Any: normalizer; input types vary
+) -> None:
+    """Normalize accepted transport-facing source sections."""
+    _normalize_source_rate_limits(source)
+    _normalize_source_endpoints(source, provider_config, api)
+    _normalize_source_auth(provider_config, api)
+    _normalize_source_pagination(source, provider_config)
+
+
+def _finalize_source_sections(
+    config: JsonDict,  # Any: normalizer; input types vary
+    source: JsonDict,  # Any: normalizer; input types vary
+    provider_config: JsonDict,  # Any: normalizer; input types vary
+) -> JsonDict:
+    """Write normalized source sections back into the config payload."""
+    if provider_config:
+        source["provider_config"] = provider_config
+
+    config["source"] = source
+    return config
 
 
 def normalize_source_config(
@@ -200,31 +260,9 @@ def normalize_source_config(
     if not isinstance(source, dict):
         return config
 
-    source_norm = source.copy()
-
-    provider_config = source_norm.get("provider_config")
-    if not isinstance(provider_config, dict):
-        provider_config = {}
-
-    api_norm = _get_dict_or_empty(source_norm, "api")
-    if provider_config:
-        _copy_keys(provider_config, api_norm, (*_ENDPOINT_KEYS, *_AUTH_KEYS))
-    if api_norm:
-        source_norm["api"] = api_norm
-    api = source_norm.pop("api", None)
-    if not isinstance(api, dict):
-        api = {}
-
-    _normalize_source_rate_limits(source_norm)
-    _normalize_source_endpoints(source_norm, provider_config, api)
-    _normalize_source_auth(provider_config, api)
-    _normalize_source_pagination(source_norm, provider_config)
-
-    if provider_config:
-        source_norm["provider_config"] = provider_config
-
-    config["source"] = source_norm
-    return config
+    source_norm, provider_config, api = _prepare_source_transport_sections(source)
+    _normalize_source_transport(source_norm, provider_config, api)
+    return _finalize_source_sections(config, source_norm, provider_config)
 
 
 __all__ = ["normalize_source_config"]

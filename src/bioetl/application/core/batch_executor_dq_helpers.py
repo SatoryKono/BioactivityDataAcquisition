@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.services.dq_report_service import DQReportContext
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.domain.types import BronzeRecord, GoldRecord
 
 _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
@@ -85,6 +85,9 @@ def build_dataframe_from_records(
     *,
     records: list[dict[str, object]],
     logger: LoggerPort,
+    metrics: MetricsPort | None = None,
+    pipeline: str | None = None,
+    stage: str = "other",
 ) -> object | None:
     """Build Polars dataframe from records, returning None on failure."""
     if not records:
@@ -110,7 +113,18 @@ def build_dataframe_from_records(
             records_count=len(records),
             error_type=type(dataframe_error).__name__,
             reason="dq_dataframe_build_failed",
+            stage=stage,
         )
+        if metrics is not None and pipeline is not None:
+            metrics.increment_counter(
+                "dq_context_build_failures_total",
+                1,
+                {
+                    "pipeline": pipeline,
+                    "stage": stage,
+                    "reason": "dq_dataframe_build_failed",
+                },
+            )
         return None
 
 
@@ -149,15 +163,15 @@ def build_dq_report_context(
     records_fetched: int,
     records_quarantined: int,
     build_dataframe: Callable[
-        [list[BronzeRecord] | list[GoldRecord]],
+        [list[BronzeRecord] | list[GoldRecord], str],
         object | None,
     ],
 ) -> DQReportContext:
     """Build DQ report context from accumulated execution samples."""
     from bioetl.application.services.dq_report_service import DQReportContext
 
-    silver_data = build_dataframe(silver_records)
-    gold_data = build_dataframe(gold_records)
+    silver_data = build_dataframe(silver_records, "silver")
+    gold_data = build_dataframe(gold_records, "gold")
     primary_keys = list(config.table_config.primary_keys)
     soft_threshold, hard_threshold = get_dq_thresholds(config)
 

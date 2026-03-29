@@ -1,8 +1,8 @@
 # Diagram Descriptions Index
 
-_Автогенерация: 2026-03-28T19:30:50+03:00_
+_Автогенерация: 2026-03-29T14:07:02+03:00_
 
-- Карточек описаний: **278**
+- Карточек описаний: **292**
 - Формат публикации: family-oriented index для derived description cards.
 - Source of truth: individual description cards под `descriptions/<family>/`.
 
@@ -17,10 +17,10 @@ _Автогенерация: 2026-03-28T19:30:50+03:00_
 
 ## Family Overview
 
-- Architecture cards: **52**
+- Architecture cards: **57**
 - Class cards: **16**
 - Foundation cards: **54**
-- View cards: **156** across **32** parent families
+- View cards: **165** across **38** parent families
 
 ## Architecture Cards
 
@@ -76,6 +76,11 @@ _Автогенерация: 2026-03-28T19:30:50+03:00_
 - [18-lock-checkpoint-shutdown](architecture/18-lock-checkpoint-shutdown.md)
 - [18a-lock-system](architecture/18a-lock-system.md)
 - [18b-checkpoint-shutdown](architecture/18b-checkpoint-shutdown.md)
+- [19-control-plane-artifacts](architecture/19-control-plane-artifacts.md)
+- [20-data-traceability-runtime](architecture/20-data-traceability-runtime.md)
+- [21-idempotent-processing-guards](architecture/21-idempotent-processing-guards.md)
+- [22-data-operations-observability](architecture/22-data-operations-observability.md)
+- [23-reproducible-run-contract](architecture/23-reproducible-run-contract.md)
 
 ## Class Diagram Cards
 
@@ -145,6 +150,7 @@ _Автогенерация: 2026-03-28T19:30:50+03:00_
 - [01-full-system-component](views/01-full-system-component-full.md) - 5 cards: dataflow, domain, full, infra, overview
 - [01-high-level](views/01-high-level-full.md) - 5 cards: dataflow, domain, full, infra, overview
 - [02-medallion](views/02-medallion-full.md) - 5 cards: dataflow, domain, full, infra, overview
+- [03-medallion-data-flow](views/03-medallion-data-flow-full.md) - 2 cards: full, overview
 - [04-domain-layer-class-diagram](views/04-domain-layer-class-diagram-full.md) - 5 cards: dataflow, domain, full, infra, overview
 - [05-layers-interaction](views/05-layers-interaction-full.md) - 5 cards: dataflow, domain, full, infra, overview
 - [05-pipeline-lifecycle-states](views/05-pipeline-lifecycle-states-full.md) - 5 cards: dataflow, domain, full, infra, overview
@@ -154,9 +160,14 @@ _Автогенерация: 2026-03-28T19:30:50+03:00_
 - [08-domain-ddd](views/08-domain-ddd-full.md) - 5 cards: dataflow, domain, full, infra, overview
 - [10-infrastructure-layer-class-diagram](views/10-infrastructure-layer-class-diagram-full.md) - 5 cards: dataflow, domain, full, infra, overview
 - [12-local-deployment-architecture](views/12-local-deployment-architecture-full.md) - 5 cards: dataflow, domain, full, infra, overview
+- [13-port-protocol-contracts](views/13-port-protocol-contracts-full.md) - 2 cards: full, overview
 - [14-provider-health-states](views/14-provider-health-states-full.md) - 5 cards: dataflow, domain, full, infra, overview
 - [15-dq-check-workflow](views/15-dq-check-workflow-full.md) - 5 cards: dataflow, domain, full, infra, overview
+- [16-transformer-hierarchy](views/16-transformer-hierarchy-full.md) - 2 cards: full, overview
 - [21-activity-entity-data-flow](views/21-activity-entity-data-flow-full.md) - 5 cards: dataflow, domain, full, infra, overview
+- [21-idempotent-processing-guards-overview](views/21-idempotent-processing-guards-overview.md)
+- [23-reproducible-run-contract-overview](views/23-reproducible-run-contract-overview.md)
+- [24-data-runtime-quality-map-overview](views/24-data-runtime-quality-map-overview.md)
 - [26-hexagonal-ports-adapters](views/26-hexagonal-ports-adapters-full.md) - 5 cards: dataflow, domain, full, infra, overview
 - [28-composition-root-di-graph](views/28-composition-root-di-graph-full.md) - 5 cards: dataflow, domain, full, infra, overview
 - [29-composite-pipeline-workflow](views/29-composite-pipeline-workflow-full.md) - 5 cards: dataflow, domain, full, infra, overview

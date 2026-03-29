@@ -323,11 +323,14 @@ bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-conf
 ```
 docs/02-architecture/diagrams/
   architecture/
-    *.mmd           # source diagrams (52)
+    *.mmd           # source diagrams (57)
     svg/*.svg       # rendered vector (scalable)
     png/*.png       # rendered raster (300 DPI)
   class-diagrams/
-    *.mmd           # source diagrams (19)
+    *.mmd           # source diagrams (94 total:
+                    #   19 curated families
+                    #   1 frontmatter sandbox copy
+                    #   74 supplemental package slices)
     svg/*.svg
     png/*.png
   foundation/
@@ -335,10 +338,19 @@ docs/02-architecture/diagrams/
     svg/*.svg
     png/*.png       # default 300 DPI, auto high-res for large @nodes diagrams,
                     # plus optional per-file @png-scale/@png-dpi overrides
+  descriptions/
+    **/*.md         # published narrative cards and family indexes
+  bundles/
+    *.bundle.md     # derived Markdown bundles
+    *.bundle.pdf    # print-safe PDF exports
+    *.bundle.docx   # editable DOCX exports
+  manifests/
+    *.txt           # smoke, quality-gate, and compatibility manifests
+  tooling/
+    render.sh       # unified renderer entrypoint
   theme/
     mermaid-config.json   # colours, fonts, spacing
     custom.css            # fine-tuned SVG styling
-  render.sh               # unified render script
   README.md               # this file
 ```
 

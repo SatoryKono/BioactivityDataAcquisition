@@ -28,7 +28,7 @@ jobs:
 
       - name: Render diagrams
         run: |
-          bash docs/02-architecture/mmd-diagrams/render.sh \
+          bash docs/02-architecture/diagrams/tooling/render.sh \
             --puppeteer /tmp/puppeteer-config.json
 
       - name: Validate rendered artifacts (DIAG-T010..T012)
@@ -40,31 +40,31 @@ jobs:
       - name: Validate SVG text visibility (DIAG-T014..T015)
         run: |
           python3 scripts/diagrams/check_svg_text_visibility.py \
-            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+            --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 
       - name: Visual smoke baseline drift (DIAG-T026)
         run: |
           python3 scripts/diagrams/check_diagram_visual_smoke.py \
-            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+            --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 
       - name: Run PR quality-gates baseline (DIAG-T018..T023)
         run: |
           mkdir -p reports/diagrams
           python3 scripts/diagrams/check_diagram_quality_gates.py \
-            --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt \
+            --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt \
             --json-out reports/diagrams/diagram-quality-report-nightly.json \
             --markdown-out reports/diagrams/diagram-quality-report-nightly.md
 
       - name: Diagram policy lint report for nightly budget checks
         run: |
-          python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json \
+          python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \
             > reports/diagrams/diagram-lint-report-nightly.json || true
 
       - name: Run Phase 2 nightly suite (DIAG-T024..T029)
         run: |
           python3 scripts/diagrams/run_diagram_nightly_suite.py \
-            --source-manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt \
-            --render-manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt \
+            --source-manifest docs/02-architecture/diagrams/manifests/quality-gates.txt \
+            --render-manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt \
             --puppeteer /tmp/puppeteer-config.json \
             --json-out reports/diagrams/diagram-nightly-phase2.json \
             --markdown-out reports/diagrams/diagram-nightly-phase2.md
@@ -149,7 +149,7 @@ jobs:
       - name: Canary render of reference source pool (DIAG-T030)
         run: |
           mkdir -p /tmp/diagram-canary/svg
-          manifest="docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt"
+          manifest="docs/02-architecture/diagrams/manifests/quality-gates.txt"
           while IFS= read -r src; do
             [ -z "$src" ] && continue
             case "$src" in
@@ -158,8 +158,8 @@ jobs:
             stem="$(basename "${src%.*}")"
             out="/tmp/diagram-canary/svg/${stem}-${{ matrix.label }}.svg"
             mmdc -i "$src" -o "$out" \
-              -c docs/02-architecture/mmd-diagrams/theme/mermaid-config.json \
-              --cssFile docs/02-architecture/mmd-diagrams/theme/custom.css \
+              -c docs/02-architecture/diagrams/theme/mermaid-config.json \
+              --cssFile docs/02-architecture/diagrams/theme/custom.css \
               -p /tmp/puppeteer-config.json
           done < "$manifest"
 

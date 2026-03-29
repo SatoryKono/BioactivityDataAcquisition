@@ -5,14 +5,18 @@
 1. `grafana/dashboards/*.json` — фактическая конфигурация Grafana и финальный source of truth по panels/links/variables.
 2. `docs/03-guides/dashboards/dashboard-v2-usage.md` — короткий операторский сценарий: какой dashboard открыть первым, куда смотреть, как делать drilldown.
 3. `docs/03-guides/dashboards/variables-guide.md` — фактические template variables и их PromQL sources.
-4. `docs/03-guides/dashboards/dashboard-v2-updates.md` — bounded audit/change log по shipped JSON.
-5. `docs/05-operations/01-monitoring-guide.md` — operational runbook: alert-backed troubleshooting path и ссылки на runbooks.
-6. `grafana/README.md` — setup/reference документ по стеку Prometheus/Grafana/Loki/Tempo, а не основной operator quick-start.
+4. `docs/03-guides/dashboards/dashboard-extension-human.md` — краткое руководство для человека, который расширяет shipped dashboards.
+5. `docs/03-guides/dashboards/dashboard-extension-llm.md` — краткий playbook для LLM/AI-агента: JSON invariants, nav model, docs cascade, verification.
+6. `docs/03-guides/dashboards/dashboard-v2-updates.md` — bounded audit/change log по shipped JSON.
+7. `docs/05-operations/01-monitoring-guide.md` — operational runbook: alert-backed troubleshooting path и ссылки на runbooks.
+8. `grafana/README.md` — setup/reference документ по стеку Prometheus/Grafana/Loki/Tempo, а не основной operator quick-start.
 
 ## Как читать этот набор
 
 - Для ежедневной работы: начните с `dashboard-v2-usage.md`, потом при необходимости откройте `01-monitoring-guide.md`.
 - Для проверки filters и variable sources: используйте `variables-guide.md`.
+- Для изменения dashboard человеком: используйте `dashboard-extension-human.md`.
+- Для изменения dashboard через AI/LLM: используйте `dashboard-extension-llm.md`.
 - Для понимания, что именно недавно менялось в JSON: используйте `dashboard-v2-updates.md`.
 - Для инфраструктурной настройки, provisioning и metric catalog: используйте `grafana/README.md`.
 

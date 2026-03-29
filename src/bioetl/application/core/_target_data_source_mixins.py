@@ -284,7 +284,7 @@ async def _yield_wrapped_fetch_records(
     iterator = cast(
         "AsyncIterator[RecordT]",
         cast(
-            "Any", data_source
+            "Any", data_source  # Any: wrapped adapter fetch signature is provider-specific.
         ).fetch(  # Any: wrapped adapter fetch signature is provider-specific.
             **fetch_kwargs
         ),

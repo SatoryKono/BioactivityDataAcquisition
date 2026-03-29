@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.7 | Дата: 2026-03-28 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v5.24*
+*Версия: 1.0.8 | Дата: 2026-03-29 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v5.24*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; Claude сохраняет отдельную runtime-specific copy в `.claude/agents/ORCHESTRATION.md` и может оставаться на другой версии без automatic drift claim.
 
@@ -49,6 +49,7 @@
 | Bootstrap | `src/bioetl/composition/bootstrap/` |
 | Configs (unified) | `configs/entities/{provider}/{entity}.yaml` |
 | Configs (composite) | `configs/composites/{entity}.yaml` |
+| Dashboard extension guide (LLM) | `docs/03-guides/dashboards/dashboard-extension-llm.md` |
 
 ### Evidence anchors
 
@@ -136,6 +137,14 @@ uv run python -m scripts.data checksums --generate
 uv run python -m scripts.ci quality-gate
 uv run python -m scripts.ci run-tests
 ```
+
+### Dashboard-specific note
+
+Если задача затрагивает `grafana/dashboards/*.json`, dashboard links,
+drilldown в Loki/Tempo или operator flow между `1. Overview`, `2. Runtime`,
+`3. Provider Health`, `4. Data Quality`, сначала прочитай:
+
+- `docs/03-guides/dashboards/dashboard-extension-llm.md`
 
 ---
 

@@ -27,8 +27,12 @@ from bioetl.domain.schemas.chembl.publication_similarity import (
     PublicationSimilaritySchema,
 )
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
+from bioetl.domain.schemas.chembl.subcellular_fraction import (
+    SubcellularFractionSchema,
+)
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.chembl.tissue import TissueSchema
 from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
 from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
 from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
@@ -56,8 +60,10 @@ SILVER_SCHEMAS = {
     "chembl_publication": ChemblPublicationSchema,
     "chembl_publication_similarity": PublicationSimilaritySchema,
     "chembl_publication_term": PublicationTermSchema,
+    "chembl_subcellular_fraction": SubcellularFractionSchema,
     "chembl_target": TargetSchema,
     "chembl_target_component": TargetComponentSchema,
+    "chembl_tissue": TissueSchema,
     # PubChem
     "pubchem_compound": PubchemMoleculeSchema,
     # UniProt

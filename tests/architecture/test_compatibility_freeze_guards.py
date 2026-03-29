@@ -95,11 +95,7 @@ CLEANUP_COMMAND_INTERNAL_MODULE = (
 VACUUM_COMMAND_INTERNAL_MODULE = (
     "bioetl.interfaces.cli.commands.domains.maintenance.vacuum"
 )
-TEST_FACING_RUN_HELPER_SEAM_MODULES = frozenset(
-    {
-        "bioetl.interfaces.cli.commands.run_result_presenter",
-    }
-)
+TEST_FACING_RUN_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_RUN_ALL_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_RUN_COMPOSITE_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_QUARANTINE_HELPER_SEAM_MODULES = frozenset(

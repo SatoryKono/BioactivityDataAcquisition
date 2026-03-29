@@ -87,10 +87,10 @@ class CliRunOrchestrationService:
         vacuum_after_run: bool | None,
         vacuum_retention_days: int | None,
         debug: bool,
-        enable_tracing: bool | None,
         use_cached_bronze: bool,
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
+        enable_tracing: bool | None = None,
     ) -> RunOptions:
         """Build RunOptions from CLI input.
 
@@ -148,10 +148,10 @@ class CliRunOrchestrationService:
         debug: bool,
         health_server: bool,
         health_port: int,
-        enable_tracing: bool | None,
         use_cached_bronze: bool,
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
+        enable_tracing: bool | None = None,
     ) -> RunPreparationResult:
         """Validate raw CLI inputs and build a prepared execution request."""
         validation = self.validate_start_offset(

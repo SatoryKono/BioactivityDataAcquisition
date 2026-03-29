@@ -14,7 +14,6 @@ from dataclasses import dataclass
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
-from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
@@ -37,10 +36,6 @@ if TYPE_CHECKING:
         MetadataWriterPort,
         SilverDQAnalyzerPort,
     )
-
-
-_OBSERVABILITY_CLOSE_ERRORS = OPERATION_ERRORS
-
 
 @dataclass(frozen=True)
 class PipelineService:
@@ -134,7 +129,12 @@ class PipelineService:
         await self.aclose()
 
     async def aclose(self) -> None:
-        """Gracefully close all I/O resources and observability."""
+        """Gracefully close async I/O resources.
+
+        Observability is intentionally closed later by ``PipelineRunner`` after the
+        outer pipeline spans have exited. Closing tracing here would shut the OTel
+        provider down while ``pipeline.run`` / ``pipeline.<name>`` are still open.
+        """
         self.logger.info("Closing pipeline services...", stage="cleanup")
 
         # Close async I/O services
@@ -156,22 +156,7 @@ class PipelineService:
                     "Error during service shutdown", stage="cleanup", error=result
                 )
 
-        # Close observability (sync, best-effort)
-        self._close_observability()
-
         self.logger.info("Pipeline services closed.", stage="cleanup")
-
-    def _close_observability(self) -> None:
-        """Close metrics and tracing resources (sync, idempotent)."""
-        try:
-            self.metrics.close()
-        except _OBSERVABILITY_CLOSE_ERRORS as e:
-            self.logger.warning("Error closing metrics", stage="cleanup", error=str(e))
-
-        try:
-            self.tracing.close()
-        except _OBSERVABILITY_CLOSE_ERRORS as e:
-            self.logger.warning("Error closing tracing", stage="cleanup", error=str(e))
 
 
 __all__ = ["PipelineService"]

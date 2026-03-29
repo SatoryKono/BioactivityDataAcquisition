@@ -267,6 +267,109 @@ def test_variable_query_sources(dashboard_path):
         )
 
 
+def test_summary_queries_use_zero_fallbacks() -> None:
+    """Runtime/provider summary panels should show zero instead of no-data."""
+    expected_panel_snippets = {
+        "bioetl-overview-v2.json": {
+            "Manifest Write Failures (24h)": "or vector(0)",
+            "Ledger Append Failures (24h)": "or vector(0)",
+            "Checkpoint Incompatibilities (24h)": "or vector(0)",
+            "Lineage Refs Missing (24h)": "or vector(0)",
+        },
+        "bioetl-runtime.json": {
+            "Unstructured Logs (1h)": "or vector(0)",
+            "DQ Alert Conditions (1h)": "or vector(0)",
+            "Control-plane Alert Conditions (1h)": "or vector(0)",
+            "Provider Alert Conditions (1h)": "or vector(0)",
+            "Freshness Alert Conditions": "or vector(0)",
+            "Log Hygiene Trend (5m)": "or vector(0)",
+        },
+        "bioetl-provider-health-v2.json": {
+            "Health Check Successes (15m)": "or vector(0)",
+            "Provider Failure Rate (15m)": "or vector(0)",
+            "Health Checks (15m)": "or vector(0)",
+        },
+        "bioetl-dq-v2.json": {
+            "Records Quarantined (24h)": "or vector(0)",
+            "Soft Threshold Exceeded (24h)": "or vector(0)",
+            "Silver Validation Failures (24h)": "or vector(0)",
+        },
+    }
+
+    for dashboard_name, panel_expectations in expected_panel_snippets.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for panel_title, expected_snippet in panel_expectations.items():
+            panel = panels.get(panel_title)
+            assert panel is not None, (
+                f"Dashboard {dashboard_name} missing panel {panel_title!r}"
+            )
+            expressions = [
+                target.get("expr", "")
+                for target in panel.get("targets", [])
+                if isinstance(target.get("expr"), str)
+            ]
+            assert expressions, (
+                f"Dashboard {dashboard_name} panel {panel_title!r} has no expressions"
+            )
+            assert any(expected_snippet in expr for expr in expressions), (
+                f"Dashboard {dashboard_name} panel {panel_title!r} must include "
+                f"{expected_snippet!r} to render zero instead of no-data"
+            )
+
+
+def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
+    """Count-like summary panels should avoid fractional event semantics."""
+    expected_panel_snippets = {
+        "bioetl-overview-v2.json": {
+            "Manifest Write Failures (24h)": "round(",
+            "Ledger Append Failures (24h)": "round(",
+            "Checkpoint Incompatibilities (24h)": "round(",
+            "Lineage Refs Missing (24h)": "round(",
+        },
+        "bioetl-provider-health-v2.json": {
+            "Health Check Successes (15m)": "round(",
+            "Health Checks (15m)": "round(",
+        },
+        "bioetl-dq-v2.json": {
+            "Records Quarantined (24h)": "round(",
+            "Soft Threshold Exceeded (24h)": "round(",
+            "Silver Validation Failures (24h)": "round(",
+            "Lineage Refs Missing (24h)": "round(",
+        },
+        "bioetl-runtime.json": {
+            "DQ Alert Conditions (1h)": "> bool 0",
+            "Control-plane Alert Conditions (1h)": "> bool 0",
+        },
+    }
+
+    for dashboard_name, panel_expectations in expected_panel_snippets.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for panel_title, expected_snippet in panel_expectations.items():
+            panel = panels.get(panel_title)
+            assert panel is not None, (
+                f"Dashboard {dashboard_name} missing panel {panel_title!r}"
+            )
+            expressions = [
+                target.get("expr", "")
+                for target in panel.get("targets", [])
+                if isinstance(target.get("expr"), str)
+            ]
+            assert any(expected_snippet in expr for expr in expressions), (
+                f"Dashboard {dashboard_name} panel {panel_title!r} must include "
+                f"{expected_snippet!r} for stable count semantics"
+            )
+
+
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
@@ -341,6 +444,8 @@ def test_overview_dashboard_contains_control_plane_and_lineage_metrics():
     required_metrics = [
         "bioetl_control_plane_manifest_writes_total",
         "bioetl_control_plane_ledger_appends_total",
+        "bioetl_control_plane_reads_total",
+        "bioetl_control_plane_read_duration_seconds",
         "bioetl_checkpoint_compatibility_events_total",
         "bioetl_lineage_fragments_emitted_total",
     ]
@@ -372,6 +477,8 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         "bioetl_data_freshness_seconds",
         "bioetl_control_plane_manifest_writes_total",
         "bioetl_control_plane_ledger_appends_total",
+        "bioetl_control_plane_reads_total",
+        "bioetl_control_plane_read_duration_seconds",
         "bioetl_checkpoint_compatibility_events_total",
         "bioetl_lineage_refs_missing_total",
         "bioetl_health_check_failures_total",

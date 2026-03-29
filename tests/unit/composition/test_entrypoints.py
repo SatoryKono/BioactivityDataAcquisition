@@ -340,9 +340,15 @@ class TestRunPipelineIntegration:
         """Test run_pipeline returns success result."""
         from bioetl.composition.entrypoints import run_pipeline
 
-        with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
-            return_value=mock_runner,
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                return_value=mock_runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ) as mock_push,
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
 
@@ -353,6 +359,11 @@ class TestRunPipelineIntegration:
         assert result.records_silver == 95
         assert result.records_quarantined == 5
         assert result.error_message is None
+        mock_push.assert_called_once_with(
+            run_label="bioetl",
+            pipeline_name="test_pipeline",
+            run_type="incremental",
+        )
 
     @pytest.mark.asyncio
     async def test_run_pipeline_shutdown(self, mock_runner):
@@ -364,14 +375,21 @@ class TestRunPipelineIntegration:
             side_effect=PipelineShutdownError("Shutdown requested")
         )
 
-        with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
-            return_value=mock_runner,
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                return_value=mock_runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ) as mock_push,
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
 
         assert result.status == PipelineRunResult.SHUTDOWN
         assert result.error_message is None  # Shutdown is not an error
+        mock_push.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_run_pipeline_failure(self, mock_runner):
@@ -380,15 +398,26 @@ class TestRunPipelineIntegration:
 
         mock_runner.run = AsyncMock(side_effect=RuntimeError("Connection failed"))
 
-        with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
-            return_value=mock_runner,
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                return_value=mock_runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ) as mock_push,
         ):
             result = await run_pipeline("test_pipeline", RunOptions(run_type="rebuild"))
 
         assert result.status == PipelineRunResult.FAILED
         assert result.error_message == "Connection failed"
         assert result.run_type == "rebuild"
+        mock_push.assert_called_once_with(
+            run_label="bioetl",
+            pipeline_name="test_pipeline",
+            run_type="rebuild",
+        )
 
     @pytest.mark.asyncio
     async def test_run_pipeline_preserves_metrics_on_failure(self, mock_runner):
@@ -415,14 +444,40 @@ class TestRunPipelineIntegration:
         """Test run_pipeline tracks execution duration."""
         from bioetl.composition.entrypoints import run_pipeline
 
-        with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
-            return_value=mock_runner,
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                return_value=mock_runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ),
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
 
         assert result.duration_seconds >= 0
         assert result.started_at <= result.completed_at
+
+    @pytest.mark.asyncio
+    async def test_run_pipeline_ignores_pushgateway_failure(self, mock_runner):
+        """Best-effort metrics publication must not fail the pipeline."""
+        from bioetl.composition.entrypoints import run_pipeline
+
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                return_value=mock_runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=False,
+            ) as mock_push,
+        ):
+            result = await run_pipeline("test_pipeline", RunOptions())
+
+        assert result.status == PipelineRunResult.SUCCESS
+        mock_push.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_run_pipeline_requires_metrics_readable_runner(self):

@@ -1,4 +1,4 @@
-"""Unit tests for run_result_presenter.py.
+"""Unit tests for canonical run result presenter helpers.
 
 Tests echo_run_result for all PipelineRunResult statuses,
 covering the previously uncovered lines 27, 35-36.
@@ -9,7 +9,9 @@ from __future__ import annotations
 import pytest
 
 from bioetl.application.services import PipelineRunResult, RunResult
-from bioetl.interfaces.cli.commands.run_result_presenter import echo_run_result
+from bioetl.interfaces.cli.commands.domains.run.result_presenter import (
+    echo_run_result,
+)
 
 
 def _make_result(**kwargs: object) -> RunResult:

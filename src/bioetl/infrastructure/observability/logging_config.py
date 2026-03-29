@@ -206,7 +206,7 @@ def _resolve_log_file_path() -> Path | None:
     return _DEFAULT_LOG_FILE
 
 
-def _build_shared_processors() -> list[Any]:
+def _build_shared_processors() -> list[Any]:  # Any: structlog processors have heterogeneous callable signatures.
     """Build processors shared by structlog and foreign stdlib loggers."""
     return [
         structlog.contextvars.merge_contextvars,
@@ -239,7 +239,7 @@ def configure_logging(
             return False
 
         shared_processors = _build_shared_processors()
-        renderer: Any = (
+        renderer: Any = (  # Any: renderer may be JSONRenderer or ConsoleRenderer with different concrete types.
             structlog.processors.JSONRenderer()
             if json_format
             else structlog.dev.ConsoleRenderer()
@@ -263,7 +263,7 @@ def configure_logging(
             ],
         )
 
-        handlers = [logging.StreamHandler(sys.stdout)]
+        handlers: list[logging.Handler] = [logging.StreamHandler(sys.stdout)]
         log_path = _resolve_log_file_path()
         if log_path is not None:
             log_path.parent.mkdir(parents=True, exist_ok=True)
