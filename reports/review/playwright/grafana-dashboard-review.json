@@ -1,8 +1,8 @@
 [
   {
     "name": "bioetl-simple",
-    "url": "http://172.26.16.1:3000/d/bioetl-simple",
-    "screenshot": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-simple.png",
+    "dashboardPath": "/d/bioetl-simple",
+    "screenshotPath": "output/playwright/bioetl-simple.png",
     "missingTexts": [],
     "errorMarkers": [],
     "noDataCount": 0,
@@ -10,8 +10,8 @@
   },
   {
     "name": "bioetl-overview-v2",
-    "url": "http://172.26.16.1:3000/d/bioetl-overview-v2",
-    "screenshot": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-overview-v2.png",
+    "dashboardPath": "/d/bioetl-overview-v2",
+    "screenshotPath": "output/playwright/bioetl-overview-v2.png",
     "missingTexts": [],
     "errorMarkers": [],
     "noDataCount": 4,
@@ -19,8 +19,8 @@
   },
   {
     "name": "bioetl-dq-v2",
-    "url": "http://172.26.16.1:3000/d/bioetl-dq-v2",
-    "screenshot": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-dq-v2.png",
+    "dashboardPath": "/d/bioetl-dq-v2",
+    "screenshotPath": "output/playwright/bioetl-dq-v2.png",
     "missingTexts": [],
     "errorMarkers": [],
     "noDataCount": 7,
@@ -28,8 +28,8 @@
   },
   {
     "name": "bioetl-provider-health-v2",
-    "url": "http://172.26.16.1:3000/d/bioetl-provider-health-v2",
-    "screenshot": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-provider-health-v2.png",
+    "dashboardPath": "/d/bioetl-provider-health-v2",
+    "screenshotPath": "output/playwright/bioetl-provider-health-v2.png",
     "missingTexts": [],
     "errorMarkers": [],
     "noDataCount": 2,

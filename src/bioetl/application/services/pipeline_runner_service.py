@@ -286,6 +286,7 @@ class PipelineRunnerService:
             records_silver=metrics.get("records_silver", 0),
             records_gold=metrics.get("records_gold", 0),
             records_quarantined=metrics.get("records_quarantined", 0),
+            records_filtered_out=metrics.get("records_filtered_out", 0),
             started_at=started_at,
             completed_at=outcome.completed_at,
             error_message=outcome.error_message,

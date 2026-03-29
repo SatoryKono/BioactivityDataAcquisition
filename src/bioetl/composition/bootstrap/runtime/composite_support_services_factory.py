@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import LoggerPort, QuarantinePort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
     from bioetl.infrastructure.config import Settings
 
 
@@ -83,7 +83,10 @@ class CompositeSupportServicesFactory:
         load_field_group_registry: Callable[
             [str, LoggerPort], FieldGroupRegistry | None
         ],
-        create_dq_report_service: Callable[[LoggerPort, Settings], DQReportService],
+        create_dq_report_service: Callable[
+            [LoggerPort, Settings, MetricsPort],
+            DQReportService,
+        ],
         checkpoint_manager_cls: type[
             CompositeCheckpointService
         ] = CompositeCheckpointService,
@@ -108,8 +111,9 @@ class CompositeSupportServicesFactory:
             load_field_group_registry: Callable that accepts a composite pipeline name
                 and a ``LoggerPort`` and returns a configured ``FieldGroupRegistry``
                 or ``None``.
-            create_dq_report_service: Callable that accepts a ``LoggerPort`` and
-                ``Settings`` and returns a ``DQReportService`` instance.
+            create_dq_report_service: Callable that accepts a ``LoggerPort``,
+                ``Settings``, and ``MetricsPort`` and returns a ``DQReportService``
+                instance.
             checkpoint_manager_cls: ``CompositeCheckpointService`` class (or
                 compatible subclass) used to create the checkpoint manager; allows
                 injection of a test double.
@@ -147,6 +151,7 @@ class CompositeSupportServicesFactory:
         runtime_management_services = build_runtime_management_services(
             config=self._config,
             runtime=self._runtime,
+            infra_context=self._infra,
             settings=self._infra.settings,
             logger=self._infra.logger,
             run_id=self._infra.run_id,

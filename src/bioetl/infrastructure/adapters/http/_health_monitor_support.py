@@ -117,7 +117,7 @@ def emit_health_check_observability(
     metrics: MetricsPort,
     result: HealthCheckResult,
 ) -> None:
-    """Emit health-check latency, gauge, and success/failure counters."""
+    """Emit health-check latency, gauge, and outcome counters."""
     metrics.observe_histogram(
         "health_check_latency_ms",
         result.latency_ms,
@@ -131,6 +131,12 @@ def emit_health_check_observability(
     if result.status == HealthStatus.HEALTHY:
         metrics.increment_counter(
             "health_check_success_total",
+            1,
+            labels={"provider": result.provider},
+        )
+    elif result.status == HealthStatus.DEGRADED:
+        metrics.increment_counter(
+            "health_check_degraded_total",
             1,
             labels={"provider": result.provider},
         )

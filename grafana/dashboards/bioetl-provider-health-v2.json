@@ -184,12 +184,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
       ],
-      "title": "Health Check Successes (15m)",
+      "title": "Healthy Checks",
       "type": "stat"
     },
     {
@@ -244,12 +244,12 @@
       },
       "targets": [
         {
-          "expr": "(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])) or vector(0)) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])) or vector(0)), 1)",
+          "expr": "(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)), 1)",
           "legendFormat": "failure_rate",
           "refId": "A"
         }
       ],
-      "title": "Provider Failure Rate (15m)",
+      "title": "Provider Failure Rate",
       "type": "gauge"
     },
     {
@@ -275,7 +275,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 16,
+        "w": 8,
         "x": 0,
         "y": 8
       },
@@ -296,12 +296,68 @@
       },
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])) or vector(0)))",
+          "expr": "round((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
       ],
-      "title": "Health Checks (15m)",
+      "title": "Health Checks Total",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 8
+      },
+      "id": 105,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Degraded Checks",
       "type": "stat"
     },
     {
@@ -404,7 +460,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_health_check_success_total, provider)",
+        "definition": "label_values(bioetl_provider_health_status, provider)",
         "hide": 0,
         "includeAll": true,
         "label": "Provider",
@@ -412,7 +468,7 @@
         "name": "provider",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_health_check_success_total, provider)",
+          "query": "label_values(bioetl_provider_health_status, provider)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

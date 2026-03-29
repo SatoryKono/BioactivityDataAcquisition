@@ -6,6 +6,7 @@ from prometheus_client import Counter, Gauge, Histogram
 
 __all__ = [
     "HEALTH_CHECK_DURATION_SECONDS",
+    "HEALTH_CHECK_DEGRADED_TOTAL",
     "HEALTH_CHECK_FAILURES_TOTAL",
     "HEALTH_CHECK_LATENCY_MS",
     "HEALTH_CHECK_LATENCY_SECONDS",
@@ -67,13 +68,19 @@ HEALTH_CHECK_MODE_LATENCY_MS = Histogram(
 
 HEALTH_CHECK_SUCCESS_TOTAL = Counter(
     "bioetl_health_check_success_total",
-    "Total successful health checks",
+    "Total health checks that returned HEALTHY",
+    ["provider"],
+)
+
+HEALTH_CHECK_DEGRADED_TOTAL = Counter(
+    "bioetl_health_check_degraded_total",
+    "Total health checks that returned DEGRADED",
     ["provider"],
 )
 
 HEALTH_CHECK_FAILURES_TOTAL = Counter(
     "bioetl_health_check_failures_total",
-    "Total failed health checks",
+    "Total health checks that failed or returned UNHEALTHY",
     ["provider"],
 )
 

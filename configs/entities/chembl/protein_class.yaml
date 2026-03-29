@@ -114,6 +114,10 @@ filters:
   entity: protein_class
   input_filter:
     enabled: false
+  silver_filters:
+    required_fields:
+    - class_level
+    - protein_class_id
   gold_filters:
     columns:
       downgraded:

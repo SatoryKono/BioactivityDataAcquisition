@@ -263,6 +263,10 @@ filters:
     filter_field: pmid
     batch_size: 100
     fallback_column: title
+  silver_filters:
+    required_fields:
+    - pmid
+    - title
   gold_filters:
     ranges:
       publication_year:

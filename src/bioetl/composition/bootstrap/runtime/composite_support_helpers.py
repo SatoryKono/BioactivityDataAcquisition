@@ -13,7 +13,7 @@ from bioetl.infrastructure.config.field_group_loader import (
 if TYPE_CHECKING:
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.config import Settings
 
 FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
@@ -72,6 +72,7 @@ def _load_field_group_registry(
 def _create_dq_report_service(
     logger: LoggerPort,
     settings: Settings,
+    metrics: MetricsPort,
 ) -> DQReportService:
     """Create DQ report service for composite pipelines.
 
@@ -81,6 +82,7 @@ def _create_dq_report_service(
     Args:
         logger: Structured logger forwarded to both the writer and service.
         settings: Global settings providing data_dir for report output paths.
+        metrics: Metrics port used for DQ lifecycle counters.
 
     Returns:
         DQReportService ready for composite pipeline DQ report generation.
@@ -96,4 +98,5 @@ def _create_dq_report_service(
     return DQReportService(
         logger=logger,
         report_writer=report_writer,
+        metrics=metrics,
     )

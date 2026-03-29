@@ -167,6 +167,10 @@ filters:
     column_name: canonical_smiles
     filter_field: smiles
     batch_size: 1
+  silver_filters:
+    required_fields:
+    - batch_date
+    - molecule_id
   gold_filters:
     required_fields:
     - molecule_id

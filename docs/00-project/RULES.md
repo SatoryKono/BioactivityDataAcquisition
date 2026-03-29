@@ -1402,7 +1402,7 @@ grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 make install      # создание venv, установка зависимостей
 make test         # локальный стабильный suite с coverage (без E2E)
 make lint         # ruff + mypy
-make run-local    # запуск сэмплового пайплайна на фикстурах
+make run-local    # запуск сэмплового пайплайна (chembl_activity, limit=10)
 ```
 
 ### 9.2. Окружение

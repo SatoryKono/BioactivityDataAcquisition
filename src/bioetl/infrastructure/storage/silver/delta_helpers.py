@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Any, NoReturn
 
 import pyarrow as pa
@@ -200,6 +200,37 @@ async def _write_plain_delta_request(
         None,
         lambda: load_module().write_deltalake(**kwargs),
     )
+
+
+def _is_duplicate_field_name_schema_error(exc: DeltaError) -> bool:
+    """Return whether a Delta error matches the known duplicate-field quirk."""
+    return "Duplicate field name:" in str(exc)
+
+
+async def _evolve_delta_schema_with_empty_append(
+    *,
+    load_module: Callable[[], Any],  # Any: lazy-loaded deltalake module
+    request: _DeltaWriteRequest,
+) -> _DeltaWriteRequest:
+    """Pre-evolve an existing Delta table schema without writing extra rows."""
+    loop = asyncio.get_running_loop()
+    empty_request = replace(
+        request,
+        validated_mode=SilverWriteMode.APPEND,
+        arrow_data=request.arrow_data.slice(0, 0),
+        schema_mode="merge",
+    )
+    await loop.run_in_executor(
+        None,
+        lambda: load_module().write_deltalake(
+            **_build_plain_delta_write_kwargs(
+                empty_request,
+                mode="append",
+                schema_mode="merge",
+            )
+        ),
+    )
+    return replace(request, merge_schema=False)
 
 
 async def _load_delta_table(

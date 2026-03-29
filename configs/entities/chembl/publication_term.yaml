@@ -115,6 +115,11 @@ filters:
     doc_type: PUBLICATION
     year__gte: 1950
     year__lte: 2050
+  silver_filters:
+    required_fields:
+    - publication_id
+    - term
+    - term_type
   gold_filters:
     columns:
       term_type:

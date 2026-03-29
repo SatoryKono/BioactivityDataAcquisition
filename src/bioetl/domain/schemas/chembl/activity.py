@@ -233,10 +233,10 @@ class ActivitySchema(ETLRecordSchema):
         nullable=True, description="Publication DOI."
     )
     publication_pmid: Series[str] | None = pa.Field(
-        nullable=True, description="Publication PubMed ID."
+        nullable=True, description="Publication PMID."
     )
     publication_pmc_id: Series[str] | None = pa.Field(
-        nullable=True, description="Publication PubMed Central ID."
+        nullable=True, description="Publication PMC ID."
     )
     publication_year: Series[int] = pa.Field(
         nullable=False,

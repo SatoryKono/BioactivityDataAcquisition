@@ -9,6 +9,10 @@ from bioetl.application.core.base_transformer import TransformerDependencyContex
 from bioetl.application.core.base_transformer.contract_policy import (
     DefaultContractPolicy,
 )
+from bioetl.application.core.base_transformer.structural_policy import (
+    NoOpStructuralPolicy,
+    StructuralPolicyProtocol,
+)
 from bioetl.domain.ports import (
     ContractPolicyPort,
     DataNormalizationPort,
@@ -45,6 +49,7 @@ def build_transformer_dependencies(
     content_hash_include_fields: Collection[str] | None = None,
     content_hash_exclude_fields: Collection[str] | None = None,
     contract_policy_loader: ContractPolicyLoader | None = None,
+    structural_policy: StructuralPolicyProtocol | None = None,
 ) -> TransformerDependencyContext:
     """Build explicit collaborator bundle for transformer construction in composition."""
 
@@ -78,6 +83,11 @@ def build_transformer_dependencies(
             else DataNormalizationService()
         ),
         contract_policy=resolved_contract_policy,
+        structural_policy=(
+            structural_policy
+            if structural_policy is not None
+            else NoOpStructuralPolicy()
+        ),
     )
 
 

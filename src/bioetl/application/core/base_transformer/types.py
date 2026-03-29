@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, runtime_checkable
 
+from bioetl.application.core.base_transformer.structural_policy import (
+    StructuralPolicyProtocol,
+)
 from bioetl.domain.ports import (
     ContractPolicyPort,
     DataNormalizationPort,
@@ -35,6 +38,7 @@ class TransformerDependencyContext:
     pii_hasher: PiiHasherPort
     data_normalizer: DataNormalizationPort
     contract_policy: ContractPolicyPort
+    structural_policy: StructuralPolicyProtocol
 
 
 @runtime_checkable

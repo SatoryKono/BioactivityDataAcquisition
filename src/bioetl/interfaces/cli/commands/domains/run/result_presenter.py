@@ -25,8 +25,12 @@ def echo_run_result(result: RunResult) -> None:
         echo_info(f"  - Silver records:      {result.records_silver}")
         if result.records_gold > 0:
             echo_info(f"  - Gold records:        {result.records_gold}")
+        if result.records_filtered_out > 0:
+            echo_info(f"  - Silver filter rejects: {result.records_filtered_out}")
+        else:
+            echo_info("  - Silver filter rejects: 0")
         if result.records_quarantined > 0:
-            echo_warning(f"  - Quarantined (DQ):    {result.records_quarantined}")
+            echo_info(f"  - Quarantined (DQ):    {result.records_quarantined}")
         else:
             echo_info("  - Quarantined (DQ):    0")
         return

@@ -82,8 +82,9 @@ NULLABLE_MAP: Final[dict[str, str]] = {
 FILTER_FAIL_SINK_MAP: Final[dict[str, str]] = {
     "-": "not_applicable",
     "No dedicated reject table found; record skipped before Silver write": (
-        "dropped_before_silver_write"
+        "quarantine"
     ),
+    "dropped_before_silver_write": "quarantine",
     "Excluded upstream by ChEMBL extraction parameters": "excluded_upstream",
 }
 SILVER_NORMALISATION_MAP: Final[dict[str, str]] = {

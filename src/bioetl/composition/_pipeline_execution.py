@@ -311,6 +311,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         records_silver=int(metrics.get("records_silver", 0)),
         records_gold=int(metrics.get("records_gold", 0)),
         records_quarantined=int(metrics.get("records_quarantined", 0)),
+        records_filtered_out=int(metrics.get("records_filtered_out", 0)),
         started_at=started_at,
         completed_at=completed_at,
         error_message=error_message,

@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
+import sys
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.services import config_dq_service as service_mod
-from bioetl.application.services.config_dq_service import ConfigDQService
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
@@ -21,6 +22,32 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     RuntimeOverrideSnapshot,
 )
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
+
+
+def _load_config_dq_service_module() -> object:
+    module_path = (
+        Path(__file__).resolve().parents[4]
+        / "src"
+        / "bioetl"
+        / "application"
+        / "services"
+        / "config_dq_service.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "_test_config_dq_service_module",
+        module_path,
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load module spec for {module_path}")
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+service_mod = _load_config_dq_service_module()
+ConfigDQService = service_mod.ConfigDQService
 
 
 def _sample_artifact_dict(*, effective_hash: str = "effective-hash") -> dict[str, object]:

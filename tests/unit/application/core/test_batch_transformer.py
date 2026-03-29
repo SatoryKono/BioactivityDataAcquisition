@@ -27,7 +27,10 @@ from bioetl.application.core.transformer_runtime.state import (
     create_transform_aggregation_state,
 )
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.core.quarantine_manager import (
+    FilteredQuarantineEntry,
+    QuarantineManager,
+)
 from bioetl.domain.config import DQConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -305,7 +308,7 @@ class TestBatchTransformerTransform:
         with pytest.raises(LockLostError):
             await transformer.transform_batch(records, batch_id)
 
-    async def test_transform_batch_quasi_quarantines_filtered_out(
+    async def test_transform_batch_quarantines_filtered_out(
         self,
         mock_context,
         mock_error_classifier,
@@ -314,7 +317,7 @@ class TestBatchTransformerTransform:
         gold_filter_callback,
         gold_transform_callback,
     ):
-        """Test that filter exclusions are captured in quasi-quarantine."""
+        """Test that filter exclusions are captured in quarantine storage."""
         from bioetl.application.core.base_transformer import FilteredOutError
 
         async def filtered_transform(ctx, record, index):
@@ -458,7 +461,7 @@ class TestBatchTransformerAggregationHelpers:
             attempt=RecordTransformOutcome(
                 silver_record=None,
                 gold_record=None,
-                filtered_entry=({"id": "filtered"}, "why"),
+                filtered_entry=FilteredQuarantineEntry({"id": "filtered"}, "why"),
             ),
         )
         apply_transform_outcome_to_state(
@@ -487,7 +490,7 @@ class TestBatchTransformerAggregationHelpers:
     ) -> None:
         """Batch finalizer should flush quarantine state and build result."""
         state = create_transform_aggregation_state()
-        state.filtered_records.append(({"id": "filtered"}, "why"))
+        state.filtered_records.append(FilteredQuarantineEntry({"id": "filtered"}, "why"))
         state.dq_records.append(({"id": "bad"}, MagicMock(), "error"))
         state.filtered_out_count = 1
         state.quarantined_count = 1

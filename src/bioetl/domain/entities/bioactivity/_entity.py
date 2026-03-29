@@ -93,9 +93,6 @@ class Bioactivity(BaseEntity):
     uo_units: str | None = None
 
     journal: str | None = None
-    publication_doi: str | None = None
-    publication_pmid: str | None = None
-    publication_pmc_id: str | None = None
     publication_year: int | None = None
 
     activity_comment: str | None = None

@@ -9,6 +9,11 @@ import argparse
 import sys
 from pathlib import Path
 
+DEFAULT_EXCLUDE_DIRS = (
+    "__pycache__,.git,.venv,node_modules,.ai,data,.worktrees,"
+    ".cache,.pytest_cache,reports,logs,output"
+)
+
 
 def get_project_root() -> Path:
     """Get the project root directory.
@@ -95,8 +100,11 @@ Examples:
     parser.add_argument(
         "--exclude-dirs",
         type=str,
-        default="__pycache__,.git,.venv,node_modules,.ai,data",
-        help="Comma-separated directories to exclude (default: __pycache__,.git,.venv,node_modules,.ai,data)",
+        default=DEFAULT_EXCLUDE_DIRS,
+        help=(
+            "Comma-separated directories to exclude "
+            f"(default: {DEFAULT_EXCLUDE_DIRS})"
+        ),
     )
 
     parser.add_argument(
@@ -511,7 +519,11 @@ def generate_tree_structure(
     for idx, item in enumerate(items):
         is_last_item = idx == len(items) - 1
 
-        if item.is_dir():
+        if item.is_symlink():
+            connector = "└── " if is_last_item else "├── "
+            extension = prefix + ("    " if is_last else "│   ")
+            lines.append(f"{extension}{connector}{item.name}@")
+        elif item.is_dir():
             # Recursively process subdirectories
             new_prefix = prefix + ("    " if is_last else "│   ")
             sub_lines = generate_tree_structure(

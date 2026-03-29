@@ -13,8 +13,9 @@ Error Handling (RULES.md §4.1):
 - Data quality errors: Log and skip record
 
 Health Check Observability (RULES.md §4.8):
-- SUCCESS: DEBUG log "health_check_passed", increment success counter
-- FAILURE: WARNING log "health_check_failed" with details, increment failure counter
+- HEALTHY: DEBUG log "health_check_passed", increment healthy counter
+- DEGRADED: WARNING log "health_check_degraded", increment degraded counter
+- FAILED/UNHEALTHY: WARNING log "health_check_failed"/"health_check_unhealthy", increment failure counter
 - LATENCY: Record duration histogram for all health checks
 """
 
@@ -57,8 +58,9 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
     - _fallback_health_status(): Fallback using circuit breaker state
 
     Health Check Observability (via HealthCheckProviderMixin):
-    - SUCCESS: DEBUG log, success counter, latency histogram
-    - FAILURE: WARNING log with details, failure counter, latency histogram
+    - HEALTHY: DEBUG log, healthy counter, latency histogram
+    - DEGRADED: WARNING log, degraded counter, latency histogram
+    - FAILED/UNHEALTHY: WARNING log with details, failure counter, latency histogram
 
     Error Handling:
     - _error_handler: Provides unified error classification, logging, and wrapping

@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
+    FilteredQuarantineEntry,
     QuarantineManagerService,
 )
 from bioetl.domain.types import BatchID, ErrorType
@@ -50,14 +51,18 @@ class TestQuarantineManagerBulkWrites:
 
         await manager.quarantine_filtered_records(
             [
-                ({"activity_id": "1"}, "filtered"),
-                ({"activity_id": "2"}, "filtered"),
+                FilteredQuarantineEntry({"activity_id": "1"}, "filtered"),
+                FilteredQuarantineEntry({"activity_id": "2"}, "filtered"),
             ],
             batch_id,
             ingestion_ts=ingestion_ts,
         )
 
         quarantine_port.write_many.assert_awaited_once()
+        requests = quarantine_port.write_many.await_args.args[0]
+        assert requests[0]["metadata"]["classification"] == "filter_rejection"
+        assert requests[0]["metadata"]["quarantine_category"] == "silver_filter"
+        assert "quasi_quarantine" not in requests[0]["metadata"]
         metrics.inc_quarantine_records.assert_called_once_with(
             pipeline="chembl_activity",
             reason="FILTERED_OUT_SILVER",

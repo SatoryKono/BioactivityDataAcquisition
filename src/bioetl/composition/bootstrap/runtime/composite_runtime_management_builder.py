@@ -20,8 +20,11 @@ if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint import CompositeCheckpointService
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+        CompositeInfrastructureContext,
+    )
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort
+    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
     from bioetl.infrastructure.config import Settings
 
 
@@ -29,11 +32,15 @@ def build_runtime_management_services(
     *,
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
+    infra_context: CompositeInfrastructureContext,
     settings: Settings,
     logger: LoggerPort,
     run_id: str,
     checkpoint_manager_cls: type[CompositeCheckpointService],
-    create_dq_report_service: Callable[[LoggerPort, Settings], DQReportService],
+    create_dq_report_service: Callable[
+        [LoggerPort, Settings, MetricsPort],
+        DQReportService,
+    ],
 ) -> RuntimeManagementServicesBundle:
     """Build checkpoint, FSM, DQ, and quarantine runtime services."""
 
@@ -53,7 +60,11 @@ def build_runtime_management_services(
             expected_contract_ref=config.name,
             expected_contract_version=getattr(config, "version", ""),
         ),
-        dq_report_service=create_dq_report_service(logger, settings),
+        dq_report_service=create_dq_report_service(
+            logger,
+            settings,
+            infra_context.metrics,
+        ),
         fsm_state_helper=FSMStateHelperService(
             config=config,
             logger=logger,

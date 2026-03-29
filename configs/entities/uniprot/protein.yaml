@@ -253,6 +253,10 @@ filters:
     column_name: uniprot_id
     filter_field: accession
     batch_size: 100
+  silver_filters:
+    required_fields:
+    - accession
+    - organism
   gold_filters:
     columns:
       reviewed:

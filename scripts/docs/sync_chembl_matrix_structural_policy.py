@@ -1,0 +1,317 @@
+#!/usr/bin/env python3
+"""Sync ChEMBL matrix workbook rows with current structural Silver policy semantics."""
+
+from __future__ import annotations
+
+import argparse
+import copy
+import re
+import zipfile
+from collections import Counter
+from pathlib import Path
+from typing import Final
+from xml.etree import ElementTree as ET
+
+PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
+DEFAULT_INPUT: Final[Path] = PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+DEFAULT_OUTPUT: Final[Path] = PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+NS: Final[dict[str, str]] = {
+    "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+    "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+    "pr": "http://schemas.openxmlformats.org/package/2006/relationships",
+}
+MAIN_NS: Final[str] = NS["a"]
+REL_NS: Final[str] = NS["r"]
+COL_RE: Final[re.Pattern[str]] = re.compile(r"[A-Z]+")
+BUSINESS_TYPED_FIELDS: Final[frozenset[str]] = frozenset({"integer", "float", "boolean"})
+SYSTEM_FIELDS: Final[frozenset[str]] = frozenset(
+    {
+        "_run_id",
+        "_run_type",
+        "_source_batch_id",
+        "_ingestion_ts",
+        "_index",
+        "_dq_warn",
+        "_dq_error",
+        "_state",
+        "entity_id",
+        "content_hash",
+    }
+)
+REQUIRED_FILTER_TOKENS: Final[frozenset[str]] = frozenset({"required", "not_null"})
+STRUCTURAL_PRESENCE_GUARD: Final[str] = "structural_presence_guard"
+STRUCTURAL_TYPE_GUARD: Final[str] = "structural_type_guard"
+STRUCTURAL_PRESENCE_VALIDATION: Final[str] = "structural:presence_required"
+STRUCTURAL_TYPE_STRICT_VALIDATION: Final[str] = "structural:type_strict"
+STRUCTURAL_TYPE_TO_NULL_WARN_VALIDATION: Final[str] = "structural:type_to_null_warn"
+STRUCTURAL_OPTIONAL_NONNULLABLE_VALIDATION: Final[str] = (
+    "structural:type_proposed_null_warn_error_then_quarantine"
+)
+SET_NULL_AND_WARN: Final[str] = "set_null_and_warn"
+QUARANTINE_FILTER_REJECTION: Final[str] = "quarantine_filter_rejection"
+PROPOSE_NULL_WARN_ERROR_THEN_QUARANTINE: Final[str] = (
+    "propose_null_warn_error_then_quarantine"
+)
+INVALID_TYPE_TO_NULL: Final[str] = "invalid_type_to_null"
+PROPOSED_NULL_THEN_QUARANTINE: Final[str] = "proposed_null_then_quarantine"
+QUARANTINE: Final[str] = "quarantine"
+HEADERS_TO_UPDATE: Final[tuple[str, ...]] = (
+    "Silver Filters",
+    "Filter fail sink",
+    "Silver Normalisation",
+    "Silver Validation",
+    "Validation fail action",
+)
+
+
+def _arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Sync the canonical ChEMBL matrix workbook with the current structural "
+            "Silver policy semantics."
+        )
+    )
+    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="Input workbook.")
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook.")
+    return parser
+
+
+def _column_index(cell_ref: str) -> int:
+    letters = "".join(COL_RE.findall(cell_ref))
+    value = 0
+    for char in letters:
+        value = value * 26 + (ord(char) - ord("A") + 1)
+    return value
+
+
+def _load_shared_strings(archive: zipfile.ZipFile) -> list[str]:
+    try:
+        root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
+    except KeyError:
+        return []
+    return ["".join(node.itertext()) for node in root.findall("a:si", NS)]
+
+
+def _sheet_targets(archive: zipfile.ZipFile) -> set[str]:
+    workbook = ET.fromstring(archive.read("xl/workbook.xml"))
+    rels = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
+    rel_map = {rel.attrib["Id"]: rel.attrib["Target"] for rel in rels.findall("pr:Relationship", NS)}
+    targets: set[str] = set()
+    for sheet in workbook.find("a:sheets", NS).findall("a:sheet", NS):
+        rel_id = sheet.attrib[f"{{{REL_NS}}}id"]
+        targets.add("xl/" + rel_map[rel_id].lstrip("/"))
+    return targets
+
+
+def _cell_text(cell: ET.Element, shared_strings: list[str]) -> str:
+    cell_type = cell.attrib.get("t")
+    if cell_type == "inlineStr":
+        inline = cell.find("a:is", NS)
+        return "".join(inline.itertext()) if inline is not None else ""
+    value_node = cell.find("a:v", NS)
+    if value_node is None:
+        return ""
+    value = value_node.text or ""
+    if cell_type == "s":
+        return shared_strings[int(value)]
+    return value
+
+
+def _set_cell_text(cell: ET.Element, value: str) -> None:
+    for child in list(cell):
+        if child.tag in {f"{{{MAIN_NS}}}v", f"{{{MAIN_NS}}}is"}:
+            cell.remove(child)
+    cell.set("t", "inlineStr")
+    is_node = ET.Element(f"{{{MAIN_NS}}}is")
+    text_node = ET.SubElement(is_node, f"{{{MAIN_NS}}}t")
+    if value.startswith(" ") or value.endswith(" "):
+        text_node.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+    text_node.text = value
+    cell.append(is_node)
+
+
+def _parse_tokens(
+    value: str,
+    *,
+    drop: frozenset[str] | None = None,
+) -> list[str]:
+    blocked = drop or frozenset()
+    return [
+        part.strip()
+        for part in value.split(";")
+        if part.strip() and part.strip() not in blocked
+    ]
+
+
+def _join_tokens(prefix: list[str], existing: list[str], *, drop: frozenset[str] | None = None) -> str:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    blocked = drop or frozenset()
+    for token in [*prefix, *existing]:
+        if token in blocked or token in seen:
+            continue
+        seen.add(token)
+        ordered.append(token)
+    return "; ".join(ordered) if ordered else "none"
+
+
+def _prepend_action(existing_value: str, action: str) -> str:
+    existing_tokens = _parse_tokens(existing_value)
+    return _join_tokens([action], existing_tokens, drop=frozenset({"not_applicable", "none"}))
+
+
+def _update_row(row: dict[str, str]) -> dict[str, str]:
+    silver_column = row.get("Silver column", "")
+    if not silver_column or silver_column in SYSTEM_FIELDS:
+        return {header: row.get(header, "") for header in HEADERS_TO_UPDATE}
+
+    type_kind = row.get("Type", "").strip().lower()
+    nullable_value = row.get("Nullable", "").strip().lower()
+    required_value = row.get("Required", "").strip().lower()
+
+    is_required = bool(required_value) and required_value != "optional"
+    is_nullable = nullable_value == "true"
+    is_nonnullable = nullable_value == "false"
+    is_typed_non_string = type_kind in BUSINESS_TYPED_FIELDS
+
+    filters = _parse_tokens(
+        row.get("Silver Filters", ""),
+        drop=frozenset({"none", "not_applicable"}),
+    )
+    validation = _parse_tokens(
+        row.get("Silver Validation", ""),
+        drop=frozenset({"none", "not_applicable"}),
+    )
+    normalization = _parse_tokens(
+        row.get("Silver Normalisation", ""),
+        drop=frozenset({"none", "not_applicable"}),
+    )
+    fail_action = row.get("Validation fail action", "")
+    fail_sink = row.get("Filter fail sink", "")
+
+    if is_required and is_nonnullable:
+        filters = [token for token in filters if token not in REQUIRED_FILTER_TOKENS]
+        filters_value = _join_tokens([STRUCTURAL_PRESENCE_GUARD], filters)
+        validation_value = _join_tokens([STRUCTURAL_PRESENCE_VALIDATION], validation)
+        fail_action_value = _prepend_action(fail_action, QUARANTINE_FILTER_REJECTION)
+        fail_sink_value = QUARANTINE
+    else:
+        filters_value = "; ".join(filters) if filters else "none"
+        validation_value = "; ".join(validation) if validation else "none"
+        fail_action_value = fail_action or "not_applicable"
+        fail_sink_value = fail_sink or "not_applicable"
+
+    normalization_value = "; ".join(normalization) if normalization else "none"
+
+    if is_typed_non_string and is_required and is_nonnullable:
+        filters_value = _join_tokens([STRUCTURAL_PRESENCE_GUARD, STRUCTURAL_TYPE_GUARD], _parse_tokens(filters_value))
+        validation_value = _join_tokens(
+            [STRUCTURAL_PRESENCE_VALIDATION, STRUCTURAL_TYPE_STRICT_VALIDATION],
+            _parse_tokens(validation_value),
+        )
+        fail_action_value = _prepend_action(fail_action_value, QUARANTINE_FILTER_REJECTION)
+        fail_sink_value = QUARANTINE
+    elif is_typed_non_string and is_nullable:
+        filters_value = _join_tokens([STRUCTURAL_TYPE_GUARD], _parse_tokens(filters_value))
+        normalization_value = _join_tokens([INVALID_TYPE_TO_NULL], normalization)
+        validation_value = _join_tokens([STRUCTURAL_TYPE_TO_NULL_WARN_VALIDATION], _parse_tokens(validation_value))
+        fail_action_value = _prepend_action(fail_action_value, SET_NULL_AND_WARN)
+    elif is_typed_non_string and is_nonnullable:
+        filters_value = _join_tokens([STRUCTURAL_TYPE_GUARD], _parse_tokens(filters_value))
+        normalization_value = _join_tokens([PROPOSED_NULL_THEN_QUARANTINE], normalization)
+        validation_value = _join_tokens(
+            [STRUCTURAL_OPTIONAL_NONNULLABLE_VALIDATION],
+            _parse_tokens(validation_value),
+        )
+        fail_action_value = _prepend_action(
+            fail_action_value,
+            PROPOSE_NULL_WARN_ERROR_THEN_QUARANTINE,
+        )
+        fail_sink_value = QUARANTINE
+
+    return {
+        "Silver Filters": filters_value,
+        "Filter fail sink": fail_sink_value,
+        "Silver Normalisation": normalization_value,
+        "Silver Validation": validation_value,
+        "Validation fail action": fail_action_value,
+    }
+
+
+def main() -> int:
+    args = _arg_parser().parse_args()
+    input_path = args.input.resolve()
+    output_path = args.output.resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_output_path = (
+        output_path.with_name(f".{output_path.stem}.tmp{output_path.suffix}")
+        if input_path == output_path
+        else output_path
+    )
+
+    with zipfile.ZipFile(input_path) as zin:
+        shared_strings = _load_shared_strings(zin)
+        sheet_targets = _sheet_targets(zin)
+        change_counter: Counter[str] = Counter()
+
+        with zipfile.ZipFile(temp_output_path, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+            for info in zin.infolist():
+                data = zin.read(info.filename)
+                if info.filename not in sheet_targets:
+                    zout.writestr(copy.copy(info), data)
+                    continue
+
+                root = ET.fromstring(data)
+                rows = root.find("a:sheetData", NS).findall("a:row", NS)
+                if not rows:
+                    zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
+                    continue
+
+                header_by_index: dict[int, str] = {}
+                for cell in rows[0].findall("a:c", NS):
+                    header_by_index[_column_index(cell.attrib["r"])] = _cell_text(cell, shared_strings)
+                index_by_header = {header: index for index, header in header_by_index.items()}
+
+                for row in rows[1:]:
+                    row_map = {
+                        header_by_index[_column_index(cell.attrib["r"])] : _cell_text(cell, shared_strings)
+                        for cell in row.findall("a:c", NS)
+                        if _column_index(cell.attrib["r"]) in header_by_index
+                    }
+                    updated = _update_row(row_map)
+                    for header, new_value in updated.items():
+                        index = index_by_header.get(header)
+                        if index is None:
+                            continue
+                        target_ref = None
+                        target_cell = None
+                        for cell in row.findall("a:c", NS):
+                            if _column_index(cell.attrib["r"]) == index:
+                                target_cell = cell
+                                target_ref = cell.attrib["r"]
+                                break
+                        if target_cell is None:
+                            continue
+                        raw_value = _cell_text(target_cell, shared_strings)
+                        if raw_value == new_value:
+                            continue
+                        _set_cell_text(target_cell, new_value)
+                        change_counter[header] += 1
+
+                zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
+
+    if temp_output_path != output_path:
+        temp_output_path.replace(output_path)
+
+    print(
+        {
+            "input": str(input_path),
+            "output": str(output_path),
+            "updated_headers": dict(change_counter),
+        }
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

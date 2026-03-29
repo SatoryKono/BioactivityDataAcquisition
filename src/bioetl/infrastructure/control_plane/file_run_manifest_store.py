@@ -5,11 +5,15 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.control_plane._read_metrics import (
+    emit_control_plane_read_metrics,
+)
 
 __all__ = ["FileRunManifestStore"]
 
@@ -75,6 +79,58 @@ class FileRunManifestStore(RunManifestPort):
 
     def get(self, manifest_id: str) -> RunManifest | None:
         """Load a manifest by identifier if present."""
+        started_at = perf_counter()
+        status = "success"
+        try:
+            manifest = self._load_manifest(manifest_id)
+            if manifest is None:
+                status = "miss"
+                return None
+            return manifest
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="manifest",
+                operation="get",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
+
+    def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
+        """Resolve run-id index to manifest identifier."""
+        started_at = perf_counter()
+        status = "success"
+        try:
+            run_index_path = self.base_path / "_by_run_id" / f"{run_id}.txt"
+            if not run_index_path.exists():
+                status = "miss"
+                return None
+            manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+            if not manifest_id:
+                status = "miss"
+                return None
+            manifest = self._load_manifest(manifest_id)
+            if manifest is None:
+                status = "miss"
+                return None
+            return manifest
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="manifest",
+                operation="get_by_run_id",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
+
+    def _load_manifest(self, manifest_id: str) -> RunManifest | None:
+        """Load one manifest payload without emitting public lookup metrics."""
         manifest_path = self.base_path / f"{manifest_id}.json"
         if not manifest_path.exists():
             return None
@@ -82,13 +138,3 @@ class FileRunManifestStore(RunManifestPort):
         if not isinstance(payload, dict):
             raise ValueError("Manifest payload must be a JSON object")
         return RunManifest.from_dict(payload)
-
-    def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
-        """Resolve run-id index to manifest identifier."""
-        run_index_path = self.base_path / "_by_run_id" / f"{run_id}.txt"
-        if not run_index_path.exists():
-            return None
-        manifest_id = run_index_path.read_text(encoding="utf-8").strip()
-        if not manifest_id:
-            return None
-        return self.get(manifest_id)

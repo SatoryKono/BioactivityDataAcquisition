@@ -205,6 +205,9 @@ jobs:
             -   name: Validate config invariants (blocking)
                 run: uv run python scripts/schema/check_config_invariants.py
 
+            -   name: Validate silver required_fields coverage (blocking)
+                run: uv run python -m scripts.schema check-required-fields --verbose
+
             -   name: Check generated config schemas are up to date
                 run: uv run python scripts/schema/generate_pipeline_schema.py --check
 

@@ -402,6 +402,7 @@ class TestMetricsExtractor:
             "records_silver": 90,
             "records_gold": 85,
             "records_quarantined": 10,
+            "records_filtered_out": 7,
         }
 
         result = extractor.extract_metrics(mock_runner)
@@ -412,6 +413,7 @@ class TestMetricsExtractor:
             "records_silver": 90,
             "records_gold": 85,
             "records_quarantined": 10,
+            "records_filtered_out": 7,
         }
 
     def test_extract_metrics_from_runner_without_execution_metrics(self):

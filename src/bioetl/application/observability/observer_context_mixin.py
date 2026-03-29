@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Self
 from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
+from bioetl.domain.ports.noop import NoOpTracing
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -61,14 +62,28 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
 
     def _start_trace_span(self) -> None:
         """Open tracing span if tracer is configured."""
-        if self._tracer:
-            otel_tracer = self._tracer.get_tracer("bioetl.pipeline")
-            attributes = self._build_trace_attributes()
-            self.span = otel_tracer.start_as_current_span(
-                f"pipeline.{self.pipeline_name}",
-                attributes=attributes,
-            )
-            self.span.__enter__()
+        if not self._has_real_tracing():
+            return
+        assert self._tracer is not None
+        otel_tracer = self._tracer.get_tracer("bioetl.pipeline")
+        attributes = self._build_trace_attributes()
+        self.span = otel_tracer.start_as_current_span(
+            f"pipeline.{self.pipeline_name}",
+            attributes=attributes,
+        )
+        self.span.__enter__()
+        self._metrics.increment_counter(
+            "traced_runs_total",
+            1,
+            labels={
+                "pipeline": self.pipeline_name,
+                "run_type": self.run_type,
+            },
+        )
+
+    def _has_real_tracing(self) -> bool:
+        """Return whether the observer uses a non-noop tracing implementation."""
+        return self._tracer is not None and not isinstance(self._tracer, NoOpTracing)
 
     def _build_trace_attributes(self) -> dict[str, object]:
         """Build span attributes with optional correlation anchors."""

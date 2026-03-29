@@ -116,6 +116,7 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
     mock_quarantine_port: MagicMock,
     mock_fsm_state_helper_cls: MagicMock,
 ) -> None:
+    infra_context = cast(Any, SimpleNamespace(metrics=MagicMock(name="metrics")))
     logger = MagicMock()
     settings = MagicMock()
     runtime = cast(Any, SimpleNamespace(resume=True))
@@ -134,6 +135,7 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
     result = build_runtime_management_services(
         config=_make_config(quarantine_enabled=True),
         runtime=runtime,
+        infra_context=infra_context,
         settings=settings,
         logger=logger,
         run_id="run-123",
@@ -157,7 +159,11 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
         expected_contract_ref="composite_publication",
         expected_contract_version="1.0.0",
     )
-    create_dq_report_service.assert_called_once_with(logger, settings)
+    create_dq_report_service.assert_called_once_with(
+        logger,
+        settings,
+        infra_context.metrics,
+    )
 
 
 @pytest.mark.unit
@@ -175,6 +181,7 @@ def test_build_runtime_management_services_skips_quarantine_when_disabled(
     mock_quarantine_port: MagicMock,
     mock_fsm_state_helper_cls: MagicMock,
 ) -> None:
+    infra_context = cast(Any, SimpleNamespace(metrics=MagicMock(name="metrics")))
     checkpoint_manager_cls = cast(Any, MagicMock(return_value=MagicMock()))
     mock_checkpoint_port.return_value = MagicMock()
     mock_fsm_state_helper_cls.return_value = MagicMock()
@@ -182,6 +189,7 @@ def test_build_runtime_management_services_skips_quarantine_when_disabled(
     result = build_runtime_management_services(
         config=_make_config(quarantine_enabled=False),
         runtime=cast(Any, SimpleNamespace(resume=False)),
+        infra_context=infra_context,
         settings=MagicMock(),
         logger=MagicMock(),
         run_id="run-123",
@@ -208,6 +216,7 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
     mock_quarantine_port: MagicMock,
     mock_fsm_state_helper_cls: MagicMock,
 ) -> None:
+    infra_context = cast(Any, SimpleNamespace(metrics=MagicMock(name="metrics")))
     logger = MagicMock()
     settings = MagicMock()
     runtime = cast(Any, SimpleNamespace(resume=False))
@@ -231,6 +240,7 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
     build_runtime_management_services(
         config=config,
         runtime=runtime,
+        infra_context=infra_context,
         settings=settings,
         logger=logger,
         run_id="run-123",

@@ -263,7 +263,8 @@ def start_metrics_server(port: int = 8000, addr: str = "0.0.0.0", ...) -> bool:
 bioetl_records_processed_total{pipeline="chembl",stage="bronze",run_type="incremental"} 15420.0
 bioetl_records_processed_total{pipeline="chembl",stage="silver",run_type="incremental"} 15380.0
 bioetl_records_processed_total{pipeline="chembl",stage="gold",run_type="incremental"} 15102.0
-bioetl_records_processed_total{pipeline="chembl",stage="quarantined",run_type="incremental"} 278.0
+bioetl_records_processed_total{pipeline="chembl",stage="filtered_out",run_type="incremental"} 40.0
+bioetl_dq_records_quarantined_total{pipeline="chembl",error_type="schema_violation",run_type="incremental"} 278.0
 
 # HELP bioetl_pipeline_duration_seconds Duration of pipeline runs in seconds
 # TYPE bioetl_pipeline_duration_seconds histogram
@@ -555,8 +556,9 @@ Host Machine (Windows/macOS/Linux)
 | `bioetl_health_check_status` | Gauge | `component` | Статус здоровья компонента: 0=unknown, 1=healthy, 2=degraded. |
 | `bioetl_health_check_latency_ms` | Histogram | `provider` | Латентность health check в миллисекундах. |
 | `bioetl_health_check_latency_seconds` | Histogram | `provider` | Латентность health check в секундах. |
-| `bioetl_health_check_success_total` | Counter | `provider` | Количество успешных health check. |
-| `bioetl_health_check_failures_total` | Counter | `provider` | Количество неуспешных health check. |
+| `bioetl_health_check_success_total` | Counter | `provider` | Количество health check с результатом `HEALTHY`. |
+| `bioetl_health_check_degraded_total` | Counter | `provider` | Количество health check с результатом `DEGRADED`. |
+| `bioetl_health_check_failures_total` | Counter | `provider` | Количество health check с результатом `UNHEALTHY` или probe-exception. |
 | `bioetl_preflight_medallion_policy_valid` | Gauge | `pipeline`, `run_id` | Валидность medallion policy (1=valid, 0=invalid). |
 | `bioetl_preflight_config_errors_total` | Gauge | `pipeline`, `run_id` | Количество ошибок конфигурации при preflight. |
 
@@ -687,6 +689,8 @@ shipped pack.
 | 3 | Pipeline Distribution | Piechart | `sum(...) by (pipeline)` | Круговая диаграмма: распределение записей по пайплайнам. |
 | 4 | Overall Quality | Gauge | `sum(...stage="gold") / sum(...stage="bronze")` | Gauge качества с 4-уровневой шкалой: <50% красный, 50-80% оранжевый, 80-95% жёлтый, >95% зелёный. |
 | 101 | Execution Timestamp | Stat | `min(bioetl_records_processed_created{pipeline=~"$pipeline", run_type=~"$run_type"})` | Timestamp начала выполнения (из автоматической метрики `_created`). |
+| 118 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный shipped signal для Silver filter rejection за текущее временное окно Grafana; не смешивается с DQ quarantine. |
+| 119 | Silver Filter Reject Rate | Gauge | `filtered_out[$__range] / clamp_min(bronze[$__range], 1)` | Доля intentionally excluded Silver filters относительно Bronze input за текущее временное окно Grafana. |
 
 **Используемые метрики:** `records_processed_total`, `records_processed_created`.
 
@@ -712,12 +716,18 @@ shipped pack.
 | 99 | Pipeline | Stat | `max(label_values(..., pipeline)) or vector(0)` | Информационная панель пайплайна. |
 | 100 | Run Type | Stat | `max(label_values(..., run_type)) or vector(0)` | Информационная панель типа запуска. |
 | 1 | Data Flow | Timeseries | `bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}` | Полный поток данных: Bronze → Silver → Gold. Легенда: `{{pipeline}} / {{stage}}`. |
-| 2 | Data Quality Score | Gauge | `sum(...stage="gold") / sum(...stage="bronze")` | 4-уровневый gauge качества: красный (<50%), оранжевый (50-80%), жёлтый (80-95%), зелёный (>95%). |
+| 2 | Data Quality Score | Gauge | `avg(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)` | Канонический DQ gauge на базе `bioetl_dq_validation_score`: красный (<50%), оранжевый (50-80%), жёлтый (80-95%), зелёный (>95%). |
 | 3 | Source Records (Bronze) | Stat | `sum(bioetl_records_processed_total{...stage="bronze"})` | Общее количество входных записей. |
 | 4 | Clean Records (Gold) | Stat | `sum(bioetl_records_processed_total{...stage="gold"})` | Общее количество финальных чистых записей. |
+| 117 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный счётчик Silver filter rejects за текущее временное окно; не заменяет `Records Quarantined`. |
+| 118 | Silver Filter Rejects by Pipeline | Bar gauge | `sum by (pipeline) (increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))` | Breakdown intentional Silver exclusions по выбранным pipeline values за текущее временное окно. |
 | 101 | Execution Timestamp | Stat | `min(bioetl_records_processed_created{...})` | Timestamp начала выполнения. |
 
 **Используемые метрики:** `records_processed_total`, `records_processed_created`.
+
+Важно: shipped DQ surface теперь явно различает два потока.
+- DQ quarantine = `bioetl_dq_records_quarantined_total`
+- Silver filter rejects = `bioetl_records_processed_total{stage="filtered_out"}`
 
 **Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и
 `Explore Traces (Tempo)` используют текущее временное окно. Panel `Data Flow:
@@ -739,12 +749,13 @@ incidents и freshness investigation.
 | ID | Название | Тип | PromQL | Описание |
 |---|---|---|---|---|
 | 1 | Health Check Latency by Provider (p95) | Timeseries | `histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))` | Сравнение p95 latency по всем выбранным провайдерам. |
-| 2 | Health Check Successes (15m) | Stat | `sum by (provider) (increase(bioetl_health_check_success_total{provider=~"$provider"}[15m]))` | Текущий объём успешных health checks за 15 минут. |
-| 104 | Provider Failure Rate (15m) | Gauge | `sum(increase(bioetl_health_check_failures_total{provider=~"$provider"}[15m])) / clamp_min(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[15m]) + increase(bioetl_health_check_failures_total{provider=~"$provider"}[15m])), 1)` | Failure-rate по выбранным провайдерам; основной alert-facing KPI. |
-| 7 | Health Checks (15m) | Stat | `sum by (provider) (increase(bioetl_health_check_success_total{provider=~"$provider"}[15m]) + increase(bioetl_health_check_failures_total{provider=~"$provider"}[15m]))` | Общий объём health checks за 15 минут. |
+| 2 | Healthy Checks | Stat | `sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range]))` | Текущий объём health probes, завершившихся статусом `HEALTHY`, за выбранное временное окно Grafana. |
+| 105 | Degraded Checks | Stat | `sum(increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range]))` | Текущий объём health probes, завершившихся статусом `DEGRADED`, за выбранное временное окно Grafana. |
+| 104 | Provider Failure Rate | Gauge | `failures[$__range] / clamp_min(healthy[$__range] + degraded[$__range] + failures[$__range], 1)` | Failure-rate по выбранным провайдерам за текущее временное окно Grafana; `DEGRADED` остаётся в denominator как completed probe, но не считается success. |
+| 7 | Health Checks Total | Stat | `sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range]) + increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range]) + increase(bioetl_health_check_failures_total{provider=~"$provider"}[$__range]))` | Общий объём completed health probes за выбранное временное окно Grafana. |
 | 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))` | Повторяемые p95 gauges по выбранным провайдерам. |
 
-**Используемые метрики:** `health_check_latency_seconds`, `health_check_success_total`, `health_check_failures_total`.
+**Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`.
 
 **Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
 
@@ -770,19 +781,20 @@ dashboard-variable interpolation. Дополнительное сужение п
 
 | ID | Название | Тип | Query | Описание |
 |---|---|---|---|---|
-| 2 | Warnings (1h) | Stat | Loki `count_over_time(... level=\"warning\" ...)` | Количество structured warning logs за последний час по `$pipeline`. |
-| 3 | Unstructured Logs (1h) | Stat | Loki `count_over_time(... | json | __error__!=\"\" ...)` | Объём строк, не соответствующих shipped JSON log contract. |
-| 4 | DQ Alert Conditions (1h) | Stat | Prometheus | Суммарный triage-signal по soft-threshold, critical validation/anomaly и silver validation failures. |
-| 5 | Control-plane Alert Conditions (1h) | Stat | Prometheus | Failures по manifest writes, ledger appends, checkpoint incompatibility и missing lineage refs. |
-| 6 | Provider Alert Conditions (1h) | Stat | Prometheus | Provider failure-rate и retry-exhaustion conditions. |
+| 2 | Warnings | Stat | Loki `count_over_time(... level=\"warning\" ... [$__range])` | Количество structured warning logs за текущее временное окно Grafana по `$pipeline`. |
+| 3 | Unstructured Logs | Stat | Loki `count_over_time(... | json | __error__!=\"\" ... [$__range])` | Объём строк, не соответствующих shipped JSON log contract, за текущее временное окно Grafana. |
+| 4 | DQ Alert Conditions | Stat | Prometheus | Суммарный triage-signal по soft-threshold, critical validation/anomaly и silver validation failures за текущее временное окно Grafana. |
+| 5 | Control-plane Alert Conditions | Stat | Prometheus | Failures по manifest writes, ledger appends, checkpoint incompatibility и missing lineage refs за текущее временное окно Grafana. |
+| 6 | Provider Alert Conditions | Stat | Prometheus | Provider failure-rate и retry-exhaustion conditions за текущее временное окно Grafana. |
 | 7 | Freshness Alert Conditions | Stat | Prometheus | Количество freshness conditions старше 24h. |
-| 8 | Top Warning Events (1h) | Bar gauge | Loki | Наиболее частые warning events за последний час. |
-| 9 | Log Hygiene Trend (5m) | Timeseries | Loki | Короткий тренд warnings против unstructured rows. |
+| 8 | Top Warning Events | Bar gauge | Loki | Наиболее частые warning events за текущее временное окно Grafana. |
+| 9 | Log Hygiene Trend | Timeseries | Loki | Тренд warnings против unstructured rows с adaptive bucket size через `$__interval`. |
+| 17 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Быстрый triage-signal за текущее временное окно, который помогает отличить intentional Silver exclusions от DQ/schema проблем. |
 
 **Фильтрация:** `$pipeline`, `$run_type`.
 
 **Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и
-`Explore Traces (Tempo)` плюс data links у `Log Hygiene Trend (5m)` ведут в
+`Explore Traces (Tempo)` плюс data links у `Log Hygiene Trend` ведут в
 Explore с тем же time range. Как и в остальных shipped dashboards, Loki handoff
 стартует с безопасного `{job="bioetl"}` entrypoint.
 
@@ -848,7 +860,8 @@ sum(bioetl_records_processed_total{stage="gold"}) / sum(bioetl_records_processed
 rate(bioetl_errors_total[5m]) / rate(bioetl_records_processed_total[5m]) * 100
 
 # Quarantine Rate
-sum(bioetl_records_processed_total{stage="quarantined"}) / sum(bioetl_records_processed_total{stage="bronze"}) * 100
+sum(rate(bioetl_dq_records_quarantined_total[5m])) /
+  clamp_min(sum(rate(bioetl_records_processed_total{stage="bronze"}[5m])), 1) * 100
 
 # Circuit breaker open alert
 bioetl_circuit_breaker_state == 2
@@ -1194,25 +1207,23 @@ BioETL использует трёхуровневую Medallion Architecture д
 │                                                                     │
 │  Метрики:                                                           │
 │  - records_processed_total{stage="gold"} — чистые записи            │
-│  - records_processed_total{stage="quarantined"} — карантинные        │
-│  - dq_records_quarantined_total — детальный карантин по типам         │
-│  - data_freshness_seconds — свежесть данных                          │
-│                                                                     │
-│  Пример: 15,102 записей в Gold, 278 на карантине                    │
+│  - dq_records_quarantined_total — канонический DQ quarantine        │
+│  - records_processed_total{stage="filtered_out"} — filter rejects   │
+│  - data_freshness_seconds — свежесть данных                         │
+│                                                                    │
+│  Пример: 15,102 записей в Gold, 278 DQ-quarantine, 40 filtered out │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 18.2 Quality Ratio
+### 18.2 Data Quality Score
 
-Ключевой показатель качества пайплайна — соотношение Gold/Bronze:
+Канонический показатель качества пайплайна — `bioetl_dq_validation_score`:
 
 ```promql
-sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="gold"})
-  /
-sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="bronze"})
+avg(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)
 ```
 
-Этот показатель используется в gauge-панелях `1. Overview` и `4. Data Quality`
+Этот показатель используется в gauge-панели `4. Data Quality`
 с пороговыми значениями:
 
 | Значение | Цвет | Интерпретация |
@@ -1222,17 +1233,21 @@ sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type",
 | 80-95% | Жёлтый | Допустимо: небольшая потеря на валидации/дедупликации |
 | > 95% | Зелёный | Нормально: высокое качество данных |
 
-Типичное значение для здорового пайплайна: 95-99%. Потеря 1-5% обычно объясняется:
-- Дублирующимися записями из API (дедупликация в Silver).
-- Записями с невалидными полями (валидация по Pandera-схемам в Silver).
-- Записями без обязательных полей (фильтрация при переходе в Gold).
+Типичное значение для здорового пайплайна: 95-99%. Снижение обычно объясняется:
+- Записями с невалидными полями и schema violations.
+- DQ quarantine по типизированным ошибкам.
+- Аномалиями и soft-threshold событиями, зафиксированными в DQ layer.
 
 ### 18.3 Карантин (Quarantined Records)
 
-Записи, не прошедшие валидацию, не удаляются, а перемещаются на карантин. Это отслеживается двумя метриками:
+Записи, не прошедшие валидацию, не удаляются, а перемещаются на карантин.
+Канонический операторский источник истины:
 
-- `bioetl_records_processed_total{stage="quarantined"}` — общий счётчик карантинных записей (по пайплайну и типу запуска).
 - `bioetl_dq_records_quarantined_total{pipeline, error_type, run_type}` — детализированный счётчик с указанием типа ошибки (`schema_violation`, `null_required_field`, `duplicate`, `type_mismatch` и др.).
+
+Важно:
+- `bioetl_records_processed_total{stage="quarantined"}` может встречаться как legacy/support signal в части runtime paths.
+- shipped dashboards и alerting должны опираться на `bioetl_dq_records_quarantined_total`, когда речь идёт именно о DQ quarantine.
 
 ---
 
@@ -1522,7 +1537,7 @@ Grafana поддерживает встроенные алерты на осно
 | Data Staleness | `(time() - bioetl_data_freshness_seconds) > 86400` | WARNING | Данные старше 24 часов. Пайплайн не выполнялся. |
 | Retry Exhaustion | `increase(bioetl_data_source_retry_exhausted_total[1h]) > 0` | WARNING | Retry-попытки исчерпаны. Запросы к провайдеру не проходят. |
 | DQ Anomaly | `increase(bioetl_dq_anomaly_detected{severity="critical"}[1h]) > 0` | WARNING | Обнаружена критическая аномалия качества данных. |
-| High Quarantine Rate | `sum(records_processed{stage="quarantined"}) / sum(records_processed{stage="bronze"}) > 0.1` | WARNING | Более 10% записей на карантине. |
+| High Quarantine Rate | `sum(rate(bioetl_dq_records_quarantined_total[5m])) / clamp_min(sum(rate(bioetl_records_processed_total{stage="bronze"}[5m])), 1) > 0.1` | WARNING | Более 10% записей ушло в DQ quarantine. |
 
 ### 24.3 Prometheus Alerting Rules
 
@@ -1642,7 +1657,7 @@ open http://localhost:9090/alerts
 | 1. Overview | `bioetl-overview-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | Обзор конкретного запуска |
 | 2. Runtime | `bioetl-runtime` | 1 | 9 | 30s | 12h | `control_plane_*`, `dq_*`, `health_check_*`, `data_source_retry_exhausted_total` + Loki log hygiene queries | Runtime triage: warnings, unstructured logs, alert conditions |
 | BioETL Provider Health | `bioetl-provider-health` | 1 | 6 | 30s | 6h | `records_processed_total`, `batch_size_records` | Пропускная способность по стадиям |
-| 3. Provider Health | `bioetl-provider-health-v2` | 2 | 5 | 30s | 12h | `health_check_latency_seconds`, `health_check_success_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам |
+| 3. Provider Health | `bioetl-provider-health-v2` | 2 | 5 | 30s | 12h | `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам |
 | BioETL Data Quality | `bioetl-dq` | 1 | 4 | 30s | 6h | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records` | DQ мониторинг с перцентилями |
 | 4. Data Quality | `bioetl-dq-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | DQ для конкретного запуска |
 
@@ -1716,7 +1731,8 @@ async def _process_bronze(self, records: list[dict]) -> int:
 bioetl_records_processed_total{pipeline="chembl",stage="bronze",run_type="incremental"} 15420.0
 bioetl_records_processed_total{pipeline="chembl",stage="silver",run_type="incremental"} 15380.0
 bioetl_records_processed_total{pipeline="chembl",stage="gold",run_type="incremental"} 15102.0
-bioetl_records_processed_total{pipeline="chembl",stage="quarantined",run_type="incremental"} 278.0
+bioetl_records_processed_total{pipeline="chembl",stage="filtered_out",run_type="incremental"} 40.0
+bioetl_dq_records_quarantined_total{pipeline="chembl",error_type="schema_violation",run_type="incremental"} 278.0
 bioetl_records_processed_total_created{pipeline="chembl",stage="bronze",run_type="incremental"} 1.7087e+09
 ```
 

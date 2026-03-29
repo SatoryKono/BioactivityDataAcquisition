@@ -115,6 +115,7 @@ def test_transformer_builder_returns_none_without_class() -> None:
             content_hash=SimpleNamespace(include=[], exclude=[])
         ),
         domain_config=SimpleNamespace(silver_filters=None, gold_filters=None),
+        pandera_silver_schema=None,
         tracer=None,
         metrics=None,
     )
@@ -148,6 +149,7 @@ def test_transformer_builder_builds_transformer_with_policy_fallback() -> None:
             silver_filters="silver-filter",
             gold_filters="gold-filter",
         ),
+        pandera_silver_schema=None,
         tracer="tracer",
         metrics="metrics",
     )
@@ -158,6 +160,7 @@ def test_transformer_builder_builds_transformer_with_policy_fallback() -> None:
     assert isinstance(built["dependencies"], TransformerDependencyContext)
     dependencies = built["dependencies"]
     assert dependencies.contract_policy is not None
+    assert dependencies.structural_policy is not None
     assert built["silver_filters"] == "silver-filter"
     assert built["gold_filters"] == "gold-filter"
 

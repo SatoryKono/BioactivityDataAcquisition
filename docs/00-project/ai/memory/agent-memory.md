@@ -82,7 +82,7 @@ make lint          # ruff + mypy
 make test          # Локальный стабильный suite с coverage (без E2E)
 make test-architecture  # Архитектурные тесты
 make install       # Установка зависимостей
-make run-local     # Запуск на фикстурах
+make run-local     # Сэмпловый pipeline-run (chembl_activity, limit=10)
 ```
 
 ### Unified Script Entry Points

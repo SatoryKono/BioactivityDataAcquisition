@@ -87,7 +87,7 @@ make lint
 | Verify dependencies    | `make test-deps`                                  |
 | Run all tests          | `make test`                                       |
 | Run linting            | `make lint`                                       |
-| Run on fixtures        | `make run-local`                                  |
+| Run sample pipeline    | `make run-local`                                  |
 | List pipelines         | `bioetl config list-pipelines`                    |
 | Full rebuild           | `bioetl run --pipeline <name> --run-type rebuild` |
 | Resume from checkpoint | `bioetl run --pipeline <name> --resume`           |

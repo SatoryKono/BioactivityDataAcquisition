@@ -123,6 +123,10 @@ filters:
     column_name: target_chembl_id
     filter_field: target_id
     batch_size: 100
+  silver_filters:
+    required_fields:
+    - target_id
+    - mapping_status
   gold_filters:
     required_fields:
     - target_id

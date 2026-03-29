@@ -35,6 +35,7 @@ class StubSyncAdapter(BaseSyncAdapter):
         dependency_context: SyncAdapterDependencyContext | None = None,
         fail_probe: bool = False,
         probe_error: Exception | None = None,
+        probe_status: HealthStatus = HealthStatus.HEALTHY,
         health_endpoint: str = "/health",
         owns_thread_pool: bool = False,
     ) -> None:
@@ -50,13 +51,14 @@ class StubSyncAdapter(BaseSyncAdapter):
         )
         self._fail_probe = fail_probe
         self._probe_error = probe_error or Exception("Probe failed")
+        self._probe_status = probe_status
         self._health_endpoint = health_endpoint
 
     async def _probe_health(self) -> HealthStatus:
         """Test implementation that can be configured to fail."""
         if self._fail_probe:
             raise self._probe_error
-        return HealthStatus.HEALTHY
+        return self._probe_status
 
     def _get_health_endpoint(self) -> str:
         """Return test health endpoint."""
@@ -264,6 +266,49 @@ class TestHealthCheckLogging:
         assert success_call[0][2] == {"provider": "test_provider"}
 
         assert status == HealthStatus.HEALTHY
+
+    async def test_health_check_increments_degraded_metric_on_degraded_result(
+        self,
+        mock_logger: MagicMock,
+        mock_metrics: MagicMock,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
+        thread_pool: ThreadPoolExecutor,
+    ) -> None:
+        """Test that DEGRADED probe results are counted separately from healthy success."""
+        adapter = StubSyncAdapter(
+            logger=mock_logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
+            metrics=mock_metrics,
+            probe_status=HealthStatus.DEGRADED,
+        )
+
+        status = await adapter.health_check()
+
+        degraded_call = next(
+            (
+                c
+                for c in mock_metrics.increment_counter.call_args_list
+                if c[0][0] == "health_check_degraded_total"
+            ),
+            None,
+        )
+        success_call = next(
+            (
+                c
+                for c in mock_metrics.increment_counter.call_args_list
+                if c[0][0] == "health_check_success_total"
+            ),
+            None,
+        )
+
+        assert degraded_call is not None
+        assert degraded_call[0][2] == {"provider": "test_provider"}
+        assert success_call is None
+        mock_logger.warning.assert_called_once()
+        assert status == HealthStatus.DEGRADED
 
     async def test_health_check_records_latency_histogram(
         self,

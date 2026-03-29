@@ -17,18 +17,19 @@
 ## TL;DR — Быстрый Старт
 
 ```bash
-# Автоматическая настройка окружения (рекомендуется для новых разработчиков)
-./dev-setup.sh          # Полная настройка с тестами
-./dev-setup.sh --quick  # Быстрая установка без тестов
+# Поддерживаемый bootstrap path
+make install
+make test-deps
+make setup-plugins
 
 # Проверка статуса перед работой
 make lint && make test
 
 # Основные команды
-make install      # установка зависимостей (альтернатива dev-setup.sh)
+make install      # установка зависимостей
 make test         # локальный стабильный прогон (без E2E)
 make lint         # ruff + mypy
-make run-local    # запуск на фикстурах
+make run-local    # сэмпловый pipeline-run (chembl_activity, limit=10)
 
 # После изменений
 make lint && make test && git add . && git commit
@@ -79,42 +80,34 @@ Operational rule:
 
 ### 2.1. Настройка Окружения Разработки
 
-Используй скрипт `dev-setup.sh` для автоматической настройки окружения:
+Используй поддерживаемый Make-based bootstrap path:
 
 ```bash
-# Полная настройка (рекомендуется для первого запуска)
-./dev-setup.sh
-
-# Быстрая установка без тестов
-./dev-setup.sh --quick
-
-# Пересоздать окружение с нуля
-./dev-setup.sh --force
-
-# Справка по опциям
-./dev-setup.sh --help
+make install
+make test-deps
+make setup-plugins
 ```
 
-**Что делает скрипт:**
+Если нужен MCP/Codex tooling setup после install:
+
+```bash
+uv run python -m scripts.dev setup-mcp
+```
+
+`scripts/dev/dev_setup.sh` остаётся legacy placeholder и не считается
+поддерживаемым onboarding path.
+
+**Что делает bootstrap path:**
 
 | Шаг | Описание                                      |
 | --- | --------------------------------------------- |
-| 1   | Проверяет Python 3.11+, Git, Make             |
-| 2   | Создаёт виртуальное окружение `.venv`         |
-| 3   | Устанавливает все зависимости `[dev]`         |
-| 4   | Настраивает pre-commit hooks                  |
-| 5   | Копирует `.env.example` → `.env`              |
-| 6   | Проверяет импорт модуля и CLI                 |
-| 7   | Запускает линтеры и тесты (если не `--quick`) |
+| 1   | Создаёт или обновляет `.venv`                 |
+| 2   | Устанавливает зависимости через `uv` или `pip`|
+| 3   | Проверяет runtime dependencies (`make test-deps`) |
+| 4   | Настраивает локальные pytest/pre-commit plugins |
 
-**Опции:**
-
-| Флаг            | Описание                                        |
-| --------------- | ----------------------------------------------- |
-| `--quick`, `-q` | Быстрая установка без запуска тестов и линтеров |
-| `--skip-tests`  | Пропустить тесты, но запустить линтеры          |
-| `--force`, `-f` | Удалить и пересоздать виртуальное окружение     |
-| `--help`, `-h`  | Показать справку                                |
+Если нужен convenience aggregate target, допустим и `make setup-dev`; он
+раскрывается в `install` + dependency verification.
 
 ----------------------------------------------------------------------
 

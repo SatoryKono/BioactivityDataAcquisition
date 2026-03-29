@@ -12,6 +12,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.domain.ports import HealthCheckResult
+from bioetl.infrastructure.adapters.http._health_monitor_support import (
+    emit_health_check_observability,
+)
 from bioetl.infrastructure.adapters.http.health_monitor import (
     ProviderHealthMonitor,
     ProviderHealthState,
@@ -264,6 +268,69 @@ class TestProviderHealthMonitorMetrics:
         assert HealthStatus.UNHEALTHY.to_metric_value() == 0
         assert HealthStatus.DEGRADED.to_metric_value() == 1
         assert HealthStatus.HEALTHY.to_metric_value() == 2
+
+
+class TestHealthCheckObservabilityCounters:
+    """Tests for status-aware health-check outcome counters."""
+
+    def test_emit_health_check_observability_counts_degraded_separately(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """DEGRADED probe outcomes must not be folded into success counters."""
+        emit_health_check_observability(
+            metrics=mock_metrics,
+            result=HealthCheckResult(
+                status=HealthStatus.DEGRADED,
+                latency_ms=12.5,
+                provider="chembl",
+                endpoint="/health",
+            ),
+        )
+
+        degraded_call = next(
+            (
+                c
+                for c in mock_metrics.increment_counter.call_args_list
+                if c[0][0] == "health_check_degraded_total"
+            ),
+            None,
+        )
+        success_call = next(
+            (
+                c
+                for c in mock_metrics.increment_counter.call_args_list
+                if c[0][0] == "health_check_success_total"
+            ),
+            None,
+        )
+
+        assert degraded_call is not None
+        assert success_call is None
+
+    def test_emit_health_check_observability_counts_unhealthy_as_failure(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """UNHEALTHY probe outcomes must increment the failure counter."""
+        emit_health_check_observability(
+            metrics=mock_metrics,
+            result=HealthCheckResult(
+                status=HealthStatus.UNHEALTHY,
+                latency_ms=7.0,
+                provider="chembl",
+                endpoint="/health",
+            ),
+        )
+
+        failure_call = next(
+            (
+                c
+                for c in mock_metrics.increment_counter.call_args_list
+                if c[0][0] == "health_check_failures_total"
+            ),
+            None,
+        )
+
+        assert failure_call is not None
 
 
 class TestProviderHealthMonitorAdaptiveParams:

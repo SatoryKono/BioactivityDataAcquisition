@@ -55,9 +55,55 @@ def _classify_retry_exhaustions(exhaustions_per_hour: int) -> str | None:
 def test_rules_file_contains_control_plane_traceability_group() -> None:
     payload = _load_rules()
     group_names = [group.get("name") for group in payload.get("groups", [])]
+    assert "bioetl_pipeline_runtime_observability" in group_names
     assert "bioetl_control_plane_traceability_observability" in group_names
     assert "bioetl_dq_observability" in group_names
     assert "bioetl_provider_health_observability" in group_names
+    assert "bioetl_chembl_assay_observability" not in group_names
+
+
+def test_runtime_and_provider_rules_are_fleet_wide_not_chembl_specific() -> None:
+    payload = _load_rules()
+    rule_map = _build_rule_map(payload)
+    chembl_specific = [
+        alert_name
+        for alert_name in rule_map
+        if isinstance(alert_name, str) and alert_name.startswith("BioETLChembl")
+    ]
+    assert not chembl_specific, (
+        "Alert rules should be fleet-wide and must not ship BioETLChembl-specific packs: "
+        f"{chembl_specific}"
+    )
+
+
+def test_pipeline_runtime_alerts_reference_expected_metrics() -> None:
+    payload = _load_rules()
+    rule_map = _build_rule_map(payload)
+
+    expected = {
+        "BioETLPipelinePreflightDataSourceFailed": (
+            "bioetl_pipeline_health_check_passed",
+            "docs/05-operations/runbooks/pipeline-failure-critical.md",
+        ),
+        "BioETLPipelineInfrastructureValidationFailed": (
+            "bioetl_infrastructure_validated",
+            "docs/05-operations/runbooks/pipeline-failure-critical.md",
+        ),
+        "BioETLPipelineRunFailed": (
+            "bioetl_pipeline_runs_total",
+            "docs/05-operations/runbooks/pipeline-failure-critical.md",
+        ),
+    }
+
+    missing = [name for name in expected if name not in rule_map]
+    assert not missing, f"Missing expected alerts: {missing}"
+
+    for alert_name, (metric_name, runbook_path) in expected.items():
+        rule = rule_map[alert_name]
+        expr = rule.get("expr", "")
+        annotations = rule.get("annotations", {})
+        assert metric_name in expr
+        assert annotations.get("runbook") == runbook_path
 
 
 def test_control_plane_traceability_alerts_reference_expected_metrics() -> None:
@@ -135,6 +181,10 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
             "bioetl_health_check_failures_total",
             "docs/05-operations/runbooks/incident-response.md",
         ),
+        "BioETLProviderHealthCheckFailuresDetected": (
+            "bioetl_health_check_failures_total",
+            "docs/05-operations/runbooks/incident-response.md",
+        ),
         "BioETLProviderRetriesExhausted": (
             "bioetl_data_source_retry_exhausted_total",
             "docs/05-operations/runbooks/incident-response.md",
@@ -165,6 +215,11 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         "BioETLDQQuarantineRateCritical": "critical",
         "BioETLDataFreshnessLagHigh": "warning",
         "BioETLDataFreshnessLagCritical": "critical",
+        "BioETLPipelinePreflightDataSourceFailed": "critical",
+        "BioETLPipelineInfrastructureValidationFailed": "critical",
+        "BioETLPipelineRunFailed": "critical",
+        "BioETLProviderHealthCheckFailuresDetected": "warning",
+        "BioETLProviderFailureRateHigh": "warning",
         "BioETLProviderRetriesExhausted": "warning",
         "BioETLProviderRetriesExhaustedPersistent": "critical",
     }
@@ -180,6 +235,35 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
             "clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)",
             "> 259200",
         ],
+        "BioETLPipelinePreflightDataSourceFailed": [
+            "bioetl_pipeline_health_check_passed",
+            'component="data_source"',
+            "[15m]",
+            "== 0",
+        ],
+        "BioETLPipelineInfrastructureValidationFailed": [
+            "bioetl_infrastructure_validated",
+            "[15m]",
+            "< 1",
+        ],
+        "BioETLPipelineRunFailed": [
+            "bioetl_pipeline_runs_total",
+            'status="failed"',
+            "[15m]",
+            "> 0",
+        ],
+        "BioETLProviderHealthCheckFailuresDetected": [
+            "bioetl_health_check_failures_total",
+            "[10m]",
+            "> 0",
+        ],
+        "BioETLProviderFailureRateHigh": [
+            "bioetl_health_check_failures_total",
+            "bioetl_health_check_success_total",
+            "bioetl_health_check_degraded_total",
+            "[15m]",
+            "> 0.2",
+        ],
         "BioETLProviderRetriesExhausted": ["> 0", "< 3", "[1h]"],
         "BioETLProviderRetriesExhaustedPersistent": [">= 3", "[1h]"],
     }
@@ -188,6 +272,11 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         "BioETLDQQuarantineRateCritical": "5m",
         "BioETLDataFreshnessLagHigh": "15m",
         "BioETLDataFreshnessLagCritical": "15m",
+        "BioETLPipelinePreflightDataSourceFailed": "2m",
+        "BioETLPipelineInfrastructureValidationFailed": "2m",
+        "BioETLPipelineRunFailed": "1m",
+        "BioETLProviderHealthCheckFailuresDetected": "2m",
+        "BioETLProviderFailureRateHigh": "5m",
         "BioETLProviderRetriesExhausted": "5m",
         "BioETLProviderRetriesExhaustedPersistent": "10m",
     }

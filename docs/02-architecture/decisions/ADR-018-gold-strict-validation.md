@@ -380,7 +380,7 @@ def test-non-strict-validation-warns-without-schema(caplog):
 | `GoldValidatorPort` протокол           | ✅ Реализован | `domain/ports/validation.py:41-61`                       |
 | `PanderaGoldValidator`                 | ✅ Реализован | `infrastructure/validation/pandera_validator.py:97-210`  |
 | `GoldWriter._validate_schema_strict()` | ✅ Реализован | `infrastructure/storage/gold_writer.py:226-232`          |
-| `NoOpGoldValidator`                    | ✅ Реализован | `infrastructure/validation/pandera_validator.py:213-230` |
+| `NoOpValidator`                        | ✅ Реализован | `infrastructure/validation/pandera_validator.py:235-255` |
 
 **Отличия от первоначального предложения:**
 

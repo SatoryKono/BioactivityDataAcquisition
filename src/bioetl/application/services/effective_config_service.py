@@ -134,6 +134,47 @@ def _compute_source_fingerprint(source_refs: list[ConfigSourceRef]) -> str:
     return _stable_hash(normalized)
 
 
+def _build_resolved_config_snapshot(
+    *,
+    pipeline_kind: str,
+    resolved_config: JsonDict,
+) -> ResolvedConfigSnapshot:
+    """Build the resolved-config snapshot and its stable hash."""
+    return ResolvedConfigSnapshot(
+        config_type=pipeline_kind,
+        config_data=resolved_config,
+        config_hash=_stable_hash(resolved_config),
+    )
+
+
+def _build_runtime_override_snapshot(
+    runtime_overrides: JsonDict,
+) -> RuntimeOverrideSnapshot:
+    """Build the runtime override snapshot and its stable hash."""
+    return RuntimeOverrideSnapshot(
+        cli_overrides=runtime_overrides.get("cli", {}),
+        env_overrides=runtime_overrides.get("env", {}),
+        runtime_adjustments=runtime_overrides.get("runtime", {}),
+        override_hash=_stable_hash(runtime_overrides),
+    )
+
+
+def _build_effective_execution_config(
+    *,
+    resolved_config: JsonDict,
+    runtime_overrides: JsonDict,
+) -> EffectiveExecutionConfig:
+    """Apply runtime overrides and capture the effective execution snapshot."""
+    effective_config_data = _apply_runtime_overrides(
+        resolved_config,
+        runtime_overrides,
+    )
+    return EffectiveExecutionConfig(
+        config_data=effective_config_data,
+        effective_hash=_stable_hash(effective_config_data),
+    )
+
+
 def _serialize_artifact(artifact: EffectiveConfigArtifact) -> str:
     payload = {
         "artifact_id": artifact.artifact_id,
@@ -179,24 +220,14 @@ class EffectiveConfigService:
             artifact_id = f"config_{uuid.uuid4().hex[:8]}"
 
         resolved_policy = _resolve_resolution_policy(resolution_policy)
-
-        resolved_snapshot = ResolvedConfigSnapshot(
-            config_type=pipeline_kind,
-            config_data=resolved_config,
-            config_hash=_stable_hash(resolved_config),
+        resolved_snapshot = _build_resolved_config_snapshot(
+            pipeline_kind=pipeline_kind,
+            resolved_config=resolved_config,
         )
-        overrides_snapshot = RuntimeOverrideSnapshot(
-            cli_overrides=runtime_overrides.get("cli", {}),
-            env_overrides=runtime_overrides.get("env", {}),
-            runtime_adjustments=runtime_overrides.get("runtime", {}),
-            override_hash=_stable_hash(runtime_overrides),
-        )
-        effective_config_data = _apply_runtime_overrides(
-            resolved_config, runtime_overrides
-        )
-        effective_snapshot = EffectiveExecutionConfig(
-            config_data=effective_config_data,
-            effective_hash=_stable_hash(effective_config_data),
+        overrides_snapshot = _build_runtime_override_snapshot(runtime_overrides)
+        effective_snapshot = _build_effective_execution_config(
+            resolved_config=resolved_config,
+            runtime_overrides=runtime_overrides,
         )
 
         dq_policy_refs, dq_policy_snapshots, dq_rule_bundle_versions = (

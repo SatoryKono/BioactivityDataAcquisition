@@ -4,8 +4,9 @@ Provides standardized logging and metrics for health_check() methods.
 Used by both BaseHttpAdapter and BaseSyncAdapter for consistent behavior.
 
 Observability Contract (RULES.md §4.8):
-- SUCCESS: DEBUG log "health_check_passed", increment success counter
-- FAILURE: WARNING log "health_check_failed" with details, increment failure counter
+- HEALTHY: DEBUG log "health_check_passed", increment healthy counter
+- DEGRADED: WARNING log "health_check_degraded", increment degraded counter
+- FAILED/UNHEALTHY: WARNING log "health_check_failed"/"health_check_unhealthy", increment failure counter
 - LATENCY: Record duration histogram for all health checks
 
 Architecture Note:
@@ -29,8 +30,8 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters._health_check_observability import (
+    handle_health_check_result,
     handle_health_check_failure,
-    handle_health_check_success,
     resolve_metrics,
     start_health_check,
 )
@@ -65,8 +66,9 @@ class HealthCheckMixin:
     Used by both BaseHttpAdapter and BaseSyncAdapter.
 
     Metrics emitted:
-    - health_check_success_total{provider}: Counter of successful checks
-    - health_check_failures_total{provider}: Counter of failed checks
+    - health_check_success_total{provider}: Counter of HEALTHY checks
+    - health_check_degraded_total{provider}: Counter of DEGRADED checks
+    - health_check_failures_total{provider}: Counter of failed/UNHEALTHY checks
     - health_check_latency_seconds{provider}: Histogram of check durations
 
     Usage:
@@ -75,7 +77,7 @@ class HealthCheckMixin:
                 ctx = self._start_health_check()
                 try:
                     status = await self._probe_health()
-                    self._handle_health_check_success(ctx, status)
+                    self._handle_health_check_result(ctx, status)
                     return status
                 except HEALTH_CHECK_ERRORS as e:
                     return self._handle_health_check_failure(ctx, e)
@@ -121,21 +123,19 @@ class HealthCheckMixin:
         """
         return ""
 
-    def _handle_health_check_success(
+    def _handle_health_check_result(
         self,
         ctx: HealthCheckContext,
         status: HealthStatus,
     ) -> None:
-        """Handle successful health check with logging and metrics.
-
-        Logs at DEBUG level and increments success counter.
+        """Handle completed health check with status-aware logging and metrics.
 
         Args:
             ctx: Health check context with timing info.
             status: The resulting health status.
 
         """
-        handle_health_check_success(
+        handle_health_check_result(
             logger=self._logger,
             metrics=self.metrics,
             ctx=ctx,
@@ -219,8 +219,9 @@ class HealthCheckProviderMixin(HealthCheckMixin):
         to _fallback_health_status() on any exception.
 
         Observability (via HealthCheckMixin):
-        - SUCCESS: DEBUG log, success counter, latency histogram
-        - FAILURE: WARNING log with details, failure counter, latency histogram
+    - HEALTHY: DEBUG log, healthy counter, latency histogram
+    - DEGRADED: WARNING log, degraded counter, latency histogram
+    - FAILED/UNHEALTHY: WARNING log with details, failure counter, latency histogram
 
         Returns:
             HealthStatus from probe or fallback.
@@ -229,7 +230,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
         ctx = self._start_health_check()
         try:
             status = await self._probe_health()
-            self._handle_health_check_success(ctx, status)
+            self._handle_health_check_result(ctx, status)
             return status
         except HEALTH_CHECK_ERRORS as e:
             fallback_status = self._fallback_health_status()
@@ -281,7 +282,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
         """Execute one provider probe and capture the normalized result state."""
         try:
             status = await self._probe_health()
-            self._handle_health_check_success(ctx, status)
+            self._handle_health_check_result(ctx, status)
             return _HealthCheckProbeOutcome(status=status)
         except HEALTH_CHECK_ERRORS as error:
             self._handle_health_check_failure(ctx, error)

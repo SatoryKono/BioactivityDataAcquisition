@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
+from bioetl.composition.factories.services.port_factories import create_metrics
 
 if TYPE_CHECKING:
     import polars as pl
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import LockPort, LoggerPort
+    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -51,7 +52,7 @@ def bootstrap_runtime_basics(
     storage_bootstrapper: Callable[..., object],
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
-) -> tuple[str, Settings, LoggerPort, object, LockPort]:
+) -> tuple[str, Settings, LoggerPort, MetricsPort, object, LockPort]:
     """Build base runtime dependencies shared across composite bootstrap.
 
     Args:
@@ -68,14 +69,15 @@ def bootstrap_runtime_basics(
             for deterministic testing.
 
     Returns:
-        Tuple of (run_id, settings, logger, storage, lock) for the composite run.
+        Tuple of (run_id, settings, logger, metrics, storage, lock) for the composite run.
     """
     effective_run_id = run_id or str(uuid_factory())
     settings = settings_provider()
     logger = logger_bootstrapper(config.name, UUID(effective_run_id), "INFO")
+    metrics = create_metrics(settings)
     storage = storage_bootstrapper(enable_csv_export=True)
     lock = lock_factory()
-    return effective_run_id, settings, logger, storage, lock
+    return effective_run_id, settings, logger, metrics, storage, lock
 
 
 def build_runner_factories(
@@ -155,7 +157,10 @@ def build_support_services(
     load_field_group_registry_fn: Callable[
         [str, LoggerPort], FieldGroupRegistry | None
     ],
-    create_dq_report_service_fn: Callable[[LoggerPort, Settings], DQReportService],
+    create_dq_report_service_fn: Callable[
+        [LoggerPort, Settings, MetricsPort],
+        DQReportService,
+    ],
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade.
 

@@ -29,30 +29,56 @@ def start_health_check(
     )
 
 
-def handle_health_check_success(
+def handle_health_check_result(
     *,
     logger: LoggerPort,
     metrics: MetricsPort | None,
     ctx: HealthCheckContext,
     status: HealthStatus,
 ) -> None:
-    """Record success-side logs and metrics for a health probe."""
+    """Record logs and counters for a completed health probe result."""
     elapsed = ctx.elapsed_seconds
     labels = {"provider": ctx.provider}
-    logger.debug(
-        "health_check_passed",
-        provider=ctx.provider,
-        endpoint=ctx.endpoint,
-        status=status.value,
-        latency_seconds=elapsed,
-    )
-
     metrics_port = resolve_metrics(metrics)
-    metrics_port.increment_counter(
-        "health_check_success_total",
-        1,
-        labels,
-    )
+    if status == HealthStatus.HEALTHY:
+        logger.debug(
+            "health_check_passed",
+            provider=ctx.provider,
+            endpoint=ctx.endpoint,
+            status=status.value,
+            latency_seconds=elapsed,
+        )
+        metrics_port.increment_counter(
+            "health_check_success_total",
+            1,
+            labels,
+        )
+    elif status == HealthStatus.DEGRADED:
+        logger.warning(
+            "health_check_degraded",
+            provider=ctx.provider,
+            endpoint=ctx.endpoint,
+            status=status.value,
+            latency_seconds=elapsed,
+        )
+        metrics_port.increment_counter(
+            "health_check_degraded_total",
+            1,
+            labels,
+        )
+    else:
+        logger.warning(
+            "health_check_unhealthy",
+            provider=ctx.provider,
+            endpoint=ctx.endpoint,
+            status=status.value,
+            latency_seconds=elapsed,
+        )
+        metrics_port.increment_counter(
+            "health_check_failures_total",
+            1,
+            labels,
+        )
     metrics_port.observe_histogram(
         "health_check_latency_seconds",
         elapsed,

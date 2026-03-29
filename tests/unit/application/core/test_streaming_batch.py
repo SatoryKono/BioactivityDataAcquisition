@@ -194,7 +194,7 @@ class TestTransformSingle:
         assert result.is_quarantined is True
         mock_quarantine_manager.quarantine_records.assert_called_once()
 
-    async def test_transform_single_filtered_out_quasi_quarantine(
+    async def test_transform_single_filtered_out_quarantine_sink(
         self,
         mock_context,
         mock_error_classifier,
@@ -203,7 +203,7 @@ class TestTransformSingle:
         gold_filter_callback,
         gold_transform_callback,
     ):
-        """Test filtered-out record goes to quasi-quarantine."""
+        """Test filtered-out record is routed to quarantine storage."""
         from bioetl.application.core.base_transformer import FilteredOutError
 
         async def filtered_transform(ctx, record, index):

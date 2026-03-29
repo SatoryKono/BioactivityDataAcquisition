@@ -117,6 +117,10 @@ filters:
     column_name: component_id
     filter_field: component_id
     batch_size: 100
+  silver_filters:
+    required_fields:
+    - component_id
+    - organism
   gold_filters:
     columns:
       component_type:
