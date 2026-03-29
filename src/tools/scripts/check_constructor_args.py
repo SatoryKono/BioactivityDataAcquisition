@@ -54,7 +54,7 @@ def check_file(filepath: Path) -> list[tuple[str, int, int]]:
 
 
 def _load_waivers(waiver_path: Path) -> dict:
-    """Load waivers from YAML file. Exits on error."""
+    """Load waivers from YAML file. Returns {} on error if warn_only."""
     if not waiver_path.exists():
         return {}
     try:
@@ -63,14 +63,21 @@ def _load_waivers(waiver_path: Path) -> dict:
         with waiver_path.open(encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
     except ImportError:
+        import sys
+
         print(
-            "Error: PyYAML is required to read constructor_waivers.yaml",
+            "Warning: PyYAML is required to read constructor_waivers.yaml. Ignoring waivers.",
             file=sys.stderr,
         )
-        sys.exit(1)
+        return {}
     except Exception as e:
-        print(f"Error reading waivers file: {e}", file=sys.stderr)
-        sys.exit(1)
+        import sys
+
+        print(
+            f"Warning: Error reading waivers file: {e}. Ignoring waivers.",
+            file=sys.stderr,
+        )
+        return {}
 
 
 def _parse_expiry(expiry_str: str) -> date:
