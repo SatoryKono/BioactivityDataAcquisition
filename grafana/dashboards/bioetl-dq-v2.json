@@ -204,7 +204,7 @@
       },
       "targets": [
         {
-          "expr": "(sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}) + sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"quarantined\"})) / clamp_min(sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}), 1)",
+          "expr": "avg(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}) or vector(0)",
           "legendFormat": "Quality",
           "refId": "A"
         }
@@ -431,12 +431,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[24h])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
           "legendFormat": "Quarantined",
           "refId": "A"
         }
       ],
-      "title": "Records Quarantined (24h)",
+      "title": "Records Quarantined",
       "type": "stat"
     },
     {
@@ -492,12 +492,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[24h])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
           "legendFormat": "Threshold Exceeded",
           "refId": "A"
         }
       ],
-      "title": "Soft Threshold Exceeded (24h)",
+      "title": "Soft Threshold Exceeded",
       "type": "stat"
     },
     {
@@ -564,6 +564,137 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 26
+      },
+      "id": 117,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "legendFormat": "Filtered Out",
+          "refId": "A"
+        }
+      ],
+      "title": "Silver Filter Rejects",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Rejects",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 26
+      },
+      "id": 118,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "sum by (pipeline) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "{{pipeline}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Silver Filter Rejects by Pipeline",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
             "mode": "palette-classic"
           },
           "mappings": [],
@@ -575,7 +706,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 26
+        "y": 34
       },
       "id": 9,
       "options": {
@@ -601,12 +732,12 @@
       },
       "targets": [
         {
-          "expr": "sum by (error_type) (increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[24h]))",
+          "expr": "sum by (error_type) (increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
           "legendFormat": "{{error_type}}",
           "refId": "A"
         }
       ],
-      "title": "Quarantine by Error Type (24h)",
+      "title": "Quarantine by Error Type",
       "type": "piechart"
     },
     {
@@ -653,7 +784,7 @@
         "h": 8,
         "w": 16,
         "x": 8,
-        "y": 26
+        "y": 34
       },
       "id": 10,
       "options": {
@@ -672,12 +803,12 @@
       },
       "targets": [
         {
-          "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[1h]))",
+          "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval]))",
           "legendFormat": "{{severity}} / {{anomaly_type}}",
           "refId": "A"
         }
       ],
-      "title": "Anomalies Detected (1h)",
+      "title": "Anomalies Detected",
       "type": "timeseries"
     },
     {
@@ -724,7 +855,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 34
+        "y": 42
       },
       "id": 11,
       "options": {
@@ -785,7 +916,7 @@
         "h": 8,
         "w": 6,
         "x": 12,
-        "y": 34
+        "y": 42
       },
       "id": 12,
       "options": {
@@ -804,12 +935,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_silver_validation_failures_total{table=~\"$pipeline\"}[24h])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_silver_validation_failures_total{table=~\"$pipeline\"}[$__range])) or vector(0))",
           "legendFormat": "Validation Failures",
           "refId": "A"
         }
       ],
-      "title": "Silver Validation Failures (24h)",
+      "title": "Silver Validation Failures",
       "type": "stat"
     },
     {
@@ -846,7 +977,7 @@
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 34
+        "y": 42
       },
       "id": 116,
       "options": {
@@ -865,12 +996,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[24h])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
           "legendFormat": "Missing Refs",
           "refId": "A"
         }
       ],
-      "title": "Lineage Refs Missing (24h)",
+      "title": "Lineage Refs Missing",
       "type": "stat"
     },
     {

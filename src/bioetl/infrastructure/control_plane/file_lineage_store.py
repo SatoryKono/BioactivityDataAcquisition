@@ -6,12 +6,20 @@ import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from time import perf_counter
+from typing import TYPE_CHECKING
 
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.ports import LineageStorePort
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.control_plane._read_metrics import (
+    emit_control_plane_read_metrics,
+)
 
 __all__ = ["FileLineageStore"]
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import MetricsPort
 
 
 def _stable_key_filename(key: str) -> str:
@@ -44,6 +52,7 @@ class FileLineageStore(LineageStorePort):
     """Persist lineage graph fragments under the control-plane output tree."""
 
     base_path: Path
+    metrics: MetricsPort | None = None
 
     def save(self, fragment: LineageGraphFragment) -> None:
         """Persist one fragment JSON and maintain lightweight lookup indexes."""
@@ -76,29 +85,97 @@ class FileLineageStore(LineageStorePort):
 
     def get(self, fragment_id: str) -> LineageGraphFragment | None:
         """Load one fragment by identifier if present."""
-        fragment_path = self._fragment_path(fragment_id)
-        if not fragment_path.exists():
-            return None
-        payload = json.loads(fragment_path.read_text(encoding="utf-8"))
-        if not isinstance(payload, dict):
-            raise ValueError("Lineage fragment payload must be a JSON object")
-        fragment = LineageGraphFragment.from_dict(payload)
-        return fragment if fragment.fragment_id == fragment_id else None
+        started_at = perf_counter()
+        status = "success"
+        try:
+            fragment = self._load_fragment(fragment_id)
+            if fragment is None:
+                status = "miss"
+                return None
+            return fragment
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="lineage",
+                operation="get",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
 
     def list_by_run_id(self, run_id: RunID) -> list[LineageGraphFragment]:
         """Return fragments linked to one run identifier."""
-        return self._load_from_index(self._run_index_path(str(run_id)), key=str(run_id))
+        started_at = perf_counter()
+        status = "success"
+        try:
+            fragments = self._load_from_index(
+                self._run_index_path(str(run_id)),
+                key=str(run_id),
+            )
+            if not fragments:
+                status = "miss"
+            return fragments
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="lineage",
+                operation="list_by_run_id",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
 
     def list_by_manifest_id(self, manifest_id: str) -> list[LineageGraphFragment]:
         """Return fragments linked to one manifest identifier."""
-        return self._load_from_index(
-            self._manifest_index_path(manifest_id),
-            key=manifest_id,
-        )
+        started_at = perf_counter()
+        status = "success"
+        try:
+            fragments = self._load_from_index(
+                self._manifest_index_path(manifest_id),
+                key=manifest_id,
+            )
+            if not fragments:
+                status = "miss"
+            return fragments
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="lineage",
+                operation="list_by_manifest_id",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
 
     def list_by_node_id(self, node_id: str) -> list[LineageGraphFragment]:
         """Return fragments that mention one node identifier."""
-        return self._load_from_index(self._node_index_path(node_id), key=node_id)
+        started_at = perf_counter()
+        status = "success"
+        try:
+            fragments = self._load_from_index(
+                self._node_index_path(node_id),
+                key=node_id,
+            )
+            if not fragments:
+                status = "miss"
+            return fragments
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="lineage",
+                operation="list_by_node_id",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
 
     def _fragment_path(self, fragment_id: str) -> Path:
         """Resolve the fragment JSON path for one fragment identifier."""
@@ -143,7 +220,18 @@ class FileLineageStore(LineageStorePort):
         """Load fragments referenced by one lookup index."""
         fragments: list[LineageGraphFragment] = []
         for fragment_id in _load_fragment_ids(index_path, key=key):
-            fragment = self.get(fragment_id)
+            fragment = self._load_fragment(fragment_id)
             if fragment is not None:
                 fragments.append(fragment)
         return fragments
+
+    def _load_fragment(self, fragment_id: str) -> LineageGraphFragment | None:
+        """Load one fragment payload without emitting public lookup metrics."""
+        fragment_path = self._fragment_path(fragment_id)
+        if not fragment_path.exists():
+            return None
+        payload = json.loads(fragment_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("Lineage fragment payload must be a JSON object")
+        fragment = LineageGraphFragment.from_dict(payload)
+        return fragment if fragment.fragment_id == fragment_id else None

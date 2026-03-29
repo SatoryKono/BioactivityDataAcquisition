@@ -230,9 +230,9 @@ def test_variable_query_sources(dashboard_path):
         provider_query_text = (
             provider_query.get("query", "") if isinstance(provider_query, dict) else ""
         )
-        assert "bioetl_health_check_success_total" in provider_query_text, (
+        assert "bioetl_provider_health_status" in provider_query_text, (
             f"Dashboard {dashboard_path.name} 'provider' query must use "
-            "bioetl_health_check_success_total"
+            "bioetl_provider_health_status"
         )
         assert "pipeline" not in variable_map, (
             f"Dashboard {dashboard_path.name} must not expose misleading 'pipeline' variable"
@@ -271,28 +271,34 @@ def test_summary_queries_use_zero_fallbacks() -> None:
     """Runtime/provider summary panels should show zero instead of no-data."""
     expected_panel_snippets = {
         "bioetl-overview-v2.json": {
-            "Manifest Write Failures (24h)": "or vector(0)",
-            "Ledger Append Failures (24h)": "or vector(0)",
-            "Checkpoint Incompatibilities (24h)": "or vector(0)",
-            "Lineage Refs Missing (24h)": "or vector(0)",
+            "Manifest Write Failures": "or vector(0)",
+            "Ledger Append Failures": "or vector(0)",
+            "Checkpoint Incompatibilities": "or vector(0)",
+            "Lineage Refs Missing": "or vector(0)",
+            "Silver Filter Rejects": "or vector(0)",
         },
         "bioetl-runtime.json": {
-            "Unstructured Logs (1h)": "or vector(0)",
-            "DQ Alert Conditions (1h)": "or vector(0)",
-            "Control-plane Alert Conditions (1h)": "or vector(0)",
-            "Provider Alert Conditions (1h)": "or vector(0)",
+            "Unstructured Logs": "or vector(0)",
+            "Pipeline Alert Conditions": "or vector(0)",
+            "DQ Alert Conditions": "or vector(0)",
+            "Control-plane Alert Conditions": "or vector(0)",
+            "Provider Alert Conditions": "or vector(0)",
             "Freshness Alert Conditions": "or vector(0)",
-            "Log Hygiene Trend (5m)": "or vector(0)",
+            "Trace-enabled Runs": "or vector(0)",
+            "Silver Filter Rejects": "or vector(0)",
+            "Log Hygiene Trend": "or vector(0)",
         },
         "bioetl-provider-health-v2.json": {
-            "Health Check Successes (15m)": "or vector(0)",
-            "Provider Failure Rate (15m)": "or vector(0)",
-            "Health Checks (15m)": "or vector(0)",
+            "Healthy Checks": "or vector(0)",
+            "Degraded Checks": "or vector(0)",
+            "Provider Failure Rate": "or vector(0)",
+            "Health Checks Total": "or vector(0)",
         },
         "bioetl-dq-v2.json": {
-            "Records Quarantined (24h)": "or vector(0)",
-            "Soft Threshold Exceeded (24h)": "or vector(0)",
-            "Silver Validation Failures (24h)": "or vector(0)",
+            "Records Quarantined": "or vector(0)",
+            "Silver Filter Rejects": "or vector(0)",
+            "Soft Threshold Exceeded": "or vector(0)",
+            "Silver Validation Failures": "or vector(0)",
         },
     }
 
@@ -326,24 +332,30 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
     expected_panel_snippets = {
         "bioetl-overview-v2.json": {
-            "Manifest Write Failures (24h)": "round(",
-            "Ledger Append Failures (24h)": "round(",
-            "Checkpoint Incompatibilities (24h)": "round(",
-            "Lineage Refs Missing (24h)": "round(",
+            "Manifest Write Failures": "round(",
+            "Ledger Append Failures": "round(",
+            "Checkpoint Incompatibilities": "round(",
+            "Lineage Refs Missing": "round(",
+            "Silver Filter Rejects": "round(",
         },
         "bioetl-provider-health-v2.json": {
-            "Health Check Successes (15m)": "round(",
-            "Health Checks (15m)": "round(",
+            "Healthy Checks": "round(",
+            "Degraded Checks": "round(",
+            "Health Checks Total": "round(",
         },
         "bioetl-dq-v2.json": {
-            "Records Quarantined (24h)": "round(",
-            "Soft Threshold Exceeded (24h)": "round(",
-            "Silver Validation Failures (24h)": "round(",
-            "Lineage Refs Missing (24h)": "round(",
+            "Records Quarantined": "round(",
+            "Silver Filter Rejects": "round(",
+            "Soft Threshold Exceeded": "round(",
+            "Silver Validation Failures": "round(",
+            "Lineage Refs Missing": "round(",
         },
         "bioetl-runtime.json": {
-            "DQ Alert Conditions (1h)": "> bool 0",
-            "Control-plane Alert Conditions (1h)": "> bool 0",
+            "Pipeline Alert Conditions": "> bool 0",
+            "DQ Alert Conditions": "> bool 0",
+            "Control-plane Alert Conditions": "> bool 0",
+            "Trace-enabled Runs": "round(",
+            "Silver Filter Rejects": "round(",
         },
     }
 
@@ -376,8 +388,8 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
         ("bioetl-dq-v2.json", "Data Quality Score"),
     ],
 )
-def test_quality_ratio_uses_clamp_min(dashboard_file, panel_title):
-    """Ensure quality ratio panels are protected from division by zero."""
+def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
+    """Ensure DQ score panels use the canonical DQ validation metric."""
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
     panel = next(
         (
@@ -390,11 +402,12 @@ def test_quality_ratio_uses_clamp_min(dashboard_file, panel_title):
     assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_file}"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("clamp_min(" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must use clamp_min for bronze denominator"
+    assert any("bioetl_dq_validation_score" in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must use "
+        "bioetl_dq_validation_score"
     )
-    assert any('stage="quarantined"' in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must include quarantined records"
+    assert any("or vector(0)" in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must stay zero-safe"
     )
 
 
@@ -470,18 +483,24 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
     all_expressions = "\n".join(get_panel_expressions(dashboard))
 
     required_metrics = [
+        "bioetl_records_processed_total",
         "bioetl_dq_soft_threshold_exceeded",
         "bioetl_dq_validation_failures_total",
         "bioetl_dq_anomaly_detected",
         "bioetl_silver_validation_failures_total",
         "bioetl_data_freshness_seconds",
+        "bioetl_pipeline_health_check_passed",
+        "bioetl_infrastructure_validated",
+        "bioetl_pipeline_runs_total",
         "bioetl_control_plane_manifest_writes_total",
         "bioetl_control_plane_ledger_appends_total",
         "bioetl_control_plane_reads_total",
         "bioetl_control_plane_read_duration_seconds",
+        "bioetl_traced_runs_total",
         "bioetl_checkpoint_compatibility_events_total",
         "bioetl_lineage_refs_missing_total",
         "bioetl_health_check_failures_total",
+        "bioetl_health_check_degraded_total",
         "bioetl_health_check_success_total",
         "bioetl_data_source_retry_exhausted_total",
     ]
@@ -499,6 +518,207 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
     )
     assert any("__error__!=\"\"" in expr for expr in loki_exprs), (
         "Runtime dashboard must expose unstructured-log hygiene signal"
+    )
+
+
+@pytest.mark.parametrize(
+    ("dashboard_file", "panel_title"),
+    [
+        ("bioetl-overview-v2.json", "Silver Filter Rejects"),
+        ("bioetl-dq-v2.json", "Silver Filter Rejects"),
+        ("bioetl-dq-v2.json", "Silver Filter Rejects by Pipeline"),
+        ("bioetl-runtime.json", "Silver Filter Rejects"),
+    ],
+)
+def test_silver_filter_reject_panels_use_filtered_out_stage(
+    dashboard_file: str, panel_title: str
+) -> None:
+    """Silver filter rejects must stay separate from DQ quarantine semantics."""
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_file}"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert expressions, f"Panel '{panel_title}' in {dashboard_file} has no expressions"
+    assert any("bioetl_records_processed_total" in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must use "
+        "bioetl_records_processed_total"
+    )
+    assert any('stage="filtered_out"' in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must filter on stage=\"filtered_out\""
+    )
+    assert any("[$__range]" in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must use the selected Grafana time range"
+    )
+
+
+def test_silver_filter_reject_rate_uses_selected_time_range() -> None:
+    """Silver filter reject rate must follow the active dashboard time range."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Silver Filter Reject Rate"
+        ),
+        None,
+    )
+    assert panel is not None, "Panel 'Silver Filter Reject Rate' not found"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any("[$__range]" in expr for expr in expressions), (
+        "Silver Filter Reject Rate must use the selected Grafana time range"
+    )
+
+
+@pytest.mark.parametrize(
+    ("panel_title", "expected_snippet"),
+    [
+        ("Healthy Checks", "[$__range]"),
+        ("Degraded Checks", "[$__range]"),
+        ("Provider Failure Rate", "[$__range]"),
+        ("Health Checks Total", "[$__range]"),
+    ],
+)
+def test_provider_health_summary_panels_use_selected_time_range(
+    panel_title: str, expected_snippet: str
+) -> None:
+    """Provider summary panels must respect the active Grafana time range."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None, f"Panel '{panel_title}' not found"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any(expected_snippet in expr for expr in expressions), (
+        f"Panel '{panel_title}' must use the selected Grafana time range"
+    )
+
+
+@pytest.mark.parametrize(
+    ("dashboard_file", "panel_title"),
+    [
+        ("bioetl-overview-v2.json", "Manifest Write Failures"),
+        ("bioetl-overview-v2.json", "Ledger Append Failures"),
+        ("bioetl-overview-v2.json", "Checkpoint Incompatibilities"),
+        ("bioetl-overview-v2.json", "Lineage Refs Missing"),
+        ("bioetl-overview-v2.json", "Control-plane Lookup Failures"),
+        ("bioetl-overview-v2.json", "Control-plane Lookup p95"),
+        ("bioetl-dq-v2.json", "Records Quarantined"),
+        ("bioetl-dq-v2.json", "Soft Threshold Exceeded"),
+        ("bioetl-dq-v2.json", "Quarantine by Error Type"),
+        ("bioetl-dq-v2.json", "Silver Validation Failures"),
+        ("bioetl-dq-v2.json", "Lineage Refs Missing"),
+        ("bioetl-runtime.json", "Warnings"),
+        ("bioetl-runtime.json", "Unstructured Logs"),
+        ("bioetl-runtime.json", "Pipeline Alert Conditions"),
+        ("bioetl-runtime.json", "DQ Alert Conditions"),
+        ("bioetl-runtime.json", "Control-plane Alert Conditions"),
+        ("bioetl-runtime.json", "Provider Alert Conditions"),
+        ("bioetl-runtime.json", "DQ Context Failures"),
+        ("bioetl-runtime.json", "DQ Reports Skipped"),
+        ("bioetl-runtime.json", "DQ Reports Generated"),
+        ("bioetl-runtime.json", "Control-plane Lookup p95"),
+        ("bioetl-runtime.json", "Top Warning Events"),
+        ("bioetl-runtime.json", "Trace-enabled Runs"),
+    ],
+)
+def test_range_aware_summary_panels_use_selected_time_range(
+    dashboard_file: str, panel_title: str
+) -> None:
+    """Summary and triage panels should follow the active Grafana time range."""
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_file}"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any("[$__range]" in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must use the selected Grafana time range"
+    )
+
+
+@pytest.mark.parametrize(
+    ("dashboard_file", "panel_title"),
+    [
+        ("bioetl-overview-v2.json", "Lineage Fragment Outcomes"),
+        ("bioetl-dq-v2.json", "Anomalies Detected"),
+        ("bioetl-runtime.json", "Control-plane Lookup Outcomes"),
+        ("bioetl-runtime.json", "Log Hygiene Trend"),
+    ],
+)
+def test_adaptive_trend_panels_use_selected_interval(
+    dashboard_file: str, panel_title: str
+) -> None:
+    """Trend panels should adapt to the active Grafana window via $__interval."""
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_file}"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any("[$__interval]" in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must use $__interval"
+    )
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_dashboard_titles_do_not_expose_fixed_window_suffixes(dashboard_path: Path) -> None:
+    """Shipped dashboards should rely on Grafana window controls, not fixed time suffixes."""
+    dashboard = load_dashboard(dashboard_path)
+    titles = [
+        panel.get("title", "")
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("title"), str)
+    ]
+    offenders = [title for title in titles if re.search(r"\((24h|15m|1h|5m)\)$", title)]
+    assert not offenders, (
+        f"Dashboard {dashboard_path.name} still contains fixed-window titles: {offenders}"
     )
 
 

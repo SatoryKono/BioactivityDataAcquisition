@@ -29,7 +29,7 @@ async def flush_filtered_records(
     records: list[FilteredQuarantineEntry],
     batch_id: BatchID,
 ) -> int:
-    """Persist filtered-out records without blocking pipeline progress."""
+    """Persist Silver filter rejections to quarantine without blocking progress."""
     if not records:
         return 0
     try:
@@ -41,7 +41,7 @@ async def flush_filtered_records(
         return 0
     except QUARANTINE_WRITE_WARN_ONLY_ERRORS as exc:
         context.logger.error(
-            "filtered_quarantine_write_failed",
+            "filter_quarantine_write_failed",
             batch_id=str(batch_id),
             records=len(records),
             error=str(exc),

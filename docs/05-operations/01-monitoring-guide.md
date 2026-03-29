@@ -57,8 +57,8 @@ Pushgateway publication на завершении run. Это позволяет
 Смешанный runtime/ops surface для triage log hygiene и alert-condition сигналов.
 - **Warnings (1h)**: count structured warning logs по текущему `$pipeline`.
 - **Unstructured Logs (1h)**: объём строк, которые не распарсились как shipped JSON log contract.
-- **DQ / Control-plane / Provider / Freshness Alert Conditions**: Prometheus-backed stat panels, которые отражают те же условия, что и alert rules, но не притворяются real alert-state engine.
-- `DQ / Control-plane / Provider / Freshness Alert Conditions` теперь считают
+- **Pipeline / DQ / Control-plane / Provider / Freshness Alert Conditions**: Prometheus-backed stat panels, которые отражают те же условия, что и alert rules, но не притворяются real alert-state engine.
+- `Pipeline / DQ / Control-plane / Provider / Freshness Alert Conditions` теперь считают
   количество активных семейств условий, а не сырые суммы event counters.
 - **Top Warning Events (1h)**: быстрый срез наиболее частых warning events.
 - **Log Hygiene Trend (5m)**: короткий тренд warnings vs unstructured rows.
@@ -68,6 +68,14 @@ Pushgateway publication на завершении run. Это позволяет
   lifecycle counters для DQ reporting. Используйте их, когда нужно быстро
   понять, не сломалась ли сборка DQ context, отчёты системно пропускаются или
   наоборот стабильно доходят до успешной генерации.
+- **Trace-enabled Runs (24h)**: показывает, были ли за окно запуски с реальным
+  tracing path. Если здесь `0`, пустой Tempo для выбранного `$pipeline/$run_type`
+  ожидаем. Если здесь значение больше нуля, а `Explore Traces (Tempo)` пуст,
+  это уже сигнал разбирать exporter / flush / ingestion path.
+- **Pipeline Alert Conditions (15m)**: fleet-wide срез по трем главным runtime
+  рискам: preflight `data_source`, `infrastructure_validated` и
+  `pipeline_runs_total{status="failed"}`. Если панель активна, расследование
+  стоит начинать с `pipeline-failure-critical.md`, а не только с provider/DQ path.
 - **Control-plane Lookup Outcomes (1h) / Control-plane Lookup p95 (1h)**:
   runtime-срез по success/miss/failed для manifest, ledger и lineage lookup
   paths. Эти панели особенно полезны, когда write-side выглядит здоровым, но
@@ -76,7 +84,7 @@ Pushgateway publication на завершении run. Это позволяет
 #### 3. 3. Provider Health
 Технический мониторинг состояния внешних API (ChEMBL, UniProt и др.).
 - **Health Check Latency by Provider (p95)**: тренд латентности провайдеров.
-- **Health Check Successes (15m) / Health Checks (15m)**: текущий объём и стабильность health_check без lifetime-counter шума.
+- **Healthy Checks / Degraded Checks / Health Checks Total**: разделяют completed probes по outcome и не маскируют `DEGRADED` как success.
 - **Per-provider gauge (102)**: повторяемая p95-панель по `$provider`.
 - **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` / `Explore Traces (Tempo)`
   и data links у latency-панели открывают correlation path. Для Loki shipped
@@ -102,6 +110,10 @@ Pushgateway publication на завершении run. Это позволяет
   - `BioETLCheckpointCompatibilityBlocked` -> `checkpoint-debugging.md`
   - `BioETLLineageFragmentPersistenceFailed` -> `traceability-signal-ownership.md`
   - `BioETLLineageRefsMissing` -> `traceability-signal-ownership.md`
+- **Pipeline runtime**
+  - `BioETLPipelinePreflightDataSourceFailed` -> `pipeline-failure-critical.md`
+  - `BioETLPipelineInfrastructureValidationFailed` -> `pipeline-failure-critical.md`
+  - `BioETLPipelineRunFailed` -> `pipeline-failure-critical.md`
 - **DQ / freshness**
   - `BioETLDQSoftThresholdExceeded` -> `dq-failure-investigation.md`
   - `BioETLDQQuarantineRateHigh` / `BioETLDQQuarantineRateCritical` -> `dq-failure-investigation.md`
@@ -112,6 +124,7 @@ Pushgateway publication на завершении run. Это позволяет
   - `BioETLDataFreshnessLagHigh` / `BioETLDataFreshnessLagCritical` -> `dq-failure-investigation.md`
     (`24-72h` warning / `>72h` critical; lag считается как `time() - bioetl_data_freshness_seconds`)
 - **Provider health**
+  - `BioETLProviderHealthCheckFailuresDetected` -> `incident-response.md`
   - `BioETLProviderFailureRateHigh` -> `incident-response.md`
   - `BioETLProviderRetriesExhausted` / `BioETLProviderRetriesExhaustedPersistent` -> `incident-response.md`
     (`1-2` exhaustions per `1h` warning / `>=3` critical)

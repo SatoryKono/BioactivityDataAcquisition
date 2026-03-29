@@ -81,6 +81,46 @@ class PipelineRegistryView(Protocol):
         ...
 
 
+def _list_registered_pipelines(
+    registry: PipelineRegistryView | None = None,
+) -> list[str]:
+    """Return registered pipeline names from the resolved registry view."""
+    return resolve_run_all_registry(registry).list_pipelines()
+
+
+def _record_success(
+    *,
+    batch_result: _BatchRunAccumulator,
+    pipeline: str,
+) -> bool:
+    """Record a successful pipeline run."""
+    batch_result.succeeded += 1
+    echo_info(f"[OK] {pipeline}: completed successfully")
+    return False
+
+
+def _record_dry_run(
+    *,
+    batch_result: _BatchRunAccumulator,
+    pipeline: str,
+) -> bool:
+    """Record a dry-run preview result."""
+    batch_result.skipped += 1
+    echo_info(f"[DRY] {pipeline}: dry-run (no changes)")
+    return False
+
+
+def _record_shutdown(
+    *,
+    batch_result: _BatchRunAccumulator,
+    pipeline: str,
+) -> bool:
+    """Record a graceful shutdown result and stop the batch."""
+    batch_result.skipped += 1
+    echo_warning(f"[STOP] {pipeline}: gracefully shut down")
+    return True
+
+
 def resolve_run_all_registry(
     registry: PipelineRegistryView | None = None,
 ) -> PipelineRegistryView:
@@ -99,7 +139,7 @@ def get_available_providers(
     registry: PipelineRegistryView | None = None,
 ) -> list[str]:
     """Get sorted list of unique provider names from registered pipelines."""
-    pipelines = resolve_run_all_registry(registry).list_pipelines()
+    pipelines = _list_registered_pipelines(registry=registry)
     providers = {p.split("_")[0] for p in pipelines if "_" in p}
     return sorted(providers)
 
@@ -109,7 +149,7 @@ def filter_pipelines_by_provider(
     registry: PipelineRegistryView | None = None,
 ) -> list[str]:
     """Filter registered pipelines by provider prefix."""
-    all_pipelines = resolve_run_all_registry(registry).list_pipelines()
+    all_pipelines = _list_registered_pipelines(registry=registry)
     return sorted([name for name in all_pipelines if name.startswith(f"{provider}_")])
 
 
@@ -257,19 +297,13 @@ def record_pipeline_result(
     batch_result.results.append(result)
 
     if result.status == PipelineRunResult.SUCCESS:
-        batch_result.succeeded += 1
-        echo_info(f"[OK] {pipeline}: completed successfully")
-        return False
+        return _record_success(batch_result=batch_result, pipeline=pipeline)
 
     if result.status == PipelineRunResult.DRY_RUN:
-        batch_result.skipped += 1
-        echo_info(f"[DRY] {pipeline}: dry-run (no changes)")
-        return False
+        return _record_dry_run(batch_result=batch_result, pipeline=pipeline)
 
     if result.status == PipelineRunResult.SHUTDOWN:
-        batch_result.skipped += 1
-        echo_warning(f"[STOP] {pipeline}: gracefully shut down")
-        return True
+        return _record_shutdown(batch_result=batch_result, pipeline=pipeline)
 
     if result.status == PipelineRunResult.FAILED:
         record_pipeline_failure(

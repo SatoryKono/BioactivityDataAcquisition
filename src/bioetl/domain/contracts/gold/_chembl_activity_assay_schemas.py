@@ -78,9 +78,6 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     # Document/Publication data
     journal: Series[str] = pa.Field(nullable=True)
     publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    publication_doi: Series[str] = pa.Field(nullable=True)
-    publication_pmid: Series[str] = pa.Field(nullable=True)
-    publication_pmc_id: Series[str] = pa.Field(nullable=True)
 
     # Quality annotations
     activity_comment: Series[str] = pa.Field(nullable=True)

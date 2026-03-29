@@ -111,6 +111,11 @@ filters:
     column_name: assay_param_id
     filter_field: assay_param_id
     batch_size: 1000
+  silver_filters:
+    required_fields:
+    - assay_id
+    - assay_param_id
+    - type
   gold_filters:
     required_fields:
     - assay_id

@@ -6,6 +6,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
+from deltalake.exceptions import DeltaError
 from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
@@ -13,6 +14,8 @@ from bioetl.domain.exceptions import DeltaTransactionError
 from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     _DeltaWriteRequest,
+    _evolve_delta_schema_with_empty_append,
+    _is_duplicate_field_name_schema_error,
     _load_delta_table,
     _MergeExecutionTimeoutError,
 )
@@ -52,36 +55,51 @@ async def _execute_merge_write_request(
     logger: LoggerPort,
 ) -> None:
     """Execute merge/upsert with retry, timeout, and append-fallback orchestration."""
+    active_request = request
     commit_retry_count = 0
     timeout_retry_count = 0
+    schema_pre_evolved = False
 
     while True:
         try:
             table = await _load_delta_table(
                 load_module=load_module,
-                table_path=request.table_path,
+                table_path=active_request.table_path,
             )
             await merge_records(
                 table,
-                request.arrow_data,
-                request.primary_keys,
-                request.table_path,
+                active_request.arrow_data,
+                active_request.primary_keys,
+                active_request.table_path,
                 timeout_seconds=policy.execution_timeout_seconds,
-                merge_schema=request.merge_schema,
+                merge_schema=active_request.merge_schema,
             )
             _emit_merge_recovered_after_retry(
                 logger=logger,
-                table_path=request.table_path,
+                table_path=active_request.table_path,
                 commit_retry_count=commit_retry_count,
                 timeout_retry_count=timeout_retry_count,
             )
             return
         except DeltaTableNotFoundError:
-            await write_append(request)
+            await write_append(active_request)
             return
+        except DeltaError as exc:
+            if (
+                active_request.merge_schema
+                and not schema_pre_evolved
+                and _is_duplicate_field_name_schema_error(exc)
+            ):
+                active_request = await _evolve_delta_schema_with_empty_append(
+                    load_module=load_module,
+                    request=active_request,
+                )
+                schema_pre_evolved = True
+                continue
+            raise
         except CommitFailedError:
             next_commit_retry_count = await _handle_commit_retry(
-                table_path=request.table_path,
+                table_path=active_request.table_path,
                 policy=policy,
                 retry_count=commit_retry_count,
                 emit_final=emit_final,
@@ -92,7 +110,7 @@ async def _execute_merge_write_request(
             commit_retry_count = next_commit_retry_count
         except _MergeExecutionTimeoutError as exc:
             timeout_retry_count = await _handle_timeout_retry(
-                table_path=request.table_path,
+                table_path=active_request.table_path,
                 policy=policy,
                 retry_count=timeout_retry_count,
                 cause=exc,

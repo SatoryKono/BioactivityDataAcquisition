@@ -1,9 +1,9 @@
 # BioETL Observability Specification (DD)
 
-Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-03-26**.
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-03-29**.
 
 - Статус: `active`
-- Версия: `3.2.0`
+- Версия: `3.3.0`
 - Scope: `logs + metrics + tracing + correlation + provider health + control plane + traceability`
 - Source of truth: код в `src/bioetl/**/observability*`, `src/bioetl/application/observability/*`, `src/bioetl/infrastructure/adapters/http/*`
 
@@ -76,7 +76,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py` и экспортируется через `metrics_definitions.py`.
 
-Текущий размер каталога: **72** метрики (`metrics_export_names.py`).
+Текущий размер каталога: **80** метрик (`metrics_export_names.py`).
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
 
@@ -156,6 +156,10 @@ Guardrail для новых метрик control-plane/traceability:
 ## 6. Alert Threshold Baseline
 
 Рекомендуемая минимальная таблица (runbook links локальные):
+
+Принцип shipped baseline: Prometheus rules должны быть fleet-wide и опираться
+на `pipeline` / `provider` labels, а не на отдельные per-pipeline packs вроде
+`chembl_assay`-only alert groups.
 
 | Metric | Condition | Severity | Runbook |
 |---|---|---|---|

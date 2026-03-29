@@ -25,6 +25,23 @@ class FilteredQuarantineEntry(NamedTuple):
 
     record: BronzeRecord
     reason: str
+    details: JsonDict | None = None
+
+
+def _filtered_quarantine_metadata(
+    *,
+    reason: str,
+    details: JsonDict | None,
+) -> JsonDict:
+    """Build canonical quarantine metadata for Silver filter rejections."""
+    error_details: JsonDict = {"message": reason}
+    if details:
+        error_details.update(details)
+    return {
+        "error_details": error_details,
+        "classification": "filter_rejection",
+        "quarantine_category": "silver_filter",
+    }
 
 
 class QuarantineManagerService:
@@ -129,12 +146,13 @@ class QuarantineManagerService:
         batch_id: BatchID,
         error_details: str,
         *,
+        details: JsonDict | None = None,
         ingestion_ts: datetime,
     ) -> None:
-        """Write filter-excluded record to quasi-quarantine for traceability.
+        """Write filter-excluded record to quarantine for traceability.
 
         These records are excluded by Silver filters (expected business rules),
-        not by data-quality exceptions.
+        not by data-quality exceptions, so they use a separate classification.
 
         Args:
             record: The raw record excluded by Silver filters.
@@ -148,11 +166,10 @@ class QuarantineManagerService:
             error_code=error_code,
             payload=record,
             bronze_batch_id=batch_id,
-            metadata={
-                "error_details": {"message": error_details},
-                "quasi_quarantine": True,
-                "classification": "filtered_out",
-            },
+            metadata=_filtered_quarantine_metadata(
+                reason=error_details,
+                details=details,
+            ),
             ingestion_ts=ingestion_ts,
         )
         if self._metrics:
@@ -168,7 +185,7 @@ class QuarantineManagerService:
         *,
         ingestion_ts: datetime,
     ) -> None:
-        """Write multiple filter-excluded records to quasi-quarantine."""
+        """Write multiple filter-excluded records to quarantine."""
         if not records:
             return
 
@@ -177,16 +194,15 @@ class QuarantineManagerService:
             {
                 "pipeline": self._pipeline_name,
                 "error_code": error_code,
-                "payload": record,
+                "payload": entry.record,
                 "bronze_batch_id": batch_id,
-                "metadata": {
-                    "error_details": {"message": error_details},
-                    "quasi_quarantine": True,
-                    "classification": "filtered_out",
-                },
+                "metadata": _filtered_quarantine_metadata(
+                    reason=entry.reason,
+                    details=entry.details,
+                ),
                 "ingestion_ts": ingestion_ts,
             }
-            for record, error_details in records
+            for entry in records
         ]
         await self._quarantine.write_many(write_requests)
         if self._metrics:

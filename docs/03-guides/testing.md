@@ -90,6 +90,7 @@ compatibility facades, где mirror-path `test_<module>.py` был бы лож�
 - **Адаптеры**: Тестирование HTTP-клиентов (ChEMBL, PubChem, UniProt) с использованием VCR-кассет.
 - **Storage**: Проверка записи в Delta Lake и Bronze хранилище (используются локальные временные пути).
 - **VCR Policy**: Кассеты хранятся в `tests/fixtures/vcr/`. При запуске в CI сетевые вызовы запрещены (`--vcr-record=none`).
+- **Compatibility Policy**: `pytest-vcr` должен импортироваться против locked `wrapt` dependency из активного окружения. Repo-root workaround'ы вроде `wrapt/` или `sitecustomize.py` не считаются поддерживаемым fix path; если импорт ломается, нужно чинить environment/lock, а не shadowing dependency.
 - **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy находятся в `partial` rollout. Репозиторий уже держит seeded sidecar inventory и canonical catalog, но глобальный enforcement ещё не repo-wide.
 - **Catalog / Backfill Policy**: canonical VCR metadata catalog и canonical backfill script уже существуют, но automated workflow rollout всё ещё остаётся неполным; это состояние фиксируется matrix и architecture guard'ами.
 - **Live Contract Baseline**: live-network enforcement обязателен для `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar`; richer pilot-soak coverage for Semantic Scholar remains opt-in and does not redefine the enforced baseline.

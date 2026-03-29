@@ -105,9 +105,6 @@ def _extract_activity_measurement_fields(raw_data: JsonDict) -> dict[str, object
 def _extract_publication_fields(raw_data: JsonDict) -> dict[str, object]:
     return {
         "journal": _safe_str(raw_data.get("journal")),
-        "publication_doi": _safe_str(raw_data.get("publication_doi")),
-        "publication_pmid": _safe_str(raw_data.get("publication_pmid")),
-        "publication_pmc_id": _safe_str(raw_data.get("publication_pmc_id")),
         "publication_year": _safe_int(raw_data.get("publication_year")),
         "action_type": _safe_str(raw_data.get("action_type")),
         "action_type_description": _safe_str(raw_data.get("action_type_description")),

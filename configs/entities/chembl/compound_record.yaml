@@ -103,6 +103,11 @@ filters:
     column_name: molecule_chembl_id
     filter_field: molecule_id
     batch_size: 1
+  silver_filters:
+    required_fields:
+    - molecule_id
+    - publication_id
+    - record_id
   gold_filters:
     required_fields:
     - molecule_id

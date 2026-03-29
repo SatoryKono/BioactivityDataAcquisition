@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.exceptions.base import DataQualityError
+from bioetl.domain.types import JsonDict
 
 
 class TransformationError(DataQualityError):
@@ -16,5 +17,11 @@ class TransformationError(DataQualityError):
 class FilteredOutError(DataQualityError):
     """Raised when a record is excluded by Silver filters."""
 
-    def __init__(self, reason: str = "Record excluded by silver filters") -> None:
+    def __init__(
+        self,
+        reason: str = "Record excluded by silver filters",
+        *,
+        details: JsonDict | None = None,
+    ) -> None:
         super().__init__(reason)
+        self.details = details or {}

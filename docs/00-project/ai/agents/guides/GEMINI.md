@@ -44,9 +44,13 @@ Dependencies flows **inwards**.
 
 ### Setup
 ```bash
-./dev-setup.sh          # Full automated setup
-source .venv/bin/activate
+make install
+make test-deps
+make setup-plugins
 ```
+
+`scripts/dev/dev_setup.sh` remains a legacy placeholder and is not the
+supported onboarding path.
 
 ### Verification (Run frequently)
 ```bash

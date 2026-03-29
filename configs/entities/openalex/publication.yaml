@@ -276,6 +276,10 @@ filters:
     filter_field: doi
     batch_size: 50
     fallback_column: title
+  silver_filters:
+    required_fields:
+    - openalex_id
+    - title
   gold_filters:
     ranges:
       publication_year:

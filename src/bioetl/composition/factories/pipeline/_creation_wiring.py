@@ -189,6 +189,7 @@ def _create_pipeline_with_services_impl(
         transformer_class=inputs.transformer_class,
         yaml_config=yaml_config,
         domain_config=domain_config,
+        pandera_silver_schema=inputs.pandera_silver_schema,
         tracer=request.tracer,
         metrics=request.metrics,
     )

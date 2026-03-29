@@ -195,8 +195,9 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_provider_health_status` | Gauge | provider | Статус провайдера |
 | `bioetl_health_check_duration_seconds` | Histogram | pipeline | Длительность health check |
 | `bioetl_health_check_latency_seconds` | Histogram | provider | Латентность health check |
-| `bioetl_health_check_success_total` | Counter | provider | Успешные health checks |
-| `bioetl_health_check_failures_total` | Counter | provider | Неуспешные health checks |
+| `bioetl_health_check_success_total` | Counter | provider | Health checks со статусом `HEALTHY` |
+| `bioetl_health_check_degraded_total` | Counter | provider | Health checks со статусом `DEGRADED` |
+| `bioetl_health_check_failures_total` | Counter | provider | Health checks со статусом `UNHEALTHY` или probe-exception |
 
 #### Preflight Metrics
 
@@ -503,6 +504,15 @@ groups:
 Use these counters together with `2. Runtime` when DQ reports appear to be missing:
 they let you distinguish between context-build failures, expected skips, and
 successful report generation without relying only on warning logs.
+
+### Trace coverage metric
+
+- `bioetl_traced_runs_total` tracks pipeline runs that started with a real tracing implementation.
+
+Use this counter together with `2. Runtime` and Tempo:
+
+- `Trace-enabled Runs (24h) = 0` means empty Tempo is expected for the selected pipeline/run_type window.
+- `Trace-enabled Runs (24h) > 0` plus empty Tempo usually means a broken tracing/export path rather than an intentionally untraced run.
 
 ### Control-plane read metrics
 

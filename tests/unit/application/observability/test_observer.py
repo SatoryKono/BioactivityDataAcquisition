@@ -14,6 +14,7 @@ import pytest
 
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 from bioetl.application.observability.observer import LifecyclePhase, PipelineObserver
+from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.observability_contract import (
     ObservabilityContractPayload,
     missing_observability_fields,
@@ -235,6 +236,17 @@ def test_observer_graceful_shutdown(metrics_mock, logger_mock, tracer_mock, run_
     # Verify span attributes were set
     mock_span.set_attribute.assert_any_call("bioetl.status", "success")
 
+    traced_run_calls = [
+        call
+        for call in metrics_mock.increment_counter.call_args_list
+        if call[0][0] == "traced_runs_total"
+    ]
+    assert len(traced_run_calls) == 1
+    assert traced_run_calls[0][1]["labels"] == {
+        "pipeline": "test_pipeline",
+        "run_type": "incremental",
+    }
+
 
 def test_observer_handles_close_error(metrics_mock, logger_mock, tracer_mock, run_id):
     """O4: Error at close() doesn't fail pipeline."""
@@ -259,6 +271,29 @@ def test_observer_handles_close_error(metrics_mock, logger_mock, tracer_mock, ru
     metrics_mock.observe_histogram.assert_called_once()
     call_args = metrics_mock.observe_histogram.call_args
     assert call_args[1]["labels"]["status"] == "success"
+
+
+def test_observer_does_not_emit_traced_run_metric_for_noop_tracing(
+    metrics_mock, logger_mock, run_id
+):
+    observer = PipelineObserver(
+        pipeline_name="test_pipeline",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics_mock,
+        logger=logger_mock,
+        tracer=NoOpTracing(),
+    )
+
+    with observer:
+        pass
+
+    traced_run_calls = [
+        call
+        for call in metrics_mock.increment_counter.call_args_list
+        if call[0][0] == "traced_runs_total"
+    ]
+    assert traced_run_calls == []
 
 
 # ==================== Unified Observability: Lifecycle Event Tests ====================

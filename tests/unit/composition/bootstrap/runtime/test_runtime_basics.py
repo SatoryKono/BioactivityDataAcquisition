@@ -24,11 +24,12 @@ _FIXED_UUID = UUID("12345678-1234-5678-1234-567812345678")
 class TestBootstrapRuntimeBasics:
     """Tests for bootstrap_runtime_basics."""
 
-    def test_returns_five_element_tuple(self) -> None:
-        """bootstrap_runtime_basics returns (run_id, settings, logger, storage, lock)."""
+    def test_returns_six_element_tuple(self) -> None:
+        """bootstrap_runtime_basics returns (run_id, settings, logger, metrics, storage, lock)."""
         config = SimpleNamespace(name="test_pipeline")
-        settings = SimpleNamespace()
+        settings = SimpleNamespace(metrics_enabled=False)
         logger = MagicMock()
+        metrics = MagicMock()
         storage = MagicMock()
         lock = MagicMock()
 
@@ -42,11 +43,12 @@ class TestBootstrapRuntimeBasics:
             uuid_factory=lambda: _FIXED_UUID,
         )
 
-        assert len(result) == 5
-        run_id, s, lg, st, lk = result
+        assert len(result) == 6
+        run_id, s, lg, mt, st, lk = result
         assert run_id == str(_FIXED_UUID)
         assert s is settings
         assert lg is logger
+        assert mt is not None
         assert st is storage
         assert lk is lock
 
@@ -58,7 +60,9 @@ class TestBootstrapRuntimeBasics:
         result = bootstrap_runtime_basics(
             config=config,
             run_id=provided_run_id,
-            settings_provider=MagicMock(return_value=SimpleNamespace()),
+            settings_provider=MagicMock(
+                return_value=SimpleNamespace(metrics_enabled=False)
+            ),
             logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
             storage_bootstrapper=lambda **kw: MagicMock(),
             lock_factory=MagicMock(return_value=MagicMock()),
@@ -74,7 +78,9 @@ class TestBootstrapRuntimeBasics:
         result = bootstrap_runtime_basics(
             config=SimpleNamespace(name="p"),
             run_id=None,
-            settings_provider=MagicMock(return_value=SimpleNamespace()),
+            settings_provider=MagicMock(
+                return_value=SimpleNamespace(metrics_enabled=False)
+            ),
             logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
             storage_bootstrapper=lambda **kw: MagicMock(),
             lock_factory=MagicMock(return_value=MagicMock()),
@@ -91,7 +97,9 @@ class TestBootstrapRuntimeBasics:
         bootstrap_runtime_basics(
             config=SimpleNamespace(name="p"),
             run_id=str(_FIXED_UUID),
-            settings_provider=MagicMock(return_value=SimpleNamespace()),
+            settings_provider=MagicMock(
+                return_value=SimpleNamespace(metrics_enabled=False)
+            ),
             logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
             storage_bootstrapper=storage_bootstrapper,
             lock_factory=MagicMock(return_value=MagicMock()),
@@ -111,7 +119,9 @@ class TestBootstrapRuntimeBasics:
         bootstrap_runtime_basics(
             config=SimpleNamespace(name="my_composite"),
             run_id=str(_FIXED_UUID),
-            settings_provider=MagicMock(return_value=SimpleNamespace()),
+            settings_provider=MagicMock(
+                return_value=SimpleNamespace(metrics_enabled=False)
+            ),
             logger_bootstrapper=_logger_bootstrapper,
             storage_bootstrapper=lambda **kw: MagicMock(),
             lock_factory=MagicMock(return_value=MagicMock()),
@@ -133,8 +143,9 @@ class TestBuildSupportServices:
         mock_cls = MagicMock(return_value=mock_instance)
         infra_context = CompositeInfrastructureContext(
             run_id="rid",
-            settings=SimpleNamespace(),
+            settings=SimpleNamespace(metrics_enabled=False),
             logger=MagicMock(),
+            metrics=MagicMock(),
             storage=MagicMock(),
             lock=MagicMock(),
         )
@@ -160,8 +171,9 @@ class TestBuildSupportServices:
         config = SimpleNamespace(name="test")
         infra_context = CompositeInfrastructureContext(
             run_id="rid",
-            settings=SimpleNamespace(),
+            settings=SimpleNamespace(metrics_enabled=False),
             logger=MagicMock(),
+            metrics=MagicMock(),
             storage=MagicMock(),
             lock=MagicMock(),
         )

@@ -120,6 +120,21 @@ def test_determine_multi_filter_batch_size_keeps_size_when_url_fits() -> None:
     adapter._logger.info.assert_not_called()
 
 
+def test_determine_multi_filter_batch_size_returns_one_without_projection_checks() -> None:
+    adapter = _TestChemblFetchMultiFilterAdapter()
+    adapter._filter_batch_size = 1
+
+    batch_size = adapter._determine_multi_filter_batch_size(
+        "https://example.test/activity",
+        {"molecule": ["A", "B"]},
+        "activity",
+    )
+
+    assert batch_size == 1
+    assert adapter.projected_lengths == []
+    adapter._logger.info.assert_not_called()
+
+
 def test_determine_multi_filter_batch_size_halves_until_url_fits() -> None:
     adapter = _TestChemblFetchMultiFilterAdapter()
     adapter.projected_lengths = [1400, 1200, 900]
@@ -173,6 +188,36 @@ async def test_fetch_multi_filter_page_loop_paginates_and_deduplicates() -> None
             },
             "activity",
         ),
+    ]
+
+
+@pytest.mark.asyncio
+async def test_fetch_multi_filter_page_loop_stops_when_page_is_empty() -> None:
+    adapter = _TestChemblFetchMultiFilterAdapter()
+    adapter.page_responses = [([], True)]
+
+    records = [
+        record
+        async for record in adapter._fetch_multi_filter_page_loop(
+            "https://example.test/activity",
+            {"molecule__in": "CHEMBL1"},
+            "activity",
+            "chembl_id",
+            set(),
+        )
+    ]
+
+    assert records == []
+    assert adapter.fetch_calls == [
+        (
+            "https://example.test/activity",
+            {
+                "offset": 0,
+                "entity_type": "activity",
+                "molecule__in": "CHEMBL1",
+            },
+            "activity",
+        )
     ]
 
 
@@ -234,3 +279,51 @@ async def test_fetch_multi_filtered_batches_filters_and_honors_limit() -> None:
         "api_molecule__in": "M1,M2",
         "api_target__in": "T1,T2",
     }
+
+
+@pytest.mark.asyncio
+async def test_fetch_multi_filtered_exhausts_all_batch_combinations_without_limit() -> None:
+    adapter = _TestChemblFetchMultiFilterAdapter()
+    adapter._filter_batch_size = 2
+    adapter.projected_lengths = [800]
+
+    async def _fake_page_loop(
+        url: str,
+        filter_params: dict[str, str],
+        entity_type: str,
+        pk_field: str,
+        seen_ids: set[str],
+    ) -> AsyncIterator[dict[str, object]]:
+        adapter.loop_calls.append(
+            (url, filter_params.copy(), entity_type, pk_field, set(seen_ids))
+        )
+        molecule_ids = filter_params["api_molecule__in"].split(",")
+        target_ids = filter_params["api_target__in"].split(",")
+        if molecule_ids == ["M3"] and target_ids == ["T3"]:
+            return
+        yield {
+            "chembl_id": f"{molecule_ids[0]}:{target_ids[0]}",
+            "filters": filter_params.copy(),
+        }
+
+    adapter._fetch_multi_filter_page_loop = _fake_page_loop  # type: ignore[method-assign]
+
+    records = [
+        record
+        async for record in adapter.fetch_multi_filtered(
+            "activity",
+            {
+                "molecule": ["M1", "M2", "M3"],
+                "target": ["T1", "T2", "T3"],
+            },
+            limit=None,
+        )
+    ]
+
+    assert _collect_ids(records) == ["M1:T1", "M1:T3", "M3:T1"]
+    assert [call[1] for call in adapter.loop_calls] == [
+        {"api_molecule__in": "M1,M2", "api_target__in": "T1,T2"},
+        {"api_molecule__in": "M1,M2", "api_target__in": "T3"},
+        {"api_molecule__in": "M3", "api_target__in": "T1,T2"},
+        {"api_molecule__in": "M3", "api_target__in": "T3"},
+    ]

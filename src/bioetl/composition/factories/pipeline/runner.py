@@ -166,6 +166,7 @@ class MetricsExtractor:
             "records_silver": int(metrics["records_silver"]),
             "records_gold": int(metrics["records_gold"]),
             "records_quarantined": int(metrics["records_quarantined"]),
+            "records_filtered_out": int(metrics.get("records_filtered_out", 0)),
         }
 
 

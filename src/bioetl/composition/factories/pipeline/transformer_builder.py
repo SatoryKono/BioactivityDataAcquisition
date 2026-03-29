@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.base_transformer.structural_policy import (
+    build_structural_policy,
+)
 from bioetl.composition.factories.pipeline.construction_types import (
     ContractPolicyLoader,
     EntityTypeExtractor,
@@ -37,6 +40,7 @@ class TransformerBuilder:
         transformer_class: type[BaseTransformer] | None,
         yaml_config: PipelineYamlConfig,
         domain_config: PipelineConfig,
+        pandera_silver_schema: object | None,
         tracer: TracingPort | None,
         metrics: MetricsPort | None,
     ) -> BaseTransformer | None:
@@ -50,11 +54,16 @@ class TransformerBuilder:
         )
         entity_type = self.entity_type_extractor(self.pipeline_name)
         contract_policy = self._load_contract_policy(entity_type)
+        structural_policy = build_structural_policy(
+            domain_config=domain_config,
+            pandera_silver_schema=pandera_silver_schema,
+        )
         dependencies = build_transformer_dependencies(
             tracer=tracer,
             metrics=metrics,
             identity_service=identity_service,
             contract_policy=contract_policy,
+            structural_policy=structural_policy,
         )
         return transformer_class(
             provider=self.provider,

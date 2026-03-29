@@ -107,6 +107,11 @@ filters:
   entity: publication_similarity
   input_filter:
     enabled: false
+  silver_filters:
+    required_fields:
+    - sim_id
+    - doc_1
+    - doc_2
   gold_filters:
     ranges:
       max_tani:

@@ -27,7 +27,7 @@
 - **Папка с промтами проекта**: `docs/00-project/ai/prompts/`.
 
 ## Разработка и запуск
-- Быстрый старт: `./dev-setup.sh` (или `--quick`).
+- Быстрый старт: `make install && make test-deps && make setup-plugins`.
 - Проверки: `make lint && make test` (локальный stable suite, без E2E).
 - Пример запуска: `bioetl run --pipeline chembl_activity --run-type incremental`.
 

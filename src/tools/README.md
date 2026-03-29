@@ -112,6 +112,11 @@ python src/tools/file_merger.py --project_structure
 python src/tools/file_merger.py --project_structure -o structure.md
 ```
 
+By default, project structure generation skips common generated or duplicated
+directories such as `.venv`, `.git`, `.worktrees`, `.cache`, `.pytest_cache`,
+`reports`, `logs`, `output`, `data`, and `node_modules`. Symlinked directories
+are listed but not traversed recursively.
+
 **Example output:**
 ```
 ./
@@ -135,7 +140,7 @@ python src/tools/file_merger.py --project_structure -o structure.md
 | `-o, --output` | Output file path | `merged_output.txt` |
 | `-e, --extensions` | Comma-separated extensions | `md,py` |
 | `--encoding` | File encoding | `utf-8` |
-| `--exclude-dirs` | Directories to exclude | `__pycache__,.git,.venv,node_modules` |
+| `--exclude-dirs` | Directories to exclude | `__pycache__,.git,.venv,node_modules,.ai,data,.worktrees,.cache,.pytest_cache,reports,logs,output` |
 | `--sort` | Sorting method | `alphabetical` (also: `by_extension`, `none`) |
 
 #### Output Format

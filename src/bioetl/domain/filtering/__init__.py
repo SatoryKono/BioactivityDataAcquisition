@@ -9,7 +9,7 @@ All public classes are re-exported from this module for backwards compatibility.
 
 from __future__ import annotations
 
-from bioetl.domain.filtering._base_filter_config import BaseFilterConfig
+from bioetl.domain.filtering._base_filter_config import BaseFilterConfig, FilterDecision
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.gold_config import GoldFilterConfig
 from bioetl.domain.filtering.input_config import FilterColumn, InputFilterConfig
@@ -24,6 +24,7 @@ from bioetl.domain.filtering.silver_config import SilverFilterConfig
 __all__ = [
     "BaseFilterConfig",
     "FilterColumn",
+    "FilterDecision",
     "FilterLoadResult",
     "FilterOperator",
     "GoldColumnFilter",

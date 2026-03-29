@@ -13,6 +13,7 @@ Commands:
     build-matrix-dicts Generate ChEMBL matrix inventory and sheet dictionaries
     filter-matrix-rows Remove rows from ChEMBL matrix workbook by column value
     normalize-matrix-values Normalize controlled values in ChEMBL matrix workbook
+    sync-matrix-structural-policy Sync the ChEMBL matrix workbook with structural Silver policy semantics
     fix-links-auto     Auto-fix broken documentation links
     fix-links-explicit Fix documentation links with explicit rules
     fix-link-warnings  Fix link warnings in specified files
@@ -32,6 +33,7 @@ COMMANDS: dict[str, str] = {
     "build-matrix-dicts": "generate_chembl_matrix_dictionaries.py",
     "filter-matrix-rows": "filter_chembl_matrix_rows.py",
     "normalize-matrix-values": "normalize_chembl_matrix_workbook.py",
+    "sync-matrix-structural-policy": "sync_chembl_matrix_structural_policy.py",
     "fix-links-auto": "fix_doc_links_auto.py",
     "fix-links-explicit": "fix_doc_links_explicit.py",
     "fix-link-warnings": "fix_link_warnings.py",

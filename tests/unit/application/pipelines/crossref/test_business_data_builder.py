@@ -2,13 +2,40 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
+import sys
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.pipelines.crossref import _business_data_builder as builder
+
+def _load_business_data_builder_module() -> object:
+    module_path = (
+        Path(__file__).resolve().parents[5]
+        / "src"
+        / "bioetl"
+        / "application"
+        / "pipelines"
+        / "crossref"
+        / "_business_data_builder.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "_test_crossref_business_data_builder_module",
+        module_path,
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load module spec for {module_path}")
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+builder = _load_business_data_builder_module()
 
 
 class _StubNormalizer:

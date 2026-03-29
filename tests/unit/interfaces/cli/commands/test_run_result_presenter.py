@@ -26,6 +26,7 @@ def _make_result(**kwargs: object) -> RunResult:
         "records_silver": 0,
         "records_gold": 0,
         "records_quarantined": 0,
+        "records_filtered_out": 0,
         "error_message": None,
         "error_type": None,
     }
@@ -88,10 +89,10 @@ class TestEchoRunResultSuccess:
         out = capsys.readouterr().out
         assert "Gold records:" not in out
 
-    def test_success_quarantined_nonzero_prints_warning(
+    def test_success_quarantined_nonzero_prints_neutral_summary_line(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        """WARNING prefix shown when records_quarantined > 0."""
+        """Non-zero quarantine count stays neutral in success summary output."""
         result = _make_result(
             status=PipelineRunResult.SUCCESS,
             records_fetched=100,
@@ -101,8 +102,41 @@ class TestEchoRunResultSuccess:
         )
         echo_run_result(result)
         out = capsys.readouterr().out
-        assert "WARNING" in out
-        assert "5" in out
+        assert "Quarantined (DQ):    5" in out
+        assert "WARNING" not in out
+
+    def test_success_filtered_out_nonzero_prints_neutral_summary_line(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """Filter-rejected count stays neutral in success summary output."""
+        result = _make_result(
+            status=PipelineRunResult.SUCCESS,
+            records_fetched=100,
+            records_silver=95,
+            records_filtered_out=5,
+            records_gold=0,
+            records_quarantined=0,
+        )
+        echo_run_result(result)
+        out = capsys.readouterr().out
+        assert "Silver filter rejects: 5" in out
+        assert "WARNING" not in out
+
+    def test_success_filtered_out_zero_prints_zero_line(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """Filter-rejected zero line is shown when there are no filter rejects."""
+        result = _make_result(
+            status=PipelineRunResult.SUCCESS,
+            records_fetched=100,
+            records_silver=100,
+            records_filtered_out=0,
+            records_gold=0,
+            records_quarantined=0,
+        )
+        echo_run_result(result)
+        out = capsys.readouterr().out
+        assert "Silver filter rejects: 0" in out
 
     def test_success_quarantined_zero_prints_zero_line(
         self, capsys: pytest.CaptureFixture[str]

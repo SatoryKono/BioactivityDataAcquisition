@@ -220,6 +220,7 @@ class TestSchemaEvolutionEvolveMode:
         When on_schema_mismatch='evolve', new fields should be added
         to the table schema and data written successfully.
         """
+        pytest.importorskip("deltalake")
         from deltalake import DeltaTable
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -271,6 +272,7 @@ class TestSchemaEvolutionEvolveMode:
         evolved_records,
     ):
         """E2E: Schema evolution logs warning about drift."""
+        pytest.importorskip("deltalake")
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_logger = MagicMock()
@@ -485,6 +487,7 @@ class TestSchemaEvolutionEdgeCases:
         self, e2e_data_dir: Path, base_schema: pa.Schema
     ):
         """E2E: Multiple schema evolutions are handled correctly."""
+        pytest.importorskip("deltalake")
         from deltalake import DeltaTable
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter

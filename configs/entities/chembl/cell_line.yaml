@@ -102,6 +102,10 @@ filters:
     column_name: cell_chembl_id
     filter_field: cell_chembl_id
     batch_size: 20
+  silver_filters:
+    required_fields:
+    - cell_id
+    - cell_name
   gold_filters:
     required_fields:
     - cell_name

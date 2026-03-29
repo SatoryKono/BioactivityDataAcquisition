@@ -7,6 +7,7 @@ from pathlib import Path
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
+from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.control_plane import (
     FileRunLedgerStore,
@@ -19,8 +20,15 @@ __all__ = ["bootstrap_run_manifest_service"]
 def bootstrap_run_manifest_service() -> RunManifestInspectionService:
     """Bootstrap manifest/ledger inspection service for CLI commands."""
     settings = get_settings()
+    metrics = create_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"
     return RunManifestInspectionService(
-        manifest_port=FileRunManifestStore(base_path=output_root / "run_manifest"),
-        ledger_port=FileRunLedgerStore(base_path=output_root / "run_ledger"),
+        manifest_port=FileRunManifestStore(
+            base_path=output_root / "run_manifest",
+            metrics=metrics,
+        ),
+        ledger_port=FileRunLedgerStore(
+            base_path=output_root / "run_ledger",
+            metrics=metrics,
+        ),
     )

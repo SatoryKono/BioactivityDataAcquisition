@@ -30,6 +30,7 @@ class RunResult:
     records_silver: int = 0
     records_gold: int = 0
     records_quarantined: int = 0
+    records_filtered_out: int = 0
     started_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
     completed_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
     error_message: str | None = None

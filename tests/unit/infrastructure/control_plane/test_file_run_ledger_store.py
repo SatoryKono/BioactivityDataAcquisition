@@ -69,3 +69,57 @@ def test_file_store_emits_ledger_append_metric(tmp_path) -> None:
             "status": "success",
         },
     )
+
+
+def test_file_store_emits_ledger_read_metric_on_list_success(tmp_path) -> None:
+    metrics = MagicMock()
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(
+        base_path=tmp_path / "run_ledger",
+        metrics=metrics,
+    )
+    entry = RunLedgerEntry(
+        entry_id="entry-2",
+        manifest_id="manifest-2",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime.now(UTC),
+        status="success",
+    )
+
+    store.append(entry)
+    metrics.reset_mock()
+
+    assert store.list_entries("manifest-2") == [entry]
+
+    metrics.increment_counter.assert_called_once_with(
+        "control_plane_reads_total",
+        1,
+        {
+            "store": "ledger",
+            "operation": "list_entries",
+            "status": "success",
+        },
+    )
+    metrics.observe_histogram.assert_called_once()
+
+
+def test_file_store_emits_ledger_read_metric_on_miss(tmp_path) -> None:
+    metrics = MagicMock()
+    store = FileRunLedgerStore(
+        base_path=tmp_path / "run_ledger",
+        metrics=metrics,
+    )
+
+    assert store.list_entries("missing-manifest") == []
+
+    metrics.increment_counter.assert_called_once_with(
+        "control_plane_reads_total",
+        1,
+        {
+            "store": "ledger",
+            "operation": "list_entries",
+            "status": "miss",
+        },
+    )
+    metrics.observe_histogram.assert_called_once()

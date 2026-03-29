@@ -22,6 +22,10 @@ from bioetl.application.core.base_transformer import (
     FilteredOutError,
     TransformationError,
 )
+from bioetl.application.core.base_transformer.structural_policy import (
+    StructuralPolicyEvent,
+    StructuralPolicyOutcome,
+)
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
@@ -38,6 +42,16 @@ class ConcreteTransformer(BaseTransformer):
         """Simple implementation that uses helper methods."""
         pk = self._get_required_field(record, "id")
         return {"id": pk, "value": record.get("value")}
+
+
+class _FakeStructuralPolicy:
+    def __init__(self, outcome: StructuralPolicyOutcome) -> None:
+        self.outcome = outcome
+        self.calls: list[dict[str, object]] = []
+
+    def apply(self, record):  # noqa: ANN001 - test double
+        self.calls.append(dict(record))
+        return self.outcome
 
 
 @pytest.fixture
@@ -319,7 +333,68 @@ class TestTemplateMethodPattern:
 
         mock_context.logger.debug.assert_called_once()
         call_args = mock_context.logger.debug.call_args
-        assert "silver_filter_excluded" in call_args[0]
+        assert "silver_filter_quarantined" in call_args[0]
+
+    @pytest.mark.asyncio
+    async def test_transform_applies_structural_policy_before_silver_filter(
+        self, mock_context: PipelineContext
+    ) -> None:
+        structural_policy = _FakeStructuralPolicy(
+            StructuralPolicyOutcome(
+                record={"id": "123", "value": "test", "must_exist": 1}
+            )
+        )
+        transformer = ConcreteTransformer(
+            provider="test",
+            silver_filters=SilverFilterConfig(required_fields=("must_exist",)),
+            dependencies=build_test_transformer_dependencies(
+                structural_policy=structural_policy
+            ),
+        )
+
+        result = await transformer.transform(
+            mock_context, {"id": "123", "value": "test"}, index=0
+        )
+
+        assert result == {"id": "123", "value": "test", "must_exist": 1}
+        assert structural_policy.calls == [{"id": "123", "value": "test"}]
+
+    @pytest.mark.asyncio
+    async def test_transform_raises_filtered_out_error_from_structural_policy(
+        self, mock_context: PipelineContext
+    ) -> None:
+        structural_policy = _FakeStructuralPolicy(
+            StructuralPolicyOutcome(
+                record={"id": "123", "value": "bad"},
+                quarantine_reason="bad structural record",
+                details={
+                    "reason_code": "required_field_type_mismatch",
+                    "field": "src_id",
+                    "action_taken": "quarantine_original_record",
+                },
+                events=(
+                    StructuralPolicyEvent(
+                        level="warning",
+                        event="silver_structural_type_mismatch_warn",
+                        details={"field": "src_id"},
+                    ),
+                ),
+            )
+        )
+        transformer = ConcreteTransformer(
+            provider="test",
+            dependencies=build_test_transformer_dependencies(
+                structural_policy=structural_policy
+            ),
+        )
+
+        with pytest.raises(FilteredOutError, match="bad structural record"):
+            await transformer.transform(mock_context, {"id": "123"}, index=0)
+
+        mock_context.logger.warning.assert_called_once()
+        mock_context.logger.debug.assert_called_once()
+        debug_args = mock_context.logger.debug.call_args
+        assert "silver_structural_quarantined" in debug_args[0]
 
 
 @pytest.mark.unit

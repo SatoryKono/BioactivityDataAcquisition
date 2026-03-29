@@ -80,7 +80,11 @@ async def transform_record_attempt(
         return RecordTransformOutcome(
             silver_record=None,
             gold_record=None,
-            filtered_entry=FilteredQuarantineEntry(raw_record, str(error)),
+            filtered_entry=FilteredQuarantineEntry(
+                record=raw_record,
+                reason=str(error),
+                details=error.details or None,
+            ),
         )
     except TRANSFORM_PROCESSING_ERRORS as error:
         error_type = error_classifier.classify(error)

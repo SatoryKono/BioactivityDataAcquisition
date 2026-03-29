@@ -31,6 +31,16 @@ class GovernancePolicy(Enum):
     CI_RELAXED = "ci_relaxed"
 
 
+_BLOCKING_POLICIES: frozenset[GovernancePolicy] = frozenset(
+    {
+        GovernancePolicy.BLOCK_ON_ANY_ISSUE,
+        GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY,
+        GovernancePolicy.CI_STRICT,
+        GovernancePolicy.CI_RELAXED,
+    }
+)
+
+
 @dataclass(frozen=True)
 class PreflightGovernanceConfig:
     """Configuration for preflight governance."""
@@ -166,6 +176,30 @@ class PreflightGovernanceService:
                 "policy_applied": policy.value,
             }
 
+        blocked, reason = self._resolve_policy_block_state(report, policy)
+        if blocked:
+            return {
+                "execution_allowed": False,
+                "reason": reason,
+                "policy_applied": policy.value,
+            }
+        return {
+            "execution_allowed": True,
+            "reason": "no_blocking_issues",
+            "policy_applied": policy.value,
+        }
+
+    def _has_effective_blockers(self, report: CompositeValidationReport) -> bool:
+        """Check if report has any effective blockers after considering overrides."""
+        all_issues = report.get_all_issues()
+        return any(self._is_effective_blocker(issue) for issue in all_issues)
+
+    def _resolve_policy_block_state(
+        self,
+        report: CompositeValidationReport,
+        policy: GovernancePolicy,
+    ) -> tuple[bool, str]:
+        """Resolve whether a policy blocks execution and why."""
         checks: dict[GovernancePolicy, tuple[bool, str]] = {
             GovernancePolicy.BLOCK_ON_ANY_ISSUE: (
                 report.has_any_issues(),
@@ -184,23 +218,7 @@ class PreflightGovernanceService:
                 "ci_relaxed_blockers_found",
             ),
         }
-        blocked, reason = checks.get(policy, (False, "no_blocking_issues"))
-        if blocked:
-            return {
-                "execution_allowed": False,
-                "reason": reason,
-                "policy_applied": policy.value,
-            }
-        return {
-            "execution_allowed": True,
-            "reason": "no_blocking_issues",
-            "policy_applied": policy.value,
-        }
-
-    def _has_effective_blockers(self, report: CompositeValidationReport) -> bool:
-        """Check if report has any effective blockers after considering overrides."""
-        all_issues = report.get_all_issues()
-        return any(self._is_effective_blocker(issue) for issue in all_issues)
+        return checks.get(policy, (False, "no_blocking_issues"))
 
     def _generate_governance_report(
         self,
@@ -211,16 +229,21 @@ class PreflightGovernanceService:
     ) -> JsonDict:
         """Generate comprehensive governance report."""
         return {
-            "governance_metadata": {
-                "policy": config.policy.value,
-                "ci_integration": config.ci_integration,
-                "fail_fast": config.fail_fast,
-                "execution_timestamp": datetime.now().isoformat(),
-            },
+            "governance_metadata": self._build_governance_metadata(config),
             "execution_decision": execution_decision,
             "validation_summary": build_validation_summary(report),
             "execution_context": execution_context,
             "detailed_issues": self._format_detailed_issues(report, config),
+        }
+
+    @staticmethod
+    def _build_governance_metadata(config: PreflightGovernanceConfig) -> JsonDict:
+        """Build governance metadata for reporting."""
+        return {
+            "policy": config.policy.value,
+            "ci_integration": config.ci_integration,
+            "fail_fast": config.fail_fast,
+            "execution_timestamp": datetime.now().isoformat(),
         }
 
     def _format_detailed_issues(
@@ -230,19 +253,24 @@ class PreflightGovernanceService:
     ) -> list[JsonDict]:
         """Format issues for governance report."""
         all_issues = report.get_all_issues()
-        return [
-            {
-                "code": issue.code.value,
-                "severity": issue.severity.value,
-                "layer": issue.layer.value,
-                "message": issue.message,
-                "details": issue.details,
-                "location": issue.location or "",
-                "is_blocker": self._is_effective_blocker(issue),
-                "governance_impact": self._determine_governance_impact(issue, config),
-            }
-            for issue in all_issues
-        ]
+        return [self._format_issue(issue, config) for issue in all_issues]
+
+    def _format_issue(
+        self,
+        issue: ValidationIssue,
+        config: PreflightGovernanceConfig,
+    ) -> JsonDict:
+        """Format one issue for governance output."""
+        return {
+            "code": issue.code.value,
+            "severity": issue.severity.value,
+            "layer": issue.layer.value,
+            "message": issue.message,
+            "details": issue.details,
+            "location": issue.location or "",
+            "is_blocker": self._is_effective_blocker(issue),
+            "governance_impact": self._determine_governance_impact(issue, config),
+        }
 
     def _is_effective_blocker(self, issue: ValidationIssue) -> bool:
         """Determine if an issue is effectively a blocker after considering overrides."""
@@ -256,14 +284,8 @@ class PreflightGovernanceService:
         config: PreflightGovernanceConfig,
     ) -> str:
         """Determine governance impact of an issue."""
-        blocking_policies = {
-            GovernancePolicy.BLOCK_ON_ANY_ISSUE,
-            GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY,
-            GovernancePolicy.CI_STRICT,
-            GovernancePolicy.CI_RELAXED,
-        }
         if issue.is_blocker():
-            if config.policy in blocking_policies:
+            if config.policy in _BLOCKING_POLICIES:
                 return "execution_blocker"
             return "warning_with_blocker_severity"
         return "informational"

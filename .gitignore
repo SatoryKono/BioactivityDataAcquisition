@@ -22,6 +22,7 @@ ENV/
 .nox/
 .benchmarks/
 test-checkpoints/
+.cache/
 
 # Type checking / Linting
 .mypy_cache/
@@ -68,6 +69,7 @@ git_commit_*.txt
 log_test.txt
 /reports/*
 !/reports/review/
+!/reports/review/**
 
 # IDE / Editors
 .idea/
@@ -114,6 +116,8 @@ _delta_log/
 
 # Temporary pipeline artifacts
 tmp/
+/tmp_*_cov.json
+/.tmp_check_env.py
 data/local/*
 !data/local/.gitkeep
 
@@ -137,6 +141,7 @@ nul
 /profile.svg
 .output.txt
 .mkdocs-site-tmp/
+output/
 site/
 docs/site/
 docs/exports/*.merged.md

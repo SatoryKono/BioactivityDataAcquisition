@@ -21,6 +21,7 @@ python -m scripts.schema <command> [args...]
 | Command | Script | Description |
 |---------|--------|-------------|
 | `check-invariants` | `check_config_invariants.py` | Validate config CI invariants (naming, schemas, auth, keys) |
+| `check-required-fields` | `check_required_filter_fields.py` | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |
 | `check-config-paths` | `lint_config_paths.py` | Check for legacy dq/filter config path references |
 | `generate-pipeline` | `generate_pipeline_schema.py` | Generate pipeline JSON schema |
 | `generate-artifacts` | `generate_schema_artifacts.py` | Generate schema artifacts |
@@ -34,6 +35,7 @@ python -m scripts.schema <command> [args...]
 | Command | When | Trigger |
 |---------|------|---------|
 | `check-invariants` | After modifying any YAML config under `configs/`; validates naming, entity sections, auth, unknown keys | Pre-commit hook (on config changes) |
+| `check-required-fields` | After modifying entity YAML quality/filter sections; ensures explicit required/not-null YAML fields are listed in `silver_filters.required_fields` | CI/config regression gate |
 | `check-config-paths` | After modifying configs, source code, or docs; detects legacy `dq/`/`filter/` path references | Pre-commit hook |
 | `generate-pipeline` | After changing `PipelineYamlConfig` or `CompositeConfigFileSchema` Pydantic models; use `--check` to verify freshness | Manual, after model changes |
 | `generate-artifacts` | After changing domain models (enums, lookup tables) | Manual, after model changes |

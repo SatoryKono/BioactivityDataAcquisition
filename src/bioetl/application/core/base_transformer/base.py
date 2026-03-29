@@ -110,6 +110,7 @@ class BaseTransformer(
         self._pii_hasher = resolved_dependencies.pii_hasher
         self._data_normalizer = resolved_dependencies.data_normalizer
         self._contract_policy = resolved_dependencies.contract_policy
+        self._structural_policy = resolved_dependencies.structural_policy
 
     def _start_transform_span(
         self,
@@ -137,17 +138,65 @@ class BaseTransformer(
         index: int,
     ) -> None:
         """Check silver filter and raise FilteredOutError if excluded."""
-        if result is not None and not self.should_write_silver(
-            context,
-            cast("GoldRecord", result),
-        ):
-            context.logger.debug(
-                "silver_filter_excluded",
+        if result is None or self._silver_filters is None or self._silver_filters.is_empty():
+            return
+
+        decision = self._silver_filters.evaluate(cast("GoldRecord", result))
+        if decision.include:
+            return
+
+        context.logger.debug(
+            "silver_filter_quarantined",
+            provider=self.provider,
+            entity_type=self.entity_type,
+            record_index=index,
+            filter_reason_code=decision.reason_code,
+            filter_rule_type=decision.rule_type,
+            filter_field=decision.field,
+        )
+        raise FilteredOutError(
+            decision.message or "Record excluded by silver filters",
+            details=decision.to_dict(),
+        )
+
+    def _apply_structural_policy(
+        self,
+        context: PipelineContext,
+        result: SilverRecord | None,
+        index: int,
+    ) -> SilverRecord | None:
+        """Apply schema-aware structural policy before semantic Silver filters."""
+        if result is None:
+            return None
+
+        outcome = self._structural_policy.apply(result)
+        for event in outcome.events:
+            log_method = getattr(context.logger, event.level)
+            log_method(
+                event.event,
                 provider=self.provider,
                 entity_type=self.entity_type,
                 record_index=index,
+                **event.details,
             )
-            raise FilteredOutError()
+
+        if not outcome.should_quarantine:
+            return outcome.record
+
+        details = outcome.details or {}
+        context.logger.debug(
+            "silver_structural_quarantined",
+            provider=self.provider,
+            entity_type=self.entity_type,
+            record_index=index,
+            reason_code=details.get("reason_code"),
+            field=details.get("field"),
+            action_taken=details.get("action_taken"),
+        )
+        raise FilteredOutError(
+            outcome.quarantine_reason or "Record excluded by structural policy",
+            details=details,
+        )
 
     def _handle_transformation_error(
         self,
@@ -226,6 +275,7 @@ class BaseTransformer(
 
         try:
             result = await self._transform_impl(context, record, index)
+            result = self._apply_structural_policy(context, result, index)
             self._apply_silver_filter(context, result, index)
             return result
         except TransformationError as e:

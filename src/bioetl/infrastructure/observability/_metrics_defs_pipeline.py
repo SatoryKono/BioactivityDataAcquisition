@@ -24,6 +24,7 @@ __all__ = [
     "SHUTDOWN_COMPLETED",
     "SHUTDOWN_INITIATED",
     "STORAGE_OPTIMIZATION_TOTAL",
+    "TRACED_RUNS_TOTAL",
     "TRANSFORM_DURATION_SECONDS",
     "TRANSFORM_ERRORS_TOTAL",
 ]
@@ -131,6 +132,12 @@ CONTROL_PLANE_READ_DURATION_SECONDS = Histogram(
     "Latency of control-plane read and lookup operations in seconds",
     ["store", "operation", "status"],
     buckets=[0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
+)
+
+TRACED_RUNS_TOTAL = Counter(
+    "bioetl_traced_runs_total",
+    "Total pipeline runs that started with real tracing enabled",
+    ["pipeline", "run_type"],
 )
 
 CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL = Counter(

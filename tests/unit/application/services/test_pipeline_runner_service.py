@@ -53,6 +53,7 @@ def mock_runner():
         "records_silver": 90,
         "records_gold": 85,
         "records_quarantined": 5,
+        "records_filtered_out": 7,
     }
     return runner
 
@@ -78,6 +79,7 @@ def mock_metrics_extractor():
             "records_silver": 90,
             "records_gold": 85,
             "records_quarantined": 5,
+            "records_filtered_out": 7,
         }
     )
     return extractor
@@ -285,6 +287,7 @@ class TestPipelineRunnerServiceRun:
         assert result.manifest_id == "manifest-123"
         assert result.records_fetched == 100
         assert result.records_silver == 90
+        assert result.records_filtered_out == 7
         mock_runner_factory.contains.assert_called_with("test_pipeline")
         mock_runner_factory.create.assert_called_once()
         mock_runner.run.assert_called_once()

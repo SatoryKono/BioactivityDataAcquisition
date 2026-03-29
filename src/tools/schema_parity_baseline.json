@@ -1,8 +1,7 @@
 {
   "description": "Known Silver↔Gold field differences. Only NEW mismatches not in this baseline trigger blocking failures. Update with: python src/tools/verify_schema_parity.py --update-baseline",
   "chembl_activity": {
-    "silver_only": ["_dq_error", "_dq_warn", "manual_curation_flag", "original_activity_id"],
-    "gold_only": ["publication_doi", "publication_pmc_id", "publication_pmid"]
+    "silver_only": ["_dq_error", "_dq_warn", "manual_curation_flag", "original_activity_id"]
   },
   "chembl_assay": {
     "silver_only": ["_dq_error", "_dq_warn"]

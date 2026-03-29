@@ -490,12 +490,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[24h])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))",
           "legendFormat": "Manifest Write Failures",
           "refId": "A"
         }
       ],
-      "title": "Manifest Write Failures (24h)",
+      "title": "Manifest Write Failures",
       "type": "stat"
     },
     {
@@ -551,12 +551,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[24h])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
           "legendFormat": "Ledger Append Failures",
           "refId": "A"
         }
       ],
-      "title": "Ledger Append Failures (24h)",
+      "title": "Ledger Append Failures",
       "type": "stat"
     },
     {
@@ -612,12 +612,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[24h])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0))",
           "legendFormat": "Incompatible Resume Decisions",
           "refId": "A"
         }
       ],
-      "title": "Checkpoint Incompatibilities (24h)",
+      "title": "Checkpoint Incompatibilities",
       "type": "stat"
     },
     {
@@ -673,12 +673,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[24h])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
           "legendFormat": "Missing Lineage References",
           "refId": "A"
         }
       ],
-      "title": "Lineage Refs Missing (24h)",
+      "title": "Lineage Refs Missing",
       "type": "stat"
     },
     {
@@ -734,12 +734,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[24h])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range])) or vector(0))",
           "legendFormat": "Failed Lookups",
           "refId": "A"
         }
       ],
-      "title": "Control-plane Lookup Failures (24h)",
+      "title": "Control-plane Lookup Failures",
       "type": "stat"
     },
     {
@@ -795,13 +795,133 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[1h]))) or vector(0)",
+          "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range]))) or vector(0)",
           "legendFormat": "Lookup p95",
           "refId": "A"
         }
       ],
-      "title": "Control-plane Lookup p95 (1h)",
+      "title": "Control-plane Lookup p95",
       "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 28
+      },
+      "id": 118,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "legendFormat": "Silver Filter Rejects",
+          "refId": "A"
+        }
+      ],
+      "title": "Silver Filter Rejects",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.2
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 28
+      },
+      "id": 119,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0), 1)",
+          "legendFormat": "Filtered / Bronze",
+          "refId": "A"
+        }
+      ],
+      "title": "Silver Filter Reject Rate",
+      "type": "gauge"
     },
     {
       "datasource": "Prometheus",
@@ -846,7 +966,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 34
       },
       "id": 115,
       "options": {
@@ -864,12 +984,12 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[1h])) by (layer, status)",
+          "expr": "sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__interval])) by (layer, status)",
           "legendFormat": "{{layer}} / {{status}}",
           "refId": "A"
         }
       ],
-      "title": "Lineage Fragment Outcomes (1h)",
+      "title": "Lineage Fragment Outcomes",
       "type": "timeseries"
     }
   ],

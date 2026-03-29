@@ -5,11 +5,15 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.control_plane._read_metrics import (
+    emit_control_plane_read_metrics,
+)
 
 __all__ = ["FileRunLedgerStore"]
 
@@ -89,6 +93,56 @@ class FileRunLedgerStore(RunLedgerPort):
 
     def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
         """Return all entries for one manifest in append order."""
+        started_at = perf_counter()
+        status = "success"
+        try:
+            entries = self._load_entries(manifest_id)
+            if not entries:
+                status = "miss"
+            return entries
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="ledger",
+                operation="list_entries",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
+
+    def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
+        """Resolve run-id index to manifest ledger file."""
+        started_at = perf_counter()
+        status = "success"
+        try:
+            run_index_path = self.base_path / "_by_run_id" / f"{run_id}.txt"
+            if not run_index_path.exists():
+                status = "miss"
+                return []
+            manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+            if not manifest_id:
+                status = "miss"
+                return []
+            entries = self._load_entries(manifest_id)
+            if not entries:
+                status = "miss"
+            return entries
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="ledger",
+                operation="list_entries_by_run_id",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
+
+    def _load_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
+        """Load ledger entries for one manifest without emitting public metrics."""
         ledger_path = self.base_path / f"{manifest_id}.jsonl"
         if not ledger_path.exists():
             return []
@@ -101,13 +155,3 @@ class FileRunLedgerStore(RunLedgerPort):
             )
             if isinstance(payload, dict)
         ]
-
-    def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
-        """Resolve run-id index to manifest ledger file."""
-        run_index_path = self.base_path / "_by_run_id" / f"{run_id}.txt"
-        if not run_index_path.exists():
-            return []
-        manifest_id = run_index_path.read_text(encoding="utf-8").strip()
-        if not manifest_id:
-            return []
-        return self.list_entries(manifest_id)

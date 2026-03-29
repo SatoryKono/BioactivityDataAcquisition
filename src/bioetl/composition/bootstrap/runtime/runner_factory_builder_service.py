@@ -67,6 +67,17 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
         self._pipeline_runner_builder = pipeline_runner_builder
         self._filter_extraction_service = filter_extraction_service
 
+    def _create_runner(
+        self,
+        *,
+        pipeline_name: str,
+        **option_kwargs: object,
+    ) -> PipelineRunner:
+        """Build a runner from one resolved RunOptions payload."""
+        options = self._run_options_cls(**option_kwargs)
+        ctx = self._build_context(pipeline_name, options)
+        return self._pipeline_runner_builder(ctx)
+
     def _build_dependency_debug_context(
         self,
         *,
@@ -140,14 +151,13 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
 
         def seed_runner_factory() -> PipelineRunner:
             """Create a PipelineRunner configured for the seed phase."""
-            options = self._run_options_cls(
+            return self._create_runner(
+                pipeline_name=seed_pipeline,
                 run_type="incremental",
                 limit=seed_limit,
                 skip_gold=True,
                 **bronze_opts,
             )
-            ctx = self._build_context(seed_pipeline, options)
-            return self._pipeline_runner_builder(ctx)
 
         return seed_runner_factory
 
@@ -197,7 +207,8 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
             if enricher_cfg and not enricher_cfg.is_many_to_one and keys is not None:
                 limit = len(keys)
 
-            options = self._run_options_cls(
+            return self._create_runner(
+                pipeline_name=pipeline_name,
                 run_type="incremental",
                 limit=limit,
                 ignore_yaml_filter=True,
@@ -208,8 +219,6 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
                 execution_context="enricher",
                 **bronze_opts,
             )
-            ctx = self._build_context(pipeline_name, options)
-            return self._pipeline_runner_builder(ctx)
 
         return enricher_runner_factory
 
@@ -256,7 +265,8 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
 
             self._logger.debug("Creating dependency runner", **debug_context)
 
-            options = self._run_options_cls(
+            return self._create_runner(
+                pipeline_name=pipeline_name,
                 run_type="incremental",
                 limit=limit,
                 filter_ids=filter_ids,
@@ -267,8 +277,6 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
                 execution_context="dependency",
                 **bronze_opts,
             )
-            ctx = self._build_context(pipeline_name, options)
-            return self._pipeline_runner_builder(ctx)
 
         return dependency_runner_factory
 

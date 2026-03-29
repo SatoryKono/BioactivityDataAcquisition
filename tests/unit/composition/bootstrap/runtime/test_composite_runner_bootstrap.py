@@ -130,6 +130,7 @@ def test_bootstrap_composite_runner_generates_run_id() -> None:
         run_id=str(generated_run_id),
         settings=MagicMock(),
         logger=MagicMock(),
+        metrics=MagicMock(),
         storage=MagicMock(),
         lock=MagicMock(),
     )
@@ -171,6 +172,7 @@ def test_bootstrap_composite_runner_generates_run_id() -> None:
 def test_create_dq_report_service_builds_writer_and_service() -> None:
     logger = MagicMock()
     settings = SimpleNamespace(data_dir="data")
+    metrics = MagicMock()
 
     with (
         patch(
@@ -188,6 +190,7 @@ def test_create_dq_report_service_builds_writer_and_service() -> None:
         result = composite_runtime._create_dq_report_service(
             logger=logger,
             settings=settings,
+            metrics=metrics,
         )
 
     assert result is service_instance
@@ -198,6 +201,7 @@ def test_create_dq_report_service_builds_writer_and_service() -> None:
     assert mock_service.call_args.kwargs == {
         "logger": logger,
         "report_writer": writer_instance,
+        "metrics": metrics,
     }
 
 
@@ -254,6 +258,7 @@ def test_build_composite_bootstrap_plan_uses_named_runtime_basics_context() -> N
         run_id="00000000-0000-0000-0000-000000000005",
         settings=MagicMock(),
         logger=MagicMock(),
+        metrics=MagicMock(),
         storage=MagicMock(),
         lock=MagicMock(),
     )

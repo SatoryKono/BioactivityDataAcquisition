@@ -44,6 +44,7 @@ from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
 from scripts.schema import check_config_invariants as invariant_script
+from scripts.schema import check_required_filter_fields as required_filter_script
 from scripts.schema.validate_pipeline_configs import _canonical_script
 
 # ---------------------------------------------------------------------------
@@ -361,6 +362,25 @@ class TestConfigContractSourceOfTruth:
         """Supported validate-configs wrapper must keep pointing to a real script."""
         script = _canonical_script()
         assert script.exists(), f"Canonical validate-configs script missing: {script}"
+
+    def test_required_filter_script_targets_real_entity_configs(self) -> None:
+        """Required-fields CI gate must inspect the same entity config set."""
+        script_paths = required_filter_script._entity_configs()
+        test_paths = _collect_pipeline_configs()
+        assert script_paths == test_paths
+
+
+# ---------------------------------------------------------------------------
+# INV-CFG-007: Explicit YAML requiredness must be mirrored in silver filters
+# ---------------------------------------------------------------------------
+class TestSilverRequiredFieldsCoverage:
+    """INV-CFG-007: silver_filters.required_fields cover YAML required/not-null fields."""
+
+    def test_explicit_required_fields_are_covered_by_silver_filters(self) -> None:
+        violations = required_filter_script.collect_required_field_coverage_violations(
+            _collect_pipeline_configs()
+        )
+        assert not violations, "\n".join(violations)
 
 
 # ---------------------------------------------------------------------------

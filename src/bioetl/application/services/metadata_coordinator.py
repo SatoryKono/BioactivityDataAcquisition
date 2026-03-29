@@ -22,7 +22,7 @@ import platform
 import socket
 from datetime import datetime
 from functools import cached_property
-from typing import TYPE_CHECKING, ClassVar, Final
+from typing import TYPE_CHECKING, ClassVar, Final, TypeVar
 
 from bioetl import __version__ as BIOETL_VERSION
 from bioetl.application.services.metadata_assemblers import (
@@ -69,6 +69,8 @@ _RUN_TYPE_TO_ENUM: Final[dict[RunType, RunTypeEnum]] = {
     RunType.BACKFILL: RunTypeEnum.BACKFILL,
     RunType.REBUILD: RunTypeEnum.REBUILD,
 }
+
+_MetadataT = TypeVar("_MetadataT", BronzeMetadata, SilverMetadata, GoldMetadata)
 
 
 class MetadataCoordinator(MetadataCoordinatorPort):
@@ -169,6 +171,56 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             rule_bundle_version=self._context.rule_bundle_version,
         )
 
+    @staticmethod
+    def _validate_records_present(
+        *,
+        records: object,
+        total_records: object,
+        layer_name: str,
+    ) -> None:
+        """Reject sidecar creation when neither records nor total count are present."""
+        if not records and total_records is None:
+            raise ValueError(f"Cannot create {layer_name} metadata without records")
+
+    @staticmethod
+    def _create_metadata_bundle(
+        *,
+        metadata: _MetadataT,
+        lineage_fragment: LineageGraphFragment,
+    ) -> MetadataLineageBundle[_MetadataT]:
+        """Bundle sidecar metadata with its canonical lineage fragment."""
+        return MetadataLineageBundle(
+            metadata=metadata,
+            lineage_fragment=lineage_fragment,
+        )
+
+    @staticmethod
+    def _build_bronze_source_metadata(
+        input_data: BronzeMetadataInput,
+    ) -> SourceMetadata:
+        """Build Bronze source metadata, injecting query_string when needed."""
+        if input_data.source_metadata is not None:
+            source = input_data.source_metadata
+            if input_data.query_string and source.query_string is None:
+                return source.model_copy(update={"query_string": input_data.query_string})
+            return source
+
+        return SourceMetadata(
+            type="api",
+            query_string=input_data.query_string,
+        )
+
+    @staticmethod
+    def _build_bronze_file_output_metadata(
+        input_data: BronzeMetadataInput,
+    ) -> FileOutputMetadata:
+        """Build Bronze file metadata for output_ext."""
+        return FileOutputMetadata(
+            path=input_data.output_path,
+            size_bytes=input_data.compressed_size,
+            record_count=input_data.record_count,
+        )
+
     @cached_property
     def _silver_assembler(self) -> SilverMetadataAssembler:
         """Build Silver metadata assembler once per coordinator instance."""
@@ -199,28 +251,8 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             Complete BronzeMetadata for sidecar file.
         """
         duration = (input_data.completed_at - input_data.started_at).total_seconds()
-
-        # Build source metadata with query_string
-        if input_data.source_metadata is not None:
-            source = input_data.source_metadata
-            # Inject query_string if provided and not already set in source_metadata
-            if input_data.query_string and source.query_string is None:
-                source = source.model_copy(
-                    update={"query_string": input_data.query_string}
-                )
-        else:
-            # Create minimal SourceMetadata with query_string
-            source = SourceMetadata(
-                type="api",
-                query_string=input_data.query_string,
-            )
-
-        # Build file metadata for output_ext
-        file_metadata = FileOutputMetadata(
-            path=input_data.output_path,
-            size_bytes=input_data.compressed_size,
-            record_count=input_data.record_count,
-        )
+        source = self._build_bronze_source_metadata(input_data)
+        file_metadata = self._build_bronze_file_output_metadata(input_data)
 
         return BronzeMetadata(
             runtime=self._build_runtime_metadata(
@@ -258,7 +290,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: BronzeMetadataInput,
     ) -> MetadataLineageBundle[BronzeMetadata]:
         """Create Bronze sidecar metadata bundled with canonical lineage fragment."""
-        return MetadataLineageBundle(
+        return self._create_metadata_bundle(
             metadata=self.create_bronze_metadata(input_data),
             lineage_fragment=self.build_bronze_lineage_fragment(input_data),
         )
@@ -272,9 +304,11 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         Returns:
             Complete SilverMetadata for sidecar file.
         """
-        # Validate records (REQ-METADATA-001)
-        if not input_data.records and input_data.total_records is None:
-            raise ValueError("Cannot create Silver metadata without records")
+        self._validate_records_present(
+            records=input_data.records,
+            total_records=input_data.total_records,
+            layer_name="Silver",
+        )
         return self._silver_assembler.assemble(input_data)
 
     def build_silver_lineage_fragment(
@@ -282,8 +316,11 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: SilverMetadataInput,
     ) -> LineageGraphFragment:
         """Build canonical Silver lineage fragment without changing sidecar API."""
-        if not input_data.records and input_data.total_records is None:
-            raise ValueError("Cannot create Silver metadata without records")
+        self._validate_records_present(
+            records=input_data.records,
+            total_records=input_data.total_records,
+            layer_name="Silver",
+        )
         return build_silver_lineage_fragment(
             run_context=self._context,
             input_data=input_data,
@@ -294,7 +331,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: SilverMetadataInput,
     ) -> MetadataLineageBundle[SilverMetadata]:
         """Create Silver sidecar metadata bundled with canonical lineage fragment."""
-        return MetadataLineageBundle(
+        return self._create_metadata_bundle(
             metadata=self.create_silver_metadata(input_data),
             lineage_fragment=self.build_silver_lineage_fragment(input_data),
         )
@@ -308,9 +345,11 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         Returns:
             Complete GoldMetadata for sidecar file.
         """
-        # Validate records (REQ-METADATA-001)
-        if not input_data.records and input_data.total_records is None:
-            raise ValueError("Cannot create Gold metadata without records")
+        self._validate_records_present(
+            records=input_data.records,
+            total_records=input_data.total_records,
+            layer_name="Gold",
+        )
         return self._gold_assembler.assemble(input_data)
 
     def build_gold_lineage_fragment(
@@ -318,8 +357,11 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: GoldMetadataInput,
     ) -> LineageGraphFragment:
         """Build canonical Gold lineage fragment without changing sidecar API."""
-        if not input_data.records and input_data.total_records is None:
-            raise ValueError("Cannot create Gold metadata without records")
+        self._validate_records_present(
+            records=input_data.records,
+            total_records=input_data.total_records,
+            layer_name="Gold",
+        )
         return build_gold_lineage_fragment(
             run_context=self._context,
             input_data=input_data,
@@ -330,7 +372,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         input_data: GoldMetadataInput,
     ) -> MetadataLineageBundle[GoldMetadata]:
         """Create Gold sidecar metadata bundled with canonical lineage fragment."""
-        return MetadataLineageBundle(
+        return self._create_metadata_bundle(
             metadata=self.create_gold_metadata(input_data),
             lineage_fragment=self.build_gold_lineage_fragment(input_data),
         )

@@ -16,22 +16,26 @@
 ## TL;DR — Быстрый Старт
 
 ```bash
-# Автоматическая настройка окружения (рекомендуется)
-./dev-setup.sh          # Полная настройка с тестами
-./dev-setup.sh --quick  # Быстрая установка без тестов
+# Поддерживаемый bootstrap path
+make install
+make test-deps
+make setup-plugins
 
 # Проверка перед работой
 make lint && make test
 
 # Основные команды
-make install          # Создание venv, установка зависимостей (альтернатива dev-setup.sh)
+make install          # Создание venv и установка зависимостей
 make test             # Локальный стабильный прогон (без E2E)
 make lint             # ruff + mypy
-make run-local        # Запуск на фикстурах
+make run-local        # Сэмпловый pipeline-run (chembl_activity, limit=10)
 
 # После изменений
 make lint && make test
 ```
+
+`scripts/dev/dev_setup.sh` остаётся legacy placeholder и не считается
+поддерживаемым onboarding path.
 
 **Главные ресурсы:**
 

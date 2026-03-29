@@ -114,10 +114,7 @@ def _apply_tracing_override(
         updated_observability = observability.model_copy(
             update={"tracing_enabled": enabled}
         )
-        return cast(
-            "Settings",
-            settings.model_copy(update={"observability": updated_observability}),
-        )
+        return settings.model_copy(update={"observability": updated_observability})
 
     updated_settings = SimpleNamespace(**vars(settings))
     updated_observability = SimpleNamespace(**vars(observability))

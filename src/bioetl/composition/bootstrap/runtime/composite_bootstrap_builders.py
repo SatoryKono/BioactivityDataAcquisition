@@ -52,7 +52,7 @@ def bootstrap_runtime_basics(
     Returns:
         Infrastructure context handoff for the composite run.
     """
-    run_id_value, settings, logger, storage, lock = _bootstrap_runtime_basics_impl(
+    run_id_value, settings, logger, metrics, storage, lock = _bootstrap_runtime_basics_impl(
         config=config,
         run_id=run_id,
         settings_provider=settings_provider,
@@ -65,6 +65,7 @@ def bootstrap_runtime_basics(
         run_id=run_id_value,
         settings=settings,
         logger=logger,
+        metrics=metrics,
         storage=storage,
         lock=lock,
     )

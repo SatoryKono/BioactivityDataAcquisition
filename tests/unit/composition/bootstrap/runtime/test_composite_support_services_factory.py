@@ -42,12 +42,14 @@ def _make_factory(
     runtime = CompositeRuntimeConfig(resume=False)
     settings = cast(Any, SimpleNamespace(data_dir="data"))
     logger = MagicMock()
+    metrics = MagicMock()
     storage = MagicMock()
 
     infra_context = cast(Any, CompositeInfrastructureContext)(
         run_id="run-123",
         settings=settings,
         logger=logger,
+        metrics=metrics,
         storage=storage,
         lock=MagicMock(),
     )
@@ -58,7 +60,7 @@ def _make_factory(
         infra_context=infra_context,
         resolve_gold_schema=lambda _name: None,
         load_field_group_registry=lambda _name, _logger: None,
-        create_dq_report_service=lambda _logger, _settings: MagicMock(),
+        create_dq_report_service=lambda _logger, _settings, _metrics: MagicMock(),
         checkpoint_manager_cls=checkpoint_manager_cls,
     )
 

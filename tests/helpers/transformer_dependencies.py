@@ -33,6 +33,7 @@ def instantiate_test_transformer(
         "pii_hasher",
         "data_normalizer",
         "contract_policy",
+        "structural_policy",
     }
     context_kwargs = {k: v for k, v in kwargs.items() if k in context_keys}
     for k in context_kwargs:
