@@ -1,0 +1,58 @@
+[
+  {
+    "id": "S1",
+    "name": "Domain Layer",
+    "files_count": 350,
+    "loc": 0,
+    "issues": []
+  },
+  {
+    "id": "S2",
+    "name": "Application Layer",
+    "files_count": 290,
+    "loc": 0,
+    "issues": []
+  },
+  {
+    "id": "S3",
+    "name": "Infrastructure Layer",
+    "files_count": 376,
+    "loc": 0,
+    "issues": []
+  },
+  {
+    "id": "S4",
+    "name": "Composition & Interfaces",
+    "files_count": 240,
+    "loc": 0,
+    "issues": []
+  },
+  {
+    "id": "S5",
+    "name": "Cross-cutting Concerns",
+    "files_count": 1258,
+    "loc": 0,
+    "issues": []
+  },
+  {
+    "id": "S6",
+    "name": "Tests",
+    "files_count": 1153,
+    "loc": 0,
+    "issues": []
+  },
+  {
+    "id": "S7",
+    "name": "Configs",
+    "files_count": 53,
+    "loc": 0,
+    "issues": []
+  },
+  {
+    "id": "S8",
+    "name": "Documentation",
+    "files_count": 753,
+    "loc": 0,
+    "issues": []
+  }
+]
