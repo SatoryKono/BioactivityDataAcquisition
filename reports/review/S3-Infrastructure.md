@@ -7,11 +7,11 @@
 ## Sub-review Summary
 | Sub-sector | Files | Score | Status | CRIT | HIGH |
 |------------|-------|-------|--------|------|------|
-| S3.1 — Adapters 1 | 75 | 10.0 | PASS | 0 | 0 |
-| S3.2 — Adapters 2 | 75 | 10.0 | PASS | 0 | 0 |
-| S3.3 — Base Adapters | 75 | 10.0 | PASS | 0 | 0 |
-| S3.4 — Storage | 75 | 10.0 | PASS | 0 | 0 |
-| S3.5 — Observability/Other | 76 | 10.0 | PASS | 0 | 0 |
+| S3.1 — Adapters 1 | 23 | 10.0 | PASS | 0 | 0 |
+| S3.2 — Adapters 2 | 18 | 10.0 | PASS | 0 | 0 |
+| S3.3 — Base Adapters | 25 | 10.0 | PASS | 0 | 0 |
+| S3.4 — Storage | 31 | 10.0 | PASS | 0 | 0 |
+| S3.5 — Observability/Other | 279 | 10.0 | PASS | 0 | 0 |
 
 ## Aggregated Issues
 ### Critical (MUST fix)
@@ -21,6 +21,7 @@ None. No raw `to_parquet` or `write_parquet` usages outside of allowed boundary 
 None
 
 ## Cross-subzone Observations
+- Excellent use of VCR testing hooks internally.
 - Clean separation of storage boundaries.
 
 ## Top 5 Recommendations

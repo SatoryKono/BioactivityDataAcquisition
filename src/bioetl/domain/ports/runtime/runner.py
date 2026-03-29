@@ -5,6 +5,8 @@ Defines protocols for pipeline runner creation and execution.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
+
 from bioetl.domain.ports.config import PipelineYamlConfigPort, SettingsPort
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
@@ -12,7 +14,6 @@ from bioetl.domain.ports.observability import (
     MetricsPort,
     TracingPort,
 )
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
@@ -21,9 +22,9 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
 
 __all__ = [
-    "ExecutionObservabilityPort",
     "ExecutionMetricsReadablePort",
     "ExecutionMetricsRunnerPort",
+    "ExecutionObservabilityPort",
     "MetricsExtractorPort",
     "PipelineFactoryPort",
     "RunnablePort",

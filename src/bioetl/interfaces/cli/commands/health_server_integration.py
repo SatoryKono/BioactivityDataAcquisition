@@ -8,10 +8,10 @@ from bioetl.interfaces.cli.commands._compat import alias_module
 
 if TYPE_CHECKING:
     from bioetl.interfaces.cli.commands.domains.health.server_integration import (
-        add_health_server_options as add_health_server_options,
+        DEFAULT_HEALTH_SERVER_PORT as DEFAULT_HEALTH_SERVER_PORT,
     )
     from bioetl.interfaces.cli.commands.domains.health.server_integration import (
-        DEFAULT_HEALTH_SERVER_PORT as DEFAULT_HEALTH_SERVER_PORT,
+        add_health_server_options as add_health_server_options,
     )
     from bioetl.interfaces.cli.commands.domains.health.server_integration import (
         echo_health_server_info as echo_health_server_info,

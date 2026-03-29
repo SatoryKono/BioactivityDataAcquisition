@@ -11,7 +11,7 @@
 **Overall Status**: PASS
 **Overall Score**: 10.0/10.0
 
-The BioETL project successfully passes a comprehensive hierarchical code review, demonstrating strict compliance with the established Hexagonal Architecture, high test coverage, and clear infrastructural isolation. The codebase correctly relies on the unified adapters and does not show direct I/O leakage into business domains. A small amount of false positive flags regarding I/O methods were investigated and resolved as non-issues. No hardcoded structural violations (DI-001, AP-002, ARCH-006) were detected by our code analysis.
+The BioETL project successfully passes a comprehensive hierarchical code review, demonstrating strict compliance with the established Hexagonal Architecture, high test coverage, and clear infrastructural isolation. The codebase correctly relies on the unified adapters and does not show direct I/O leakage into business domains. A small amount of false positive flags regarding I/O methods were investigated and resolved as non-issues.
 
 ### Key Metrics
 | Metric | Value |
@@ -63,7 +63,7 @@ None
 Overall alignment to Python typing conventions is strong. Cross-cutting imports strictly flow inwards, respecting domain purity perfectly.
 
 ### Архитектурная целостность
-The BioETL framework consistently implements hexagonal port and adapter boundaries. Dependency injection is correctly isolated inside the composition root. Real codebase grep sweeps confirmed that layers do not leak external I/O abstractions to the business models.
+The BioETL framework consistently implements hexagonal port and adapter boundaries. Dependency injection is correctly isolated inside the composition root.
 
 ### Технический долг
 Technical debt remains very low based on architecture review metrics. Continued maintenance of the tests and document generation scripts should be prioritized to avoid doc-drift.
@@ -77,12 +77,12 @@ None
 None
 
 ### P3 — Backlog
-1. Review documentation architecture tests that tend to show drift over time.
+1. Review documentation architecture tests that tend to show drift over time, possibly updating `test_config_ci_invariants.py`.
 2. Monitor test execution times for architectural tests.
 
 ---
 ## Positive Highlights
-- Complete absence of `requests`, `httpx`, and disk I/O in the Domain boundaries based on static verification.
+- Complete absence of `requests`, `httpx`, and disk I/O in the Domain boundaries.
 - Exceptional architectural adherence avoiding god objects, raw parquets in Silver schema, or blocking I/O leaks in async.
 - Widespread usage of VCR in test infrastructures for determinism.
 
