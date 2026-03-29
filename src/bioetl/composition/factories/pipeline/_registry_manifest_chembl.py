@@ -65,8 +65,12 @@ from bioetl.domain.schemas.chembl.publication_similarity import (
     PublicationSimilaritySchema,
 )
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
+from bioetl.domain.schemas.chembl.subcellular_fraction import (
+    SubcellularFractionSchema,
+)
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.chembl.tissue import TissueSchema
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_PARAMETERS_SCHEMA,
@@ -200,6 +204,7 @@ CHEMBL_PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=TissueTransformer,
         silver_schema=CHEMBL_TISSUE_SCHEMA,
         gold_schema=ChEMBLTissueGoldSchema,
+        pandera_silver_schema=TissueSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_subcellular_fraction",
@@ -208,6 +213,7 @@ CHEMBL_PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=SubcellularFractionTransformer,
         silver_schema=CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
         gold_schema=ChEMBLSubcellularFractionGoldSchema,
+        pandera_silver_schema=SubcellularFractionSchema,
     ),
 )
 

@@ -59,6 +59,11 @@ export BIOETL_OBSERVABILITY__METRICS_ENABLED=false
 > **Note:** Prometheus metrics включены по settings default, но OpenTelemetry tracing
 > в текущем runtime выключен по умолчанию и активируется только явным
 > `BIOETL_OBSERVABILITY__TRACING_ENABLED=true`.
+>
+> Для short-lived pipeline runs BioETL теперь дополнительно делает best-effort
+> публикацию текущего registry в локальный Pushgateway (`localhost:9091` по
+> умолчанию). Это снижает риск потери post-run метрик между scrape-циклами
+> Prometheus.
 
 ---
 
@@ -488,6 +493,31 @@ groups:
    - Batch size distribution
    - Write duration by layer
    - VACUUM duration
+
+### DQ lifecycle metrics
+
+- `bioetl_dq_context_build_failures_total` tracks failures while building dataframe context for DQ reports.
+- `bioetl_dq_report_skipped_total` tracks layer-specific DQ report skips with bounded reasons.
+- `bioetl_dq_report_generated_total` tracks successfully generated Bronze/Silver/Gold DQ reports.
+
+Use these counters together with `2. Runtime` when DQ reports appear to be missing:
+they let you distinguish between context-build failures, expected skips, and
+successful report generation without relying only on warning logs.
+
+### Control-plane read metrics
+
+- `bioetl_control_plane_reads_total` tracks manifest, ledger, and lineage lookup outcomes.
+- `bioetl_control_plane_read_duration_seconds` tracks latency for the same read/list operations.
+
+Bounded labels are used intentionally:
+
+- `store`: `manifest`, `ledger`, `lineage`
+- `operation`: lookup/list operation class such as `get`, `get_by_run_id`, `list_entries`
+- `status`: `success`, `miss`, `failed`
+
+Use these metrics to answer a different question than write counters:
+did control-plane state fail to persist, or was it persisted successfully but
+could not be read back during investigation and follow-up processing?
 
 ---
 

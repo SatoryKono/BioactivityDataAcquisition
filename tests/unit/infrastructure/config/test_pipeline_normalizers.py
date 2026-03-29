@@ -5,42 +5,42 @@ from __future__ import annotations
 import pytest
 
 from bioetl.infrastructure.config.pipeline_normalizers import (
-    _merge_data_schema_into_config,
+    _project_schema_fields_into_config,
     _validate_schema_config,
     apply_pipeline_schema_normalization,
 )
 
 
-class TestMergeDataSchemaIntoConfig:
-    """Tests for _merge_data_schema_into_config."""
+class TestProjectSchemaFieldsIntoConfig:
+    """Tests for _project_schema_fields_into_config."""
 
     def test_merges_column_groups(self) -> None:
         """Should merge column_groups into config."""
         config: dict = {}
         data_schema = {"column_groups": [{"name": "system"}]}
-        _merge_data_schema_into_config(config, data_schema)
+        _project_schema_fields_into_config(config, data_schema)
         assert config["column_groups"] == [{"name": "system"}]
 
     def test_merges_content_hash(self) -> None:
         """Should merge content_hash into config."""
         config: dict = {}
         data_schema = {"content_hash": {"fields": ["id"]}}
-        _merge_data_schema_into_config(config, data_schema)
+        _project_schema_fields_into_config(config, data_schema)
         assert config["content_hash"] == {"fields": ["id"]}
 
-    def test_merges_silver_into_data_schema(self) -> None:
-        """Should merge silver config under data_schema key."""
+    def test_does_not_project_silver_into_data_schema(self) -> None:
+        """Should not create transient data_schema payload for silver config."""
         config: dict = {}
         data_schema = {"silver": {"include_groups": ["system"]}}
-        _merge_data_schema_into_config(config, data_schema)
-        assert config["data_schema"]["silver"] == {"include_groups": ["system"]}
+        _project_schema_fields_into_config(config, data_schema)
+        assert "data_schema" not in config
 
-    def test_merges_gold_into_data_schema(self) -> None:
-        """Should merge gold config under data_schema key."""
+    def test_does_not_project_gold_into_data_schema(self) -> None:
+        """Should not create transient data_schema payload for gold config."""
         config: dict = {}
         data_schema = {"gold": {"include_groups": ["system"]}}
-        _merge_data_schema_into_config(config, data_schema)
-        assert config["data_schema"]["gold"] == {"include_groups": ["system"]}
+        _project_schema_fields_into_config(config, data_schema)
+        assert "data_schema" not in config
 
 
 class TestValidateSchemaConfig:
@@ -142,7 +142,7 @@ class TestApplyPipelineSchemaNormalization:
         assert "column_groups" not in config
 
     def test_unified_schema_applied(self) -> None:
-        """Should apply unified_schema when provided."""
+        """Should project runtime-relevant unified_schema fields when provided."""
         config: dict = {}
         unified_schema = {
             "column_groups": [
@@ -159,8 +159,8 @@ class TestApplyPipelineSchemaNormalization:
             unified_schema=unified_schema,
         )
         assert config["column_groups"] == unified_schema["column_groups"]
-        assert config["data_schema"]["silver"] == unified_schema["silver"]
-        assert config["data_schema"]["gold"] == unified_schema["gold"]
+        assert "data_schema" not in config
+        assert "content_hash" not in config
 
     def test_no_schema_sources_does_nothing(self) -> None:
         """Should do nothing when no schema sources are available."""

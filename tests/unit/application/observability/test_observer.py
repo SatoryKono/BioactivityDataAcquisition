@@ -54,6 +54,7 @@ def tracer_mock():
     mock_tracer = MagicMock()
     mock_tracer.get_tracer = MagicMock(return_value=mock_otel_tracer)
     mock_tracer.close = MagicMock()
+    mock_tracer.flush = MagicMock()
 
     return mock_tracer
 
@@ -229,6 +230,7 @@ def test_observer_graceful_shutdown(metrics_mock, logger_mock, tracer_mock, run_
     mock_span = tracer_mock.get_tracer.return_value.start_as_current_span.return_value
     mock_span.__enter__.assert_called_once()
     mock_span.__exit__.assert_called_once()
+    tracer_mock.flush.assert_called_once()
 
     # Verify span attributes were set
     mock_span.set_attribute.assert_any_call("bioetl.status", "success")

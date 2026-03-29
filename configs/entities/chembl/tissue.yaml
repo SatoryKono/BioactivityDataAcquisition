@@ -98,7 +98,9 @@ filters:
   input_filter:
     enabled: false
   silver_filters:
-    required_fields: []
+    required_fields:
+    - tissue_id
+    - pref_name
   gold_filters:
     required_fields:
     - tissue_id

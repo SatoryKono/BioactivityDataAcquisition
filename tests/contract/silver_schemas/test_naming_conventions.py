@@ -228,6 +228,7 @@ class TestMetadataFieldNaming:
             "_dq_warn",
             "_dq_error",
             "_index",
+            "_state",
         }
 
         # Some schemas may have provider-specific underscore fields
@@ -409,6 +410,7 @@ class TestCrossProviderNaming:
             "chembl_target": "target_id",
             "chembl_protein_class": "protein_class_id",
             "chembl_publication_similarity": "sim_id",
+            "chembl_tissue": "tissue_id",
             "chembl_subcellular_fraction": "subcellular_fraction",
             "chembl_target_component": "component_id",
             "pubchem_compound": "molecule_id",

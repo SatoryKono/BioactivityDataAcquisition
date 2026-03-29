@@ -17,6 +17,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("_source_batch_id", pa.string()),
         ("_ingestion_ts", pa.string()),
         ("_index", pa.int64()),
+        ("_state", pa.string()),
         ("action_type", pa.string()),
         ("action_type_description", pa.string()),
         ("action_type_parent_type", pa.string()),

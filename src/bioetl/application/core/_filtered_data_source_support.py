@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
+    from bioetl.domain.filtering import (
+        FilterColumn,
+        FilterLoadResult,
+        InputFilterConfig,
+    )
     from bioetl.domain.ports import (
         DataSourcePort,
         InputFilterPort,
@@ -123,7 +127,7 @@ async def load_csv_filter_ids(state: _FilteredDataSourceState) -> None:
 async def _load_multi_column_filter(
     state: _FilteredDataSourceState,
     source_path: str,
-    columns: tuple[Any, ...],
+    columns: tuple[FilterColumn, ...],
 ) -> None:
     """Load multi-column filter from CSV."""
     assert state._filter_reader is not None

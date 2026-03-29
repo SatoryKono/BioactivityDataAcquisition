@@ -26,6 +26,7 @@ def mock_tracer():
 
     tracer = MagicMock()
     tracer.get_tracer = MagicMock(return_value=otel_tracer)
+    tracer.flush = MagicMock()
 
     return tracer, otel_tracer, span
 
@@ -55,6 +56,7 @@ class TestTracedOperation:
 
         span.__enter__.assert_called_once()
         span.__exit__.assert_called_once_with(None, None, None)
+        tracer.flush.assert_called_once()
 
     def test_span_closed_on_exception(self, mock_tracer):
         """Test span is closed even when exception occurs."""

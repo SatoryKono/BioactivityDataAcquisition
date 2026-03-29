@@ -34,11 +34,9 @@ schema:
     - _index
   - name: business
     fields:
-    - assay_subcellular_fraction
-    - assay_id
-    - target_id
-    - assay_type
-    - assay_organism
+    - subcellular_fraction
+    - assay_count
+    - example_assay_id
   - name: dq
     pattern: ^_dq_
   silver:
@@ -94,6 +92,9 @@ filters:
   entity: subcellular_fraction
   input_filter:
     enabled: false
+  silver_filters:
+    required_fields:
+    - subcellular_fraction
   gold_filters:
     required_fields:
     - subcellular_fraction

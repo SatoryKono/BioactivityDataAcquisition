@@ -7,8 +7,13 @@ from prometheus_client import Counter, Histogram
 __all__ = [
     "CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL",
     "COMPOSITE_SOURCE_SELECTION_TOTAL",
+    "CONTROL_PLANE_READ_DURATION_SECONDS",
+    "CONTROL_PLANE_READS_TOTAL",
     "CONTROL_PLANE_LEDGER_APPENDS_TOTAL",
     "CONTROL_PLANE_MANIFEST_WRITES_TOTAL",
+    "DQ_CONTEXT_BUILD_FAILURES_TOTAL",
+    "DQ_REPORT_GENERATED_TOTAL",
+    "DQ_REPORT_SKIPPED_TOTAL",
     "DQ_SOFT_THRESHOLD_EXCEEDED",
     "FILTER_COMBINATIONS_LOADED_TOTAL",
     "LINEAGE_FRAGMENTS_EMITTED_TOTAL",
@@ -61,6 +66,24 @@ DQ_SOFT_THRESHOLD_EXCEEDED = Counter(
     ["pipeline"],
 )
 
+DQ_CONTEXT_BUILD_FAILURES_TOTAL = Counter(
+    "bioetl_dq_context_build_failures_total",
+    "Total failures while building DQ dataframe context for report generation",
+    ["pipeline", "stage", "reason"],
+)
+
+DQ_REPORT_SKIPPED_TOTAL = Counter(
+    "bioetl_dq_report_skipped_total",
+    "Total DQ report generation skips by pipeline and medallion stage",
+    ["pipeline", "stage", "reason"],
+)
+
+DQ_REPORT_GENERATED_TOTAL = Counter(
+    "bioetl_dq_report_generated_total",
+    "Total successfully generated DQ reports by pipeline and medallion stage",
+    ["pipeline", "stage"],
+)
+
 SHUTDOWN_INITIATED = Counter(
     "bioetl_shutdown_initiated",
     "Total shutdown initiations",
@@ -95,6 +118,19 @@ CONTROL_PLANE_LEDGER_APPENDS_TOTAL = Counter(
     "bioetl_control_plane_ledger_appends_total",
     "Total append attempts for run-ledger entries",
     ["pipeline", "event_type", "status"],
+)
+
+CONTROL_PLANE_READS_TOTAL = Counter(
+    "bioetl_control_plane_reads_total",
+    "Total control-plane read and lookup operations by store, operation, and outcome",
+    ["store", "operation", "status"],
+)
+
+CONTROL_PLANE_READ_DURATION_SECONDS = Histogram(
+    "bioetl_control_plane_read_duration_seconds",
+    "Latency of control-plane read and lookup operations in seconds",
+    ["store", "operation", "status"],
+    buckets=[0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
 )
 
 CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL = Counter(

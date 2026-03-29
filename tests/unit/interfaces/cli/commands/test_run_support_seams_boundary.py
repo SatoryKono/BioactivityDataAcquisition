@@ -8,12 +8,7 @@ from pathlib import Path
 import pytest
 
 
-RUN_SUPPORT_SEAMS = (
-    (
-        "src/bioetl/interfaces/cli/commands/run_result_presenter.py",
-        "bioetl.interfaces.cli.commands.domains.run.result_presenter",
-    ),
-)
+RUN_SUPPORT_SEAMS = ()
 
 
 def _extract_alias_targets(path: Path) -> set[str]:

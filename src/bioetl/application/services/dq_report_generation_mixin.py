@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         GoldDQAnalyzerPort,
         GoldDQConfigPort,
         LoggerPort,
+        MetricsPort,
         SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
@@ -27,6 +28,7 @@ class DQReportGenerationMixin:
     """Mixin with layer-specific DQ report generation flows."""
 
     _logger: LoggerPort
+    _metrics: MetricsPort | None
     _bronze_analyzer: BronzeDQAnalyzerPort | None
     _silver_analyzer: SilverDQAnalyzerPort | None
     _gold_analyzer: GoldDQAnalyzerPort | None
@@ -36,6 +38,44 @@ class DQReportGenerationMixin:
     def _path_to_str(path: Path | None) -> str | None:
         """Convert path to string or None."""
         return str(path) if path else None
+
+    def _emit_dq_report_skipped_metric(
+        self,
+        *,
+        pipeline: str,
+        stage: str,
+        reason: str,
+    ) -> None:
+        """Emit a bounded skip counter when metrics are available."""
+        if self._metrics is None:
+            return
+        self._metrics.increment_counter(
+            "dq_report_skipped_total",
+            1,
+            {
+                "pipeline": pipeline,
+                "stage": stage,
+                "reason": reason,
+            },
+        )
+
+    def _emit_dq_report_generated_metric(
+        self,
+        *,
+        pipeline: str,
+        stage: str,
+    ) -> None:
+        """Emit a generated counter when metrics are available."""
+        if self._metrics is None:
+            return
+        self._metrics.increment_counter(
+            "dq_report_generated_total",
+            1,
+            {
+                "pipeline": pipeline,
+                "stage": stage,
+            },
+        )
 
     async def _try_generate_bronze(
         self,
@@ -77,6 +117,11 @@ class DQReportGenerationMixin:
     ) -> Path | None:
         """Generate Bronze DQ report."""
         if not self._bronze_analyzer or not self._report_writer:
+            self._emit_dq_report_skipped_metric(
+                pipeline=context.pipeline_name,
+                stage="bronze",
+                reason="analyzer_or_writer_unavailable",
+            )
             self._logger.warning(
                 "bronze_dq_report_skipped",
                 reason="analyzer or writer not available",
@@ -85,6 +130,11 @@ class DQReportGenerationMixin:
             return None
 
         if context.bronze_records is None or context.bronze_batch_id is None:
+            self._emit_dq_report_skipped_metric(
+                pipeline=context.pipeline_name,
+                stage="bronze",
+                reason="no_bronze_data",
+            )
             self._logger.warning(
                 "bronze_dq_report_skipped",
                 reason="no bronze data available",
@@ -124,6 +174,10 @@ class DQReportGenerationMixin:
                 path=str(path),
                 status=report.summary.overall_status.value,
             )
+            self._emit_dq_report_generated_metric(
+                pipeline=context.pipeline_name,
+                stage="bronze",
+            )
             return path
 
         except _DQ_REPORT_ERRORS as e:
@@ -141,6 +195,11 @@ class DQReportGenerationMixin:
     ) -> Path | None:
         """Generate Silver DQ report."""
         if not self._silver_analyzer or not self._report_writer:
+            self._emit_dq_report_skipped_metric(
+                pipeline=context.pipeline_name,
+                stage="silver",
+                reason="analyzer_or_writer_unavailable",
+            )
             self._logger.warning(
                 "silver_dq_report_skipped",
                 reason="analyzer or writer not available",
@@ -149,6 +208,11 @@ class DQReportGenerationMixin:
             return None
 
         if context.silver_data is None or context.silver_target_table is None:
+            self._emit_dq_report_skipped_metric(
+                pipeline=context.pipeline_name,
+                stage="silver",
+                reason="no_silver_data",
+            )
             self._logger.warning(
                 "silver_dq_report_skipped",
                 reason="no silver data available",
@@ -194,6 +258,10 @@ class DQReportGenerationMixin:
                 path=str(path),
                 status=report.summary.overall_status.value,
             )
+            self._emit_dq_report_generated_metric(
+                pipeline=context.pipeline_name,
+                stage="silver",
+            )
             return path
 
         except _DQ_REPORT_ERRORS as e:
@@ -211,6 +279,11 @@ class DQReportGenerationMixin:
     ) -> Path | None:
         """Generate Gold DQ report."""
         if not self._gold_analyzer or not self._report_writer:
+            self._emit_dq_report_skipped_metric(
+                pipeline=context.pipeline_name,
+                stage="gold",
+                reason="analyzer_or_writer_unavailable",
+            )
             self._logger.warning(
                 "gold_dq_report_skipped",
                 reason="analyzer or writer not available",
@@ -219,6 +292,11 @@ class DQReportGenerationMixin:
             return None
 
         if context.gold_data is None or context.gold_target_table is None:
+            self._emit_dq_report_skipped_metric(
+                pipeline=context.pipeline_name,
+                stage="gold",
+                reason="no_gold_data",
+            )
             self._logger.warning(
                 "gold_dq_report_skipped",
                 reason="no gold data available",
@@ -259,6 +337,10 @@ class DQReportGenerationMixin:
                 run_id=context.run_id,
                 path=str(path),
                 status=report.summary.overall_status.value,
+            )
+            self._emit_dq_report_generated_metric(
+                pipeline=context.pipeline_name,
+                stage="gold",
             )
             return path
 

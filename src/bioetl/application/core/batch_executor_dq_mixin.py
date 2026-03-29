@@ -108,11 +108,15 @@ class _BatchExecutorDQMixin:
     def _build_dataframe_from_records(
         self,
         records: list[BronzeRecord] | list[GoldRecord],
+        stage: str = "other",
     ) -> object | None:
         """Build Polars dataframe from records, returning None on failure."""
         return build_dataframe_from_records(
             records=records,
             logger=self._logger,
+            metrics=self._services.metrics,
+            pipeline=self._config.pipeline_name,
+            stage=stage,
         )
 
     @staticmethod

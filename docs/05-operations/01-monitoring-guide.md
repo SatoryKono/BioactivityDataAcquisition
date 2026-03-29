@@ -13,8 +13,13 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 2.  **Prometheus**: Регулярно собирает (scrape) метрики из приложения и сохраняет их в базе данных временных рядов (TSDB).
 3.  **Grafana**: Выступает в роли интерфейса визуализации, подключаясь к Prometheus как к источнику данных.
 
+Для короткоживущих запусков BioETL дополнительно использует best-effort
+Pushgateway publication на завершении run. Это позволяет сохранить итоговые
+метрики после завершения процесса и уменьшает зависимость operator-поверхностей
+от удачного scrape-окна.
+
 Для Loki в shipped конфигурации уже включён `limits_config.volume_enabled: true`
-в [grafana/loki-config.yml](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/loki-config.yml).
+в файле `grafana/loki-config.yml`.
 Это полезно для live validation и Explore-side log volume inspection, даже если
 сами Prometheus dashboards не зависят от этой опции напрямую.
 
@@ -24,8 +29,8 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 
 ### Фильтрация и Изоляция данных
 В верхней части каждого дашборда расположены выпадающие списки:
-- **Simple / Overview v2 / DQ v2 / Runtime**: `$pipeline`, `$run_type`
-- **Provider Health v2**: `$provider`
+- **1. Overview / 2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`
+- **3. Provider Health**: `$provider`
 
 > **Важно**: Если вы не видите данных, убедитесь, что в фильтре выбран правильный пайплайн или стоит значение `All`.
 
@@ -39,39 +44,53 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 - **Control Plane & Lineage**: отдельная строка для `Manifest Writes (24h)`,
   `Ledger Appends (24h)`, `Checkpoint Incompatibilities (24h)` и
   `Lineage Fragment Failures (24h)`.
+- **Control-plane Lookup Failures (24h) / Control-plane Lookup p95 (1h)**:
+  показывают, можно ли читать manifest/ledger/lineage обратно и насколько
+  дорогими становятся lookup paths во время расследований.
 - **Lineage Fragment Outcomes (1h)**: тренд публикации lineage fragments по
   `layer/status` без использования high-cardinality labels.
 - **Drilldown**: dashboard links `Explore Logs (Loki)` / `Explore Traces (Tempo)`
   и data links у `Processing Pipeline` переводят оператора в Grafana Explore с тем
   же временным окном.
 
-#### 2. 4. Data Quality
-Сфокусирован на чистоте данных и аномалиях.
-- **Data Quality Score**: `(gold + quarantined) / clamp-min(bronze, 1)`.
-- **Quarantine / Soft Threshold / Validation Failures**: контроль деградаций по окнам времени.
-- **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы.
-- **Drilldown**: dashboard links `Explore Logs (Loki)` / `Explore Traces (Tempo)`
-  и data links у `Data Flow: Bronze -> Silver -> Gold` переводят расследование
-  DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
+#### 2. 2. Runtime
+Смешанный runtime/ops surface для triage log hygiene и alert-condition сигналов.
+- **Warnings (1h)**: count structured warning logs по текущему `$pipeline`.
+- **Unstructured Logs (1h)**: объём строк, которые не распарсились как shipped JSON log contract.
+- **DQ / Control-plane / Provider / Freshness Alert Conditions**: Prometheus-backed stat panels, которые отражают те же условия, что и alert rules, но не притворяются real alert-state engine.
+- `DQ / Control-plane / Provider / Freshness Alert Conditions` теперь считают
+  количество активных семейств условий, а не сырые суммы event counters.
+- **Top Warning Events (1h)**: быстрый срез наиболее частых warning events.
+- **Log Hygiene Trend (5m)**: короткий тренд warnings vs unstructured rows.
+- **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` / `Explore Traces (Tempo)` и data links у `Log Hygiene Trend (5m)` ведут в Explore с тем же временным окном.
+
+- **DQ Context Failures (24h) / DQ Reports Skipped (24h) / DQ Reports Generated (24h)**:
+  lifecycle counters для DQ reporting. Используйте их, когда нужно быстро
+  понять, не сломалась ли сборка DQ context, отчёты системно пропускаются или
+  наоборот стабильно доходят до успешной генерации.
+- **Control-plane Lookup Outcomes (1h) / Control-plane Lookup p95 (1h)**:
+  runtime-срез по success/miss/failed для manifest, ledger и lineage lookup
+  paths. Эти панели особенно полезны, когда write-side выглядит здоровым, но
+  follow-up investigation или lineage drilldown начинают терять данные.
 
 #### 3. 3. Provider Health
 Технический мониторинг состояния внешних API (ChEMBL, UniProt и др.).
 - **Health Check Latency by Provider (p95)**: тренд латентности провайдеров.
 - **Health Check Successes (15m) / Health Checks (15m)**: текущий объём и стабильность health_check без lifetime-counter шума.
 - **Per-provider gauge (102)**: повторяемая p95-панель по `$provider`.
-- **Drilldown**: dashboard links `Explore Logs (Loki)` / `Explore Traces (Tempo)`
+- **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` / `Explore Traces (Tempo)`
   и data links у latency-панели открывают correlation path. Для Loki shipped
   baseline стартует с общего `{job="bioetl"}` stream, а дополнительное
   сужение по `provider` оператор делает уже в Explore.
 
-#### 4. 2. Runtime
-Смешанный runtime/ops surface для triage log hygiene и alert-condition сигналов.
-- **Warnings (1h)**: count structured warning logs по текущему `$pipeline`.
-- **Unstructured Logs (1h)**: объём строк, которые не распарсились как shipped JSON log contract.
-- **DQ / Control-plane / Provider / Freshness Alert Conditions**: Prometheus-backed stat panels, которые отражают те же условия, что и alert rules, но не притворяются real alert-state engine.
-- **Top Warning Events (1h)**: быстрый срез наиболее частых warning events.
-- **Log Hygiene Trend (5m)**: короткий тренд warnings vs unstructured rows.
-- **Drilldown**: dashboard links `Explore Logs (Loki)` / `Explore Traces (Tempo)` и data links у `Log Hygiene Trend (5m)` ведут в Explore с тем же временным окном.
+#### 4. 4. Data Quality
+Сфокусирован на чистоте данных и аномалиях.
+- **Data Quality Score**: `(gold + quarantined) / clamp-min(bronze, 1)`.
+- **Quarantine / Soft Threshold / Validation Failures**: контроль деградаций по окнам времени.
+- **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы.
+- **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` / `Explore Traces (Tempo)`
+  и data links у `Data Flow: Bronze -> Silver -> Gold` переводят расследование
+  DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
 
 ## 3. Alert-backed сигналы
 

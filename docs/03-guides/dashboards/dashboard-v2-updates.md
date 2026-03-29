@@ -1,4 +1,4 @@
-# Dashboard v2 Updates (Audit 2026-03-28)
+# Dashboard v2 Updates (Audit 2026-03-29)
 
 Источник истины: `grafana/dashboards/bioetl-*.json`
 
@@ -11,7 +11,8 @@
 
 ## Подтверждено по JSON
 
-- Все 4 дашборда используют `refresh: 30s`, `time.from: now-12h`.
+- Все 4 дашборда используют `refresh: 30s`.
+- `time.from`: `1. Overview` / `4. Data Quality` = `now-7d`; `2. Runtime` / `3. Provider Health` = `now-12h`.
 - Переменные `overview/dq/runtime`: `$pipeline`, `$run_type`.
 - Переменные `provider-health-v2`: `$provider`.
 - В JSON отсутствуют `$run_id` и `execution`.
@@ -26,7 +27,7 @@
 sum(increase(bioetl_silver_validation_failures_total{table=~"$pipeline"}[24h]))
 ```
 
-4. Упрощён Provider Health v2:
+4. Упрощён `3. Provider Health`:
 
 - removed legacy `Pipeline`/`Execution Timestamp` header section;
 - removed duplicate repeated latency gauge `id=103`;
@@ -54,15 +55,22 @@ histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_b
 - `bioetl-runtime` собирает Loki-backed `Warnings (1h)` и `Unstructured Logs (1h)`;
 - Prometheus-backed панели `Alert Conditions` показывают условия из shipped rule pack,
   а не реальный firing-state alert engine;
-- runtime dashboard содержит быстрые links обратно в `overview`, `dq`,
-  `provider-health` и Explore surfaces.
+- runtime dashboard содержит `Back to Overview` и Explore surfaces; переходы
+  к `3. Provider Health` и `4. Data Quality` идут через `1. Overview`.
+
+8. Синхронизирована dashboard-навигация:
+
+- `1. Overview` содержит links `2. Runtime`, `3. Provider Health`,
+  `4. Data Quality`, `Explore Logs (Loki)`, `Explore Traces (Tempo)`;
+- `2. Runtime`, `3. Provider Health` и `4. Data Quality` содержат `Back to Overview`
+  и Explore links.
 
 ## Актуальные ключевые панели
 
 - `bioetl-overview-v2`: `id=99`, `id=101`, `id=1..4`, `id=110..115`
 - `bioetl-dq-v2`: `id=99`, `id=101`, `id=1..12`, `id=116`
 - `bioetl-provider-health-v2`: row `id=91` + панели `1,2,104,7,102`
-- `bioetl-runtime`: `id=1..8`, links в `Overview`, `DQ`, `Provider Health`, `Explore`
+- `bioetl-runtime`: `id=1..9`, `Back to Overview`, links в `Explore`
 
 ## Примечание по старым гайдам
 

@@ -572,6 +572,9 @@ def test_env_var_centralization(src_dir: Path):
         src_dir / "bioetl" / "infrastructure" / "security" / "pii_hasher.py",
         # dq_config_loader.py uses os.environ for relaxed DQ thresholds in tests
         src_dir / "bioetl" / "infrastructure" / "config" / "dq_config_loader.py",
+        # observability bootstrap reads runtime env knobs for sink selection and local test behavior
+        src_dir / "bioetl" / "infrastructure" / "observability" / "logging_config.py",
+        src_dir / "bioetl" / "infrastructure" / "observability" / "tracing.py",
     }
     allowed_resolved = {f.resolve() for f in allowed_files}
     violations = []

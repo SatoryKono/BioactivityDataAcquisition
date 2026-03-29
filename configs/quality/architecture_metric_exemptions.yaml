@@ -31,6 +31,14 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Extract runner wiring seams during the next composition bootstrap cleanup wave"
+    src/bioetl/composition/factories/storage/_helpers.py:
+      value: 450
+      owner: "@bioetl-platform"
+      reason: "Storage helper wiring still concentrates runtime assembly details that need a dedicated extraction pass rather than a rushed split under active refactor."
+      classification: "technical_debt"
+      linked_rf: "RF-023"
+      expires_on: "2026-06-30"
+      removal_step: "Extract storage-path, schema, and writer helper seams during the next composition storage-factory cleanup wave"
   function_complexity: {}
   function_length: {}
   class_size: {}

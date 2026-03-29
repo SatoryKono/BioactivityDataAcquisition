@@ -26,3 +26,7 @@ class TracingPort(Protocol):
     def close(self) -> None:
         """Flush pending spans and cleanup resources."""
         ...
+
+    def flush(self) -> None:
+        """Best-effort flush of pending spans without shutting the provider down."""
+        ...

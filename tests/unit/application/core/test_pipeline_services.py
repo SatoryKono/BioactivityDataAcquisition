@@ -104,6 +104,8 @@ class TestPipelineServicesAclose:
         mock_services.lock.aclose.assert_called_once()
         mock_services.checkpoint.aclose.assert_called_once()
         mock_services.quarantine.aclose.assert_called_once()
+        mock_services.metrics.close.assert_not_called()
+        mock_services.tracing.close.assert_not_called()
 
     async def test_aclose_logs_info(self, mock_services):
         """Test that aclose logs info messages."""

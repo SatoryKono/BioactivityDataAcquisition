@@ -174,5 +174,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
                         self.span.record_exception(exc_val)
                     self.span.set_attribute("error", True)
                 self.span.__exit__(exc_type, exc_val, exc_tb)
+                if self._tracer is not None:
+                    self._tracer.flush()
             except (AttributeError, RuntimeError, TypeError, ValueError):
                 pass  # Why: observer teardown is best-effort; span errors must not mask pipeline result

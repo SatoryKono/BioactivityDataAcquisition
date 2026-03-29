@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import SimpleNamespace
+import sys
 
 import pytest
 
@@ -43,9 +44,26 @@ class _LoggerStub:
         self.warning_calls.append((args, kwargs))
 
 
+class _MetricsStub:
+    def __init__(self) -> None:
+        self.increment_calls: list[tuple[str, int, dict[str, str]]] = []
+
+    def increment_counter(
+        self,
+        name: str,
+        value: int,
+        labels: dict[str, str] | None = None,
+        **_: object,
+    ) -> None:
+        self.increment_calls.append((name, value, labels or {}))
+
+
 class _BatchExecutorDQHarness(_BatchExecutorDQMixin):
     def __init__(self) -> None:
-        self._services = SimpleNamespace(dq_report_service=object())  # type: ignore[assignment]
+        self._services = SimpleNamespace(  # type: ignore[assignment]
+            dq_report_service=object(),
+            metrics=_MetricsStub(),
+        )
         self._context = SimpleNamespace(run_id="run-1")  # type: ignore[assignment]
         self._config = SimpleNamespace(  # type: ignore[assignment]
             dq_config=_DQConfig(
@@ -134,6 +152,39 @@ def test_build_dataframe_from_records_handles_null_then_string_columns() -> None
     assert df.shape == (151, 2)
     assert df["assay_test_type"].to_list()[-1] == "In vitro"
     assert harness._logger.warning_calls == []
+    assert harness._services.metrics.increment_calls == []
+
+
+def test_build_dataframe_from_records_emits_metric_on_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    harness = _BatchExecutorDQHarness()
+    records: list[dict[str, object]] = [
+        {"entity_id": "1", "payload": "value"},
+    ]
+    fake_polars = SimpleNamespace(
+        DataFrame=lambda *args, **kwargs: (_ for _ in ()).throw(
+            RuntimeError("boom")
+        ),
+        exceptions=SimpleNamespace(PolarsError=RuntimeError),
+    )
+    monkeypatch.setitem(sys.modules, "polars", fake_polars)
+
+    df = harness._build_dataframe_from_records(records, stage="silver")
+
+    assert df is None
+    assert harness._logger.warning_calls
+    assert harness._services.metrics.increment_calls == [
+        (
+            "dq_context_build_failures_total",
+            1,
+            {
+                "pipeline": "pubmed_publication",
+                "stage": "silver",
+                "reason": "dq_dataframe_build_failed",
+            },
+        )
+    ]
 
 
 def test_extract_dq_entity_prefers_suffix_from_table_name() -> None:
@@ -161,7 +212,9 @@ def test_get_dq_context_builds_context_with_resolved_rules() -> None:
     harness._silver_records_for_dq = [{"entity_id": "A1"}]
     harness._gold_records_for_dq = [{"entity_id": "A1", "score": 0.9}]
     harness._last_bronze_path = "bronze/file.jsonl"
-    harness._build_dataframe_from_records = lambda records: {"rows": len(records)}  # type: ignore[method-assign]
+    harness._build_dataframe_from_records = (  # type: ignore[method-assign]
+        lambda records, stage="other": {"rows": len(records)}
+    )
 
     context = harness.get_dq_context()
 

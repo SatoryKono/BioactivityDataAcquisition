@@ -132,10 +132,7 @@ def test_pipeline_schema_normalizer_golden_vector(
     expected = {
         "column_groups": schema_payload["column_groups"],
         "content_hash": schema_payload["content_hash"],
-        "data_schema": {
-            "silver": schema_payload["silver"],
-            "gold": schema_payload["gold"],
-        },
+        "data_schema": None,
     }
 
     unified_cfg: dict[str, Any] = {}

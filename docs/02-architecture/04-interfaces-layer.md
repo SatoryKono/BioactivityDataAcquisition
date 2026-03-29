@@ -47,7 +47,6 @@
 
 | Модуль                          | Назначение                              |
 | ------------------------------- | --------------------------------------- |
-| `run_result_presenter.py`       | Retained support seam; canonical implementation lives in `domains/run/result_presenter.py` |
 | `health_rendering.py`           | Retained support seam; canonical implementation lives in `domains/health/rendering.py` |
 | `health_server_integration.py`  | Retained support seam; canonical implementation lives in `domains/health/server_integration.py` |
 | `metrics_server_integration.py` | Retained support seam; canonical implementation lives in `domains/health/metrics_server_integration.py` |

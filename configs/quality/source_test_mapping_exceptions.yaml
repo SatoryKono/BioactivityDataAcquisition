@@ -14,11 +14,3 @@ exemptions:
     owner_tests:
       - tests/unit/interfaces/cli/test_cli_helpers.py
       - tests/unit/interfaces/cli/test_cli_commands_basic.py
-  - source: src/bioetl/interfaces/cli/commands/domains/shared/execution_policy.py
-    policy: aggregate_owner
-    reason: >
-      Shared CLI execution policy is covered by aggregate command policy suites
-      rather than a same-path thin-package owner test.
-    owner_tests:
-      - tests/unit/interfaces/cli/commands/test_execution_policy.py
-      - tests/unit/interfaces/cli/commands/test_run_command_policy.py

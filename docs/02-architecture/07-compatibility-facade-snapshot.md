@@ -8,9 +8,9 @@
 - Curated inventory rows: `16`
 - Transition debt rows: `0`
 - Retained public entrypoints: `16`
-- Measured tracked modules: `41`
-- Measured-only modules outside curated inventory: `25`
-- Discovered docstring-tracked modules: `25`
+- Measured tracked modules: `25`
+- Measured-only modules outside curated inventory: `9`
+- Discovered docstring-tracked modules: `9`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 
@@ -50,14 +50,12 @@
 - `src/bioetl/interfaces/cli/commands/run.py`
 - `src/bioetl/interfaces/cli/commands/run_all.py`
 - `src/bioetl/interfaces/cli/commands/run_composite.py`
-- `src/bioetl/interfaces/cli/commands/run_result_presenter.py`
 - `src/bioetl/interfaces/cli/commands/vacuum.py`
 
 ## Measured-Only Allowlist
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py` — owner: `bioetl.application.pipelines.chembl`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export surface for ChEMBL pipeline marker classes.
 - `src/bioetl/composition/factories/pipeline/creation_api.py` — owner: `bioetl.composition.factories.pipeline`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Sanctioned compatibility shim for canonical pipeline creation wiring symbols.
-- `src/bioetl/interfaces/cli/commands/run_result_presenter.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing run result-presentation imports; first-party src should keep importing the canonical domains.run.result_presenter module directly.
 - `src/bioetl/interfaces/cli/commands/quarantine_execution.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for quarantine execution helper imports; first-party src should keep importing the canonical domains.quarantine.execution module directly.
 - `src/bioetl/interfaces/cli/commands/quarantine_rendering.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for quarantine rendering helper imports; first-party src should keep importing the canonical domains.quarantine.rendering module directly.
 - `src/bioetl/interfaces/cli/commands/quarantine_support.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing quarantine helper imports; first-party src should keep importing the canonical domains.quarantine.support module directly.
@@ -79,7 +77,6 @@
 - `src/bioetl/interfaces/cli/commands/quarantine_execution.py`
 - `src/bioetl/interfaces/cli/commands/quarantine_rendering.py`
 - `src/bioetl/interfaces/cli/commands/quarantine_support.py`
-- `src/bioetl/interfaces/cli/commands/run_result_presenter.py`
 
 ### Unexpected Docstring-Tracked Modules
 

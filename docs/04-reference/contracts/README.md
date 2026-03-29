@@ -17,8 +17,8 @@ truth являются доменные модели и порты в:
 - после изменения кодовых контрактов необходимо перегенерировать exported JSON;
 - parity-check между кодом и exported JSON не должен допускать расхождений по `name/type/nullable/description`.
 
-Обновление выполняется скриптом:
+Обновление выполняется через unified script entry point:
 
 ```bash
-python scripts/schema/generate_contracts.py
+python -m scripts.schema generate-contracts
 ```

@@ -107,9 +107,6 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("data_validity_description", pa.string()),
         pa.field("publication_id", pa.string(), nullable=False),
         pa.field("journal", pa.string(), nullable=False),
-        pa.field("publication_doi", pa.string()),  # Cross-reference: DOI
-        pa.field("publication_pmid", pa.string()),  # Cross-reference: PubMed ID
-        pa.field("publication_pmc_id", pa.string()),  # Cross-reference: PMC ID
         pa.field("publication_year", pa.int64(), nullable=False),
         pa.field("ligand_efficiency_bei", pa.float64()),
         pa.field("ligand_efficiency_le", pa.float64()),
@@ -325,7 +322,7 @@ CHEMBL_TISSUE_SCHEMA = pa.schema(
         pa.field("bto_id", pa.string()),  # BRENDA Tissue Ontology
         pa.field("caloha_id", pa.string()),  # CALIPHO ID
         pa.field("efo_id", pa.string()),  # Experimental Factor Ontology
-        pa.field("pref_name", pa.string()),  # Preferred tissue name
+        pa.field("pref_name", pa.string(), nullable=False),  # Preferred tissue name
         pa.field("tissue_id", pa.string(), nullable=False),  # Primary key
         pa.field("uberon_id", pa.string()),  # Uberon Ontology
         # === DQ_FIELDS_SUFFIX ===

@@ -46,6 +46,7 @@ this page when you specifically need evidence-pack navigation.
 | `compatibility-registry-refactor` | yes | yes | yes | yes | yes |
 | `compatibility-registry-snapshot-automation-drift` | yes | no | yes | no | no |
 | `composition-package-topology` | yes | no | yes | yes | yes |
+| `data-observability-audit` | yes | no | no | no | no |
 | `dependency-hotspots` | yes | no | yes | yes | yes |
 | `documentation-internal-surface-governance` | yes | no | yes | yes | yes |
 | `documentation-publication-remediation` | yes | no | yes | yes | yes |
@@ -91,6 +92,9 @@ this page when you specifically need evidence-pack navigation.
 - `documentation-internal-surface-governance` is refreshed to the current
   `published` vs `repo-only` boundary model; do not read its older
   `internal-published` posture for `plans/**` and `reports/**` as current.
+- `data-observability-audit` captures the current evidence-backed assessment
+  of runtime metrics/logs/traces/control-plane visibility and the next-wave
+  improvement plan for short-lived data runs.
 - `project-test-health/semanticscholar-pilot-options` is retained as a historical pre-promotion shard.
 - `project-test-health/semanticscholar-enforced-options` is the active post-promotion shard.
 - `src-bioetl-refactor-facts` is now stored under the canonical

@@ -184,7 +184,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (provider) (increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m]))",
+          "expr": "round(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m])) or vector(0))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
@@ -244,7 +244,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])) / clamp_min(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m]) + increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])), 1)",
+          "expr": "(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])) or vector(0)) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])) or vector(0)), 1)",
           "legendFormat": "failure_rate",
           "refId": "A"
         }
@@ -296,7 +296,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (provider) (increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m]) + increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m]))",
+          "expr": "round((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])) or vector(0)))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }

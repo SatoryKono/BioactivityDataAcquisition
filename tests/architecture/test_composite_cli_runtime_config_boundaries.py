@@ -13,8 +13,10 @@ import pytest
     "relative_path",
     [
         Path("bioetl/interfaces/cli/commands/run_composite.py"),
-        Path("bioetl/interfaces/cli/commands/run_composite_runtime.py"),
-        Path("bioetl/interfaces/cli/commands/run_composite_helpers.py"),
+        Path("bioetl/interfaces/cli/commands/domains/composite/command.py"),
+        Path("bioetl/interfaces/cli/commands/domains/composite/execution.py"),
+        Path("bioetl/interfaces/cli/commands/domains/composite/runtime.py"),
+        Path("bioetl/interfaces/cli/commands/domains/composite/support.py"),
         Path("bioetl/composition/bootstrap/runtime/composite.py"),
         Path("bioetl/composition/bootstrap/runtime/runtime_basics.py"),
         Path("bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py"),

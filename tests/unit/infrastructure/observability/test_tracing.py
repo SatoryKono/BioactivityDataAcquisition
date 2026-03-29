@@ -115,6 +115,41 @@ class TestOpenTelemetryTracerWithOTEL:
         else:
             pytest.skip("OpenTelemetry is not available")
 
+    def test_sets_service_name_resource_attribute(self) -> None:
+        """Tracer provider should publish a stable service.name resource."""
+        from bioetl.infrastructure.observability import tracing
+
+        if tracing.OTEL_AVAILABLE:
+            tracer = tracing.OpenTelemetryTracer("bioetl")
+            try:
+                assert (
+                    tracer._provider.resource.attributes.get("service.name") == "bioetl"
+                )
+            finally:
+                tracer.close()
+        else:
+            pytest.skip("OpenTelemetry is not available")
+
+    def test_prefers_otel_service_name_env(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Explicit OTEL_SERVICE_NAME should override the constructor default."""
+        from bioetl.infrastructure.observability import tracing
+
+        if tracing.OTEL_AVAILABLE:
+            monkeypatch.setenv("OTEL_SERVICE_NAME", "bioetl-local")
+            tracer = tracing.OpenTelemetryTracer("bioetl")
+            try:
+                assert (
+                    tracer._provider.resource.attributes.get("service.name")
+                    == "bioetl-local"
+                )
+            finally:
+                tracer.close()
+        else:
+            pytest.skip("OpenTelemetry is not available")
+
 
 class TestOpenTelemetryTracerClose:
     """Tests for OpenTelemetryTracer close behavior."""

@@ -54,6 +54,7 @@ def _span_context(
                 span.record_exception(exc)
         # Keep closing semantics stable for existing OTel facade tests.
         span.__exit__(None, None, None)
+        tracer.flush()
 
 
 traced_operation = _span_context

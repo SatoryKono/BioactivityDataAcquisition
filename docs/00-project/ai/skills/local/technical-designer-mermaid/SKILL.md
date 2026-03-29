@@ -50,15 +50,15 @@ Otherwise use generic Mermaid mode.
 ## BioETL Project Mode Workflow
 
 1. Choose target file family first.
-- Canonical source diagrams: `docs/02-architecture/mmd-diagrams/**.mmd`.
-- Decomposed views: `docs/02-architecture/mmd-diagrams/views/*.mermaid`.
+- Canonical source diagrams: `docs/02-architecture/diagrams/**.mmd`.
+- Decomposed views: `docs/02-architecture/diagrams/views/*.mermaid`.
 - Do not create new diagram files under `docs/99-archive/**`.
 
 2. Enforce file purpose and placement.
-- New architecture-level canonical work goes to `mmd-diagrams/architecture/`.
-- Class families go to `mmd-diagrams/class-diagrams/`.
-- Foundation canonical updates go to `mmd-diagrams/foundation/`.
-- View decomposition outputs go to `mmd-diagrams/views/` as `-full/-overview/-domain/-infra/-dataflow`.
+- New architecture-level canonical work goes to `diagrams/architecture/`.
+- Class families go to `diagrams/class-diagrams/`.
+- Foundation canonical updates go to `diagrams/foundation/`.
+- View decomposition outputs go to `diagrams/views/` as `-full/-overview/-domain/-infra/-dataflow`.
 
 3. Enforce metadata contract.
 - For `.mmd`, include:
@@ -91,9 +91,9 @@ Otherwise use generic Mermaid mode.
 7. Run project quality gate after edits.
 - `python scripts/diagrams/lint_diagrams.py docs`
 - `bash scripts/diagrams/validate_mermaid_syntax.sh`
-- `bash docs/02-architecture/mmd-diagrams/render.sh` (or targeted render command)
+- `bash docs/02-architecture/diagrams/tooling/render.sh` (or targeted render command)
 - Optional smoke check:
-  - `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
+  - `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
 
 8. Respect repository delivery rules.
 - If source `.mmd/.mermaid` changed, ensure rendered `svg/png` outputs are updated in commit.

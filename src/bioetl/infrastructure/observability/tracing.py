@@ -30,7 +30,7 @@ Implements TracingPort (OTel facade).
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import Any, cast
 from urllib.parse import urlparse
 
 from bioetl.domain.ports.noop import NoOpTracing
@@ -46,6 +46,7 @@ _OtlpExporterClass: (
 
 try:
     from opentelemetry import trace
+    from opentelemetry.sdk.resources import Resource
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
@@ -77,9 +78,12 @@ _LOCAL_OTLP_HOSTS = {
 class _SpanHandle:
     """Compatibility wrapper exposing span methods on OTel context managers."""
 
-    def __init__(self, context_manager: Any) -> None:
+    def __init__(
+        self,
+        context_manager: Any,
+    ) -> None:  # Any: OpenTelemetry context manager protocol is imported dynamically.
         self._context_manager = context_manager
-        self._span: Any | None = None
+        self._span: Any | None = None  # Any: active span object comes from optional OTel runtime types.
 
     def __enter__(self) -> _SpanHandle:
         self._span = self._context_manager.__enter__()
@@ -91,7 +95,10 @@ class _SpanHandle:
         exc_val: BaseException | None,
         exc_tb: object | None,
     ) -> object | None:
-        return self._context_manager.__exit__(exc_type, exc_val, exc_tb)
+        return cast(
+            object | None,
+            self._context_manager.__exit__(exc_type, exc_val, exc_tb),
+        )
 
     def set_attribute(self, key: str, value: object) -> None:
         if self._span is not None:
@@ -105,12 +112,23 @@ class _SpanHandle:
 class _TracerAdapter:
     """Adapter returning span handles compatible with BioETL tracing helpers."""
 
-    def __init__(self, otel_tracer: Any) -> None:
+    def __init__(
+        self,
+        otel_tracer: Any,
+    ) -> None:  # Any: concrete tracer instance depends on optional OTel installation.
         self._otel_tracer = otel_tracer
 
-    def start_as_current_span(self, name: str, *, attributes: dict[str, object]) -> Any:
+    def start_as_current_span(
+        self,
+        name: str,
+        *,
+        attributes: dict[str, object] | None = None,
+    ) -> Any:  # Any: returns an OTel-managed context manager/span wrapper.
         return _SpanHandle(
-            self._otel_tracer.start_as_current_span(name, attributes=attributes)
+            self._otel_tracer.start_as_current_span(
+                name,
+                attributes={} if attributes is None else attributes,
+            )
         )
 
 
@@ -151,12 +169,14 @@ def _get_otlp_insecure_setting() -> str | None:
     return None
 
 
-def _build_telemetry_exporter() -> Any:
+def _build_telemetry_exporter(
+) -> Any:  # Any: exporter class is selected dynamically between console and OTLP implementations.
     """Create the most appropriate tracing exporter for the current runtime."""
     if not OTLP_AVAILABLE or _OtlpExporterClass is None:
         return ConsoleSpanExporter()
 
     exporter_kwargs: dict[str, Any] = {}
+    # Any: OTLP exporter kwargs vary by installed exporter implementation.
     endpoint = _get_otlp_endpoint()
     insecure_override = _get_otlp_insecure_setting()
     if endpoint is not None:
@@ -169,6 +189,14 @@ def _build_telemetry_exporter() -> Any:
         exporter_kwargs["insecure"] = _parse_bool_env(insecure_override)
 
     return _OtlpExporterClass(**exporter_kwargs)
+
+
+def _resolve_service_name(default_service_name: str) -> str:
+    """Return the configured OTel service name for emitted spans."""
+    override = os.getenv("OTEL_SERVICE_NAME", "").strip()
+    if override:
+        return override
+    return default_service_name
 
 
 class OpenTelemetryTracer:
@@ -196,7 +224,10 @@ class OpenTelemetryTracer:
                 "OpenTelemetry is not installed. Install with 'pip install opentelemetry-api opentelemetry-sdk'"
             )
 
-        self._provider = TracerProvider()
+        resolved_service_name = _resolve_service_name(service_name)
+        self._provider = TracerProvider(
+            resource=Resource.create({"service.name": resolved_service_name})
+        )
 
         # Prefer OTLP if available (production), fall back to Console (dev/debug)
         exporter = _build_telemetry_exporter()
@@ -204,7 +235,7 @@ class OpenTelemetryTracer:
         processor = BatchSpanProcessor(exporter)
         self._provider.add_span_processor(processor)
         trace.set_tracer_provider(self._provider)
-        self._tracer = trace.get_tracer(service_name)
+        self._tracer = trace.get_tracer(resolved_service_name)
         self._closed = False
 
     def get_tracer(self, name: str) -> Any:  # Any: returns OTel Tracer wh...
@@ -219,13 +250,22 @@ class OpenTelemetryTracer:
         """
         return _TracerAdapter(trace.get_tracer(name))
 
+    def flush(self) -> None:
+        """Force-flush pending spans without shutting down the provider."""
+        if self._closed:
+            return
+        try:
+            self._provider.force_flush(timeout_millis=5000)
+        except (RuntimeError, OSError, ValueError, TypeError, AttributeError):  # nosec B110
+            # Best effort - tracing flush must never fail the pipeline.
+            pass
+
     def close(self) -> None:
         """Flush pending spans and shutdown provider. Idempotent."""
         if self._closed:
             return
         try:
-            # Force flush with 5 second timeout
-            self._provider.force_flush(timeout_millis=5000)
+            self.flush()
             self._provider.shutdown()
         except (RuntimeError, OSError, ValueError, TypeError, AttributeError):  # nosec B110
             # Best effort - don't fail the pipeline on tracing cleanup

@@ -3,97 +3,111 @@
 **Имя пайплайна:** `chembl_target`
 **Провайдер:** `chembl`
 **Сущность:** `target`
-**Версия схемы:** 1.2.0
 
 ---
 
-## 1. Описание
+## 1. Что делает пайплайн
 
-Пайплайн извлекает данные о биологических мишенях из API ChEMBL. Мишени включают белки, нуклеиновые кислоты и другие биомолекулы, на которые направлено действие лекарств.
+`chembl_target` нормализует биологические мишени ChEMBL в Silver-модель
+`Target`, включая агрегирование target components и derived organism metadata.
 
----
+Source of truth:
 
-## 2. Ключевые поля
-
-### Идентификаторы
-
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `target_id` | `str` | Уникальный ChEMBL ID мишени |
-| `pref_name` | `str` | Предпочтительное название |
-| `target_type` | `str` | Тип мишени (SINGLE PROTEIN, PROTEIN COMPLEX, etc.) |
-
-### Таксономия
-
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `organism` | `str` | Название организма |
-| `taxonomy_id` | `int` | NCBI Taxonomy ID |
-| `species_group_flag` | `bool` | Флаг группы видов |
-
-### Компоненты мишени
-
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `component_accessions` | `list[str]` | UniProt accessions |
-| `component_ids` | `list[int]` | ID компонентов |
-| `component_types` | `list[str]` | Типы компонентов |
-| `component_descriptions` | `list[str]` | Описания компонентов |
-| `component_relationships` | `list[str]` | Тип связи компонента с мишенью |
-
-### Связи
-
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `cross_references` | `list[str]` | Кросс-ссылки на внешние БД |
-| `target_component_synonyms` | `list[str]` | Синонимы названия |
+- `configs/entities/chembl/target.yaml`
+- `src/bioetl/application/pipelines/chembl/target_transformer.py`
+- `src/bioetl/domain/schemas/chembl/target.py`
+- `src/bioetl/infrastructure/schemas/silver_chembl_core.py`
 
 ---
 
-## 3. Трансформация
+## 2. Конфигурация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/target_transformer.py`
+Текущий pipeline config задаёт:
 
-### Агрегация компонентов
+- `quality.entity_field_validations` для `target_id`, `target_type`, `organism`, `tax_id`
+- `quality.entity_cross_field_validations`: `target_id` + `pref_name`
+- `filters.extraction_params`:
+  - `target_type: SINGLE PROTEIN`
+  - `organism__isnull: false`
+  - `tax_id__isnull: false`
+- `filters.silver_filters.required_fields`:
+  - `target_id`
+  - `pref_name`
+  - `organism`
+- `filters.gold_filters`:
+  - `target_type = SINGLE PROTEIN`
+  - list-based checks for `component_accessions`, `component_ids`, `component_types`
 
-Компоненты мишени (`target_components`) агрегируются в списки:
-- `component_accessions`, `component_ids`, `component_types`
-- `component_descriptions`, `component_relationships`
+---
 
-### Entity ID
+## 3. Silver surface
 
-```python
-entity_id = f"chembl:{target_id}"
-```
+### 3.1. Обязательные поля
+
+Current Silver contract требует:
+
+| Поле | Где закреплено |
+|------|----------------|
+| `target_id` | YAML required + Arrow + Pandera |
+| `pref_name` | YAML required + Arrow + Pandera |
+| `organism` | YAML required + Arrow + Pandera |
+
+`target_type` участвует в filters/partition semantics, но остаётся nullable в
+Arrow/Pandera и не считается обязательным полем записи на уровне текущего
+Silver schema.
+
+### 3.2. Компоненты мишени
+
+Трансформер читает `target_components`, агрегирует базовые списки и затем
+сериализует их в canonical JSON string surface:
+
+- `component_accessions`
+- `component_ids`
+- `component_types`
+- `component_descriptions`
+- `component_relationships`
+
+Это не `list[...]` поля в Silver-таблице. И Arrow schema, и Pandera schema
+ожидают здесь строки.
+
+### 3.3. Дополнительные derived-поля
+
+`TargetTransformer` также формирует:
+
+- `primary_component_id` из первого элемента `component_ids`
+- `taxonomy_id` как нормализованную форму входного `tax_id`
+- `organism_class` через `OrganismClassificationService`
+- `description` из `target_description` или fallback `description`
+- `downgraded` как bool-нормализацию входного значения
+- `target_components`, `target_component_synonyms`, `cross_references`, `pipeline_stages` как JSON-строки
+
+Документация не фиксирует literal-формулу `entity_id`; identity/content hash
+вычисляются базовым ChEMBL transformer/runtime слоем.
 
 ---
 
 ## 4. Валидация
 
-### DQ-правила
+### 4.1. Arrow schema
 
-1. **`target_id`** — обязательное
-2. **`target_type`** — должен быть валидным типом
+Silver Arrow schema определяется в
+`src/bioetl/infrastructure/schemas/silver_chembl_core.py` как
+`CHEMBL_TARGET_SCHEMA`.
 
-### Пороги ошибок
+### 4.2. Pandera schema
 
-| Порог | Условие | Действие |
-|-------|---------|----------|
-| Soft | > 5% ошибок | WARNING |
-| Hard | > 20% ошибок | FAIL BATCH |
+Silver Pandera schema определяется в
+`src/bioetl/domain/schemas/chembl/target.py` как `TargetSchema`.
+
+Обе схемы отражают строковый contract для component/xref/synonym payloads.
 
 ---
 
-## 5. Использование CLI
+## 5. CLI
 
 ```bash
-# Инкрементальная загрузка
 bioetl run --pipeline chembl_target
-
-# С ограничением
 bioetl run --pipeline chembl_target --limit 500
-
-# Полная перезагрузка
 bioetl run --pipeline chembl_target --run-type rebuild
 ```
 
@@ -106,7 +120,5 @@ bioetl run --pipeline chembl_target --run-type rebuild
 | Конфигурация | `configs/entities/chembl/target.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/target_transformer.py` |
 | Сущность | `src/bioetl/domain/entities/chembl_structures_foundation.py` |
-
----
-
-*Последнее обновление: 2026-03-03*
+| Arrow schema | `src/bioetl/infrastructure/schemas/silver_chembl_core.py` |
+| Pandera schema | `src/bioetl/domain/schemas/chembl/target.py` |

@@ -97,6 +97,13 @@ uv run python -m mypy --strict src/bioetl/         # Type checking
 uv run python -m bioetl run --pipeline chembl_molecule --limit 100  # Run pipeline
 ```
 
+## Dashboard Extension Guide (LLM)
+
+If the task touches `grafana/dashboards/*.json`, dashboard navigation, or
+Loki/Tempo drilldown behavior, read:
+
+- `docs/03-guides/dashboards/dashboard-extension-llm.md`
+
  rj### Unified script entry points and developer workflow (project-specific)
 
 - All repository helper scripts are available as python modules under `scripts/` and can be run as `python -m scripts.<group> <command>` (examples below). Prefer `uv run python -m scripts.<group> <command>` when `uv` is available.

@@ -25,10 +25,10 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "BioETL Data Quality",
+      "title": "2. Runtime",
       "tooltip": "",
       "type": "link",
-      "url": "/d/bioetl-dq-v2"
+      "url": "/d/bioetl-runtime"
     },
     {
       "asDropdown": false,
@@ -37,10 +37,22 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "BioETL Provider Health",
+      "title": "3. Provider Health",
       "tooltip": "",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "4. Data Quality",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-dq-v2"
     },
     {
       "asDropdown": false,
@@ -457,7 +469,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
+        "w": 4,
         "x": 0,
         "y": 22
       },
@@ -478,7 +490,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[24h]))",
+          "expr": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[24h])) or vector(0))",
           "legendFormat": "Manifest Write Failures",
           "refId": "A"
         }
@@ -518,8 +530,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 6,
+        "w": 4,
+        "x": 4,
         "y": 22
       },
       "id": 112,
@@ -539,7 +551,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[24h]))",
+          "expr": "round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[24h])) or vector(0))",
           "legendFormat": "Ledger Append Failures",
           "refId": "A"
         }
@@ -579,8 +591,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 12,
+        "w": 4,
+        "x": 8,
         "y": 22
       },
       "id": 113,
@@ -600,7 +612,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[24h]))",
+          "expr": "round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[24h])) or vector(0))",
           "legendFormat": "Incompatible Resume Decisions",
           "refId": "A"
         }
@@ -640,8 +652,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 18,
+        "w": 4,
+        "x": 12,
         "y": 22
       },
       "id": 114,
@@ -661,12 +673,134 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[24h]))",
+          "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[24h])) or vector(0))",
           "legendFormat": "Missing Lineage References",
           "refId": "A"
         }
       ],
       "title": "Lineage Refs Missing (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 16,
+        "y": 22
+      },
+      "id": 116,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[24h])) or vector(0))",
+          "legendFormat": "Failed Lookups",
+          "refId": "A"
+        }
+      ],
+      "title": "Control-plane Lookup Failures (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 22
+      },
+      "id": 117,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[1h]))) or vector(0)",
+          "legendFormat": "Lookup p95",
+          "refId": "A"
+        }
+      ],
+      "title": "Control-plane Lookup p95 (1h)",
       "type": "stat"
     },
     {

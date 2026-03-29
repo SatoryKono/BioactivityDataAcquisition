@@ -67,6 +67,7 @@ def _require_execution_metrics_runner(
 def push_metrics_to_gateway(
     run_label: str = "bioetl",
     pipeline_name: str | None = None,
+    run_type: str | None = None,
 ) -> bool:
     """Push current metrics to Prometheus Pushgateway.
 
@@ -77,6 +78,7 @@ def push_metrics_to_gateway(
     Args:
         run_label: Run label for pushed metrics.
         pipeline_name: Pipeline name for grouping (e.g. "chembl_molecule").
+        run_type: Optional run type for grouping (e.g. "incremental").
 
     Returns:
         True if push succeeded, False otherwise.
@@ -87,7 +89,11 @@ def push_metrics_to_gateway(
 
     settings = get_settings()
     gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
-    grouping_key = {"pipeline": pipeline_name} if pipeline_name else {}
+    grouping_key: dict[str, str] = {}
+    if pipeline_name:
+        grouping_key["pipeline"] = pipeline_name
+    if run_type:
+        grouping_key["run_type"] = run_type
     return _push(
         gateway=gateway,
         run_label=run_label,
@@ -295,7 +301,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     completed_at = datetime.now(tz=UTC)
 
     metrics = create_metrics_extractor().extract_metrics(runner)
-    return RunResult(
+    result = RunResult(
         status=status,
         pipeline_name=name,
         run_id=run_id,
@@ -310,3 +316,10 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         error_message=error_message,
         error_type=error_type,
     )
+    if settings.observability.metrics_enabled:
+        push_metrics_to_gateway(
+            run_label="bioetl",
+            pipeline_name=name,
+            run_type=run_type,
+        )
+    return result

@@ -145,6 +145,38 @@ class TestValidateRecords:
         ]
         _validate_records(host, records, "test_table", schema)
 
+    def test_null_source_batch_id_raises(self) -> None:
+        """Should raise when _source_batch_id is present but null."""
+        host = MagicMock()
+        schema = pa.schema([("id", pa.int64())])
+        records = [
+            {
+                "id": 1,
+                "_run_id": "r1",
+                "_run_type": "incremental",
+                "_source_batch_id": None,
+                "_ingestion_ts": "2025-01-01T00:00:00Z",
+            }
+        ]
+        with pytest.raises(ValueError, match="_source_batch_id"):
+            _validate_records(host, records, "test_table", schema)
+
+    def test_blank_source_batch_id_raises(self) -> None:
+        """Should raise when _source_batch_id is blank."""
+        host = MagicMock()
+        schema = pa.schema([("id", pa.int64())])
+        records = [
+            {
+                "id": 1,
+                "_run_id": "r1",
+                "_run_type": "incremental",
+                "_source_batch_id": "   ",
+                "_ingestion_ts": "2025-01-01T00:00:00Z",
+            }
+        ]
+        with pytest.raises(ValueError, match="_source_batch_id"):
+            _validate_records(host, records, "test_table", schema)
+
 
 @pytest.mark.unit
 class TestValidateSilverPandera:

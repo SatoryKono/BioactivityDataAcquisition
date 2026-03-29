@@ -230,6 +230,8 @@ class TestNoHardcodedSecrets:
             "USER",
             "PYTHONPATH",
             "VIRTUAL_ENV",
+            "PYTEST_",
+            "OTEL_",
             "DEBUG",
             "LOG_LEVEL",
             "CI",

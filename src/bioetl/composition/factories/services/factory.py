@@ -236,9 +236,15 @@ class BaseServicesFactory:
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
+        metrics: MetricsPort | None = None,
     ) -> JsonDict:  # Any: heterogeneous DQ service instances
         """Create DQ analyzers/writer/services when DQ reporting is enabled."""
-        return _create_dq_services_impl(settings, pipeline_config, logger)
+        return _create_dq_services_impl(
+            settings,
+            pipeline_config,
+            logger,
+            metrics,
+        )
 
     @staticmethod
     def _is_dq_report_enabled(config: PipelineYamlConfig) -> bool:

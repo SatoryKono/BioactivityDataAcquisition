@@ -105,5 +105,7 @@ def _replace_checkpoint_state(
 ) -> CompositeCheckpointState:
     # `dataclasses.replace` accepts field-aligned keyword overrides, but mypy
     # cannot infer them from a generic kwargs dict in this helper.
-    typed_changes = dict[str, Any](changes)
+    typed_changes = dict[str, Any](
+        changes
+    )  # Any: dataclasses.replace consumes field-specific kwargs assembled dynamically here.
     return replace(checkpoint_state, updated_at=datetime.now(tz=UTC), **typed_changes)

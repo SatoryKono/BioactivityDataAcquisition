@@ -74,6 +74,7 @@ Operational rule:
 1. Проверь `guides/CLAUDE.md` — справочник для Claude Code.
 1. Изучи `.claude/PROJECT_CONTEXT.md` для быстрой справки.
 1. Ознакомься с `runtime/agent-memory.md` — краткая выжимка по проекту.
+1. Если задача затрагивает `grafana/dashboards/*.json`, прочитай `docs/03-guides/dashboards/dashboard-extension-llm.md`.
 1. Изучи существующий код в затрагиваемых модулях.
 
 ### 2.1. Настройка Окружения Разработки

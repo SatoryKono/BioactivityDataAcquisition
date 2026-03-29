@@ -38,6 +38,7 @@ make lint && make test
 1. `docs/00-project/RULES.md` — Конституция проекта (RFC 2119 keywords)
 1. `.claude/PROJECT_CONTEXT.md` — Компактный контекст
 1. `AGENT.md` — Детальные инструкции для агента
+1. `docs/03-guides/dashboards/dashboard-extension-llm.md` — если задача затрагивает `grafana/dashboards/*.json`, links или drilldown в Grafana
 1. `docs/99-archive/refactoring-plan.md` — Архив плана рефакторинга (исторический справочник, optional)
 
 > ⚠️ **ОБЯЗАТЕЛЬНО**: Перед предложением задач рефакторинга опирайся на код,

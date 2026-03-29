@@ -1,7 +1,7 @@
 # BioETL Мониторинг: Prometheus + Grafana
 
 **Версия документа:** 2.0.0
-**Дата обновления:** 2026-03-28
+**Дата обновления:** 2026-03-29
 **Статус:** Production Ready
 **Совместимость:** BioETL v5.21+, Grafana 9+, Prometheus 2.40+
 
@@ -17,9 +17,9 @@
 6. [Переменные фильтрации (Template Variables)](#6-переменные-фильтрации-template-variables)
 8. [Архив: Overview/Data Quality/Provider Health v1](#8-архив-overviewdata-qualityprovider-health-v1)
 9. [Дашборд: 1. Overview](#9-дашборд-1-overview)
-11. [Дашборд: 4. Data Quality](#11-дашборд-4-data-quality)
-13. [Дашборд: 3. Provider Health](#13-дашборд-3-provider-health)
 13.1. [Дашборд: 2. Runtime](#131-дашборд-2-runtime)
+13. [Дашборд: 3. Provider Health](#13-дашборд-3-provider-health)
+11. [Дашборд: 4. Data Quality](#11-дашборд-4-data-quality)
 14. [Справочник PromQL-паттернов](#14-справочник-promql-паттернов)
 15. [Устранение неполадок](#15-устранение-неполадок)
 16. [Архитектурные решения и обоснования](#16-архитектурные-решения-и-обоснования)
@@ -115,9 +115,9 @@
 │                                                                   │
 │  Дашборды (shipped):                                             │
 │  - 1. Overview (bioetl-overview-v2)                              │
-│  - 4. Data Quality (bioetl-dq-v2)                                │
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
+│  - 4. Data Quality (bioetl-dq-v2)                                │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -690,9 +690,10 @@ shipped pack.
 
 **Используемые метрики:** `records_processed_total`, `records_processed_created`.
 
-**Drilldown:** dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)`
-используют текущее временное окно. Panel `Processing Pipeline` дублирует этот
-handoff через data links для быстрого перехода в Grafana Explore.
+**Drilldown:** dashboard links `2. Runtime`, `3. Provider Health`,
+`4. Data Quality`, `Explore Logs (Loki)` и `Explore Traces (Tempo)` используют
+текущее временное окно. Panel `Processing Pipeline` дублирует Explore handoff
+через data links для быстрого перехода в Grafana Explore.
 
 ---
 
@@ -718,6 +719,11 @@ handoff через data links для быстрого перехода в Grafan
 
 **Используемые метрики:** `records_processed_total`, `records_processed_created`.
 
+**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и
+`Explore Traces (Tempo)` используют текущее временное окно. Panel `Data Flow:
+Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
+incidents и freshness investigation.
+
 ---
 
 ## 13. Дашборд: 3. Provider Health
@@ -742,8 +748,9 @@ handoff через data links для быстрого перехода в Grafan
 
 **Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
 
-**Drilldown:** dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)`
-плюс data links у latency-панели открывают Grafana Explore в том же time range.
+**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и
+`Explore Traces (Tempo)` плюс data links у latency-панели открывают Grafana
+Explore в том же time range.
 Loki drilldown стартует с безопасного `{job="bioetl"}` entrypoint без encoded
 dashboard-variable interpolation. Дополнительное сужение по `provider` или
 `pipeline` оператор делает уже в Explore, а trace correlation идёт через
@@ -757,7 +764,7 @@ dashboard-variable interpolation. Дополнительное сужение п
 **UID:** `bioetl-runtime`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Отдельный runtime/ops surface для triage log hygiene и alert-condition сигналов. Не заменяет `Overview v2`, а собирает warnings, unstructured logs и Prometheus-backed alert conditions в одном месте.
+**Назначение:** Отдельный runtime/ops surface для triage log hygiene и alert-condition сигналов. Не заменяет `1. Overview`, а собирает warnings, unstructured logs и Prometheus-backed alert conditions в одном месте.
 
 ### Панели
 
@@ -774,7 +781,10 @@ dashboard-variable interpolation. Дополнительное сужение п
 
 **Фильтрация:** `$pipeline`, `$run_type`.
 
-**Drilldown:** dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)` плюс data links у `Log Hygiene Trend (5m)` ведут в Explore с тем же time range. Как и в остальных shipped dashboards, Loki handoff стартует с безопасного `{job="bioetl"}` entrypoint.
+**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и
+`Explore Traces (Tempo)` плюс data links у `Log Hygiene Trend (5m)` ведут в
+Explore с тем же time range. Как и в остальных shipped dashboards, Loki handoff
+стартует с безопасного `{job="bioetl"}` entrypoint.
 
 ---
 
@@ -1202,7 +1212,8 @@ sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type",
 sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="bronze"})
 ```
 
-Этот показатель используется в gauge-панелях дашбордов Simple, Overview, Data Quality с пороговыми значениями:
+Этот показатель используется в gauge-панелях `1. Overview` и `4. Data Quality`
+с пороговыми значениями:
 
 | Значение | Цвет | Интерпретация |
 |---|---|---|
@@ -1255,7 +1266,7 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
 
 ### 19.2 Provider Health Dashboard: как читать
 
-Дашборд Provider Health v2 предоставляет четыре gauge-панели для отдельных провайдеров (UniProt, PubMed, PubChem, ChemBL). Каждая панель показывает P95-латентность API-запросов в секундах за последние 5 минут.
+Дашборд `3. Provider Health` предоставляет четыре gauge-панели для отдельных провайдеров (UniProt, PubMed, PubChem, ChemBL). Каждая панель показывает P95-латентность API-запросов в секундах за последние 5 минут.
 
 Пороговые значения gauge:
 - **< 0.5 сек (зелёный):** Нормальная латентность. API отвечает быстро.
@@ -1400,7 +1411,7 @@ Grafana автоматически обнаружит новый файл в т�
 
 | Сценарий | Интервал | Обоснование |
 |---|---|---|
-| Live мониторинг (Simple дашборд) | `[1m]` | Максимальная отзывчивость |
+| Live мониторинг (короткие runtime/overview тренды) | `[1m]` | Максимальная отзывчивость |
 | Стандартный мониторинг | `[5m]` | Баланс отзывчивости и сглаживания |
 | Trend-анализ | `[15m]` или `[30m]` | Сглаженные тренды без шума |
 | Долгосрочный анализ | `[1h]` | Дневные и недельные паттерны |
@@ -1419,9 +1430,12 @@ curl -s http://localhost:8000/metrics | grep "^bioetl_" | awk '{print $1}' | sor
 
 Или в Prometheus UI: введите `{__name__=~"bioetl_.*"}` и нажмите Execute.
 
-### Почему дашборд Simple обновляется каждые 5 секунд, а остальные — каждые 30?
+### Почему shipped dashboards обновляются каждые 30 секунд?
 
-Simple предназначен для live-мониторинга текущего запуска. Частое обновление (5 сек) позволяет наблюдать за процессом в реальном времени. Остальные дашборды используют 30-секундный refresh для снижения нагрузки на Prometheus, так как их запросы более тяжёлые (histogram_quantile, rate, by clauses).
+Текущий shipped pack использует единый `refresh: 30s` для всех операторских
+дашбордов. Это снижает нагрузку на Prometheus и сохраняет предсказуемое
+поведение для тяжёлых запросов (`histogram_quantile`, `rate`, агрегаты по
+labels, Loki log-hygiene queries).
 
 ### Почему v1 и v2 дашборды сосуществуют?
 
@@ -1626,11 +1640,11 @@ open http://localhost:9090/alerts
 |---|---|---|---|---|---|---|---|
 | BioETL Overview | `bioetl-overview` | 1 | 8 | 30s | 6h | `records_processed_total`, `errors_total`, `pipeline_duration_seconds`, `batch_size_records`, `data_freshness_seconds`, `filter_ids_*` | Полный обзор пайплайнов |
 | 1. Overview | `bioetl-overview-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | Обзор конкретного запуска |
-| BioETL Data Quality | `bioetl-dq` | 1 | 4 | 30s | 6h | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records` | DQ мониторинг с перцентилями |
-| 4. Data Quality | `bioetl-dq-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | DQ для конкретного запуска |
 | 2. Runtime | `bioetl-runtime` | 1 | 9 | 30s | 12h | `control_plane_*`, `dq_*`, `health_check_*`, `data_source_retry_exhausted_total` + Loki log hygiene queries | Runtime triage: warnings, unstructured logs, alert conditions |
 | BioETL Provider Health | `bioetl-provider-health` | 1 | 6 | 30s | 6h | `records_processed_total`, `batch_size_records` | Пропускная способность по стадиям |
 | 3. Provider Health | `bioetl-provider-health-v2` | 2 | 5 | 30s | 12h | `health_check_latency_seconds`, `health_check_success_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам |
+| BioETL Data Quality | `bioetl-dq` | 1 | 4 | 30s | 6h | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records` | DQ мониторинг с перцентилями |
+| 4. Data Quality | `bioetl-dq-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | DQ для конкретного запуска |
 
 ---
 
@@ -1735,8 +1749,8 @@ Application code → increment_counter("records_processed_total", ...) →
 Задержка от момента инструментации до отображения на дашборде складывается из:
 - Интервал scrape: до 15 секунд
 - Обработка Prometheus: <1 секунда
-- Refresh дашборда: до 5 секунд (Simple) или до 30 секунд (остальные)
-- Итого: максимальная задержка ~50 секунд для обычных дашбордов, ~20 секунд для Simple
+- Refresh дашборда: до 30 секунд
+- Итого: максимальная задержка ~50 секунд для shipped dashboards
 
 ---
 
@@ -1892,4 +1906,4 @@ print(f\"Grafana: {data['database']}\" )
 
 **Конец документа.**
 
-*Версия 2.0.0. Обновлена 2026-03-28. Синхронизирована с RULES.md v5.24 и текущим состоянием shipped dashboards.*
+*Версия 2.0.0. Обновлена 2026-03-29. Синхронизирована с RULES.md v5.24 и текущим состоянием shipped dashboards.*

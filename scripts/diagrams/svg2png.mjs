@@ -8,8 +8,8 @@
  *
  * Usage:
  *   node scripts/diagrams/svg2png.mjs [--scale N] [--jobs N] <svg-dir|svg-file> ...
- *   node scripts/diagrams/svg2png.mjs docs/02-architecture/mmd-diagrams
- *   node scripts/diagrams/svg2png.mjs --scale 3 docs/02-architecture/mmd-diagrams/architecture/svg/01-high-level-hexagonal.svg
+ *   node scripts/diagrams/svg2png.mjs docs/02-architecture/diagrams
+ *   node scripts/diagrams/svg2png.mjs --scale 3 docs/02-architecture/diagrams/architecture/svg/01-high-level-hexagonal.svg
  */
 
 import { createRequire } from "module";

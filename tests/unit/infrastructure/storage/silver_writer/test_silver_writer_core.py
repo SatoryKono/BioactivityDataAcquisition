@@ -425,6 +425,8 @@ class TestSilverWriterValidation:
             validated_mode=SilverWriteMode.MERGE,
             table_path="/tmp/silver/test/table",
             arrow_data=pa.Table.from_pylist(payload_records),
+            schema_mode=None,
+            merge_schema=False,
         )
         prepare_payload = AsyncMock(return_value=payload)
         dispatch_write = AsyncMock()
@@ -522,6 +524,8 @@ class TestSilverWriterValidation:
             validated_mode=SilverWriteMode.MERGE,
             table_path="/tmp/silver/test/table",
             arrow_data=pa.Table.from_pylist(payload_records),
+            schema_mode=None,
+            merge_schema=False,
         )
         writer._prepare_silver_write_payload = AsyncMock(  # type: ignore[method-assign]
             return_value=payload

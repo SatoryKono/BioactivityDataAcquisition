@@ -81,6 +81,14 @@ _RUN_FAILURE_EXCEPTIONS = (
     ValueError,
 )
 
+_METRICS_CLOSE_EXCEPTIONS = (
+    AttributeError,
+    OSError,
+    RuntimeError,
+    TypeError,
+    ValueError,
+)
+
 
 @dataclass(frozen=True, slots=True)
 class PipelineRunnerDependencies:
@@ -282,60 +290,46 @@ class PipelineRunner:
         - Flushes tracer spans before shutdown
         - Handles tracer close errors without failing the pipeline
         """
-        self._log_start()
-        self._record_run_started()
-        shutdown_recorded = False
-
+        emit_pipeline_start(self)
+        record_run_started(self)
         try:
-            with self._pipeline_span(), self._observer:
-                try:
-                    async with self._services, self._lock_manager:
-                        await self._run_managed_pipeline()
-                except PipelineShutdownError:
-                    self._record_run_shutdown()
-                    shutdown_recorded = True
-                    raise
+            shutdown_recorded = await self._run_pipeline_lifecycle()
         except PipelineShutdownError:
-            if not shutdown_recorded:
-                self._record_run_shutdown()
+            record_run_shutdown(self)
             raise
         except _RUN_FAILURE_EXCEPTIONS as exc:
-            self._record_run_failed(exc)
+            record_run_failed(self, exc)
             raise
         else:
             if not shutdown_recorded:
-                self._log_completion()
-                self._record_run_finished()
+                emit_pipeline_completion(self)
+                record_run_finished(self)
         finally:
+            await self._cleanup_after_run()
+
+    async def _run_pipeline_lifecycle(self) -> bool:
+        """Execute the observed pipeline lifecycle and report shutdown state."""
+        shutdown_recorded = False
+        with self._pipeline_span(), self._observer:
+            try:
+                async with self._services, self._lock_manager:
+                    await self._run_managed_pipeline()
+            except PipelineShutdownError:
+                record_run_shutdown(self)
+                shutdown_recorded = True
+                raise
+        return shutdown_recorded
+
+    async def _cleanup_after_run(self) -> None:
+        """Run the always-on cleanup sequence for one pipeline run."""
+        try:
             await self._postrun_service.cleanup(self._tracer)
-
-    def _log_start(self) -> None:
-        """Emit the pipeline start event."""
-        emit_pipeline_start(self)
-
-    def _log_completion(self) -> None:
-        """Emit the pipeline completion event."""
-        emit_pipeline_completion(self)
-
-    def _record_run_started(self) -> None:
-        """Append run_started ledger entry when control-plane ledger is attached."""
-        record_run_started(self)
+        finally:
+            self._close_metrics()
 
     def _record_stage_completed(self, stage: str) -> None:
         """Append stage_completed ledger entry."""
         record_stage_completed(self, stage)
-
-    def _record_run_finished(self) -> None:
-        """Append successful completion ledger entry."""
-        record_run_finished(self)
-
-    def _record_run_shutdown(self) -> None:
-        """Append graceful shutdown ledger entry."""
-        record_run_shutdown(self)
-
-    def _record_run_failed(self, exc: Exception) -> None:
-        """Append failed completion ledger entry."""
-        record_run_failed(self, exc)
 
     async def _run_managed_pipeline(self) -> None:
         """Run the validated pipeline lifecycle within managed contexts."""
@@ -379,3 +373,16 @@ class PipelineRunner:
     def _check_data_quality(self) -> None:
         """Check data quality metrics and report anomalies."""
         self._postrun_service.run_dq_checks(self._executor)
+
+    def _close_metrics(self) -> None:
+        """Close metrics after outer spans and observer teardown have completed."""
+        try:
+            self._services.metrics.close()
+        except _METRICS_CLOSE_EXCEPTIONS as error:
+            self._logger.warning(
+                "Failed to close metrics",
+                stage="cleanup",
+                error=str(error),
+                error_type=type(error).__name__,
+                reason="metrics_close_failed",
+            )

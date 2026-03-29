@@ -87,6 +87,11 @@ class TestNoOpTracing:
         tracing.close()
         tracing.close()  # Should not raise
 
+    def test_flush_no_error(self) -> None:
+        """Test flush is a no-op."""
+        tracing = NoOpTracing()
+        tracing.flush()
+
 
 @pytest.mark.unit
 class TestNoOpMetrics:
