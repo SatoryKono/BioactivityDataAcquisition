@@ -5,12 +5,13 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-026: Composite Pipeline Pattern
 
 **Date:** 2026-01-15
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 
 ## Context
@@ -423,7 +424,6 @@ class DependencyConfig:
         """Check if dependency uses keys from seed."""
         return self.key-source is None or self.key-source == "seed"
 
-
 @dataclass(frozen=True, slots=True)
 class EnricherConfig:
     """Configuration for a single enrichment pipeline."""
@@ -434,7 +434,6 @@ class EnricherConfig:
     timeout-seconds: int = 600       # Per-enricher timeout
     fallback-strategy: Literal["skip", "use-cached", "fail"] = "skip"
 
-
 @dataclass(frozen=True, slots=True)
 class MergeConfig:
     """Configuration for merge step."""
@@ -443,7 +442,6 @@ class MergeConfig:
     output-silver-path: str
     output-gold-path: str
     field-mappings: dict[str, str] | None = None  # Rename fields during merge
-
 
 @dataclass(frozen=True, slots=True)
 class CompositeConfig:
@@ -478,7 +476,6 @@ class EnrichmentResult:
     def is-success(self) -> bool:
         return self.status in (EnrichmentStatus.SUCCESS, EnrichmentStatus.PARTIAL)
 
-
 class EnrichmentStatus(str, Enum):
     SUCCESS = "success"       # All records enriched
     PARTIAL = "partial"       # Some records enriched (below hard threshold)
@@ -495,7 +492,6 @@ class MergeStrategy(str, Enum):
     LEFT-OUTER = "left-outer"  # All seed records, nullable enrichments
     INNER = "inner"            # Only records found in ALL required enrichers
     UNION = "union"            # All records from any source (with dedup)
-
 
 class ConflictResolution(str, Enum):
     """Strategy for resolving field conflicts between sources."""
@@ -1110,7 +1106,6 @@ class TestMergeService:
         """Lineage metadata should track all sources."""
         ...
 
-
 # tests/unit/application/composite/test_coordinator.py
 
 class TestEnrichmentCoordinator:
@@ -1184,7 +1179,6 @@ class TestCompositePublicationPipeline:
         # Seed should be skipped
         assert result.seed-result.status == "resumed"
 
-
 # tests/integration/composite/test_enricher_failures.py
 
 @pytest.mark.integration
@@ -1215,11 +1209,9 @@ def test-composite-domain-has-no-infrastructure-imports():
         assert "from bioetl.infrastructure" not in content
         assert "import bioetl.infrastructure" not in content
 
-
 def test-composite-application-has-no-infrastructure-imports():
     """application/composite should not import from infrastructure."""
     ...
-
 
 def test-composite-port-contracts():
     """Composite ports should follow standard conventions."""
@@ -1301,7 +1293,7 @@ def run_composite_command(composite: str, enrich_only: str | None, required_only
 | Inconsistent data on partial failures | Checkpoint + resume mechanism |
 | Configuration errors | Schema validation via Pydantic |
 
-## Migration Path
+## Rollout
 
 ### Phase 1: Foundation (v1.0)
 - [ ] Domain models (CompositeConfig, EnrichmentResult, MergeStrategy)
@@ -1355,3 +1347,32 @@ def run_composite_command(composite: str, enrich_only: str | None, required_only
 - ADR-020: BasePipeline Decomposition
 - RULES.md v5.24 §2.4 (Backfill/Replay)
 - RULES.md v5.24 §3.3 (Concurrency & Locks)
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-026-composite-pipeline-pattern.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

@@ -5,14 +5,15 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-025: Pipeline Configuration Unification
 
 **Date:** 2026-01-19
-**Partially Superseded by:** [ADR-039](ADR-039-unified-entity-config-format.md) (2026-02-24) — the former pipeline/source config directories were replaced by `configs/entities/` and `configs/providers/`.
+**Status:** Accepted (partially superseded by ADR-039)
 **Decision makers:** @BioETL-Team
+**Superseded by:** [ADR-039](ADR-039-unified-entity-config-format.md) (partial supersede: canonical config layout and active path model)
 
 ## Context
 
@@ -297,3 +298,28 @@ pipeline-name: chembl_activity
 | 2026-02-17 | Claude Code | Fixed: Removed `_schema.json` reference (validation via Pydantic schemas) |
 | 2026-02-17 | Claude Code | Fixed: Composite directory listing (activity, assay, molecule, publication, target) |
 | 2026-02-24 | Claude Code | Superseded (partially): Entity configs consolidated into unified format (see ADR-039). Config path `configs/entities/{p}/{e}.yaml` replaced by `configs/entities/{p}/{e}.yaml`. Legacy directories removed (RF-CFG-035). |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

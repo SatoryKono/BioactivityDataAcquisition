@@ -5,19 +5,20 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-017: Observability Architecture
 
 **Date:** 2025-12-26
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 
 ## Context
 
 BioETL pipelines require comprehensive observability for debugging, performance monitoring, and operational alerting. The observability stack must follow the Ports & Adapters architecture to maintain testability and avoid infrastructure dependencies in domain/application layers.
 
-## The Decision
+## Decision
 
 We have implemented a **port-based observability architecture** with three formal Protocol definitions (`LoggerPort`, `MetricsPort`, `TracingPort`), Prometheus metrics with standardized labels, and NoOp implementations for testing.
 
@@ -338,7 +339,7 @@ Rejected because:
 - **Indirection**: One level of abstraction vs direct calls
 - **Learning curve**: Developers must use ports, not direct imports
 
-## Related ADRs
+## References
 
 - [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports — initial decision for LoggerPort/MetricsPort
 - [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes — logging constraints for reproducibility
@@ -346,3 +347,38 @@ Rejected because:
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — logging integration
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement — enforces this architecture
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — NoOp pattern for tracing defined here
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-017-observability-architecture.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

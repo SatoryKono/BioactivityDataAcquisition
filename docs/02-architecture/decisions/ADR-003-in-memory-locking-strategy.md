@@ -5,14 +5,16 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-003: In-Memory Locking Strategy (MemoryLock)
 
 **Date:** 2025-05-20
-**Last Updated:** 2026-01-02
+**Status:** Accepted (Revised 2025-12-23, see also ADR-010)
+**Last updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
+**Superseded by:** [ADR-010](ADR-010-local-only-deployment.md) (local-only locking scope and deployment posture)
 **Related:** [ADR-010: Local-Only Deployment](ADR-010-local-only-deployment.md)
 
 ## Context
@@ -35,7 +37,7 @@ Last verified: '2026-03-29'
 3. **Замедление разработки**: Новым разработчикам нужно настраивать внешние сервисы
 4. **Single Instance by Design**: Система спроектирована как однопроцессное приложение
 
-## The Decision
+## Decision
 
 **ОТКАЗ ОТ REDIS**. Использование **MemoryLock** для всех блокировок в рамках Local-Only архитектуры.
 
@@ -159,16 +161,45 @@ await lock.aclose()
 - Проблемы с stale locks при crash
 - MemoryLock проще и достаточен для single-instance
 
-## Related ADRs
+## References
 
 - [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — определяет Local-Only стратегию (Updated: 2025-12-23)
 - [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker — комплементарный паттерн устойчивости (Updated: 2025-12-22)
 - [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown — освобождение блокировок при shutdown (Updated: 2025-12-22)
 
-## Migration Notes
+## Rollout
 
 При обновлении с версий, использовавших Redis:
 1. Удалить `docker-compose.yml` (секция redis)
 2. Удалить переменные окружения `REDIS-*`
 3. Удалить зависимости: `pip uninstall redis aioredis fakeredis`
 4. Обновить код: заменить `RedisLock` на `MemoryLock`
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-003-in-memory-locking-strategy.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted (Revised 2025-12-23, see also ADR-010)` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `declared` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

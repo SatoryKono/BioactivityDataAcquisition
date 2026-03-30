@@ -12,6 +12,7 @@ Commands:
     check-kpi          Report documentation KPI metrics
     export-matrix-structural-contract Export canonical runtime structural contract for ChEMBL matrix sync
     build-matrix-dicts Generate ChEMBL matrix inventory and sheet dictionaries
+    enrich-matrix-normalization-details Populate exact per-row normalization details in the ChEMBL matrix workbook
     filter-matrix-rows Remove rows from ChEMBL matrix workbook by column value
     normalize-matrix-values Normalize controlled values in ChEMBL matrix workbook
     sync-matrix-structural-policy Sync the ChEMBL matrix workbook with structural Silver policy semantics
@@ -33,6 +34,7 @@ COMMANDS: dict[str, str] = {
     "check-kpi": "report_docs_kpi.py",
     "export-matrix-structural-contract": "export_chembl_matrix_structural_contract.py",
     "build-matrix-dicts": "generate_chembl_matrix_dictionaries.py",
+    "enrich-matrix-normalization-details": "enrich_chembl_matrix_normalization_details.py",
     "filter-matrix-rows": "filter_chembl_matrix_rows.py",
     "normalize-matrix-values": "normalize_chembl_matrix_workbook.py",
     "sync-matrix-structural-policy": "sync_chembl_matrix_structural_policy.py",

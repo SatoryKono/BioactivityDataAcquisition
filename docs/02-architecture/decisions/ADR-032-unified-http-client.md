@@ -5,12 +5,13 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-032: Unified HTTP Client Pattern
 
 **Date:** 2026-01-28
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 
 ## Context
@@ -27,7 +28,7 @@ Without unification, each adapter would implement its own HTTP handling, leading
 - Difficulty in applying cross-cutting concerns (tracing, metrics)
 - Testing complexity
 
-## The Decision
+## Decision
 
 We have implemented **`UnifiedHTTPClient`** in `infrastructure/adapters/http/client.py` as the single HTTP abstraction for all adapters.
 
@@ -182,7 +183,7 @@ class ChemblAdapter(BaseHttpAdapter):
 - Factory hides complexity from adapter authors
 - Sensible defaults reduce configuration burden
 
-## Related ADRs
+## References
 
 - [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker Implementation
 - [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy (client cleanup)
@@ -190,3 +191,38 @@ class ChemblAdapter(BaseHttpAdapter):
 - [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy (retry classification)
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement (TracingPort, MetricsPort)
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing for Local-Only
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-032-unified-http-client.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

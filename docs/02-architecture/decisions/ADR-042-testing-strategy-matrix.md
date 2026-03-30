@@ -5,16 +5,15 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-042: Testing Strategy Matrix and Fixture Governance
 
 **Date:** 2026-03-09
-**Authors:** Claude (architecture review)
-**Supersedes:** —
+**Status:** Accepted
+**Decision makers:** @BioETL-Team
 **Related:** ADR-027 (DQ rules), ADR-032 (HTTP unification), RULES.md §4
-
 ---
 
 ## Context
@@ -126,3 +125,32 @@ These are fundamentally incompatible at the adapter level. Clear boundary needed
 
 - RULES.md §4.2: TEST-001 (coverage), TEST-003 (VCR), TEST-004 (arch tests)
 - This ADR extends RULES.md testing requirements with matrix governance
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.
+
+## References
+
+- `<link-or-path>`

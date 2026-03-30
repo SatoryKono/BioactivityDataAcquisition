@@ -5,16 +5,15 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-041: Naming Policy for Skills, Agents, and Commands
 
 **Date:** 2026-03-04
-**Authors:** Claude (audit), project team (review)
-**Supersedes:** —
+**Status:** Accepted
+**Decision makers:** @BioETL-Team
 **Related:** ADR-040 (Mermaid), RULES.md §NAME
-
 ---
 
 ## Context
@@ -214,3 +213,32 @@ This ADR establishes rules **NAME-007** through **NAME-009** to be added to `ai-
 | NAME-007 | HIGH | Skill frontmatter `name:` MUST equal directory name |
 | NAME-008 | HIGH | Agent frontmatter `name:` MUST equal filename (sans `.md`) |
 | NAME-009 | MEDIUM | Agent `model:` MUST use abstract alias (`opus`/`sonnet`/`haiku`), not versioned ID |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.
+
+## References
+
+- `<link-or-path>`

@@ -5,15 +5,16 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-010: Local-Only Deployment Strategy
 
 **Date:** 2025-12-23
-**Last Updated:** 2026-01-02
+**Status:** Accepted
+**Last updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
-**Supersedes:** ADR-003 (Redis for Distributed Locking)
+**Supersedes:** [ADR-003](ADR-003-in-memory-locking-strategy.md) (original distributed-locking posture)
 
 ## Context
 
@@ -28,7 +29,7 @@ BioETL изначально проектировался с поддержкой
 3. Поддержка облачной инфраструктуры добавляет значительную сложность
 4. Зависимости от внешних сервисов усложняют локальную разработку
 
-## The Decision
+## Decision
 
 Переход на **исключительно локальное развертывание** с использованием:
 - **Локальная файловая система** для всех слоёв данных (Bronze, Silver, Gold)
@@ -194,7 +195,7 @@ class Settings:
 2. **Однако**, внедрение распределенных блокировок (Redis) потребует пересмотра этого ADR и явного одобрения, так как текущая стратегия — жесткий Local-Only.
 3. Hexagonal архитектура позволяет добавлять адаптеры, но это **ЗАПРЕЩЕНО** текущей политикой.
 
-## Related ADRs
+## References
 
 - [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — сохраняется, меняется только storage backend (Updated: 2025-05-20)
 - [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking — детализация стратегии блокировок (Updated: 2025-12-23)
@@ -203,10 +204,39 @@ class Settings:
 - [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — simplification aligned with Local-Only (Updated: 2025-12-23)
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — NoOp pattern consistent with Local-Only (no external infra) (Updated: 2025-12-27)
 
-## Migration Notes
+## Rollout
 
 При обновлении с предыдущих версий:
 1. Удалить Docker Compose конфигурацию (minio, redis)
 2. Обновить переменные окружения (удалить AWS-*, REDIS-*)
 3. Переустановить зависимости: `pip install -e .[dev]`
 4. Перенести данные из S3 в локальную директорию `data/`
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-010-local-only-deployment.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `declared` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

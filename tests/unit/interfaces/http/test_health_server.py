@@ -86,7 +86,8 @@ class TestHealthServer:
         assert server.uptime_seconds == 0.0
 
         await server.start()
-        await asyncio.sleep(0.1)
+        assert server._start_time is not None
+        server._start_time -= 0.1
         assert server.uptime_seconds > 0
 
         await server.stop()
@@ -752,7 +753,10 @@ class TestRunHealthServer:
             )
         )
 
-        await asyncio.sleep(0.1)  # Let server start
+        for _ in range(20):
+            if mock_logger.info.call_count >= 1:
+                break
+            await asyncio.sleep(0)
         task.cancel()
 
         # The task catches CancelledError and performs cleanup,
@@ -783,7 +787,10 @@ class TestRunHealthServer:
             )
         )
 
-        await asyncio.sleep(0.1)
+        for _ in range(20):
+            if mock_logger.info.call_count >= 1:
+                break
+            await asyncio.sleep(0)
         task.cancel()
 
         # The task catches CancelledError and performs cleanup

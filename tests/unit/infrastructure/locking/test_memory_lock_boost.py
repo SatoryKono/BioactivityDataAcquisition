@@ -75,23 +75,33 @@ class TestAcquireWaitTimeout:
     """Tests for acquire wait loop (line 165)."""
 
     @pytest.mark.asyncio
-    async def test_acquire_wait_returns_token_when_lock_available(self) -> None:
+    async def test_acquire_wait_returns_token_when_lock_available(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Line 165: wait=True, lock becomes available before timeout."""
         lock = MemoryLock()
 
         # Acquire first
         await lock.acquire(key="key", owner_id="owner_1")
 
-        # Release after a tiny delay in a separate task
-        async def release_after() -> None:
-            await asyncio.sleep(0.05)
-            await lock.release(key="key", owner_id="owner_1")
+        real_sleep = asyncio.sleep
+        release_triggered = False
 
-        task = asyncio.create_task(release_after())
+        async def _fast_sleep(_seconds: float) -> None:
+            nonlocal release_triggered
+            if not release_triggered:
+                release_triggered = True
+                await lock.release(key="key", owner_id="owner_1")
+            await real_sleep(0)
+
+        monkeypatch.setattr(
+            "bioetl.infrastructure.locking.memory_lock.asyncio.sleep",
+            _fast_sleep,
+        )
+
         token = await lock.acquire(
             key="key", owner_id="owner_2", wait=True, wait_timeout=2
         )
-        await task
 
         assert token is not None
         await lock.aclose()

@@ -5,12 +5,13 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-044: Run Manifest and Run Ledger Control Plane
 
 **Date:** 2026-03-24
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 **Related:** ADR-014 (deterministic writes), ADR-015 (pipeline lifecycle), ADR-029 (output metadata), ADR-043 (documentation governance)
 
@@ -134,3 +135,32 @@ runtime lifecycle events are appended through one shared control-plane service.
 - Lifecycle boundaries and shutdown behavior: ADR-015
 - Sidecar metadata linkage: ADR-029
 - Documentation publication and runbook indexing: ADR-043
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.
+
+## References
+
+- `<link-or-path>`

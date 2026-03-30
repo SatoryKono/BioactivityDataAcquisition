@@ -5,20 +5,21 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-007: Circuit Breaker Implementation
 
 **Date:** 2025-12-22
-**Last Updated:** 2026-01-02
+**Status:** Accepted
+**Last updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
 
 ## Context
 
 External API calls (ChEMBL, PubChem, UniProt) can experience temporary failures, slowdowns, or rate limiting. Without protection, the pipeline would repeatedly hammer failing services, wasting resources and potentially causing cascading failures. A circuit breaker pattern was needed to gracefully handle degraded external dependencies.
 
-## The Decision
+## Decision
 
 We have implemented a **state machine-based Circuit Breaker** in `infrastructure/adapters/http/circuit_breaker.py` with the following characteristics:
 
@@ -161,9 +162,44 @@ async def fetch-activity(activity-id: int) -> dict:
     return await cb.call(http-client.get, f"/activity/{activity-id}")
 ```
 
-## Related ADRs
+## References
 
 - [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking (MemoryLock) — complementary resilience pattern (Updated: 2025-12-20)
 - [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy — coordinates with circuit breaker during shutdown (Updated: 2025-12-22)
 - [ADR-009](ADR-009-paginated-fetcher-mixin.md): PaginatedFetcherMixin — wraps fetch calls with circuit breaker (Updated: 2025-12-22)
 - [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy — circuit breaker is part of error handling (Updated: 2025-12-26)
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-007-circuit-breaker-implementation.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

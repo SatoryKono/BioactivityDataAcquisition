@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 
 import pytest
 
@@ -23,6 +24,24 @@ def fast_ttl_lock():
     Uses aggressive interval (20ms) for faster test execution.
     """
     return MemoryLock(ttl_check_interval=0.02)
+
+
+@pytest.fixture
+def fake_monotonic(monkeypatch: pytest.MonkeyPatch) -> Callable[[float], None]:
+    """Patch memory lock monotonic clock for deterministic TTL tests."""
+    current = {"value": 1000.0}
+
+    def _now() -> float:
+        return current["value"]
+
+    def _advance(delta: float) -> None:
+        current["value"] += delta
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.locking.memory_lock.time.monotonic",
+        _now,
+    )
+    return _advance
 
 
 @pytest.mark.unit
@@ -87,7 +106,7 @@ class TestMemoryLock:
         assert isinstance(result, FencingToken)
 
     @pytest.mark.asyncio
-    async def test_acquire_timeout(self, memory_lock):
+    async def test_acquire_timeout(self, memory_lock, monkeypatch: pytest.MonkeyPatch):
         """Test acquire with timeout when lock is held."""
         # First acquire the lock
         await memory_lock.acquire(
@@ -96,12 +115,22 @@ class TestMemoryLock:
             wait=True,
         )
 
+        real_sleep = asyncio.sleep
+
+        async def _fast_sleep(_seconds: float) -> None:
+            await real_sleep(0)
+
+        monkeypatch.setattr(
+            "bioetl.infrastructure.locking.memory_lock.asyncio.sleep",
+            _fast_sleep,
+        )
+
         # Try to acquire again with short timeout
         result = await memory_lock.acquire(
             key="test_key",
             owner_id="owner_2",
             wait=True,
-            wait_timeout=0.01,
+            wait_timeout=0.0001,
         )
         assert result is None
 
@@ -180,7 +209,7 @@ class TestMemoryLockTTL:
     """Tests for MemoryLock TTL expiration functionality."""
 
     @pytest.mark.asyncio
-    async def test_lock_expires_after_ttl(self, fast_ttl_lock):
+    async def test_lock_expires_after_ttl(self, fast_ttl_lock, fake_monotonic):
         """Test that lock is automatically released after TTL expires."""
         # Acquire lock with TTL (increased for CI stability)
         result = await fast_ttl_lock.acquire(
@@ -198,8 +227,9 @@ class TestMemoryLockTTL:
         )
         assert result is None
 
-        # Wait for TTL to expire (TTL + check interval buffer)
-        await asyncio.sleep(0.45)
+        # Advance past TTL and trigger expiration scan directly.
+        fake_monotonic(0.45)
+        await fast_ttl_lock._release_expired_locks()
 
         # Now another owner should be able to acquire
         result = await fast_ttl_lock.acquire(
@@ -212,7 +242,7 @@ class TestMemoryLockTTL:
         await fast_ttl_lock.aclose()
 
     @pytest.mark.asyncio
-    async def test_heartbeat_extends_ttl(self, fast_ttl_lock):
+    async def test_heartbeat_extends_ttl(self, fast_ttl_lock, fake_monotonic):
         """Test that heartbeat extends the lock TTL."""
         # Acquire lock with TTL
         await fast_ttl_lock.acquire(
@@ -221,8 +251,8 @@ class TestMemoryLockTTL:
             ttl=1.0,  # 1s TTL (reduced from 2s; sufficient for heartbeat test)
         )
 
-        # Wait less than half the TTL
-        await asyncio.sleep(0.1)
+        # Advance time without real waiting.
+        fake_monotonic(0.1)
 
         # Heartbeat to extend TTL (resets to 1s from now)
         result = await fast_ttl_lock.heartbeat(
@@ -231,9 +261,9 @@ class TestMemoryLockTTL:
         )
         assert result is True
 
-        # Wait another 0.15s (original TTL would have expired at 1s, but heartbeat extended)
-        # After heartbeat, TTL is 1s, so 0.15s wait leaves 0.85s margin for CI stability
-        await asyncio.sleep(0.15)
+        # Advance again and force a TTL sweep. The heartbeat should keep the lock alive.
+        fake_monotonic(0.15)
+        await fast_ttl_lock._release_expired_locks()
 
         # Lock should still be held because heartbeat extended it
         result = await fast_ttl_lock.acquire(
@@ -284,7 +314,9 @@ class TestMemoryLockTTL:
         assert fast_ttl_lock._closed is True
 
     @pytest.mark.asyncio
-    async def test_lock_without_ttl_does_not_expire(self, fast_ttl_lock):
+    async def test_lock_without_ttl_does_not_expire(
+        self, fast_ttl_lock, fake_monotonic
+    ):
         """Test that lock without TTL never expires automatically."""
         # Acquire lock without TTL
         result = await fast_ttl_lock.acquire(
@@ -293,8 +325,9 @@ class TestMemoryLockTTL:
         )
         assert result is not None
 
-        # Wait some time (would have expired if TTL was set)
-        await asyncio.sleep(0.3)
+        # Advance time and run TTL sweep; TTL-less locks should remain held.
+        fake_monotonic(0.3)
+        await fast_ttl_lock._release_expired_locks()
 
         # Lock should still be held
         result = await fast_ttl_lock.acquire(
@@ -307,7 +340,9 @@ class TestMemoryLockTTL:
         await fast_ttl_lock.aclose()
 
     @pytest.mark.asyncio
-    async def test_multiple_locks_with_different_ttl(self, fast_ttl_lock):
+    async def test_multiple_locks_with_different_ttl(
+        self, fast_ttl_lock, fake_monotonic
+    ):
         """Test multiple locks with different TTL values."""
         # Acquire two locks with different TTLs (increased for CI stability)
         await fast_ttl_lock.acquire(
@@ -321,8 +356,9 @@ class TestMemoryLockTTL:
             ttl=1.0,  # 1s (increased from 500ms for CI stability)
         )
 
-        # Wait for short TTL to expire (with margin)
-        await asyncio.sleep(0.45)
+        # Advance only far enough for the short TTL to expire.
+        fake_monotonic(0.45)
+        await fast_ttl_lock._release_expired_locks()
 
         # Short TTL lock should be available
         result = await fast_ttl_lock.acquire(

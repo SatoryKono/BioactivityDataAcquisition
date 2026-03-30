@@ -5,15 +5,16 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-020: Декомпозиция BasePipeline
 
 **Date:** 2025-12-16
+**Status:** Accepted (Implemented 2025-12-16)
 **Decision makers:** @BioETL-Team
 
-## Контекст
+## Context
 
 ### Проблема
 
@@ -67,7 +68,7 @@ def __init__(
 - `tests/unit/application/test_pipeline_config.py` - тесты
 - `tests/unit/application/pipelines/test_chembl_activity_unit.py` - тесты
 
-## Решение
+## Decision
 
 ### 1. Разделить на три структуры
 
@@ -201,7 +202,7 @@ finally:
     await self.-postrun-service.cleanup(self.-tracer)
 ```
 
-## Последствия
+## Consequences
 
 ### Положительные
 
@@ -225,7 +226,7 @@ finally:
 | Регрессии           | Baseline metrics + integration tests  | Закрыт |
 | Resource leaks      | `PipelineServices.aclose()` в finally | Закрыт |
 
-## План миграции
+## Rollout
 
 ### Фаза 1: Подготовка
 
@@ -262,7 +263,7 @@ finally:
 - [x] Удалить `from_params()`
 - [x] Финальное обновление документации
 
-## Альтернативы рассмотренные
+## Alternatives Considered
 
 ### 1. Builder Pattern
 
@@ -314,15 +315,44 @@ finally:
                     (uses CHEMBL-ACTIVITY-CONFIG)
 ```
 
-## Related ADRs
+## References
 
 - [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer — assembles decomposed components
 - [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports — LoggerPort in PipelineServices
 - [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — PipelineServices design
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — further domain layer improvements
 
-## Связанные документы
+## References
 
 - `RULES.md` Section 1.1 (Ports & Adapters)
 
 > **Note:** Planning docs `docs/refactoring/basepipeline-dependency-map.md` and `docs/refactoring/entry-criteria-check.md` were archived after the refactoring was completed.
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-020-basepipeline-decomposition.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted (Implemented 2025-12-16)` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

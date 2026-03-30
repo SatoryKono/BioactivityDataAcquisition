@@ -5,20 +5,21 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-002: Why Medallion Architecture?
 
 **Date:** 2025-05-20
-**Last Updated:** 2026-01-02
+**Status:** Accepted
+**Last updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
 
 ## Context
 
 The project needs a structured and scalable approach to manage data pipelines, from raw ingestion to analysis-ready aggregates.
 
-## The Decision
+## Decision
 
 We have adopted the **Medallion Architecture**, which organizes data into three distinct quality layers: **Bronze**, **Silver**, and **Gold**.
 
@@ -51,10 +52,45 @@ The Medallion Architecture provides a clear and logical separation of concerns, 
 *   **Higher Latency**: The multi-hop process (Bronze -> Silver -> Gold) introduces latency compared to a single, monolithic ETL job. This is an acceptable trade-off for the gains in reliability and maintainability.
 *   **Development Overhead**: Requires developers to think in terms of layers and manage pipelines between them. However, this structure also simplifies individual pipeline logic.
 
-## Related ADRs
+## References
 
 - [ADR-001](ADR-001-delta-lake-vs-parquet.md): Delta Lake vs Parquet — storage format choice for Silver/Gold layers (Updated: 2025-05-20)
 - [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — simplifies deployment while preserving Medallion architecture (Updated: 2025-12-23)
 - [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — simplifies load strategy within Medallion (Updated: 2025-12-23)
 - [ADR-012](ADR-012-storage-clear-contract-and-run-id.md): Storage Clear Contract — Medallion invariants for destructive operations (Updated: 2025-12-25)
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — quality guarantees for Gold layer (Updated: 2025-12-26)
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-002-medallion-architecture.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.
