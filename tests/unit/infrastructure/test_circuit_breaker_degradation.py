@@ -277,7 +277,6 @@ class TestRecoveryUnderLoad:
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
-        await asyncio.sleep(0.01)
         await cb.call(succeed)
 
         # Burst of concurrent requests
@@ -321,8 +320,7 @@ class TestMultipleConsecutiveTrips:
             assert cb.get_state() == CircuitBreakerState.OPEN
             assert cb.get_trips_total() == expected_trips
 
-            # Brief recovery
-            await asyncio.sleep(0.01)
+            # recovery_timeout=0 means the next probe can run immediately
             await cb.call(succeed)
             assert cb.get_state() == CircuitBreakerState.CLOSED
 

@@ -119,8 +119,8 @@ class AssaySchema(ETLRecordSchema):
     src_assay_id: Series[str] | None = pa.Field(
         nullable=True, description="Source Assay ID."
     )
-    publication_id: Series[str] | None = pa.Field(
-        nullable=True,
+    publication_id: Series[str] = pa.Field(
+        nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="Document ChEMBL ID.",
     )
@@ -139,8 +139,8 @@ class AssaySchema(ETLRecordSchema):
     # )
 
     # === Other Fields ===
-    bao_format: Series[str] | None = pa.Field(
-        nullable=True,
+    bao_format: Series[str] = pa.Field(
+        nullable=False,
         str_matches=BAO_ID_PATTERN,
         description="BAO format.",
     )

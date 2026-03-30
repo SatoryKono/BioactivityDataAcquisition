@@ -31,6 +31,21 @@ if TYPE_CHECKING:
     from click.testing import CliRunner
 
 
+async def _yield_control(turns: int = 1) -> None:
+    """Advance the loop without sleeping in real time."""
+    for _ in range(turns):
+        await asyncio.sleep(0)
+
+
+async def _wait_until(predicate, turns: int = 20) -> None:
+    """Poll a predicate over a few loop turns for async background tasks."""
+    for _ in range(turns):
+        if predicate():
+            return
+        await _yield_control()
+    raise AssertionError("Condition was not met within expected event-loop turns")
+
+
 class TestShutdownSignalIntegration:
     """Test ShutdownSignal integration."""
 
@@ -46,18 +61,15 @@ class TestShutdownSignalIntegration:
     async def test_shutdown_signal_wait_returns_on_request(self):
         """Test that wait() returns when request() is called."""
         shutdown_signal = ShutdownSignal()
+        wait_task = asyncio.create_task(shutdown_signal.wait())
 
-        async def delayed_request():
-            await asyncio.sleep(0.05)
-            shutdown_signal.request()
+        await _yield_control()
+        assert wait_task.done() is False
 
-        task = asyncio.create_task(delayed_request())
-
-        # Wait should return after request
-        await asyncio.wait_for(shutdown_signal.wait(), timeout=1.0)
+        shutdown_signal.request()
+        await asyncio.wait_for(wait_task, timeout=1.0)
 
         assert shutdown_signal.is_requested is True
-        await task
 
     def test_shutdown_signal_reset_clears_flag(self):
         """Test that reset() clears the shutdown flag."""
@@ -173,16 +185,18 @@ class TestSignalHandlerIntegration:
     async def test_shutdown_during_async_operation(self):
         """Test that shutdown signal can interrupt async operations."""
         shutdown_signal = ShutdownSignal()
+        work_started = asyncio.Event()
 
         async def long_running_task():
             for _ in range(100):
+                work_started.set()
                 if shutdown_signal.is_requested:
                     raise PipelineShutdownError("Shutdown requested")
-                await asyncio.sleep(0.01)
+                await _yield_control()
 
         # Request shutdown after a short delay
         async def delayed_shutdown():
-            await asyncio.sleep(0.05)
+            await work_started.wait()
             shutdown_signal.request()
 
         task = asyncio.create_task(delayed_shutdown())
@@ -323,7 +337,7 @@ class TestConcurrentSignals:
         tasks = [asyncio.create_task(waiter(i)) for i in range(5)]
 
         # Small delay then request shutdown
-        await asyncio.sleep(0.01)
+        await _yield_control()
         shutdown_signal.request()
 
         # Wait for all tasks to complete
@@ -387,7 +401,7 @@ class TestShutdownWithCheckpointManager:
         shutdown_signal.request()
 
         # Give heartbeat loop time to check signal
-        await asyncio.sleep(0.1)
+        await _yield_control(3)
 
         # Release lock
         await manager.release()
@@ -438,7 +452,7 @@ class TestShutdownWithCheckpointManager:
 
         # Wait for the heartbeat loop to run and fail
         # The background task should set the shutdown signal
-        await asyncio.sleep(0.1)
+        await _wait_until(lambda: shutdown_signal.is_requested)
 
         # Verify shutdown was triggered
         assert shutdown_signal.is_requested is True

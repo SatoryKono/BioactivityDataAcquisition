@@ -55,6 +55,7 @@ class TestAssayTransformer:
             "assay_id": "CHEMBL1234567",
             "target_id": "CHEMBL123",
             "publication_id": "CHEMBL456",
+            "bao_format": "BAO_0000218",
             "assay_type": "B",
             "assay_type_description": "Binding",
             "description": "Test assay description",
@@ -66,6 +67,8 @@ class TestAssayTransformer:
         assert result is not None
         assert result["assay_id"] == "CHEMBL1234567"
         assert result["target_id"] == "CHEMBL123"
+        assert result["publication_id"] == "CHEMBL456"
+        assert result["bao_format"] == "BAO_0000218"
         assert result["assay_type"] == "B"
         assert result["confidence_score"] == 9
         assert "entity_id" in result
@@ -493,6 +496,7 @@ class TestTargetTransformer:
             "target_type": "SINGLE PROTEIN",
             "organism": "Homo sapiens",
             "tax_id": 9606,  # Source API field name
+            "species_group_flag": False,
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -501,6 +505,8 @@ class TestTargetTransformer:
         assert result["target_id"] == "CHEMBL1862"
         assert result["pref_name"] == "Cyclooxygenase-2"
         assert result["target_type"] == "SINGLE PROTEIN"
+        assert result["organism"] == "Homo sapiens"
+        assert result["species_group_flag"] is False
         assert result["taxonomy_id"] == 9606  # Standardized output field name
         assert "entity_id" in result
         assert "content_hash" in result
@@ -703,6 +709,39 @@ class TestTargetTransformer:
 
         assert result is not None
         assert result["organism_class"] == "multicellular"
+
+    @pytest.mark.asyncio
+    async def test_transform_normalizes_organism_to_canonical_display(
+        self, transformer, mock_context
+    ):
+        """Known organism drift should collapse to a canonical display value."""
+        record = {
+            "target_id": "CHEMBL1862",
+            "organism": "  homo sapiens (Human)  ",
+            "tax_id": 9606,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["organism"] == "Homo sapiens"
+
+    @pytest.mark.asyncio
+    async def test_transform_normalizes_organism_alias_to_scientific_name(
+        self, transformer, mock_context
+    ):
+        """Common organism aliases should resolve before downstream classification."""
+        record = {
+            "target_id": "CHEMBL2000",
+            "organism": "e. coli",
+            "tax_id": 562,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["organism"] == "Escherichia coli"
+        assert result["organism_class"] == "unicellular"
 
     @pytest.mark.asyncio
     async def test_transform_organism_class_unicellular(

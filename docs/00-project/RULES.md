@@ -18,7 +18,7 @@ Last verified: '2026-03-29'
 | Добавить поле в схему               | 2.2, App E   | Pydantic model              |
 | Ошибка в проде (Alert)              | App C        | Runbook                     |
 | Удалить битые данные                | 2.6          | `bioetl quarantine purge --pipeline ...` |
-| Развернуть на Staging               | 5.6.1        | CI/CD                       |
+| Подготовить staging-like local profile | 5.6.1     | Environment isolation       |
 | Восстановление при аварии           | 5.5          | DR Runbook                  |
 | Откат релиза                        | 7.2          | Rollback Strategy           |
 | Безопасность                        | 5.4          | Security Policy             |
@@ -1089,7 +1089,9 @@ async with services:  # --aenter-- инициализирует ресурсы
 ### 5.4. Политика Чувствительных Данных (Sensitive Data)
 
 - **Classification**: Public / Internal / Restricted.
-- **IAM**: Принцип Least Privilege. Разделение ролей `writer` (пайплайн) и `reader` (аналитик).
+- **Access Control**: Следовать least-privilege для текущего runtime: секреты и
+  write-доступ к локальным данным выдаются только оператору/процессу,
+  запускающему пайплайн.
 - **Bronze**: Хранить как есть (Internal).
 - **Silver**: Хэшировать PII поля: `sha256(lowercase(value) + SALT)` (Restricted). **PII fields MUST be salted.**
 - **Gold**: PII исключается или агрегируется (Public/Internal).
@@ -1097,7 +1099,9 @@ async with services:  # --aenter-- инициализирует ресурсы
 **Threat Model Scope**:
 
 - В фокусе: Утечка PII через логи, SQL-инъекции, несанкционированный доступ к локальным данным.
-- Out of Scope: Физический доступ к серверам, компрометация AWS Root Account (управляемый сервис).
+- Out of Scope: Компрометация хоста/рабочей станции вне границ приложения,
+  физический доступ к устройству, атаки на внешнюю инфраструктуру,
+  не управляемую самим BioETL.
 
 ### 5.5. Disaster Recovery (DR)
 
@@ -1111,23 +1115,24 @@ async with services:  # --aenter-- инициализирует ресурсы
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить локальное хранилище из backup (point-in-time restore). 3. Перезапустить пайплайны с флагом `--run-type rebuild` (если затронут Silver).      |
 | **Потеря чекпоинта**          | Удалить файл чекпоинта: `data/output/checkpoints/{pipeline-name}.json`, затем запустить `--run-type rebuild` (приведет к дубликатам в Bronze, но дедупликация в Silver исправит это). |
-| **Отказ региона AWS**         | Переключение DNS на Failover Region. Развертывание Infrastructure-as-Code (Terraform) в резервном регионе.                                                                            |
+| **Потеря локального хоста/тома** | 1. Поднять новый локальный runtime/рабочую директорию. 2. Восстановить backup данных и конфигов. 3. Запустить `--run-type rebuild` или targeted restore по runbook. |
 
 ### 5.6. Среды (Environments)
 
-- **Dev**: Локальная разработка (Local-Only, см. [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)). Данные: фикстуры или сэмпл Bronze.
-- **Staging**: Полная копия архитектуры. Данные: Prod-like (обфусцированные). Тест деплоя.
-- **Prod**: Боевая среда. Доступ на запись только у CI/CD.
+- **Dev**: Локальная разработка (Local-Only, см. [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)). Данные: фикстуры или sample Bronze.
+- **Staging-like local profile**: Локальный или single-host профиль для rehearsal/verification с prod-like обфусцированными данными и отдельным data root.
+- **Prod-like local profile**: Операторский single-host профиль для долгоживущих данных и контролируемых запусков. Это не отдельный distributed deployment tier.
 
 ### 5.6.1. Environment Isolation
 
 Изоляция ресурсов для предотвращения "Cross-Env Pollution".
 
 > **Note**: Текущая архитектура — Local-Only (см. [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)).
-> Нижеследующие примеры относятся к будущему распределённому развёртыванию.
+> Изоляция ниже относится к локальным/single-host профилям, а не к
+> распределённому runtime.
 
-- **Storage**: Разные директории или бакеты (`data/dev`, `data/staging`, `data/prod` или `bioetl-dev`, `bioetl-staging`, `bioetl-prod`).
-- **Configs**: Строгое разделение переменных окружения. Доступ к Prod-секретам только у CI Runner.
+- **Storage**: Разные локальные директории данных (`data/dev`, `data/staging`, `data/prod` или явные override-paths вне репозитория).
+- **Configs**: Строгое разделение переменных окружения и секретов между профилями. Live credentials не хранятся в репозитории.
 
 ## 6. Документация (Автоматизация — приоритет)
 
@@ -1361,8 +1366,8 @@ grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
   - Minor: добавление nullable полей.
   - Major: удаление/переименование полей, изменение типов.
 - **Уведомление о Breaking Change**:
-  1. PR с изменением Gold-схемы **MUST** иметь лейбл `breaking-change`.
-  1. CI генерирует diff схемы и постит в Slack-канал `#bioetl-contracts`.
+  1. PR с изменением Gold-схемы **MUST** содержать явную impact note и migration strategy в PR/changelog/ADR-контексте.
+  1. Generated contract artifacts и parity-check **MUST** быть обновлены вместе с кодом.
   1. Период депрекации: 2 недели до удаления поля.
 - **Consumer Tests**: Потребители могут подписаться на `contracts/` и запускать свои тесты при изменениях.
 
@@ -1398,8 +1403,8 @@ grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 ### 8.2. Rollback Strategy
 
 - **Scope**:
-  - **Infrastructure/Code**: Auto Rollback при Error Rate > 10%.
-  - **Data DQ**: Ручной анализ и replay. Ошибки качества данных не должны триггерить автоматический откат версии приложения.
+  - **Infrastructure/Code**: Автоматический rollback не входит в текущий Local-Only runtime. Откат выполняется вручную по platform/deployment procedure.
+  - **Data DQ**: Ручной анализ и replay. Ошибки качества данных не должны триггерить rollback версии приложения.
 - **Manual Rollback**: В текущем Local-Only runtime отдельной команды `bioetl rollback` нет; rollback выполняется через platform-specific deployment procedure или восстановление предыдущего артефакта по runbook.
 
 ## 9. Опыт Разработчика (Developer Experience)

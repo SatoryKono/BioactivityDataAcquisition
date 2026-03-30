@@ -75,8 +75,13 @@ Last verified: '2026-03-30'
 ### Post-Mortem
 
 - Create a P1 Incident Report.
-- Analyze why the error wasn't caught in staging.
+- Analyze why the error wasn't caught by preflight, smoke, or staging-like local verification.
 - Add new regression tests if applicable.
+
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
 
 ## Verification
 

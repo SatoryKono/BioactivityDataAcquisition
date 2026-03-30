@@ -18,14 +18,25 @@ This directory uses a **canonical-by-domain** structure.
 - `scripts/migrations/oneoff/` — one-time migration scripts.
 - `scripts/diagrams/` — diagram quality/render tooling.
 
+## Retained Support Directories
+
+- `scripts/archive/` — retired or superseded scripts preserved for traceability.
+- `scripts/baselines/` — baseline/reference artifacts used by selected quality workflows.
+
 ## Root Directory Policy
 
-The `scripts/` root contains only the launcher (`run.py`) and catalog metadata.
-All scripts live in canonical subdirectories listed above.
+The `scripts/` root is intentionally minimal. Canonical long-lived scripts live
+in the domain directories above, while the root retains only:
+
+- launcher/catalog files (`run.py`, `catalog.yaml`, package markers, this README)
+- compatibility wrappers (`run_pytest.sh`, `run_pytest.ps1`)
+- a small number of legacy bridge entry points still referenced by docs/tests
+  (`generate_architecture_dependency_map.py`, `rerender_grafana_screenshots.*`)
 
 Rules:
 - New scripts must be placed in the appropriate canonical subdirectory.
-- Do not add scripts to `scripts/` root.
+- Do not add new long-lived scripts to `scripts/` root unless they are
+  explicitly approved as compatibility wrappers.
 
 ## Unified Entry Points
 

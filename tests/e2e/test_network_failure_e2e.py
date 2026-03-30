@@ -23,6 +23,11 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
 
+async def _yield_control() -> None:
+    """Advance retry loops without incurring real backoff delays."""
+    await asyncio.sleep(0)
+
+
 @pytest.fixture
 def mock_pipeline_context() -> PipelineContext:
     """Create a mock pipeline context for testing."""
@@ -61,7 +66,7 @@ class TestConnectionTimeout:
             except TimeoutError:
                 if attempt == max_retries - 1:
                     raise
-                await asyncio.sleep(0.01)  # Minimal backoff for test
+                await _yield_control()
 
         assert result is not None
         assert result["success"] is True
@@ -84,7 +89,7 @@ class TestConnectionTimeout:
                 except TimeoutError:
                     if attempt == max_retries - 1:
                         raise
-                    await asyncio.sleep(0.01)
+                    await _yield_control()
 
         assert retry_count == max_retries
 
@@ -121,7 +126,7 @@ class TestRateLimitHandling:
                 if e.response.status_code == 429:
                     delay = 0.01 * (2**attempt)  # Exponential backoff
                     backoff_delays.append(delay)
-                    await asyncio.sleep(delay)
+                    await _yield_control()
                 else:
                     raise
 
@@ -156,7 +161,7 @@ class TestRateLimitHandling:
                 break
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
-                    await asyncio.sleep(retry_after_value)
+                    await _yield_control()
                     waited_time += retry_after_value
                 else:
                     raise
@@ -195,7 +200,7 @@ class TestServerErrorHandling:
                 break
             except httpx.HTTPStatusError as e:
                 if e.response.status_code >= 500:
-                    await asyncio.sleep(0.01)
+                    await _yield_control()
                 else:
                     raise
 
@@ -225,7 +230,7 @@ class TestServerErrorHandling:
                 result = await internal_error()
                 break
             except httpx.HTTPStatusError:
-                await asyncio.sleep(0.01)
+                await _yield_control()
 
         assert result is not None
         assert call_count == 2
@@ -259,7 +264,7 @@ class TestRetryExhaustion:
                 except httpx.HTTPStatusError:
                     if attempt == max_retries - 1:
                         raise
-                    await asyncio.sleep(0.01)
+                    await _yield_control()
 
         assert exc_info.value.response.status_code == 503
         assert call_count == max_retries
@@ -283,7 +288,7 @@ class TestRetryExhaustion:
                 retry_metrics["failures"] += 1
                 if attempt == 4:
                     raise
-                await asyncio.sleep(0.01)
+                await _yield_control()
 
         assert retry_metrics["attempts"] == 3
         assert retry_metrics["failures"] == 2
@@ -350,7 +355,7 @@ class TestConnectionPoolExhaustion:
             async with semaphore:
                 active_connections += 1
                 assert active_connections <= pool_size
-                await asyncio.sleep(0.02)
+                await _yield_control()
                 active_connections -= 1
                 completed += 1
                 return f"response_{request_id}"
@@ -366,15 +371,18 @@ class TestConnectionPoolExhaustion:
         """E2E: Pool timeout should raise appropriate error."""
         pool_size = 1
         semaphore = asyncio.Semaphore(pool_size)
+        acquired = asyncio.Event()
+        release_blocker = asyncio.Event()
 
         async def blocking_request():
             async with semaphore:
-                await asyncio.sleep(1.0)  # Long running
+                acquired.set()
+                await release_blocker.wait()
                 return "done"
 
         async def waiting_request():
             try:
-                async with asyncio.timeout(0.05):
+                async with asyncio.timeout(0.01):
                     async with semaphore:
                         return "acquired"
             except TimeoutError:
@@ -382,7 +390,7 @@ class TestConnectionPoolExhaustion:
 
         # Start blocking request
         blocking_task = asyncio.create_task(blocking_request())
-        await asyncio.sleep(0.01)  # Let it acquire the semaphore
+        await acquired.wait()
 
         # Try to get another connection
         with pytest.raises(ConnectionError) as exc_info:

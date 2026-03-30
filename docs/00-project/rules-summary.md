@@ -28,7 +28,7 @@ Last verified: '2026-03-29'
 | Добавить поле в схему               | 2.2, App E      | Pydantic model              |
 | Ошибка в проде (Alert)              | App C           | Runbook                     |
 | Удалить битые данные                | 2.6             | `bioetl quarantine purge --pipeline ...` |
-| Развернуть на Staging               | 5.6.1           | CI/CD                       |
+| Подготовить staging-like local profile | 5.6.1        | Environment isolation       |
 | Восстановление при аварии           | 5.5             | DR Runbook                  |
 | Откат релиза                        | 7.2             | Rollback Strategy           |
 | Безопасность                        | 5.4             | Security Policy             |
@@ -108,7 +108,7 @@ Last verified: '2026-03-29'
 |-----------|---------------------|
 | RPO       | 24 часа             |
 | RTO       | 4 часа              |
-| Game Days | **SHOULD** ежегодно |
+| Restore drills | **SHOULD** периодически |
 
 ### Graceful Shutdown (SIGTERM/SIGINT)
 
@@ -141,7 +141,7 @@ Last verified: '2026-03-29'
 2. Medallion: Bronze (JSONL) → Silver (Delta Lake, merge) → Gold (strict).
 3. Quarantine: `common.quarantine`, retention 30 дней, sentinel values запрещены.
 4. Locks: только `MemoryLock` (local), TTL 90s, Heartbeat 30s, Max 4h, Redis lock запрещён.
-5. DR: RPO 24h, RTO 4h, Game Days ежегодно.
+5. DR: RPO 24h, RTO 4h, периодические restore drills.
 6. Schema Evolution: 14-дневный deprecation period, dual-write.
 7. Coverage ≥85%, `mypy --strict`, deterministic writes.
 

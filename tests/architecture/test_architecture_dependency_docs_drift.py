@@ -32,6 +32,15 @@ def _format_diff(label: str, actual: str, expected: str) -> str:
     return "\n".join(diff_lines[:40])
 
 
+def _strip_frontmatter(text: str) -> str:
+    if not text.startswith("---\n"):
+        return text
+    parts = text.split("\n---\n", 1)
+    if len(parts) != 2:
+        return text
+    return parts[1]
+
+
 def test_dependency_map_script_exists() -> None:
     script = Path("scripts/qa/generate_architecture_dependency_map.py")
     assert script.exists(), "Missing dependency map generator script"
@@ -97,7 +106,7 @@ def test_dependency_map_drift_check_passes_current_repo() -> None:
 
     md_path = Path("docs/02-architecture/generated/module-dependency-map.md")
     json_path = Path("docs/02-architecture/generated/module-dependency-map.json")
-    actual_md = md_path.read_text(encoding="utf-8")
+    actual_md = _strip_frontmatter(md_path.read_text(encoding="utf-8"))
     actual_json = json_path.read_text(encoding="utf-8")
 
     assert actual_md == expected_md, (

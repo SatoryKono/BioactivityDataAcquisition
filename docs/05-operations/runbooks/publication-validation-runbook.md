@@ -858,6 +858,11 @@ scrape-configs:
 
 - **Версия runbook:** 1.0.0 **Последнее обновление:** 2026-02-06 **Владелец:** Data Engineering Team **Статус:** Production Ready ✅
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

@@ -210,6 +210,11 @@ rm -rf data/output/silver/chembl/activity.bak
 1. Review recent code changes
 1. Escalate to development team
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

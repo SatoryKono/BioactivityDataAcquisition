@@ -76,6 +76,11 @@ Last verified: '2026-03-30'
 
 - --- *Last updated: 2026-03-26*
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the selected runbook matches the active symptom, severity, and ownership path.

@@ -465,8 +465,8 @@
     "coerce": false,
     "description": "Molecule type.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "mw_freebase": {

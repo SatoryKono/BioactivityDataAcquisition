@@ -613,6 +613,7 @@
       "targets": [
         {
           "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "instant": true,
           "legendFormat": "Filtered Out",
           "refId": "A"
         }
@@ -732,7 +733,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (error_type) (increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+          "expr": "sum by (error_type) (increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or label_replace(vector(0), \"error_type\", \"none\", \"\", \"\")",
           "legendFormat": "{{error_type}}",
           "refId": "A"
         }
@@ -803,7 +804,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval]))",
+          "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(label_replace(vector(0), \"severity\", \"none\", \"\", \"\"), \"anomaly_type\", \"none\", \"\", \"\")",
           "legendFormat": "{{severity}} / {{anomaly_type}}",
           "refId": "A"
         }
@@ -874,7 +875,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (rate(bioetl_dq_check_duration_ms_bucket{pipeline=~\"$pipeline\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"$pipeline\"}[$__interval]))) or vector(0)",
           "legendFormat": "{{pipeline}} p95",
           "refId": "A"
         }

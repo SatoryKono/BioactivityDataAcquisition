@@ -19,6 +19,10 @@ Checks:
      - invalid env var style (`BIOETL-...`)
      - invalid kebab-case Python snippets in fenced `python` blocks
      - path contracts for REQUIREMENTS and governance links
+  7. Provider specs contain required API governance sections
+  8. Runbooks contain required operational sections
+  9. Provider specs and runbooks contain Compliance + Last verified metadata
+ 10. Version frontmatter uses SemVer format
 
 Usage:
     python scripts/check_doc_links.py          # Full check
@@ -26,6 +30,7 @@ Usage:
     python scripts/check_doc_links.py --links   # Only broken link check
     python scripts/check_doc_links.py --contracts-index  # Gold contract index parity
     python scripts/check_doc_links.py --provider-overview  # Provider overview parity
+    python scripts/check_doc_links.py --doc-governance  # Provider/runbook governance checks
     python scripts/check_doc_links.py --not-in-nav-growth   # Only not-in-nav growth guard
     python scripts/check_doc_links.py --legacy-paths   # Only doc drift guardrails
     python scripts/check_doc_links.py --legacy-paths-all   # Drift guardrails incl. internal nav docs
@@ -52,7 +57,9 @@ PIPELINES_DIR = DOCS_DIR / "04-reference" / "pipelines"
 GOLD_SCHEMAS_DOC = DOCS_DIR / "04-reference" / "contracts" / "gold-schemas.md"
 GOLD_CONTRACTS_DIR = DOCS_DIR / "04-reference" / "contracts" / "gold"
 PROVIDERS_OVERVIEW_DOC = DOCS_DIR / "04-reference" / "providers" / "README.md"
+PROVIDERS_SPECS_DIR = DOCS_DIR / "04-reference" / "providers"
 CHEMBL_PROVIDERS_DIR = DOCS_DIR / "04-reference" / "providers" / "chembl"
+RUNBOOKS_DIR = DOCS_DIR / "05-operations" / "runbooks"
 CANONICAL_REQUIREMENTS_FILE = DOCS_DIR / "01-requirements" / "REQUIREMENTS.md"
 CANONICAL_GOVERNANCE_DIR = DOCS_DIR / "00-project" / "governance"
 NOT_IN_NAV_BASELINE_FILE = (
@@ -83,6 +90,7 @@ SKIP_DIRS = frozenset(
 MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((?!https?://|mailto:)([^)#]+)")
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
 MD_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+\.md")
+MD_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*$")
 PYTHON_FENCE_START_RE = re.compile(r"^\s*```(?:python|py|python3)\b", re.IGNORECASE)
 FENCE_END_RE = re.compile(r"^\s*```")
 GOLD_CONTRACT_RE = re.compile(r"`([a-z0-9_]+_v1\.0\.json)`")
@@ -100,6 +108,26 @@ NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES = ("reports/",)
 
 # Optional inline marker to allow historical legacy examples in a specific line.
 ALLOW_LEGACY_MARKER = "doc-lint: allow-legacy"
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+
+REQUIRED_PROVIDER_SECTIONS = (
+    "API Compliance",
+    "Rate limits & retries",
+    "429 handling policy",
+    "Authentication model",
+    "ToS URL",
+    "Data license",
+    "Personal data notes",
+)
+REQUIRED_RUNBOOK_SECTIONS = (
+    "Trigger",
+    "Impact",
+    "Preconditions",
+    "Procedure",
+    "Verification",
+    "Rollback",
+    "Post-incident",
+)
 
 
 class DriftRule:
@@ -245,6 +273,113 @@ def _check_python_snippet_drift(lines: list[str]) -> list[tuple[int, str, str]]:
                 snippet_violations.append((line_no, rule.name, match.group(0)))
 
     return snippet_violations
+
+
+def _extract_frontmatter(md_file: Path) -> dict[str, object]:
+    """Parse YAML frontmatter from a markdown file."""
+    try:
+        text = md_file.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return {}
+
+    if not text.startswith("---\n"):
+        return {}
+
+    _, _, remainder = text.partition("---\n")
+    frontmatter_text, sep, _ = remainder.partition("\n---")
+    if not sep:
+        return {}
+
+    loaded = yaml.safe_load(frontmatter_text)
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def _extract_headings(md_file: Path) -> set[str]:
+    """Return normalized markdown headings for a document."""
+    try:
+        lines = md_file.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return set()
+
+    headings: set[str] = set()
+    for line in lines:
+        match = MD_HEADING_RE.match(line)
+        if not match:
+            continue
+        heading = match.group(1).strip().strip("#").strip()
+        if heading:
+            headings.add(heading.casefold())
+    return headings
+
+
+def _provider_spec_files() -> list[Path]:
+    """Return provider-spec markdown docs (excluding overview README)."""
+    return sorted(
+        path
+        for path in PROVIDERS_SPECS_DIR.glob("*/*.md")
+        if path.name.lower() != "readme.md"
+    )
+
+
+def _runbook_files() -> list[Path]:
+    """Return operational runbook markdown docs."""
+    return sorted(path for path in RUNBOOKS_DIR.glob("*.md") if path.is_file())
+
+
+def check_provider_spec_governance() -> list[tuple[Path, str]]:
+    """Validate provider-spec API governance sections and metadata."""
+    violations: list[tuple[Path, str]] = []
+
+    for md_file in _provider_spec_files():
+        headings = _extract_headings(md_file)
+        frontmatter = _extract_frontmatter(md_file)
+
+        for section in REQUIRED_PROVIDER_SECTIONS:
+            if section.casefold() not in headings:
+                violations.append(
+                    (md_file, f"missing provider-spec section: {section}")
+                )
+
+        if "compliance" not in " ".join(headings):
+            violations.append((md_file, "missing Compliance heading"))
+
+        last_verified = frontmatter.get("Last verified")
+        if not isinstance(last_verified, str) or not last_verified.strip():
+            violations.append((md_file, "missing Last verified frontmatter"))
+
+        version = frontmatter.get("Version")
+        version_str = str(version).strip() if version is not None else ""
+        if not SEMVER_RE.fullmatch(version_str):
+            violations.append((md_file, f"invalid Version SemVer: {version_str!r}"))
+
+    return violations
+
+
+def check_runbook_governance() -> list[tuple[Path, str]]:
+    """Validate runbook required sections and metadata."""
+    violations: list[tuple[Path, str]] = []
+
+    for md_file in _runbook_files():
+        headings = _extract_headings(md_file)
+        frontmatter = _extract_frontmatter(md_file)
+
+        for section in REQUIRED_RUNBOOK_SECTIONS:
+            if section.casefold() not in headings:
+                violations.append((md_file, f"missing runbook section: {section}"))
+
+        if "compliance" not in " ".join(headings):
+            violations.append((md_file, "missing Compliance heading"))
+
+        last_verified = frontmatter.get("Last verified")
+        if not isinstance(last_verified, str) or not last_verified.strip():
+            violations.append((md_file, "missing Last verified frontmatter"))
+
+        version = frontmatter.get("Version")
+        version_str = str(version).strip() if version is not None else ""
+        if not SEMVER_RE.fullmatch(version_str):
+            violations.append((md_file, f"invalid Version SemVer: {version_str!r}"))
+
+    return violations
 
 
 def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
@@ -599,6 +734,11 @@ def main() -> int:
         help="Only check provider overview parity (providers README vs docs inventory)",
     )
     parser.add_argument(
+        "--doc-governance",
+        action="store_true",
+        help="Only check provider-spec/runbook sections, Compliance, Last verified, and Version SemVer",
+    )
+    parser.add_argument(
         "--not-in-nav-growth",
         action="store_true",
         help="Only check growth of markdown docs outside mkdocs nav baseline",
@@ -622,6 +762,7 @@ def main() -> int:
         or args.configs
         or args.contracts_index
         or args.provider_overview
+        or args.doc_governance
         or args.not_in_nav_growth
         or args.legacy_paths
         or args.legacy_paths_all
@@ -724,6 +865,31 @@ def main() -> int:
             violations += len(missing_in_readme) + len(extra_in_readme)
         else:
             print("ChEMBL provider overview: OK (README links match provider docs)")
+
+    if run_all or args.doc_governance:
+        provider_doc_violations = check_provider_spec_governance()
+        if provider_doc_violations:
+            print(f"\n{'=' * 60}")
+            print(f"PROVIDER SPEC GOVERNANCE VIOLATIONS ({len(provider_doc_violations)} found)")
+            print(f"{'=' * 60}")
+            for filepath, message in provider_doc_violations:
+                rel = filepath.relative_to(PROJECT_ROOT)
+                print(f"  {rel}: {message}")
+            violations += len(provider_doc_violations)
+        else:
+            print("Provider spec governance: OK")
+
+        runbook_violations = check_runbook_governance()
+        if runbook_violations:
+            print(f"\n{'=' * 60}")
+            print(f"RUNBOOK GOVERNANCE VIOLATIONS ({len(runbook_violations)} found)")
+            print(f"{'=' * 60}")
+            for filepath, message in runbook_violations:
+                rel = filepath.relative_to(PROJECT_ROOT)
+                print(f"  {rel}: {message}")
+            violations += len(runbook_violations)
+        else:
+            print("Runbook governance: OK")
 
     if run_all or args.not_in_nav_growth:
         current_count, baseline_count, added, removed, baseline_exists = (

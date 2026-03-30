@@ -99,12 +99,12 @@ but active docs in `docs/00-05` remain the source of truth.
 | Path | Role | Orientation |
 | --- | --- | --- |
 | `src/bioetl/` | Runtime source tree organized by the five-layer architecture | [Source Map](src/bioetl/README.md) |
-| `configs/` | Provider, entity, composite, and quality configuration assets | [configs/README.md](configs/README.md) |
-| `tests/` | Unit, integration, e2e, smoke, and architecture verification | `tests/` mirrors source concerns by scope |
+| `configs/` | Provider, entity, composite, contract, and quality configuration assets | [configs/README.md](configs/README.md) |
+| `tests/` | Unit, integration, e2e, smoke, contract, security, performance, and architecture verification | `tests/` mirrors source concerns by scope and policy surface |
 | `docs/` | Published documentation tree: canonical active docs plus selected extended mirrors | Start at [Project Map](docs/00-project/00-map.md) |
 | `docs/reports/` | Repo-only curated evidence and report artifacts (not published in MkDocs) | [docs/reports/index.md](docs/reports/index.md) |
 | `reports/` | Generated or working analysis outputs before curation | [reports/README.md](reports/README.md) |
-| `scripts/` | Operational and maintenance tooling | [scripts/README.md](scripts/README.md) |
+| `scripts/` | Canonical tooling by domain plus a small set of compatibility wrappers at repo root | [scripts/README.md](scripts/README.md) |
 
 The current top-level layout is intentionally stable. Structural improvements
 should usually target a specific family or navigation seam rather than trigger a

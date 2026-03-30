@@ -76,6 +76,11 @@ Last verified: '2026-03-30'
     *   Ensure you are partitioning on low-cardinality fields that are frequently used in `WHERE` clauses (e.g., `year`, `month`, `entity-type`).
     *   **Avoid over-partitioning**: Do not partition on high-cardinality fields like UUIDs or hashes. This creates a "small files" problem and slows down the metadata log. Refer to the partitioning limits in `RULES.md`.
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

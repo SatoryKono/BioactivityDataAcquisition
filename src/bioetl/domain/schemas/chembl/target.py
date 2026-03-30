@@ -33,8 +33,8 @@ class TargetSchema(ETLRecordSchema):
     )
 
     # === Classification ===
-    target_type: Series[str] | None = pa.Field(
-        nullable=True,
+    target_type: Series[str] = pa.Field(
+        nullable=False,
         isin=list(TARGET_TYPES),
         description="Target type.",
     )
@@ -55,8 +55,9 @@ class TargetSchema(ETLRecordSchema):
         isin=["acellular", "unicellular", "multicellular"],
         description="Organism cellularity classification.",
     )
-    species_group_flag: Series[bool] | None = pa.Field(
-        nullable=True,
+    species_group_flag: Series[bool] = pa.Field(
+        nullable=False,
+        coerce=False,
         description="Species group flag.",
     )
     description: Series[str] | None = pa.Field(
@@ -108,4 +109,4 @@ class TargetSchema(ETLRecordSchema):
 
         strict = True
         ordered = False
-        coerce = True
+        coerce = False

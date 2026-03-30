@@ -182,6 +182,46 @@ class TestActivityTransformerTransform:
         assert result["standard_flag"] == 1
 
     @pytest.mark.asyncio
+    async def test_transform_normalizes_bao_and_uo_identifiers(
+        self, transformer, mock_context
+    ):
+        """Mixed-form BAO/UO identifiers should collapse to canonical underscore form."""
+        record = {
+            "activity_id": 12345,
+            "molecule_id": "CHEMBL25",
+            "bao_endpoint": " bao:0000190 ",
+            "bao_format": "bao:0000218",
+            "uo_units": "uo:0000065",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["bao_endpoint"] == "BAO_0000190"
+        assert result["bao_format"] == "BAO_0000218"
+        assert result["uo_units"] == "UO_0000065"
+
+    @pytest.mark.asyncio
+    async def test_transform_normalizes_standard_units_and_preserves_qudt_uri(
+        self, transformer, mock_context
+    ):
+        """Canonical fields should normalize without rewriting raw unit or QUDT text."""
+        record = {
+            "activity_id": 12345,
+            "molecule_id": "CHEMBL25",
+            "standard_units": "nanomolar",
+            "units": "uM",
+            "qudt_units": " http://www.openphacts.org/units/Nanomolar ",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["standard_units"] == "nM"
+        assert result["units"] == "uM"
+        assert result["qudt_units"] == "http://www.openphacts.org/units/Nanomolar"
+
+    @pytest.mark.asyncio
     async def test_transform_with_quality_annotations(self, transformer, mock_context):
         """Test transformation with data quality annotations."""
         record = {

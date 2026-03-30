@@ -301,6 +301,11 @@ def test-activity-schema-handles-null-smiles():
 - New error type not in known issues
 - Upstream API changes suspected
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

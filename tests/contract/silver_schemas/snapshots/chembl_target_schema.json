@@ -227,8 +227,8 @@
     "coerce": false,
     "description": "Species group flag.",
     "dtype": "bool",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "target_component_synonyms": {
@@ -273,8 +273,8 @@
     "coerce": false,
     "description": "Target type.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "taxonomy_id": {

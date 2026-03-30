@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+import pyarrow as pa
 
 from bioetl.domain.exceptions import SchemaViolationError
 
@@ -130,6 +132,119 @@ class TestSilverWriterOptimize:
 
             with pytest.raises(TableNotFoundError):
                 await writer.optimize("nonexistent.table")
+
+
+@pytest.mark.unit
+class TestSilverWriterSchemaEvolutionRetry:
+    """Tests for schema evolution retry quirks in merge mode."""
+
+    @pytest.mark.asyncio
+    async def test_merge_pre_evolves_existing_table_before_first_merge(
+        self,
+    ) -> None:
+        """Existing tables should be schema-evolved before the first merge call."""
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.delta.resilience import (
+            DEFAULT_SILVER_MERGE_POLICY,
+        )
+        from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+        from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
+            _execute_merge_write_request,
+        )
+
+        table = MagicMock()
+        delta_table_factory = MagicMock(side_effect=[table, table])
+        write_deltalake = MagicMock()
+        load_module = MagicMock(
+            return_value=SimpleNamespace(
+                DeltaTable=delta_table_factory,
+                write_deltalake=write_deltalake,
+            )
+        )
+        merge_records = AsyncMock(return_value=None)
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="s3://bucket/silver/test.table",
+            arrow_data=pa.table({"entity_id": ["v1"], "new_field": ["x"]}),
+            primary_keys=["entity_id"],
+            partition_cols=None,
+            schema_mode=None,
+            merge_schema=True,
+        )
+
+        await _execute_merge_write_request(
+            request=request,
+            policy=DEFAULT_SILVER_MERGE_POLICY,
+            load_module=load_module,
+            write_append=AsyncMock(),
+            merge_records=merge_records,
+            emit_final=MagicMock(),
+            emit_retry=MagicMock(),
+            logger=MagicMock(),
+        )
+
+        assert write_deltalake.call_count == 1
+        assert delta_table_factory.call_count == 2
+        assert merge_records.await_count == 1
+        assert merge_records.await_args.kwargs["merge_schema"] is False
+
+    @pytest.mark.asyncio
+    async def test_merge_raises_when_duplicate_field_is_generic_exception_after_pre_evolution(
+        self,
+    ) -> None:
+        """Generic duplicate-field exceptions still surface after eager pre-evolution."""
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.delta.resilience import (
+            DEFAULT_SILVER_MERGE_POLICY,
+        )
+        from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+        from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
+            _execute_merge_write_request,
+        )
+
+        table = MagicMock()
+        delta_table_factory = MagicMock(side_effect=[table, table])
+        write_deltalake = MagicMock()
+        load_module = MagicMock(
+            return_value=SimpleNamespace(
+                DeltaTable=delta_table_factory,
+                write_deltalake=write_deltalake,
+            )
+        )
+        merge_records = AsyncMock(
+            side_effect=[
+                Exception("External error: Schema error: Duplicate field name: new_field"),
+                None,
+            ]
+        )
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="s3://bucket/silver/test.table",
+            arrow_data=pa.table({"entity_id": ["v1"], "new_field": ["x"]}),
+            primary_keys=["entity_id"],
+            partition_cols=None,
+            schema_mode=None,
+            merge_schema=True,
+        )
+
+        with pytest.raises(
+            Exception,
+            match="Duplicate field name: new_field",
+        ):
+            await _execute_merge_write_request(
+                request=request,
+                policy=DEFAULT_SILVER_MERGE_POLICY,
+                load_module=load_module,
+                write_append=AsyncMock(),
+                merge_records=merge_records,
+                emit_final=MagicMock(),
+                emit_retry=MagicMock(),
+                logger=MagicMock(),
+            )
+
+        assert write_deltalake.call_count == 1
+        assert merge_records.await_count == 1
+        assert merge_records.await_args.kwargs["merge_schema"] is False
 
 
 @pytest.mark.unit

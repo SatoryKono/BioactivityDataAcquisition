@@ -116,7 +116,8 @@ bioetl maintenance vacuum-all --dry-run
 
 ## Scheduled VACUUM (Cron)
 
-Для production рекомендуется настроить scheduled VACUUM через cron:
+Для long-running local или production-like профиля рекомендуется настроить
+scheduled VACUUM через cron:
 
 ### Еженедельный VACUUM
 
@@ -166,8 +167,8 @@ fi
 | Сценарий | Retention | Обоснование |
 |----------|-----------|-------------|
 | **Development** | 1 день | Минимум, экономия места |
-| **Staging** | 7 дней | Баланс между отладкой и хранением |
-| **Production** | 7-30 дней | Time travel для расследования инцидентов |
+| **Staging-like local profile** | 7 дней | Баланс между отладкой и хранением |
+| **Production-like local profile** | 7-30 дней | Time travel для расследования инцидентов |
 | **Compliance** | 30-90 дней | Требования аудита |
 
 ### Forensic Retention

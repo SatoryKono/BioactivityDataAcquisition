@@ -79,6 +79,11 @@ Last verified: '2026-03-30'
      - **Impact**: This may create duplicate records in the Bronze layer, but the merge/upsert logic in the Silver layer will handle deduplication, ensuring correctness.
   1. **Option B (Advanced)**: Manually determine the last successfully processed record ID or timestamp from the Silver table and create a new checkpoint file. This is faster but more error-prone.
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

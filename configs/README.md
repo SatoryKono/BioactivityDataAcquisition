@@ -14,6 +14,8 @@ configs/
 ├── entities/           # Canonical unified configs (single YAML per entity)
 │   └── {provider}/{entity}.yaml  # pipeline + schema + contracts + quality + filters + hash_policy
 ├── composites/         # Composite pipeline definitions (seed/enrichers/merge)
+│   └── field_groups/   # Retained composite field-group assets used by composite tooling/docs
+├── contracts/          # Retained provider contract inputs for selected contract/migration flows
 ├── quality/            # DQ override files (hierarchy; still active)
 │   └── entities/{provider}/{entity}.yaml
 ├── enums/              # Externalized enum value sets
@@ -54,6 +56,13 @@ Composite pipeline config is loaded from `configs/composites/*.yaml` through
 `src/bioetl/infrastructure/config/composite_config_api.py`. External
 `dq_overrides.dq_config_file` payloads are merged there before schema
 validation; composition-facing modules keep only thin compatibility/access seams.
+
+Retained supporting assets:
+- `configs/composites/field_groups/` stores composite-specific field-group data
+  still referenced by composite documentation/tooling.
+- `configs/contracts/` stores retained contract-oriented provider inputs used by
+  selected contract and migration workflows; the canonical runtime surface
+  remains `configs/entities/`.
 
 ## Key Config Sections (entity YAML)
 

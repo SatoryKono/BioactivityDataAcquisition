@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # Пайплайн: UniProt Protein
@@ -62,4 +62,59 @@ Last verified: '2026-03-29'
 
 ---
 
-*Последнее обновление: 2026-03-03*
+## Contract References
+
+| Артефакт | Ссылка |
+| --- | --- |
+| Gold contract export | [uniprot_protein_v1.0.json](../../contracts/gold/uniprot_protein_v1.0.json) |
+| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
+| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+
+---
+
+## Compliance
+
+| Контроль | Статус | Evidence |
+| --- | --- | --- |
+| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Runtime alignment | Pass | Активный config/runtime surface описан в разделах `Конфигурация` и `Процесс (ETL)` |
+| Contract linkage | Pass | [uniprot_protein_v1.0.json](../../contracts/gold/uniprot_protein_v1.0.json) |
+| API governance | Pass | См. [API Compliance](#api-compliance) |
+
+---
+
+## API Compliance
+
+### Rate limits & retries
+
+Официально доступные retrievable источники подтверждают, что UniProt REST API свободно доступен и не требует login/authentication, но не публикуют числовой rate limit. Клиент SHOULD использовать bounded exponential backoff и MUST NOT рассматривать внутренние project-config лимиты как provider contract. Provider-published numeric retry budget — [неуточнено].
+
+### 429 handling policy
+
+Явная HTTP `429` policy для `rest.uniprot.org` в доступных официальных источниках — [неуточнено]. При throttle или transient failures клиент SHOULD уменьшать частоту запросов и использовать backoff.
+
+### Authentication model
+
+UniProt explicitly describes the website REST API as free to use and states that there is no login or authentication requirement.
+
+### ToS URL
+
+- [неуточнено]
+
+### Data license
+
+UniProt publishes its RDF data under CC BY 4.0. The canonical REST API help/license page exists, but its machine-readable contents were not retrievable during this audit.
+
+### Personal data notes
+
+REST API data are protein-centric rather than user-centric. API-specific personal-data handling is [неуточнено] in the accessible official docs.
+
+### Official sources
+
+- [UniProt website API paper](https://academic.oup.com/nar/article/53/W1/W547/8126256)
+- [UniProt API documentation](https://www.uniprot.org/api-documentation)
+- [UniProt license page](https://www.uniprot.org/help/license)
+- [UniProt copyright page](https://www.uniprot.org/help/copyright)
+- [UniProt RDF void metadata](https://sparql.uniprot.org/.well-known/void)
+
+*Последнее обновление: 2026-03-30*

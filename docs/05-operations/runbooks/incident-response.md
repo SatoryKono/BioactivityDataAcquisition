@@ -92,6 +92,11 @@ Last verified: '2026-03-30'
 2.  **Tech Lead**: Notify stakeholders if P0/P1.
 3.  **Post-Mortem**: Required for all P0/P1 incidents within 48 hours.
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

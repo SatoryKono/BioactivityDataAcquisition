@@ -26,6 +26,7 @@ from bioetl.domain import context_filtering
 from bioetl.domain import lineage
 from bioetl.domain import mapping  # noqa: F401
 from bioetl.domain import normalization_authors
+from bioetl.domain import normalization_chembl
 from bioetl.domain import normalization_dates
 from bioetl.domain import normalization_pages
 from bioetl.domain import observability_contract
@@ -45,6 +46,7 @@ __all__ = [
     "get_version",
     "lineage",
     "normalization_authors",
+    "normalization_chembl",
     "normalization_dates",
     "normalization_pages",
     "observability_contract",

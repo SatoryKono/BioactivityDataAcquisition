@@ -251,8 +251,8 @@
     "coerce": false,
     "description": "BAO format.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "bao_label": {
@@ -342,8 +342,8 @@
     "coerce": false,
     "description": "Document ChEMBL ID.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "relationship_description": {

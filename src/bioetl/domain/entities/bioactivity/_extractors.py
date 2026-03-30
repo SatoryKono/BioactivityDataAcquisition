@@ -102,10 +102,39 @@ def _extract_activity_measurement_fields(raw_data: JsonDict) -> dict[str, object
     }
 
 
+def _first_truthy_value(raw_data: JsonDict, *field_names: str) -> object | None:
+    """Return the first truthy raw value across a set of alias fields."""
+    for field_name in field_names:
+        value = raw_data.get(field_name)
+        if value:
+            return value
+    return None
+
+
 def _extract_publication_fields(raw_data: JsonDict) -> dict[str, object]:
     return {
         "journal": _safe_str(raw_data.get("journal")),
         "publication_year": _safe_int(raw_data.get("publication_year")),
+        "publication_doi": _safe_str(
+            _first_truthy_value(raw_data, "publication_doi", "doi", "document_doi")
+        ),
+        "publication_pmid": _safe_str(
+            _first_truthy_value(
+                raw_data,
+                "publication_pmid",
+                "pmid",
+                "pubmed_id",
+                "document_pubmed_id",
+            )
+        ),
+        "publication_pmc_id": _safe_str(
+            _first_truthy_value(
+                raw_data,
+                "publication_pmc_id",
+                "pmc_id",
+                "document_pmc_id",
+            )
+        ),
         "action_type": _safe_str(raw_data.get("action_type")),
         "action_type_description": _safe_str(raw_data.get("action_type_description")),
         "action_type_parent_type": _safe_str(raw_data.get("action_type_parent_type")),

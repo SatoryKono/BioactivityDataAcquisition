@@ -106,9 +106,6 @@ class TestCircuitBreaker:
 
         assert cb.get_state() == CircuitBreakerState.OPEN
 
-        # Wait for recovery (0 seconds in test)
-        await asyncio.sleep(0.01)
-
         # Next call should be allowed (probe request)
         async def success() -> str:
             return "ok"
@@ -141,9 +138,6 @@ class TestCircuitBreaker:
 
         assert cb.get_state() == CircuitBreakerState.OPEN
         initial_trips = cb.get_trips_total()
-
-        # Wait for recovery
-        await asyncio.sleep(0.01)
 
         # Probe request should fail and reopen
         with pytest.raises(RuntimeError):
@@ -278,9 +272,6 @@ class TestCircuitBreakerMetrics:
         assert cb.get_state() == CircuitBreakerState.OPEN
         mock_metrics.reset_mock()
 
-        # Wait for recovery
-        await asyncio.sleep(0.01)
-
         # Probe request that triggers HALF_OPEN transition
         async def success() -> str:
             return "ok"
@@ -359,9 +350,6 @@ class TestCircuitBreakerMetrics:
 
         assert cb.get_state() == CircuitBreakerState.OPEN
         mock_metrics.reset_mock()
-
-        # Wait for recovery
-        await asyncio.sleep(0.01)
 
         # Failed probe request
         with pytest.raises(RuntimeError):

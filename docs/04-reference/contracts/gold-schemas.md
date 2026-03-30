@@ -159,6 +159,9 @@ gold_filters:
 | `molecule_id` | str | No | ID молекулы |
 | `target_id` | str | Yes | ID мишени |
 | `assay_id` | str | Yes | ID эксперимента |
+| `publication_doi` | str | Yes | DOI публикации |
+| `publication_pmid` | str | Yes | PubMed ID публикации |
+| `publication_pmc_id` | str | Yes | PubMed Central ID публикации |
 | `standard_type` | str | Yes | Тип метрики (IC50, Ki) |
 | `standard_value` | float | Yes | Значение активности |
 | `standard_units` | str | Yes | Единицы измерения |

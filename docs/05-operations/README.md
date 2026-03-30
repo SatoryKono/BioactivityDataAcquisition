@@ -16,7 +16,9 @@ Last verified: '2026-03-29'
 
 ## Overview
 
-This section contains operational documentation for managing BioETL in production.
+This section contains operational documentation for managing the supported
+BioETL runtime, including long-running local and production-like operator
+profiles.
 
 Default operational guidance in this section assumes the supported ADR-010
 runtime profile: single-instance, filesystem-backed, Local-Only execution.

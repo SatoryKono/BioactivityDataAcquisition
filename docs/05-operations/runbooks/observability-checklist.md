@@ -170,6 +170,11 @@ def test_adapters_have_health_check(src_dir: Path) -> None:
 
 - Run with: `make test-architecture`
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

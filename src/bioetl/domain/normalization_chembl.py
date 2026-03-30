@@ -1,0 +1,136 @@
+"""Pure normalization helpers for ChEMBL ontology, unit, and organism fields."""
+
+from __future__ import annotations
+
+import re
+
+from bioetl.domain.mapping.organism_classification import normalize_organism_name
+from bioetl.domain.normalization import normalize_string
+from bioetl.domain.services.value_validator_rules import normalize_unit_name
+
+__all__ = [
+    "normalize_bao_identifier",
+    "normalize_chembl_organism_name",
+    "normalize_qudt_unit",
+    "normalize_standard_unit",
+    "normalize_uo_identifier",
+]
+
+_BAO_IDENTIFIER_RE = re.compile(r"^bao[_:](\d+)$", re.IGNORECASE)
+_UO_IDENTIFIER_RE = re.compile(r"^uo[_:](\d+)$", re.IGNORECASE)
+_ORGANISM_TRAILING_ANNOTATION_RE = re.compile(r"\s+\(.*\)$")
+_ORGANISM_WHITESPACE_RE = re.compile(r"\s+")
+
+_ORGANISM_DISPLAY_NAME_MAP: dict[str, str] = {
+    "homo sapiens": "Homo sapiens",
+    "mus musculus": "Mus musculus",
+    "rattus norvegicus": "Rattus norvegicus",
+    "bos taurus": "Bos taurus",
+    "sus scrofa": "Sus scrofa",
+    "glycine max": "Glycine max",
+    "oryza sativa japonica group": "Oryza sativa japonica group",
+    "electrophorus electricus": "Electrophorus electricus",
+    "chlorocebus aethiops": "Chlorocebus aethiops",
+    "macaca fascicularis": "Macaca fascicularis",
+    "macaca mulatta": "Macaca mulatta",
+    "drosophila melanogaster": "Drosophila melanogaster",
+    "xenopus laevis": "Xenopus laevis",
+    "gallus gallus": "Gallus gallus",
+    "aspergillus niger": "Aspergillus niger",
+    "escherichia coli": "Escherichia coli",
+    "staphylococcus aureus": "Staphylococcus aureus",
+    "streptococcus pneumoniae": "Streptococcus pneumoniae",
+    "pseudomonas aeruginosa": "Pseudomonas aeruginosa",
+    "mycobacterium tuberculosis": "Mycobacterium tuberculosis",
+    "candida albicans": "Candida albicans",
+    "plasmodium falciparum": "Plasmodium falciparum",
+    "trypanosoma brucei": "Trypanosoma brucei",
+    "trypanosoma cruzi": "Trypanosoma cruzi",
+    "leishmania major": "Leishmania major",
+    "toxoplasma gondii": "Toxoplasma gondii",
+    "methanosarcina thermophila": "Methanosarcina thermophila",
+    "human immunodeficiency virus 1": "Human immunodeficiency virus 1",
+    "human immunodeficiency virus 2": "Human immunodeficiency virus 2",
+    "influenza a virus": "Influenza A virus",
+    "enterobacteria phage lambda": "Enterobacteria phage lambda",
+    "herpes simplex virus": "Herpes simplex virus",
+}
+
+_ORGANISM_DISPLAY_ALIASES: dict[str, str] = {
+    "e. coli": "Escherichia coli",
+}
+
+
+def _normalize_prefixed_identifier(
+    value: str | None,
+    *,
+    prefix: str,
+    pattern: re.Pattern[str],
+) -> str | None:
+    """Canonicalize ontology identifiers to ``PREFIX_0000000`` form."""
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+
+    match = pattern.fullmatch(normalized)
+    if match is not None:
+        return f"{prefix}_{match.group(1)}"
+
+    if normalized.lower().startswith(prefix.lower()):
+        return normalized.upper()
+    return normalized
+
+
+def normalize_bao_identifier(value: str | None) -> str | None:
+    """Normalize BAO identifiers to canonical underscore form."""
+    return _normalize_prefixed_identifier(
+        value,
+        prefix="BAO",
+        pattern=_BAO_IDENTIFIER_RE,
+    )
+
+
+def normalize_uo_identifier(value: str | None) -> str | None:
+    """Normalize Units Ontology identifiers to canonical underscore form."""
+    return _normalize_prefixed_identifier(
+        value,
+        prefix="UO",
+        pattern=_UO_IDENTIFIER_RE,
+    )
+
+
+def normalize_standard_unit(value: str | None) -> str | None:
+    """Normalize standard unit names using the shared activity-unit rules."""
+    normalized = normalize_string(value)
+    return normalize_unit_name(normalized) if normalized is not None else None
+
+
+def normalize_qudt_unit(value: str | None) -> str | None:
+    """Normalize QUDT values by trimming only.
+
+    Historical ChEMBL data stores full URIs, so this helper deliberately avoids
+    inventing a compact-ID policy.
+    """
+    return normalize_string(value)
+
+
+def normalize_chembl_organism_name(value: str | None) -> str | None:
+    """Normalize ChEMBL organism text while keeping display-friendly output."""
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+
+    cleaned = _ORGANISM_TRAILING_ANNOTATION_RE.sub("", normalized)
+    cleaned = _ORGANISM_WHITESPACE_RE.sub(" ", cleaned).strip()
+    if not cleaned:
+        return None
+
+    lowered_cleaned = cleaned.lower()
+    if lowered_cleaned in _ORGANISM_DISPLAY_ALIASES:
+        return _ORGANISM_DISPLAY_ALIASES[lowered_cleaned]
+
+    normalized_key = normalize_organism_name(cleaned)
+    if normalized_key is None:
+        return cleaned
+
+    return _ORGANISM_DISPLAY_NAME_MAP.get(normalized_key, cleaned)

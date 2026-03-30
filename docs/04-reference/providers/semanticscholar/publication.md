@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # Пайплайн: Semantic Scholar Publication
@@ -407,4 +407,58 @@ GET https://api.semanticscholar.org/graph/v1/paper/search?query=...&fields=...&l
 
 ---
 
-*Последнее обновление: 2026-03-03*
+## Contract References
+
+| Артефакт | Ссылка |
+| --- | --- |
+| Gold contract export | [semanticscholar_publication_v1.0.json](../../contracts/gold/semanticscholar_publication_v1.0.json) |
+| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
+| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+
+---
+
+## Compliance
+
+| Контроль | Статус | Evidence |
+| --- | --- | --- |
+| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Описание`, `Трансформация`, `API Reference` |
+| Contract linkage | Pass | [semanticscholar_publication_v1.0.json](../../contracts/gold/semanticscholar_publication_v1.0.json) |
+| API governance | Pass | См. [API Compliance](#api-compliance) |
+
+---
+
+## API Compliance
+
+### Rate limits & retries
+
+Semantic Scholar documents `1000 requests/second` shared across unauthenticated users for most public endpoints, and `1 request/second` as the introductory limit for an API key. Requests may be throttled further during heavy use. Clients SHOULD include an API key on every request and SHOULD retry with bounded exponential backoff.
+
+### 429 handling policy
+
+The overview docs say requests may be throttled further during heavy use, and the API License Agreement allows AI2 to throttle, suspend, or disable access if rate limits are exceeded. A concrete `Retry-After` contract is [неуточнено].
+
+### Authentication model
+
+Most endpoints are public without authentication, but some endpoints require an API key. The official best practice is to include the API key on every request.
+
+### ToS URL
+
+- https://www.semanticscholar.org/product/api/license
+
+### Data license
+
+API and S2 Data use are governed by the Semantic Scholar API License Agreement. The agreement says Response Data / S2 Data may be governed by accompanying licenses such as CC BY-NC or ODC-BY, and third-party content may impose additional terms.
+
+### Personal data notes
+
+The API may expose author and affiliation metadata, and the license agreement allows AI2 to collect Licensee Data, usage data, and aggregate statistics to operate and improve the API.
+
+### Official sources
+
+- [Semantic Scholar API overview](https://www.semanticscholar.org/product/api)
+- [Semantic Scholar public API FAQ](https://www.semanticscholar.org/faq/public-api)
+- [Semantic Scholar API License Agreement](https://www.semanticscholar.org/product/api/license)
+- [AI2 privacy policy](https://allenai.org/privacy-policy/2018-07-30)
+
+*Последнее обновление: 2026-03-30*
