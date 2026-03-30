@@ -5,12 +5,13 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-011: Отказ от механизма Watermark
 
 **Date:** 2025-12-23
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 
 ## Context
@@ -35,7 +36,7 @@ Last verified: '2026-03-29'
 2. **Full reload**: Для небольших датасетов (< 1M записей) полная перезагрузка эффективнее
 3. **Content-based deduplication**: Delta Lake merge по `content-hash` автоматически обрабатывает дубликаты
 
-## The Decision
+## Decision
 
 **Удаление механизма Watermark** из проекта:
 
@@ -160,7 +161,7 @@ class BasePipeline(ABC):
 2. **Limit параметр**: Ограничение количества записей для тестирования
 3. **Фильтрация на стороне API**: Использование query параметра для ограничения данных
 
-## Related ADRs
+## References
 
 - [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — сохраняется, меняется только механизм загрузки
 - [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer — упрощён, удалены watermark factories
@@ -169,9 +170,38 @@ class BasePipeline(ABC):
 - [ADR-030](ADR-030-publication-pagination-strategy.md): Publication Pagination Strategy — развивает концепцию полной загрузки
 - [ADR-031](ADR-031-loading-strategy-formalization.md): Loading Strategy Formalization — формализация стратегий загрузки
 
-## Migration Notes
+## Rollout
 
 При обновлении:
 1. Удалить поле `watermark-field` из конфигов пайплайнов
 2. Удалить метод `extract-watermark()` из кастомных пайплайнов
 3. Обновить тесты, использующие Watermark
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-011-remove-watermark-mechanism.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

@@ -5,14 +5,14 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-019: Observability Port Enforcement
 
 **Date:** 2025-12-26
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
-**Supersedes:** None
 **Related:** ADR-006 (Logger/Metrics Ports), ADR-017 (Observability Architecture)
 
 ## Context
@@ -24,7 +24,7 @@ Following the adoption of `LoggerPort` abstraction (ADR-006), there was still di
 
 This violated the principle that all layers should use ports, not concrete implementations.
 
-## The Decision
+## Decision
 
 We have chosen to:
 
@@ -204,3 +204,32 @@ test_no_structlog_import_in_application_interfaces PASSED
 - ADR-006: LoggerPort definition
 - ADR-017: Observability architecture overview
 - RULES.md §11: Anti-Patterns (structlog in application/interfaces)
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-019-observability-port-enforcement.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

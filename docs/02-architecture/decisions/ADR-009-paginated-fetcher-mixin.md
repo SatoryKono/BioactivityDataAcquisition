@@ -5,19 +5,20 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-009: PaginatedFetcherMixin Design
 
 **Date:** 2025-12-22
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 
 ## Context
 
 All data source adapters (ChEMBL, PubChem, UniProt) implement pagination, but each API uses different mechanisms (offset-based, cursor-based, page tokens). The pagination loop logic was duplicated across adapters, leading to inconsistent error handling and limit enforcement. A unified abstraction was needed.
 
-## The Decision
+## Decision
 
 We have implemented **`PaginatedFetcherMixin`** in `infrastructure/adapters/http/pagination.py`:
 
@@ -222,9 +223,44 @@ class UniProtAdapter(PaginatedFetcherMixin):
 
 > **Note:** ChEMBL uses a specialized `ChemblFetchPagingMixin` instead of the generic `PaginatedFetcherMixin`.
 
-## Related ADRs
+## References
 
 - ADR-007: Circuit Breaker (wraps fetch calls)
 - ADR-008: Graceful Shutdown (can interrupt pagination loop)
 - ADR-030: Full Scan Loading Strategy (uses pagination for complete data loads)
 - ADR-031: Loading Strategy Formalization (orchestrates paginated fetches across providers)
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-009-paginated-fetcher-mixin.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

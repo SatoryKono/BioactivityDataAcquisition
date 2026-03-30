@@ -1,0 +1,392 @@
+#!/usr/bin/env python3
+"""Populate exact Silver normalization detail strings in the ChEMBL matrix workbook."""
+
+from __future__ import annotations
+
+import argparse
+import copy
+import re
+import zipfile
+from pathlib import Path
+from typing import Final
+from xml.etree import ElementTree as ET
+
+PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
+DEFAULT_INPUT: Final[Path] = (
+    PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+)
+DEFAULT_OUTPUT: Final[Path] = (
+    PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+)
+DETAIL_HEADER: Final[str] = "Silver Normalisation Detail"
+NS: Final[dict[str, str]] = {
+    "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+    "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+    "pr": "http://schemas.openxmlformats.org/package/2006/relationships",
+}
+MAIN_NS: Final[str] = NS["a"]
+REL_NS: Final[str] = NS["r"]
+COL_RE: Final[re.Pattern[str]] = re.compile(r"[A-Z]+")
+
+_SOURCE_NORMALIZATION_DETAILS: Final[dict[str, str]] = {
+    "trim; blank_to_null": "trim; blank->null",
+    "runtime-managed": "runtime-managed",
+    "derived_from_transformer": "derived in transformer",
+    "numeric_only; blank_to_null": "numeric only; blank->null",
+    "trim; identifier_normalized": "trim; id normalized",
+    "trim; blank_to_null; controlled_vocabulary": "trim; blank->null; enum source",
+    "numeric_only": "numeric only",
+    "trim; blank_to_null; value_xor_text_value": "trim; blank->null; value xor text",
+    "derived_from_nested; trim; blank_to_null": "nested extract; trim; blank->null",
+    "numeric_only; value_xor_text_value; relation_required_if_value": (
+        "numeric only; value xor text; relation if value"
+    ),
+    "derived_from_nested; trim; blank_to_null; identifier_normalized": (
+        "nested extract; trim; blank->null; id norm"
+    ),
+    "derived_from_nested; trim; controlled_vocabulary": (
+        "nested extract; trim; enum source"
+    ),
+    "trim; blank_to_null; identifier_normalized": (
+        "trim; blank->null; id normalized"
+    ),
+    "trim; controlled_vocabulary": "trim; enum source",
+}
+
+_TOKEN_DETAILS: Final[dict[str, str]] = {
+    "passthrough": "scalar passthrough",
+    "invalid_type_to_null": "invalid type -> null",
+    "string_normalized": "normalized string",
+    "boolean_flag": "normalized boolean flag",
+    "entity_id_generated": "entity_id generated",
+    "content_hash_generated": "content hash generated",
+    "datetime_to_iso8601": "datetime -> ISO 8601",
+    "runtime_counter": "runtime counter",
+    "lineage_optional_normalized": "optional lineage normalized",
+    "renamed": "renamed to canonical column",
+    "nested_flattened": "nested field flattened",
+    "float_coerced": "safe_float coercion",
+    "integer_coerced": "safe_int/INT coercion",
+    "nullable_integer_as_float": "nullable int via float path",
+    "identifier_to_string": "identifier -> string",
+    "fallback_identifier_to_string": "fallback identifier -> string",
+    "taxonomy_id_validated": "taxonomy id validated",
+    "proposed_null_then_quarantine": "null first; quarantine later",
+    "json_serialized": "JSON serialized",
+    "runtime_lineage_injected": "runtime lineage injected",
+    "runtime_state_propagated": "runtime state propagated",
+    "runtime_managed": "runtime-managed field",
+}
+
+
+def _arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Populate exact per-row Silver normalization detail strings in the "
+            "canonical ChEMBL matrix workbook."
+        )
+    )
+    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="Input workbook.")
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook.")
+    return parser
+
+
+def _column_index(cell_ref: str) -> int:
+    letters = "".join(COL_RE.findall(cell_ref))
+    value = 0
+    for char in letters:
+        value = value * 26 + (ord(char) - ord("A") + 1)
+    return value
+
+
+def _column_letters(index: int) -> str:
+    letters = ""
+    value = index
+    while value:
+        value, remainder = divmod(value - 1, 26)
+        letters = chr(65 + remainder) + letters
+    return letters
+
+
+def _load_shared_strings(archive: zipfile.ZipFile) -> list[str]:
+    try:
+        root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
+    except KeyError:
+        return []
+    return ["".join(node.itertext()) for node in root.findall("a:si", NS)]
+
+
+def _sheet_targets(archive: zipfile.ZipFile) -> dict[str, str]:
+    workbook = ET.fromstring(archive.read("xl/workbook.xml"))
+    rels = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
+    rel_map = {
+        rel.attrib["Id"]: rel.attrib["Target"] for rel in rels.findall("pr:Relationship", NS)
+    }
+    targets: dict[str, str] = {}
+    for sheet in workbook.find("a:sheets", NS).findall("a:sheet", NS):
+        rel_id = sheet.attrib[f"{{{REL_NS}}}id"]
+        targets["xl/" + rel_map[rel_id].lstrip("/")] = sheet.attrib["name"]
+    return targets
+
+
+def _cell_text(cell: ET.Element, shared_strings: list[str]) -> str:
+    cell_type = cell.attrib.get("t")
+    if cell_type == "inlineStr":
+        inline = cell.find("a:is", NS)
+        return "".join(inline.itertext()) if inline is not None else ""
+    value_node = cell.find("a:v", NS)
+    if value_node is None:
+        return ""
+    value = value_node.text or ""
+    if cell_type == "s":
+        return shared_strings[int(value)]
+    return value
+
+
+def _set_cell_text(cell: ET.Element, value: str) -> None:
+    for child in list(cell):
+        if child.tag in {f"{{{MAIN_NS}}}v", f"{{{MAIN_NS}}}is"}:
+            cell.remove(child)
+    cell.set("t", "inlineStr")
+    is_node = ET.Element(f"{{{MAIN_NS}}}is")
+    text_node = ET.SubElement(is_node, f"{{{MAIN_NS}}}t")
+    if value.startswith(" ") or value.endswith(" "):
+        text_node.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+    text_node.text = value
+    cell.append(is_node)
+
+
+def _update_dimension(root: ET.Element, row_count: int, max_col_index: int) -> None:
+    dimension = root.find("a:dimension", NS)
+    if dimension is None:
+        return
+    max_col = _column_letters(max_col_index)
+    dimension.set("ref", f"A1:{max_col}{row_count}")
+
+
+def _append_or_update_cell(
+    row: ET.Element,
+    col_index: int,
+    value: str,
+    template_cell: ET.Element | None,
+) -> None:
+    ref = f"{_column_letters(col_index)}{row.attrib['r']}"
+    for cell in row.findall("a:c", NS):
+        if _column_index(cell.attrib["r"]) == col_index:
+            _set_cell_text(cell, value)
+            return
+
+    cell = ET.Element(f"{{{MAIN_NS}}}c")
+    cell.set("r", ref)
+    if template_cell is not None and "s" in template_cell.attrib:
+        cell.set("s", template_cell.attrib["s"])
+    _set_cell_text(cell, value)
+    row.append(cell)
+
+
+def _source_clause(source_norm: str) -> str | None:
+    return _SOURCE_NORMALIZATION_DETAILS.get(source_norm)
+
+
+def _split_tokens(value: str) -> list[str]:
+    return [token.strip() for token in value.split(";") if token.strip()]
+
+
+def _token_clauses(tokens: list[str], row: dict[str, str]) -> list[str]:
+    clauses: list[str] = []
+    source_field = row.get("Source Field", "")
+    silver_column = row.get("Silver column", "")
+
+    for token in tokens:
+        if token == "renamed" and source_field and silver_column and source_field != silver_column:
+            clauses.append(
+                f"`{source_field}` -> `{silver_column}`"
+            )
+            continue
+        clause = _TOKEN_DETAILS.get(token)
+        if clause:
+            clauses.append(clause)
+    return clauses
+
+
+def _override_detail(sheet_name: str, row: dict[str, str]) -> str | None:
+    silver_column = row.get("Silver column", "")
+    source_field = row.get("Source Field", "")
+
+    if sheet_name == "chembl_publication" and silver_column in {
+        "publication_doi",
+        "doi",
+    }:
+        return "DOI: strip prefix; trim; lower; invalid->null"
+    if sheet_name == "chembl_publication" and silver_column in {
+        "publication_pmid",
+        "pmid",
+    }:
+        return "PMID: digits only; int->str; invalid->null"
+    if sheet_name == "chembl_publication" and silver_column == "title":
+        return "normalize_title(): html strip; NFC; ws collapse"
+    if sheet_name == "chembl_publication" and silver_column == "abstract":
+        return "normalize_abstract(): html strip; NFC; ws collapse"
+    if sheet_name == "chembl_publication" and silver_column == "authors":
+        return "normalize_author_list(): parse -> JSON"
+    if sheet_name == "chembl_publication" and silver_column == "author_keys":
+        return "normalize_author_keys(): Surname_F pipe-joined"
+    if sheet_name == "chembl_publication" and silver_column == "publication_type":
+        return "doc_type -> canonical kebab-case type"
+    if sheet_name == "chembl_publication" and silver_column in {
+        "page_first",
+        "page_last",
+    }:
+        return "renamed page field; trimmed text passthrough"
+    if sheet_name == "chembl_publication" and silver_column == "publication_year":
+        return "publication_year via INT coercion"
+    if sheet_name == "chembl_publication" and silver_column == "creation_date":
+        return "nested chembl_release.creation_date passthrough"
+    if silver_column in {"bao_endpoint", "bao_format", "bao_label"}:
+        return "BAO passthrough; regex accepts _ and : forms"
+    if sheet_name == "chembl_activity" and silver_column == "target_taxonomy_id":
+        return "target_tax_id -> target_taxonomy_id; validate"
+    if sheet_name == "chembl_target" and silver_column == "organism_class":
+        return "derived via organism classifier; taxonomy first"
+    if sheet_name == "chembl_target" and silver_column == "taxonomy_id":
+        return "TaxonomyId.from_raw(): trim; int; invalid->null"
+    if sheet_name == "chembl_molecule" and silver_column == "canonical_smiles":
+        return "SMILES.from_raw(canonical=True); trim; empty->null"
+    if sheet_name == "chembl_molecule" and silver_column == "inchi_key":
+        return "InChIKey.from_raw(): trim; upper; pattern check"
+    if silver_column in {
+        "author_orcids",
+        "affiliation_list",
+        "publication_type_unified",
+        "publication_date",
+    }:
+        return "no extra ChEMBL-specific rewrite"
+    return None
+
+
+def _build_detail(sheet_name: str, row: dict[str, str]) -> str:
+    override = _override_detail(sheet_name, row)
+    if override is not None:
+        return override
+
+    parts: list[str] = []
+    source_norm = row.get("Source_Field_Normalisation", "")
+    silver_norm = row.get("Silver Normalisation", "")
+
+    source_clause = _source_clause(source_norm)
+    if source_clause:
+        parts.append(source_clause)
+
+    token_clauses = _token_clauses(_split_tokens(silver_norm), row)
+    parts.extend(token_clauses)
+
+    if not parts:
+        return "no extra normalization rule recorded"
+    detail = "; ".join(parts)
+    if len(detail) <= 50:
+        return detail
+    compact_parts = [part.replace("normalized", "norm") for part in parts]
+    detail = "; ".join(compact_parts)
+    if len(detail) <= 50:
+        return detail
+    return detail[:47].rstrip(" ;") + "..."
+
+
+def main() -> int:
+    args = _arg_parser().parse_args()
+    input_path = args.input.resolve()
+    output_path = args.output.resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_output_path = (
+        output_path.with_name(f".{output_path.stem}.tmp{output_path.suffix}")
+        if input_path == output_path
+        else output_path
+    )
+
+    with zipfile.ZipFile(input_path) as zin:
+        shared_strings = _load_shared_strings(zin)
+        sheet_targets = _sheet_targets(zin)
+
+        with zipfile.ZipFile(temp_output_path, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+            for info in zin.infolist():
+                data = zin.read(info.filename)
+                if info.filename not in sheet_targets:
+                    zout.writestr(copy.copy(info), data)
+                    continue
+                sheet_name = sheet_targets[info.filename]
+
+                root = ET.fromstring(data)
+                sheet_data = root.find("a:sheetData", NS)
+                rows = sheet_data.findall("a:row", NS)
+                if not rows:
+                    zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
+                    continue
+
+                header_row = rows[0]
+                header_map = {
+                    _column_index(cell.attrib["r"]): _cell_text(cell, shared_strings)
+                    for cell in header_row.findall("a:c", NS)
+                }
+                ordered_indexes = sorted(header_map)
+                max_col_index = max(ordered_indexes)
+                detail_col_index = next(
+                    (
+                        index
+                        for index, header in header_map.items()
+                        if header == DETAIL_HEADER
+                    ),
+                    max_col_index + 1,
+                )
+
+                note_template = next(
+                    (
+                        cell
+                        for cell in header_row.findall("a:c", NS)
+                        if _column_index(cell.attrib["r"]) == max_col_index
+                    ),
+                    None,
+                )
+                _append_or_update_cell(
+                    header_row,
+                    detail_col_index,
+                    DETAIL_HEADER,
+                    note_template,
+                )
+
+                for row in rows[1:]:
+                    row_map = {
+                        header_map[_column_index(cell.attrib["r"])]: _cell_text(
+                            cell, shared_strings
+                        )
+                        for cell in row.findall("a:c", NS)
+                        if _column_index(cell.attrib["r"]) in header_map
+                    }
+                    detail = _build_detail(sheet_name, row_map)
+                    template_cell = next(
+                        (
+                            cell
+                            for cell in row.findall("a:c", NS)
+                            if _column_index(cell.attrib["r"]) == max_col_index
+                        ),
+                        None,
+                    )
+                    _append_or_update_cell(row, detail_col_index, detail, template_cell)
+
+                _update_dimension(root, len(rows), max(max_col_index, detail_col_index))
+                zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
+
+    if temp_output_path != output_path:
+        temp_output_path.replace(output_path)
+
+    print(
+        {
+            "input": str(input_path),
+            "output": str(output_path),
+            "detail_header": DETAIL_HEADER,
+        }
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

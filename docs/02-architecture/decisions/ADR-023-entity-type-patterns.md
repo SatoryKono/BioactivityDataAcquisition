@@ -5,14 +5,14 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-023: Паттерны передачи entity_type в трансформерах
 
 **Date:** 2026-01-06
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
-**Relates to:** ADR-006 (Logger and Metrics Ports), ADR-017 (Observability Architecture)
 
 ## Context
 
@@ -88,7 +88,7 @@ class PubMedPublicationTransformer(BaseTransformer):
         )
 ```
 
-## The Decision
+## Decision
 
 ### 1. Auto-derive entity_type в BaseChemblTransformer
 
@@ -267,13 +267,48 @@ class BaseChemblTransformer(BaseTransformer):
 
 If more readable names needed, a mapping dictionary can be added later without breaking changes.
 
-## Related ADRs
+## References
 
 - **ADR-006**: Logger and Metrics Ports — defines MetricsPort used for observability
 - **ADR-017**: Observability Architecture — establishes O1 requirements for tracing and metrics
 - **ADR-020**: BasePipeline Decomposition — related transformer architecture decisions
 - **ADR-022**: NoOp Tracing — TracingPort and span attributes mentioned here
 
-## Related Documents
+## References
 
 - **Audit Report**: `docs/audits/entity_type-audit.md` — detailed analysis of all 19 transformers
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-023-entity-type-patterns.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

@@ -66,8 +66,7 @@ class TestFlappingBehavior:
             assert cb.get_state() == CircuitBreakerState.OPEN
             assert cb.get_trips_total() == cycle + 1
 
-            # Wait for recovery and succeed
-            await asyncio.sleep(0.01)
+            # recovery_timeout=0 means the next probe can run immediately
             result = await cb.call(succeed)
             assert result == "ok"
             assert cb.get_state() == CircuitBreakerState.CLOSED
@@ -103,7 +102,6 @@ class TestFlappingBehavior:
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
-        await asyncio.sleep(0.01)
         await cb.call(succeed)
 
         # Should have multiple gauge calls (CLOSED, OPEN, HALF_OPEN, CLOSED)
@@ -141,7 +139,6 @@ class TestFlappingBehavior:
 
         # 3 failed recovery probes
         for probe_attempt in range(3):
-            await asyncio.sleep(0.01)  # Wait for half-open
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
             assert cb.get_state() == CircuitBreakerState.OPEN
@@ -233,7 +230,6 @@ class TestRecoveryUnderLoad:
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
-        await asyncio.sleep(0.01)
 
         # Due to lock, concurrent calls are serialized
         # First will be probe, subsequent behavior depends on probe result
@@ -464,8 +460,6 @@ class TestConcurrentHalfOpenProbes:
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
-        await asyncio.sleep(0.01)
-
         # Multiple concurrent probes
         async def probe(delay: float) -> str:
             await asyncio.sleep(delay)
@@ -506,8 +500,6 @@ class TestConcurrentHalfOpenProbes:
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
-        await asyncio.sleep(0.01)
-
         # 50 concurrent recovery attempts
         tasks = [asyncio.create_task(cb.call(succeed)) for _ in range(50)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -547,8 +539,8 @@ class TestTimeoutBoundaryConditions:
 
         assert cb.get_state() == CircuitBreakerState.OPEN
 
-        # Wait exactly recovery_timeout + small buffer
-        await asyncio.sleep(recovery_timeout + 0.01)
+        # Simulate the timeout window elapsing without a real wait.
+        cb._last_failure_time -= recovery_timeout + 0.01
 
         # Should transition to HALF_OPEN and then CLOSED
         result = await cb.call(succeed)
@@ -575,8 +567,8 @@ class TestTimeoutBoundaryConditions:
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
-        # Wait 25% of recovery timeout (250ms) - far from boundary
-        await asyncio.sleep(recovery_timeout * 0.25)
+        # Simulate 25% of recovery timeout having elapsed.
+        cb._last_failure_time -= recovery_timeout * 0.25
 
         # Should still be blocked
         async def probe() -> str:
@@ -616,8 +608,8 @@ class TestTimeoutBoundaryConditions:
 
         retry_after_1 = exc1.value.retry_after
 
-        # Wait 0.2 seconds
-        await asyncio.sleep(0.2)
+        # Simulate more elapsed time before the second attempt.
+        cb._last_failure_time -= 0.2
 
         # Second attempt
         with pytest.raises(CircuitBreakerOpenError) as exc2:
@@ -661,7 +653,6 @@ class TestGracefulDegradationWithoutMetrics:
         assert cb.get_state() == CircuitBreakerState.OPEN
 
         # Test recovery
-        await asyncio.sleep(0.01)
         result = await cb.call(succeed)
         assert result == "ok"
 
@@ -696,7 +687,6 @@ class TestGracefulDegradationWithoutMetrics:
 
             assert cb.get_trips_total() == cycle + 1
 
-            await asyncio.sleep(0.01)
             await cb.call(succeed)
 
         assert cb.get_trips_total() == 3
@@ -845,5 +835,4 @@ class TestStateInvariantsUnderStress:
             previous_trips = current_trips
 
             # Recovery
-            await asyncio.sleep(0.01)
             await cb.call(succeed)

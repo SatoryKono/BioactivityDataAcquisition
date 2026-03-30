@@ -32,6 +32,7 @@ TARGET_COLUMNS: Final[tuple[str, ...]] = (
     "Silver Validation",
     "Source_Field_Validation",
     "Validation fail action",
+    "Silver Normalisation Detail",
 )
 COMPLEX_REVIEW_COLUMNS: Final[frozenset[str]] = frozenset(
     {

@@ -5,13 +5,14 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-006: Ports for Logger and Metrics
 
 **Date:** 2025-12-18
-**Last Updated:** 2025-12-25
+**Status:** Accepted
+**Last updated:** 2025-12-25
 **Decision makers:** @BioETL-Team
 
 ## Context
@@ -20,7 +21,7 @@ Logger and metrics dependencies were not consistently formalized as ports. The l
 
 Note: `domain/ports.py` was reorganized into a package `domain/ports/` with a facade. Import: `from bioetl.domain.ports import LoggerPort`.
 
-## The Decision
+## Decision
 
 We have chosen to:
 
@@ -162,16 +163,45 @@ Rejected because:
 ### Negative
 - Minor: Existing code using `BoundLogger` still works but should migrate to `LoggerPort`
 
-## Migration Path
+## Rollout
 
 1. New code should use `LoggerPort` directly
 2. Existing code using `BoundLogger` continues to work
 3. Gradual migration as files are modified
 
-## Related ADRs
+## References
 
 - [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes — logging constraints for reproducibility
 - [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — MetricsPort lifecycle management
 - [ADR-017](ADR-017-observability-architecture.md): Observability Architecture — extends this with TracingPort and full observability stack
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement — enforces LoggerPort usage in all layers
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — applies NoOp pattern established here to tracing
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-006-logger-metrics-ports.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

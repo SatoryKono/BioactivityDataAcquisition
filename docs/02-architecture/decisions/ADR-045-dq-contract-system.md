@@ -5,12 +5,13 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-045: Data Quality Contract System
 
 **Date:** 2026-03-26
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 
 ## Context
@@ -233,7 +234,7 @@ dq_contracts:
 4. **Performance Impact**: <10% overhead on pipeline execution time
 5. **Adoption Rate**: 100% of new pipelines use DQ contract system within 6 months
 
-## Rollout Plan
+## Rollout
 
 ### Phase 1: Foundation (Completed)
 - [x] Core DQ contract types and interfaces
@@ -259,7 +260,7 @@ dq_contracts:
 - [ ] Automated contract generation
 - [ ] Contract versioning system
 
-## Related Documents
+## References
 
 - [ADR-002: Medallion Architecture](ADR-002-medallion-architecture.md)
 - [ADR-017: Observability Architecture](ADR-017-observability-architecture.md)
@@ -271,3 +272,32 @@ dq_contracts:
 - **1.0** (2024-03-25): Initial draft
 - **1.1** (2024-03-28): Added implementation details
 - **1.2** (2024-04-01): Incorporated feedback from architecture review
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-045-dq-contract-system.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

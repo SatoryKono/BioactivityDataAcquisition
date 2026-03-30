@@ -5,15 +5,16 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-021: Внедрение DDD Aggregates в Domain Layer
 
 **Date:** 2025-12-29
+**Status:** Accepted (Implemented 2025-12-29)
 **Decision makers:** @BioETL-Team
 
-## Контекст
+## Context
 
 ### Мотивация
 
@@ -35,7 +36,7 @@ Last verified: '2026-03-29'
 - `src/bioetl/domain/types.py` — расширен новыми типами
 - `src/bioetl/domain/exceptions/` — добавлены DDD-исключения
 
-## Решение
+## Decision
 
 ### 1. Добавлены DDD Aggregates
 
@@ -175,7 +176,7 @@ src/bioetl/domain/
 └── ...
 ```
 
-## Последствия
+## Consequences
 
 ### Положительные
 
@@ -269,14 +270,14 @@ async def run(self) -> None:
         # Publish events...
 ```
 
-## Связанные документы
+## References
 
 - [ADR-020: Декомпозиция BasePipeline](ADR-020-basepipeline-decomposition.md) — рефакторинг application layer
 - [ADR-015: Pipeline Services Lifecycle](ADR-015-pipeline-services-lifecycle.md) — lifecycle management
 - [RULES.md §1.1](../../00-project/RULES.md) — Ports & Adapters Architecture
 - [docs/glossary.md](../../00-project/glossary.md) — Ubiquitous Language
 
-## Альтернативы рассмотренные
+## Alternatives Considered
 
 ### 1. Оставить простые dataclasses
 
@@ -295,3 +296,38 @@ async def run(self) -> None:
 - **Плюсы**: Разделение чтения и записи
 - **Минусы**: Over-engineering для текущего масштаба
 - **Решение**: Отклонено, рассмотреть при масштабировании
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-021-ddd-aggregates-adoption.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted (Implemented 2025-12-29)` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

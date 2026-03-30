@@ -5,13 +5,13 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-018: Строгая валидация Gold-схем
 
 **Date:** 2025-12-26
-**Accepted:** 2025-12-28
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 **Related:** ADR-035 (JSON Field Typing Policy)
 
@@ -19,7 +19,7 @@ Last verified: '2026-03-29'
 
 Gold-слой должен гарантировать качество данных для downstream consumers. Текущая реализация позволяет пайплайнам работать без определённой Gold-схемы, что может привести к несогласованности данных и проблемам интеграции.
 
-## The Decision
+## Decision
 
 Мы вводим **строгую валидацию Gold-схем** с feature flag для контролируемой миграции существующих пайплайнов.
 
@@ -272,7 +272,6 @@ src/bioetl/
 # infrastructure/validation/gold_validator.py
 import pandera as pa
 
-
 class GoldValidator:
     """Валидатор Gold-схем на основе Pandera."""
 
@@ -293,7 +292,6 @@ class GoldValidator:
 ```python
 # tests/unit/application/test_gold_validation.py
 
-
 def test-strict-validation-fails-without-schema():
     """strict-gold-validation=True без схемы должен падать."""
     config = PipelineConfig(
@@ -310,7 +308,6 @@ def test-strict-validation-fails-without-schema():
         await pipeline.validate-gold-schema(context)
 
     assert "requires Gold schema" in str(exc-info.value)
-
 
 def test-non-strict-validation-warns-without-schema(caplog):
     """strict-gold-validation=False без схемы должен логировать warning."""
@@ -397,7 +394,7 @@ def test-non-strict-validation-warns-without-schema(caplog):
 - Валидация интегрирована в `GoldWriter` через `_validate_schema_strict()` проверку
 - Feature flag находится в `RuntimeConfig` вместо `PipelineConfig` — централизованное управление
 
-## Related ADRs
+## References
 
 - [ADR-001](ADR-001-delta-lake-vs-parquet.md): Delta Lake vs Parquet — Gold layer uses Delta Lake
 - [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — Gold layer definition
@@ -411,3 +408,38 @@ def test-non-strict-validation-warns-without-schema(caplog):
 
 - `Series[object]` для JSON-like полей в Gold-контрактах считается нарушением контракта.
 - Миграция выполняется через dual-read совместимость 14 дней, затем обязательный backfill Delta-таблиц.
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-018-gold-strict-validation.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

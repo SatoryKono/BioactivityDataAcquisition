@@ -5,19 +5,20 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-004: Why Pydantic over Standard Dataclasses?
 
 **Date:** 2025-05-20
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 
 ## Context
 
 The project requires a robust way to define and validate data schemas, especially for data contracts between layers (e.g., API responses, records in Delta tables). The primary candidates were standard Python `dataclasses` and Pydantic.
 
-## The Decision
+## Decision
 
 We have chosen to use **Pydantic** for defining all data models and schemas throughout the application. Standard `dataclasses` should only be used for simple, internal data structures that do not require runtime validation.
 
@@ -49,9 +50,44 @@ While `dataclasses` provide a convenient way to create classes for storing data,
 *   **Dependency**: The project has a dependency on the Pydantic library.
 *   **Performance**: The runtime validation adds a small performance overhead compared to `dataclasses`. However, this is a negligible and worthwhile trade-off for the massive gains in data quality and developer productivity.
 
-## Related ADRs
+## References
 
 - [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes — requires consistent type handling
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — uses Pydantic/Pandera for Gold schema validation
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — uses dataclasses for domain aggregates (different concern)
 - [ADR-023](ADR-023-entity-type-patterns.md): Entity Type Patterns — defines entity modeling with Pydantic
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-004-pydantic-vs-dataclasses.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

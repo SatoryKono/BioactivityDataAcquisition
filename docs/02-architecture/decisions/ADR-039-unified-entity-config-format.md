@@ -5,13 +5,15 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-039: Unified Entity Configuration Format
 
 **Date:** 2026-02-24
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
+**Supersedes:** [ADR-025](ADR-025-pipeline-config-unification.md) (partial: active unified entity config format)
 **Related:** ADR-025 (Pipeline Config Unification), ADR-027 (DQ Rules Externalization), ADR-028 (Filter Rules Externalization), ADR-029 (Convention-based Config)
 
 ## Context
@@ -355,7 +357,7 @@ includes:
 - legacy `filters/entities` directory (21 файлов)
 - `configs/contracts/` (21 файлов)
 
-## Migration Guide
+## Rollout
 
 ### Добавление нового entity
 
@@ -406,3 +408,32 @@ contracts:
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-02-24 | Claude Code | Initial version — documenting completed implementation |
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-039-unified-entity-config-format.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `declared` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.

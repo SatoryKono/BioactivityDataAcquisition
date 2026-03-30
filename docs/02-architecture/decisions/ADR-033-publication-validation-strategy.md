@@ -1,15 +1,18 @@
 ---
 Version: 1.0.0
-Status: active
+Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # ADR-033: Publication Metadata Validation Strategy
 
+**Date:** <YYYY-MM-DD>
+**Status:** Accepted
+**Decision makers:** @BioETL-Team
 | Параметр          | Значение                                                                                                                                                                                                      |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Статус**        | Accepted (Levels 1,4 implemented; Level 2 partial; Levels 3,5 not yet realized — see Implementation Status)                                                                                                 |
@@ -19,10 +22,9 @@ Last verified: '2026-03-29'
 | **Связанные ADR** | [ADR-002](ADR-002-medallion-architecture.md) (Medallion Architecture), [ADR-014](ADR-014-deterministic-writes.md) (Deterministic Writes), [ADR-027](ADR-027-dq-rules-externalization.md) (DQ Externalization) |
 | **Заменяет**      | —                                                                                                                                                                                                             |
 | **Заменён**       | —                                                                                                                                                                                                             |
-
 ----------------------------------------------------------------------
 
-## Контекст
+## Context
 
 ### Проблема
 
@@ -89,7 +91,7 @@ Last verified: '2026-03-29'
 
 ----------------------------------------------------------------------
 
-## Решение
+## Decision
 
 ### Пятиуровневая стратегия валидации
 
@@ -322,7 +324,7 @@ dq-thresholds:
 
 ----------------------------------------------------------------------
 
-## Альтернативы
+## Alternatives Considered
 
 ### Альтернатива 1: Монолитная валидация в Pandera (отклонена)
 
@@ -384,7 +386,7 @@ dq-thresholds:
 
 ----------------------------------------------------------------------
 
-## Последствия
+## Consequences
 
 ### Позитивные
 
@@ -466,7 +468,7 @@ Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would ad
 
 ----------------------------------------------------------------------
 
-## Связанные решения
+## References
 
 - **ADR-002 (Medallion Architecture):** Валидация на Silver-слое, strict mode на Gold.
 - **ADR-014 (Deterministic Writes):** `content-hash` проверяется structural validation.
@@ -488,7 +490,7 @@ Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would ad
 
 ----------------------------------------------------------------------
 
-## Ссылки
+## References
 
 **Документация:**
 
@@ -511,3 +513,38 @@ Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would ad
 
 **Версия документа:** 1.1.0
 **Последнее обновление:** 2026-03-15
+
+## Compliance
+
+| Control | Requirement | Status | Evidence |
+|---|---|---|---|
+| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-033-publication-validation-strategy.md` |
+| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
+| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
+| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+
+## Rollout
+
+- Rollout steps MUST be sequenced before broad adoption.
+- Documentation, configuration, and test surfaces SHOULD be updated in the same change set when the decision is implemented.
+- Breaking or migration-sensitive adoption SHOULD include an explicit transition window.
+
+## Rollback
+
+- Rollback MUST identify the last known-good behavior or artifact set.
+- If the decision changes contracts, configuration, or storage semantics, rollback SHOULD include data and compatibility checks.
+- Rollback triggers SHOULD be observable through tests, runtime signals, or regression symptoms.
+
+## Verification
+
+- Verify architecture, configuration, and documentation changes against the current codebase.
+- Run the relevant tests, validators, or parity checks before considering the ADR fully adopted.
+- Confirm downstream docs and contracts reflect the same decision boundaries.
+
+## Acceptance Criteria
+
+- [ ] The decision is documented with current status, date, and owner metadata.
+- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
+- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.
