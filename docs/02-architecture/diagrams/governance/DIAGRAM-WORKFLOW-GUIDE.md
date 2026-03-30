@@ -1,6 +1,14 @@
-# Руководство по работе с диаграммами BioETL
+---
+Version: 1.1.1
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
 
-*Версия: 1.1.1 | Дата: 2026-03-19 | Основано на ADR-040 v3.0*
+# Руководство по работе с диаграммами BioETL
 
 ---
 

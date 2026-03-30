@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: Superseded (signal handlers removed; shutdown handled in canonical CLI domain command modules and application/core/lifecycle/shutdown.py)
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 > **Superseded:** Signal handlers удалены 2025-12-31.
 > Graceful shutdown обрабатывается в canonical CLI domain command modules
 > (`interfaces/cli/commands/domains/run/command.py`,

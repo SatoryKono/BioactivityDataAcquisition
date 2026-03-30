@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-018: Строгая валидация Gold-схем
 
-**Status:** Accepted
 **Date:** 2025-12-26
 **Accepted:** 2025-12-28
 **Decision makers:** @BioETL-Team

@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-040: Diagram Governance and Layout Policy
 
-**Status:** Accepted
 **Date:** 2026-02-25
 **Decision makers:** @BioETL-Team
 **Related:** ADR-005 (Layered Architecture), ADR-020 (Composition Layer)

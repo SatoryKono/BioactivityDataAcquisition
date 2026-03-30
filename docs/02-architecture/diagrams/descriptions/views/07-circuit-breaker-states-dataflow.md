@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Circuit Breaker States Dataflow
 
 - Исходная диаграмма: `views/07-circuit-breaker-states-dataflow.mermaid`

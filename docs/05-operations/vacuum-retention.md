@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # VACUUM и Retention в BioETL
 
-*Версия: 1.0 | Дата: 2026-01-01*
 *Reference: [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)*
 
 > Runtime profile: Local-Only single-instance. Все примеры предполагают локальные Delta-таблицы и локальные планировщики задач.

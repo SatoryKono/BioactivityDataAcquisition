@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Title: Five-Layer Import Matrix Enforcement (ARCH-001)
 
 - Исходная диаграмма: `foundation/27-import-matrix-enforcement.mmd`

@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 _Дата: 2026-02-27_  
 _Статус: Phase 1 + Phase 2 Nightly implemented (2026-02-27)_  
 _Связанные документы: diagram-modernization-program.md, diagrams/governance/policy.md, ADR-040_

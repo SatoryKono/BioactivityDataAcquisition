@@ -1,55 +1,80 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P2
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # VACUUM Procedures Runbook
 
-*Reference: [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md)*
+## Trigger
 
-> Runtime profile: Local-Only single-instance. VACUUM commands target local Delta tables only.
+- Run this procedure when Delta maintenance requires vacuum or retention validation.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-## Overview
+## Impact
 
-Delta Lake tables accumulate old versions of data files for time travel and ACID transactions. VACUUM removes files older than the retention period to reclaim storage.
+- Priority: P2.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
 
-**Note**: Pipeline-integrated VACUUM поддерживается, но по умолчанию выключен. Этот runbook покрывает ручные VACUUM операции и explicit enablement.
+## Preconditions
 
-## When to Run Manual VACUUM
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Overview
+
+- Delta Lake tables accumulate old versions of data files for time travel and ACID transactions. VACUUM removes files older than the retention period to reclaim storage.
+
+- **Note**: Pipeline-integrated VACUUM поддерживается, но по умолчанию выключен. Этот runbook покрывает ручные VACUUM операции и explicit enablement.
+
+### When to Run Manual VACUUM
 
 - After bulk data corrections
 - When storage usage is unexpectedly high
 - After schema evolution operations
 - During scheduled maintenance windows
 
-## Prerequisites
+### Prerequisites
 
 - Pipeline is **not running** (avoid conflicts)
 - Sufficient disk space for temporary files
 - Backup strategy in place
 
-## Automatic VACUUM
+### Automatic VACUUM
 
-VACUUM выполняется после успешного pipeline run только если он явно включён:
+- VACUUM выполняется после успешного pipeline run только если он явно включён:
 
 ```python
 # From PostrunService / MedallionLifecycleService
 await self.run_vacuum_if_enabled()
 ```
 
-Configuration in pipeline YAML:
+- Configuration in pipeline YAML:
 ```yaml
 maintenance:
   auto_vacuum: true
   vacuum_retention_days: 7
 ```
 
-CLI override for a single run:
+- CLI override for a single run:
 
 ```bash
 bioetl run --pipeline chembl_activity --vacuum-after-run --vacuum-retention-days 7
 ```
 
-## Manual VACUUM Procedures
+### Manual VACUUM Procedures
 
 ### Check Table Status
 
-Before VACUUM, check current table state:
+- Before VACUUM, check current table state:
 
 ```python
 from deltalake import DeltaTable
@@ -83,7 +108,7 @@ dt.vacuum(retention_hours=168, dry_run=True, enforce_retention_duration=False)
 dt.vacuum(retention_hours=168, dry_run=False, enforce_retention_duration=False)
 ```
 
-**Warning**: `enforce_retention_duration=False` bypasses the 7-day safety check. Only use in controlled scenarios.
+- **Warning**: `enforce_retention_duration=False` bypasses the 7-day safety check. Only use in controlled scenarios.
 
 ### VACUUM All Tables
 
@@ -113,9 +138,9 @@ vacuum_all_tables("data/silver")
 vacuum_all_tables("data/gold")
 ```
 
-## OPTIMIZE Operations
+### OPTIMIZE Operations
 
-In addition to VACUUM, consider running OPTIMIZE for query performance:
+- In addition to VACUUM, consider running OPTIMIZE for query performance:
 
 ```python
 from deltalake import DeltaTable
@@ -129,7 +154,7 @@ dt.optimize.compact()
 dt.optimize.z-order(columns=["molecule-chembl-id"])
 ```
 
-## Retention Guidelines
+### Retention Guidelines
 
 | Table Type | Retention | Justification |
 |------------|-----------|---------------|
@@ -138,48 +163,63 @@ dt.optimize.z-order(columns=["molecule-chembl-id"])
 | Gold | 7 days | Default, analytics |
 | Critical | 30 days | Forensic/compliance |
 
-## Troubleshooting
+### Troubleshooting
 
 ### VACUUM Hangs
 
-If VACUUM takes too long:
+- If VACUUM takes too long:
 1. Check for large number of files
 2. Consider running in batches by version range
 3. Increase retention to skip fewer files
 
 ### "Files still referenced" Error
 
-Files may still be referenced if:
+- Files may still be referenced if:
 - Active readers are using old versions
 - Time travel queries are running
 - Retention period not exceeded
 
-Solution: Wait for active operations to complete or increase retention.
+- Solution: Wait for active operations to complete or increase retention.
 
 ### Storage Not Freed
 
-After VACUUM, if storage isn't freed:
+- After VACUUM, if storage isn't freed:
 1. Check filesystem cache
 2. Verify VACUUM completed successfully
 3. Check for files outside Delta log management
 
-## Monitoring
+### Monitoring
 
-Track VACUUM metrics:
+- Track VACUUM metrics:
 - Time to complete
 - Files removed
 - Storage reclaimed
 - Table version after VACUUM
 
-Log example:
+- Log example:
 ```
 INFO  | vacuum_completed | table=chembl_activity | files_removed=150 | bytes_freed=524288000 | duration_s=45.2
 ```
 
-## Best Practices
+### Best Practices
 
 1. **Schedule during low-usage periods**
 2. **Always dry-run first** on production tables
 3. **Monitor storage trends** to adjust retention
 4. **Document VACUUM runs** in operations log
 5. **Test time travel** after VACUUM to ensure required history preserved
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

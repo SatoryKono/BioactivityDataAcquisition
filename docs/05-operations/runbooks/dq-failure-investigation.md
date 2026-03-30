@@ -1,21 +1,46 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P1
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # DQ Failure Investigation Runbook
 
-*Reference: [RULES.md §3.1.2](../../00-project/RULES.md#312-пороги-ошибок-батча-thresholds)*
+## Trigger
 
-> Runtime profile: Local-Only single-instance (ADR-010). DQ investigation operates on local Silver/Gold/Quarantine artifacts.
+- Run this procedure when data quality alerts, validation failures, or quarantine outcomes require investigation.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-## Overview
+## Impact
 
-Data Quality (DQ) checks ensure data integrity throughout the pipeline. This runbook covers investigating DQ threshold violations and data quality issues.
+- Priority: P1.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
 
-## DQ Thresholds
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Overview
+
+- Data Quality (DQ) checks ensure data integrity throughout the pipeline. This runbook covers investigating DQ threshold violations and data quality issues.
+
+### DQ Thresholds
 
 | Threshold | Default | Behavior                                              |
 | --------- | ------- | ----------------------------------------------------- |
 | Soft      | 5%      | Warning logged, pipeline continues                    |
 | Hard      | 20%     | Pipeline fails with exit code 83 (DATA-QUALITY-ERROR) |
 
-Configuration:
+- Configuration:
 
 ```yaml
 # configs/entities/chembl/activity.yaml
@@ -25,24 +50,24 @@ quality:
     hard_fail: 0.20  # 20%
 ```
 
-## Symptoms
+### Symptoms
 
 - Pipeline exits with code 83 (DATA-QUALITY-ERROR, DQ hard threshold)
 - Log messages: `DQ Soft Threshold exceeded`
 - Prometheus metric: `bioetl_dq_soft_threshold_exceeded`
 - Records in quarantine directory
 
-## Investigation Steps
+### Investigation Steps
 
 ### Step 1: Identify Failure Scope
 
-Check logs for DQ summary:
+- Check logs for DQ summary:
 
 ```bash
 grep "dq-check\|dq-threshold" logs/bioetl.log | tail -20
 ```
 
-Key log fields:
+- Key log fields:
 
 - `error_rate`: Percentage of quarantined records in the evaluated batch
 - `quarantined_count`: Absolute count
@@ -51,7 +76,7 @@ Key log fields:
 
 ### Step 2: Examine Quarantine Records
 
-Quarantined records are stored in unified Delta table:
+- Quarantined records are stored in unified Delta table:
 
 ```
 data/output/quarantine
@@ -62,7 +87,7 @@ data/output/quarantine
 bioetl quarantine inspect --pipeline chembl_activity --limit 10
 ```
 
-Quarantine record structure:
+- Quarantine record structure:
 
 ```json
 {
@@ -76,7 +101,7 @@ Quarantine record structure:
 
 ### Step 3: Categorize Errors
 
-Common DQ error categories:
+- Common DQ error categories:
 
 | Category        | Examples                 | Severity |
 | --------------- | ------------------------ | -------- |
@@ -94,19 +119,19 @@ bioetl quarantine stats --pipeline chembl_activity
 
 ### Step 4: Root Cause Analysis
 
-**Source Data Issues**
+- **Source Data Issues**
 
 - Check if upstream API changed response format
 - Verify API version in use
 - Compare with known-good historical data
 
-**Schema Evolution**
+- **Schema Evolution**
 
 - Check if new fields were added upstream
 - Verify transformer handles optional fields
 - Review schema validation rules
 
-**Pipeline Bug**
+- **Pipeline Bug**
 
 - Review recent code changes to transformer
 - Check for off-by-one errors in parsing
@@ -132,16 +157,15 @@ run_stats = df.group_by("_run_id").agg(
 print(run_stats)
 ```
 
-## Resolution Procedures
+### Resolution Procedures
 
 ### Option 1: Fix and Reprocess Quarantine
 
-For fixable issues (e.g., encoding, format):
+- For fixable issues (e.g., encoding, format):
 
 ```python
 import json
 from pathlib import Path
-
 
 def reprocess_quarantine(quarantine_dir: str, output_file: str) -> None:
     """Extract and fix quarantined records."""
@@ -171,7 +195,7 @@ def reprocess_quarantine(quarantine_dir: str, output_file: str) -> None:
 
 ### Option 2: Adjust Thresholds
 
-If DQ issues are expected (e.g., known data quality in source):
+- If DQ issues are expected (e.g., known data quality in source):
 
 ```yaml
 # Temporarily relax thresholds
@@ -181,11 +205,11 @@ pipeline:
     hard_fail_threshold: 0.30  # 30%
 ```
 
-**Warning**: Document why thresholds were changed!
+- **Warning**: Document why thresholds were changed!
 
 ### Option 3: Add Data Cleansing
 
-For systematic issues, add cleansing to transformer:
+- For systematic issues, add cleansing to transformer:
 
 ```python
 def transform(self, record: dict) -> dict:
@@ -203,7 +227,7 @@ def transform(self, record: dict) -> dict:
 
 ### Option 4: Skip Problematic Records
 
-For unfixable records, quarantine is the correct behavior:
+- For unfixable records, quarantine is the correct behavior:
 
 ```bash
 # View quarantine statistics
@@ -213,7 +237,7 @@ bioetl quarantine stats --pipeline chembl_activity
 bioetl quarantine purge --pipeline <pipeline-name> --older-than-days 30
 ```
 
-## Prevention
+### Prevention
 
 ### Add Schema Tests
 
@@ -227,13 +251,13 @@ def test-activity-schema-handles-null-smiles():
 
 ### Monitor DQ Trends
 
-Set up dashboards for:
+- Set up dashboards for:
 
 - DQ error rate over time
 - Error type distribution
 - Records quarantined per run
 
-Alert on:
+- Alert on:
 
 - Soft threshold exceeded
 - New error type appearing
@@ -241,7 +265,7 @@ Alert on:
 
 ### Document Known Issues
 
-Maintain a list of known DQ issues:
+- Maintain a list of known DQ issues:
 
 ```markdown
 # Known DQ Issues
@@ -252,9 +276,9 @@ Maintain a list of known DQ issues:
 | PubChem | compound | Invalid InChI | Skip record | Investigating |
 ```
 
-## Metrics
+### Metrics
 
-Key Prometheus metrics:
+- Key Prometheus metrics:
 
 - `bioetl-dq-records-processed-total{provider, entity}`
 - `bioetl-dq-records-passed-total{provider, entity}`
@@ -262,17 +286,32 @@ Key Prometheus metrics:
 - `bioetl-dq-soft-threshold-exceeded-total{provider, entity}`
 - `bioetl-dq-check-duration-ms{provider, entity}`
 
-## Provenance Notes
+### Provenance Notes
 
 - Silver metadata may include `dq_summary.rule_provenance` when the pipeline passes `dq_rule_provenance` into metadata assembly.
 - Gold metadata carries `dq_report_path` and schema contract metadata, but does not yet have a separate Gold-only `dq_rule_provenance` field.
 - Current DQ runtime is threshold-driven first; a fully contract-bound `contract_version -> rule_id -> disposition` chain is not yet a repo-wide invariant.
 
-## Escalation
+### Escalation
 
-Escalate if:
+- Escalate if:
 
 - Hard threshold exceeded for > 3 consecutive runs
 - Error rate increasing over time
 - New error type not in known issues
 - Upstream API changes suspected
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

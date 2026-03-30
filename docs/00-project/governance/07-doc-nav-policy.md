@@ -1,6 +1,14 @@
-# Documentation Navigation Policy
+---
+Version: 1.8.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
 
-*Version: 1.8 (2026-03-28)*
+# Documentation Navigation Policy
 
 ----------------------------------------------------------------------
 

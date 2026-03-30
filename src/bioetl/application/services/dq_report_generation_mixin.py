@@ -5,8 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.services._dq_report_layer_flows import (
+    generate_bronze_report,
+    generate_gold_report,
+    generate_silver_report,
+)
 from bioetl.application.services.dq_report_models import (
-    _DQ_REPORT_ERRORS,
     DQReportContext,
 )
 
@@ -116,77 +120,22 @@ class DQReportGenerationMixin:
         config: BronzeDQConfigPort,
     ) -> Path | None:
         """Generate Bronze DQ report."""
-        if not self._bronze_analyzer or not self._report_writer:
-            self._emit_dq_report_skipped_metric(
-                pipeline=context.pipeline_name,
-                stage="bronze",
-                reason="analyzer_or_writer_unavailable",
-            )
-            self._logger.warning(
-                "bronze_dq_report_skipped",
-                reason="analyzer or writer not available",
-                run_id=context.run_id,
-            )
-            return None
-
-        if context.bronze_records is None or context.bronze_batch_id is None:
-            self._emit_dq_report_skipped_metric(
-                pipeline=context.pipeline_name,
-                stage="bronze",
-                reason="no_bronze_data",
-            )
-            self._logger.warning(
-                "bronze_dq_report_skipped",
-                reason="no bronze data available",
-                run_id=context.run_id,
-            )
-            return None
-
-        try:
-            report = self._bronze_analyzer.analyze(
-                records=iter(context.bronze_records),
-                run_id=context.run_id,
-                pipeline=context.pipeline_name,
-                batch_id=context.bronze_batch_id,
-                source_file=context.bronze_source_file or "",
-                config=config,
-                timestamp=context.timestamp,
-            )
-
-            output_path: Path | None = None
-            if context.bronze_output_path:
-                output_path = Path(context.bronze_output_path)
-            elif config.output_path:
-                output_path = Path(config.output_path)
-
-            path = await self._report_writer.write_bronze_report(
-                report=report,
-                output_path=output_path,
-                format=config.get_format_enum(),
-                provider=context.provider,
-                entity=context.entity,
-                date_str=context.bronze_date_str,
-            )
-
-            self._logger.debug(
-                "bronze_dq_report_generated",
-                run_id=context.run_id,
-                path=str(path),
-                status=report.summary.overall_status.value,
-            )
-            self._emit_dq_report_generated_metric(
-                pipeline=context.pipeline_name,
-                stage="bronze",
-            )
-            return path
-
-        except _DQ_REPORT_ERRORS as e:
-            self._logger.error(
-                "bronze_dq_report_failed",
-                run_id=context.run_id,
-                error=str(e),
-            )
-            return None
+        return await generate_bronze_report(
+            context=context,
+            config=config,
+            analyzer=self._bronze_analyzer,
+            report_writer=self._report_writer,
+            logger=self._logger,
+            emit_skipped_metric=lambda pipeline, stage, reason: self._emit_dq_report_skipped_metric(
+                pipeline=pipeline,
+                stage=stage,
+                reason=reason,
+            ),
+            emit_generated_metric=lambda pipeline, stage: self._emit_dq_report_generated_metric(
+                pipeline=pipeline,
+                stage=stage,
+            ),
+        )
 
     async def _generate_silver_report(
         self,
@@ -194,83 +143,22 @@ class DQReportGenerationMixin:
         config: SilverDQConfigPort,
     ) -> Path | None:
         """Generate Silver DQ report."""
-        if not self._silver_analyzer or not self._report_writer:
-            self._emit_dq_report_skipped_metric(
-                pipeline=context.pipeline_name,
-                stage="silver",
-                reason="analyzer_or_writer_unavailable",
-            )
-            self._logger.warning(
-                "silver_dq_report_skipped",
-                reason="analyzer or writer not available",
-                run_id=context.run_id,
-            )
-            return None
-
-        if context.silver_data is None or context.silver_target_table is None:
-            self._emit_dq_report_skipped_metric(
-                pipeline=context.pipeline_name,
-                stage="silver",
-                reason="no_silver_data",
-            )
-            self._logger.warning(
-                "silver_dq_report_skipped",
-                reason="no silver data available",
-                run_id=context.run_id,
-            )
-            return None
-
-        try:
-            report = self._silver_analyzer.analyze(
-                data=context.silver_data,
-                run_id=context.run_id,
-                pipeline=context.pipeline_name,
-                target_table=context.silver_target_table,
-                source_batch_ids=context.silver_source_batch_ids or [],
-                config=config,
-                timestamp=context.timestamp,
-                primary_keys=context.silver_primary_keys or [],
-                soft_fail_threshold=context.dq_soft_threshold,
-                hard_fail_threshold=context.dq_hard_threshold,
-                input_record_count=context.silver_input_count,
-                quarantined_count=context.silver_quarantined_count,
-                previous_schema=context.silver_previous_schema,
-                key_nullability_rules=context.silver_key_nullability_rules,
-            )
-
-            output_path: Path | None = None
-            if context.silver_output_path:
-                output_path = Path(context.silver_output_path)
-            elif config.output_path:
-                output_path = Path(config.output_path)
-
-            path = await self._report_writer.write_silver_report(
-                report=report,
-                output_path=output_path,
-                format=config.get_format_enum(),
-                provider=context.provider,
-                entity=context.entity,
-            )
-
-            self._logger.debug(
-                "silver_dq_report_generated",
-                run_id=context.run_id,
-                path=str(path),
-                status=report.summary.overall_status.value,
-            )
-            self._emit_dq_report_generated_metric(
-                pipeline=context.pipeline_name,
-                stage="silver",
-            )
-            return path
-
-        except _DQ_REPORT_ERRORS as e:
-            self._logger.error(
-                "silver_dq_report_failed",
-                run_id=context.run_id,
-                error=str(e),
-            )
-            return None
+        return await generate_silver_report(
+            context=context,
+            config=config,
+            analyzer=self._silver_analyzer,
+            report_writer=self._report_writer,
+            logger=self._logger,
+            emit_skipped_metric=lambda pipeline, stage, reason: self._emit_dq_report_skipped_metric(
+                pipeline=pipeline,
+                stage=stage,
+                reason=reason,
+            ),
+            emit_generated_metric=lambda pipeline, stage: self._emit_dq_report_generated_metric(
+                pipeline=pipeline,
+                stage=stage,
+            ),
+        )
 
     async def _generate_gold_report(
         self,
@@ -278,79 +166,22 @@ class DQReportGenerationMixin:
         config: GoldDQConfigPort,
     ) -> Path | None:
         """Generate Gold DQ report."""
-        if not self._gold_analyzer or not self._report_writer:
-            self._emit_dq_report_skipped_metric(
-                pipeline=context.pipeline_name,
-                stage="gold",
-                reason="analyzer_or_writer_unavailable",
-            )
-            self._logger.warning(
-                "gold_dq_report_skipped",
-                reason="analyzer or writer not available",
-                run_id=context.run_id,
-            )
-            return None
-
-        if context.gold_data is None or context.gold_target_table is None:
-            self._emit_dq_report_skipped_metric(
-                pipeline=context.pipeline_name,
-                stage="gold",
-                reason="no_gold_data",
-            )
-            self._logger.warning(
-                "gold_dq_report_skipped",
-                reason="no gold data available",
-                run_id=context.run_id,
-            )
-            return None
-
-        try:
-            report = self._gold_analyzer.analyze(
-                data=context.gold_data,
-                run_id=context.run_id,
-                pipeline=context.pipeline_name,
-                target_table=context.gold_target_table,
-                config=config,
-                timestamp=context.timestamp,
-                required_fields=context.gold_required_fields,
-                business_rules=context.gold_business_rules,
-                baseline_stats=context.gold_baseline_stats,
-                scd_config=context.gold_scd_config,
-            )
-
-            output_path: Path | None = None
-            if context.gold_output_path:
-                output_path = Path(context.gold_output_path)
-            elif config.output_path:
-                output_path = Path(config.output_path)
-
-            path = await self._report_writer.write_gold_report(
-                report=report,
-                output_path=output_path,
-                format=config.get_format_enum(),
-                provider=context.provider,
-                entity=context.entity,
-            )
-
-            self._logger.debug(
-                "gold_dq_report_generated",
-                run_id=context.run_id,
-                path=str(path),
-                status=report.summary.overall_status.value,
-            )
-            self._emit_dq_report_generated_metric(
-                pipeline=context.pipeline_name,
-                stage="gold",
-            )
-            return path
-
-        except _DQ_REPORT_ERRORS as e:
-            self._logger.error(
-                "gold_dq_report_failed",
-                run_id=context.run_id,
-                error=str(e),
-            )
-            return None
+        return await generate_gold_report(
+            context=context,
+            config=config,
+            analyzer=self._gold_analyzer,
+            report_writer=self._report_writer,
+            logger=self._logger,
+            emit_skipped_metric=lambda pipeline, stage, reason: self._emit_dq_report_skipped_metric(
+                pipeline=pipeline,
+                stage=stage,
+                reason=reason,
+            ),
+            emit_generated_metric=lambda pipeline, stage: self._emit_dq_report_generated_metric(
+                pipeline=pipeline,
+                stage=stage,
+            ),
+        )
 
 
 __all__ = ["DQReportGenerationMixin"]

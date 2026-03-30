@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-035: JSON Field Typing Policy (Silver ↔ Gold)
 
-**Status:** Accepted
 **Date:** 2026-02-17
 **Decision makers:** @BioETL-Team
 **Related:** RULES.md §Schema Typing Policy, ADR-018, ADR-034

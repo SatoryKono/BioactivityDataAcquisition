@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Release Checklist v5.9.0
 
 > **Historical Document**: This checklist was created for BioETL v5.9.0 (verified 2026-01-13).

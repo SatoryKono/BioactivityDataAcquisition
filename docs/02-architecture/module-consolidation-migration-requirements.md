@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Draft (обязательные критерии для RFC/ADR и implementation plan).
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Требования к плану консолидации модулей BioETL
 
-*Статус: Draft (обязательные критерии для RFC/ADR и implementation plan).*  
 *Область: `src/bioetl/**`.*
 
 ## 1) Обязательная карта перемещения модулей по каждому варианту

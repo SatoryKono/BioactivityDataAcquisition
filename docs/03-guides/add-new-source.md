@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Guide: Add a New Provider
 
 This guide describes the current (v6.x) process for adding a **new external provider** to BioETL.

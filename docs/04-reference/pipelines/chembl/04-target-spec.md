@@ -1,6 +1,14 @@
-# ChEMBL Target Pipeline Deep Spec
-
+---
+Version: 1.0.0
 Status: Historical deep spec.
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
+# ChEMBL Target Pipeline Deep Spec
 
 This page is retained for historical context only. It predates the current snake_case unified config and field naming contract and should not be used as the canonical source for new work.
 

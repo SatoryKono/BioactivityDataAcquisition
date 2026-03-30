@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Политика файлов и директорий
 
 *Синхронизировано с RULES.md v5.24 | Последнее обновление: 2026-03-20*
@@ -256,4 +266,3 @@ pre-commit run validate-pipeline-configs --all-files
 - [04-extending-bioetl.md](04-extending-bioetl.md) — Добавление новых pipeline
 
 ----------------------------------------------------------------------
-

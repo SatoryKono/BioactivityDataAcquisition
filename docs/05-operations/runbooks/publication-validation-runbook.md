@@ -1,15 +1,35 @@
-# Operational Runbook: Publication Validation
-
-**Версия:** 1.0.0
-**Дата:** 2026-02-06
-**Для:** DevOps, Data Engineers, Support
-**Связанный ADR:** ADR-033
-
-> Runtime profile: Local-Only single-instance (ADR-010). Validation and triage steps assume local process/log/data context.
-
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P1
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
 ---
 
-## Содержание
+# Operational Runbook: Publication Validation
+
+## Trigger
+
+- Run this procedure when publication validation fails or publication evidence must be triaged before release.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
+
+## Impact
+
+- Priority: P1.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
+
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Содержание
 
 1. [Обзор](#обзор)
 2. [Мониторинг и алерты](#мониторинг-и-алерты)
@@ -18,34 +38,34 @@
 5. [Escalation Path](#escalation-path)
 6. [Контакты и ресурсы](#контакты-и-ресурсы)
 
----
+- ---
 
-## Обзор
+### Обзор
 
-Данный runbook описывает процедуры диагностики и устранения сбоев в **5-уровневой валидационной системе** для публикационных данных BioETL.
+- Данный runbook описывает процедуры диагностики и устранения сбоев в **5-уровневой валидационной системе** для публикационных данных BioETL.
 
-**Validation Levels:**
+- **Validation Levels:**
 1. Base Validation (Pandera)
 2. Structural Validation
 3. External Verification
 4. Logical Validation
 5. Semantic Validation
 
-**Key Metrics:**
+- **Key Metrics:**
 - **DQ Pass Rate** — процент записей без ошибок/предупреждений
 - **WARN Rate** — процент записей с `-dq-warn=True`
 - **FAIL Rate** — процент отклонённых записей
 - **Validation Latency** — время выполнения валидации (per level)
 
----
+- ---
 
-## Мониторинг и алерты
+### Мониторинг и алерты
 
 ### Критичные алерты (P1 — немедленная реакция)
 
 #### Alert: HighFailRate
 
-**Триггер:**
+- **Триггер:**
 ```promql
 (
   bioetl_validation_failed_total /
@@ -53,9 +73,9 @@
 ) > 0.10
 ```
 
-**Описание:** Более 10% записей отклонены валидацией
+- **Описание:** Более 10% записей отклонены валидацией
 
-**Действия:**
+- **Действия:**
 1. Проверить логи последних запусков:
    ```bash
    # Посмотреть ошибки за последний час
@@ -77,18 +97,18 @@
 3. Если проблема в **Base Validation** → проверить схему (см. [Base Validation Failures](#level-1-base-validation-failures))
 4. Если проблема в **External Verification** → проверить доступность API (см. [External Verification Failures](#level-3-external-verification-failures))
 
----
+- ---
 
 #### Alert: ValidationLatencyHigh
 
-**Триггер:**
+- **Триггер:**
 ```promql
 histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 ```
 
-**Описание:** P95 validation latency > 5 минут
+- **Описание:** P95 validation latency > 5 минут
 
-**Действия:**
+- **Действия:**
 1. Проверить, какой уровень валидации медленный:
    ```bash
    # Latency по уровням
@@ -115,13 +135,13 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
        --skip-semantic
      ```
 
----
+- ---
 
 ### Предупреждающие алерты (P2 — реакция в течение 4 часов)
 
 #### Alert: HighWarnRate
 
-**Триггер:**
+- **Триггер:**
 ```promql
 (
   bioetl_validation_warned_total /
@@ -129,9 +149,9 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 ) > 0.20
 ```
 
-**Описание:** Более 20% записей в карантине (`-dq-warn=True`)
+- **Описание:** Более 20% записей в карантине (`-dq-warn=True`)
 
-**Действия:**
+- **Действия:**
 1. Проверить топ правил, вызывающих WARN:
    ```bash
    cat logs/bioetl.log | \
@@ -152,13 +172,13 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 
 4. **Не требует немедленного action** — записи в карантине доступны для анализа
 
----
+- ---
 
-## Диагностика по уровням валидации
+### Диагностика по уровням валидации
 
 ### Level 1: Base Validation Failures
 
-**Симптом:** Pandera `SchemaError`, записи отклонены на первом уровне
+- **Симптом:** Pandera `SchemaError`, записи отклонены на первом уровне
 
 #### Диагностика
 
@@ -182,7 +202,7 @@ cat logs/bioetl.log | \
 
 #### Типичные проблемы
 
-**Проблема 1: Regex mismatch**
+- **Проблема 1: Regex mismatch**
 
 ```bash
 # Пример: DOI не проходит валидацию
@@ -218,7 +238,7 @@ for doi in bad_dois:
 PY
 ```
 
-**Решение:**
+- **Решение:**
 - Обновить трансформер для удаления префикса `doi:`:
   ```python
   # src/bioetl/application/pipelines/crossref/transformer.py
@@ -229,9 +249,9 @@ PY
       return doi
   ```
 
----
+- ---
 
-**Проблема 2: NULL в non-nullable полях**
+- **Проблема 2: NULL в non-nullable полях**
 
 ```bash
 # Проверить NULL в Primary Key на sample Bronze batch
@@ -257,7 +277,7 @@ for row in null_pk[:5]:
 PY
 ```
 
-**Решение:**
+- **Решение:**
 - Фильтровать NULL PK в адаптере перед записью в Bronze:
   ```python
   # src/bioetl/infrastructure/adapters/pubmed/client.py
@@ -269,9 +289,9 @@ PY
           yield record
   ```
 
----
+- ---
 
-**Проблема 3: Неправильный тип данных**
+- **Проблема 3: Неправильный тип данных**
 
 ```bash
 # Проверить типы данных
@@ -285,7 +305,7 @@ print(df[~df['publication-year'].apply(lambda x: isinstance(x, (int, float, type
 "
 ```
 
-**Решение:**
+- **Решение:**
 - Добавить coercion в трансформере:
   ```python
   def transform-publication-year(raw-year: Any) -> int | None:
@@ -298,11 +318,11 @@ print(df[~df['publication-year'].apply(lambda x: isinstance(x, (int, float, type
           return None
   ```
 
----
+- ---
 
 ### Level 2: Structural Validation Warnings
 
-**Симптом:** `-dq-warn=True` из-за нарушения межполевых правил
+- **Симптом:** `-dq-warn=True` из-за нарушения межполевых правил
 
 #### Диагностика
 
@@ -331,7 +351,7 @@ print(invalid-pages[['pmid', 'page_first', 'page_last', '_dq_warn']].head(10))
 
 #### Типичные проблемы
 
-**Проблема: Year mismatch между `publication_year` и `publication_date`**
+- **Проблема: Year mismatch между `publication_year` и `publication_date`**
 
 ```bash
 # Найти несоответствия
@@ -350,7 +370,7 @@ print(mismatches[['doi', 'publication_year', 'publication_date']].head(10))
 "
 ```
 
-**Решение:**
+- **Решение:**
 - Использовать `publication_date` как source of truth:
   ```python
   def transform(self, raw: RawRecord) -> TransformedRecord:
@@ -367,11 +387,11 @@ print(mismatches[['doi', 'publication_year', 'publication_date']].head(10))
       )
   ```
 
----
+- ---
 
 ### Level 3: External Verification Failures
 
-**Симптом:** HTTP 404/timeout от upstream API, `_dq_warn=True`
+- **Симптом:** HTTP 404/timeout от upstream API, `_dq_warn=True`
 
 #### Диагностика
 
@@ -396,7 +416,7 @@ cat logs/bioetl.log | \
 
 #### Типичные проблемы
 
-**Проблема 1: CrossRef API rate limit (HTTP 429)**
+- **Проблема 1: CrossRef API rate limit (HTTP 429)**
 
 ```bash
 # Проверить rate limit конфигурацию
@@ -406,7 +426,7 @@ cat config/crossref-validation.yaml | grep -A5 "external-verification"
 # rate-limit: 50  # requests per second
 ```
 
-**Решение:**
+- **Решение:**
 - Снизить rate limit:
   ```yaml
   # config/crossref-validation.yaml
@@ -433,9 +453,9 @@ cat config/crossref-validation.yaml | grep -A5 "external-verification"
       return VerificationResult(status="WARN", found=False)
   ```
 
----
+- ---
 
-**Проблема 2: PubMed NCBI API timeout**
+- **Проблема 2: PubMed NCBI API timeout**
 
 ```bash
 # Проверить timeout конфигурацию
@@ -445,7 +465,7 @@ cat config/pubmed-validation.yaml | grep -A2 "timeout"
 # timeout: 10.0  # seconds
 ```
 
-**Решение:**
+- **Решение:**
 - Увеличить timeout для PubMed (NCBI часто медленный):
   ```yaml
   external-verification:
@@ -455,9 +475,9 @@ cat config/pubmed-validation.yaml | grep -A2 "timeout"
         rate-limit: 2  # Lower than default 3 to reduce load
   ```
 
----
+- ---
 
-**Проблема 3: API недоступен (network issue)**
+- **Проблема 3: API недоступен (network issue)**
 
 ```bash
 # Проверить сетевую связность
@@ -471,7 +491,7 @@ nslookup api.crossref.org
 curl -v --connect-timeout 5 https://api.crossref.org/
 ```
 
-**Решение:**
+- **Решение:**
 - Временно отключить External Verification:
   ```bash
   bioetl run \
@@ -489,11 +509,11 @@ curl -v --connect-timeout 5 https://api.crossref.org/
         enabled: false  # Disable temporarily
   ```
 
----
+- ---
 
 ### Level 4: Logical Validation Warnings
 
-**Симптом:** `-dq-warn=True` из-за нарушения бизнес-правил
+- **Симптом:** `-dq-warn=True` из-за нарушения бизнес-правил
 
 #### Диагностика
 
@@ -520,7 +540,7 @@ print(invalid-years[['pmid', 'publication-year', '-dq-warn']].head(10))
 
 #### Типичные проблемы
 
-**Проблема: Publication year в будущем (> CURRENT-YEAR + 1)**
+- **Проблема: Publication year в будущем (> CURRENT-YEAR + 1)**
 
 ```bash
 # Найти записи с future year
@@ -535,7 +555,7 @@ print(future-years[['openalex-id', 'publication-year', 'title']].head())
 "
 ```
 
-**Решение:**
+- **Решение:**
 - **Не исправлять автоматически** (может быть preprint с корректной датой)
 - Пометить как WARN, оставить для ручного review
 - Если точно ошибка — обновить в Bronze:
@@ -546,9 +566,9 @@ print(future-years[['openalex-id', 'publication-year', 'title']].head())
   WHERE publication-year = 2099;
   ```
 
----
+- ---
 
-**Проблема: Negative citations**
+- **Проблема: Negative citations**
 
 ```bash
 # Найти записи с отрицательными citations
@@ -564,7 +584,7 @@ print(negative-cit[['paper-id', 'citations-received', 'title']].head())
 "
 ```
 
-**Решение:**
+- **Решение:**
 - **Data quality issue у источника**
 - Обнулить некорректные значения в трансформере:
   ```python
@@ -577,11 +597,11 @@ print(negative-cit[['paper-id', 'citations-received', 'title']].head())
       return raw-citations
   ```
 
----
+- ---
 
 ### Level 5: Semantic Validation Warnings
 
-**Симптом:** `-dq-warn=True` из-за низкой semantic similarity или language mismatch
+- **Симптом:** `-dq-warn=True` из-за низкой semantic similarity или language mismatch
 
 #### Диагностика
 
@@ -606,7 +626,7 @@ print(low-sim[['pmid', 'title', 'abstract']].head(3))
 
 #### Типичные проблемы
 
-**Проблема: False positive — title и abstract семантически связаны, но низкий score**
+- **Проблема: False positive — title и abstract семантически связаны, но низкий score**
 
 ```bash
 # Проверить threshold
@@ -616,7 +636,7 @@ cat config/pubmed-validation.yaml | grep -A3 "semantic-validation"
 # similarity-threshold: 0.3
 ```
 
-**Решение:**
+- **Решение:**
 - Semantic validation **НЕ блокирует** записи (только WARN)
 - Если слишком много false positives — увеличить threshold:
   ```yaml
@@ -632,9 +652,9 @@ cat config/pubmed-validation.yaml | grep -A3 "semantic-validation"
     enabled: false  # Disable for ChEMBL (low quality abstracts)
   ```
 
----
+- ---
 
-**Проблема: Language mismatch (detected != declared)**
+- **Проблема: Language mismatch (detected != declared)**
 
 ```bash
 # Примеры language mismatch
@@ -650,22 +670,22 @@ print(lang-mismatch[['pmid', 'language', 'title', 'abstract']].head())
 "
 ```
 
-**Решение:**
+- **Решение:**
 - **Не исправлять автоматически**
 - Language detection может быть некорректной для коротких текстов
 - Оставить как WARN, не блокировать запись
 
----
+- ---
 
-## Общие проблемы и решения
+### Общие проблемы и решения
 
 ### 1. Pipeline застревает на валидации
 
-**Симптомы:**
+- **Симптомы:**
 - Pipeline выполняется > 2 часов
 - CPU usage low, network idle
 
-**Диагностика:**
+- **Диагностика:**
 ```bash
 # Проверить, какой процесс активен
 ps aux | grep bioetl
@@ -677,7 +697,7 @@ tail -1 logs/bioetl.log | jq
 lsof -i -P -n | grep bioetl
 ```
 
-**Решение:**
+- **Решение:**
 ```bash
 # Kill pipeline
 pkill -f "bioetl run"
@@ -689,15 +709,15 @@ bioetl run \
   --skip-semantic
 ```
 
----
+- ---
 
 ### 2. Карантинная таблица переполнена
 
-**Симптомы:**
+- **Симптомы:**
 - > 50% записей в карантине (`-dq-warn=True`)
 - Silver storage растёт быстрее обычного
 
-**Диагностика:**
+- **Диагностика:**
 ```bash
 # Количество записей в карантине
 python -c "
@@ -720,7 +740,7 @@ print(reasons.value-counts().head(10))
 "
 ```
 
-**Решение:**
+- **Решение:**
 1. **Если причина — External 404:**
    - Отключить External Verification для следующих запусков
    - Провести manual review топ-N записей
@@ -740,15 +760,15 @@ print(reasons.value-counts().head(10))
    single-warn.to-parquet("data/silver/pubmed/publication.parquet", mode="append")
    ```
 
----
+- ---
 
 ### 3. DQ Metrics отсутствуют в Prometheus
 
-**Симптомы:**
+- **Симптомы:**
 - Grafana dashboard пустой
 - Prometheus `/metrics` endpoint не показывает `bioetl_validation_*` метрики
 
-**Диагностика:**
+- **Диагностика:**
 ```bash
 # Проверить Prometheus endpoint
 curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.job == "bioetl")'
@@ -757,7 +777,7 @@ curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.
 curl http://localhost:8000/metrics | grep bioetl_validation
 ```
 
-**Решение:**
+- **Решение:**
 ```bash
 # Перезапустить pipeline с Prometheus exporter
 bioetl run \
@@ -772,9 +792,9 @@ scrape-configs:
       - targets: ['localhost:8000']
 ```
 
----
+- ---
 
-## Escalation Path
+### Escalation Path
 
 ### Level 1: Self-Service (0-30 min)
 
@@ -806,9 +826,9 @@ scrape-configs:
   - Архитектурные изменения необходимы
   - SLA нарушено
 
----
+- ---
 
-## Контакты и ресурсы
+### Контакты и ресурсы
 
 ### Внутренние ресурсы
 
@@ -834,9 +854,21 @@ scrape-configs:
 - **Canonical provider refs:** `docs/04-reference/providers/{provider}/publication.md`
 - **Test Suite:** `tests/contract/` + `tests/unit/` (471 тест)
 
----
+- ---
 
-**Версия runbook:** 1.0.0
-**Последнее обновление:** 2026-02-06
-**Владелец:** Data Engineering Team
-**Статус:** Production Ready ✅
+- **Версия runbook:** 1.0.0 **Последнее обновление:** 2026-02-06 **Владелец:** Data Engineering Team **Статус:** Production Ready ✅
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

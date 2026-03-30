@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-032: Unified HTTP Client Pattern
 
-**Status:** Accepted
 **Date:** 2026-01-28
 **Decision makers:** @BioETL-Team
 

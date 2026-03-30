@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # VCR Provider Rebalancing (RF-013)
 
 > **Status:** Historical verification and operations artifact (non-normative).

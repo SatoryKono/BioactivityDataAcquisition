@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-006: Ports for Logger and Metrics
 
-**Status:** Accepted
 **Date:** 2025-12-18
 **Last Updated:** 2025-12-25
 **Decision makers:** @BioETL-Team

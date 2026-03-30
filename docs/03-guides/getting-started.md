@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Getting Started Guide
 
 This guide will walk you through setting up a complete local development environment for BioETL. By the end of this guide, you will have a running instance of the platform and be able to execute data pipelines.

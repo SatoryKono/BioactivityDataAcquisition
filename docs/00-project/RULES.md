@@ -1,6 +1,14 @@
-# BioETL: Правила Проекта
+---
+Version: 5.24.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
 
-*Версия: 5.24 (Docs Governance Sync), 2026-03-13*
+# BioETL: Правила Проекта
 
 ## Введение (Quick Reference)
 

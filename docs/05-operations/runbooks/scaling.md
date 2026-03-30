@@ -1,26 +1,50 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P3
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Scaling and Performance Tuning
 
-This document provides guidance on scaling the BioETL platform to handle larger data volumes and improve performance.
+## Trigger
 
-> Runtime profile: Local-Only single-instance (ADR-010). This runbook covers vertical scaling and local performance tuning only.
+- Run this procedure when local execution needs vertical scaling or maintenance tuning.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-## Horizontal Scaling (Not Supported in Current Architecture)
+## Impact
 
-BioETL currently runs in Local-Only single-instance mode (ADR-010).
-Horizontal scaling and distributed lock orchestration are not supported.
+- Priority: P3.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
+
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Horizontal Scaling (Not Supported in Current Architecture)
+
+- BioETL currently runs in Local-Only single-instance mode (ADR-010). Horizontal scaling and distributed lock orchestration are not supported.
 
 *   **Current strategy**: Run one pipeline process at a time on a single host.
 *   **Concurrency guard**: `MemoryLock` is process-local and does not provide inter-process safety.
 *   **Recommended approach**: Scale vertically and optimize batch/IO behavior.
 
-## Vertical Scaling: Primary Tuning Strategy
+### Vertical Scaling: Primary Tuning Strategy
 
-If a single pipeline run is slow, consider increasing the resources available to the worker.
+- If a single pipeline run is slow, consider increasing the resources available to the worker.
 
 *   **CPU**: More cores can help with CPU-bound tasks like data transformation and validation (e.g., using Polars).
 *   **Memory**: Larger memory is crucial for handling large dataframes. Insufficient memory can lead to out-of-memory (OOM) errors or slow disk swapping.
 
-## Performance Tuning
+### Performance Tuning
 
 ### 1. Adjusting Batch Sizes
 
@@ -51,3 +75,18 @@ If a single pipeline run is slow, consider increasing the resources available to
 *   **Action**:
     *   Ensure you are partitioning on low-cardinality fields that are frequently used in `WHERE` clauses (e.g., `year`, `month`, `entity-type`).
     *   **Avoid over-partitioning**: Do not partition on high-cardinality fields like UUIDs or hashes. This creates a "small files" problem and slows down the metadata log. Refer to the partitioning limits in `RULES.md`.
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

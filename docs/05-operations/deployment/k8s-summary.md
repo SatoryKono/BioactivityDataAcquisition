@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # BioETL Kubernetes Manifests - Summary
 
 > **Status:** Internal / Extended document (experimental deployment profile, non-normative for default operations).
@@ -291,4 +301,3 @@ See DEPLOYMENT-GUIDE.md for detailed troubleshooting.
 - Grafana Docs: https://grafana.com/docs/
 - Docker Docs: https://docs.docker.com/reference/cli/docker/container/run/
 - BioETL README: ../README.md
-

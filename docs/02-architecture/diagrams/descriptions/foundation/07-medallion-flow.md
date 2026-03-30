@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Title: Medallion Data Flow (Sources → Bronze → Silver → Gold)
 
 - Исходная диаграмма: `foundation/07-medallion-flow.mmd`

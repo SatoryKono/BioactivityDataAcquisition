@@ -1,24 +1,47 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P1
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Stale Lock Detected (P2)
 
-*Reference: [RULES.md §3.3](../../00-project/RULES.md#33-конкурентность-и-блокировки)*
+## Trigger
 
-> Runtime profile: Local-Only single-instance (ADR-010). Lock diagnostics assume local process scope and `MemoryLock`.
+- Run this procedure when MemoryLock or filesystem lock artifacts block progress after interrupted execution.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-This runbook describes how to handle "Stale Lock" alerts.
+## Impact
 
-## Symptoms
+- Priority: P1.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
+
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Symptoms
 
 - Alert "Lock expired" fires.
 - Pipeline refuses to start with `LockAcquisitionError`.
 - Logs show "Lock held by owner ... (expired)".
 
-## Causes
+### Causes
 
 1. **Worker Crash**: Worker process was killed (OOM, SIGKILL) without releasing the lock.
 1. **Long Running Job**: Job exceeded the 4-hour hard limit.
 1. **Forced Termination**: Process was interrupted before graceful shutdown (`aclose()`), leaving stale in-process lock state.
 
-## Diagnosis Steps
+### Diagnosis Steps
 
 1. **Check Active Processes**:
    - Are there any running python processes for this pipeline?
@@ -27,7 +50,7 @@ This runbook describes how to handle "Stale Lock" alerts.
    - Inspect local logs and identify lock owner `run-id`.
    - Remember that `bioetl lock ...` operates on the `MemoryLock` instance in the current CLI process only.
 
-## Recovery Actions
+### Recovery Actions
 
 1. **Kill Zombie Processes**:
    - If a worker is stuck, kill it.
@@ -39,10 +62,25 @@ This runbook describes how to handle "Stale Lock" alerts.
    ```bash
    bioetl lock check --pipeline {pipeline-name} --run-id {run-id}
    ```
-   Use `bioetl lock release ...` only if you are debugging lock state in the same process that created it; it is not a cross-process stale-lock recovery tool.
+- Use `bioetl lock release ...` only if you are debugging lock state in the same process that created it; it is not a cross-process stale-lock recovery tool.
 
-## Prevention
+### Prevention
 
 - **Heartbeats**: Ensure workers send heartbeats regularly.
 - **Timeouts**: Configure appropriate timeouts for HTTP requests and DB queries.
 - **Resource Limits**: Ensure workers have enough memory to avoid OOM kills.
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

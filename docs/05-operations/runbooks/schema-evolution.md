@@ -1,15 +1,38 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P2
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Schema Evolution Guide
 
-*Reference: [RULES.md §2.2](../../00-project/RULES.md#22-политика-дрейфа-схемы-schema-drift) and [Appendix E](../../00-project/RULES.md#приложение-e-примеры-schema-evolution)*
+## Trigger
 
-> Runtime profile: Local-Only single-instance (ADR-010). Schema evolution steps apply to local Bronze/Silver/Gold data paths.
+- Run this procedure when schema changes affect ingestion, storage, or downstream contract compatibility.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-This runbook describes how to handle schema changes in Bronze, Silver, and Gold layers.
+## Impact
 
-## Scenario 1: Adding a New Field (Backward Compatible)
+- Priority: P2.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
+
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Scenario 1: Adding a New Field (Backward Compatible)
 
 1. **Update Pydantic Model**:
-   Add the new field to the entity model in `src/bioetl/domain/entities/`.
+- Add the new field to the entity model in `src/bioetl/domain/entities/`.
    ```python
    class MyEntity(BaseEntity):
        ...
@@ -17,7 +40,7 @@ This runbook describes how to handle schema changes in Bronze, Silver, and Gold 
    ```
 
 2. **Update Pandera Schema**:
-   Add the field to `src/bioetl/infrastructure/schemas/`.
+- Add the field to `src/bioetl/infrastructure/schemas/`.
    ```python
    class MySchema(pa.DataFrameModel):
        ...
@@ -25,9 +48,9 @@ This runbook describes how to handle schema changes in Bronze, Silver, and Gold 
    ```
 
 3. **Deploy**:
-   Deploy the changes. Delta Lake will automatically handle the schema evolution (mergeSchema).
+- Deploy the changes. Delta Lake will automatically handle the schema evolution (mergeSchema).
 
-## Scenario 2: Breaking Change (Rename/Type Change)
+### Scenario 2: Breaking Change (Rename/Type Change)
 
 1. **Create Migration Plan**:
    - **Option A**: Full Rebuild (Simplest). Delete table and reload.
@@ -46,10 +69,26 @@ This runbook describes how to handle schema changes in Bronze, Silver, and Gold 
    - After deprecation period, remove `old-field`.
    - Run `VACUUM` to clean up old versions.
 
-## Handling Schema Drift Alerts
+### Handling Schema Drift Alerts
+
 - **Warning**: "New fields detected: [...]".
   - Review the fields.
   - If useful, add to explicit schema.
   - If garbage, ignore (Silver will store them, Gold might drop them depending on `strict` mode).
 - **Critical**: "Missing required field: [...]".
   - **Immediate Action**: Fix the parser or contact provider. Pipeline is broken.
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

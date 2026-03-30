@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Guide: Add a Pipeline for an Existing Provider
 
 This guide describes the current process for adding a **new entity pipeline** when provider integration already exists.

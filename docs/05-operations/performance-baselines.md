@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Performance Baselines
 
 *Reference: [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md), [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)*

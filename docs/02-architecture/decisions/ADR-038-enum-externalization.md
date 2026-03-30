@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-038: ChEMBL Enum Values Externalization to YAML
 
-**Status:** Accepted
 **Date:** 2026-02-16
 **Decision makers:** @BioETL-Team
 

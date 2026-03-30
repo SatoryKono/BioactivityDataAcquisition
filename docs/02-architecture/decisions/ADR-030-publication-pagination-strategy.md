@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-030: Publication Pagination Strategy (force-full-scan)
 
-**Status:** Accepted
 **Date:** 2026-01-26
 **Decision makers:** @BioETL-Team
 **Relates to:** ADR-011 (Remove Watermark), ADR-009 (Paginated Fetcher Mixin)

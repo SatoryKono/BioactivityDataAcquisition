@@ -1,25 +1,48 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P2
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Backfill and Rebuild Operations
 
-*Reference: [RULES.md §2.4](../../00-project/RULES.md#24-политика-backfill--replay)*
+## Trigger
 
-> Runtime profile: Local-Only single-instance (ADR-010). Steps assume local filesystem storage and `MemoryLock` (no Redis/distributed coordinator).
+- Run this procedure for controlled backfills or rebuilds of previously processed data.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-This runbook describes how to perform Backfill (historical load) and Rebuild (full reload) operations.
+## Impact
 
-## Definitions
+- Priority: P2.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
+
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Definitions
 
 - **Backfill**: Loading historical data for a specific period.
 - **Rebuild**: Completely clearing Silver/Gold tables and reloading from source/Bronze.
 
-## Prerequisites
+### Prerequisites
 
 - **Exclusive Lock**: These operations require an exclusive lock in local `MemoryLock` scope.
 - **Downtime**: Incremental pipelines must be stopped or will be blocked.
 
-## Procedure: Full Rebuild
+### Procedure: Full Rebuild
 
 1. **Stop Incremental Pipelines**:
-   Ensure no incremental runs are scheduled.
+- Ensure no incremental runs are scheduled.
 
 1. **Run Rebuild**:
 
@@ -27,7 +50,7 @@ This runbook describes how to perform Backfill (historical load) and Rebuild (fu
    bioetl run --pipeline {name} --run-type rebuild
    ```
 
-   *Note: This will automatically clear Silver and Gold tables for this entity.*
+- *Note: This will automatically clear Silver and Gold tables for this entity.*
 
 1. **Verify Data**:
 
@@ -35,12 +58,12 @@ This runbook describes how to perform Backfill (historical load) and Rebuild (fu
    - Validate DQ metrics.
 
 1. **Resume Incremental**:
-   Enable scheduled incremental runs.
+- Enable scheduled incremental runs.
 
-## Procedure: Backfill (Time Range)
+### Procedure: Backfill (Time Range)
 
 1. **Determine Range**:
-   Identify start and end dates for backfill.
+- Identify start and end dates for backfill.
 
 1. **Run Backfill**:
 
@@ -50,9 +73,24 @@ This runbook describes how to perform Backfill (historical load) and Rebuild (fu
    ```
 
 1. **Monitor Progress**:
-   Watch logs for progress. Backfills can be long-running.
+- Watch logs for progress. Backfills can be long-running.
 
-## Troubleshooting
+### Troubleshooting
 
 - **LockAcquisitionError**: Another process holds the lock. Wait or investigate.
 - **Memory Issues**: Backfills process large volumes. Watch for OOM. Reduce batch size if needed.
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

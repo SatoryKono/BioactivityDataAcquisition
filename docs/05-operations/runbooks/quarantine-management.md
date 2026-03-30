@@ -1,18 +1,42 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P2
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Quarantine Management
 
-*Reference: [RULES.md §2.6](../../00-project/RULES.md#26-политика-null-и-пропущенных-значений)*
+## Trigger
 
-> Runtime profile: Local-Only single-instance (ADR-010). Quarantine operations are performed against local storage.
+- Run this procedure when records enter quarantine and require review, disposition, or release.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-This runbook describes how to manage the Quarantine (Dead Letter Queue).
+## Impact
 
-## Overview
-Records that fail Data Quality (DQ) checks are sent to the Quarantine table (`common.quarantine`) instead of crashing the pipeline.
+- Priority: P2.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
 
-## Routine Tasks (Weekly)
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Overview
+
+- Records that fail Data Quality (DQ) checks are sent to the Quarantine table (`common.quarantine`) instead of crashing the pipeline.
+
+### Routine Tasks (Weekly)
 
 ### 1. Inspect Quarantine
-Review new errors to identify systemic issues.
+- Review new errors to identify systemic issues.
 ```bash
 bioetl quarantine inspect --pipeline {pipeline-name} --limit 50
 ```
@@ -23,22 +47,39 @@ bioetl quarantine inspect --pipeline {pipeline-name} --limit 50
 - **Transient Error**: Network glitch during validation. -> **Replay**.
 
 ### 3. Replay Records
-After fixing a bug, replay quarantined records.
+- After fixing a bug, replay quarantined records.
 ```bash
 bioetl quarantine replay --pipeline {pipeline-name}
 ```
-*Note: Replay targets records with `dq_status='NEW'` and marks processed records as `REPROCESSED`.*
+- *Note: Replay targets records with `dq_status='NEW'` and marks processed records as `REPROCESSED`.*
 
 ### 4. Purge Garbage
-Remove records that cannot be recovered.
+- Remove records that cannot be recovered.
 ```bash
 bioetl quarantine purge --pipeline {pipeline-name}
 ```
-*Note: Purge deletes old records from the Delta quarantine table.*
+- *Note: Purge deletes old records from the Delta quarantine table.*
 
-## Metrics
+### Metrics
+
 - `dq-records-quarantined-total`: Total records sent to quarantine.
 - `dq-quarantine-size-bytes`: Storage size of quarantine table.
 
-## Retention
-Quarantine data is retained for **30 days** by default. Cleanup is executed via explicit purge operations (`bioetl quarantine purge`).
+### Retention
+
+- Quarantine data is retained for **30 days** by default. Cleanup is executed via explicit purge operations (`bioetl quarantine purge`).
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

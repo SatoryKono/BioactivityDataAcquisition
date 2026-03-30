@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Title: Domain Layer — DDD Components
 
 - Исходная диаграмма: `foundation/08-domain-ddd.mmd`

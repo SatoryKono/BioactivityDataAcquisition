@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-005: Composition Layer as Separate Module (Not Part of Interfaces)
 
-**Status:** Accepted
 **Date:** 2025-12-18
 **Decision makers:** @BioETL-Team
 

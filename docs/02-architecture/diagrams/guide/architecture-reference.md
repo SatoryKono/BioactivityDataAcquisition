@@ -1,6 +1,14 @@
-# Architecture Diagrams - BioETL
+---
+Version: 1.1.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
 
-*Версия: 1.1 | Дата: 2026-03-20 | Статус: Активная*
+# Architecture Diagrams - BioETL
 
 Комплексная система архитектурных диаграмм для понимания структуры, потоков данных и компонентов проекта BioETL.
 

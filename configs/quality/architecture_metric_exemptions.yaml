@@ -19,15 +19,7 @@ registries:
   function_complexity:
     {}
   function_length: {}
-  class_size:
-    src/bioetl/application/services/dq_report_generation_mixin.py::DQReportGenerationMixin:
-      value: 380
-      owner: "@bioetl-platform"
-      reason: "DQ report generation is still grouped by medallion layer to preserve shared metrics/logging semantics during the DQ-service stabilization wave."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Extract bronze, silver, and gold report generators behind a shared reporting strategy interface"
+  class_size: {}
   class_method_count: {}
   god_object: {}
   domain_complexity: {}

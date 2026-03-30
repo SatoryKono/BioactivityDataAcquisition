@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-043: Documentation and Knowledge Management Strategy
 
-**Status:** Accepted
 **Date:** 2026-03-09
 **Authors:** Claude (architecture review)
 **Supersedes:** —

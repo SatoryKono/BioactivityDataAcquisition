@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Утверждено ✅
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Руководство по валидации публикаций (Publication Validation Guide)
 
-**Версия:** 1.0.0
 **Дата:** 2026-02-06
 **Статус:** Утверждено ✅
 **Связанный ADR:** ADR-033
