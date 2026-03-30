@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-023: Паттерны передачи entity_type в трансформерах
 
-**Status:** Accepted
 **Date:** 2026-01-06
 **Decision makers:** @BioETL-Team
 **Relates to:** ADR-006 (Logger and Metrics Ports), ADR-017 (Observability Architecture)

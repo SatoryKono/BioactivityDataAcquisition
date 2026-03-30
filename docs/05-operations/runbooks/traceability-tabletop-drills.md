@@ -1,43 +1,63 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P2
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Traceability Tabletop Drills
 
-*Last verified: 2026-03-25*
+## Trigger
 
-## Purpose
+- Run this procedure when conducting operator tabletop drills for traceability scenarios.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-Validate operator adoption for Traceability Fabric by running short tabletop
-drills. Goal: confirm that on-call engineers can complete the path:
+## Impact
 
-`alert -> run_id -> manifest -> diagnostics -> artifact/lineage evidence -> decision`
-
-## Cadence
-
-- Weekly: one P1 scenario (30-45 minutes)
-- Bi-weekly: one P2 scenario (20-30 minutes)
-- Monthly: one mixed scenario with handover (45-60 minutes)
+- Priority: P2.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
 
 ## Preconditions
 
 - `run-manifest` CLI is available.
 - Control-plane artifacts are present for the scenario (`manifest` and
-  `run_ledger`).
+- `run_ledger`).
 - Incident ticket template contains response contract fields (see
-  [Traceability Signal Ownership](traceability-signal-ownership.md)).
+- [Traceability Signal Ownership](traceability-signal-ownership.md)).
 
-## Drill Template
+## Procedure
+
+### Purpose
+
+- Validate operator adoption for Traceability Fabric by running short tabletop drills. Goal: confirm that on-call engineers can complete the path:
+
+- `alert -> run_id -> manifest -> diagnostics -> artifact/lineage evidence -> decision`
+
+### Cadence
+
+- Weekly: one P1 scenario (30-45 minutes)
+- Bi-weekly: one P2 scenario (20-30 minutes)
+- Monthly: one mixed scenario with handover (45-60 minutes)
+
+### Drill Template
 
 1. Facilitator announces synthetic alert and gives `run_id`.
 2. Operator runs:
-   `bioetl run-manifest show <run-id> --format json`
+- `bioetl run-manifest show <run-id> --format json`
 3. Operator extracts:
-   `manifest_id`, `latest_status`, `latest_event_type`,
-   `event_family_counts`, `artifact_refs`, `missing_artifact_links`.
+- `manifest_id`, `latest_status`, `latest_event_type`, `event_family_counts`, `artifact_refs`, `missing_artifact_links`.
 4. Operator classifies incident type:
-   control-plane, DQ, lineage, checkpoint, or composite degradation.
+- control-plane, DQ, lineage, checkpoint, or composite degradation.
 5. Operator proposes decision:
-   retry, quarantine, rollback, monitor, escalate.
+- retry, quarantine, rollback, monitor, escalate.
 6. Facilitator records timing and evidence completeness.
 
-## Scenarios
+### Scenarios
 
 ### Scenario A: Missing Manifest Link
 
@@ -48,11 +68,11 @@ drills. Goal: confirm that on-call engineers can complete the path:
 ### Scenario B: Artifact Linkage Regression
 
 - Injected symptom: `artifact_published` events exist and
-  `missing_artifact_links > 0`.
+- `missing_artifact_links > 0`.
 - Expected decision: treat as traceability regression, block blind retry until
-  linkage diagnosis is complete.
+- linkage diagnosis is complete.
 - Pass criteria: operator references both `artifact_refs` and
-  `missing_artifact_links`.
+- `missing_artifact_links`.
 
 ### Scenario C: DQ-Driven Failure with Good Control Plane
 
@@ -60,23 +80,38 @@ drills. Goal: confirm that on-call engineers can complete the path:
 - Expected decision: DQ owner path with policy outcome (`quarantine` vs fail).
 - Pass criteria: operator reports full correlation anchors and chosen disposition.
 
-## Scoring
+### Scoring
 
-Score each drill from 0 to 2 per category:
+- Score each drill from 0 to 2 per category:
 
 - Identification speed (time-to-first-diagnosis)
 - Evidence completeness (all required anchors captured)
 - Correct routing (owner/escalation path)
 - Decision quality (safe and policy-consistent)
 
-Total score:
+- Total score:
 
 - 7-8: pass
 - 5-6: conditional pass with action items
 - <=4: fail, follow-up coaching required
 
-## Post-Drill Actions
+### Post-Drill Actions
 
 - Record one improvement item per failed/conditional category.
 - Update related runbook sections if diagnostic steps were ambiguous.
 - Re-run the same scenario within 7 days if score <= 6.
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

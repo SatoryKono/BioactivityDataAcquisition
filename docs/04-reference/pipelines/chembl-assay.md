@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Pipeline: ChEMBL Assay
 
 > **Full Documentation (RU):** [docs/04-reference/providers/chembl/assay.md](../providers/chembl/assay.md)

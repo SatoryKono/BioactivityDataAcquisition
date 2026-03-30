@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Composition Root Wiring — Full DI Graph
 
 - Исходная диаграмма: `diagrams/mermaid/28-composition-root-di-graph-full.mermaid`

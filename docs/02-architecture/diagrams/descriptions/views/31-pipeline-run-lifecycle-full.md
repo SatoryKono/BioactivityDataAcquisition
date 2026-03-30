@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Pipeline Run Lifecycle Full
 
 - Исходная диаграмма: `views/31-pipeline-run-lifecycle-full.mermaid`

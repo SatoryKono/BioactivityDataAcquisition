@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-010: Local-Only Deployment Strategy
 
-**Status:** Accepted
 **Date:** 2025-12-23
 **Last Updated:** 2026-01-02
 **Decision makers:** @BioETL-Team

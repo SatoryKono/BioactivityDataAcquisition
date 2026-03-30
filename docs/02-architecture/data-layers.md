@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Архитектура Данных и Слои (Data Layers)
 
 В этом документе детально описывается реализация слоев данных (Bronze, Silver, Gold), их форматы, схемы, процессы нормализации и валидации.

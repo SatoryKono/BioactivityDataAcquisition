@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Silver Schema Testing Guide
 
-**Version:** 1.0.0
 **Created:** 2026-02-10
 **Purpose:** Guidelines for testing and maintaining Silver layer schemas
 

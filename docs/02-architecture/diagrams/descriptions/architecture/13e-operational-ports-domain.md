@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Domain Operational Ports
 
 - Исходная диаграмма: `architecture/13e-operational-ports-domain.mmd`

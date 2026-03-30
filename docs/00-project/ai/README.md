@@ -1,6 +1,14 @@
-# AI Documentation Surface
+---
+Version: 1.0.0
+Status: internal (repo-only entrypoint; excluded from MkDocs)
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
 
-*Статус: internal (repo-only entrypoint; excluded from MkDocs)*
+# AI Documentation Surface
 
 Этот каталог собирает AI-related documentation surfaces для BioETL:
 runtime-facing guides, published mirrors, prompts, skills, memory notes и

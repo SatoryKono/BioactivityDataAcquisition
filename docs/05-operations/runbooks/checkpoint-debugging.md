@@ -1,25 +1,49 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P2
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Checkpoint Debugging Runbook
 
-*Reference: [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md)*
+## Trigger
 
-> Runtime profile: Local-Only single-instance. Checkpoints are local files under `data/output/checkpoints/`.
+- Run this procedure when checkpoint state blocks resume, causes stale progress, or becomes inconsistent.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-## Overview
+## Impact
 
-Checkpoints store resume state for each pipeline.
-Use this runbook to inspect, reset, and recover checkpoint files.
+- Priority: P2.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
 
-## Checkpoint Location
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Overview
+
+- Checkpoints store resume state for each pipeline. Use this runbook to inspect, reset, and recover checkpoint files.
+
+### Checkpoint Location
 
 ```text
 data/output/checkpoints/{pipeline}.json
 ```
 
-Example: `data/output/checkpoints/chembl_activity.json`
+- Example: `data/output/checkpoints/chembl_activity.json`
 
-## Checkpoint Structure
+### Checkpoint Structure
 
-Actual local checkpoint format:
+- Actual local checkpoint format:
 
 ```json
 {
@@ -32,13 +56,13 @@ Actual local checkpoint format:
 }
 ```
 
-## Common Issues
+### Common Issues
 
 ### Issue 1: Resume starts from unexpected position
 
-**Symptom**: `--resume` starts too early or too late.
+- **Symptom**: `--resume` starts too early or too late.
 
-**Diagnosis**:
+- **Diagnosis**:
 
 ```bash
 # Inspect checkpoint payload
@@ -48,7 +72,7 @@ cat data/output/checkpoints/chembl_activity.json | jq
 cat data/output/checkpoints/chembl_activity.json | jq '.metadata.records_processed'
 ```
 
-**Resolution**:
+- **Resolution**:
 
 1. If value is stale/corrupt, backup and reset checkpoint.
 2. If state is valid but data is inconsistent, run full rebuild:
@@ -59,30 +83,30 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 
 ### Issue 2: Checkpoint file is missing
 
-**Symptom**: `--resume` does not resume and starts from beginning.
+- **Symptom**: `--resume` does not resume and starts from beginning.
 
-**Diagnosis**:
+- **Diagnosis**:
 
 ```bash
 ls -la data/output/checkpoints/
 ```
 
-**Resolution**:
+- **Resolution**:
 
 1. This is expected after successful runs (checkpoint is cleaned up).
 2. If pipeline crashed and file is still missing, rerun without `--resume` or recover from backup.
 
 ### Issue 3: Checkpoint corruption
 
-**Symptom**: JSON parse errors while loading checkpoint.
+- **Symptom**: JSON parse errors while loading checkpoint.
 
-**Diagnosis**:
+- **Diagnosis**:
 
 ```bash
 python -m json.tool data/output/checkpoints/chembl_activity.json
 ```
 
-**Resolution**:
+- **Resolution**:
 
 ```bash
 # Backup corrupted file
@@ -96,9 +120,9 @@ echo '{"pipeline":"chembl_activity","run_id":"00000000-0000-0000-0000-0000000000
 
 ### Issue 4: File not updating
 
-**Symptom**: Pipeline runs but checkpoint timestamp does not change.
+- **Symptom**: Pipeline runs but checkpoint timestamp does not change.
 
-**Diagnosis**:
+- **Diagnosis**:
 
 ```bash
 stat data/output/checkpoints/chembl_activity.json
@@ -106,13 +130,13 @@ stat data/output/checkpoints/chembl_activity.json
 touch data/output/checkpoints/.write-test && rm data/output/checkpoints/.write-test
 ```
 
-**Resolution**:
+- **Resolution**:
 
 1. Verify filesystem permissions.
 2. Verify available disk space.
 3. Verify run is actually in incremental mode and checkpoint saving is reached.
 
-## Manual Operations
+### Manual Operations
 
 ### View checkpoint
 
@@ -144,12 +168,11 @@ cp data/output/checkpoints/*.json data/output/checkpoints.bak/ 2>/dev/null || tr
 rm -f data/output/checkpoints/*.json
 ```
 
-## Integrity Check Script
+### Integrity Check Script
 
 ```python
 import json
 from pathlib import Path
-
 
 def validate_checkpoint(pipeline: str) -> bool:
     checkpoint_path = Path(f"data/output/checkpoints/{pipeline}.json")
@@ -172,15 +195,29 @@ def validate_checkpoint(pipeline: str) -> bool:
     print(f"version={data.get('version')}")
     return True
 
-
 validate_checkpoint("chembl_activity")
 ```
 
-## Monitoring Recommendations
+### Monitoring Recommendations
 
-Track and alert on:
+- Track and alert on:
 
 - checkpoint file load failures
 - repeated resume from same `records_processed` value
 - missing checkpoint after abnormal termination
 - write/permission errors in `data/output/checkpoints/`
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

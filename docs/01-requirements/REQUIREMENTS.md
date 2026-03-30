@@ -1,6 +1,15 @@
+---
+Version: 1.8.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # BioETL: Требования к Проекту
 
-*Версия: 1.8 (2026-03-13)*
 *Синхронизировано с RULES.md v5.24 (2026-03-13)*
 
 ---

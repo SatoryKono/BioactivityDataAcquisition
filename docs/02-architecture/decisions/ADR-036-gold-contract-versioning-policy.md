@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-036: Gold Contract Versioning Policy
 
-**Status:** Accepted
 **Date:** 2026-02-18
 **Decision makers:** @BioETL-Team
 **Related:** ADR-018 (Gold Strict Validation), ADR-035 (JSON Field Typing Policy), ADR-026 (Composite Pipeline Pattern)

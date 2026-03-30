@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # OpenAI Codex CLI: Setup and Usage via WSL2
 
 Guide for running OpenAI Codex CLI on Windows through WSL2 Debian,

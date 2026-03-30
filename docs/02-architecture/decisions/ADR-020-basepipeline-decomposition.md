@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted (Implemented 2025-12-16)
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-020: Декомпозиция BasePipeline
 
-**Status:** Accepted (Implemented 2025-12-16)
 **Date:** 2025-12-16
 **Decision makers:** @BioETL-Team
 

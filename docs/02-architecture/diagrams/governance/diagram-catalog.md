@@ -1,6 +1,14 @@
-# Исторический Каталог Диаграмм BioETL
+---
+Version: 1.0.0
+Status: 'historical planning artifact | Версия: 1.0 | Дата: 2026-01-20 | Актуализировано: 2026-03-19'
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
 
-*Статус: historical planning artifact | Версия: 1.0 | Дата: 2026-01-20 | Актуализировано: 2026-03-19*
+# Исторический Каталог Диаграмм BioETL
 
 Этот документ сохраняется как historical/planning artifact и не является текущим canonical inventory.
 Актуальный measured inventory и governance baseline ведутся через:

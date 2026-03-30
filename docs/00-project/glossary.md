@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # BioETL Glossary (Ubiquitous Language)
 
 *Version 2.7 | Updated: 2026-03-08 | Created: 2025-12-29*

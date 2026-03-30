@@ -1,14 +1,37 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P2
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Observability Checklist
 
-*Reference: [RULES.md §3.2](../../00-project/RULES.md#32-наблюдаемость-observability)*
+## Trigger
 
-> Runtime profile: Local-Only single-instance (ADR-010). Observability checks assume one local process and local log/metrics endpoints.
+- Run this checklist to verify logs, metrics, alerts, and dashboards for the local BioETL runtime.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-This checklist ensures all components meet the project's observability requirements.
+## Impact
 
-## Adapter Requirements
+- Priority: P2.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
 
-Every adapter in `src/bioetl/infrastructure/adapters/` **MUST** implement:
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Adapter Requirements
+
+- Every adapter in `src/bioetl/infrastructure/adapters/` **MUST** implement:
 
 ### 1. Health Check Method
 
@@ -21,7 +44,7 @@ async def health_check(self) -> HealthStatus:
     """
 ```
 
-**Health Check Endpoints by Provider:**
+- **Health Check Endpoints by Provider:**
 
 | Provider | Health Check                                                     |
 | -------- | ---------------------------------------------------------------- |
@@ -32,7 +55,7 @@ async def health_check(self) -> HealthStatus:
 
 ### 2. Structured Logging
 
-All log messages **MUST** include:
+- All log messages **MUST** include:
 
 | Field      | Required | Example                        |
 | ---------- | -------- | ------------------------------ |
@@ -41,7 +64,7 @@ All log messages **MUST** include:
 | `stage`    | MUST     | `extract`, `transform`, `load` |
 | `dataset`  | SHOULD   | `chembl/activity`              |
 
-**Example:**
+- **Example:**
 
 ```python
 self.logger.info(
@@ -54,9 +77,9 @@ self.logger.info(
 )
 ```
 
-## Pipeline Metrics
+### Pipeline Metrics
 
-*Reference: [RULES.md §3.2.2](../../00-project/RULES.md#322-prometheus-metrics)*
+- Reference: [RULES.md §3.2.2](../../00-project/RULES.md#322-prometheus-metrics)
 
 ### Required Metrics (prefix: `bioetl_`)
 
@@ -84,7 +107,7 @@ self.logger.info(
 | `circuit_breaker_success_total` | Counter | adapter                                      |
 | `circuit_breaker_failure_total` | Counter | adapter                                      |
 
-## Verification Commands
+### Verification Commands
 
 ### Check Metrics Endpoint
 
@@ -113,7 +136,7 @@ cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .stage)'
 bioetl run-manifest show <run-id|manifest-id> --format json
 ```
 
-Checklist for incident triage payload:
+- Checklist for incident triage payload:
 
 - `diagnostics.latest_status`
 - `diagnostics.latest_event_type`
@@ -121,12 +144,11 @@ Checklist for incident triage payload:
 - `diagnostics.alert_signals`
 - `diagnostics.next_steps`
 
-If `diagnostics.alert_signals.artifact_linkage_gap=true`, escalation must include
-artifact/linkage remediation before retry.
+- If `diagnostics.alert_signals.artifact_linkage_gap=true`, escalation must include artifact/linkage remediation before retry.
 
-## Adding New Adapters
+### Adding New Adapters
 
-When creating a new adapter:
+- When creating a new adapter:
 
 1. [ ] Implement `health_check()` method
 1. [ ] Use `LoggerPort` (injected via DI) for all logging
@@ -135,9 +157,9 @@ When creating a new adapter:
 1. [ ] Register metrics in composition layer (`bootstrap/runtime/observability.py`)
 1. [ ] Add integration test with VCR cassette
 
-## Architecture Test
+### Architecture Test
 
-The following test enforces health_check presence:
+- The following test enforces health_check presence:
 
 ```python
 # tests/architecture/test_layer_dependencies.py
@@ -146,4 +168,19 @@ def test_adapters_have_health_check(src_dir: Path) -> None:
     ...
 ```
 
-Run with: `make test-architecture`
+- Run with: `make test-architecture`
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

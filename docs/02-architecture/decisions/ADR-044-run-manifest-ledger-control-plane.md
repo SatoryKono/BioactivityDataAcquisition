@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-044: Run Manifest and Run Ledger Control Plane
 
-**Status:** Accepted
 **Date:** 2026-03-24
 **Decision makers:** @BioETL-Team
 **Related:** ADR-014 (deterministic writes), ADR-015 (pipeline lifecycle), ADR-029 (output metadata), ADR-043 (documentation governance)

@@ -1,6 +1,14 @@
-# ChEMBL Activity Domain Schema
-
+---
+Version: 1.0.0
 Status: Historical deep schema.
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
+# ChEMBL Activity Domain Schema
 
 This page is retained as a historical schema artifact. It predates the current normalized field contract and contains legacy dashed publication identifiers.
 

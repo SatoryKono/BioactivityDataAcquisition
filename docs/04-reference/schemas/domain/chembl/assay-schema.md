@@ -1,6 +1,14 @@
-# ChEMBL Assay Domain Schema
-
+---
+Version: 1.0.0
 Status: Historical deep schema.
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
+# ChEMBL Assay Domain Schema
 
 This page is kept as an archived schema note. It reflects a pre-normalization contract and should not be used as the source of truth for current assay fields.
 

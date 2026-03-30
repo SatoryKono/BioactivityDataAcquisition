@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted (Implemented 2025-12-29)
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-021: Внедрение DDD Aggregates в Domain Layer
 
-**Status:** Accepted (Implemented 2025-12-29)
 **Date:** 2025-12-29
 **Decision makers:** @BioETL-Team
 

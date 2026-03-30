@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: '@bioetl-architecture'
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Decision Note: P0-1 Architecture Quality-Gate Stabilization
 
 Date: 2026-03-04

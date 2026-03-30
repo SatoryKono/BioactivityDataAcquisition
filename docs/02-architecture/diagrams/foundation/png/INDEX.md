@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # BioETL Diagrams — PNG Index
 
 _Generated: 2026-03-28T16:48:18+03:00_
@@ -331,4 +341,3 @@ _Generated: 2026-03-28T16:48:18+03:00_
 ![50-exception-hierarchy](./50-exception-hierarchy.png)
 
 ---
-

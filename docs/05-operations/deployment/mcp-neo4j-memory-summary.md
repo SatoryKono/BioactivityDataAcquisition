@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # MCP Neo4j Memory Configuration - Setup Summary
 
 > Scope note: This document describes auxiliary MCP tooling setup. It is not BioETL runtime deployment guidance and does not change ADR-010 Local-Only policy.

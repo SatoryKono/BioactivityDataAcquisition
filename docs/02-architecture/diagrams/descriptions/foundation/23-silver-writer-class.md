@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Title: SilverWriter Class Diagram
 
 - Исходная диаграмма: `foundation/23-silver-writer-class.mmd`

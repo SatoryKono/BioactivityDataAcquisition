@@ -1,15 +1,35 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P0/P1
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Data Recovery Runbook
 
-*Reference: [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md)*
+## Trigger
 
-> Runtime profile: Local-Only single-instance. Recovery procedures target local Delta/JSONL data only.
+- Run this procedure after data corruption, accidental deletion, or recovery-point incidents affecting Bronze, Silver, or Gold assets.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-This runbook provides procedures for recovering data in case of corruption, accidental deletion, or other disaster scenarios.
+## Impact
 
-**RPO (Recovery Point Objective):** 24 hours
-**RTO (Recovery Time Objective):** 4 hours
+- Priority: P0/P1.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
 
-## Scenario 1: Silver/Gold Data Corruption
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Scenario 1: Silver/Gold Data Corruption
 
 - **Symptom**: Data in Silver or Gold layers is found to be incorrect, incomplete, or corrupted. The Bronze layer is intact.
 - **Cause**: A bug in a transformation, incorrect business logic, or a failed merge operation.
@@ -31,7 +51,7 @@ This runbook provides procedures for recovering data in case of corruption, acci
      bioetl run --pipeline <pipeline-name> --run-type rebuild
      ```
 
-## Scenario 2: Bronze Data Loss or Corruption
+### Scenario 2: Bronze Data Loss or Corruption
 
 - **Symptom**: Files in the Bronze layer (local storage) are deleted or corrupted.
 - **Cause**: Accidental deletion, filesystem errors, or infrastructure failure.
@@ -42,7 +62,7 @@ This runbook provides procedures for recovering data in case of corruption, acci
      - Verify the restore point is just before the incident occurred.
   1. **Rebuild Silver/Gold**: Once the Bronze layer is restored, follow the steps in **Scenario 1** to rebuild the downstream layers. A full rebuild is mandatory.
 
-## Scenario 3: Lost Checkpoint
+### Scenario 3: Lost Checkpoint
 
 - **Symptom**: A pipeline was interrupted, but the checkpoint file was lost or corrupted. The pipeline warns about a "Stale checkpoint" on restart.
 - **Cause**: Local checkpoint write failure, race condition, or manual error.
@@ -58,3 +78,18 @@ This runbook provides procedures for recovering data in case of corruption, acci
      - **Note**: For checkpoint reset, delete the file at `data/output/checkpoints/{pipeline-name}.json`.
      - **Impact**: This may create duplicate records in the Bronze layer, but the merge/upsert logic in the Silver layer will handle deduplication, ensuring correctness.
   1. **Option B (Advanced)**: Manually determine the last successfully processed record ID or timestamp from the Silver table and create a new checkpoint file. This is faster but more error-prone.
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

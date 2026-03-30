@@ -1,6 +1,15 @@
+---
+Version: 1.0.1
+Status: Production Ready ✅
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Publication Validation Documentation Index
 
-**Версия:** 1.0.1
 **Дата:** 2026-03-20
 **Статус:** Production Ready ✅
 

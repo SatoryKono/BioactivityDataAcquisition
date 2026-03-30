@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # Title: ContentHashService Class Diagram
 
 - Исходная диаграмма: `foundation/24-hash-service-class.mmd`

@@ -1,26 +1,52 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P1
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Traceability Signal Ownership
 
-*Last verified: 2026-03-26*
+## Trigger
 
-## Purpose
+- Run this procedure when operators need the owner, routing, and escalation contract for traceability signals.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-Define explicit ownership for operational signals so each alert has a clear path:
+## Impact
+
+- Priority: P1.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
+
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Purpose
+
+- Define explicit ownership for operational signals so each alert has a clear path:
 
 1. signal trigger;
 2. first diagnostic command;
 3. responsible owner;
 4. escalation target.
 
-This runbook complements:
+- This runbook complements:
 
 - [Run Manifest Inspection](run-manifest-inspection.md)
 - [Incident Response](incident-response.md)
 - [Observability Checklist](observability-checklist.md)
 
-## Canonical Correlation Anchors
+### Canonical Correlation Anchors
 
-All Track D diagnostics assume these anchors are present in log/event payloads
-or recoverable from `run-manifest show`:
+- All Track D diagnostics assume these anchors are present in log/event payloads or recoverable from `run-manifest show`:
 
 - `run_id`
 - `manifest_id`
@@ -29,7 +55,7 @@ or recoverable from `run-manifest show`:
 - `entity`
 - `event_family`
 
-When available, include:
+- When available, include:
 
 - `dataset_ref`
 - `lineage_fragment_id`
@@ -39,7 +65,7 @@ When available, include:
 - `dq_policy_ref`
 - `effective_config_artifact_id`
 
-## Signal Ownership Matrix
+### Signal Ownership Matrix
 
 | Signal | Trigger | Primary Owner | Backup Owner | First Command | Escalation |
 |---|---|---|---|---|---|
@@ -50,9 +76,9 @@ When available, include:
 | Artifact publish linkage error | `artifact_published` exists but missing dataset/lineage links | Storage/Metadata Owner | Metadata/Lineage Owner | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 30m unresolved |
 | Composite dependency degradation | composite enrichment/cross-validation degradation signal | Composite Owner | Data Quality Owner | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 45m unresolved |
 
-## Minimal Response Contract
+### Minimal Response Contract
 
-For each incident, owner must document in the ticket:
+- For each incident, owner must document in the ticket:
 
 - `run_id`
 - `manifest_id`
@@ -64,24 +90,39 @@ For each incident, owner must document in the ticket:
 - `cross_validation_signal_present` (for composite/DQ incidents)
 - decision (`retry`, `quarantine`, `rollback`, `monitor`)
 
-## Decision Guidance
+### Decision Guidance
 
-Use this fast policy:
+- Use this fast policy:
 
 - `latest_status=failed` with missing manifest or empty ledger -> treat as
-  control-plane integrity incident.
+- control-plane integrity incident.
 - `artifact_refs` present but `missing_artifact_links > 0` -> treat as
-  traceability regression (P1 for critical datasets).
+- traceability regression (P1 for critical datasets).
 - `cross_validation_signal_present=true` -> involve Composite Owner + DQ Owner
-  before retry.
+- before retry.
 - `event_family_counts` inconsistent with success path -> run lifecycle audit
-  before restart.
+- before restart.
 
-## Handover Notes
+### Handover Notes
 
-During ownership handover, transfer:
+- During ownership handover, transfer:
 
 - known failure signatures;
 - working diagnostic commands;
 - expected `event_family_counts` per main scenario;
 - typical false positives and suppression policy.
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

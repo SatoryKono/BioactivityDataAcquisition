@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-024: Entity Naming Unification
 
-**Status:** Accepted
 **Date:** 2026-01-06
 **Decision makers:** @BioETL-Team
 **Relates to:** glossary.md (Ubiquitous Language), RULES.md §8.2 (Domain Layer)

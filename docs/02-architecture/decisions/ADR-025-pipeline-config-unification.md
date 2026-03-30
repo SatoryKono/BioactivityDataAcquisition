@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted (partially superseded by ADR-039)
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-025: Pipeline Configuration Unification
 
-**Status:** Accepted (partially superseded by ADR-039)
 **Date:** 2026-01-19
 **Partially Superseded by:** [ADR-039](ADR-039-unified-entity-config-format.md) (2026-02-24) — the former pipeline/source config directories were replaced by `configs/entities/` and `configs/providers/`.
 **Decision makers:** @BioETL-Team

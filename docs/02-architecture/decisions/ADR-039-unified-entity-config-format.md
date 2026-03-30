@@ -1,6 +1,15 @@
+---
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # ADR-039: Unified Entity Configuration Format
 
-**Status:** Accepted
 **Date:** 2026-02-24
 **Decision makers:** @BioETL-Team
 **Related:** ADR-025 (Pipeline Config Unification), ADR-027 (DQ Rules Externalization), ADR-028 (Filter Rules Externalization), ADR-029 (Convention-based Config)

@@ -1,11 +1,36 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: Informational
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Operations Runbooks (Playbooks)
-*Synced with RULES.md v5.24 (2026-03-13)*
 
-This section contains playbooks for handling common alerts and operational tasks.
+## Trigger
 
-> Runtime profile for all runbooks: Local-Only single-instance (ADR-010), local filesystem storage, `MemoryLock`.
+- Use this page to route operators to the correct runbook for the active incident, maintenance action, or diagnostic task.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-## Available Runbooks
+## Impact
+
+- Incorrect routing delays the correct response path for incidents, maintenance, or diagnostics.
+- Use the mapped priority and scope of the target runbook before execution.
+
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+- Confirm the incident or maintenance task has been classified before selecting a target runbook.
+
+## Procedure
+
+### Available Runbooks
 
 ### Incident Response
 | Runbook | Description | Priority |
@@ -42,11 +67,26 @@ This section contains playbooks for handling common alerts and operational tasks
 | [Traceability Adoption Checklist](traceability-adoption-checklist.md) | Exit-gate checklist and session evidence log for operator adoption | P2 |
 | [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md) | One-pack execution guide for the final operator tabletop/adoption gate | P2 |
 
----
+- ---
 
-## See Also
+### See Also
+
 - [RULES.md](../../00-project/RULES.md) - Project rules and governance
 - [ADR-008: Graceful Shutdown](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
 
----
-*Last updated: 2026-03-26*
+- --- *Last updated: 2026-03-26*
+
+## Verification
+
+- Confirm the selected runbook matches the active symptom, severity, and ownership path.
+- Verify that follow-on execution moved into the correct detailed runbook.
+
+## Rollback
+
+- If the wrong runbook was selected, return to this index and reroute immediately.
+- Revert to the last known safe operating decision before starting a different procedure.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

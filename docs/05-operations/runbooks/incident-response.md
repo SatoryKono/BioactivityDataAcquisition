@@ -1,10 +1,35 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: P1
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-03-30'
+---
+
 # Incident Response Playbook
 
-This document outlines the standard operating procedures for responding to production incidents in the BioETL platform.
+## Trigger
 
-> Runtime profile: Local-Only single-instance (ADR-010). Incident handling assumes local filesystem storage and `MemoryLock`.
+- Run this procedure when an operational alert requires triage, stabilization, and incident coordination.
+- Escalate according to the priority declared in metadata when operator ownership is unclear.
 
-## Severity Levels
+## Impact
+
+- Priority: P1.
+- Delayed handling can extend service disruption, data correctness risk, or operator response time.
+
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+
+## Procedure
+
+### Severity Levels
 
 | Level | Description | Response SLA | Recovery SLA |
 |-------|-------------|--------------|--------------|
@@ -13,7 +38,7 @@ This document outlines the standard operating procedures for responding to produ
 | **P2** | Secondary pipeline failure (e.g., enrichment sources). | 8 hours | 24 hours |
 | **P3** | Warning / Data Quality anomalies / Non-blocking bugs. | 24 hours | Next Sprint |
 
-## Common Alerts & Actions
+### Common Alerts & Actions
 
 ### 1. Auth Failure (`401 Unauthorized`)
 *   **Symptom**: Logs show repeated `401` errors from a provider API.
@@ -60,9 +85,24 @@ This document outlines the standard operating procedures for responding to produ
         ```
     4.  Investigate why the job took so long (performance regression?).
 
-## Escalation Policy
+### Escalation Policy
 
-If an incident cannot be resolved within the Response SLA:
+- If an incident cannot be resolved within the Response SLA:
 1.  **On-Call Engineer**: Post status update in `#bioetl-alerts`.
 2.  **Tech Lead**: Notify stakeholders if P0/P1.
 3.  **Post-Mortem**: Required for all P0/P1 incidents within 48 hours.
+
+## Verification
+
+- Confirm the triggering condition is cleared or understood with evidence.
+- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+
+## Rollback
+
+- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
+- Return to the last known good state before attempting an alternate recovery path.
+
+## Post-incident
+
+- Record timeline, commands executed, evidence reviewed, and follow-up owners.
+- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.

@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-29'
+---
+
 # BioETL Kubernetes Deployment Guide
 
 > **Status:** Internal / Extended document (experimental deployment profile, non-normative for default operations).
@@ -497,4 +507,3 @@ resources:
 - [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)
 - [Grafana Helm Chart](https://grafana.com/grafana/helm-charts/)
 - Docker Documentation: https://docs.docker.com/reference/cli/docker/container/run/
-
