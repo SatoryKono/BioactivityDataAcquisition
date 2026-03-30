@@ -53,7 +53,7 @@ model: opus
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
 - 5 слоёв: domain (192), application (133), infrastructure (140), composition (54), interfaces (29)
-- 310 markdown-файлов в `docs/`, 40 ADR, 7 провайдеров
+- 310 markdown-файлов в `docs/`, 50 ADR, 7 провайдеров
 - Doc site: MkDocs + Material + mkdocstrings (Google-style docstrings)
 
 **Полная спецификация:** `.claude/agents/py-doc-swarm-standalone.md`
