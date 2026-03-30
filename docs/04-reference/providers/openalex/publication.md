@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # Пайплайн: OpenAlex Publication
@@ -499,4 +499,59 @@ Silver → GoldWriter (validated)
 
 ----------------------------------------------------------------------
 
-*Последнее обновление: 2026-03-03*
+## Contract References
+
+| Артефакт | Ссылка |
+| --- | --- |
+| Gold contract export | [openalex_publication_v1.0.json](../../contracts/gold/openalex_publication_v1.0.json) |
+| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
+| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+
+----------------------------------------------------------------------
+
+## Compliance
+
+| Контроль | Статус | Evidence |
+| --- | --- | --- |
+| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Описание`, `Трансформация`, `Data Flow` |
+| Contract linkage | Pass | [openalex_publication_v1.0.json](../../contracts/gold/openalex_publication_v1.0.json) |
+| API governance | Pass | См. [API Compliance](#api-compliance) |
+
+----------------------------------------------------------------------
+
+## API Compliance
+
+### Rate limits & retries
+
+Официальные источники OpenAlex конфликтуют. Current Developers docs state that the REST API requires an API key and the LLM quick reference documents HTTP `429` with exponential backoff. At the same time, the Help Center pricing page says the free tier is `100k/day` and `max 10/second`. До официального снятия противоречия клиент SHOULD использовать консервативный лимит `10 requests/second`, MUST honor HTTP `429`, and SHOULD применять exponential backoff.
+
+### 429 handling policy
+
+OpenAlex documents HTTP `429` for excess usage and shows exponential backoff as the expected retry pattern. The concrete `Retry-After` contract is not documented in the accessible references.
+
+### Authentication model
+
+Current technical documentation states that the REST API requires an API key; without a key only a very small free budget is available. Production clients MUST send the API key on every request.
+
+### ToS URL
+
+- https://openalex.org/OpenAlex_termsofservice.pdf
+
+### Data license
+
+OpenAlex data are published under CC0.
+
+### Personal data notes
+
+OpenAlex records include person-centric scholarly metadata such as author names, affiliations, and external identifiers (for example, ORCID when available). API/account-specific personal-data handling beyond those scholarly metadata fields is [неуточнено] in the accessible technical docs.
+
+### Official sources
+
+- [OpenAlex Developers overview](https://developers.openalex.org/)
+- [OpenAlex API guide for LLMs](https://developers.openalex.org/api-guide-for-llms)
+- [OpenAlex Pricing](https://help.openalex.org/hc/en-us/articles/24397762024087-Pricing)
+- [OpenAlex About us](https://help.openalex.org/hc/en-us/articles/24396686889751-About-us)
+- [OpenAlex Terms of Service](https://openalex.org/OpenAlex_termsofservice.pdf)
+
+*Последнее обновление: 2026-03-30*

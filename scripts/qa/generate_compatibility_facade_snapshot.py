@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT = (
     ROOT / "docs" / "02-architecture" / "07-compatibility-facade-snapshot.md"
 )
+_FRONTMATTER_DELIMITER = "---"
 
 
 def _parse_args() -> argparse.Namespace:
@@ -133,6 +134,16 @@ def render_snapshot(
     return "\n".join(sections)
 
 
+def _split_frontmatter(text: str) -> tuple[str | None, str]:
+    if not text.startswith(f"{_FRONTMATTER_DELIMITER}\n"):
+        return None, text
+    parts = text.split(f"\n{_FRONTMATTER_DELIMITER}\n", 1)
+    if len(parts) != 2:
+        return None, text
+    frontmatter, body = parts
+    return f"{frontmatter}\n{_FRONTMATTER_DELIMITER}\n", body
+
+
 def main() -> int:
     args = _parse_args()
     registry = load_compatibility_registry(Path(args.registry))
@@ -151,10 +162,11 @@ def main() -> int:
         missing_measured_only_modules=missing,
     )
     output_path = Path(args.output)
+    current = output_path.read_text(encoding="utf-8") if output_path.exists() else ""
+    frontmatter, current_body = _split_frontmatter(current)
 
     if args.check:
-        current = output_path.read_text(encoding="utf-8") if output_path.exists() else ""
-        if current != rendered:
+        if current_body != rendered:
             print(f"[drift] mismatch: {output_path.as_posix()}")
             return 1
         if unexpected or missing:
@@ -171,7 +183,8 @@ def main() -> int:
         return 0
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(rendered, encoding="utf-8")
+    rendered_with_frontmatter = f"{frontmatter}{rendered}" if frontmatter else rendered
+    output_path.write_text(rendered_with_frontmatter, encoding="utf-8")
     print(f"[updated] wrote {output_path.as_posix()}")
     if unexpected or missing:
         if unexpected:

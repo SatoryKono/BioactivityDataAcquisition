@@ -746,8 +746,8 @@ Last verified: '2026-03-29'
 
 #### REQ-SEC-001
 - **Уровень**: MUST
-- **Описание**: IAM: Least Privilege, разделение ролей writer/reader
-- **Проверка**: Проверить IAM policies
+- **Описание**: Для текущего Local-Only runtime доступ к секретам и локальным данным организуется по принципу least privilege: live credentials приходят через environment/secret injection, а write-доступ к data/output путям ограничен оператором или процессом, запускающим пайплайн
+- **Проверка**: Проверить, что секреты берутся не из репозитория, а из environment/secret injection; review локальных permission/profile настроек
 
 #### REQ-SEC-002
 - **Уровень**: MUST
@@ -778,15 +778,15 @@ Last verified: '2026-03-29'
 
 #### REQ-DR-003
 - **Уровень**: SHOULD
-- **Описание**: Game Days проводятся ежегодно
-- **Проверка**: Проверить наличие запланированных Game Days
+- **Описание**: Restore drills SHOULD проводиться периодически для активных локальных backup-процедур
+- **Проверка**: Проверить наличие зафиксированного restore drill или rehearsal по runbook
 
 ### 5.7 Environments
 
 #### REQ-ENV-001
 - **Уровень**: MUST
-- **Описание**: Локальное хранение: отдельные директории для dev/staging/prod
-- **Проверка**: Проверить конфигурации бакетов
+- **Описание**: Локальное хранение: отдельные директории/override paths для dev, staging-like и prod-like local profiles
+- **Проверка**: Проверить конфигурации локальных путей и profile overrides
 
 #### REQ-ENV-002
 - **Уровень**: MUST
@@ -795,8 +795,8 @@ Last verified: '2026-03-29'
 
 #### REQ-ENV-003
 - **Уровень**: MUST
-- **Описание**: Prod секреты доступны только CI Runner
-- **Проверка**: Проверить IAM и secrets access
+- **Описание**: Secrets для prod-like local profile загружаются через environment/secret injection и не хранятся в репозитории или опубликованных docs
+- **Проверка**: Проверить `.env.example`, source-of-secrets в коде и отсутствие live credentials в tracked files
 
 ---
 
@@ -830,8 +830,8 @@ Last verified: '2026-03-29'
 
 #### REQ-CONTRACT-003
 - **Уровень**: MUST
-- **Описание**: PR с изменением Gold-схемы имеет лейбл `breaking-change`
-- **Проверка**: CI проверка наличия лейбла при изменении схемы
+- **Описание**: PR с изменением Gold-схемы содержит явный consumer-impact note / migration note и обновлённые generated contract artifacts
+- **Проверка**: Проверить diff PR: обновлены JSON exports/contract parity и есть impact note в PR/changelog/ADR-контексте
 
 #### REQ-CONTRACT-004
 - **Уровень**: MUST
@@ -842,8 +842,8 @@ Last verified: '2026-03-29'
 
 #### REQ-ROLLBACK-001
 - **Уровень**: MUST
-- **Описание**: Auto Rollback при Error Rate > 10%
-- **Проверка**: Проверить настройку auto rollback в CI/CD
+- **Описание**: Automatic application rollback не является частью текущего Local-Only runtime; rollback выполняется по documented manual platform/deployment procedure
+- **Проверка**: Проверить наличие manual rollback procedure и placeholder/guard, запрещающий несуществующий runtime rollback command
 
 #### REQ-ROLLBACK-002
 - **Уровень**: MUST NOT

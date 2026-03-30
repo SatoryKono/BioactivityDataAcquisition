@@ -10,8 +10,7 @@ pipeline:
   - molecule_id
   sink:
     silver:
-      partition_by:
-      - batch_date
+      partition_by: []
     gold:
       mode: scd2
       scd_config:
@@ -154,9 +153,6 @@ quality:
   - field: molecule_id
     key_type: merge
     nullable: false
-  - field: batch_date
-    key_type: partition
-    nullable: false
 filters:
   version: 1.0.0
   provider: pubchem
@@ -169,7 +165,6 @@ filters:
     batch_size: 1
   silver_filters:
     required_fields:
-    - batch_date
     - molecule_id
   gold_filters:
     required_fields:

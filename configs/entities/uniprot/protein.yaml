@@ -11,7 +11,7 @@ pipeline:
   sink:
     silver:
       partition_by:
-      - organism
+      - organism_scientific
     gold:
       mode: scd2
       scd_config:
@@ -150,7 +150,7 @@ quality:
     pattern: ^[A-Z0-9_]+$
     nullable: true
     error_message: Entry name must be alphanumeric with underscores
-  - field: organism
+  - field: organism_scientific
     type: pattern
     pattern: ^[A-Z][a-z]+ [a-z]+.*$
     nullable: true
@@ -167,7 +167,7 @@ quality:
     max: 100000
     nullable: true
     error_message: Sequence length must be between 1 and 100,000
-  - field: mass
+  - field: sequence_mass
     type: range
     min: 100
     max: 10000000
@@ -240,7 +240,7 @@ quality:
   - field: accession
     key_type: merge
     nullable: false
-  - field: organism
+  - field: organism_scientific
     key_type: partition
     nullable: false
 filters:
@@ -256,7 +256,7 @@ filters:
   silver_filters:
     required_fields:
     - accession
-    - organism
+    - organism_scientific
   gold_filters:
     columns:
       reviewed:
@@ -264,7 +264,7 @@ filters:
     required_fields:
     - accession
     - entry_name
-    - organism
+    - organism_scientific
 contracts:
   primary_key:
   - accession

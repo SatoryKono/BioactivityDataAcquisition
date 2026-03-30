@@ -33,7 +33,10 @@ TARGET_COLUMNS: Final[tuple[str, ...]] = (
     "Source_Field_Validation",
     "Validation fail action",
     "Silver Normalisation Detail",
+    "Silver Normalisation Detail ID",
 )
+DETAIL_COLUMN: Final[str] = "Silver Normalisation Detail"
+DETAIL_ID_COLUMN: Final[str] = "Silver Normalisation Detail ID"
 COMPLEX_REVIEW_COLUMNS: Final[frozenset[str]] = frozenset(
     {
         "Silver Filters",
@@ -358,6 +361,50 @@ def _column_dictionary(
     return dictionaries, review_queue
 
 
+def _detail_id_dictionary(
+    workbook_rows: dict[str, list[dict[str, str]]],
+) -> dict[str, object]:
+    """Build workbook-global mapping from detail IDs to detail strings."""
+    pairs: dict[int, str] = {}
+    detail_to_id: dict[str, int] = {}
+
+    for rows in workbook_rows.values():
+        for row in rows:
+            detail = row.get(DETAIL_COLUMN, "")
+            raw_id = row.get(DETAIL_ID_COLUMN, "")
+            if not detail or not raw_id:
+                continue
+            try:
+                detail_id = int(raw_id)
+            except ValueError:
+                continue
+
+            existing_detail = pairs.get(detail_id)
+            if existing_detail is not None and existing_detail != detail:
+                raise ValueError(
+                    f"Conflicting detail text for ID {detail_id}: "
+                    f"{existing_detail!r} != {detail!r}"
+                )
+            existing_id = detail_to_id.get(detail)
+            if existing_id is not None and existing_id != detail_id:
+                raise ValueError(
+                    f"Conflicting detail ID for {detail!r}: "
+                    f"{existing_id} != {detail_id}"
+                )
+
+            pairs[detail_id] = detail
+            detail_to_id[detail] = detail_id
+
+    entries = [
+        {"id": detail_id, "detail": detail}
+        for detail_id, detail in sorted(pairs.items())
+    ]
+    return {
+        "unique_detail_count": len(entries),
+        "entries": entries,
+    }
+
+
 def _write_yaml(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
@@ -396,6 +443,7 @@ def main() -> int:
         },
     }
     column_dictionaries, review_queue = _column_dictionary(workbook_rows)
+    detail_id_dictionary = _detail_id_dictionary(workbook_rows)
     column_dictionary_payload = {
         "generated_at_utc": generated_at,
         "source_workbook": str(workbook),
@@ -414,10 +462,21 @@ def main() -> int:
     sheet_dict_path = output_dir / f"{stem}_sheet_dictionaries.yaml"
     column_dict_path = output_dir / f"{stem}_column_dictionaries.yaml"
     review_queue_path = output_dir / f"{stem}_dictionary_review_queue.yaml"
+    detail_id_dict_path = output_dir / f"{stem}_normalisation_detail_ids.yaml"
     _write_yaml(inventory_path, inventory_payload)
     _write_yaml(sheet_dict_path, dictionary_payload)
     _write_yaml(column_dict_path, column_dictionary_payload)
     _write_yaml(review_queue_path, review_queue_payload)
+    _write_yaml(
+        detail_id_dict_path,
+        {
+            "generated_at_utc": generated_at,
+            "source_workbook": str(workbook),
+            "detail_column": DETAIL_COLUMN,
+            "detail_id_column": DETAIL_ID_COLUMN,
+            **detail_id_dictionary,
+        },
+    )
 
     print(
         {
@@ -425,6 +484,7 @@ def main() -> int:
             "sheet_dictionaries": str(sheet_dict_path),
             "column_dictionaries": str(column_dict_path),
             "review_queue": str(review_queue_path),
+            "detail_id_dictionary": str(detail_id_dict_path),
             "sheet_count": len(workbook_rows),
             "target_columns": len(TARGET_COLUMNS),
         }

@@ -14,242 +14,180 @@ Current shipped dashboards from [grafana/dashboards](/mnt/e/g-drive/05_AI/github
 Audit evidence sources:
 
 - shipped dashboard JSON files in [grafana/dashboards](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards)
-- latest Playwright review snapshot [grafana-dashboard-review.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/reports/review/playwright/grafana-dashboard-review.json)
-- screenshots in [output/playwright](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright)
+- fresh live screenshots in [output/playwright](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright)
+- direct live checks against local Grafana / Prometheus / Loki during the audit
 
-## Limitations
+## Audit Method
 
-- Live Grafana was unavailable during this audit:
-  - `http://localhost:3000` -> connection refused
-  - `http://localhost:9090` -> connection refused
-- Because live backends were down, this is an offline audit based on dashboard definitions plus the latest available screenshot/review snapshot.
-- `bioetl-runtime` has no current screenshot/review artifact in the repository, so its panel fill state could not be verified visually.
-- `bioetl-simple` appears in the Playwright review snapshot but is not present in the current shipped dashboard directory, so it is excluded from the main audit scope.
+- dashboards were reviewed from the shipped JSON definitions
+- screenshots were re-rendered from live Grafana via Playwright
+- empty-state panels were checked against their current query semantics
+- placeholder / zero-state rendering was treated as valid only where the absence of events is expected behavior
 
 ## Dashboard Reports
 
 ### 1. Overview
 
 Dashboard file: [bioetl-overview-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-overview-v2.json)  
-Snapshot: [bioetl-overview-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-overview-v2.png)
+Screenshot: [bioetl-overview-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-overview-v2.png)
 
-Overall status: Partial / degraded  
-Confidence: Medium
+Overall status: Healthy dashboard with live pipeline degradation signal  
+Confidence: High
 
-Visible snapshot findings:
+Verified panels:
 
-- `Pipeline` [text]: populated
-- `Execution Timestamp` [stat]: populated, shows `03/28/2026, 03:53:26 PM`
+- `Pipeline` [text]: populated, `chembl_activity`
+- `Execution Timestamp` [stat]: populated, `03/30/2026, 10:44:50 AM`
 - `Processing Pipeline` [timeseries]: populated
 - `Stage Distribution` [piechart]: populated
 - `Pipeline Distribution` [piechart]: populated
-- `Overall Quality` [gauge]: populated, `100.0%`
-- `Control Plane & Lineage` [text]: populated
-- `Manifest Write Failures` [stat]: `No data`
-- `Ledger Append Failures` [stat]: `No data`
-- `Checkpoint Incompatibilities` [stat]: `No data`
-- `Lineage Refs Missing` [stat]: `No data`
+- `Overall Quality` [gauge]: populated, `0.00%`
+- `Manifest Write Failures` [stat]: explicit zero-state
+- `Ledger Append Failures` [stat]: explicit zero-state
+- `Checkpoint Incompatibilities` [stat]: explicit zero-state
+- `Lineage Refs Missing` [stat]: explicit zero-state
+- `Control-plane Lookup Failures` [stat]: explicit zero-state
+- `Control-plane Lookup p95` [stat]: populated, `0 s`
+- `Silver Filter Rejects` [stat]: populated, about `10k`
+- `Silver Filter Reject Rate` [gauge]: populated, about `5.09%`
 - `Lineage Fragment Outcomes` [timeseries]: populated
 
-Panels defined in JSON but not directly visible in the captured screenshot:
+Findings:
 
-- `Control-plane Lookup Failures` [stat]: query present, live fill not verified
-- `Control-plane Lookup p95` [stat]: query present, live fill not verified
-- `Silver Filter Rejects` [stat]: query present, live fill not verified
-- `Silver Filter Reject Rate` [gauge]: query present, live fill not verified
-
-Detected problems:
-
-- Four control-plane stat panels display `No data`.
-- These panels use PromQL with `or vector(0)` fallback, so an operator would normally expect a rendered zero instead of `No data`.
-- Snapshot timestamp is from 2026-03-28, so the reviewed data is stale relative to the audit date.
-
-Possible causes:
-
-- corresponding control-plane metrics are not being emitted
-- Prometheus scrape gap or datasource problem at capture time
-- label mismatch for `pipeline` / `run_type`
-- panel reduction / stat configuration causing empty result rendering despite fallback
+- no broken or empty core panels remain
+- zero-state control-plane panels now render as usable values instead of `No data`
+- `Overall Quality = 0.00%` is not a dashboard bug: this panel is defined as `gold / bronze`
+- the panel aligns with current live flow, where Bronze is populated, `Silver Filter Rejects` are high, and Gold is currently `0`
 
 Recommendations:
 
-- validate the four control-plane panel queries directly in Grafana Explore once Grafana is back up
-- verify that `bioetl_control_plane_*`, `bioetl_checkpoint_*`, and `bioetl_lineage_*` metrics are present in Prometheus
-- confirm whether the stat panels should render `0` instead of `No data`
-- capture a fresh full-page screenshot including panels 116-119
+- no corrective dashboard action required
+- retain current zero-state rendering as the baseline
+- investigate why the current selected run window has no Gold output
 
 ### 2. Data Quality
 
 Dashboard file: [bioetl-dq-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-dq-v2.json)  
-Snapshot: [bioetl-dq-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-dq-v2.png)
+Screenshot: [bioetl-dq-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-dq-v2.png)
 
-Overall status: Partial / degraded  
-Confidence: Medium
+Overall status: Healthy dashboard with downstream completion gap  
+Confidence: High
 
-Visible snapshot findings:
+Verified panels:
 
-- `Pipeline` [text]: populated
-- `Execution Timestamp` [stat]: populated, shows `03/28/2026, 03:53:26 PM`
+- `Pipeline` [text]: populated, `chembl_activity`
+- `Execution Timestamp` [stat]: populated, `03/30/2026, 10:44:50 AM`
 - `Data Flow: Bronze -> Silver -> Gold` [timeseries]: populated
 - `Data Quality Score` [gauge]: populated, `100.0%`
-- `Source Records (Bronze)` [stat]: populated, `10`
-- `Clean Records (Gold)` [stat]: populated, `10`
+- `Source Records (Bronze)` [stat]: populated, about `50k`
+- `Clean Records (Gold)` [stat]: populated, `0`
 - `DQ Validation Score` [gauge]: populated, `100.0%`
-- `Records Quarantined` [stat]: `No data`
-- `Soft Threshold Exceeded` [stat]: `No data`
-- `Data Freshness Lag (seconds)` [gauge]: populated, `55 mins`
-- `Quarantine by Error Type` [piechart]: `No data`
-- `Anomalies Detected` [timeseries]: `No data`
-- `DQ Check Duration (p95)` [timeseries]: `No data`
-- `Silver Validation Failures` [stat]: `No data`
-- `Lineage Refs Missing` [stat]: `No data`
+- `Records Quarantined` [stat]: explicit zero-state
+- `Soft Threshold Exceeded` [stat]: explicit zero-state
+- `Data Freshness Lag (seconds)` [gauge]: populated, about `1 hours`
+- `Silver Filter Rejects` [stat]: populated, about `10k`
+- `Silver Filter Rejects by Pipeline` [bargauge]: populated, single-series view around `10.2k`
+- `Quarantine by Error Type` [piechart]: explicit placeholder / zero-state
+- `Anomalies Detected` [timeseries]: explicit zero-state
+- `DQ Check Duration (p95)` [timeseries]: explicit zero-state
+- `Silver Validation Failures` [stat]: explicit zero-state
+- `Lineage Refs Missing` [stat]: explicit zero-state
 
-Panels defined in JSON but not directly visible in the captured screenshot:
+Findings:
 
-- `Silver Filter Rejects` [stat]: query present, live fill not verified
-- `Silver Filter Rejects by Pipeline` [bargauge]: query present, live fill not verified
-
-Detected problems:
-
-- Seven panels show `No data` in the review snapshot.
-- Four stat panels are especially suspicious:
-  - `Records Quarantined`
-  - `Soft Threshold Exceeded`
-  - `Silver Validation Failures`
-  - `Lineage Refs Missing`
-- Those four panels also use fallback patterns that would usually be expected to render `0`, not `No data`.
-
-Potentially acceptable empty states, but still needing confirmation:
-
-- `Quarantine by Error Type`
-- `Anomalies Detected`
-- `DQ Check Duration (p95)`
-
-Possible causes:
-
-- metrics absent for quarantine / validation / lineage signals
-- Prometheus label mismatch for `pipeline` or `run_type`
-- DQ checks not emitting duration/anomaly series for the selected scope
-- stat/pie/timeseries panels configured to show empty state when series are absent
+- previously empty DQ zero-state panels now render correctly
+- `Quarantine by Error Type`, `Anomalies Detected`, and `DQ Check Duration (p95)` no longer disappear into `No data`
+- `Data Quality Score = 100%` and `DQ Validation Score = 100%` are not inconsistent with `Clean Records (Gold) = 0`: these gauges are backed by validation score metrics, not by Gold throughput
+- the dashboard therefore looks structurally correct, but the live pipeline state indicates that nothing reached Gold in the selected window
+- `Silver Filter Rejects by Pipeline` is technically populated but visually weak because the current window only has one dominant series
 
 Recommendations:
 
-- validate all seven empty panels in Grafana Explore with the selected `$pipeline` and `$run_type`
-- verify that DQ and lineage metrics exist in Prometheus for `chembl_activity`
-- make zero-state stat panels render explicit `0` where appropriate
-- capture a fresh screenshot that also includes panels 117-118
+- no critical corrective dashboard action required
+- optional UX improvement: make `Silver Filter Rejects by Pipeline` easier to read when only one series is present
+- investigate why Gold remains `0` while Bronze and Silver activity are present
 
 ### 3. Provider Health
 
 Dashboard file: [bioetl-provider-health-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-provider-health-v2.json)  
-Snapshot: [bioetl-provider-health-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-provider-health-v2.png)
+Screenshot: [bioetl-provider-health-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-provider-health-v2.png)
 
-Overall status: Problematic  
-Confidence: Medium
+Overall status: Healthy  
+Confidence: High
 
-Visible snapshot findings:
+Verified panels:
 
 - `Health Check Latency by Provider (p95)` [timeseries]: populated
-- `Health Check Successes (15m)` / `Healthy Checks` [stat]: `No data` in the current snapshot
-- `Provider Failure Rate` [gauge]: `No data`
-- `Health Checks Total` [stat]: populated, value `0`
-- `Provider Health Check Latency (p95) - $provider` [gauge]: populated, value `9.500 ms`
-- `Selected Providers` [row]: present / collapsed
+- `Healthy Checks` [stat]: populated, `3`
+- `Health Checks Total` [stat]: populated, `3`
+- `Degraded Checks` [stat]: populated, `0`
+- `Provider Failure Rate` [gauge]: populated, `0.00%`
+- `Provider Health Check Latency (p95) - $provider` [gauge]: populated, about `9.500 ms`
 
-Panel defined in JSON but not directly visible as a standalone stat in the captured screenshot:
+Findings:
 
-- `Degraded Checks` [stat]: query present, live fill not verified
-
-Detected problems:
-
-- Two panels are confirmed `No data`:
-  - `Healthy Checks`
-  - `Provider Failure Rate`
-- Cross-panel inconsistency is visible:
-  - latency panels have data
-  - selected-provider latency gauge has data
-  - `Health Checks Total` is `0`
-  - `Healthy Checks` is `No data`
-
-Possible causes:
-
-- histogram latency metric is present but success/degraded/failure counters are missing
-- provider label mismatch between histogram and counter metrics
-- gauge/stat queries and time range are not aligned
-- scrape/source inconsistency at snapshot time
+- earlier counter/latency inconsistency is no longer present in the live view
+- the dashboard now presents a coherent provider-health story
 
 Recommendations:
 
-- compare `bioetl_health_check_latency_seconds_*` vs `bioetl_health_check_success_total`, `bioetl_health_check_degraded_total`, and `bioetl_health_check_failures_total` in Prometheus
-- verify provider label values and variable interpolation for `$provider`
-- normalize empty-state behavior so health counters show `0` rather than `No data` when appropriate
-- capture a refreshed screenshot with the row expanded
+- no corrective action required
 
 ### 4. Runtime
 
-Dashboard file: [bioetl-runtime.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-runtime.json)
+Dashboard file: [bioetl-runtime.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-runtime.json)  
+Screenshot: [bioetl-runtime.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-runtime.png)
 
-Overall status: Not fully verifiable  
-Confidence: Low
+Overall status: Healthy with one live alert signal to investigate  
+Confidence: High
 
-Offline configuration audit:
+Verified panels:
 
-- Dashboard contains 17 panels.
-- All non-text panels have query targets.
-- Datasource mix appears intentional:
-  - Loki-backed runtime/log panels
-  - Prometheus-backed alert and control-plane panels
-- `Log Hygiene Trend` uses two targets.
+- `Runtime Scope` [text]: populated, wide multi-pipeline scope
+- `Warnings` [stat]: explicit zero-state
+- `Unstructured Logs` [stat]: explicit zero-state
+- `DQ Alert Conditions` [stat]: explicit zero-state
+- `Control-plane Alert Conditions` [stat]: explicit zero-state
+- `Provider Alert Conditions` [stat]: explicit zero-state
+- `Freshness Alert Conditions` [stat]: populated, `2`
+- `Pipeline Alert Conditions` [stat]: explicit zero-state
+- `Top Warning Events` [bargauge]: explicit placeholder / zero-state
+- `Log Hygiene Trend` [stat summary]: explicit zero-state
+- `Trace-enabled Runs` [stat]: explicit zero-state
+- `Silver Filter Rejects` [stat]: populated, about `10.2k`
+- `DQ Context Failures` [stat]: explicit zero-state
+- `DQ Reports Skipped` [stat]: populated, `2`
+- `DQ Reports Generated` [stat]: populated, `2`
+- `Control-plane Lookup Outcomes` [timeseries]: explicit placeholder / zero-state
+- `Control-plane Lookup p95` [stat]: populated, `0 s`
 
-Panel inventory from JSON:
+Findings:
 
-- `Runtime Scope` [text]: config present
-- `Warnings` [stat]: config present
-- `Unstructured Logs` [stat]: config present
-- `Pipeline Alert Conditions` [stat]: config present
-- `DQ Alert Conditions` [stat]: config present
-- `Control-plane Alert Conditions` [stat]: config present
-- `Provider Alert Conditions` [stat]: config present
-- `Freshness Alert Conditions` [stat]: config present
-- `DQ Context Failures` [stat]: config present
-- `DQ Reports Skipped` [stat]: config present
-- `DQ Reports Generated` [stat]: config present
-- `Control-plane Lookup Outcomes` [timeseries]: config present
-- `Control-plane Lookup p95` [stat]: config present
-- `Top Warning Events` [bargauge]: config present
-- `Trace-enabled Runs` [stat]: config present
-- `Silver Filter Rejects` [stat]: config present
-- `Log Hygiene Trend` [timeseries]: config present
-
-Detected problems:
-
-- No live validation was possible because Grafana and Prometheus were unavailable.
-- No current screenshot/review artifact for this dashboard exists in the repository.
-- Therefore fill status for every runtime panel remains unverified.
-
-Possible causes:
-
-- audit limitation only; not enough runtime evidence
+- all previously broken runtime zero-state panels now render usable values
+- `Warnings`, `Unstructured Logs`, `Top Warning Events`, `Log Hygiene Trend`, and `Control-plane Lookup Outcomes` no longer collapse into empty / `No data` panels
+- `Freshness Alert Conditions = 2` is a live signal, not a rendering bug
+- the current runtime scope is broad, so the freshness count is not limited to one pipeline
+- `DQ Reports Skipped = 2` and `DQ Reports Generated = 2` are also live signals, not visualization defects
 
 Recommendations:
 
-- capture a live Playwright review for `bioetl-runtime`
-- verify Loki datasource connectivity before the next audit
-- validate top warning, unstructured logs, and alert-condition panels against a known recent run window
+- do not treat `Freshness Alert Conditions = 2` as a dashboard bug
+- follow up operationally on the freshness alert source if this dashboard is expected to stay clean
+- optionally tighten dashboard defaults if the intended default scope is a single pipeline rather than `All`
 
 ## Summary Table
 
-| Dashboard | Status | Panels | Confirmed issues | Criticality | Brief conclusion |
+| Dashboard | Status | Panels | Problems | Criticality | Brief conclusion |
 |---|---|---:|---:|---|---|
-| `bioetl-overview-v2` | Partial / degraded | 16 | 4 | Medium | Core throughput panels work, but control-plane visibility is degraded by `No data` stats. |
-| `bioetl-dq-v2` | Partial / degraded | 17 | 4 confirmed, 3 need confirmation | Medium-High | Core quality KPIs render, but several DQ / lineage panels are empty and need validation. |
-| `bioetl-provider-health-v2` | Problematic | 7 | 3 | High | Health counters are inconsistent with latency data, so provider-health picture is unreliable. |
-| `bioetl-runtime` | Not fully verifiable | 17 | not verified | Medium | Dashboard config is present, but runtime fill state could not be validated without live Grafana/Loki/Prometheus. |
+| `bioetl-overview-v2` | Healthy dashboard with live pipeline degradation signal | 16 | 0 dashboard bugs, 1 live operational issue | Medium | Dashboard is correct, but Gold output is absent in the selected live window. |
+| `bioetl-dq-v2` | Healthy dashboard with downstream completion gap | 17 | 0 dashboard bugs, 1 cosmetic, 1 live operational issue | Medium | DQ rendering is fixed; live data still shows Bronze activity without Gold completion. |
+| `bioetl-provider-health-v2` | Healthy | 6 | 0 | Low | Provider counters and latency views are now consistent. |
+| `bioetl-runtime` | Healthy with one live alert signal to investigate | 17 | 0 dashboard bugs, 1 live alert condition | Medium | Runtime rendering issues are fixed; remaining signal is operational, not visual. |
 
 ## Final Conclusion
 
-- The repository contains four current shipped Grafana dashboards.
-- At least three dashboards have evidence of incomplete or unreliable data filling in the latest available review snapshot.
-- The most concerning dashboard is `bioetl-provider-health-v2`, because it shows conflicting health signals across panels.
-- `bioetl-runtime` cannot be signed off until a fresh live review is captured.
-- A follow-up audit should be run after restoring local Grafana/Prometheus availability.
+- All four shipped dashboards were reviewed against live Grafana renders.
+- The dashboard-filling problems identified earlier were primarily zero-state rendering issues, and those have now been corrected.
+- `bioetl-provider-health-v2` is in a good operational state.
+- `bioetl-overview-v2` and `bioetl-dq-v2` are visually correct, but the current live telemetry shows a real downstream completion gap: Bronze is populated while Gold remains `0`.
+- `bioetl-runtime` is also visually healthy; the remaining notable item is the live `Freshness Alert Conditions = 2` signal, which should be handled as runtime telemetry, not as a dashboard defect.

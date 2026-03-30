@@ -25,6 +25,12 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Bioactivity
+from bioetl.domain.normalization_chembl import (
+    normalize_bao_identifier,
+    normalize_qudt_unit,
+    normalize_standard_unit,
+    normalize_uo_identifier,
+)
 from bioetl.domain.transformations import safe_float
 from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import validate_taxonomy_id
@@ -251,5 +257,19 @@ class ActivityTransformer(BaseChemblTransformer):
         business_data["publication_id"] = business_data.get(
             "publication_id"
         ) or record.get("publication_id")
-
+        business_data["bao_endpoint"] = normalize_bao_identifier(
+            cast("str | None", business_data.get("bao_endpoint"))
+        )
+        business_data["bao_format"] = normalize_bao_identifier(
+            cast("str | None", business_data.get("bao_format"))
+        )
+        business_data["uo_units"] = normalize_uo_identifier(
+            cast("str | None", business_data.get("uo_units"))
+        )
+        business_data["standard_units"] = normalize_standard_unit(
+            cast("str | None", business_data.get("standard_units"))
+        )
+        business_data["qudt_units"] = normalize_qudt_unit(
+            cast("str | None", business_data.get("qudt_units"))
+        )
         return business_data

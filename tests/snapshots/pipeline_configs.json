@@ -1581,7 +1581,6 @@
       "list_length_filters": [],
       "range_filters": [],
       "required_fields": [
-        "batch_date",
         "molecule_id"
       ]
     },
@@ -2614,7 +2613,7 @@
       "required_fields": [
         "accession",
         "entry_name",
-        "organism"
+        "organism_scientific"
       ]
     },
     "gold_schema": null,
@@ -2637,7 +2636,7 @@
       "range_filters": [],
       "required_fields": [
         "accession",
-        "organism"
+        "organism_scientific"
       ]
     },
     "table": {

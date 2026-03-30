@@ -69,6 +69,11 @@ bioetl quarantine purge --pipeline {pipeline-name}
 
 - Quarantine data is retained for **30 days** by default. Cleanup is executed via explicit purge operations (`bioetl quarantine purge`).
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

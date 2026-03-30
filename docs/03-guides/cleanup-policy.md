@@ -304,21 +304,23 @@ make clean-local-artifacts
 make clean-local-artifacts PURGE_WORKTREES=1
 ```
 
-### 9.2. Staging Environment
+### 9.2. Staging-Like Local Profile
 
 ```bash
-# Staging cleanup (preserve tracked project structure)
+# Staging-like profile cleanup (preserve tracked project structure)
 make clean
 make clean-preflight
 ```
 
-### 9.3. Prod Environment
+### 9.3. Production-Like Local Profile
 
-Production cleanup **MUST** be done through CI/CD only. Manual cleanup **MUST NOT**.
+Production-like local cleanup SHOULD run inside a change window with a backup or
+restore point available. Repository cleanup is manual/operator-driven in the
+current Local-Only runtime; no CI/CD-only cleanup path is required.
 
 | Action           | Approval Required           |
 | ---------------- | --------------------------- |
 | VACUUM           | No (automated)              |
 | Quarantine purge | No (automated, >30 days)    |
 | Bronze archive   | No (local retention policy) |
-| Manual delete    | Yes (P0 incident only)      |
+| Manual delete    | Yes (change window / incident) |

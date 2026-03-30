@@ -17,9 +17,16 @@ from pathlib import Path
 
 import pytest
 
-# Паттерн для извлечения версии из RULES.md
-# Пример: *Версия: 5.10 (TTL/Heartbeat Values Correction), 2026-01-06*
+# Паттерны для извлечения версии из RULES.md.
+# Legacy header example: *Версия: 5.10 (TTL/Heartbeat Values Correction), 2026-01-06*
+# Canonical frontmatter example: Version: 5.24.0
 RULES_VERSION_PATTERN = re.compile(r"\*Версия:\s*(\d+\.\d+)")
+RULES_FRONTMATTER_VERSION_PATTERN = re.compile(
+    r"^Version:\s*(\d+\.\d+)(?:\.\d+)?\s*$"
+)
+RULES_FRONTMATTER_VERIFIED_PATTERN = re.compile(
+    r"^Last verified:\s*'?\d{4}-\d{2}-\d{2}'?\s*$"
+)
 
 # Паттерны для проверки ссылок на версию в документах
 DOC_VERSION_PATTERNS = [
@@ -77,9 +84,12 @@ def extract_rules_version(project_root: Path) -> str:
 
     content = rules_path.read_text(encoding="utf-8")
 
-    # Ищем в первых 10 строках
-    for line in content.split("\n")[:10]:
+    # Ищем в первых 12 строках: поддерживаем legacy inline header и canonical frontmatter.
+    for line in content.split("\n")[:12]:
         match = RULES_VERSION_PATTERN.search(line)
+        if match:
+            return match.group(1)
+        match = RULES_FRONTMATTER_VERSION_PATTERN.search(line)
         if match:
             return match.group(1)
 
@@ -330,25 +340,29 @@ class TestVersionFormat:
         )
 
     def test_rules_header_format(self, project_root: Path) -> None:
-        """RULES.md заголовок MUST содержать версию и дату.
-
-        Формат: *Версия: X.Y (описание), YYYY-MM-DD*
-        """
+        """RULES.md header MUST expose version and verification date."""
         rules_path = project_root / "docs" / "00-project" / "RULES.md"
         content = rules_path.read_text(encoding="utf-8")
 
-        # Полный паттерн заголовка
-        header_pattern = re.compile(
+        legacy_header_pattern = re.compile(
             r"\*Версия:\s*\d+\.\d+\s*\([^)]+\),\s*\d{4}-\d{2}-\d{2}\*"
         )
+        lines = content.split("\n")[:12]
 
-        header_found = False
-        for line in content.split("\n")[:10]:
-            if header_pattern.search(line):
-                header_found = True
-                break
+        legacy_header_found = any(
+            legacy_header_pattern.search(line) for line in lines
+        )
+        frontmatter_version_found = any(
+            RULES_FRONTMATTER_VERSION_PATTERN.search(line) for line in lines
+        )
+        frontmatter_verified_found = any(
+            RULES_FRONTMATTER_VERIFIED_PATTERN.search(line) for line in lines
+        )
 
-        assert header_found, (
-            "RULES.md must have version header in format:\n"
-            "*Версия: X.Y (description), YYYY-MM-DD*"
+        assert legacy_header_found or (
+            frontmatter_version_found and frontmatter_verified_found
+        ), (
+            "RULES.md must have either a legacy version header:\n"
+            "*Версия: X.Y (description), YYYY-MM-DD*\n"
+            "or canonical frontmatter with Version and Last verified fields."
         )

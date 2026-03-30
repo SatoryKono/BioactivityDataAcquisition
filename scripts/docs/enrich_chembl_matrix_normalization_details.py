@@ -19,6 +19,8 @@ DEFAULT_OUTPUT: Final[Path] = (
     PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
 )
 DETAIL_HEADER: Final[str] = "Silver Normalisation Detail"
+DETAIL_ID_HEADER: Final[str] = "Silver Normalisation Detail ID"
+MAX_DETAIL_LENGTH: Final[int] = 100
 NS: Final[dict[str, str]] = {
     "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
     "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
@@ -283,13 +285,57 @@ def _build_detail(sheet_name: str, row: dict[str, str]) -> str:
     if not parts:
         return "no extra normalization rule recorded"
     detail = "; ".join(parts)
-    if len(detail) <= 50:
+    if len(detail) <= MAX_DETAIL_LENGTH:
         return detail
     compact_parts = [part.replace("normalized", "norm") for part in parts]
     detail = "; ".join(compact_parts)
-    if len(detail) <= 50:
+    if len(detail) <= MAX_DETAIL_LENGTH:
         return detail
-    return detail[:47].rstrip(" ;") + "..."
+    return detail[: MAX_DETAIL_LENGTH - 3].rstrip(" ;") + "..."
+
+
+def _collect_sheet_details(
+    archive: zipfile.ZipFile,
+    *,
+    shared_strings: list[str],
+    sheet_targets: dict[str, str],
+) -> tuple[dict[str, list[str]], dict[str, int]]:
+    """Collect per-row detail strings and global IDs in first-seen order."""
+    detail_rows_by_sheet: dict[str, list[str]] = {}
+    detail_ids: dict[str, int] = {}
+    next_id = 1
+
+    for sheet_path, sheet_name in sheet_targets.items():
+        root = ET.fromstring(archive.read(sheet_path))
+        sheet_data = root.find("a:sheetData", NS)
+        rows = sheet_data.findall("a:row", NS)
+        if not rows:
+            detail_rows_by_sheet[sheet_name] = []
+            continue
+
+        header_map = {
+            _column_index(cell.attrib["r"]): _cell_text(cell, shared_strings)
+            for cell in rows[0].findall("a:c", NS)
+        }
+
+        details: list[str] = []
+        for row in rows[1:]:
+            row_map = {
+                header_map[_column_index(cell.attrib["r"])]: _cell_text(
+                    cell, shared_strings
+                )
+                for cell in row.findall("a:c", NS)
+                if _column_index(cell.attrib["r"]) in header_map
+            }
+            detail = _build_detail(sheet_name, row_map)
+            details.append(detail)
+            if detail not in detail_ids:
+                detail_ids[detail] = next_id
+                next_id += 1
+
+        detail_rows_by_sheet[sheet_name] = details
+
+    return detail_rows_by_sheet, detail_ids
 
 
 def main() -> int:
@@ -306,6 +352,11 @@ def main() -> int:
     with zipfile.ZipFile(input_path) as zin:
         shared_strings = _load_shared_strings(zin)
         sheet_targets = _sheet_targets(zin)
+        detail_rows_by_sheet, detail_ids = _collect_sheet_details(
+            zin,
+            shared_strings=shared_strings,
+            sheet_targets=sheet_targets,
+        )
 
         with zipfile.ZipFile(temp_output_path, "w", compression=zipfile.ZIP_DEFLATED) as zout:
             for info in zin.infolist():
@@ -337,6 +388,14 @@ def main() -> int:
                     ),
                     max_col_index + 1,
                 )
+                detail_id_col_index = next(
+                    (
+                        index
+                        for index, header in header_map.items()
+                        if header == DETAIL_ID_HEADER
+                    ),
+                    max(max_col_index, detail_col_index) + 1,
+                )
 
                 note_template = next(
                     (
@@ -352,8 +411,15 @@ def main() -> int:
                     DETAIL_HEADER,
                     note_template,
                 )
+                _append_or_update_cell(
+                    header_row,
+                    detail_id_col_index,
+                    DETAIL_ID_HEADER,
+                    note_template,
+                )
 
-                for row in rows[1:]:
+                sheet_details = detail_rows_by_sheet.get(sheet_name, [])
+                for row_index, row in enumerate(rows[1:]):
                     row_map = {
                         header_map[_column_index(cell.attrib["r"])]: _cell_text(
                             cell, shared_strings
@@ -361,7 +427,11 @@ def main() -> int:
                         for cell in row.findall("a:c", NS)
                         if _column_index(cell.attrib["r"]) in header_map
                     }
-                    detail = _build_detail(sheet_name, row_map)
+                    if row_index < len(sheet_details):
+                        detail = sheet_details[row_index]
+                    else:
+                        detail = _build_detail(sheet_name, row_map)
+                    detail_id = str(detail_ids[detail])
                     template_cell = next(
                         (
                             cell
@@ -371,8 +441,18 @@ def main() -> int:
                         None,
                     )
                     _append_or_update_cell(row, detail_col_index, detail, template_cell)
+                    _append_or_update_cell(
+                        row,
+                        detail_id_col_index,
+                        detail_id,
+                        template_cell,
+                    )
 
-                _update_dimension(root, len(rows), max(max_col_index, detail_col_index))
+                _update_dimension(
+                    root,
+                    len(rows),
+                    max(max_col_index, detail_col_index, detail_id_col_index),
+                )
                 zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
 
     if temp_output_path != output_path:
@@ -383,6 +463,9 @@ def main() -> int:
             "input": str(input_path),
             "output": str(output_path),
             "detail_header": DETAIL_HEADER,
+            "detail_id_header": DETAIL_ID_HEADER,
+            "unique_detail_count": len(detail_ids),
+            "max_detail_length": MAX_DETAIL_LENGTH,
         }
     )
     return 0

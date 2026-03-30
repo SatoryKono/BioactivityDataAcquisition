@@ -38,3 +38,21 @@ Last verified: '2026-03-29'
   validation.
 - This page no longer republishes the older dashed API field tables or legacy
   Pandera snippets.
+
+## Contract References
+
+| Artifact | Link |
+| --- | --- |
+| Provider reference | [assay.md](../../providers/chembl/assay.md) |
+| Gold contract export | [chembl_assay_v1.0.json](../../contracts/gold/chembl_assay_v1.0.json) |
+| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
+| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+
+## Compliance
+
+| Control | Status | Evidence |
+| --- | --- | --- |
+| Metadata | Pass | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Canonical source traceability | Pass | Page delegates current contract to the linked canonical source and active config surface |
+| Contract linkage | Pass | [chembl_assay_v1.0.json](../../contracts/gold/chembl_assay_v1.0.json) |
+| Published-page role | Pass | Historical deep spec or summary is explicitly bounded by current canonical sources |

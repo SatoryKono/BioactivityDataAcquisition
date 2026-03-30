@@ -6,7 +6,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
-from deltalake.exceptions import CommitFailedError, DeltaError
+from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import DeltaTransactionError
@@ -42,6 +42,49 @@ def _emit_merge_recovered_after_retry(
     )
 
 
+async def _pre_evolve_existing_table_schema(
+    *,
+    request: _DeltaWriteRequest,
+    load_module: Callable[[], Any],  # Any: silver_writer module is loaded lazily
+) -> tuple[_DeltaWriteRequest, bool]:
+    """Pre-evolve schema only when merge-schema targets an existing table."""
+    if not request.merge_schema:
+        return request, False
+    try:
+        await _load_delta_table(
+            load_module=load_module,
+            table_path=request.table_path,
+        )
+    except DeltaTableNotFoundError:
+        return request, False
+    evolved_request = await _evolve_delta_schema_with_empty_append(
+        load_module=load_module,
+        request=request,
+    )
+    return evolved_request, True
+
+
+async def _maybe_pre_evolve_on_duplicate_field_error(
+    *,
+    exc: BaseException,
+    request: _DeltaWriteRequest,
+    schema_pre_evolved: bool,
+    load_module: Callable[[], Any],  # Any: silver_writer module is loaded lazily
+) -> tuple[_DeltaWriteRequest, bool] | None:
+    """Pre-evolve schema on the known duplicate-field merge quirk."""
+    if (
+        not request.merge_schema
+        or schema_pre_evolved
+        or not _is_duplicate_field_name_schema_error(exc)
+    ):
+        return None
+    evolved_request = await _evolve_delta_schema_with_empty_append(
+        load_module=load_module,
+        request=request,
+    )
+    return evolved_request, True
+
+
 async def _execute_merge_write_request(
     *,
     request: _DeltaWriteRequest,
@@ -54,10 +97,12 @@ async def _execute_merge_write_request(
     logger: LoggerPort,
 ) -> None:
     """Execute merge/upsert with retry, timeout, and append-fallback orchestration."""
-    active_request = request
+    active_request, schema_pre_evolved = await _pre_evolve_existing_table_schema(
+        request=request,
+        load_module=load_module,
+    )
     commit_retry_count = 0
     timeout_retry_count = 0
-    schema_pre_evolved = False
 
     while True:
         try:
@@ -94,28 +139,28 @@ async def _execute_merge_write_request(
             if next_commit_retry_count is None:
                 raise
             commit_retry_count = next_commit_retry_count
-        except DeltaError as exc:
-            if (
-                active_request.merge_schema
-                and not schema_pre_evolved
-                and _is_duplicate_field_name_schema_error(exc)
-            ):
-                active_request = await _evolve_delta_schema_with_empty_append(
-                    load_module=load_module,
-                    request=active_request,
+        except BaseException as exc:
+            if not isinstance(exc, Exception):
+                raise
+            if isinstance(exc, _MergeExecutionTimeoutError):
+                timeout_retry_count = await _handle_timeout_retry(
+                    table_path=active_request.table_path,
+                    policy=policy,
+                    retry_count=timeout_retry_count,
+                    cause=exc,
+                    emit_final=emit_final,
+                    emit_retry=emit_retry,
                 )
-                schema_pre_evolved = True
                 continue
-            raise
-        except _MergeExecutionTimeoutError as exc:
-            timeout_retry_count = await _handle_timeout_retry(
-                table_path=active_request.table_path,
-                policy=policy,
-                retry_count=timeout_retry_count,
-                cause=exc,
-                emit_final=emit_final,
-                emit_retry=emit_retry,
+            evolved = await _maybe_pre_evolve_on_duplicate_field_error(
+                exc=exc,
+                request=active_request,
+                schema_pre_evolved=schema_pre_evolved,
+                load_module=load_module,
             )
+            if evolved is None:
+                raise
+            active_request, schema_pre_evolved = evolved
 
 
 async def _handle_commit_retry(

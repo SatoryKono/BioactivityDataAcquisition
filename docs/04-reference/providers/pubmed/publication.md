@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # Пайплайн: PubMed Publication
@@ -128,4 +128,56 @@ bioetl run --pipeline pubmed_publication --run-type rebuild
 
 ---
 
-*Последнее обновление: 2026-03-03*
+## Contract References
+
+| Артефакт | Ссылка |
+| --- | --- |
+| Gold contract export | [pubmed_publication_v1.0.json](../../contracts/gold/pubmed_publication_v1.0.json) |
+| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
+| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+
+---
+
+## Compliance
+
+| Контроль | Статус | Evidence |
+| --- | --- | --- |
+| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Runtime alignment | Pass | Активный config/runtime surface описан в разделах `Конфигурация`, `Особенности`, `Связанные файлы` |
+| Contract linkage | Pass | [pubmed_publication_v1.0.json](../../contracts/gold/pubmed_publication_v1.0.json) |
+| API governance | Pass | См. [API Compliance](#api-compliance) |
+
+---
+
+## API Compliance
+
+### Rate limits & retries
+
+NCBI E-utilities usage guidelines publish `3 requests/second` without an API key and `10 requests/second` by default with an API key; higher limits require explicit arrangement with NCBI. Clients SHOULD identify themselves with `tool` and `email`, and SHOULD use batching/history-server workflows instead of high-frequency polling.
+
+### 429 handling policy
+
+NCBI documents over-limit failures via the `API rate limit exceeded` response message. A stable HTTP `429` contract is [неуточнено] in the official E-utilities book chapter, so clients SHOULD back off conservatively on any rate-limit error.
+
+### Authentication model
+
+PubMed E-utilities are publicly accessible. An API key is optional and increases default throughput; the API key is associated with an NCBI account.
+
+### ToS URL
+
+- https://www.ncbi.nlm.nih.gov/home/about/policies/
+
+### Data license
+
+NCBI data and software are generally public-domain U.S. Government works where no copyright is noted, but PubMed abstracts may include publisher-supplied copyrighted material.
+
+### Personal data notes
+
+NCBI asks API clients to register `tool` and `email`; the email is used to contact operators if a tool violates usage policy. NCBI also states that it does not collect PII about general visitors, but does collect visit metadata for analytics and operations.
+
+### Official sources
+
+- [NCBI E-utilities usage guidelines](https://www.ncbi.nlm.nih.gov/books/NBK25497/)
+- [NCBI policies and disclaimers](https://www.ncbi.nlm.nih.gov/home/about/policies/)
+
+*Последнее обновление: 2026-03-30*

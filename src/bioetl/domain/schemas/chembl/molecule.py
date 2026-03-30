@@ -64,8 +64,8 @@ class MoleculeSchema(ETLRecordSchema):
         isin=list(STRUCTURE_TYPES),
         description="Structure type.",
     )
-    molecule_type: Series[str] | None = pa.Field(
-        nullable=True,
+    molecule_type: Series[str] = pa.Field(
+        nullable=False,
         isin=list(MOLECULE_TYPES),
         description="Molecule type.",
     )

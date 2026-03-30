@@ -202,8 +202,12 @@ async def _write_plain_delta_request(
     )
 
 
-def _is_duplicate_field_name_schema_error(exc: DeltaError) -> bool:
-    """Return whether a Delta error matches the known duplicate-field quirk."""
+def _is_duplicate_field_name_schema_error(exc: BaseException) -> bool:
+    """Return whether an exception matches the known duplicate-field quirk.
+
+    Delta Lake may surface this schema-evolution failure either as ``DeltaError``
+    or as a generic ``Exception`` depending on platform/runtime bindings.
+    """
     return "Duplicate field name:" in str(exc)
 
 

@@ -551,7 +551,7 @@ def test_probe_mode_fallback_counter_exists() -> None:
 
 GROUP_EDGE_LIMIT = 60
 GROUP_EDGE_TOTAL_BUDGET = (
-    259  # ratchet: control-plane + config-governance baseline raised from 254
+    260  # ratchet: normalization_chembl/module-map baseline raised from 259
 )
 
 _dep_map_module = None

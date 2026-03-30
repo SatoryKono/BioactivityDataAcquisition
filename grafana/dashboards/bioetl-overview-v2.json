@@ -857,6 +857,7 @@
       "targets": [
         {
           "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "instant": true,
           "legendFormat": "Silver Filter Rejects",
           "refId": "A"
         }

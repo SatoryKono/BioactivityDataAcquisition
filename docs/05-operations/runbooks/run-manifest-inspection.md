@@ -236,6 +236,11 @@ data/output/control/effective_config/_by_run_id/{run_id}.txt
 - [ADR-044](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
 - [Run Manifest & Ledger Contract](../../04-reference/contracts/run-manifest-ledger.md)
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

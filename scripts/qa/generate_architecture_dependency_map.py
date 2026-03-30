@@ -47,6 +47,7 @@ LAYER_IMPORT_MATRIX: dict[str, frozenset[str]] = {
 
 LAYER_ORDER = tuple(LAYER_IMPORT_MATRIX.keys())
 GROUP_EDGE_LIMIT = 60
+_FRONTMATTER_DELIMITER = "---"
 
 
 @dataclass(frozen=True)
@@ -345,6 +346,16 @@ def build_json(snapshot: DependencySnapshot) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
 
 
+def _split_frontmatter(text: str) -> tuple[str | None, str]:
+    if not text.startswith(f"{_FRONTMATTER_DELIMITER}\n"):
+        return None, text
+    parts = text.split(f"\n{_FRONTMATTER_DELIMITER}\n", 1)
+    if len(parts) != 2:
+        return None, text
+    frontmatter, body = parts
+    return f"{frontmatter}\n{_FRONTMATTER_DELIMITER}\n", body
+
+
 def _write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
@@ -355,6 +366,8 @@ def _check_file_sync(path: Path, expected: str) -> bool:
         print(f"[drift] missing file: {path.relative_to(PROJECT_ROOT)}")
         return False
     actual = path.read_text(encoding="utf-8")
+    if path.suffix == ".md":
+        _, actual = _split_frontmatter(actual)
     if actual == expected:
         return True
     print(f"[drift] mismatch: {path.relative_to(PROJECT_ROOT)}")
@@ -415,7 +428,12 @@ def main() -> int:
         )
         return 1
 
-    _write_text(args.md_output, markdown)
+    current_markdown = (
+        args.md_output.read_text(encoding="utf-8") if args.md_output.exists() else ""
+    )
+    frontmatter, _ = _split_frontmatter(current_markdown)
+    markdown_to_write = f"{frontmatter}{markdown}" if frontmatter else markdown
+    _write_text(args.md_output, markdown_to_write)
     _write_text(args.json_output, json_text)
     print(
         "[updated] wrote architecture dependency docs:\n"

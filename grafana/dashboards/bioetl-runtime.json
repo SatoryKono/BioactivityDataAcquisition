@@ -72,6 +72,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -116,7 +117,7 @@
       },
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__range]))",
+          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__range])) or vector(0)",
           "refId": "A"
         }
       ],
@@ -131,6 +132,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -715,7 +717,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_control_plane_reads_total[$__interval])) by (store, status)",
+          "expr": "sum(increase(bioetl_control_plane_reads_total[$__interval])) by (store, status) or label_replace(label_replace(vector(0), \"store\", \"none\", \"\", \"\"), \"status\", \"none\", \"\", \"\")",
           "legendFormat": "{{store}} / {{status}}",
           "refId": "A"
         }
@@ -791,6 +793,7 @@
             "mode": "palette-classic"
           },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -825,7 +828,7 @@
       },
       "targets": [
         {
-          "expr": "topk(8, sum by (event) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__range])))",
+          "expr": "topk(8, sum by (event) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__range]))) or label_replace(vector(0), \"event\", \"none\", \"\", \"\")",
           "legendFormat": "{{event}}",
           "refId": "A"
         }
@@ -941,6 +944,7 @@
       "targets": [
         {
           "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "instant": true,
           "refId": "A"
         }
       ],
@@ -954,25 +958,8 @@
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 15,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 4,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -994,17 +981,7 @@
       },
       "id": 9,
       "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        },
+        "colorMode": "value",
         "dataLinks": [
           {
             "title": "Open Logs in Loki Explore",
@@ -1014,22 +991,33 @@
             "title": "Open Traces in Tempo Explore",
             "url": "/explore?left=%7B%22datasource%22:%22tempo%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22queryType%22:%22traceqlSearch%22,%22query%22:%22%7B%7D%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D"
           }
-        ]
+        ],
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
       },
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__interval])) or vector(0)",
-          "legendFormat": "warnings",
+          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__range])) or label_replace(vector(0), \"series\", \"warnings\", \"\", \"\")",
+          "legendFormat": "{{series}}",
           "refId": "A"
         },
         {
-          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [$__interval])) or vector(0)",
-          "legendFormat": "unstructured",
+          "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [$__range])) or label_replace(vector(0), \"series\", \"unstructured\", \"\", \"\")",
+          "legendFormat": "{{series}}",
           "refId": "B"
         }
       ],
       "title": "Log Hygiene Trend",
-      "type": "timeseries"
+      "type": "stat"
     }
   ],
   "refresh": "30s",

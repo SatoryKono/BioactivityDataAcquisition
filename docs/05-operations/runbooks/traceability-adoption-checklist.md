@@ -79,6 +79,11 @@ Last verified: '2026-03-30'
 - [Traceability Signal Ownership](traceability-signal-ownership.md)
 - [Run Manifest Inspection](run-manifest-inspection.md)
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.

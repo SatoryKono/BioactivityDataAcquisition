@@ -1,69 +1,24 @@
-"""Rerender Grafana dashboard screenshots through the Grafana render API."""
+"""Compatibility wrapper for Grafana screenshot rerendering.
+
+Canonical implementation lives in scripts/ops/rerender_grafana_screenshots.py.
+This wrapper preserves historical invocation paths used by docs and tooling.
+"""
 
 from __future__ import annotations
 
-import base64
-import json
+import sys
+from collections.abc import Callable
 from pathlib import Path
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
-
-BASE_URL = "http://localhost:3000"
-SEARCH_URL = f"{BASE_URL}/api/search?type=dash-db"
-OUTPUT_DIR = Path("output/playwright")
-WIDTH = 1600
-HEIGHT = 2200
 
 
-def _auth_header(username: str = "admin", password: str = "admin") -> str:
-    token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
-    return f"Basic {token}"
+def _load_main() -> Callable[[], int]:
+    project_root = Path(__file__).resolve().parents[1]
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+    from scripts.ops.rerender_grafana_screenshots import main
 
-
-def _fetch_json(url: str) -> object:
-    request = Request(url, headers={"Authorization": _auth_header()})
-    with urlopen(request, timeout=30) as response:
-        return json.loads(response.read().decode("utf-8"))
-
-
-def _download_binary(url: str) -> bytes:
-    request = Request(url, headers={"Authorization": _auth_header()})
-    with urlopen(request, timeout=120) as response:
-        return response.read()
-
-
-def main() -> int:
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    dashboards = _fetch_json(SEARCH_URL)
-    if not isinstance(dashboards, list):
-        raise RuntimeError("Grafana search API returned unexpected payload")
-
-    for item in dashboards:
-        if not isinstance(item, dict):
-            continue
-        url = item.get("url")
-        uid = item.get("uid")
-        if not isinstance(url, str) or not isinstance(uid, str):
-            continue
-
-        render_path = "/render" + url
-        query = urlencode({"width": WIDTH, "height": HEIGHT, "tz": "UTC"})
-        render_url = f"{BASE_URL}{render_path}?{query}"
-        target = OUTPUT_DIR / f"{uid}.png"
-        print(f"Rendering {uid} -> {target}")
-        try:
-            target.write_bytes(_download_binary(render_url))
-        except HTTPError as exc:
-            print(f"HTTP error for {uid}: {exc.code} {exc.reason}")
-            return 1
-        except URLError as exc:
-            print(f"URL error for {uid}: {exc.reason}")
-            return 1
-
-    print("Done.")
-    return 0
+    return main
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(_load_main()())

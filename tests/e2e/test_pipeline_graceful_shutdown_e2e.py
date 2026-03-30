@@ -25,6 +25,12 @@ from bioetl.application.core.lifecycle.shutdown import (
 )
 
 
+async def _yield_control(turns: int = 1) -> None:
+    """Advance the event loop without paying real wall-clock delays."""
+    for _ in range(turns):
+        await asyncio.sleep(0)
+
+
 @pytest.mark.e2e
 @pytest.mark.asyncio
 class TestShutdownSignal:
@@ -57,19 +63,15 @@ class TestShutdownSignal:
     async def test_shutdown_signal_wait_blocks_until_requested(self):
         """E2E: wait() blocks until shutdown is requested."""
         shutdown = ShutdownSignal()
+        wait_task = asyncio.create_task(shutdown.wait())
 
-        async def request_after_delay():
-            await asyncio.sleep(0.1)
-            shutdown.request()
+        await _yield_control()
+        assert wait_task.done() is False
 
-        # Start background task to request shutdown
-        task = asyncio.create_task(request_after_delay())
-
-        # Wait should complete after request
-        await asyncio.wait_for(shutdown.wait(), timeout=1.0)
+        shutdown.request()
+        await asyncio.wait_for(wait_task, timeout=1.0)
 
         assert shutdown.is_requested is True
-        await task
 
     async def test_shutdown_signal_reset(self):
         """E2E: reset() clears the signal for reuse."""
@@ -98,7 +100,7 @@ class TestGracefulShutdownBehavior:
                 if shutdown.is_requested:
                     break
                 processed_count += 1
-                await asyncio.sleep(0.01)  # Simulate processing
+                await _yield_control()  # Simulate processing
                 if i == 5:  # Request shutdown mid-processing
                     shutdown.request()
 
@@ -118,7 +120,7 @@ class TestGracefulShutdownBehavior:
             nonlocal batch_completed
             # Simulate batch processing
             for _record in batch:
-                await asyncio.sleep(0.01)
+                await _yield_control()
             batch_completed = True
 
         # Request shutdown before processing
@@ -133,21 +135,25 @@ class TestGracefulShutdownBehavior:
         """E2E: Shutdown waits for async operation to complete."""
         shutdown = ShutdownSignal()
         operation_completed = False
+        operation_started = asyncio.Event()
+        allow_completion = asyncio.Event()
 
         async def long_running_operation():
             nonlocal operation_completed
-            await asyncio.sleep(0.2)
+            operation_started.set()
+            await allow_completion.wait()
             operation_completed = True
 
         async def shutdown_coordinator():
             # Start operation
             operation_task = asyncio.create_task(long_running_operation())
 
-            # Request shutdown
-            await asyncio.sleep(0.05)
+            await operation_started.wait()
             shutdown.request()
+            assert operation_task.done() is False
 
             # Wait for operation to complete
+            allow_completion.set()
             await operation_task
 
         await shutdown_coordinator()
@@ -180,7 +186,7 @@ class TestCheckpointSavingOnShutdown:
                     # Save checkpoint on shutdown
                     await save_checkpoint(checkpoint_path, {"offset": i * 10})
                     break
-                await asyncio.sleep(0.01)
+                await _yield_control()
 
                 if i == 5:
                     shutdown.request()
@@ -202,7 +208,7 @@ class TestCheckpointSavingOnShutdown:
                     processed_records.append(record)
                     break
                 processed_records.append(record)
-                await asyncio.sleep(0.01)
+                await _yield_control()
 
                 if i == 4:
                     shutdown.request()
@@ -269,7 +275,7 @@ class TestConcurrentShutdown:
                 if shutdown.is_requested:
                     task_states[name] = True
                     return
-                await asyncio.sleep(0.01)
+                await _yield_control()
 
         async def coordinator():
             # Start workers
@@ -279,8 +285,7 @@ class TestConcurrentShutdown:
                 asyncio.create_task(worker("task3")),
             ]
 
-            # Request shutdown after brief delay
-            await asyncio.sleep(0.05)
+            await _yield_control(3)
             shutdown.request()
 
             # Wait for all workers
@@ -296,13 +301,16 @@ class TestConcurrentShutdown:
         shutdown = ShutdownSignal()
         writes_completed = 0
         write_lock = asyncio.Lock()
+        ready_for_shutdown = asyncio.Event()
 
         async def write_record(record_id: int):
             nonlocal writes_completed
             async with write_lock:
                 # Simulate I/O
-                await asyncio.sleep(0.02)
+                await _yield_control()
                 writes_completed += 1
+                if writes_completed == 5:
+                    ready_for_shutdown.set()
 
         async def writer_task():
             for i in range(20):
@@ -312,7 +320,7 @@ class TestConcurrentShutdown:
                 await write_record(i)
 
         async def shutdown_task():
-            await asyncio.sleep(0.05)
+            await ready_for_shutdown.wait()
             shutdown.request()
 
         await asyncio.gather(

@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-30'
 ---
 
 # Пайплайн: CrossRef Publication
@@ -292,4 +292,58 @@ gold_filters:
 
 ----------------------------------------------------------------------
 
-*Последнее обновление: 2026-03-03*
+## Contract References
+
+| Артефакт | Ссылка |
+| --- | --- |
+| Gold contract export | [crossref_publication_v1.0.json](../../contracts/gold/crossref_publication_v1.0.json) |
+| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
+| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+
+----------------------------------------------------------------------
+
+## Compliance
+
+| Контроль | Статус | Evidence |
+| --- | --- | --- |
+| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
+| Contract linkage | Pass | [crossref_publication_v1.0.json](../../contracts/gold/crossref_publication_v1.0.json) |
+| API governance | Pass | См. [API Compliance](#api-compliance) |
+
+----------------------------------------------------------------------
+
+## API Compliance
+
+### Rate limits & retries
+
+Crossref documents three pools for the REST API: public `5 requests/second` with `1 concurrent request`, polite `10 requests/second` with `3 concurrent requests`, and `Plus` `150 requests/second` with no concurrency limit. Clients SHOULD send a descriptive `User-Agent`, SHOULD include `mailto`, and SHOULD back off exponentially if response times rise or blocks occur.
+
+### 429 handling policy
+
+Crossref explicitly documents HTTP `429 Too Many Requests`: wait briefly, reduce request rate or concurrency, then retry. If usage has been manually blocked, the API may return `403`, and the client SHOULD back off for several minutes before retrying.
+
+### Authentication model
+
+Public REST endpoints do not require authentication. Polite access identifies the client via `mailto` and `User-Agent`; Metadata Plus uses a token-based `Crossref-Plus-API-Token` header.
+
+### ToS URL
+
+- [неуточнено]
+
+### Data license
+
+Crossref-generated metadata values are provided as CC0 facts/identifiers; bibliographic facts are generally not copyrightable. Abstracts and linked full-text targets may remain subject to third-party rights.
+
+### Personal data notes
+
+Crossref asks clients to send a contact email for troubleshooting; that address is kept only as long as needed and then deleted after three months. Crossref also logs request metadata such as IP address, browser type, OS, date/time, and accessed resources.
+
+### Official sources
+
+- [Crossref REST API overview](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
+- [Crossref access and authentication](https://www.crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/)
+- [Crossref API tips](https://www.crossref.org/documentation/retrieve-metadata/rest-api/tips-for-using-the-crossref-rest-api/)
+- [Crossref privacy notice](https://www.crossref.org/privacy/)
+
+*Последнее обновление: 2026-03-30*

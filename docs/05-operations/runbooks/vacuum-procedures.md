@@ -209,6 +209,11 @@ INFO  | vacuum_completed | table=chembl_activity | files_removed=150 | bytes_fre
 4. **Document VACUUM runs** in operations log
 5. **Test time travel** after VACUUM to ensure required history preserved
 
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.
