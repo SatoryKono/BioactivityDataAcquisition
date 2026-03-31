@@ -10,6 +10,7 @@ from bioetl.domain.services.value_validator_rules import normalize_unit_name
 
 __all__ = [
     "normalize_bao_identifier",
+    "normalize_bao_label",
     "normalize_chembl_organism_name",
     "normalize_qudt_unit",
     "normalize_standard_unit",
@@ -60,6 +61,16 @@ _ORGANISM_DISPLAY_ALIASES: dict[str, str] = {
     "e. coli": "Escherichia coli",
 }
 
+_BAO_LABEL_BY_IDENTIFIER: dict[str, str] = {
+    "BAO_0000019": "assay format",
+    "BAO_0000219": "cell-based format",
+    "BAO_0000221": "tissue-based format",
+    "BAO_0000249": "cell membrane format",
+    "BAO_0000251": "microsome format",
+    "BAO_0000357": "single protein format",
+    "BAO_0000366": "cell-free format",
+}
+
 
 def _normalize_prefixed_identifier(
     value: str | None,
@@ -88,6 +99,26 @@ def normalize_bao_identifier(value: str | None) -> str | None:
         prefix="BAO",
         pattern=_BAO_IDENTIFIER_RE,
     )
+
+
+def normalize_bao_label(
+    value: str | None,
+    *,
+    bao_identifier: str | None = None,
+) -> str | None:
+    """Normalize BAO labels using evidence-backed assay format mappings.
+
+    If a known BAO identifier is provided, prefer the canonical label associated
+    with that identifier. Otherwise, trim and lowercase the incoming label.
+    """
+    normalized_identifier = normalize_bao_identifier(bao_identifier)
+    if normalized_identifier is not None:
+        canonical_label = _BAO_LABEL_BY_IDENTIFIER.get(normalized_identifier)
+        if canonical_label is not None:
+            return canonical_label
+
+    normalized = normalize_string(value)
+    return normalized.lower() if normalized is not None else None
 
 
 def normalize_uo_identifier(value: str | None) -> str | None:

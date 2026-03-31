@@ -244,12 +244,31 @@ def _override_detail(sheet_name: str, row: dict[str, str]) -> str | None:
         return "publication_year via INT coercion"
     if sheet_name == "chembl_publication" and silver_column == "creation_date":
         return "nested chembl_release.creation_date passthrough"
-    if silver_column in {"bao_endpoint", "bao_format", "bao_label"}:
-        return "BAO passthrough; regex accepts _ and : forms"
+    if sheet_name == "chembl_activity" and silver_column in {
+        "bao_endpoint",
+        "bao_format",
+    }:
+        return "trim; blank->null; BAO id -> canonical BAO_########"
+    if sheet_name == "chembl_assay" and silver_column == "bao_format":
+        return "trim; blank->null; BAO id -> canonical BAO_########"
+    if sheet_name == "chembl_assay" and silver_column == "bao_label":
+        return "canonical from BAO format when known; else trim; lower"
+    if sheet_name == "chembl_assay" and silver_column == "assay_organism":
+        return "trim; blank->null; ws collapse; drop trailing strain notes"
+    if sheet_name == "chembl_activity" and silver_column == "standard_units":
+        return "trim; blank->null; shared unit aliases -> canonical symbol"
+    if sheet_name == "chembl_activity" and silver_column == "uo_units":
+        return "trim; blank->null; UO id -> canonical UO_########"
+    if sheet_name == "chembl_activity" and silver_column == "qudt_units":
+        return "trim; blank->null; preserve full URI"
+    if silver_column == "bao_label":
+        return "BAO label passthrough"
     if sheet_name == "chembl_activity" and silver_column == "target_taxonomy_id":
         return "target_tax_id -> target_taxonomy_id; validate"
     if sheet_name == "chembl_target" and silver_column == "organism_class":
         return "derived via organism classifier; taxonomy first"
+    if sheet_name == "chembl_target" and silver_column == "organism":
+        return "trim; blank->null; ws collapse; drop trailing strain notes"
     if sheet_name == "chembl_target" and silver_column == "taxonomy_id":
         return "TaxonomyId.from_raw(): trim; int; invalid->null"
     if sheet_name == "chembl_molecule" and silver_column == "canonical_smiles":

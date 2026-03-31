@@ -79,8 +79,8 @@ query = {}
 ## 5. Минимальная проверка после изменений
 
 ```bash
-./.venv/Scripts/python.exe -m json.tool grafana/dashboards/<dashboard>.json
-./.venv/Scripts/python.exe -m pytest -q tests/integration/test_grafana_config.py
+uv run python -m json.tool grafana/dashboards/<dashboard>.json
+uv run python -m pytest -q tests/integration/test_grafana_config.py
 ```
 
 Если менялись названия, порядок дашбордов, links, time ranges или operator flow,

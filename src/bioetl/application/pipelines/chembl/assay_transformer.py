@@ -25,6 +25,11 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Assay
+from bioetl.domain.normalization_chembl import (
+    normalize_bao_identifier,
+    normalize_bao_label,
+    normalize_chembl_organism_name,
+)
 from bioetl.domain.transformations import (
     safe_float,
     safe_str,
@@ -211,5 +216,15 @@ class AssayTransformer(BaseChemblTransformer):
         business_data["cell_id"] = business_data.get("cell_id") or record.get("cell_id")
         business_data["tissue_id"] = business_data.get("tissue_id") or record.get(
             "tissue_id"
+        )
+        business_data["bao_format"] = normalize_bao_identifier(
+            cast("str | None", business_data.get("bao_format"))
+        )
+        business_data["bao_label"] = normalize_bao_label(
+            cast("str | None", business_data.get("bao_label")),
+            bao_identifier=cast("str | None", business_data.get("bao_format")),
+        )
+        business_data["assay_organism"] = normalize_chembl_organism_name(
+            cast("str | None", business_data.get("assay_organism"))
         )
         return business_data

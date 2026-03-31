@@ -86,10 +86,10 @@ python scripts/qa/check_c901_baseline.py --target src/bioetl  # still works
 Use project-local commands for architecture docs and compatibility drift:
 
 ```bash
-./.venv/Scripts/python.exe -m pytest tests/architecture/test_architecture_dependency_docs_drift.py -q
-./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update
-./.venv/Scripts/python.exe -m pytest tests/architecture/test_compatibility_facade_inventory.py tests/architecture/test_documentation_sync.py -q
-./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --configs
+uv run python -m pytest tests/architecture/test_architecture_dependency_docs_drift.py -q
+uv run python -m scripts.qa report-dep-map --update
+uv run python -m pytest tests/architecture/test_compatibility_facade_inventory.py tests/architecture/test_documentation_sync.py -q
+uv run python -m scripts.docs check-links --configs
 ```
 
 Canonical repair flow:
@@ -158,7 +158,7 @@ Notes:
 When you need a reproducible raw snapshot of large Python modules under `src/bioetl`, use a local command like this:
 
 ```bash
-./.venv/Scripts/python.exe - <<'PY'
+uv run python - <<'PY'
 from pathlib import Path
 
 root = Path("src/bioetl")
@@ -187,11 +187,11 @@ Use this output as an evidence/inventory snapshot. Do not interpret it as equiva
 High-frequency sync commands:
 
 ```bash
-python scripts/qa/generate_architecture_dependency_map.py --check
-python scripts/qa/generate_architecture_dependency_map.py --update
-python scripts/qa/report_vcr_metadata_catalog.py --check
-python scripts/qa/report_vcr_metadata_catalog.py --update
-python scripts/docs/check_doc_links.py --configs
+uv run python -m scripts.qa report-dep-map --check
+uv run python -m scripts.qa report-dep-map --update
+uv run python -m scripts.qa report-vcr-metadata --check
+uv run python -m scripts.qa report-vcr-metadata --update
+uv run python -m scripts.docs check-links --configs
 ```
 
 ### scripts.schema

@@ -18,7 +18,7 @@ __all__ = [
 
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
@@ -40,6 +40,7 @@ from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
+        ClockPort,
         ExecutionMetricsRunnerPort,
         LoggerPort,
         MetricsExtractorPort,
@@ -77,6 +78,7 @@ class PipelineRunnerService:
     runner_factory: RunnerFactoryPort
     metrics_extractor: MetricsExtractorPort
     logger: LoggerPort
+    clock: ClockPort
     _context_service: PipelineRunContextService
     _execution_service: PipelineRunExecutionService
 
@@ -114,7 +116,7 @@ class PipelineRunnerService:
         Raises:
             PipelineNotFoundError: If pipeline_name is not registered in the factory.
         """
-        started_at = datetime.now(tz=UTC)
+        started_at = self.clock.now()
         effective_options = self._merge_options(options, dry_run)
         self._ensure_pipeline_exists(pipeline_name)
         effective_run_id: RunID = cast(RunID, run_id or uuid4())
@@ -189,7 +191,7 @@ class PipelineRunnerService:
             run_id=str(run_id),
             run_type=options.run_type,
             started_at=started_at,
-            completed_at=datetime.now(tz=UTC),
+            completed_at=self.clock.now(),
         )
 
     def list_pipelines(self) -> list[str]:

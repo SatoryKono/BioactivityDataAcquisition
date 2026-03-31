@@ -1,11 +1,11 @@
 ---
-Version: 1.5.0
+Version: 1.6.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-31'
 ---
 
 # Documentation Publication Policy
@@ -44,8 +44,8 @@ Last verified: '2026-03-29'
 - Документ хранится в репозитории как рабочий или curated extended surface, но
   намеренно исключён из MkDocs publication.
 - Назначение: `docs/plans/**`, `docs/reports/**`, excluded AI entrypoints и
-  другие repo-path surfaces, которые должны быть discoverable через ссылки из
-  published docs, но не через nav.
+  другие repo-path surfaces (включая `reports/**` и `reports/evidence/**`),
+  которые должны быть discoverable через ссылки из published docs, но не через nav.
 - Требования:
   - в тексте или status note указывать, что это repo-only surface;
   - не использовать как источник истины для опубликованных контрактов;
@@ -68,12 +68,42 @@ Last verified: '2026-03-29'
   - документ должен содержать пометку о служебном статусе;
   - нормативные утверждения должны ссылаться на `published` документы.
 
+## Path-Classified Bulk Surfaces
+
+Для bulk / generated семейств допускается классификация по path-prefix и
+курируемому entrypoint, а не через frontmatter в каждом файле.
+
+Это применяется только если одновременно выполнены все условия:
+
+1. семейство уже ratified в governance policy;
+2. у семейства есть discoverable entrypoint (`README`, `INDEX`, `SUMMARY` или
+   каталог в nav / repository path);
+3. документы не используются как первичный источник архитектурной,
+   продуктовой или операционной политики;
+4. bulk family целиком рассматривается как `repo-only` или
+   `internal-generated`.
+
+Текущие ratified path-classified family buckets:
+
+- `docs/00-project/ai/agents/agents/**` -> `internal-generated`
+- `docs/00-project/ai/prompts/collected/**` -> `repo-only` / `internal-generated`
+- `docs/00-project/ai/skills/_references/**` -> `internal-generated`
+- unpublished bulk skill bodies / references under
+  `docs/00-project/ai/skills/local/**` -> `internal-generated`
+- `reports/**` and `reports/evidence/**` -> `repo-only`
+
+Для этих семейств отсутствие per-file frontmatter не считается policy violation,
+если entrypoint и surrounding policy остаются актуальными.
+
 ## Правила поддержки
 
 1. Документы класса `published` являются нормативными и должны отражать текущее состояние репозитория.
    Для текущего project guidance источником истины остаются активные docs в `docs/00-05`.
 2. Документы класса `internal-published` публикуются для удобства команды, но не являются нормативным источником требований.
 3. Документы класса `repo-only` остаются discoverable через repository-path ссылки и curated summaries, но не должны маскироваться под nav-published guidance.
+4. Path-classified bulk families MAY inherit class from governance policy and
+   entrypoint without per-file frontmatter, если они не претендуют на
+   normative status.
 4. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published`, затем `repo-only` и `internal`.
 4. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
 5. Для активных docs использовать автоматические проверки `check_doc_links` и nav/strict-build guardrails в CI.
@@ -128,25 +158,29 @@ Last verified: '2026-03-29'
 1. Проверить, не остались ли current-tense рекомендации для уже закрытых waves.
 2. Проверить, что active indexes (`docs/plans`, `docs/reports`, evidence indexes)
    не ведут к stale interpretation без rebaseline note.
+3. Для path-classified bulk families проверить, что entrypoint / catalog /
+   `SUMMARY.md` остаются достаточными для discoverability и не ведут к stale
+   interpretation.
 3. Для generated surfaces прогнать owner `--check`.
 4. Для runtime/governance freshness прогнать:
 ```bash
-./.venv/Scripts/python.exe scripts/docs/check_doc_drift.py --freshness
+uv run python -m scripts.docs check-drift --freshness
+./.venv/Scripts/python.exe scripts/check_doc_drift.py --freshness
 ```
 
 ## Минимальный чек-лист перед merge
 
 1. Прогнать базовую docs-проверку:
 ```bash
-./.venv/Scripts/python.exe scripts/docs/check_doc_links.py
+uv run python -m scripts.docs check-links
 ```
 2. При изменениях вокруг nav/non-nav проверить рост вне навигации:
 ```bash
-./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --not-in-nav-growth
+uv run python -m scripts.docs check-links --not-in-nav-growth
 ```
 3. Проверить, что docs-site всё ещё собирается в strict-режиме:
 ```bash
-bash scripts/docs/build_docs_site.sh --strict
+uv run bash scripts/docs/build_docs_site.sh --strict
 ```
 4. Если менялись active internal-published или repo-only summaries/indexes,
    проверить, что они либо refreshed, либо снабжены явной freshness/rebaseline

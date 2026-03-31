@@ -61,15 +61,20 @@ The following artifacts are operational architecture/config signals and are trea
 Canonical commands for this cycle:
 
 ```bash
-./.venv/Scripts/python.exe -m pytest tests/architecture/test_architecture_dependency_docs_drift.py -q
+uv run python -m pytest tests/architecture/test_architecture_dependency_docs_drift.py -q
+uv run python -m scripts.qa report-dep-map --check
+uv run python -m scripts.qa report-dep-map --update
 ./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --check
 ./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update
+uv run python scripts/qa/generate_compatibility_facade_snapshot.py --check
+uv run python scripts/qa/generate_compatibility_facade_snapshot.py --update
 ./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --check
 ./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --update
+uv run python -m pytest tests/architecture/test_compatibility_facade_inventory.py -q
 ./.venv/Scripts/python.exe -m pytest tests/architecture/test_compatibility_facade_inventory.py -q
-./.venv/Scripts/python.exe -m pytest tests/architecture/test_config_schema_legacy_status.py -q
-./.venv/Scripts/python.exe -m pytest tests/architecture/test_documentation_sync.py -q
-./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --configs
+uv run python -m pytest tests/architecture/test_config_schema_legacy_status.py -q
+uv run python -m pytest tests/architecture/test_documentation_sync.py -q
+uv run python -m scripts.docs check-links --configs
 ```
 
 Artifact-to-command policy:
@@ -80,12 +85,12 @@ Artifact-to-command policy:
 - compatibility snapshot markdown: generated only by `scripts/qa/generate_compatibility_facade_snapshot.py`
 - compatibility inventory: curated operational doc guarded by `tests/architecture/test_compatibility_facade_inventory.py`
 - config/runtime guidance: active docs stay aligned through `tests/architecture/test_config_schema_legacy_status.py`
-- internal docs references: validated through `scripts/docs/check_doc_links.py --configs`
+- internal docs references: validated through `python -m scripts.docs check-links --configs`
 
 Fast local repair path:
 
-1. If `test_architecture_dependency_docs_drift.py` fails, run `./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update`.
-2. If compatibility snapshot drift fails, update `configs/quality/compatibility_facade_inventory.yaml` first when policy changed, then run `./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --update`.
+1. If `test_architecture_dependency_docs_drift.py` fails, run `uv run python -m scripts.qa report-dep-map --update`.
+2. If compatibility snapshot drift fails, update `configs/quality/compatibility_facade_inventory.yaml` first when policy changed, then run `uv run python scripts/qa/generate_compatibility_facade_snapshot.py --update`.
 3. Re-run `test_architecture_dependency_docs_drift.py`, `test_compatibility_facade_inventory.py`, and `test_documentation_sync.py`.
 4. Use `scripts/README.md` for the canonical scripts index; treat `docs/reports/**` as historical evidence only, not as repair guidance.
 

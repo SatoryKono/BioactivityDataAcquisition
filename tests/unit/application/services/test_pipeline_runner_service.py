@@ -88,10 +88,13 @@ def mock_metrics_extractor():
 @pytest.fixture
 def service(mock_runner_factory, mock_metrics_extractor, mock_logger):
     """Create a PipelineRunnerService instance."""
+    clock = MagicMock()
+    clock.now.return_value = datetime(2026, 3, 31, 9, 0, tzinfo=UTC)
     return PipelineRunnerService(
         runner_factory=mock_runner_factory,
         metrics_extractor=mock_metrics_extractor,
         logger=mock_logger,
+        clock=clock,
         _context_service=PipelineRunContextService(),
         _execution_service=PipelineRunExecutionService(),
     )
@@ -242,6 +245,25 @@ class TestRunResult:
         )
 
         assert result.success_rate == 1.0
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_service_uses_clock_for_dry_run_timestamps(
+    service: PipelineRunnerService,
+) -> None:
+    started_at = datetime(2026, 3, 31, 9, 0, tzinfo=UTC)
+    completed_at = datetime(2026, 3, 31, 9, 5, tzinfo=UTC)
+    service.clock.now.side_effect = [started_at, completed_at]
+
+    result = await service.run(
+        "test_pipeline",
+        options=RunOptions(dry_run=True),
+    )
+
+    assert result.started_at == started_at
+    assert result.completed_at == completed_at
+    assert result.status == PipelineRunResult.DRY_RUN
 
 
 # =============================================================================

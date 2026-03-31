@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-30'
+Last verified: '2026-03-31'
 ---
 
 # Пайплайн: ChEMBL Assay
@@ -47,6 +47,11 @@ Silver-запись `Assay`. Источник поведения для теку
   - `assay_type`
   - `description`
   - `target_id`
+  - `publication_id`
+  - `bao_format`
+  - `assay_type_description`
+  - `relationship_type`
+  - `confidence_score`
 - `filters.gold_filters`:
   - `assay_type in {B, F}`
   - `confidence_score in {8, 9}`
@@ -66,6 +71,11 @@ Silver-запись `Assay`. Источник поведения для теку
 | `assay_type` | YAML required + Arrow + Pandera |
 | `description` | YAML required + Arrow + Pandera |
 | `target_id` | YAML required + Arrow + Pandera |
+| `publication_id` | YAML required + Arrow + Pandera |
+| `bao_format` | YAML required + Arrow + Pandera |
+| `assay_type_description` | YAML required + Pandera |
+| `relationship_type` | YAML required + Pandera |
+| `confidence_score` | YAML required + Pandera |
 
 ### 3.2. Дополнительные бизнес-поля
 
@@ -113,8 +123,11 @@ Silver-запись `Assay`. Источник поведения для теку
 2. Маппит плоские поля через declarative field groups.
 3. Разворачивает вложенный `variant_sequence` через `flatten_nested_dict()`.
 4. Нормализует `assay_tax_id -> assay_taxonomy_id` и `variant_tax_id -> variant_taxonomy_id`.
-5. Сериализует `variant_sequence`, `assay_classifications`, `assay_parameters` в JSON-строки.
-6. Передаёт итоговые business fields в базовый ChEMBL transformer для вычисления identity, content hash и system fields.
+5. Канонизирует `bao_format` в форму `BAO_########`.
+6. Нормализует `bao_label` по evidence-backed BAO mapping, а при неизвестном формате делает trim/lowercase passthrough.
+7. Нормализует `assay_organism` как display field: trim, whitespace collapse, удаление trailing strain annotations.
+8. Сериализует `variant_sequence`, `assay_classifications`, `assay_parameters` в JSON-строки.
+9. Передаёт итоговые business fields в базовый ChEMBL transformer для вычисления identity, content hash и system fields.
 
 ---
 
@@ -131,8 +144,18 @@ Silver Arrow schema находится в
 Silver Pandera schema находится в
 `src/bioetl/domain/schemas/chembl/assay.py` как `AssaySchema`.
 
-Обе схемы отражают строковый surface для JSON-полей и non-null ограничения для
-`assay_id`, `assay_type`, `description`, `target_id`.
+Обе схемы отражают строковый surface для JSON-полей. Pandera schema также
+закрепляет non-null ограничения для:
+
+- `assay_id`
+- `assay_type`
+- `description`
+- `target_id`
+- `publication_id`
+- `bao_format`
+- `assay_type_description`
+- `relationship_type`
+- `confidence_score`
 
 ---
 

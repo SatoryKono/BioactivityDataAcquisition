@@ -213,7 +213,7 @@ class HealthService:
                     latency_ms=result.latency_ms,
                     endpoint=result.endpoint,
                     error=result.last_error,
-                    checked_at=result.checked_at,
+                    checked_at=result.checked_at or datetime.now(tz=UTC),
                 )
 
             # Adapter doesn't implement HealthCheckPort

@@ -51,7 +51,13 @@ to_windows_path() {
     return 1
 }
 
-if [[ -x ".venv/Scripts/python.exe" ]]; then
+if [[ -x ".venv-win/Scripts/python.exe" ]]; then
+    PYTHON_BIN=".venv-win/Scripts/python.exe"
+    PYTHON_KIND="windows-venv"
+elif [[ -x ".venv-wsl/bin/python" ]]; then
+    PYTHON_BIN=".venv-wsl/bin/python"
+    PYTHON_KIND="posix-venv"
+elif [[ -x ".venv/Scripts/python.exe" ]]; then
     PYTHON_BIN=".venv/Scripts/python.exe"
     PYTHON_KIND="windows-venv"
 elif [[ -x ".venv/bin/python" ]]; then

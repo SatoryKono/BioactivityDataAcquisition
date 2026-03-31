@@ -297,6 +297,7 @@
         "value",
         "units",
         "standard_value",
+        "standard_units",
         "standard_flag",
         "pchembl_value",
         "uo_units",

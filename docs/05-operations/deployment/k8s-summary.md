@@ -1,7 +1,7 @@
 ---
 Version: 1.0.0
 Status: active
-Class: published
+Class: internal-published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team

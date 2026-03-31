@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -16,8 +17,15 @@ from bioetl.domain.types import RunID, RunType
 
 
 @pytest.fixture
-def service() -> PipelineRunLifecycleService:
-    return PipelineRunLifecycleService()
+def mock_clock() -> MagicMock:
+    clock = MagicMock()
+    clock.now.return_value = datetime(2026, 3, 7, 12, 0, tzinfo=UTC)
+    return clock
+
+
+@pytest.fixture
+def service(mock_clock: MagicMock) -> PipelineRunLifecycleService:
+    return PipelineRunLifecycleService(clock=mock_clock)
 
 
 @pytest.fixture
@@ -74,6 +82,20 @@ def test_stage_failed_marks_run_failed(
     assert run.stages[0].status == StageStatus.FAILED
     assert run.stages[0].error == "bad data"
     assert run.stages[0].error_type == "validation"
+
+
+def test_start_run_uses_clock_when_timestamp_omitted(
+    service: PipelineRunLifecycleService,
+    run: PipelineRun,
+    mock_clock: MagicMock,
+) -> None:
+    expected = datetime(2026, 3, 8, 9, 15, tzinfo=UTC)
+    mock_clock.now.return_value = expected
+
+    service.start_run(run)
+
+    assert run.started_at == expected
+    mock_clock.now.assert_called_once_with()
 
 
 def test_fail_and_shutdown_helpers(

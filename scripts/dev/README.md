@@ -15,6 +15,38 @@ python -m scripts.dev setup-mcp  # optional MCP tooling
 
 `dev_setup.sh` is still wired into `python -m scripts.dev setup`, but it is currently a legacy placeholder rather than the supported bootstrap path.
 
+## Stable Dual-OS Environments
+
+If you work from both Windows PowerShell and WSL against the same checkout, do
+not share a single `.venv`. Use separate environment directories instead:
+
+```text
+.venv-win  # PowerShell / native Windows Python
+.venv-wsl  # WSL / Linux Python
+```
+
+Bootstrap commands:
+
+```powershell
+.\scripts\dev\setup_env_windows.ps1
+```
+
+```bash
+bash scripts/dev/setup_env_wsl.sh
+```
+
+Preferred runners automatically select the OS-appropriate environment:
+
+```powershell
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+```
+
+```bash
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
+```
+
 If you need MkDocs commands such as `make docs-build` or `make docs-serve`,
 install the separate docs toolchain extra:
 
@@ -69,3 +101,5 @@ python -m scripts.dev <command> [args...]
 | `run_pytest.ps1` | Run pytest directly (PowerShell variant) |
 | `setup_copilot_codex_mcp.sh` | Setup MCP (shell variant) |
 | `setup_copilot_codex_mcp.ps1` | Setup MCP (PowerShell variant) |
+| `setup_env_windows.ps1` | Create/update the stable Windows virtualenv at `.venv-win` |
+| `setup_env_wsl.sh` | Create/update the stable WSL virtualenv at `.venv-wsl` |

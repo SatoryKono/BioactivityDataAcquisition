@@ -72,7 +72,7 @@ Scope: `docs/` **без** `docs/00-project/ai/` (AI-конфигурация а�
 ##### 1.1. Битые ссылки
 
     # Найти все markdown-ссылки и проверить targets
-    python scripts/docs/check_doc_links.py --links
+    uv run python -m scripts.docs check-links --links
 
     # Проверить что все файлы из mkdocs.yml nav существуют
     grep "\.md" mkdocs.yml | sed 's/.*: //' | while read f; do

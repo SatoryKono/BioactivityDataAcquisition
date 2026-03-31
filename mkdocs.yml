@@ -26,13 +26,10 @@ exclude_docs: |
     exports/**
     reports/docs-export-report-*.md
     **/~$*.docx
-    02-architecture/diagrams/**/svg/INDEX.md
-    02-architecture/diagrams/**/png/INDEX.md
-
-# Rendered SVG/PNG diagram images are gitignored and generated locally or in CI
+# Rendered SVG/PNG diagram images may be generated locally or in CI
 # (render-diagrams job). Downgrade broken-link severity so `mkdocs build --strict`
-# does not abort on missing image targets. Real doc-link integrity is enforced by
-# scripts/check_doc_links.py (runs in the same CI job before the build step).
+# does not abort on temporarily missing image targets. Real doc-link integrity is
+# enforced by scripts/check_doc_links.py (runs in the same CI job before the build step).
 validation:
     links:
         not_found: info
@@ -209,6 +206,9 @@ nav:
                     -   "Overview": 03-guides/dashboards/README.md
                     -   "V2 Updates": 03-guides/dashboards/dashboard-v2-updates.md
                     -   "V2 Usage": 03-guides/dashboards/dashboard-v2-usage.md
+                    -   "Extension Guides":
+                            -   "Human": 03-guides/dashboards/dashboard-extension-human.md
+                            -   "LLM": 03-guides/dashboards/dashboard-extension-llm.md
                     -   "Monitoring Index": 03-guides/dashboards/monitoring-index.md
                     -   "Variables Guide": 03-guides/dashboards/variables-guide.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
@@ -375,9 +375,15 @@ nav:
                     -   "Foundation Bundle": 02-architecture/diagrams/bundles/foundation.bundle.md
                     -   "Class Bundle": 02-architecture/diagrams/bundles/class.bundle.md
                     -   "Views Bundle": 02-architecture/diagrams/bundles/views.bundle.md
-                    # SVG/PNG Index pages excluded from nav: images are gitignored
-                    # (generated locally). Including INDEX.md breaks mkdocs --strict.
-                    # Local generated SVG index pages are under docs/02-architecture/diagrams/{category}/svg/.
+                    -   "Rendered Diagram Indexes":
+                            -   "Architecture SVG Index": 02-architecture/diagrams/architecture/svg/INDEX.md
+                            -   "Architecture PNG Index": 02-architecture/diagrams/architecture/png/INDEX.md
+                            -   "Class Diagram SVG Index": 02-architecture/diagrams/class-diagrams/svg/INDEX.md
+                            -   "Class Diagram PNG Index": 02-architecture/diagrams/class-diagrams/png/INDEX.md
+                            -   "Foundation SVG Index": 02-architecture/diagrams/foundation/svg/INDEX.md
+                            -   "Foundation PNG Index": 02-architecture/diagrams/foundation/png/INDEX.md
+                            -   "Views SVG Index": 02-architecture/diagrams/views/svg/INDEX.md
+                            -   "Views PNG Index": 02-architecture/diagrams/views/png/INDEX.md
                     -   "Diagram Views Plan": 02-architecture/diagrams/governance/diagram-views-plan.md
                     -   "Diagram Prompt Expansion": 02-architecture/diagrams/governance/PROMPT-diagram-expansion.md
                     -   "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
@@ -481,6 +487,12 @@ nav:
                     -   "18 Lock Checkpoint Shutdown": 02-architecture/diagrams/descriptions/architecture/18-lock-checkpoint-shutdown.md
                     -   "18A Lock System": 02-architecture/diagrams/descriptions/architecture/18a-lock-system.md
                     -   "18B Checkpoint Shutdown": 02-architecture/diagrams/descriptions/architecture/18b-checkpoint-shutdown.md
+                    -   "Control Plane & Runtime":
+                            -   "19 Control Plane Artifacts": 02-architecture/diagrams/descriptions/architecture/19-control-plane-artifacts.md
+                            -   "20 Data Traceability Runtime": 02-architecture/diagrams/descriptions/architecture/20-data-traceability-runtime.md
+                            -   "21 Idempotent Processing Guards": 02-architecture/diagrams/descriptions/architecture/21-idempotent-processing-guards.md
+                            -   "22 Data Operations Observability": 02-architecture/diagrams/descriptions/architecture/22-data-operations-observability.md
+                            -   "23 Reproducible Run Contract": 02-architecture/diagrams/descriptions/architecture/23-reproducible-run-contract.md
                 -   "Class Diagrams":
                     -   "Index": 02-architecture/diagrams/descriptions/class/INDEX.md
                     -   "01 Domain Ports": 02-architecture/diagrams/descriptions/class/01-domain-ports.md
@@ -571,6 +583,16 @@ nav:
                     -   "02 Medallion Full": 02-architecture/diagrams/descriptions/views/02-medallion-full.md
                     -   "02 Medallion Infra": 02-architecture/diagrams/descriptions/views/02-medallion-infra.md
                     -   "02 Medallion Overview": 02-architecture/diagrams/descriptions/views/02-medallion-overview.md
+                    -   "Focused Runtime Views":
+                            -   "03 Medallion Data Flow Full": 02-architecture/diagrams/descriptions/views/03-medallion-data-flow-full.md
+                            -   "03 Medallion Data Flow Overview": 02-architecture/diagrams/descriptions/views/03-medallion-data-flow-overview.md
+                            -   "13 Port Protocol Contracts Full": 02-architecture/diagrams/descriptions/views/13-port-protocol-contracts-full.md
+                            -   "13 Port Protocol Contracts Overview": 02-architecture/diagrams/descriptions/views/13-port-protocol-contracts-overview.md
+                            -   "16 Transformer Hierarchy Full": 02-architecture/diagrams/descriptions/views/16-transformer-hierarchy-full.md
+                            -   "16 Transformer Hierarchy Overview": 02-architecture/diagrams/descriptions/views/16-transformer-hierarchy-overview.md
+                            -   "21 Idempotent Processing Guards Overview": 02-architecture/diagrams/descriptions/views/21-idempotent-processing-guards-overview.md
+                            -   "23 Reproducible Run Contract Overview": 02-architecture/diagrams/descriptions/views/23-reproducible-run-contract-overview.md
+                            -   "24 Data Runtime Quality Map Overview": 02-architecture/diagrams/descriptions/views/24-data-runtime-quality-map-overview.md
                     -   "04 Domain Layer Class Diagram Dataflow": 02-architecture/diagrams/descriptions/views/04-domain-layer-class-diagram-dataflow.md
                     -   "04 Domain Layer Class Diagram Domain": 02-architecture/diagrams/descriptions/views/04-domain-layer-class-diagram-domain.md
                     -   "04 Domain Layer Class Diagram Full": 02-architecture/diagrams/descriptions/views/04-domain-layer-class-diagram-full.md
@@ -718,6 +740,7 @@ nav:
                     -   "Diagram Docs Orchestrator Agent": 00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md
             -   "Skills":
                 -   "Overview": 00-project/ai/skills/README.md
+                -   "Practical Index": 00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md
                 -   "Global Skills":
                     -   "Skill": 00-project/ai/skills/global/agent-orchestration/SKILL.md
                     -   "Skill": 00-project/ai/skills/global/documentation-audit/SKILL.md
@@ -744,6 +767,14 @@ nav:
                     -   "Capability Discovery": 00-project/ai/skills/local/capability-discovery/SKILL.md
                     -   "Create PR": 00-project/ai/skills/local/create-pr/SKILL.md
                     -   "Deep Research": 00-project/ai/skills/local/deep-research/SKILL.md
+                    -   "Evidence & Decisions":
+                            -   "Collecting Evidence": 00-project/ai/skills/local/collecting-evidence/SKILL.md
+                            -   "Hierarchical Evidence Orchestration": 00-project/ai/skills/local/hierarchical-evidence-orchestration/SKILL.md
+                            -   "Synthesizing Pillars": 00-project/ai/skills/local/synthesizing-pillars/SKILL.md
+                            -   "Making Decisions": 00-project/ai/skills/local/making-decisions/SKILL.md
+                            -   "Generating Constrained Specs": 00-project/ai/skills/local/generating-constrained-specs/SKILL.md
+                            -   "Initializing Ledger": 00-project/ai/skills/local/initializing-ledger/SKILL.md
+                            -   "NCI Analysis": 00-project/ai/skills/local/nci-analysis/SKILL.md
                     -   "Deep Research Critique Framework": 00-project/ai/skills/local/deep-research/references/critique-framework.md
                     -   "Deep Research Report Templates": 00-project/ai/skills/local/deep-research/references/report-templates.md
                     -   "Deep Research Search Patterns": 00-project/ai/skills/local/deep-research/references/search-patterns.md

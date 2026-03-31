@@ -10,7 +10,7 @@ Tests verify that:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -26,6 +26,11 @@ from bioetl.domain.types import BatchID, ContentHash, RunID
 # ──────────────────────────────────────────────────────────────────────────────
 # Fixtures
 # ──────────────────────────────────────────────────────────────────────────────
+
+
+def _ts(offset_seconds: int = 0) -> datetime:
+    """Return deterministic UTC timestamps for quarantine tests."""
+    return datetime(2026, 1, 1, tzinfo=UTC) + timedelta(seconds=offset_seconds)
 
 
 @pytest.fixture
@@ -49,6 +54,7 @@ def quarantine_entry(run_id: RunID, batch_id: BatchID) -> QuarantineEntry:
         payload={"id": "bad-record", "value": "invalid"},
         run_id=run_id,
         batch_id=batch_id,
+        created_at=_ts(0),
     )
 
 
@@ -65,14 +71,14 @@ class TestResolutionInfoInvariants:
         with pytest.raises(ValueError, match="Invalid resolution_type"):
             ResolutionInfo(
                 resolution_type="deleted",  # Invalid
-                resolved_at=datetime.now(UTC),
+                resolved_at=_ts(1),
             )
 
     def test_valid_ignored_resolution(self) -> None:
         """Valid ignored resolution should be created."""
         info = ResolutionInfo(
             resolution_type="ignored",
-            resolved_at=datetime.now(UTC),
+            resolved_at=_ts(1),
             reason="Known bad data",
         )
         assert info.resolution_type == "ignored"
@@ -81,7 +87,7 @@ class TestResolutionInfoInvariants:
         """Valid reprocessed resolution should be created."""
         info = ResolutionInfo(
             resolution_type="reprocessed",
-            resolved_at=datetime.now(UTC),
+            resolved_at=_ts(1),
             new_record_id="silver:123",
         )
         assert info.resolution_type == "reprocessed"
@@ -91,7 +97,7 @@ class TestResolutionInfoInvariants:
         """ResolutionInfo should be frozen (immutable)."""
         info = ResolutionInfo(
             resolution_type="ignored",
-            resolved_at=datetime.now(UTC),
+            resolved_at=_ts(1),
         )
         with pytest.raises(AttributeError):
             info.resolution_type = "reprocessed"  # type: ignore
@@ -116,6 +122,7 @@ class TestQuarantineEntryConstructorValidation:
                 payload_hash=ContentHash("abc123"),
                 run_id=run_id,
                 batch_id=batch_id,
+                created_at=_ts(0),
             )
 
     def test_pipeline_name_required(self, run_id: RunID, batch_id: BatchID) -> None:
@@ -129,6 +136,7 @@ class TestQuarantineEntryConstructorValidation:
                 payload_hash=ContentHash("abc123"),
                 run_id=run_id,
                 batch_id=batch_id,
+                created_at=_ts(0),
             )
 
     def test_error_code_required(self, run_id: RunID, batch_id: BatchID) -> None:
@@ -142,6 +150,7 @@ class TestQuarantineEntryConstructorValidation:
                 payload_hash=ContentHash("abc123"),
                 run_id=run_id,
                 batch_id=batch_id,
+                created_at=_ts(0),
             )
 
     def test_payload_cannot_be_empty(self, run_id: RunID, batch_id: BatchID) -> None:
@@ -155,6 +164,7 @@ class TestQuarantineEntryConstructorValidation:
                 payload_hash=ContentHash("abc123"),
                 run_id=run_id,
                 batch_id=batch_id,
+                created_at=_ts(0),
             )
 
 
@@ -187,35 +197,40 @@ class TestQuarantineEntryStateTransitions:
 
     def test_mark_ignored_from_new(self, quarantine_entry: QuarantineEntry) -> None:
         """Should transition NEW -> IGNORED."""
-        quarantine_entry.mark_ignored(reason="Known bad data")
+        quarantine_entry.mark_ignored(reason="Known bad data", resolved_at=_ts(10))
 
         assert quarantine_entry.status == QuarantineStatus.IGNORED
         assert quarantine_entry.resolution_info is not None
         assert quarantine_entry.resolution_info.reason == "Known bad data"
+        assert quarantine_entry.resolution_info.resolved_at == _ts(10)
 
     def test_mark_ignored_from_under_review(
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """Should transition UNDER_REVIEW -> IGNORED."""
         quarantine_entry.start_review()
-        quarantine_entry.mark_ignored()
+        quarantine_entry.mark_ignored(resolved_at=_ts(10))
 
         assert quarantine_entry.status == QuarantineStatus.IGNORED
 
     def test_mark_reprocessed_from_new(self, quarantine_entry: QuarantineEntry) -> None:
         """Should transition NEW -> REPROCESSED."""
-        quarantine_entry.mark_reprocessed(new_record_id="silver:456")
+        quarantine_entry.mark_reprocessed(
+            new_record_id="silver:456",
+            resolved_at=_ts(10),
+        )
 
         assert quarantine_entry.status == QuarantineStatus.REPROCESSED
         assert quarantine_entry.resolution_info is not None
         assert quarantine_entry.resolution_info.new_record_id == "silver:456"
+        assert quarantine_entry.resolution_info.resolved_at == _ts(10)
 
     def test_mark_reprocessed_requires_new_record_id(
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """Invariant: new_record_id is required for reprocessing."""
         with pytest.raises(ValueError, match="new_record_id is required"):
-            quarantine_entry.mark_reprocessed(new_record_id="")
+            quarantine_entry.mark_reprocessed(new_record_id="", resolved_at=_ts(10))
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -230,25 +245,28 @@ class TestQuarantineEntryTerminalStates:
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """Invariant: Cannot resolve an already ignored entry."""
-        quarantine_entry.mark_ignored()
+        quarantine_entry.mark_ignored(resolved_at=_ts(10))
 
         with pytest.raises(InvalidStateError, match="entry is in status ignored"):
-            quarantine_entry.mark_reprocessed(new_record_id="test")
+            quarantine_entry.mark_reprocessed(
+                new_record_id="test",
+                resolved_at=_ts(11),
+            )
 
     def test_cannot_resolve_already_reprocessed(
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """Invariant: Cannot resolve an already reprocessed entry."""
-        quarantine_entry.mark_reprocessed(new_record_id="test")
+        quarantine_entry.mark_reprocessed(new_record_id="test", resolved_at=_ts(10))
 
         with pytest.raises(InvalidStateError, match="entry is in status reprocessed"):
-            quarantine_entry.mark_ignored()
+            quarantine_entry.mark_ignored(resolved_at=_ts(11))
 
     def test_cannot_modify_metadata_after_resolution(
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """Invariant: Cannot modify metadata after resolution."""
-        quarantine_entry.mark_ignored()
+        quarantine_entry.mark_ignored(resolved_at=_ts(10))
 
         with pytest.raises(InvalidStateError, match="terminal status"):
             quarantine_entry.add_metadata("key", "value")
@@ -272,19 +290,34 @@ class TestQuarantineEntryExpiration:
 
     def test_mark_expired_from_new(self, quarantine_entry: QuarantineEntry) -> None:
         """Should transition NEW -> EXPIRED."""
-        quarantine_entry.mark_expired()
+        quarantine_entry.mark_expired(expired_at=_ts(10))
 
         assert quarantine_entry.status == QuarantineStatus.EXPIRED
         assert quarantine_entry.resolution_info is not None
+        assert quarantine_entry.resolution_info.resolved_at == _ts(10)
+
+    def test_age_requires_explicit_reference_until_resolved(
+        self, quarantine_entry: QuarantineEntry
+    ) -> None:
+        """Unresolved entry age should require an explicit reference timestamp."""
+        assert quarantine_entry.age_seconds is None
+        assert quarantine_entry.age_seconds_at(_ts(10)) == pytest.approx(10.0)
+
+    def test_resolved_entry_has_stable_age(self, quarantine_entry: QuarantineEntry) -> None:
+        """Resolved entry should expose deterministic age from stored state."""
+        quarantine_entry.mark_ignored(resolved_at=_ts(10))
+
+        assert quarantine_entry.age_seconds == pytest.approx(10.0)
+        assert quarantine_entry.age_seconds_at(_ts(20)) == pytest.approx(20.0)
 
     def test_cannot_expire_already_resolved(
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """Invariant: Cannot expire an already resolved entry."""
-        quarantine_entry.mark_ignored()
+        quarantine_entry.mark_ignored(resolved_at=_ts(10))
 
         with pytest.raises(InvalidStateError, match="already in terminal status"):
-            quarantine_entry.mark_expired()
+            quarantine_entry.mark_expired(expired_at=_ts(11))
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -343,23 +376,26 @@ class TestQuarantineEntryDomainEvents:
             payload={"id": "1"},
             run_id=run_id,
             batch_id=batch_id,
+            created_at=_ts(0),
         )
 
         events = entry.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "QuarantineEntryCreated"
+        assert events[0].occurred_at == _ts(0)
 
     def test_resolve_emits_quarantine_entry_resolved_event(
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """Resolution should emit QuarantineEntryResolved event."""
         quarantine_entry.collect_events()  # Clear creation event
-        quarantine_entry.mark_ignored(reason="Test")
+        quarantine_entry.mark_ignored(reason="Test", resolved_at=_ts(10))
 
         events = quarantine_entry.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "QuarantineEntryResolved"
         assert events[0].resolution == "ignored"
+        assert events[0].occurred_at == _ts(10)
 
     def test_collect_events_clears_event_list(
         self, quarantine_entry: QuarantineEntry
@@ -415,6 +451,7 @@ class TestQuarantineEntryFactory:
             payload={"id": "1"},
             run_id=run_id,
             batch_id=batch_id,
+            created_at=_ts(0),
         )
 
         assert entry.entry_id  # Not empty
@@ -430,6 +467,7 @@ class TestQuarantineEntryFactory:
             payload={"id": "1"},
             run_id=run_id,
             batch_id=batch_id,
+            created_at=_ts(0),
         )
 
         assert entry.payload_hash
@@ -445,6 +483,7 @@ class TestQuarantineEntryFactory:
             payload={"id": "1", "value": 100},
             run_id=run_id,
             batch_id=batch_id,
+            created_at=_ts(0),
         )
         entry2 = QuarantineEntry.create(
             pipeline_name="test",
@@ -452,6 +491,7 @@ class TestQuarantineEntryFactory:
             payload={"id": "1", "value": 100},
             run_id=run_id,
             batch_id=batch_id,
+            created_at=_ts(1),
         )
 
         assert entry1.payload_hash == entry2.payload_hash

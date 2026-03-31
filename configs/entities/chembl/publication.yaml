@@ -127,7 +127,7 @@ quality:
                 - book
                 - dataset
                 - patent
-            nullable: true
+            nullable: false
         -   field: publication_year
             type: range
             min: 1500

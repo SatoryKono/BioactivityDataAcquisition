@@ -9,10 +9,11 @@ Migration note (P2-9):
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports import ClockPort
     from bioetl.domain.types import JsonDict
 
 
@@ -60,6 +61,8 @@ class _PipelineRunLifecycleProtocol(Protocol):
 class PipelineRunLifecycleService:
     """Coordinate PipelineRun lifecycle transitions in application layer."""
 
+    clock: ClockPort
+
     def start_run(
         self,
         run: _PipelineRunLifecycleProtocol,
@@ -71,7 +74,7 @@ class PipelineRunLifecycleService:
             run: PipelineRun aggregate to transition to the running state.
             started_at: Optional explicit start timestamp. Defaults to now (UTC).
         """
-        run.start(started_at or datetime.now(UTC))
+        run.start(started_at or self.clock.now())
 
     def stage_started(
         self,
@@ -86,7 +89,7 @@ class PipelineRunLifecycleService:
             stage: Stage name identifier (e.g. 'bronze', 'silver', 'gold').
             started_at: Optional explicit start timestamp. Defaults to now (UTC).
         """
-        run.record_stage_start(stage=stage, started_at=started_at or datetime.now(UTC))
+        run.record_stage_start(stage=stage, started_at=started_at or self.clock.now())
 
     def stage_succeeded(
         self,
@@ -108,7 +111,7 @@ class PipelineRunLifecycleService:
             started_at: Optional stage start timestamp. Defaults to now (UTC).
             completed_at: Optional stage completion timestamp. Defaults to now (UTC).
         """
-        now = datetime.now(UTC)
+        now = self.clock.now()
         run.record_stage_success(
             stage=stage,
             result=result,
@@ -137,7 +140,7 @@ class PipelineRunLifecycleService:
             started_at: Optional stage start timestamp. Defaults to now (UTC).
             completed_at: Optional stage failure timestamp. Defaults to now (UTC).
         """
-        now = datetime.now(UTC)
+        now = self.clock.now()
         run.record_stage_failure(
             stage=stage,
             error=error,
@@ -157,7 +160,7 @@ class PipelineRunLifecycleService:
             run: PipelineRun aggregate to transition to the completed state.
             completed_at: Optional explicit completion timestamp. Defaults to now (UTC).
         """
-        run.complete(completed_at=completed_at or datetime.now(UTC))
+        run.complete(completed_at=completed_at or self.clock.now())
 
     def fail_run(
         self,
@@ -178,7 +181,7 @@ class PipelineRunLifecycleService:
         run.fail(
             error=error,
             error_type=error_type,
-            failed_at=failed_at or datetime.now(UTC),
+            failed_at=failed_at or self.clock.now(),
         )
 
     def shutdown_run(
@@ -192,7 +195,7 @@ class PipelineRunLifecycleService:
             run: PipelineRun aggregate to transition to the shutdown state.
             shutdown_at: Optional explicit shutdown timestamp. Defaults to now (UTC).
         """
-        run.shutdown(shutdown_at=shutdown_at or datetime.now(UTC))
+        run.shutdown(shutdown_at=shutdown_at or self.clock.now())
 
 
 __all__ = ["PipelineRunLifecycleService"]

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates import _batch_lifecycle as lifecycle
@@ -36,7 +36,8 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
         batch_id: BatchID,
         run_id: RunID,
         start_index: int = 0,
-        created_at: datetime | None = None,
+        *,
+        created_at: datetime,
         metadata: MetaDict | None = None,
     ) -> None:
         """Initialise a new OPEN batch aggregate."""
@@ -49,7 +50,7 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
         self._records: list[BatchRecord] = []
         self._quarantined: list[BatchRecord] = []
         self._start_index = start_index
-        self._created_at = created_at or datetime.now(UTC)
+        self._created_at = created_at
         self._sealed_at: datetime | None = None
         self._events: list[DomainEvent] = []
         self._metadata: MetaDict = metadata or {}
@@ -59,6 +60,8 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
         cls,
         run_id: RunID,
         start_index: int = 0,
+        *,
+        created_at: datetime,
         metadata: MetaDict | None = None,
     ) -> Batch:
         """Create a new batch with a generated ID.
@@ -66,6 +69,7 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
         Args:
             run_id: Pipeline run identifier that owns this batch.
             start_index: Index offset for the first record in the batch. Defaults to 0.
+            created_at: Explicit timestamp when the batch was created.
             metadata: Optional key-value metadata to attach to the batch.
 
         Returns:
@@ -78,6 +82,7 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
             batch_id=batch_id,
             run_id=run_id,
             start_index=start_index,
+            created_at=created_at,
             metadata=metadata,
         )
         lifecycle.emit_batch_created(batch._events, batch._created_at, run_id, batch_id)

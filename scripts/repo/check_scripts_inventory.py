@@ -742,7 +742,14 @@ def _payload_status_counts(payload: dict[str, object]) -> tuple[int, dict[str, o
 
 def _write_ascii_json_stdout(payload: dict[str, object]) -> None:
     """Write ASCII-only JSON bytes regardless of console codepage settings."""
-    rendered = json.dumps(payload, ensure_ascii=True, indent=2) + "\n"
+    rendered = (
+        json.dumps(
+            payload,
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
+        + "\n"
+    )
     stdout_buffer = getattr(sys.stdout, "buffer", None)
     if stdout_buffer is not None:
         stdout_buffer.write(rendered.encode("ascii"))
@@ -751,9 +758,24 @@ def _write_ascii_json_stdout(payload: dict[str, object]) -> None:
     sys.stdout.write(rendered)
 
 
+def _stdout_payload(payload: dict[str, object]) -> dict[str, object]:
+    """Return a compact JSON payload suitable for console/stdout transport.
+
+    The full inventory is still used for manifest updates and drift checks.
+    For `--json` stdout we intentionally emit only summary-level data, which is
+    sufficient for machine checks in this repository and avoids large captured
+    subprocess payloads stalling on Windows codepage-constrained pipes.
+    """
+    return {
+        "schema_version": payload.get("schema_version"),
+        "generated_at": payload.get("generated_at"),
+        "summary": payload.get("summary", {}),
+    }
+
+
 def _print_payload(*, args: argparse.Namespace, payload: dict[str, object]) -> None:
     if args.json:
-        _write_ascii_json_stdout(payload)
+        _write_ascii_json_stdout(_stdout_payload(payload))
         return
 
     total_scripts, status_counts = _payload_status_counts(payload)

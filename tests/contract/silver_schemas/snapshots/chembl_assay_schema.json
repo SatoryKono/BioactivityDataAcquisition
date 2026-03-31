@@ -237,8 +237,8 @@
     "coerce": false,
     "description": "Assay type description.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "bao_format": {
@@ -296,8 +296,8 @@
     "coerce": false,
     "description": "Confidence score.",
     "dtype": "int64",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "content_hash": {
@@ -365,8 +365,8 @@
     "coerce": false,
     "description": "Relationship type.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "score": {

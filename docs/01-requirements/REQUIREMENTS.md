@@ -805,7 +805,7 @@ Last verified: '2026-03-29'
 #### REQ-DOC-001
 - **Уровень**: MUST
 - **Описание**: Активная документация в `docs/00-05` является нормативным published surface и вместе с generated docs проверяется автоматическими docs guardrails; материалы в `docs/99-archive/` сохраняются только как historical/non-normative context
-- **Проверка**: Прогнать `scripts/docs/check_doc_links.py` и убедиться, что generated-doc проверки (например dependency-map / schema export checks) проходят в CI, а active entry points не ссылаются на `docs/99-archive/` как на источник текущих требований
+- **Проверка**: Прогнать `uv run python -m scripts.docs check-links --links --specs --configs` и убедиться, что generated-doc проверки (например dependency-map / schema export checks) проходят в CI, а active entry points не ссылаются на `docs/99-archive/` как на источник текущих требований
 
 #### REQ-DOC-002
 - **Уровень**: MUST
