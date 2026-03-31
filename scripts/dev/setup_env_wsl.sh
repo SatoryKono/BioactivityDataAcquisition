@@ -9,12 +9,18 @@ export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
 export UV_HTTP_TIMEOUT="${UV_HTTP_TIMEOUT:-180}"
 
-VENV_DIR="$REPO_ROOT/.venv-wsl"
+VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
 VENV_PYTHON="$VENV_DIR/bin/python"
 
-if [[ -d "$REPO_ROOT/.venv" && ! -x "$REPO_ROOT/.venv/bin/python" ]]; then
-    echo "[setup_env_wsl][hint] Found a non-WSL .venv. It will be ignored in favor of .venv-wsl."
+if [[ -e "$REPO_ROOT/.venv-wsl" ]]; then
+    echo "[setup_env_wsl][hint] Found a repository-local .venv-wsl. Remove it to avoid Windows conflicts."
 fi
+
+if [[ -d "$REPO_ROOT/.venv" && ! -x "$REPO_ROOT/.venv/bin/python" ]]; then
+    echo "[setup_env_wsl][hint] Found a non-WSL .venv. It will be ignored in favor of an external WSL venv."
+fi
+
+mkdir -p "$(dirname "$VENV_DIR")"
 
 if command -v uv >/dev/null 2>&1; then
     uv venv "$VENV_DIR" --python 3.13
@@ -39,6 +45,6 @@ else
     "$VENV_PYTHON" -m pip install -e '.[dev,tracing]'
 fi
 
-echo "[setup_env_wsl][ok] Environment ready at .venv-wsl"
-echo "[setup_env_wsl][hint] Activate with: source .venv-wsl/bin/activate"
+echo "[setup_env_wsl][ok] Environment ready at $VENV_DIR"
+echo "[setup_env_wsl][hint] Activate with: source \"$VENV_DIR/bin/activate\""
 echo "[setup_env_wsl][hint] Run tests with: bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf"

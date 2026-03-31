@@ -22,7 +22,7 @@ See Also:
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
+from types import ModuleType
 
 from bioetl.composition.registry import (
     PipelineDefinition,
@@ -58,7 +58,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> ModuleType:
     """Lazily expose composition public submodules for patch/import stability."""
     try:
         module_name = _LAZY_MODULE_EXPORTS[name]

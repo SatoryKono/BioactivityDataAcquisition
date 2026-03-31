@@ -11,9 +11,7 @@ from pathlib import Path
 
 
 ALLOWED_MISSING_FUTURE_IMPORTS = {
-    "composition/__init__.py",
     "domain/entities/bioactivity/__init__.py",
-    "interfaces/__init__.py",
 }
 
 

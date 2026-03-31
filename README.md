@@ -164,7 +164,7 @@ This creates:
 
 ```text
 .venv-win  # Windows PowerShell
-.venv-wsl  # WSL/Linux
+$HOME/.venvs/bioetl  # WSL/Linux by default
 ```
 
 Then use the OS-specific wrappers:
@@ -546,7 +546,8 @@ Access the docs at `http://localhost:8000`.
 
 ### Root layout policy
 
-Repository root is protected by `scripts/audit_root_cleanliness.py` (pre-commit + CI job `root-hygiene`).
+Repository root is protected by `scripts/repo/audit_root_cleanliness.py`
+(pre-commit + CI job `root-hygiene`).
 Only approved top-level entries are allowed.
 
 **Core allowed root entries**:
@@ -555,7 +556,7 @@ Only approved top-level entries are allowed.
 - Documentation and references: `docs/`, `README.md`, `CHANGELOG.md`
 - Build/configuration: `pyproject.toml`, `uv.lock`, `Makefile`, `.pre-commit-config.yaml`, `.github/`
 - Operational/project assets: `configs/`, `scripts/`, `assets/`, `data/`, `reports/`, `grafana/`
-- Legacy tracked root artifacts listed in the allowlist inside `scripts/audit_root_cleanliness.py`
+- Explicit exceptions listed in `.github/root-allowlist.txt`
 
 **Where to place artifacts**:
 

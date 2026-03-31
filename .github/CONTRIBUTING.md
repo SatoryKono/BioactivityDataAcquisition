@@ -3,14 +3,14 @@
 ## Quick Start
 
 ```bash
-# 1. Clone and install (automated setup)
+# 1. Clone and install
 # Clone the canonical repository or your fork, then verify origin:
 git clone <repo-url>
 cd BioactivityDataAcquisition2
 git remote -v
-./scripts/dev/dev_setup.sh          # Full setup with all checks
-# ./scripts/dev/dev_setup.sh --quick  # Fast: skip tests and linters
-# ./scripts/dev/dev_setup.sh --ci     # CI mode: no colors, non-interactive
+uv sync --extra dev --extra tests --extra tracing
+# Windows/.venv fallback:
+# .venv/Scripts/python.exe -m pip install -e .[dev,tests]
 
 # 2. Run checks before any changes
 make lint && make test
@@ -143,8 +143,8 @@ This ensures no PR can be merged with failing tests, lint errors, or secret leak
 
 **3. "Missing dependencies"**
 
-- Run `./scripts/dev/dev_setup.sh --force` to reinstall from scratch.
-- Or manually: `uv sync --extra dev --extra tracing`.
+- Re-sync the environment: `uv sync --extra dev --extra tests --extra tracing`.
+- Or use the local virtualenv fallback if `uv` is unavailable.
 - Check `pyproject.toml` for new groups.
 
 **4. "ERROR: Missing required plugins: pytest-asyncio>=0.23, pytest-cov>=4.0"**

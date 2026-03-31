@@ -19,7 +19,7 @@ description: Создание и запуск миграций Delta Lake таб
 
 ### `list` (default)
 ```bash
-ls -la src/tools/scripts/migrations/*.py | grep -v __
+find scripts/migrations -type f -name '*.py' | sort
 ```
 Per migration: filename, description (docstring), date (git log), status (applied/pending).
 
@@ -27,7 +27,7 @@ Per migration: filename, description (docstring), date (git log), status (applie
 
 Ask via AskUserQuestion: name (snake_case), description, target tables (Silver/Gold), operation (rename/cast/add/drop/transform).
 
-Study existing: `cat src/tools/scripts/migrations/migrate_pmid_to_string.py`
+Study existing: `find scripts/migrations -type f -name '*.py' | sort | head`
 
 Template:
 ```python
@@ -83,16 +83,16 @@ if __name__ == "__main__":
     main()
 ```
 
-Verify: `uv run python src/tools/scripts/migrations/{name}.py --dry-run`
+Verify: `uv run python scripts/migrations/{active|oneoff}/{name}.py --dry-run`
 
 ### `run`
 ```bash
-uv run python src/tools/scripts/migrations/{target}.py --data-dir data/output
+uv run python scripts/migrations/{target}.py --data-dir data/output
 ```
 
 ### `dry-run`
 ```bash
-uv run python src/tools/scripts/migrations/{target}.py --data-dir data/output --dry-run
+uv run python scripts/migrations/{target}.py --data-dir data/output --dry-run
 ```
 
 ### `status`

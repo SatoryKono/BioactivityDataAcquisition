@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import os
 from contextlib import suppress
-from typing import Any, cast
+from typing import Any, Protocol, cast
 from urllib.parse import urlparse
 
 from bioetl.domain.ports.noop import NoOpTracing
@@ -76,15 +76,47 @@ _LOCAL_OTLP_HOSTS = {
 }
 
 
+class _SpanProtocol(Protocol):
+    """Minimal span surface used by BioETL tracing helpers."""
+
+    def set_attribute(self, key: str, value: object) -> None: ...
+
+    def record_exception(self, exception: Exception) -> None: ...
+
+
+class _SpanContextManagerProtocol(Protocol):
+    """Context manager returned by OTel tracer implementations."""
+
+    def __enter__(self) -> _SpanProtocol: ...
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object | None,
+    ) -> object | None: ...
+
+
+class _TracerProtocol(Protocol):
+    """Minimal tracer surface required by the adapter wrapper."""
+
+    def start_as_current_span(
+        self,
+        name: str,
+        *,
+        attributes: dict[str, object] | None = None,
+    ) -> _SpanContextManagerProtocol: ...
+
+
 class _SpanHandle:
     """Compatibility wrapper exposing span methods on OTel context managers."""
 
     def __init__(
         self,
-        context_manager: Any,
-    ) -> None:  # Any: OpenTelemetry context manager protocol is imported dynamically.
+        context_manager: _SpanContextManagerProtocol,
+    ) -> None:
         self._context_manager = context_manager
-        self._span: Any | None = None  # Any: active span object comes from optional OTel runtime types.
+        self._span: _SpanProtocol | None = None
 
     def __enter__(self) -> _SpanHandle:
         self._span = self._context_manager.__enter__()
@@ -115,8 +147,8 @@ class _TracerAdapter:
 
     def __init__(
         self,
-        otel_tracer: Any,
-    ) -> None:  # Any: concrete tracer instance depends on optional OTel installation.
+        otel_tracer: _TracerProtocol,
+    ) -> None:
         self._otel_tracer = otel_tracer
 
     def start_as_current_span(
@@ -124,7 +156,7 @@ class _TracerAdapter:
         name: str,
         *,
         attributes: dict[str, object] | None = None,
-    ) -> Any:  # Any: returns an OTel-managed context manager/span wrapper.
+    ) -> _SpanHandle:
         return _SpanHandle(
             self._otel_tracer.start_as_current_span(
                 name,
@@ -176,8 +208,7 @@ def _build_telemetry_exporter(
     if not OTLP_AVAILABLE or _OtlpExporterClass is None:
         return ConsoleSpanExporter()
 
-    exporter_kwargs: dict[str, Any] = {}
-    # Any: OTLP exporter kwargs vary by installed exporter implementation.
+    exporter_kwargs: dict[str, str | bool] = {}
     endpoint = _get_otlp_endpoint()
     insecure_override = _get_otlp_insecure_setting()
     if endpoint is not None:

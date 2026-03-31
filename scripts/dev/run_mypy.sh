@@ -14,9 +14,10 @@ fi
 
 export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
+export BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
 
-if [[ -x ".venv-wsl/bin/python" ]]; then
-    exec .venv-wsl/bin/python -m mypy "${ARGS[@]}"
+if [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]]; then
+    exec "$BIOETL_WSL_VENV_DIR/bin/python" -m mypy "${ARGS[@]}"
 fi
 
 if [[ -x ".venv/bin/python" ]]; then
@@ -24,7 +25,7 @@ if [[ -x ".venv/bin/python" ]]; then
 fi
 
 if [[ -d ".venv-win" ]]; then
-    echo "[run_mypy][hint] A Windows virtualenv was detected. WSL should use .venv-wsl."
+    echo "[run_mypy][hint] A Windows virtualenv was detected. WSL should use an external venv."
     echo "[run_mypy][hint] Bootstrap it with: bash scripts/dev/setup_env_wsl.sh"
 fi
 

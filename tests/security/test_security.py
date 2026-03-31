@@ -272,6 +272,7 @@ class TestPrivateKeyExposure:
             ".git",
             ".worktrees",
             ".venv",
+            ".venv-win",
             "venv",
             "__pycache__",
             ".mypy_cache",
