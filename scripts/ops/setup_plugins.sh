@@ -24,6 +24,8 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
+BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
+
 log_info() { echo -e "${BLUE}[setup-plugins]${NC} $1"; }
 log_ok() { echo -e "${GREEN}[setup-plugins]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[setup-plugins]${NC} $1"; }
@@ -54,8 +56,8 @@ to_windows_path() {
 if [[ -x ".venv-win/Scripts/python.exe" ]]; then
     PYTHON_BIN=".venv-win/Scripts/python.exe"
     PYTHON_KIND="windows-venv"
-elif [[ -x ".venv-wsl/bin/python" ]]; then
-    PYTHON_BIN=".venv-wsl/bin/python"
+elif [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]]; then
+    PYTHON_BIN="$BIOETL_WSL_VENV_DIR/bin/python"
     PYTHON_KIND="posix-venv"
 elif [[ -x ".venv/Scripts/python.exe" ]]; then
     PYTHON_BIN=".venv/Scripts/python.exe"

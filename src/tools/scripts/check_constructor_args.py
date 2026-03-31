@@ -64,7 +64,7 @@ def _load_waivers(waiver_path: Path) -> dict:
             return yaml.safe_load(f) or {}
     except ImportError:
         print(
-            "Error: PyYAML is required to read constructor_waivers.yaml",
+            "Error: PyYAML is required to read configs/quality/constructor_waivers.yaml",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -171,7 +171,7 @@ def main() -> None:
     """Main entry point."""
     warn_only = "--warn-only" in sys.argv
     src_path = Path("src/bioetl")
-    waiver_path = Path("constructor_waivers.yaml")
+    waiver_path = Path("configs/quality/constructor_waivers.yaml")
 
     if not src_path.exists():
         print(f"Source path {src_path} not found")

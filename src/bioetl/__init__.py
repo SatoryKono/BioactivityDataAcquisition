@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
+from types import ModuleType
 
 __version__ = "6.1.0"
 
@@ -105,7 +105,7 @@ _PACKAGE_EXPORTS: dict[str, str] = {
 __all__ = ["__version__", *_PACKAGE_EXPORTS]
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> ModuleType:
     """Lazily expose top-level package namespaces for patch/import stability."""
     try:
         module_name = _PACKAGE_EXPORTS[name]

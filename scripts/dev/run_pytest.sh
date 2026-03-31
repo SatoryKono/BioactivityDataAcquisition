@@ -7,6 +7,7 @@ cd "$REPO_ROOT"
 
 export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
+export BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
 
 DEFAULT_FLAGS=(--cov=src/bioetl --cov-report=term -q --maxfail=1)
 PYTEST_ARGS=("$@")
@@ -24,8 +25,8 @@ if [[ -f "scripts/ops/setup_plugins.sh" ]]; then
     bash scripts/ops/setup_plugins.sh --pytest-only
 fi
 
-if [[ -x ".venv-wsl/bin/python" ]]; then
-    exec .venv-wsl/bin/python -m pytest "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
+if [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]]; then
+    exec "$BIOETL_WSL_VENV_DIR/bin/python" -m pytest "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
 fi
 
 if [[ -x ".venv/bin/python" ]]; then
@@ -33,7 +34,7 @@ if [[ -x ".venv/bin/python" ]]; then
 fi
 
 if [[ -d ".venv-win" ]]; then
-    echo "[run_pytest][hint] A Windows virtualenv was detected. WSL should use .venv-wsl."
+    echo "[run_pytest][hint] A Windows virtualenv was detected. WSL should use an external venv."
     echo "[run_pytest][hint] Bootstrap it with: bash scripts/dev/setup_env_wsl.sh"
 fi
 

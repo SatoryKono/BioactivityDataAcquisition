@@ -1,6 +1,7 @@
 # Tracked files allowed at repository root.
 # Any new root-level tracked file must be explicitly reviewed and added here.
 .dockerignore
+.python-version
 .editorconfig
 .setup_wsl_codex.sh
 .env.example

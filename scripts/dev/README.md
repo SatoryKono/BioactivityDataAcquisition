@@ -22,7 +22,7 @@ not share a single `.venv`. Use separate environment directories instead:
 
 ```text
 .venv-win  # PowerShell / native Windows Python
-.venv-wsl  # WSL / Linux Python
+$HOME/.venvs/bioetl  # WSL / Linux Python by default
 ```
 
 Bootstrap commands:
@@ -102,4 +102,4 @@ python -m scripts.dev <command> [args...]
 | `setup_copilot_codex_mcp.sh` | Setup MCP (shell variant) |
 | `setup_copilot_codex_mcp.ps1` | Setup MCP (PowerShell variant) |
 | `setup_env_windows.ps1` | Create/update the stable Windows virtualenv at `.venv-win` |
-| `setup_env_wsl.sh` | Create/update the stable WSL virtualenv at `.venv-wsl` |
+| `setup_env_wsl.sh` | Create/update the stable WSL virtualenv outside the repo (default: `$HOME/.venvs/bioetl`) |

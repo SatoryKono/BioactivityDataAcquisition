@@ -152,6 +152,7 @@ where = ["src"]
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+norecursedirs = [".venv", ".venv-win", ".venv-wsl", "venv", "env", "ENV", "node_modules"]
 pythonpath = ["src", "."]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
@@ -200,6 +201,8 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     # NoOpMetrics warns when metrics are disabled (expected in tests)
     "ignore:NoOpMetrics is being used:UserWarning",
+    # Explicit norecursedirs is intentional to avoid mixed Windows/WSL venv traversal.
+    "ignore:Skipping collection of '.hypothesis' directory:UserWarning",
     # Pytest cleanup warnings (sockets/event loops not closed during teardown)
     "ignore::pytest.PytestUnraisableExceptionWarning",
     # pytest-benchmark warning when xdist is active (expected in parallel mode)

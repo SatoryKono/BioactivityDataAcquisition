@@ -14,7 +14,7 @@ architecture and depends on all other layers per RULES.md.
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
+from types import ModuleType
 
 _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "cli": "bioetl.interfaces.cli",
@@ -25,7 +25,7 @@ _LAZY_MODULE_EXPORTS: dict[str, str] = {
 __all__ = list(_LAZY_MODULE_EXPORTS)
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> ModuleType:
     """Lazily expose interface subpackages for patch/import stability."""
     try:
         module_name = _LAZY_MODULE_EXPORTS[name]
