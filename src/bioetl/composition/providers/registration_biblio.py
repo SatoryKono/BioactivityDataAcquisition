@@ -10,7 +10,7 @@ from bioetl.composition.factories.datasource.crossref import (
 from bioetl.composition.providers._config_helpers import (
     _create_http_data_source,
     _get_batch_size_from_config,
-    _get_rate_limit_from_config,
+    _get_rate_limits_from_config,
 )
 from bioetl.composition.providers._models import (
     ProviderConfig,
@@ -26,6 +26,7 @@ from bioetl.composition.providers._registration_biblio_profiles import (
     _resolve_semanticscholar_request_profile,
 )
 from bioetl.composition.providers._registration_contracts import (
+    HttpProviderConfigSpec,
     ProviderAssemblySupport,
     build_http_provider_config,
     resolve_provider_assembly_support,
@@ -226,42 +227,61 @@ def _get_biblio_provider_configs(
 ) -> dict[str, ProviderConfig]:
     """Build ProviderConfig entries for bibliographic providers."""
     support = resolve_provider_assembly_support(assembly_support)
-    pubmed = _get_rate_limit_from_config("pubmed")
-    crossref = _get_rate_limit_from_config("crossref")
-    openalex = _get_rate_limit_from_config("openalex")
-    semanticscholar = _get_rate_limit_from_config("semanticscholar")
+    rate_limits = _get_rate_limits_from_config(
+        "pubmed",
+        "crossref",
+        "openalex",
+        "semanticscholar",
+    )
+    pubmed = rate_limits["pubmed"]
+    crossref = rate_limits["crossref"]
+    openalex = rate_limits["openalex"]
+    semanticscholar = rate_limits["semanticscholar"]
 
-    return {
-        "pubmed": build_http_provider_config(
+    specs = (
+        HttpProviderConfigSpec(
+            provider_name="pubmed",
             adapter_class=PubMedAdapter,
             rate=pubmed.rate,
             capacity=pubmed.capacity,
             rate_overrides={"pubmed_api_key": 10.0},
             custom_creator=_create_pubmed_adapter_from_settings,
             data_source_creator=_create_pubmed_data_source,
-            assembly_support=support,
         ),
-        "crossref": build_http_provider_config(
+        HttpProviderConfigSpec(
+            provider_name="crossref",
             adapter_class=CrossRefAdapter,
             rate=crossref.rate,
             capacity=crossref.capacity,
             custom_creator=create_crossref_adapter,
             data_source_creator=_create_crossref_data_source,
-            assembly_support=support,
         ),
-        "openalex": build_http_provider_config(
+        HttpProviderConfigSpec(
+            provider_name="openalex",
             adapter_class=OpenAlexAdapter,
             rate=openalex.rate,
             capacity=openalex.capacity,
             custom_creator=_create_openalex_adapter_from_settings,
             data_source_creator=_create_openalex_data_source,
-            assembly_support=support,
         ),
-        "semanticscholar": build_http_provider_config(
+        HttpProviderConfigSpec(
+            provider_name="semanticscholar",
             adapter_class=SemanticScholarAdapter,
             rate=semanticscholar.rate,
             capacity=semanticscholar.capacity,
             data_source_creator=_create_semanticscholar_data_source,
-            assembly_support=support,
         ),
+    )
+
+    return {
+        spec.provider_name: build_http_provider_config(
+            adapter_class=spec.adapter_class,
+            rate=spec.rate,
+            capacity=spec.capacity,
+            data_source_creator=spec.data_source_creator,
+            assembly_support=support,
+            rate_overrides=spec.rate_overrides,
+            custom_creator=spec.custom_creator,
+        )
+        for spec in specs
     }

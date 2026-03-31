@@ -78,6 +78,19 @@ class ProviderAssemblySupport:
     create_adapter: ProviderAdapterFactoryProtocol
 
 
+@dataclass(frozen=True)
+class HttpProviderConfigSpec:
+    """Declarative manifest entry for one HTTP-backed provider config."""
+
+    provider_name: str
+    adapter_class: type[DataSourcePort]
+    rate: float
+    capacity: int
+    data_source_creator: SupportAwareDataSourceCreatorProtocol
+    rate_overrides: dict[str, float] | None = None
+    custom_creator: AdapterCreator | None = None
+
+
 def _create_http_client_for_provider(
     provider: str,
     settings: ProviderSettingsProtocol | None = None,
@@ -233,3 +246,23 @@ def build_http_provider_config(
             assembly_support=assembly_support,
         ),
     )
+
+
+def build_http_provider_config_map(
+    *,
+    specs: tuple[HttpProviderConfigSpec, ...],
+    assembly_support: ProviderAssemblySupport,
+) -> dict[str, ProviderConfig]:
+    """Build multiple HTTP-backed provider configs from one declarative manifest."""
+    return {
+        spec.provider_name: build_http_provider_config(
+            adapter_class=spec.adapter_class,
+            rate=spec.rate,
+            capacity=spec.capacity,
+            rate_overrides=spec.rate_overrides,
+            custom_creator=spec.custom_creator,
+            data_source_creator=spec.data_source_creator,
+            assembly_support=assembly_support,
+        )
+        for spec in specs
+    }

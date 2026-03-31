@@ -16,7 +16,7 @@ from bioetl.composition.factories.datasource.pubchem import (
 )
 from bioetl.composition.providers._config_helpers import (
     _get_adapter_config,
-    _get_rate_limit_from_config,
+    _get_rate_limits_from_config,
     _validate_extraction_input_filter_overlap,
     _wrap_with_filter,
 )
@@ -26,9 +26,10 @@ from bioetl.composition.providers._models import (
     ProviderSettingsProtocol,
 )
 from bioetl.composition.providers._registration_contracts import (
+    HttpProviderConfigSpec,
     ProviderAssemblySupport,
+    build_http_provider_config_map,
     build_data_source_provider_config,
-    build_http_provider_config,
     resolve_provider_assembly_support,
 )
 from bioetl.domain.models.filter import ExtractionParams
@@ -247,18 +248,38 @@ def _get_bio_provider_configs(
 ) -> dict[str, ProviderConfig]:
     """Build ProviderConfig entries for bio providers."""
     support = resolve_provider_assembly_support(assembly_support)
-    chembl = _get_rate_limit_from_config("chembl")
-    pubchem = _get_rate_limit_from_config("pubchem")
-    uniprot = _get_rate_limit_from_config("uniprot")
+    rate_limits = _get_rate_limits_from_config("chembl", "pubchem", "uniprot")
+    chembl = rate_limits["chembl"]
+    pubchem = rate_limits["pubchem"]
+    uniprot = rate_limits["uniprot"]
 
-    return {
-        "chembl": build_http_provider_config(
-            adapter_class=ChemblAdapter,
-            rate=chembl.rate,
-            capacity=chembl.capacity,
-            data_source_creator=_create_chembl_data_source,
-            assembly_support=support,
+    return build_http_provider_config_map(
+        specs=(
+            HttpProviderConfigSpec(
+                provider_name="chembl",
+                adapter_class=ChemblAdapter,
+                rate=chembl.rate,
+                capacity=chembl.capacity,
+                data_source_creator=_create_chembl_data_source,
+            ),
+            HttpProviderConfigSpec(
+                provider_name="uniprot",
+                adapter_class=UniProtAdapter,
+                rate=uniprot.rate,
+                capacity=uniprot.capacity,
+                rate_overrides={"uniprot_api_key": 100.0},
+                data_source_creator=_create_uniprot_data_source,
+            ),
+            HttpProviderConfigSpec(
+                provider_name="uniprot_idmapping",
+                adapter_class=IDMappingDataSource,
+                rate=uniprot.rate,
+                capacity=uniprot.capacity,
+                data_source_creator=_create_uniprot_idmapping_data_source,
+            ),
         ),
+        assembly_support=support,
+    ) | {
         "pubchem": build_data_source_provider_config(
             adapter_class=PubChemAdapter,
             http_config=HttpConfig(rate=pubchem.rate, capacity=pubchem.capacity),
@@ -266,20 +287,5 @@ def _get_bio_provider_configs(
             requires_logger=True,
             custom_creator=_create_pubchem_adapter,
             data_source_creator=_create_pubchem_data_source,
-        ),
-        "uniprot": build_http_provider_config(
-            adapter_class=UniProtAdapter,
-            rate=uniprot.rate,
-            capacity=uniprot.capacity,
-            rate_overrides={"uniprot_api_key": 100.0},
-            data_source_creator=_create_uniprot_data_source,
-            assembly_support=support,
-        ),
-        "uniprot_idmapping": build_http_provider_config(
-            adapter_class=IDMappingDataSource,
-            rate=uniprot.rate,
-            capacity=uniprot.capacity,
-            data_source_creator=_create_uniprot_idmapping_data_source,
-            assembly_support=support,
         ),
     }

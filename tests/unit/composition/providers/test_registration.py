@@ -19,12 +19,15 @@ from bioetl.composition.providers.provider_registry import (
 )
 from bioetl.composition.providers.registration import (
     _build_provider_configs,
+    _merge_provider_config_families,
     register_all_providers,
 )
 from bioetl.composition.providers._registration_contracts import (
+    HttpProviderConfigSpec,
     bind_provider_data_source_creator,
     build_data_source_provider_config,
     build_http_provider_config,
+    build_http_provider_config_map,
     create_provider_assembly_support,
     resolve_provider_assembly_support,
 )
@@ -201,24 +204,24 @@ class TestRegisterAllProviders:
             call(support),
         ]
 
-    @patch("bioetl.composition.providers.registration.get_default_provider_registrar")
+    @patch("bioetl.composition.providers.registration.get_default_provider_registry")
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
     @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
-    def test_default_registration_uses_named_default_registry_seam(
+    def test_default_registration_uses_default_registry_helper(
         self,
         mock_biblio: MagicMock,
         mock_bio: MagicMock,
-        mock_get_default_registrar: MagicMock,
+        mock_get_default_registry: MagicMock,
     ) -> None:
         """Implicit registration should resolve the default registry via helper."""
         default_registry = create_provider_registry()
-        mock_get_default_registrar.return_value = default_registry
+        mock_get_default_registry.return_value = default_registry
         mock_bio.return_value = {}
         mock_biblio.return_value = {}
 
         register_all_providers()
 
-        mock_get_default_registrar.assert_called_once_with()
+        mock_get_default_registry.assert_called_once_with()
 
 
 @pytest.mark.unit
@@ -287,6 +290,37 @@ class TestBuildProviderConfigs:
 
         mock_bio.assert_called_once_with(assembly_support=support)
         mock_biblio.assert_called_once_with(assembly_support=support)
+
+
+@pytest.mark.unit
+def test_merge_provider_config_families_uses_declared_builder_order(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Family merge helper should preserve ordered override semantics."""
+
+    def _build_alpha(*, assembly_support):
+        assert assembly_support == "support"
+        return {
+            "shared": ProviderConfig(adapter_class=MagicMock(name="alpha")),
+            "alpha": ProviderConfig(adapter_class=MagicMock(name="alpha_only")),
+        }
+
+    def _build_beta(*, assembly_support):
+        assert assembly_support == "support"
+        return {
+            "shared": ProviderConfig(adapter_class=MagicMock(name="beta")),
+            "beta": ProviderConfig(adapter_class=MagicMock(name="beta_only")),
+        }
+
+    monkeypatch.setattr(
+        "bioetl.composition.providers.registration._iter_provider_config_family_builders",
+        lambda: (_build_alpha, _build_beta),
+    )
+
+    result = _merge_provider_config_families(assembly_support="support")
+
+    assert set(result) == {"shared", "alpha", "beta"}
+    assert result["shared"].adapter_class._mock_name == "beta"
 
 
 @pytest.mark.unit
@@ -417,3 +451,47 @@ def test_build_data_source_provider_config_supports_non_http_special_case() -> N
     assert config.requires_logger is True
     assert config.custom_creator is custom_creator
     assert config.data_source_creator is creator
+
+
+@pytest.mark.unit
+def test_build_http_provider_config_map_builds_multiple_entries_from_manifest() -> None:
+    """HTTP provider manifests should reuse one shared map-construction helper."""
+    support = MagicMock(name="support")
+    custom_creator = MagicMock(name="custom_creator")
+
+    def _creator(settings, pipeline_config, logger, **kwargs):
+        return kwargs["assembly_support"]
+
+    configs = build_http_provider_config_map(
+        specs=(
+            HttpProviderConfigSpec(
+                provider_name="alpha",
+                adapter_class=MagicMock(name="alpha_adapter"),
+                rate=1.5,
+                capacity=3,
+                data_source_creator=_creator,
+            ),
+            HttpProviderConfigSpec(
+                provider_name="beta",
+                adapter_class=MagicMock(name="beta_adapter"),
+                rate=7.5,
+                capacity=15,
+                rate_overrides={"api_key": 30.0},
+                custom_creator=custom_creator,
+                data_source_creator=_creator,
+            ),
+        ),
+        assembly_support=support,
+    )
+
+    assert set(configs) == {"alpha", "beta"}
+    assert configs["alpha"].http_config is not None
+    assert configs["alpha"].http_config.rate == 1.5
+    assert configs["beta"].http_config is not None
+    assert configs["beta"].http_config.capacity == 15
+    assert configs["beta"].http_config.rate_overrides == {"api_key": 30.0}
+    assert configs["beta"].custom_creator is custom_creator
+    assert configs["alpha"].data_source_creator is not None
+    assert configs["alpha"].data_source_creator(
+        MagicMock(), MagicMock(), MagicMock()
+    ) is support

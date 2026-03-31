@@ -18,6 +18,10 @@ from bioetl.composition.providers import (
     create_provider_registry,
     register_provider,
 )
+from bioetl.composition.providers._loading import (
+    get_provider_registry_loaded_status,
+    load_provider_registry,
+)
 from bioetl.composition.providers.provider_registry import (
     register_default_provider_config,
 )
@@ -633,8 +637,8 @@ class TestProviderLoader:
 
         assert get_loaded_status() is False
 
-    def test_ensure_providers_loaded_recovers_from_stale_loaded_flag(self):
-        """Ensure loader recovers when registry was cleared after a successful load."""
+    def test_ensure_providers_loaded_recovers_after_registry_clear(self):
+        """Ensure loader repopulates the default registry after it was cleared."""
         load_providers()
         assert get_loaded_status() is True
 
@@ -645,6 +649,69 @@ class TestProviderLoader:
 
         assert get_loaded_status() is True
         assert ProviderRegistry.list_providers()
+
+    def test_custom_registry_loaded_status_tracks_registry_contents_without_global_flag(
+        self,
+    ) -> None:
+        """Loader status for isolated registries should depend on actual contents."""
+        registry = create_provider_registry()
+
+        def _register(registrar) -> None:
+            registrar.register("mock", ProviderConfig(adapter_class=MockAdapter))
+
+        assert get_provider_registry_loaded_status(registry) is False
+
+        load_provider_registry(registry, register_providers=_register)
+
+        assert get_provider_registry_loaded_status(registry) is True
+
+        registry.clear()
+
+        assert get_provider_registry_loaded_status(registry) is False
+
+    def test_loader_entrypoints_route_default_registry_through_private_helper(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Loader module should resolve the default registry through one helper path."""
+        from bioetl.composition.providers import loader as module
+
+        registry = create_provider_registry()
+        captured: dict[str, object] = {}
+
+        monkeypatch.setattr(module, "_get_loader_registry", lambda: registry)
+        monkeypatch.setattr(
+            module,
+            "load_provider_registry",
+            lambda candidate, *, force=False: captured.setdefault(
+                "load", (candidate, force)
+            ),
+        )
+        monkeypatch.setattr(
+            module,
+            "ensure_provider_registry_loaded",
+            lambda candidate: captured.setdefault("ensure", candidate),
+        )
+        monkeypatch.setattr(
+            module,
+            "get_provider_registry_loaded_status",
+            lambda candidate: captured.setdefault("status", candidate) is candidate,
+        )
+        monkeypatch.setattr(
+            module,
+            "reset_provider_registry_loader",
+            lambda candidate: captured.setdefault("reset", candidate),
+        )
+
+        module.load_providers(force=True)
+        module.ensure_providers_loaded()
+        assert module.get_loaded_status() is True
+        module.reset_loader()
+
+        assert captured["load"] == (registry, True)
+        assert captured["ensure"] is registry
+        assert captured["status"] is registry
+        assert captured["reset"] is registry
 
 
 class TestRealProviderRegistration:

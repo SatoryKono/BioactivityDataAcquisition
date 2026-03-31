@@ -97,11 +97,17 @@ uv run python -m scripts.dev setup-mcp
 `scripts/dev/dev_setup.sh` остаётся legacy placeholder и не считается
 поддерживаемым onboarding path.
 
+Если один и тот же checkout используется из Windows PowerShell и WSL, не
+дели одну `.venv` между ОС. Используй:
+
+- `.\scripts\dev\setup_env_windows.ps1` → `.venv-win`
+- `bash scripts/dev/setup_env_wsl.sh` → `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`
+
 **Что делает bootstrap path:**
 
 | Шаг | Описание                                      |
 | --- | --------------------------------------------- |
-| 1   | Создаёт или обновляет `.venv`                 |
+| 1   | Создаёт или обновляет активное OS-specific окружение (`.venv-win` или внешний WSL venv) |
 | 2   | Устанавливает зависимости через `uv` или `pip`|
 | 3   | Проверяет runtime dependencies (`make test-deps`) |
 | 4   | Настраивает локальные pytest/pre-commit plugins |

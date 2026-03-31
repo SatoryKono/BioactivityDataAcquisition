@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -13,13 +12,13 @@ _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
     bootstrap_composite_runner,
     create_composite_runner,
-    create_composite_runner_with_legacy_fsm_adapter,
+    create_composite_runner_service,
 )
 
 
 @pytest.mark.unit
-class TestCreateCompositeRunnerWithLegacyFsmAdapter:
-    """Tests for create_composite_runner_with_legacy_fsm_adapter."""
+class TestCreateCompositeRunnerService:
+    """Tests for create_composite_runner_service."""
 
     def test_returns_runner_service(self) -> None:
         """Creates CompositePipelineRunnerService with all provided deps."""
@@ -29,7 +28,7 @@ class TestCreateCompositeRunnerWithLegacyFsmAdapter:
         lock = MagicMock()
         fsm = MagicMock()
 
-        result = create_composite_runner_with_legacy_fsm_adapter(
+        result = create_composite_runner_service(
             config=config,
             runtime=runtime,
             seed_runner_factory=MagicMock(),
@@ -48,7 +47,7 @@ class TestCreateCompositeRunnerWithLegacyFsmAdapter:
 
     def test_generates_run_id_when_none(self) -> None:
         """When run_id is None a UUID is generated."""
-        result = create_composite_runner_with_legacy_fsm_adapter(
+        result = create_composite_runner_service(
             config=MagicMock(),
             runtime=MagicMock(),
             seed_runner_factory=MagicMock(),
@@ -65,11 +64,12 @@ class TestCreateCompositeRunnerWithLegacyFsmAdapter:
 
         assert result is not None
 
-    def test_warns_when_fsm_state_helper_is_none(self) -> None:
-        """Emits DeprecationWarning when fsm_state_helper not provided."""
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            create_composite_runner_with_legacy_fsm_adapter(
+    def test_requires_fsm_state_helper(self) -> None:
+        """Implicit FSM helper construction is no longer supported."""
+        with pytest.raises(
+            AssertionError, match="Composite runner requires fsm_state_helper"
+        ):
+            create_composite_runner_service(
                 config=MagicMock(),
                 runtime=MagicMock(),
                 seed_runner_factory=MagicMock(),
@@ -83,12 +83,6 @@ class TestCreateCompositeRunnerWithLegacyFsmAdapter:
                 fsm_state_helper=None,
                 run_id=_VALID_RUN_ID,
             )
-
-        deprecation_warnings = [
-            x for x in w if issubclass(x.category, DeprecationWarning)
-        ]
-        assert len(deprecation_warnings) >= 1
-        assert "fsm_state_helper" in str(deprecation_warnings[0].message)
 
 
 @pytest.mark.unit

@@ -2,230 +2,26 @@
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
   "entries": {
-    "scripts/archive/build_diagram_docs.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Confirm replacement coverage in scripts/diagrams and archive/remove.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/build_diagram_docs.py"
-    },
-    "scripts/archive/ci/apply-ci-optimizations.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-04-30",
-      "next_step": "PowerShell CI optimization script with no active consumers. Delete after confirming no operational need.",
-      "sunset_date": "2026-04-30",
-      "replacement": "scripts/ci/apply-ci-optimizations.ps1",
-      "archived_from": "scripts/apply-ci-optimizations.ps1"
-    },
-    "scripts/archive/cleanup_cache.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/scripts/cleanup_cache.py"
-    },
-    "scripts/archive/data/check_delta_integrity.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/data/check_delta_integrity.py",
-      "archived_from": "scripts/check_delta_integrity.py"
-    },
-    "scripts/archive/data/extract_null_fields.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/data/extract_null_fields.py",
-      "archived_from": "scripts/extract_null_fields.py"
-    },
-    "scripts/archive/data/generate_content_hash_comparison_report.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/data/generate_content_hash_comparison_report.py",
-      "archived_from": "scripts/generate_content_hash_comparison_report.py"
-    },
-    "scripts/archive/debug/_tmp_inspect_vcr.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-04-30",
-      "next_step": "Delete after one sprint if no recovery/debug need is identified.",
-      "sunset_date": "2026-04-30",
-      "replacement": "scripts/diagnostics/_tmp_inspect_vcr.py",
-      "archived_from": "scripts/_tmp_inspect_vcr.py"
-    },
-    "scripts/archive/debug/debug_pandera.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-04-30",
-      "next_step": "Удалить после одного спринта при отсутствии подтвержденного debug-use-case.",
-      "sunset_date": "2026-04-30",
-      "replacement": "scripts/diagnostics/debug_pandera.py",
-      "archived_from": "scripts/debug_pandera.py"
-    },
-    "scripts/archive/debug/debug_storage_health.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-04-30",
-      "next_step": "Удалить после одного спринта при отсутствии подтвержденного debug-use-case.",
-      "sunset_date": "2026-04-30",
-      "replacement": "scripts/diagnostics/debug_storage_health.py",
-      "archived_from": "scripts/debug_storage_health.py"
-    },
-    "scripts/archive/dev/install_deps.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/dev/install_deps.py",
-      "archived_from": "scripts/install_deps.py"
-    },
-    "scripts/archive/dev/run-tests.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/scripts/run-tests.sh"
-    },
-    "scripts/archive/diagrams/fix_diagram_links.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/diagrams/fix_diagram_links.py"
-    },
-    "scripts/archive/diagrams/fix_sequence_nbsp.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/diagrams/fix_sequence_nbsp.py"
-    },
-    "scripts/archive/diagrams/mermaid_prune_orphans.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/diagrams/mermaid_prune_orphans.py"
-    },
-    "scripts/archive/diagrams/normalize_node_sizes.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/diagrams/normalize_node_sizes.py"
-    },
-    "scripts/archive/docs/fix_doc_links_explicit.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/docs/fix_doc_links_explicit.py",
-      "archived_from": "scripts/fix_doc_links_explicit.py"
-    },
-    "scripts/archive/docs/fix_link_warnings.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/docs/fix_link_warnings.py",
-      "archived_from": "scripts/fix_link_warnings.py"
-    },
-    "scripts/archive/docs/sentence_doc_audit.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/docs/sentence_doc_audit.py",
-      "archived_from": "scripts/sentence_doc_audit.py"
-    },
-    "scripts/archive/log_explorer.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Confirm no consumers, then archive/remove.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/log_explorer.py"
-    },
-    "scripts/archive/migrations/migrate_exemption_keys_to_paths.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Move to migration archive after confirming one-time migration completion.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/migrate_exemption_keys_to_paths.py"
-    },
     "scripts/archive/migrations/migrate_openalex_citation_count.py": {
       "owner": "@bioetl-architecture",
-      "decision": "removed",
+      "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
+      "next_step": "Retain as a historical OpenAlex schema migration reference until a dedicated historical-migrations documentation surface replaces archive-held scripts.",
       "archived_from": "src/tools/scripts/migrate_openalex_citation_count.py"
     },
     "scripts/archive/migrations/migrate_pmid_to_string.py": {
       "owner": "@bioetl-architecture",
-      "decision": "removed",
+      "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
+      "next_step": "Retain as a historical PMID normalization migration reference until a dedicated historical-migrations documentation surface replaces archive-held scripts.",
       "archived_from": "src/tools/scripts/migrations/migrate_pmid_to_string.py"
-    },
-    "scripts/archive/migrations/migrate_vcr_extensionless.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Move to migration archive after confirming no extensionless cassettes remain.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/migrate_vcr_extensionless.py"
     },
     "scripts/archive/migrations/rename_structure_fields.py": {
       "owner": "@bioetl-architecture",
-      "decision": "removed",
+      "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
+      "next_step": "Retain as a historical ChEMBL structure-field migration reference while schema docs still point to it for legacy upgrades.",
       "archived_from": "src/tools/scripts/migrations/rename_structure_fields.py"
-    },
-    "scripts/archive/scaffold_pipeline.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Consolidate with create_pipeline.py and archive/remove duplicate entrypoint.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/scaffold_pipeline.py"
     },
     "scripts/diagnostics/ast_inventory.py": {
       "owner": "@bioetl-platform",
@@ -293,18 +89,6 @@
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
     },
-    "scripts/dev/run_mypy.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как локальный PowerShell launcher для mypy до отдельной консолидации dev wrappers."
-    },
-    "scripts/dev/run_mypy.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как локальный shell launcher для mypy до отдельной консолидации dev wrappers."
-    },
     "scripts/diagrams/check_class_method_render_integrity.py": {
       "owner": "@bioetl-architecture",
       "decision": "keep_manual",
@@ -356,12 +140,6 @@
       "next_step": "Подтвердить отсутствие PowerShell consumers и удалить wrapper после smoke-check для shell entrypoint.",
       "sunset_date": "2026-06-30",
       "replacement": "scripts/ops/mcp_prometheus_wrapper.sh"
-    },
-    "scripts/dev/run_pytest.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-05-31",
-      "next_step": "Сохранить как manual helper до следующего governance review; при отсутствии подтвержденных call-site либо перевести в archive, либо удалить."
     },
     "scripts/ops/salt_rotate.py": {
       "owner": "@bioetl-platform",
@@ -428,6 +206,48 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Package marker for canonical docs scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/docs/chembl_matrix_structural_contract.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual ChemBL workbook maintenance helper until the structural-contract workflow is either documented or retired."
+    },
+    "scripts/docs/enrich_chembl_matrix_normalization_details.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual ChemBL workbook enrichment helper until the normalization-detail workflow is either documented or retired."
+    },
+    "scripts/docs/export_chembl_matrix_structural_contract.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual export helper for the ChemBL matrix structural contract until workbook tooling is consolidated."
+    },
+    "scripts/docs/filter_chembl_matrix_rows.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual workbook row-filter helper until ChemBL matrix maintenance scripts are consolidated."
+    },
+    "scripts/docs/generate_chembl_matrix_dictionaries.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual dictionary generator for ChemBL matrix maintenance until the workbook toolchain is consolidated."
+    },
+    "scripts/docs/normalize_chembl_matrix_workbook.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual workbook normalizer until ChemBL matrix maintenance scripts are consolidated or retired."
+    },
+    "scripts/docs/sync_chembl_matrix_structural_policy.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual policy-sync helper for ChemBL matrix maintenance until the workflow gains a documented owner or is retired."
     },
     "scripts/qa/__init__.py": {
       "owner": "@bioetl-platform",
@@ -549,6 +369,18 @@
       "review_by": "2026-06-30",
       "next_step": "Integrated into pre-commit custom hook."
     },
+    "scripts/schema/audit_effective_optionality.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual schema audit helper for effective optionality until it gains a documented workflow or is retired."
+    },
+    "scripts/schema/check_required_filter_fields.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual schema validation helper until it gains an explicit workflow or is retired."
+    },
     "scripts/ci/__main__.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
@@ -579,6 +411,30 @@
       "review_by": "2026-06-30",
       "next_step": "Keep as a manual VCR secret-safety check and document the expected operator workflow plus periodic smoke validation."
     },
+    "scripts/data/check_delta_integrity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual Delta integrity probe until it gains a documented workflow or is retired."
+    },
+    "scripts/data/extract_null_fields.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual null-field extraction helper until it gains a documented workflow or is retired."
+    },
+    "scripts/data/generate_content_hash_comparison_report.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual content-hash comparison helper until the migration-analysis workflow is either documented or retired."
+    },
+    "scripts/dev/dev_setup.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Retain as a documented legacy placeholder until all contributor docs stop referencing the historical setup entrypoint."
+    },
     "scripts/dev/__init__.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
@@ -591,11 +447,11 @@
       "review_by": "2026-06-30",
       "next_step": "Canonical CLI entrypoint for scripts.dev package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
     },
-    "scripts/dev/run_pytest.ps1": {
+    "scripts/dev/install_deps.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "Keep the canonical PowerShell pytest launcher while Windows developer workflows remain supported and documented."
+      "next_step": "Keep as a manual fallback dependency installer until onboarding is fully standardized on uv-only flows."
     },
     "scripts/diagnostics/__init__.py": {
       "owner": "@bioetl-platform",
@@ -639,6 +495,24 @@
       "review_by": "2026-06-30",
       "next_step": "Canonical CLI entrypoint for scripts.docs package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
     },
+    "scripts/docs/fix_doc_links_explicit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual explicit-link rewrite helper until all link repair flows are consolidated."
+    },
+    "scripts/docs/fix_link_warnings.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual Mermaid link-warning fixer until diagram cleanup flows are consolidated."
+    },
+    "scripts/docs/sentence_doc_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual sentence-level documentation audit helper until its workflow is documented or the script is retired."
+    },
     "scripts/ops/__init__.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
@@ -656,6 +530,21 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Keep as a manual operations guard for MCP configuration and document the invocation path plus periodic smoke validation."
+    },
+    "scripts/rerender_grafana_screenshots.mjs": {
+      "owner": "@bioetl-platform",
+      "decision": "removed",
+      "review_by": "2026-06-30",
+      "next_step": "Superseded by the Python ops implementation; remove after confirming no local Playwright-only workflow still depends on the Node entrypoint.",
+      "sunset_date": "2026-06-30",
+      "replacement": "scripts/ops/rerender_grafana_screenshots.py"
+    },
+    "scripts/rerender_grafana_screenshots.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as the root compatibility wrapper while historical rerender commands still target the legacy path.",
+      "replacement": "scripts/ops/rerender_grafana_screenshots.py"
     },
     "scripts/qa/__main__.py": {
       "owner": "@bioetl-platform",
@@ -686,6 +575,18 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual backfill entrypoint, пока workflow-level automated rollout для VCR metadata sidecars не включён."
+    },
+    "scripts/migrations/oneoff/migrate_exemption_keys_to_paths.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a canonical one-off migration entrypoint for manual registry normalization runs."
+    },
+    "scripts/migrations/oneoff/migrate_vcr_extensionless.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a canonical one-off migration entrypoint for manual VCR cassette normalization runs."
     },
     "src/tools/apply_entity_naming_rename_plan.py": {
       "owner": "@bioetl-architecture",

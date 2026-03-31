@@ -146,7 +146,7 @@ def test_bootstrap_composite_runner_generates_run_id() -> None:
             "bioetl.composition.bootstrap.runtime.composite._build_support_services"
         ) as mock_build_support_services,
         patch(
-            "bioetl.composition.bootstrap.runtime.composite.create_composite_runner_with_legacy_fsm_adapter"
+            "bioetl.composition.bootstrap.runtime.composite.create_composite_runner_service"
         ) as mock_runner_cls,
     ):
         mock_runtime_basics.return_value = runtime_basics

@@ -131,6 +131,10 @@ uv run python -m pytest tests/architecture/ -v
 uv run python -m mypy --strict src/bioetl/
 ```
 
+Если работаешь из mixed Windows + WSL checkout, используй OS-specific entrypoints:
+- PowerShell: `.\scripts\dev\run_pytest.ps1 tests\architecture\ -v`, `.\scripts\dev\run_mypy.ps1`
+- WSL/Linux: `bash scripts/dev/run_pytest.sh tests/architecture/ -v`, `bash scripts/dev/run_mypy.sh`
+
 ----------------------------------------------------------------------
 
 ## 7) Формат отчёта аудита

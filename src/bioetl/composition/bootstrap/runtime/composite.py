@@ -33,7 +33,7 @@ from bioetl.composition.bootstrap.runtime.composite_support_services_factory imp
     CompositeSupportServices,
 )
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
-    create_composite_runner_with_legacy_fsm_adapter,
+    create_composite_runner_service,
 )
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config.composite_config_api import (
@@ -262,7 +262,7 @@ def _create_composite_runner_from_plan(
         dependencies_runner_factory=plan.dependencies_runner_factory,
         enricher_runner_factory=plan.enricher_runner_factory,
         support_services=plan.support_services,
-        runner_factory=create_composite_runner_with_legacy_fsm_adapter,
+        runner_factory=create_composite_runner_service,
     )
 
 

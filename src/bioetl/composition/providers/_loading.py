@@ -8,8 +8,6 @@ from bioetl.composition.providers._registry_protocols import (
     ProviderRegistrarProtocol,
 )
 
-_loaded = False
-
 
 def _register_default_providers(registry: ProviderRegistrarProtocol) -> None:
     """Register providers using the canonical registration entrypoint."""
@@ -30,26 +28,19 @@ def load_provider_registry(
     register_providers: Callable[[ProviderRegistrarProtocol], None] | None = None,
 ) -> None:
     """Load and register all providers into the supplied registry."""
-    global _loaded
-
     register_fn = (
         register_providers
         if register_providers is not None
         else _register_default_providers
     )
 
-    if get_provider_registry_loaded_status(registry) and not force:
-        return
-
     if _has_registered_providers(registry) and not force:
-        _loaded = True
         return
 
     if force:
         registry.clear()
 
     register_fn(registry)
-    _loaded = _has_registered_providers(registry)
 
 
 def ensure_provider_registry_loaded(
@@ -69,13 +60,11 @@ def get_provider_registry_loaded_status(
     registry: ProviderRegistrarProtocol,
 ) -> bool:
     """Return current loaded status for the supplied registry."""
-    return _loaded and _has_registered_providers(registry)
+    return _has_registered_providers(registry)
 
 
 def reset_provider_registry_loader(
     registry: ProviderRegistrarProtocol,
 ) -> None:
     """Reset loader state and clear the supplied registry. Testing only."""
-    global _loaded
-    _loaded = False
     registry.clear()

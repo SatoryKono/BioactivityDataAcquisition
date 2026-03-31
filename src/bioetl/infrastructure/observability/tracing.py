@@ -103,8 +103,8 @@ class _TracerProtocol(Protocol):
     def start_as_current_span(
         self,
         name: str,
-        *,
-        attributes: dict[str, object] | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> _SpanContextManagerProtocol: ...
 
 
@@ -128,10 +128,7 @@ class _SpanHandle:
         exc_val: BaseException | None,
         exc_tb: object | None,
     ) -> object | None:
-        return cast(
-            object | None,
-            self._context_manager.__exit__(exc_type, exc_val, exc_tb),
-        )
+        return self._context_manager.__exit__(exc_type, exc_val, exc_tb)
 
     def set_attribute(self, key: str, value: object) -> None:
         if self._span is not None:
@@ -280,7 +277,7 @@ class OpenTelemetryTracer:
             OpenTelemetry tracer instance.
 
         """
-        return _TracerAdapter(trace.get_tracer(name))
+        return _TracerAdapter(cast(_TracerProtocol, trace.get_tracer(name)))
 
     def flush(self) -> None:
         """Force-flush pending spans without shutting down the provider."""

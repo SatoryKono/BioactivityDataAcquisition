@@ -80,6 +80,14 @@ def _get_rate_limit_from_config(provider: str) -> RateLimitContext:
     return RateLimitContext(rate=5.0, capacity=10)
 
 
+def _get_rate_limits_from_config(*providers: str) -> dict[str, RateLimitContext]:
+    """Resolve multiple provider rate limits through one canonical helper path."""
+    return {
+        provider: _get_rate_limit_from_config(provider)
+        for provider in providers
+    }
+
+
 def _get_circuit_breaker_from_config(provider: str) -> CircuitBreakerConfig:
     """Get circuit breaker configuration from source config or defaults.
 

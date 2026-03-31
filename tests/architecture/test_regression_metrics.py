@@ -423,7 +423,7 @@ def test_inline_adapter_construction_budget(
 
 
 # ---------------------------------------------------------------------------
-# Metric 5: exemptions_total (baseline: 92, ratchet)
+# Metric 5: exemptions_total (baseline from debt scorecard, ratchet)
 # ---------------------------------------------------------------------------
 
 

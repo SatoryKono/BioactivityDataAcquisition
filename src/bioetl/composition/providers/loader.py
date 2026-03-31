@@ -12,8 +12,10 @@ from bioetl.composition.providers._loading import (
     load_provider_registry,
     reset_provider_registry_loader,
 )
-from bioetl.composition.providers.provider_registry import get_default_provider_registry
-from bioetl.composition.providers.registration import register_all_providers
+from bioetl.composition.providers.provider_registry import (
+    ProviderRegistry,
+    get_default_provider_registry,
+)
 
 __all__ = [
     "ensure_providers_loaded",
@@ -21,6 +23,11 @@ __all__ = [
     "load_providers",
     "reset_loader",
 ]
+
+
+def _get_loader_registry() -> ProviderRegistry:
+    """Resolve the canonical default provider registry for loader entrypoints."""
+    return get_default_provider_registry()
 
 
 def load_providers(force: bool = False) -> None:
@@ -44,9 +51,8 @@ def load_providers(force: bool = False) -> None:
 
     """
     load_provider_registry(
-        get_default_provider_registry(),
+        _get_loader_registry(),
         force=force,
-        register_providers=register_all_providers,
     )
 
 
@@ -57,8 +63,7 @@ def ensure_providers_loaded() -> None:
     must be initialized.
     """
     ensure_provider_registry_loaded(
-        get_default_provider_registry(),
-        register_providers=register_all_providers,
+        _get_loader_registry(),
     )
 
 
@@ -68,12 +73,12 @@ def get_loaded_status() -> bool:
     Returns:
         Loaded status.
     """
-    return get_provider_registry_loaded_status(get_default_provider_registry())
+    return get_provider_registry_loaded_status(_get_loader_registry())
 
 
 def reset_loader() -> None:
     """Reset loading status. Only for tests."""
-    reset_provider_registry_loader(get_default_provider_registry())
+    reset_provider_registry_loader(_get_loader_registry())
 
 
 _LOADER_API = (get_loaded_status, reset_loader)

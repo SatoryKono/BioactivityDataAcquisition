@@ -28,6 +28,9 @@ python -m scripts.schema <command> [args...]
 | `generate-artifacts` | `generate_schema_artifacts.py` | Generate schema artifacts |
 | `generate-pubtype` | `generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts |
 | `generate-contracts` | `generate_contracts.py` | Generate contracts |
+| `generate-unified-map` | `generate_unified_schema_map.py` | Generate unified Bronze→Silver→Gold schema map CSV |
+| `generate-field-diagnostics` | `generate_field_level_diagnostics.py` | Generate field-level schema drift diagnostics CSV |
+| `generate-field-spec` | `generate_field_transformation_spec.py` | Generate deterministic per-field transformation specification CSV |
 | `validate-configs` | `validate_pipeline_configs.py` | Validate unified pipeline YAML configs against JSON Schema |
 | `analyze-gaps` | `config_gap_analysis.py` | Config gap analysis between configs and code |
 
@@ -43,6 +46,9 @@ python -m scripts.schema <command> [args...]
 | `generate-artifacts` | After changing domain models (enums, lookup tables) | Manual, after model changes |
 | `generate-pubtype` | After changing publication type classification logic | Manual, after classification changes |
 | `generate-contracts` | Before release; auto-generates JSON contracts from Pandera DataFrameModel schemas | Manual, pre-release |
+| `generate-unified-map` | When you need one reproducible cross-layer inventory of entity configs, Silver schemas, and Gold contracts | Manual, audit/reporting |
+| `generate-field-diagnostics` | When you need per-field type drift, JSON storage pattern, nullable conflicts, or alias redundancy diagnostics across Bronze/Silver/Gold | Manual, audit/reporting |
+| `generate-field-spec` | When you need deterministic per-field normalization specs with canonical JSON/DOI/PMID/date rules and conservative hash impact flags | Manual, audit/reporting |
 | `validate-configs` | After editing any entity YAML config; validates against JSON Schema | Pre-commit hook (on config changes) |
 | `analyze-gaps` | When adding new pipelines; identifies missing entity configs or inconsistencies | Manual, on-demand |
 

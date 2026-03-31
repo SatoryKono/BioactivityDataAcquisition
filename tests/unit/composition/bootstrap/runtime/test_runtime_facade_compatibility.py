@@ -38,7 +38,7 @@ def test_composite_runtime_patch_points_remain_available() -> None:
     expected_attrs = {
         "DEFAULT_COMPOSITE_CONFIG_DIR",
         "DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY",
-        "create_composite_runner_with_legacy_fsm_adapter",
+        "create_composite_runner_service",
         "ValidationError",
         "_resolve_composite_config_path",
         "validate_composite_config_payload",
