@@ -27,3 +27,10 @@ mkdocs.yml
 pyproject.toml
 requirements.txt
 uv.lock
+.cursorignore
+PLAN.md
+constructor_waivers.yaml
+signature_check.py
+tasks_architecture_metric_exemptions_2026-03-13-12-46.json
+tasks_architecture_metric_exemptions_2026-03-18-12-46.json
+requirements-audit.txt
