@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from importlib import import_module
+from typing import Any
+
 __version__ = "6.1.0"
 
 # Project-wide monkeypatch for Pandera compatibility with Python 3.14.
@@ -90,3 +93,30 @@ try:
 except (ImportError, AttributeError, TypeError, ValueError, RuntimeError):
     # Fail silently to avoid breaking the entire project if Pandera/Pandas are not present
     pass
+
+_PACKAGE_EXPORTS: dict[str, str] = {
+    "application": "bioetl.application",
+    "composition": "bioetl.composition",
+    "domain": "bioetl.domain",
+    "infrastructure": "bioetl.infrastructure",
+    "interfaces": "bioetl.interfaces",
+}
+
+__all__ = ["__version__", *_PACKAGE_EXPORTS]
+
+
+def __getattr__(name: str) -> Any:
+    """Lazily expose top-level package namespaces for patch/import stability."""
+    try:
+        module_name = _PACKAGE_EXPORTS[name]
+    except KeyError as exc:  # pragma: no cover - standard attribute path
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+
+    module = import_module(module_name)
+    globals()[name] = module
+    return module
+
+
+def __dir__() -> list[str]:
+    """Return stable top-level exports for shell/help introspection."""
+    return sorted(set(globals()) | set(__all__))

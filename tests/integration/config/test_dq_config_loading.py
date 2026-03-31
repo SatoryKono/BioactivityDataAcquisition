@@ -13,6 +13,9 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.infrastructure.config.domain_config_resolver import (
+    resolve_domain_pipeline_config,
+)
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
@@ -107,6 +110,47 @@ class TestPipelineConfigLoaderWithDQResolution:
         # Should be same object if caching works (no inline overrides)
         # Note: caching is internal to DQConfigLoader
         assert dq1.soft_fail_threshold == dq2.soft_fail_threshold
+
+    def test_chembl_activity_required_fields_include_nonnullable_contract_units(
+        self, config_loader: PipelineConfigLoader
+    ) -> None:
+        """chembl_activity config should require core non-nullable chemistry fields."""
+        yaml_config = config_loader.load_pipeline_config("chembl_activity")
+        domain_config = resolve_domain_pipeline_config(yaml_config)
+
+        required_fields = set(domain_config.silver_filters.required_fields)
+
+        assert "canonical_smiles" in required_fields
+        assert "standard_units" in required_fields
+        assert "uo_units" in required_fields
+
+    def test_chembl_assay_required_fields_include_nonnullable_contract_fields(
+        self, config_loader: PipelineConfigLoader
+    ) -> None:
+        """chembl_assay config should require schema non-nullable foreign-key fields."""
+        yaml_config = config_loader.load_pipeline_config("chembl_assay")
+        domain_config = resolve_domain_pipeline_config(yaml_config)
+
+        required_fields = set(domain_config.silver_filters.required_fields)
+
+        assert "publication_id" in required_fields
+        assert "bao_format" in required_fields
+        assert "assay_type_description" in required_fields
+        assert "relationship_type" in required_fields
+        assert "confidence_score" in required_fields
+
+    def test_chembl_publication_required_fields_include_runtime_contract_fields(
+        self, config_loader: PipelineConfigLoader
+    ) -> None:
+        """chembl_publication should require the runtime Silver gate fields."""
+        yaml_config = config_loader.load_pipeline_config("chembl_publication")
+        domain_config = resolve_domain_pipeline_config(yaml_config)
+
+        required_fields = set(domain_config.silver_filters.required_fields)
+
+        assert "publication_id" in required_fields
+        assert "publication_type" in required_fields
+        assert "title" in required_fields
 
     def test_clear_cache_works(self, config_loader: PipelineConfigLoader) -> None:
         """clear_cache() should work without errors."""
@@ -267,6 +311,21 @@ class TestChemblPublicationCrossFieldRules:
         assert "publication_pmid" in cross_ref.fields
         assert "publication_doi" in cross_ref.fields
         assert cross_ref.severity == "warn"
+
+    def test_chembl_publication_type_validation_is_non_nullable(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """publication_type DQ enum should match Silver/runtime non-nullability."""
+        config = dq_loader.load("chembl", "publication")
+
+        publication_type_rules = [
+            rule
+            for rule in config.field_validations
+            if rule.field == "publication_type" and rule.validation_type == "enum"
+        ]
+
+        assert publication_type_rules, "Missing publication_type enum rule"
+        assert publication_type_rules[0].nullable is False
 
     def test_all_publication_providers_have_identifiable_rule(
         self, dq_loader: DQConfigLoader

@@ -1151,7 +1151,7 @@ async with services:  # --aenter-- инициализирует ресурсы
 #### MUST (Обязательно)
 
 1. **Randomness**: Модуль `random` **MUST NOT** использоваться в `infrastructure/storage` и других критических узлах записи. Используйте хэш-функции от входных данных или фиксированные константы.
-1. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `infrastructure` слое (за исключением мониторинга реального времени). Все временные метки (`_ingestion_ts`, `_processing_ts`) **MUST** генерироваться в `Application` слое (`PipelineContext.started_at`) и передаваться вниз.
+1. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `domain` business-path и `infrastructure` слое по умолчанию. Канонический source-of-time seam для pipeline runtime — `domain/context.py` (`PipelineContext.started_at` / `_now_utc`). Все runtime timestamps (`_ingestion_ts`, `_processing_ts`, lifecycle timestamps aggregate'ов) **MUST** генерироваться в sanctioned seam/Application слое и передаваться вниз явными параметрами. Read-model вычисления длительности/возраста **MUST** использовать сохранённый terminal timestamp или explicit reference time, а не скрытый `now`. Реальные monitoring/audit exceptions допускаются только через явный allowlist в architecture tests.
 1. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `domain/resilience.py:RetryConfig.calculate-delay()` использует MD5-based jitter.
 1. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
 1. **Content Hash**: Исключать из расчёта хэша технические мета-поля. Canonical policy: см. `docs/02-architecture/policies/content-hash-identity-policy.md`; поля с префиксом `_` исключаются из identity/hash (включая `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`, `_lookup_method`, `_original_id`, `_source`). Реализация: `domain/constants.py:META_FIELDS` + `domain/transformations.py:_should_include_field()`.
@@ -1164,6 +1164,7 @@ async with services:  # --aenter-- инициализирует ресурсы
 | `test-no-random-uniform-calls-in-storage`  | REQ-ARCH-030 | Запрет `random.uniform()` | `test_no_random_in_writers.py`              |
 | `test-no-random-choice-calls-in-storage`   | REQ-ARCH-030 | Запрет `random.choice()`  | `test_no_random_in_writers.py`              |
 | `test-no-datetime-now-in-infrastructure`   | REQ-ARCH-031 | Запрет `datetime.now()`   | `test_no_datetime_now_in_infrastructure.py` |
+| `test-no-datetime-now-in-domain`           | REQ-ARCH-031 | Запрет `datetime.now()` вне sanctioned seam | `test_no_datetime_now_in_domain.py` |
 | `test-allowed-files-still-exist`           | REQ-ARCH-031 | Валидация исключений      | `test_no_datetime_now_in_infrastructure.py` |
 
 #### Детерминистичный Retry Jitter

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from datetime import datetime
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import ValidationIssue, ValidationResult
@@ -91,13 +90,17 @@ def resolve_policy_block_state(
     return checks.get(policy, (False, "no_blocking_issues"))
 
 
-def build_governance_metadata(config: PreflightGovernanceConfig) -> JsonDict:
+def build_governance_metadata(
+    config: PreflightGovernanceConfig,
+    *,
+    execution_timestamp: str,
+) -> JsonDict:
     """Build governance metadata for reporting."""
     return {
         "policy": config.policy.value,
         "ci_integration": config.ci_integration,
         "fail_fast": config.fail_fast,
-        "execution_timestamp": datetime.now().isoformat(),
+        "execution_timestamp": execution_timestamp,
     }
 
 

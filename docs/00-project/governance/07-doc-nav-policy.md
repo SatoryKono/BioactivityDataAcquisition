@@ -1,11 +1,11 @@
 ---
-Version: 1.8.0
+Version: 1.9.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-03-31'
 ---
 
 # Documentation Navigation Policy
@@ -36,19 +36,22 @@ traceability, but they are not normative for current project behavior.
 | `docs/00-project/ai/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/00-project/ai/skills/README.md](../ai/skills/README.md) |
 | `docs/plans/**` | `internal` + `repo-only` | Working plans MAY remain outside MkDocs publication; surface them from published docs only as repository paths or curated summaries when needed | Repository path `docs/plans/README.md` |
 | `docs/reports/**` | `internal` + `repo-only` | Curated evidence/report artifacts MAY stay outside MkDocs publication; published docs SHOULD reference them as repository paths or summarized findings rather than nav pages | Repository path `docs/reports/index.md` |
+| `reports/**` | `repo-only` | Repo-root generated/evidence outputs stay outside MkDocs publication and are surfaced only via repository paths, curated summaries, or published evidence indexes | Repository path `reports/README.md` |
 | `docs/99-archive/**` | `archive` | SHOULD remain non-nav by default; curated archive entrypoints MAY appear in nav with explicit historical labeling | Repository path `docs/99-archive/README.md` (or equivalent archive index) |
 
 Notes:
 - active project guidance comes from published docs in `docs/00-05`;
 - `docs/99-archive/**` remains historical context only and does not override active guidance, even when curated entries are visible in nav;
 - `internal-generated` documents (for example large generated index/variant sets) are allowed outside nav.
+- Path-classified bulk families MAY rely on their zone-level rule and entrypoint
+  instead of per-file frontmatter.
 - Non-nav documents MUST NOT be used as the primary source of architecture or operational policy.
 
 ----------------------------------------------------------------------
 
 ## 2. Mandatory Rules
 
-1. Every new document MUST be classified as `published`, `internal-published`, `internal`, `repo-only`, `archive`, or `internal-generated`.
+1. Every new document MUST be classified as `published`, `internal-published`, `internal`, `repo-only`, `archive`, or `internal-generated`, either by per-file frontmatter or by an explicit ratified path-family rule in governance.
 2. `published` documents MUST have a stable nav path in `mkdocs.yml`.
 3. `internal-published` documents SHOULD be grouped under `Internal / Extended` when they are intentionally published in MkDocs.
 4. `archive` documents MUST include an explicit historical/superseded disclaimer.
@@ -60,17 +63,27 @@ Notes:
 
 ```bash
 # Full docs checks (links + legacy + nav + baseline growth)
-./.venv/Scripts/python.exe scripts/docs/check_doc_links.py
+uv run python -m scripts.docs check-links
 
 # Optional focused checks
-./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --not-in-nav-growth
-bash scripts/docs/build_docs_site.sh --strict
+uv run python -m scripts.docs check-links --not-in-nav-growth
+uv run bash scripts/docs/build_docs_site.sh --strict
 ```
 
 If non-nav growth is intentional:
 1. Regenerate baseline list:
-   `./.venv/Scripts/python.exe -c "from scripts.check_doc_links import get_not_in_nav_docs, NOT_IN_NAV_BASELINE_FILE; docs=get_not_in_nav_docs(); NOT_IN_NAV_BASELINE_FILE.write_text('\\n'.join(docs)+'\\n', encoding='utf-8')"`
-2. Re-run `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py`.
+```bash
+uv run python - <<'PY'
+from scripts.docs.check_doc_links import (
+    NOT_IN_NAV_BASELINE_FILE,
+    get_not_in_nav_docs,
+)
+
+docs = get_not_in_nav_docs()
+NOT_IN_NAV_BASELINE_FILE.write_text("\n".join(docs) + "\n", encoding="utf-8")
+PY
+```
+2. Re-run `uv run python -m scripts.docs check-links`.
 3. Include a short rationale in PR/commit message (why growth is expected).
 
 ----------------------------------------------------------------------
@@ -97,7 +110,7 @@ Current KPI model for docs outside nav:
 Weekly CI control:
 
 - Workflow: `.github/workflows/docs-kpi-weekly.yml`
-- Script: `scripts/docs/report_docs_kpi.py`
+- Command: `uv run python -m scripts.docs check-kpi`
 - Outputs:
   - `reports/docs-kpi/docs-kpi-weekly.json`
   - `reports/docs-kpi/docs-kpi-weekly.md`
@@ -126,6 +139,18 @@ Failure policy:
 | `internal-generated` | generated indexes/variants (for example some diagram artifact indexes) | MAY stay outside nav, but MUST be linked from an index |
 | `archive` | `99-archive/**` | SHOULD stay outside nav by default; curated archive entrypoints MAY appear with explicit historical labeling |
 
+Wave-9 note (2026-03-31):
+- bulk non-nav backlog is currently dominated by path-governed families rather
+  than misclassified active docs;
+- primary residual buckets are:
+  - `docs/00-project/ai/skills/local/**`
+  - `docs/00-project/ai/agents/agents/**`
+  - `docs/00-project/ai/prompts/collected/**`
+  - `docs/00-project/ai/skills/_references/**`
+  - `reports/**` / `reports/evidence/**`
+- these buckets SHOULD be managed by curated entrypoints and path policy, not
+  by forcing frontmatter onto every generated or operational artifact.
+
 ### 6.2 Selection Criteria (for nav promotion)
 
 A document SHOULD be promoted when at least two criteria are true:
@@ -138,13 +163,13 @@ A document SHOULD be promoted when at least two criteria are true:
 ### 6.3 Execution Loop
 
 1. Compute current state:
-   - `./.venv/Scripts/python.exe scripts/docs/report_docs_kpi.py`
+   - `uv run python -m scripts.docs check-kpi`
 2. Classify each outside-nav cluster (`archive`, `internal-generated`, `internal-published`, `repo-only`).
 3. Promote a small curated batch to nav (`Internal / Extended` first).
 4. Ensure every non-promoted cluster has a discoverable index entrypoint.
 5. Re-run:
-   - `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py`
-   - `bash scripts/docs/build_docs_site.sh --strict`
+   - `uv run python -m scripts.docs check-links`
+   - `uv run bash scripts/docs/build_docs_site.sh --strict`
 6. Update baseline only when growth is intentional and justified.
 
 ### 6.4 Historical Backlog Snapshot (2026-03-03, wave-7)
@@ -157,7 +182,7 @@ A document SHOULD be promoted when at least two criteria are true:
 Freshness note (2026-03-28):
 - This snapshot is retained for wave-7 traceability only and is not the current
   KPI baseline.
-- Use the live output of `scripts.docs report-kpi` (or the current CI artifact)
+- Use the live output of `scripts.docs check-kpi` (or the current CI artifact)
   for present-state counts before making nav decisions.
 
 Interpretation:
@@ -179,6 +204,17 @@ Ratified baseline for residual non-nav backlog:
 1. `99-archive/**` remains non-nav by default (`archive`).
 2. `00-project/ai/skills/global/.system/**` remains non-nav by default (`internal-generated`).
 3. Any deviation requires explicit governance revision.
+
+Wave-9 ratification (2026-03-31):
+4. `docs/00-project/ai/agents/agents/**` remains non-nav by default as a bulk
+   path-classified family (`internal-generated`).
+5. `docs/00-project/ai/prompts/collected/**` remains non-nav by default as
+   `repo-only` / `internal-generated`.
+6. `docs/00-project/ai/skills/_references/**` and unpublished bulk
+   `docs/00-project/ai/skills/local/**` reference families remain non-nav by
+   default as `internal-generated`.
+7. `reports/**` and `reports/evidence/**` remain repo-only by default and are
+   governed through repository entrypoints / curated summaries rather than MkDocs nav.
 
 Decision record:
 - retained in this policy revision; no separate archived `wave-8` decision file is currently kept in the repository

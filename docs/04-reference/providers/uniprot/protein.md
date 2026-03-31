@@ -35,7 +35,7 @@ Last verified: '2026-03-30'
 
 - **Источник:** UniProt REST API.
 - **Стратегия:** `incremental` по `accession`.
-- **Rate Limit:** 10 запросов в секунду.
+- **Rate Limit:** 10 запросов в секунду по умолчанию, до 100 запросов в секунду с API key.
 
 ### 3.2. Transform
 

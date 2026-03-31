@@ -120,10 +120,10 @@ Last verified: '2026-03-29'
 ## 8. Обязательные проверки
 
 ```bash
-python3 scripts/diagrams/lint_diagrams.py docs
-python3 scripts/docs/check_doc_links.py --links
-python3 scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
-python3 scripts/diagrams/check_diagram_visual_smoke.py
+uv run python -m scripts.diagrams lint docs
+uv run python -m scripts.docs check-links --links
+uv run python -m scripts.diagrams check-artifacts --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+uv run python -m scripts.diagrams check-visual-smoke
 bash scripts/diagrams/validate_mermaid_syntax.sh
 ```
 

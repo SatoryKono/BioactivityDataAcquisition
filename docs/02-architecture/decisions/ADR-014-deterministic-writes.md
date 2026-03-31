@@ -70,7 +70,7 @@ class RetryConfig:
 
 ### 3. Единый Источник Времени
 
-`PipelineContext.started_at` — единственный источник timestamps для batch:
+`PipelineContext.started_at` в `domain/context.py` — канонический source-of-time seam для pipeline runtime:
 
 ```python
 @dataclass(frozen=True)
@@ -88,7 +88,7 @@ class PipelineContext:
 Infrastructure компоненты получают timestamp как параметр:
 
 ```python
-# Application layer
+# Application/composition layer
 ingestion_ts = self.-context.started_at
 
 # Infrastructure layer - receives timestamp
@@ -96,12 +96,19 @@ await bronze-writer.write-bronze(..., ingestion_ts=ingestion_ts)
 await quarantine.write(..., ingestion_ts=ingestion_ts)
 ```
 
+Domain business paths не должны создавать текущее время самостоятельно:
+
+- aggregate lifecycle transitions получают `started_at/completed_at/failed_at/...` явно
+- read-model расчёты используют либо сохранённый terminal timestamp, либо explicit `reference_time`
+- operational/reporting structures получают `checked_at` / `execution_timestamp` из application/runtime seam
+
 ### 4. Архитектурные Тесты
 
 | Тест | Цель |
 |------|------|
 | `test-no-random-in-writers` | Блокирует `import random` в `infrastructure/storage/` |
 | `test-no-datetime-now-in-infrastructure` | Блокирует `datetime.now()` в `infrastructure/` |
+| `test-no-datetime-now-in-domain` | Блокирует `datetime.now()` в `domain/` вне `domain/context.py` |
 | `test-no-structlog-in-application-interfaces` | Блокирует прямой импорт `structlog` в `application/` и `interfaces/` |
 
 ### 5. Изоляция логирования

@@ -390,12 +390,12 @@ Local run (PR budget):
 
 ```bash
 mkdir -p reports/diagrams
-python3 scripts/diagrams/check_diagram_quality_gates.py \
+uv run python -m scripts.diagrams check-quality-gates \
   --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt \
   --json-out reports/diagrams/diagram-quality-report.json
-python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \
+uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \
   > reports/diagrams/diagram-lint-report.json || true
-python3 scripts/diagrams/enforce_diagram_quality_budget.py \
+uv run python -m scripts.diagrams lint-budget \
   --mode pr \
   --quality-report reports/diagrams/diagram-quality-report.json \
   --lint-report reports/diagrams/diagram-lint-report.json \

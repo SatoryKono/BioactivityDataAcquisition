@@ -9,8 +9,8 @@ with detailed health status information including latency and error tracking.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import HealthStatus
@@ -60,7 +60,7 @@ class HealthCheckResult:
     endpoint: str = ""
     last_error: str | None = None
     consecutive_failures: int = 0
-    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    checked_at: datetime | None = None
 
     @property
     def is_healthy(self) -> bool:
@@ -103,7 +103,7 @@ class HealthCheckResult:
             "endpoint": self.endpoint,
             "last_error": self.last_error,
             "consecutive_failures": self.consecutive_failures,
-            "checked_at": self.checked_at.isoformat(),
+            "checked_at": self.checked_at.isoformat() if self.checked_at else None,
         }
 
 

@@ -97,8 +97,8 @@ query = {}
 Минимум:
 
 ```bash
-./.venv/Scripts/python.exe -m json.tool grafana/dashboards/<dashboard>.json
-./.venv/Scripts/python.exe -m pytest -q tests/integration/test_grafana_config.py
+uv run python -m json.tool grafana/dashboards/<dashboard>.json
+uv run python -m pytest -q tests/integration/test_grafana_config.py
 ```
 
 Если меняется observability navigation, дополнительно проверь реальный Grafana UI.

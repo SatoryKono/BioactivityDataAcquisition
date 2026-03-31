@@ -9,7 +9,7 @@ state transitions, and domain event emission.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates._batch_status import BatchStatus
@@ -61,7 +61,7 @@ def seal(
     record_count: int,
     valid_count: int,
     quarantined_count: int,
-    sealed_at: datetime | None = None,
+    sealed_at: datetime,
 ) -> tuple[BatchStatus, datetime]:
     """Validate and perform OPEN -> SEALED transition.
 
@@ -73,7 +73,7 @@ def seal(
         record_count: Total number of records in the batch.
         valid_count: Number of valid (non-quarantined) records.
         quarantined_count: Number of quarantined records.
-        sealed_at: Optional explicit seal timestamp. Defaults to UTC now.
+        sealed_at: Explicit seal timestamp.
 
     Returns:
         Tuple of (BatchStatus.SEALED, sealed_at timestamp).
@@ -84,10 +84,9 @@ def seal(
             current_state=status.value,
             attempted_operation="seal",
         )
-    ts = sealed_at or datetime.now(UTC)
     events.append(
         BatchSealed(
-            occurred_at=ts,
+            occurred_at=sealed_at,
             run_id=run_id,
             batch_id=batch_id,
             record_count=record_count,
@@ -95,7 +94,7 @@ def seal(
             quarantined_count=quarantined_count,
         )
     )
-    return BatchStatus.SEALED, ts
+    return BatchStatus.SEALED, sealed_at
 
 
 def mark_writing(status: BatchStatus) -> BatchStatus:
@@ -123,6 +122,7 @@ def mark_committed(
     batch_id: BatchID,
     valid_count: int,
     layer: str,
+    committed_at: datetime,
 ) -> BatchStatus:
     """Validate and perform WRITING -> COMMITTED transition.
 
@@ -133,6 +133,7 @@ def mark_committed(
         batch_id: Batch identifier.
         valid_count: Number of valid records successfully written.
         layer: Medallion layer name (e.g., 'bronze', 'silver', 'gold').
+        committed_at: Explicit timestamp when the batch write completed.
 
     Returns:
         BatchStatus.COMMITTED after successful transition.
@@ -145,7 +146,7 @@ def mark_committed(
         )
     events.append(
         BatchWritten(
-            occurred_at=datetime.now(UTC),
+            occurred_at=committed_at,
             run_id=run_id,
             batch_id=batch_id,
             layer=layer,
@@ -163,6 +164,8 @@ def mark_failed(
     layer: str,
     error: str,
     error_type: str | None = None,
+    *,
+    failed_at: datetime,
 ) -> BatchStatus:
     """Validate and perform WRITING -> FAILED transition.
 
@@ -174,6 +177,7 @@ def mark_failed(
         layer: Medallion layer where failure occurred (e.g., 'bronze').
         error: Human-readable error message describing the failure.
         error_type: Optional error classification (e.g., exception class name).
+        failed_at: Explicit timestamp when the batch failure occurred.
 
     Returns:
         BatchStatus.FAILED after recording the failure event.
@@ -186,7 +190,7 @@ def mark_failed(
         )
     events.append(
         BatchFailed(
-            occurred_at=datetime.now(UTC),
+            occurred_at=failed_at,
             run_id=run_id,
             batch_id=batch_id,
             layer=layer,
@@ -205,6 +209,7 @@ def emit_record_quarantined(
     error_code: str | None,
     error: str,
     content_hash: ContentHash | None,
+    occurred_at: datetime,
 ) -> None:
     """Append a RecordQuarantined event.
 
@@ -216,10 +221,11 @@ def emit_record_quarantined(
         error_code: Optional classification code for the error.
         error: Human-readable error message.
         content_hash: Optional content hash of the failed record for deduplication.
+        occurred_at: Explicit timestamp when the record was quarantined.
     """
     events.append(
         RecordQuarantined(
-            occurred_at=datetime.now(UTC),
+            occurred_at=occurred_at,
             run_id=run_id,
             batch_id=batch_id,
             record_id=str(entity_id) if entity_id else None,

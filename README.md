@@ -69,7 +69,7 @@ The domain layer implements Domain-Driven Design patterns:
 | **PubChem**          | Compound                                                                                                                                 | Production | 5 req/sec    |
 | **UniProt**          | Protein                                                                                                                                  | Production | 10 req/sec (100 req/sec with API key) |
 | **UniProt ID Mapping** | ID Mapping                                                                                                                             | Production | Local job / no external rate limit |
-| **PubMed**           | Publication                                                                                                                              | Production | 3 req/sec    |
+| **PubMed**           | Publication                                                                                                                              | Production | 3 req/sec (10 req/sec with API key) |
 | **CrossRef**         | Publication                                                                                                                              | Production | Polite pool  |
 | **OpenAlex**         | Publication                                                                                                                              | Production | ~10 req/sec  |
 | **Semantic Scholar** | Publication                                                                                                                              | Production | 0.1 req/sec (1 req/sec with API key) |
@@ -143,6 +143,41 @@ Notes:
 - `make setup-skills` syncs repository-local Codex `skills` and their paired `agents` into `$CODEX_HOME` (default `~/.codex`).
 - If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.dev setup-mcp` after install. If you activated `.venv` instead of using `uv`, `python -m scripts.dev setup-mcp` is also valid.
 - `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
+
+#### Mixed Windows + WSL Development
+
+If you use the same checkout from both Windows PowerShell and WSL, keep the
+virtual environments separate. A Linux `.venv` is not valid in PowerShell, and
+a Windows `.venv` is not valid in WSL.
+
+Use:
+
+```powershell
+.\scripts\dev\setup_env_windows.ps1
+```
+
+```bash
+bash scripts/dev/setup_env_wsl.sh
+```
+
+This creates:
+
+```text
+.venv-win  # Windows PowerShell
+.venv-wsl  # WSL/Linux
+```
+
+Then use the OS-specific wrappers:
+
+```powershell
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+```
+
+```bash
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
+```
 
 #### Option B: Manual Setup Without `make`
 

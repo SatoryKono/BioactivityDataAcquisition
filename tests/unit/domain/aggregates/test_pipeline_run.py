@@ -24,6 +24,12 @@ from bioetl.domain.aggregates.pipeline_run import (
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import RunID, RunType
 
+
+def _ts(minutes: int = 0, seconds: int = 0) -> datetime:
+    """Return a deterministic UTC timestamp for aggregate tests."""
+    return datetime(2026, 3, 31, 12, minutes, seconds, tzinfo=UTC)
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Fixtures
 # ──────────────────────────────────────────────────────────────────────────────
@@ -48,7 +54,7 @@ def pipeline_run(run_id: RunID) -> PipelineRun:
 @pytest.fixture
 def started_run(pipeline_run: PipelineRun) -> PipelineRun:
     """Create a started pipeline run."""
-    pipeline_run.start()
+    pipeline_run.start(_ts(0))
     return pipeline_run
 
 
@@ -145,22 +151,29 @@ class TestPipelineRunStateTransitions:
 
     def test_start_transitions_to_running(self, pipeline_run: PipelineRun) -> None:
         """start() should transition PENDING -> RUNNING."""
-        pipeline_run.start()
+        pipeline_run.start(_ts(0))
         assert pipeline_run.status == PipelineRunState.RUNNING
-        assert pipeline_run.started_at is not None
+        assert pipeline_run.started_at == _ts(0)
 
     def test_cannot_start_already_running(self, started_run: PipelineRun) -> None:
         """Invariant: Cannot start a run that's already running."""
         with pytest.raises(InvalidStateError, match="Cannot start run"):
-            started_run.start()
+            started_run.start(_ts(1))
 
     def test_cannot_start_completed_run(self, started_run: PipelineRun) -> None:
         """Invariant: Cannot start a completed run."""
-        started_run.record_stage_success("test")
-        started_run.complete()
+        started_run.record_stage_success("test", started_at=_ts(1), completed_at=_ts(2))
+        started_run.complete(_ts(3))
 
         with pytest.raises(InvalidStateError, match="Cannot start run"):
-            started_run.start()
+            started_run.start(_ts(4))
+
+    def test_running_duration_requires_explicit_reference(
+        self, started_run: PipelineRun
+    ) -> None:
+        """Running duration should be computed only with an explicit reference time."""
+        assert started_run.duration_seconds is None
+        assert started_run.duration_seconds_at(_ts(seconds=5)) == pytest.approx(5.0)
 
 
 class TestPipelineRunStageRecording:
@@ -168,7 +181,12 @@ class TestPipelineRunStageRecording:
 
     def test_record_stage_success(self, started_run: PipelineRun) -> None:
         """Should record successful stage."""
-        started_run.record_stage_success("preflight", result={"checks": 5})
+        started_run.record_stage_success(
+            "preflight",
+            result={"checks": 5},
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
 
         assert len(started_run.stages) == 1
         assert started_run.stages[0].stage == "preflight"
@@ -179,13 +197,22 @@ class TestPipelineRunStageRecording:
     ) -> None:
         """Invariant: Cannot record stages on PENDING run."""
         with pytest.raises(InvalidStateError, match="run is in status pending"):
-            pipeline_run.record_stage_success("test")
+            pipeline_run.record_stage_success(
+                "test",
+                started_at=_ts(1),
+                completed_at=_ts(2),
+            )
 
     def test_record_stage_failure_transitions_to_failed(
         self, started_run: PipelineRun
     ) -> None:
         """Invariant: First stage failure transitions run to FAILED."""
-        started_run.record_stage_failure("execution", "Test error")
+        started_run.record_stage_failure(
+            "execution",
+            "Test error",
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
 
         assert started_run.status == PipelineRunState.FAILED
         assert started_run.ended_at is not None
@@ -193,10 +220,19 @@ class TestPipelineRunStageRecording:
 
     def test_cannot_record_stages_after_failure(self, started_run: PipelineRun) -> None:
         """Invariant: Cannot record stages after run has failed."""
-        started_run.record_stage_failure("execution", "Test error")
+        started_run.record_stage_failure(
+            "execution",
+            "Test error",
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
 
         with pytest.raises(InvalidStateError, match="run is in status failed"):
-            started_run.record_stage_success("postrun")
+            started_run.record_stage_success(
+                "postrun",
+                started_at=_ts(3),
+                completed_at=_ts(4),
+            )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -209,27 +245,61 @@ class TestPipelineRunCompletionInvariants:
 
     def test_cannot_complete_with_failed_stages(self, started_run: PipelineRun) -> None:
         """Invariant: complete() impossible with failed stages."""
-        started_run.record_stage_success("preflight")
-        started_run.record_stage_failure("execution", ValueError("bad data"))
+        started_run.record_stage_success(
+            "preflight",
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
+        started_run.record_stage_failure(
+            "execution",
+            ValueError("bad data"),
+            started_at=_ts(3),
+            completed_at=_ts(4),
+        )
 
         # Run is already FAILED after stage failure
         with pytest.raises(InvalidStateError, match="Cannot complete"):
-            started_run.complete()
+            started_run.complete(_ts(5))
 
     def test_cannot_complete_with_no_stages(self, started_run: PipelineRun) -> None:
         """Invariant: complete() requires at least one stage."""
         with pytest.raises(InvalidStateError, match="no stages recorded"):
-            started_run.complete()
+            started_run.complete(_ts(1))
+
+    def test_completed_run_has_stable_duration(self, started_run: PipelineRun) -> None:
+        """Completed runs should expose deterministic duration from stored state."""
+        started_run.record_stage_success(
+            "preflight",
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
+        started_run.complete(_ts(seconds=6))
+
+        assert started_run.duration_seconds == pytest.approx(6.0)
+        assert started_run.duration_seconds_at(_ts(seconds=10)) == pytest.approx(6.0)
 
     def test_complete_with_all_successful_stages(
         self, started_run: PipelineRun
     ) -> None:
         """Should complete when all stages succeeded."""
-        started_run.record_stage_success("preflight")
-        started_run.record_stage_success("execution", records_processed=1000)
-        started_run.record_stage_success("postrun")
+        started_run.record_stage_success(
+            "preflight",
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
+        started_run.record_stage_success(
+            "execution",
+            records_processed=1000,
+            started_at=_ts(3),
+            completed_at=_ts(4),
+        )
+        started_run.record_stage_success(
+            "postrun",
+            started_at=_ts(5),
+            completed_at=_ts(6),
+        )
 
-        started_run.complete()
+        started_run.complete(_ts(7))
 
         assert started_run.status == PipelineRunState.COMPLETED
         assert started_run.ended_at is not None
@@ -253,7 +323,11 @@ class TestPipelineRunEncapsulation:
 
     def test_stages_returns_immutable_tuple(self, started_run: PipelineRun) -> None:
         """Invariant: stages property returns immutable copy."""
-        started_run.record_stage_success("test")
+        started_run.record_stage_success(
+            "test",
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
 
         stages = started_run.stages
         assert isinstance(stages, tuple)
@@ -299,8 +373,13 @@ class TestPipelineRunDomainEvents:
         self, started_run: PipelineRun
     ) -> None:
         """complete() should emit PipelineCompleted event."""
-        started_run.record_stage_success("test", records_processed=100)
-        started_run.complete()
+        started_run.record_stage_success(
+            "test",
+            records_processed=100,
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
+        started_run.complete(_ts(3))
 
         events = started_run.collect_events()
         assert len(events) == 1
@@ -311,7 +390,12 @@ class TestPipelineRunDomainEvents:
         self, started_run: PipelineRun
     ) -> None:
         """Stage failure should emit PipelineFailed event."""
-        started_run.record_stage_failure("execution", "Test error")
+        started_run.record_stage_failure(
+            "execution",
+            "Test error",
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
 
         events = started_run.collect_events()
         assert len(events) == 1
@@ -322,8 +406,12 @@ class TestPipelineRunDomainEvents:
         self, started_run: PipelineRun
     ) -> None:
         """shutdown() should emit PipelineShutdown event."""
-        started_run.record_stage_success("test")
-        started_run.shutdown()
+        started_run.record_stage_success(
+            "test",
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
+        started_run.shutdown(_ts(3))
 
         events = started_run.collect_events()
         assert len(events) == 1
@@ -331,8 +419,12 @@ class TestPipelineRunDomainEvents:
 
     def test_collect_events_clears_event_list(self, started_run: PipelineRun) -> None:
         """collect_events() should clear internal list."""
-        started_run.record_stage_success("test")
-        started_run.complete()
+        started_run.record_stage_success(
+            "test",
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
+        started_run.complete(_ts(3))
 
         first_collection = started_run.collect_events()
         second_collection = started_run.collect_events()

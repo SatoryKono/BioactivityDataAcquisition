@@ -88,10 +88,13 @@ async def test_chembl_publication_full_cycle(e2e_data_dir: Path):
 
     # Assert - Schema validation
     records = get_silver_records(e2e_data_dir, "chembl_publication")
-    required_fields = ["publication_id"]
+    required_fields = ["publication_id", "publication_type", "title"]
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"
+            assert record.get(field) not in (None, ""), (
+                f"Required field must be populated: {field}"
+            )
 
 
 @pytest.mark.e2e
@@ -117,23 +120,24 @@ async def test_chembl_publication_metadata_fields(e2e_data_dir: Path):
     # Assert - Check publication fields
     records = get_silver_records(e2e_data_dir, "chembl_publication")
 
-    # Publication fields that may be present
-    publication_fields = [
-        "title",
-        "publication_year",
-        "doi",
-        "pmid",
-        "publication_type",
-    ]
-
-    docs_with_publication_info = 0
+    # Publication pipeline records should always have core metadata populated.
     for record in records:
-        has_pub_info = any(
-            record.get(field) is not None for field in publication_fields
-        )
-        if has_pub_info:
-            docs_with_publication_info += 1
+        assert record.get("title") not in (None, "")
+        assert record.get("publication_year") is not None
+        assert record.get("publication_type") == "journal-article"
 
-    # At least some documents should have publication information
-    # (not all documents are journal articles)
-    assert docs_with_publication_info >= 0  # Relaxed assertion
+        prefixed_doi = record.get("publication_doi")
+        raw_doi = record.get("doi")
+        if prefixed_doi is not None and raw_doi is not None:
+            assert prefixed_doi == raw_doi
+
+        prefixed_pmid = record.get("publication_pmid")
+        raw_pmid = record.get("pmid")
+        if prefixed_pmid is not None and raw_pmid is not None:
+            assert prefixed_pmid == raw_pmid
+
+    assert any(
+        (record.get("publication_doi") or record.get("doi"))
+        or (record.get("publication_pmid") or record.get("pmid"))
+        for record in records
+    ), "Expected at least one external publication identifier in cassette-backed data"

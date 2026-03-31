@@ -127,7 +127,7 @@ class TestHealthReport:
 
     def test_checked_at_has_default(self) -> None:
         report = HealthReport(results=[])
-        assert report.checked_at is not None
+        assert report.checked_at is None
 
 
 @pytest.mark.unit

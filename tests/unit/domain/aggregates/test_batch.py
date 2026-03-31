@@ -10,6 +10,7 @@ Tests verify that:
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -27,6 +28,11 @@ from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 # ──────────────────────────────────────────────────────────────────────────────
 
 
+def _ts(offset_seconds: int = 0) -> datetime:
+    """Return deterministic UTC timestamps for batch tests."""
+    return datetime(2026, 1, 1, tzinfo=UTC) + timedelta(seconds=offset_seconds)
+
+
 @pytest.fixture
 def run_id() -> RunID:
     """Create a test run ID."""
@@ -36,7 +42,7 @@ def run_id() -> RunID:
 @pytest.fixture
 def batch(run_id: RunID) -> Batch:
     """Create a test batch."""
-    return Batch.create(run_id=run_id)
+    return Batch.create(run_id=run_id, created_at=_ts(0))
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -130,36 +136,36 @@ class TestBatchStateTransitions:
     def test_seal_transitions_to_sealed(self, batch: Batch) -> None:
         """seal() should transition OPEN -> SEALED."""
         batch.add_record({"id": "1"})
-        batch.seal()
+        batch.seal(_ts(10))
 
         assert batch.status == BatchStatus.SEALED
-        assert batch.sealed_at is not None
+        assert batch.sealed_at == _ts(10)
 
     def test_cannot_seal_already_sealed(self, batch: Batch) -> None:
         """Invariant: Cannot seal an already sealed batch."""
         batch.add_record({"id": "1"})
-        batch.seal()
+        batch.seal(_ts(10))
 
         with pytest.raises(InvalidStateError, match="Cannot seal"):
-            batch.seal()
+            batch.seal(_ts(11))
 
     def test_writing_to_committed_transitions(self, batch: Batch) -> None:
         """Test SEALED -> WRITING -> COMMITTED transitions."""
         batch.add_record({"id": "1"})
-        batch.seal()
+        batch.seal(_ts(10))
         batch.mark_writing()
         assert batch.status == BatchStatus.WRITING
 
-        batch.mark_committed("silver")
+        batch.mark_committed("silver", _ts(20))
         assert batch.status == BatchStatus.COMMITTED
 
     def test_writing_to_failed_transitions(self, batch: Batch) -> None:
         """Test SEALED -> WRITING -> FAILED transitions."""
         batch.add_record({"id": "1"})
-        batch.seal()
+        batch.seal(_ts(10))
         batch.mark_writing()
 
-        batch.mark_failed("silver", "Write error")
+        batch.mark_failed("silver", "Write error", failed_at=_ts(20))
         assert batch.status == BatchStatus.FAILED
 
 
@@ -190,7 +196,7 @@ class TestBatchRecordManagement:
 
     def test_add_records_respects_start_index(self, run_id: RunID) -> None:
         """Invariant: Indices start from start_index."""
-        batch = Batch.create(run_id=run_id, start_index=100)
+        batch = Batch.create(run_id=run_id, start_index=100, created_at=_ts(0))
         batch.add_record({"id": "1"})
         batch.add_record({"id": "2"})
 
@@ -200,7 +206,7 @@ class TestBatchRecordManagement:
     def test_cannot_add_record_after_seal(self, batch: Batch) -> None:
         """Invariant: Cannot add records after sealing."""
         batch.add_record({"id": "1"})
-        batch.seal()
+        batch.seal(_ts(10))
 
         with pytest.raises(InvalidStateError, match="Cannot add_record"):
             batch.add_record({"id": "2"})
@@ -231,7 +237,10 @@ class TestBatchQuarantine:
         """Should mark record as quarantined."""
         record = batch.add_record({"id": "1"})
         quarantined = batch.quarantine_record(
-            record, "Schema violation", "SCHEMA_VIOLATION"
+            record,
+            "Schema violation",
+            "SCHEMA_VIOLATION",
+            quarantined_at=_ts(10),
         )
 
         assert not quarantined.is_valid
@@ -242,7 +251,7 @@ class TestBatchQuarantine:
         """Invariant: Quarantined records tracked separately."""
         record1 = batch.add_record({"id": "1"})
         batch.add_record({"id": "2"})
-        batch.quarantine_record(record1, "Error", "ERR")
+        batch.quarantine_record(record1, "Error", "ERR", quarantined_at=_ts(10))
 
         assert batch.record_count == 2  # Total
         assert batch.valid_count == 1  # Only valid
@@ -251,22 +260,27 @@ class TestBatchQuarantine:
     def test_cannot_quarantine_after_seal(self, batch: Batch) -> None:
         """Invariant: Cannot quarantine after sealing."""
         record = batch.add_record({"id": "1"})
-        batch.seal()
+        batch.seal(_ts(10))
 
         with pytest.raises(InvalidStateError, match="Cannot quarantine"):
-            batch.quarantine_record(record, "Error", "ERR")
+            batch.quarantine_record(record, "Error", "ERR", quarantined_at=_ts(11))
 
     def test_cannot_quarantine_foreign_record(
         self, batch: Batch, run_id: RunID
     ) -> None:
         """Invariant: Cannot quarantine record from another batch."""
-        other_batch = Batch.create(run_id=run_id)
+        other_batch = Batch.create(run_id=run_id, created_at=_ts(1))
         foreign_record = other_batch.add_record({"id": "1"})
 
         batch.add_record({"id": "2"})
 
         with pytest.raises(ValueError, match="does not belong"):
-            batch.quarantine_record(foreign_record, "Error", "ERR")
+            batch.quarantine_record(
+                foreign_record,
+                "Error",
+                "ERR",
+                quarantined_at=_ts(10),
+            )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -303,7 +317,7 @@ class TestBatchEncapsulation:
 
     def test_metadata_returns_copy(self, run_id: RunID) -> None:
         """Invariant: metadata returns a copy."""
-        batch = Batch.create(run_id=run_id, metadata={"key": "value"})
+        batch = Batch.create(run_id=run_id, created_at=_ts(0), metadata={"key": "value"})
 
         metadata = batch.metadata
         metadata["new_key"] = "new_value"
@@ -321,45 +335,49 @@ class TestBatchDomainEvents:
 
     def test_create_emits_batch_created_event(self, run_id: RunID) -> None:
         """create() should emit BatchCreated event."""
-        batch = Batch.create(run_id=run_id)
+        batch = Batch.create(run_id=run_id, created_at=_ts(0))
 
         events = batch.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "BatchCreated"
+        assert events[0].occurred_at == _ts(0)
 
     def test_seal_emits_batch_sealed_event(self, batch: Batch) -> None:
         """seal() should emit BatchSealed event."""
         batch.collect_events()  # Clear creation event
         batch.add_record({"id": "1"})
-        batch.seal()
+        batch.seal(_ts(10))
 
         events = batch.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "BatchSealed"
+        assert events[0].occurred_at == _ts(10)
 
     def test_quarantine_emits_record_quarantined_event(self, batch: Batch) -> None:
         """quarantine_record() should emit RecordQuarantined event."""
         batch.collect_events()  # Clear creation event
         record = batch.add_record({"id": "1"})
-        batch.quarantine_record(record, "Error", "ERR")
+        batch.quarantine_record(record, "Error", "ERR", quarantined_at=_ts(10))
 
         events = batch.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "RecordQuarantined"
+        assert events[0].occurred_at == _ts(10)
 
     def test_committed_emits_batch_written_event(self, batch: Batch) -> None:
         """mark_committed() should emit BatchWritten event."""
         batch.collect_events()  # Clear creation event
         batch.add_record({"id": "1"})
-        batch.seal()
+        batch.seal(_ts(10))
         batch.mark_writing()
         batch.collect_events()  # Clear sealed event
-        batch.mark_committed("silver")
+        batch.mark_committed("silver", _ts(20))
 
         events = batch.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "BatchWritten"
         assert events[0].layer == "silver"
+        assert events[0].occurred_at == _ts(20)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -394,4 +412,5 @@ class TestBatchConstructorValidation:
                 batch_id=BatchID(uuid4()),
                 run_id=run_id,
                 start_index=-1,
+                created_at=_ts(0),
             )

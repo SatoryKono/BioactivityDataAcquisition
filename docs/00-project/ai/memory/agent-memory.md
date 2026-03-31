@@ -1,3 +1,13 @@
+---
+Version: 1.0.8
+Status: active
+Class: internal-published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-31'
+---
+
 # Agent Memory — BioETL Project
 
 *Статус: internal-published (Internal / Extended)*

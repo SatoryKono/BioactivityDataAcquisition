@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates._quarantine_value_objects import (
@@ -90,9 +90,15 @@ class QuarantineEntryPropertiesMixin:
         return self._status.is_terminal()
 
     @property
-    def age_seconds(self) -> float:
-        """Age of the entry in seconds."""
-        return (datetime.now(UTC) - self._created_at).total_seconds()
+    def age_seconds(self) -> float | None:
+        """Resolved lifetime of the entry in seconds, if terminal."""
+        if self._resolution_info is None:
+            return None
+        return (self._resolution_info.resolved_at - self._created_at).total_seconds()
+
+    def age_seconds_at(self, reference_time: datetime) -> float:
+        """Return entry age relative to an explicit reference time."""
+        return (reference_time - self._created_at).total_seconds()
 
     def __repr__(self) -> str:
         return (

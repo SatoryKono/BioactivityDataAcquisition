@@ -48,8 +48,8 @@ class AssaySchema(ETLRecordSchema):
         isin=list(ASSAY_TYPES),
         description="Assay type.",
     )
-    assay_type_description: Series[str] | None = pa.Field(
-        nullable=True, description="Assay type description."
+    assay_type_description: Series[str] = pa.Field(
+        nullable=False, description="Assay type description."
     )
     assay_test_type: Series[str] | None = pa.Field(
         nullable=True,
@@ -88,16 +88,16 @@ class AssaySchema(ETLRecordSchema):
         str_matches=CHEMBL_ID_PATTERN,
         description="Target ChEMBL ID.",
     )
-    relationship_type: Series[str] | None = pa.Field(
-        nullable=True,
+    relationship_type: Series[str] = pa.Field(
+        nullable=False,
         isin=list(RELATIONSHIP_TYPES),
         description="Relationship type.",
     )
     relationship_description: Series[str] | None = pa.Field(
         nullable=True, description="Relationship description."
     )
-    confidence_score: Series[int] | None = pa.Field(
-        nullable=True,
+    confidence_score: Series[int] = pa.Field(
+        nullable=False,
         ge=0,
         le=9,
         description="Confidence score.",

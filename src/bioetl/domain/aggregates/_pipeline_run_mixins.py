@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 from bioetl.domain.aggregates._pipeline_run_read_model_mixin import (
     _PipelineRunAttrs,
@@ -29,11 +29,11 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
 
     __slots__ = ()
 
-    def start(self, started_at: datetime | None = None) -> None:
+    def start(self, started_at: datetime) -> None:
         """Start the pipeline run.
 
         Args:
-            started_at: Optional explicit start timestamp. Defaults to UTC now.
+            started_at: Explicit start timestamp.
         """
         if self._status != PipelineRunState.PENDING:
             raise InvalidStateError(
@@ -42,11 +42,9 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
                 attempted_operation="start",
             )
         self._status = PipelineRunState.RUNNING
-        self._started_at = started_at or datetime.now(UTC)
+        self._started_at = started_at
 
-    def record_stage_start(
-        self, stage: str, started_at: datetime | None = None
-    ) -> None:
+    def record_stage_start(self, stage: str, started_at: datetime) -> None:
         """Record the start of a pipeline stage.
 
         Compatibility path (P2-9):
@@ -56,14 +54,14 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
 
         Args:
             stage: Name of the pipeline stage being started (e.g., 'bronze', 'silver').
-            started_at: Optional explicit stage start timestamp. Defaults to UTC now.
+            started_at: Explicit stage start timestamp.
         """
         self._assert_running("record_stage_start")
         self._stages.append(
             StageResult(
                 stage=stage,
                 status=StageStatus.RUNNING,
-                started_at=started_at or datetime.now(UTC),
+                started_at=started_at,
             )
         )
 
@@ -72,8 +70,9 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         stage: str,
         result: object = None,
         records_processed: int = 0,
-        started_at: datetime | None = None,
-        completed_at: datetime | None = None,
+        *,
+        started_at: datetime,
+        completed_at: datetime,
     ) -> None:
         """Record successful completion of a pipeline stage.
 
@@ -86,17 +85,16 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             stage: Name of the pipeline stage that succeeded.
             result: Optional stage result payload for audit/lineage purposes.
             records_processed: Number of records processed during this stage. Defaults to 0.
-            started_at: Optional explicit stage start timestamp.
-            completed_at: Optional explicit stage completion timestamp. Defaults to UTC now.
+            started_at: Explicit stage start timestamp.
+            completed_at: Explicit stage completion timestamp.
         """
         self._assert_running("record_stage_success")
-        now = datetime.now(UTC)
         self._stages.append(
             StageResult(
                 stage=stage,
                 status=StageStatus.SUCCESS,
-                started_at=started_at or now,
-                completed_at=completed_at or now,
+                started_at=started_at,
+                completed_at=completed_at,
                 result=result,
                 records_processed=records_processed,
             )
@@ -107,8 +105,9 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         stage: str,
         error: str | Exception,
         error_type: str | None = None,
-        started_at: datetime | None = None,
-        completed_at: datetime | None = None,
+        *,
+        started_at: datetime,
+        completed_at: datetime,
     ) -> None:
         """Record failure of a pipeline stage and fail the run.
 
@@ -121,19 +120,18 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             stage: Name of the pipeline stage that failed.
             error: Error message string or Exception instance describing the failure.
             error_type: Optional error classification (e.g., exception class name).
-            started_at: Optional explicit stage start timestamp.
-            completed_at: Optional explicit failure timestamp. Defaults to UTC now.
+            started_at: Explicit stage start timestamp.
+            completed_at: Explicit failure timestamp.
         """
         self._assert_running("record_stage_failure")
-        now = datetime.now(UTC)
         error_message = str(error) if isinstance(error, Exception) else error
-        ended_at = completed_at or now
+        ended_at = completed_at
 
         self._stages.append(
             StageResult(
                 stage=stage,
                 status=StageStatus.FAILED,
-                started_at=started_at or now,
+                started_at=started_at,
                 completed_at=ended_at,
                 error=error_message,
                 error_type=error_type,
@@ -152,15 +150,15 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             )
         )
 
-    def complete(self, completed_at: datetime | None = None) -> None:
+    def complete(self, completed_at: datetime) -> None:
         """Mark run as COMPLETED if all stages succeeded.
 
         Args:
-            completed_at: Optional explicit completion timestamp. Defaults to UTC now.
+            completed_at: Explicit completion timestamp.
         """
         self._assert_running("complete")
         self._assert_can_complete()
-        ended_at = completed_at or datetime.now(UTC)
+        ended_at = completed_at
         self._status = PipelineRunState.COMPLETED
         self._ended_at = ended_at
 
@@ -184,17 +182,18 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         self,
         error: str,
         error_type: str | None = None,
-        failed_at: datetime | None = None,
+        *,
+        failed_at: datetime,
     ) -> None:
         """Mark run as failed without stage-level details.
 
         Args:
             error: Human-readable error description.
             error_type: Optional error classification (e.g., exception class name).
-            failed_at: Optional explicit failure timestamp. Defaults to UTC now.
+            failed_at: Explicit failure timestamp.
         """
         self._assert_running("fail")
-        ended_at = failed_at or datetime.now(UTC)
+        ended_at = failed_at
         self._status = PipelineRunState.FAILED
         self._ended_at = ended_at
         self._events.append(
@@ -208,14 +207,14 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             )
         )
 
-    def shutdown(self, shutdown_at: datetime | None = None) -> None:
+    def shutdown(self, shutdown_at: datetime) -> None:
         """Mark the run as gracefully shutdown.
 
         Args:
-            shutdown_at: Optional explicit shutdown timestamp. Defaults to UTC now.
+            shutdown_at: Explicit shutdown timestamp.
         """
         self._assert_running("shutdown")
-        ended_at = shutdown_at or datetime.now(UTC)
+        ended_at = shutdown_at
         self._status = PipelineRunState.SHUTDOWN
         self._ended_at = ended_at
         self._events.append(

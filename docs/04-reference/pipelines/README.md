@@ -77,7 +77,7 @@ canonical implementation source.
 | Provider             | Pipelines | Rate Limit                 | Auth               |
 | -------------------- | --------- | -------------------------- | ------------------ |
 | **ChEMBL**           | 14        | 3 req/sec                  | Public             |
-| **UniProt**          | 2         | 100 req/sec                | API Key (optional) |
+| **UniProt**          | 2         | 10 req/sec (100 with key) | API Key (optional) |
 | **PubChem**          | 1         | 5 req/sec                  | Public             |
 | **PubMed**           | 1         | 3 req/sec (10 with key)    | API Key            |
 | **CrossRef**         | 1         | Polite pool                | mailto header      |

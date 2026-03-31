@@ -1,3 +1,13 @@
+---
+Version: 1.0.0
+Status: active
+Class: internal-published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-31'
+---
+
 # Local Skills Catalog (BioETL Core)
 
 Consolidated registry of BioETL-focused local skills under `.codex/skills/`.

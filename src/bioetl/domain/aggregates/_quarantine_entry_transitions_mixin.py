@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates._quarantine_value_objects import (
@@ -40,22 +40,22 @@ class QuarantineEntryTransitionsMixin:
         self,
         reason: str | None = None,
         resolved_by: str | None = None,
-        resolved_at: datetime | None = None,
+        *,
+        resolved_at: datetime,
     ) -> None:
         """Mark entry as ignored (non-actionable).
 
         Args:
             reason: Optional human-readable explanation for ignoring the entry.
             resolved_by: Optional identifier of the user or system that resolved it.
-            resolved_at: Optional explicit resolution timestamp. Defaults to UTC now.
+            resolved_at: Explicit resolution timestamp.
         """
         self._assert_can_resolve("mark_ignored")
 
-        now = resolved_at or datetime.now(UTC)
         self._status = QuarantineStatus.IGNORED
         self._resolution_info = ResolutionInfo(
             resolution_type="ignored",
-            resolved_at=now,
+            resolved_at=resolved_at,
             resolved_by=resolved_by,
             reason=reason,
         )
@@ -64,7 +64,7 @@ class QuarantineEntryTransitionsMixin:
 
         self._events.append(
             QuarantineEntryResolved(
-                occurred_at=now,
+                occurred_at=resolved_at,
                 run_id=self._run_id,
                 entry_id=self._entry_id,
                 resolution="ignored",
@@ -76,25 +76,25 @@ class QuarantineEntryTransitionsMixin:
         self,
         new_record_id: str,
         resolved_by: str | None = None,
-        resolved_at: datetime | None = None,
+        *,
+        resolved_at: datetime,
     ) -> None:
         """Mark entry as successfully reprocessed.
 
         Args:
             new_record_id: Identifier of the replacement record created after reprocessing.
             resolved_by: Optional identifier of the user or system that reprocessed it.
-            resolved_at: Optional explicit resolution timestamp. Defaults to UTC now.
+            resolved_at: Explicit resolution timestamp.
         """
         if not new_record_id:
             raise ValueError("new_record_id is required for reprocessing")
 
         self._assert_can_resolve("mark_reprocessed")
 
-        now = resolved_at or datetime.now(UTC)
         self._status = QuarantineStatus.REPROCESSED
         self._resolution_info = ResolutionInfo(
             resolution_type="reprocessed",
-            resolved_at=now,
+            resolved_at=resolved_at,
             resolved_by=resolved_by,
             new_record_id=new_record_id,
         )
@@ -103,7 +103,7 @@ class QuarantineEntryTransitionsMixin:
 
         self._events.append(
             QuarantineEntryResolved(
-                occurred_at=now,
+                occurred_at=resolved_at,
                 run_id=self._run_id,
                 entry_id=self._entry_id,
                 resolution="reprocessed",
@@ -111,11 +111,11 @@ class QuarantineEntryTransitionsMixin:
             )
         )
 
-    def mark_expired(self, expired_at: datetime | None = None) -> None:
+    def mark_expired(self, *, expired_at: datetime) -> None:
         """Mark entry as expired due to retention policy.
 
         Args:
-            expired_at: Optional explicit expiry timestamp. Defaults to UTC now.
+            expired_at: Explicit expiry timestamp.
         """
         if self._status.is_terminal():
             raise InvalidStateError(
@@ -125,10 +125,9 @@ class QuarantineEntryTransitionsMixin:
             )
 
         self._status = QuarantineStatus.EXPIRED
-        now = expired_at or datetime.now(UTC)
         self._resolution_info = ResolutionInfo(
             resolution_type="expired",
-            resolved_at=now,
+            resolved_at=expired_at,
             reason="Retention period exceeded",
         )
 

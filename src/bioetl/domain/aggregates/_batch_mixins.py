@@ -185,6 +185,8 @@ class _BatchMutationMixin(_BatchReadModelMixin):
         record: BatchRecord,
         error: str,
         error_code: str | None = None,
+        *,
+        quarantined_at: datetime,
     ) -> BatchRecord:
         """Mark an existing record as quarantined.
 
@@ -192,6 +194,7 @@ class _BatchMutationMixin(_BatchReadModelMixin):
             record: An existing BatchRecord that belongs to this batch.
             error: Human-readable description of the validation or processing error.
             error_code: Optional error classification code for downstream routing.
+            quarantined_at: Explicit timestamp when the record was quarantined.
 
         Returns:
             Updated BatchRecord with quarantine status and error information.
@@ -213,6 +216,7 @@ class _BatchMutationMixin(_BatchReadModelMixin):
             error_code,
             error,
             record.content_hash,
+            quarantined_at,
         )
         return quarantined
 
@@ -230,11 +234,11 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
 
     __slots__ = ()
 
-    def seal(self, sealed_at: datetime | None = None) -> None:
+    def seal(self, sealed_at: datetime) -> None:
         """Seal the batch (OPEN -> SEALED).
 
         Args:
-            sealed_at: Optional explicit seal timestamp. Defaults to UTC now.
+            sealed_at: Explicit seal timestamp.
         """
         self._status, self._sealed_at = lifecycle.seal(
             self._status,
@@ -251,11 +255,12 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
         """Mark batch as being written (SEALED -> WRITING)."""
         self._status = lifecycle.mark_writing(self._status)
 
-    def mark_committed(self, layer: str) -> None:
+    def mark_committed(self, layer: str, committed_at: datetime) -> None:
         """Mark batch as committed (WRITING -> COMMITTED).
 
         Args:
             layer: Medallion layer that successfully received the batch (e.g., 'bronze').
+            committed_at: Explicit timestamp when the batch write completed.
         """
         self._status = lifecycle.mark_committed(
             self._status,
@@ -264,10 +269,16 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
             self._batch_id,
             self.valid_count,
             layer,
+            committed_at,
         )
 
     def mark_failed(
-        self, layer: str, error: str, error_type: str | None = None
+        self,
+        layer: str,
+        error: str,
+        error_type: str | None = None,
+        *,
+        failed_at: datetime,
     ) -> None:
         """Mark batch write as failed (WRITING -> FAILED).
 
@@ -275,6 +286,7 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
             layer: Medallion layer where the write failure occurred.
             error: Human-readable error description.
             error_type: Optional error classification (e.g., exception class name).
+            failed_at: Explicit timestamp when the batch failure occurred.
         """
         self._status = lifecycle.mark_failed(
             self._status,
@@ -284,4 +296,5 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
             layer,
             error,
             error_type,
+            failed_at=failed_at,
         )

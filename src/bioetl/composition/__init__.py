@@ -21,6 +21,9 @@ See Also:
 
 from __future__ import annotations
 
+from importlib import import_module
+from typing import Any
+
 from bioetl.composition.registry import (
     PipelineDefinition,
     PipelineRegistry,
@@ -28,9 +31,45 @@ from bioetl.composition.registry import (
 )
 from bioetl.composition.registry_default import get_default_registry
 
+_LAZY_MODULE_EXPORTS: dict[str, str] = {
+    "bootstrap": "bioetl.composition.bootstrap",
+    "composite_api": "bioetl.composition.composite_api",
+    "entrypoints": "bioetl.composition.entrypoints",
+    "execution_api": "bioetl.composition.execution_api",
+    "observability_api": "bioetl.composition.observability_api",
+    "resource_management_api": "bioetl.composition.resource_management_api",
+    "services_api": "bioetl.composition.services_api",
+    "types": "bioetl.composition.types",
+}
+
 __all__ = [
     "PipelineDefinition",
     "PipelineRegistry",
+    "bootstrap",
+    "composite_api",
     "create_registry",
+    "entrypoints",
+    "execution_api",
     "get_default_registry",
+    "observability_api",
+    "resource_management_api",
+    "services_api",
+    "types",
 ]
+
+
+def __getattr__(name: str) -> Any:
+    """Lazily expose composition public submodules for patch/import stability."""
+    try:
+        module_name = _LAZY_MODULE_EXPORTS[name]
+    except KeyError as exc:  # pragma: no cover - standard attribute path
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+
+    module = import_module(module_name)
+    globals()[name] = module
+    return module
+
+
+def __dir__() -> list[str]:
+    """Return stable composition exports for help() and shell introspection."""
+    return sorted(set(globals()) | set(__all__))

@@ -2,13 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.services.preflight_governance_reporting import (
-    build_validation_summary,
-)
-from bioetl.domain.services._preflight_governance_types import (
-    GovernancePolicy,
-    PreflightGovernanceConfig,
-)
 from bioetl.domain.services._preflight_governance_helpers import (
     BLOCKING_POLICIES,
     apply_overrides_to_issues,
@@ -16,6 +9,13 @@ from bioetl.domain.services._preflight_governance_helpers import (
     format_issue,
     rebuild_validation_result,
     resolve_policy_block_state,
+)
+from bioetl.domain.services._preflight_governance_types import (
+    GovernancePolicy,
+    PreflightGovernanceConfig,
+)
+from bioetl.domain.services.preflight_governance_reporting import (
+    build_validation_summary,
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import (
@@ -171,7 +171,10 @@ class PreflightGovernanceService:
     ) -> JsonDict:
         """Generate comprehensive governance report."""
         return {
-            "governance_metadata": self._build_governance_metadata(config),
+            "governance_metadata": self._build_governance_metadata(
+                config,
+                execution_timestamp=self._resolve_execution_timestamp(report),
+            ),
             "execution_decision": execution_decision,
             "validation_summary": build_validation_summary(report),
             "execution_context": execution_context,
@@ -179,9 +182,29 @@ class PreflightGovernanceService:
         }
 
     @staticmethod
-    def _build_governance_metadata(config: PreflightGovernanceConfig) -> JsonDict:
+    def _build_governance_metadata(
+        config: PreflightGovernanceConfig,
+        *,
+        execution_timestamp: str,
+    ) -> JsonDict:
         """Build governance metadata for reporting."""
-        return build_governance_metadata(config)
+        return build_governance_metadata(
+            config,
+            execution_timestamp=execution_timestamp,
+        )
+
+    @staticmethod
+    def _resolve_execution_timestamp(report: CompositeValidationReport) -> str:
+        """Resolve governance timestamp from existing validation results."""
+        candidates = (
+            report.runtime_guard_result,
+            report.deep_preflight_result,
+            report.structural_result,
+        )
+        for result in candidates:
+            if result is not None and result.timestamp:
+                return result.timestamp
+        return ""
 
     def _format_detailed_issues(
         self,

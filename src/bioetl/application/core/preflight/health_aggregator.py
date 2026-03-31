@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
@@ -86,7 +87,10 @@ class HealthAggregator:
             else:
                 component_results.append(result)
 
-        report = HealthReport(results=component_results)
+        report = HealthReport(
+            results=component_results,
+            checked_at=datetime.now(tz=UTC),
+        )
         log_health_report(logger=self._logger, report=report)
         return report
 

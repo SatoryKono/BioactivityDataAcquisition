@@ -67,15 +67,15 @@ scripts/diagrams/run_diagram_checks.sh --profile pr
 scripts/diagrams/run_diagram_checks.sh --profile pr --diagram docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd
 
 # Or run checks individually:
-python3 scripts/diagrams/lint_diagrams.py docs
-python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true
-python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
-python3 scripts/docs/check_doc_links.py --links
+uv run python -m scripts.diagrams lint docs
+uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true
+uv run python -m scripts.diagrams lint-summarize /tmp/diagram-lint.json
+uv run python -m scripts.docs check-links --links
 bash scripts/diagrams/validate_mermaid_syntax.sh
 bash docs/02-architecture/diagrams/tooling/render.sh
-python3 scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
-python3 scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
-python3 scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt
+uv run python -m scripts.diagrams check-svg-text --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+uv run python -m scripts.diagrams check-visual-smoke --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+uv run python -m scripts.diagrams check-quality-gates --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt
 ```
 
 ## Notes

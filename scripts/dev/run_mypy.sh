@@ -12,16 +12,24 @@ if [[ ${#ARGS[@]} -eq 0 ]]; then
     ARGS=("${DEFAULT_ARGS[@]}")
 fi
 
-if command -v uv >/dev/null 2>&1; then
-    exec uv run python -m mypy "${ARGS[@]}"
+export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
+export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
+
+if [[ -x ".venv-wsl/bin/python" ]]; then
+    exec .venv-wsl/bin/python -m mypy "${ARGS[@]}"
 fi
 
 if [[ -x ".venv/bin/python" ]]; then
     exec .venv/bin/python -m mypy "${ARGS[@]}"
 fi
 
-if [[ -x ".venv/Scripts/python.exe" ]]; then
-    exec .venv/Scripts/python.exe -m mypy "${ARGS[@]}"
+if [[ -d ".venv-win" ]]; then
+    echo "[run_mypy][hint] A Windows virtualenv was detected. WSL should use .venv-wsl."
+    echo "[run_mypy][hint] Bootstrap it with: bash scripts/dev/setup_env_wsl.sh"
+fi
+
+if command -v uv >/dev/null 2>&1; then
+    exec uv run python -m mypy "${ARGS[@]}"
 fi
 
 if command -v python >/dev/null 2>&1; then
@@ -34,5 +42,5 @@ fi
 
 echo "[run_mypy][error] Python runtime is not available."
 echo "[run_mypy][hint] Install dependencies first:"
-echo "  uv sync --extra dev --extra tracing"
+echo "  bash scripts/dev/setup_env_wsl.sh"
 exit 1

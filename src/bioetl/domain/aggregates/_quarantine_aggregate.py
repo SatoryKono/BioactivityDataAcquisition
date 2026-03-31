@@ -16,7 +16,7 @@ Consistency Boundary:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates._quarantine_entry_properties_mixin import (
@@ -86,7 +86,8 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
         payload_hash: ContentHash,
         run_id: RunID,
         batch_id: BatchID,
-        created_at: datetime | None = None,
+        *,
+        created_at: datetime,
         metadata: MetaDict | None = None,
     ) -> None:
         """Initialize a quarantine entry.
@@ -99,7 +100,7 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
             payload_hash: Hash of the payload for deduplication.
             run_id: Pipeline run identifier.
             batch_id: Source batch identifier.
-            created_at: Creation timestamp.
+            created_at: Explicit creation timestamp.
             metadata: Additional error context.
 
         Raises:
@@ -117,7 +118,7 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
         self._run_id = run_id
         self._batch_id = batch_id
         self._status = QuarantineStatus.NEW
-        self._created_at = created_at or datetime.now(UTC)
+        self._created_at = created_at
         self._metadata: MetaDict = dict(metadata) if metadata else {}
         self._resolution_info: ResolutionInfo | None = None
         self._events: list[DomainEvent] = []
@@ -130,6 +131,8 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
         payload: BronzeRecord,
         run_id: RunID,
         batch_id: BatchID,
+        *,
+        created_at: datetime,
         metadata: MetaDict | None = None,
     ) -> QuarantineEntry:
         """Factory method to create a new quarantine entry.
@@ -142,6 +145,7 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
             payload: The failed record.
             run_id: Pipeline run identifier.
             batch_id: Source batch identifier.
+            created_at: Explicit timestamp when the quarantine entry was created.
             metadata: Additional context.
 
         Returns:
@@ -168,6 +172,7 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
             payload_hash=payload_hash,
             run_id=run_id,
             batch_id=batch_id,
+            created_at=created_at,
             metadata=metadata,
         )
 

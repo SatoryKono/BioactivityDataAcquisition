@@ -58,6 +58,7 @@ class TestAssayTransformer:
             "bao_format": "BAO_0000218",
             "assay_type": "B",
             "assay_type_description": "Binding",
+            "relationship_type": "D",
             "description": "Test assay description",
             "confidence_score": 9,
         }
@@ -70,10 +71,38 @@ class TestAssayTransformer:
         assert result["publication_id"] == "CHEMBL456"
         assert result["bao_format"] == "BAO_0000218"
         assert result["assay_type"] == "B"
+        assert result["assay_type_description"] == "Binding"
+        assert result["relationship_type"] == "D"
         assert result["confidence_score"] == 9
         assert "entity_id" in result
         assert "content_hash" in result
         assert "_run_id" in result
+
+    @pytest.mark.asyncio
+    async def test_transform_normalizes_assay_bao_and_organism_fields(
+        self, transformer, mock_context
+    ):
+        """Assay normalization should canonicalize BAO fields and organism text."""
+        record = {
+            "assay_id": "CHEMBL1234567",
+            "target_id": "CHEMBL123",
+            "publication_id": "CHEMBL456",
+            "bao_format": " bao:0000357 ",
+            "bao_label": " Single Protein Format ",
+            "assay_type": "B",
+            "assay_type_description": "Binding",
+            "relationship_type": "D",
+            "description": "Test assay description",
+            "confidence_score": 9,
+            "assay_organism": "Homo sapiens (Human)",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["bao_format"] == "BAO_0000357"
+        assert result["bao_label"] == "single protein format"
+        assert result["assay_organism"] == "Homo sapiens"
 
     @pytest.mark.asyncio
     async def test_transform_missing_assay_id(self, transformer, mock_context):
@@ -742,6 +771,58 @@ class TestTargetTransformer:
         assert result is not None
         assert result["organism"] == "Escherichia coli"
         assert result["organism_class"] == "unicellular"
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("raw_organism", "tax_id", "expected_organism", "expected_class"),
+        [
+            (
+                "Homo\n        sapiens",
+                9606,
+                "Homo sapiens",
+                "multicellular",
+            ),
+            (
+                "Candida albicans (strain SC5314 / ATCC MYA-2876) (Yeast)",
+                5476,
+                "Candida albicans",
+                "unicellular",
+            ),
+            (
+                "Influenza A virus (strain A/Udorn/1972 H3N2)",
+                11320,
+                "Influenza A virus",
+                None,
+            ),
+            (
+                "Mycobacterium tuberculosis (strain ATCC 25618 / H37Rv)",
+                1773,
+                "Mycobacterium tuberculosis",
+                "unicellular",
+            ),
+        ],
+    )
+    async def test_transform_normalizes_historical_vcr_organism_variants(
+        self,
+        transformer,
+        mock_context,
+        raw_organism,
+        tax_id,
+        expected_organism,
+        expected_class,
+    ):
+        """Historical target-organism variants from VCR should normalize deterministically."""
+        record = {
+            "target_id": f"CHEMBL-{tax_id}",
+            "organism": raw_organism,
+            "tax_id": tax_id,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["organism"] == expected_organism
+        assert result["organism_class"] == expected_class
 
     @pytest.mark.asyncio
     async def test_transform_organism_class_unicellular(

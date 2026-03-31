@@ -1,3 +1,13 @@
+---
+Version: 4.2.0
+Status: active
+Class: internal-published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-03-31'
+---
+
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
 *Версия: 4.2 | Дата: 2026-03-26 | Supersedes v4.1 | Платформа: Codex CLI*

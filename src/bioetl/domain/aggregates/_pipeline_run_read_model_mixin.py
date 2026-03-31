@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates.pipeline_run_stage_result import StageResult
@@ -93,10 +93,18 @@ class _PipelineRunReadModelMixin(_PipelineRunAttrs):
 
     @property
     def duration_seconds(self) -> float | None:
-        """Total run duration in seconds."""
+        """Total run duration in seconds for completed runs."""
         if self._started_at is None:
             return None
-        end = self._ended_at or datetime.now(UTC)
+        if self._ended_at is None:
+            return None
+        return (self._ended_at - self._started_at).total_seconds()
+
+    def duration_seconds_at(self, reference_time: datetime) -> float | None:
+        """Return run duration relative to an explicit reference time."""
+        if self._started_at is None:
+            return None
+        end = self._ended_at or reference_time
         return (end - self._started_at).total_seconds()
 
     @property

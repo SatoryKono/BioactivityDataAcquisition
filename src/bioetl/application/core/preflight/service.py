@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.preflight.health_aggregator import HealthAggregator
@@ -179,6 +180,7 @@ class PreflightService:
             health_report=health_report,
             medallion_policy_valid=medallion_policy_valid,
             config_errors=config_errors,
+            checked_at=health_report.checked_at or datetime.now(tz=UTC),
         )
 
         self._record_preflight_metrics(report)

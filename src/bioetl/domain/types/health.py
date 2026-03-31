@@ -7,7 +7,7 @@ No I/O operations allowed (REQ-ARCH-003).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 
 from bioetl.domain.types.enums import HealthStatus
 from bioetl.domain.types_config_validation import ConfigValidationError
@@ -60,7 +60,7 @@ class HealthReport:
     """
 
     results: list[ComponentHealthResult]
-    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    checked_at: datetime | None = None
 
     @property
     def is_healthy(self) -> bool:
@@ -106,7 +106,7 @@ class PreflightReport:
     health_report: HealthReport
     medallion_policy_valid: bool
     config_errors: list[ConfigValidationError] = field(default_factory=list)
-    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    checked_at: datetime | None = None
 
     @property
     def is_valid(self) -> bool:

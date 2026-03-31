@@ -243,6 +243,8 @@ filters:
                 min: 1950
                 max: 2050
         required_fields:
+            # Final Silver policy: unit-less activity records are quarantined
+            # instead of relaxing canonical chemistry/unit fields to nullable.
             - activity_id
             - molecule_id
             - assay_id
@@ -261,6 +263,7 @@ filters:
             - value
             - units
             - standard_value
+            - standard_units
             - standard_flag
             - pchembl_value
             - uo_units

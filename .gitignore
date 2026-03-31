@@ -10,6 +10,8 @@ __pycache__/
 
 # Virtual environments
 .venv/
+.venv-win/
+.venv-wsl/
 venv/
 env/
 ENV/
@@ -70,6 +72,8 @@ log_test.txt
 /reports/*
 !/reports/review/
 !/reports/review/**
+/reports/Codex/review_documentation-cascade-audit_*.md
+/reports/Codex/review_py-test-swarm_*.md
 
 # IDE / Editors
 .idea/
@@ -117,6 +121,7 @@ _delta_log/
 # Temporary pipeline artifacts
 tmp/
 /tmp_*_cov.json
+/tmp_*coverage.json
 /.tmp_check_env.py
 data/local/*
 !data/local/.gitkeep
@@ -203,6 +208,8 @@ data/.idea/
 docs/reports/branch-full-diff-matrix-2026-03-01.csv
 .claude/settings*
 .claude/marketplace.json
+.claude/.dropbox.cache/
+.claude/*.docx
 /docs/.claude/settings*
 /data/миграция
 /docs/02-architecture/diagrams/mermaid/png
