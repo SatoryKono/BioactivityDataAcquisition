@@ -10,7 +10,6 @@ from bioetl.composition.providers._creation import ProviderCreator
 from bioetl.composition.providers._default_registry import (
     DefaultRegistryMethod,
     ProvidersDescriptor,
-    get_default_provider_registrar,
     get_default_provider_registry,
 )
 from bioetl.composition.providers._models import (
@@ -169,7 +168,7 @@ class ProviderRegistry:
     @DefaultRegistryMethod
     def build_data_source_creator(self, name: str) -> DataSourceCreatorProtocol:
         """Return a provider-bound data-source creator closure."""
-        if self is get_default_provider_registry():
+        if self is type(self)._get_default():
             type(self).ensure_loaded()
 
         with self._lock:
@@ -212,7 +211,7 @@ class ProviderRegistry:
 
 def register_default_provider_config(name: str, config: ProviderConfig) -> None:
     """Register a provider config through the named default-registry seam."""
-    get_default_provider_registrar().register(name, config)
+    get_default_provider_registry().register(name, config)
 
 
 def ensure_provider_registry_ready(registry: ProviderRegistry) -> ProviderRegistry:

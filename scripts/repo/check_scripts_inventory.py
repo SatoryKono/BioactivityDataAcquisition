@@ -19,9 +19,11 @@ import re
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Final
+
+UTC = timezone.utc
 
 SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
     ".py",
@@ -249,7 +251,7 @@ def _discover_refs_in_file(
     original_lines = text.splitlines()
     normalized_lines = normalized_text.splitlines()
     for line_no, (raw_line, normalized_line) in enumerate(
-        zip(original_lines, normalized_lines, strict=True),
+        zip(original_lines, normalized_lines),
         start=1,
     ):
         if not any(token in normalized_line for token in SCRIPT_PATH_TOKENS):

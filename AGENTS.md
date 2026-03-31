@@ -11,7 +11,12 @@ BioETL is a Python ETL pipeline for bioactivity data acquisition from multiple p
 - **Delta Lake** for Silver layer (MUST, no raw Parquet)
 - **httpx** for async HTTP, **structlog** for logging
 - **pytest** + **VCR.py** for testing, **mypy --strict** for types
-- Run commands via `uv run python -m pytest ...` or `uv run python -m bioetl ...`
+- In CI or a single-OS checkout, `uv run python -m ...` is the preferred path.
+- In a mixed Windows + WSL checkout, bootstrap per-OS environments and use the matching wrappers:
+  - Windows PowerShell: `.\scripts\dev\setup_env_windows.ps1`, then `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`, or `.\.venv-win\Scripts\python.exe -m bioetl ...`
+  - WSL/Linux: `bash scripts/dev/setup_env_wsl.sh`, then `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`, or `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl ...`
+- `run_pytest.ps1|.sh` add default pytest flags `--cov=src/bioetl --cov-report=term -q --maxfail=1` unless called with help/version.
+- `run_pytest.sh` also invokes `scripts/ops/setup_plugins.sh --pytest-only`; `run_pytest.ps1` expects `.venv-win` to already be prepared.
 
 ## Architecture Rules (CRITICAL)
 
@@ -91,6 +96,19 @@ Use these evidence packs as the default calibration layer:
 ## Common Commands
 
 ```bash
+# Windows PowerShell (mixed Windows + WSL checkout)
+.\scripts\dev\setup_env_windows.ps1
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_molecule --limit 100
+
+# WSL/Linux (mixed Windows + WSL checkout)
+bash scripts/dev/setup_env_wsl.sh
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_molecule --limit 100
+
+# CI / single-OS uv workflow
 uv run python -m pytest tests/ -x -q              # Run all tests
 uv run python -m pytest tests/architecture/ -v     # Architecture boundary tests
 uv run python -m mypy --strict src/bioetl/         # Type checking
@@ -122,10 +140,10 @@ uv run python -m scripts.schema check-invariants
 
 # Dev / type-check
 uv sync --extra dev --extra tests --extra tracing    # sync dev deps (preferred)
-uv run python -m mypy --strict src/bioetl/            # type checks (or use .venv)
+uv run python -m mypy --strict src/bioetl/            # type checks (CI / single-OS)
 ```
 
-- Dev environment note (Windows/.venv fallback): many scripts use the pattern `.venv/Scripts/python.exe -m ...` when `uv` is not present. See `scripts/dev/run_mypy.ps1` for the exact fallback logic.
+- Dev environment note: for mixed Windows + WSL work, do not share `.venv` across OS boundaries. Use `.venv-win` in PowerShell and `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` in WSL, then run commands through `scripts/dev/run_pytest.ps1|.sh` and `scripts/dev/run_mypy.ps1|.sh`.
 - CI note: GitHub Actions uses the repository-local `.github/actions/setup-python-uv` action and runs `uv run` for many gates; follow the same `uv`-first approach locally to reproduce CI behavior (see `.github/workflows/tests.yml`).
 
 ## What NOT to Do

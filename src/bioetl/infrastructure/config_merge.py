@@ -68,6 +68,77 @@ def _resolve_list_merger(
     return None
 
 
+def _merge_mapping_value(
+    base_value: Mapping[str, Any],  # Any: YAML config values are heterogeneous
+    override_value: Mapping[str, Any],  # Any: YAML config values are heterogeneous
+    *,
+    list_concat_keys: frozenset[str],
+    concat_merger: ListMergeFn,
+    list_merger_resolver: ListMergeResolver | None,
+) -> JsonDict:
+    """Recursively merge nested mapping values."""
+    return config_merge(
+        base_value,
+        override_value,
+        list_concat_keys=list_concat_keys,
+        concat_list_merger=concat_merger,
+        list_merger_resolver=list_merger_resolver,
+    )
+
+
+def _merge_list_value(
+    key: str,
+    base_value: list[Any],  # Any: YAML config values are heterogeneous
+    override_value: list[Any],  # Any: YAML config values are heterogeneous
+    *,
+    list_concat_keys: frozenset[str],
+    concat_merger: ListMergeFn,
+    list_merger_resolver: ListMergeResolver | None,
+) -> list[Any]:  # Any: YAML config values are heterogeneous
+    """Merge list values using configured per-key strategy or default override."""
+    merger = _resolve_list_merger(
+        key,
+        list_concat_keys=list_concat_keys,
+        concat_merger=concat_merger,
+        list_merger_resolver=list_merger_resolver,
+    )
+    if merger is None:
+        return copy.deepcopy(override_value)
+    return merger(base_value, override_value, key)
+
+
+def _merge_config_value(
+    key: str,
+    base_value: Any,  # Any: YAML config values are heterogeneous
+    override_value: Any,  # Any: YAML config values are heterogeneous
+    *,
+    list_concat_keys: frozenset[str],
+    concat_merger: ListMergeFn,
+    list_merger_resolver: ListMergeResolver | None,
+) -> Any:  # Any: YAML config values are heterogeneous
+    """Merge one config value pair using mapping/list/scalar semantics."""
+    if isinstance(base_value, dict) and isinstance(override_value, dict):
+        return _merge_mapping_value(
+            base_value,
+            override_value,
+            list_concat_keys=list_concat_keys,
+            concat_merger=concat_merger,
+            list_merger_resolver=list_merger_resolver,
+        )
+
+    if isinstance(base_value, list) and isinstance(override_value, list):
+        return _merge_list_value(
+            key,
+            base_value,
+            override_value,
+            list_concat_keys=list_concat_keys,
+            concat_merger=concat_merger,
+            list_merger_resolver=list_merger_resolver,
+        )
+
+    return copy.deepcopy(override_value)
+
+
 def config_merge(
     base: Mapping[str, Any],  # Any: YAML config values are heterogeneous
     override: Mapping[str, Any],  # Any: YAML config values are heterogeneous
@@ -89,32 +160,14 @@ def config_merge(
             result[key] = copy.deepcopy(override_value)
             continue
 
-        base_value = result[key]
-
-        if isinstance(base_value, dict) and isinstance(override_value, dict):
-            result[key] = config_merge(
-                base_value,
-                override_value,
-                list_concat_keys=list_concat_keys,
-                concat_list_merger=concat_merger,
-                list_merger_resolver=list_merger_resolver,
-            )
-            continue
-
-        if isinstance(base_value, list) and isinstance(override_value, list):
-            merger = _resolve_list_merger(
-                key,
-                list_concat_keys=list_concat_keys,
-                concat_merger=concat_merger,
-                list_merger_resolver=list_merger_resolver,
-            )
-            if merger is not None:
-                result[key] = merger(base_value, override_value, key)
-            else:
-                result[key] = copy.deepcopy(override_value)
-            continue
-
-        result[key] = copy.deepcopy(override_value)
+        result[key] = _merge_config_value(
+            key,
+            result[key],
+            override_value,
+            list_concat_keys=list_concat_keys,
+            concat_merger=concat_merger,
+            list_merger_resolver=list_merger_resolver,
+        )
 
     return result
 

@@ -46,7 +46,7 @@ Workflow следует принципу "Safe-by-Design":
 
 Субагенты ОБЯЗАНЫ использовать следующие инструменты:
 
-- **Зависимости**: `uv run python -m ...` или `.venv\Scripts\python.exe -m ...`
+- **Зависимости**: `uv run python -m ...` в CI/одиночном checkout; в mixed Windows + WSL checkout используй `.\.venv-win\Scripts\python.exe -m ...` для PowerShell или `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...` для WSL.
 - **Линтинг**: `make lint` (ruff + mypy).
 - **Тесты**: `make test-unit`, `make test-integration` (VCR).
 - **Архитектура**: `pytest tests/architecture/`.

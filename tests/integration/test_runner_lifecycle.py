@@ -132,7 +132,7 @@ def mock_checkpoint_manager_with_recorder(call_recorder):
     """Create checkpoint manager that records calls."""
     manager = AsyncMock()
 
-    async def load_checkpoint():
+    async def load_checkpoint(*, current_metadata=None):
         call_recorder.record("checkpoint.load")
         return None
 
@@ -787,7 +787,7 @@ class TestPipelineRunnerLifecycle:
 
         checkpoint_manager = AsyncMock()
 
-        async def load_checkpoint():
+        async def load_checkpoint(*, current_metadata=None):
             nonlocal checkpoint_loaded
             checkpoint_loaded = True
             call_recorder.record("checkpoint.load")

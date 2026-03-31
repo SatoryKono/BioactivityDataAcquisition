@@ -16,6 +16,12 @@ model: opus
 - `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification
 - `docs/00-project/ai/agents/agents/ORCHESTRATION.md` — публикуемый mirror протокола оркестрации (§2-§7)
 
+## Runtime Note
+
+- CI или single-OS checkout: `uv run python -m ...`
+- Mixed checkout в Windows PowerShell: `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`, `.\.venv-win\Scripts\python.exe -m ...`
+- Mixed checkout в WSL/Linux: `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`, `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...`
+
 ## Контекст проекта
 
 **BioETL Overview:**
@@ -333,7 +339,7 @@ Task(
 > - Стек: Python 3.13, uv, pytest, pytest-asyncio, hypothesis, VCR.py, respx, syrupy
 > - Coverage threshold: ≥85% overall, ≥90% domain
 > - Архитектура: domain → application → infrastructure → composition → interfaces
-> - Команды: через `uv run python -m pytest ...` и `uv run python -m mypy --strict ...`
+> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\scripts\dev\run_pytest.ps1` / `.\scripts\dev\run_mypy.ps1`; WSL mixed checkout: `bash scripts/dev/run_pytest.sh` / `bash scripts/dev/run_mypy.sh`
 >
 > ## Task Brief
 > - **Тестовые файлы**: {test_paths}

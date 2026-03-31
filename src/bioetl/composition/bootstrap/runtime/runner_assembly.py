@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -46,39 +45,13 @@ CompositeRunnerFactory = Callable[..., CompositePipelineRunnerService]
 __all__ = [
     "bootstrap_composite_runner",
     "create_composite_runner",
-    "create_composite_runner_with_legacy_fsm_adapter",
+    "create_composite_runner_service",
 ]
 
 
 def _resolve_effective_run_id(run_id: str | None) -> str:
     """Return caller-provided run_id or generate a UUID."""
     return run_id or str(uuid4())
-
-
-def _resolve_legacy_fsm_state_helper(
-    *,
-    config: CompositeConfig,
-    logger: LoggerPort,
-    run_id: str,
-    fsm_state_helper: FSMStateHelperService | None,
-) -> FSMStateHelperService:
-    """Return injected FSM helper or build the deprecated legacy fallback."""
-    if fsm_state_helper is not None:
-        return fsm_state_helper
-
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-
-    warnings.warn(
-        "Creating CompositePipelineRunner without fsm_state_helper is deprecated; "
-        "inject fsm_state_helper from composition.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return FSMStateHelperService(
-        config=config,
-        logger=logger,
-        run_id=run_id,
-    )
 
 
 def _build_composite_runner_dependencies(
@@ -120,7 +93,7 @@ def _build_composite_runner_dependencies(
     )
 
 
-def create_composite_runner_with_legacy_fsm_adapter(
+def create_composite_runner_service(
     *,
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
@@ -132,7 +105,7 @@ def create_composite_runner_with_legacy_fsm_adapter(
     checkpoint_manager: CompositeCheckpointService,
     logger: LoggerPort,
     lock: LockPort,
-    fsm_state_helper: FSMStateHelperService | None = None,
+    fsm_state_helper: FSMStateHelperService,
     run_id: str | None = None,
     dq_report_service: DQReportService | None = None,
     preflight_validator: CompositePreflightValidator | None = None,
@@ -142,18 +115,14 @@ def create_composite_runner_with_legacy_fsm_adapter(
     quarantine_port: QuarantinePort | None = None,
     metrics: MetricsPort | None = None,
 ) -> CompositePipelineRunnerService:
-    """Create composite runner with temporary legacy FSM injection in composition.
+    """Create composite runner service from fully resolved composition dependencies.
 
     Returns:
         CompositePipelineRunnerService wired with the provided dependencies.
     """
     effective_run_id = _resolve_effective_run_id(run_id)
-    effective_fsm_state_helper = _resolve_legacy_fsm_state_helper(
-        config=config,
-        logger=logger,
-        run_id=effective_run_id,
-        fsm_state_helper=fsm_state_helper,
-    )
+    if fsm_state_helper is None:
+        raise AssertionError("Composite runner requires fsm_state_helper")
     deps = _build_composite_runner_dependencies(
         seed_runner_factory=seed_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
@@ -163,7 +132,7 @@ def create_composite_runner_with_legacy_fsm_adapter(
         checkpoint_manager=checkpoint_manager,
         logger=logger,
         lock=lock,
-        fsm_state_helper=effective_fsm_state_helper,
+        fsm_state_helper=fsm_state_helper,
         dq_report_service=dq_report_service,
         preflight_validator=preflight_validator,
         dependencies_runner_factory=dependencies_runner_factory,
@@ -190,7 +159,7 @@ def create_composite_runner(
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     support_services: CompositeSupportServices,
-    runner_factory: CompositeRunnerFactory = create_composite_runner_with_legacy_fsm_adapter,
+    runner_factory: CompositeRunnerFactory = create_composite_runner_service,
 ) -> CompositePipelineRunnerService:
     """Create fully wired CompositePipelineRunner service.
 

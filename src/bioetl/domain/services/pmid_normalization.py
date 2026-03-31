@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.domain.normalization.identifiers import normalize_pmid
+
 __all__ = [
     "PmidNormalizationService",
 ]
@@ -30,23 +32,4 @@ class PmidNormalizationService:
         Returns:
             Normalized PMID string, or None if invalid.
         """
-        str_value = self._pmid_to_string(pmid)
-        return self._validate_pmid_string(str_value) if str_value else None
-
-    @staticmethod
-    def _pmid_to_string(pmid: str | int | None) -> str | None:
-        """Convert PMID to string, rejecting invalid types."""
-        if pmid is None or isinstance(pmid, bool):
-            return None
-        if isinstance(pmid, (int, str)):
-            result = str(pmid).strip()
-            return result if result else None
-        return None
-
-    @staticmethod
-    def _validate_pmid_string(str_value: str) -> str | None:
-        """Validate and normalize PMID string."""
-        if not str_value.isdigit():
-            return None
-        int_value = int(str_value)
-        return str(int_value) if int_value > 0 else None
+        return normalize_pmid(pmid)

@@ -47,6 +47,20 @@ bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
 bash scripts/dev/run_mypy.sh
 ```
 
+`run_pytest.ps1` and `run_pytest.sh` both add default pytest flags unless you ask
+for help/version:
+
+```text
+--cov=src/bioetl --cov-report=term -q --maxfail=1
+```
+
+Behavior differs slightly by platform:
+
+- `bash scripts/dev/run_pytest.sh` runs `bash scripts/ops/setup_plugins.sh --pytest-only`
+  first, so missing pytest plugins can be auto-installed in the selected Python environment.
+- `.\scripts\dev\run_pytest.ps1` assumes `.venv-win` is already prepared via
+  `.\scripts\dev\setup_env_windows.ps1` or `make setup-plugins`.
+
 If you need MkDocs commands such as `make docs-build` or `make docs-serve`,
 install the separate docs toolchain extra:
 

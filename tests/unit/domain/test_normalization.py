@@ -15,6 +15,7 @@ from bioetl.domain.normalization import (
     format_date_parts,
     normalize_doi,
     normalize_pmc_id,
+    normalize_pmid,
     normalize_string,
     normalize_to_string,
     parse_authors_to_list,
@@ -98,6 +99,8 @@ class TestNormalizeDoi:
             ("10.1038/NATURE12373", "10.1038/nature12373"),
             ("  10.1038/nature12373  ", "10.1038/nature12373"),
             ("  10.1038/NATURE12373  ", "10.1038/nature12373"),
+            ("https://doi.org/10.1038/NATURE12373", "10.1038/nature12373"),
+            ("doi:10.1126/SCIENCE.ABC1234", "10.1126/science.abc1234"),
             (None, None),
         ],
     )
@@ -150,6 +153,33 @@ class TestFormatDateParts:
         assert format_date_parts([[1900, 2]]) == "1900-02-28"  # Century, not div by 400
         assert format_date_parts([[2020, 2]]) == "2020-02-29"  # Leap year
         assert format_date_parts([[2021, 2]]) == "2021-02-28"  # Not leap year
+
+
+class TestNormalizePmid:
+    """Tests for normalize_pmid function."""
+
+    @pytest.mark.parametrize(
+        "pmid,expected",
+        [
+            (12345678, "12345678"),
+            ("12345678", "12345678"),
+            ("  12345678  ", "12345678"),
+            ("012345678", "12345678"),
+            (None, None),
+            ("", None),
+            ("abc", None),
+            ("12.34", None),
+            (0, None),
+            (-1, None),
+            (True, None),
+            (False, None),
+        ],
+    )
+    def test_normalize_pmid(
+        self, pmid: str | int | None, expected: str | None
+    ) -> None:
+        """Test PMID normalization."""
+        assert normalize_pmid(pmid) == expected
 
 
 class TestParseDateField:

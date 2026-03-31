@@ -75,7 +75,7 @@ done
 
 ```bash
 # Root agent instructions
-grep -E "uv run python -m pytest|uv run python -m mypy|ruff|pytest|mypy" AGENTS.md 2>/dev/null
+grep -E "run_pytest|run_mypy|uv run python -m pytest|uv run python -m mypy|bioetl run|ruff|pytest|mypy" AGENTS.md 2>/dev/null
 
 # Project Codex config
 sed -n '1,120p' .codex/config.toml 2>/dev/null

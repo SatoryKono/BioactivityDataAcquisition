@@ -104,8 +104,5 @@ def _replace_checkpoint_state(
     **changes: object,
 ) -> CompositeCheckpointState:
     # `dataclasses.replace` accepts field-aligned keyword overrides, but mypy
-    # cannot infer them from a generic kwargs dict in this helper.
-    typed_changes = dict[str, object](
-        changes
-    )
-    return replace(checkpoint_state, updated_at=datetime.now(tz=UTC), **typed_changes)
+    # cannot infer them from this helper's dynamic kwargs surface.
+    return replace(checkpoint_state, updated_at=datetime.now(tz=UTC), **changes)  # type: ignore[arg-type]

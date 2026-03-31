@@ -69,19 +69,9 @@ ALLOWED_PRIVATE_DEFAULT_REGISTRY_IMPORT_SRC_FILES = {
 ALLOWED_DEFAULT_PROVIDER_REGISTRY_CALL_SRC_FILES = {
     DEFAULT_REGISTRY_PATH,
     REGISTRY_PATH,
-    ROOT / "src" / "bioetl" / "composition" / "providers" / "loader.py",
-    ROOT
-    / "src"
-    / "bioetl"
-    / "composition"
-    / "factories"
-    / "datasource"
-    / "provider_registry_resolution.py",
-}
-ALLOWED_DEFAULT_PROVIDER_REGISTRAR_CALL_SRC_FILES = {
-    REGISTRY_PATH,
     REGISTRATION_PATH,
 }
+ALLOWED_DEFAULT_PROVIDER_REGISTRAR_CALL_SRC_FILES: set[Path] = set()
 
 
 def _import_from_modules(path: Path) -> set[str]:

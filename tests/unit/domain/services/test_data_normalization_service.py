@@ -49,6 +49,8 @@ class TestNormalizeDoi:
             ("10.1038/NATURE12373", "10.1038/nature12373"),
             ("  10.1038/nature12373  ", "10.1038/nature12373"),
             ("  10.1038/NATURE12373  ", "10.1038/nature12373"),
+            ("https://doi.org/10.1038/NATURE12373", "10.1038/nature12373"),
+            ("DOI:10.1001/JAMA.2024.0001", "10.1001/jama.2024.0001"),
             (None, None),
             ("", None),
         ],

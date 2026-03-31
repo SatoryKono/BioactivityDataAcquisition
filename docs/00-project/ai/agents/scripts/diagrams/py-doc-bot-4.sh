@@ -54,8 +54,20 @@ resolve_python() {
     printf '%s\n' "$PYTHON_BIN"
     return
   fi
+  if [[ -x "$REPO_ROOT/.venv-win/Scripts/python.exe" ]]; then
+    printf '%s\n' "$REPO_ROOT/.venv-win/Scripts/python.exe"
+    return
+  fi
+  if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
+    printf '%s\n' "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
+    return
+  fi
   if [[ -x "$REPO_ROOT/.venv/Scripts/python.exe" ]]; then
     printf '%s\n' "$REPO_ROOT/.venv/Scripts/python.exe"
+    return
+  fi
+  if [[ -x "$REPO_ROOT/.venv/bin/python" ]]; then
+    printf '%s\n' "$REPO_ROOT/.venv/bin/python"
     return
   fi
   if command -v python3 >/dev/null 2>&1; then

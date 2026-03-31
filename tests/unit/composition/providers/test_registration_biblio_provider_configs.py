@@ -25,18 +25,18 @@ class TestGetBiblioProviderConfigs:
     """Tests for bibliographic ProviderConfig registry entries."""
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limit_from_config"
+        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
     )
     def test_contains_expected_provider_keys(
         self,
-        mock_get_rate_limit: MagicMock,
+        mock_get_rate_limits: MagicMock,
     ) -> None:
-        mock_get_rate_limit.side_effect = [
-            _rate_limit(3.0, 6),
-            _rate_limit(50.0, 100),
-            _rate_limit(10.0, 20),
-            _rate_limit(100.0, 200),
-        ]
+        mock_get_rate_limits.return_value = {
+            "pubmed": _rate_limit(3.0, 6),
+            "crossref": _rate_limit(50.0, 100),
+            "openalex": _rate_limit(10.0, 20),
+            "semanticscholar": _rate_limit(100.0, 200),
+        }
 
         configs = _get_biblio_provider_configs(assembly_support=MagicMock())
 
@@ -48,18 +48,18 @@ class TestGetBiblioProviderConfigs:
         }
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limit_from_config"
+        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
     )
     def test_pubmed_provider_config_has_pubmed_api_key_rate_override(
         self,
-        mock_get_rate_limit: MagicMock,
+        mock_get_rate_limits: MagicMock,
     ) -> None:
-        mock_get_rate_limit.side_effect = [
-            _rate_limit(3.0, 6),
-            _rate_limit(50.0, 100),
-            _rate_limit(10.0, 20),
-            _rate_limit(100.0, 200),
-        ]
+        mock_get_rate_limits.return_value = {
+            "pubmed": _rate_limit(3.0, 6),
+            "crossref": _rate_limit(50.0, 100),
+            "openalex": _rate_limit(10.0, 20),
+            "semanticscholar": _rate_limit(100.0, 200),
+        }
 
         configs = _get_biblio_provider_configs(assembly_support=MagicMock())
         pubmed = configs["pubmed"]
@@ -68,18 +68,18 @@ class TestGetBiblioProviderConfigs:
         assert pubmed.http_config.rate_overrides == {"pubmed_api_key": 10.0}
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limit_from_config"
+        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
     )
     def test_crossref_provider_config_uses_crossref_adapter_factory(
         self,
-        mock_get_rate_limit: MagicMock,
+        mock_get_rate_limits: MagicMock,
     ) -> None:
-        mock_get_rate_limit.side_effect = [
-            _rate_limit(3.0, 6),
-            _rate_limit(50.0, 100),
-            _rate_limit(10.0, 20),
-            _rate_limit(100.0, 200),
-        ]
+        mock_get_rate_limits.return_value = {
+            "pubmed": _rate_limit(3.0, 6),
+            "crossref": _rate_limit(50.0, 100),
+            "openalex": _rate_limit(10.0, 20),
+            "semanticscholar": _rate_limit(100.0, 200),
+        }
 
         configs = _get_biblio_provider_configs(assembly_support=MagicMock())
         crossref = configs["crossref"]
@@ -89,18 +89,18 @@ class TestGetBiblioProviderConfigs:
         assert crossref.requires_logger is True
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limit_from_config"
+        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
     )
     def test_openalex_and_pubmed_use_composition_local_custom_creators(
         self,
-        mock_get_rate_limit: MagicMock,
+        mock_get_rate_limits: MagicMock,
     ) -> None:
-        mock_get_rate_limit.side_effect = [
-            _rate_limit(3.0, 6),
-            _rate_limit(50.0, 100),
-            _rate_limit(10.0, 20),
-            _rate_limit(100.0, 200),
-        ]
+        mock_get_rate_limits.return_value = {
+            "pubmed": _rate_limit(3.0, 6),
+            "crossref": _rate_limit(50.0, 100),
+            "openalex": _rate_limit(10.0, 20),
+            "semanticscholar": _rate_limit(100.0, 200),
+        }
 
         configs = _get_biblio_provider_configs(assembly_support=MagicMock())
 
@@ -110,18 +110,18 @@ class TestGetBiblioProviderConfigs:
         )
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limit_from_config"
+        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
     )
     def test_data_source_creators_capture_same_injected_support_instance(
         self,
-        mock_get_rate_limit: MagicMock,
+        mock_get_rate_limits: MagicMock,
     ) -> None:
-        mock_get_rate_limit.side_effect = [
-            _rate_limit(3.0, 6),
-            _rate_limit(50.0, 100),
-            _rate_limit(10.0, 20),
-            _rate_limit(100.0, 200),
-        ]
+        mock_get_rate_limits.return_value = {
+            "pubmed": _rate_limit(3.0, 6),
+            "crossref": _rate_limit(50.0, 100),
+            "openalex": _rate_limit(10.0, 20),
+            "semanticscholar": _rate_limit(100.0, 200),
+        }
         support = MagicMock(name="assembly_support")
 
         configs = _get_biblio_provider_configs(assembly_support=support)

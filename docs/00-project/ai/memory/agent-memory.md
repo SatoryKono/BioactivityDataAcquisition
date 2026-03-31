@@ -98,8 +98,10 @@ make run-local     # Сэмпловый pipeline-run (chembl_activity, limit=10)
 ### Unified Script Entry Points
 
 Все скрипты доступны через `python -m scripts.<group> <command>`.
-После `uv sync` предпочитай запуск через `uv run python -m scripts.<group> <command>`;
-при активированном `.venv` допускается и прямой `python -m ...`.
+После `uv sync` предпочитай запуск через `uv run python -m scripts.<group> <command>`.
+Для mixed Windows + WSL checkout используй OS-specific окружение:
+`.venv-win` в PowerShell и `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` в WSL.
+При активированном подходящем окружении допускается и прямой `python -m ...`.
 
 | Group | Entry Point | Назначение |
 |-------|-------------|------------|

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.domain.normalization import strip_doi_prefix
+from bioetl.domain.normalization.identifiers import normalize_doi
 
 __all__ = [
     "DoiNormalizationService",
@@ -28,16 +28,12 @@ class DoiNormalizationService:
     """
 
     def normalize_doi(self, doi: str | None) -> str | None:
-        """Normalize DOI to lowercase, stripped format.
+        """Normalize DOI to canonical lowercase bare format.
 
         Args:
             doi: DOI string in any supported format.
 
         Returns:
-            Normalized bare DOI (lowercase, stripped) or None if input is None/empty.
+            Normalized bare DOI (prefix removed, lowercase, stripped) or None.
         """
-        if not doi:
-            return None
-        stripped = strip_doi_prefix(doi)
-        result = stripped.strip().lower()
-        return result if result else None
+        return normalize_doi(doi)

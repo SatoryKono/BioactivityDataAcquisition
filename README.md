@@ -141,7 +141,7 @@ Notes:
 - Documentation site commands such as `make docs-build` require the separate `docs` extra: `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"`.
 - `make setup-plugins` configures local pytest/pre-commit tooling.
 - `make setup-skills` syncs repository-local Codex `skills` and their paired `agents` into `$CODEX_HOME` (default `~/.codex`).
-- If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.dev setup-mcp` after install. If you activated `.venv` instead of using `uv`, `python -m scripts.dev setup-mcp` is also valid.
+- If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.dev setup-mcp` is also valid.
 - `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
 #### Mixed Windows + WSL Development
@@ -269,30 +269,44 @@ bash scripts/dev/run_mypy.sh
 
 ### Running Pipelines
 
-Activate the virtual environment:
+Use the OS-appropriate bootstrap path first:
 
-```bash
-# Linux/macOS
-source .venv/bin/activate
-
-# Windows
-.venv\Scripts\activate
+```powershell
+# Windows PowerShell
+.\scripts\dev\setup_env_windows.ps1
+.\.venv-win\Scripts\Activate.ps1
 ```
 
-Run the ETL pipeline using the CLI:
+```bash
+# WSL/Linux
+bash scripts/dev/setup_env_wsl.sh
+source "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/activate"
+```
+
+Then run the ETL pipeline using the CLI:
 
 ```bash
 # Run incremental update for ChEMBL
-bioetl run --pipeline chembl_activity --run-type incremental
+python -m bioetl run --pipeline chembl_activity --run-type incremental
 
 # Run backfill with resume capability
-bioetl run --pipeline chembl_activity --run-type backfill --resume
+python -m bioetl run --pipeline chembl_activity --run-type backfill --resume
 
 # Inspect quarantined records
-bioetl quarantine inspect --pipeline chembl_activity --limit 10
+python -m bioetl quarantine inspect --pipeline chembl_activity --limit 10
 
 # List checkpoints
-bioetl checkpoint list --pipeline chembl_activity
+python -m bioetl checkpoint list --pipeline chembl_activity
+```
+
+If you do not want to activate the environment, call the interpreter directly:
+
+```powershell
+.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_publication --limit 50000
+```
+
+```bash
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_publication --limit 50000
 ```
 
 ## Development
@@ -384,30 +398,45 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
 - **Quick Check (with dependencies auto-synced and coverage):**
 
   ```bash
-  ./scripts/run_pytest.sh
+  bash scripts/dev/run_pytest.sh
   ```
 
   Windows PowerShell:
 
   ```powershell
-  .\scripts\run_pytest.ps1
+  .\scripts\dev\run_pytest.ps1
   ```
 
-  The helper bootstraps the virtual environment (installs `pytest-cov`, `orjson`, `syrupy`, and other test-only dependencies) and reproduces the default CI command with coverage output.
+  The helpers assume you already bootstrapped the OS-appropriate environment with
+  `make install` / `make setup-plugins` or `scripts/dev/setup_env_windows.ps1` /
+  `scripts/dev/setup_env_wsl.sh`. By default they run `pytest` with
+  `--cov=src/bioetl --cov-report=term -q --maxfail=1`.
 
-  If you prefer to run the command manually, activate the local virtual environment first to avoid `--cov` argument errors:
+  `bash scripts/dev/run_pytest.sh` also calls `bash scripts/ops/setup_plugins.sh --pytest-only`
+  before execution, so it can self-heal missing pytest plugins in WSL/Linux.
+  `.\scripts\dev\run_pytest.ps1` does not perform that bootstrap step and expects
+  `.venv-win` to be prepared already.
+
+  If you prefer to run the command manually, activate the OS-appropriate virtual environment first to avoid `--cov` argument errors:
 
   ```bash
-  source .venv/bin/activate
-  # Install test extras so pytest-asyncio/pytest-cov options are available
-  pip install -e ".[dev,tests]"
+  source "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/activate"
+  # dev already includes pytest, pytest-cov, pytest-xdist, pytest-timeout, VCR, etc.
+  pip install -e ".[dev,tracing]"
   python -m pytest tests --cov=src/bioetl --cov-report=term
+  ```
+
+  Windows PowerShell:
+
+  ```powershell
+  .\.venv-win\Scripts\Activate.ps1
+  python -m pytest tests\ --cov=src/bioetl --cov-report=term
   ```
 
   With `uv`, the equivalent is:
 
   ```bash
-  uv sync --extra dev --extra tests
+  uv sync --extra dev --extra tracing
   uv run python -m pytest tests --cov=src/bioetl --cov-report=term
   ```
 
@@ -418,13 +447,13 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   uv run python -m pre_commit install --install-hooks
   ```
 
-  Если `pytest` сообщает об отсутствии обязательных плагинов (`pytest-asyncio`, `pytest-cov`), выполните повторную синхронизацию:
+  Если `pytest` сообщает об отсутствии обязательных плагинов (`pytest-asyncio`, `pytest-cov`, `pytest-xdist`, `pytest-timeout`, `pytest-vcr`), выполните повторную синхронизацию:
 
   ```bash
   uv sync --extra dev --extra tests --extra tracing
   ```
 
-  Скрипт `./scripts/run_pytest.sh` проверяет наличие плагинов и автоматически доустанавливает их при необходимости.
+  Скрипт `bash scripts/dev/run_pytest.sh` проверяет наличие плагинов и автоматически доустанавливает их при необходимости.
 
 - **Run All Tests**:
 

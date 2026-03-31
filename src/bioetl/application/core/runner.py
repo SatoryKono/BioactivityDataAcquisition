@@ -138,19 +138,13 @@ def _resolve_legacy_dependencies(
     )
 
 
-async def _load_checkpoint_with_current_metadata(
+async def _load_checkpoint(
     checkpoint_manager: CheckpointManagerService,
 ) -> CheckpointMetadata | dict[str, object] | None:
-    """Load checkpoint with compatibility fallback for legacy test doubles."""
-    load_checkpoint = checkpoint_manager.load_checkpoint
-    try:
-        return await load_checkpoint(
-            current_metadata=getattr(checkpoint_manager, "current_metadata", None)
-        )
-    except TypeError as exc:
-        if "current_metadata" not in str(exc):
-            raise
-        return await load_checkpoint()
+    """Load checkpoint with the current execution metadata."""
+    return await checkpoint_manager.load_checkpoint(
+        current_metadata=checkpoint_manager.current_metadata
+    )
 
 
 class PipelineRunner:
@@ -344,7 +338,7 @@ class PipelineRunner:
         """Resolve the executor start offset from runtime overrides or checkpoint."""
         return await resolve_execution_offset(
             self,
-            _load_checkpoint_with_current_metadata,
+            _load_checkpoint,
         )
 
     def _extract_checkpoint_offset(

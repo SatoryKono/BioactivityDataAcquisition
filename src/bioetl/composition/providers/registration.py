@@ -8,8 +8,10 @@ ProviderConfig building delegated to sibling modules (Wave 3 simplification).
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from bioetl.composition.providers._default_registry import (
-    get_default_provider_registrar,
+    get_default_provider_registry,
 )
 from bioetl.composition.providers._models import ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
@@ -66,10 +68,31 @@ def _build_provider_configs(
 ) -> dict[str, ProviderConfig]:
     """Build provider registry configs from YAML-backed rate limits."""
     support = resolve_provider_assembly_support(assembly_support)
-    return {
-        **_get_bio_provider_configs(assembly_support=support),
-        **_get_biblio_provider_configs(assembly_support=support),
-    }
+    return _merge_provider_config_families(
+        assembly_support=support,
+    )
+
+
+def _merge_provider_config_families(
+    *,
+    assembly_support: ProviderAssemblySupport,
+) -> dict[str, ProviderConfig]:
+    """Merge provider-config families through one canonical assembly path."""
+    merged: dict[str, ProviderConfig] = {}
+    for build_family_configs in _iter_provider_config_family_builders():
+        merged.update(build_family_configs(assembly_support=assembly_support))
+    return merged
+
+
+def _iter_provider_config_family_builders() -> tuple[
+    Callable[..., dict[str, ProviderConfig]],
+    ...,
+]:
+    """Return ordered family builders for provider registration assembly."""
+    return (
+        _get_bio_provider_configs,
+        _get_biblio_provider_configs,
+    )
 
 
 def _resolve_registration_registry(
@@ -79,4 +102,4 @@ def _resolve_registration_registry(
     if registry is not None:
         return registry
 
-    return get_default_provider_registrar()
+    return get_default_provider_registry()
