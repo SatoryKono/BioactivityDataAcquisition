@@ -166,7 +166,7 @@ class IDMappingTransformer(BaseTransformer):
     def _build_mapping_business_data(
         self,
         record: BronzeRecord,
-    ) -> tuple[str, dict[str, Any]]:
+    ) -> tuple[str, dict[str, object]]:
         """Build ID mapping business data prior to hash finalization."""
         target_id = str(self._get_required_field(record, "target_id"))
         uniprot_accession = record.get("uniprot_accession")
@@ -179,7 +179,7 @@ class IDMappingTransformer(BaseTransformer):
         else:
             mapping_status = "not_found"
 
-        business_data: dict[str, Any] = {
+        business_data: dict[str, object] = {
             "target_id": target_id,
             "uniprot_accession": uniprot_accession,
             "mapping_status": mapping_status,

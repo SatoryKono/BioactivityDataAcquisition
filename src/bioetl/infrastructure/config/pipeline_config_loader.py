@@ -122,7 +122,6 @@ class PipelineConfigLoader:
         Raises:
             FileNotFoundError: Propagated only when no hierarchy file exists
                 and no inline overrides are present.
-
         """
         return resolve_pipeline_dq_config(
             yaml_config,
@@ -142,6 +141,5 @@ class PipelineConfigLoader:
         """
         self._dq_loader.clear_cache()
         self._filter_loader.clear_cache()
-
 
 __all__ = ["PipelineConfigLoader"]

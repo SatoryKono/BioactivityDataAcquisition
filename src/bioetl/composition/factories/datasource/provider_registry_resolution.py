@@ -5,7 +5,6 @@ from __future__ import annotations
 from bioetl.composition.providers.provider_registry import (
     ProviderRegistry,
     ensure_provider_registry_ready,
-    get_default_provider_registry,
 )
 
 
@@ -16,7 +15,7 @@ def resolve_datasource_provider_registry(
     resolved_registry = (
         provider_registry
         if provider_registry is not None
-        else get_default_provider_registry()
+        else ProviderRegistry._get_default()
     )
     return ensure_provider_registry_ready(resolved_registry)
 

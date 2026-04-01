@@ -214,7 +214,7 @@ class PubChemCompoundTransformer(BaseTransformer):
         context: PipelineContext,
         record: BronzeRecord,
         index: int,
-    ) -> tuple[object, dict[str, Any]] | None:
+    ) -> tuple[object, dict[str, object]] | None:
         """Build PubChem business data prior to hash finalization."""
         cid = record.get("cid")
         if cid is None:
@@ -226,7 +226,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             )
             return None
 
-        business_data: dict[str, Any] = {
+        business_data: dict[str, object] = {
             "molecule_id": str(cid),
             "canonical_smiles": record.get("canonical_smiles"),
             "isomeric_smiles": record.get("isomeric_smiles"),
