@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-01'
 ---
 
 # Running Pipelines
@@ -40,7 +40,7 @@ Last verified: '2026-03-29'
 
 1. **Environment настроен** (`.env` файл или переменные окружения)
 
-1. **Зависимости установлены:**
+1. **Bootstrap проверен локальным smoke/stable run:**
 
    ```bash
    # Stable local suite

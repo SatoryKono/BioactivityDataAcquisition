@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-01'
 ---
 
 # Quick Start
@@ -108,13 +108,17 @@ bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 # Stable local suite
 make test
 
-# Mixed-checkout wrappers
+# WSL mixed-checkout wrappers
 bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
 
 # Check linting / typing
 make lint
-bash scripts/dev/run_mypy.sh
+```
+
+```powershell
+# PowerShell mixed-checkout wrappers
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
 .\scripts\dev\run_mypy.ps1
 ```
 
