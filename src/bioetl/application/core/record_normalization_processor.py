@@ -182,6 +182,8 @@ class RecordNormalizationProcessor:
         normalized_special = self._normalize_special_field(field_name, value)
         if normalized_special is not _UNHANDLED:
             return normalized_special
+        if field_name == "issn" and isinstance(value, list):
+            return list(value)
         if isinstance(value, dict | list):
             return serialize_json_canonical(value)
         if not isinstance(value, str):

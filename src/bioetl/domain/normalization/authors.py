@@ -7,9 +7,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.normalization.json import deserialize_json_value
 
-if TYPE_CHECKING:
-    from typing import Any
-
 __all__ = [
     "extract_first_item",
     "extract_first_string",
