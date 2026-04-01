@@ -1,0 +1,60 @@
+version: 1
+policy_scope: environment_limited_green_interpretation
+taxonomy_path: configs/quality/test_health_reporting.yaml
+classifier_source: scripts/ci/quality_integral_gate.py
+current_baseline:
+  enforced_provider_count: 7
+  accepted_steady_state_reasons:
+    - live_network_opt_in_gate
+    - live_api_gate_mode_non_always
+  transitional_reasons:
+    - architecture_suite_skips
+  disallowed_reopened_gap_reasons:
+    - pilot_provider_count
+    - vcr_only_provider_count
+  architecture_skip_budget_reference:
+    scorecard_path: configs/quality/debt_scorecard.yaml
+    coarse_budget_key: architecture_skip_count
+  interpretation_note: >-
+    An enforced seven-provider live baseline does not imply fully exercised
+    green. The current baseline may still classify as environment-limited when
+    live execution is intentionally network-gated or scheduled, while pilot or
+    VCR-only provider counts would represent a reopened baseline gap rather than
+    acceptable steady-state posture.
+reason_policy:
+  - skip_class: architecture_suite_skips
+    posture: transitional_debt
+    allowed_in_current_baseline: true
+    rationale: >-
+      Historical architecture skips still have an explicit coarse budget, but
+      they remain debt to retire rather than the target steady state.
+    next_hardening_target: retire skip inventory and ratchet budget downward
+  - skip_class: live_network_opt_in_gate
+    posture: accepted_steady_state_policy
+    allowed_in_current_baseline: true
+    rationale: >-
+      Live or networked execution remains intentionally opt-in for ordinary runs
+      and should not be misread as a broken enforced-provider baseline.
+    next_hardening_target: keep explicit at reporting layers; do not silently
+      convert into a second merge gate
+  - skip_class: live_api_gate_mode_non_always
+    posture: accepted_steady_state_policy
+    allowed_in_current_baseline: true
+    rationale: >-
+      Scheduled live execution remains an intentional policy boundary for the
+      current baseline and therefore still maps to environment-limited green.
+    next_hardening_target: revisit only if policy shifts from scheduled to always-on
+  - skip_class: pilot_provider_count
+    posture: reopened_baseline_gap
+    allowed_in_current_baseline: false
+    rationale: >-
+      Pilot providers would mean the enforced live baseline is no longer closed
+      for the current provider set.
+    next_hardening_target: keep pilot count at zero in the active baseline
+  - skip_class: vcr_only_provider_count
+    posture: reopened_baseline_gap
+    allowed_in_current_baseline: false
+    rationale: >-
+      VCR-only providers would reintroduce baseline exclusion rather than a
+      stable environment-limited edge.
+    next_hardening_target: keep VCR-only count at zero in the active baseline

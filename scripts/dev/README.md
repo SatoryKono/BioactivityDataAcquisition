@@ -81,14 +81,14 @@ python -m scripts.dev <command> [args...]
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `setup` | `dev_setup.sh` | Legacy shell facade; currently not the supported onboarding path |
-| `setup --quick` | `dev_setup.sh` | Legacy placeholder mode; not recommended for current setup |
-| `setup --ci` | `dev_setup.sh` | Legacy placeholder mode; not recommended for current setup |
-| `install-deps` | `install_deps.py` | Auxiliary helper script, not a full project bootstrap |
-| `run-tests` | `run_tests.py` | Run tests |
-| `mock-metrics` | `metrics_mock_server.py` | Start mock metrics server |
-| `test-changed` | `run_tests.py changed` | Run tests for changed files only |
-| `setup-mcp` | `setup_copilot_codex_mcp.py` | Setup Copilot/Codex MCP integration |
+| `setup` | `scripts/dev/dev_setup.sh` | Legacy shell facade; currently not the supported onboarding path |
+| `setup --quick` | `scripts/dev/dev_setup.sh` | Legacy placeholder mode; not recommended for current setup |
+| `setup --ci` | `scripts/dev/dev_setup.sh` | Legacy placeholder mode; not recommended for current setup |
+| `install-deps` | `scripts/dev/install_deps.py` | Auxiliary helper script, not a full project bootstrap |
+| `run-tests` | `scripts/dev/run_tests.py` | Run tests |
+| `mock-metrics` | `scripts/dev/metrics_mock_server.py` | Start mock metrics server |
+| `test-changed` | `scripts/dev/run_tests.py changed` | Run tests for changed files only |
+| `setup-mcp` | `scripts/dev/setup_copilot_codex_mcp.py` | Setup Copilot/Codex MCP integration |
 
 ## When to Use
 
@@ -107,13 +107,15 @@ python -m scripts.dev <command> [args...]
 
 | File | Description |
 |------|-------------|
-| `run_tests.sh` | Run tests (shell variant) |
-| `run_tests.ps1` | Run tests (PowerShell variant) |
-| `run_mypy.sh` | Run mypy with local-environment fallbacks (shell variant) |
-| `run_mypy.ps1` | Run mypy with local-environment fallbacks (PowerShell variant) |
-| `run_pytest.sh` | Run pytest directly |
-| `run_pytest.ps1` | Run pytest directly (PowerShell variant) |
-| `setup_copilot_codex_mcp.sh` | Setup MCP (shell variant) |
-| `setup_copilot_codex_mcp.ps1` | Setup MCP (PowerShell variant) |
-| `setup_env_windows.ps1` | Create/update the stable Windows virtualenv at `.venv-win` |
-| `setup_env_wsl.sh` | Create/update the stable WSL virtualenv outside the repo (default: `$HOME/.venvs/bioetl`) |
+| `scripts/dev/run_tests.sh` | Run tests (shell variant) |
+| `scripts/dev/run_tests.ps1` | Run tests (PowerShell variant) |
+| `scripts/dev/run_mypy.sh` | Run mypy with local-environment fallbacks (shell variant) |
+| `scripts/dev/run_mypy.ps1` | Run mypy with local-environment fallbacks (PowerShell variant) |
+| `scripts/dev/run_pytest.sh` | Run pytest directly |
+| `scripts/dev/run_pytest.ps1` | Run pytest directly (PowerShell variant) |
+| `scripts/dev/setup_copilot_codex_mcp.sh` | Setup MCP (shell variant) |
+| `scripts/dev/setup_copilot_codex_mcp.ps1` | Setup MCP (PowerShell variant) |
+| `scripts/dev/setup_env_windows.ps1` | Create/update the stable Windows virtualenv at `.venv-win` |
+| `scripts/dev/setup_env_wsl.sh` | Create/update the stable WSL virtualenv outside the repo (default: `$HOME/.venvs/bioetl`) |
+| `scripts/dev/.wsl-vpn-fix.ps1` | Recover Windows-side VPN proxy settings for WSL interoperability |
+| `scripts/dev/.setup_wsl_codex.sh` | WSL/Codex DNS and connectivity bootstrap helper for the documented WSL setup flow |

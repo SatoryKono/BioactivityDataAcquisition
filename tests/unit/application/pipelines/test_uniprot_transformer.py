@@ -7,6 +7,10 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -241,6 +245,61 @@ class TestUniProtProteinTransformer:
         assert "content_hash" in result1
         assert "content_hash" in result2
         assert result1["content_hash"] == result2["content_hash"]
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_silver_returns_staged_payload(
+        self, transformer, mock_context
+    ):
+        """Test staged UniProt path returns business data before hash finalization."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "COX2_HUMAN",
+            "proteinDescription": {
+                "recommendedName": {
+                    "fullName": {"value": "Prostaglandin G/H synthase 2"}
+                }
+            },
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.entity_id == "uniprot:P12345"
+        assert result.business_data["accession"] == "P12345"
+        assert result.business_data["entry_name"] == "COX2_HUMAN"
+        assert "content_hash" not in result.business_data
+
+    @pytest.mark.asyncio
+    async def test_transform_matches_staged_finalization(
+        self, transformer, mock_context
+    ):
+        """Legacy UniProt transform should match staged finalization."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "COX2_HUMAN",
+            "proteinDescription": {
+                "recommendedName": {
+                    "fullName": {"value": "Prostaglandin G/H synthase 2"}
+                }
+            },
+            "genes": [{"geneName": {"value": "PTGS2"}}],
+        }
+
+        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        assert isinstance(pre_silver, PreSilverRecord)
+        staged_result = RecordNormalizationProcessor(
+            provider=transformer.provider,
+        ).finalize_pre_silver(pre_silver, mock_context, 0)
+        legacy_result = await transformer.transform(mock_context, record, index=0)
+
+        assert staged_result is not None
+        assert legacy_result is not None
+        assert legacy_result["accession"] == staged_result["accession"]
+        assert legacy_result["entry_name"] == staged_result["entry_name"]
+        assert legacy_result["protein_name"] == staged_result["protein_name"]
+        assert legacy_result["gene_names"] == staged_result["gene_names"]
+        assert legacy_result["entity_id"] == staged_result["entity_id"]
+        assert legacy_result["content_hash"] == staged_result["content_hash"]
 
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):

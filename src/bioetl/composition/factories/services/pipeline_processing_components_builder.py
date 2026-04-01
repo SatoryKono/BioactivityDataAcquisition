@@ -16,6 +16,9 @@ from bioetl.application.core.protocols import (
     TransformCallback,
 )
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
@@ -49,6 +52,16 @@ def create_batch_processing_components(
         pipeline_name=config.pipeline_name,
         metrics=services.metrics,
     )
+    normalization_processor = (
+        RecordNormalizationProcessor(
+            provider=config.provider,
+            rule_set=config.normalization_rule_set,
+            content_hash_include_fields=config.content_hash_include_fields,
+            content_hash_exclude_fields=config.content_hash_exclude_fields,
+        )
+        if config.normalization_enabled
+        else None
+    )
     transformer = BatchTransformer(
         context=context,
         config=config,
@@ -58,6 +71,7 @@ def create_batch_processing_components(
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,
+        normalization_processor=normalization_processor,
     )
     column_orderer = (
         ColumnOrderer(context.logger, column_groups=config.column_groups)

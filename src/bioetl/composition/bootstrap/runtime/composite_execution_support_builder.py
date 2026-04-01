@@ -5,6 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+    validate_join_key_normalization_policies,
+)
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
@@ -36,15 +40,23 @@ def build_execution_support_services(
     delta_reader: DeltaReader,
 ) -> ExecutionSupportServicesBundle:
     """Build execution-facing support services shared across runtime stages."""
+    validate_join_key_normalization_policies(config)
     return ExecutionSupportServicesBundle(
         key_extractor=KeyExtractorService(
             delta_reader=delta_reader,
             logger=logger,
+            normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
         ),
         dependency_coordinator=DependencyCoordinatorService(
             logger=logger,
-            seed_key_resolver=create_seed_key_resolver(logger),
-            chained_key_resolver=create_chained_key_resolver(logger),
+            seed_key_resolver=create_seed_key_resolver(
+                logger,
+                normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
+            ),
+            chained_key_resolver=create_chained_key_resolver(
+                logger,
+                normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
+            ),
             progress_service=DependencyProgressService(logger),
             result_service=DependencyResultService(logger),
             delta_reader=delta_reader,

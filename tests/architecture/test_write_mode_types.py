@@ -62,8 +62,7 @@ def test_no_literal_write_modes_in_domain_config() -> None:
     Will become a MUST after full migration.
     """
     existing_paths = [p for p in DOMAIN_CONFIG_PATHS if p.exists()]
-    if not existing_paths:
-        pytest.skip("No domain config files found")
+    assert existing_paths, "No domain config files found"
 
     all_pure_literals: list[tuple[str, int, str]] = []
     for config_path in existing_paths:
@@ -82,16 +81,13 @@ def test_no_literal_write_modes_in_domain_config() -> None:
         ]
         all_pure_literals.extend(pure_literals)
 
-    # For now, just report - will be a hard failure after migration
-    if all_pure_literals:
-        warnings = [
+    assert not all_pure_literals, (
+        f"Found {len(all_pure_literals)} Literal write mode annotations:\n"
+        + "\n".join(
             f"  {path} Line {line}: Literal{vals} should use WriteMode enum"
             for path, line, vals in all_pure_literals
-        ]
-        pytest.skip(
-            f"Found {len(all_pure_literals)} Literal write mode annotations:\n"
-            + "\n".join(warnings)
         )
+    )
 
 
 def test_write_mode_enums_exist_in_domain() -> None:
@@ -209,8 +205,7 @@ def test_no_silent_degradation_in_batch_writer() -> None:
     from batch_writer.py as per R1 refactoring.
     """
     batch_writer_path = Path("src/bioetl/application/core/batch_writer.py")
-    if not batch_writer_path.exists():
-        pytest.skip(f"{batch_writer_path} does not exist")
+    assert batch_writer_path.exists(), f"{batch_writer_path} does not exist"
 
     source = batch_writer_path.read_text(encoding="utf-8")
 

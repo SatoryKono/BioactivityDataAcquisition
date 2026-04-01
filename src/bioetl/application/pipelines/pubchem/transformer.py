@@ -18,8 +18,13 @@ from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformerDependencyContext,
 )
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.types import JsonDict
 from bioetl.domain.validation import validate_molecular_weight, validate_non_negative
 from bioetl.domain.value_objects import InChIKey
 
@@ -159,6 +164,58 @@ class PubChemCompoundTransformer(BaseTransformer):
             SilverRecord if transformation successful, None if skipped.
 
         """
+        prepared = self._build_compound_business_data(context, record, index)
+        if prepared is None:
+            return None
+        cid, business_data = prepared
+        normalized_business_data = RecordNormalizationProcessor(
+            provider=self.provider,
+        ).normalize_business_data(business_data)
+        entity_id = self.compute_entity_id(
+            source_id=str(cid), record={"molecule_id": cid}
+        )
+        content_hash = self.compute_content_hash(
+            normalized_business_data,
+            exclude_none=True,
+        )
+
+        return self._build_pre_silver_record(
+            context,
+            entity_id,
+            content_hash,
+            index,
+            normalized_business_data,
+        )
+
+    async def transform_pre_silver(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> PreSilverRecord | None:
+        """Build an intermediate PubChem payload for application finalization."""
+        prepared = self._build_compound_business_data(context, record, index)
+        if prepared is None:
+            return None
+        cid, business_data = prepared
+        entity_id = self.compute_entity_id(
+            source_id=str(cid), record={"molecule_id": cid}
+        )
+        return PreSilverRecord(
+            entity_id=entity_id,
+            business_data=business_data,
+            build_silver_record=self._build_pre_silver_record,
+            apply_structural_policy=self._apply_structural_policy,
+            apply_silver_filter=self._apply_silver_filter,
+        )
+
+    def _build_compound_business_data(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> tuple[object, dict[str, Any]] | None:
+        """Build PubChem business data prior to hash finalization."""
         cid = record.get("cid")
         if cid is None:
             cid = record.get("molecule_id")
@@ -169,10 +226,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             )
             return None
 
-        # Build business data with all physicochemical properties
-        business_data: dict[
-            str, Any  # Any: transformer record has heterogeneous values
-        ] = {  # Any: transformer record has heterogeneous values
+        business_data: dict[str, Any] = {
             "molecule_id": str(cid),
             "canonical_smiles": record.get("canonical_smiles"),
             "isomeric_smiles": record.get("isomeric_smiles"),
@@ -192,12 +246,17 @@ class PubChemCompoundTransformer(BaseTransformer):
             **self._extract_stereochemistry(record),
             **self._extract_3d_properties(record),
         }
+        return cid, business_data
 
-        entity_id = self.compute_entity_id(
-            source_id=str(cid), record={"molecule_id": cid}
-        )
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
+    def _build_pre_silver_record(
+        self,
+        context: PipelineContext,
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Build a finalized Silver record from normalized compound business data."""
         entity = self._create_entity(
             PubchemMolecule,
             context,

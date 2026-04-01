@@ -10,8 +10,13 @@ Uses declarative field_specs DSL for mapping.
 from __future__ import annotations
 
 import hashlib
+from functools import partial
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -41,67 +46,54 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
     entity_class = SubcellularFraction
     primary_id_field = "subcellular_fraction"
 
+    async def transform_pre_silver(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> PreSilverRecord | None:
+        """Build an intermediate subcellular-fraction payload for finalization."""
+        del context, index
+        resolved = _resolve_subcellular_fraction_payload(self, record)
+        if resolved is None:
+            return None
+        primary_id, business_data = resolved
+        entity_id = _resolve_subcellular_fraction_entity_id(self, record, primary_id)
+        return PreSilverRecord(
+            entity_id=entity_id,
+            business_data=business_data,
+            build_silver_record=partial(_build_subcellular_fraction_silver_record, self),
+            apply_structural_policy=self._apply_structural_policy,
+            apply_silver_filter=self._apply_silver_filter,
+        )
+
     async def _transform_impl(
         self,
         context: PipelineContext,
         record: BronzeRecord,
         index: int,
     ) -> SilverRecord | None:
-        """Override base implementation to use subcellular_fraction as entity_id.
-
-        SubcellularFraction is a derived entity with single-field primary key.
-        The entity_id is computed from the normalized subcellular_fraction name.
-
-        If record contains pre-computed entity_id (from SubcellularFractionDataSource),
-        use it directly. Otherwise, compute entity_id from subcellular_fraction.
-
-        Args:
-            context: Pipeline context with run_id, run_type, logger.
-            record: Bronze record (pre-extracted fraction or raw assay).
-            index: Sequential index of the record in the pipeline run.
-
-        Returns:
-            SilverRecord if transformation successful, None if skipped.
-
-        """
-        # 1. Resolve subcellular fraction from normalized or raw assay payload
-        extracted_from_assay = self.extract_fraction_from_assay(record)
-        primary_value = record.get(self.primary_id_field)
-
-        if extracted_from_assay and primary_value is None:
-            primary_id = cast("PrimaryId", extracted_from_assay["subcellular_fraction"])
-            business_data = extracted_from_assay
-        else:
-            primary_id = cast(
-                "PrimaryId",
-                self._get_required_field(record, self.primary_id_field),
-            )
-            business_data = self._extract_business_data(record, primary_id)
-
-        # 3. Compute entity_id
-        # Priority: pre-computed entity_id from record > computed from subcellular_fraction
-        pre_computed_id = record.get("entity_id")
-        entity_id = (
-            str(pre_computed_id)
-            if pre_computed_id
-            else self.compute_fraction_entity_id(str(primary_id))
+        """Override base implementation to use subcellular_fraction as entity_id."""
+        resolved = _resolve_subcellular_fraction_payload(self, record)
+        if resolved is None:
+            return None
+        primary_id, business_data = resolved
+        normalized_business_data = RecordNormalizationProcessor(
+            provider=self.provider,
+        ).normalize_business_data(business_data)
+        entity_id = _resolve_subcellular_fraction_entity_id(self, record, primary_id)
+        content_hash = self.compute_content_hash(
+            normalized_business_data,
+            exclude_none=True,
         )
-
-        # 4. Compute content hash
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-        # 5. Create domain entity
-        entity = self._create_entity(
-            self.entity_class,
+        return _build_subcellular_fraction_silver_record(
+            self,
             context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            index=index,
-            **business_data,
+            entity_id,
+            content_hash,
+            index,
+            normalized_business_data,
         )
-
-        # 6. Convert to SilverRecord
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
 
     def _extract_business_data(
         self,
@@ -192,6 +184,58 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
             "example_assay_id": str(assay_id) if assay_id else None,
             "assay_count": 1,
         }
+
+
+def _resolve_subcellular_fraction_payload(
+    transformer: SubcellularFractionTransformer,
+    record: BronzeRecord,
+) -> tuple[PrimaryId, JsonDict] | None:
+    """Resolve primary id and business data from direct or assay-derived records."""
+    extracted_from_assay = transformer.extract_fraction_from_assay(record)
+    primary_value = record.get(transformer.primary_id_field)
+    if extracted_from_assay and primary_value is None:
+        primary_id = cast("PrimaryId", extracted_from_assay["subcellular_fraction"])
+        return primary_id, extracted_from_assay
+    try:
+        primary_id = cast(
+            "PrimaryId",
+            transformer._get_required_field(record, transformer.primary_id_field),
+        )
+    except ValueError:
+        return None
+    return primary_id, transformer._extract_business_data(record, primary_id)
+
+
+def _resolve_subcellular_fraction_entity_id(
+    transformer: SubcellularFractionTransformer,
+    record: BronzeRecord,
+    primary_id: PrimaryId,
+) -> str:
+    """Resolve entity id from precomputed value or normalized fraction name."""
+    pre_computed_id = record.get("entity_id")
+    if pre_computed_id:
+        return str(pre_computed_id)
+    return transformer.compute_fraction_entity_id(str(primary_id))
+
+
+def _build_subcellular_fraction_silver_record(
+    transformer: SubcellularFractionTransformer,
+    context: PipelineContext,
+    entity_id: str,
+    content_hash: str,
+    index: int,
+    business_data: JsonDict,
+) -> SilverRecord:
+    """Build a finalized Silver record from normalized fraction business data."""
+    entity = transformer._create_entity(
+        transformer.entity_class,
+        context,
+        entity_id=entity_id,
+        content_hash=content_hash,
+        index=index,
+        **business_data,
+    )
+    return cast("SilverRecord", transformer.entity_to_silver_record(entity))
 
 
 __all__ = ["SubcellularFractionTransformer"]

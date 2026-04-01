@@ -61,7 +61,6 @@ jobs:
           # DQ analyzers: Multiple validation checks in analyze() methods (CC=11-15)
           # Merger: _apply_explicit_rules with field conflict resolution (CC=11)
           # CLI formatters: Presentation logic with multiple display branches (CC=11)
-          # Storage writers: _write_*_metadata with coordinator path + fallback (CC=12)
           # Storage factory: create() with multi-layer config extraction (CC=11)
           # Composite runner: _run_with_lock orchestration with FSM state transitions (CC=12)
           # Metadata coordinator: create_silver_metadata, _extract_schema_metadata with schema introspection (CC=12-16)
@@ -70,24 +69,17 @@ jobs:
           # UniProt idmapping: _fetch_results with pagination and retry logic (CC=13)
           # UniProt extractors: extract_isoform_details with multi-field parsing (CC=20), extract_ptm_by_pattern (CC=12)
           # PubChem: fetch_by_inchikey with InChIKey resolution and fallback (CC=12)
-          # BatchWriter: _apply_system_prefix_order with column ordering logic (CC=11)
           # PubChem: fetch_by_inchikey with multi-step InChIKey resolution (CC=11)
           # UniProt extractors: extract_isoform_details, extract_ptm_by_pattern with complex parsing (CC=11-12)
           # Config loader: _normalize_source_pagination with legacy pagination promotion (CC=15)
           # Source config schema: ProviderConfigYaml, _promote_legacy_pagination with backward-compat logic (CC=14-15)
-          # __init__.py: _dispatcher_call_with_any_fallback pandera compat shim (CC=11)
-          # postrun_service.py: _write_final_metadata with metadata assembly (CC=12)
           # FsAdrService: validate with multi-check ADR validation (CC=13), _extract_from_section with heading parsing (CC=12)
-          # composite_dq_loader: merge_external_dq_overrides with multi-source DQ config merging (CC=11)
-          # client_retry_mixin: _attempt_request with retry/backoff state machine (CC=12)
           # pipeline_normalizers: apply_pipeline_schema_normalization with multi-field schema coercion (CC=12)
           # quality validation internals: _validate_registry_groups_section (CC=12), _validate_owner_decomposition_targets_section (CC=11), _validate_priority_registry_burndown (CC=11), _validate_grace_window_identity_fields (CC=14), validate_exemptions_registry (CC=12)
           # metadata_writer: _write_metadata with multi-path coordinator fallback (CC=11)
-          # silver_writer_delta_mixin: _write_merge with Delta Lake merge conflict resolution (CC=11)
-          # silver_writer_validation_mixin: _validate_key_nullability with multi-column null checks (CC=11)
           xenon --max-absolute B --max-modules B --max-average A \
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/bioetl/__init__.py,src/bioetl/application/core/postrun_service.py,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/core/batch_writer.py,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/infrastructure/storage/silver_writer.py,src/bioetl/infrastructure/storage/gold_writer.py,src/bioetl/composition/factories/storage_factory.py,src/bioetl/composition/services/metadata_coordinator.py,src/bioetl/infrastructure/storage/metadata_builder.py,src/bioetl/infrastructure/config_loader.py,src/bioetl/infrastructure/schemas/source_config.py,src/bioetl/infrastructure/adr/*,src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py,src/bioetl/infrastructure/adapters/http/client_retry_mixin.py,src/bioetl/infrastructure/config/pipeline_normalizers.py,src/bioetl/infrastructure/quality/_baseline_validation.py,src/bioetl/infrastructure/quality/_decomposition_validation.py,src/bioetl/infrastructure/quality/_grace_windows_validation.py,src/bioetl/infrastructure/quality/exemptions_registry.py,src/bioetl/infrastructure/storage/metadata_writer.py,src/bioetl/infrastructure/storage/silver_writer_delta_mixin.py,src/bioetl/infrastructure/storage/silver_writer_validation_mixin.py" src
+            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -141,27 +133,6 @@ jobs:
 
           # Exempted files (specific files with justified complexity)
           EXEMPT_FILES = {
-              "src/bioetl/__init__.py",  # _dispatcher_call_with_any_fallback pandera compat shim (CC=11)
-              "src/bioetl/application/core/postrun_service.py",  # _write_final_metadata metadata assembly (CC=12)
-              "src/bioetl/infrastructure/storage/silver_writer.py",  # _write_silver_metadata (CC=12)
-              "src/bioetl/infrastructure/storage/gold_writer.py",  # _write_gold_metadata (CC=12)
-              "src/bioetl/application/core/batch_writer.py",  # _apply_system_prefix_order with column ordering (CC=12)
-              "src/bioetl/composition/factories/storage_factory.py",  # create() multi-layer config (CC=11)
-              "src/bioetl/composition/services/metadata_coordinator.py",  # create_silver_metadata, _extract_schema_metadata (CC=12-16)
-              "src/bioetl/infrastructure/storage/metadata_builder.py",  # _extract_schema_metadata with schema introspection (CC=16)
-              "src/bioetl/infrastructure/config_loader.py",  # _normalize_source_pagination with legacy promotion (CC=15)
-              "src/bioetl/infrastructure/schemas/source_config.py",  # _promote_legacy_pagination backward-compat (CC=14-15)
-              "src/bioetl/infrastructure/adr/fs_adr_service.py",  # validate + _extract_from_section ADR parsing (CC=12-13)
-              "src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py",  # merge_external_dq_overrides multi-source DQ config merging (CC=11)
-              "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",  # _attempt_request retry/backoff state machine (CC=12)
-              "src/bioetl/infrastructure/config/pipeline_normalizers.py",  # apply_pipeline_schema_normalization multi-field coercion (CC=12)
-              "src/bioetl/infrastructure/quality/_baseline_validation.py",  # _validate_registry_groups_section (CC=12)
-              "src/bioetl/infrastructure/quality/_decomposition_validation.py",  # _validate_owner_decomposition_targets_section, _validate_priority_registry_burndown (CC=11)
-              "src/bioetl/infrastructure/quality/_grace_windows_validation.py",  # _validate_grace_window_identity_fields (CC=14)
-              "src/bioetl/infrastructure/quality/exemptions_registry.py",  # validate_exemptions_registry (CC=12)
-              "src/bioetl/infrastructure/storage/metadata_writer.py",  # _write_metadata multi-path coordinator fallback (CC=11)
-              "src/bioetl/infrastructure/storage/silver_writer_delta_mixin.py",  # _write_merge Delta Lake merge conflict resolution (CC=11)
-              "src/bioetl/infrastructure/storage/silver_writer_validation_mixin.py",  # _validate_key_nullability multi-column null checks (CC=11)
           }
 
           # Exempted functions (with documented reasons)
@@ -169,8 +140,6 @@ jobs:
               "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing
               "_request_with_retry": 20,  # HTTP retry logic with circuit breaker
               "fetch_batch": 15,  # CrossRef batch DOI resolution with fallback to individual
-              "_write_silver_metadata": 15,  # Metadata assembly with coordinator path + fallback (CC=12)
-              "_write_gold_metadata": 15,  # Metadata assembly with coordinator path + fallback (CC=12)
               "load_filter_with_fallback": 15,  # CSV filter loading with multiple fallback strategies (CC=12)
           }
 

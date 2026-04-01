@@ -1,11 +1,11 @@
 ---
-Version: 1.6.0
+Version: 1.7.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-31'
+Last verified: '2026-04-01'
 ---
 
 # Documentation Publication Policy
@@ -13,6 +13,11 @@ Last verified: '2026-03-31'
 ## Цель
 
 Снизить дрейф документации и сделать статус каждой страницы явным: опубликованная, внутренняя или архивная.
+
+D-01 задаёт содержательные требования к документационным пакетам и cross-link
+consistency, а этот документ задаёт правила публикации, nav-видимости и
+классификации. Эти документы MUST использоваться совместно, а не как
+взаимозаменяемые политики.
 
 ## Классы документации
 
@@ -22,6 +27,8 @@ Last verified: '2026-03-31'
   - актуальные пути/команды;
   - отсутствие ссылок на удалённые legacy-директории конфигов;
   - регулярная проверка в CI.
+- Для supported runtime / inspection surface этот класс охватывает не только
+  user guides, но и published contracts, CLI reference и обязательные runbooks.
 
 2. `internal-published`
 - Документ включён в `mkdocs.yml` nav как non-normative internal surface
@@ -50,6 +57,9 @@ Last verified: '2026-03-31'
   - в тексте или status note указывать, что это repo-only surface;
   - не использовать как источник истины для опубликованных контрактов;
   - published docs должны ссылаться на такие материалы как на repository path.
+  - published и `internal-published` страницы MUST NOT оформлять ссылки на такие
+    материалы как built-site navigation links; допустимы только repository-path
+    references, inline code paths или curated summaries.
 
 5. `archive`
 - Исторические материалы, superseded ADR/планы/отчёты.
@@ -104,12 +114,60 @@ Last verified: '2026-03-31'
 4. Path-classified bulk families MAY inherit class from governance policy and
    entrypoint without per-file frontmatter, если они не претендуют на
    normative status.
-4. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published`, затем `repo-only` и `internal`.
-4. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
-5. Для активных docs использовать автоматические проверки `check_doc_links` и nav/strict-build guardrails в CI.
-6. Документы по runtime, который не является стандартным или default-supported, могут быть `published`, `internal-published` или `repo-only` только при явной пометке experimental/disclaimer и без конфликта с ADR-010 Local-Only posture.
-7. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
-8. Материалы в `docs/99-archive/` сохраняются для traceability, но не являются нормативными для текущего поведения проекта.
+5. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published`, затем `repo-only` и `internal`.
+6. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
+7. Для активных docs использовать автоматические проверки `check_doc_links` и nav/strict-build guardrails в CI.
+8. Документы по runtime, который не является стандартным или default-supported, могут быть `published`, `internal-published` или `repo-only` только при явной пометке experimental/disclaimer и без конфликта с ADR-010 Local-Only posture.
+9. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
+10. Материалы в `docs/99-archive/` сохраняются для traceability, но не являются нормативными для текущего поведения проекта.
+
+## Published Control-Plane & Feature-Rollout Pack
+
+Для supported control-plane / traceability surface документы MUST трактоваться
+как active published documentation, а не как internal notes или archive.
+
+Обязательный published pack для такой surface включает:
+
+1. contract-spec в `docs/04-reference/contracts/`;
+2. CLI reference entry в `docs/04-reference/cli.md`;
+3. operations runbook в `docs/05-operations/runbooks/`;
+4. связанные ADR, которые фиксируют runtime semantics и rollout posture.
+
+Текущий ratified пример такого пакета:
+
+- published contract:
+  [`docs/04-reference/contracts/run-manifest-ledger.md`](../../04-reference/contracts/run-manifest-ledger.md)
+- supported inspection runbook:
+  [`docs/05-operations/runbooks/run-manifest-inspection.md`](../../05-operations/runbooks/run-manifest-inspection.md)
+- CLI reference:
+  [`docs/04-reference/cli.md`](../../04-reference/cli.md)
+- governing ADRs:
+  [`ADR-044`](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md),
+  [`ADR-045`](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
+
+Нормативные правила для таких пакетов:
+
+- control-plane contract MUST оставаться `published`, если surface
+  поддерживается оператором или CLI;
+- supported inspection surface MUST иметь published runbook и CLI routing;
+- feature-rollout pack MUST обновляться согласованно при изменении storage
+  layout, rollout flags, inspection commands или traceability invariants;
+- retired surface MUST сначала получить explicit deprecation / unsupported note в
+  published docs, а не тихо переводиться в `internal` или `archive`.
+
+## Publication Metadata Note
+
+Published site metadata canonical source находится в `mkdocs.yml`:
+
+- `site_name = BioETL Project`
+- `site_url = https://SatoryKono.github.io/BioactivityDataAcquisition2/`
+- `repo_name = SatoryKono/BioactivityDataAcquisition2`
+- `repo_url = https://github.com/SatoryKono/BioactivityDataAcquisition2`
+
+Verified 2026-04-01: drift между publication policy и текущим MkDocs metadata не
+обнаружен. Разница между site title и repository slug считается intentional,
+но при rename / move MUST обновляться в одном changeset вместе с published
+governance и navigator pages.
 
 ## Freshness Protocol
 
@@ -188,4 +246,6 @@ uv run bash scripts/docs/build_docs_site.sh --strict
  
 ## Связанный документ
 
+- [D-01: Governance & Style Guide документации BioETL](01-documentation-governance-style-guide.md)
 - [Documentation Navigation Policy](07-doc-nav-policy.md)
+- [Template Index](../../04-reference/templates/index.md)

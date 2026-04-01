@@ -17,9 +17,9 @@ Last verified: '2026-03-29'
 - Curated inventory rows: `16`
 - Transition debt rows: `0`
 - Retained public entrypoints: `16`
-- Measured tracked modules: `25`
-- Measured-only modules outside curated inventory: `9`
-- Discovered docstring-tracked modules: `9`
+- Measured tracked modules: `30`
+- Measured-only modules outside curated inventory: `14`
+- Discovered docstring-tracked modules: `14`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 
@@ -40,6 +40,11 @@ Last verified: '2026-03-29'
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/factories/pipeline/creation_api.py`
 - `src/bioetl/domain/composite/config.py`
+- `src/bioetl/domain/normalization_authors.py`
+- `src/bioetl/domain/normalization_chembl.py`
+- `src/bioetl/domain/normalization_dates.py`
+- `src/bioetl/domain/normalization_pages.py`
+- `src/bioetl/domain/services/_date_helpers.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
 - `src/bioetl/infrastructure/adapters/crossref/batch.py`
@@ -70,6 +75,11 @@ Last verified: '2026-03-29'
 - `src/bioetl/interfaces/cli/commands/quarantine_support.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing quarantine helper imports; first-party src should keep importing the canonical domains.quarantine.support module directly.
 - `src/bioetl/interfaces/cli/commands/health_rendering.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for health rendering helper imports; first-party src should keep importing the canonical domains.health.rendering module directly.
 - `src/bioetl/interfaces/cli/commands/health_server_integration.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing health-server integration imports; first-party src should keep importing the canonical domains.health.server_integration module directly.
+- `src/bioetl/domain/normalization_authors.py` — owner: `bioetl.domain`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Deprecated compatibility wrapper for author normalization imports while callers migrate to bioetl.domain.normalization.authors.
+- `src/bioetl/domain/normalization_chembl.py` — owner: `bioetl.domain`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Deprecated compatibility wrapper for ChEMBL normalization imports while callers migrate to bioetl.domain.normalization.chembl.
+- `src/bioetl/domain/normalization_dates.py` — owner: `bioetl.domain`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Deprecated compatibility wrapper for date normalization imports while callers migrate to bioetl.domain.normalization.dates.
+- `src/bioetl/domain/normalization_pages.py` — owner: `bioetl.domain`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Deprecated compatibility wrapper for page-range normalization imports while callers migrate to bioetl.domain.normalization.pages.
+- `src/bioetl/domain/services/_date_helpers.py` — owner: `bioetl.domain.services`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility helper seam for legacy date-service imports that now delegate to bioetl.domain.normalization.dates.
 - `src/bioetl/interfaces/cli/commands/metrics_server_integration.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing metrics-server integration imports; first-party src should keep importing the canonical domains.health.metrics_server_integration module directly.
 - `src/bioetl/infrastructure/adapters/crossref/batch.py` — owner: `bioetl.infrastructure.adapters.crossref`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for CrossRef batch and pagination collaborators.
 
@@ -79,6 +89,11 @@ Last verified: '2026-03-29'
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
 - `src/bioetl/composition/factories/pipeline/creation_api.py`
+- `src/bioetl/domain/normalization_authors.py`
+- `src/bioetl/domain/normalization_chembl.py`
+- `src/bioetl/domain/normalization_dates.py`
+- `src/bioetl/domain/normalization_pages.py`
+- `src/bioetl/domain/services/_date_helpers.py`
 - `src/bioetl/infrastructure/adapters/crossref/batch.py`
 - `src/bioetl/interfaces/cli/commands/health_rendering.py`
 - `src/bioetl/interfaces/cli/commands/health_server_integration.py`

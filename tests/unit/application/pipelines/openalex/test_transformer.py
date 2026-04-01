@@ -454,13 +454,13 @@ class TestOpenAlexPublicationDateNormalization:
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Test that YYYY-MM is normalized to YYYY-MM-30 (end of month approximation)."""
-        record = self._make_record_with_date("2024-05")
+        """Test that YYYY-MM is normalized to the last day of month."""
+        record = self._make_record_with_date("2024-02")
 
         result = await transformer.transform(pipeline_context, record, 0)
 
         assert result is not None
-        assert result["publication_date"] == "2024-05-30"
+        assert result["publication_date"] == "2024-02-29"
 
     @pytest.mark.asyncio
     async def test_partial_date_year_normalized_to_end(
@@ -537,9 +537,9 @@ class TestOpenAlexPublicationDateNormalization:
         "raw_date,expected",
         [
             ("2024-01-15", "2024-01-15"),  # Full date
-            ("2024-01", "2024-01-30"),  # Month precision
+            ("2024-01", "2024-01-31"),  # Month precision
             ("2024", "2024-12-31"),  # Year precision
-            ("1999-12", "1999-12-30"),  # Old date, month precision
+            ("1999-12", "1999-12-31"),  # Old date, month precision
             ("1999", "1999-12-31"),  # Old date, year precision
         ],
     )

@@ -165,7 +165,7 @@ def _check_lifecycle_coverage(
     if not isinstance(scripts, list):
         violations.append(f"manifest scripts payload malformed: {manifest_rel}")
         return
-    if not entries:
+    if not isinstance(registry_payload.get("entries"), dict):
         violations.append(f"registry entries payload malformed: {registry_rel}")
         return
 

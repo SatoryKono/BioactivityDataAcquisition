@@ -13,16 +13,16 @@ python -m scripts.data <command> [args...]
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `check-vcr-placement` | `check_root_vcr_cassettes.py` | Block VCR cassette anti-patterns |
-| `check-vcr-naming` | `check_vcr_filename_policy.py` | Enforce VCR filename policy |
-| `check-vcr-secrets` | `check_vcr_secrets.py` | Detect potential secret leaks in VCR cassettes |
-| `check-delta` | `check_delta_integrity.py` | Check Delta Lake integrity |
-| `check-data-dir` | `validate_data_dir.py` | Validate data directory structure against allowlist |
-| `vacuum` | `vacuum_delta.py` | Vacuum Delta Lake tables |
-| `checksums` | `verify_checksums.py` | Generate/verify file checksums |
-| `dq-baseline` | `dq_baseline_update.py` | Update DQ baseline metrics |
-| `report-null-fields` | `extract_null_fields.py` | Extract null field statistics |
-| `report-content-hash` | `generate_content_hash_comparison_report.py` | Generate content hash comparison report |
+| `check-vcr-placement` | `scripts/data/check_root_vcr_cassettes.py` | Block VCR cassette anti-patterns |
+| `check-vcr-naming` | `scripts/data/check_vcr_filename_policy.py` | Enforce VCR filename policy |
+| `check-vcr-secrets` | `scripts/data/check_vcr_secrets.py` | Detect potential secret leaks in VCR cassettes |
+| `check-delta` | `scripts/data/check_delta_integrity.py` | Check Delta Lake integrity |
+| `check-data-dir` | `scripts/data/validate_data_dir.py` | Validate data directory structure against allowlist |
+| `vacuum` | `scripts/data/vacuum_delta.py` | Vacuum Delta Lake tables |
+| `checksums` | `scripts/data/verify_checksums.py` | Generate/verify file checksums |
+| `dq-baseline` | `scripts/data/dq_baseline_update.py` | Update DQ baseline metrics |
+| `report-null-fields` | `scripts/data/extract_null_fields.py` | Extract null field statistics |
+| `report-content-hash` | `scripts/data/generate_content_hash_comparison_report.py` | Generate content hash comparison report |
 
 ## When to Use
 

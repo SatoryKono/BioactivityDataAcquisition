@@ -10,6 +10,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
+from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
 from bioetl.application.core.transformer_runtime.finalization import (
     finalize_batch_transform_result,
@@ -35,6 +36,7 @@ from bioetl.domain.config import DQConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
+from bioetl.domain.transformations import generate_content_hash
 from bioetl.domain.types import BatchID, RunType
 
 
@@ -266,6 +268,142 @@ class TestBatchTransformerTransform:
 
         assert len(result.silver_records) == 1
         assert result.quarantined_count == 1
+
+    async def test_transform_batch_normalizes_before_gold_filter(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_transform_callback,
+    ) -> None:
+        """Gold filter should see finalized staged payloads after normalization."""
+
+        async def transform(ctx, record, index):
+            return PreSilverRecord(
+                entity_id="crossref:10.1000/abc",
+                business_data={
+                    "publication_doi": " HTTPS://doi.org/10.1000/ABC ",
+                    "publication_date": "2024-02",
+                    "title": "  Example Title  ",
+                },
+                build_silver_record=build_silver_record,
+            )
+
+        def build_silver_record(context, entity_id, content_hash, index, business_data):
+            return {
+                "entity_id": "crossref:raw",
+                "content_hash": content_hash,
+                **business_data,
+                "_run_id": str(context.run_id),
+            }
+
+        seen_record: dict[str, object] = {}
+
+        def filter_gold(ctx, record):
+            seen_record.update(record)
+            return True
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="crossref_publication",
+                provider="crossref",
+                entity_type="publication",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=transform,
+            gold_filter_callback=filter_gold,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        result = await transformer.transform_batch([{"id": "1"}], BatchID(uuid4()))
+
+        assert result.gold_records
+        assert seen_record["publication_doi"] == "10.1000/abc"
+        assert seen_record["publication_date"] == "2024-02-29"
+        assert seen_record["title"] == "Example Title"
+        assert seen_record["_run_id"] == str(mock_context.run_id)
+        assert seen_record["content_hash"] == str(
+            generate_content_hash(
+                {
+                    "publication_doi": "10.1000/abc",
+                    "publication_date": "2024-02-29",
+                    "title": "Example Title",
+                },
+                "crossref",
+                exclude_none=True,
+            )
+        )
+        mock_quarantine_manager.quarantine_records.assert_not_called()
+
+    async def test_transform_batch_staged_normalization_preserves_cardinality_and_quarantine(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_transform_callback,
+    ) -> None:
+        """Normalization should not change batch counts or quarantine semantics."""
+
+        async def transform(ctx, record, index):
+            if record["id"] == "bad":
+                raise DataQualityError("Invalid data")
+            return PreSilverRecord(
+                entity_id=f"crossref:{record['id']}",
+                business_data={
+                    "publication_doi": record["doi"],
+                    "title": record["title"],
+                },
+                build_silver_record=build_silver_record,
+            )
+
+        def build_silver_record(context, entity_id, content_hash, index, business_data):
+            return {
+                "entity_id": entity_id,
+                "content_hash": content_hash,
+                **business_data,
+                "_run_id": str(context.run_id),
+            }
+
+        def filter_gold(ctx, record):
+            return True
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="crossref_publication",
+                provider="crossref",
+                entity_type="publication",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=transform,
+            gold_filter_callback=filter_gold,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        result = await transformer.transform_batch(
+            [
+                {"id": "1", "doi": " HTTPS://doi.org/10.1000/ABC ", "title": "  A  "},
+                {"id": "bad", "doi": "10.1000/bad", "title": "Bad"},
+                {"id": "2", "doi": "10.1000/xyz", "title": "  B  "},
+            ],
+            BatchID(uuid4()),
+        )
+
+        assert len(result.silver_records) == 2
+        assert len(result.gold_records) == 2
+        assert result.quarantined_count == 1
+        assert result.filtered_out_count == 0
         mock_quarantine_manager.quarantine_records.assert_called_once()
 
     async def test_transform_batch_raises_non_dq_errors(

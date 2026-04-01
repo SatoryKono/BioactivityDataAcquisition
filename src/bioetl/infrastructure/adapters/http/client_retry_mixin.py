@@ -25,6 +25,10 @@ from bioetl.infrastructure.adapters.http._client_retry_models import (
     _RequestAttemptOutcome,
     _RetryRequestState,
 )
+from bioetl.infrastructure.adapters.http._client_retry_flow import (
+    handle_request_exception,
+    handle_response_attempt,
+)
 from bioetl.infrastructure.adapters.http._client_retry_policy import (
     _can_retry,
     _is_retryable_error,
@@ -35,7 +39,6 @@ from bioetl.infrastructure.adapters.http.client_retry_observability import (
     SpanLike,
     finalize_request_observability,
     handle_circuit_breaker_trip,
-    mark_span_error,
     raise_retry_exhausted,
     start_request_span,
 )
@@ -263,25 +266,18 @@ class HTTPClientRetryMixin:
         span: SpanLike,
     ) -> httpx.Response | _RequestAttemptOutcome:
         """Process a completed HTTP response without changing retry semantics."""
-        status_code = response.status_code
-
-        if self.retry_config.is_retryable_status(status_code) and _can_retry(
-            self.retry_config,
-            attempt,
-            retries_used,
-        ):
-            wait_seconds = await self._handle_retry_delay(attempt, url, response)
-            self._log_retry(url, method, attempt, wait_seconds, status_code=status_code)
-            status_error = httpx.HTTPStatusError(
-                f"Server error {status_code}",
-                request=response.request,
-                response=response,
-            )
-            return _RequestAttemptOutcome(True, status_code, 1, status_error)
-
-        response.raise_for_status()
-        span.set_attribute("http.status_code", status_code)
-        return response
+        return await handle_response_attempt(
+            response,
+            method=method,
+            url=url,
+            attempt=attempt,
+            retries_used=retries_used,
+            span=span,
+            retry_config=self.retry_config,
+            can_retry=self._can_retry,
+            handle_retry_delay=self._handle_retry_delay,
+            log_retry=self._log_retry,
+        )
 
     async def _handle_request_exception(
         self,
@@ -294,28 +290,18 @@ class HTTPClientRetryMixin:
         span: SpanLike,
     ) -> _RequestAttemptOutcome | None:
         """Process retryable vs terminal exception paths for one request attempt."""
-        if not self._is_retryable_error(exc):
-            mark_span_error(span, type(exc).__name__, exc)
-            return None
-
-        if _can_retry(self.retry_config, attempt, retries_used):
-            wait_seconds = await self._handle_retry_delay(attempt, url)
-            self._log_retry(url, method, attempt, wait_seconds, reason=str(exc))
-            return _RequestAttemptOutcome(
-                True,
-                _status_code_from_error(exc),
-                1,
-                exc,
-            )
-
-        if (
-            self.retry_config.retry_budget_per_request is not None
-            and not self.retry_config.is_last_attempt(attempt)
-        ):
-            self._record_retry_budget_exhausted(method, url)
-        return _RequestAttemptOutcome(
-            False,
-            _status_code_from_error(exc),
-            0,
+        return await handle_request_exception(
             exc,
+            method=method,
+            url=url,
+            attempt=attempt,
+            retries_used=retries_used,
+            span=span,
+            retry_config=self.retry_config,
+            is_retryable_error=self._is_retryable_error,
+            can_retry=self._can_retry,
+            handle_retry_delay=self._handle_retry_delay,
+            log_retry=self._log_retry,
+            record_retry_budget_exhausted=self._record_retry_budget_exhausted,
+            status_code_from_error=_status_code_from_error,
         )

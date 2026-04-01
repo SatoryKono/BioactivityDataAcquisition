@@ -45,6 +45,7 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 - [05-risks/RISKS.yaml](05-risks/RISKS.yaml)
 - [05-execution-plan/TECHNICAL-DEBT-EXECUTION-PLAN.md](05-execution-plan/TECHNICAL-DEBT-EXECUTION-PLAN.md)
 - [ORCHESTRATION.md](ORCHESTRATION.md)
+- [../residual-test-ci-debt/SUMMARY.md](../residual-test-ci-debt/SUMMARY.md)
 
 ## Strongest Technical Debt Findings
 
@@ -64,8 +65,8 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 
 ## Remaining Gaps
 
-- No dedicated evidence pillar yet for test-inventory debt outside current shard models.
-- No separate evidence pillar yet for storage-specific write path complexity versus adapter-side complexity.
+- A dedicated follow-up pack for residual test/CI debt now exists in `docs/reports/evidence/residual-test-ci-debt/`, and the repo now has tracked governance artifacts for the ranked queue, fixture-governance ledger, CI coverage-surface matrix, environment-limited-green policy, and weak-surface-to-watchlist map; the remaining gap is implementation follow-through and stale wording cleanup, not missing planning artifacts.
+- A dedicated evidence pillar for storage-specific write path complexity versus adapter-side complexity now exists in `docs/reports/evidence/storage-vs-adapter-complexity/`; the remaining question is whether future hotspot governance should reopen a bounded storage-focused wave, not whether the comparison is still missing.
 - The roadmap is now prioritized, but it still remains a recommended sequence rather than an accepted decision ledger.
 - The new top-level `DECISIONS.yaml` / `RISKS.yaml` pair captures the accepted posture, while detailed sequencing still lives in the roadmap and execution-plan artifacts.
 
@@ -76,4 +77,4 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 3. Use [TECHNICAL-DEBT-EXECUTION-PLAN.md](05-execution-plan/TECHNICAL-DEBT-EXECUTION-PLAN.md) as the current implementation sequence.
 4. Treat `duplication-dead-code` evidence as a cleanup candidate ledger, not as blanket delete authorization.
 5. Use [complexity-hotspots/SUMMARY.md](complexity-hotspots/SUMMARY.md) as historical trigger evidence for the completed CrossRef hotspot wave unless a fresh evidence pass reopens that seam.
-6. Add a follow-up pillar for residual test-scope debt if you want evidence-backed CI/test architecture decisions.
+6. Use [../residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md](../residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md) together with [../../../../configs/quality/test_structural_watchlist_map.yaml](../../../../configs/quality/test_structural_watchlist_map.yaml) as the current ranked queue and family-level bridge for CI/test hardening work.

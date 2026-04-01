@@ -28,6 +28,12 @@ Canonical sources:
 - [`docs/plans/README.md`](../plans/README.md) — active planning artifacts
 - [`docs/99-archive/README.md`](../99-archive/README.md) — archive index for historical/superseded plans and baselines
 
+## Recent Bounded Reports
+
+- [`great-expectations-spike-2026-04-01.md`](great-expectations-spike-2026-04-01.md)
+  — recommendation memo for issue `#2595` on whether Great Expectations should
+  be adopted alongside the existing `Pandera` and DQ stack
+
 ## Reading Pattern
 
 - Start here if you need the current reports-surface map.

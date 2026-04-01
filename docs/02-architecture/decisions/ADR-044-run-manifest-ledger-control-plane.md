@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-30'
+Last verified: '2026-04-01'
 ---
 
 # ADR-044: Run Manifest and Run Ledger Control Plane
@@ -13,15 +13,15 @@ Last verified: '2026-03-30'
 **Date:** 2026-03-24
 **Status:** Accepted
 **Decision makers:** @BioETL-Team
-**Related:** ADR-014 (deterministic writes), ADR-015 (pipeline lifecycle), ADR-029 (output metadata), ADR-043 (documentation governance)
+**Related:** ADR-014 (deterministic writes), ADR-015 (pipeline lifecycle), ADR-029 (output metadata), ADR-043 (documentation governance), ADR-045 (DQ contract system)
 
 ## Context
 
 BioETL already captured useful provenance fragments during execution:
 
-- `RunContext` stored `pipeline_version`, `git_commit`, and `config_hash`
-- Bronze/Silver/Gold sidecars stored runtime and lineage metadata
-- `PipelineRun` modeled in-process lifecycle transitions
+- `RunContext` stored `pipeline_version`, `git_commit`, and `config_hash`;
+- Bronze/Silver/Gold sidecars stored runtime and lineage metadata;
+- `PipelineRun` modeled in-process lifecycle transitions.
 
 However, those facts were distributed across multiple layers and were not
 persisted as one immutable control-plane artifact. As a result, reproducibility
@@ -34,7 +34,7 @@ remained partial:
 
 ## Decision
 
-BioETL introduces a dedicated control-plane family with two different roles:
+BioETL introduces a dedicated control-plane family with two different roles.
 
 ### 1. `RunManifest` is immutable
 
@@ -49,29 +49,33 @@ BioETL introduces a dedicated control-plane family with two different roles:
 - source references
 - planned artifact references
 
-The manifest is created and persisted **before** runner execution begins.
+The manifest is created and persisted before runner assembly and execution
+begins.
 
 ### 2. `RunLedgerEntry` is append-only
 
-`RunLedgerEntry` records what actually happened during lifecycle:
+`RunLedgerEntry` records what actually happened during lifecycle. The current
+inspection baseline includes:
 
 - `manifest_created`
 - `run_started`
+- `stage_completed`
+- `artifact_published`
 - `run_finished`
 - `run_failed`
 - `run_shutdown`
-
-Additional lineage-oriented events such as `artifact_published` may be added
-later without mutating existing manifests.
+- `dq_policy_applied`
 
 ### 3. `manifest_id` links execution-local projections
 
-`RunContext`, `PipelineRunContext`, runtime sidecar metadata, and inspection CLI
-carry `manifest_id` as a reference. They do **not** embed the full manifest.
+`RunContext`, `PipelineRunContext`, runtime sidecar metadata, lineage fragments,
+and inspection CLI carry `manifest_id` as a reference. They do not embed the
+full manifest.
 
 ### 4. File-backed persistence is the first implementation
 
-The initial control-plane store is filesystem-backed:
+The initial control-plane store is filesystem-backed and uses these canonical
+paths:
 
 - `data/output/control/run_manifest/{manifest_id}.json`
 - `data/output/control/run_manifest/_by_run_id/{run_id}.txt`
@@ -79,7 +83,7 @@ The initial control-plane store is filesystem-backed:
 - `data/output/control/run_ledger/_by_run_id/{run_id}.txt`
 
 This keeps the domain/application contracts stable while leaving room for a
-future SQLite/Delta projection.
+future SQLite or Delta projection.
 
 ### 5. Inspection is part of the supported CLI
 
@@ -88,14 +92,34 @@ The control plane is inspectable via:
 - `bioetl run-manifest show <run-id|manifest-id>`
 - `bioetl run-manifest diff <left> <right>`
 
-### 6. Governance is fail-closed
+`show` resolves to one payload with `manifest`, `ledger_entries`, and
+operator-oriented `diagnostics`. `diff` compares top-level manifest fields
+after canonical JSON normalization.
 
-The system follows the invariant:
+This inspection surface is a published documentation surface, not an
+internal-only diagnostic appendix. The normative pack is ADR + contract + CLI +
+runbook, following [D-01](../../00-project/governance/01-documentation-governance-style-guide.md).
 
-`no manifest, no run`
+### 6. Rollout is governed by explicit control-plane settings
 
-At the verification level, canonical E2E full-cycle coverage must assert that a
-successful pipeline run emits both manifest and ledger artifacts.
+The supported rollout flags are:
+
+- `run_manifest_enabled=true`
+- `run_ledger_enabled=true`
+- `checkpoint_compatibility_policy=soft_fail`
+
+`run_ledger_enabled` depends on `run_manifest_enabled`, and checkpoint resume
+behavior is constrained to `observe | soft_fail | hard_fail`.
+
+### 7. Governance is fail-closed on the enabled path
+
+The enabled control-plane path follows these invariants:
+
+- no manifest, no run;
+- manifest created before execution;
+- manifest immutable after persistence;
+- ledger append-only;
+- sidecars reference `manifest_id` instead of embedding manifest.
 
 ## Consequences
 
@@ -120,14 +144,22 @@ successful pipeline run emits both manifest and ledger artifacts.
 - `src/bioetl/domain/ports/control_plane/`
 - `src/bioetl/application/services/run_manifest_service.py`
 - `src/bioetl/application/services/run_ledger_service.py`
+- `src/bioetl/application/services/run_manifest_diagnostics.py`
 - `src/bioetl/application/services/run_manifest_inspection_service.py`
+- `src/bioetl/application/core/lifecycle/checkpoint_runtime.py`
+- `src/bioetl/interfaces/cli/commands/run_manifest.py`
+- `src/bioetl/composition/bootstrap/cli/run_manifest.py`
+- `src/bioetl/composition/runtime_builders/run_manifest_builder.py`
+- `src/bioetl/composition/runtime_builders/runner_builder.py`
+- `src/bioetl/composition/factories/pipeline/checkpoint_policy_helpers.py`
+- `src/bioetl/infrastructure/config/_base.py`
 - `src/bioetl/infrastructure/control_plane/`
 
 ### Execution boundary
 
-Manifest creation is wired into the pipeline bootstrap/runtime assembly path
-before runner execution. Ledger attachment happens during runner construction so
-runtime lifecycle events are appended through one shared control-plane service.
+Manifest creation is wired into runtime assembly before runner creation.
+Ledger attachment happens during runner construction so lifecycle events are
+appended through one shared control-plane service.
 
 ## Compliance
 
@@ -156,11 +188,15 @@ runtime lifecycle events are appended through one shared control-plane service.
 
 ## Acceptance Criteria
 
-- [ ] The decision is documented with current status, date, and owner metadata.
-- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
-- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
-- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.
+- [x] ADR, contract, CLI, and runbook are aligned.
+- [x] Storage layout, flags, event names, and invariants match the active runtime.
+- [x] Inspection commands are reproducible for operators.
+- [x] Related navigation and governance docs point to the current control-plane pack.
 
 ## References
 
-- `<link-or-path>`
+- [Run Manifest and Run Ledger Contract](../../04-reference/contracts/run-manifest-ledger.md)
+- [CLI Reference](../../04-reference/cli.md)
+- [Run Manifest Inspection Runbook](../../05-operations/runbooks/run-manifest-inspection.md)
+- [D-01 Documentation Governance](../../00-project/governance/01-documentation-governance-style-guide.md)
+- [Project Navigator](../../00-project/00-map.md)

@@ -37,10 +37,10 @@ class TestSeedKeyResolver:
     """Test SeedKeyResolver pass-through behaviour."""
 
     @pytest.mark.asyncio
-    async def test_returns_seed_keys_unchanged(self) -> None:
+    async def test_returns_seed_keys_with_canonical_normalization(self) -> None:
         logger = MagicMock()
         resolver = SeedKeyResolver(logger)
-        seed_keys = pl.DataFrame({"doi": ["10.1/a", "10.1/b"]})
+        seed_keys = pl.DataFrame({"doi": [" 10.1/A ", "10.1/b"]})
         dep = _dep_config()
 
         result = await resolver.resolve(
@@ -50,7 +50,7 @@ class TestSeedKeyResolver:
             delta_reader=None,
         )
 
-        assert result.equals(seed_keys)
+        assert result.to_dict(as_series=False) == {"doi": ["10.1/a", "10.1/b"]}
 
     @pytest.mark.asyncio
     async def test_logs_debug_message(self) -> None:
@@ -176,6 +176,25 @@ class TestChainedKeyResolver:
 
         assert len(result) == 2
         assert "doi" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_normalizes_chained_source_keys_before_returning(self) -> None:
+        logger = MagicMock()
+        resolver = ChainedKeyResolver(logger)
+        dep = _dep_config(key_source="source_dep")
+        source_dep = _dep_config(pipeline="source_dep", silver_table="silver/src")
+        delta_reader = AsyncMock()
+        source_df = pl.DataFrame({"doi": [" 10.1/X ", "10.1/x"]})
+        delta_reader.read_table.return_value = source_df.to_arrow()
+
+        result = await resolver.resolve(
+            dependency=dep,
+            seed_keys=pl.DataFrame(),
+            dep_config_lookup={"source_dep": source_dep},
+            delta_reader=delta_reader,
+        )
+
+        assert result.to_dict(as_series=False) == {"doi": ["10.1/x", "10.1/x"]}
 
     @pytest.mark.asyncio
     async def test_validates_join_key_exists(self) -> None:

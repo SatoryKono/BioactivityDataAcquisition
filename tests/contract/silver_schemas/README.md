@@ -31,6 +31,22 @@ These tests protect against acmolecule_idental schema changes that would break:
 pytest tests/contract/silver_schemas/ -v
 ```
 
+### Representative CI Drift Gate
+
+Use the fast representative subset when you want the same snapshot-based drift
+signal that CI enforces for the initial selected pipelines:
+
+```bash
+pytest tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py -v
+```
+
+Representative pipelines in the current gate:
+
+- `chembl_activity`
+- `pubchem_compound`
+- `pubmed_publication`
+- `uniprot_protein`
+
 ### By Category
 
 ```bash

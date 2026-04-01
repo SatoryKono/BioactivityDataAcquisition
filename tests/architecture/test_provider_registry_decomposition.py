@@ -12,6 +12,7 @@ SRC_ROOT = ROOT / "src"
 REGISTRY_PATH = (
     ROOT / "src" / "bioetl" / "composition" / "providers" / "provider_registry.py"
 )
+LOADER_PATH = ROOT / "src" / "bioetl" / "composition" / "providers" / "loader.py"
 DEFAULT_REGISTRY_PATH = (
     ROOT / "src" / "bioetl" / "composition" / "providers" / "_default_registry.py"
 )
@@ -64,12 +65,10 @@ CANONICAL_PROVIDER_CONFIG_BUILDERS = {
 }
 ALLOWED_PRIVATE_DEFAULT_REGISTRY_IMPORT_SRC_FILES = {
     REGISTRY_PATH,
-    REGISTRATION_PATH,
 }
 ALLOWED_DEFAULT_PROVIDER_REGISTRY_CALL_SRC_FILES = {
     DEFAULT_REGISTRY_PATH,
     REGISTRY_PATH,
-    REGISTRATION_PATH,
 }
 ALLOWED_DEFAULT_PROVIDER_REGISTRAR_CALL_SRC_FILES: set[Path] = set()
 
@@ -202,13 +201,20 @@ def test_provider_registry_keeps_default_singleton_in_private_helper() -> None:
     """Default singleton ownership should stay in `_default_registry`."""
     source = REGISTRY_PATH.read_text(encoding="utf-8")
 
+    assert "Retained compatibility obligations are intentionally narrow:" in source, (
+        "provider_registry.py must explicitly document the retained compatibility "
+        "obligations after Wave 1."
+    )
     assert "def get_default_provider_registry(" not in source, (
         "provider_registry.py must not own the lazy default singleton again. "
         "Keep default-registry state in _default_registry.py."
     )
+    assert "def _resolve_default_provider_registry(" not in source, (
+        "provider_registry.py must not reintroduce a duplicate private "
+        "default-registry resolver shim."
+    )
     assert "def get_default_provider_registrar(" not in source, (
-        "provider_registry.py must not reintroduce a local default-registrar "
-        "helper. Keep the compat seam private in _default_registry.py."
+        "provider_registry.py must not reintroduce a local default-registrar helper."
     )
     assert "_default_provider_registry: ProviderRegistry | None =" not in source, (
         "provider_registry.py must not grow a module-level default singleton "
@@ -237,8 +243,8 @@ def test_default_registry_helper_stays_thin_and_private() -> None:
     assert "def get_default_provider_registry(" in source, (
         "_default_registry.py must keep the lazy singleton seam explicit."
     )
-    assert "def get_default_provider_registrar(" in source, (
-        "_default_registry.py must keep the named compat registrar seam explicit."
+    assert "def get_default_provider_registrar(" not in source, (
+        "_default_registry.py must not keep the removed registrar compat seam."
     )
     assert "_default_provider_registry: ProviderRegistry | None = None" in source, (
         "_default_registry.py must remain the owner of the lazy singleton slot."
@@ -281,14 +287,14 @@ def test_default_provider_registry_raw_calls_stay_confined_to_known_src_baseline
 def test_default_provider_registrar_raw_calls_stay_confined_to_known_src_baseline() -> (
     None
 ):
-    """Named registrar seam should remain local to the sanctioned compat entrypoints."""
+    """Removed registrar seam must not reappear in source call sites."""
     violations = _iter_named_callsite_violations(
         root=SRC_ROOT,
         function_name="get_default_provider_registrar",
         allowed_files=ALLOWED_DEFAULT_PROVIDER_REGISTRAR_CALL_SRC_FILES,
     )
     assert not violations, (
-        "get_default_provider_registrar() leaked into new src call sites:\n"
+        "get_default_provider_registrar() must remain removed from src call sites:\n"
         + "\n".join(violations)
     )
 
@@ -304,6 +310,35 @@ def test_registration_module_stays_decoupled_from_provider_registry() -> None:
         "registration.py must assemble configs against injected registries, "
         "not import ProviderRegistry directly:\n"
         + "\n".join(sorted(unexpected_registry_imports))
+    )
+
+
+@pytest.mark.architecture
+def test_registration_module_documents_wave3_simplify_now_closeout() -> None:
+    """Registration module should stay classified as a simplified thin seam."""
+    source = REGISTRATION_PATH.read_text(encoding="utf-8")
+    assert "Wave 3 ownership classification: simplify-now closeout complete." in source, (
+        "registration.py must keep its Wave 3 ownership classification explicit "
+        "after the provider-assembly scaffold closeout."
+    )
+    assert "_config_helpers.py" in source, (
+        "registration.py must keep the shared scaffold helper ownership explicit "
+        "in the module docstring."
+    )
+
+
+@pytest.mark.architecture
+def test_loader_routes_default_registry_through_canonical_resolution_helper() -> None:
+    """Loader entrypoints should share the canonical registry-resolution seam."""
+    imported_modules = _import_from_modules(LOADER_PATH)
+    assert (
+        "bioetl.composition.providers._registry_resolution" in imported_modules
+    ), "loader.py must import the shared _registry_resolution helper."
+
+    source = LOADER_PATH.read_text(encoding="utf-8")
+    assert "_resolve_default_provider_registry" not in source, (
+        "loader.py must not depend on a duplicate resolver shim from "
+        "provider_registry.py."
     )
 
 
@@ -334,15 +369,19 @@ def test_registration_family_uses_canonical_provider_config_builders(
     )
 
     imported_modules = _import_from_modules(path)
-    assert "bioetl.composition.providers._registration_contracts" in imported_modules, (
-        f"{path.name} must import canonical provider-config builders from "
-        "_registration_contracts."
+    assert (
+        "bioetl.composition.providers._config_helpers" in imported_modules
+    ), (
+        f"{path.name} must route family assembly through shared scaffold helpers "
+        "from _config_helpers."
     )
 
-    missing_builders = CANONICAL_PROVIDER_CONFIG_BUILDERS & called_names
-    assert missing_builders, (
-        f"{path.name} must call at least one canonical provider-config builder "
-        "from _registration_contracts."
+    assert (
+        "_build_provider_family_config_map" in called_names
+        or bool(CANONICAL_PROVIDER_CONFIG_BUILDERS & called_names)
+    ), (
+        f"{path.name} must call the shared family scaffold builder or a canonical "
+        "provider-config builder."
     )
 
 

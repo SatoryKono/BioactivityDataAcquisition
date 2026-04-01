@@ -31,7 +31,13 @@ in the domain directories above, while the root retains only:
 - launcher/catalog files (`run.py`, `catalog.yaml`, package markers, this README)
 - compatibility wrappers (`run_pytest.sh`, `run_pytest.ps1`)
 - a small number of legacy bridge entry points still referenced by docs/tests
-  (`generate_architecture_dependency_map.py`, `rerender_grafana_screenshots.*`)
+  (`generate_architecture_dependency_map.py`, `rerender_grafana_screenshots.py`)
+
+Canonical root-level direct paths retained for compatibility:
+- `scripts/run_pytest.sh`
+- `scripts/run_pytest.ps1`
+- `scripts/generate_architecture_dependency_map.py`
+- `scripts/rerender_grafana_screenshots.py`
 
 Rules:
 - New scripts must be placed in the appropriate canonical subdirectory.
@@ -76,6 +82,7 @@ python scripts/qa/check_c901_baseline.py --target src/bioetl  # still works
   - `python scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json`
 - Validate lifecycle coverage for non-active scripts:
   - `python scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json`
+  - When inventory is fully active-only, `configs/quality/scripts_lifecycle_registry.json` may legitimately contain `entries: {}` and this check should still pass.
 - Validate catalog governance policy:
   - `python -m scripts.repo check-catalog --catalog scripts/catalog.yaml`
 - Run all repo checks:

@@ -16,8 +16,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-import pytest
-
 
 class TestBootstrapLayerBoundaries:
     """Tests for bootstrap package structure and import rules."""
@@ -30,8 +28,7 @@ class TestBootstrapLayerBoundaries:
         pipeline execution.
         """
         runtime_path = src_dir / "bioetl" / "composition" / "bootstrap" / "runtime"
-        if not runtime_path.exists():
-            pytest.skip("Bootstrap runtime package not found")
+        assert runtime_path.exists(), "Bootstrap runtime package not found"
 
         violations = []
         forbidden_patterns = [
@@ -58,8 +55,7 @@ class TestBootstrapLayerBoundaries:
         REQ-ARCH-BOOT-002: Bootstrap should be split into assembly/cli/runtime.
         """
         bootstrap_path = src_dir / "bioetl" / "composition" / "bootstrap"
-        if not bootstrap_path.exists():
-            pytest.skip("Bootstrap package not found")
+        assert bootstrap_path.exists(), "Bootstrap package not found"
 
         expected_subpackages = ["assembly", "cli", "runtime"]
         missing = []
@@ -84,8 +80,7 @@ class TestBootstrapLayerBoundaries:
         without NoOp observability hardcoded.
         """
         assembly_path = src_dir / "bioetl" / "composition" / "bootstrap" / "assembly"
-        if not assembly_path.exists():
-            pytest.skip("Bootstrap assembly package not found")
+        assert assembly_path.exists(), "Bootstrap assembly package not found"
 
         # These imports are OK in assembly (used for storage adapter)
         # but should not be used for service-level dependencies
@@ -120,8 +115,7 @@ class TestBootstrapLayerBoundaries:
         so they should use NoOpLogger to avoid unnecessary overhead.
         """
         cli_path = src_dir / "bioetl" / "composition" / "bootstrap" / "cli"
-        if not cli_path.exists():
-            pytest.skip("Bootstrap CLI package not found")
+        assert cli_path.exists(), "Bootstrap CLI package not found"
 
         modules_using_noop = 0
         modules_without_noop = []
@@ -163,8 +157,7 @@ class TestBootstrapLayerBoundaries:
             / "runtime"
             / "observability.py"
         )
-        if not observability_file.exists():
-            pytest.skip("Runtime observability module not found")
+        assert observability_file.exists(), "Runtime observability module not found"
 
         content = observability_file.read_text(encoding="utf-8")
 
@@ -200,8 +193,7 @@ class TestBootstrapLayerBoundaries:
         full pipeline execution capabilities.
         """
         cli_path = src_dir / "bioetl" / "composition" / "bootstrap" / "cli"
-        if not cli_path.exists():
-            pytest.skip("Bootstrap CLI package not found")
+        assert cli_path.exists(), "Bootstrap CLI package not found"
 
         # This test verifies that CLI -> runtime imports don't cause errors
         # by checking the structure exists and can be imported
@@ -244,13 +236,11 @@ class TestBootstrapFunctionCategorization:
         These functions use NoOp observability and are for admin operations.
         """
         cli_path = src_dir / "bioetl" / "composition" / "bootstrap" / "cli"
-        if not cli_path.exists():
-            pytest.skip("Bootstrap CLI package not found")
+        assert cli_path.exists(), "Bootstrap CLI package not found"
 
         # CLI should have these service bootstrap functions
         cli_init = cli_path / "__init__.py"
-        if not cli_init.exists():
-            pytest.skip("CLI __init__.py not found")
+        assert cli_init.exists(), "CLI __init__.py not found"
 
         content = cli_init.read_text(encoding="utf-8")
 
@@ -286,12 +276,10 @@ class TestBootstrapFunctionCategorization:
         These functions use full observability for pipeline execution.
         """
         runtime_path = src_dir / "bioetl" / "composition" / "bootstrap" / "runtime"
-        if not runtime_path.exists():
-            pytest.skip("Bootstrap runtime package not found")
+        assert runtime_path.exists(), "Bootstrap runtime package not found"
 
         runtime_init = runtime_path / "__init__.py"
-        if not runtime_init.exists():
-            pytest.skip("Runtime __init__.py not found")
+        assert runtime_init.exists(), "Runtime __init__.py not found"
 
         content = runtime_init.read_text(encoding="utf-8")
 
@@ -323,12 +311,10 @@ class TestBootstrapFunctionCategorization:
         These are pure infrastructure building blocks used by both CLI and runtime.
         """
         assembly_path = src_dir / "bioetl" / "composition" / "bootstrap" / "assembly"
-        if not assembly_path.exists():
-            pytest.skip("Bootstrap assembly package not found")
+        assert assembly_path.exists(), "Bootstrap assembly package not found"
 
         assembly_init = assembly_path / "__init__.py"
-        if not assembly_init.exists():
-            pytest.skip("Assembly __init__.py not found")
+        assert assembly_init.exists(), "Assembly __init__.py not found"
 
         content = assembly_init.read_text(encoding="utf-8")
 

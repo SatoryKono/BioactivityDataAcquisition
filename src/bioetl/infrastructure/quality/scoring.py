@@ -167,6 +167,8 @@ def _evaluate_owner_diversification(
     active_owner_count = sum(
         1 for owner, count in by_owner.items() if owner != "<missing>" and count > 0
     )
+    if active_owner_count == 0:
+        return []
     if active_owner_count >= min_distinct_owners:
         return []
     return [

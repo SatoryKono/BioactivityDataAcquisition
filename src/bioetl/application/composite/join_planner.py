@@ -59,7 +59,6 @@ class _PreparedEnricherJoinContext:
 class JoinPlannerService(JoinPlannerDelegationMixin):
     """Prepares and executes enricher/dependency joins with key normalization."""
 
-    _NORMALIZE_JOIN_KEYS: frozenset[str] = frozenset({"doi", "pmid", "pmc_id"})
     _SYSTEM_COLUMNS_TO_DROP: frozenset[str] = frozenset(
         {
             "_run_id",

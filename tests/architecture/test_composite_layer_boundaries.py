@@ -20,8 +20,6 @@ import ast
 import re
 from pathlib import Path
 
-import pytest
-
 
 def _get_composite_runner_file(src_dir: Path) -> Path:
     """Return the canonical CompositePipelineRunner module path."""
@@ -38,8 +36,7 @@ class TestDomainCompositeLayerBoundaries:
         They must not depend on application layer orchestration.
         """
         domain_composite_path = src_dir / "bioetl" / "domain" / "composite"
-        if not domain_composite_path.exists():
-            pytest.skip("domain/composite not found")
+        assert domain_composite_path.exists(), "domain/composite not found"
 
         violations = []
 
@@ -64,8 +61,7 @@ class TestDomainCompositeLayerBoundaries:
         REQ-ARCH-FSM-002: FSM state enum must not depend on I/O implementations.
         """
         domain_composite_path = src_dir / "bioetl" / "domain" / "composite"
-        if not domain_composite_path.exists():
-            pytest.skip("domain/composite not found")
+        assert domain_composite_path.exists(), "domain/composite not found"
 
         violations = []
 
@@ -91,8 +87,7 @@ class TestDomainCompositeLayerBoundaries:
         and not depend on external packages (except typing).
         """
         state_file = src_dir / "bioetl" / "domain" / "composite" / "state.py"
-        if not state_file.exists():
-            pytest.skip("domain/composite/state.py not found")
+        assert state_file.exists(), "domain/composite/state.py not found"
 
         content = state_file.read_text(encoding="utf-8")
         tree = ast.parse(content)
@@ -147,8 +142,7 @@ class TestCoordinatorIsolation:
         coordinator_file = (
             src_dir / "bioetl" / "application" / "composite" / "coordinator.py"
         )
-        if not coordinator_file.exists():
-            pytest.skip("application/composite/coordinator.py not found")
+        assert coordinator_file.exists(), "application/composite/coordinator.py not found"
 
         content = coordinator_file.read_text(encoding="utf-8")
 
@@ -168,8 +162,7 @@ class TestCoordinatorIsolation:
         coordinator_file = (
             src_dir / "bioetl" / "application" / "composite" / "coordinator.py"
         )
-        if not coordinator_file.exists():
-            pytest.skip("application/composite/coordinator.py not found")
+        assert coordinator_file.exists(), "application/composite/coordinator.py not found"
 
         content = coordinator_file.read_text(encoding="utf-8")
 
@@ -208,8 +201,7 @@ class TestMergerIsolation:
         It should not know about FSM states.
         """
         merger_file = src_dir / "bioetl" / "application" / "composite" / "merger.py"
-        if not merger_file.exists():
-            pytest.skip("application/composite/merger.py not found")
+        assert merger_file.exists(), "application/composite/merger.py not found"
 
         content = merger_file.read_text(encoding="utf-8")
 
@@ -224,8 +216,7 @@ class TestMergerIsolation:
         REQ-ARCH-FSM-007: Merger should not directly manage checkpoints.
         """
         merger_file = src_dir / "bioetl" / "application" / "composite" / "merger.py"
-        if not merger_file.exists():
-            pytest.skip("application/composite/merger.py not found")
+        assert merger_file.exists(), "application/composite/merger.py not found"
 
         content = merger_file.read_text(encoding="utf-8")
         tree = ast.parse(content)
@@ -261,8 +252,7 @@ class TestKeyExtractorIsolation:
         key_extractor_file = (
             src_dir / "bioetl" / "application" / "composite" / "key_extractor.py"
         )
-        if not key_extractor_file.exists():
-            pytest.skip("application/composite/key_extractor.py not found")
+        assert key_extractor_file.exists(), "application/composite/key_extractor.py not found"
 
         content = key_extractor_file.read_text(encoding="utf-8")
 
@@ -282,8 +272,7 @@ class TestRunnerFSMOwnership:
         It must import the state enum from domain layer.
         """
         runner_file = _get_composite_runner_file(src_dir)
-        if not runner_file.exists():
-            pytest.skip("application/composite/runner_pkg/runner.py not found")
+        assert runner_file.exists(), "application/composite/runner_pkg/runner.py not found"
 
         content = runner_file.read_text(encoding="utf-8")
 
@@ -303,8 +292,7 @@ class TestRunnerFSMOwnership:
         REQ-ARCH-FSM-010: Runner should have methods for state transitions.
         """
         runner_file = _get_composite_runner_file(src_dir)
-        if not runner_file.exists():
-            pytest.skip("application/composite/runner_pkg/runner.py not found")
+        assert runner_file.exists(), "application/composite/runner_pkg/runner.py not found"
 
         content = runner_file.read_text(encoding="utf-8")
 
@@ -343,7 +331,7 @@ class TestCheckpointFSMIntegration:
         elif checkpoint_file.exists():
             content = checkpoint_file.read_text(encoding="utf-8")
         else:
-            pytest.skip("application/composite/checkpoint not found")
+            raise AssertionError("application/composite/checkpoint not found")
 
         # Must import FSM state from domain
         has_fsm_import = (
@@ -379,7 +367,7 @@ class TestCheckpointFSMIntegration:
         elif checkpoint_file.exists():
             content = checkpoint_file.read_text(encoding="utf-8")
         else:
-            pytest.skip("application/composite/checkpoint not found")
+            raise AssertionError("application/composite/checkpoint not found")
 
         # Check for correct import direction
         correct_import = (
@@ -402,8 +390,7 @@ class TestFSMDomainExports:
         REQ-ARCH-FSM-013: FSM state should be importable from package root.
         """
         init_file = src_dir / "bioetl" / "domain" / "composite" / "__init__.py"
-        if not init_file.exists():
-            pytest.skip("domain/composite/__init__.py not found")
+        assert init_file.exists(), "domain/composite/__init__.py not found"
 
         content = init_file.read_text(encoding="utf-8")
 
@@ -428,8 +415,7 @@ class TestFSMDomainExports:
         REQ-ARCH-FSM-014: Public API should be explicit.
         """
         init_file = src_dir / "bioetl" / "domain" / "composite" / "__init__.py"
-        if not init_file.exists():
-            pytest.skip("domain/composite/__init__.py not found")
+        assert init_file.exists(), "domain/composite/__init__.py not found"
 
         content = init_file.read_text(encoding="utf-8")
         tree = ast.parse(content)

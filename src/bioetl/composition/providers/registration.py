@@ -1,22 +1,24 @@
-"""Explicit provider registration for Composition layer.
+"""Explicit provider registration entrypoint for the composition layer.
 
-Loads config from configs/providers/*.yaml. HttpConfig serves as fallback.
-Config helpers extracted to _config_helpers.py per audit-package-structure-2026-02-07.
-Creator functions extracted to registration_bio.py and registration_biblio.py.
-ProviderConfig building delegated to sibling modules (Wave 3 simplification).
+Wave 3 ownership classification: simplify-now closeout complete.
+
+Canonical assembly ownership now lives in ``_registration_contracts.py``,
+``_config_helpers.py``, and the family-specific manifest builders. This module
+stays as a thin explicit bootstrap seam that merges family builders onto an
+injected or canonically resolved registry.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
 
-from bioetl.composition.providers._default_registry import (
-    get_default_provider_registry,
-)
 from bioetl.composition.providers._models import ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
     resolve_provider_assembly_support,
+)
+from bioetl.composition.providers._registry_resolution import (
+    resolve_provider_registry,
 )
 from bioetl.composition.providers._registry_protocols import (
     ProviderRegistrarProtocol,
@@ -49,7 +51,7 @@ def register_all_providers(
 
     Each provider includes a data_source_creator for unified registry access.
     """
-    target_registry = _resolve_registration_registry(registry)
+    target_registry = resolve_provider_registry(registry)
     support = resolve_provider_assembly_support(
         assembly_support,
         provider_registry=target_registry,
@@ -93,13 +95,3 @@ def _iter_provider_config_family_builders() -> tuple[
         _get_bio_provider_configs,
         _get_biblio_provider_configs,
     )
-
-
-def _resolve_registration_registry(
-    registry: ProviderRegistrarProtocol | None,
-) -> ProviderRegistrarProtocol:
-    """Resolve the target registry while keeping default access as a compat seam."""
-    if registry is not None:
-        return registry
-
-    return get_default_provider_registry()

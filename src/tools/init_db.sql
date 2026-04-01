@@ -1,2 +1,0 @@
--- Bootstrap SQL entrypoint for local tooling inventory checks.
--- Intentionally minimal: runtime DB init is currently handled elsewhere.

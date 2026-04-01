@@ -22,7 +22,7 @@ python -m scripts.qa <command> [args...]
 | `report-vcr-metadata` | `report_vcr_metadata_catalog.py` | Generate/check canonical VCR metadata catalog |
 | `report-hotspots` | `generate_hotspot_degradation_report.py` | Generate performance hotspot degradation report |
 | `report-duplication-baseline` | `report_duplication_baseline.py` | Generate report-only duplication baseline for `composition`/`application` |
-| `calibrate-hotspots` | `calibrate_hotspot_budgets.py` | Calibrate hotspot budgets |
+| `calibrate-hotspots` | `scripts/qa/calibrate_hotspot_budgets.py` | Calibrate hotspot budgets |
 
 ## When to Use
 

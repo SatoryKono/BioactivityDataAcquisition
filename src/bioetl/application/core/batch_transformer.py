@@ -21,6 +21,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.core.transformer_runtime.attempts import (
     transform_record_attempt,
 )
@@ -63,6 +66,20 @@ if TYPE_CHECKING:
 class BatchTransformer:
     """Transforms Bronze records to Silver/Gold with error handling and DQ checks."""
 
+    @staticmethod
+    def _create_default_normalization_processor(
+        config: RecordProcessorConfig,
+    ) -> RecordNormalizationProcessor | None:
+        """Build the default normalization stage from record-processor config."""
+        if not config.normalization_enabled:
+            return None
+        return RecordNormalizationProcessor(
+            provider=config.provider,
+            rule_set=config.normalization_rule_set,
+            content_hash_include_fields=config.content_hash_include_fields,
+            content_hash_exclude_fields=config.content_hash_exclude_fields,
+        )
+
     def __init__(
         self,
         context: PipelineContext,
@@ -73,6 +90,7 @@ class BatchTransformer:
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
         gold_transform_callback: GoldTransformCallback,
+        normalization_processor: RecordNormalizationProcessor | None = None,
     ) -> None:
         """Initialize batch transformer."""
         self._context = context
@@ -83,6 +101,11 @@ class BatchTransformer:
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
         self._gold_transform = gold_transform_callback
+        self._normalization_processor = (
+            normalization_processor
+            if normalization_processor is not None
+            else self._create_default_normalization_processor(config)
+        )
 
     async def _transform_attempt(
         self,
@@ -98,6 +121,7 @@ class BatchTransformer:
             transform=self._transform,
             gold_filter=self._gold_filter,
             gold_transform=self._gold_transform,
+            normalization_processor=self._normalization_processor,
             raw_record=raw_record,
             batch_id=batch_id,
             index=index,

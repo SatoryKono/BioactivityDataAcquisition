@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.infrastructure.quality._baseline_validation import (
     _is_valid_rollout_section_key,
     _validate_baseline_section,
+    _validate_historical_baseline_section,
     _validate_registry_group_entry,
     _validate_registry_groups_section,
 )
@@ -168,6 +169,78 @@ class TestValidateRegistryGroupEntry:
         assert result is not None
         assert "valid" in result
         assert len(errors) >= 2  # empty string and int both cause errors
+
+
+class TestValidateHistoricalBaselineSection:
+    """Tests for _validate_historical_baseline_section."""
+
+    def test_valid_historical_baseline(self) -> None:
+        """Historical baseline with matching metadata and floors should pass."""
+        raw = {
+            "historical_baseline": {
+                "total_exemptions": 12,
+                "by_registry": {"reg_a": 7, "reg_b": 5},
+                "snapshot_date": "2026-03-01",
+                "source_report": "reports/example.md",
+            }
+        }
+        errors: list[str] = []
+
+        result = _validate_historical_baseline_section(
+            raw,
+            enforceable_total=10,
+            enforceable_registry_counts={"reg_a": 6, "reg_b": 4},
+            errors=errors,
+        )
+
+        assert result is not None
+        assert errors == []
+
+    def test_missing_and_extra_registries_are_reported(self) -> None:
+        """Historical baseline should report registry-set drift against baseline."""
+        raw = {
+            "historical_baseline": {
+                "total_exemptions": 12,
+                "by_registry": {"reg_a": 7, "reg_extra": 5},
+                "snapshot_date": "2026-03-01",
+                "source_report": "reports/example.md",
+            }
+        }
+        errors: list[str] = []
+
+        _validate_historical_baseline_section(
+            raw,
+            enforceable_total=10,
+            enforceable_registry_counts={"reg_a": 6, "reg_b": 4},
+            errors=errors,
+        )
+
+        assert any("missing enforceable registries" in e for e in errors)
+        assert any("not present in baseline" in e for e in errors)
+
+    def test_historical_totals_and_registry_counts_cannot_drop_below_baseline(self) -> (
+        None
+    ):
+        """Historical baseline must not go below enforceable totals or registry counts."""
+        raw = {
+            "historical_baseline": {
+                "total_exemptions": 9,
+                "by_registry": {"reg_a": 5, "reg_b": 4},
+                "snapshot_date": "2026-03-01",
+                "source_report": "reports/example.md",
+            }
+        }
+        errors: list[str] = []
+
+        _validate_historical_baseline_section(
+            raw,
+            enforceable_total=10,
+            enforceable_registry_counts={"reg_a": 6, "reg_b": 4},
+            errors=errors,
+        )
+
+        assert any("total_exemptions must be greater than or equal" in e for e in errors)
+        assert any("historical_baseline.by_registry.reg_a" in e for e in errors)
 
 
 class TestValidateRegistryGroupsSection:

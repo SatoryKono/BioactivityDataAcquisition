@@ -8,6 +8,7 @@ __all__ = ["LockConfig", "RecordProcessorConfig"]
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
 from bioetl.domain.types import ArrowSchema, GoldSchemaType, ScdConfig
@@ -39,6 +40,12 @@ class RecordProcessorConfig:
     silver_output_path: str | None = None
     gold_output_path: str | None = None
     flat_structure: bool = False
+    normalization_enabled: bool = True
+    normalization_rule_set: NormalizationRulesPolicy = field(
+        default_factory=NormalizationRulesPolicy
+    )
+    content_hash_include_fields: frozenset[str] = field(default_factory=frozenset)
+    content_hash_exclude_fields: frozenset[str] = field(default_factory=frozenset)
 
 
 @dataclass(frozen=True, slots=True)

@@ -67,16 +67,16 @@ Last verified: '2026-03-31'
 
 | Topic | File |
 |-------|------|
-| File structure baseline | [../../../reports/evidence/project-file-structure/SUMMARY.md](../../../reports/evidence/project-file-structure/SUMMARY.md) |
-| File structure decisions | [../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md) |
-| Package topology baseline | [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md) |
-| Package topology synthesis | [../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md](../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md) |
-| Topology vs governance cross-synthesis | [../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md](../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md) |
-| Package topology decisions | [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md) |
-| Governance signals baseline | [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md) |
-| Governance signals decisions | [../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md) |
-| Compatibility registry refactor evidence | [../../../reports/evidence/compatibility-registry-refactor/SUMMARY.md](../../../reports/evidence/compatibility-registry-refactor/SUMMARY.md) |
-| Compatibility registry refactor decisions | [../../../reports/evidence/compatibility-registry-refactor/04-decisions/SUMMARY.md](../../../reports/evidence/compatibility-registry-refactor/04-decisions/SUMMARY.md) |
+| File structure baseline | `docs/reports/evidence/project-file-structure/SUMMARY.md` |
+| File structure decisions | `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md` |
+| Package topology baseline | `docs/reports/evidence/project-package-topology/SUMMARY.md` |
+| Package topology synthesis | `docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md` |
+| Topology vs governance cross-synthesis | `docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md` |
+| Package topology decisions | `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md` |
+| Governance signals baseline | `docs/reports/evidence/governance-signals/SUMMARY.md` |
+| Governance signals decisions | `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md` |
+| Compatibility registry refactor evidence | `docs/reports/evidence/compatibility-registry-refactor/SUMMARY.md` |
+| Compatibility registry refactor decisions | `docs/reports/evidence/compatibility-registry-refactor/04-decisions/SUMMARY.md` |
 
 Короткая operational rule:
 - package count сам по себе не запускает structural wave;
@@ -138,7 +138,7 @@ uv run python -m scripts.docs check-docstrings --summary
 
 # Диаграммы
 uv run python -m scripts.diagrams lint
-uv run python -m scripts.diagrams check quality-gates
+uv run python -m scripts.diagrams check-quality-gates
 uv run python -m scripts.diagrams render-pdf
 
 # Data integrity

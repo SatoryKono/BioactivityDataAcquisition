@@ -304,6 +304,45 @@ class FsAdrService(AdrServicePort):
                 )
             )
 
+    def _validate_single_adr_file(
+        self,
+        p: Path,
+        *,
+        seen_numbers: set[int],
+        issues: list[AdrValidationIssue],
+    ) -> None:
+        """Validate one ADR file and append issues in place."""
+        match = self._validate_filename(p, issues)
+        if match is None:
+            return
+
+        number = int(match.group(1))
+        self._validate_duplicate_number(number, p, seen_numbers, issues)
+
+        text = self._read_adr_text(p, number, issues)
+        if text is None:
+            return
+
+        self._validate_title(text, number, p, issues)
+        self._validate_status(text, number, p, issues)
+
+    @staticmethod
+    def _build_validation_report(
+        *,
+        files: list[Path],
+        issues: list[AdrValidationIssue],
+    ) -> AdrValidationReport:
+        """Build aggregate validation report from discovered files and issues."""
+        errors = sum(1 for issue in issues if issue.severity == "error")
+        warnings = sum(1 for issue in issues if issue.severity == "warning")
+        return AdrValidationReport(
+            valid=errors == 0,
+            total=len(files),
+            errors=errors,
+            warnings=warnings,
+            issues=issues,
+        )
+
     def validate(self) -> AdrValidationReport:
         """Validate all ADR files for naming, numbering and metadata consistency.
 
@@ -315,28 +354,10 @@ class FsAdrService(AdrServicePort):
         seen_numbers: set[int] = set()
 
         for p in files:
-            m = self._validate_filename(p, issues)
-            if m is None:
-                continue
+            self._validate_single_adr_file(p, seen_numbers=seen_numbers, issues=issues)
 
-            number = int(m.group(1))
-            self._validate_duplicate_number(number, p, seen_numbers, issues)
-
-            text = self._read_adr_text(p, number, issues)
-            if text is None:
-                continue
-
-            self._validate_title(text, number, p, issues)
-            self._validate_status(text, number, p, issues)
-
-        total = len(files)
-        errors = sum(1 for i in issues if i.severity == "error")
-        warnings = sum(1 for i in issues if i.severity == "warning")
-        return AdrValidationReport(
-            valid=errors == 0,
-            total=total,
-            errors=errors,
-            warnings=warnings,
+        return self._build_validation_report(
+            files=files,
             issues=issues,
         )
 

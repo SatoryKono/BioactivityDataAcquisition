@@ -241,13 +241,13 @@ class TestMergeServiceWritesViaStorage:
 class TestMergeServiceJoinKeyNormalization:
     """Tests for join key normalization (case-insensitive DOI/PMID matching)."""
 
-    def test_normalize_doi_to_lowercase(self, merge_service):
-        """Test DOI column is normalized to lowercase."""
+    def test_normalize_doi_with_trim_and_lowercase(self, merge_service):
+        """Test DOI column is normalized with trim and lowercase."""
         import polars as pl
 
         df = pl.DataFrame(
             {
-                "doi": ["10.1038/NATURE12373", "10.1000/ABC.DEF"],
+                "doi": [" 10.1038/NATURE12373 ", "10.1000/ABC.DEF"],
                 "title": ["Title 1", "Title 2"],
             }
         )
@@ -293,13 +293,13 @@ class TestMergeServiceJoinKeyNormalization:
 
         assert result["pmc_id"].to_list() == ["pmc1234567", "pmc7654321"]
 
-    def test_normalize_skips_non_identifier_columns(self, merge_service):
-        """Test non-identifier columns are not normalized."""
+    def test_normalize_title_trims_without_lowercasing(self, merge_service):
+        """Test title join keys are trimmed but keep original casing."""
         import polars as pl
 
         df = pl.DataFrame(
             {
-                "title": ["UPPERCASE TITLE", "Another TITLE"],
+                "title": ["  UPPERCASE TITLE  ", " Another TITLE"],
                 "doi": ["10.1038/NATURE", "10.1000/ABC"],
             }
         )
@@ -308,7 +308,6 @@ class TestMergeServiceJoinKeyNormalization:
             df, ["title", "doi"], None
         )
 
-        # title is not in _NORMALIZE_JOIN_KEYS, so it should be unchanged
         assert result["title"].to_list() == ["UPPERCASE TITLE", "Another TITLE"]
         # doi should be normalized
         assert result["doi"].to_list() == ["10.1038/nature", "10.1000/abc"]
@@ -344,7 +343,7 @@ class TestMergeServiceJoinKeyNormalization:
             df, ["id", "name"], None
         )
 
-        # Neither id nor name are in _NORMALIZE_JOIN_KEYS
+        # Neither id nor name has an explicit normalization policy
         assert result["id"].to_list() == ["ID1", "ID2"]
         assert result["name"].to_list() == ["Name1", "Name2"]
 

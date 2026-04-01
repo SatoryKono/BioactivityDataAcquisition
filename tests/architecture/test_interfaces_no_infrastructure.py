@@ -52,9 +52,7 @@ class TestInterfacesNoDIrectInfrastructure:
         """Test that CLI doesn't import from infrastructure directly."""
         # CLI is now in a package structure: interfaces/cli/main.py
         cli_path = SRC_PATH / "interfaces" / "cli" / "main.py"
-
-        if not cli_path.exists():
-            pytest.skip("CLI main.py not found")
+        assert cli_path.exists(), "CLI main.py not found"
 
         imports = get_imports_from_file(cli_path)
 
@@ -75,9 +73,7 @@ class TestInterfacesNoDIrectInfrastructure:
         """
         # CLI is now in a package structure: interfaces/cli/main.py
         cli_path = SRC_PATH / "interfaces" / "cli" / "main.py"
-
-        if not cli_path.exists():
-            pytest.skip("CLI main.py not found")
+        assert cli_path.exists(), "CLI main.py not found"
 
         imports = get_imports_from_file(cli_path)
 
@@ -96,9 +92,7 @@ class TestInterfacesNoDIrectInfrastructure:
         instead of importing infrastructure modules directly.
         """
         commands_dir = SRC_PATH / "interfaces" / "cli" / "commands"
-
-        if not commands_dir.exists():
-            pytest.skip("CLI commands directory not found")
+        assert commands_dir.exists(), "CLI commands directory not found"
 
         violations = []
 
@@ -129,9 +123,7 @@ class TestInterfacesNoDIrectInfrastructure:
         If all are fixed, this test can be removed.
         """
         commands_dir = SRC_PATH / "interfaces" / "cli" / "commands"
-
-        if not commands_dir.exists():
-            pytest.skip("CLI commands directory not found")
+        assert commands_dir.exists(), "CLI commands directory not found"
 
         # Expected legacy violations - keep in sync with test above
         # Note: quarantine.py was fixed in IF-002 refactoring to use QuarantineService
@@ -174,9 +166,7 @@ class TestInterfacesNoDIrectInfrastructure:
     def test_interfaces_module_no_infrastructure_imports(self):
         """Test that interfaces __init__ doesn't import infrastructure."""
         init_path = SRC_PATH / "interfaces" / "__init__.py"
-
-        if not init_path.exists():
-            pytest.skip("interfaces __init__ not found")
+        assert init_path.exists(), "interfaces __init__ not found"
 
         imports = get_imports_from_file(init_path)
 
@@ -192,9 +182,7 @@ class TestInterfacesNoDIrectInfrastructure:
     def test_observability_no_infrastructure_imports(self):
         """Observability interface should route through composition, not infrastructure."""
         obs_path = SRC_PATH / "interfaces" / "observability.py"
-
-        if not obs_path.exists():
-            pytest.skip("observability.py not found")
+        assert obs_path.exists(), "observability.py not found"
 
         imports = get_imports_from_file(obs_path)
 
@@ -312,9 +300,7 @@ class TestHttpInterfaceNoInfrastructure:
     def test_http_init_no_runtime_infrastructure_imports(self):
         """Test that http/__init__.py doesn't import infrastructure at runtime."""
         init_path = SRC_PATH / "interfaces" / "http" / "__init__.py"
-
-        if not init_path.exists():
-            pytest.skip("http/__init__.py not found")
+        assert init_path.exists(), "http/__init__.py not found"
 
         imports = get_runtime_imports_from_file(init_path)
 
@@ -331,9 +317,7 @@ class TestHttpInterfaceNoInfrastructure:
     def test_http_types_no_runtime_infrastructure_imports(self):
         """Test that http/types.py doesn't import infrastructure at runtime."""
         types_path = SRC_PATH / "interfaces" / "http" / "types.py"
-
-        if not types_path.exists():
-            pytest.skip("http/types.py not found")
+        assert types_path.exists(), "http/types.py not found"
 
         imports = get_runtime_imports_from_file(types_path)
 
@@ -354,9 +338,7 @@ class TestHttpInterfaceNoInfrastructure:
         from infrastructure should go through Application services.
         """
         server_path = SRC_PATH / "interfaces" / "http" / "health_server.py"
-
-        if not server_path.exists():
-            pytest.skip("health_server.py not found")
+        assert server_path.exists(), "health_server.py not found"
 
         imports = get_runtime_imports_from_file(server_path)
 
@@ -378,9 +360,7 @@ class TestHttpInterfaceNoInfrastructure:
         for type hints are allowed.
         """
         http_dir = SRC_PATH / "interfaces" / "http"
-
-        if not http_dir.exists():
-            pytest.skip("http/ directory not found")
+        assert http_dir.exists(), "http/ directory not found"
 
         violations = []
 
@@ -411,9 +391,7 @@ class TestHttpInterfaceNoInfrastructure:
         This is the correct architectural approach.
         """
         server_path = SRC_PATH / "interfaces" / "http" / "health_server.py"
-
-        if not server_path.exists():
-            pytest.skip("health_server.py not found")
+        assert server_path.exists(), "health_server.py not found"
 
         with open(server_path) as f:
             content = f.read()

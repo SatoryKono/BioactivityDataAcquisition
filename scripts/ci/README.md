@@ -13,11 +13,11 @@ python -m scripts.ci <command> [args...]
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `run-tests` | `run_pytest_resilient.py` | Run pytest with resilient retry logic |
-| `quality-gate` | `quality_integral_gate.py` | Integral quality gate for CI with descriptive test-health classification |
-| `e2e-skip-rate` | `check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold |
-| `e2e-rerun` | `check_e2e_rerun_stability.py` | Check E2E rerun stability |
-| `debt-report` | `report_quality_debt_weekly.py` | Generate weekly quality debt report |
+| `run-tests` | `scripts/ci/run_pytest_resilient.py` | Run pytest with resilient retry logic |
+| `quality-gate` | `scripts/ci/quality_integral_gate.py` | Integral quality gate for CI with descriptive test-health classification |
+| `e2e-skip-rate` | `scripts/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold |
+| `e2e-rerun` | `scripts/ci/check_e2e_rerun_stability.py` | Check E2E rerun stability |
+| `debt-report` | `scripts/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report |
 
 ## When to Use
 
@@ -38,5 +38,7 @@ Canonical taxonomy:
 
 | File | Description |
 |------|-------------|
-| `apply-ci-optimizations.ps1` | PowerShell CI optimization script |
-| `apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization |
+| `scripts/ci/apply-ci-optimizations.ps1` | PowerShell CI optimization script |
+| `scripts/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization |
+| `scripts/ci/_compatibility_registry.py` | Shared compatibility registry loader used by telemetry/reporting helpers |
+| `scripts/ci/_compatibility_telemetry.py` | Compatibility inventory telemetry helper used by architecture reporting flows |

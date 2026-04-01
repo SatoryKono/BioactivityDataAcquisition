@@ -38,7 +38,7 @@ pipeline:
   pipeline_name: ${provider}_${entity}
   provider: ${provider}
   entity_type: ${entity}
-  description: TODO add description
+  description: ${pipeline_description}
   business_primary_keys:
     - ${entity}_id
   silver_table: ${provider}_${entity}
@@ -281,7 +281,12 @@ def main() -> int:
 
     files_to_create = {
         config_dir / f"{entity}.yaml": YAML_TEMPLATE.substitute(
-            provider=provider, entity=entity, pipeline_name=pipeline_name
+            provider=provider,
+            entity=entity,
+            pipeline_name=pipeline_name,
+            pipeline_description=(
+                f"{provider_title} {entity_title} unified entity pipeline"
+            ),
         ),
         pipeline_dir / f"{entity}.py": PIPELINE_TEMPLATE.substitute(
             provider=provider,

@@ -1,7 +1,8 @@
-"""Date normalization service.
+"""Deprecated date normalization compatibility service.
 
-Pure domain service (no I/O) per RULES.md §1.1.
-Handles year validation and partial date normalization.
+Deprecated: import pure helpers from ``bioetl.domain.normalization.dates``
+instead.
+Sunset target: 2026-06-30.
 """
 
 from __future__ import annotations
@@ -9,11 +10,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.domain.services._date_helpers import (
+from bioetl.domain.normalization.dates import (
     format_date_parts as _format_date_parts,
 )
-from bioetl.domain.services._date_helpers import (
+from bioetl.domain.normalization.dates import (
     normalize_partial_date as _normalize_partial_date,
+)
+from bioetl.domain.normalization.dates import (
+    validate_publication_year as _validate_publication_year,
 )
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 
@@ -24,33 +28,23 @@ __all__ = [
     "DateNormalizationService",
 ]
 
+DEPRECATED_IN_FAVOR_OF = "bioetl.domain.normalization.dates"
+SUNSET_DATE = "2026-06-30"
+
 
 @dataclass(frozen=True, slots=True)
 class DateNormalizationService:
-    """Normalize dates and validate publication years.
-
-    Delegates partial date normalization and date-parts formatting
-    to pure helper functions in ``_date_helpers``.
-    """
+    """Compatibility façade over pure date normalization helpers."""
 
     config: DataNormalizationConfig = field(default_factory=DataNormalizationConfig)
 
     def normalize_year(self, year: int | None) -> tuple[int | None, bool]:
-        """Validate publication year against configured range.
-
-        Returns (year, is_warning). Warning is True if year is outside valid range.
-
-        Args:
-            year: Publication year.
-
-        Returns:
-            Tuple of (year, is_warning).
-        """
-        if year is None:
-            return None, False
-        if self.config.min_publication_year <= year <= self.config.max_publication_year:
-            return year, False
-        return year, True
+        """Validate publication year against configured bounds."""
+        return _validate_publication_year(
+            year,
+            min_year=self.config.min_publication_year,
+            max_year=self.config.max_publication_year,
+        )
 
     def normalize_partial_date(self, date_str: str | None) -> str | None:
         """Normalize partial date to full YYYY-MM-DD format (end of period).

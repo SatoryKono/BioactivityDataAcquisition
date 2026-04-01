@@ -76,6 +76,16 @@ SILVER_SCHEMAS = {
     "semanticscholar_publication": SemanticScholarPublicationSchema,
 }
 
+# A small representative set used by regular CI as an initial schema-watch gate.
+# The goal is fast feedback across distinct pipeline families without paying the
+# cost of treating the entire Silver schema surface as a per-PR blocking lane.
+REPRESENTATIVE_SILVER_SCHEMAS = (
+    "chembl_activity",
+    "pubchem_compound",
+    "pubmed_publication",
+    "uniprot_protein",
+)
+
 
 @pytest.fixture
 def snapshots_dir() -> Path:
@@ -183,3 +193,83 @@ def load_snapshot(schema_name: str, snapshots_dir: Path) -> dict[str, Any] | Non
 
     with snapshot_path.open() as f:
         return json.load(f)
+
+
+def assert_schema_matches_snapshot(
+    schema_name: str,
+    *,
+    snapshots_dir: Path,
+    update_snapshots: bool = False,
+) -> None:
+    """Assert that current schema metadata matches the stored snapshot.
+
+    This helper centralizes schema drift diagnostics so the full suite and the
+    representative CI subset share exactly the same matching logic.
+    """
+    schema_class = SILVER_SCHEMAS[schema_name]
+
+    current_metadata = extract_field_metadata(schema_class)
+    snapshot = load_snapshot(schema_name, snapshots_dir)
+
+    if snapshot is None or update_snapshots:
+        save_snapshot(schema_name, current_metadata, snapshots_dir)
+        if snapshot is None:
+            pytest.skip(f"Created initial snapshot for {schema_name}")
+        pytest.skip(f"Updated snapshot for {schema_name} (UPDATE_SNAPSHOTS=1)")
+
+    current_fields = set(current_metadata.keys())
+    snapshot_fields = set(snapshot.keys())
+    allowed_attr_diffs = {
+        "_run_id": {"dtype"},
+        "_source_batch_id": {"dtype"},
+        "molecule_id": {"dtype"},
+        "publication_year": {"required"},
+    }
+    allowed_check_diffs = {"publication_year", "standard_relation", "usan_year"}
+
+    added_fields = current_fields - snapshot_fields
+    if added_fields:
+        pytest.fail(
+            f"{schema_name}: New fields detected: {sorted(added_fields)}\n"
+            "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
+        )
+
+    removed_fields = snapshot_fields - current_fields
+    if removed_fields:
+        pytest.fail(
+            f"{schema_name}: Fields removed: {sorted(removed_fields)}\n"
+            "This is a BREAKING CHANGE. Update downstream consumers first.\n"
+            "Then run: UPDATE_SNAPSHOTS=1 pytest ..."
+        )
+
+    for field_name in current_fields:
+        current_field = current_metadata[field_name]
+        snapshot_field = snapshot[field_name]
+
+        for attr in ["dtype", "nullable", "required"]:
+            if field_name in allowed_attr_diffs and attr in allowed_attr_diffs[field_name]:
+                continue
+            if current_field.get(attr) != snapshot_field.get(attr):
+                pytest.fail(
+                    f"{schema_name}.{field_name}: {attr} changed\n"
+                    f"  Expected: {snapshot_field.get(attr)}\n"
+                    f"  Got:      {current_field.get(attr)}\n"
+                    "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
+                )
+
+        if field_name in allowed_check_diffs:
+            continue
+
+        current_checks = {c["name"] for c in current_field.get("checks", [])}
+        snapshot_checks = {c["name"] for c in snapshot_field.get("checks", [])}
+
+        added_checks = current_checks - snapshot_checks
+        removed_checks = snapshot_checks - current_checks
+
+        if added_checks or removed_checks:
+            pytest.fail(
+                f"{schema_name}.{field_name}: Validation checks changed\n"
+                f"  Added:   {sorted(added_checks) if added_checks else 'none'}\n"
+                f"  Removed: {sorted(removed_checks) if removed_checks else 'none'}\n"
+                "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
+            )

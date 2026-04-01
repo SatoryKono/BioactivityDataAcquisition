@@ -74,6 +74,9 @@ These tests are marked `contracts` and `no_api`, so they do **not** require:
 # Schema stability (snapshot tests)
 uv run pytest tests/contract/silver_schemas/test_schema_stability.py -m contracts -v
 
+# Representative CI schema drift gate
+uv run pytest tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py -m contracts -v
+
 # Type safety
 uv run pytest tests/contract/silver_schemas/test_field_types.py -m contracts -v
 
@@ -89,11 +92,23 @@ uv run pytest tests/contract/silver_schemas/test_naming_conventions.py -m contra
 ```bash
 # Run the schema-only contract subset locally
 uv run pytest tests/contract/silver_schemas/ -m contracts -v
+
+# Run the fast representative subset used as the initial per-PR schema-watch gate
+uv run pytest tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py -m contracts -v
 ```
 
 In CI these tests are included in the broader `contract-tests.yml` workflow.
 They run alongside live API contract suites, but unlike provider live contracts
 the Silver schema subset itself is offline and `no_api`.
+
+The initial regular CI gate does not run every Silver schema on every PR. It
+uses a representative subset to keep schema drift protection cheap and fast
+while still covering distinct pipeline families:
+
+- `chembl_activity`
+- `pubchem_compound`
+- `pubmed_publication`
+- `uniprot_protein`
 
 ---
 

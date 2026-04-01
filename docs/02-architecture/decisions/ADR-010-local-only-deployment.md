@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-30'
+Last verified: '2026-04-01'
 ---
 
 # ADR-010: Local-Only Deployment Strategy
@@ -93,7 +93,7 @@ writer = BronzeWriter(
 )
 
 # Стало
-writer = BronzeWriter(base_path=Path("data/bronze"))
+writer = BronzeWriter(base_path=Path("data/output/bronze"))
 ```
 
 ### Locking
@@ -152,7 +152,7 @@ checkpoint = S3Checkpoint(
 )
 
 # Стало
-checkpoint = LocalCheckpoint(base_path=Path("data/checkpoints"))
+checkpoint = LocalCheckpoint(base_path=Path("data/output/checkpoints"))
 ```
 
 ### Configuration
@@ -166,11 +166,11 @@ class Settings:
 
 # Стало
 class Settings:
-    data-dir: Path = Path("data")
+    data_dir: Path = Path("data")
 
     @property
-    def bronze-path(self) -> Path:
-        return self.data-dir / "bronze"
+    def bronze_path(self) -> Path:
+        return self.data_dir / "output" / "bronze"
 ```
 
 ## Consequences
@@ -211,6 +211,20 @@ class Settings:
 2. Обновить переменные окружения (удалить AWS-*, REDIS-*)
 3. Переустановить зависимости: `pip install -e .[dev]`
 4. Перенести данные из S3 в локальную директорию `data/`
+
+## Migration Notes
+
+При migration / reconciliation with current published storage docs используйте
+современную output-root topology:
+
+- Bronze data -> `data/output/bronze/`
+- Silver data -> `data/output/silver/`
+- Gold data -> `data/output/gold/`
+- Checkpoints -> `data/output/checkpoints/`
+
+Исторические локальные пути вида `data/bronze` и `data/checkpoints` следует
+трактовать как pre-ADR-025 simplification, а не как current canonical storage
+layout.
 
 ## Compliance
 

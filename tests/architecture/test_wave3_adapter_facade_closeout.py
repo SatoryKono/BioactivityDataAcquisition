@@ -20,6 +20,7 @@ FACADE_RATCHETS: dict[str, tuple[int, set[str]]] = {
     "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py": (
         335,
         {
+            "bioetl.infrastructure.adapters.http._client_retry_flow",
             "bioetl.infrastructure.adapters.http._client_retry_models",
             "bioetl.infrastructure.adapters.http._client_retry_policy",
         },

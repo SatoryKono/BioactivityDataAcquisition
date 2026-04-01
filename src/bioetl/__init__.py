@@ -59,10 +59,40 @@ try:
             union_args = typing_inspect.get_args(registered_type)
             if union_args and any(
                 isinstance(arg, type) and issubclass(input_data_type, arg)
-                for arg in union_args
+                    for arg in union_args
             ):
                 return registered_fn
         return None
+
+    def _find_any_fallback(
+        registry: dict[
+            typing.Any, typing.Any  # Any: multipledispatch requires erased types
+        ],
+    ) -> typing.Any:  # Any: multipledispatch requires erased types
+        """Return Any-registered dispatcher function when present."""
+        if (
+            typing.Any  # Any: multipledispatch requires erased types
+            in registry  # Any: multipledispatch requires erased types
+        ):
+            return registry[
+                typing.Any  # Any: multipledispatch requires erased types
+            ]  # Any: multipledispatch requires erased types
+        return None
+
+    def _resolve_registered_dispatch_fn(
+        registry: dict[
+            typing.Any, typing.Any  # Any: multipledispatch requires erased types
+        ],  # Any: multipledispatch requires erased types
+        input_data_type: type,
+    ) -> typing.Any:  # Any: multipledispatch requires erased types
+        """Resolve dispatcher function using exact, union/subclass, then Any fallback."""
+        fn = registry.get(input_data_type)
+        if fn is not None:
+            return fn
+        union_match = _find_fn_by_subclass_or_union(registry, input_data_type)
+        if union_match is not None:
+            return union_match
+        return _find_any_fallback(registry)
 
     def _dispatcher_call_with_any_fallback(
         self: typing.Any,  # Any: multipledispatch requires erased types
@@ -70,21 +100,7 @@ try:
         **kwargs: typing.Any,  # Any: multipledispatch requires erased types
     ) -> typing.Any:  # Any: multipledispatch requires erased types
         input_data_type = type(args[0])
-        fn = self._function_registry.get(input_data_type)
-
-        # Python 3.14 can leave Union-annotated registrations as single keys
-        # (e.g., pandas.Series | pandas.DataFrame) in Pandera's registry.
-        if fn is None:
-            fn = _find_fn_by_subclass_or_union(self._function_registry, input_data_type)
-
-        if (
-            fn is None
-            and typing.Any  # Any: multipledispatch requires erased types
-            in self._function_registry  # Any: multipledispatch requires erased types
-        ):  # Any: multipledispatch requires erased types
-            fn = self._function_registry[
-                typing.Any  # Any: multipledispatch requires erased types
-            ]  # Any: multipledispatch requires erased types
+        fn = _resolve_registered_dispatch_fn(self._function_registry, input_data_type)
         if fn is None:
             return _orig_dispatcher_call(self, *args, **kwargs)  # type: ignore[no-untyped-call]
         return fn(*args, **kwargs)

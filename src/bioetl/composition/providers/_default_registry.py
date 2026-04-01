@@ -1,4 +1,10 @@
-"""Private helpers for class-level access to the default provider registry."""
+"""Retained class-level compatibility helpers for the default provider registry.
+
+This module is the private owner of the lazy default registry singleton used by
+legacy class-level access patterns. New bootstrap logic should resolve
+registries through ``_registry_resolution.py`` or explicit injection instead of
+importing this helper directly.
+"""
 
 from __future__ import annotations
 
@@ -15,9 +21,6 @@ from typing import (
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._models import ProviderConfig
-    from bioetl.composition.providers._registry_protocols import (
-        ProviderRegistrarProtocol,
-    )
     from bioetl.composition.providers.provider_registry import ProviderRegistry
 
 R = TypeVar("R")
@@ -104,11 +107,6 @@ class ProvidersDescriptor(Generic[ProviderRegistryT]):
     ) -> dict[str, ProviderConfig]:
         target = obj if obj is not None else objtype._get_default()
         return target._store._providers
-
-
-def get_default_provider_registrar() -> ProviderRegistrarProtocol:
-    """Return the sanctioned default-registry seam for provider registration."""
-    return get_default_provider_registry()
 
 
 def get_default_provider_registry() -> ProviderRegistry:

@@ -7,7 +7,13 @@ from bioetl.domain.normalization.authors import (
     extract_first_string,
     parse_authors_to_list,
 )
-from bioetl.domain.normalization.dates import format_date_parts, parse_date_field
+from bioetl.domain.normalization.dates import (
+    format_date_parts,
+    normalize_partial_date,
+    parse_date_field,
+    validate_publication_year,
+)
+from bioetl.domain.normalization.json import canonicalize_json_string, serialize_json_canonical
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
     normalize_pmc_id,
@@ -25,7 +31,9 @@ __all__ = [
     "extract_first_item",
     "extract_first_string",
     "format_date_parts",
+    "canonicalize_json_string",
     "normalize_doi",
+    "normalize_partial_date",
     "normalize_pmc_id",
     "normalize_pmid",
     "normalize_string",
@@ -33,6 +41,8 @@ __all__ = [
     "parse_authors_to_list",
     "parse_date_field",
     "parse_page_range",
+    "serialize_json_canonical",
     "strip_doi_prefix",
     "strip_html_tags",
+    "validate_publication_year",
 ]

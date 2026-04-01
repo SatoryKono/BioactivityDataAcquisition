@@ -39,11 +39,10 @@ from bioetl.domain.types import BronzeRecord, GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.services import IdentityService
-    from bioetl.domain.types import PrimaryId, SilverRecord
+    from bioetl.domain.types import PrimaryId
 
 
 # Declarative field groups for ChemblPublication entity
@@ -149,12 +148,7 @@ class PublicationTransformer(BaseChemblTransformer):
             dependencies=dependencies,
         )
 
-    async def _transform_impl(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-        index: int,
-    ) -> SilverRecord | None:
+    def _resolve_primary_id(self, record: BronzeRecord) -> PrimaryId:
         """Handle legacy and unified publication ID fields."""
         primary_id = record.get(self.primary_id_field) or record.get(
             "document_chembl_id"
@@ -164,31 +158,7 @@ class PublicationTransformer(BaseChemblTransformer):
                 "Missing required field: publication_id or document_chembl_id",
                 field=self.primary_id_field,
             )
-
-        # 2. Generate entity ID using IdentityService
-        entity_id = self.compute_entity_id(
-            source_id=str(primary_id),
-            record={self.primary_id_field: str(primary_id)},
-        )
-
-        # 3. Extract business data (delegated to subclass)
-        business_data = self._extract_business_data(record, primary_id)
-
-        # 4. Compute content hash
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-        # 5. Create domain entity
-        entity = self._create_entity(
-            self.entity_class,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            index=index,
-            **business_data,
-        )
-
-        # 6. Convert to SilverRecord
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
+        return cast("PrimaryId", primary_id)
 
     def _extract_business_data(
         self,

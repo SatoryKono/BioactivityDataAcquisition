@@ -7,6 +7,10 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.transformations import safe_float
@@ -210,6 +214,50 @@ class TestPubChemCompoundTransformer:
         assert "content_hash" in result1
         assert "content_hash" in result2
         assert result1["content_hash"] == result2["content_hash"]
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_silver_returns_staged_payload(
+        self, transformer, mock_context
+    ):
+        """Test staged PubChem path returns business data before hash finalization."""
+        record = {
+            "molecule_id": 2244,
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.entity_id == "pubchem:2244"
+        assert result.business_data["molecule_id"] == "2244"
+        assert "content_hash" not in result.business_data
+
+    @pytest.mark.asyncio
+    async def test_transform_matches_staged_finalization(
+        self, transformer, mock_context
+    ):
+        """Legacy PubChem transform should match staged finalization."""
+        record = {
+            "molecule_id": 2244,
+            "molecular_formula": "C9H8O4",
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+            "iupac_name": "  Aspirin  ",
+        }
+
+        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        assert isinstance(pre_silver, PreSilverRecord)
+        staged_result = RecordNormalizationProcessor(
+            provider=transformer.provider,
+        ).finalize_pre_silver(pre_silver, mock_context, 0)
+        legacy_result = await transformer.transform(mock_context, record, index=0)
+
+        assert staged_result is not None
+        assert legacy_result is not None
+        assert legacy_result["molecule_id"] == staged_result["molecule_id"]
+        assert legacy_result["canonical_smiles"] == staged_result["canonical_smiles"]
+        assert legacy_result["iupac_name"] == staged_result["iupac_name"]
+        assert legacy_result["entity_id"] == staged_result["entity_id"]
+        assert legacy_result["content_hash"] == staged_result["content_hash"]
 
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):

@@ -16,7 +16,12 @@ from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformerDependencyContext,
 )
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.domain.entities.uniprot import IDMappingResult
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -118,12 +123,55 @@ class IDMappingTransformer(BaseTransformer):
             TransformationError: If required fields are missing.
             ValueError: If IDMappingResult entity validation fails.
         """
-        # Step 1: Extract required field
+        target_id, business_data = self._build_mapping_business_data(record)
+        normalized_business_data = RecordNormalizationProcessor(
+            provider=self.provider,
+        ).normalize_business_data(business_data)
+        entity_id = self.compute_entity_id(
+            source_id=target_id, record={"target_id": target_id}
+        )
+        content_hash = self.compute_content_hash(
+            normalized_business_data,
+            exclude_none=True,
+        )
+
+        return self._build_pre_silver_record(
+            context,
+            entity_id,
+            content_hash,
+            index,
+            normalized_business_data,
+        )
+
+    async def transform_pre_silver(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> PreSilverRecord | None:
+        """Build an intermediate ID mapping payload for application finalization."""
+        del context, index
+        target_id, business_data = self._build_mapping_business_data(record)
+        entity_id = self.compute_entity_id(
+            source_id=target_id, record={"target_id": target_id}
+        )
+        return PreSilverRecord(
+            entity_id=entity_id,
+            business_data=business_data,
+            build_silver_record=self._build_pre_silver_record,
+            apply_structural_policy=self._apply_structural_policy,
+            apply_silver_filter=self._apply_silver_filter,
+        )
+
+    def _build_mapping_business_data(
+        self,
+        record: BronzeRecord,
+    ) -> tuple[str, dict[str, Any]]:
+        """Build ID mapping business data prior to hash finalization."""
         target_id = str(self._get_required_field(record, "target_id"))
-        uniprot_accession = record.get("uniprot_accession")  # Can be None
+        uniprot_accession = record.get("uniprot_accession")
         all_mappings = record.get("all_mappings")
 
-        # Step 2: Determine mapping status
         if all_mappings:
             mapping_status = "multiple"
         elif uniprot_accession:
@@ -131,14 +179,10 @@ class IDMappingTransformer(BaseTransformer):
         else:
             mapping_status = "not_found"
 
-        # Step 3: Build business data dictionary for content hash
-        business_data: dict[
-            str, Any  # Any: transformer record has heterogeneous values
-        ] = {  # Any: transformer record has heterogeneous values
+        business_data: dict[str, Any] = {
             "target_id": target_id,
             "uniprot_accession": uniprot_accession,
             "mapping_status": mapping_status,
-            # UniProt entry metadata
             "uniprot_entry_name": record.get("uniprot_entry_name"),
             "organism_scientific": record.get("organism_scientific"),
             "organism_common": record.get("organism_common"),
@@ -151,16 +195,17 @@ class IDMappingTransformer(BaseTransformer):
             "annotation_score": record.get("annotation_score"),
             "all_mappings": all_mappings,
         }
+        return target_id, business_data
 
-        # Step 4: Generate entity_id using IdentityService (RULES.md §2.8)
-        entity_id = self.compute_entity_id(
-            source_id=target_id, record={"target_id": target_id}
-        )
-
-        # Step 5: Compute content_hash (RULES.md §2.8.1)
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-        # Step 6: Create domain entity with lineage metadata
+    def _build_pre_silver_record(
+        self,
+        context: PipelineContext,
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Build a finalized Silver record from normalized ID mapping data."""
         entity = self._create_entity(
             IDMappingResult,
             context,
@@ -169,11 +214,8 @@ class IDMappingTransformer(BaseTransformer):
             index=index,
             **business_data,
         )
-
-        # Step 7: Convert to SilverRecord with lineage field renaming
         silver_record = self.entity_to_silver_record(entity)
-
-        # Step 8: Set DQ warning flag for not_found mappings
-        silver_record["_dq_warn"] = mapping_status == "not_found"
-
+        silver_record["_dq_warn"] = (
+            business_data.get("mapping_status") == "not_found"
+        )
         return cast("SilverRecord", silver_record)

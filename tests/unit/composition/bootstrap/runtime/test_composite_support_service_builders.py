@@ -8,6 +8,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+)
 from bioetl.composition.bootstrap.runtime.composite_support_service_builders import (
     build_execution_support_services,
     build_merge_dependencies,
@@ -26,6 +29,8 @@ def _make_config(
         SimpleNamespace(
             name="composite_publication",
             version="1.0.0",
+            enrichers=(),
+            dependencies=(),
             dq=SimpleNamespace(),
             execution=SimpleNamespace(max_concurrency=3),
             cross_validation=SimpleNamespace(enabled=quarantine_enabled),
@@ -90,9 +95,16 @@ def test_build_execution_support_services_wires_expected_collaborators(
     mock_key_extractor_cls.assert_called_once_with(
         delta_reader=delta_reader,
         logger=logger,
+        normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
     )
-    mock_seed_key_resolver.assert_called_once_with(logger)
-    mock_chained_key_resolver.assert_called_once_with(logger)
+    mock_seed_key_resolver.assert_called_once_with(
+        logger,
+        normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
+    )
+    mock_chained_key_resolver.assert_called_once_with(
+        logger,
+        normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
+    )
     mock_progress_service_cls.assert_called_once_with(logger)
     mock_result_service_cls.assert_called_once_with(logger)
     assert (
@@ -332,7 +344,7 @@ def test_build_merge_dependencies_wires_join_adapter_and_planner(
         resolve_join_how=lambda strategy: (
             "left" if strategy is MergeStrategy.LEFT_OUTER else "inner"
         ),
-        normalize_join_keys=frozenset({"doi", "pmid"}),
+        normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
         system_columns_to_drop=frozenset({"_run_id"}),
     )
 
@@ -349,10 +361,10 @@ def test_build_merge_dependencies_wires_join_adapter_and_planner(
         column_groups=("priority",),
     )
     mock_coalesce_policy_cls.assert_called_once_with(logger, priority_orderer)
-    assert mock_join_key_resolver_cls.call_args.kwargs["normalize_join_keys"] == {
-        "doi",
-        "pmid",
-    }
+    assert (
+        mock_join_key_resolver_cls.call_args.kwargs["normalization_policies"]
+        is JOIN_KEY_NORMALIZATION_POLICIES
+    )
     join_adapter_kwargs = mock_join_adapter_cls.call_args.kwargs
     assert join_adapter_kwargs["logger"] is logger
     assert join_adapter_kwargs["join_type_resolver"]() == "left"

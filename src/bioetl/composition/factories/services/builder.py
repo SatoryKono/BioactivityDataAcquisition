@@ -159,6 +159,8 @@ class ServicesBuilder:
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
         column_groups: tuple[ColumnGroupConfig, ...] = (),
         scd_config: ScdConfig | None = None,
+        content_hash_include_fields: frozenset[str] = frozenset(),
+        content_hash_exclude_fields: frozenset[str] = frozenset(),
     ) -> RecordProcessor:
         """Create configured ``RecordProcessor`` for pipeline execution."""
         effective_tracer = tracer or services.tracing
@@ -179,6 +181,8 @@ class ServicesBuilder:
             ),
             column_groups=column_groups,
             scd_config=scd_config,
+            content_hash_include_fields=content_hash_include_fields,
+            content_hash_exclude_fields=content_hash_exclude_fields,
         )
 
         components = ServicesBuilder.create_batch_processing_components(

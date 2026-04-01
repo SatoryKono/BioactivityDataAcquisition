@@ -207,9 +207,10 @@ async def test_pipeline_isolation(e2e_data_dir: Path):
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
-    """E2E: Running the same pipeline twice should be idempotent.
+    """E2E: Merge-mode pipeline rerun preserves business identity set.
 
-    Second run should not duplicate records due to merge/upsert behavior.
+    ``chembl_target`` uses Silver merge semantics, so rerunning the same input
+    should preserve both row count and the ``(target_id, content_hash)`` set.
     """
     # First run
     ctx1 = create_test_context("chembl_target", limit=3)
@@ -218,6 +219,11 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
 
     first_count = assert_silver_table_has_records(
         e2e_data_dir, "chembl_target", expected_min=1
+    )
+    first_records = get_silver_records(e2e_data_dir, "chembl_target")
+    first_identity = sorted(
+        (str(record["target_id"]), str(record["content_hash"]))
+        for record in first_records
     )
 
     # Second run
@@ -228,8 +234,13 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
     second_count = assert_silver_table_has_records(
         e2e_data_dir, "chembl_target", expected_min=1
     )
-
-    # Should not double the records
-    assert second_count <= first_count * 2, (
-        f"Records may have duplicated: {first_count} -> {second_count}"
+    second_records = get_silver_records(e2e_data_dir, "chembl_target")
+    second_identity = sorted(
+        (str(record["target_id"]), str(record["content_hash"]))
+        for record in second_records
     )
+
+    assert second_count == first_count, (
+        f"Merge rerun changed row count: {first_count} -> {second_count}"
+    )
+    assert second_identity == first_identity, "Merge rerun changed identity set"

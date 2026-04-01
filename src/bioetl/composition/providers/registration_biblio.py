@@ -8,9 +8,9 @@ from bioetl.composition.factories.datasource.crossref import (
     create_crossref_adapter,
 )
 from bioetl.composition.providers._config_helpers import (
+    _build_provider_family_config_map,
     _create_http_data_source,
     _get_batch_size_from_config,
-    _get_rate_limits_from_config,
 )
 from bioetl.composition.providers._models import (
     ProviderConfig,
@@ -28,8 +28,6 @@ from bioetl.composition.providers._registration_biblio_profiles import (
 from bioetl.composition.providers._registration_contracts import (
     HttpProviderConfigSpec,
     ProviderAssemblySupport,
-    build_http_provider_config,
-    resolve_provider_assembly_support,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
@@ -37,6 +35,7 @@ from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 
 if TYPE_CHECKING:
+    from bioetl.composition.bootstrap_contexts import RateLimitContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -221,24 +220,16 @@ def _create_semanticscholar_data_source(
     )
 
 
-def _get_biblio_provider_configs(
-    *,
-    assembly_support: ProviderAssemblySupport | None = None,
-) -> dict[str, ProviderConfig]:
-    """Build ProviderConfig entries for bibliographic providers."""
-    support = resolve_provider_assembly_support(assembly_support)
-    rate_limits = _get_rate_limits_from_config(
-        "pubmed",
-        "crossref",
-        "openalex",
-        "semanticscholar",
-    )
+def _build_biblio_http_provider_specs(
+    rate_limits: dict[str, RateLimitContext],
+) -> tuple[HttpProviderConfigSpec, ...]:
+    """Build the declarative HTTP provider manifest for the biblio family."""
     pubmed = rate_limits["pubmed"]
     crossref = rate_limits["crossref"]
     openalex = rate_limits["openalex"]
     semanticscholar = rate_limits["semanticscholar"]
 
-    specs = (
+    return (
         HttpProviderConfigSpec(
             provider_name="pubmed",
             adapter_class=PubMedAdapter,
@@ -273,15 +264,17 @@ def _get_biblio_provider_configs(
         ),
     )
 
-    return {
-        spec.provider_name: build_http_provider_config(
-            adapter_class=spec.adapter_class,
-            rate=spec.rate,
-            capacity=spec.capacity,
-            data_source_creator=spec.data_source_creator,
-            assembly_support=support,
-            rate_overrides=spec.rate_overrides,
-            custom_creator=spec.custom_creator,
-        )
-        for spec in specs
-    }
+
+def _get_biblio_provider_configs(
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
+) -> dict[str, ProviderConfig]:
+    """Build ProviderConfig entries for bibliographic providers."""
+    return _build_provider_family_config_map(
+        "pubmed",
+        "crossref",
+        "openalex",
+        "semanticscholar",
+        assembly_support=assembly_support,
+        http_spec_builder=_build_biblio_http_provider_specs,
+    )

@@ -2,6 +2,12 @@
 
 Implements RULES.md §2.8 — Entity ID Generation and Content Hashing.
 REQ-ID-001..008.
+
+Hashing contract:
+- Exclude ``META_FIELDS`` and any underscore-prefixed technical fields.
+- Normalize values recursively before hashing.
+- Serialize only through canonical JSON.
+- The same ``provider + normalized payload`` MUST always produce the same hash.
 """
 
 from __future__ import annotations
@@ -15,7 +21,7 @@ from typing import Any  # Any: required for singledispatch base case signature
 from bioetl.domain.types import JsonDict
 
 from ..constants import META_FIELDS
-from ..serialization import serialize_to_json_canonical
+from ..serialization import serialize_to_canonical_json
 from ..types import ContentHash, EntityID
 
 # =============================================================================
@@ -146,7 +152,7 @@ def normalize_for_hash(
 def canonical_json_dumps(obj: JsonDict) -> str:
     """Convert object to canonical JSON representation.
 
-    Delegates to domain.serialization.serialize_to_json_canonical()
+    Delegates to ``domain.serialization.serialize_to_canonical_json()``
     for consistent JSON serialization across the codebase.
 
     Args:
@@ -155,7 +161,7 @@ def canonical_json_dumps(obj: JsonDict) -> str:
     Returns:
         Canonical JSON string with sorted keys and no extra whitespace.
     """
-    return serialize_to_json_canonical(obj)
+    return serialize_to_canonical_json(obj)
 
 
 def generate_content_hash(
@@ -166,6 +172,10 @@ def generate_content_hash(
     exclude_fields: set[str] | None = None,
 ) -> ContentHash:
     """Generate SHA256 content hash for record versioning.
+
+    The hash material is built from ``provider + canonical_json(normalized_record)``.
+    Normalization excludes technical metadata, strips strings, canonicalizes nested
+    dictionaries via sorted-key JSON, and preserves list order.
 
     Args:
         record: Single data record.

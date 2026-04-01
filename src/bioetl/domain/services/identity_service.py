@@ -32,6 +32,10 @@ __all__ = [
 class IdentityService:
     """Service for generating entity identifiers and content hashes.
 
+    This is the canonical domain facade for content hashing. It delegates to the
+    single hashing implementation in ``bioetl.domain.transformations`` so callers
+    cannot accidentally diverge on metadata exclusion or canonical JSON behavior.
+
     Implements RULES.md §2.8 entity identification:
     - Stable entity_id from business keys or content hash
     - SHA256 content hash with canonical JSON normalization
@@ -121,6 +125,7 @@ class IdentityService:
 
         Implements RULES.md §2.8.1:
         - sha256(provider + canonical_json(record))
+        - Excludes ``META_FIELDS`` and underscore-prefixed technical fields
         - Normalizes values before hashing for consistency
 
         Args:

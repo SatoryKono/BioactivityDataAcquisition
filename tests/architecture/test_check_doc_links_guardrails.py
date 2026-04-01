@@ -217,6 +217,74 @@ def test_not_in_nav_growth_excludes_reports_prefixes(
     assert removed == []
 
 
+def test_has_any_heading_accepts_cli_inspection_alias() -> None:
+    module = _load_module()
+    headings = {"purpose", "cli inspection", "invariants"}
+
+    assert module._has_any_heading(headings, "Inspection Surface", "CLI Inspection")
+
+
+def test_control_plane_contract_files_include_run_manifest_ledger() -> None:
+    module = _load_module()
+
+    files = module._control_plane_contract_spec_files()
+
+    assert any(path.name == "run-manifest-ledger.md" for path in files)
+
+
+def test_control_plane_contract_governance_passes_current_repo() -> None:
+    module = _load_module()
+
+    violations = module.check_control_plane_contract_governance()
+
+    assert violations == []
+
+
+def test_load_nav_docs_ignores_exclude_docs_entries(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _load_module()
+    mkdocs_payload = """
+site_name: Example
+exclude_docs: |
+  D-01 Governance & Style Guide документации BioETL.md
+nav:
+  - Home: 00-project/index.md
+  - Governance:
+      - D-01: 00-project/governance/01-documentation-governance-style-guide.md
+"""
+    monkeypatch.setattr(
+        module,
+        "PROJECT_ROOT",
+        Path("/tmp/example-repo"),
+    )
+    monkeypatch.setattr(
+        module,
+        "DOCS_DIR",
+        Path("/tmp/example-repo/docs"),
+    )
+    mkdocs_file = Path("/tmp/example-repo/mkdocs.yml")
+    monkeypatch.setattr(
+        Path,
+        "read_text",
+        lambda self, encoding="utf-8", errors="replace": mkdocs_payload
+        if self == mkdocs_file
+        else "",
+    )
+    monkeypatch.setattr(Path, "exists", lambda self: self == mkdocs_file)
+
+    nav_docs = module._load_nav_docs()
+
+    assert Path("/tmp/example-repo/docs/BioETL.md") not in nav_docs
+    assert (
+        Path(
+            "/tmp/example-repo/docs/00-project/governance/"
+            "01-documentation-governance-style-guide.md"
+        )
+        in nav_docs
+    )
+
+
 def test_not_in_nav_growth_detects_increase_against_reduced_baseline(
     tmp_path: Path,
 ) -> None:

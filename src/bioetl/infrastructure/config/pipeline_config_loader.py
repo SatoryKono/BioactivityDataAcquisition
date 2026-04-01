@@ -1,5 +1,7 @@
 """Retained convenience loader for pipeline YAML plus DQ integration.
 
+Wave 3 ownership classification: retain.
+
 Loads and validates pipeline configurations from YAML files.
 Integrates with DQConfigLoader for hierarchical DQ config resolution.
 
@@ -41,6 +43,9 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 class PipelineConfigLoader:
     """Retained convenience facade for YAML loading plus DQ/filter integration.
+
+    This class is intentionally retained as a legacy infrastructure convenience
+    seam, not the canonical owner of pipeline config resolution.
 
     Loads pipeline configurations from YAML files and resolves DQ config
     through the hierarchical DQConfigLoader system. Filter configs are

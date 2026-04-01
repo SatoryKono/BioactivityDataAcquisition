@@ -18,7 +18,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Target
-from bioetl.domain.normalization_chembl import normalize_chembl_organism_name
+from bioetl.domain.normalization.chembl import normalize_chembl_organism_name
 from bioetl.domain.services import OrganismClassificationService
 from bioetl.domain.transformations import safe_int
 from bioetl.domain.types import GoldRecord, JsonDict

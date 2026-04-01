@@ -33,6 +33,8 @@ def _make_factory(
         SimpleNamespace(
             name="composite_publication",
             version="1.0.0",
+            enrichers=(),
+            dependencies=(),
             merge=SimpleNamespace(strategy=MergeStrategy.LEFT_OUTER),
             cross_validation=SimpleNamespace(enabled=False),
             dq=SimpleNamespace(),

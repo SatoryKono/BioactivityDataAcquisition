@@ -13,16 +13,17 @@ _DOI_URL_PREFIXES = (
     "https://doi.org/",
     "http://doi.org/",
     "doi:",
-    "DOI:",
 )
 
 
 def strip_doi_prefix(doi: str) -> str:
     """Strip known DOI URL/scheme prefixes, preserving the DOI payload."""
+    normalized = doi.strip()
+    lowered = normalized.lower()
     for prefix in _DOI_URL_PREFIXES:
-        if doi.startswith(prefix):
-            return doi[len(prefix) :]
-    return doi
+        if lowered.startswith(prefix):
+            return normalized[len(prefix) :]
+    return normalized
 
 
 def normalize_doi(doi: str | None) -> str | None:

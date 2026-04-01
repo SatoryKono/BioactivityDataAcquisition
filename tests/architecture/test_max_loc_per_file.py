@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from bioetl.infrastructure.quality import (
     build_module_path_key,
     get_registry_values,
@@ -25,8 +23,7 @@ LAYER_LIMITS = {
 def test_no_source_file_exceeds_500_loc(src_dir: Path) -> None:
     """Keep source modules compact for readability and reviewability."""
     source_root = src_dir / "bioetl"
-    if not source_root.exists():
-        pytest.skip("Source directory not found: src/bioetl")
+    assert source_root.exists(), "Source directory not found: src/bioetl"
 
     # Load file size limit exemptions
     EXEMPTIONS = get_registry_values("file_size_limits")

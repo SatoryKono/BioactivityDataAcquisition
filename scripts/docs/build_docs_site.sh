@@ -36,7 +36,11 @@ fi
 
 rm -rf "$OUT_SITE_DIR"
 mkdir -p "$(dirname "$OUT_SITE_DIR")"
-mv "$TMP_SITE_DIR" "$OUT_SITE_DIR"
+if ! mv "$TMP_SITE_DIR" "$OUT_SITE_DIR"; then
+  mkdir -p "$OUT_SITE_DIR"
+  cp -a "$TMP_SITE_DIR"/. "$OUT_SITE_DIR"/
+  rm -rf "$TMP_SITE_DIR"
+fi
 
 # Normalize generated artifacts to a single location.
 rm -rf "$LEGACY_SITE_DIR"

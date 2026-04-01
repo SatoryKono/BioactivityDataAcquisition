@@ -7,6 +7,10 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+    validate_join_key_normalization_policies,
+)
 from bioetl.composition.factories.services.port_factories import create_metrics
 
 if TYPE_CHECKING:
@@ -117,7 +121,11 @@ def build_runner_factories(
     # CIRCULAR-DEPENDENCY: kept local to avoid entrypoints bootstrap cycle.
     from bioetl.composition.entrypoints import RunOptions, build_pipeline_context
 
-    filter_extraction_service = filter_extraction_service_cls(logger=logger)
+    validate_join_key_normalization_policies(config)
+    filter_extraction_service = filter_extraction_service_cls(
+        logger=logger,
+        normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
+    )
     runner_factory_builder = runner_factory_builder_cls(
         logger=logger,
         run_options_cls=RunOptions,

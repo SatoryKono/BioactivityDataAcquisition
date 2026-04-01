@@ -15,6 +15,16 @@ def _make_pipeline() -> MagicMock:
     pipeline = MagicMock()
     pipeline.services = MagicMock(name="services")
     pipeline.context = MagicMock(name="context")
+    pipeline.transformer = SimpleNamespace(
+        _identity=SimpleNamespace(
+            _content_hash_include_fields={"doi", "title"},
+            _content_hash_exclude_fields={"journal"},
+        ),
+        _contract_policy=SimpleNamespace(
+            hash_include=("doi", "publication_date"),
+            hash_exclude=("publisher",),
+        ),
+    )
     pipeline.config.pipeline_name = "chembl_activity"
     pipeline.config.provider = "chembl"
     pipeline.config.entity_type = "activity"
@@ -58,6 +68,10 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     assert call_kwargs["entity_type"] == "activity"
     assert call_kwargs["column_groups"] == ("system", "business")
     assert call_kwargs["scd_config"] == {"type": 2}
+    assert call_kwargs["content_hash_include_fields"] == frozenset({"doi"})
+    assert call_kwargs["content_hash_exclude_fields"] == frozenset(
+        {"journal", "publisher", "entity_id", "content_hash"}
+    )
 
 
 def test_build_record_processor_config_and_validator_forwards_paths_and_strict() -> (
@@ -83,5 +97,9 @@ def test_build_record_processor_config_and_validator_forwards_paths_and_strict()
     assert config.silver_output_path == "/tmp/silver"
     assert config.gold_output_path == "/tmp/gold"
     assert config.flat_structure is True
+    assert config.content_hash_include_fields == frozenset({"doi"})
+    assert config.content_hash_exclude_fields == frozenset(
+        {"journal", "publisher", "entity_id", "content_hash"}
+    )
     assert validator is gold_validator_factory.return_value
     assert gold_validator_factory.call_args.kwargs["strict"] is False

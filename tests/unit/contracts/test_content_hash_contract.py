@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from bioetl.domain.services import IdentityService
+from bioetl.domain.transformations import generate_content_hash
 
 
 def test_content_hash_normalization_contract() -> None:
@@ -41,6 +42,38 @@ def test_content_hash_excludes_meta_and_dq_prefix_contract() -> None:
 
     assert service.compute_content_hash("chembl", base) == service.compute_content_hash(
         "chembl", with_meta
+    )
+
+
+def test_content_hash_service_matches_canonical_transform_contract() -> None:
+    """IdentityService MUST delegate to the canonical transformation path."""
+    service = IdentityService()
+    record = {
+        "activity_id": "A1",
+        "value": 10,
+        "comment": "  stable  ",
+        "nested": {"b": 2, "a": 1},
+        "_run_id": "run-1",
+    }
+
+    assert service.compute_content_hash("chembl", record) == generate_content_hash(
+        record, "chembl"
+    )
+
+
+def test_content_hash_future_meta_field_contract() -> None:
+    """Future underscore-prefixed technical fields MUST NOT alter content hash."""
+    service = IdentityService()
+
+    base = {"activity_id": "A1", "value": 10}
+    with_future_meta = {
+        **base,
+        "_future_meta_field": "v2",
+        "_new_runtime_flag": True,
+    }
+
+    assert service.compute_content_hash("chembl", base) == service.compute_content_hash(
+        "chembl", with_future_meta
     )
 
 

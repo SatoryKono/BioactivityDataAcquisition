@@ -12,9 +12,11 @@ import pytest
 from bioetl.domain.serialization import (
     _escape_non_ascii,
     _has_non_ascii,
+    canonicalize_json_string,
     deserialize_from_json,
     flatten_arrow_table_for_export,
     is_orjson_available,
+    serialize_to_canonical_json,
     serialize_to_json,
     serialize_to_json_canonical,
 )
@@ -116,6 +118,30 @@ class TestSerializeToJsonCanonical:
         assert result1 == result2
 
 
+class TestSerializeToCanonicalJson:
+    """Tests for serialize_to_canonical_json alias."""
+
+    def test_alias_matches_public_canonical_serializer(self) -> None:
+        """Alias delegates to the existing public canonical serializer."""
+        data = {"z": 3, "a": 1, "m": 2}
+
+        assert serialize_to_canonical_json(data) == serialize_to_json_canonical(data)
+
+    def test_alias_escapes_non_ascii(self) -> None:
+        """Alias preserves canonical ASCII-only output."""
+        data = {"name": "café"}
+
+        result = serialize_to_canonical_json(data)
+
+        assert result == '{"name":"caf\\u00e9"}'
+
+    def test_alias_is_deterministic(self) -> None:
+        """Alias produces stable output for identical input."""
+        data = {"b": 2, "a": 1}
+
+        assert serialize_to_canonical_json(data) == serialize_to_canonical_json(data)
+
+
 class TestDeserializeFromJson:
     """Tests for deserialize_from_json function."""
 
@@ -158,6 +184,23 @@ class TestDeserializeFromJson:
         """Deserialize truncated JSON raises ValueError."""
         with pytest.raises(ValueError, match="Invalid JSON"):
             deserialize_from_json('{"key": ')
+
+
+class TestCanonicalizeJsonString:
+    """Tests for canonicalize_json_string compatibility helper."""
+
+    def test_canonicalizes_json_string(self) -> None:
+        """JSON strings are normalized to deterministic canonical form."""
+        assert canonicalize_json_string('{"b":2, "a":1}') == '{"a":1,"b":2}'
+
+    def test_blank_json_string_returns_none(self) -> None:
+        """Blank values normalize to None."""
+        assert canonicalize_json_string("   ") is None
+
+    def test_invalid_json_string_raises(self) -> None:
+        """Invalid JSON raises ValueError."""
+        with pytest.raises(ValueError, match="Invalid JSON"):
+            canonicalize_json_string("{invalid}")
 
 
 class TestRoundTrip:

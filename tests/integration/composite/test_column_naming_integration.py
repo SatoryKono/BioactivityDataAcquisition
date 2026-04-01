@@ -9,6 +9,9 @@ import pytest
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_renamer import ColumnRenamer
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.domain.value_objects.column_order import SemanticGroup
 
 
@@ -421,6 +424,75 @@ class TestMultipleEnrichers:
 
         # Title before metrics, metrics before classification
         assert title_idx < metrics_idx < classification_idx
+
+
+class TestNormalizedJoinKeys:
+    """Tests for merge-facing normalized join keys."""
+
+    def test_normalization_enables_provider_join_on_equivalent_doi_variants(
+        self,
+        renamer: ColumnRenamer,
+    ) -> None:
+        """Equivalent DOI variants should join only after normalization."""
+        raw_seed = pl.DataFrame(
+            {
+                "doi": [" HTTPS://doi.org/10.1038/NATURE12373 "],
+                "title": ["Seed Title"],
+            }
+        )
+        raw_enricher = pl.DataFrame(
+            {
+                "doi": ["10.1038/nature12373"],
+                "citation_count": [100],
+            }
+        )
+
+        raw_seed_renamed = renamer.rename_dataframe(raw_seed, "chembl_publication")
+        raw_enricher_renamed = renamer.rename_dataframe(
+            raw_enricher, "crossref_publication"
+        )
+        raw_joined = raw_seed_renamed.join(raw_enricher_renamed, on="doi", how="left")
+        assert raw_joined["crossref.publication.citation_count"].to_list() == [None]
+
+        seed_processor = RecordNormalizationProcessor(provider="chembl")
+        enricher_processor = RecordNormalizationProcessor(provider="crossref")
+        normalized_seed = pl.DataFrame(
+            [
+                seed_processor.normalize_record(
+                    {
+                        "doi": " HTTPS://doi.org/10.1038/NATURE12373 ",
+                        "title": "Seed Title",
+                    }
+                )
+            ]
+        )
+        normalized_enricher = pl.DataFrame(
+            [
+                enricher_processor.normalize_record(
+                    {
+                        "doi": "10.1038/nature12373",
+                        "citation_count": 100,
+                    }
+                )
+            ]
+        )
+
+        normalized_seed_renamed = renamer.rename_dataframe(
+            normalized_seed, "chembl_publication"
+        )
+        normalized_enricher_renamed = renamer.rename_dataframe(
+            normalized_enricher, "crossref_publication"
+        )
+        normalized_joined = normalized_seed_renamed.join(
+            normalized_enricher_renamed,
+            on="doi",
+            how="left",
+        )
+
+        assert normalized_joined["doi"].to_list() == ["10.1038/nature12373"]
+        assert normalized_joined["crossref.publication.citation_count"].to_list() == [
+            100
+        ]
 
 
 class TestQualifiedColumnHandling:

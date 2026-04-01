@@ -1,22 +1,33 @@
 # tests/integration/test_cross_provider_doi_normalization.py
 """Integration tests for cross-provider DOI normalization consistency.
 
-Verifies that the same DOI produces identical normalized values and content hashes
-across all publication providers (CrossRef, PubMed, SemanticScholar, OpenAlex).
+Verifies two related invariants for publication providers
+(CrossRef, PubMed, SemanticScholar, OpenAlex):
+- the same DOI normalizes to the same canonical value across providers
+- normalization-equivalent DOI inputs produce the same final provider-local
+  content hash after staged Silver finalization
 
 This ensures JOIN operations between Silver tables from different providers
-will correctly match records based on normalized DOI.
+will correctly match records based on normalized DOI, while respecting the
+hashing contract that includes provider identity.
 """
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
+from bioetl.composition.bootstrap.runtime.classification_init import (
+    initialize_publication_type_classification,
+)
 from bioetl.application.pipelines.crossref.transformer import (
     CrossRefPublicationTransformer,
 )
@@ -32,6 +43,12 @@ from bioetl.application.pipelines.semanticscholar.transformer import (
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
+
+
+@pytest.fixture(scope="module", autouse=True)
+def publication_type_classification_initialized() -> None:
+    """Bootstrap publication-type classification for this integration suite."""
+    initialize_publication_type_classification(Path("configs"))
 
 
 @pytest.fixture
@@ -53,6 +70,24 @@ def mock_context() -> PipelineContext:
 @pytest.mark.integration
 class TestCrossProviderDoiNormalization:
     """Integration tests for DOI normalization consistency across providers."""
+
+    @staticmethod
+    async def _finalize_publication_record(
+        transformer: Any,
+        provider: str,
+        context: PipelineContext,
+        record: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Run the staged publication path through normalization and final hash."""
+        pre_silver = await transformer.transform_pre_silver(context, record, 0)
+        assert pre_silver is not None, f"{provider} pre-silver transformation failed"
+        finalized = RecordNormalizationProcessor(provider=provider).finalize_pre_silver(
+            pre_silver,
+            context,
+            0,
+        )
+        assert finalized is not None, f"{provider} Silver finalization failed"
+        return finalized
 
     @staticmethod
     def _make_pubmed_record(doi: str) -> dict[str, Any]:
@@ -172,9 +207,10 @@ class TestCrossProviderDoiNormalization:
         self,
         mock_context: PipelineContext,
     ) -> None:
-        """Test that uppercase and lowercase DOIs produce the same normalized value.
+        """Normalization-equivalent DOI inputs must converge before final hash.
 
-        This is critical for cross-provider JOINs in Silver layer.
+        Hash equality is asserted per provider because provider identity is part of
+        the content-hash contract.
         """
         uppercase_doi = "10.1038/NATURE12373"
         lowercase_doi = "10.1038/nature12373"
@@ -200,21 +236,19 @@ class TestCrossProviderDoiNormalization:
         }
 
         for provider_name, (transformer, make_record) in transformers.items():
-            result_upper = await transformer.transform(
-                mock_context, make_record(uppercase_doi), 0
+            result_upper = await self._finalize_publication_record(
+                transformer,
+                provider_name,
+                mock_context,
+                make_record(uppercase_doi),
             )
-            result_lower = await transformer.transform(
-                mock_context, make_record(lowercase_doi), 0
+            result_lower = await self._finalize_publication_record(
+                transformer,
+                provider_name,
+                mock_context,
+                make_record(lowercase_doi),
             )
 
-            assert result_upper is not None, (
-                f"{provider_name} uppercase transform failed"
-            )
-            assert result_lower is not None, (
-                f"{provider_name} lowercase transform failed"
-            )
-
-            # Both should normalize to the same value
             assert result_upper["doi"] == expected_normalized, (
                 f"{provider_name} uppercase DOI not normalized correctly: "
                 f"got {result_upper['doi']}, expected {expected_normalized}"
@@ -222,6 +256,10 @@ class TestCrossProviderDoiNormalization:
             assert result_lower["doi"] == expected_normalized, (
                 f"{provider_name} lowercase DOI not normalized correctly: "
                 f"got {result_lower['doi']}, expected {expected_normalized}"
+            )
+            assert result_upper["content_hash"] == result_lower["content_hash"], (
+                f"{provider_name} final content hash diverged for normalization-"
+                "equivalent DOI inputs"
             )
 
     @pytest.mark.asyncio

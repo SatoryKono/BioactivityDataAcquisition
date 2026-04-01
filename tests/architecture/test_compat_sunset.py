@@ -28,6 +28,33 @@ COMPAT_MODULES: dict[str, Path] = {
     "aggregate_port.py (StoragePort)": Path(
         "src/bioetl/domain/ports/storage/aggregate_port.py"
     ),
+    "domain normalization_authors compat wrapper": Path(
+        "src/bioetl/domain/normalization_authors.py"
+    ),
+    "domain normalization_pages compat wrapper": Path(
+        "src/bioetl/domain/normalization_pages.py"
+    ),
+    "domain normalization_dates compat wrapper": Path(
+        "src/bioetl/domain/normalization_dates.py"
+    ),
+    "domain normalization_chembl compat wrapper": Path(
+        "src/bioetl/domain/normalization_chembl.py"
+    ),
+    "domain services doi_normalization compat wrapper": Path(
+        "src/bioetl/domain/services/doi_normalization.py"
+    ),
+    "domain services pmid_normalization compat wrapper": Path(
+        "src/bioetl/domain/services/pmid_normalization.py"
+    ),
+    "domain services date_normalization compat wrapper": Path(
+        "src/bioetl/domain/services/date_normalization.py"
+    ),
+    "domain services text_normalization compat wrapper": Path(
+        "src/bioetl/domain/services/text_normalization.py"
+    ),
+    "domain services _date_helpers compat wrapper": Path(
+        "src/bioetl/domain/services/_date_helpers.py"
+    ),
 }
 
 

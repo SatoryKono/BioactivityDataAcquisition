@@ -46,7 +46,7 @@ Last verified: '2026-03-31'
 | --- | --- | --- |
 | Guides | [guides/AGENT.md](guides/AGENT.md) | Инструкции для конкретных ассистентов |
 | Runtime docs | [runtime/agent-memory.md](runtime/agent-memory.md) | Канонические docs-артефакты агентных prompt/workflow |
-| Memory | [../memory/README.md](../memory/README.md) | Project memory entry point and role-specific memory snapshots |
+| Memory | `docs/00-project/ai/memory/README.md` | Repo-only project memory entry point and role-specific memory snapshots |
 | Agent scripts | [scripts/diagrams/py-doc-bot-4.sh](scripts/diagrams/py-doc-bot-4.sh) | Оркестратор диаграммного агентного цикла |
 | Policy | [policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md) | Политики именования и стандарты |
 
@@ -67,20 +67,20 @@ Last verified: '2026-03-31'
 
 Для структурных утверждений про repo layout, package topology и hotspot calibration сначала опирайся на актуальные evidence packs:
 
-- [Project File Structure Summary](../../../reports/evidence/project-file-structure/SUMMARY.md)
-- [Project File Structure Decisions](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [Project Package Topology Summary](../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [Topology Synthesis](../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
-- [Topology vs Governance Cross-Synthesis](../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
-- [Package Topology Decisions](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
-- [Governance Signals Summary](../../../reports/evidence/governance-signals/SUMMARY.md)
-- [Governance Signals Decisions](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+- `docs/reports/evidence/project-file-structure/SUMMARY.md`
+- `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md`
+- `docs/reports/evidence/project-package-topology/SUMMARY.md`
+- `docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md`
+- `docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md`
+- `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`
+- `docs/reports/evidence/governance-signals/SUMMARY.md`
+- `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md`
 
 ## Policy & Audit Reports
 
 - [policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md)
 - [policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md](policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md)
-- [policy/SPECIALIST_PROFILE_TEMPLATE.md](policy/SPECIALIST_PROFILE_TEMPLATE.md)
+- `docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md`
 - [policy/CONSOLIDATION_VALIDATION.md](policy/CONSOLIDATION_VALIDATION.md)
 
 ## Navigation Entry Points
@@ -90,7 +90,7 @@ Last verified: '2026-03-31'
 - [Agent Naming Policy and Rename Plan (2026-03-08)](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md)
 - [Consolidation Validation](policy/CONSOLIDATION_VALIDATION.md)
 - [Agent Consolidation Matrix (2026-03-08)](policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md)
-- [AI Prompts Surface](../prompts/README.md)
+- `docs/00-project/ai/prompts/README.md` — repo-only prompts surface entrypoint
 - [Collected Prompts Index](../prompts/COLLECTED_PROMPTS_INDEX.md)
 - [Shared Agent Memory](../memory/agent-memory.md)
 - [Codex Orchestration Mirror](agents/ORCHESTRATION.md)

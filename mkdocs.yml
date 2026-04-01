@@ -6,6 +6,7 @@ repo_name: SatoryKono/BioactivityDataAcquisition2
 edit_uri: "edit/main/docs/"
 site_dir: site
 exclude_docs: |
+    D-01 Governance & Style Guide документации BioETL.md
     00-project/ai/README.md
     00-project/ai/agents/CLAUDE.md
     00-project/ai/agents/agents/py-*.md
@@ -17,7 +18,7 @@ exclude_docs: |
     00-project/ai/memory/memory-*.md
     00-project/ai/prompts/README.md
     00-project/ai/prompts/collected/**
-    00-project/ai/skills/SKILLS-*.md
+    00-project/ai/skills/SKILLS-CATALOG.md
     99-archive/**
     plans/**
     reports/**
@@ -26,6 +27,17 @@ exclude_docs: |
     exports/**
     reports/docs-export-report-*.md
     **/~$*.docx
+not_in_nav: |
+    00-project/ai/prompts/*.md
+    00-project/ai/skills/_references/**
+    00-project/ai/skills/local/**/references/**
+    04-reference/templates/adr-template.md
+    04-reference/templates/contract-spec-template.md
+    04-reference/templates/control-plane-contract-spec-template.md
+    04-reference/templates/data-contract-spec-template.md
+    04-reference/templates/pipeline-spec-template.md
+    04-reference/templates/provider-spec-template.md
+    04-reference/templates/runbook-template.md
 # Rendered SVG/PNG diagram images may be generated locally or in CI
 # (render-diagrams job). Downgrade broken-link severity so `mkdocs build --strict`
 # does not abort on temporarily missing image targets. Real doc-link integrity is
@@ -104,6 +116,7 @@ nav:
             -   "Glossary": 00-project/glossary.md
             -   "Tools Hub": 00-project/TOOLS.md
             -   Governance:
+                    -   "D-01 Documentation Governance": 00-project/governance/01-documentation-governance-style-guide.md
                     -   "Naming Policy": 00-project/governance/02-naming-policy.md
                     -   "File Policy": 00-project/governance/03-file-policy.md
                     -   "Extending BioETL": 00-project/governance/04-extending-bioetl.md
@@ -285,6 +298,7 @@ nav:
             -   "Run Manifest & Ledger": 04-reference/contracts/run-manifest-ledger.md
     -   Reference:
             -   CLI: 04-reference/cli.md
+            -   Templates: 04-reference/templates/index.md
             -   API:
                     -   Overview: 04-reference/api/index.md
                     -   Domain:

@@ -13,6 +13,6 @@ Rules:
   historical migration reference rather than a standard operational path.
 
 Current retained historical migrations:
-- `migrate_openalex_citation_count.py`
-- `migrate_pmid_to_string.py`
-- `rename_structure_fields.py`
+- `scripts/archive/migrations/migrate_openalex_citation_count.py`
+- `scripts/archive/migrations/migrate_pmid_to_string.py`
+- `scripts/archive/migrations/rename_structure_fields.py`

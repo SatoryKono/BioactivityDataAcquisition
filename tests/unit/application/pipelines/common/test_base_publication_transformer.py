@@ -15,6 +15,10 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.base import BaseEntity
@@ -41,6 +45,8 @@ class StubPublicationEntity(BaseEntity):
     title: str | None = None
     abstract: str | None = None
     year: int | None = None
+    publication_doi: str | None = None
+    publication_date: str | None = None
     _lookup_method: str | None = None
     _original_id: str | None = None
 
@@ -63,6 +69,8 @@ class StubPublicationTransformer(BasePublicationTransformer):
             "title": record.get("title"),
             "abstract": record.get("abstract"),
             "year": record.get("year"),
+            "publication_doi": record.get("publication_doi"),
+            "publication_date": record.get("publication_date"),
             "_source": "test_provider",
             "_lookup_method": record.get("_lookup_method"),
             "_original_id": record.get("_original_id"),
@@ -212,6 +220,54 @@ class TestBasePublicationTransformerBasics:
         assert result is not None
         assert "content_hash" in result
         assert len(result["content_hash"]) == 64  # SHA256 hex
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_silver_returns_staged_payload(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Application runtime should be able to request staged publication payloads."""
+        result = await transformer.transform_pre_silver(mock_context, sample_record, 0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.entity_id == "test_provider:test-12345"
+        assert result.business_data["test_id"] == "test-12345"
+        assert "content_hash" not in result.business_data
+
+    @pytest.mark.asyncio
+    async def test_transform_matches_staged_finalization_for_normalized_fields(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Legacy transform should match staged finalization after normalization."""
+        record = {
+            "id": "test-12345",
+            "title": "  Test Publication Title  ",
+            "abstract": "This is a test abstract.",
+            "publication_doi": " HTTPS://doi.org/10.1000/ABC123 ",
+            "publication_date": "2024-05",
+            "_lookup_method": "doi",
+        }
+
+        pre_silver = await transformer.transform_pre_silver(mock_context, record, 0)
+        assert isinstance(pre_silver, PreSilverRecord)
+        staged_result = RecordNormalizationProcessor(
+            provider=transformer.provider,
+        ).finalize_pre_silver(pre_silver, mock_context, 0)
+        legacy_result = await transformer.transform(mock_context, record, 0)
+
+        assert staged_result is not None
+        assert legacy_result is not None
+        assert legacy_result["publication_doi"] == staged_result["publication_doi"]
+        assert legacy_result["publication_date"] == staged_result["publication_date"]
+        assert legacy_result["title"] == staged_result["title"]
+        assert legacy_result["entity_id"] == staged_result["entity_id"]
+        assert legacy_result["content_hash"] == staged_result["content_hash"]
+        assert legacy_result["publication_doi"] == "10.1000/abc123"
+        assert legacy_result["publication_date"] == "2024-05-31"
 
     @pytest.mark.asyncio
     async def test_transform_adds_lineage_fields(
