@@ -33,9 +33,19 @@ log_warn() { echo -e "${YELLOW}[setup-plugins]${NC} $1"; }
 USE_UV=false
 PYTHON_BIN=""
 PYTHON_KIND=""
+IS_WSL=false
+
+if [[ -n "${WSL_INTEROP:-}" ]]; then
+    IS_WSL=true
+fi
 
 to_windows_path() {
     local path="$1"
+
+    if [[ "$path" =~ ^[A-Za-z]:\\ ]]; then
+        printf '%s\n' "$path"
+        return 0
+    fi
 
     if command -v wslpath >/dev/null 2>&1; then
         wslpath -w "$path"
@@ -50,10 +60,46 @@ to_windows_path() {
         return 0
     fi
 
+    if [[ "$path" =~ ^/([a-zA-Z])/(.*)$ ]]; then
+        local drive="${BASH_REMATCH[1]}"
+        local rest="${BASH_REMATCH[2]}"
+        rest="${rest//\//\\}"
+        printf '%s:\\%s\n' "${drive^^}" "$rest"
+        return 0
+    fi
+
     return 1
 }
 
-if [[ -x ".venv-win/Scripts/python.exe" ]]; then
+if [[ "$IS_WSL" == true ]]; then
+    if [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]]; then
+        PYTHON_BIN="$BIOETL_WSL_VENV_DIR/bin/python"
+        PYTHON_KIND="posix-venv"
+    elif [[ -x ".venv/bin/python" ]]; then
+        PYTHON_BIN=".venv/bin/python"
+        PYTHON_KIND="posix-venv"
+    elif command -v uv >/dev/null 2>&1; then
+        USE_UV=true
+        PYTHON_KIND="uv"
+    elif command -v python3 >/dev/null 2>&1; then
+        PYTHON_BIN="python3"
+        PYTHON_KIND="system-python3"
+    elif command -v python >/dev/null 2>&1; then
+        PYTHON_BIN="python"
+        PYTHON_KIND="system-python"
+    elif [[ -x ".venv-win/Scripts/python.exe" ]]; then
+        PYTHON_BIN=".venv-win/Scripts/python.exe"
+        PYTHON_KIND="windows-venv"
+    elif [[ -x ".venv/Scripts/python.exe" ]]; then
+        PYTHON_BIN=".venv/Scripts/python.exe"
+        PYTHON_KIND="windows-venv"
+    else
+        log_warn "Python runtime not found."
+        log_warn "Install uv or activate a Python environment, then rerun:"
+        echo "  uv sync --extra dev --extra tests --extra tracing"
+        exit 1
+    fi
+elif [[ -x ".venv-win/Scripts/python.exe" ]]; then
     PYTHON_BIN=".venv-win/Scripts/python.exe"
     PYTHON_KIND="windows-venv"
 elif [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]]; then
@@ -130,16 +176,26 @@ install_precommit() {
     fi
 
     log_info "Ensuring pre-commit is installed..."
-    if [[ "$PYTHON_KIND" == "windows-venv" ]] && command -v powershell.exe >/dev/null 2>&1; then
+    local precommit_home="$REPO_ROOT/.cache/pre-commit"
+    local precommit_home_runtime="$precommit_home"
+    mkdir -p "$precommit_home"
+
+    if [[ "$PYTHON_KIND" == "windows-venv" ]] && [[ "$IS_WSL" == false ]]; then
+        local precommit_home_win_runtime=""
+        precommit_home_win_runtime="$(to_windows_path "$precommit_home")" || precommit_home_win_runtime=""
+        if [[ -n "$precommit_home_win_runtime" ]]; then
+            precommit_home_runtime="$precommit_home_win_runtime"
+        fi
+    fi
+    export PRE_COMMIT_HOME="$precommit_home_runtime"
+
+    if [[ "$PYTHON_KIND" == "windows-venv" ]] && [[ "$IS_WSL" == false ]] && command -v powershell.exe >/dev/null 2>&1; then
         local repo_root_win=""
         local python_bin_win=""
-        local precommit_home=""
         local precommit_home_win=""
 
         repo_root_win="$(to_windows_path "$REPO_ROOT")" || repo_root_win=""
         python_bin_win="$(to_windows_path "$REPO_ROOT/$PYTHON_BIN")" || python_bin_win=""
-        precommit_home="$REPO_ROOT/.cache/pre-commit"
-        mkdir -p "$precommit_home"
         precommit_home_win="$(to_windows_path "$precommit_home")" || precommit_home_win=""
 
         if [[ -n "$repo_root_win" ]] && [[ -n "$python_bin_win" ]] && [[ -n "$precommit_home_win" ]]; then
