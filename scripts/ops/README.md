@@ -16,7 +16,7 @@ python -m scripts.ops <command> [args...]
 | `salt-rotate` | `scripts/ops/salt_rotate.py` | PII salt rotation (standard and emergency) |
 | `fix-grafana` | `scripts/ops/fix_grafana_dashboards.py` | Fix Grafana dashboard configurations |
 | `wsl-proxy` | `scripts/ops/wsl_proxy.py` | WSL proxy helper |
-| `update-issue` | `scripts/ops/update_github_issue.sh` | Update a GitHub issue title, body, comment, and/or state via the GitHub API |
+| `update-issue` | `scripts/ops/update_github_issue.sh` | Update a GitHub issue title, body, comment, and/or state via the GitHub API, with inline text or file inputs |
 | `triage-issues` | `scripts/ops/triage_cleanup_issue_wave.sh` | Apply the cleanup/docs issue triage wave via GitHub API |
 | `close-ge-spike` | `scripts/ops/close_great_expectations_spike_issue.sh` | Close issue `#2595` with the completed Great Expectations spike memo |
 | `close-schema-drift` | `scripts/ops/close_pandera_schema_drift_issue.sh` | Close issue `#2594` with the completed Pandera schema drift gate summary |

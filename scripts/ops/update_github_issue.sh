@@ -11,8 +11,11 @@ Usage:
 
 Options:
   --issue NUMBER         GitHub issue number to update (required)
+  --title TEXT           Set updated title directly from CLI text
   --title-file PATH      Read updated title from file
+  --body TEXT            Set updated body directly from CLI text
   --body-file PATH       Read updated body from file
+  --comment TEXT         Post a comment directly from CLI text
   --comment-file PATH    Post a comment from file contents
   --state STATE          Patch issue state: open | closed
   --owner NAME           Repository owner (default: SatoryKono)
@@ -24,6 +27,11 @@ Environment:
   GITHUB_PERSONAL_ACCESS_TOKEN   Fine-grained or classic token with issue write access
 
 Examples:
+  bash scripts/ops/update_github_issue.sh \
+    --issue 2594 \
+    --comment "Schema drift gate implemented" \
+    --state closed
+
   bash scripts/ops/update_github_issue.sh \
     --issue 2594 \
     --comment-file /tmp/comment.md \
@@ -39,8 +47,11 @@ EOF
 OWNER="$DEFAULT_OWNER"
 REPO="$DEFAULT_REPO"
 ISSUE_NUMBER=""
+TITLE_TEXT=""
 TITLE_FILE=""
+BODY_TEXT=""
 BODY_FILE=""
+COMMENT_TEXT=""
 COMMENT_FILE=""
 STATE=""
 DRY_RUN=0
@@ -55,12 +66,24 @@ while [[ $# -gt 0 ]]; do
       TITLE_FILE="${2:-}"
       shift 2
       ;;
+    --title)
+      TITLE_TEXT="${2:-}"
+      shift 2
+      ;;
     --body-file)
       BODY_FILE="${2:-}"
       shift 2
       ;;
+    --body)
+      BODY_TEXT="${2:-}"
+      shift 2
+      ;;
     --comment-file)
       COMMENT_FILE="${2:-}"
+      shift 2
+      ;;
+    --comment)
+      COMMENT_TEXT="${2:-}"
       shift 2
       ;;
     --state)
@@ -106,17 +129,29 @@ if [[ -n "$TITLE_FILE" && ! -f "$TITLE_FILE" ]]; then
   printf 'Title file not found: %s\n' "$TITLE_FILE" >&2
   exit 2
 fi
+if [[ -n "$TITLE_TEXT" && -n "$TITLE_FILE" ]]; then
+  printf 'Use only one of --title or --title-file\n' >&2
+  exit 2
+fi
 if [[ -n "$BODY_FILE" && ! -f "$BODY_FILE" ]]; then
   printf 'Body file not found: %s\n' "$BODY_FILE" >&2
+  exit 2
+fi
+if [[ -n "$BODY_TEXT" && -n "$BODY_FILE" ]]; then
+  printf 'Use only one of --body or --body-file\n' >&2
   exit 2
 fi
 if [[ -n "$COMMENT_FILE" && ! -f "$COMMENT_FILE" ]]; then
   printf 'Comment file not found: %s\n' "$COMMENT_FILE" >&2
   exit 2
 fi
+if [[ -n "$COMMENT_TEXT" && -n "$COMMENT_FILE" ]]; then
+  printf 'Use only one of --comment or --comment-file\n' >&2
+  exit 2
+fi
 
-if [[ -z "$TITLE_FILE" && -z "$BODY_FILE" && -z "$COMMENT_FILE" && -z "$STATE" ]]; then
-  printf 'Nothing to do: provide at least one of --title-file, --body-file, --comment-file, or --state\n' >&2
+if [[ -z "$TITLE_TEXT" && -z "$TITLE_FILE" && -z "$BODY_TEXT" && -z "$BODY_FILE" && -z "$COMMENT_TEXT" && -z "$COMMENT_FILE" && -z "$STATE" ]]; then
+  printf 'Nothing to do: provide at least one of --title, --title-file, --body, --body-file, --comment, --comment-file, or --state\n' >&2
   exit 2
 fi
 
@@ -158,16 +193,20 @@ json_from_stdin_as_comment() {
 }
 
 build_issue_patch() {
-  python3 - "$TITLE_FILE" "$BODY_FILE" "$STATE" <<'PY'
+  python3 - "$TITLE_TEXT" "$TITLE_FILE" "$BODY_TEXT" "$BODY_FILE" "$STATE" <<'PY'
 import json
 import pathlib
 import sys
 
-title_file, body_file, state = sys.argv[1:4]
+title_text, title_file, body_text, body_file, state = sys.argv[1:6]
 payload = {}
-if title_file:
+if title_text:
+    payload["title"] = title_text
+elif title_file:
     payload["title"] = pathlib.Path(title_file).read_text(encoding="utf-8").strip()
-if body_file:
+if body_text:
+    payload["body"] = body_text
+elif body_file:
     payload["body"] = pathlib.Path(body_file).read_text(encoding="utf-8")
 if state:
     payload["state"] = state
@@ -175,11 +214,13 @@ print(json.dumps(payload, ensure_ascii=False))
 PY
 }
 
-if [[ -n "$COMMENT_FILE" ]]; then
+if [[ -n "$COMMENT_TEXT" ]]; then
+  api POST "/issues/${ISSUE_NUMBER}/comments" "$(printf '%s' "$COMMENT_TEXT" | json_from_stdin_as_comment)"
+elif [[ -n "$COMMENT_FILE" ]]; then
   api POST "/issues/${ISSUE_NUMBER}/comments" "$(cat "$COMMENT_FILE" | json_from_stdin_as_comment)"
 fi
 
-if [[ -n "$TITLE_FILE" || -n "$BODY_FILE" || -n "$STATE" ]]; then
+if [[ -n "$TITLE_TEXT" || -n "$TITLE_FILE" || -n "$BODY_TEXT" || -n "$BODY_FILE" || -n "$STATE" ]]; then
   api PATCH "/issues/${ISSUE_NUMBER}" "$(build_issue_patch)"
 fi
 
