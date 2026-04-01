@@ -1,0 +1,76 @@
+# Code Review Report — S5: Cross-cutting
+**Date**: 2026-04-01
+**Scope**: src/bioetl/
+**Files reviewed**: 1258
+**Total LOC**: 169932
+**Status**: PASS
+**Score**: 9.8/10.0
+
+---
+
+## Summary
+| Category | Issues | CRIT | HIGH | MED | LOW | Score |
+|----------|--------|------|------|-----|-----|-------|
+| Architecture | 2 | 0 | 0 | 0 | 2 | 9.5 |
+| Anti-Patterns | 0 | 0 | 0 | 0 | 0 | 10.0 |
+| DI Violations | 0 | 0 | 0 | 0 | 0 | 10.0 |
+| Naming | 0 | 0 | 0 | 0 | 0 | 10.0 |
+| Types | 0 | 0 | 0 | 0 | 0 | 10.0 |
+| Testing | 0 | 0 | 0 | 0 | 0 | 10.0 |
+| **TOTAL** | **2** | **0** | **0** | **0** | **2** | **9.8** |
+
+## Critical Issues (MUST fix before merge)
+No issues found.
+
+## High Issues
+No issues found.
+
+## Medium Issues
+No issues found.
+
+## Low Issues
+### ARCH-008: Determinism
+- **Rule**: ARCH-008 (Determinism)
+- **Severity**: LOW
+- **File**: `src/bioetl/__init__.py:1`
+- **Description**: Missing 'from __future__ import annotations'
+- **Code**:
+  ```python
+  """User interfaces for BioETL.
+  ```
+- **Fix**:
+  ```python
+  from __future__ import annotations
+  ```
+- **Verification**: `grep 'from __future__ import annotations' src/bioetl/interfaces/__init__.py`
+
+### ARCH-008: Determinism
+- **Rule**: ARCH-008 (Determinism)
+- **Severity**: LOW
+- **File**: `src/bioetl/__init__.py:1`
+- **Description**: Missing 'from __future__ import annotations'
+- **Code**:
+  ```python
+  """Bioactivity domain entity package for ChEMBL/PubChem data."""
+  ```
+- **Fix**:
+  ```python
+  from __future__ import annotations
+  ```
+- **Verification**: `grep 'from __future__ import annotations' src/bioetl/domain/entities/bioactivity/__init__.py`
+
+## Positive Observations
+- Patterns generally followed correctly.
+
+## Scoring Calculation
+| Category | Weight | Raw Score | Deductions | Weighted |
+|----------|--------|-----------|------------|----------|
+| Architecture | 30% | 10 | -0.50 | 2.85 |
+| Anti-Patterns | 25% | 10 | -0.00 | 2.50 |
+| DI Violations | 20% | 10 | -0.00 | 2.00 |
+| Naming | 10% | 10 | -0.00 | 1.00 |
+| Types | 10% | 10 | -0.00 | 1.00 |
+| Testing | 5% | 10 | -0.00 | 0.50 |
+| **FINAL** | **100%** | | | **9.8** |
+Deduction rules: CRITICAL = -2.0, HIGH = -1.0, MEDIUM = -0.5, LOW = -0.25
+Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
