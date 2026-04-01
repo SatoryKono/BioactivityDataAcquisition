@@ -94,6 +94,57 @@ test для модуля.
 compatibility facades, где mirror-path `test_<module>.py` был бы ложным сигналом,
 а реальный owner живёт в contract или architecture suite.
 
+#### 2.1.2. Pure Transformation Logic Baseline
+
+Pure transformation logic считается отдельным high-signal unit-test surface для:
+
+- функций в `src/bioetl/domain/transformations/`;
+- pure helpers и dict-level transformers в `src/bioetl/application/core/`,
+  если они работают только in-memory и не оркестрируют adapters, storage или
+  runtime lifecycle.
+
+Для такого класса тестов canonical expectations следующие:
+
+- тесты должны быть детерминированными и работать только в памяти;
+- входы и ожидаемые выходы должны быть зафиксированы явно, без скрытой
+  зависимости от времени, сети, filesystem, random state или глобального
+  runtime context;
+- failure/edge behavior должен проверяться так же явно, как happy path;
+- in-memory fakes допустимы только там, где helper нельзя протестировать как
+  чистую функцию, но для pure transformation logic прямой input/output assertion
+  остаётся предпочитаемым стилем.
+
+Минимальный edge-case baseline для новых и изменяемых pure transformation tests:
+
+- empty inputs;
+- malformed inputs;
+- Unicode значения и строковая нормализация без потери смысла;
+- `null` / missing values и их deterministic fallback semantics.
+
+Подходящие canonical examples в репозитории:
+
+- `tests/unit/domain/transformations/test_coercion.py`
+- `tests/unit/domain/test_transformations.py`
+- `tests/unit/application/core/test_dict_transformers.py`
+
+Рекомендуемый execution path для этого baseline:
+
+```bash
+# CI / single-OS
+uv run python -m pytest -q tests/unit/domain/transformations/test_coercion.py
+uv run python -m pytest -q tests/unit/application/core/test_dict_transformers.py
+uv run python -m pytest -q tests/architecture/test_domain_unit_test_purity.py
+
+# Mixed Windows + WSL checkout (WSL)
+bash scripts/dev/run_pytest.sh tests/unit/domain/transformations/test_coercion.py
+bash scripts/dev/run_pytest.sh tests/unit/application/core/test_dict_transformers.py
+bash scripts/dev/run_pytest.sh tests/architecture/test_domain_unit_test_purity.py
+```
+
+Если изменение затрагивает только pure transformation logic, такой targeted run
+считается поддерживаемым local feedback path до более широкого `make test-fast`
+или полного `make test`.
+
 ### 2.2. Integration Tests (`tests/integration/`)
 
 Проверка взаимодействия компонентов с внешними API и хранилищем.
