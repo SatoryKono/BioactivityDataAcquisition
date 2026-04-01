@@ -55,6 +55,11 @@ class RecordNormalizationProcessor:
     content_hash_exclude_fields: frozenset[str] = frozenset()
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None
 
+    def _should_project_hashes_by_version(self) -> bool:
+        """Return True when rollout semantics require versioned content hashes."""
+        policy = self.content_hash_policy_by_version
+        return policy is not None and policy.requires_projected_hashes
+
     def normalize_record(self, record: JsonDict) -> JsonDict:
         """Apply deterministic normalization to one transformed Silver record."""
         normalized = self._normalize_mapping(record)
@@ -62,7 +67,7 @@ class RecordNormalizationProcessor:
         if "content_hash" in normalized:
             normalized["content_hash"] = self.compute_content_hash(normalized)
         version_hashes = self.compute_content_hashes_by_version(normalized)
-        if self.content_hash_policy_by_version is not None and self.content_hash_policy_by_version.is_multi_version:
+        if self._should_project_hashes_by_version():
             normalized["_content_hashes_by_version"] = version_hashes
         return normalized
 
@@ -92,8 +97,9 @@ class RecordNormalizationProcessor:
 
     def compute_content_hashes_by_version(self, record: JsonDict) -> dict[str, str]:
         """Compute per-version content hashes when rollout policy requires it."""
-        if self.content_hash_policy_by_version is None:
+        if not self._should_project_hashes_by_version():
             return {}
+        assert self.content_hash_policy_by_version is not None
         return {
             policy.version: self.compute_content_hash(
                 record,
@@ -150,16 +156,17 @@ class RecordNormalizationProcessor:
             index,
             normalized_business_data,
         )
-        if self.content_hash_policy_by_version is not None and self.content_hash_policy_by_version.is_multi_version:
+        if self._should_project_hashes_by_version():
             silver_record["_content_hashes_by_version"] = version_hashes
         if pre_silver.apply_structural_policy is not None:
-            silver_record = pre_silver.apply_structural_policy(
+            projected_record = pre_silver.apply_structural_policy(
                 context,
                 silver_record,
                 index,
             )
-            if silver_record is None:
+            if projected_record is None:
                 return None
+            silver_record = projected_record
         if pre_silver.apply_silver_filter is not None:
             pre_silver.apply_silver_filter(context, silver_record, index)
         return silver_record

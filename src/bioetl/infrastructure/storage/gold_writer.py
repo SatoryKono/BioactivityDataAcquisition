@@ -6,7 +6,7 @@ import asyncio  # noqa: F401 - compatibility monkeypatch target in tests
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake  # noqa: F401
@@ -21,7 +21,12 @@ from bioetl.domain.ports import (
     MetricsPort,
     TracingPort,
 )
-from bioetl.domain.types import GoldRecord, RunID, ScdConfig
+from bioetl.domain.types import (
+    GoldRecord,
+    GoldSchemaPolicyByVersion,
+    RunID,
+    ScdConfig,
+)
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
@@ -59,6 +64,9 @@ from bioetl.infrastructure.storage.gold.runtime_helpers import (
 from bioetl.infrastructure.storage.gold.validation_mixin import (
     GoldWriterValidationMixin,
 )
+from bioetl.infrastructure.storage.versioned_table_resolver import (
+    resolve_write_targets,
+)
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
@@ -78,6 +86,20 @@ GOLD_WRITE_RETRY_ERRORS = (
 )
 
 
+class _SchemaBuilder(Protocol):
+    """Protocol for schema objects exposing ``to_schema``."""
+
+    def to_schema(self) -> object:
+        """Materialize runtime schema representation."""
+        ...
+
+
+class _ResolvedSchema(Protocol):
+    """Protocol for resolved schema objects exposing columns mapping."""
+
+    columns: dict[str, object]
+
+
 def _normalize_scd_config(
     scd_config: ScdConfig,
     primary_keys: list[str] | None,
@@ -90,6 +112,54 @@ def _normalize_scd_config(
     return normalize_scd_config(scd_config, primary_keys)
 
 
+def _schema_column_names(schema: object) -> tuple[str, ...]:
+    """Extract ordered column names from a Pandera schema-like object."""
+    if hasattr(schema, "to_schema"):
+        try:
+            resolved = cast(_ResolvedSchema, cast(_SchemaBuilder, schema).to_schema())
+            return tuple(resolved.columns.keys())
+        except (
+            AttributeError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ):
+            pass
+    if hasattr(schema, "columns"):
+        columns = getattr(schema, "columns")
+        if isinstance(columns, Mapping):
+            return tuple(str(column) for column in columns.keys())
+    return ()
+
+
+def _project_records_for_gold_schema(
+    records: list[GoldRecord],
+    *,
+    schema: object,
+) -> list[GoldRecord]:
+    """Project raw Gold records to the ordered columns of one schema version."""
+    schema_columns = _schema_column_names(schema)
+    if not schema_columns:
+        return records
+
+    dq_defaults = {"_dq_warn": False, "_dq_error": False}
+    return [
+        {
+            key: record.get(key, dq_defaults.get(key))
+            for key in schema_columns
+            if key in record or key in dq_defaults
+        }
+        for record in records
+    ]
+
+
+def _resolve_active_gold_schema(schema: object) -> object:
+    """Return the active schema from version-aware routing or a plain schema."""
+    if isinstance(schema, GoldSchemaPolicyByVersion):
+        return schema.active_schema
+    return schema
+
+
 class GoldWriter(
     GoldWriterValidationMixin,
     GoldWriterIOMixin,
@@ -97,6 +167,15 @@ class GoldWriter(
     BaseDeltaWriter,
 ):
     """Gold layer writer: strict Pandera validation, Delta Lake, and SCD2."""
+
+    def _should_dual_write(self) -> bool:
+        """Return True when rollout policy requires Gold shadow writes."""
+        if self._contract_rollout_policy is None:
+            return False
+        return self._contract_rollout_policy.mode in {
+            "dual_write",
+            "dual_read_write",
+        } and len(self._contract_rollout_policy.write_versions) > 1
 
     def __init__(
         self,
@@ -108,17 +187,7 @@ class GoldWriter(
         flat_structure: bool = False,
         **legacy_kwargs: object,
     ) -> None:
-        """Initialize Gold writer and optional observability/metadata ports.
-
-        Args:
-            base_path: Root directory for Gold layer Delta Lake tables.
-            logger: Structured logger for write events and errors.
-            transform_version: Optional version string embedded in Gold metadata.
-            transform_steps: Optional tuple of transform step names for lineage.
-            runtime_services: Optional grouped runtime collaborators for tracing,
-                metadata, audit, and optional CSV export.
-            flat_structure: When True, omit the table-based subdirectory hierarchy.
-        """
+        """Initialize Gold writer with explicit runtime collaborators."""
         csv_exporter = cast(
             "CsvExporter | None", legacy_kwargs.pop("csv_exporter", None)
         )
@@ -137,6 +206,7 @@ class GoldWriter(
             "LineageStorePort | None",
             legacy_kwargs.pop("lineage_store", None),
         )
+        contract_rollout_policy = legacy_kwargs.pop("contract_rollout_policy", None)
         if legacy_kwargs:
             unexpected = ", ".join(sorted(legacy_kwargs))
             raise TypeError(f"Unexpected GoldWriter options: {unexpected}")
@@ -150,6 +220,7 @@ class GoldWriter(
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
             lineage_store=lineage_store,
+            contract_rollout_policy=cast("Any", contract_rollout_policy),
         )
         self.csv_exporter = services.csv_exporter
         self._metrics = services.metrics
@@ -158,6 +229,7 @@ class GoldWriter(
         self._metadata_writer = services.metadata_writer
         self._metadata_coordinator = services.metadata_coordinator
         self._lineage_store = services.lineage_store
+        self._contract_rollout_policy = services.contract_rollout_policy
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
 
@@ -165,7 +237,7 @@ class GoldWriter(
         self,
         table_name: str,
         records: list[GoldRecord],
-        schema: DataFrameSchema,
+        schema: object,
         primary_keys: list[str] | None = None,
         mode: str = "overwrite",
         partition_cols: list[str] | None = None,
@@ -176,28 +248,7 @@ class GoldWriter(
         run_id: RunID | None = None,
         silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
-        """Write validated records to Gold layer.
-
-        Args:
-            table_name: Logical Delta table name (e.g., ``"chembl_activity"``).
-            records: Fully transformed and validated Gold records to write.
-            schema: Pandera DataFrameSchema for strict validation before write.
-            primary_keys: Optional business key fields used for SCD2 merge;
-                unused for overwrite mode.
-            mode: Write mode string (``"overwrite"`` or ``"scd2"``).
-            partition_cols: Optional column names for Delta table partitioning;
-                disables partitioning when None.
-            scd_config: Optional SCD type-2 configuration including column
-                mappings and business key definitions; required for ``"scd2"`` mode.
-            column_order: Optional explicit column ordering applied before writing;
-                uses schema order when None.
-            ingestion_ts: Optional UTC timestamp embedded in Gold metadata;
-                uses current time when None.
-            run_id: Optional pipeline run ID for lineage; excluded from metadata
-                when None.
-            silver_refs: Optional Silver write results included as lineage
-                references in Gold metadata.
-        """
+        """Validate and write Gold records, including SCD2 and dual-write flows."""
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_gold") as span:
             normalized_scd_config = (
@@ -205,10 +256,11 @@ class GoldWriter(
                 if isinstance(scd_config, Mapping)
                 else scd_config
             )
+            active_schema = _resolve_active_gold_schema(schema)
             request = _GoldWriteRequest(
                 table_name=table_name,
                 records=records,
-                schema=schema,
+                schema=cast("DataFrameSchema", active_schema),
                 primary_keys=primary_keys,
                 mode=mode,
                 partition_cols=partition_cols,
@@ -224,6 +276,12 @@ class GoldWriter(
                 request.mode,
                 len(request.records),
             )
+            if self._should_dual_write() and isinstance(
+                schema,
+                GoldSchemaPolicyByVersion,
+            ):
+                await self._write_dual_targets(request=request, schema_policy=schema)
+                return
             prepared = await self._prepare_write_gold(
                 table_name=request.table_name,
                 records=request.records,
@@ -250,6 +308,82 @@ class GoldWriter(
                 )
             )
 
+    async def _write_dual_targets(
+        self,
+        *,
+        request: _GoldWriteRequest,
+        schema_policy: GoldSchemaPolicyByVersion,
+    ) -> None:
+        """Write all versioned Gold targets and fail on the first error."""
+        assert self._contract_rollout_policy is not None  # guarded by caller
+
+        write_targets = resolve_write_targets(
+            request.table_name,
+            self._contract_rollout_policy.write_versions,
+        )
+        for contract_version, physical_table in zip(
+            self._contract_rollout_policy.write_versions,
+            write_targets,
+            strict=True,
+        ):
+            target_schema = schema_policy.for_version(contract_version)
+            if target_schema is None:
+                raise ValueError(
+                    f"No Gold schema configured for contract version {contract_version}"
+                )
+            target_records = _project_records_for_gold_schema(
+                request.records,
+                schema=target_schema,
+            )
+            try:
+                prepared = await self._prepare_write_gold(
+                    table_name=physical_table,
+                    records=target_records,
+                    mode=request.mode,
+                    schema=cast("DataFrameSchema", target_schema),
+                    scd_config=request.scd_config,
+                    ingestion_ts=request.ingestion_ts,
+                )
+                await self._dispatch_write(
+                    _GoldWriteDispatchContext(
+                        prepared=prepared,
+                        request=_GoldWriteRequest(
+                            table_name=physical_table,
+                            records=target_records,
+                            schema=cast("DataFrameSchema", target_schema),
+                            primary_keys=request.primary_keys,
+                            mode=request.mode,
+                            partition_cols=request.partition_cols,
+                            scd_config=request.scd_config,
+                            column_order=request.column_order,
+                            ingestion_ts=request.ingestion_ts,
+                            run_id=request.run_id,
+                            silver_refs=request.silver_refs,
+                        ),
+                    )
+                )
+                await self._post_write_gold(
+                    _GoldWritePostwriteContext(
+                        prepared=prepared,
+                        records=target_records,
+                        ingestion_ts=request.ingestion_ts,
+                        run_id=request.run_id,
+                        scd_config=request.scd_config,
+                        silver_refs=request.silver_refs,
+                        schema=cast("DataFrameSchema", target_schema),
+                    )
+                )
+            except Exception:
+                self.logger.error(
+                    "gold_dual_write_failed",
+                    logical_table=request.table_name,
+                    failed_contract_version=contract_version,
+                    failed_target_table=physical_table,
+                    active_contract_version=self._contract_rollout_policy.active_version,
+                    write_versions=self._contract_rollout_policy.write_versions,
+                )
+                raise
+
     async def _prepare_write_gold(
         self,
         *,
@@ -260,19 +394,7 @@ class GoldWriter(
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
     ) -> _PreparedGoldWriteContext:
-        """Run validation steps and resolve target path.
-
-        Args:
-            table_name: Logical Delta table name for path resolution.
-            records: Gold records to validate before writing.
-            mode: Write mode string passed through for validation.
-            schema: Pandera schema used for strict record validation.
-            scd_config: Optional SCD2 config; required for ``"scd2"`` mode.
-            ingestion_ts: Optional UTC timestamp required for SCD2 writes.
-
-        Returns:
-            Prepared write context with validated mode and resolved target path.
-        """
+        """Run validation and path resolution before a Gold write."""
         return await _prepare_write_gold_impl(
             self,
             table_name=table_name,
@@ -287,12 +409,7 @@ class GoldWriter(
         self,
         context: _GoldWritePostwriteContext,
     ) -> None:
-        """Emit audit and metadata after successful Gold write.
-
-        Args:
-            context: Named post-write context containing prepared path/mode,
-                records, lineage inputs, and schema for metadata emission.
-        """
+        """Emit audit, lineage, and metadata after a successful Gold write."""
         await _post_write_gold_impl(self, context)
 
     @staticmethod
@@ -302,12 +419,5 @@ class GoldWriter(
         mode: str,
         record_count: int,
     ) -> None:
-        """Set standard tracing attributes for write_gold span.
-
-        Args:
-            span: Active OpenTelemetry span to annotate.
-            table_name: Logical Delta table name set as span attribute.
-            mode: Write mode string set as span attribute.
-            record_count: Number of records being written set as span attribute.
-        """
+        """Set standard tracing attributes for a Gold write span."""
         _set_write_span_attributes_impl(span, table_name, mode, record_count)

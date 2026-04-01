@@ -33,6 +33,10 @@ from bioetl.domain.types.health import (
     PreflightReport,
     ValidationResult,
 )
+from bioetl.domain.types.gold_schema_policy import (
+    GoldSchemaPolicyByVersion,
+    GoldSchemaVersionPolicy,
+)
 from bioetl.domain.types.identifiers import (
     ArrowSchema,
     BatchID,
@@ -65,7 +69,9 @@ __all__ = [
     "ExecutionContext",
     "GoldBusinessRuleSpec",
     "GoldRecord",
+    "GoldSchemaPolicyByVersion",
     "GoldSchemaType",
+    "GoldSchemaVersionPolicy",
     "HealthReport",
     "HealthStatus",
     "JsonDict",

@@ -151,6 +151,7 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         self._silver_schema = config.silver_schema
         self._table_config = config.table_config
         self._gold_schema = config.gold_schema
+        self._gold_schema_policy_by_version = config.gold_schema_policy_by_version
         self._column_groups = config.column_groups
         self._data_schema = (
             opts.data_schema_config

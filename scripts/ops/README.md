@@ -17,6 +17,7 @@ python -m scripts.ops <command> [args...]
 | `fix-grafana` | `scripts/ops/fix_grafana_dashboards.py` | Fix Grafana dashboard configurations |
 | `wsl-proxy` | `scripts/ops/wsl_proxy.py` | WSL proxy helper |
 | `update-issue` | `scripts/ops/update_github_issue.sh` | Update a GitHub issue title, body, comment, and/or state via the GitHub API, with inline text or file inputs |
+| `create-runmanifest-ledger-issue` | `scripts/ops/create_runmanifest_runledger_issue.sh` | Create the prepared RunManifest-and-Run-Ledger GitHub issue (dry-run by default) |
 | `post-2597-progress` | `scripts/ops/post_issue_2597_progress.sh` | Post the current bounded progress update for issue `#2597` (dry-run by default) |
 | `close-2597` | `scripts/ops/close_issue_2597.sh` | Post the prepared closeout comment for issue `#2597` and close it (dry-run by default) |
 | `triage-issues` | `scripts/ops/triage_cleanup_issue_wave.sh` | Apply the cleanup/docs issue triage wave via GitHub API |
@@ -39,6 +40,7 @@ python -m scripts.ops <command> [args...]
 | `fix-grafana` | After Grafana dashboard drift; injects variables and fixes PromQL queries | Manual, infrastructure maintenance |
 | `wsl-proxy` | When WSL2 networking needs proxy configuration | Manual, developer utility |
 | `update-issue` | When a maintainer needs a reusable shell utility to edit GitHub issues from WSL/bash | Manual, maintainer utility |
+| `create-runmanifest-ledger-issue` | When the prepared RunManifest-and-Run-Ledger architecture issue should be created without retyping the payload by hand | Manual, maintainer utility |
 | `post-2597-progress` | When the current `#2597` pure-transformation testing slice should be reported back to GitHub without retyping the comment body | Manual, maintainer utility |
 | `close-2597` | When the bounded `#2597` pure-transformation baseline slice is merged and the issue should be closed with a prepared summary | Manual, maintainer utility |
 | `triage-issues` | When the cleanup/docs GitHub issue wave must be applied from WSL with a PAT | Manual, maintainer utility |
@@ -63,6 +65,7 @@ python -m scripts.ops <command> [args...]
 | `scripts/ops/codex.bat` | Windows Codex launcher |
 | `scripts/ops/codex-exec.bat` | Windows Codex exec launcher |
 | `scripts/ops/update_github_issue.sh` | Generic issue edit helper for comment/title/body/state updates |
+| `scripts/ops/create_runmanifest_runledger_issue.sh` | Wrapper that creates the prepared RunManifest-and-Run-Ledger issue payload |
 | `scripts/ops/post_issue_2597_progress.sh` | Wrapper that posts the prepared progress comment for issue `#2597` |
 | `scripts/ops/close_issue_2597.sh` | Wrapper that posts the prepared closeout comment for issue `#2597` and closes it |
 | `scripts/ops/close_great_expectations_spike_issue.sh` | Close issue `#2595` with a standard comment |

@@ -1,9 +1,4 @@
-"""Configuration helpers for provider registration.
-
-Utility functions for loading and extracting provider configuration
-from YAML source configs. Split from registration.py per
-audit-package-structure-2026-02-07.
-"""
+"""Configuration helpers for provider registration."""
 
 from __future__ import annotations
 
@@ -39,17 +34,7 @@ ProviderFamilyExtraConfigBuilder = Callable[
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
-    """Load config from configs/providers/{provider}.yaml or return None.
-
-    Args:
-        provider: Provider name used to locate the YAML source config file.
-
-    Returns:
-        SourceYamlConfig if found, None if config file does not exist.
-
-    Raises:
-        yaml.YAMLError, pydantic.ValidationError: If config file exists but is invalid.
-    """
+    """Load ``configs/providers/{provider}.yaml`` or return ``None``."""
     try:
         return load_source_config(provider)
     except ValueError:
@@ -57,15 +42,7 @@ def _get_source_config(provider: str) -> SourceYamlConfig | None:
 
 
 def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
-    """Get batch size from source config or return default.
-
-    Args:
-        provider: Provider name used to locate the source config.
-        default: Batch size to use when source config is absent; defaults to 100.
-
-    Returns:
-        Configured batch size from source YAML, or default.
-    """
+    """Get batch size from source config, falling back to ``default``."""
     source_config = _get_source_config(provider)
     return source_config.batch_size if source_config else default
 

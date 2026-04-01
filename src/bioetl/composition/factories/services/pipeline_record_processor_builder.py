@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Iterable, Mapping
 from itertools import chain
 from typing import TYPE_CHECKING, cast
 
@@ -10,6 +10,10 @@ from bioetl.application.core.config import (
     ContentHashPolicyByVersion,
     ContentHashVersionPolicy,
     RecordProcessorConfig,
+)
+from bioetl.domain.types import (
+    GoldSchemaPolicyByVersion,
+    GoldSchemaVersionPolicy,
 )
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
@@ -29,10 +33,9 @@ def _coerce_string_frozenset(value: object | None) -> frozenset[str]:
     """Coerce list/set-like string collections to an immutable set."""
     if value is None or isinstance(value, str | bytes):
         return frozenset()
-    try:
-        return frozenset(item for item in value if isinstance(item, str))
-    except TypeError:
+    if not isinstance(value, Iterable):
         return frozenset()
+    return frozenset(item for item in value if isinstance(item, str))
 
 
 def _extract_hash_policy(pipeline: BasePipeline) -> tuple[frozenset[str], frozenset[str]]:
@@ -77,6 +80,7 @@ def _extract_hash_policy_by_version(
     active_version = getattr(contract_policy, "active_version", None)
     rollout = getattr(contract_policy, "rollout", None)
     write_versions = getattr(rollout, "write_versions", None)
+    affects_hash = bool(getattr(rollout, "affects_hash", False))
 
     normalized_active_version = (
         str(active_version).strip() if active_version is not None else ""
@@ -85,7 +89,7 @@ def _extract_hash_policy_by_version(
         return None
 
     if write_versions is None:
-        versions = (normalized_active_version,)
+        versions: tuple[str, ...] = (normalized_active_version,)
     else:
         versions = tuple(
             str(version).strip() for version in write_versions if str(version).strip()
@@ -96,11 +100,64 @@ def _extract_hash_policy_by_version(
 
     return ContentHashPolicyByVersion(
         active_version=normalized_active_version,
+        affects_hash=affects_hash,
         policies=tuple(
             ContentHashVersionPolicy(
                 version=version,
                 include_fields=include_fields,
                 exclude_fields=exclude_fields,
+            )
+            for version in versions
+        ),
+    )
+
+
+def _extract_gold_schema_policy_by_version(
+    pipeline: BasePipeline,
+    *,
+    gold_schema: GoldSchemaType,
+) -> GoldSchemaPolicyByVersion | None:
+    """Build ordered per-version Gold schema routing from rollout-aware policy."""
+    transformer = getattr(pipeline, "transformer", None)
+    contract_policy = getattr(transformer, "_contract_policy", None)
+    active_version = getattr(contract_policy, "active_version", None)
+    rollout = getattr(contract_policy, "rollout", None)
+    write_versions = getattr(rollout, "write_versions", None)
+    configured_mapping = getattr(pipeline, "gold_schema_by_version", None)
+
+    normalized_active_version = (
+        str(active_version).strip() if active_version is not None else ""
+    )
+    if not normalized_active_version:
+        return None
+
+    if write_versions is None:
+        versions: tuple[str, ...] = (normalized_active_version,)
+    else:
+        versions = tuple(
+            str(version).strip() for version in write_versions if str(version).strip()
+        ) or (normalized_active_version,)
+
+    if normalized_active_version not in versions:
+        versions = (normalized_active_version, *versions)
+
+    schema_mapping: dict[str, object] = {}
+    if isinstance(configured_mapping, Mapping):
+        schema_mapping = {
+            str(version).strip(): schema
+            for version, schema in configured_mapping.items()
+            if str(version).strip() and schema is not None
+        }
+
+    for version in versions:
+        schema_mapping.setdefault(version, gold_schema)
+
+    return GoldSchemaPolicyByVersion(
+        active_version=normalized_active_version,
+        policies=tuple(
+            GoldSchemaVersionPolicy(
+                version=version,
+                schema=schema_mapping[version],
             )
             for version in versions
         ),
@@ -126,6 +183,15 @@ def build_record_processor_config_and_validator(
         include_fields=include_fields,
         exclude_fields=exclude_fields,
     )
+    gold_schema_policy_by_version = _extract_gold_schema_policy_by_version(
+        pipeline,
+        gold_schema=gold_schema,
+    )
+    active_gold_schema = (
+        gold_schema_policy_by_version.active_schema
+        if gold_schema_policy_by_version is not None
+        else gold_schema
+    )
     processor_config = RecordProcessorConfig(
         pipeline_name=pipeline.config.pipeline_name,
         provider=pipeline.config.provider,
@@ -143,9 +209,10 @@ def build_record_processor_config_and_validator(
         content_hash_include_fields=include_fields,
         content_hash_exclude_fields=exclude_fields,
         content_hash_policy_by_version=hash_policy_by_version,
+        gold_schema_policy_by_version=gold_schema_policy_by_version,
     )
     gold_validator = gold_validator_factory(
-        cast("pdr.DataFrameSchema | None", cast(object, gold_schema)),
+        cast("pdr.DataFrameSchema | None", active_gold_schema),
         strict=strict_gold_validation,
     )
     return processor_config, gold_validator
@@ -168,6 +235,10 @@ def create_record_processor_from_pipeline(
         pipeline,
         include_fields=include_fields,
         exclude_fields=exclude_fields,
+    )
+    gold_schema_policy_by_version = _extract_gold_schema_policy_by_version(
+        pipeline,
+        gold_schema=gold_schema,
     )
     return create_record_processor_fn(
         services=pipeline.services,
@@ -195,4 +266,5 @@ def create_record_processor_from_pipeline(
         content_hash_include_fields=include_fields,
         content_hash_exclude_fields=exclude_fields,
         content_hash_policy_by_version=hash_policy_by_version,
+        gold_schema_policy_by_version=gold_schema_policy_by_version,
     )

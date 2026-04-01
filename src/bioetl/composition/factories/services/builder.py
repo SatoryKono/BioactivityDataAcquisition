@@ -53,7 +53,12 @@ if TYPE_CHECKING:
         MemoryMonitorPort,
         TracingPort,
     )
-    from bioetl.domain.types import GoldSchemaType, RunID, ScdConfig
+    from bioetl.domain.types import (
+        GoldSchemaPolicyByVersion,
+        GoldSchemaType,
+        RunID,
+        ScdConfig,
+    )
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 __all__ = [
@@ -150,9 +155,15 @@ class ServicesBuilder:
         content_hash_include_fields: frozenset[str] = frozenset(),
         content_hash_exclude_fields: frozenset[str] = frozenset(),
         content_hash_policy_by_version: ContentHashPolicyByVersion | None = None,
+        gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None = None,
     ) -> RecordProcessor:
         """Create configured ``RecordProcessor`` for pipeline execution."""
         effective_tracer = tracer or services.tracing
+        active_gold_schema = (
+            gold_schema_policy_by_version.active_schema
+            if gold_schema_policy_by_version is not None
+            else gold_schema
+        )
         processor_config = RecordProcessorConfig(
             pipeline_name=pipeline_name,
             provider=provider,
@@ -173,6 +184,7 @@ class ServicesBuilder:
             content_hash_include_fields=content_hash_include_fields,
             content_hash_exclude_fields=content_hash_exclude_fields,
             content_hash_policy_by_version=content_hash_policy_by_version,
+            gold_schema_policy_by_version=gold_schema_policy_by_version,
         )
 
         components = ServicesBuilder.create_batch_processing_components(
@@ -184,7 +196,7 @@ class ServicesBuilder:
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
             gold_validator=PanderaGoldValidator(
-                cast("pdr.DataFrameSchema | None", cast(object, gold_schema)),
+                cast("pdr.DataFrameSchema | None", active_gold_schema),
                 strict=strict_gold_validation,
             ),
             tracer=effective_tracer,

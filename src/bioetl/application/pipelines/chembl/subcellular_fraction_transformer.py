@@ -17,6 +17,7 @@ from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
+from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -201,7 +202,7 @@ def _resolve_subcellular_fraction_payload(
             "PrimaryId",
             transformer._get_required_field(record, transformer.primary_id_field),
         )
-    except ValueError:
+    except TransformationError:
         return None
     return primary_id, transformer._extract_business_data(record, primary_id)
 

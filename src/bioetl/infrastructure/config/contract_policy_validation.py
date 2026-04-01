@@ -59,6 +59,57 @@ def load_contract_registry_entries(
     return entries if isinstance(entries, dict) else {}
 
 
+def _supported_versions(entry: dict[str, object]) -> set[str]:
+    """Return supported contract versions declared in the registry entry."""
+    supported_versions = entry.get("supported_versions")
+    if not isinstance(supported_versions, list):
+        return set()
+    return {str(version) for version in supported_versions}
+
+
+def _validate_supported_rollout_versions(
+    *,
+    contract_ref: str,
+    rollout_versions: set[str],
+    supported_versions: set[str],
+) -> None:
+    """Ensure every rollout version is declared in the registry."""
+    unsupported_versions = sorted(
+        version for version in rollout_versions if version not in supported_versions
+    )
+    if unsupported_versions:
+        raise ValueError(
+            f"Unsupported contract versions for {contract_ref}: {unsupported_versions}"
+        )
+
+
+def _migration_guides(entry: dict[str, object]) -> dict[str, object]:
+    """Return migration-guide metadata for a registry entry."""
+    guides = entry.get("migration_guides")
+    return guides if isinstance(guides, dict) else {}
+
+
+def _validate_major_transition_guides(
+    *,
+    contract_ref: str,
+    active_version: str,
+    rollout_versions: set[str],
+    guides: dict[str, object],
+) -> None:
+    """Require a migration guide when rollout spans contract major versions."""
+    active_major = active_version.split(".", 1)[0]
+    for version in rollout_versions:
+        if version == active_version or version.split(".", 1)[0] == active_major:
+            continue
+        forward_key = f"{version}->{active_version}"
+        reverse_key = f"{active_version}->{version}"
+        if forward_key not in guides and reverse_key not in guides:
+            raise ValueError(
+                f"Missing migration guide for major contract transition {contract_ref}: "
+                f"{forward_key}"
+            )
+
+
 def validate_contract_policy_registry_alignment(
     policy: PipelineContractPolicy,
     *,
@@ -72,34 +123,18 @@ def validate_contract_policy_registry_alignment(
     if not isinstance(entry, dict):
         return
 
-    supported_versions = entry.get("supported_versions")
-    supported = (
-        {str(version) for version in supported_versions}
-        if isinstance(supported_versions, list)
-        else set()
-    )
     rollout_versions = set(policy.read_order) | set(policy.write_versions)
-    unsupported_versions = sorted(version for version in rollout_versions if version not in supported)
-    if unsupported_versions:
-        raise ValueError(
-            f"Unsupported contract versions for {policy.contract_ref}: {unsupported_versions}"
-        )
-
-    migration_guides = entry.get("migration_guides")
-    guides = migration_guides if isinstance(migration_guides, dict) else {}
-    active_major = policy.active_version.split(".", 1)[0]
-    for version in rollout_versions:
-        if version == policy.active_version:
-            continue
-        if version.split(".", 1)[0] == active_major:
-            continue
-        forward_key = f"{version}->{policy.active_version}"
-        reverse_key = f"{policy.active_version}->{version}"
-        if forward_key not in guides and reverse_key not in guides:
-            raise ValueError(
-                f"Missing migration guide for major contract transition {policy.contract_ref}: "
-                f"{forward_key}"
-            )
+    _validate_supported_rollout_versions(
+        contract_ref=policy.contract_ref,
+        rollout_versions=rollout_versions,
+        supported_versions=_supported_versions(entry),
+    )
+    _validate_major_transition_guides(
+        contract_ref=policy.contract_ref,
+        active_version=policy.active_version,
+        rollout_versions=rollout_versions,
+        guides=_migration_guides(entry),
+    )
 
 
 def schema_columns(schema_class: object) -> set[str]:

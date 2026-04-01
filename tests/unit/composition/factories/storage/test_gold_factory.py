@@ -13,6 +13,7 @@ from bioetl.domain.ports.noop import (
     NoOpMetadataWriter,
     NoOpTracing,
 )
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 
 
 @pytest.mark.unit
@@ -131,3 +132,33 @@ class TestCreateGoldWriter:
         assert call_kwargs["transform_version"] == "1.2.0"
         assert call_kwargs["transform_steps"] == ("step_a", "step_b")
         assert call_kwargs["flat_structure"] is True
+
+    def test_passes_contract_rollout_policy(self) -> None:
+        """contract_rollout_policy is preserved in runtime services for dual-write."""
+        writer_cls = MagicMock()
+        rollout_policy = ContractRolloutPolicy(
+            contract_ref="pubmed/publication",
+            active_version="2.0.0",
+            mode="dual_write",
+            read_order=("2.0.0", "1.0.0"),
+            write_versions=("1.0.0", "2.0.0"),
+        )
+
+        create_gold_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/gold"),
+            config=None,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            contract_rollout_policy=rollout_policy,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert (
+            call_kwargs["runtime_services"].contract_rollout_policy == rollout_policy
+        )

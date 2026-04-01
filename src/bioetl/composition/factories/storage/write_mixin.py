@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.types import JsonDict, ScdConfig
 
@@ -167,7 +167,7 @@ class StorageAdapterWriteMixin:
         await self.gold.write_gold(
             table_name=table_name,
             records=records,
-            schema=cast("DataFrameSchema", schema),
+            schema=schema,
             primary_keys=primary_keys,
             mode=mode,
             scd_config=scd_config,

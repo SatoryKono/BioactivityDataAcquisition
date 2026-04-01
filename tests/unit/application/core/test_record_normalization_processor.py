@@ -81,6 +81,7 @@ def test_compute_content_hashes_by_version_returns_ordered_multi_hash_payload() 
         provider="crossref",
         content_hash_policy_by_version=ContentHashPolicyByVersion(
             active_version="2.0.0",
+            affects_hash=True,
             policies=(
                 ContentHashVersionPolicy(
                     version="1.0.0",
@@ -110,6 +111,7 @@ def test_finalize_pre_silver_attaches_active_and_versioned_content_hashes() -> N
         provider="crossref",
         content_hash_policy_by_version=ContentHashPolicyByVersion(
             active_version="2.0.0",
+            affects_hash=True,
             policies=(
                 ContentHashVersionPolicy(
                     version="1.0.0",
@@ -144,3 +146,45 @@ def test_finalize_pre_silver_attaches_active_and_versioned_content_hashes() -> N
     assert silver_record is not None
     assert silver_record["content_hash"] == silver_record["_content_hashes_by_version"]["2.0.0"]
     assert silver_record["_content_hashes_by_version"]["1.0.0"] != silver_record["content_hash"]
+
+
+@pytest.mark.unit
+def test_finalize_pre_silver_skips_versioned_hash_projection_when_rollout_does_not_affect_hash() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="crossref",
+        content_hash_policy_by_version=ContentHashPolicyByVersion(
+            active_version="2.0.0",
+            affects_hash=False,
+            policies=(
+                ContentHashVersionPolicy(
+                    version="1.0.0",
+                    include_fields=frozenset({"title"}),
+                    exclude_fields=frozenset(),
+                ),
+                ContentHashVersionPolicy(
+                    version="2.0.0",
+                    include_fields=frozenset({"title", "journal"}),
+                    exclude_fields=frozenset(),
+                ),
+            ),
+        ),
+    )
+    pre_silver = PreSilverRecord(
+        entity_id="crossref:1",
+        business_data={"title": "Example", "journal": "Nature"},
+        build_silver_record=lambda _context, entity_id, content_hash, index, business: {
+            "entity_id": entity_id,
+            "content_hash": content_hash,
+            "_index": index,
+            **business,
+        },
+    )
+
+    silver_record = processor.finalize_pre_silver(
+        pre_silver,
+        context=object(),
+        index=0,
+    )
+
+    assert silver_record is not None
+    assert "_content_hashes_by_version" not in silver_record

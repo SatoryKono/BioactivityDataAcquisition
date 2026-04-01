@@ -143,8 +143,13 @@ class BatchWriterIOMixin:
         span = self._start_span("write_gold", "gold", len(records))
 
         try:
-            records, available_cols = self._prepare_gold_records(records)
-            self._validate_gold_records(records)
+            schema_payload: object = self._gold_schema
+            if self._should_defer_gold_validation_to_storage():
+                available_cols = self._collect_record_columns(records)
+                schema_payload = self._gold_schema_policy_by_version
+            else:
+                records, available_cols = self._prepare_gold_records(records)
+                self._validate_gold_records(records)
 
             column_order, rename_map = self._resolve_layer_columns(
                 "gold", available_cols
@@ -155,7 +160,7 @@ class BatchWriterIOMixin:
             await self._storage.write_gold(
                 table_name=self._gold_table_name,
                 records=records,
-                schema=self._gold_schema,
+                schema=schema_payload,
                 primary_keys=list(self._table_config.primary_keys),
                 mode=self._gold_mode,
                 scd_config=self._config.scd_config,
@@ -194,3 +199,8 @@ class BatchWriterIOMixin:
         result = self._gold_validator.validate(records)
         if not result.valid:
             raise SchemaViolationError("gold", result.errors)
+
+    def _should_defer_gold_validation_to_storage(self) -> bool:
+        """Whether Gold validation/projection must happen per-version in storage."""
+        policy = getattr(self, "_gold_schema_policy_by_version", None)
+        return bool(policy is not None and policy.is_multi_version)

@@ -136,6 +136,22 @@ class TestProteinClassTransformer:
         assert result is None
 
     @pytest.mark.asyncio
+    async def test_transform_skips_root_classification_record(
+        self, transformer, mock_context
+    ):
+        """The synthetic ChEMBL root node should be skipped before DQ validation."""
+        record = {
+            "protein_class_id": 0,
+            "class_level": 0,
+            "pref_name": "Protein class",
+            "short_name": "Protein class",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is None
+
+    @pytest.mark.asyncio
     async def test_transform_minimal_record(self, transformer, mock_context):
         """Test transformation with only required fields."""
         record = {

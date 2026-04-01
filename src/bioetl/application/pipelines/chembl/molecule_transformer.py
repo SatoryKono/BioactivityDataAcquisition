@@ -27,8 +27,7 @@ from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import SMILES, InChIKey
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 # Field mappings for molecule nested structures

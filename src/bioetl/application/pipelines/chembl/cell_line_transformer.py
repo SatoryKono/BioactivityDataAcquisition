@@ -21,8 +21,7 @@ from bioetl.domain.entities import CellLine
 from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 class CellLineTransformer(BaseChemblTransformer):

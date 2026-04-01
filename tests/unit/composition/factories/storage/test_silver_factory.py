@@ -9,6 +9,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.factories.storage._silver import create_silver_writer
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.domain.ports.noop import (
     NoOpMetadataWriter,
     NoOpTracing,
@@ -184,3 +185,33 @@ class TestCreateSilverWriter:
 
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["runtime_services"].csv_exporter is csv
+
+    def test_passes_contract_rollout_policy(self) -> None:
+        """contract_rollout_policy is preserved in runtime services for dual-write."""
+        writer_cls = MagicMock()
+        rollout_policy = ContractRolloutPolicy(
+            contract_ref="chembl.activity",
+            active_version="2.0.0",
+            mode="dual_read_write",
+            read_order=("2.0.0", "1.0.0"),
+            write_versions=("1.0.0", "2.0.0"),
+            affects_hash=True,
+        )
+
+        create_silver_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/silver"),
+            config=None,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            silver_validator=None,
+            contract_rollout_policy=rollout_policy,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert call_kwargs["runtime_services"].contract_rollout_policy == rollout_policy

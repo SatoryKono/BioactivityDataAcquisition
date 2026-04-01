@@ -20,7 +20,13 @@ from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import BioETLError, SchemaViolationError
-from bioetl.domain.types import BatchID, RunType, ValidationResult
+from bioetl.domain.types import (
+    BatchID,
+    GoldSchemaPolicyByVersion,
+    GoldSchemaVersionPolicy,
+    RunType,
+    ValidationResult,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -496,6 +502,43 @@ class TestBatchWriterIOMixinGold:
         record = kwargs["records"][0]
         assert record.get("_dq_warn") is False
         assert record.get("_dq_error") is False
+
+    async def test_write_gold_defers_multi_version_validation_to_storage(
+        self, mock_storage, mock_context, mock_gold_validator
+    ):
+        """Multi-version Gold writes should skip local projection and validator calls."""
+        active_schema = MagicMock(name="active_schema")
+        legacy_schema = MagicMock(name="legacy_schema")
+        config = RecordProcessorConfig(
+            pipeline_name="p",
+            provider="prov",
+            entity_type="ent",
+            silver_schema=MagicMock(),
+            gold_schema=active_schema,
+            gold_schema_policy_by_version=GoldSchemaPolicyByVersion(
+                active_version="2.0.0",
+                policies=(
+                    GoldSchemaVersionPolicy(version="1.0.0", schema=legacy_schema),
+                    GoldSchemaVersionPolicy(version="2.0.0", schema=active_schema),
+                ),
+            ),
+        )
+        writer = BatchWriter(
+            storage=mock_storage,
+            context=mock_context,
+            config=config,
+            gold_validator=mock_gold_validator,
+            error_classifier=ErrorClassifier(),
+            batch_metrics=MagicMock(spec=BatchMetricsRecorder),
+        )
+
+        records = [{"entity_id": "e1", "legacy_value": "x", "new_value": "y"}]
+        await writer.write_gold(records)
+
+        mock_gold_validator.validate.assert_not_called()
+        kwargs = mock_storage.write_gold.call_args[1]
+        assert kwargs["schema"] == config.gold_schema_policy_by_version
+        assert kwargs["records"] == records
 
     async def test_write_gold_passes_primary_keys_to_storage(
         self, mock_storage, mock_context, mock_gold_validator

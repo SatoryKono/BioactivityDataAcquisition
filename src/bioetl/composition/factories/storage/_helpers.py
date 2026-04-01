@@ -208,6 +208,10 @@ def create_storage_adapter(
         transform_steps=tuple(config.transform.steps),
         flat_structure=gold_writer_flat,
         metrics=metrics,
+        contract_rollout_policy=load_pipeline_contract_policy(
+            config.provider,
+            config.entity_type,
+        ).to_contract_rollout_policy(),
     )
     return StorageAdapter(
         bronze_writer=bronze_writer,

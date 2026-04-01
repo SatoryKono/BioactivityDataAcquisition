@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pyarrow as pa
 import pytest
@@ -349,6 +350,90 @@ async def test_write_silver_dual_write_routes_to_all_versioned_tables(
     assert result.table_name == "chembl.activity__v2_0_0"
     assert old_table.to_pandas()["content_hash"].iloc[0] == "legacy-hash"
     assert new_table.to_pandas()["content_hash"].iloc[0] == "active-hash"
+
+
+@pytest.mark.asyncio
+async def test_write_silver_dual_write_fails_logical_write_when_any_target_fails(
+    temp_delta_path: str,
+    noop_logger,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Any failed physical target should fail the logical Silver dual-write."""
+    writer = SilverWriter(
+        base_path=temp_delta_path,
+        logger=noop_logger,
+        runtime_services=build_silver_writer_runtime_services(
+            csv_exporter=None,
+            tracing=None,
+            write_policy=None,
+            metrics=None,
+            audit=None,
+            silver_validator=None,
+            metadata_writer=None,
+            metadata_coordinator=None,
+            lineage_store=None,
+            dq_calculator=None,
+            merge_resilience_policy=None,
+            contract_rollout_policy=ContractRolloutPolicy(
+                contract_ref="chembl.activity",
+                active_version="2.0.0",
+                mode="dual_read_write",
+                read_order=("2.0.0", "1.0.0"),
+                write_versions=("1.0.0", "2.0.0"),
+                affects_hash=True,
+            ),
+        ),
+    )
+    schema = pa.schema(
+        [
+            ("id", pa.string()),
+            ("val", pa.string()),
+            ("content_hash", pa.string()),
+            ("_run_id", pa.string()),
+            ("_run_type", pa.string()),
+            ("_source_batch_id", pa.string()),
+            ("_ingestion_ts", pa.string()),
+        ]
+    )
+    records = [
+        {
+            "id": "1",
+            "val": "A",
+            "content_hash": "active-hash",
+            "_content_hashes_by_version": {
+                "1.0.0": "legacy-hash",
+                "2.0.0": "active-hash",
+            },
+            "_run_id": "run1",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch1",
+            "_ingestion_ts": "2023-01-01T00:00:00",
+        }
+    ]
+    observed_targets: list[str] = []
+
+    async def _failing_write_single_target(**kwargs: object) -> SimpleNamespace:
+        table_name = str(kwargs["table_name"])
+        observed_targets.append(table_name)
+        if table_name.endswith("__v2_0_0"):
+            raise RuntimeError("simulated target failure")
+        return SimpleNamespace(table_name=table_name)
+
+    monkeypatch.setattr(writer, "_write_single_target", _failing_write_single_target)
+
+    with pytest.raises(RuntimeError, match="simulated target failure"):
+        await writer.write_silver(
+            table_name="chembl.activity",
+            records=records,
+            primary_keys=["id"],
+            schema=schema,
+            mode="append",
+        )
+
+    assert observed_targets == [
+        "chembl.activity__v1_0_0",
+        "chembl.activity__v2_0_0",
+    ]
 
 
 @pytest.mark.asyncio
