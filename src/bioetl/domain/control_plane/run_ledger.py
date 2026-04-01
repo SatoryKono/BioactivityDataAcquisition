@@ -1,14 +1,24 @@
-"""Control-plane run ledger models."""
+"""Control-plane run ledger models and deterministic replay helpers."""
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime
 from uuid import UUID
 
+from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.types import RunID
 
-__all__ = ["RunLedgerEntry", "slice_ledger_entries_after"]
+__all__ = [
+    "CANONICAL_RUN_LEDGER_STAGE_NAMES",
+    "COMPOSITE_RUN_LEDGER_STAGE_NAMES",
+    "ORDINARY_RUN_LEDGER_STAGE_NAMES",
+    "RunLedgerEntry",
+    "RunLedgerReplayProjection",
+    "canonicalize_run_ledger_stage_name",
+    "project_run_ledger_replay",
+    "slice_ledger_entries_after",
+]
 
 _LEDGER_EVENT_FAMILY_EXACT: dict[str, str] = {
     "manifest_created": "diagnostic",
@@ -16,6 +26,7 @@ _LEDGER_EVENT_FAMILY_EXACT: dict[str, str] = {
     "run_finished": "pipeline.lifecycle",
     "run_failed": "pipeline.lifecycle",
     "run_shutdown": "pipeline.lifecycle",
+    "stage_started": "pipeline.phase",
     "stage_completed": "pipeline.phase",
     "artifact_published": "artifact",
 }
@@ -30,6 +41,38 @@ _LEDGER_EVENT_FAMILY_SUFFIXES: tuple[tuple[str, str], ...] = (
     ("_started", "pipeline.phase"),
     ("_completed", "pipeline.phase"),
 )
+
+
+
+ORDINARY_RUN_LEDGER_STAGE_NAMES: tuple[str, ...] = (
+    "preflight",
+    "prepare_medallion_layers",
+    "execute_pipeline",
+    "postrun",
+    "checkpoint_finalize",
+)
+COMPOSITE_RUN_LEDGER_STAGE_NAMES: tuple[str, ...] = (
+    "seed",
+    "dependencies",
+    "enrichment",
+    "merge",
+)
+CANONICAL_RUN_LEDGER_STAGE_NAMES: tuple[str, ...] = (
+    *ORDINARY_RUN_LEDGER_STAGE_NAMES,
+    *COMPOSITE_RUN_LEDGER_STAGE_NAMES,
+)
+_CANONICAL_RUN_LEDGER_STAGE_NAME_SET = frozenset(CANONICAL_RUN_LEDGER_STAGE_NAMES)
+
+
+def canonicalize_run_ledger_stage_name(stage: str) -> str:
+    """Normalize and validate canonical pipeline stage names for ledger events."""
+    normalized_stage = stage.strip().lower()
+    if normalized_stage not in _CANONICAL_RUN_LEDGER_STAGE_NAME_SET:
+        valid_stages = ", ".join(CANONICAL_RUN_LEDGER_STAGE_NAMES)
+        raise ValueError(
+            f"Unsupported run-ledger stage {stage!r}; expected one of: {valid_stages}"
+        )
+    return normalized_stage
 
 
 def _normalize_ledger_value(value: object) -> object:
@@ -94,6 +137,82 @@ def slice_ledger_entries_after(
     raise ValueError(
         f"Ledger watermark entry_id {after_entry_id!r} was not found in append order"
     )
+
+
+@dataclass(frozen=True, slots=True)
+class RunLedgerReplayProjection:
+    """Deterministic coarse-grained replay delta derived from ledger events.
+
+    The projection is intentionally snapshot-compatible: it only restores
+    durable lifecycle milestones and replay watermark metadata. Rich checkpoint
+    payloads such as ``seed_result`` or per-provider result maps remain owned by
+    the checkpoint snapshot and are never fabricated from ledger metrics.
+    """
+
+    state: CompositePipelineState | None = None
+    seed_completed: bool | None = None
+    merge_completed: bool | None = None
+    last_event_id: str | None = None
+    last_event_occurred_at: datetime | None = None
+    replayed_entry_count: int = 0
+
+
+def _project_stage_completed(
+    projection: RunLedgerReplayProjection,
+    entry: RunLedgerEntry,
+) -> RunLedgerReplayProjection:
+    stage = (entry.stage or "").strip().lower()
+    if stage == "seed":
+        return replace(
+            projection,
+            state=CompositePipelineState.SEED_COMPLETED,
+            seed_completed=True,
+        )
+    if stage == "dependencies":
+        return replace(
+            projection,
+            state=CompositePipelineState.DEPENDENCIES_COMPLETED,
+        )
+    if stage == "enrichment":
+        return replace(
+            projection,
+            state=CompositePipelineState.ENRICHMENT_COMPLETED,
+        )
+    if stage == "merge":
+        return replace(
+            projection,
+            state=CompositePipelineState.MERGING,
+            merge_completed=True,
+        )
+    return projection
+
+
+def _apply_replay_entry(
+    projection: RunLedgerReplayProjection,
+    entry: RunLedgerEntry,
+) -> RunLedgerReplayProjection:
+    replayed = replace(
+        projection,
+        last_event_id=entry.entry_id,
+        last_event_occurred_at=entry.occurred_at,
+    )
+    if entry.event_type == "stage_completed":
+        return _project_stage_completed(replayed, entry)
+    if entry.event_type == "run_finished":
+        return replace(replayed, state=CompositePipelineState.COMPLETED)
+    if entry.event_type == "run_failed":
+        return replace(replayed, state=CompositePipelineState.FAILED)
+    return replayed
+
+
+def project_run_ledger_replay(
+    entries: tuple[RunLedgerEntry, ...] | list[RunLedgerEntry],
+) -> RunLedgerReplayProjection:
+    """Project append-ordered ledger entries into a deterministic replay delta."""
+    projection = RunLedgerReplayProjection(replayed_entry_count=len(entries))
+    for entry in entries:
+        projection = _apply_replay_entry(projection, entry)
+    return projection
 
 
 @dataclass(frozen=True, slots=True)

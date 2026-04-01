@@ -19,6 +19,7 @@ from bioetl.application.composite.checkpoint import (
 )
 from bioetl.application.composite.checkpoint.service import CompositeCheckpointService
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.domain.composite.result import SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.exceptions import CheckpointConflictError, StorageError
@@ -141,6 +142,7 @@ def _make_run_ledger_entry(
     entry_id: str,
     manifest_id: str = "manifest-123",
     event_type: str = "stage_completed",
+    stage: str | None = None,
     occurred_at: datetime | None = None,
 ) -> RunLedgerEntry:
     return RunLedgerEntry(
@@ -148,6 +150,7 @@ def _make_run_ledger_entry(
         manifest_id=manifest_id,
         run_id=RunID(uuid4()),
         event_type=event_type,
+        stage=stage,
         occurred_at=occurred_at or FIXED_CHECKPOINT_TIME,
         status="completed",
     )
@@ -493,14 +496,16 @@ class TestLoadResume:
     async def test_resume_replays_only_ledger_entries_after_checkpoint_watermark(
         self,
     ) -> None:
-        """Resume advances only the checkpoint watermark from later ledger entries."""
+        """Resume replays only the suffix after the checkpoint watermark."""
         ledger_port = MagicMock()
         first_replayed = _make_run_ledger_entry(
             entry_id="entry-2",
+            stage="dependencies",
             occurred_at=datetime(2024, 6, 1, 10, 0, tzinfo=UTC),
         )
         second_replayed = _make_run_ledger_entry(
             entry_id="entry-3",
+            event_type="run_finished",
             occurred_at=datetime(2024, 6, 1, 11, 0, tzinfo=UTC),
         )
         ledger_port.list_entries_after.return_value = [first_replayed, second_replayed]
@@ -527,10 +532,64 @@ class TestLoadResume:
             "manifest-123",
             "entry-1",
         )
-        assert state.state == CompositePipelineState.ENRICHING
+        assert state.state == CompositePipelineState.COMPLETED
         assert state.seed_completed is True
         assert state.last_event_id == "entry-3"
         assert state.last_event_occurred_at == second_replayed.occurred_at
+
+    @pytest.mark.asyncio
+    async def test_resume_replay_preserves_snapshot_payloads_while_applying_flags(
+        self,
+    ) -> None:
+        """Resume replay should update coarse progress without fabricating payloads."""
+        ledger_port = MagicMock()
+        ledger_port.list_entries_after.return_value = [
+            _make_run_ledger_entry(
+                entry_id="entry-2",
+                stage="merge",
+                occurred_at=datetime(2024, 6, 1, 10, 0, tzinfo=UTC),
+            ),
+            _make_run_ledger_entry(
+                entry_id="entry-3",
+                event_type="run_failed",
+                occurred_at=datetime(2024, 6, 1, 10, 30, tzinfo=UTC),
+            ),
+        ]
+        svc, storage, _ = _make_service(
+            resume=True,
+            expected_manifest_id="manifest-123",
+            run_ledger_port=ledger_port,
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHMENT_COMPLETED,
+            seed_completed=True,
+            seed_result=SeedResult(
+                pipeline_name="chembl_activity",
+                records_extracted=100,
+                records_silver=95,
+                keys_generated=90,
+                duration_seconds=10.5,
+            ),
+            completed_enrichers=frozenset({"crossref"}),
+            enrichment_results={},
+            manifest_id="manifest-123",
+            last_event_id="entry-1",
+            last_event_occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+            merge_completed=False,
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        state = await svc.load()
+
+        assert state.state == CompositePipelineState.FAILED
+        assert state.seed_completed is True
+        assert state.seed_result == state_data.seed_result
+        assert state.completed_enrichers == frozenset({"crossref"})
+        assert state.merge_completed is True
+        assert state.last_event_id == "entry-3"
 
     @pytest.mark.asyncio
     async def test_resume_raises_conflict_when_ledger_watermark_is_missing(

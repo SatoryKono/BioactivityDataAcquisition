@@ -161,6 +161,92 @@ def _resolve_active_gold_schema(schema: object) -> object:
     return schema
 
 
+async def _write_single_target(
+    writer: GoldWriter,
+    *,
+    request: _GoldWriteRequest,
+) -> None:
+    """Execute one physical Gold write target through the standard pipeline."""
+    prepared = await writer._prepare_write_gold(
+        table_name=request.table_name,
+        records=request.records,
+        mode=request.mode,
+        schema=request.schema,
+        scd_config=request.scd_config,
+        ingestion_ts=request.ingestion_ts,
+    )
+    await writer._dispatch_write(
+        _GoldWriteDispatchContext(
+            prepared=prepared,
+            request=request,
+        )
+    )
+    await writer._post_write_gold(
+        _GoldWritePostwriteContext(
+            prepared=prepared,
+            records=request.records,
+            ingestion_ts=request.ingestion_ts,
+            run_id=request.run_id,
+            scd_config=request.scd_config,
+            silver_refs=request.silver_refs,
+            schema=request.schema,
+        )
+    )
+
+
+async def _write_dual_targets(
+    writer: GoldWriter,
+    *,
+    request: _GoldWriteRequest,
+    schema_policy: GoldSchemaPolicyByVersion,
+) -> None:
+    """Write all versioned Gold targets and fail on the first error."""
+    assert writer._contract_rollout_policy is not None  # guarded by caller
+
+    write_targets = resolve_write_targets(
+        request.table_name,
+        writer._contract_rollout_policy.write_versions,
+    )
+    for contract_version, physical_table in zip(
+        writer._contract_rollout_policy.write_versions,
+        write_targets,
+        strict=True,
+    ):
+        target_schema = schema_policy.for_version(contract_version)
+        if target_schema is None:
+            raise ValueError(
+                f"No Gold schema configured for contract version {contract_version}"
+            )
+        target_request = _GoldWriteRequest(
+            table_name=physical_table,
+            records=_project_records_for_gold_schema(
+                request.records,
+                schema=target_schema,
+            ),
+            schema=cast("DataFrameSchema", target_schema),
+            primary_keys=request.primary_keys,
+            mode=request.mode,
+            partition_cols=request.partition_cols,
+            scd_config=request.scd_config,
+            column_order=request.column_order,
+            ingestion_ts=request.ingestion_ts,
+            run_id=request.run_id,
+            silver_refs=request.silver_refs,
+        )
+        try:
+            await writer._write_single_target(request=target_request)
+        except (BioETLError, OSError, RuntimeError, ValueError):
+            writer.logger.error(
+                "gold_dual_write_failed",
+                logical_table=request.table_name,
+                failed_contract_version=contract_version,
+                failed_target_table=physical_table,
+                active_contract_version=writer._contract_rollout_policy.active_version,
+                write_versions=writer._contract_rollout_policy.write_versions,
+            )
+            raise
+
+
 class GoldWriter(
     GoldWriterValidationMixin,
     GoldWriterIOMixin,
@@ -315,75 +401,23 @@ class GoldWriter(
         request: _GoldWriteRequest,
         schema_policy: GoldSchemaPolicyByVersion,
     ) -> None:
-        """Write all versioned Gold targets and fail on the first error."""
-        assert self._contract_rollout_policy is not None  # guarded by caller
-
-        write_targets = resolve_write_targets(
-            request.table_name,
-            self._contract_rollout_policy.write_versions,
+        """Compatibility seam for direct test patching and dual-write orchestration."""
+        await _write_dual_targets(
+            self,
+            request=request,
+            schema_policy=schema_policy,
         )
-        for contract_version, physical_table in zip(
-            self._contract_rollout_policy.write_versions,
-            write_targets,
-            strict=True,
-        ):
-            target_schema = schema_policy.for_version(contract_version)
-            if target_schema is None:
-                raise ValueError(
-                    f"No Gold schema configured for contract version {contract_version}"
-                )
-            target_records = _project_records_for_gold_schema(
-                request.records,
-                schema=target_schema,
-            )
-            try:
-                prepared = await self._prepare_write_gold(
-                    table_name=physical_table,
-                    records=target_records,
-                    mode=request.mode,
-                    schema=cast("DataFrameSchema", target_schema),
-                    scd_config=request.scd_config,
-                    ingestion_ts=request.ingestion_ts,
-                )
-                await self._dispatch_write(
-                    _GoldWriteDispatchContext(
-                        prepared=prepared,
-                        request=_GoldWriteRequest(
-                            table_name=physical_table,
-                            records=target_records,
-                            schema=cast("DataFrameSchema", target_schema),
-                            primary_keys=request.primary_keys,
-                            mode=request.mode,
-                            partition_cols=request.partition_cols,
-                            scd_config=request.scd_config,
-                            column_order=request.column_order,
-                            ingestion_ts=request.ingestion_ts,
-                            run_id=request.run_id,
-                            silver_refs=request.silver_refs,
-                        ),
-                    )
-                )
-                await self._post_write_gold(
-                    _GoldWritePostwriteContext(
-                        prepared=prepared,
-                        records=target_records,
-                        ingestion_ts=request.ingestion_ts,
-                        run_id=request.run_id,
-                        scd_config=request.scd_config,
-                        silver_refs=request.silver_refs,
-                        schema=cast("DataFrameSchema", target_schema),
-                    )
-                )
-            except (BioETLError, OSError, RuntimeError, ValueError):
-                self.logger.error(
-                    "gold_dual_write_failed",
-                    logical_table=request.table_name,
-                    failed_contract_version=contract_version,
-                    failed_target_table=physical_table,
-                    active_contract_version=self._contract_rollout_policy.active_version,
-                    write_versions=self._contract_rollout_policy.write_versions,
-                )
-                raise
+
+    async def _write_single_target(
+        self,
+        *,
+        request: _GoldWriteRequest,
+    ) -> None:
+        """Compatibility seam for direct test patching and dual-write orchestration."""
+        await _write_single_target(
+            self,
+            request=request,
+        )
 
     async def _prepare_write_gold(
         self,

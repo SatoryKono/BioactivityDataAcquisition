@@ -8,16 +8,16 @@ from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import slice_ledger_entries_after
-from bioetl.domain.exceptions import StorageError
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
+from bioetl.infrastructure.errors import build_storage_error
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = ["FileRunLedgerStore"]
@@ -64,34 +64,16 @@ def _emit_ledger_append_metric(
     )
 
 
-def _build_storage_error(
-    *,
-    operation: str,
-    path: Path,
-    error: Exception,
-    **context: object,
-) -> StorageError:
-    """Normalize ledger persistence failures under the shared storage taxonomy."""
-    wrapped = StorageError(f"Run ledger {operation} failed for '{path}': {error}")
-    return cast(
-        "StorageError",
-        wrapped.with_context(
-            operation=operation,
-            path=str(path),
-            original_error=str(error),
-            **context,
-        ),
-    )
-
-
 def _truncate_ledger_to_offset(path: Path, *, offset: int) -> None:
     """Best-effort rollback to one known-good byte offset."""
     if not path.exists():
         return
-    with path.open("r+b") as handle:
-        handle.truncate(offset)
-        handle.flush()
-        os.fsync(handle.fileno())
+    file_descriptor = os.open(path, os.O_RDWR)
+    try:
+        os.ftruncate(file_descriptor, offset)
+        os.fsync(file_descriptor)
+    finally:
+        os.close(file_descriptor)
 
 
 def _append_jsonl_payload(path: Path, payload: bytes) -> int:
@@ -173,7 +155,8 @@ class FileRunLedgerStore(RunLedgerPort):
                 event_type=entry.event_type,
                 status="failed",
             )
-            raise _build_storage_error(
+            raise build_storage_error(
+                message_prefix="Run ledger",
                 operation="append",
                 path=ledger_path,
                 error=error,
@@ -197,12 +180,10 @@ class FileRunLedgerStore(RunLedgerPort):
             if not entries:
                 status = "miss"
             return entries
-        except StorageError:
-            status = "failed"
-            raise
         except (OSError, TypeError, ValueError) as error:
             status = "failed"
-            raise _build_storage_error(
+            raise build_storage_error(
+                message_prefix="Run ledger",
                 operation="list_entries",
                 path=self.base_path / f"{manifest_id}.jsonl",
                 error=error,
@@ -234,12 +215,10 @@ class FileRunLedgerStore(RunLedgerPort):
             if not entries:
                 status = "miss"
             return entries
-        except StorageError:
-            status = "failed"
-            raise
         except (OSError, TypeError, ValueError) as error:
             status = "failed"
-            raise _build_storage_error(
+            raise build_storage_error(
+                message_prefix="Run ledger",
                 operation="list_entries_by_run_id",
                 path=self.base_path / "_by_run_id" / f"{run_id}.txt",
                 error=error,
@@ -268,15 +247,13 @@ class FileRunLedgerStore(RunLedgerPort):
                 status = "miss"
                 return []
             return list(slice_ledger_entries_after(entries, after_entry_id))
-        except StorageError:
-            status = "failed"
-            raise
         except ValueError:
             status = "failed"
             raise
         except (OSError, TypeError) as error:
             status = "failed"
-            raise _build_storage_error(
+            raise build_storage_error(
+                message_prefix="Run ledger",
                 operation="list_entries_after",
                 path=self.base_path / f"{manifest_id}.jsonl",
                 error=error,

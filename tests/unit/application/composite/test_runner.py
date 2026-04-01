@@ -317,6 +317,14 @@ class TestFSMSeedStateTransitions:
         run_ledger_service.record_run_started.assert_called_once_with()
         assert [
             call.kwargs["stage"]
+            for call in run_ledger_service.record_stage_started.call_args_list
+        ] == [
+            "seed",
+            "enrichment",
+            "merge",
+        ]
+        assert [
+            call.kwargs["stage"]
             for call in run_ledger_service.record_stage_completed.call_args_list
         ] == [
             "seed",
@@ -420,6 +428,10 @@ class TestFSMSeedFailure:
             await runner.run()
 
         run_ledger_service.record_run_started.assert_called_once_with()
+        assert [
+            call.kwargs["stage"]
+            for call in run_ledger_service.record_stage_started.call_args_list
+        ] == ["seed"]
         run_ledger_service.record_run_failed.assert_called_once()
 
 

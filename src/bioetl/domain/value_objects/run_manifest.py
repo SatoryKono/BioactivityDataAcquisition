@@ -36,7 +36,7 @@ def _require_non_empty(value: str, field_name: str) -> str:
 
 @dataclass(frozen=True, slots=True)
 class RunManifest:
-    """Deprecated minimal run descriptor, kept only as a transitional artifact."""
+    """Deprecated minimal run descriptor, not the canonical runtime context."""
 
     run_id: str
     pipeline_name: str

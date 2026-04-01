@@ -1,0 +1,131 @@
+"""Unit tests for deterministic run-ledger replay projection."""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from uuid import UUID
+
+import pytest
+
+from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.control_plane.run_ledger import (
+    RunLedgerEntry,
+    project_run_ledger_replay,
+)
+from bioetl.domain.types import RunID
+
+TEST_RUN_ID = RunID(UUID("12345678-1234-5678-1234-567812345678"))
+
+
+def _entry(
+    *,
+    entry_id: str,
+    event_type: str,
+    stage: str | None = None,
+    occurred_at: datetime,
+) -> RunLedgerEntry:
+    return RunLedgerEntry(
+        entry_id=entry_id,
+        manifest_id="manifest-123",
+        run_id=TEST_RUN_ID,
+        event_type=event_type,
+        stage=stage,
+        occurred_at=occurred_at,
+    )
+
+
+@pytest.mark.unit
+class TestRunLedgerReplayProjection:
+    """Replay should produce deterministic coarse-grained checkpoint deltas."""
+
+    def test_projects_completed_stages_and_terminal_state_in_append_order(self) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id="entry-1",
+                    event_type="stage_completed",
+                    stage="seed",
+                    occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+                ),
+                _entry(
+                    entry_id="entry-2",
+                    event_type="stage_completed",
+                    stage="dependencies",
+                    occurred_at=datetime(2024, 6, 1, 10, 0, tzinfo=UTC),
+                ),
+                _entry(
+                    entry_id="entry-3",
+                    event_type="stage_completed",
+                    stage="enrichment",
+                    occurred_at=datetime(2024, 6, 1, 11, 0, tzinfo=UTC),
+                ),
+                _entry(
+                    entry_id="entry-4",
+                    event_type="run_finished",
+                    occurred_at=datetime(2024, 6, 1, 12, 0, tzinfo=UTC),
+                ),
+            ]
+        )
+
+        assert projection.state == CompositePipelineState.COMPLETED
+        assert projection.seed_completed is True
+        assert projection.merge_completed is None
+        assert projection.last_event_id == "entry-4"
+        assert projection.last_event_occurred_at == datetime(
+            2024,
+            6,
+            1,
+            12,
+            0,
+            tzinfo=UTC,
+        )
+        assert projection.replayed_entry_count == 4
+
+    def test_projects_merge_completion_without_fabricating_terminal_state(self) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id="entry-merge",
+                    event_type="stage_completed",
+                    stage="merge",
+                    occurred_at=datetime(2024, 6, 1, 13, 0, tzinfo=UTC),
+                )
+            ]
+        )
+
+        assert projection.state == CompositePipelineState.MERGING
+        assert projection.seed_completed is None
+        assert projection.merge_completed is True
+        assert projection.last_event_id == "entry-merge"
+
+    def test_ignores_non_progress_events_except_for_watermark_advance(self) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id="entry-1",
+                    event_type="run_started",
+                    occurred_at=datetime(2024, 6, 1, 8, 0, tzinfo=UTC),
+                ),
+                _entry(
+                    entry_id="entry-2",
+                    event_type="run_shutdown",
+                    occurred_at=datetime(2024, 6, 1, 8, 30, tzinfo=UTC),
+                ),
+            ]
+        )
+
+        assert projection.state is None
+        assert projection.seed_completed is None
+        assert projection.merge_completed is None
+        assert projection.last_event_id == "entry-2"
+        assert projection.replayed_entry_count == 2
+
+    def test_empty_projection_has_no_state_delta(self) -> None:
+        projection = project_run_ledger_replay([])
+
+        assert projection.state is None
+        assert projection.seed_completed is None
+        assert projection.merge_completed is None
+        assert projection.last_event_id is None
+        assert projection.last_event_occurred_at is None
+        assert projection.replayed_entry_count == 0

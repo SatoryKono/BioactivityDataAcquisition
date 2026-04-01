@@ -17,6 +17,16 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError
 
 
+def _record_dependencies_stage_started_if_supported(
+    host: _CompositeRunnerStageHostProtocol,
+    dependency_pipeline_names: list[str],
+) -> None:
+    """Record optional dependency-stage start event when host exposes callback."""
+    record = getattr(host, "_record_dependencies_stage_started", None)
+    if callable(record):
+        record(dependency_pipeline_names)
+
+
 async def start_dependencies_phase(
     host: _CompositeRunnerStageHostProtocol,
     state: CompositeCheckpointState,
@@ -32,6 +42,7 @@ async def start_dependencies_phase(
         count=len(dependency_pipeline_names),
     )
     await host._call_save_checkpoint_safe(next_state, "dependencies_running")
+    _record_dependencies_stage_started_if_supported(host, dependency_pipeline_names)
     host._logger.info(
         PipelineEvent.phase_started("dependencies"),
         composite=host._config.name,

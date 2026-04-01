@@ -103,6 +103,39 @@ def test_record_manifest_created_appends_first_control_plane_event() -> None:
     assert store.list_entries("manifest-1") == [entry]
 
 
+def test_record_stage_started_captures_stage_and_details() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-stage-started",
+    )
+
+    entry = service.record_stage_started(
+        stage="Seed",
+        details={"count": 1},
+    )
+
+    assert entry.event_type == "stage_started"
+    assert entry.event_family == "pipeline.phase"
+    assert entry.status == "running"
+    assert entry.stage == "seed"
+    assert entry.details == {
+        "count": 1,
+        "_diagnostic": {
+            "contract_version": "v1",
+            "event_type": "stage_started",
+            "event_family": "pipeline.phase",
+            "manifest_id": "manifest-1",
+            "run_id": str(run_id),
+            "status": "running",
+            "stage": "seed",
+        },
+    }
+
+
 def test_record_run_failed_captures_message_and_metrics() -> None:
     run_id = RunID(uuid4())
     store = _InMemoryRunLedgerStore()
@@ -150,7 +183,7 @@ def test_record_stage_completed_captures_stage_and_metrics() -> None:
     )
 
     entry = service.record_stage_completed(
-        stage="postrun",
+        stage="Postrun",
         metrics_snapshot={"records_silver": 42},
         details={"result": "ok"},
     )

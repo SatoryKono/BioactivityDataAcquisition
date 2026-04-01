@@ -43,6 +43,7 @@ from bioetl.application.core.runner_flow import (
     record_run_shutdown,
     record_run_started,
     record_stage_completed,
+    record_stage_started,
     resolve_execution_offset,
 )
 
@@ -321,6 +322,10 @@ class PipelineRunner:
             await self._postrun_service.cleanup(self._tracer)
         finally:
             self._close_metrics()
+
+    def _record_stage_started(self, stage: str) -> None:
+        """Append stage_started ledger entry."""
+        record_stage_started(self, stage)
 
     def _record_stage_completed(self, stage: str) -> None:
         """Append stage_completed ledger entry."""

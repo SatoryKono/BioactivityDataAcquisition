@@ -112,7 +112,7 @@ cat data/output/control/run_manifest/_by_run_id/<run_id>.txt
 cat data/output/control/run_manifest/<manifest_id>.json
 tail -n 20 data/output/control/run_ledger/<manifest_id>.jsonl
 cat data/output/control/run_ledger/_by_run_id/<run_id>.txt
-rg -n '"event_type":"(manifest_created|run_started|stage_completed|artifact_published|run_finished|run_failed|run_shutdown|dq_policy_applied)"' \
+rg -n '"event_type":"(manifest_created|run_started|stage_started|stage_completed|artifact_published|run_finished|run_failed|run_shutdown|dq_policy_applied)"' \
   data/output/control/run_ledger/<manifest_id>.jsonl
 rg -n '"_diagnostic"|"effective_config_hash"|"contract_ref"|"dq_policy_ref"|"effective_config_artifact_id"' \
   data/output/control/run_ledger/<manifest_id>.jsonl
@@ -147,6 +147,7 @@ For a healthy successful run with ledger enabled, expect the baseline event fami
 
 - `manifest_created`
 - `run_started`
+- one or more `stage_started`
 - one or more `stage_completed`
 - zero or more `artifact_published`
 - `run_finished`

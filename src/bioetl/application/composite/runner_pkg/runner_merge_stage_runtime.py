@@ -26,6 +26,15 @@ __all__ = [
 ]
 
 
+def _record_merge_stage_started_if_supported(
+    host: _CompositeRunnerMergeStageHostProtocol,
+) -> None:
+    """Record optional merge-stage start event when host exposes callback."""
+    record = getattr(host, "_record_merge_stage_started", None)
+    if callable(record):
+        record()
+
+
 def _record_merge_stage_completed_if_supported(
     host: _CompositeRunnerMergeStageHostProtocol,
     merge_result: MergeResult,
@@ -61,12 +70,13 @@ async def start_merge_phase(
 ) -> CompositeCheckpointState:
     """Transition checkpoint/FSM to MERGING and persist checkpoint."""
     merging_state = transition_to_merging_state(host, state)
+    await host._call_save_checkpoint_safe(merging_state, "merging")
+    _record_merge_stage_started_if_supported(host)
     host._logger.info(
         PipelineEvent.phase_started("merge"),
         composite=host._config.name,
         run_id=host._run_id_str,
     )
-    await host._call_save_checkpoint_safe(merging_state, "merging")
     return merging_state
 
 

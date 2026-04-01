@@ -19,6 +19,16 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import InvalidStateError
 
 
+def _record_enrichment_stage_started_if_supported(
+    host: _CompositeRunnerStageEnrichmentHostProtocol,
+    enricher_names: list[str],
+) -> None:
+    """Record optional enrichment-stage start event when host exposes callback."""
+    record = getattr(host, "_record_enrichment_stage_started", None)
+    if callable(record):
+        record(enricher_names)
+
+
 class _CompositeRunnerStageEnrichmentMixin:
     """Host mixin for enrichment phase execution and final transition."""
 
@@ -47,6 +57,7 @@ class _CompositeRunnerStageEnrichmentMixin:
             count=len(context.enrichers_to_run),
         )
         await self._call_save_checkpoint_safe(state, "enrichment_running")
+        _record_enrichment_stage_started_if_supported(self, context.enricher_names)
         self._logger.info(
             PipelineEvent.phase_started("enrichment"),
             composite=self._config.name,
@@ -157,6 +168,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Emit ENRICHING transition for the no-enrichers path."""
+        _record_enrichment_stage_started_if_supported(self, [])
         return self._transition_state_with_fsm_log(
             state,
             CompositePipelineState.ENRICHING,

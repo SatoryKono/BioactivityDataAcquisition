@@ -13,6 +13,8 @@ __all__ = [
 
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
+
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle.checkpoint_manager import (
@@ -27,6 +29,13 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
 
 
+_PREFLIGHT_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[0]
+_PREPARE_MEDALLION_LAYERS_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[1]
+_EXECUTE_PIPELINE_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[2]
+_POSTRUN_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[3]
+_CHECKPOINT_FINALIZE_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[4]
+
+
 class _PipelineRunnerExecutionHostProtocol(Protocol):
     _config: PipelineConfig
     _runtime: RuntimeConfig
@@ -39,27 +48,34 @@ class _PipelineRunnerExecutionHostProtocol(Protocol):
 
     async def _resolve_execution_offset(self) -> int | None: ...
 
+    def _record_stage_started(self, stage: str) -> None: ...
+
     def _record_stage_completed(self, stage: str) -> None: ...
 
 
 async def run_managed_pipeline(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Run the validated pipeline lifecycle within managed contexts."""
+    host._record_stage_started(_PREFLIGHT_STAGE_NAME)
     await validate_infrastructure(host)
-    host._record_stage_completed("preflight")
+    host._record_stage_completed(_PREFLIGHT_STAGE_NAME)
+    host._record_stage_started(_PREPARE_MEDALLION_LAYERS_STAGE_NAME)
     await prepare_medallion_layers(host)
-    host._record_stage_completed("prepare_medallion_layers")
+    host._record_stage_completed(_PREPARE_MEDALLION_LAYERS_STAGE_NAME)
     await run_execution_cycle(host)
 
 
 async def run_execution_cycle(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Execute extraction, postrun, and checkpoint finalization."""
     offset = await host._resolve_execution_offset()
+    host._record_stage_started(_EXECUTE_PIPELINE_STAGE_NAME)
     await execute_pipeline(host, offset=offset)
-    host._record_stage_completed("execute_pipeline")
+    host._record_stage_completed(_EXECUTE_PIPELINE_STAGE_NAME)
+    host._record_stage_started(_POSTRUN_STAGE_NAME)
     await run_postrun_phase(host)
-    host._record_stage_completed("postrun")
+    host._record_stage_completed(_POSTRUN_STAGE_NAME)
+    host._record_stage_started(_CHECKPOINT_FINALIZE_STAGE_NAME)
     await host._checkpoint_manager.delete_checkpoint()
-    host._record_stage_completed("checkpoint_finalize")
+    host._record_stage_completed(_CHECKPOINT_FINALIZE_STAGE_NAME)
 
 
 async def execute_pipeline(

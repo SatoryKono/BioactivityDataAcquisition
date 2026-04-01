@@ -31,5 +31,10 @@ class RunLedgerPort(Protocol):
         manifest_id: str,
         after_entry_id: str | None,
     ) -> list[RunLedgerEntry]:
-        """Return append-ordered entries strictly after one watermark entry."""
+        """Return replay-ready entries strictly after one append watermark.
+
+        Implementations must preserve append order so resume replay remains
+        deterministic. When ``after_entry_id`` is not ``None`` and the
+        watermark cannot be found, implementations should raise ``ValueError``.
+        """
         ...
