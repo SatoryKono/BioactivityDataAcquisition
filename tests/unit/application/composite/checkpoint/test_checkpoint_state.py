@@ -147,6 +147,15 @@ class TestDefaultStateCreation:
         assert state.composite_name == "my_composite"
         assert state.run_id == "run-abc-123"
 
+    def test_default_replay_watermark_is_empty(self) -> None:
+        """Replay watermark fields default to None for fresh snapshots."""
+        state = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-001",
+        )
+        assert state.last_event_id is None
+        assert state.last_event_occurred_at is None
+
 
 # ---------------------------------------------------------------------------
 # 2. with_seed_completed
@@ -457,6 +466,8 @@ class TestToDict:
             "contract_version",
             "manifest_id",
             "composite_run_identity",
+            "last_event_id",
+            "last_event_occurred_at",
             "created_at",
             "updated_at",
         }
@@ -536,19 +547,28 @@ class TestToDict:
         assert d["enrichment_results"]["crossref"]["records_enriched"] == 60
 
     def test_datetimes_serialized_as_isoformat(self) -> None:
-        """created_at and updated_at are serialized as ISO-8601 strings."""
+        """created_at, updated_at, and watermark timestamps serialize as ISO-8601."""
         dt = datetime(2024, 3, 15, 9, 30, 0, tzinfo=UTC)
         state = CompositeCheckpointState(
-            composite_name="c", run_id="r", created_at=dt, updated_at=dt
+            composite_name="c",
+            run_id="r",
+            last_event_id="evt-123",
+            last_event_occurred_at=dt,
+            created_at=dt,
+            updated_at=dt,
         )
         d = state.to_dict()
+        assert d["last_event_id"] == "evt-123"
+        assert d["last_event_occurred_at"] == dt.isoformat()
         assert d["created_at"] == dt.isoformat()
         assert d["updated_at"] == dt.isoformat()
 
     def test_none_datetimes_serialized_as_none(self) -> None:
-        """None timestamps produce None in the dict."""
+        """None timestamps and watermark fields produce None in the dict."""
         state = CompositeCheckpointState(composite_name="c", run_id="r")
         d = state.to_dict()
+        assert d["last_event_id"] is None
+        assert d["last_event_occurred_at"] is None
         assert d["created_at"] is None
         assert d["updated_at"] is None
 
@@ -592,6 +612,8 @@ class TestFromDict:
             completed_enrichers=frozenset({"crossref"}),
             enrichment_results={"crossref": er},
             manifest_id="manifest-123",
+            last_event_id="evt-123",
+            last_event_occurred_at=updated,
             created_at=created,
             updated_at=updated,
         )
@@ -609,6 +631,8 @@ class TestFromDict:
         assert "crossref" in restored.completed_enrichers
         assert restored.enrichment_results["crossref"].enricher_name == er.enricher_name
         assert restored.manifest_id == "manifest-123"
+        assert restored.last_event_id == "evt-123"
+        assert restored.last_event_occurred_at == updated
         assert restored.created_at == created
         assert restored.updated_at == updated
 
@@ -624,6 +648,8 @@ class TestFromDict:
         assert state.seed_result is None
         assert state.completed_dependencies == frozenset()
         assert state.completed_enrichers == frozenset()
+        assert state.last_event_id is None
+        assert state.last_event_occurred_at is None
 
     def test_invalid_state_value_falls_back_to_not_started(self) -> None:
         """Corrupted state value produces NOT_STARTED without raising."""
@@ -662,6 +688,19 @@ class TestFromDict:
         state = CompositeCheckpointState.from_dict(data)
         assert state.updated_at is not None
         assert state.updated_at.tzinfo is UTC
+
+    def test_naive_last_event_occurred_at_gets_utc(self) -> None:
+        """Naive ISO datetime string for watermark timestamp gains UTC timezone."""
+        data = {
+            "composite_name": "c",
+            "run_id": "r",
+            "last_event_id": "evt-123",
+            "last_event_occurred_at": "2024-06-15T10:00:00",
+        }
+        state = CompositeCheckpointState.from_dict(data)
+        assert state.last_event_id == "evt-123"
+        assert state.last_event_occurred_at is not None
+        assert state.last_event_occurred_at.tzinfo is UTC
 
     def test_dependency_status_deserialized(self) -> None:
         """Dependency status string is converted back to DependencyStatus enum."""

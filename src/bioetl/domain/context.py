@@ -1,4 +1,15 @@
-"""Domain context objects."""
+"""Domain execution context objects.
+
+The runtime model is intentionally split:
+- ``PipelineRunContext`` carries launch-time execution parameters used to
+  assemble and start a pipeline run.
+- ``PipelineContext`` carries in-run processing state used by record, batch,
+  and write paths after launch-time resolution is complete.
+
+Control-plane provenance is modeled separately via
+``bioetl.domain.control_plane.run_manifest.RunManifest`` and must not be folded
+back into a universal runtime manifest object.
+"""
 
 from __future__ import annotations
 
@@ -27,6 +38,14 @@ __all__ = [
 def _now_utc() -> datetime:
     """Factory function for default started_at timestamp."""
     return datetime.now(UTC)
+
+
+def _normalize_correlation_value(value: object | None) -> str | None:
+    """Normalize one optional correlation field to a non-empty string."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
 
 
 def _validate_dq_contract_alignment(
@@ -70,7 +89,7 @@ def _validate_manifest_contract_alignment(
 
 @dataclass(frozen=True, slots=True)
 class PipelineContext:
-    """Context object for a pipeline run."""
+    """In-run processing context for record, batch, and write execution paths."""
 
     run_id: RunID
     run_type: RunType
@@ -126,7 +145,7 @@ class PipelineContext:
 
 @dataclass(frozen=True, slots=True)
 class PipelineRunContext:
-    """Context object encapsulating pipeline launch parameters."""
+    """Launch/execution descriptor used to configure and start a pipeline run."""
 
     pipeline_name: str
     run_id: RunID
@@ -176,6 +195,24 @@ class PipelineRunContext:
     def vacuum_enabled_override(self) -> bool | None:
         """Return the explicit vacuum override, if one was provided."""
         return self.vacuum.enabled
+
+    def log_correlation_fields(self) -> dict[str, str]:
+        """Return the mandatory bound logging fields for one pipeline run.
+
+        The application-layer logging contract requires:
+        - ``run_id`` always
+        - ``pipeline`` and ``pipeline_name`` always
+        - ``manifest_id`` when available
+        """
+        fields = {
+            "run_id": str(self.run_id),
+            "pipeline": self.pipeline_name,
+            "pipeline_name": self.pipeline_name,
+        }
+        manifest_id = _normalize_correlation_value(self.manifest_id)
+        if manifest_id is not None:
+            fields["manifest_id"] = manifest_id
+        return fields
 
     def validate_contract_consistency(self) -> list[str]:
         """Validate contract identity consistency across runtime components.

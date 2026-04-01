@@ -441,7 +441,9 @@ class TestPipelineRunnerServiceObservability:
         mock_logger.bind.assert_called_once()
         bind_kwargs = mock_logger.bind.call_args.kwargs
         assert bind_kwargs["pipeline"] == "test_pipeline"
+        assert bind_kwargs["pipeline_name"] == "test_pipeline"
         assert bind_kwargs["run_id"] == result.run_id
+        assert "manifest_id" not in bind_kwargs
         mock_logger.info.assert_any_call(
             "Starting pipeline run",
             run_type="incremental",

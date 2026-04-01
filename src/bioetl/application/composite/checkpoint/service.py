@@ -16,7 +16,7 @@ from bioetl.application.composite.checkpoint.state import CompositeCheckpointSta
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort
+    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, RunLedgerPort
 
 
 class CompositeCheckpointService:
@@ -36,6 +36,7 @@ class CompositeCheckpointService:
         expected_contract_ref: str | None = None,
         expected_contract_version: str | None = None,
         expected_manifest_id: str | None = None,
+        run_ledger_port: RunLedgerPort | None = None,
         load_service_factory: Callable[
             ..., CompositeCheckpointLoadService
         ] = CompositeCheckpointLoadService,
@@ -72,6 +73,7 @@ class CompositeCheckpointService:
             expected_context=self._expected_checkpoint_context,
             checkpoint_filename=self._checkpoint_filename,
             glob_pattern=self._glob_pattern_value,
+            run_ledger_port=run_ledger_port,
         )
         self._persistence_service = persistence_service_factory(
             composite_name=composite_name,

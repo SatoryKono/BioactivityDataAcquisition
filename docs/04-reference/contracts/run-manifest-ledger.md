@@ -37,6 +37,22 @@ The current code owners / source-of-truth seams are:
 - `src/bioetl/infrastructure/config/_base.py`
 - `src/bioetl/infrastructure/control_plane/`
 
+## Execution Context Boundary
+
+The published control-plane contract does not replace BioETL runtime execution
+contexts.
+
+- `PipelineRunContext` remains the canonical launch/execution descriptor used
+  by composition/runtime assembly before a runner starts.
+- `PipelineContext` remains the canonical in-run processing context used by
+  record, batch, write, and post-write flows.
+- `RunManifest` remains an immutable provenance/control-plane artifact linked
+  to runtime execution via `manifest_id`.
+
+This means the supported model is deliberately split. BioETL does not define
+one universal manifest object that serves as launch descriptor, in-run context,
+and provenance artifact at the same time.
+
 ## Storage Layout
 
 File-backed control-plane persistence uses the following canonical paths:

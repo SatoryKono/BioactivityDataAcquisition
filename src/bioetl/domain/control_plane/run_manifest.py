@@ -1,4 +1,10 @@
-"""Control-plane run manifest models."""
+"""Control-plane run manifest models.
+
+These immutable artifacts capture provenance, reproducibility, and audit data
+for a launched run. They complement runtime execution contexts, but do not
+replace ``PipelineRunContext`` or ``PipelineContext`` as the canonical runtime
+descriptors.
+"""
 
 from __future__ import annotations
 
@@ -99,7 +105,11 @@ class RunCodeProvenance:
 
 @dataclass(frozen=True, slots=True)
 class RunManifest:
-    """Immutable control-plane snapshot describing one launched run."""
+    """Immutable provenance snapshot for one launched run.
+
+    This manifest is a control-plane artifact. It is not the universal runtime
+    execution descriptor used by runner, processing, or writer paths.
+    """
 
     manifest_id: str
     execution_fingerprint: str

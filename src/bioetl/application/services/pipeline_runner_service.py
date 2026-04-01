@@ -120,9 +120,11 @@ class PipelineRunnerService:
         effective_options = self._merge_options(options, dry_run)
         self._ensure_pipeline_exists(pipeline_name)
         effective_run_id: RunID = cast(RunID, run_id or uuid4())
+        context = self._build_context(
+            pipeline_name, effective_run_id, effective_options
+        )
         run_logger = self._create_run_logger(
-            pipeline_name=pipeline_name,
-            run_id=effective_run_id,
+            context=context,
             options=effective_options,
         )
         dry_run_result = self._maybe_dry_run_result(
@@ -135,9 +137,6 @@ class PipelineRunnerService:
         if dry_run_result is not None:
             return dry_run_result
 
-        context = self._build_context(
-            pipeline_name, effective_run_id, effective_options
-        )
         runner = self._require_execution_runner(self.runner_factory.create(context))
         return await self._execute_pipeline(
             runner=runner,
@@ -157,14 +156,10 @@ class PipelineRunnerService:
     def _create_run_logger(
         self,
         *,
-        pipeline_name: str,
-        run_id: RunID,
+        context: PipelineRunContext,
         options: RunOptions,
     ) -> LoggerPort:
-        run_logger = self.logger.bind(
-            run_id=str(run_id),
-            pipeline=pipeline_name,
-        )
+        run_logger = self.logger.bind(**context.log_correlation_fields())
         run_logger.info(
             "Starting pipeline run",
             run_type=options.run_type,

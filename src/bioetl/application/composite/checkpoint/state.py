@@ -37,6 +37,8 @@ class CompositeCheckpointState:
     contract_version: str = "1.0.0"
     manifest_id: str = ""
     composite_run_identity: str = ""
+    last_event_id: str | None = None
+    last_event_occurred_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

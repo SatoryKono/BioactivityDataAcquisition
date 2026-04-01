@@ -86,14 +86,23 @@ class BatchWriterIOMixin:
         Returns:
             SilverWriteResult with Delta table version and row counts, or None if skipped.
         """
-        del ingestion_ts
         await self._validate_lock("write_silver")
         span = self._start_span("write_silver", "silver", len(records), batch_id)
 
         try:
             batch_id_str = str(batch_id)
+            run_id = str(self._context.run_id)
+            run_type = str(getattr(self._context.run_type, "value", self._context.run_type))
+            ingestion_ts_value = ingestion_ts.isoformat()
             for record in records:
-                record["_source_batch_id"] = batch_id_str
+                if not record.get("_source_batch_id"):
+                    record["_source_batch_id"] = batch_id_str
+                if not record.get("_run_id"):
+                    record["_run_id"] = run_id
+                if not record.get("_run_type"):
+                    record["_run_type"] = run_type
+                if not record.get("_ingestion_ts"):
+                    record["_ingestion_ts"] = ingestion_ts_value
 
             available_cols = (
                 list(self._silver_schema.names)

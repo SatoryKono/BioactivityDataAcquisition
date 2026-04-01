@@ -43,6 +43,12 @@ def to_dict(checkpoint_state: CompositeCheckpointState) -> dict[str, object]:
         "contract_version": checkpoint_state.contract_version,
         "manifest_id": checkpoint_state.manifest_id,
         "composite_run_identity": checkpoint_state.composite_run_identity,
+        "last_event_id": checkpoint_state.last_event_id,
+        "last_event_occurred_at": (
+            checkpoint_state.last_event_occurred_at.isoformat()
+            if checkpoint_state.last_event_occurred_at
+            else None
+        ),
         "created_at": (
             checkpoint_state.created_at.isoformat()
             if checkpoint_state.created_at
@@ -78,6 +84,8 @@ def from_dict(data: JsonDict) -> CompositeCheckpointState:
         contract_version=data.get("contract_version", "1.0.0"),
         manifest_id=data.get("manifest_id", ""),
         composite_run_identity=data.get("composite_run_identity", ""),
+        last_event_id=_parse_optional_string(data.get("last_event_id")),
+        last_event_occurred_at=_parse_timestamp(data.get("last_event_occurred_at")),
         created_at=_parse_timestamp(data.get("created_at")),
         updated_at=_parse_timestamp(data.get("updated_at")),
     )
@@ -198,6 +206,12 @@ def _parse_timestamp(value: object) -> datetime | None:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=UTC)
     return parsed
+
+
+def _parse_optional_string(value: object) -> str | None:
+    if not isinstance(value, str) or not value:
+        return None
+    return value
 
 
 def _parse_state(value: object) -> CompositePipelineState:

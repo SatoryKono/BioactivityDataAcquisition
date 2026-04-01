@@ -240,6 +240,34 @@ class TestPipelineContextEquality:
 class TestRunContextValidationAndProperties:
     """Coverage tests for context dataclasses used by orchestration."""
 
+    def test_pipeline_run_context_log_correlation_fields_without_manifest(self) -> None:
+        ctx = PipelineRunContext(
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+        )
+
+        assert ctx.log_correlation_fields() == {
+            "run_id": str(ctx.run_id),
+            "pipeline": "chembl_activity",
+            "pipeline_name": "chembl_activity",
+        }
+
+    def test_pipeline_run_context_log_correlation_fields_with_manifest(self) -> None:
+        ctx = PipelineRunContext(
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            manifest_id="manifest-123",
+        )
+
+        assert ctx.log_correlation_fields() == {
+            "run_id": str(ctx.run_id),
+            "pipeline": "chembl_activity",
+            "pipeline_name": "chembl_activity",
+            "manifest_id": "manifest-123",
+        }
+
     def test_cached_bronze_from_options_and_validation(self) -> None:
         ctx = CachedBronzeContext.from_options(path="/tmp/bronze", date="2026-01-20")
 

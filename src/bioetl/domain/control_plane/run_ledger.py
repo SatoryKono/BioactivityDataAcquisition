@@ -8,7 +8,7 @@ from uuid import UUID
 
 from bioetl.domain.types import RunID
 
-__all__ = ["RunLedgerEntry"]
+__all__ = ["RunLedgerEntry", "slice_ledger_entries_after"]
 
 _LEDGER_EVENT_FAMILY_EXACT: dict[str, str] = {
     "manifest_created": "diagnostic",
@@ -79,6 +79,21 @@ def infer_ledger_event_family(event_type: str) -> str:
     if prefix_match is not None:
         return prefix_match
     return "diagnostic"
+
+
+def slice_ledger_entries_after(
+    entries: list[RunLedgerEntry],
+    after_entry_id: str | None,
+) -> tuple[RunLedgerEntry, ...]:
+    """Return the append-ordered suffix strictly after one watermark entry."""
+    if after_entry_id is None:
+        return tuple(entries)
+    for index, entry in enumerate(entries):
+        if entry.entry_id == after_entry_id:
+            return tuple(entries[index + 1 :])
+    raise ValueError(
+        f"Ledger watermark entry_id {after_entry_id!r} was not found in append order"
+    )
 
 
 @dataclass(frozen=True, slots=True)

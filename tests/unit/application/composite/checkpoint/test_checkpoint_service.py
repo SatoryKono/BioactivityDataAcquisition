@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 from unittest.mock import MagicMock
 
 import pytest
@@ -19,7 +20,9 @@ from bioetl.application.composite.checkpoint import (
 from bioetl.application.composite.checkpoint.service import CompositeCheckpointService
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.exceptions import CheckpointConflictError, StorageError
+from bioetl.domain.types import RunID
 
 
 # ---------------------------------------------------------------------------
@@ -75,6 +78,7 @@ def _make_service(
     expected_contract_ref: str | None = None,
     expected_contract_version: str | None = None,
     expected_manifest_id: str | None = None,
+    run_ledger_port: MagicMock | None = None,
 ) -> tuple[CompositeCheckpointService, MagicMock, MagicMock]:
     """Convenience factory — returns (service, storage_mock, logger_mock)."""
     s = storage if storage is not None else _make_storage()
@@ -89,6 +93,7 @@ def _make_service(
         expected_contract_ref=expected_contract_ref,
         expected_contract_version=expected_contract_version,
         expected_manifest_id=expected_manifest_id,
+        run_ledger_port=run_ledger_port,
     )
     return svc, s, lg
 
@@ -99,6 +104,8 @@ def _serialized_state(
     state: CompositePipelineState = CompositePipelineState.SEED_COMPLETED,
     seed_completed: bool = True,
     with_seed_result: bool = True,
+    last_event_id: str | None = None,
+    last_event_occurred_at: str | None = None,
 ) -> str:
     """Return a JSON string that can be returned by storage.read()."""
     sr = None
@@ -121,10 +128,29 @@ def _serialized_state(
         "dependency_results": {},
         "completed_enrichers": [],
         "enrichment_results": {},
+        "last_event_id": last_event_id,
+        "last_event_occurred_at": last_event_occurred_at,
         "created_at": "2024-06-01T08:00:00+00:00",
         "updated_at": "2024-06-01T09:00:00+00:00",
     }
     return json.dumps(data)
+
+
+def _make_run_ledger_entry(
+    *,
+    entry_id: str,
+    manifest_id: str = "manifest-123",
+    event_type: str = "stage_completed",
+    occurred_at: datetime | None = None,
+) -> RunLedgerEntry:
+    return RunLedgerEntry(
+        entry_id=entry_id,
+        manifest_id=manifest_id,
+        run_id=RunID(uuid4()),
+        event_type=event_type,
+        occurred_at=occurred_at or FIXED_CHECKPOINT_TIME,
+        status="completed",
+    )
 
 
 def _enriched_serialized_state(
@@ -279,6 +305,29 @@ class TestLoadResume:
 
         assert state.state == CompositePipelineState.SEED_COMPLETED
         assert state.seed_completed is True
+
+    @pytest.mark.asyncio
+    async def test_resume_preserves_replay_watermark(self) -> None:
+        """load(resume=True) preserves persisted replay watermark fields."""
+        svc, storage, _ = _make_service(resume=True)
+        storage.exists.return_value = True
+        storage.read.return_value = _serialized_state(
+            state=CompositePipelineState.SEED_COMPLETED,
+            last_event_id="evt-123",
+            last_event_occurred_at="2024-06-01T09:30:00+00:00",
+        )
+
+        state = await svc.load()
+
+        assert state.last_event_id == "evt-123"
+        assert state.last_event_occurred_at == datetime(
+            2024,
+            6,
+            1,
+            9,
+            30,
+            tzinfo=UTC,
+        )
 
     @pytest.mark.asyncio
     async def test_resume_returns_fresh_when_no_checkpoint_exists(self) -> None:
@@ -440,6 +489,75 @@ class TestLoadResume:
         with pytest.raises(CheckpointConflictError):
             await svc.load()
 
+    @pytest.mark.asyncio
+    async def test_resume_replays_only_ledger_entries_after_checkpoint_watermark(
+        self,
+    ) -> None:
+        """Resume advances only the checkpoint watermark from later ledger entries."""
+        ledger_port = MagicMock()
+        first_replayed = _make_run_ledger_entry(
+            entry_id="entry-2",
+            occurred_at=datetime(2024, 6, 1, 10, 0, tzinfo=UTC),
+        )
+        second_replayed = _make_run_ledger_entry(
+            entry_id="entry-3",
+            occurred_at=datetime(2024, 6, 1, 11, 0, tzinfo=UTC),
+        )
+        ledger_port.list_entries_after.return_value = [first_replayed, second_replayed]
+        svc, storage, _ = _make_service(
+            resume=True,
+            expected_manifest_id="manifest-123",
+            run_ledger_port=ledger_port,
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            manifest_id="manifest-123",
+            last_event_id="entry-1",
+            last_event_occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        state = await svc.load()
+
+        ledger_port.list_entries_after.assert_called_once_with(
+            "manifest-123",
+            "entry-1",
+        )
+        assert state.state == CompositePipelineState.ENRICHING
+        assert state.seed_completed is True
+        assert state.last_event_id == "entry-3"
+        assert state.last_event_occurred_at == second_replayed.occurred_at
+
+    @pytest.mark.asyncio
+    async def test_resume_raises_conflict_when_ledger_watermark_is_missing(
+        self,
+    ) -> None:
+        """Resume fails fast when checkpoint watermark cannot be found in ledger."""
+        ledger_port = MagicMock()
+        ledger_port.list_entries_after.side_effect = ValueError("missing watermark")
+        svc, storage, _ = _make_service(
+            resume=True,
+            expected_manifest_id="manifest-123",
+            run_ledger_port=ledger_port,
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            manifest_id="manifest-123",
+            last_event_id="entry-missing",
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        with pytest.raises(CheckpointConflictError):
+            await svc.load()
+
 
 # ---------------------------------------------------------------------------
 # 4. load – warns on overwrite (resume=False, existing checkpoint with progress)
@@ -590,6 +708,8 @@ class TestSave:
         parsed = json.loads(content_arg)
         assert parsed["composite_name"] == "my_composite"
         assert parsed["run_id"] == "run-001"
+        assert parsed["last_event_id"] is None
+        assert parsed["last_event_occurred_at"] is None
 
     @pytest.mark.asyncio
     async def test_save_logs_debug_on_success(self) -> None:

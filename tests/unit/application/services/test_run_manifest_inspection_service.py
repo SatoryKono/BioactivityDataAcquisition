@@ -58,6 +58,19 @@ class _InMemoryRunLedgerStore(RunLedgerPort):
     def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
         return [item for item in self._items if item.run_id == run_id]
 
+    def list_entries_after(
+        self,
+        manifest_id: str,
+        after_entry_id: str | None,
+    ) -> list[RunLedgerEntry]:
+        entries = self.list_entries(manifest_id)
+        if after_entry_id is None:
+            return entries
+        for index, item in enumerate(entries):
+            if item.entry_id == after_entry_id:
+                return entries[index + 1 :]
+        raise ValueError(f"missing watermark {after_entry_id!r}")
+
 
 def _make_manifest(
     *,

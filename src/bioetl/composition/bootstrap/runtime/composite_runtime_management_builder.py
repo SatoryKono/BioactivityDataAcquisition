@@ -66,6 +66,12 @@ def build_runtime_management_services(
                 if control_plane_bundle is None
                 else control_plane_bundle.manifest_id
             ),
+            run_ledger_port=(
+                None
+                if control_plane_bundle is None
+                or control_plane_bundle.run_ledger_service is None
+                else control_plane_bundle.run_ledger_service.ledger_port
+            ),
         ),
         dq_report_service=create_dq_report_service(
             logger,
