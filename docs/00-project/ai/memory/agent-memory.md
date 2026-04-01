@@ -1,18 +1,18 @@
 ---
-Version: 1.0.8
+Version: 1.0.9
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-31'
+Last verified: '2026-04-01'
 ---
 
 # Agent Memory — BioETL Project
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.8 | Дата: 2026-03-29 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v5.24*
+*Версия: 1.0.9 | Дата: 2026-04-01 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v5.24*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; Claude сохраняет отдельную runtime-specific copy в `.claude/agents/ORCHESTRATION.md` и может оставаться на другой версии без automatic drift claim.
 
@@ -93,6 +93,20 @@ make test          # Локальный стабильный suite с coverage (
 make test-architecture  # Архитектурные тесты
 make install       # Установка зависимостей
 make run-local     # Сэмпловый pipeline-run (chembl_activity, limit=10)
+```
+
+Для mixed Windows + WSL checkout предпочитай OS-specific wrappers:
+
+```powershell
+.\scripts\dev\setup_env_windows.ps1
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+```
+
+```bash
+bash scripts/dev/setup_env_wsl.sh
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
 ```
 
 ### Unified Script Entry Points
