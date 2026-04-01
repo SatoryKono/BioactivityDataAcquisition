@@ -7,9 +7,11 @@ from bioetl.infrastructure.errors.exception_mapper import (
     DomainInfraExceptionMapper,
     InfraErrorDisposition,
 )
+from bioetl.infrastructure.errors.storage_error_helpers import build_storage_error
 
 __all__ = [
     "DomainErrorMappingInput",
     "DomainInfraExceptionMapper",
     "InfraErrorDisposition",
+    "build_storage_error",
 ]

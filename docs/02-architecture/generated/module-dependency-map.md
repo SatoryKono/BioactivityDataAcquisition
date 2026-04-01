@@ -14,8 +14,8 @@ Last verified: '2026-03-29'
 
 ## Summary
 
-- Scanned modules: `1415`
-- Internal import edges (raw): `5419`
+- Scanned modules: `1416`
+- Internal import edges (raw): `5425`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `261`
@@ -31,14 +31,14 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|777 OK| application
-    application -->|846 OK| domain
+    application -->|847 OK| domain
     composition -->|282 OK| application
     composition -->|372 OK| composition
     composition -->|282 OK| domain
     composition -->|241 OK| infrastructure
     domain -->|837 OK| domain
-    infrastructure -->|635 OK| domain
-    infrastructure -->|779 OK| infrastructure
+    infrastructure -->|637 OK| domain
+    infrastructure -->|782 OK| infrastructure
     interfaces -->|47 OK| application
     interfaces -->|42 OK| composition
     interfaces -->|36 OK| domain
@@ -50,14 +50,14 @@ flowchart LR
 | From | To | Imports | Policy |
 |---|---|---:|---|
 | `application` | `application` | 777 | allowed |
-| `application` | `domain` | 846 | allowed |
+| `application` | `domain` | 847 | allowed |
 | `composition` | `application` | 282 | allowed |
 | `composition` | `composition` | 372 | allowed |
 | `composition` | `domain` | 282 | allowed |
 | `composition` | `infrastructure` | 241 | allowed |
 | `domain` | `domain` | 837 | allowed |
-| `infrastructure` | `domain` | 635 | allowed |
-| `infrastructure` | `infrastructure` | 779 | allowed |
+| `infrastructure` | `domain` | 637 | allowed |
+| `infrastructure` | `infrastructure` | 782 | allowed |
 | `interfaces` | `application` | 47 | allowed |
 | `interfaces` | `composition` | 42 | allowed |
 | `interfaces` | `domain` | 36 | allowed |
@@ -91,9 +91,9 @@ flowchart LR
 | `composition.bootstrap` | `application.services` | 28 |
 | `composition.factories` | `domain.types` | 28 |
 | `composition.factories` | `infrastructure.config` | 28 |
+| `application.composite` | `domain.exceptions` | 24 |
 | `application.pipelines` | `domain.entities` | 24 |
 | `application.services` | `domain.value_objects` | 24 |
-| `application.composite` | `domain.exceptions` | 23 |
 | `composition.factories` | `application.pipelines` | 23 |
 | `infrastructure.storage` | `domain.value_objects` | 23 |
 | `composition.factories` | `domain.schemas` | 21 |

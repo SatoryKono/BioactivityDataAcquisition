@@ -276,6 +276,7 @@ Current event baseline for ledger-backed runs:
 
 - `manifest_created`
 - `run_started`
+- `stage_started`
 - `stage_completed`
 - `artifact_published`
 - `run_finished`

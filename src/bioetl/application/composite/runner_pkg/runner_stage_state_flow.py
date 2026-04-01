@@ -23,6 +23,15 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError, InvalidStateError
 
 
+def _record_seed_stage_started_if_supported(
+    host: _CompositeRunnerStageSupportHostProtocol,
+) -> None:
+    """Record optional seed-stage start event when host exposes the callback."""
+    record = getattr(host, "_record_seed_stage_started", None)
+    if callable(record):
+        record()
+
+
 def _record_seed_stage_completed_if_supported(
     host: _CompositeRunnerStageSupportHostProtocol,
     seed_result: SeedResult,
@@ -102,12 +111,13 @@ async def start_seed_phase(
         CompositePipelineState.SEED_RUNNING,
         stage="seed_start",
     )
+    await host._call_save_checkpoint_safe(running_state, "seed_running")
+    _record_seed_stage_started_if_supported(host)
     host._logger.info(
         PipelineEvent.phase_started("seed"),
         composite=host._config.name,
         run_id=host._run_id_str,
     )
-    await host._call_save_checkpoint_safe(running_state, "seed_running")
     return running_state
 
 

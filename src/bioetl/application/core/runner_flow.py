@@ -11,6 +11,7 @@ __all__ = [
     "record_run_shutdown",
     "record_run_started",
     "record_stage_completed",
+    "record_stage_started",
     "resolve_execution_offset",
 ]
 
@@ -97,6 +98,16 @@ def record_run_started(host: _PipelineRunnerFlowHostProtocol) -> None:
     if host._run_ledger_service is None:
         return
     host._run_ledger_service.record_run_started()
+
+
+def record_stage_started(
+    host: _PipelineRunnerFlowHostProtocol,
+    stage: str,
+) -> None:
+    """Append stage_started ledger entry."""
+    if host._run_ledger_service is None:
+        return
+    host._run_ledger_service.record_stage_started(stage=stage)
 
 
 def record_stage_completed(

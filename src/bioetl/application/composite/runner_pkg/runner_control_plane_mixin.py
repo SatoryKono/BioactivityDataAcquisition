@@ -11,6 +11,9 @@ from bioetl.domain.composite.result import (
     MergeResult,
     SeedResult,
 )
+from bioetl.domain.control_plane.run_ledger import (
+    COMPOSITE_RUN_LEDGER_STAGE_NAMES,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runner_pkg.runner_models import (
@@ -113,6 +116,12 @@ def _run_completion_metrics(
     return metrics
 
 
+_SEED_STAGE_NAME = COMPOSITE_RUN_LEDGER_STAGE_NAMES[0]
+_DEPENDENCIES_STAGE_NAME = COMPOSITE_RUN_LEDGER_STAGE_NAMES[1]
+_ENRICHMENT_STAGE_NAME = COMPOSITE_RUN_LEDGER_STAGE_NAMES[2]
+_MERGE_STAGE_NAME = COMPOSITE_RUN_LEDGER_STAGE_NAMES[3]
+
+
 class CompositeRunnerControlPlaneMixin:
     """Mixin that emits composite lifecycle events into RunLedgerService."""
 
@@ -143,6 +152,52 @@ class CompositeRunnerControlPlaneMixin:
             metrics_snapshot={},
         )
 
+    def _record_seed_stage_started(
+        self: _CompositeRunnerControlPlaneHostProtocol,
+    ) -> None:
+        """Append one ``stage_started`` entry for seed phase."""
+        if self._run_ledger_service is None:
+            return
+        self._run_ledger_service.record_stage_started(stage=_SEED_STAGE_NAME)
+
+    def _record_dependencies_stage_started(
+        self: _CompositeRunnerControlPlaneHostProtocol,
+        dependency_pipeline_names: list[str],
+    ) -> None:
+        """Append one ``stage_started`` entry for dependencies phase."""
+        if self._run_ledger_service is None:
+            return
+        self._run_ledger_service.record_stage_started(
+            stage=_DEPENDENCIES_STAGE_NAME,
+            details={
+                "dependencies": list(dependency_pipeline_names),
+                "count": len(dependency_pipeline_names),
+            },
+        )
+
+    def _record_enrichment_stage_started(
+        self: _CompositeRunnerControlPlaneHostProtocol,
+        enricher_names: list[str],
+    ) -> None:
+        """Append one ``stage_started`` entry for enrichment phase."""
+        if self._run_ledger_service is None:
+            return
+        self._run_ledger_service.record_stage_started(
+            stage=_ENRICHMENT_STAGE_NAME,
+            details={
+                "enrichers": list(enricher_names),
+                "count": len(enricher_names),
+            },
+        )
+
+    def _record_merge_stage_started(
+        self: _CompositeRunnerControlPlaneHostProtocol,
+    ) -> None:
+        """Append one ``stage_started`` entry for merge phase."""
+        if self._run_ledger_service is None:
+            return
+        self._run_ledger_service.record_stage_started(stage=_MERGE_STAGE_NAME)
+
     def _record_run_finished(
         self: _CompositeRunnerControlPlaneHostProtocol,
         artifacts: CompositeExecutionContext,
@@ -162,7 +217,7 @@ class CompositeRunnerControlPlaneMixin:
         if self._run_ledger_service is None:
             return
         self._run_ledger_service.record_stage_completed(
-            stage="seed",
+            stage=_SEED_STAGE_NAME,
             metrics_snapshot=_seed_stage_metrics(seed_result),
         )
 
@@ -174,7 +229,7 @@ class CompositeRunnerControlPlaneMixin:
         if self._run_ledger_service is None:
             return
         self._run_ledger_service.record_stage_completed(
-            stage="dependencies",
+            stage=_DEPENDENCIES_STAGE_NAME,
             metrics_snapshot=_dependency_stage_metrics(dependency_results),
         )
 
@@ -186,7 +241,7 @@ class CompositeRunnerControlPlaneMixin:
         if self._run_ledger_service is None:
             return
         self._run_ledger_service.record_stage_completed(
-            stage="enrichment",
+            stage=_ENRICHMENT_STAGE_NAME,
             metrics_snapshot=_enrichment_stage_metrics(enrichment_results),
         )
 
@@ -198,6 +253,6 @@ class CompositeRunnerControlPlaneMixin:
         if self._run_ledger_service is None:
             return
         self._run_ledger_service.record_stage_completed(
-            stage="merge",
+            stage=_MERGE_STAGE_NAME,
             metrics_snapshot=_merge_stage_metrics(merge_result),
         )

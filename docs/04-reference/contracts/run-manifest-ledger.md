@@ -168,6 +168,7 @@ The current baseline ledger records these events:
 
 - `manifest_created`
 - `run_started`
+- `stage_started`
 - `stage_completed`
 - `artifact_published`
 - `run_finished`

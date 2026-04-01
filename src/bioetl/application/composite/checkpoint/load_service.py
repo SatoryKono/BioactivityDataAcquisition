@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint import _service_support as support
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.domain.control_plane.run_ledger import project_run_ledger_replay
 from bioetl.domain.exceptions import CheckpointConflictError
 
 if TYPE_CHECKING:
@@ -81,7 +82,7 @@ class CompositeCheckpointLoadService:
             composite_name=self._composite_name,
         )
         merged_state = support.merge_expected_anchors(state, self._expected_context)
-        replayed_state = self._replay_checkpoint_watermark(merged_state)
+        replayed_state = self._replay_checkpoint_suffix(merged_state)
         support.warn_if_checkpoint_stale(
             logger=self._logger,
             composite_name=self._composite_name,
@@ -98,7 +99,7 @@ class CompositeCheckpointLoadService:
             glob_pattern=self._glob_pattern,
         )
 
-    def _replay_checkpoint_watermark(
+    def _replay_checkpoint_suffix(
         self,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
@@ -122,18 +123,32 @@ class CompositeCheckpointLoadService:
         if not replay_entries:
             return state
 
-        replayed_state = state
-        for entry in replay_entries:
-            replayed_state = replace(
-                replayed_state,
-                last_event_id=entry.entry_id,
-                last_event_occurred_at=entry.occurred_at,
-            )
+        replay_projection = project_run_ledger_replay(replay_entries)
+        replayed_state = replace(
+            state,
+            state=(
+                replay_projection.state
+                if replay_projection.state is not None
+                else state.state
+            ),
+            seed_completed=(
+                replay_projection.seed_completed
+                if replay_projection.seed_completed is not None
+                else state.seed_completed
+            ),
+            merge_completed=(
+                replay_projection.merge_completed
+                if replay_projection.merge_completed is not None
+                else state.merge_completed
+            ),
+            last_event_id=replay_projection.last_event_id,
+            last_event_occurred_at=replay_projection.last_event_occurred_at,
+        )
         self._logger.info(
-            "Replayed checkpoint watermark from run ledger",
+            "Replayed checkpoint state from run ledger",
             composite=self._composite_name,
             manifest_id=state.manifest_id,
-            replayed_event_count=len(replay_entries),
+            replayed_event_count=replay_projection.replayed_entry_count,
             replay_start_event_id=state.last_event_id,
             replay_end_event_id=replayed_state.last_event_id,
             replay_end_occurred_at=(
@@ -141,6 +156,8 @@ class CompositeCheckpointLoadService:
                 if replayed_state.last_event_occurred_at is not None
                 else None
             ),
+            replay_end_state=replayed_state.state.value,
+            replay_seed_completed=replayed_state.seed_completed,
+            replay_merge_completed=replayed_state.merge_completed,
         )
         return replayed_state
-
