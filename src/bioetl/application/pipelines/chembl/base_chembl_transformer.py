@@ -120,6 +120,13 @@ class BaseChemblTransformer(BaseTransformer):
             self._get_required_field(record, self.primary_id_field),
         )
 
+    def _prepare_record(
+        self,
+        record: BronzeRecord,
+    ) -> BronzeRecord:
+        """Normalize record aliases before primary-key resolution."""
+        return record
+
     async def transform_pre_silver(
         self,
         context: PipelineContext,
@@ -127,6 +134,7 @@ class BaseChemblTransformer(BaseTransformer):
         index: int,
     ) -> PreSilverRecord | None:
         """Build an intermediate ChEMBL payload for application finalization."""
+        record = self._prepare_record(record)
         primary_id = self._resolve_primary_id(record)
         entity_id = self.compute_entity_id(
             source_id=str(primary_id),
@@ -148,6 +156,7 @@ class BaseChemblTransformer(BaseTransformer):
         index: int,
     ) -> SilverRecord | None:
         """Template method implementing common ChEMBL transformation flow."""
+        record = self._prepare_record(record)
         primary_id = self._resolve_primary_id(record)
         entity_id = self.compute_entity_id(
             source_id=str(primary_id),

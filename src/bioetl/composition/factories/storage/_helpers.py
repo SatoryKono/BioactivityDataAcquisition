@@ -5,6 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
+
 from ._bronze import create_bronze_writer
 from ._context_resolution import (
     StorageCreationContext,
@@ -182,6 +186,10 @@ def create_storage_adapter(
         metrics=metrics,
         metadata_atomic_retry_policy=metadata_atomic_retry_policy,
         merge_resilience_policy=merge_resilience_policy,
+        contract_rollout_policy=load_pipeline_contract_policy(
+            config.provider,
+            config.entity_type,
+        ).to_contract_rollout_policy(),
     )
     gold_writer = create_gold_writer(
         writer_cls=gold_writer_cls,

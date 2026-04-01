@@ -32,18 +32,16 @@ class TissueTransformer(BaseChemblTransformer):
     entity_class = Tissue
     primary_id_field = "tissue_id"
 
-    async def _transform_impl(
+    def _prepare_record(
         self,
-        context: PipelineContext,
         record: BronzeRecord,
-        index: int,
-    ) -> SilverRecord | None:
+    ) -> BronzeRecord:
         """Support both unified and legacy tissue identifier field names."""
         if "tissue_id" not in record and record.get("tissue_chembl_id") is not None:
             record_with_alias = dict(record)
             record_with_alias["tissue_id"] = record_with_alias.get("tissue_chembl_id")
             record = record_with_alias
-        return await super()._transform_impl(context, record, index)
+        return record
 
     def _extract_business_data(
         self,

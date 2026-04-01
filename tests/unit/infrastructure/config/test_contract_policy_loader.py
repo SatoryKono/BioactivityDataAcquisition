@@ -57,6 +57,11 @@ def test_load_contracts_from_unified_entity_with_base_defaults(
     assert policy.merge_keys == ["id"]
     assert policy.rename_map == {"run_id": "_run_id"}
     assert policy.hash_exclude == ["_ingestion_ts"]
+    assert policy.contract_ref == "test_provider.test_entity"
+    assert policy.active_version == "1.0.0"
+    assert policy.rollout_mode == "single"
+    assert policy.read_order == ["1.0.0"]
+    assert policy.write_versions == ["1.0.0"]
 
 
 @pytest.mark.unit
@@ -247,3 +252,60 @@ def test_entity_contract_values_override_base_defaults(
 
     assert policy.rename_map == {"custom": "_custom"}
     assert policy.hash_exclude == ["_custom_meta"]
+
+
+@pytest.mark.unit
+def test_rollout_defaults_and_registry_alignment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Loader should hydrate rollout defaults and validate supported versions."""
+    load_pipeline_contract_policy.cache_clear()
+    monkeypatch.chdir(tmp_path)
+
+    base_dir = tmp_path / "configs" / "base"
+    base_dir.mkdir(parents=True)
+    (base_dir / "contract_registry.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "entries": {
+                    "test_provider.entity6": {
+                        "identity": {"contract_version": "1.0.0"},
+                        "supported_versions": ["1.0.0", "2.0.0"],
+                        "migration_guides": {"1.0.0->2.0.0": "docs/migrate.md"},
+                    }
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    entity_dir = tmp_path / "configs" / "entities" / "test_provider"
+    entity_dir.mkdir(parents=True)
+    (entity_dir / "entity6.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "contracts": {
+                    "primary_key": ["pk"],
+                    "merge_keys": ["pk"],
+                    "contract_ref": "test_provider.entity6",
+                    "active_version": "2.0.0",
+                    "rollout": {
+                        "mode": "dual_read_write",
+                        "read_order": ["2.0.0", "1.0.0"],
+                        "write_versions": ["1.0.0", "2.0.0"],
+                        "affects_hash": True,
+                    },
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    policy = load_pipeline_contract_policy("test_provider", "entity6")
+
+    assert policy.rollout_mode == "dual_read_write"
+    assert policy.read_order == ["2.0.0", "1.0.0"]
+    assert policy.write_versions == ["1.0.0", "2.0.0"]
+    assert policy.affects_hash is True

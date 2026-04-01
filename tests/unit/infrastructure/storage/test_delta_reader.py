@@ -92,6 +92,15 @@ class TestResolvePath:
         result = reader._resolve_path("provider/entity/table")
         assert result == tmp_path / "provider" / "entity" / "table"
 
+    def test_dot_notation_path_resolves_to_provider_entity_path(
+        self,
+        reader: DeltaReader,
+        tmp_path: Path,
+    ) -> None:
+        """Logical provider.entity names should resolve to nested directories."""
+        result = reader._resolve_path("chembl.activity__v2_0_0")
+        assert result == tmp_path / "chembl" / "activity__v2_0_0"
+
 
 @pytest.mark.unit
 @pytest.mark.asyncio
@@ -182,6 +191,65 @@ class TestReadTable:
         call_kwargs = mock_logger.debug.call_args[1]
         assert call_kwargs["columns"] == ["id"]
         assert call_kwargs["limit"] == 2
+
+    async def test_read_versioned_table_uses_versioned_logical_name(
+        self,
+        reader: DeltaReader,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Version-aware read should resolve the physical versioned table name."""
+        expected = pa.table({"id": ["1"]})
+        captured: dict[str, object] = {}
+
+        async def _fake_read_table(
+            table_path: str,
+            columns: list[str] | None = None,
+            limit: int | None = None,
+        ) -> pa.Table:
+            captured["table_path"] = table_path
+            captured["columns"] = columns
+            captured["limit"] = limit
+            return expected
+
+        monkeypatch.setattr(reader, "read_table", _fake_read_table)
+
+        result = await reader.read_versioned_table(
+            "chembl.activity",
+            "2.0.0",
+            columns=["id"],
+            limit=1,
+        )
+
+        assert result == expected
+        assert captured["table_path"] == "chembl.activity__v2_0_0"
+
+    async def test_read_with_fallback_reads_first_existing_candidate(
+        self,
+        reader: DeltaReader,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Fallback read should skip missing tables and return the next available one."""
+        expected = pa.table({"id": ["1"]})
+
+        async def _fake_read_table(
+            table_path: str,
+            columns: list[str] | None = None,
+            limit: int | None = None,
+        ) -> pa.Table:
+            del columns, limit
+            if table_path == "chembl.activity__v2_0_0":
+                raise FileNotFoundError("missing v2")
+            return expected
+
+        monkeypatch.setattr(reader, "read_table", _fake_read_table)
+
+        result = await reader.read_with_fallback(
+            "chembl.activity",
+            ["2.0.0", "1.0.0"],
+        )
+
+        assert result == expected
 
 
 @pytest.mark.unit

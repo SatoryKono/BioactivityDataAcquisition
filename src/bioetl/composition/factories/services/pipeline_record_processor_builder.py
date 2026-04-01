@@ -6,7 +6,11 @@ from collections.abc import Awaitable, Callable
 from itertools import chain
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.config import RecordProcessorConfig
+from bioetl.application.core.config import (
+    ContentHashPolicyByVersion,
+    ContentHashVersionPolicy,
+    RecordProcessorConfig,
+)
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
@@ -61,6 +65,48 @@ def _extract_hash_policy(pipeline: BasePipeline) -> tuple[frozenset[str], frozen
     return include_fields, exclude_fields
 
 
+def _extract_hash_policy_by_version(
+    pipeline: BasePipeline,
+    *,
+    include_fields: frozenset[str],
+    exclude_fields: frozenset[str],
+) -> ContentHashPolicyByVersion | None:
+    """Build ordered per-version hash policies from rollout-aware contract policy."""
+    transformer = getattr(pipeline, "transformer", None)
+    contract_policy = getattr(transformer, "_contract_policy", None)
+    active_version = getattr(contract_policy, "active_version", None)
+    rollout = getattr(contract_policy, "rollout", None)
+    write_versions = getattr(rollout, "write_versions", None)
+
+    normalized_active_version = (
+        str(active_version).strip() if active_version is not None else ""
+    )
+    if not normalized_active_version:
+        return None
+
+    if write_versions is None:
+        versions = (normalized_active_version,)
+    else:
+        versions = tuple(
+            str(version).strip() for version in write_versions if str(version).strip()
+        ) or (normalized_active_version,)
+
+    if normalized_active_version not in versions:
+        versions = (normalized_active_version, *versions)
+
+    return ContentHashPolicyByVersion(
+        active_version=normalized_active_version,
+        policies=tuple(
+            ContentHashVersionPolicy(
+                version=version,
+                include_fields=include_fields,
+                exclude_fields=exclude_fields,
+            )
+            for version in versions
+        ),
+    )
+
+
 def build_record_processor_config_and_validator(
     *,
     pipeline: BasePipeline,
@@ -75,6 +121,11 @@ def build_record_processor_config_and_validator(
 ) -> tuple[RecordProcessorConfig, GoldValidatorPort]:
     """Build RecordProcessorConfig plus Gold validator from pipeline state."""
     include_fields, exclude_fields = _extract_hash_policy(pipeline)
+    hash_policy_by_version = _extract_hash_policy_by_version(
+        pipeline,
+        include_fields=include_fields,
+        exclude_fields=exclude_fields,
+    )
     processor_config = RecordProcessorConfig(
         pipeline_name=pipeline.config.pipeline_name,
         provider=pipeline.config.provider,
@@ -91,6 +142,7 @@ def build_record_processor_config_and_validator(
         scd_config=pipeline.config.scd_config,
         content_hash_include_fields=include_fields,
         content_hash_exclude_fields=exclude_fields,
+        content_hash_policy_by_version=hash_policy_by_version,
     )
     gold_validator = gold_validator_factory(
         cast("pdr.DataFrameSchema | None", cast(object, gold_schema)),
@@ -112,6 +164,11 @@ def create_record_processor_from_pipeline(
 ) -> RecordProcessor:
     """Project pipeline fields into the injected record-processor factory."""
     include_fields, exclude_fields = _extract_hash_policy(pipeline)
+    hash_policy_by_version = _extract_hash_policy_by_version(
+        pipeline,
+        include_fields=include_fields,
+        exclude_fields=exclude_fields,
+    )
     return create_record_processor_fn(
         services=pipeline.services,
         context=pipeline.context,
@@ -137,4 +194,5 @@ def create_record_processor_from_pipeline(
         scd_config=pipeline.config.scd_config,
         content_hash_include_fields=include_fields,
         content_hash_exclude_fields=exclude_fields,
+        content_hash_policy_by_version=hash_policy_by_version,
     )

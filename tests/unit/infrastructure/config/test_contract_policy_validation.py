@@ -8,9 +8,13 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.infrastructure.config.contract_policy_validation import (
+    validate_contract_policy_registry_alignment,
     resolve_silver_columns,
     schema_columns,
     validate_pipeline_contract_policy,
+)
+from bioetl.infrastructure.schemas.pipeline_contract_policy import (
+    PipelineContractPolicy,
 )
 
 
@@ -72,4 +76,33 @@ def test_validate_pipeline_contract_policy_raises_when_keys_missing() -> None:
                 primary_key=["pk", "missing_key"],
                 merge_keys=[],
             ),
+        )
+
+
+@pytest.mark.unit
+def test_validate_contract_policy_registry_alignment_requires_guide_for_major_transition() -> None:
+    policy = PipelineContractPolicy.model_validate(
+        {
+            "primary_key": ["id"],
+            "merge_keys": ["id"],
+            "contract_ref": "chembl.activity",
+            "active_version": "2.0.0",
+            "rollout": {
+                "mode": "dual_read_write",
+                "read_order": ["2.0.0", "1.0.0"],
+                "write_versions": ["1.0.0", "2.0.0"],
+                "affects_hash": True,
+            },
+        }
+    )
+
+    with pytest.raises(ValueError, match="Missing migration guide"):
+        validate_contract_policy_registry_alignment(
+            policy,
+            registry_entries={
+                "chembl.activity": {
+                    "supported_versions": ["1.0.0", "2.0.0"],
+                    "migration_guides": {},
+                }
+            },
         )

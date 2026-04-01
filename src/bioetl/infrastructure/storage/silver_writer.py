@@ -60,6 +60,9 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
 from bioetl.infrastructure.storage.silver.validation_mixin import (
     SilverWriterValidationMixin,
 )
+from bioetl.infrastructure.storage.versioned_table_resolver import (
+    resolve_write_targets,
+)
 
 # Backward-compatible module aliases for tests patching historical symbols.
 asyncio = _asyncio
@@ -175,8 +178,73 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self._lineage_store = services.lineage_store
         self._dq_calculator = services.dq_calculator
         self._merge_resilience_policy = services.merge_resilience_policy
+        self._contract_rollout_policy = services.contract_rollout_policy
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
+
+    def _should_dual_write(self) -> bool:
+        """Return True when rollout policy requires Silver shadow writes."""
+        if self._contract_rollout_policy is None:
+            return False
+        return self._contract_rollout_policy.mode in {
+            "dual_write",
+            "dual_read_write",
+        } and len(self._contract_rollout_policy.write_versions) > 1
+
+    def _records_for_contract_version(
+        self,
+        records: list[BronzeRecord],
+        *,
+        contract_version: str,
+    ) -> list[BronzeRecord]:
+        """Project write-time content hash for one target contract version."""
+        projected_records: list[BronzeRecord] = []
+        for record in records:
+            versioned_hashes = record.get("_content_hashes_by_version")
+            projected = dict(record)
+            if isinstance(versioned_hashes, dict):
+                selected_hash = versioned_hashes.get(contract_version)
+                if selected_hash is not None:
+                    projected["content_hash"] = selected_hash
+            projected.pop("_content_hashes_by_version", None)
+            projected_records.append(projected)
+        return projected_records
+
+    async def _write_single_target(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        schema: pa.Schema,
+        mode: str,
+        partition_cols: list[str] | None,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+        column_order: list[str] | None,
+        bronze_refs: list[BronzeWriteResult] | None,
+        key_nullability_rules: list[KeyNullabilityRule] | None,
+    ) -> SilverWriteResult | None:
+        """Execute one physical Silver write target with tracing."""
+        started_at, start_perf = datetime.now(UTC), time.perf_counter()
+        return await execute_silver_write_with_tracing(
+            tracing=self._tracing,
+            module_name=__name__,
+            invocation=_SilverWriteInvocation(
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                schema=schema,
+                mode=mode,
+                partition_cols=partition_cols,
+                on_schema_mismatch=on_schema_mismatch,
+                column_order=column_order,
+                bronze_refs=bronze_refs,
+                key_nullability_rules=key_nullability_rules,
+            ),
+            started_at=started_at,
+            start_perf=start_perf,
+            execute_pipeline=self._execute_silver_write_pipeline,
+        )
 
     def _enforce_write_policy(
         self,
@@ -248,11 +316,8 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             SilverWriteResult with record count and write metadata, or None if
             no records were provided.
         """
-        started_at, start_perf = datetime.now(UTC), time.perf_counter()
-        return await execute_silver_write_with_tracing(
-            tracing=self._tracing,
-            module_name=__name__,
-            invocation=_SilverWriteInvocation(
+        if not self._should_dual_write():
+            return await self._write_single_target(
                 table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,
@@ -263,11 +328,37 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 column_order=column_order,
                 bronze_refs=bronze_refs,
                 key_nullability_rules=key_nullability_rules,
-            ),
-            started_at=started_at,
-            start_perf=start_perf,
-            execute_pipeline=self._execute_silver_write_pipeline,
+            )
+
+        assert self._contract_rollout_policy is not None  # guarded by _should_dual_write
+        active_result: SilverWriteResult | None = None
+        write_targets = resolve_write_targets(
+            table_name,
+            self._contract_rollout_policy.write_versions,
         )
+        for contract_version, physical_table in zip(
+            self._contract_rollout_policy.write_versions,
+            write_targets,
+            strict=True,
+        ):
+            result = await self._write_single_target(
+                table_name=physical_table,
+                records=self._records_for_contract_version(
+                    records,
+                    contract_version=contract_version,
+                ),
+                primary_keys=primary_keys,
+                schema=schema,
+                mode=mode,
+                partition_cols=partition_cols,
+                on_schema_mismatch=on_schema_mismatch,
+                column_order=column_order,
+                bronze_refs=bronze_refs,
+                key_nullability_rules=key_nullability_rules,
+            )
+            if contract_version == self._contract_rollout_policy.active_version:
+                active_result = result
+        return active_result
 
     async def _execute_silver_write_pipeline(
         self,

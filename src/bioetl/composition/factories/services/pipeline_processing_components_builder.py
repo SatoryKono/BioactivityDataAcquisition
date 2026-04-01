@@ -58,6 +58,7 @@ def create_batch_processing_components(
             rule_set=config.normalization_rule_set,
             content_hash_include_fields=config.content_hash_include_fields,
             content_hash_exclude_fields=config.content_hash_exclude_fields,
+            content_hash_policy_by_version=config.content_hash_policy_by_version,
         )
         if config.normalization_enabled
         else None

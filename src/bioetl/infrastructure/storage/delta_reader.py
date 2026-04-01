@@ -19,6 +19,11 @@ import pyarrow as pa
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
+from bioetl.infrastructure.storage.versioned_table_resolver import (
+    resolve_read_candidates,
+    resolve_versioned_table_name,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
@@ -59,6 +64,9 @@ class DeltaReader:
         path = Path(table_path)
         if path.is_absolute():
             return path
+        if "/" not in table_path and "\\" not in table_path and "." in table_path:
+            provider, remainder = table_path.split(".", 1)
+            return self._base_path / provider / remainder
         return self._base_path / table_path
 
     async def read_table(
@@ -106,6 +114,38 @@ class DeltaReader:
         )
 
         return await loop.run_in_executor(None, _read)
+
+    async def read_versioned_table(
+        self,
+        logical_table: str,
+        contract_version: str,
+        columns: list[str] | None = None,
+        limit: int | None = None,
+    ) -> pa.Table:
+        """Read a versioned physical table for one logical contract version."""
+        return await self.read_table(
+            resolve_versioned_table_name(logical_table, contract_version),
+            columns=columns,
+            limit=limit,
+        )
+
+    async def read_with_fallback(
+        self,
+        logical_table: str,
+        read_order: list[str],
+        columns: list[str] | None = None,
+        limit: int | None = None,
+    ) -> pa.Table:
+        """Read the first available versioned table in fallback order."""
+        missing_errors: list[FileNotFoundError] = []
+        for candidate in resolve_read_candidates(logical_table, read_order):
+            try:
+                return await self.read_table(candidate, columns=columns, limit=limit)
+            except FileNotFoundError as exc:
+                missing_errors.append(exc)
+        if missing_errors:
+            raise missing_errors[0]
+        raise FileNotFoundError(f"No read candidates configured for {logical_table}")
 
     async def get_schema(self, table_path: str) -> pa.Schema:
         """Get the schema of a Delta Lake table.

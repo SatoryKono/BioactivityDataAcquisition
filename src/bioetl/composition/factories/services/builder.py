@@ -7,7 +7,10 @@ from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_processing_service import BatchProcessingComponents
-from bioetl.application.core.config import RecordProcessorConfig
+from bioetl.application.core.config import (
+    ContentHashPolicyByVersion,
+    RecordProcessorConfig,
+)
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointManagerService,
 )
@@ -106,22 +109,7 @@ class ServicesBuilder:
             "observe", "soft_fail", "hard_fail"
         ] = "soft_fail",
     ) -> CheckpointManagerService:
-        """Create configured CheckpointManagerService.
-
-        Args:
-            checkpoint_port: CheckpointPort for reading and writing checkpoint state.
-            logger: LoggerPort for structured checkpoint event logging.
-            pipeline_name: Pipeline identifier used for checkpoint scoping.
-            run_id: Unique run identifier embedded in checkpoint records.
-            resume: If True, resumes from existing checkpoint instead of starting fresh.
-            loading_strategy: Optional strategy controlling checkpoint loading behavior.
-            checkpoint_compatibility_service: Optional compatibility validator service.
-            current_metadata: Optional execution-identity metadata for resume checks.
-            compatibility_policy: Policy for incompatible checkpoints.
-
-        Returns:
-            CheckpointManagerService configured for the pipeline run.
-        """
+        """Create a configured checkpoint manager for one pipeline run."""
         return create_checkpoint_manager(
             checkpoint_port=checkpoint_port,
             logger=logger,
@@ -161,6 +149,7 @@ class ServicesBuilder:
         scd_config: ScdConfig | None = None,
         content_hash_include_fields: frozenset[str] = frozenset(),
         content_hash_exclude_fields: frozenset[str] = frozenset(),
+        content_hash_policy_by_version: ContentHashPolicyByVersion | None = None,
     ) -> RecordProcessor:
         """Create configured ``RecordProcessor`` for pipeline execution."""
         effective_tracer = tracer or services.tracing
@@ -183,6 +172,7 @@ class ServicesBuilder:
             scd_config=scd_config,
             content_hash_include_fields=content_hash_include_fields,
             content_hash_exclude_fields=content_hash_exclude_fields,
+            content_hash_policy_by_version=content_hash_policy_by_version,
         )
 
         components = ServicesBuilder.create_batch_processing_components(
@@ -219,18 +209,7 @@ class ServicesBuilder:
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> RecordProcessor:
-        """Create RecordProcessor from pipeline instance.
-
-        Args:
-            pipeline: Configured pipeline instance providing services, context, and callbacks.
-            silver_schema: Optional PyArrow schema for Silver layer validation.
-            gold_schema: Pandera DataFrameModel class for Gold layer validation.
-            strict_gold_validation: If True, raises on Gold schema violations. Defaults to True.
-            lock_validator: Optional async callable for lock validation before writes.
-
-        Returns:
-            RecordProcessor configured from the pipeline's services and context.
-        """
+        """Create a ``RecordProcessor`` from an already configured pipeline."""
         callbacks = extract_pipeline_callbacks(pipeline)
         return create_record_processor_from_pipeline(
             pipeline=pipeline,
@@ -262,28 +241,7 @@ class ServicesBuilder:
         flat_structure: bool = False,
         batch_id_factory: BatchIdGeneratorPort | None = None,
     ) -> BatchExecutor:
-        """Create BatchExecutor from pipeline instance.
-
-        Args:
-            pipeline: Configured pipeline instance providing services, context, and callbacks.
-            silver_schema: Optional PyArrow schema for Silver layer validation.
-            gold_schema: Pandera DataFrameModel class for Gold layer validation.
-            checkpoint_manager: CheckpointManagerService for batch-level checkpointing.
-            shutdown_signal: Signal used to gracefully terminate batch execution.
-            strict_gold_validation: If True, raises on Gold schema violations. Defaults to True.
-            lock_validator: Optional async callable for lock validation before writes.
-            tracer: Optional TracingPort for distributed tracing.
-            memory_monitor: Optional monitor for memory pressure tracking.
-            memory_config: Optional memory configuration for batch sizing.
-            bronze_output_path: Optional path override for Bronze output.
-            silver_output_path: Optional path override for Silver output.
-            gold_output_path: Optional path override for Gold output.
-            flat_structure: If True, writes use flat directory structure. Defaults to False.
-            batch_id_factory: Optional custom batch ID generator.
-
-        Returns:
-            BatchExecutor configured from the pipeline's services, context, and config.
-        """
+        """Create a ``BatchExecutor`` from an already configured pipeline."""
         callbacks = extract_pipeline_callbacks(pipeline)
         return create_batch_executor_from_pipeline(
             pipeline=pipeline,

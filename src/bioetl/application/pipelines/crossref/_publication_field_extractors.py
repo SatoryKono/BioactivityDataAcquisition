@@ -25,9 +25,11 @@ def extract_journal_info(
     publication: JsonDict,  # Any: untyped API JSON record
 ) -> JsonDict:
     """Extract journal information from publication."""
+    issn_values = publication.get("ISSN", [])
+    issn_list = issn_values if isinstance(issn_values, list) else []
     return {
         "journal": extract_first_string(publication.get("container-title")),
-        "issn": publication.get("ISSN", []),
+        "issn": issn_list,
         "publisher": publication.get("publisher"),
     }
 
