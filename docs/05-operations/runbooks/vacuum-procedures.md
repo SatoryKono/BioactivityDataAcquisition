@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,224 +7,140 @@ Reviewers:
 - BioETL Team
 Priority: P2
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
+Last verified: '2026-04-02'
 ---
 
 # VACUUM Procedures Runbook
 
 ## Trigger
 
-- Run this procedure when Delta maintenance requires vacuum or retention validation.
-- Escalate according to the priority declared in metadata when operator ownership is unclear.
+- Run this procedure when Delta maintenance requires manual VACUUM execution or
+  explicit validation of retention behavior.
+- Escalate according to the priority declared in metadata when operator
+  ownership is unclear.
 
 ## Impact
 
 - Priority: P2.
-- Delayed handling can extend service disruption, data correctness risk, or operator response time.
+- Delayed handling can extend storage growth, retention-policy drift, or
+  operator response time.
 
 ## Preconditions
 
-- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem
+  storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and
+  relevant data/control-plane artifacts.
+- No active pipeline run should be mutating the target tables.
 
 ## Procedure
 
-### Overview
+### 1. Use the guide for policy, use this page for actions
 
-- Delta Lake tables accumulate old versions of data files for time travel and ACID transactions. VACUUM removes files older than the retention period to reclaim storage.
+- Policy, retention defaults, and scheduled maintenance guidance live in
+  [VACUUM & Retention](../vacuum-retention.md).
+- This runbook is the operator action path for manual execution.
 
-- **Note**: Pipeline-integrated VACUUM поддерживается, но по умолчанию выключен. Этот runbook покрывает ручные VACUUM операции и explicit enablement.
+### 2. Confirm the target and retention window
 
-### When to Run Manual VACUUM
+Decide whether you are vacuuming:
 
-- After bulk data corrections
-- When storage usage is unexpectedly high
-- After schema evolution operations
-- During scheduled maintenance windows
+- one table
+- all Silver tables
+- all Gold tables
 
-### Prerequisites
+Use the retention value from the guide unless an incident or forensic need
+requires an override.
 
-- Pipeline is **not running** (avoid conflicts)
-- Sufficient disk space for temporary files
-- Backup strategy in place
+### 3. Start with a dry run
 
-### Automatic VACUUM
-
-- VACUUM выполняется после успешного pipeline run только если он явно включён:
-
-```python
-# From PostrunService / MedallionLifecycleService
-await self.run_vacuum_if_enabled()
-```
-
-- Configuration in pipeline YAML:
-```yaml
-maintenance:
-  auto_vacuum: true
-  vacuum_retention_days: 7
-```
-
-- CLI override for a single run:
+Single table:
 
 ```bash
-bioetl run --pipeline chembl_activity --vacuum-after-run --vacuum-retention-days 7
+bioetl maintenance vacuum <provider>.<entity> --dry-run
 ```
 
-### Manual VACUUM Procedures
+Layer-wide:
 
-### Check Table Status
-
-- Before VACUUM, check current table state:
-
-```python
-from deltalake import DeltaTable
-
-dt = DeltaTable("data/output/silver/chembl/activity")
-
-# Get table info
-print(f"Version: {dt.version()}")
-print(f"Files: {len(dt.file_uris())}")
-print(f"Protocol: {dt.protocol()}")
-
-# Check file sizes
-import os
-total_size = sum(os.path.getsize(f) for f in dt.file_uris())
-print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
+```bash
+bioetl maintenance vacuum-all --layer silver --dry-run
+bioetl maintenance vacuum-all --layer gold --dry-run
 ```
 
-### Run VACUUM
+Review what would be removed before executing the real operation.
 
-```python
-from deltalake import DeltaTable
-from datetime import timedelta
+### 4. Execute manual VACUUM
 
-# Open table
-dt = DeltaTable("data/output/silver/chembl/activity")
+Single table:
 
-# Dry run first (shows files that would be deleted)
-dt.vacuum(retention_hours=168, dry_run=True, enforce_retention_duration=False)
-
-# Execute VACUUM (7 day retention)
-dt.vacuum(retention_hours=168, dry_run=False, enforce_retention_duration=False)
+```bash
+bioetl maintenance vacuum <provider>.<entity>
+bioetl maintenance vacuum <provider>.<entity> --retention-days 30
 ```
 
-- **Warning**: `enforce_retention_duration=False` bypasses the 7-day safety check. Only use in controlled scenarios.
+All tables:
 
-### VACUUM All Tables
-
-```python
-from pathlib import Path
-from deltalake import DeltaTable
-
-def vacuum_all_tables(base_path: str, retention_hours: int = 168) -> None:
-    """VACUUM all Delta tables in directory."""
-    base = Path(base_path)
-
-    for table_dir in base.iterdir():
-        if not table_dir.is_dir():
-            continue
-        if not (table_dir / "_delta_log").exists():
-            continue
-
-        print(f"Vacuuming: {table_dir.name}")
-        dt = DeltaTable(str(table_dir))
-        dt.vacuum(retention_hours=retention_hours, dry_run=False)
-        print(f"  Version: {dt.version()}, Files: {len(dt.file_uris())}")
-
-# Run for Silver tables
-vacuum_all_tables("data/silver")
-
-# Run for Gold tables
-vacuum_all_tables("data/gold")
+```bash
+bioetl maintenance vacuum-all
+bioetl maintenance vacuum-all --layer silver
+bioetl maintenance vacuum-all --layer gold
 ```
 
-### OPTIMIZE Operations
+### 5. Enable run-triggered VACUUM only when intentional
 
-- In addition to VACUUM, consider running OPTIMIZE for query performance:
+Pipeline-integrated VACUUM is supported but disabled by default. For a single
+run, enable it explicitly:
 
-```python
-from deltalake import DeltaTable
-
-dt = DeltaTable("data/output/silver/chembl/activity")
-
-# Compact small files
-dt.optimize.compact()
-
-# Z-order by frequently queried column
-dt.optimize.z-order(columns=["molecule-chembl-id"])
+```bash
+bioetl run --pipeline <pipeline-name> --vacuum-after-run --vacuum-retention-days 7
 ```
 
-### Retention Guidelines
+For persistent enablement, use the YAML/runtime policy documented in
+[VACUUM & Retention](../vacuum-retention.md).
 
-| Table Type | Retention | Justification |
-|------------|-----------|---------------|
-| Bronze | 90 days | Archival, debugging |
-| Silver | 7 days | Default, active queries |
-| Gold | 7 days | Default, analytics |
-| Critical | 30 days | Forensic/compliance |
+### 6. Validate the result
 
-### Troubleshooting
+After execution, verify:
 
-### VACUUM Hangs
+- the command completed without storage errors
+- expected files were removed
+- no active investigation still depends on older time-travel versions
+- logs contain the expected `vacuum_completed` or corresponding failure signal
 
-- If VACUUM takes too long:
-1. Check for large number of files
-2. Consider running in batches by version range
-3. Increase retention to skip fewer files
+### 7. Troubleshooting shortcuts
 
-### "Files still referenced" Error
+If VACUUM does not behave as expected:
 
-- Files may still be referenced if:
-- Active readers are using old versions
-- Time travel queries are running
-- Retention period not exceeded
+- files not removed: retention window has not elapsed yet
+- storage not freed: verify the command actually completed and targeted the
+  intended table/layer
+- operation too slow: split by layer or run during a quieter maintenance window
 
-- Solution: Wait for active operations to complete or increase retention.
-
-### Storage Not Freed
-
-- After VACUUM, if storage isn't freed:
-1. Check filesystem cache
-2. Verify VACUUM completed successfully
-3. Check for files outside Delta log management
-
-### Monitoring
-
-- Track VACUUM metrics:
-- Time to complete
-- Files removed
-- Storage reclaimed
-- Table version after VACUUM
-
-- Log example:
-```
-INFO  | vacuum_completed | table=chembl_activity | files_removed=150 | bytes_freed=524288000 | duration_s=45.2
-```
-
-### Best Practices
-
-1. **Schedule during low-usage periods**
-2. **Always dry-run first** on production tables
-3. **Monitor storage trends** to adjust retention
-4. **Document VACUUM runs** in operations log
-5. **Test time travel** after VACUUM to ensure required history preserved
+Use [VACUUM & Retention](../vacuum-retention.md) for the full retention
+strategy and scheduling guidance.
 
 ## Compliance
 
-- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
-- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+- This runbook MUST be executed within the priority and runtime profile
+  declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the
+  Verification and Post-incident sections.
 
 ## Verification
 
-- Confirm the triggering condition is cleared or understood with evidence.
-- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+- Confirm the chosen table/layer and retention values were the intended ones.
+- Verify logs, manifests, datasets, or alerts reflect the expected
+  post-procedure state.
 
 ## Rollback
 
-- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
-- Return to the last known good state before attempting an alternate recovery path.
+- Do not immediately rerun with a lower retention window unless the operator
+  intent is explicit and documented.
+- If the wrong table/layer was targeted, stop and escalate rather than broadening
+  the cleanup action.
 
 ## Post-incident
 
 - Record timeline, commands executed, evidence reviewed, and follow-up owners.
-- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.
+- Update retention policy or scheduling docs if repeated manual VACUUM work is
+  becoming the norm.

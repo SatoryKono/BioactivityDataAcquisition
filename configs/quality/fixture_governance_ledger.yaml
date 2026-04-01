@@ -82,22 +82,30 @@ entries:
       The repo has a canonical backfill path for the managed cassette inventory
       and rollout status no longer depends on a seeded subset of metadata files.
   - field: contract_snapshots
-    status: planned
+    status: partial
     owner: "@bioetl-data-model"
-    blocking_classification: missing_contract_snapshot_registry
+    blocking_classification: representative_scope_gap
     current_evidence_paths:
       - configs/quality/test_matrix.yaml
       - tests/architecture/test_test_matrix_coverage.py
-      - tests/contract/silver_schemas/snapshots
+      - tests/contract/test_provider_contract_snapshot_registry.py
+      - tests/fixtures/contracts/crossref/v1.json
+      - tests/fixtures/contracts/openalex/v1.json
     artifact_paths:
-      - tests/contract/silver_schemas/snapshots
-      - tests/architecture/test_test_matrix_coverage.py
+      - tests/fixtures/contracts
+      - tests/fixtures/contracts/README.md
+      - tests/contract/_provider_contract_drift.py
+      - tests/contract/test_crossref_contract.py
+      - tests/contract/test_openalex_contract.py
+      - tests/contract/test_provider_contract_snapshot_registry.py
     next_step: >-
-      Define the minimum viable external contract snapshot registry shape and
-      how it differs from the current silver schema snapshot fallback.
+      Expand the provider-facing contract snapshot registry beyond the initial
+      Crossref and OpenAlex slice, then tie each adopted provider family to a
+      stable update path and CI-visible drift diagnostics.
     promotion_criteria: >-
-      A canonical provider-facing contract snapshot registry exists and the
-      rollout can move from planned fallback to active contract inventory.
+      Representative provider families own tracked external contract snapshots,
+      update guidance is documented, and rollout no longer depends on the
+      silver schema snapshot fallback alone.
   - field: golden_masters
     status: partial
     owner: "@bioetl-data-model"

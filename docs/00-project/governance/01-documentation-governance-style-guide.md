@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-01'
----
+  Last verified: '2026-04-01'
+
+______________________________________________________________________
 
 # D-01: Governance & Style Guide документации BioETL
 
@@ -17,10 +20,10 @@ D-01 задаёт единые правила управления и стиля
 разрешаются, cross-links синхронизированы с кодом, а источник истины указан
 явно.
 
-Актуализация `2026-03-31` закрепляет дельту ветки
-`RunManifest-and-Run-Ledger`: проект публикует не только data contracts Gold
-слоя, но и control-plane / inspection contracts. Для таких surfaces действует
-правило traceability documentation pack: `ADR + contract + CLI + runbook`.
+Актуализация `2026-03-31` закрепляет control-plane publication delta: проект
+публикует не только data contracts Gold слоя, но и control-plane / inspection
+contracts. Для таких surfaces действует правило traceability documentation
+pack: `ADR + contract + CLI + runbook`.
 
 ## Область действия
 
@@ -52,9 +55,9 @@ D-01 задаёт единые правила управления и стиля
 
 1. `RULES.md`, active ADR, published contract docs и published runbooks задают
    проектные и runtime-правила.
-2. D-01 задаёт metapolicy: как документировать эти правила и как связывать
+1. D-01 задаёт metapolicy: как документировать эти правила и как связывать
    документационные surfaces.
-3. Publication policy и nav policy определяют class/discoverability, но не
+1. Publication policy и nav policy определяют class/discoverability, но не
    подменяют содержательные требования D-01.
 
 ## Документационные классы и Source of Truth
@@ -73,13 +76,13 @@ D-01 задаёт единые правила управления и стиля
 Published doc families MUST опираться на живые шаблоны из
 [Template Index](../../04-reference/templates/index.md).
 
-| Template type | Canonical file | Назначение |
-|---|---|---|
-| `adr` | `docs/04-reference/templates/adr-template.md` | Архитектурное решение |
-| `runbook` | `docs/04-reference/templates/runbook-template.md` | Операционная процедура |
-| `provider-spec` | `docs/04-reference/templates/provider-spec-template.md` | Спецификация внешнего провайдера |
-| `pipeline-spec` | `docs/04-reference/templates/pipeline-spec-template.md` | Спецификация пайплайна |
-| `data-contract-spec` | `docs/04-reference/templates/data-contract-spec-template.md` | Контракт данных / published schema contract |
+| Template type                 | Canonical file                                                        | Назначение                                                  |
+| ----------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `adr`                         | `docs/04-reference/templates/adr-template.md`                         | Архитектурное решение                                       |
+| `runbook`                     | `docs/04-reference/templates/runbook-template.md`                     | Операционная процедура                                      |
+| `provider-spec`               | `docs/04-reference/templates/provider-spec-template.md`               | Спецификация внешнего провайдера                            |
+| `pipeline-spec`               | `docs/04-reference/templates/pipeline-spec-template.md`               | Спецификация пайплайна                                      |
+| `data-contract-spec`          | `docs/04-reference/templates/data-contract-spec-template.md`          | Контракт данных / published schema contract                 |
 | `control-plane-contract-spec` | `docs/04-reference/templates/control-plane-contract-spec-template.md` | Контракт feature-flagged control-plane / inspection surface |
 
 `data-contract-spec` является нормативным именем семейства для published data
@@ -125,11 +128,11 @@ surface, такая ссылка MUST оформляться как repository-p
 Traceability documentation pack MUST включать:
 
 1. active ADR с решением, rollout boundary и rationale;
-2. published contract doc или `control-plane-contract-spec`;
-3. published CLI reference либо нормативную CLI-секцию;
-4. published runbook для операторской диагностики и эскалации;
-5. двусторонние cross-links между ADR, contract, CLI и runbook;
-6. воспроизводимые команды и storage paths, совпадающие с реальным runtime.
+1. published contract doc или `control-plane-contract-spec`;
+1. published CLI reference либо нормативную CLI-секцию;
+1. published runbook для операторской диагностики и эскалации;
+1. двусторонние cross-links между ADR, contract, CLI и runbook;
+1. воспроизводимые команды и storage paths, совпадающие с реальным runtime.
 
 Если surface feature-flagged, документация MUST явно фиксировать:
 
@@ -165,19 +168,19 @@ Traceability documentation pack MUST включать:
    - enabled/disabled semantics;
    - partial rollout behavior;
    - compatibility constraints между flag-ами.
-2. `Storage Layout`
+1. `Storage Layout`
    - канонические файловые или табличные пути;
    - sidecar, index и lookup anchors;
    - ownership и resolution semantics.
-3. `Invariants`
+1. `Invariants`
    - immutable / append-only guarantees;
    - identity lookup guarantees;
    - correlation guarantees между artifacts.
-4. `Inspection CLI`
+1. `Inspection CLI`
    - canonical commands;
    - supported identifiers;
    - expected output modes для human/machine inspection.
-5. `References`
+1. `References`
    - active ADR;
    - CLI reference;
    - runbook;
@@ -185,7 +188,7 @@ Traceability documentation pack MUST включать:
 
 ## RunManifest / RunLedger как нормативный пример
 
-В ветке `RunManifest-and-Run-Ledger` canonical control-plane surface уже
+В текущем published documentation pack canonical control-plane surface уже
 представлен published документами:
 
 - [ADR-044: Run Manifest and Run Ledger Control Plane](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md);

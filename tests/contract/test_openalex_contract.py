@@ -6,13 +6,20 @@ compatible with the current publication adapter expectations.
 
 from __future__ import annotations
 
+import os
+
 import httpx
 import pytest
+
+from tests.contract._provider_contract_drift import (
+    assert_provider_probe_matches_snapshot,
+)
 
 OPENALEX_API_BASE = "https://api.openalex.org"
 OPENALEX_MAILTO = "bioetl-test@example.com"
 STABLE_DOI = "10.1038/s41586-020-2649-2"
 SEARCH_TITLE = "SARS-CoV-2"
+UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 pytestmark = pytest.mark.network
 
 
@@ -123,3 +130,72 @@ class TestOpenAlexContract:
         data = response.json()
         assert "results" in data
         assert "meta" in data
+
+    @pytest.mark.asyncio
+    async def test_works_filter_snapshot_contract(self) -> None:
+        """Verify the provider-facing DOI filter payload matches the snapshot."""
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{OPENALEX_API_BASE}/works",
+                params={
+                    "mailto": OPENALEX_MAILTO,
+                    "filter": f"doi:{STABLE_DOI}",
+                    "per-page": 1,
+                },
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "openalex",
+            "works_filter_by_doi",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
+
+    @pytest.mark.asyncio
+    async def test_works_search_snapshot_contract(self) -> None:
+        """Verify the provider-facing search payload matches the snapshot."""
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{OPENALEX_API_BASE}/works",
+                params={
+                    "mailto": OPENALEX_MAILTO,
+                    "search": SEARCH_TITLE,
+                    "per-page": 1,
+                    "cursor": "*",
+                },
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "openalex",
+            "works_search_endpoint",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
+
+    @pytest.mark.asyncio
+    async def test_health_probe_snapshot_contract(self) -> None:
+        """Verify the provider-facing health payload matches the snapshot."""
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{OPENALEX_API_BASE}/works",
+                params={
+                    "mailto": OPENALEX_MAILTO,
+                    "per-page": 1,
+                },
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "openalex",
+            "health_probe_shape",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )

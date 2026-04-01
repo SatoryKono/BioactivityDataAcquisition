@@ -1,433 +1,54 @@
----
-Version: 1.0.0
+______________________________________________________________________
+
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-04-02'
 
-# MCP Neo4j Memory - Complete Setup Summary
+______________________________________________________________________
 
-> Scope note: This document describes auxiliary MCP tooling setup. It is not BioETL runtime deployment guidance and does not change ADR-010 Local-Only policy.
+# MCP Neo4j Memory - Archived Implementation Snapshot
 
-## ✅ Production-Grade fastmcp Server Successfully Deployed
+> Scope note: this page documents historical auxiliary tooling only. It is not
+> BioETL runtime deployment guidance and does not change ADR-010 Local-Only
+> policy.
 
-A complete, production-ready Model Context Protocol server for Neo4j memory management has been built and configured.
+> Historical note: the repository no longer contains the previously documented
+> `.ai/mcp/neo4j-memory/` package. This page is therefore an archive snapshot,
+> not an executable implementation guide.
 
----
+## Purpose
 
-## 📦 Package Structure
+This page answers two narrow questions:
 
-### Project Root
-```
-.ai/mcp/neo4j-memory/
-├── src/mcp-neo4j-memory/              ← Main Python Package
-│   ├── __init__.py                    (Package exports)
-│   ├── main.py                        (CLI entry point: mcp-neo4j-memory)
-│   ├── server.py                      (12 MCP tools implementation)
-│   ├── neo4j-connection.py             (Neo4j driver wrapper with health checks)
-│   └── memory-manager.py               (Memory profile management)
-│
-├── pyproject.toml                     (Build config - hatchling, entry points)
-├── Dockerfile                         (Python 3.13.8-slim container)
-├── docker-compose.yml                 (Neo4j + MCP server stack)
-├── .dockerignore                      (Optimized image size)
-│
-├── Documentation:
-│   ├── README.md                      (6k words - usage guide)
-│   ├── PRODUCTION-DEPLOYMENT.md       (10k words - deployment guide)
-│   ├── SETUP-PRODUCTION-COMPLETE.md   (8k words - final status)
-│   ├── QUICK-REFERENCE.txt            (1-page quick reference)
-│   ├── SETUP-COMPLETE.md              (Initial setup summary)
-│   └── This file
-│
-├── Legacy/Examples:
-│   ├── examples.py                    (Python usage examples)
-│   ├── server.js                      (Node.js alternative)
-│   ├── memory.json                    (Configuration storage)
-│   └── __init__.py                    (Legacy package marker)
-```
+1. What kind of Neo4j/MCP integration had been documented historically?
+1. Which current documents should operators read instead?
 
----
+## Historical Capability Envelope
 
-## 🔧 What Was Built
+The archived implementation narrative described:
 
-### 1. **Production Python Package** (`src/mcp-neo4j-memory/`)
+- a dedicated MCP package for Neo4j-oriented tooling
+- profile-based Neo4j memory configuration
+- health and usage inspection helpers
+- local containerized startup notes
+- optional Kubernetes-oriented deployment references
 
-#### `main.py` - CLI Entry Point
-- Installed as `mcp-neo4j-memory` command
-- Configurable via environment variables
-- Proper error handling and logging
+These items are preserved as historical intent only.
 
-#### `server.py` - MCP Server (12 Tools)
-```
-Memory Profiles (5 tools)
-├── get-memory-profile
-├── list-memory-profiles
-├── get-current-profile
-├── set-memory-profile
-└── save-custom-profile
+## Current Docs To Use
 
-Configuration (2 tools)
-├── recommend-memory-configuration
-└── export-environment-variables
+- [Neo4j Memory Configuration Guide](neo4j-memory-setup.md)
+- [Deployment & Tooling Extras](README.md)
+- [BioETL Kubernetes Deployment Guide](deployment-guide.md)
+- [BioETL Kubernetes Manifests - Summary](k8s-summary.md)
 
-Monitoring (4 tools)
-├── check-neo4j-health
-├── get-memory-usage
-├── get-transaction-statistics
-└── get-database-statistics
+## Archive Policy
 
-Troubleshooting (1 tool)
-└── get-troubleshooting-guide
-```
-
-#### `neo4j-connection.py` - Neo4j Integration
-- GraphDatabase driver wrapper
-- Connection pooling & lifecycle management
-- Health checks: `test-connection()`, `get-server-info()`
-- Memory stats: `get-memory-config()`, `get-memory-usage()`
-- Database info: `get-transaction-stats()`, `get-database-stats()`
-
-#### `memory-manager.py` - Memory Management
-- 3 built-in profiles (dev/staging/prod)
-- Custom profile creation & persistence
-- Memory recommendations based on host RAM
-- Troubleshooting guide with solutions
-- Environment variable export
-
-### 2. **Build & Packaging** (`pyproject.toml`)
-
-```toml
-[build-system]
-requires = ["hatchling"]              ← Lightweight builder
-build-backend = "hatchling.build"
-
-[project]
-name = "mcp-neo4j-memory"
-version = "1.0.0"
-requires-python = ">=3.11"
-dependencies = ["fastmcp>=2.0.0", "neo4j>=5.26.0", "pydantic>=2.0"]
-
-[project.scripts]
-mcp-neo4j-memory = "mcp-neo4j-memory.main:main-entry"  ← CLI command
-```
-
-### 3. **Containerization**
-
-#### Dockerfile
-- Base: `python:3.13.8-slim` (lightweight)
-- Builder: `hatchling` (minimal dependencies)
-- Dependencies: fastmcp, neo4j
-- Entry: `mcp-neo4j-memory`
-- Env: 10 configurable variables
-- Label: `io.modelcontextprotocol.server.name`
-
-#### docker-compose.yml
-```yaml
-services:
-  neo4j:
-    - Full Neo4j 5.x service
-    - Memory configuration via environment
-    - Health checks enabled
-    - Persistent volumes
-    
-  neo4j-mcp:
-    - Standalone MCP server
-    - Depends on neo4j service
-    - Port 8000 exposed
-    - Health checks
-    - Auto-restart
-```
-
----
-
-## 📊 Capabilities
-
-### Memory Profile Management
-- Pre-configured: development, staging, production
-- Custom profiles with persistent storage
-- Profile activation and switching
-- Environment variable export
-
-### Neo4j Integration
-- Connection management with pooling
-- Real-time health monitoring
-- Memory configuration reading
-- Memory usage tracking
-- Transaction statistics
-- Database statistics
-
-### Intelligence
-- RAM-based configuration recommendations
-- Troubleshooting guides with solutions
-- Memory allocation rules enforcement
-- Best practice recommendations
-
-### Deployment
-- Docker containerization
-- Docker Compose orchestration
-- Health checks (liveness & readiness)
-- Environment variable configuration
-- Kubernetes ready (see PRODUCTION-DEPLOYMENT.md)
-
----
-
-## 🚀 Deployment Options
-
-### Option 1: Local Development
-```bash
-pip install -e .ai/mcp/neo4j-memory
-export NEO4J-PASSWORD=password
-mcp-neo4j-memory
-```
-
-### Option 2: Docker
-```bash
-docker build -t bioetl-neo4j-mcp .ai/mcp/neo4j-memory
-docker run -e NEO4J-PASSWORD=password bioetl-neo4j-mcp
-```
-
-### Option 3: Docker Compose (Full Stack)
-```bash
-cd .ai/mcp/neo4j-memory
-docker-compose up -d
-```
-
-### Option 4: Kubernetes
-```bash
-kubectl apply -f deployment.yaml  (see PRODUCTION-DEPLOYMENT.md)
-```
-
----
-
-## 📚 Documentation
-
-| File | Size | Content |
-|------|------|---------|
-| README.md | 6k | Usage guide, features, examples |
-| PRODUCTION-DEPLOYMENT.md | 10k | Deployment, config, monitoring, k8s |
-| SETUP-PRODUCTION-COMPLETE.md | 8k | Final status, architecture, next steps |
-| QUICK-REFERENCE.txt | 2k | One-page cheat sheet |
-| SETUP-COMPLETE.md | 6k | Initial setup summary |
-
-**Total Documentation**: 32k+ words covering all aspects
-
----
-
-## 🔑 Key Features
-
-✅ **Production Ready**
-- Type-hinted code (mypy strict)
-- Error handling throughout
-- Logging infrastructure
-- Health checks
-- Graceful shutdown
-
-✅ **fastmcp Framework**
-- Modern MCP implementation
-- 12 professional tools
-- Proper error responses
-- Documented parameters
-
-✅ **Neo4j Integration**
-- Python 5.x driver
-- Connection pooling
-- Real-time monitoring
-- Memory introspection
-
-✅ **Containerization**
-- Multi-stage builds (via hatchling)
-- Minimal image size
-- Health checks
-- Environment configuration
-
-✅ **Documentation**
-- Comprehensive guides
-- Code examples
-- Troubleshooting steps
-- Deployment patterns
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────┐
-│   IDE / Client      │ (Claude, Cursor, etc.)
-│  (MCP Compatible)   │
-└──────────┬──────────┘
-           │
-      MCP Protocol
-     (stdio/HTTP)
-           │
-    ┌──────▼───────┐
-    │  MCP Server  │ (fastmcp)
-    │ 12 Tools     │
-    └──────┬───────┘
-           │
-    ┌──────┴──────────┐
-    │                 │
-┌───▼────┐    ┌──────▼────────┐
-│ Memory  │    │ Neo4j Driver  │
-│ Manager │    │               │
-└────┬────┘    └──────┬────────┘
-     │                │
-     └────────┬───────┘
-              │
-         ┌────▼────┐
-         │  Neo4j  │
-         │ Database│
-         └─────────┘
-```
-
----
-
-## 🛠️ Technology Stack
-
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| MCP Framework | fastmcp | >= 2.0.0 |
-| Database Driver | neo4j | >= 5.26.0 |
-| Validation | pydantic | >= 2.0 |
-| Config Management | pydantic-settings | >= 2.0 |
-| Build System | hatchling | (latest) |
-| Container | Docker | 20.10+ |
-| Orchestration | Docker Compose | 1.29+ |
-| Python | 3.11 - 3.13 | 3.13.8-slim |
-
----
-
-## 📋 Checklist
-
-### ✅ Completed
-- [x] Production Python package structure
-- [x] 12 MCP tools fully implemented
-- [x] Neo4j connection management
-- [x] Memory profile system
-- [x] Health checks and monitoring
-- [x] pyproject.toml configuration
-- [x] Dockerfile (Python 3.13.8-slim)
-- [x] docker-compose.yml (full stack)
-- [x] Comprehensive documentation (30k+ words)
-- [x] Examples and quick references
-- [x] Type hints and error handling
-- [x] Environment variable configuration
-
-### 🎯 Ready For
-- [x] Local development
-- [x] Docker deployment
-- [x] Docker Compose orchestration
-- [x] Kubernetes deployment (patterns provided)
-- [x] CI/CD integration
-- [x] IDE integration (Claude, Cursor)
-- [x] Production use
-
----
-
-## 📖 Quick Start
-
-### 1. Install & Run
-```bash
-cd .ai/mcp/neo4j-memory
-pip install -e .
-export NEO4J-PASSWORD=password
-mcp-neo4j-memory
-```
-
-### 2. Or Use Docker Compose
-```bash
-cd .ai/mcp/neo4j-memory
-docker-compose up -d
-```
-
-### 3. Python API Example
-```python
-from mcp-neo4j-memory.memory-manager import Neo4jMemoryManager
-
-manager = Neo4jMemoryManager()
-profiles = manager.list-profiles()
-rec = manager.recommend-configuration(8)  # For 8GB host
-print(rec)
-```
-
-### 4. Call MCP Tool
-```bash
-# List all profiles
-mcp call list-memory-profiles
-
-# Check Neo4j health
-mcp call check-neo4j-health
-
-# Get memory usage
-mcp call get-memory-usage
-```
-
----
-
-## 🔒 Security Features
-
-- Environment-based credentials (no hardcoding)
-- Encrypted connection support (neo4j driver)
-- TLS certificate validation options
-- Database isolation
-- No secrets in logs
-- Health endpoint for monitoring
-
----
-
-## 📈 Performance
-
-- Lightweight container image (~300MB)
-- Efficient memory manager
-- Connection pooling
-- Async-ready architecture
-- Fast health checks
-- Minimal latency MCP calls
-
----
-
-## 📞 Support Resources
-
-### Documentation
-- README.md - Daily usage
-- PRODUCTION-DEPLOYMENT.md - Deployment specifics
-- QUICK-REFERENCE.txt - Quick lookup
-- Code comments - Implementation details
-
-### External
-- fastmcp: https://github.com/modelcontextprotocol/python-sdk
-- Neo4j: https://neo4j.com/docs/
-- MCP Protocol: https://modelcontextprotocol.io/
-- Docker: https://docs.docker.com/
-
----
-
-## ✨ Summary
-
-**Status**: ✅ PRODUCTION READY
-
-A complete, professional-grade MCP server for Neo4j memory management has been successfully built:
-
-- 5 production modules
-- 12 MCP tools
-- 30k+ words documentation
-- Full Docker support
-- Type-hinted & tested
-- Ready for deployment
-
-**Next Steps**:
-1. Test locally: `mcp-neo4j-memory`
-2. Deploy: `docker-compose up -d`
-3. Integrate: Add to IDE MCP config
-4. Monitor: Use provided tools
-
-**Version**: 1.0.0
-**Built**: 2026-02-21
-**Status**: Production Ready ✅
-
----
-
-Thank you for using MCP Neo4j Memory!
+Detailed procedures, commands, and package-layout explanations should live only
+in current operator-facing documents. This archive page should remain compact so
+it does not become a second drifting source of truth.
