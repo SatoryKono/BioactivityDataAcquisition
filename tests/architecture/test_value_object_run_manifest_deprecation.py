@@ -1,4 +1,4 @@
-"""Freeze guard for the deprecated minimal value-object RunManifest."""
+"""Freeze guard preventing reintroduction of the removed value-object RunManifest."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ def test_deprecated_value_object_run_manifest_is_not_used_in_src(
     """Repo source must use runtime contexts or control-plane manifest instead."""
     violations = _iter_run_manifest_import_violations(
         source_ast_cache,
-        allowed_files=frozenset({RUN_MANIFEST_MODULE}),
+        allowed_files=frozenset(),
     )
     assert not violations, (
         "Deprecated bioetl.domain.value_objects.run_manifest imports are still used "
@@ -81,8 +81,17 @@ def test_deprecated_value_object_run_manifest_is_not_used_in_tests(
 
 @pytest.mark.architecture
 def test_value_objects_facade_does_not_export_deprecated_run_manifest() -> None:
-    """The value_objects public facade must not re-export the deprecated artifact."""
+    """The value_objects public facade must not re-export the removed artifact."""
     source = VALUE_OBJECTS_FACADE.read_text(encoding="utf-8")
     assert "run_manifest" not in source
     assert '"RunManifest"' not in source
     assert "'RunManifest'" not in source
+
+
+@pytest.mark.architecture
+def test_removed_value_object_run_manifest_module_is_not_reintroduced() -> None:
+    """The removed module must stay absent from the active source tree."""
+    assert not RUN_MANIFEST_MODULE.exists(), (
+        "src/bioetl/domain/value_objects/run_manifest.py must remain removed. "
+        "Reintroducing it would reopen the deprecated split-manifest surface."
+    )

@@ -6,8 +6,8 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.composite.lineage import CompositeLineageMetadata
 from bioetl.domain.lineage import (
+    CompositeLineageMetadata,
     LineageEdge,
     LineageEdgeType,
     LineageNodeRef,

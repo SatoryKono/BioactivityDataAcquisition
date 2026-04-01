@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -36,7 +36,27 @@ make setup-plugins
 
 `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
-### Option B: Manual Fallback
+### Option B: Mixed Windows + WSL Checkout
+
+If you open the same repository from both Windows PowerShell and WSL, keep the
+environments separate:
+
+```powershell
+.\scripts\dev\setup_env_windows.ps1
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+```
+
+```bash
+bash scripts/dev/setup_env_wsl.sh
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
+```
+
+This bootstrap creates `.venv-win` for PowerShell and
+`${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` for WSL/Linux by default.
+
+### Option C: Manual Fallback
 
 ```bash
 # Clone and enter directory
@@ -64,12 +84,16 @@ pip install -e ".[dev,tracing,docs]"
 ## Run Your First Pipeline
 
 ```bash
-# Activate virtual environment
-source .venv/bin/activate  # Linux/macOS
-# .venv\Scripts\activate   # Windows
+# CI / single-OS checkout
+uv run python -m bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 
-# Run ChEMBL activity pipeline (limited to 100 records)
-# Note: Use --no-cached-bronze for the very first run to fetch from API
+# WSL mixed checkout
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
+
+# Windows PowerShell mixed checkout
+.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
+
+# Console-script form also works after the environment is activated:
 bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 
 # Data will be stored in:
@@ -81,11 +105,17 @@ bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 ## Verify
 
 ```bash
-# Run tests
+# Stable local suite
 make test
 
-# Check linting
+# Mixed-checkout wrappers
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+
+# Check linting / typing
 make lint
+bash scripts/dev/run_mypy.sh
+.\scripts\dev\run_mypy.ps1
 ```
 
 ## Common Commands
@@ -93,8 +123,10 @@ make lint
 | Task                   | Command                                           |
 | ---------------------- | ------------------------------------------------- |
 | Install dependencies   | `make install`                                    |
+| Mixed-checkout bootstrap | `setup_env_windows.ps1` / `setup_env_wsl.sh`    |
 | Configure plugins      | `make setup-plugins`                              |
 | Verify dependencies    | `make test-deps`                                  |
+| Run tests via wrappers | `run_pytest.ps1` / `run_pytest.sh`                |
 | Run all tests          | `make test`                                       |
 | Run linting            | `make lint`                                       |
 | Run sample pipeline    | `make run-local`                                  |

@@ -204,10 +204,10 @@ reproducibility anchors. Он не заменяет `PipelineRunContext` или
 `PipelineContext` как runtime descriptor.
 
 Соответственно, проект не использует модель “один universal manifest на всё”.
-Если в domain присутствует минимальный `value_objects.RunManifest`, он не
-считается каноническим runtime execution context и рассматривается как
-transitional/deprecated artifact. Новый first-party код не должен строить на
-нём новые execution contracts.
+Отдельный minimal `value_objects.RunManifest` больше не входит в активную
+domain surface. Runtime execution остаётся на `PipelineRunContext` и
+`PipelineContext`, а provenance/control-plane — на
+`domain.control_plane.RunManifest`.
 
 ### 2.6. Доменные сервисы (`services/`)
 

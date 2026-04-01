@@ -1,5 +1,5 @@
 ---
-Version: 6.1.0
+Version: 6.2.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -12,21 +12,30 @@ Last verified: '2026-03-29'
 
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
-**Версия:** 6.1.0
-**Дата обновления:** 2026-03-25
+**Версия:** 6.2.0
+**Дата обновления:** 2026-04-01
 
 ----------------------------------------------------------------------
 
 ## Prerequisites
 
-1. **Virtual environment активирован:**
+1. **Используется поддерживаемый bootstrap path:**
 
    ```bash
-   # Linux/macOS
-   source .venv/bin/activate
+   # CI / single-OS checkout
+   make install
+   make test-deps
+   make setup-plugins
+   ```
 
-   # Windows
-   .venv\Scripts\activate
+   ```powershell
+   # Mixed Windows + WSL checkout: PowerShell
+   .\scripts\dev\setup_env_windows.ps1
+   ```
+
+   ```bash
+   # Mixed Windows + WSL checkout: WSL/Linux
+   bash scripts/dev/setup_env_wsl.sh
    ```
 
 1. **Environment настроен** (`.env` файл или переменные окружения)
@@ -34,9 +43,8 @@ Last verified: '2026-03-29'
 1. **Зависимости установлены:**
 
    ```bash
-   make install
-   make test-deps
-   make setup-plugins
+   # Stable local suite
+   make test
    ```
 
    `scripts/dev/dev_setup.sh` остаётся legacy placeholder и не является
@@ -61,6 +69,17 @@ bioetl run --pipeline chembl_activity
 
 # Инспекция control-plane артефактов завершённого запуска
 bioetl run-manifest show <RUN-ID>
+```
+
+Для mixed Windows + WSL checkout можно вызывать CLI через OS-specific
+интерпретатор без явной активации окружения:
+
+```powershell
+.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_activity --limit 100
+```
+
+```bash
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_activity --limit 100
 ```
 
 ### Run Manifest и Run Ledger

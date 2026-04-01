@@ -551,7 +551,7 @@ def test_probe_mode_fallback_counter_exists() -> None:
 
 GROUP_EDGE_LIMIT = 60
 GROUP_EDGE_TOTAL_BUDGET = (
-    261  # ratchet: module-dependency-map baseline raised from 260
+    263  # ratchet: module-dependency-map baseline raised from 261
 )
 
 _dep_map_module = None

@@ -51,12 +51,9 @@ def test_control_plane_run_manifest_is_documented_as_provenance_artifact() -> No
     assert "not the universal runtime" in class_docstring
 
 
-def test_value_object_run_manifest_is_not_described_as_universal_runtime_context() -> None:
-    module_docstring = _module_docstring(VALUE_OBJECT_MANIFEST_MODULE)
-    class_docstring = _class_docstring(VALUE_OBJECT_MANIFEST_MODULE, "RunManifest")
-
-    assert "not the universal runtime execution descriptor" in module_docstring
-    assert "PipelineRunContext" in module_docstring
-    assert "PipelineContext" in module_docstring
-    assert "control_plane.run_manifest.RunManifest" in module_docstring
-    assert "not the canonical runtime context" in class_docstring
+def test_value_object_run_manifest_module_is_not_reintroduced() -> None:
+    assert not VALUE_OBJECT_MANIFEST_MODULE.exists(), (
+        "The deprecated value-object RunManifest module must stay removed. "
+        "Use PipelineRunContext/PipelineContext for runtime execution and "
+        "domain.control_plane.RunManifest for provenance."
+    )
