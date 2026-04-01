@@ -35,6 +35,7 @@ class CompositeCheckpointService:
         expected_effective_config_hash: str | None = None,
         expected_contract_ref: str | None = None,
         expected_contract_version: str | None = None,
+        expected_manifest_id: str | None = None,
         load_service_factory: Callable[
             ..., CompositeCheckpointLoadService
         ] = CompositeCheckpointLoadService,
@@ -56,6 +57,7 @@ class CompositeCheckpointService:
             effective_config_hash=expected_effective_config_hash,
             contract_ref=expected_contract_ref,
             contract_version=expected_contract_version,
+            manifest_id=expected_manifest_id,
             composite_run_identity=run_id,
         )
         self._checkpoint_filename = self._make_filename(run_id)
@@ -99,6 +101,11 @@ class CompositeCheckpointService:
     def expected_contract_version(self) -> str:
         """Expose the configured contract-version anchor for dependent helpers."""
         return self._expected_checkpoint_context.contract_version
+
+    @property
+    def expected_manifest_id(self) -> str:
+        """Expose the configured manifest anchor for checkpoint correlation."""
+        return self._expected_checkpoint_context.manifest_id
 
     async def load(self) -> CompositeCheckpointState:
         """Load checkpoint state or create a fresh one."""

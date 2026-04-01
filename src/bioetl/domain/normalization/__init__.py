@@ -13,12 +13,15 @@ from bioetl.domain.normalization.dates import (
     parse_date_field,
     validate_publication_year,
 )
-from bioetl.domain.normalization.json import canonicalize_json_string, serialize_json_canonical
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
     normalize_pmc_id,
     normalize_pmid,
     strip_doi_prefix,
+)
+from bioetl.domain.normalization.json import (
+    canonicalize_json_string,
+    serialize_json_canonical,
 )
 from bioetl.domain.normalization.pages import parse_page_range
 from bioetl.domain.normalization.text import (
@@ -28,10 +31,10 @@ from bioetl.domain.normalization.text import (
 )
 
 __all__ = [
+    "canonicalize_json_string",
     "extract_first_item",
     "extract_first_string",
     "format_date_parts",
-    "canonicalize_json_string",
     "normalize_doi",
     "normalize_partial_date",
     "normalize_pmc_id",

@@ -29,6 +29,7 @@ if TYPE_CHECKING:
         CompositePreflightValidator,
     )
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.domain.ports import (
         ExecutionMetricsRunnerPort,
         LockPort,
@@ -97,6 +98,8 @@ class CompositeRunnerDependencyGroup:
     dependency_coordinator: DependencyCoordinatorService | None = None
     quarantine_port: QuarantinePort | None = None
     metrics: MetricsPort | None = None
+    manifest_id: str | None = None
+    run_ledger_service: RunLedgerService | None = None
 
 
 # Backward-compatible alias for legacy naming

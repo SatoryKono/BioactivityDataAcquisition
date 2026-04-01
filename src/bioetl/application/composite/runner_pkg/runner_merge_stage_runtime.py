@@ -26,6 +26,16 @@ __all__ = [
 ]
 
 
+def _record_merge_stage_completed_if_supported(
+    host: _CompositeRunnerMergeStageHostProtocol,
+    merge_result: MergeResult,
+) -> None:
+    """Record optional merge ledger event when host exposes callback."""
+    record = getattr(host, "_record_merge_stage_completed", None)
+    if callable(record):
+        record(merge_result)
+
+
 def transition_to_merging_state(
     host: _CompositeRunnerMergeStageHostProtocol,
     state: CompositeCheckpointState,
@@ -176,3 +186,4 @@ async def handle_merge_success(
     )
     await host._call_generate_dq_reports(merge_result)
     await host._call_write_cv_quarantine(merge_result)
+    _record_merge_stage_completed_if_supported(host, merge_result)

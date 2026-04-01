@@ -10,6 +10,7 @@ from bioetl.composition.providers._registry_protocols import (
 from bioetl.composition.providers.provider_registry import (
     ProviderRegistry,
     ensure_provider_registry_ready,
+    get_default_provider_registry,
 )
 
 __all__ = ["resolve_provider_registry"]
@@ -50,7 +51,7 @@ def resolve_provider_registry(
     resolved_registry = (
         provider_registry
         if provider_registry is not None
-        else ProviderRegistry._get_default()
+        else get_default_provider_registry()
     )
     if ensure_ready:
         return ensure_provider_registry_ready(cast("ProviderRegistry", resolved_registry))

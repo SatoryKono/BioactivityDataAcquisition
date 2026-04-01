@@ -5,10 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-from bioetl.application.composite.join_key_normalization import (
-    JOIN_KEY_NORMALIZATION_POLICIES,
-    validate_join_key_normalization_policies,
-)
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
@@ -21,6 +17,10 @@ from bioetl.application.composite.dependency_progress_tracker import (
 )
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
+)
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+    validate_join_key_normalization_policies,
 )
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (

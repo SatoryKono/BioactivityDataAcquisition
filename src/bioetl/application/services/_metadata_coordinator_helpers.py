@@ -5,14 +5,12 @@ from __future__ import annotations
 from typing import TypeVar
 
 from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.models.metadata import (
     FileOutputMetadata,
     SourceMetadata,
 )
 from bioetl.domain.ports import BronzeMetadataInput
-
-if False:  # pragma: no cover
-    from bioetl.domain.lineage import LineageGraphFragment
 
 _MetadataT = TypeVar("_MetadataT")
 
@@ -31,7 +29,7 @@ def validate_records_present(
 def create_metadata_bundle(
     *,
     metadata: _MetadataT,
-    lineage_fragment: "LineageGraphFragment",
+    lineage_fragment: LineageGraphFragment,
 ) -> MetadataLineageBundle[_MetadataT]:
     """Bundle sidecar metadata with its canonical lineage fragment."""
     return MetadataLineageBundle(

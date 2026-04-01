@@ -16,15 +16,15 @@ from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 
 if TYPE_CHECKING:
+    from bioetl.composition.bootstrap_contexts import RateLimitContext
+    from bioetl.composition.providers._models import ProviderConfig
     from bioetl.composition.providers._registration_contracts import (
         HttpProviderConfigSpec,
         ProviderAssemblySupport,
     )
-    from bioetl.composition.bootstrap_contexts import RateLimitContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.models.filter import ExtractionParams
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
-    from bioetl.composition.providers._models import ProviderConfig
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 ProviderFamilyExtraConfigBuilder = Callable[

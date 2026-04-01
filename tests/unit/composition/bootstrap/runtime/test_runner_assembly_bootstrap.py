@@ -102,6 +102,8 @@ class TestCreateCompositeRunner:
             fsm_state_helper=MagicMock(),
             dq_report_service=MagicMock(),
             quarantine_port=MagicMock(),
+            manifest_id="manifest-123",
+            run_ledger_service=MagicMock(),
         )
 
         result = create_composite_runner(
@@ -137,6 +139,8 @@ class TestCreateCompositeRunner:
             fsm_state_helper=fsm_state_helper,
             dq_report_service=dq_report_service,
             quarantine_port=quarantine_port,
+            manifest_id="manifest-123",
+            run_ledger_service=MagicMock(name="run_ledger_service"),
         )
 
         create_composite_runner(
@@ -158,6 +162,8 @@ class TestCreateCompositeRunner:
         assert call_kwargs["fsm_state_helper"] is fsm_state_helper
         assert call_kwargs["dq_report_service"] is dq_report_service
         assert call_kwargs["quarantine_port"] is quarantine_port
+        assert call_kwargs["manifest_id"] == "manifest-123"
+        assert call_kwargs["run_ledger_service"] is support_services.run_ledger_service
 
 
 @pytest.mark.unit

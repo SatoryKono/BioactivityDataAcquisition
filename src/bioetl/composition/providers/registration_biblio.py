@@ -8,9 +8,10 @@ from bioetl.composition.factories.datasource.crossref import (
     create_crossref_adapter,
 )
 from bioetl.composition.providers._config_helpers import (
-    _build_provider_family_config_map,
+    _build_provider_family_http_config_map,
     _create_http_data_source,
     _get_batch_size_from_config,
+    _get_rate_limits_from_config,
 )
 from bioetl.composition.providers._models import (
     ProviderConfig,
@@ -28,6 +29,7 @@ from bioetl.composition.providers._registration_biblio_profiles import (
 from bioetl.composition.providers._registration_contracts import (
     HttpProviderConfigSpec,
     ProviderAssemblySupport,
+    resolve_provider_assembly_support,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
@@ -270,11 +272,15 @@ def _get_biblio_provider_configs(
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> dict[str, ProviderConfig]:
     """Build ProviderConfig entries for bibliographic providers."""
-    return _build_provider_family_config_map(
+    support = resolve_provider_assembly_support(assembly_support)
+    rate_limits = _get_rate_limits_from_config(
         "pubmed",
         "crossref",
         "openalex",
         "semanticscholar",
-        assembly_support=assembly_support,
-        http_spec_builder=_build_biblio_http_provider_specs,
+    )
+    return _build_provider_family_http_config_map(
+        rate_limits=rate_limits,
+        assembly_support=support,
+        spec_builder=_build_biblio_http_provider_specs,
     )

@@ -17,11 +17,11 @@ from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
     resolve_provider_assembly_support,
 )
-from bioetl.composition.providers._registry_resolution import (
-    resolve_provider_registry,
-)
 from bioetl.composition.providers._registry_protocols import (
     ProviderRegistrarProtocol,
+)
+from bioetl.composition.providers._registry_resolution import (
+    resolve_provider_registry,
 )
 from bioetl.composition.providers.registration_biblio import (
     _get_biblio_provider_configs,

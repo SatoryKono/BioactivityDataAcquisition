@@ -51,6 +51,7 @@ from bioetl.composition.bootstrap.cli.run_manifest import (
 from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_bronze_cleanup_service,
     bootstrap_cleanup_service,
+    bootstrap_contract_migration_service,
     bootstrap_export_service,
     bootstrap_lifecycle_service,
     bootstrap_vacuum_service,
@@ -64,6 +65,7 @@ __all__ = [
     "bootstrap_checkpoint_service",
     "bootstrap_cleanup_service",
     "bootstrap_config_service",
+    "bootstrap_contract_migration_service",
     "bootstrap_export_service",
     "bootstrap_health_server_dependencies",
     "bootstrap_health_service",

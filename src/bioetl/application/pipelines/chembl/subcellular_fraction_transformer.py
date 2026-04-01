@@ -13,11 +13,11 @@ import hashlib
 from functools import partial
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
-from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )

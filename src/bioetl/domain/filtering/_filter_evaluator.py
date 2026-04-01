@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
+from bioetl.domain.filtering.column_filter import GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
     GoldListContainsFilter,
     GoldListLengthFilter,

@@ -170,6 +170,7 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
         expected_effective_config_hash="",
         expected_contract_ref="composite_publication",
         expected_contract_version="1.0.0",
+        expected_manifest_id=None,
     )
     create_dq_report_service.assert_called_once_with(
         logger,

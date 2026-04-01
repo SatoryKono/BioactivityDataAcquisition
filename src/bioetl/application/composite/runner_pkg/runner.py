@@ -8,6 +8,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.runner_pkg.runner_control_plane_mixin import (
+    CompositeRunnerControlPlaneMixin,
+)
 from bioetl.application.composite.runner_pkg.runner_execution_orchestrator import (
     CompositeLockedExecutionContext,
     execute_locked_run_phases,
@@ -64,6 +67,7 @@ __all__ = [
 
 
 class CompositePipelineRunner(
+    CompositeRunnerControlPlaneMixin,
     CompositeRunnerSupportMixin,
     CompositeRunnerObservabilityMixin,
     CompositeRunnerStageMixin,
@@ -104,15 +108,15 @@ class CompositePipelineRunner(
         """Return current run ID."""
         return self._run_id_str
 
-    @property
-    def config(self) -> CompositeConfig:
-        """Return composite configuration."""
-        return self._config
-
     def _mark_finished(self, final_state: CompositePipelineState) -> None:
         """Persist terminal runner state for re-entry guards and diagnostics."""
         self._finished = True
         self._final_state = final_state
+
+    @property
+    def config(self) -> CompositeConfig:
+        """Return composite configuration."""
+        return self._config
 
     def _log_failed_run(
         self,
@@ -136,6 +140,7 @@ class CompositePipelineRunner(
     def _handle_pipeline_execution_failure(self, error: Exception) -> None:
         """Map execution-phase failures to canonical runner diagnostics."""
         self._mark_finished(CompositePipelineState.FAILED)
+        self._record_run_failed(error)
         self._log_failed_run(
             error,
             reason_code="composite_pipeline_execution_failed",
@@ -145,6 +150,7 @@ class CompositePipelineRunner(
     def _handle_bioetl_failure(self, error: BioETLError) -> None:
         """Map unexpected BioETL failures to canonical runner diagnostics."""
         self._mark_finished(CompositePipelineState.FAILED)
+        self._record_run_failed(error)
         self._log_failed_run(error, reason_code="unexpected_bioetl_error")
 
     def _start_run_lifecycle(self) -> None:
@@ -158,6 +164,7 @@ class CompositePipelineRunner(
             run_id=self._run_id_str,
             stage="composite_start",
         )
+        self._record_run_started()
 
     async def _run_with_managed_lock(self) -> CompositeResult:
         """Acquire/release the distributed lock around the canonical run body.
@@ -249,7 +256,9 @@ class CompositePipelineRunner(
         state = await self._prepare_run_state()
         state, execution_context = await self._execute_locked_run_phases(state)
         await self._finalize_pipeline(state)
-        return self._build_composite_result(execution_context)
+        result = self._build_composite_result(execution_context)
+        self._record_run_finished(execution_context)
+        return result
 
 
 # Backward-compatible alias for iterative NAME-001 migration.

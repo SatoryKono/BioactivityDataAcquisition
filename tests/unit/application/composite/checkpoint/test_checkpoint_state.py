@@ -455,6 +455,7 @@ class TestToDict:
             "effective_config_hash",
             "contract_ref",
             "contract_version",
+            "manifest_id",
             "composite_run_identity",
             "created_at",
             "updated_at",
@@ -590,6 +591,7 @@ class TestFromDict:
             dependency_results={"uniprot": dep},
             completed_enrichers=frozenset({"crossref"}),
             enrichment_results={"crossref": er},
+            manifest_id="manifest-123",
             created_at=created,
             updated_at=updated,
         )
@@ -606,6 +608,7 @@ class TestFromDict:
         assert restored.dependency_results["uniprot"].pipeline_name == dep.pipeline_name
         assert "crossref" in restored.completed_enrichers
         assert restored.enrichment_results["crossref"].enricher_name == er.enricher_name
+        assert restored.manifest_id == "manifest-123"
         assert restored.created_at == created
         assert restored.updated_at == updated
 

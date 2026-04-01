@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __all__ = [
     "ContentHashPolicyByVersion",
+    "ContentHashPolicyGroup",
     "ContentHashVersionPolicy",
     "GoldSchemaPolicyByVersion",
     "LockConfig",
@@ -39,7 +40,7 @@ class ContentHashVersionPolicy:
 
 
 @dataclass(frozen=True, slots=True)
-class ContentHashPolicyByVersion:
+class ContentHashPolicyGroup:
     """Typed container for active and shadow content-hash policies."""
 
     active_version: str
@@ -114,6 +115,9 @@ class RecordProcessorConfig:
     content_hash_exclude_fields: frozenset[str] = field(default_factory=frozenset)
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None
     gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None = None
+
+
+ContentHashPolicyByVersion = ContentHashPolicyGroup
 
 
 @dataclass(frozen=True, slots=True)

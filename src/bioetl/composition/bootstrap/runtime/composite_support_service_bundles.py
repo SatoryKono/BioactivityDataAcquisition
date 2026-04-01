@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.join_planner import JoinPlannerService
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.domain.ports import QuarantinePort
 
 
@@ -48,6 +49,17 @@ class RuntimeManagementServicesBundle:
     quarantine_port: QuarantinePort | None
 
 
+@dataclass(frozen=True, slots=True)
+class CompositeControlPlaneBundle:
+    """Optional control-plane artifacts materialized for one composite run."""
+
+    manifest_id: str | None = None
+    run_ledger_service: RunLedgerService | None = None
+    config_hash: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+
+
 @dataclass(slots=True)
 class MergeDependenciesBundle:
     """Merge-specific collaborators assembled in composition."""
@@ -63,6 +75,7 @@ class MergeDependenciesBundle:
 
 
 __all__ = [
+    "CompositeControlPlaneBundle",
     "ExecutionSupportServicesBundle",
     "MergeDependenciesBundle",
     "RuntimeManagementServicesBundle",

@@ -20,14 +20,22 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.lifecycle.cleanup_service import CleanupService
 from bioetl.application.services import (
     BronzeCleanupService,
+    ContractMigrationService,
     ExportService,
     VacuumService,
 )
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition import get_default_registry
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
+from bioetl.infrastructure.config.contract_policy_validation import (
+    load_contract_registry_entries,
+)
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.infrastructure.export import ExportCatalogAdapter, ExportWriterAdapter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
@@ -35,6 +43,7 @@ from bioetl.infrastructure.storage.delta_reader import DeltaReader
 __all__ = [
     "bootstrap_bronze_cleanup_service",
     "bootstrap_cleanup_service",
+    "bootstrap_contract_migration_service",
     "bootstrap_export_service",
     "bootstrap_lifecycle_service",
     "bootstrap_vacuum_service",
@@ -89,6 +98,21 @@ def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
     noop_logger = create_noop_logger()
 
     return BronzeCleanupService(storage=storage, logger=noop_logger)
+
+
+def bootstrap_contract_migration_service(
+    *,
+    registry: PipelineRegistry | None = None,
+) -> ContractMigrationService:
+    """Bootstrap ContractMigrationService for maintenance planner commands."""
+    noop_logger = create_noop_logger()
+    config_service = bootstrap_config_service(registry=registry)
+    return ContractMigrationService(
+        logger=noop_logger,
+        _pipeline_info_loader=config_service.validate_pipeline_config,
+        _contract_policy_loader=load_pipeline_contract_policy,
+        _registry_entries_loader=load_contract_registry_entries,
+    )
 
 
 def bootstrap_vacuum_service(

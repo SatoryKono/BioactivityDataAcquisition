@@ -5,8 +5,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.join_key_normalization import JoinKeyNormalizationPolicy
-
 from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.column_orderer import ColumnOrderer
@@ -18,6 +16,9 @@ from bioetl.application.composite.conflict_resolver import ConflictResolverServi
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 from bioetl.application.composite.dependency_joiner import DependencyJoinerService
 from bioetl.application.composite.join_execution import JoinHow
+from bioetl.application.composite.join_key_normalization import (
+    JoinKeyNormalizationPolicy,
+)
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner import (
     JoinPlannerService,

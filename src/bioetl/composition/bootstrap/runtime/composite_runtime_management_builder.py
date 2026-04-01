@@ -10,6 +10,7 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_quarantine_port,
 )
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
+    CompositeControlPlaneBundle,
     RuntimeManagementServicesBundle,
 )
 from bioetl.composition.services import compute_config_hash
@@ -41,6 +42,7 @@ def build_runtime_management_services(
         [LoggerPort, Settings, MetricsPort],
         DQReportService,
     ],
+    control_plane_bundle: CompositeControlPlaneBundle | None = None,
 ) -> RuntimeManagementServicesBundle:
     """Build checkpoint, FSM, DQ, and quarantine runtime services."""
 
@@ -59,6 +61,11 @@ def build_runtime_management_services(
             expected_effective_config_hash=expected_effective_config_hash,
             expected_contract_ref=config.name,
             expected_contract_version=getattr(config, "version", ""),
+            expected_manifest_id=(
+                None
+                if control_plane_bundle is None
+                else control_plane_bundle.manifest_id
+            ),
         ),
         dq_report_service=create_dq_report_service(
             logger,

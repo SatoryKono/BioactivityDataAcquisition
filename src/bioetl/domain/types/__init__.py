@@ -27,15 +27,15 @@ from bioetl.domain.types.enums import (
     RunType,
 )
 from bioetl.domain.types.gold_contracts import GoldBusinessRuleSpec, ScdConfig
+from bioetl.domain.types.gold_schema_policy import (
+    GoldSchemaPolicyByVersion,
+    GoldSchemaVersionPolicy,
+)
 from bioetl.domain.types.health import (
     ComponentHealthResult,
     HealthReport,
     PreflightReport,
     ValidationResult,
-)
-from bioetl.domain.types.gold_schema_policy import (
-    GoldSchemaPolicyByVersion,
-    GoldSchemaVersionPolicy,
 )
 from bioetl.domain.types.identifiers import (
     ArrowSchema,
