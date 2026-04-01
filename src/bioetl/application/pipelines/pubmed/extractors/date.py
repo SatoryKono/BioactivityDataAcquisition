@@ -263,7 +263,7 @@ class DateExtractor(BaseFieldExtractor):
 
         Uses end-of-period strategy for partial dates:
         - Year + Month + Day → YYYY-MM-DD
-        - Year + Month (no day) → YYYY-MM-30
+        - Year + Month (no day) → YYYY-MM-last_day
         - Year only → YYYY-12-31
         """
         if not year:

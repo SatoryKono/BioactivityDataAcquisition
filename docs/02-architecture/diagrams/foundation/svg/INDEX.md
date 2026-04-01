@@ -341,9 +341,3 @@ _Generated: 2026-03-28T16:48:17+03:00_
 ![50-exception-hierarchy](./50-exception-hierarchy.svg)
 
 ---
-
-## _tmp01 High
-
-![_tmp-01-high](./_tmp-01-high.svg)
-
----

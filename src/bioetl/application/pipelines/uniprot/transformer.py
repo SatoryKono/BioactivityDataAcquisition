@@ -13,10 +13,15 @@ from bioetl.application.core.base_transformer import (
     TransformationError,
     TransformerDependencyContext,
 )
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.pipelines.uniprot.transformer_business_data_mixin import (
     UniProtBusinessDataMixin,
 )
 from bioetl.domain.entities import UniprotTarget
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -66,13 +71,58 @@ class UniProtProteinTransformer(BaseTransformer, UniProtBusinessDataMixin):
         accession = str(self._get_required_field(record, "primaryAccession"))
         entry_name = self._get_entry_name(record)
         business_data = self._build_business_data(record, accession, entry_name)
+        normalized_business_data = RecordNormalizationProcessor(
+            provider=self.provider,
+        ).normalize_business_data(business_data)
 
         entity_id = self.compute_entity_id(
             source_id=accession,
             record={"accession": accession},
         )
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
+        content_hash = self.compute_content_hash(
+            normalized_business_data,
+            exclude_none=True,
+        )
 
+        return self._build_pre_silver_record(
+            context,
+            entity_id,
+            content_hash,
+            index,
+            normalized_business_data,
+        )
+
+    async def transform_pre_silver(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> PreSilverRecord | None:
+        """Build an intermediate UniProt payload for application finalization."""
+        accession = str(self._get_required_field(record, "primaryAccession"))
+        entry_name = self._get_entry_name(record)
+        business_data = self._build_business_data(record, accession, entry_name)
+        entity_id = self.compute_entity_id(
+            source_id=accession,
+            record={"accession": accession},
+        )
+        return PreSilverRecord(
+            entity_id=entity_id,
+            business_data=business_data,
+            build_silver_record=self._build_pre_silver_record,
+            apply_structural_policy=self._apply_structural_policy,
+            apply_silver_filter=self._apply_silver_filter,
+        )
+
+    def _build_pre_silver_record(
+        self,
+        context: PipelineContext,
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Build a finalized Silver record from normalized business data."""
         entity = self._create_entity(
             UniprotTarget,
             context,
@@ -81,7 +131,6 @@ class UniProtProteinTransformer(BaseTransformer, UniProtBusinessDataMixin):
             index=index,
             **business_data,
         )
-
         return cast("SilverRecord", self.entity_to_silver_record(entity))
 
     def _get_entry_name(self, record: BronzeRecord) -> str:

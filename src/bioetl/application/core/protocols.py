@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from collections.abc import Awaitable
 
+    from bioetl.application.core.pre_silver_record import PreSilverRecord
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
@@ -34,7 +35,7 @@ class TransformCallback(Protocol):
         context: PipelineContext,
         record: JsonDict,  # Any: values are heterogeneous
         index: int,  # Any: values are heterogeneous
-    ) -> Awaitable[JsonDict | None]:  # Any: values are heterogeneous
+    ) -> Awaitable[JsonDict | PreSilverRecord | None]:  # Any: values are heterogeneous
         """Execute transformation."""
         ...
 
@@ -88,7 +89,7 @@ class TransformerProtocol(Protocol):
         context: PipelineContext,
         record: BronzeRecord,
         index: int,
-    ) -> SilverRecord | None:
+    ) -> SilverRecord | PreSilverRecord | None:
         """Transform a Bronze record to Silver format.
 
         Args:

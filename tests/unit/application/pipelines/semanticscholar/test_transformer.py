@@ -591,10 +591,10 @@ class TestSemanticScholarDateNormalization:
             ("2024-05-15", "2024-05-15"),
             ("2020-01-01", "2020-01-01"),
             ("1999-12-31", "1999-12-31"),
-            # Year-month only -> day 30
-            ("2024-05", "2024-05-30"),
-            ("2020-01", "2020-01-30"),
-            ("1999-12", "1999-12-30"),
+            # Year-month only -> last day of month
+            ("2024-05", "2024-05-31"),
+            ("2020-01", "2020-01-31"),
+            ("1999-12", "1999-12-31"),
             # Year only -> December 31
             ("2024", "2024-12-31"),
             ("2020", "2020-12-31"),
@@ -695,7 +695,7 @@ class TestSemanticScholarDateNormalization:
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["publication_date"] == "2024-05-30"
+        assert result["publication_date"] == "2024-05-31"
 
 
 class TestSemanticScholarUnifiedPageFields:

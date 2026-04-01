@@ -1,7 +1,8 @@
-"""PMID normalization service.
+"""Deprecated PMID normalization compatibility service.
 
-Pure domain service (no I/O) per RULES.md §1.1.
-Handles normalization of PubMed identifiers.
+Deprecated: import pure helpers from
+``bioetl.domain.normalization.identifiers`` instead.
+Sunset target: 2026-06-30.
 """
 
 from __future__ import annotations
@@ -9,6 +10,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.normalization.identifiers import normalize_pmid
+
+DEPRECATED_IN_FAVOR_OF = "bioetl.domain.normalization.identifiers.normalize_pmid"
+SUNSET_DATE = "2026-06-30"
 
 __all__ = [
     "PmidNormalizationService",

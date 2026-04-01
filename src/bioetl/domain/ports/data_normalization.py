@@ -159,7 +159,8 @@ class DataNormalizationPort(Protocol):
     def normalize_partial_date(self, date_str: str | None) -> str | None:
         """Normalize partial date to full YYYY-MM-DD (end of period strategy).
 
-        Partial dates: YYYY-MM->YYYY-MM-30, YYYY->YYYY-12-31. Full dates unchanged.
+        Partial dates: YYYY-MM->YYYY-MM-last_day, YYYY->YYYY-12-31.
+        Full dates remain unchanged.
 
         Args:
             date_str: Date str.
@@ -175,7 +176,7 @@ class DataNormalizationPort(Protocol):
     ) -> str | None:
         """Format CrossRef date-parts to full YYYY-MM-DD (end of period strategy).
 
-        Partial dates: [year,month]->YYYY-MM-30, [year]->YYYY-12-31.
+        Partial dates: [year,month]->YYYY-MM-last_day, [year]->YYYY-12-31.
 
         Args:
             date_parts: Nested sequences ``[[year, month, day]]`` as returned

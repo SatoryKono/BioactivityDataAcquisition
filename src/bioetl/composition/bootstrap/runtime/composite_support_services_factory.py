@@ -7,6 +7,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+    validate_join_key_normalization_policies,
+)
 from bioetl.application.composite.cross_validator import (
     EnrichmentCrossValidator,
 )
@@ -57,7 +61,7 @@ class CompositeSupportServices:
 class CompositeSupportServicesFactory:
     """Build support services used by composite runtime orchestration."""
 
-    _NORMALIZE_JOIN_KEYS: frozenset[str] = frozenset({"doi", "pmid", "pmc_id"})
+    _JOIN_KEY_NORMALIZATION_POLICIES = JOIN_KEY_NORMALIZATION_POLICIES
     _SYSTEM_COLUMNS_TO_DROP: frozenset[str] = frozenset(
         {
             "_run_id",
@@ -118,6 +122,10 @@ class CompositeSupportServicesFactory:
                 compatible subclass) used to create the checkpoint manager; allows
                 injection of a test double.
         """
+        validate_join_key_normalization_policies(
+            config,
+            self._JOIN_KEY_NORMALIZATION_POLICIES,
+        )
         self._config = config
         self._runtime = runtime
         self._infra = infra_context
@@ -196,7 +204,7 @@ class CompositeSupportServicesFactory:
             config=self._config,
             logger=self._infra.logger,
             resolve_join_how=self._resolve_join_how,
-            normalize_join_keys=self._NORMALIZE_JOIN_KEYS,
+            normalization_policies=self._JOIN_KEY_NORMALIZATION_POLICIES,
             system_columns_to_drop=self._SYSTEM_COLUMNS_TO_DROP,
         )
         return MergeService(

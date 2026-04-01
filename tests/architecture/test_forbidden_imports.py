@@ -76,8 +76,7 @@ class TestLocalOnlyPolicy:
 
         # Scan the entire bioetl package
         source_path = src_dir / "bioetl"
-        if not source_path.exists():
-            pytest.skip("Source directory not found")
+        assert source_path.exists(), "Source directory not found"
 
         violations = []
 
@@ -120,8 +119,7 @@ class TestOrchestrationIsolation:
         lightweight PipelineRunner for orchestration.
         """
         application_path = src_dir / "bioetl" / "application"
-        if not application_path.exists():
-            pytest.skip("Application layer not found")
+        assert application_path.exists(), "Application layer not found"
 
         disallowed = ["prefect", "celery", "airflow", "dagster"]
         violations = []
@@ -199,8 +197,7 @@ class TestPortImportFacade:
         # Discover internal port modules dynamically to avoid stale allowlists.
         # All modules under domain/ports (except __init__.py facade) are internal.
         internal_port_modules = _discover_internal_port_modules(src_dir)
-        if not internal_port_modules:
-            pytest.skip("No internal port modules found")
+        assert internal_port_modules, "No internal port modules found"
 
         violations = []
 
@@ -246,8 +243,7 @@ class TestBootstrapAdapterIsolation:
         bootstrap_file = (
             src_dir / "bioetl" / "composition" / "bootstrap" / "runtime" / "pipeline.py"
         )
-        if not bootstrap_file.exists():
-            pytest.skip("bootstrap/runtime/pipeline.py not found")
+        assert bootstrap_file.exists(), "bootstrap/runtime/pipeline.py not found"
 
         content = bootstrap_file.read_text(encoding="utf-8")
 
@@ -295,8 +291,7 @@ class TestInterfacesFilesystemAccess:
         REQ-ARCH-023: CLI delegates to StoragePort, not Path.rglob.
         """
         interfaces_path = src_dir / "bioetl" / "interfaces"
-        if not interfaces_path.exists():
-            pytest.skip("Interfaces layer not found")
+        assert interfaces_path.exists(), "Interfaces layer not found"
 
         forbidden_patterns = [
             r"\.rglob\(",
@@ -340,8 +335,7 @@ class TestInterfacesBootstrapIsolation:
         - Stable composition API seams with explicit ownership
         """
         interfaces_path = src_dir / "bioetl" / "interfaces"
-        if not interfaces_path.exists():
-            pytest.skip("Interfaces layer not found")
+        assert interfaces_path.exists(), "Interfaces layer not found"
 
         forbidden_patterns = [
             r"from bioetl\.composition\.bootstrap import",
@@ -373,8 +367,7 @@ class TestInterfacesBootstrapIsolation:
     def test_interfaces_no_direct_entrypoints_imports(self, src_dir: Path) -> None:
         """Interfaces must consume narrow composition APIs, not entrypoints façade."""
         interfaces_path = src_dir / "bioetl" / "interfaces"
-        if not interfaces_path.exists():
-            pytest.skip("Interfaces layer not found")
+        assert interfaces_path.exists(), "Interfaces layer not found"
 
         violations: list[str] = []
         for py_file in interfaces_path.rglob("*.py"):

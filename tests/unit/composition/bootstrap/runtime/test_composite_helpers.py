@@ -421,6 +421,20 @@ class TestExtractFilterIdsFromKeys:
         assert filter_field == "chembl_id"
         assert fallback is None  # No title in join_keys
 
+    def test_normalizes_trim_and_case_for_identifier_filters(self) -> None:
+        """Test filter IDs use the same canonical normalization as merge joins."""
+        helpers = _import_helpers()
+        fn = helpers["_extract_filter_ids_from_keys"]
+
+        enricher_cfg = self._make_enricher_cfg(("doi",))
+        keys = pl.DataFrame({"doi": [" 10.1000/ABC ", "10.1000/abc"]})
+
+        filter_ids, filter_field, fallback = fn(enricher_cfg, keys)
+
+        assert filter_ids == ("10.1000/abc",)
+        assert filter_field == "doi"
+        assert fallback is None
+
     def test_returns_none_triple_when_join_key_not_in_columns(self) -> None:
         """Test that (None, None, None) is returned when join key not in columns."""
         helpers = _import_helpers()
@@ -496,6 +510,17 @@ class TestExtractMultiFilterIds:
         assert "document_id" in result
         assert set(result["molecule_id"]) == {"M1", "M2"}
         assert set(result["document_id"]) == {"D1", "D2"}
+
+    def test_normalizes_trim_only_fields_without_lowercasing(self) -> None:
+        """Test trim-only join keys keep their original casing in filter extraction."""
+        helpers = _import_helpers()
+        fn = helpers["_extract_field_values"]
+
+        keys = pl.DataFrame({"title": ["  Mixed Case Title  ", "Mixed Case Title"]})
+
+        result = fn(keys, "title")
+
+        assert result == ("Mixed Case Title",)
 
     def test_returns_none_when_field_missing(self) -> None:
         """Test that None is returned when a required field is missing."""

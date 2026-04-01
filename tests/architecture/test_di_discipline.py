@@ -32,7 +32,7 @@ FORBIDDEN_IN_APPLICATION = [
 DEFINITION_FILES = {
     "PipelineObserver(": {"observability/observer.py"},
     "PreflightService(": {"core/preflight_service.py"},
-    "PostrunService(": {"core/postrun_service.py"},
+    "PostrunService(": {"core/postrun/service.py"},
     "MedallionLifecycleService(": {"services/medallion_lifecycle.py"},
 }
 

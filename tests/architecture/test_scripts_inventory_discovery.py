@@ -28,20 +28,19 @@ def _load_inventory_module():
     return module
 
 
-def test_iter_scripts_includes_mjs_and_sql_files() -> None:
-    """Inventory must cover non-Python utility entrypoints tracked in scope."""
+def test_iter_scripts_includes_non_python_entrypoints_in_current_scope() -> None:
+    """Inventory must cover non-Python utility entrypoints currently present in scope."""
     module = _load_inventory_module()
     root = _project_root()
 
     svg2png_path = "/".join(["scripts", "diagrams", "svg2png.mjs"])
-    init_db_path = "/".join(["src", "tools", "init_db.sql"])
 
     rel_paths = {
         path.relative_to(root).as_posix() for path in module._iter_scripts(root)
     }
 
     assert svg2png_path in rel_paths
-    assert init_db_path in rel_paths
+    assert not any(path.endswith(".sql") for path in rel_paths)
 
 
 def test_discover_refs_normalizes_windows_path_separators() -> None:

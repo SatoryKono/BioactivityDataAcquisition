@@ -206,6 +206,7 @@ mutation_testing:
 # ── Fixture governance ───────────────────────────────────────
 
 fixture_governance:
+  governance_ledger_location: configs/quality/fixture_governance_ledger.yaml
   vcr_cassette_max_age_days: 90
   golden_master_location: tests/fixtures/golden/{provider}/
   current_silver_schema_snapshot_location: tests/contract/silver_schemas/snapshots/

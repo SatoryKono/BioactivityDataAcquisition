@@ -74,8 +74,7 @@ def test_domain_layer_no_infrastructure_imports(src_dir: Path) -> None:
     with no dependencies on external I/O libraries.
     """
     domain_path = src_dir / "bioetl" / "domain"
-    if not domain_path.exists():
-        pytest.skip("Domain layer not found")
+    assert domain_path.exists(), "Domain layer not found"
 
     all_errors = []
     for py_file in domain_path.rglob("*.py"):
@@ -92,8 +91,7 @@ def test_domain_layer_no_application_imports(src_dir: Path) -> None:
     to maintain proper dependency direction (inward).
     """
     domain_path = src_dir / "bioetl" / "domain"
-    if not domain_path.exists():
-        pytest.skip("Domain layer not found")
+    assert domain_path.exists(), "Domain layer not found"
 
     all_errors = []
     for py_file in domain_path.rglob("*.py"):
@@ -110,8 +108,7 @@ def test_domain_layer_no_infrastructure_layer_imports(src_dir: Path) -> None:
     implementations, only define ports (interfaces).
     """
     domain_path = src_dir / "bioetl" / "domain"
-    if not domain_path.exists():
-        pytest.skip("Domain layer not found")
+    assert domain_path.exists(), "Domain layer not found"
 
     all_errors = []
     for py_file in domain_path.rglob("*.py"):
@@ -131,8 +128,7 @@ def test_application_layer_no_common_infrastructure_adapter_imports(
     architecture-sensitive infrastructure modules that previously regressed.
     """
     application_path = src_dir / "bioetl" / "application"
-    if not application_path.exists():
-        pytest.skip("Application layer not found")
+    assert application_path.exists(), "Application layer not found"
 
     implementation_imports = {
         "bioetl.infrastructure.adapters.chembl",
@@ -257,8 +253,7 @@ def test_infrastructure_does_not_import_application(src_dir: Path) -> None:
     implement domain ports, not depend on application services.
     """
     infra_path = src_dir / "bioetl" / "infrastructure"
-    if not infra_path.exists():
-        pytest.skip("Infrastructure layer not found")
+    assert infra_path.exists(), "Infrastructure layer not found"
 
     all_errors = []
     forbidden = {"bioetl.application"}
@@ -280,8 +275,7 @@ def test_no_empty_source_files(src_dir: Path) -> None:
     Only __init__.py files are allowed to be empty (for package markers).
     """
     bioetl_path = src_dir / "bioetl"
-    if not bioetl_path.exists():
-        pytest.skip("bioetl source not found")
+    assert bioetl_path.exists(), "bioetl source not found"
 
     empty_files = []
     for py_file in bioetl_path.rglob("*.py"):
@@ -316,8 +310,7 @@ def test_no_orphan_directories(src_dir: Path) -> None:
     Directories that have subdirectories with content are not considered orphan.
     """
     bioetl_path = src_dir / "bioetl"
-    if not bioetl_path.exists():
-        pytest.skip("bioetl source not found")
+    assert bioetl_path.exists(), "bioetl source not found"
 
     def has_content_in_subtree(dir_path: Path) -> bool:
         """Check if directory or any subdirectory has real Python content."""
@@ -466,8 +459,7 @@ def test_application_layer_no_infrastructure_imports(src_dir: Path) -> None:
     not concrete infrastructure implementations.
     """
     application_path = src_dir / "bioetl" / "application"
-    if not application_path.exists():
-        pytest.skip("Application layer not found")
+    assert application_path.exists(), "Application layer not found"
 
     violations = []
 
@@ -537,8 +529,7 @@ def test_application_layer_no_third_party_infrastructure_libs(
     their functionality.
     """
     application_path = src_dir / "bioetl" / "application"
-    if not application_path.exists():
-        pytest.skip("Application layer not found")
+    assert application_path.exists(), "Application layer not found"
 
     all_errors = []
     for py_file in application_path.rglob("*.py"):
@@ -559,8 +550,7 @@ def test_infrastructure_does_not_import_interfaces(src_dir: Path) -> None:
     not the other way around. Prevents circular dependencies.
     """
     infra_path = src_dir / "bioetl" / "infrastructure"
-    if not infra_path.exists():
-        pytest.skip("Infrastructure layer not found")
+    assert infra_path.exists(), "Infrastructure layer not found"
 
     all_errors = []
     forbidden = {"bioetl.interfaces"}
@@ -580,8 +570,7 @@ def test_infrastructure_does_not_import_composition(src_dir: Path) -> None:
     See CLAUDE.md §2.1 Matrix of Imports.
     """
     infra_path = src_dir / "bioetl" / "infrastructure"
-    if not infra_path.exists():
-        pytest.skip("Infrastructure layer not found")
+    assert infra_path.exists(), "Infrastructure layer not found"
 
     all_errors = []
     forbidden = {"bioetl.composition"}
@@ -611,8 +600,7 @@ def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
     import ast
 
     application_path = src_dir / "bioetl" / "application"
-    if not application_path.exists():
-        pytest.skip("Application layer not found")
+    assert application_path.exists(), "Application layer not found"
 
     # Methods that indicate duck-typing on ports (suspicious patterns)
     PORT_METHOD_PATTERNS = (
@@ -709,7 +697,7 @@ def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
         # Legacy single file structure
         exception_files = [exceptions_file]
     else:
-        pytest.skip("Domain exceptions not found")
+        pytest.fail("Domain exceptions not found")
 
     # Parse all exception files and collect AST trees
     trees: list[ast.AST] = []
@@ -809,7 +797,7 @@ def test_observability_ports_have_close_method(src_dir: Path) -> None:
         with observability_file.open(encoding="utf-8") as f:
             content = f.read()
     else:
-        pytest.skip("Domain ports observability file not found")
+        pytest.fail("Domain ports observability file not found")
 
     import ast
 
@@ -838,8 +826,7 @@ def test_storage_port_has_preview_cleanup(src_dir: Path) -> None:
         storage_file = storage_path / "__init__.py"
     else:
         storage_file = src_dir / "bioetl" / "domain" / "ports" / "storage.py"
-    if not storage_file.exists():
-        pytest.skip("Domain ports storage file not found")
+    assert storage_file.exists(), "Domain ports storage file not found"
 
     content = ""
     if storage_path.is_dir():
@@ -860,8 +847,7 @@ def test_error_classifier_uses_error_type_attribute(src_dir: Path) -> None:
     REQ-ARCH-024: Deterministic error classification.
     """
     classifier_file = src_dir / "bioetl" / "domain" / "error_classifier.py"
-    if not classifier_file.exists():
-        pytest.skip("Error classifier not found")
+    assert classifier_file.exists(), "Error classifier not found"
 
     with classifier_file.open(encoding="utf-8") as f:
         content = f.read()

@@ -83,10 +83,11 @@ async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
 @pytest.mark.asyncio
 @pytest.mark.timeout(180)  # 2 pipeline runs need more time
 async def test_pipeline_idempotency(e2e_data_dir: Path):
-    """E2E: Pipeline runs are idempotent.
+    """E2E: Append-mode activity pipeline reruns remain bounded.
 
-    Running the same pipeline twice with same data should not duplicate records
-    in Silver table (merge/upsert behavior).
+    ``chembl_activity`` is configured with Silver ``append`` mode, so rerunning
+    the same pipeline is not merge-idempotent. This test only verifies that the
+    rerun succeeds and row growth stays within the expected append envelope.
     """
     # Arrange – use higher limit to ensure Silver table is materialized
     ctx1 = create_test_context("chembl_activity", limit=5)
@@ -106,10 +107,12 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
         e2e_data_dir, "chembl_activity", expected_min=1
     )
 
-    # Assert - Count should be similar (merge/upsert prevents duplicates)
-    # Note: May differ slightly due to different batches, but should not double
+    # Append-mode reruns may add rows, but should not grow beyond a second full batch.
+    assert count_after_second >= count_after_first, (
+        f"Append rerun unexpectedly shrank output: {count_after_first} -> {count_after_second}"
+    )
     assert count_after_second <= count_after_first * 2, (
-        f"Records doubled after second run: {count_after_first} -> {count_after_second}"
+        f"Append rerun exceeded expected growth envelope: {count_after_first} -> {count_after_second}"
     )
 
 

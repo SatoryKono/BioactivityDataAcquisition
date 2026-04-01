@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: Informational
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
+Last verified: '2026-04-01'
 ---
 
 # Operations Runbooks (Playbooks)
@@ -16,6 +16,9 @@ Last verified: '2026-03-30'
 
 - Use this page to route operators to the correct runbook for the active incident, maintenance action, or diagnostic task.
 - Escalate according to the priority declared in metadata when operator ownership is unclear.
+- For supported control-plane inspection, this index MUST route operators to the
+  published `Run Manifest Inspection` runbook rather than to ad-hoc notes or
+  repo-only artifacts.
 
 ## Impact
 
@@ -61,25 +64,41 @@ Last verified: '2026-03-30'
 | Runbook | Description | Priority |
 |---------|-------------|----------|
 | [Observability Checklist](observability-checklist.md) | Metrics, logging, and alerting verification | - |
-| [Run Manifest Inspection](run-manifest-inspection.md) | Inspect run control-plane provenance, config, and ledger history | P1 |
+| [Run Manifest Inspection](run-manifest-inspection.md) | Mandatory runbook for the supported RunManifest / RunLedger inspection surface | P1 |
 | [Traceability Signal Ownership](traceability-signal-ownership.md) | Signal ownership matrix for alert -> diagnostics -> escalation | P1 |
 | [Traceability Tabletop Drills](traceability-tabletop-drills.md) | Tabletop scenarios and scoring for operator adoption | P2 |
 | [Traceability Adoption Checklist](traceability-adoption-checklist.md) | Exit-gate checklist and session evidence log for operator adoption | P2 |
 | [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md) | One-pack execution guide for the final operator tabletop/adoption gate | P2 |
 
-- ---
+### Control-Plane / Traceability Routing
+
+- Use [Run Manifest and Run Ledger Contract](../../04-reference/contracts/run-manifest-ledger.md)
+  when you need storage layout, rollout flags, invariants, or event baseline.
+- Use [CLI Reference](../../04-reference/cli.md) for supported inspection
+  commands: `bioetl run-manifest show <run-id|manifest-id>` and
+  `bioetl run-manifest diff <left> <right>`.
+- Use [Run Manifest Inspection](run-manifest-inspection.md) as the mandatory
+  operator runbook for the supported inspection surface.
+- Use [ADR-044](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
+  and [ADR-045](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
+  when triage depends on the intended control-plane or DQ rollout posture.
 
 ### See Also
 
 - [RULES.md](../../00-project/RULES.md) - Project rules and governance
+- [Project Navigator](../../00-project/00-map.md) - Active routing map for control-plane and traceability docs
+- [CLI Reference](../../04-reference/cli.md) - Supported inspection commands
+- [Run Manifest and Run Ledger Contract](../../04-reference/contracts/run-manifest-ledger.md) - Published control-plane contract
+- [ADR-044: Run Manifest and Run Ledger Control Plane](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
+- [ADR-045: Data Quality Contract System](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
 - [ADR-008: Graceful Shutdown](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
-
-- --- *Last updated: 2026-03-26*
 
 ## Compliance
 
 - This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
 - Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+- Supported control-plane inspection MUST keep the contract, CLI reference, and
+  `Run Manifest Inspection` runbook aligned as one published documentation pack.
 
 ## Verification
 

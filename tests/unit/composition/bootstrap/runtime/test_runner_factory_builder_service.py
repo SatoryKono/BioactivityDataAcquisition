@@ -96,7 +96,7 @@ def test_enricher_runoptions_snapshot() -> None:
             is_many_to_one=False,
         )
     ]
-    keys = pl.DataFrame({"doi": ["10.1000/test"], "title": ["Test title"]})
+    keys = pl.DataFrame({"doi": [" 10.1000/TEST "], "title": [" Test title "]})
 
     factory = builder.build_enricher_factory(
         enrichers=list(enrichers), bronze_opts=bronze_opts
@@ -110,7 +110,7 @@ def test_enricher_runoptions_snapshot() -> None:
         "skip_gold": True,
         "filter_ids": ("10.1000/test",),
         "filter_field": "doi",
-        "fallback_mapping": {"10.1000/test": "Test title"},
+        "fallback_mapping": {"10.1000/test": " Test title "},
         "execution_context": "enricher",
         "use_cached_bronze": True,
         "cached_bronze_path": "data/bronze",

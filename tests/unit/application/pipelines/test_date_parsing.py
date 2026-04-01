@@ -46,7 +46,7 @@ class TestPubMedDateBuilding:
             (None, None, None, None),
             # Partial dates (less than 10 chars) fall back to pub_date normalization
             ("2024", "2024-06-15", 2024, "2024-06-15"),
-            # Partial pub_date gets normalized (YYYY-MM → YYYY-MM-30)
+            # Partial pub_date gets normalized using end-of-period month handling
             ("2024-06", None, 2024, "2024-12-31"),  # partial epub, no pub_date → year
         ],
     )

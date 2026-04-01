@@ -12,6 +12,12 @@ This package provides specialized services for domain operations:
 
 Services are pure domain logic (no I/O) per RULES.md §1.1.
 
+Note:
+    ``DoiNormalizationService``, ``PmidNormalizationService``,
+    ``DateNormalizationService``, and ``TextNormalizationService`` are retained
+    as deprecated compatibility façades over ``bioetl.domain.normalization.*``
+    for one sunset cycle.
+
 Usage:
     >>> from bioetl.domain.services import IdentityService
     >>> identity = IdentityService()

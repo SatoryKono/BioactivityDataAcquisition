@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING
+
+from bioetl.application.composite.join_key_normalization import JoinKeyNormalizationPolicy
 
 from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
@@ -42,7 +45,7 @@ def build_merge_dependencies(
     config: CompositeConfig,
     logger: LoggerPort,
     resolve_join_how: Callable[[MergeStrategy], JoinHow],
-    normalize_join_keys: frozenset[str],
+    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy],
     system_columns_to_drop: frozenset[str],
 ) -> MergeDependenciesBundle:
     """Assemble merge-specific collaborators used by MergeService."""
@@ -62,7 +65,7 @@ def build_merge_dependencies(
         coalesce_policy,
     )
     join_key_resolver = JoinKeyResolverService(
-        normalize_join_keys=normalize_join_keys,
+        normalization_policies=normalization_policies,
         parse_pipeline_name=parse_pipeline_name,
     )
     join_executor = PolarsJoinAdapter(

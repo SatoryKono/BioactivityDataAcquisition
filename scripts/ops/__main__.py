@@ -9,6 +9,10 @@ Commands:
     salt-rotate        Rotate PII hashing salt
     fix-grafana        Fix Grafana dashboard configurations
     wsl-proxy          Start WSL proxy helper
+    update-issue       Update a GitHub issue title/body/comment/state (shell)
+    triage-issues      Triage cleanup/docs issue wave (shell)
+    close-ge-spike     Close issue #2595 with the completed spike memo (shell)
+    close-schema-drift Close issue #2594 with the completed Pandera drift gate (shell)
     setup-agents       Sync Codex agents into CODEX_HOME
     setup-plugins      Setup plugins (shell)
     setup-skills       Setup skills (shell)
@@ -31,6 +35,10 @@ COMMANDS: dict[str, str] = {
 }
 
 SHELL_COMMANDS: dict[str, str] = {
+    "update-issue": "update_github_issue.sh",
+    "triage-issues": "triage_cleanup_issue_wave.sh",
+    "close-ge-spike": "close_great_expectations_spike_issue.sh",
+    "close-schema-drift": "close_pandera_schema_drift_issue.sh",
     "setup-agents": "setup_agents.sh",
     "setup-plugins": "setup_plugins.sh",
     "setup-skills": "setup_skills.sh",

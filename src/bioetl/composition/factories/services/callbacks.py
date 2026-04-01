@@ -30,8 +30,12 @@ def extract_pipeline_callbacks(pipeline: BasePipeline) -> PipelineCallbacksConte
     """
     transformer = pipeline.transformer
     if transformer is not None:
+        transform_callback = cast(
+            TransformCallback,
+            getattr(transformer, "transform_pre_silver", transformer.transform),
+        )
         return PipelineCallbacksContext(
-            transform=cast(TransformCallback, transformer.transform),
+            transform=transform_callback,
             gold_filter=cast(GoldFilterCallback, transformer.should_write_gold),
             gold_transform=cast(GoldTransformCallback, transformer.transform_for_gold),
         )

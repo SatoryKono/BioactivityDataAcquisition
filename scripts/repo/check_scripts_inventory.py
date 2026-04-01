@@ -89,8 +89,18 @@ SKIP_FILE_EXTENSIONS: Final[set[str]] = {
     ".zip",
 }
 SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = ("scripts/", "src/tools/")
+MODULE_REF_TOKENS: Final[tuple[str, ...]] = (
+    "python -m scripts.",
+    "python -m src.tools.",
+    "uv run python -m scripts.",
+    "uv run python -m src.tools.",
+)
 SCRIPT_PATH_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:scripts|src/tools)/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
+)
+MODULE_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r"(?:uv\s+run\s+)?(?:python(?:3(?:\.\d+)?)?|py)\s+-m\s+"
+    r"((?:scripts|src\.tools)(?:\.[A-Za-z0-9_]+)+)"
 )
 SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {
     "scripts/ops/codex-exec.bat": ("scripts/codex-exec.bat",),
@@ -135,6 +145,8 @@ def _iter_scripts(root: Path) -> list[Path]:
             if not file_path.is_file():
                 continue
             if file_path.suffix not in SCRIPT_EXTENSIONS:
+                continue
+            if file_path.name == "__init__.py":
                 continue
             scripts.append(file_path)
     return sorted(set(scripts))
@@ -243,7 +255,9 @@ def _discover_refs_in_file(
         return []
 
     normalized_text = text.replace("\\", "/")
-    if not any(token in normalized_text for token in SCRIPT_PATH_TOKENS):
+    has_script_path_refs = any(token in normalized_text for token in SCRIPT_PATH_TOKENS)
+    has_module_refs = any(token in normalized_text for token in MODULE_REF_TOKENS)
+    if not has_script_path_refs and not has_module_refs:
         return []
 
     source_group = _source_group(rel)
@@ -254,7 +268,9 @@ def _discover_refs_in_file(
         zip(original_lines, normalized_lines),
         start=1,
     ):
-        if not any(token in normalized_line for token in SCRIPT_PATH_TOKENS):
+        if not any(token in normalized_line for token in SCRIPT_PATH_TOKENS) and not any(
+            token in normalized_line for token in MODULE_REF_TOKENS
+        ):
             continue
         discovered.extend(
             _discover_refs_from_line(
@@ -295,6 +311,21 @@ def _discover_refs_from_line(
                     ),
                 )
             )
+    for module_name in set(MODULE_REF_CANDIDATE_PATTERN.findall(normalized_line)):
+        candidate_path = f"{module_name.replace('.', '/')}/__main__.py"
+        if candidate_path not in script_set or rel == candidate_path:
+            continue
+        discovered.append(
+            (
+                candidate_path,
+                RefEvidence(
+                    path=rel,
+                    line=line_no,
+                    text=raw_line.strip()[:200],
+                    source_group=source_group,
+                ),
+            )
+        )
     return discovered
 
 

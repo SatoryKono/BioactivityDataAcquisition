@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from itertools import chain
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.config import RecordProcessorConfig
@@ -20,6 +21,46 @@ if TYPE_CHECKING:
     from bioetl.domain.types import GoldSchemaType
 
 
+def _coerce_string_frozenset(value: object | None) -> frozenset[str]:
+    """Coerce list/set-like string collections to an immutable set."""
+    if value is None or isinstance(value, str | bytes):
+        return frozenset()
+    try:
+        return frozenset(item for item in value if isinstance(item, str))
+    except TypeError:
+        return frozenset()
+
+
+def _extract_hash_policy(pipeline: BasePipeline) -> tuple[frozenset[str], frozenset[str]]:
+    """Extract effective content-hash field policy from transformer wiring."""
+    transformer = getattr(pipeline, "transformer", None)
+    identity = getattr(transformer, "_identity", None)
+    contract_policy = getattr(transformer, "_contract_policy", None)
+
+    identity_include = _coerce_string_frozenset(
+        getattr(identity, "_content_hash_include_fields", None)
+    )
+    identity_exclude = _coerce_string_frozenset(
+        getattr(identity, "_content_hash_exclude_fields", None)
+    )
+    contract_include = _coerce_string_frozenset(
+        getattr(contract_policy, "hash_include", None)
+    )
+    contract_exclude = _coerce_string_frozenset(
+        getattr(contract_policy, "hash_exclude", None)
+    )
+
+    include_fields = (
+        frozenset(contract_include & identity_include)
+        if contract_include and identity_include
+        else (contract_include or identity_include)
+    )
+    exclude_fields = frozenset(
+        chain(identity_exclude, contract_exclude, ("entity_id", "content_hash"))
+    )
+    return include_fields, exclude_fields
+
+
 def build_record_processor_config_and_validator(
     *,
     pipeline: BasePipeline,
@@ -33,6 +74,7 @@ def build_record_processor_config_and_validator(
     gold_validator_factory: Callable[..., GoldValidatorPort] = PanderaGoldValidator,
 ) -> tuple[RecordProcessorConfig, GoldValidatorPort]:
     """Build RecordProcessorConfig plus Gold validator from pipeline state."""
+    include_fields, exclude_fields = _extract_hash_policy(pipeline)
     processor_config = RecordProcessorConfig(
         pipeline_name=pipeline.config.pipeline_name,
         provider=pipeline.config.provider,
@@ -47,6 +89,8 @@ def build_record_processor_config_and_validator(
         flat_structure=flat_structure,
         column_groups=pipeline.config.column_groups,
         scd_config=pipeline.config.scd_config,
+        content_hash_include_fields=include_fields,
+        content_hash_exclude_fields=exclude_fields,
     )
     gold_validator = gold_validator_factory(
         cast("pdr.DataFrameSchema | None", cast(object, gold_schema)),
@@ -67,6 +111,7 @@ def create_record_processor_from_pipeline(
     tracer: TracingPort | None = None,
 ) -> RecordProcessor:
     """Project pipeline fields into the injected record-processor factory."""
+    include_fields, exclude_fields = _extract_hash_policy(pipeline)
     return create_record_processor_fn(
         services=pipeline.services,
         context=pipeline.context,
@@ -90,4 +135,6 @@ def create_record_processor_from_pipeline(
         tracer=tracer,
         column_groups=tuple(pipeline.config.column_groups),
         scd_config=pipeline.config.scd_config,
+        content_hash_include_fields=include_fields,
+        content_hash_exclude_fields=exclude_fields,
     )

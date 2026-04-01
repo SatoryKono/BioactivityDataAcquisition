@@ -182,16 +182,16 @@ class TestPubMedDateNormalization:
         transformer: PubMedPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Year-month dates should be normalized to YYYY-MM-30."""
-        xml = _make_pubmed_xml(year="2024", month="06", day=None)
+        """Year-month dates should be normalized to the last day of month."""
+        xml = _make_pubmed_xml(year="2024", month="02", day=None)
         record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(pipeline_context, record, 0)
 
         pub_date = result.get("publication_date")
-        # PubMed normalizes YYYY-MM to YYYY-MM-30 per _normalize_partial_date
-        assert pub_date is not None
-        assert DATE_PATTERN.match(pub_date), f"Invalid date format: {pub_date}"
+        assert pub_date == "2024-02-29", (
+            f"Year-month date should normalize to month end, got {pub_date}"
+        )
 
     @pytest.mark.asyncio
     async def test_epub_date_takes_priority(

@@ -16,6 +16,9 @@ from bioetl.application.composite.conflict_resolver import ConflictResolverServi
 from bioetl.application.composite.dependency_joiner import DependencyJoinerService
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+)
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner import (
     JoinPlannerService,
@@ -53,7 +56,7 @@ def build_join_planner_service(
         join_type_resolver = _default_join_type_resolver
 
     join_key_resolver = JoinKeyResolverService(
-        normalize_join_keys=JoinPlannerService._NORMALIZE_JOIN_KEYS,
+        normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
         parse_pipeline_name=JoinPlannerService._parse_pipeline_name,
     )
     join_executor = JoinExecutorService(

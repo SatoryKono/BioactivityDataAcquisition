@@ -295,17 +295,17 @@ async def test_pipeline_resume_after_failure(
 @pytest.mark.e2e
 @pytest.mark.slow
 @pytest.mark.vcr
+@pytest.mark.asyncio
 async def test_pipeline_idempotency(
     e2e_temp_storage,
     e2e_redis_client,
     e2e_minio_client,
 ):
-    """Test that running the same pipeline twice produces idempotent results.
+    """Test that rerunning append-mode activity pipeline stays bounded.
 
-    Verifies:
-    - Same content_hash for identical records
-    - No duplicate records in Silver
-    - Delta Lake merge/upsert working correctly
+    ``chembl_activity`` uses Silver ``append`` mode, so this scenario is not a
+    strict merge-idempotency check. It verifies that a second run completes and
+    does not grow beyond the expected two-batch envelope.
     """
     import structlog
 
@@ -365,7 +365,7 @@ async def test_pipeline_idempotency(
         df_first = pl.read_delta(str(delta_tables[0]))
         count_first = len(df_first)
 
-        # Run 2: Same data (should be idempotent)
+        # Run 2: Same data on append-mode pipeline
         with patch(
             "bioetl.composition.factories.services.factory.StorageFactory.create",
             return_value=storage_context,
@@ -379,11 +379,11 @@ async def test_pipeline_idempotency(
         df_second = pl.read_delta(str(delta_tables[0]))
         count_second = len(df_second)
 
-        # Verify idempotency: record count should be similar
-        # (may differ slightly due to API changes, but should not double)
-        assert count_second <= count_first * 1.5, (
-            f"Record count increased too much: {count_first} -> {count_second}. "
-            "Idempotency may be broken."
+        assert count_second >= count_first, (
+            f"Append rerun unexpectedly shrank output: {count_first} -> {count_second}."
+        )
+        assert count_second <= count_first * 2, (
+            f"Append rerun exceeded expected growth envelope: {count_first} -> {count_second}."
         )
 
     # Cleanup locks

@@ -46,11 +46,11 @@ Last verified: '2026-03-31'
 - Корень репозитория защищён политикой allowlist.
 
 ## Evidence anchors
-- File structure: [../../../../reports/evidence/project-file-structure/SUMMARY.md](../../../../reports/evidence/project-file-structure/SUMMARY.md)
-- File structure decisions: [../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- Package topology: [../../../../reports/evidence/project-package-topology/SUMMARY.md](../../../../reports/evidence/project-package-topology/SUMMARY.md)
-- Package topology decisions: [../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
-- Governance signals: [../../../../reports/evidence/governance-signals/SUMMARY.md](../../../../reports/evidence/governance-signals/SUMMARY.md)
+- File structure: `docs/reports/evidence/project-file-structure/SUMMARY.md`
+- File structure decisions: `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md`
+- Package topology: `docs/reports/evidence/project-package-topology/SUMMARY.md`
+- Package topology decisions: `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`
+- Governance signals: `docs/reports/evidence/governance-signals/SUMMARY.md`
 
 Для structural claims:
 - не считать package count самостоятельным сигналом к reorg;

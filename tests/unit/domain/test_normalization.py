@@ -14,6 +14,7 @@ from bioetl.domain.normalization import (
     extract_first_string,
     format_date_parts,
     normalize_doi,
+    normalize_partial_date,
     normalize_pmc_id,
     normalize_pmid,
     normalize_string,
@@ -23,6 +24,7 @@ from bioetl.domain.normalization import (
     parse_page_range,
     strip_doi_prefix,
     strip_html_tags,
+    validate_publication_year,
 )
 
 
@@ -100,6 +102,7 @@ class TestNormalizeDoi:
             ("  10.1038/nature12373  ", "10.1038/nature12373"),
             ("  10.1038/NATURE12373  ", "10.1038/nature12373"),
             ("https://doi.org/10.1038/NATURE12373", "10.1038/nature12373"),
+            (" HTTPS://doi.org/10.1038/NATURE12373 ", "10.1038/nature12373"),
             ("doi:10.1126/SCIENCE.ABC1234", "10.1126/science.abc1234"),
             (None, None),
         ],
@@ -180,6 +183,61 @@ class TestNormalizePmid:
     ) -> None:
         """Test PMID normalization."""
         assert normalize_pmid(pmid) == expected
+
+
+class TestNormalizePartialDate:
+    """Tests for normalize_partial_date function."""
+
+    @pytest.mark.parametrize(
+        "date_str,expected",
+        [
+            ("2024-03-15", "2024-03-15"),
+            ("2024-03", "2024-03-31"),
+            ("2024-02", "2024-02-29"),
+            ("2023-02", "2023-02-28"),
+            ("2024", "2024-12-31"),
+            ("  2024-03  ", "2024-03-31"),
+            ("2024/03", None),
+            (None, None),
+        ],
+    )
+    def test_normalize_partial_date(
+        self, date_str: str | None, expected: str | None
+    ) -> None:
+        """Test canonical partial-date normalization."""
+        assert normalize_partial_date(date_str) == expected
+
+
+class TestValidatePublicationYear:
+    """Tests for validate_publication_year function."""
+
+    @pytest.mark.parametrize(
+        ("year", "min_year", "max_year", "expected"),
+        [
+            (2024, 1500, 2100, (2024, False)),
+            (1500, 1500, 2100, (1500, False)),
+            (2100, 1500, 2100, (2100, False)),
+            (1499, 1500, 2100, (1499, True)),
+            (2101, 1500, 2100, (2101, True)),
+            (None, 1500, 2100, (None, False)),
+        ],
+    )
+    def test_validate_publication_year(
+        self,
+        year: int | None,
+        min_year: int,
+        max_year: int,
+        expected: tuple[int | None, bool],
+    ) -> None:
+        """Year validation should be deterministic for explicit bounds."""
+        assert (
+            validate_publication_year(
+                year,
+                min_year=min_year,
+                max_year=max_year,
+            )
+            == expected
+        )
 
 
 class TestParseDateField:

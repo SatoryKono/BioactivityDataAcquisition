@@ -25,7 +25,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Bioactivity
-from bioetl.domain.normalization_chembl import (
+from bioetl.domain.normalization.chembl import (
     normalize_bao_identifier,
     normalize_qudt_unit,
     normalize_standard_unit,

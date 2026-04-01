@@ -14,6 +14,11 @@ import from the specific sub-facades for most symbols:
 - ``bioetl.domain.validation``     — Pure validation functions
 - ``bioetl.domain.serialization``  — Centralized JSON helpers
 - ``bioetl.domain.composite``      — Composite pipeline models (ADR-026)
+
+Legacy ``bioetl.domain.normalization_*`` modules remain as direct-import
+compatibility wrappers only. They are intentionally not exported from the
+top-level domain facade; canonical callers should use
+``bioetl.domain.normalization``.
 """
 
 from __future__ import annotations
@@ -25,10 +30,6 @@ from bioetl.domain import context_cached_bronze
 from bioetl.domain import context_filtering
 from bioetl.domain import lineage
 from bioetl.domain import mapping  # noqa: F401
-from bioetl.domain import normalization_authors
-from bioetl.domain import normalization_chembl
-from bioetl.domain import normalization_dates
-from bioetl.domain import normalization_pages
 from bioetl.domain import observability_contract
 from bioetl.domain import registry  # noqa: F401
 from bioetl.domain import types_config_validation
@@ -45,10 +46,6 @@ __all__ = [
     "context_filtering",
     "get_version",
     "lineage",
-    "normalization_authors",
-    "normalization_chembl",
-    "normalization_dates",
-    "normalization_pages",
     "observability_contract",
     "types_config_validation",
     # Data contracts (subpackage)

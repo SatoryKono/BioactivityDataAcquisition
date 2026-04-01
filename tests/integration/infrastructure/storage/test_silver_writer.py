@@ -8,6 +8,7 @@ import pyarrow as pa
 import pytest
 from deltalake import DeltaTable
 
+from bioetl.domain.transformations import generate_content_hash
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 
@@ -51,6 +52,21 @@ def sample_schema():
         [
             ("id", pa.string()),
             ("val", pa.string()),
+            ("_run_id", pa.string()),
+            ("_run_type", pa.string()),
+            ("_source_batch_id", pa.string()),
+            ("_ingestion_ts", pa.string()),
+        ]
+    )
+
+
+@pytest.fixture
+def sample_schema_with_content_hash():
+    return pa.schema(
+        [
+            ("id", pa.string()),
+            ("val", pa.string()),
+            ("content_hash", pa.string()),
             ("_run_id", pa.string()),
             ("_run_type", pa.string()),
             ("_source_batch_id", pa.string()),
@@ -108,6 +124,67 @@ async def test_write_silver_default_merge(
     assert df.loc[df["id"] == "1", "val"].iloc[0] == "A_updated"
     assert df.loc[df["id"] == "2", "val"].iloc[0] == "B"
     assert df.loc[df["id"] == "3", "val"].iloc[0] == "C"
+
+
+@pytest.mark.asyncio
+async def test_write_silver_merge_is_idempotent_for_identical_input(
+    silver_writer, temp_delta_path, sample_schema_with_content_hash
+):
+    """Merge with identical input should preserve row count and identity set."""
+    records = [
+        {
+            "id": "1",
+            "val": "A",
+            "content_hash": str(generate_content_hash({"id": "1", "val": "A"}, "test")),
+            "_run_id": "run1",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch1",
+            "_ingestion_ts": "2023-01-01T00:00:00",
+        },
+        {
+            "id": "2",
+            "val": "B",
+            "content_hash": str(generate_content_hash({"id": "2", "val": "B"}, "test")),
+            "_run_id": "run1",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch1",
+            "_ingestion_ts": "2023-01-01T00:00:00",
+        },
+    ]
+
+    await silver_writer.write_silver(
+        table_name="test_merge_idempotent",
+        records=records,
+        primary_keys=["id"],
+        schema=sample_schema_with_content_hash,
+    )
+
+    dt = DeltaTable(f"{temp_delta_path}/test_merge_idempotent")
+    first_df = dt.to_pandas().sort_values("id").reset_index(drop=True)
+    first_rows = first_df.to_dict(orient="records")
+    first_identity = {
+        (row["id"], row["content_hash"])
+        for row in first_rows
+    }
+
+    await silver_writer.write_silver(
+        table_name="test_merge_idempotent",
+        records=records,
+        primary_keys=["id"],
+        schema=sample_schema_with_content_hash,
+    )
+
+    dt = DeltaTable(f"{temp_delta_path}/test_merge_idempotent")
+    second_df = dt.to_pandas().sort_values("id").reset_index(drop=True)
+    second_rows = second_df.to_dict(orient="records")
+    second_identity = {
+        (row["id"], row["content_hash"])
+        for row in second_rows
+    }
+
+    assert len(second_df) == len(first_df)
+    assert second_rows == first_rows
+    assert second_identity == first_identity
 
 
 @pytest.mark.asyncio

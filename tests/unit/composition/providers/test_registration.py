@@ -22,6 +22,11 @@ from bioetl.composition.providers.registration import (
     _merge_provider_config_families,
     register_all_providers,
 )
+from bioetl.composition.providers._config_helpers import (
+    _build_provider_family_config_map,
+    _build_provider_family_http_config_map,
+    _resolve_provider_family_registration_context,
+)
 from bioetl.composition.providers._registration_contracts import (
     HttpProviderConfigSpec,
     bind_provider_data_source_creator,
@@ -204,24 +209,24 @@ class TestRegisterAllProviders:
             call(support),
         ]
 
-    @patch("bioetl.composition.providers.registration.get_default_provider_registry")
+    @patch("bioetl.composition.providers.registration.resolve_provider_registry")
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
     @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
     def test_default_registration_uses_default_registry_helper(
         self,
         mock_biblio: MagicMock,
         mock_bio: MagicMock,
-        mock_get_default_registry: MagicMock,
+        mock_resolve_provider_registry: MagicMock,
     ) -> None:
         """Implicit registration should resolve the default registry via helper."""
         default_registry = create_provider_registry()
-        mock_get_default_registry.return_value = default_registry
+        mock_resolve_provider_registry.return_value = default_registry
         mock_bio.return_value = {}
         mock_biblio.return_value = {}
 
         register_all_providers()
 
-        mock_get_default_registry.assert_called_once_with()
+        mock_resolve_provider_registry.assert_called_once_with(None)
 
 
 @pytest.mark.unit
@@ -381,6 +386,146 @@ def test_resolve_provider_assembly_support_binds_explicit_registry_when_building
 
     assert result is sentinel_support
     assert captured["provider_registry"] is registry
+
+
+@pytest.mark.unit
+def test_resolve_provider_family_registration_context_reuses_injected_support(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Family registration helper should preserve the injected support owner."""
+    support = MagicMock(name="support")
+    rate_limits = {"chembl": MagicMock(name="chembl_rate")}
+
+    monkeypatch.setattr(
+        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config",
+        lambda *providers: rate_limits,
+    )
+
+    resolved_support, resolved_rate_limits = (
+        _resolve_provider_family_registration_context(
+            "chembl",
+            assembly_support=support,
+        )
+    )
+
+    assert resolved_support is support
+    assert resolved_rate_limits is rate_limits
+
+
+@pytest.mark.unit
+def test_resolve_provider_family_registration_context_builds_default_support_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Family registration helper should delegate default support creation once."""
+    sentinel_support = MagicMock(name="support")
+    rate_limits = {"pubmed": MagicMock(name="pubmed_rate")}
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config",
+        lambda *providers: captured.update(providers=providers) or rate_limits,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.providers._registration_contracts.resolve_provider_assembly_support",
+        lambda assembly_support: captured.update(assembly_support=assembly_support)
+        or sentinel_support,
+    )
+
+    resolved_support, resolved_rate_limits = (
+        _resolve_provider_family_registration_context(
+            "pubmed",
+            "crossref",
+        )
+    )
+
+    assert resolved_support is sentinel_support
+    assert resolved_rate_limits is rate_limits
+    assert captured["assembly_support"] is None
+    assert captured["providers"] == ("pubmed", "crossref")
+
+
+@pytest.mark.unit
+def test_build_provider_family_http_config_map_uses_shared_manifest_builder(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Family HTTP config builder should delegate through the canonical map helper."""
+    support = MagicMock(name="support")
+    rate_limits = {"chembl": MagicMock(name="chembl_rate")}
+    sentinel_spec = MagicMock(name="spec")
+    sentinel_config_map = {"chembl": MagicMock(name="config")}
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        "bioetl.composition.providers._registration_contracts.build_http_provider_config_map",
+        lambda *, specs, assembly_support: captured.update(
+            specs=specs,
+            assembly_support=assembly_support,
+        )
+        or sentinel_config_map,
+    )
+
+    result = _build_provider_family_http_config_map(
+        rate_limits=rate_limits,
+        assembly_support=support,
+        spec_builder=lambda incoming_rate_limits: captured.update(
+            rate_limits=incoming_rate_limits
+        )
+        or (sentinel_spec,),
+    )
+
+    assert result is sentinel_config_map
+    assert captured["rate_limits"] is rate_limits
+    assert captured["specs"] == (sentinel_spec,)
+    assert captured["assembly_support"] is support
+
+
+@pytest.mark.unit
+def test_build_provider_family_config_map_composes_context_http_and_extra_builders(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Top-level family config builder should compose the full scaffold once."""
+    support = MagicMock(name="support")
+    rate_limits = {"chembl": MagicMock(name="chembl_rate")}
+    http_configs = {"chembl": MagicMock(name="http_config")}
+    extra_configs = {"pubchem": MagicMock(name="extra_config")}
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        "bioetl.composition.providers._config_helpers._resolve_provider_family_registration_context",
+        lambda *providers, assembly_support=None: captured.update(
+            providers=providers,
+            assembly_support=assembly_support,
+        )
+        or (support, rate_limits),
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.providers._config_helpers._build_provider_family_http_config_map",
+        lambda *, rate_limits, assembly_support, spec_builder: captured.update(
+            http_rate_limits=rate_limits,
+            http_assembly_support=assembly_support,
+            http_spec_builder=spec_builder,
+        )
+        or http_configs,
+    )
+
+    sentinel_spec_builder = MagicMock(name="spec_builder")
+    sentinel_extra_builder = MagicMock(name="extra_builder", return_value=extra_configs)
+
+    result = _build_provider_family_config_map(
+        "chembl",
+        "pubchem",
+        assembly_support=None,
+        http_spec_builder=sentinel_spec_builder,
+        extra_config_builder=sentinel_extra_builder,
+    )
+
+    assert result == http_configs | extra_configs
+    assert captured["providers"] == ("chembl", "pubchem")
+    assert captured["assembly_support"] is None
+    assert captured["http_rate_limits"] is rate_limits
+    assert captured["http_assembly_support"] is support
+    assert captured["http_spec_builder"] is sentinel_spec_builder
+    sentinel_extra_builder.assert_called_once_with(rate_limits, support)
 
 
 @pytest.mark.unit

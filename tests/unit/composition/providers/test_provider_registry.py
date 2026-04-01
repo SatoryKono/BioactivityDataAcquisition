@@ -713,6 +713,26 @@ class TestProviderLoader:
         assert captured["status"] is registry
         assert captured["reset"] is registry
 
+    def test_loader_registry_helper_uses_canonical_registry_resolution(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Loader helper should reuse the shared registry-resolution seam."""
+        from bioetl.composition.providers import loader as module
+
+        registry = create_provider_registry()
+        captured: dict[str, object] = {}
+
+        monkeypatch.setattr(
+            module,
+            "resolve_provider_registry",
+            lambda candidate=None: captured.setdefault("candidate", candidate)
+            or registry,
+        )
+
+        assert module._get_loader_registry() is registry
+        assert captured["candidate"] is None
+
 
 class TestRealProviderRegistration:
     """Integration tests for real provider registration."""

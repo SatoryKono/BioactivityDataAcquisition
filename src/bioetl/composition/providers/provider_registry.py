@@ -1,4 +1,10 @@
-"""Provider registry facade over split metadata and creation helpers."""
+"""Provider registry facade over split metadata and creation helpers.
+
+Retained compatibility obligations are intentionally narrow:
+- the class-level ``DefaultRegistryMethod`` mirror for legacy call sites;
+- ``register_default_provider_config()`` for import-time decorator registration;
+- ``ensure_provider_registry_ready()`` for canonical bootstrap resolution.
+"""
 
 from __future__ import annotations
 
@@ -210,12 +216,16 @@ class ProviderRegistry:
 
 
 def register_default_provider_config(name: str, config: ProviderConfig) -> None:
-    """Register a provider config through the named default-registry seam."""
+    """Register a provider config through the retained import-time compat seam."""
     get_default_provider_registry().register(name, config)
 
 
 def ensure_provider_registry_ready(registry: ProviderRegistry) -> ProviderRegistry:
-    """Ensure a provider registry instance is populated before use."""
+    """Ensure a provider registry instance is populated before use.
+
+    This remains the sanctioned bootstrap seam for callers that need an
+    initialized registry instance without importing provider loading internals.
+    """
     _ensure_registry_loaded(registry)
     return registry
 

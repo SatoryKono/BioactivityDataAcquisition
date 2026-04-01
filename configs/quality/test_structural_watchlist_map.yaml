@@ -1,0 +1,119 @@
+version: 1
+policy_scope: residual_test_ci_to_structural_watchlist_mapping
+source_artifacts:
+  - configs/quality/fixture_governance_ledger.yaml
+  - configs/quality/ci_coverage_surface_matrix.yaml
+  - configs/quality/environment_limited_green_policy.yaml
+  - configs/quality/debt_scorecard.yaml
+  - docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml
+ranking_rule: >-
+  Rank by shared blast radius first, then by governance maturity gap, then by how
+  directly the weak confidence surface overlaps a family-level structural watchlist.
+watchlist_families:
+  - family: infrastructure_adapters
+    status: candidate_family
+    owner: "@bioetl-platform"
+    evidence_anchor: docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml
+    path_prefixes:
+      - src/bioetl/infrastructure/adapters/
+    representative_modules:
+      - src/bioetl/infrastructure/adapters/health_check_mixin.py
+      - src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py
+      - src/bioetl/infrastructure/adapters/error_handling.py
+    rationale: >-
+      Provider live execution, replay governance, and residual environment-limited
+      behavior land most directly on adapter families rather than broad infrastructure
+      as a whole.
+  - family: infrastructure_storage
+    status: candidate_family
+    owner: "@bioetl-data-model"
+    evidence_anchor: docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml
+    path_prefixes:
+      - src/bioetl/infrastructure/storage/
+    representative_modules:
+      - src/bioetl/infrastructure/storage/metadata_builder.py
+      - src/bioetl/infrastructure/storage/silver/runtime_helpers.py
+      - src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py
+    rationale: >-
+      Contract snapshots, schema snapshots, and replay-confidence promotion all
+      intersect storage-facing artifact governance and fixture-derived confidence.
+  - family: composition_bootstrap_runtime
+    status: active_family
+    owner: "@bioetl-platform"
+    evidence_anchor: configs/quality/debt_scorecard.yaml
+    path_prefixes:
+      - src/bioetl/composition/bootstrap/runtime/
+    representative_modules:
+      - src/bioetl/composition/bootstrap/runtime/observability.py
+    rationale: >-
+      Runtime/bootstrap governance is already an active family-level watchlist and
+      remains the composition-side bridge for CI/test confidence reporting.
+ranked_intersections:
+  - rank: 1
+    weak_surface: replay_fixture_governance
+    primary_family: infrastructure_adapters
+    secondary_families:
+      - infrastructure_storage
+    priority_band: P0
+    blast_radius: high
+    governance_maturity: partial
+    linked_artifacts:
+      - configs/quality/fixture_governance_ledger.yaml
+      - configs/quality/test_matrix.yaml
+      - docs/reports/evidence/residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md
+    rationale: >-
+      Replay governance is the strongest unfinished shared confidence surface and it
+      touches provider adapter behavior first, with storage artifacts as the secondary
+      contract for snapshots and fixture-derived outputs.
+    next_wave_entrypoint: >-
+      Start with adapter-facing metadata/backfill promotion, then tighten storage-side
+      snapshot and golden-master promotion criteria.
+  - rank: 2
+    weak_surface: centralized_coverage_threshold_vs_ci_breadth
+    primary_family: infrastructure_storage
+    secondary_families:
+      - infrastructure_adapters
+      - composition_bootstrap_runtime
+    priority_band: P1
+    blast_radius: medium
+    governance_maturity: partial
+    linked_artifacts:
+      - configs/quality/ci_coverage_surface_matrix.yaml
+      - configs/quality/test_matrix.yaml
+      - .github/workflows/tests.yml
+    rationale: >-
+      The main gap is not missing execution, but understanding which broad execution
+      surfaces stay outside the hard threshold path. Storage and contract-shaped outputs
+      are the clearest downstream confidence consumers, while adapters and runtime policy
+      remain secondary overlap points.
+    next_wave_entrypoint: >-
+      Keep the mapping informational, then use it to choose whether any future hard gate
+      should target storage-facing contract confidence rather than generic repo coverage.
+  - rank: 3
+    weak_surface: environment_limited_green_live_policy
+    primary_family: infrastructure_adapters
+    secondary_families:
+      - composition_bootstrap_runtime
+    priority_band: P1
+    blast_radius: medium
+    governance_maturity: policy_stabilized
+    linked_artifacts:
+      - configs/quality/environment_limited_green_policy.yaml
+      - configs/quality/test_health_reporting.yaml
+      - scripts/ci/quality_integral_gate.py
+    rationale: >-
+      The remaining environment-limited posture is mostly about live adapter execution
+      policy, with runtime/bootstrap acting as the reporting and orchestration bridge.
+    next_wave_entrypoint: >-
+      Only reopen this as implementation work if accepted steady-state policy changes or
+      if adapter-specific instability escapes the current informational classification.
+selection_outcome:
+  recommended_next_family: infrastructure_adapters
+  recommended_next_surface: replay_fixture_governance
+  why: >-
+    It has the highest shared blast radius, remains only partially governed, and is the
+    clearest overlap between unresolved confidence debt and a concrete structural family.
+  defer_until_after_mapping:
+    - broad infrastructure reorganization
+    - new whole-layer hotspot programs
+    - coverage-threshold expansion beyond coverage-verify

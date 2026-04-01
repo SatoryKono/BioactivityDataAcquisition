@@ -5,12 +5,12 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-01'
 ---
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.24 | Last updated: 2026-03-27*
+*Synced with RULES.md v5.24 | Last updated: 2026-04-01*
 
 > **Documentation Update:** 2026-03-24
 > - Compatibility inventory synced with the current measured CLI shim registry
@@ -20,6 +20,7 @@ Last verified: '2026-03-29'
 > - 2026-03-20: stale config-loader entry updated to current composition/runtime and infrastructure config seams
 > - 2026-03-24: composition/domain references synced with RF-021 config ownership and RF-022 runtime port contracts
 > - 2026-03-27: navigator synced with ADR-044/ADR-045, GitHub local workflow guide, and active traceability runbooks
+> - 2026-04-01: control-plane documentation pack re-synced with RunManifest / RunLedger runtime, storage layout, rollout flags, inspection CLI, and event baseline
 
 ## Quick Links
 
@@ -28,8 +29,15 @@ Last verified: '2026-03-29'
 | Understand the rules    | [RULES.md](RULES.md)                 |
 | Look up terminology     | [glossary.md](glossary.md)           |
 | Find tool commands      | [TOOLS.md](TOOLS.md)                 |
+| Govern documentation    | [D-01](governance/01-documentation-governance-style-guide.md) |
 | Create a new pipeline   | [governance/04-extending-bioetl.md](governance/04-extending-bioetl.md)      |
 | Review a pipeline       | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |
+| Find doc templates      | [templates/index.md](../04-reference/templates/index.md) |
+| Inspect run traceability | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md) |
+| Use inspection CLI      | [cli.md](../04-reference/cli.md) |
+| Run control-plane triage | [run-manifest-inspection.md](../05-operations/runbooks/run-manifest-inspection.md) |
+| Understand control-plane decision | [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md) |
+| Understand rollout / DQ decision | [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md) |
 | Handle a prod error     | [runbooks/index.md](../05-operations/runbooks/index.md)                           |
 | Understand architecture | [00-overview.md](../02-architecture/00-overview.md)                  |
 | Check data contracts    | [chembl_activity-v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)          |
@@ -61,6 +69,7 @@ docs/
 │   ├── TOOLS.md                 # Active tools hub & unified entry points
 │   ├── rules-summary.md         # TL;DR of RULES.md
 │   └── governance/              # Project governance policies
+│       ├── 01-documentation-governance-style-guide.md  # D-01 documentation metapolicy
 │       ├── 02-naming-policy.md  # Entity naming conventions
 │       ├── 03-file-policy.md
 │       ├── 04-extending-bioetl.md
@@ -85,9 +94,9 @@ docs/
 │   ├── cli.md                   # CLI Reference
 │   ├── providers/               # Provider documentation (ChEMBL, PubMed, etc.)
 │   ├── pipelines/               # Pipeline specifications
-│   ├── contracts/               # Data Contracts (Gold layer schemas)
+│   ├── contracts/               # Data and control-plane contracts
 │   ├── schemas/                 # Auxiliary schemas & field maps
-│   └── templates/               # Code & doc templates
+│   └── templates/               # Code & doc templates + published template index
 │
 ├── 05-operations/               # Operations & Runbooks
 │   ├── runbooks/                # Incident response playbooks
@@ -161,6 +170,8 @@ docs/
 | [ADR-041: Naming Policy Skills/Agents](../02-architecture/decisions/ADR-041-naming-policy-skills-agents.md) | Naming conventions for skills and agents | §7.1 |
 | [ADR-042: Testing Strategy Matrix](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md) | Test categorization and coverage strategy | §5 |
 | [ADR-043: Documentation Knowledge Management](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md) | Documentation governance and knowledge management | §7 |
+| [ADR-044: Run Manifest and Run Ledger Control Plane](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md) | Immutable manifest, append-only ledger, inspection CLI | §2.4, §5.5 |
+| [ADR-045: Data Quality Contract System](../02-architecture/decisions/ADR-045-dq-contract-system.md) | DQ contract semantics and rollout alignment | §3.4, §5.5 |
 
 ### Data Management
 
@@ -172,6 +183,17 @@ docs/
 | Backfill/Replay  | [RULES.md](RULES.md#24-политика-backfill--replay)            | §2.4     |
 | Quarantine       | [RULES.md](RULES.md#26-политика-null-и-пропущенных-значений) | §2.6     |
 | Content Hash     | [system-context.md](../02-architecture/system-context.md)                                              | §2.8     |
+
+### Control Plane & Traceability
+
+| Topic | Document | RULES.md |
+|-------|----------|----------|
+| Published control-plane contract | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md) | §2.4, §5.5 |
+| Supported inspection CLI | [cli.md](../04-reference/cli.md) | §5.5 |
+| Mandatory inspection runbook | [run-manifest-inspection.md](../05-operations/runbooks/run-manifest-inspection.md) | §2.4, §5.5 |
+| Control-plane ADR | [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md) | §2.4, §5.5 |
+| DQ / rollout ADR | [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md) | §3.4, §5.5 |
+| Documentation metapolicy | [D-01](governance/01-documentation-governance-style-guide.md) | §7 |
 
 ### Schema Documentation
 
@@ -192,6 +214,9 @@ docs/
 | DQ Metrics        | [RULES.md](RULES.md)                                    | §3.4     |
 | Graceful Shutdown | [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)      | §5.3     |
 | DR Procedures     | [runbooks/index.md](../05-operations/runbooks/index.md)                            | §5.5     |
+| Control-Plane Contract | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md) | §2.4, §5.5 |
+| Inspection CLI    | [cli.md](../04-reference/cli.md)                                                  | §5.5     |
+| Run Traceability  | [run-manifest-inspection.md](../05-operations/runbooks/run-manifest-inspection.md) | §2.4, §5.5 |
 | Cleanup           | [cleanup-policy.md](../03-guides/cleanup-policy.md)                                | §2.1.1   |
 
 ### Development

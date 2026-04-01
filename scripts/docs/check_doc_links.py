@@ -21,8 +21,10 @@ Checks:
      - path contracts for REQUIREMENTS and governance links
   7. Provider specs contain required API governance sections
   8. Runbooks contain required operational sections
-  9. Provider specs and runbooks contain Compliance + Last verified metadata
- 10. Version frontmatter uses SemVer format
+  9. Published control-plane contract specs contain required contract sections
+ 10. Provider specs / runbooks / published control-plane contracts contain
+     required governance metadata
+ 11. Version frontmatter uses SemVer format
 
 Usage:
     python scripts/check_doc_links.py          # Full check
@@ -30,7 +32,7 @@ Usage:
     python scripts/check_doc_links.py --links   # Only broken link check
     python scripts/check_doc_links.py --contracts-index  # Gold contract index parity
     python scripts/check_doc_links.py --provider-overview  # Provider overview parity
-    python scripts/check_doc_links.py --doc-governance  # Provider/runbook governance checks
+    python scripts/check_doc_links.py --doc-governance  # Provider/runbook/control-plane governance checks
     python scripts/check_doc_links.py --not-in-nav-growth   # Only not-in-nav growth guard
     python scripts/check_doc_links.py --legacy-paths   # Only doc drift guardrails
     python scripts/check_doc_links.py --legacy-paths-all   # Drift guardrails incl. internal nav docs
@@ -56,6 +58,7 @@ DOCS_DIR = PROJECT_ROOT / "docs"
 PIPELINES_DIR = DOCS_DIR / "04-reference" / "pipelines"
 GOLD_SCHEMAS_DOC = DOCS_DIR / "04-reference" / "contracts" / "gold-schemas.md"
 GOLD_CONTRACTS_DIR = DOCS_DIR / "04-reference" / "contracts" / "gold"
+CONTRACTS_DOC_DIR = DOCS_DIR / "04-reference" / "contracts"
 PROVIDERS_OVERVIEW_DOC = DOCS_DIR / "04-reference" / "providers" / "README.md"
 PROVIDERS_SPECS_DIR = DOCS_DIR / "04-reference" / "providers"
 CHEMBL_PROVIDERS_DIR = DOCS_DIR / "04-reference" / "providers" / "chembl"
@@ -125,8 +128,15 @@ REQUIRED_RUNBOOK_SECTIONS = (
     "Preconditions",
     "Procedure",
     "Verification",
-    "Rollback",
+    "Rollback/Recovery",
     "Post-incident",
+)
+REQUIRED_CONTROL_PLANE_CONTRACT_SECTIONS = (
+    "Purpose",
+    "Storage layout",
+    "Rollout flags",
+    "Invariants",
+    "Inspection surface",
 )
 
 
@@ -312,6 +322,24 @@ def _extract_headings(md_file: Path) -> set[str]:
     return headings
 
 
+def _is_published_doc(frontmatter: dict[str, object]) -> bool:
+    """Return True when frontmatter marks a doc as published."""
+    raw_class = frontmatter.get("Class")
+    if raw_class is None:
+        return False
+    return str(raw_class).strip().casefold() == "published"
+
+
+def _has_heading(headings: set[str], section: str) -> bool:
+    """Return True when headings contain an exact normalized section title."""
+    return section.casefold() in headings
+
+
+def _has_any_heading(headings: set[str], *sections: str) -> bool:
+    """Return True when headings contain any normalized section title."""
+    return any(_has_heading(headings, section) for section in sections)
+
+
 def _provider_spec_files() -> list[Path]:
     """Return provider-spec markdown docs (excluding overview README)."""
     return sorted(
@@ -326,6 +354,28 @@ def _runbook_files() -> list[Path]:
     return sorted(path for path in RUNBOOKS_DIR.glob("*.md") if path.is_file())
 
 
+def _control_plane_contract_spec_files() -> list[Path]:
+    """Return published control-plane contract specs from reference contracts."""
+    candidates = sorted(
+        path
+        for path in CONTRACTS_DOC_DIR.glob("*.md")
+        if path.is_file()
+        and path.name.lower() not in {"readme.md", "gold-schemas.md"}
+    )
+    control_plane_files: list[Path] = []
+    for md_file in candidates:
+        frontmatter = _extract_frontmatter(md_file)
+        if not _is_published_doc(frontmatter):
+            continue
+        stem = md_file.stem.casefold()
+        if any(
+            token in stem
+            for token in ("run-manifest", "run-ledger", "control-plane")
+        ):
+            control_plane_files.append(md_file)
+    return control_plane_files
+
+
 def check_provider_spec_governance() -> list[tuple[Path, str]]:
     """Validate provider-spec API governance sections and metadata."""
     violations: list[tuple[Path, str]] = []
@@ -337,20 +387,24 @@ def check_provider_spec_governance() -> list[tuple[Path, str]]:
         for section in REQUIRED_PROVIDER_SECTIONS:
             if section.casefold() not in headings:
                 violations.append(
-                    (md_file, f"missing provider-spec section: {section}")
+                    (md_file, f"provider-spec: missing required section '{section}'")
                 )
 
         if "compliance" not in " ".join(headings):
-            violations.append((md_file, "missing Compliance heading"))
+            violations.append((md_file, "provider-spec: missing Compliance heading"))
 
         last_verified = frontmatter.get("Last verified")
         if not isinstance(last_verified, str) or not last_verified.strip():
-            violations.append((md_file, "missing Last verified frontmatter"))
+            violations.append(
+                (md_file, "provider-spec: missing Last verified frontmatter")
+            )
 
         version = frontmatter.get("Version")
         version_str = str(version).strip() if version is not None else ""
         if not SEMVER_RE.fullmatch(version_str):
-            violations.append((md_file, f"invalid Version SemVer: {version_str!r}"))
+            violations.append(
+                (md_file, f"provider-spec: invalid Version SemVer: {version_str!r}")
+            )
 
     return violations
 
@@ -364,20 +418,86 @@ def check_runbook_governance() -> list[tuple[Path, str]]:
         frontmatter = _extract_frontmatter(md_file)
 
         for section in REQUIRED_RUNBOOK_SECTIONS:
-            if section.casefold() not in headings:
-                violations.append((md_file, f"missing runbook section: {section}"))
+            if section == "Rollback/Recovery":
+                if _has_any_heading(headings, "Rollback", "Recovery"):
+                    continue
+                violations.append(
+                    (
+                        md_file,
+                        "runbook: missing required section 'Rollback/Recovery'",
+                    )
+                )
+                continue
+            if not _has_heading(headings, section):
+                violations.append(
+                    (md_file, f"runbook: missing required section '{section}'")
+                )
 
         if "compliance" not in " ".join(headings):
-            violations.append((md_file, "missing Compliance heading"))
+            violations.append((md_file, "runbook: missing Compliance heading"))
 
         last_verified = frontmatter.get("Last verified")
         if not isinstance(last_verified, str) or not last_verified.strip():
-            violations.append((md_file, "missing Last verified frontmatter"))
+            violations.append((md_file, "runbook: missing Last verified frontmatter"))
 
         version = frontmatter.get("Version")
         version_str = str(version).strip() if version is not None else ""
         if not SEMVER_RE.fullmatch(version_str):
-            violations.append((md_file, f"invalid Version SemVer: {version_str!r}"))
+            violations.append(
+                (md_file, f"runbook: invalid Version SemVer: {version_str!r}")
+            )
+
+    return violations
+
+
+def check_control_plane_contract_governance() -> list[tuple[Path, str]]:
+    """Validate published control-plane contract required sections and metadata."""
+    violations: list[tuple[Path, str]] = []
+
+    for md_file in _control_plane_contract_spec_files():
+        headings = _extract_headings(md_file)
+        frontmatter = _extract_frontmatter(md_file)
+
+        for section in REQUIRED_CONTROL_PLANE_CONTRACT_SECTIONS:
+            if section == "Inspection surface":
+                if _has_any_heading(headings, "Inspection Surface", "CLI Inspection"):
+                    continue
+                violations.append(
+                    (
+                        md_file,
+                        "control-plane contract-spec: missing required section "
+                        "'Inspection surface'",
+                    )
+                )
+                continue
+            if not _has_heading(headings, section):
+                violations.append(
+                    (
+                        md_file,
+                        "control-plane contract-spec: missing required section "
+                        f"'{section}'",
+                    )
+                )
+
+        last_verified = frontmatter.get("Last verified")
+        if not isinstance(last_verified, str) or not last_verified.strip():
+            violations.append(
+                (
+                    md_file,
+                    "control-plane contract-spec: missing Last verified frontmatter",
+                )
+            )
+
+        version = frontmatter.get("Version")
+        version_str = str(version).strip() if version is not None else ""
+        if not SEMVER_RE.fullmatch(version_str):
+            violations.append(
+                (
+                    md_file,
+                    "control-plane contract-spec: invalid Version SemVer: "
+                    f"{version_str!r}",
+                )
+            )
 
     return violations
 
@@ -426,15 +546,23 @@ def _load_nav_docs() -> list[Path]:
         return []
 
     raw = mkdocs_file.read_text(encoding="utf-8", errors="replace")
-    # Strip YAML comments so regex doesn't pick up paths from comment text
-    text = "\n".join(
-        line.split(" #")[0] if " #" in line else line for line in raw.splitlines()
-    )
-    nav_paths = sorted(set(MD_PATH_RE.findall(text)))
-    # Filter out absolute paths that may survive stripping
-    return [
-        DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")
-    ]
+    lines = raw.splitlines()
+    nav_lines: list[str] = []
+    in_nav = False
+
+    for line in lines:
+        stripped = line.strip()
+        if not in_nav:
+            if stripped == "nav:":
+                in_nav = True
+            continue
+
+        if line and not line.startswith((" ", "\t")) and ":" in line:
+            break
+        nav_lines.append(line.split(" #")[0] if " #" in line else line)
+
+    nav_paths = sorted(set(MD_PATH_RE.findall("\n".join(nav_lines))))
+    return [DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")]
 
 
 def _collect_link_scan_files(root: Path) -> list[Path]:
@@ -736,7 +864,10 @@ def main() -> int:
     parser.add_argument(
         "--doc-governance",
         action="store_true",
-        help="Only check provider-spec/runbook sections, Compliance, Last verified, and Version SemVer",
+        help=(
+            "Only check provider-spec/runbook/control-plane contract sections, "
+            "required governance metadata, and Version SemVer"
+        ),
     )
     parser.add_argument(
         "--not-in-nav-growth",
@@ -890,6 +1021,21 @@ def main() -> int:
             violations += len(runbook_violations)
         else:
             print("Runbook governance: OK")
+
+        control_plane_contract_violations = check_control_plane_contract_governance()
+        if control_plane_contract_violations:
+            print(f"\n{'=' * 60}")
+            print(
+                "CONTROL-PLANE CONTRACT GOVERNANCE VIOLATIONS "
+                f"({len(control_plane_contract_violations)} found)"
+            )
+            print(f"{'=' * 60}")
+            for filepath, message in control_plane_contract_violations:
+                rel = filepath.relative_to(PROJECT_ROOT)
+                print(f"  {rel}: {message}")
+            violations += len(control_plane_contract_violations)
+        else:
+            print("Control-plane contract governance: OK")
 
     if run_all or args.not_in_nav_growth:
         current_count, baseline_count, added, removed, baseline_exists = (

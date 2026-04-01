@@ -22,12 +22,20 @@ from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterRead
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._registration_contracts import (
+        HttpProviderConfigSpec,
         ProviderAssemblySupport,
     )
+    from bioetl.composition.bootstrap_contexts import RateLimitContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.models.filter import ExtractionParams
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.composition.providers._models import ProviderConfig
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+ProviderFamilyExtraConfigBuilder = Callable[
+    [dict[str, "RateLimitContext"], "ProviderAssemblySupport"],
+    dict[str, "ProviderConfig"],
+]
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
@@ -86,6 +94,62 @@ def _get_rate_limits_from_config(*providers: str) -> dict[str, RateLimitContext]
         provider: _get_rate_limit_from_config(provider)
         for provider in providers
     }
+
+
+def _resolve_provider_family_registration_context(
+    *providers: str,
+    assembly_support: ProviderAssemblySupport | None = None,
+) -> tuple[ProviderAssemblySupport, dict[str, RateLimitContext]]:
+    """Resolve shared assembly support plus YAML-backed rate limits for a family."""
+    from bioetl.composition.providers._registration_contracts import (
+        resolve_provider_assembly_support,
+    )
+
+    return (
+        resolve_provider_assembly_support(assembly_support),
+        _get_rate_limits_from_config(*providers),
+    )
+
+
+def _build_provider_family_http_config_map(
+    *,
+    rate_limits: dict[str, RateLimitContext],
+    assembly_support: ProviderAssemblySupport,
+    spec_builder: Callable[[dict[str, RateLimitContext]], tuple[HttpProviderConfigSpec, ...]],
+) -> dict[str, ProviderConfig]:
+    """Build one family's HTTP provider configs from a manifest builder."""
+    from bioetl.composition.providers._registration_contracts import (
+        build_http_provider_config_map,
+    )
+
+    return build_http_provider_config_map(
+        specs=spec_builder(rate_limits),
+        assembly_support=assembly_support,
+    )
+
+
+def _build_provider_family_config_map(
+    *providers: str,
+    assembly_support: ProviderAssemblySupport | None = None,
+    http_spec_builder: Callable[
+        [dict[str, RateLimitContext]],
+        tuple[HttpProviderConfigSpec, ...],
+    ],
+    extra_config_builder: ProviderFamilyExtraConfigBuilder | None = None,
+) -> dict[str, ProviderConfig]:
+    """Build one provider family's config map from manifest builders."""
+    support, rate_limits = _resolve_provider_family_registration_context(
+        *providers,
+        assembly_support=assembly_support,
+    )
+    configs = _build_provider_family_http_config_map(
+        rate_limits=rate_limits,
+        assembly_support=support,
+        spec_builder=http_spec_builder,
+    )
+    if extra_config_builder is None:
+        return configs
+    return configs | extra_config_builder(rate_limits, support)
 
 
 def _get_circuit_breaker_from_config(provider: str) -> CircuitBreakerConfig:

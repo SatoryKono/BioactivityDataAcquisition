@@ -198,6 +198,85 @@ When adding new tools to this directory:
 
 ## Scripts
 
+### apply_entity_naming_rename_plan.py
+
+Manual architecture refactor helper for applying precomputed entity naming waves.
+
+**Location:** `src/tools/apply_entity_naming_rename_plan.py`
+
+**Typical usage:**
+
+```bash
+python src/tools/apply_entity_naming_rename_plan.py --wave W1-domain-entities
+python src/tools/apply_entity_naming_rename_plan.py --wave W2-gold-contract-schemas --apply
+```
+
+### create_pipeline.py
+
+Legacy pipeline scaffolding helper retained as a specialized manual tool.
+
+**Location:** `src/tools/create_pipeline.py`
+
+**Typical usage:**
+
+```bash
+python src/tools/create_pipeline.py --provider <name> --entity <name> --dry-run
+```
+
+Prefer the maintained project workflow for new pipelines when possible; use this helper only for targeted legacy scaffolding cases.
+
+### apply_elk_layout.py
+
+Diagram-layout helper for adding or auditing ELK layout hints in Mermaid sources.
+
+**Location:** `src/tools/apply_elk_layout.py`
+
+**Typical usage:**
+
+```bash
+python src/tools/apply_elk_layout.py --dry-run
+python src/tools/apply_elk_layout.py
+```
+
+### differentiate_linkstyle.py
+
+Diagram semantics helper for assigning differentiated Mermaid `linkStyle` classes.
+
+**Location:** `src/tools/differentiate_linkstyle.py`
+
+**Typical usage:**
+
+```bash
+python src/tools/differentiate_linkstyle.py --dry-run
+python src/tools/differentiate_linkstyle.py
+```
+
+### scripts/config_matrix_generator.py
+
+Generates a cross-config comparison matrix and discrepancy report for entity and composite YAMLs.
+
+**Location:** `src/tools/scripts/config_matrix_generator.py`
+
+**Typical usage:**
+
+```bash
+python src/tools/scripts/config_matrix_generator.py
+```
+
+### scripts/validate_unified_configs.py
+
+Legacy standalone validator for unified entity YAML configs.
+
+**Location:** `src/tools/scripts/validate_unified_configs.py`
+
+**Typical usage:**
+
+```bash
+python src/tools/scripts/validate_unified_configs.py
+```
+
+Prefer the maintained grouped entrypoint `python -m scripts.schema validate-configs` for regular contributor workflows.
+
 ### duplicate_function_analyzer.py
 
 AST-анализатор дубликатов функций в выбранной области (по умолчанию `src/bioetl/application/**/utils.py`,

@@ -20,19 +20,19 @@ python -m scripts.schema <command> [args...]
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `check-invariants` | `check_config_invariants.py` | Validate config CI invariants (naming, schemas, auth, keys) |
-| `check-required-fields` | `check_required_filter_fields.py` | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |
-| `audit-optionality` | `audit_effective_optionality.py` | Audit or validate `effective_optional_v1` derived from current config surface |
-| `check-config-paths` | `lint_config_paths.py` | Check for legacy dq/filter config path references |
-| `generate-pipeline` | `generate_pipeline_schema.py` | Generate pipeline JSON schema |
-| `generate-artifacts` | `generate_schema_artifacts.py` | Generate schema artifacts |
-| `generate-pubtype` | `generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts |
-| `generate-contracts` | `generate_contracts.py` | Generate contracts |
-| `generate-unified-map` | `generate_unified_schema_map.py` | Generate unified Bronze→Silver→Gold schema map CSV |
-| `generate-field-diagnostics` | `generate_field_level_diagnostics.py` | Generate field-level schema drift diagnostics CSV |
-| `generate-field-spec` | `generate_field_transformation_spec.py` | Generate deterministic per-field transformation specification CSV |
-| `validate-configs` | `validate_pipeline_configs.py` | Validate unified pipeline YAML configs against JSON Schema |
-| `analyze-gaps` | `config_gap_analysis.py` | Config gap analysis between configs and code |
+| `check-invariants` | `scripts/schema/check_config_invariants.py` | Validate config CI invariants (naming, schemas, auth, keys) |
+| `check-required-fields` | `scripts/schema/check_required_filter_fields.py` | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |
+| `audit-optionality` | `scripts/schema/audit_effective_optionality.py` | Audit or validate `effective_optional_v1` derived from current config surface |
+| `check-config-paths` | `scripts/schema/lint_config_paths.py` | Check for legacy dq/filter config path references |
+| `generate-pipeline` | `scripts/schema/generate_pipeline_schema.py` | Generate pipeline JSON schema |
+| `generate-artifacts` | `scripts/schema/generate_schema_artifacts.py` | Generate schema artifacts |
+| `generate-pubtype` | `scripts/schema/generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts |
+| `generate-contracts` | `scripts/schema/generate_contracts.py` | Generate contracts |
+| `generate-unified-map` | `scripts/schema/generate_unified_schema_map.py` | Generate unified Bronze→Silver→Gold schema map CSV |
+| `generate-field-diagnostics` | `scripts/schema/generate_field_level_diagnostics.py` | Generate field-level schema drift diagnostics CSV |
+| `generate-field-spec` | `scripts/schema/generate_field_transformation_spec.py` | Generate deterministic per-field transformation specification CSV |
+| `validate-configs` | `scripts/schema/validate_pipeline_configs.py` | Validate unified pipeline YAML configs against JSON Schema |
+| `analyze-gaps` | `scripts/schema/config_gap_analysis.py` | Config gap analysis between configs and code |
 
 ## When to Use
 

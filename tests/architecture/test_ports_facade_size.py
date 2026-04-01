@@ -6,8 +6,6 @@ import ast
 from dataclasses import dataclass
 from pathlib import Path
 
-import pytest
-
 MAX_EXPORTS_PER_PORTS_SUBMODULE = 22
 
 
@@ -80,8 +78,7 @@ def _collect_module_export_stats(ports_dir: Path) -> list[ModuleExportStats]:
 def test_ports_submodule_exports_stay_under_cap(src_dir: Path) -> None:
     """Every ``domain/ports`` sub-module must keep export surface small."""
     ports_dir = src_dir / "bioetl" / "domain" / "ports"
-    if not ports_dir.exists():
-        pytest.skip("domain/ports directory not found")
+    assert ports_dir.exists(), "domain/ports directory not found"
 
     stats = _collect_module_export_stats(ports_dir)
     violations = [

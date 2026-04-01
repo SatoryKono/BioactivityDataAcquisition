@@ -7,6 +7,10 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.publication_term_transformer import (
@@ -202,6 +206,25 @@ class TestAssayTransformer:
         assert result["variant_taxonomy_id"] is None
 
     @pytest.mark.asyncio
+    async def test_transform_pre_silver_returns_staged_payload(
+        self, transformer, mock_context
+    ):
+        """Assay transformer should expose staged payloads without content hash."""
+        record = {
+            "assay_id": "CHEMBL1234567",
+            "target_id": "CHEMBL123",
+            "publication_id": "CHEMBL456",
+            "bao_format": "BAO_0000218",
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.entity_id == "chembl:CHEMBL1234567"
+        assert result.business_data["assay_id"] == "CHEMBL1234567"
+        assert "content_hash" not in result.business_data
+
+    @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
         transformer = AssayTransformer(
@@ -312,6 +335,24 @@ class TestPublicationTransformer:
         assert result["chembl_release"] == "34"
         assert result["creation_date"] == "2026-01-01"
         assert result["citations_received"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_silver_supports_legacy_document_id_fallback(
+        self, transformer, mock_context
+    ):
+        """Publication staged path should accept document_chembl_id fallback."""
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "title": "Fallback publication",
+            "doi": "10.1000/test.doi",
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.entity_id == "chembl:CHEMBL1234567"
+        assert result.business_data["publication_id"] == "CHEMBL1234567"
+        assert "content_hash" not in result.business_data
 
 
 @pytest.mark.unit
@@ -1309,6 +1350,51 @@ class TestPublicationTermTransformer:
 
         # Empty term should trigger skip logic in base transformer
         assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_silver_supports_legacy_document_id_fallback(
+        self, transformer, mock_context
+    ):
+        """PublicationTerm staged path should accept document_chembl_id fallback."""
+        record = {
+            "document_chembl_id": "CHEMBL1135642",
+            "term": "  kinase  ",
+            "term_type": "  KEYWORD  ",
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.business_data["publication_id"] == "CHEMBL1135642"
+        assert result.business_data["term"] == "kinase"
+        assert result.business_data["term_type"] == "KEYWORD"
+        assert "content_hash" not in result.business_data
+
+    @pytest.mark.asyncio
+    async def test_transform_matches_staged_finalization(
+        self, transformer, mock_context
+    ):
+        """Legacy publication-term transform should match staged finalization."""
+        record = {
+            "document_chembl_id": "CHEMBL1135642",
+            "term": "  aspirin  ",
+            "term_type": "  KEYWORD  ",
+        }
+
+        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        assert isinstance(pre_silver, PreSilverRecord)
+        staged_result = RecordNormalizationProcessor(
+            provider=transformer.provider,
+        ).finalize_pre_silver(pre_silver, mock_context, 0)
+        legacy_result = await transformer.transform(mock_context, record, index=0)
+
+        assert staged_result is not None
+        assert legacy_result is not None
+        assert legacy_result["publication_id"] == staged_result["publication_id"]
+        assert legacy_result["term"] == staged_result["term"] == "aspirin"
+        assert legacy_result["term_type"] == staged_result["term_type"] == "KEYWORD"
+        assert legacy_result["entity_id"] == staged_result["entity_id"]
+        assert legacy_result["content_hash"] == staged_result["content_hash"]
 
     @pytest.mark.asyncio
     async def test_transform_pre_extracted_empty_term_type_returns_none(

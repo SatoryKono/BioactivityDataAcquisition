@@ -8,6 +8,7 @@ from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
 from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
+from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
     FilteredQuarantineEntry,
@@ -19,6 +20,9 @@ if TYPE_CHECKING:
         GoldFilterCallback,
         GoldTransformCallback,
         TransformCallback,
+    )
+    from bioetl.application.core.record_normalization_processor import (
+        RecordNormalizationProcessor,
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
@@ -40,6 +44,49 @@ def bind_record_context(
     )
 
 
+def _empty_outcome() -> RecordTransformOutcome:
+    """Return an empty transform outcome."""
+    return RecordTransformOutcome(silver_record=None, gold_record=None)
+
+
+def _finalize_transformed_record(
+    *,
+    transformed: dict[str, object] | PreSilverRecord | None,
+    normalization_processor: RecordNormalizationProcessor | None,
+    context: PipelineContext,
+    index: int,
+) -> dict[str, object] | None:
+    """Finalize transform output through the normalization stage."""
+    if transformed is None:
+        return None
+    if isinstance(transformed, PreSilverRecord):
+        if normalization_processor is None:
+            raise RuntimeError(
+                "PreSilverRecord requires RecordNormalizationProcessor"
+            )
+        return normalization_processor.finalize_pre_silver(
+            transformed,
+            context,
+            index,
+        )
+    if normalization_processor is None:
+        return transformed
+    return normalization_processor.normalize_record(transformed)
+
+
+def _build_gold_record(
+    *,
+    context: PipelineContext,
+    silver_record: dict[str, object],
+    gold_filter: GoldFilterCallback,
+    gold_transform: GoldTransformCallback,
+) -> dict[str, object] | None:
+    """Create a Gold record when the finalized Silver record passes filtering."""
+    if not gold_filter(context, silver_record):
+        return None
+    return gold_transform(context, silver_record)
+
+
 async def transform_record_attempt(
     *,
     context: PipelineContext,
@@ -48,6 +95,7 @@ async def transform_record_attempt(
     transform: TransformCallback,
     gold_filter: GoldFilterCallback,
     gold_transform: GoldTransformCallback,
+    normalization_processor: RecordNormalizationProcessor | None,
     raw_record: BronzeRecord,
     batch_id: BatchID,
     index: int,
@@ -61,18 +109,24 @@ async def transform_record_attempt(
 
     try:
         transformed = await transform(record_context, raw_record, index)
-        if transformed is None:
-            return RecordTransformOutcome(
-                silver_record=None,
-                gold_record=None,
-            )
+        finalized_record = _finalize_transformed_record(
+            transformed=transformed,
+            normalization_processor=normalization_processor,
+            context=record_context,
+            index=index,
+        )
+        if finalized_record is None:
+            return _empty_outcome()
 
-        gold_record = None
-        if gold_filter(record_context, transformed):
-            gold_record = gold_transform(record_context, transformed)
+        gold_record = _build_gold_record(
+            context=record_context,
+            silver_record=finalized_record,
+            gold_filter=gold_filter,
+            gold_transform=gold_transform,
+        )
 
         return RecordTransformOutcome(
-            silver_record=transformed,
+            silver_record=finalized_record,
             gold_record=gold_record,
         )
     except FilteredOutError as error:

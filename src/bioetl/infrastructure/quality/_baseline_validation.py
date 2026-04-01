@@ -103,6 +103,33 @@ def _validate_historical_baseline_section(
     if not isinstance(historical, dict):
         return None
 
+    _validate_historical_baseline_metadata(historical=historical, errors=errors)
+
+    historical_total, historical_registry_counts = result
+    _validate_historical_registry_coverage(
+        enforceable_registry_counts=enforceable_registry_counts,
+        historical_registry_counts=historical_registry_counts,
+        errors=errors,
+    )
+    _validate_historical_total_floor(
+        historical_total=historical_total,
+        enforceable_total=enforceable_total,
+        errors=errors,
+    )
+    _validate_historical_registry_floors(
+        enforceable_registry_counts=enforceable_registry_counts,
+        historical_registry_counts=historical_registry_counts,
+        errors=errors,
+    )
+    return result
+
+
+def _validate_historical_baseline_metadata(
+    *,
+    historical: JsonDict,
+    errors: list[str],
+) -> None:
+    """Validate historical baseline metadata fields."""
     if _parse_iso_date(historical.get("snapshot_date")) is None:
         errors.append(
             "historical_baseline.snapshot_date: expected ISO date (YYYY-MM-DD)"
@@ -111,7 +138,14 @@ def _validate_historical_baseline_section(
     if not isinstance(source_report, str) or not source_report.strip():
         errors.append("historical_baseline.source_report: expected non-empty string")
 
-    historical_total, historical_registry_counts = result
+
+def _validate_historical_registry_coverage(
+    *,
+    enforceable_registry_counts: dict[str, int],
+    historical_registry_counts: dict[str, int],
+    errors: list[str],
+) -> None:
+    """Validate registry-set parity between baseline and historical baseline."""
     enforceable_registry_names = set(enforceable_registry_counts)
     historical_registry_names = set(historical_registry_counts)
 
@@ -128,6 +162,14 @@ def _validate_historical_baseline_section(
             f"{extra_registries}"
         )
 
+
+def _validate_historical_total_floor(
+    *,
+    historical_total: int | None,
+    enforceable_total: int | None,
+    errors: list[str],
+) -> None:
+    """Validate historical total does not fall below enforceable baseline."""
     if (
         historical_total is not None
         and enforceable_total is not None
@@ -138,6 +180,14 @@ def _validate_historical_baseline_section(
             "baseline.total_exemptions"
         )
 
+
+def _validate_historical_registry_floors(
+    *,
+    enforceable_registry_counts: dict[str, int],
+    historical_registry_counts: dict[str, int],
+    errors: list[str],
+) -> None:
+    """Validate historical registry counts do not fall below baseline counts."""
     for registry_name, enforceable_count in sorted(enforceable_registry_counts.items()):
         historical_count = historical_registry_counts.get(registry_name)
         if historical_count is not None and historical_count < enforceable_count:
@@ -146,7 +196,6 @@ def _validate_historical_baseline_section(
                 f"{registry_name} must be greater than or equal to "
                 f"baseline.by_registry.{registry_name}"
             )
-    return result
 
 
 def _validate_registry_group_entry(
@@ -209,6 +258,22 @@ def _validate_registry_groups_section(
         errors.append("registry_groups: required non-empty mapping")
         return {}
 
+    normalized_groups, grouped_registries = _normalize_registry_groups(
+        registry_groups=registry_groups,
+        errors=errors,
+    )
+    _validate_grouped_registry_coverage(
+        grouped_registries, baseline_registry_names, errors
+    )
+    return normalized_groups
+
+
+def _normalize_registry_groups(
+    *,
+    registry_groups: dict[object, object],
+    errors: list[str],
+) -> tuple[dict[str, tuple[str, ...]], list[str]]:
+    """Normalize registry group mappings and collect listed registries."""
     grouped_registries: list[str] = []
     normalized_groups: dict[str, tuple[str, ...]] = {}
     for group_name, group_data in sorted(registry_groups.items()):
@@ -224,11 +289,7 @@ def _validate_registry_groups_section(
             continue
         normalized_groups[group_name] = parsed
         grouped_registries.extend(parsed)
-
-    _validate_grouped_registry_coverage(
-        grouped_registries, baseline_registry_names, errors
-    )
-    return normalized_groups
+    return normalized_groups, grouped_registries
 
 
 def _is_valid_rollout_section_key(

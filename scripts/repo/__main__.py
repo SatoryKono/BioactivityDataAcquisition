@@ -10,6 +10,7 @@ Commands:
     check-catalog      Validate catalog governance policy
     check-versions     Check version consistency across project files
     check-cleanliness  Audit repository root layout allowlist
+    split-testing-roadmap  Create or preview #2511 child issues
     all                Run all checks sequentially
 """
 from __future__ import annotations
@@ -23,6 +24,7 @@ COMMANDS: dict[str, str] = {
     "check-catalog": "check_scripts_catalog.py",
     "check-versions": "check_version_consistency.py",
     "check-cleanliness": "audit_root_cleanliness.py",
+    "split-testing-roadmap": "split_testing_roadmap_issue.py",
 }
 
 _DIR = Path(__file__).parent

@@ -319,7 +319,7 @@ pipelines visible and actionable.
 
 If migrating from a previous S3-based deployment:
 
-1. Download S3 data: `aws s3 sync s3://bioetl-bronze/ data/bronze/`
+1. Download S3 data: `aws s3 sync s3://bioetl-bronze/ data/output/bronze/`
 2. Update environment: Remove `AWS-*` variables
 3. Reinstall: `pip install -e .[dev]`
 

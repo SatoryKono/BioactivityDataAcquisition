@@ -7,6 +7,10 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.pipelines.uniprot.idmapping_transformer import (
     IDMappingTransformer,
 )
@@ -137,6 +141,51 @@ class TestIDMappingTransformer:
         assert result is not None
         assert "content_hash" in result
         assert len(result["content_hash"]) == 64  # SHA256 hex length
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_silver_returns_staged_payload(
+        self, transformer, mock_context
+    ):
+        """Test staged ID mapping path returns business data before hash finalization."""
+        record = {
+            "target_id": "CHEMBL204",
+            "uniprot_accession": "P00742",
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.entity_id == "uniprot:CHEMBL204"
+        assert result.business_data["target_id"] == "CHEMBL204"
+        assert result.business_data["mapping_status"] == "found"
+        assert "content_hash" not in result.business_data
+
+    @pytest.mark.asyncio
+    async def test_transform_matches_staged_finalization(
+        self, transformer, mock_context
+    ):
+        """Legacy ID-mapping transform should match staged finalization."""
+        record = {
+            "target_id": "CHEMBL204",
+            "uniprot_accession": "P00742",
+            "protein_name": "  Test Protein  ",
+        }
+
+        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        assert isinstance(pre_silver, PreSilverRecord)
+        staged_result = RecordNormalizationProcessor(
+            provider=transformer.provider,
+        ).finalize_pre_silver(pre_silver, mock_context, 0)
+        legacy_result = await transformer.transform(mock_context, record, index=0)
+
+        assert staged_result is not None
+        assert legacy_result is not None
+        assert legacy_result["target_id"] == staged_result["target_id"]
+        assert legacy_result["uniprot_accession"] == staged_result["uniprot_accession"]
+        assert legacy_result["protein_name"] == staged_result["protein_name"]
+        assert legacy_result["mapping_status"] == staged_result["mapping_status"]
+        assert legacy_result["entity_id"] == staged_result["entity_id"]
+        assert legacy_result["content_hash"] == staged_result["content_hash"]
 
     @pytest.mark.asyncio
     async def test_transform_content_hash_consistent(self, transformer, mock_context):

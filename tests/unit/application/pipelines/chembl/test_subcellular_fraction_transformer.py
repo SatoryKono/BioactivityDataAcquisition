@@ -11,6 +11,10 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
     SubcellularFractionTransformer,
 )
@@ -222,6 +226,53 @@ class TestSubcellularFractionTransformer:
         assert result["subcellular_fraction"] == "S9 fraction"
         assert result["assay_count"] is None
         assert result["example_assay_id"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_silver_extracts_fraction_from_assay(
+        self,
+        transformer: SubcellularFractionTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Staged path should support assay-derived fraction payloads."""
+        record = {
+            "assay_id": "CHEMBL123456",
+            "assay_subcellular_fraction": "  Microsomes  ",
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.business_data["subcellular_fraction"] == "Microsomes"
+        assert result.business_data["example_assay_id"] == "CHEMBL123456"
+        assert result.business_data["assay_count"] == 1
+        assert "content_hash" not in result.business_data
+
+    @pytest.mark.asyncio
+    async def test_transform_matches_staged_finalization_for_assay_input(
+        self,
+        transformer: SubcellularFractionTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Legacy subcellular-fraction transform should match staged finalization."""
+        record = {
+            "assay_id": "CHEMBL123456",
+            "assay_subcellular_fraction": "  Microsomes  ",
+        }
+
+        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        assert isinstance(pre_silver, PreSilverRecord)
+        staged_result = RecordNormalizationProcessor(
+            provider=transformer.provider,
+        ).finalize_pre_silver(pre_silver, mock_context, 0)
+        legacy_result = await transformer.transform(mock_context, record, index=0)
+
+        assert staged_result is not None
+        assert legacy_result is not None
+        assert legacy_result["subcellular_fraction"] == staged_result["subcellular_fraction"]
+        assert legacy_result["example_assay_id"] == staged_result["example_assay_id"]
+        assert legacy_result["assay_count"] == staged_result["assay_count"]
+        assert legacy_result["entity_id"] == staged_result["entity_id"]
+        assert legacy_result["content_hash"] == staged_result["content_hash"]
 
 
 @pytest.mark.unit

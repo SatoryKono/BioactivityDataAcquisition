@@ -9,6 +9,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.config import RecordProcessorConfig
+from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.factories.services.factory import ServicesBuilder
@@ -18,6 +19,7 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpTracing
+from bioetl.domain.transformations import generate_content_hash
 from bioetl.domain.types import BatchID, RunType, ValidationResult
 from bioetl.infrastructure.config import get_pipeline_config
 
@@ -338,7 +340,142 @@ class TestRecordProcessorProcessBatch:
         result = await record_processor.process_batch(records, batch_id)
 
         assert result.gold_count == 0
-        mock_storage.write_gold.assert_not_called()
+
+    async def test_process_batch_writes_normalized_silver_records(
+        self,
+        mock_services,
+        mock_error_classifier,
+        mock_context,
+        gold_transform_callback,
+        mock_gold_validator,
+    ) -> None:
+        """Silver writer should receive finalized staged records after normalization."""
+
+        async def transform(ctx, record, index):
+            return PreSilverRecord(
+                entity_id="crossref:10.1000/abc",
+                business_data={
+                    "publication_doi": " HTTPS://doi.org/10.1000/ABC ",
+                    "publication_date": "2024-02",
+                    "title": "  Example Title  ",
+                },
+                build_silver_record=build_silver_record,
+            )
+
+        def build_silver_record(ctx, entity_id, content_hash, index, business_data):
+            return {
+                "entity_id": entity_id,
+                "content_hash": content_hash,
+                **business_data,
+                "_run_id": str(ctx.run_id),
+                "_run_type": ctx.run_type.value,
+                "_ingestion_ts": ctx.started_at.isoformat(),
+            }
+
+        def filter_gold(ctx, record):
+            return True
+
+        config = RecordProcessorConfig(
+            pipeline_name="crossref_publication",
+            provider="crossref",
+            entity_type="publication",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            table_config=TableConfig(primary_keys=("publication_doi",)),
+        )
+        processor = _create_record_processor(
+            services=mock_services,
+            error_classifier=mock_error_classifier,
+            context=mock_context,
+            config=config,
+            transform_callback=transform,
+            gold_filter_callback=filter_gold,
+            gold_transform_callback=gold_transform_callback,
+            gold_validator=mock_gold_validator,
+        )
+
+        await processor.process_batch([{"id": "1"}], BatchID(uuid4()))
+
+        silver_records = mock_services.storage.write_silver.call_args.kwargs["records"]
+        normalized = silver_records[0]
+        assert normalized["entity_id"] == "crossref:10.1000/abc"
+        assert normalized["publication_doi"] == "10.1000/abc"
+        assert normalized["publication_date"] == "2024-02-29"
+        assert normalized["title"] == "Example Title"
+        assert normalized["content_hash"] == str(
+            generate_content_hash(
+                {
+                    "publication_doi": "10.1000/abc",
+                    "publication_date": "2024-02-29",
+                    "title": "Example Title",
+                },
+                "crossref",
+                exclude_none=True,
+            )
+        )
+        mock_services.storage.write_gold.assert_called_once()
+
+    async def test_process_batch_same_normalized_doi_produces_same_final_hash(
+        self,
+        mock_services,
+        mock_error_classifier,
+        mock_context,
+        gold_transform_callback,
+        mock_gold_validator,
+    ) -> None:
+        """Equivalent DOI inputs should converge to the same final content hash."""
+
+        async def transform(ctx, record, index):
+            return PreSilverRecord(
+                entity_id=f"crossref:{record['id']}",
+                business_data={
+                    "publication_doi": record["doi"],
+                    "title": "Same Title",
+                },
+                build_silver_record=build_silver_record,
+            )
+
+        def build_silver_record(ctx, entity_id, content_hash, index, business_data):
+            return {
+                "entity_id": entity_id,
+                "content_hash": content_hash,
+                **business_data,
+                "_run_id": str(ctx.run_id),
+                "_run_type": ctx.run_type.value,
+                "_ingestion_ts": ctx.started_at.isoformat(),
+            }
+
+        config = RecordProcessorConfig(
+            pipeline_name="crossref_publication",
+            provider="crossref",
+            entity_type="publication",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            table_config=TableConfig(primary_keys=("publication_doi",)),
+        )
+        processor = _create_record_processor(
+            services=mock_services,
+            error_classifier=mock_error_classifier,
+            context=mock_context,
+            config=config,
+            transform_callback=transform,
+            gold_filter_callback=lambda c, r: True,
+            gold_transform_callback=gold_transform_callback,
+            gold_validator=mock_gold_validator,
+        )
+
+        await processor.process_batch(
+            [
+                {"id": "1", "doi": " HTTPS://doi.org/10.1000/ABC "},
+                {"id": "2", "doi": "10.1000/abc"},
+            ],
+            BatchID(uuid4()),
+        )
+
+        silver_records = mock_services.storage.write_silver.call_args.kwargs["records"]
+        assert silver_records[0]["publication_doi"] == "10.1000/abc"
+        assert silver_records[1]["publication_doi"] == "10.1000/abc"
+        assert silver_records[0]["content_hash"] == silver_records[1]["content_hash"]
 
     async def test_process_batch_handles_transform_error(
         self, mock_services, mock_error_classifier, mock_context

@@ -2,8 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 import polars as pl
 
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+    JoinKeyNormalizationPolicy,
+    normalize_join_key_dataframe_columns,
+)
 from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -27,10 +34,15 @@ _DEPENDENCY_KEY_READ_ERRORS = (
 
 
 class SeedKeyResolver:
-    """Resolve dependency keys by reusing seed keys directly."""
+    """Resolve dependency keys by reusing normalized seed keys directly."""
 
-    def __init__(self, logger: LoggerPort) -> None:
+    def __init__(
+        self,
+        logger: LoggerPort,
+        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    ) -> None:
         self._logger = logger
+        self._normalization_policies = normalization_policies
 
     async def resolve(
         self,
@@ -48,22 +60,32 @@ class SeedKeyResolver:
             delta_reader: Delta Lake reader port (unused here).
 
         Returns:
-            The seed_keys DataFrame unmodified.
+            The seed_keys DataFrame with canonical join-key normalization applied.
         """
         del dep_config_lookup, delta_reader
+        normalized_keys = normalize_join_key_dataframe_columns(
+            df=seed_keys,
+            join_keys=dependency.join_keys,
+            normalization_policies=self._normalization_policies,
+        )
         self._logger.debug(
             "Using seed keys for dependency",
             dependency=dependency.pipeline,
-            key_count=len(seed_keys),
+            key_count=len(normalized_keys),
         )
-        return seed_keys
+        return normalized_keys
 
 
 class ChainedKeyResolver:
     """Resolve dependency keys from another dependency's Silver table."""
 
-    def __init__(self, logger: LoggerPort) -> None:
+    def __init__(
+        self,
+        logger: LoggerPort,
+        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    ) -> None:
         self._logger = logger
+        self._normalization_policies = normalization_policies
 
     async def resolve(
         self,
@@ -138,6 +160,11 @@ class ChainedKeyResolver:
         source_keys = self._to_source_keys(pa_table, source_table)
         self._validate_join_key(source_keys, dependency, source_table)
         source_keys = self._apply_key_filter(source_keys, dependency)
+        source_keys = normalize_join_key_dataframe_columns(
+            df=source_keys,
+            join_keys=dependency.join_keys,
+            normalization_policies=self._normalization_policies,
+        )
 
         self._logger.info(
             "Using chained dependency keys",
@@ -232,7 +259,10 @@ class ChainedKeyResolver:
             return source_keys
 
 
-def create_seed_key_resolver(logger: LoggerPort) -> SeedKeyResolver:
+def create_seed_key_resolver(
+    logger: LoggerPort,
+    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+) -> SeedKeyResolver:
     """Create default seed-key resolver.
 
     Args:
@@ -241,10 +271,13 @@ def create_seed_key_resolver(logger: LoggerPort) -> SeedKeyResolver:
     Returns:
         New SeedKeyResolver instance wired with the provided logger.
     """
-    return SeedKeyResolver(logger)
+    return SeedKeyResolver(logger, normalization_policies=normalization_policies)
 
 
-def create_chained_key_resolver(logger: LoggerPort) -> ChainedKeyResolver:
+def create_chained_key_resolver(
+    logger: LoggerPort,
+    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+) -> ChainedKeyResolver:
     """Create default chained-key resolver.
 
     Args:
@@ -253,7 +286,7 @@ def create_chained_key_resolver(logger: LoggerPort) -> ChainedKeyResolver:
     Returns:
         New ChainedKeyResolver instance wired with the provided logger.
     """
-    return ChainedKeyResolver(logger)
+    return ChainedKeyResolver(logger, normalization_policies=normalization_policies)
 
 
 __all__ = [

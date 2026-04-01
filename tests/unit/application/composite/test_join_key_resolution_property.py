@@ -5,6 +5,9 @@ from __future__ import annotations
 from hypothesis import given
 from hypothesis import strategies as st
 
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+)
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 
@@ -19,7 +22,7 @@ _IDENT = st.builds(
 
 def _build_resolver() -> JoinKeyResolverService:
     return JoinKeyResolverService(
-        normalize_join_keys=frozenset({"doi", "pmid", "pmc_id"}),
+        normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
         parse_pipeline_name=parse_pipeline_name,
     )
 

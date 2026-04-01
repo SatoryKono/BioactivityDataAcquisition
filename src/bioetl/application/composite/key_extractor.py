@@ -8,10 +8,15 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 import polars as pl
 
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+    JoinKeyNormalizationPolicy,
+    normalize_join_key_dataframe_columns,
+)
 from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 
 __all__ = ["KeyExtractorService"]
@@ -44,6 +49,7 @@ class KeyExtractorService:
         self,
         delta_reader: DeltaReaderPort,
         logger: LoggerPort,
+        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
     ) -> None:
         """Initialize key extractor service.
 
@@ -53,6 +59,7 @@ class KeyExtractorService:
         """
         self._delta_reader = delta_reader
         self._logger = logger
+        self._normalization_policies = normalization_policies
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
         """Read a Silver table via DeltaReaderPort.
@@ -123,8 +130,12 @@ class KeyExtractorService:
                 f"Available: {available_cols}"
             )
 
-        # Select only key columns
-        keys_df = full_df.select(list(keys))
+        # Select only key columns and apply canonical join-key normalization
+        keys_df = normalize_join_key_dataframe_columns(
+            df=full_df.select(list(keys)),
+            join_keys=keys,
+            normalization_policies=self._normalization_policies,
+        )
 
         # Remove rows where ALL keys are null
         # (but keep rows where at least one key is non-null)

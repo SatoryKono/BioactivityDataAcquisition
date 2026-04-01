@@ -1,11 +1,11 @@
 ---
-Version: 6.1.0
+Version: 6.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-01'
 ---
 
 # CLI Reference
@@ -13,8 +13,8 @@ Last verified: '2026-03-29'
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 6.1.0
-**Дата обновления:** 2026-03-25
+**Версия:** 6.1.1
+**Дата обновления:** 2026-04-01
 
 ---
 
@@ -242,45 +242,83 @@ bioetl run-composite --composite publication --use-cached-bronze
 Просмотр immutable run manifest и append-only ledger history для уже
 запущенных пайплайнов.
 
-Поведение команды зависит от runtime rollout flags:
+Это published inspection surface и CLI-leg traceability documentation pack,
+зафиксированного в
+[D-01](../00-project/governance/01-documentation-governance-style-guide.md).
+
+Поведение inspection surface зависит от rollout flags на runtime object path
+`settings.pipeline.control_plane` (source-of-truth model:
+`src/bioetl/infrastructure/config/_base.py`):
 
 - `settings.pipeline.control_plane.run_manifest_enabled`
 - `settings.pipeline.control_plane.run_ledger_enabled`
+- `settings.pipeline.control_plane.checkpoint_compatibility_policy`
 
-Если `run_manifest_enabled=false`, команда не сможет разрешить новые запуски,
-потому что control-plane artifacts не создаются. Если manifest включён, а ledger
-выключен, `show` по-прежнему вернёт manifest payload, но без history entries.
+Operational semantics:
+
+- если `run_manifest_enabled=false`, новые control-plane artifacts не создаются;
+- если `run_manifest_enabled=true` и `run_ledger_enabled=false`, `show`
+  вернёт manifest payload, но без ledger history;
+- `run_ledger_enabled=true` допустим только при `run_manifest_enabled=true`;
+- `checkpoint_compatibility_policy` принимает значения `observe`, `soft_fail`,
+  `hard_fail` и управляет resume-поведением при checkpoint identity mismatch.
+- при `run_manifest_enabled=false` runtime builder также эффективно отключает
+  ledger attachment для новых запусков.
+
+Canonical storage layout:
+
+- `data/output/control/run_manifest/{manifest_id}.json`
+- `data/output/control/run_manifest/_by_run_id/{run_id}.txt`
+- `data/output/control/run_ledger/{manifest_id}.jsonl`
+- `data/output/control/run_ledger/_by_run_id/{run_id}.txt`
+
+Current event baseline for ledger-backed runs:
+
+- `manifest_created`
+- `run_started`
+- `stage_completed`
+- `artifact_published`
+- `run_finished`
+- `run_failed`
+- `run_shutdown`
+- `dq_policy_applied`
 
 #### `run-manifest show` — Показать manifest и ledger
 
 ```bash
-bioetl run-manifest show <RUN-ID|MANIFEST-ID> [--format text|json|yaml]
+bioetl run-manifest show <run-id|manifest-id> [--format text|json|yaml]
 ```
 
 Команда:
 
-- разрешает `run_id` через control-plane index;
-- выводит manifest payload;
-- добавляет ledger history для этого же manifest.
+- сначала пытается разрешить `manifest_id` напрямую;
+- затем при UUID-like identifier выполняет `run_id -> manifest_id` lookup;
+- выводит `manifest`, `ledger_entries`, `diagnostics`;
+- добавляет ledger history для этого же manifest, если ledger включён.
 
 По умолчанию команда использует человекочитаемый `text`-формат. Для
 machine-readable вывода укажи `--format json` или `--format yaml`.
+
+`text`-рендерер группирует ответ по секциям `Manifest`, `Code Provenance`,
+`Execution Inputs`, `Ledger`, `Diagnostics`, чтобы оператору не приходилось
+читать сырой JSON при triage.
 
 **Примеры:**
 
 ```bash
 bioetl run-manifest show 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87
 bioetl run-manifest show 8d166b4d-c4a8-4755-896e-cf9158c5b5ec --format yaml
+bioetl run-manifest show 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87 --format json
 ```
 
 #### `run-manifest diff` — Сравнить два запуска
 
 ```bash
-bioetl run-manifest diff <LEFT> <RIGHT> [--format text|json|yaml]
+bioetl run-manifest diff <left> <right> [--format text|json|yaml]
 ```
 
-Команда сравнивает все top-level поля двух manifest (по каноническому JSON
-сравнению значений). На практике чаще всего различаются:
+Команда сравнивает все top-level поля двух manifest по каноническому JSON
+сравнению значений. На практике чаще всего различаются:
 
 - `pipeline_name`, `run_type`
 - `runtime_config`, `resolved_config`
@@ -297,6 +335,15 @@ bioetl run-manifest diff <LEFT> <RIGHT> [--format text|json|yaml]
 bioetl run-manifest diff 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87 17f6799e-6c1a-4dd6-a7a1-b1fe2ea3e9ae
 bioetl run-manifest diff 8d166b4d-c4a8-4755-896e-cf9158c5b5ec d775f516-ff3e-4d66-a369-1417c3ff093f --format yaml
 ```
+
+See also:
+
+- [Run Manifest and Run Ledger Contract](contracts/run-manifest-ledger.md)
+- [Run Manifest Inspection Runbook](../05-operations/runbooks/run-manifest-inspection.md)
+- [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
+- [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md)
+- [D-01 Documentation Governance](../00-project/governance/01-documentation-governance-style-guide.md)
+- [Project Navigator](../00-project/00-map.md)
 
 ---
 

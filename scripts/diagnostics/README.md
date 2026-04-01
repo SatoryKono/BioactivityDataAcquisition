@@ -13,13 +13,13 @@ python -m scripts.diagnostics <command> [args...]
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `cleanup` | `cleanup_project.py` | Clean caches, build artifacts, and temp files |
-| `cleanup-audit` | `cleanup_consolidate.py` | Consolidated cleanup and quality audit |
-| `audit-structure` | `audit_structure.py` | Validate project structure against file policy |
-| `ast-inventory` | `ast_inventory.py` | AST-based code inventory |
-| `debug-pandera` | `debug_pandera.py` | Debug Pandera schema validation |
-| `debug-storage` | `debug_storage_health.py` | Debug storage health checks |
-| `inspect-vcr` | `_tmp_inspect_vcr.py` | Temporary VCR cassette inspector |
+| `cleanup` | `scripts/diagnostics/cleanup_project.py` | Clean caches, build artifacts, and temp files |
+| `cleanup-audit` | `scripts/diagnostics/cleanup_consolidate.py` | Consolidated cleanup and quality audit |
+| `audit-structure` | `scripts/diagnostics/audit_structure.py` | Validate project structure against file policy |
+| `ast-inventory` | `scripts/diagnostics/ast_inventory.py` | AST-based code inventory |
+| `debug-pandera` | `scripts/diagnostics/debug_pandera.py` | Debug Pandera schema validation |
+| `debug-storage` | `scripts/diagnostics/debug_storage_health.py` | Debug storage health checks |
+| `inspect-vcr` | `scripts/diagnostics/_tmp_inspect_vcr.py` | Temporary VCR cassette inspector |
 
 ## When to Use
 
@@ -32,3 +32,9 @@ python -m scripts.diagnostics <command> [args...]
 | `debug-pandera` | When Pandera DataFrame validation fails unexpectedly; helps isolate schema vs data issues | Manual, troubleshooting |
 | `debug-storage` | When storage operations fail; checks writability of data storage directories | Manual, troubleshooting |
 | `inspect-vcr` | When VCR cassette contents need examination for debugging test failures | Manual, troubleshooting |
+
+## Other Files
+
+| File | Description |
+|------|-------------|
+| `scripts/diagnostics/generate_src_bioetl_refactor_evidence.py` | Generate evidence artifacts for focused `src/bioetl` refactor investigations |

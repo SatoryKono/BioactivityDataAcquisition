@@ -13,11 +13,12 @@ def resolve_datasource_provider_registry(
     provider_registry: ProviderRegistry | None = None,
 ) -> ProviderRegistry:
     """Resolve and initialize the registry used by datasource factory helpers."""
-    return ensure_provider_registry_ready(
+    resolved_registry = (
         provider_registry
         if provider_registry is not None
         else get_default_provider_registry()
     )
+    return ensure_provider_registry_ready(resolved_registry)
 
 
 __all__ = ["resolve_datasource_provider_registry"]

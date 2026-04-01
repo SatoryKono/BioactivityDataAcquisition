@@ -8,12 +8,16 @@ on:
     branches: [ "main" ]
     paths:
       - 'docs/**'
+      - 'scripts/docs/**'
+      - 'tests/architecture/test_check_doc_links_guardrails.py'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'docs/**'
+      - 'scripts/docs/**'
+      - 'tests/architecture/test_check_doc_links_guardrails.py'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
 

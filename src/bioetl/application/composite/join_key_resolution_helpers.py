@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING
+
+from bioetl.application.composite.join_key_normalization import (
+    JoinKeyNormalizationPolicy,
+    build_join_key_normalization_expr,
+)
 
 if TYPE_CHECKING:
     import polars as pl
@@ -50,31 +55,32 @@ def normalize_join_key_columns(
     df: pl.DataFrame,
     join_keys: list[str],
     pipeline: str | None,
-    normalize_join_keys: frozenset[str],
+    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy],
     parse_pipeline_name: Callable[[str], tuple[str, str]],
 ) -> pl.DataFrame:
-    """Lowercase configured join keys when those columns are present."""
-    import polars as pl
-
-    columns = df.columns
-    normalize = [
-        column
+    """Apply canonical trim/casing policy to resolved join-key columns."""
+    expressions = [
+        expr
         for key in join_keys
-        if key in normalize_join_keys
         if (
             column := find_join_key_column(
                 key=key,
-                columns=columns,
+                columns=df.columns,
                 pipeline=pipeline,
                 parse_pipeline_name=parse_pipeline_name,
             )
         )
+        if (
+            expr := build_join_key_normalization_expr(
+                column=column,
+                key=key,
+                normalization_policies=normalization_policies,
+            )
+        ) is not None
     ]
-    if not normalize:
+    if not expressions:
         return df
-    return df.with_columns(
-        [pl.col(column).str.to_lowercase().alias(column) for column in normalize]
-    )
+    return df.with_columns(expressions)
 
 
 def resolve_join_key_names(

@@ -21,9 +21,8 @@ import pytest
 from bioetl.infrastructure.config import load_pipeline_config
 from tests.contract.silver_schemas.conftest import (
     SILVER_SCHEMAS,
+    assert_schema_matches_snapshot,
     extract_field_metadata,
-    load_snapshot,
-    save_snapshot,
 )
 
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
@@ -46,86 +45,11 @@ class TestSchemaStability:
         If schema change is intentional:
             UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
         """
-        schema_class = SILVER_SCHEMAS[schema_name]
-
-        # Extract current schema metadata
-        current_metadata = extract_field_metadata(schema_class)
-
-        # Load existing snapshot
-        snapshot = load_snapshot(schema_name, snapshots_dir)
-
-        if snapshot is None or UPDATE_SNAPSHOTS:
-            # Create or update snapshot
-            save_snapshot(schema_name, current_metadata, snapshots_dir)
-            if snapshot is None:
-                pytest.skip(f"Created initial snapshot for {schema_name}")
-            else:
-                pytest.skip(f"Updated snapshot for {schema_name} (UPDATE_SNAPSHOTS=1)")
-
-        # Compare current schema with snapshot
-        current_fields = set(current_metadata.keys())
-        snapshot_fields = set(snapshot.keys())
-        allowed_attr_diffs = {
-            "_run_id": {"dtype"},
-            "_source_batch_id": {"dtype"},
-            "molecule_id": {"dtype"},
-            "publication_year": {"required"},
-        }
-        allowed_check_diffs = {"publication_year", "standard_relation", "usan_year"}
-
-        # Check for added fields
-        added_fields = current_fields - snapshot_fields
-        if added_fields:
-            pytest.fail(
-                f"{schema_name}: New fields detected: {sorted(added_fields)}\n"
-                "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
-            )
-
-        # Check for removed fields
-        removed_fields = snapshot_fields - current_fields
-        if removed_fields:
-            pytest.fail(
-                f"{schema_name}: Fields removed: {sorted(removed_fields)}\n"
-                "This is a BREAKING CHANGE. Update downstream consumers first.\n"
-                "Then run: UPDATE_SNAPSHOTS=1 pytest ..."
-            )
-
-        # Check for field metadata changes (type, nullable, checks)
-        for field_name in current_fields:
-            current_field = current_metadata[field_name]
-            snapshot_field = snapshot[field_name]
-
-            # Compare field attributes
-            for attr in ["dtype", "nullable", "required"]:
-                if (
-                    field_name in allowed_attr_diffs
-                    and attr in allowed_attr_diffs[field_name]
-                ):
-                    continue
-                if current_field.get(attr) != snapshot_field.get(attr):
-                    pytest.fail(
-                        f"{schema_name}.{field_name}: {attr} changed\n"
-                        f"  Expected: {snapshot_field.get(attr)}\n"
-                        f"  Got:      {current_field.get(attr)}\n"
-                        "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
-                    )
-
-            # Compare validation checks
-            if field_name in allowed_check_diffs:
-                continue
-            current_checks = {c["name"] for c in current_field.get("checks", [])}
-            snapshot_checks = {c["name"] for c in snapshot_field.get("checks", [])}
-
-            added_checks = current_checks - snapshot_checks
-            removed_checks = snapshot_checks - current_checks
-
-            if added_checks or removed_checks:
-                pytest.fail(
-                    f"{schema_name}.{field_name}: Validation checks changed\n"
-                    f"  Added:   {sorted(added_checks) if added_checks else 'none'}\n"
-                    f"  Removed: {sorted(removed_checks) if removed_checks else 'none'}\n"
-                    "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
-                )
+        assert_schema_matches_snapshot(
+            schema_name,
+            snapshots_dir=snapshots_dir,
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_primary_key_field_exists(self, schema_name: str) -> None:

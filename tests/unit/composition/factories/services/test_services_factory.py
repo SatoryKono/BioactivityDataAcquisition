@@ -38,6 +38,21 @@ def test_extract_pipeline_callbacks_uses_transformer_when_present() -> None:
 
 
 @pytest.mark.unit
+def test_extract_pipeline_callbacks_prefers_pre_silver_transform_when_available() -> None:
+    transformer = SimpleNamespace(
+        transform=MagicMock(name="transform"),
+        transform_pre_silver=MagicMock(name="transform_pre_silver"),
+        should_write_gold=MagicMock(name="gold_filter"),
+        transform_for_gold=MagicMock(name="gold_transform"),
+    )
+    pipeline = SimpleNamespace(transformer=transformer)
+
+    callbacks = extract_pipeline_callbacks(pipeline)
+
+    assert callbacks.transform is transformer.transform_pre_silver
+
+
+@pytest.mark.unit
 def test_extract_pipeline_callbacks_legacy_defaults() -> None:
     transform_cb = MagicMock(name="transform")
     pipeline = SimpleNamespace(

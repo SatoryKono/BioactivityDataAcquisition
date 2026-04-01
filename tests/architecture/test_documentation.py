@@ -29,8 +29,7 @@ class TestModuleDocstrings:
         REQ-DOC-001: Port files should document what contracts they define.
         """
         ports_dir = src_dir / "bioetl" / "domain" / "ports"
-        if not ports_dir.exists():
-            pytest.skip("Domain ports not found")
+        assert ports_dir.exists(), "Domain ports not found"
 
         missing_docstrings = []
 
@@ -61,8 +60,7 @@ class TestModuleDocstrings:
         REQ-DOC-001: Pipeline files should document their purpose.
         """
         pipelines_dir = src_dir / "bioetl" / "application" / "pipelines"
-        if not pipelines_dir.exists():
-            pytest.skip("Application pipelines not found")
+        assert pipelines_dir.exists(), "Application pipelines not found"
 
         missing_docstrings = []
 
@@ -97,8 +95,7 @@ class TestClassDocstrings:
         REQ-DOC-002: Port interfaces should document their contracts.
         """
         ports_dir = src_dir / "bioetl" / "domain" / "ports"
-        if not ports_dir.exists():
-            pytest.skip("Domain ports not found")
+        assert ports_dir.exists(), "Domain ports not found"
 
         missing_docstrings = []
 
@@ -139,8 +136,7 @@ class TestClassDocstrings:
         REQ-DOC-001: Adapters should document what port they implement.
         """
         adapters_dir = src_dir / "bioetl" / "infrastructure" / "adapters"
-        if not adapters_dir.exists():
-            pytest.skip("Infrastructure adapters not found")
+        assert adapters_dir.exists(), "Infrastructure adapters not found"
 
         # Excluded utility files
         excluded_files = {
@@ -197,8 +193,7 @@ class TestMethodDocstrings:
         REQ-DOC-002: Each port method should document its contract.
         """
         ports_dir = src_dir / "bioetl" / "domain" / "ports"
-        if not ports_dir.exists():
-            pytest.skip("Domain ports not found")
+        assert ports_dir.exists(), "Domain ports not found"
 
         missing_docstrings = []
 
@@ -265,7 +260,7 @@ class TestExceptionDocstrings:
         elif exceptions_file.exists():
             exception_files = [exceptions_file]
         else:
-            pytest.skip("Domain exceptions not found")
+            pytest.fail("Domain exceptions not found")
 
         missing_docstrings = []
 

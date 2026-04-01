@@ -193,6 +193,34 @@ class TestKeyExtractorServiceWithActivity:
         assert len(result) == 2
         assert "molecule_id" in result.columns
 
+    async def test_extract_normalizes_trim_and_case_before_deduplication(
+        self,
+        mock_logger: LoggerPort,
+        mock_delta_reader: DeltaReaderPort,
+    ) -> None:
+        """KeyExtractorService should canonicalize join keys before deduping."""
+        mock_delta_reader.read_table.return_value = pa.table(
+            {
+                "doi": [" 10.1000/ABC ", "10.1000/abc"],
+                "title": ["  Mixed Case Title  ", "Mixed Case Title"],
+            }
+        )
+
+        extractor = KeyExtractorService(
+            logger=mock_logger,
+            delta_reader=mock_delta_reader,
+        )
+
+        result = await extractor.extract(
+            silver_table="silver/chembl/publication",
+            keys=["doi", "title"],
+        )
+
+        assert result.to_dict(as_series=False) == {
+            "doi": ["10.1000/abc"],
+            "title": ["Mixed Case Title"],
+        }
+
 
 # =============================================================================
 # Dependency Coordinator Tests

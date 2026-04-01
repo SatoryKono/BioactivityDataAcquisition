@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services._date_helpers import (
+from bioetl.domain.normalization.dates import (
     format_date_parts,
     normalize_partial_date,
 )
@@ -36,12 +36,17 @@ class TestNormalizePartialDate:
         assert normalize_partial_date("2024/03/15") is None
 
     def test_partial_month_normalized_to_end_of_month(self) -> None:
-        """Test that YYYY-MM is normalized to YYYY-MM-30."""
-        assert normalize_partial_date("2024-03") == "2024-03-30"
+        """Test that YYYY-MM is normalized to the last day of month."""
+        assert normalize_partial_date("2024-03") == "2024-03-31"
 
     def test_partial_month_january(self) -> None:
-        """Test that YYYY-MM for January is normalized to YYYY-01-30."""
-        assert normalize_partial_date("2024-01") == "2024-01-30"
+        """Test that YYYY-MM for January is normalized to YYYY-01-31."""
+        assert normalize_partial_date("2024-01") == "2024-01-31"
+
+    def test_partial_month_february_respects_month_length(self) -> None:
+        """Test leap and non-leap February partial dates."""
+        assert normalize_partial_date("2024-02") == "2024-02-29"
+        assert normalize_partial_date("2023-02") == "2023-02-28"
 
     def test_partial_month_invalid_format_returns_none(self) -> None:
         """Test that 7-char string without dash at position 4 returns None."""
@@ -63,14 +68,14 @@ class TestNormalizePartialDate:
     def test_whitespace_is_stripped(self) -> None:
         """Test that leading/trailing whitespace is stripped before processing."""
         assert normalize_partial_date("  2024  ") == "2024-12-31"
-        assert normalize_partial_date("  2024-03  ") == "2024-03-30"
+        assert normalize_partial_date("  2024-03  ") == "2024-03-31"
         assert normalize_partial_date("  2024-03-15  ") == "2024-03-15"
 
     @pytest.mark.parametrize(
         "date_str, expected",
         [
             ("2024-03-15", "2024-03-15"),
-            ("2024-03", "2024-03-30"),
+            ("2024-03", "2024-03-31"),
             ("2024", "2024-12-31"),
             (None, None),
             ("", None),

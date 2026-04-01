@@ -14,9 +14,14 @@ from __future__ import annotations
 
 __all__ = ["PublicationTermTransformer"]
 
+from functools import partial
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -52,77 +57,62 @@ class PublicationTermTransformer(BaseChemblTransformer):
     entity_class = ChemblPublicationTerm
     primary_id_field = "publication_id"
 
+    async def transform_pre_silver(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> PreSilverRecord | None:
+        """Build an intermediate publication-term payload for application finalization."""
+        del context, index
+        prepared_record = _prepare_publication_term_record(record)
+        primary_id = cast(
+            "PrimaryId",
+            self._get_required_field(prepared_record, self.primary_id_field),
+        )
+        business_data = self._extract_business_data(prepared_record, primary_id)
+        entity_id = _resolve_publication_term_entity_id(self, prepared_record, business_data)
+        return PreSilverRecord(
+            entity_id=entity_id,
+            business_data=business_data,
+            build_silver_record=partial(_build_publication_term_silver_record, self),
+            apply_structural_policy=self._apply_structural_policy,
+            apply_silver_filter=self._apply_silver_filter,
+        )
+
     async def _transform_impl(
         self,
         context: PipelineContext,
         record: BronzeRecord,
         index: int,
     ) -> SilverRecord | None:
-        """Override base implementation to use composite entity_id.
-
-        PublicationTerm is a derived entity with composite primary key:
-        (document_chembl_id, term_type, term). The entity_id must be computed
-        from all three fields, not just document_chembl_id.
-
-        If record contains pre-computed entity_id (from PublicationTermDataSource),
-        use it directly. Otherwise, compute composite entity_id.
-
-        Args:
-            context: Pipeline context with run_id, run_type, logger.
-            record: Bronze record (pre-extracted term or raw publication).
-            index: Sequential index of the record in the pipeline run.
-
-        Returns:
-            SilverRecord if transformation successful, None if skipped.
-
-        """
-        # Support raw ChEMBL API field name for derived publication_term pipeline.
-        # ChEMBL /document endpoint emits document_chembl_id, while pipeline contracts
-        # use canonical publication_id.
-        if (
-            "publication_id" not in record
-            and record.get("document_chembl_id") is not None
-        ):
-            record = dict(record)
-            record["publication_id"] = record.get("document_chembl_id")
-
-        # 1. Validate primary ID (publication_id)
+        """Override base implementation to use composite entity_id."""
+        prepared_record = _prepare_publication_term_record(record)
         primary_id = cast(
             "PrimaryId",
-            self._get_required_field(record, self.primary_id_field),
+            self._get_required_field(prepared_record, self.primary_id_field),
         )
-
-        # 2. Extract business data (term details)
-        business_data = self._extract_business_data(record, primary_id)
-
-        # 3. Compute entity_id using composite key
-        # Priority: pre-computed entity_id from record > computed from composite key
-        pre_computed_id = record.get("entity_id")
-        if pre_computed_id:
-            entity_id = str(pre_computed_id)
-        else:
-            # Compute from composite key (publication_id, term_type, term)
-            entity_id = self.compute_term_entity_id(
-                publication_id=str(business_data.get("publication_id", primary_id)),
-                term_type=str(business_data.get("term_type", "")),
-                term=str(business_data.get("term", "")),
-            )
-
-        # 4. Compute content hash
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-        # 5. Create domain entity
-        entity = self._create_entity(
-            self.entity_class,
+        business_data = self._extract_business_data(prepared_record, primary_id)
+        normalized_business_data = RecordNormalizationProcessor(
+            provider=self.provider,
+        ).normalize_business_data(business_data)
+        entity_id = _resolve_publication_term_entity_id(
+            self,
+            prepared_record,
+            normalized_business_data,
+        )
+        content_hash = self.compute_content_hash(
+            normalized_business_data,
+            exclude_none=True,
+        )
+        return _build_publication_term_silver_record(
+            self,
             context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            index=index,
-            **business_data,
+            entity_id,
+            content_hash,
+            index,
+            normalized_business_data,
         )
-
-        # 6. Convert to SilverRecord
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
 
     def _extract_business_data(
         self,
@@ -301,3 +291,51 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         """
         return compute_publication_term_entity_id(publication_id, term_type, term)
+
+
+def _prepare_publication_term_record(record: BronzeRecord) -> BronzeRecord:
+    """Normalize legacy ChEMBL publication-term input field names."""
+    if (
+        "publication_id" not in record
+        and record.get("document_chembl_id") is not None
+    ):
+        normalized_record = dict(record)
+        normalized_record["publication_id"] = record.get("document_chembl_id")
+        return normalized_record
+    return record
+
+
+def _resolve_publication_term_entity_id(
+    transformer: PublicationTermTransformer,
+    record: BronzeRecord,
+    business_data: GoldRecord,
+) -> str:
+    """Resolve publication-term entity id from precomputed or composite key data."""
+    pre_computed_id = record.get("entity_id")
+    if pre_computed_id:
+        return str(pre_computed_id)
+    return transformer.compute_term_entity_id(
+        publication_id=str(business_data.get("publication_id", "")),
+        term_type=str(business_data.get("term_type", "")),
+        term=str(business_data.get("term", "")),
+    )
+
+
+def _build_publication_term_silver_record(
+    transformer: PublicationTermTransformer,
+    context: PipelineContext,
+    entity_id: str,
+    content_hash: str,
+    index: int,
+    business_data: GoldRecord,
+) -> SilverRecord:
+    """Build a finalized Silver record from normalized publication-term data."""
+    entity = transformer._create_entity(
+        transformer.entity_class,
+        context,
+        entity_id=entity_id,
+        content_hash=content_hash,
+        index=index,
+        **business_data,
+    )
+    return cast("SilverRecord", transformer.entity_to_silver_record(entity))

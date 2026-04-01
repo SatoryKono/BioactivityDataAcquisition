@@ -7,9 +7,16 @@ Encapsulates extraction logic for:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
 import polars as pl
+
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+    JoinKeyNormalizationPolicy,
+    stringify_join_key_value,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
@@ -19,24 +26,30 @@ if TYPE_CHECKING:
 class CompositeFilterExtractionService:
     """Extract runner filter inputs from keys DataFrame."""
 
-    def __init__(self, logger: LoggerPort | None = None) -> None:
+    def __init__(
+        self,
+        logger: LoggerPort | None = None,
+        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    ) -> None:
         self._logger = logger
+        self._normalization_policies = normalization_policies
 
-    @staticmethod
-    def to_id_str(value: object) -> str:
-        """Convert value to stable ID string (e.g. 4044.0 -> 4044).
+    def to_id_str(self, value: object, *, key: str) -> str:
+        """Convert a join key to a canonical filter ID string."""
+        return stringify_join_key_value(
+            value,
+            key=key,
+            normalization_policies=self._normalization_policies,
+        )
 
-        Args:
-            value: Value to convert; floats with integer values are truncated.
-
-        Returns:
-            String representation of value, with float integers converted to ints.
-        """
-        if value is None:
-            return ""
-        if isinstance(value, float) and value.is_integer():
-            return str(int(value))
-        return str(value)
+    def _deduplicate_filter_ids(
+        self,
+        values: list[object],
+        *,
+        key: str,
+    ) -> tuple[str, ...]:
+        """Normalize values and preserve first-seen order after deduplication."""
+        return tuple(dict.fromkeys(self.to_id_str(value, key=key) for value in values))
 
     def build_fallback_mapping(
         self,
@@ -56,13 +69,11 @@ class CompositeFilterExtractionService:
         """
         if "title" not in join_keys or "title" not in keys.columns:
             return None
-        pairs = (
-            keys.select([filter_key, "title"])
-            .drop_nulls()
-            .unique(subset=[filter_key])
-            .iter_rows()
-        )
-        return {self.to_id_str(key): str(title) for key, title in pairs}
+        pairs = keys.select([filter_key, "title"]).drop_nulls().iter_rows()
+        mapping: dict[str, str] = {}
+        for key, title in pairs:
+            mapping.setdefault(self.to_id_str(key, key=filter_key), str(title))
+        return mapping
 
     @staticmethod
     def find_filter_key(
@@ -115,11 +126,11 @@ class CompositeFilterExtractionService:
             )
             return None, None, None
 
-        key_values = keys.select(filter_key).drop_nulls().unique().to_series().to_list()
+        key_values = keys.select(filter_key).drop_nulls().to_series().to_list()
         if not key_values:
             return None, None, None
 
-        filter_ids = tuple(self.to_id_str(v) for v in key_values)
+        filter_ids = self._deduplicate_filter_ids(key_values, key=filter_key)
         fallback_mapping = self.build_fallback_mapping(
             keys=keys,
             filter_key=filter_key,
@@ -143,10 +154,10 @@ class CompositeFilterExtractionService:
         """
         if field not in keys.columns:
             return None
-        values = keys.select(field).drop_nulls().unique().to_series().to_list()
+        values = keys.select(field).drop_nulls().to_series().to_list()
         if not values:
             return None
-        return tuple(self.to_id_str(value) for value in values)
+        return self._deduplicate_filter_ids(values, key=field)
 
     def extract_multi_filter_ids(
         self,
@@ -214,10 +225,10 @@ class CompositeFilterExtractionService:
         for key in dep_cfg.join_keys:
             if key not in keys.columns:
                 continue
-            key_values = keys.select(key).drop_nulls().unique().to_series().to_list()
+            key_values = keys.select(key).drop_nulls().to_series().to_list()
             if not key_values:
                 continue
-            filter_ids = tuple(self.to_id_str(v) for v in key_values)
+            filter_ids = self._deduplicate_filter_ids(key_values, key=key)
             filter_field = dep_cfg.filter_field or key
             break
 

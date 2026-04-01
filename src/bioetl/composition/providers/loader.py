@@ -1,7 +1,10 @@
-"""Provider loader module.
+"""Retained bootstrap convenience seam for provider loading.
 
-Ensures all providers are registered in ProviderRegistry.
-Called from bootstrap.py for initialization.
+Wave 3 ownership classification: retain.
+
+This module remains a thin bootstrap facade over ``_loading.py`` and routes the
+default-registry path through ``_registry_resolution.py`` instead of owning
+registry bootstrap logic directly.
 """
 
 from __future__ import annotations
@@ -12,10 +15,10 @@ from bioetl.composition.providers._loading import (
     load_provider_registry,
     reset_provider_registry_loader,
 )
-from bioetl.composition.providers.provider_registry import (
-    ProviderRegistry,
-    get_default_provider_registry,
+from bioetl.composition.providers._registry_resolution import (
+    resolve_provider_registry,
 )
+from bioetl.composition.providers.provider_registry import ProviderRegistry
 
 __all__ = [
     "ensure_providers_loaded",
@@ -27,7 +30,7 @@ __all__ = [
 
 def _get_loader_registry() -> ProviderRegistry:
     """Resolve the canonical default provider registry for loader entrypoints."""
-    return get_default_provider_registry()
+    return resolve_provider_registry()
 
 
 def load_providers(force: bool = False) -> None:

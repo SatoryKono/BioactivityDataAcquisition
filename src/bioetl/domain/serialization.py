@@ -29,6 +29,15 @@ from collections.abc import Sequence
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
+from bioetl.domain.normalization.json import (
+    canonicalize_json_string as _canonicalize_json_string,
+)
+from bioetl.domain.normalization.json import (
+    deserialize_json_value as _deserialize_json_value,
+)
+from bioetl.domain.normalization.json import (
+    serialize_json_canonical as _serialize_json_canonical,
+)
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -106,7 +115,24 @@ def serialize_to_json_canonical(
         '{"a":1,"b":2}'
 
     """
-    return serialize_to_json(data, sort_keys=True, ensure_ascii=True)
+    return _serialize_json_canonical(data)
+
+
+def serialize_to_canonical_json(
+    obj: JsonDict,  # Any: JSON values are heterogeneous
+) -> str:
+    """Serialize a mapping to canonical JSON via the domain hashing contract.
+
+    This alias preserves the existing dict-oriented public contract used by
+    content hashing helpers while exposing a clearer public entrypoint name.
+
+    Args:
+        obj: Dictionary to serialize.
+
+    Returns:
+        Canonical JSON string suitable for deterministic hashing.
+    """
+    return serialize_to_json_canonical(obj)
 
 
 _NON_ASCII_RE = re.compile(r"[^\x00-\x7F]")
@@ -136,9 +162,12 @@ def deserialize_from_json(
         [1, 2, 3]
 
     """
-    if _ORJSON_AVAILABLE:
-        return _deserialize_with_orjson(data)
-    return _deserialize_with_stdlib(data)
+    return _deserialize_json_value(data)
+
+
+def canonicalize_json_string(value: str | None) -> str | None:
+    """Normalize JSON string to canonical deterministic JSON representation."""
+    return _canonicalize_json_string(value)
 
 
 def _escape_non_ascii(text: str) -> str:
@@ -197,40 +226,6 @@ def _serialize_with_stdlib(
         separators=(",", ":"),
         ensure_ascii=ensure_ascii,
     )
-
-
-def _deserialize_with_orjson(
-    data: str | bytes,
-) -> JsonDict | list[object]:  # Any: JSON deserialization produces heterogeneous types
-    """Deserialize using orjson."""
-    assert orjson is not None
-    try:
-        result: (
-            JsonDict
-            | list[object]  # Any: JSON deserialization produces heterogeneous types
-        ) = orjson.loads(data)
-        return result
-    except orjson.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON: {e}") from e
-
-
-def _deserialize_with_stdlib(
-    data: str | bytes,
-) -> JsonDict | list[object]:  # Any: JSON deserialization produces heterogeneous types
-    """Deserialize using stdlib json as fallback."""
-    import json
-
-    try:
-        result: (
-            JsonDict | list[object]
-        ) = (  # Any: JSON deserialization produces heterogeneous types
-            json.loads(  # Any: JSON values are heterogeneous
-                data
-            )
-        )  # Any: JSON values are heterogeneous
-        return result
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON: {e}") from e
 
 
 @lru_cache(maxsize=1)
@@ -292,9 +287,11 @@ def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
 
 
 __all__ = [
+    "canonicalize_json_string",
     "deserialize_from_json",
     "flatten_arrow_table_for_export",
     "is_orjson_available",
+    "serialize_to_canonical_json",
     "serialize_to_json",
     "serialize_to_json_canonical",
 ]

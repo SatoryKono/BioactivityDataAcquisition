@@ -18,11 +18,16 @@ __all__ = ["BaseChemblTransformer"]
 
 
 from abc import abstractmethod
+from functools import partial
 from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformerDependencyContext,
+)
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
 )
 
 if TYPE_CHECKING:
@@ -108,61 +113,63 @@ class BaseChemblTransformer(BaseTransformer):
             dependencies=dependencies,
         )
 
+    def _resolve_primary_id(self, record: BronzeRecord) -> PrimaryId:
+        """Resolve the primary identifier from one bronze record."""
+        return cast(
+            "PrimaryId",
+            self._get_required_field(record, self.primary_id_field),
+        )
+
+    async def transform_pre_silver(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> PreSilverRecord | None:
+        """Build an intermediate ChEMBL payload for application finalization."""
+        primary_id = self._resolve_primary_id(record)
+        entity_id = self.compute_entity_id(
+            source_id=str(primary_id),
+            record={self.primary_id_field: str(primary_id)},
+        )
+        business_data = self._extract_business_data(record, primary_id)
+        return PreSilverRecord(
+            entity_id=entity_id,
+            business_data=business_data,
+            build_silver_record=partial(_build_chembl_silver_record, self),
+            apply_structural_policy=self._apply_structural_policy,
+            apply_silver_filter=self._apply_silver_filter,
+        )
+
     async def _transform_impl(
         self,
         context: PipelineContext,
         record: BronzeRecord,
         index: int,
     ) -> SilverRecord | None:
-        """Template method implementing common ChEMBL transformation flow.
-
-        Steps:
-        1. Validate and extract primary ID
-        2. Generate entity_id using standard format
-        3. Extract business data (delegated to subclass)
-        4. Compute content hash
-        5. Create domain entity
-        6. Convert to SilverRecord
-
-        Args:
-            context: Pipeline context with run_id, run_type, logger.
-            record: Raw Bronze record from ChEMBL API.
-            index: Sequential index of the record in the pipeline run.
-
-        Returns:
-            SilverRecord if transformation successful, None if skipped.
-
-        """
-        # 1. Validate primary ID
-        primary_id = cast(
-            "PrimaryId",
-            self._get_required_field(record, self.primary_id_field),
-        )
-
-        # 2. Generate entity ID using IdentityService
+        """Template method implementing common ChEMBL transformation flow."""
+        primary_id = self._resolve_primary_id(record)
         entity_id = self.compute_entity_id(
             source_id=str(primary_id),
             record={self.primary_id_field: str(primary_id)},
         )
-
-        # 3. Extract business data (delegated to subclass)
         business_data = self._extract_business_data(record, primary_id)
-
-        # 4. Compute content hash
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-        # 5. Create domain entity
-        entity = self._create_entity(
-            self.entity_class,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            index=index,
-            **business_data,
+        normalized_business_data = _normalize_chembl_business_data(
+            self,
+            business_data,
         )
-
-        # 6. Convert to SilverRecord
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
+        content_hash = self.compute_content_hash(
+            normalized_business_data,
+            exclude_none=True,
+        )
+        return _build_chembl_silver_record(
+            self,
+            context,
+            entity_id,
+            content_hash,
+            index,
+            normalized_business_data,
+        )
 
     @abstractmethod
     def _extract_business_data(
@@ -192,3 +199,33 @@ class BaseChemblTransformer(BaseTransformer):
 
         """
         ...
+
+
+def _normalize_chembl_business_data(
+    transformer: BaseChemblTransformer,
+    business_data: JsonDict,
+) -> JsonDict:
+    """Normalize ChEMBL business data before legacy hash finalization."""
+    return RecordNormalizationProcessor(
+        provider=transformer.provider,
+    ).normalize_business_data(business_data)
+
+
+def _build_chembl_silver_record(
+    transformer: BaseChemblTransformer,
+    context: PipelineContext,
+    entity_id: str,
+    content_hash: str,
+    index: int,
+    business_data: JsonDict,
+) -> SilverRecord:
+    """Build a finalized Silver record from normalized ChEMBL business data."""
+    entity = transformer._create_entity(
+        transformer.entity_class,
+        context,
+        entity_id=entity_id,
+        content_hash=content_hash,
+        index=index,
+        **business_data,
+    )
+    return cast("SilverRecord", transformer.entity_to_silver_record(entity))
