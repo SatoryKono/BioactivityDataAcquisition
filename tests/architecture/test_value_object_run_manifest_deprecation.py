@@ -20,7 +20,6 @@ RUN_MANIFEST_MODULE = (
 def _iter_run_manifest_import_violations(
     ast_cache: dict[Path, ast.Module],
     *,
-    root_prefix: str,
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
@@ -50,7 +49,6 @@ def test_deprecated_value_object_run_manifest_is_not_used_in_src(
     """Repo source must use runtime contexts or control-plane manifest instead."""
     violations = _iter_run_manifest_import_violations(
         source_ast_cache,
-        root_prefix="src",
         allowed_files=frozenset({RUN_MANIFEST_MODULE}),
     )
     assert not violations, (
@@ -70,7 +68,6 @@ def test_deprecated_value_object_run_manifest_is_not_used_in_tests(
     """Tests should exercise canonical runtime/control-plane contracts instead."""
     violations = _iter_run_manifest_import_violations(
         test_ast_cache,
-        root_prefix="tests",
         allowed_files=frozenset(),
     )
     assert not violations, (
