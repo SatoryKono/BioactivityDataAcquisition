@@ -1,0 +1,98 @@
+version: 1
+policy_scope: integration_and_vcr_execution_policy
+issue_reference: 2598
+source_of_truth:
+  test_matrix_path: configs/quality/test_matrix.yaml
+  fixture_governance_ledger_path: configs/quality/fixture_governance_ledger.yaml
+  ci_coverage_surface_matrix_path: configs/quality/ci_coverage_surface_matrix.yaml
+  testing_guide_path: docs/03-guides/testing.md
+supported_scopes:
+  integration:
+    canonical_test_roots:
+      - tests/integration/adapters/
+      - tests/integration/chembl/
+      - tests/integration/composite/
+      - tests/integration/config/
+      - tests/integration/infrastructure/
+      - tests/integration/interfaces/
+      - tests/integration/pipelines/
+      - tests/integration/validation/
+      - tests/integration/ci/
+    purpose: >-
+      Adapter-, pipeline-, config-, and storage-facing integration checks that use
+      either VCR-backed HTTP replay or local temporary artifacts rather than live
+      network execution by default.
+  e2e:
+    canonical_test_root: tests/e2e/
+    required_marker: e2e
+    purpose: >-
+      End-to-end local-only pipeline execution with memory/file-system control plane
+      components and provider I/O constrained by VCR replay unless an explicit
+      recording refresh path is being used.
+    ci_smoke_workflow_job: control-plane-e2e
+    ci_smoke_target: tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle
+execution_paths:
+  local:
+    windows:
+      bootstrap: scripts/dev/setup_env_windows.ps1
+      pytest_runner: scripts/dev/run_pytest.ps1
+      supported_targets:
+        integration: tests\integration\
+        e2e: tests\e2e\
+    wsl:
+      bootstrap: scripts/dev/setup_env_wsl.sh
+      pytest_runner: scripts/dev/run_pytest.sh
+      supported_targets:
+        integration: tests/integration/
+        e2e: tests/e2e/
+    ci_uv:
+      workflow_path: .github/workflows/tests.yml
+      preferred_command_pattern: uv run pytest
+  live_contract:
+    workflow_path: .github/workflows/contract-tests.yml
+    gate_mode: scheduled
+    required_env:
+      BIOETL_LIVE_API_TESTS: "true"
+      BIOETL_NETWORK_TESTS: "true"
+    required_pytest_flag: --network
+vcr_policy:
+  canonical_root: tests/fixtures/vcr/{provider}/
+  forbidden_locations:
+    - tests/fixtures/vcr_cassettes/
+  placement_checks:
+    - scripts/data/check_root_vcr_cassettes.py
+    - scripts/data/check_vcr_filename_policy.py
+    - scripts/data/check_vcr_secrets.py
+  default_record_modes:
+    ci: none
+    local: once
+  supported_refresh_record_modes:
+    - new_episodes
+  legacy_compatibility_record_modes:
+    - all
+  extensionless_allowlist: .github/vcr-noext-allowlist.txt
+  stale_age_days: 90
+  stale_age_requires_metadata: true
+  fixture_governance_rollout_source: configs/quality/fixture_governance_ledger.yaml
+  metadata_catalog_path: reports/quality/vcr-metadata-catalog.json
+  metadata_catalog_script: scripts/qa/report_vcr_metadata_catalog.py
+  metadata_backfill_script: scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+governance_rules:
+  refresh_triggers:
+    - missing cassette for an already-supported integration or e2e path
+    - intentional adapter request-shape or endpoint change
+    - contract failure or schema-drift investigation that proves replay divergence
+  review_required_after_refresh:
+    - cassette diff changes request parameters, headers, or pagination shape
+    - cassette diff changes sanitized fields or redaction coverage
+    - cassette refresh introduces or removes extensionless filenames
+  ci_behavior:
+    - standard CI paths must run with VCR replay locked to none
+    - scheduled live contract coverage is separate from standard integration and e2e replay
+incremental_extension_model:
+  add_new_provider_or_pipeline_family:
+    - add tests under canonical integration or e2e roots
+    - store cassettes only under tests/fixtures/vcr/{provider}/
+    - update configs/quality/test_matrix.yaml for policy ownership
+    - update configs/quality/fixture_governance_ledger.yaml if rollout status changes
+    - prefer tightening tracked policy artifacts over adding ad hoc doc-only exceptions
