@@ -1,9 +1,19 @@
-"""Canonical execution descriptor for a launched pipeline run.
+"""Deprecated minimal immutable run descriptor value object.
 
 This domain value object intentionally stays minimal and deterministic:
 - immutable via ``frozen=True``
 - no runtime-generated defaults
 - no infrastructure or control-plane imports
+
+It is not the universal runtime execution descriptor for the project. Runtime
+orchestration uses ``PipelineRunContext`` and ``PipelineContext``, while
+provenance/audit uses ``bioetl.domain.control_plane.run_manifest.RunManifest``.
+
+This module is a transitional leftover and must not gain new first-party
+consumers. The supported direction is:
+- runtime orchestration: ``bioetl.domain.context``
+- provenance/control plane: ``bioetl.domain.control_plane.run_manifest``
+- metadata/value-object flows: ``bioetl.domain.value_objects.run_context``
 """
 
 from __future__ import annotations
@@ -26,7 +36,7 @@ def _require_non_empty(value: str, field_name: str) -> str:
 
 @dataclass(frozen=True, slots=True)
 class RunManifest:
-    """Canonical immutable descriptor for pipeline execution."""
+    """Deprecated minimal run descriptor, kept only as a transitional artifact."""
 
     run_id: str
     pipeline_name: str

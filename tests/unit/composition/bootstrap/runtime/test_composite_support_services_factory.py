@@ -181,6 +181,9 @@ def test_build_uses_canonical_composite_checkpoint_port(
         expected_contract_ref="composite_publication",
         expected_contract_version="1.0.0",
         expected_manifest_id="manifest-123",
+        run_ledger_port=(
+            mock_build_control_plane_bundle.return_value.run_ledger_service.ledger_port
+        ),
     )
     assert result.manifest_id == "manifest-123"
     assert (

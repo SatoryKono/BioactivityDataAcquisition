@@ -256,6 +256,12 @@ def load_checkpoint_state(
             state=state.state.value,
             seed_completed=state.seed_completed,
             completed_enrichers=list(state.completed_enrichers),
+            last_event_id=state.last_event_id,
+            last_event_occurred_at=(
+                state.last_event_occurred_at.isoformat()
+                if state.last_event_occurred_at is not None
+                else None
+            ),
         )
         return state
     except CHECKPOINT_READ_ERRORS as error:
@@ -292,6 +298,8 @@ def fresh_checkpoint_state(
         contract_version=anchors.contract_version or "1.0.0",
         manifest_id=anchors.manifest_id,
         composite_run_identity=anchors.composite_run_identity,
+        last_event_id=None,
+        last_event_occurred_at=None,
         created_at=datetime.now(tz=UTC),
     )
 

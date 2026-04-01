@@ -72,6 +72,21 @@ inspection baseline includes:
 and inspection CLI carry `manifest_id` as a reference. They do not embed the
 full manifest.
 
+### 3a. Runtime execution contexts remain separate from the manifest
+
+BioETL does not collapse runtime orchestration into one universal manifest
+object.
+
+- `PipelineRunContext` remains the canonical launch/execution descriptor used
+  during runtime assembly and runner construction.
+- `PipelineContext` remains the canonical in-run processing context for batch,
+  writer, and post-write flows.
+- `RunManifest` remains a provenance/control-plane artifact linked into those
+  runtime paths via `manifest_id`, not a replacement for them.
+
+This decision is intentional: execution context and provenance context evolve
+at different seams and must remain separately testable.
+
 ### 4. File-backed persistence is the first implementation
 
 The initial control-plane store is filesystem-backed and uses these canonical
@@ -129,6 +144,8 @@ The enabled control-plane path follows these invariants:
 2. Run-centric provenance can be inspected without reconstructing logs.
 3. Sidecars now link upward to the control plane through `manifest_id`.
 4. The model creates a stable base for future lineage and replay tooling.
+5. Runtime code avoids a “one manifest for everything” god-object and keeps
+   launch-time and in-run concerns separated.
 
 ### Negative
 

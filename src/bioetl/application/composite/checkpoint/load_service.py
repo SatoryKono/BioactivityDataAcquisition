@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint import _service_support as support
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.domain.exceptions import CheckpointConflictError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort
+    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, RunLedgerPort
 
 
 class CompositeCheckpointLoadService:
@@ -26,6 +28,7 @@ class CompositeCheckpointLoadService:
         expected_context: support.ExpectedCheckpointContext,
         checkpoint_filename: str,
         glob_pattern: str,
+        run_ledger_port: RunLedgerPort | None = None,
     ) -> None:
         self._composite_name = composite_name
         self._run_id = run_id
@@ -36,6 +39,7 @@ class CompositeCheckpointLoadService:
         self._expected_context = expected_context
         self._checkpoint_filename = checkpoint_filename
         self._glob_pattern = glob_pattern
+        self._run_ledger_port = run_ledger_port
 
     def load(self) -> CompositeCheckpointState:
         """Load resumable state when available, otherwise return a fresh state."""
@@ -77,13 +81,14 @@ class CompositeCheckpointLoadService:
             composite_name=self._composite_name,
         )
         merged_state = support.merge_expected_anchors(state, self._expected_context)
+        replayed_state = self._replay_checkpoint_watermark(merged_state)
         support.warn_if_checkpoint_stale(
             logger=self._logger,
             composite_name=self._composite_name,
             stale_threshold_hours=self._stale_threshold_hours,
-            state=merged_state,
+            state=replayed_state,
         )
-        return merged_state
+        return replayed_state
 
     def _warn_if_overwrite_would_drop_progress(self) -> None:
         support.warn_if_checkpoint_exists_with_progress(
@@ -92,3 +97,50 @@ class CompositeCheckpointLoadService:
             composite_name=self._composite_name,
             glob_pattern=self._glob_pattern,
         )
+
+    def _replay_checkpoint_watermark(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState:
+        if self._run_ledger_port is None:
+            return state
+        if not state.manifest_id:
+            return state
+
+        try:
+            replay_entries = self._run_ledger_port.list_entries_after(
+                state.manifest_id,
+                state.last_event_id,
+            )
+        except ValueError as error:
+            detail = (
+                f"checkpoint replay watermark {state.last_event_id!r} is missing "
+                f"for manifest {state.manifest_id!r}"
+            )
+            raise CheckpointConflictError(self._composite_name, detail) from error
+
+        if not replay_entries:
+            return state
+
+        replayed_state = state
+        for entry in replay_entries:
+            replayed_state = replace(
+                replayed_state,
+                last_event_id=entry.entry_id,
+                last_event_occurred_at=entry.occurred_at,
+            )
+        self._logger.info(
+            "Replayed checkpoint watermark from run ledger",
+            composite=self._composite_name,
+            manifest_id=state.manifest_id,
+            replayed_event_count=len(replay_entries),
+            replay_start_event_id=state.last_event_id,
+            replay_end_event_id=replayed_state.last_event_id,
+            replay_end_occurred_at=(
+                replayed_state.last_event_occurred_at.isoformat()
+                if replayed_state.last_event_occurred_at is not None
+                else None
+            ),
+        )
+        return replayed_state
+

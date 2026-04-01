@@ -172,9 +172,21 @@ Split internal modules остаются implementation detail owner packages и 
 
 ### 2.5.1. Runtime Context (`context.py`)
 
-`src/bioetl/domain/context.py` содержит `PipelineContext` и связанные runtime context objects.
+`src/bioetl/domain/context.py` содержит runtime execution contexts и связанные
+domain-level context objects.
 
-`PipelineContext` является нормативным domain-level execution context:
+В текущей архитектуре execution model намеренно разделён на два разных
+контракта:
+
+- `PipelineRunContext` — launch/execution descriptor верхнего уровня; он
+  несёт параметры запуска, rollout/resume flags, identity anchors и
+  launch-time overrides, которые нужны composition/runtime assembly до старта
+  runner-а;
+- `PipelineContext` — in-run processing context; он несёт `run_id`,
+  `run_type`, `LoggerPort` и детерминированный `started_at` для record, batch,
+  write и post-write flows после завершения launch-time assembly.
+
+`PipelineContext` остаётся нормативным domain-level processing context:
 
 - `started_at` — единый детерминированный источник времени для batch и writer flows по ADR-014;
 - `logger` хранится как `LoggerPort`, то есть как чистая абстракция, а не как привязка к `structlog`;
@@ -184,6 +196,18 @@ Split internal modules остаются implementation detail owner packages и 
 Следовательно, `PipelineContext` не считается infrastructure leakage. Concrete logger implementation по-прежнему
 создаётся вне domain и внедряется через composition/infrastructure, а domain удерживает только value semantics и
 portable execution context contract.
+
+`src/bioetl/domain/control_plane/run_manifest.py` решает другую задачу.
+`domain.control_plane.RunManifest` — это immutable provenance/control-plane
+artifact, который фиксирует, что именно было запущено и с какими
+reproducibility anchors. Он не заменяет `PipelineRunContext` или
+`PipelineContext` как runtime descriptor.
+
+Соответственно, проект не использует модель “один universal manifest на всё”.
+Если в domain присутствует минимальный `value_objects.RunManifest`, он не
+считается каноническим runtime execution context и рассматривается как
+transitional/deprecated artifact. Новый first-party код не должен строить на
+нём новые execution contracts.
 
 ### 2.6. Доменные сервисы (`services/`)
 

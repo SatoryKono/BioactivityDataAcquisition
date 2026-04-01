@@ -374,7 +374,7 @@ class GoldWriter(
                         schema=cast("DataFrameSchema", target_schema),
                     )
                 )
-            except (BioETLError, OSError, RuntimeError, ValueError) as exc:
+            except (BioETLError, OSError, RuntimeError, ValueError):
                 self.logger.error(
                     "gold_dual_write_failed",
                     logical_table=request.table_name,
@@ -382,7 +382,6 @@ class GoldWriter(
                     failed_target_table=physical_table,
                     active_contract_version=self._contract_rollout_policy.active_version,
                     write_versions=self._contract_rollout_policy.write_versions,
-                    error_type=type(exc).__name__,
                 )
                 raise
 

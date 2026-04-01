@@ -25,3 +25,11 @@ class RunLedgerPort(Protocol):
     def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
         """Return all entries linked to a run identifier."""
         ...
+
+    def list_entries_after(
+        self,
+        manifest_id: str,
+        after_entry_id: str | None,
+    ) -> list[RunLedgerEntry]:
+        """Return append-ordered entries strictly after one watermark entry."""
+        ...

@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import os
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 from uuid import uuid4
 
+import pytest
+
 from bioetl.domain.control_plane import RunLedgerEntry
+from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore
 
@@ -123,3 +127,146 @@ def test_file_store_emits_ledger_read_metric_on_miss(tmp_path) -> None:
         },
     )
     metrics.observe_histogram.assert_called_once()
+
+
+def test_file_store_wraps_partial_append_failure_and_preserves_existing_events(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    initial_run_id = RunID(uuid4())
+    failed_run_id = RunID(uuid4())
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    initial = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-1",
+        run_id=initial_run_id,
+        event_type="manifest_created",
+        occurred_at=datetime.now(UTC),
+        status="created",
+    )
+    failed = RunLedgerEntry(
+        entry_id="entry-2",
+        manifest_id="manifest-1",
+        run_id=failed_run_id,
+        event_type="run_finished",
+        occurred_at=datetime.now(UTC),
+        status="failed",
+    )
+
+    store.append(initial)
+
+    original_write = os.write
+    state = {"calls": 0}
+
+    def _partial_write_then_fail(fd: int, payload: bytes) -> int:
+        state["calls"] += 1
+        if state["calls"] == 1:
+            chunk = max(1, len(payload) // 2)
+            return original_write(fd, payload[:chunk])
+        raise OSError("simulated partial append failure")
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.control_plane.file_run_ledger_store.os.write",
+        _partial_write_then_fail,
+    )
+
+    with pytest.raises(StorageError) as exc_info:
+        store.append(failed)
+
+    assert "Run ledger append failed" in str(exc_info.value)
+    assert exc_info.value.operation == "append"
+    assert exc_info.value.manifest_id == "manifest-1"
+    assert store.list_entries("manifest-1") == [initial]
+    assert store.list_entries_by_run_id(initial_run_id) == [initial]
+    assert store.list_entries_by_run_id(failed_run_id) == []
+
+
+def test_file_store_rolls_back_ledger_append_when_run_index_write_fails(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    entry = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime.now(UTC),
+        status="success",
+    )
+
+    def _raise_index_failure(*args: object, **kwargs: object) -> None:
+        raise OSError("index write failed")
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.control_plane.file_run_ledger_store.atomic_write_text",
+        _raise_index_failure,
+    )
+
+    with pytest.raises(StorageError) as exc_info:
+        store.append(entry)
+
+    assert "Run ledger append failed" in str(exc_info.value)
+    assert store.list_entries("manifest-1") == []
+    assert store.list_entries_by_run_id(run_id) == []
+
+
+def test_file_store_ignores_truncated_tail_line_during_reads(tmp_path) -> None:
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    entry = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=datetime.now(UTC),
+        status="created",
+    )
+
+    store.append(entry)
+    ledger_path = tmp_path / "run_ledger" / "manifest-1.jsonl"
+    with ledger_path.open("a", encoding="utf-8") as handle:
+        handle.write('{"entry_id":"broken-tail"')
+
+    assert store.list_entries("manifest-1") == [entry]
+    assert store.list_entries_by_run_id(run_id) == [entry]
+
+
+def test_file_store_lists_entries_after_watermark(tmp_path) -> None:
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    first = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=datetime.now(UTC),
+        status="created",
+    )
+    second = RunLedgerEntry(
+        entry_id="entry-2",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type="stage_completed",
+        occurred_at=datetime.now(UTC),
+        status="completed",
+    )
+    third = RunLedgerEntry(
+        entry_id="entry-3",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime.now(UTC),
+        status="success",
+    )
+
+    store.append(first)
+    store.append(second)
+    store.append(third)
+
+    assert store.list_entries_after("manifest-1", None) == [first, second, third]
+    assert store.list_entries_after("manifest-1", "entry-1") == [second, third]
+    assert store.list_entries_after("manifest-1", "entry-3") == []
+    with pytest.raises(ValueError):
+        store.list_entries_after("manifest-1", "missing")
