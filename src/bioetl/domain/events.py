@@ -14,8 +14,17 @@ Usage:
 from __future__ import annotations
 
 __all__ = [
+    "ORDINARY_PIPELINE_STAGE_NAMES",
     "PipelineEvent",
 ]
+
+ORDINARY_PIPELINE_STAGE_NAMES: tuple[str, ...] = (
+    "preflight",
+    "prepare_medallion_layers",
+    "execute_pipeline",
+    "postrun",
+    "checkpoint_finalize",
+)
 
 
 class PipelineEvent:

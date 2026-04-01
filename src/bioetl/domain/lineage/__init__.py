@@ -12,8 +12,10 @@ from bioetl.domain.lineage.models import (
     SchemaRef,
     TransformRef,
 )
+from bioetl.domain.composite.lineage import CompositeLineageMetadata
 
 __all__ = [
+    "CompositeLineageMetadata",
     "DatasetRef",
     "LineageEdge",
     "LineageEdgeType",

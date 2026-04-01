@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -24,6 +24,22 @@ Source of truth для тестовой governance:
 - [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)
 - `configs/quality/test_matrix.yaml`
 - `configs/quality/integration_vcr_policy.yaml`
+
+Canonical local execution paths:
+
+- **CI / single-OS checkout**: `uv run python -m ...` или поддерживаемые
+  Make targets (`make test`, `make test-fast`, `make test-architecture`).
+- **Mixed Windows + WSL checkout (PowerShell)**:
+  `.\scripts\dev\setup_env_windows.ps1`,
+  `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`.
+- **Mixed Windows + WSL checkout (WSL/Linux)**:
+  `bash scripts/dev/setup_env_wsl.sh`,
+  `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`.
+
+Wrappers `run_pytest.ps1|.sh` по умолчанию добавляют флаги
+`--cov=src/bioetl --cov-report=term -q --maxfail=1`, если запуск не был вызван
+с `--help` / `--version`. WSL-обёртка дополнительно вызывает
+`scripts/ops/setup_plugins.sh --pytest-only` перед запуском pytest.
 
 Текущее состояние rollout по ADR-042:
 - mutation testing в CI блокирует только `domain/` с порогом `70%`
@@ -214,6 +230,12 @@ make test-ci
 # Запуск E2E в Local-Only режиме
 uv run python -m pytest tests/e2e/ -m e2e -v
 
+# Mixed Windows + WSL checkout (PowerShell)
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+
+# Mixed Windows + WSL checkout (WSL/Linux)
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+
 # Запуск только архитектурных тестов
 make test-architecture
 
@@ -228,8 +250,8 @@ uv run coverage html -d htmlcov
 
 | Шаг | Команда | Назначение |
 | --- | ------- | ---------- |
-| 1 | `make install` | Создать `.venv` и установить зависимости `[dev]` |
-| 2 | `source .venv/bin/activate` | Активировать окружение для дальнейших команд |
+| 1 | `make install` | CI/single-OS bootstrap через `uv sync` или `.venv` fallback |
+| 2 | `setup_env_windows.ps1` / `setup_env_wsl.sh` | Mixed-checkout bootstrap в `.venv-win` или `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` |
 | 3 | `make test-fast` | Получить быстрый feedback для unit + architecture |
 | 4 | `make test` | Выполнить стабильный локальный прогон с coverage gate 85% |
 | 5 | `make test-cov-fast-stable` | Выполнить ускоренный split-run для локального coverage анализа |
@@ -242,6 +264,7 @@ uv run coverage html -d htmlcov
 - Для корректного прохождения трассировки и мониторинга установите опциональные зависимости (`psutil`, `opentelemetry-*`).
 - `make test` не генерирует `htmlcov/` автоматически; HTML-отчёт создаётся отдельной командой `uv run coverage html -d htmlcov`.
 - В CI используется `.github/workflows/tests.yml`, а локальный `make test-ci` служит способом воспроизвести resilient flow вручную.
+- В mixed Windows + WSL checkout `.venv` не должен быть общим между PowerShell и WSL: используйте `.venv-win` и внешний WSL venv через `setup_env_windows.ps1` / `setup_env_wsl.sh`.
 
 ## 5. План по устранению избыточности (ChEMBL Target Component)
 
@@ -385,6 +408,10 @@ contract-tests.yml
 make install
 make test-deps
 make setup-plugins
+
+# Mixed Windows + WSL checkout
+.\scripts\dev\setup_env_windows.ps1
+bash scripts/dev/setup_env_wsl.sh
 ```
 
 `make setup-dev` остаётся удобным aggregate target поверх `make install` и
@@ -411,7 +438,7 @@ make test-deps-dev
 
 Если аудит или CI падают с ошибками `ModuleNotFoundError`:
 1. Выполните `make install` или `make setup-dev`.
-2. Убедитесь, что используете `uv run` или активировали виртуальное окружение.
+2. В mixed Windows + WSL checkout пересоберите правильное OS-specific окружение через `setup_env_windows.ps1` или `setup_env_wsl.sh`, а затем запускайте `run_pytest.ps1|.sh` / `run_mypy.ps1|.sh`.
 3. Проверьте статус инструментов через `make test-deps-dev`.
 
 В CI для этого используется не `make test`, а отдельный набор шагов в

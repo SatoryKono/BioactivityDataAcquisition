@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -38,7 +38,11 @@ cd BioactivityDataAcquisition2
 
 ## 2. Environment Setup
 
-The supported setup path is the maintained Make-based bootstrap:
+The supported setup path depends on how you use the checkout.
+
+### 2.1. CI / Single-OS Checkout
+
+Use the maintained Make-based bootstrap:
 
 ```bash
 make install
@@ -56,6 +60,28 @@ If you activated `.venv` instead of using `uv`, `python -m scripts.dev setup-mcp
 is also valid.
 
 `scripts/dev/dev_setup.sh` remains in the repository as a legacy placeholder and is not the supported onboarding path.
+
+### 2.2. Mixed Windows + WSL Checkout
+
+If you use the same repository from both Windows PowerShell and WSL, bootstrap
+each OS separately instead of sharing one `.venv`:
+
+```powershell
+.\scripts\dev\setup_env_windows.ps1
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+```
+
+```bash
+bash scripts/dev/setup_env_wsl.sh
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
+```
+
+This path creates `.venv-win` for PowerShell and
+`${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` for WSL/Linux by default.
+
+### 2.3. Manual Fallback Without `make`
 
 Manual fallback without `make`:
 
@@ -122,6 +148,18 @@ Then run the full test suite:
 make test
 ```
 
+For mixed-checkout day-to-day verification, prefer the OS-specific wrappers:
+
+```powershell
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+```
+
+```bash
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
+```
+
 If all tests pass, your environment is ready!
 
 ## 5. Running Your First Pipeline
@@ -129,12 +167,14 @@ If all tests pass, your environment is ready!
 To verify the end-to-end flow, run a sample pipeline (e.g., ChEMBL Activity).
 
 ```bash
-# Ensure your virtual environment is active
-source .venv/bin/activate  # Linux/macOS
-# .venv\Scripts\activate   # Windows
+# CI / single-OS checkout
+uv run python -m bioetl run --pipeline chembl_activity --limit 100
 
-# Run the pipeline
-bioetl run --pipeline chembl_activity --limit 100
+# WSL mixed checkout
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_activity --limit 100
+
+# Windows PowerShell mixed checkout
+.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_activity --limit 100
 ```
 
 This command will:
@@ -160,6 +200,9 @@ data/
     ├── gold/
     │   └── chembl/activity/
     │       └── _delta_log/
+    ├── control/
+    │   ├── run_manifest/
+    │   └── run_ledger/
     ├── checkpoints/
     │   └── chembl_activity.json
     └── quarantine/
@@ -171,6 +214,12 @@ data/
 ### "Make command not found"
 
 On Windows, ensure you have installed Make via Chocolatey (`choco install make`) or use the manual commands listed above.
+
+### "The environment works in WSL but not in PowerShell" (or vice versa)
+
+Do not reuse the same `.venv` across Windows and WSL. Use
+`.venv-win` in PowerShell and `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` in
+WSL via `setup_env_windows.ps1` / `setup_env_wsl.sh`.
 
 ### Permission Denied on data/
 

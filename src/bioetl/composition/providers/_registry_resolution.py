@@ -9,7 +9,7 @@ from bioetl.composition.providers._registry_protocols import (
 )
 from bioetl.composition.providers.provider_registry import (
     ProviderRegistry,
-    ensure_provider_registry_ready,
+    resolve_provider_registry as _resolve_public_provider_registry,
 )
 
 __all__ = ["resolve_provider_registry"]
@@ -47,11 +47,7 @@ def resolve_provider_registry(
     ensure_ready: bool = False,
 ) -> ProviderRegistrarProtocol:
     """Resolve explicit-or-default registry access through one private seam."""
-    resolved_registry = (
-        provider_registry
-        if provider_registry is not None
-        else ProviderRegistry._get_default()
+    return _resolve_public_provider_registry(
+        cast("ProviderRegistry | None", provider_registry),
+        ensure_ready=ensure_ready,
     )
-    if ensure_ready:
-        return ensure_provider_registry_ready(cast("ProviderRegistry", resolved_registry))
-    return resolved_registry
