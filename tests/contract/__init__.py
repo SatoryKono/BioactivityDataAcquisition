@@ -10,8 +10,11 @@ Environment:
     BIOETL_NETWORK_TESTS: Set to "true" to opt into outbound network tests (or pass --network)
     BIOETL_PILOT_SOAK_TESTS: Set to "true" to enable richer pilot-only live suites
         (or pass --pilot-soak)
+    UPDATE_SNAPSHOTS: Set to "1" only when intentionally rebaselining provider
+        contract snapshots in `tests/fixtures/contracts/{provider}/v{version}.json`.
 
 See:
     - RULES.md §4.2 for contract test policies
     - .github/workflows/contract-tests.yml for CI configuration
+    - tests/fixtures/contracts/README.md for provider snapshot registry guidance
 """

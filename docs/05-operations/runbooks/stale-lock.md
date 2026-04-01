@@ -10,7 +10,7 @@ Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage,
 Last verified: '2026-03-30'
 ---
 
-# Stale Lock Detected (P2)
+# Stale Lock Detected (P1)
 
 ## Trigger
 

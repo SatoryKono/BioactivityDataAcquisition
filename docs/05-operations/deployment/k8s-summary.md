@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-02'
 ---
 
 # BioETL Kubernetes Manifests - Summary
@@ -19,285 +19,76 @@ Last verified: '2026-03-29'
 > Placement note: this page lives under [Deployment & Tooling Extras](README.md),
 > not under the standard operations/runbook path.
 
-## Files Generated
+## Purpose
 
-### Core Manifests
+This page is the compact index for the experimental Kubernetes subtree. It is
+not a second deployment guide. Use it to answer:
 
-1. **k8s-deployment.yaml** (5.4 KB)
-   - Deployment: BioETL application pod with 1 replica, resource limits, probes
-   - Service: ClusterIP for metrics endpoint
-   - PersistentVolumeClaim: 50GB data storage
-   - ConfigMap: Environment variables for pipeline configuration
-   - Secret: API keys and credentials
-   - ServiceAccount + RBAC: Pod access control
+1. Which manifest files exist here?
+2. Which document should I read for procedures and troubleshooting?
 
-2. **k8s-monitoring.yaml** (5.8 KB)
-   - Prometheus Deployment: Time-series metrics database
-   - Prometheus Service: Exposes metrics scraping
-   - Grafana Deployment: Visualization and dashboards
-   - Grafana Service: LoadBalancer for external access
-   - ConfigMaps: Prometheus scrape config, Grafana datasources
-   - Secret: Grafana admin credentials
-   - PersistentVolumeClaims: Storage for both
+For actual step-by-step deployment flow, use
+[deployment-guide.md](deployment-guide.md).
 
-3. **k8s-networking.yaml** (2.8 KB)
-   - Ingress: HTTPS/TLS routing for bioetl.example.com and grafana.example.com
-   - HorizontalPodAutoscaler: Auto-scales 1-5 replicas on CPU/memory
-   - PodDisruptionBudget: Maintains availability during cluster maintenance
-   - NetworkPolicy: Restricts ingress/egress traffic
-   - ResourceQuota: Namespace resource limits
+## Experimental Assets
 
-### Documentation & Scripts
+### Core manifests
 
-4. **DEPLOYMENT-GUIDE.md** (9.5 KB)
-   - Step-by-step deployment instructions
-   - Prerequisites and verification
-   - Image building and registry setup
-   - Secrets management
-   - Storage class configuration (AWS/GCP/Azure)
-   - Ingress setup
-   - Verification procedures
-   - Scaling and updates
-   - Troubleshooting guide
-   - Backup/recovery procedures
-   - Production checklist
+1. `k8s-deployment.yaml`
+   - BioETL application deployment
+   - service, PVC, ConfigMap, Secret
+   - ServiceAccount and RBAC wiring
 
-5. **deploy-bioetl.sh** (4.7 KB)
-   - Automation script for common operations
-   - Commands: deploy, update, delete, status, logs, port-forward
+2. `k8s-monitoring.yaml`
+   - Prometheus deployment and service
+   - Grafana deployment and service
+   - monitoring ConfigMaps and secrets
+   - monitoring PVCs
 
----
+3. `k8s-networking.yaml`
+   - ingress and TLS routing
+   - HPA and PodDisruptionBudget
+   - NetworkPolicy and ResourceQuota
 
-## Quick Deployment
+### Supporting docs and helpers
 
-### 1. Prepare
+4. [deployment-guide.md](deployment-guide.md)
+   - prerequisites
+   - image build/push flow
+   - namespace and manifest apply steps
+   - verification, rollout, backup, troubleshooting
 
-```bash
-# Update image registry in k8s-deployment.yaml
-sed -i 's|image: bioetl:REPLACE_IMAGE_TAG|image: YOUR-REGISTRY/bioetl:REPLACE_IMAGE_TAG|g' k8s-deployment.yaml
+5. `scripts/ops/deploy-bioetl.sh`
+   - helper automation for deploy/update/delete/status/logs
+   - convenience wrapper around the experimental manifests
 
-# Build and push container
-docker build -t YOUR-REGISTRY/bioetl:REPLACE_IMAGE_TAG .
-docker push YOUR-REGISTRY/bioetl:REPLACE_IMAGE_TAG
-```
+## Minimal Usage Pattern
 
-If you use the helper automation, pass the same registry/tag pair explicitly:
+If you are evaluating this experimental path, the intended reading order is:
 
-```bash
-BIOETL_IMAGE_REGISTRY=YOUR-REGISTRY BIOETL_IMAGE_TAG=REPLACE_IMAGE_TAG \
-  scripts/ops/deploy-bioetl.sh deploy dev
-```
+1. Read [deployment-guide.md](deployment-guide.md)
+2. Inspect the three YAML manifests
+3. Optionally use `scripts/ops/deploy-bioetl.sh`
+4. Return to standard runbooks for supported operations work
 
-### 2. Deploy
+## Quick Orientation
 
-```bash
-# Option A: Automated script
-chmod +x deploy-bioetl.sh
-./deploy-bioetl.sh deploy dev
+- Metrics endpoint: exposed from the BioETL app pod on port `8000`
+- Monitoring stack: Prometheus + Grafana
+- Persistence: PVC-backed application and monitoring storage
+- Networking extras: ingress, autoscaling, disruption budget, quotas
 
-# Option B: Manual kubectl
-kubectl create namespace bioetl-dev
-kubectl apply -n bioetl-dev -f k8s-deployment.yaml
-kubectl apply -n bioetl-dev -f k8s-monitoring.yaml
-kubectl apply -n bioetl-dev -f k8s-networking.yaml
-```
+## Scope Boundary
 
-### 3. Verify
+This subtree does **not** redefine the supported production posture of BioETL.
+It remains experimental material only. The supported operator model is still:
 
-```bash
-# Check pods
-kubectl get pods -n bioetl-dev
+- local-only single-instance execution
+- filesystem-backed checkpoints and storage
+- in-memory locking
+- standard runbooks under `docs/05-operations/`
 
-# View logs
-kubectl logs -n bioetl-dev -l app=bioetl -f
+## Troubleshooting Pointer
 
-# Port forward for local testing
-kubectl port-forward -n bioetl-dev svc/bioetl 8000:8000
-curl http://localhost:8000/metrics
-```
-
----
-
-## Architecture Overview
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Kubernetes Cluster                       │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │ Namespace: bioetl-{dev,staging,prod}                 │   │
-│  │                                                       │   │
-│  │  ┌─────────────────┐         ┌──────────────────┐   │   │
-│  │  │  BioETL Pod     │         │ Prometheus Pod   │   │   │
-│  │  │  (Deployment)   │         │                  │   │   │
-│  │  │                 │────────→│ Scrapes metrics  │   │   │
-│  │  │ Python app      │         │ every 10s        │   │   │
-│  │  │ :8000/metrics   │         │                  │   │   │
-│  │  └────────┬────────┘         └────────┬─────────┘   │   │
-│  │           │                           │             │   │
-│  │  ┌────────▼────────────────────────────▼──────┐    │   │
-│  │  │   Grafana Pod                              │    │   │
-│  │  │   (Dashboard & Visualization)              │    │   │
-│  │  │   :3000                                    │    │   │
-│  │  └────────┬─────────────────────────────────┘    │   │
-│  │           │                                       │   │
-│  │  ┌────────┴──────────────────────────────────┐   │   │
-│  │  │  PersistentVolumes                        │   │   │
-│  │  │  - bioetl-data (50GB)                     │   │   │
-│  │  │  - prometheus-data (20GB)                 │   │   │
-│  │  │  - grafana-data (5GB)                     │   │   │
-│  │  └──────────────────────────────────────────┘   │   │
-│  │                                                  │   │
-│  └──────────────────────────────────────────────────┘   │
-│                                                          │
-├─────────────────────────────────────────────────────────┤
-│  Networking                                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌────────────┐   │
-│  │ Ingress      │  │ Network      │  │ Resource   │   │
-│  │ Controller   │  │ Policies     │  │ Quotas     │   │
-│  │ (TLS/HTTPS)  │  │ (RBAC)       │  │ (Limits)   │   │
-│  └──────────────┘  └──────────────┘  └────────────┘   │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-## Key Features
-
-### Application Deployment
-- **Multi-replica support** with HPA (scales 1-5 pods)
-- **Health checks**: Liveness & readiness probes on metrics endpoint
-- **Resource management**: CPU/memory requests and limits
-- **Graceful shutdown**: 30-second termination grace period
-- **Configuration**: Environment variables via ConfigMap
-- **Secrets management**: API keys stored separately
-
-### Monitoring Stack
-- **Prometheus**: Collects metrics from BioETL endpoints
-- **Grafana**: Provides dashboards for visualization
-- **Automated scraping**: 10-second intervals from BioETL pods
-- **Data retention**: 15 days for Prometheus, persistent for Grafana
-
-### Networking & Security
-- **Ingress**: HTTPS/TLS support for external access
-- **Network Policies**: Restrict pod-to-pod communication
-- **RBAC**: Service accounts with minimal permissions
-- **Resource Quotas**: Namespace-level resource limits
-- **Pod Disruption Budget**: High availability during maintenance
-
-### Data Persistence
-- **50GB** for application data (Bronze/Silver/Gold layers)
-- **20GB** for metrics (Prometheus time-series)
-- **5GB** for dashboards (Grafana)
-- **Configurable storage classes** (fast-ssd, default, etc.)
-
----
-
-## Configuration Reference
-
-### Environment Variables (ConfigMap)
-
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| BIOETL_ENV | prod | Environment name (dev/staging/prod) |
-| BIOETL_PIPELINE__BATCH_SIZE | 100 | Data batch size for processing |
-| BIOETL_PIPELINE__MAX_CONCURRENT_BATCHES | 4 | Concurrent batch limit |
-| BIOETL_LOG_LEVEL | INFO | Logging level |
-| BIOETL_METRICS_ENABLED | true | Enable Prometheus metrics |
-| BIOETL_METRICS_PORT | 8000 | Metrics HTTP server port |
-
-### Secrets (Must Update)
-
-| Secret | Description |
-|--------|-------------|
-| BIOETL_PII_SALT_CURRENT | Random 64-char string for PII hashing |
-| BIOETL_UNIPROT_API_KEY | UniProt API access key |
-| BIOETL_OPENALEX_EMAIL | OpenAlex polite pool email |
-| BIOETL_SEMANTICSCHOLAR_API_KEY | Semantic Scholar access key |
-| BIOETL_PUBMED_API_KEY | NCBI PubMed access key |
-| BIOETL_CROSSREF_EMAIL | Crossref polite pool email |
-
-### Resources (Adjustable)
-
-```yaml
-# Development
-requests: {cpu: 100m, memory: 256Mi}
-limits: {cpu: 500m, memory: 1Gi}
-
-# Staging
-requests: {cpu: 500m, memory: 1Gi}
-limits: {cpu: 2000m, memory: 2Gi}
-
-# Production
-requests: {cpu: 1000m, memory: 2Gi}
-limits: {cpu: 4000m, memory: 8Gi}
-```
-
----
-
-## Deployment Scenarios
-
-### Development (Local minikube/kind)
-```bash
-./deploy-bioetl.sh deploy dev
-kubectl port-forward -n bioetl-dev svc/grafana 3000:3000
-```
-Access: http://localhost:3000
-
-### Staging (AWS EKS)
-```bash
-kubectl create namespace bioetl-staging
-kubectl apply -n bioetl-staging -f k8s-deployment.yaml
-kubectl apply -n bioetl-staging -f k8s-monitoring.yaml
-# Configure ingress with cert-manager for HTTPS
-```
-
-### Production (Multi-zone, HA)
-```bash
-# Increase replicas
-kubectl scale deployment/bioetl -n bioetl-prod --replicas=3
-
-# Enable auto-scaling
-kubectl apply -f k8s-networking.yaml
-
-# Monitor with Prometheus/Grafana
-kubectl port-forward -n bioetl-prod svc/prometheus 9090:9090
-```
-
----
-
-## Troubleshooting Quick Links
-
-| Issue | Resolution |
-|-------|-----------|
-| Pod pending | Check: PVC status, node resources, image pull |
-| Metrics 404 | Verify BIOETL_METRICS_PORT=8000 in ConfigMap |
-| Grafana no data | Check Prometheus datasource, scrape targets |
-| OOM Errors | Increase memory limits, check log volume |
-| Storage full | Check PVC usage, run cleanup tasks |
-
-See DEPLOYMENT-GUIDE.md for detailed troubleshooting.
-
----
-
-## Next Steps
-
-1. **Update image registry** in all manifests
-2. **Configure secrets** with real API keys
-3. **Set storage class** based on cloud provider
-4. **Deploy** using kubectl or automated script
-5. **Verify** with status and logs commands
-6. **Configure ingress** with your domain
-7. **Set up alerting** in Prometheus/Grafana
-8. **Document runbooks** for operations team
-
----
-
-## Support Resources
-
-- Kubernetes Docs: https://kubernetes.io/docs/
-- Prometheus Docs: https://prometheus.io/docs/
-- Grafana Docs: https://grafana.com/docs/
-- Docker Docs: https://docs.docker.com/reference/cli/docker/container/run/
-- BioETL README: ../README.md
+For concrete troubleshooting procedures and rollout commands, see
+[deployment-guide.md](deployment-guide.md).

@@ -8,6 +8,7 @@ from bioetl.composition.factories.datasource.crossref import (
     create_crossref_adapter,
 )
 from bioetl.composition.providers._config_helpers import (
+    _build_provider_family_http_config_map,
     _create_http_data_source,
     _get_batch_size_from_config,
     _get_rate_limits_from_config,
@@ -28,7 +29,6 @@ from bioetl.composition.providers._registration_biblio_profiles import (
 from bioetl.composition.providers._registration_contracts import (
     HttpProviderConfigSpec,
     ProviderAssemblySupport,
-    build_http_provider_config,
     resolve_provider_assembly_support,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
@@ -279,15 +279,8 @@ def _get_biblio_provider_configs(
         "openalex",
         "semanticscholar",
     )
-    return {
-        spec.provider_name: build_http_provider_config(
-            adapter_class=spec.adapter_class,
-            rate=spec.rate,
-            capacity=spec.capacity,
-            data_source_creator=spec.data_source_creator,
-            assembly_support=support,
-            rate_overrides=spec.rate_overrides,
-            custom_creator=spec.custom_creator,
-        )
-        for spec in _build_biblio_http_provider_specs(rate_limits)
-    }
+    return _build_provider_family_http_config_map(
+        rate_limits=rate_limits,
+        assembly_support=support,
+        spec_builder=_build_biblio_http_provider_specs,
+    )

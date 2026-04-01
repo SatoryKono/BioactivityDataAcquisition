@@ -353,11 +353,8 @@ nav:
                     -   "Traceability Wave 5 Closeout Pack": 05-operations/runbooks/traceability-wave5-closeout-pack.md
                     -   "Scaling": 05-operations/runbooks/scaling.md
                     -   "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
-            -   "Historical Release Checklist (v5.9)": 05-operations/release-checklist.md
             -   "Performance Baselines": 05-operations/performance-baselines.md
             -   "VACUUM & Retention": 05-operations/vacuum-retention.md
-    -   Verification:
-            -   "VCR Provider Rebalancing": 05-operations/verification/vcr-provider-rebalancing.md
     -   "Internal / Extended":
             -   Agents:
                     -   "Agents Overview": 00-project/ai/agents/README.md
@@ -430,9 +427,11 @@ nav:
                             -   "Auxiliary Neo4j / MCP Tooling":
                                     -   "Neo4j Memory Setup": 05-operations/deployment/neo4j-memory-setup.md
                                     -   "MCP Neo4j Memory Summary": 05-operations/deployment/mcp-neo4j-memory-summary.md
-                                    -   "MCP Neo4j Memory Final Summary": 05-operations/deployment/mcp-neo4j-memory-final-summary.md
-                    -   "Endpoint Validation Checklist": 05-operations/verification/endpoint-validation-checklist.md
-                    -   "VCR Test Tasks": 05-operations/verification/vcr-test-tasks.md
+                    -   "Historical Verification & Release Evidence":
+                            -   "Release Checklist (v5.9)": 05-operations/release-checklist.md
+                            -   "Endpoint Validation Checklist": 05-operations/verification/endpoint-validation-checklist.md
+                            -   "VCR Provider Rebalancing": 05-operations/verification/vcr-provider-rebalancing.md
+                            -   "VCR Test Tasks": 05-operations/verification/vcr-test-tasks.md
             -   "Diagram Descriptions":
                 -   "Index": 02-architecture/diagrams/descriptions/INDEX.md
                 -   "Legacy":

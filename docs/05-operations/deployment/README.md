@@ -48,8 +48,11 @@ outside normal support, release, and incident procedures.
 ### Auxiliary Tooling Setup
 
 - [Neo4j Memory Configuration Guide](neo4j-memory-setup.md)
-- [MCP Neo4j Memory Configuration - Setup Summary](mcp-neo4j-memory-summary.md)
-- [MCP Neo4j Memory - Complete Setup Summary](mcp-neo4j-memory-final-summary.md)
+- [MCP Neo4j Memory Configuration - Setup Summary](mcp-neo4j-memory-summary.md) — archived setup note
 
 These pages describe optional Neo4j/MCP tooling and do not redefine BioETL's
 runtime deployment architecture.
+
+The longer implementation snapshot remains available as a historical backlink
+target at `mcp-neo4j-memory-final-summary.md`, but it is intentionally omitted
+from the primary reading path.

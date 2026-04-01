@@ -10,7 +10,7 @@ Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage,
 Last verified: '2026-03-30'
 ---
 
-# Pipeline Failure: High DQ Rate (P2)
+# Pipeline Failure: High DQ Rate (P1)
 
 ## Trigger
 

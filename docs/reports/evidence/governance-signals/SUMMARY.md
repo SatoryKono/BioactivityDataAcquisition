@@ -3,6 +3,8 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
+Update note (2026-04-02): the `2026-03-24` table below remains the last reviewed duplication snapshot, but `composition/bootstrap/runtime` and `composition/factories/pipeline` now also carry bounded `files_ge_250_loc` caps at the current reviewed baseline (`6` and `4` respectively) while fan-in remains watch-only.
+
 **Создано объектов evidence:** 12  
 **Gate Статус:** PASSED
 
@@ -35,10 +37,10 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 
 - `C901` remains green, so structural-pressure discussions can focus on hotspot families rather than baseline complexity noise.
 - The new RF-023 layer now shows all three tracked families at zero duplication. `application/core` still carries the largest large-file tail and the highest local fan-in of the tracked families, so it remains the primary watch zone even after duplication cleanup reached zero.
-- The three tracked families now share the same duplication posture: zero current residue and an active family-level duplication ratchet, while overall governance still stays report-only at the repo level. That keeps CI bounded to non-regression on duplication without turning file-growth or fan-in into premature blockers.
+- The three tracked families still share the same duplication posture: zero current residue and an active family-level duplication ratchet, while overall governance stays report-only at the repo level. As of `2026-04-02`, the two composition families additionally hold bounded `files_ge_250_loc` caps at the reviewed baseline, while fan-in remains watch-only.
 - Governance is now more actionable because each tracked family has an owner, an expected action, and a stated ratchet posture instead of a raw number without follow-up.
 - Trend capture is now operationalized through an append-only hotspot history artifact, and the latest reviewed comparison point now totals `0` duplication clusters across the tracked families.
-- The latest reviewed hotspot report has no current `R0801` findings in the tracked families; the remaining governance pressure is now carried by file-growth and fan-in rather than duplication, which is why the active ratchet remains duplication-only.
+- The latest reviewed hotspot report has no current `R0801` findings in the tracked families; the remaining governance pressure is now carried by file-growth and fan-in rather than duplication. The active duplication ratchet remains in place, and the composition-side file-growth tail now also has a bounded non-regression cap.
 
 ## Отмеченные противоречия
 
@@ -47,6 +49,6 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 
 ## Оставшиеся пробелы
 
-- A bounded duplication-only ratchet is now active for the tracked families because the history artifact contains a second confirming clean snapshot; file-growth and fan-in still remain watch-only until a later governance wave proves those signals are actionable enough for enforcement.
+- A bounded duplication-only ratchet is now active for the tracked families because the history artifact contains a second confirming clean snapshot. On `2026-04-02`, the governance wave tightened that posture for `composition/bootstrap/runtime` and `composition/factories/pipeline` by enforcing `files_ge_250_loc` at the reviewed baseline while keeping fan-in watch-only.
 - Helper density is a lightweight heuristic based on underscore-prefixed functions; it is useful for prioritization, but not a standalone design-quality verdict.
 - Fan-in is currently a local import-based indicator, not a full SCC/dependency-cycle analysis.

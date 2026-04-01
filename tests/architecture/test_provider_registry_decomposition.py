@@ -378,10 +378,11 @@ def test_registration_family_uses_canonical_provider_config_builders(
 
     assert (
         "_build_provider_family_config_map" in called_names
+        or "_build_provider_family_http_config_map" in called_names
         or bool(CANONICAL_PROVIDER_CONFIG_BUILDERS & called_names)
     ), (
-        f"{path.name} must call the shared family scaffold builder or a canonical "
-        "provider-config builder."
+        f"{path.name} must call a sanctioned shared family scaffold helper or a "
+        "canonical provider-config builder."
     )
 
 

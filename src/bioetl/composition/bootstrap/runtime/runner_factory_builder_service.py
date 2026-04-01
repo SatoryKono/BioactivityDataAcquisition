@@ -14,6 +14,10 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import LoggerPort
 
+from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
+    build_dependency_debug_context,
+    resolve_dependency_runner_limit,
+)
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
     CompositeFilterExtractionService,
 )
@@ -77,64 +81,6 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
         options = self._run_options_cls(**option_kwargs)
         ctx = self._build_context(pipeline_name, options)
         return self._pipeline_runner_builder(ctx)
-
-    def _build_dependency_debug_context(
-        self,
-        *,
-        pipeline_name: str,
-        keys: pl.DataFrame,
-        dep_cfg: DependencyConfig | None,
-        filter_field: str | None,
-        filter_ids: tuple[str, ...] | None,
-        multi_filter_ids: dict[str, tuple[str, ...]] | None,
-    ) -> dict[str, object]:
-        """Build structured logging context for dependency runners."""
-        keys_columns = list(keys.columns)
-        keys_count = len(keys)
-        join_keys = [] if dep_cfg is None else list(dep_cfg.join_keys)
-        filter_ids_count = 0 if filter_ids is None else len(filter_ids)
-        filter_ids_sample = [] if filter_ids is None else list(filter_ids)[:5]
-        multi_filter_fields = []
-        multi_filter_counts: dict[str, int] = {}
-        is_chained = False
-        key_source: str | None = None
-
-        if multi_filter_ids is not None:
-            multi_filter_fields = list(multi_filter_ids.keys())
-            multi_filter_counts = {
-                field: len(ids) for field, ids in multi_filter_ids.items()
-            }
-
-        if dep_cfg is not None:
-            is_chained = dep_cfg.key_source is not None
-            key_source = dep_cfg.key_source
-
-        return {
-            "pipeline": pipeline_name,
-            "keys_columns": keys_columns,
-            "keys_count": keys_count,
-            "join_keys": join_keys,
-            "filter_field": filter_field,
-            "filter_ids_count": filter_ids_count,
-            "filter_ids_sample": filter_ids_sample,
-            "multi_filter_fields": multi_filter_fields,
-            "multi_filter_counts": multi_filter_counts,
-            "is_chained": is_chained,
-            "key_source": key_source,
-        }
-
-    def _resolve_dependency_limit(
-        self,
-        *,
-        keys: pl.DataFrame,
-        filter_ids: tuple[str, ...] | None,
-        multi_filter_ids: dict[str, tuple[str, ...]] | None,
-    ) -> int | None:
-        """Return dependency runner limit when filter inputs are present."""
-        has_filter_inputs = filter_ids is not None or multi_filter_ids is not None
-        if not has_filter_inputs:
-            return None
-        return len(keys)
 
     def build_seed_factory(
         self,
@@ -249,7 +195,7 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
                     keys=keys,
                 )
             )
-            debug_context = self._build_dependency_debug_context(
+            debug_context = build_dependency_debug_context(
                 pipeline_name=pipeline_name,
                 keys=keys,
                 dep_cfg=dep_cfg,
@@ -257,7 +203,7 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
                 filter_ids=filter_ids,
                 multi_filter_ids=multi_filter_ids,
             )
-            limit = self._resolve_dependency_limit(
+            limit = resolve_dependency_runner_limit(
                 keys=keys,
                 filter_ids=filter_ids,
                 multi_filter_ids=multi_filter_ids,

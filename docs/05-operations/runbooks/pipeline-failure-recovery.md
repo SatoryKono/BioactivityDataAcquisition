@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,225 +7,159 @@ Reviewers:
 - BioETL Team
 Priority: P1
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
+Last verified: '2026-04-02'
 ---
 
 # Pipeline Failure Recovery Runbook
 
 ## Trigger
 
-- Run this procedure when a pipeline must be diagnosed, stabilized, and safely resumed or rebuilt.
-- Escalate according to the priority declared in metadata when operator ownership is unclear.
+- Run this procedure when a pipeline must be stabilized and resumed, rebuilt, or
+  rolled back to a known-good local state.
+- Escalate according to the priority declared in metadata when operator
+  ownership is unclear.
 
 ## Impact
 
 - Priority: P1.
-- Delayed handling can extend service disruption, data correctness risk, or operator response time.
+- Delayed handling can extend service disruption, data correctness risk, or
+  operator response time.
 
 ## Preconditions
 
-- Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-- Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem
+  storage, MemoryLock.
+- Required access: repository checkout, local shell, logs, configuration, and
+  relevant data/control-plane artifacts.
 
 ## Procedure
 
-### Overview
+### 1. Route to the right symptom runbook first
 
-- This runbook covers diagnosing and recovering from failed BioETL pipeline runs.
+- If the failure is clearly critical or integrity-threatening, start with
+  [Pipeline Failure - Critical](pipeline-failure-critical.md).
+- If the failure is driven by DQ policy or invalid records, start with
+  [Pipeline Failure - DQ](pipeline-failure-dq.md).
+- Use this page as the shared recovery decision layer after the initial triage.
 
-### Symptoms
+### 2. Capture recovery evidence
 
-- Pipeline exits with non-zero exit code
-- Error messages in logs
-- Incomplete data in Silver/Gold tables
-
-### Diagnostic Steps
-
-### Step 1: Check Exit Code
+Collect the minimum state you need before changing anything:
 
 ```bash
-echo $?  # After pipeline run
-```
-
-| Exit Code               | Meaning           | Next Step        |
-| ----------------------- | ----------------- | ---------------- |
-| 1                       | General error     | Check logs       |
-| 2                       | Invalid arguments | Review CLI args  |
-| 83 (DATA-QUALITY-ERROR) | DQ hard threshold | See DQ runbook   |
-| 130                     | SIGINT            | Check checkpoint |
-| 143                     | SIGTERM           | Check checkpoint |
-
-### Step 2: Review Logs
-
-```bash
-# Find recent log entries with errors
+# Recent errors
 grep -r "error\|ERROR\|exception" logs/ | tail -50
 
-# Check specific run by run-id
-grep "run-id.*<run-id>" logs/
-```
-
-- Key log fields to examine:
-
-- `error-category`: CRITICAL, RECOVERABLE, or DATA-QUALITY
-- `status-code`: HTTP status if external API error
-- `retry-count`: Number of retry attempts
-- `provider`: Which data source failed
-
-### Step 3: Check Checkpoint State
-
-```bash
+# Checkpoint owner and progress
 cat data/output/checkpoints/{pipeline}.json
+
+# Control-plane state
+bioetl run-manifest show <run-id|manifest-id> --format json
 ```
 
-- Checkpoint contains:
+Focus on:
 
-- `pipeline`: Pipeline name
-- `run_id`: Run identifier of the checkpoint owner
-- `metadata.records_processed`: Offset-like progress counter used for resume
-- `version`: Checkpoint payload version
+- exit code
+- `run_id`
+- latest checkpoint owner/progress
+- whether the run failed before or after any Silver/Gold writes
 
-### Step 4: Identify Error Type
+### 3. Choose the recovery mode
 
-- **Critical Errors (Fail Immediately)**
+| Situation | Action |
+|---|---|
+| Interrupted run with valid checkpoint | Resume |
+| Recoverable failure after transient issue | Resume |
+| Checkpoint missing/corrupted/incompatible | Rebuild |
+| Silver/Gold output is suspected inconsistent | Backup then rebuild |
+| `loading_strategy: full_scan_only` | Rebuild, not resume |
 
-- Authentication failures (401, 403)
-- Schema mismatch in Gold layer
-- Database unavailable
+### 4. Resume when checkpoint is still trustworthy
 
-- **Recoverable Errors (Auto-Retry)**
-
-- Rate limits (429)
-- Timeouts (502, 503, 504)
-- Temporary network issues
-
-- **Data Quality Errors (Skip Record)**
-
-- Invalid SMILES strings
-- Missing required fields
-- Value out of range
-
-### Recovery Procedures
-
-### Resume from Checkpoint
-
-- For recoverable failures, simply resume:
+For recoverable failures or interrupted runs:
 
 ```bash
-bioetl run --pipeline chembl_activity --resume
+bioetl run --pipeline <pipeline-name> --resume
 ```
 
-- The pipeline will:
+Use resume only when:
 
-1. Load checkpoint state
-1. Resume from `metadata.records_processed`
-1. Continue processing
+- checkpoint belongs to the expected pipeline/run family
+- storage layout is still intact
+- there is no evidence of schema or write-side corruption
 
-- **Important:** pipelines configured with `loading_strategy: full_scan_only` do not resume from checkpoint even when `--resume` is requested.
+### 5. Rebuild when state is not trustworthy
 
-### Force Full Refresh
-
-- If checkpoint is corrupted or data inconsistent:
+If the checkpoint is corrupted, incompatible, or the pipeline cannot safely
+resume:
 
 ```bash
-# Clear checkpoint and reprocess all data
-bioetl run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline <pipeline-name> --run-type rebuild
 ```
 
-- **Warning**: This will reprocess all records from the beginning.
+Use rebuild when:
 
-### Clear and Rebuild Silver
+- checkpoint compatibility blocks resume
+- critical schema/write invariants were violated
+- output needs to be recomputed from source of truth
 
-- For schema issues or data corruption:
+### 6. Backup and rebuild affected Delta outputs when needed
+
+If Silver/Gold data is suspected inconsistent, preserve the last broken state
+before rebuilding:
 
 ```bash
-# 1. Backup current Silver table
-mv data/output/silver/chembl/activity data/output/silver/chembl/activity.bak
-
-# 2. Clear checkpoint only after the failed process has stopped
-rm data/output/checkpoints/chembl_activity.json
-
-# 3. Full refresh
-bioetl run --pipeline chembl_activity --run-type rebuild
-
-# 4. Verify data
-Для проверки данных используйте: `bioetl run --pipeline chembl_activity --run-type rebuild --limit 10`
-
-# 5. Remove backup if successful
-rm -rf data/output/silver/chembl/activity.bak
+# Example path; adjust provider/entity
+mv data/output/silver/<provider>/<entity> data/output/silver/<provider>/<entity>.bak
+rm data/output/checkpoints/<pipeline>.json
+bioetl run --pipeline <pipeline-name> --run-type rebuild
 ```
 
-### Handle Authentication Errors
+After validation succeeds, remove the backup intentionally.
 
-- For 401/403 errors:
+### 7. Post-recovery validation
 
-1. Check API key validity
-1. Verify environment variables:
-   ```bash
-   echo $BIOETL_CHEMBL_API_KEY
-   echo $BIOETL_UNIPROT_API_KEY
-   ```
-1. Rotate API key if expired
-1. Resume pipeline
+Confirm the recovery path actually restored a sane runtime:
 
-### Handle Rate Limit Errors
+```bash
+# Smoke validation with limited scope when supported
+bioetl run --pipeline <pipeline-name> --limit 10
+```
 
-- For persistent 429 errors:
+Also verify:
 
-1. Check current rate limit configuration in pipeline YAML
-1. Reduce batch size if needed:
-   ```yaml
-   # configs/entities/chembl/activity.yaml
-   batch-size: 500  # Reduce from default
-   ```
-1. Add delay between requests:
-   ```yaml
-   rate-limit:
-     requests-per-second: 5  # Reduce if hitting limits
-   ```
-1. Resume pipeline
+- logs no longer emit the triggering failure
+- expected Silver/Gold outputs are readable
+- checkpoint/control-plane artifacts reflect the new run state
 
-### Prevention
+### 8. Escalate when recovery loops
 
-### Enable Monitoring
+Escalate to development/architecture ownership when:
 
-- Set up alerts for:
-
-- Pipeline failures (exit code != 0)
-- DQ threshold warnings (soft threshold exceeded)
-- Long-running pipelines (> expected duration)
-
-### Regular Maintenance
-
-- Run VACUUM weekly (see [VACUUM Procedures](vacuum-procedures.md))
-- Monitor checkpoint file sizes
-- Review the unified quarantine table for patterns (`bioetl quarantine stats --pipeline ...`)
-
-### Escalation
-
-- If recovery fails after 3 attempts:
-
-1. Document error details
-1. Check for upstream API issues
-1. Review recent code changes
-1. Escalate to development team
+- the same failure repeats after 3 recovery attempts
+- rebuild also fails with the same invariant break
+- control-plane inspection shows contradictory lifecycle state
 
 ## Compliance
 
-- This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
-- Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+- This runbook MUST be executed within the priority and runtime profile
+  declared in the YAML header.
+- Operators SHOULD preserve evidence, commands, and follow-up actions in the
+  Verification and Post-incident sections.
 
 ## Verification
 
-- Confirm the triggering condition is cleared or understood with evidence.
-- Verify logs, manifests, datasets, or alerts reflect the expected post-procedure state.
+- Confirm the selected recovery mode matched the observed failure type.
+- Verify logs, manifests, datasets, or alerts reflect the expected
+  post-recovery state.
 
 ## Rollback
 
-- Revert partial changes made during mitigation, including config overrides, restored checkpoints, or rewritten data, if they worsen the situation.
-- Return to the last known good state before attempting an alternate recovery path.
+- Revert partial mitigation changes if they worsen the situation.
+- Restore backups before attempting an alternate rebuild path.
 
 ## Post-incident
 
 - Record timeline, commands executed, evidence reviewed, and follow-up owners.
-- Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.
+- Update linked symptom-specific runbooks when repeated recovery decisions show
+  missing operator guidance.

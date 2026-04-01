@@ -225,7 +225,7 @@ fixture_governance:
     cassette_staleness_age: partial
     cassette_metadata_catalog: partial
     cassette_metadata_backfill: partial
-    contract_snapshots: planned
+    contract_snapshots: partial
     golden_masters: partial
     extensionless_filenames: partial
 

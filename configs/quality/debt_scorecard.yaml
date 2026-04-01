@@ -170,9 +170,11 @@ report_only_hotspot_families:
       linked_rf: "RF-023"
       ratchet_stage: "active"
       ratchet_scope: "duplication-only"
-      expected_action: "Hold duplication at zero via an active family-level ratchet while keeping file-growth and fan-in in watch mode during runtime/bootstrap changes."
+      expected_action: "Hold duplication at zero via an active family-level ratchet, tighten file-growth and fan-in governance incrementally by capping files_ge_250_loc at the reviewed baseline, and keep fan-in in watch mode during runtime/bootstrap changes."
       path_prefixes:
         - "src/bioetl/composition/bootstrap/runtime/"
+      bounded_growth_budgets:
+        files_ge_250_loc: 6
       metrics:
         duplication_clusters: 0
         files: 27
@@ -183,15 +185,17 @@ report_only_hotspot_families:
         max_internal_fan_in_module: "bioetl.composition.bootstrap.runtime.observability"
       trend:
         status: "down_vs_2026-03-23"
-        next_action: "2026-03-24 now has two confirming clean snapshots for composition/bootstrap/runtime; keep the bounded duplication-only family ratchet active while file-growth and fan-in remain watch-only."
+        next_action: "2026-04-02 adds a bounded files_ge_250_loc cap at the current reviewed baseline for composition/bootstrap/runtime while max_internal_fan_in remains watch-only."
     - name: "composition_factories_pipeline"
       owner: "@bioetl-platform"
       linked_rf: "RF-023"
       ratchet_stage: "active"
       ratchet_scope: "duplication-only"
-      expected_action: "Hold duplication at zero via an active family-level ratchet while keeping file-growth and fan-in in watch mode during pipeline-factory changes."
+      expected_action: "Hold duplication at zero via an active family-level ratchet, tighten file-growth and fan-in governance incrementally by capping files_ge_250_loc at the reviewed baseline, and keep fan-in in watch mode during pipeline-factory changes."
       path_prefixes:
         - "src/bioetl/composition/factories/pipeline/"
+      bounded_growth_budgets:
+        files_ge_250_loc: 4
       metrics:
         duplication_clusters: 0
         files: 22
@@ -202,7 +206,7 @@ report_only_hotspot_families:
         max_internal_fan_in_module: "bioetl.composition.factories.pipeline.registry"
       trend:
         status: "down_vs_2026-03-23"
-        next_action: "2026-03-24 now has two confirming clean snapshots for composition/factories/pipeline; keep the bounded duplication-only family ratchet active while file-growth and fan-in remain watch-only."
+        next_action: "2026-04-02 adds a bounded files_ge_250_loc cap at the current reviewed baseline for composition/factories/pipeline while max_internal_fan_in remains watch-only."
 quarterly_targets:
   - quarter: "2026-Q1"
     max_total_exemptions: 9
