@@ -25,7 +25,7 @@ class JoinKeyNormalizationPolicy:
         return self.trim or self.lowercase
 
 
-_NOOP_POLICY = JoinKeyNormalizationPolicy()
+_NOOP_POLICY = JoinKeyNormalizationPolicy()  # EXC-002: immutable module constant
 
 JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
     "canonical_smiles": JoinKeyNormalizationPolicy(trim=True),

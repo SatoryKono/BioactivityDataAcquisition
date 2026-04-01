@@ -46,7 +46,7 @@ def _parse_authors_from_list(authors: Sequence[object]) -> list[str]:
     return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
 
 
-def _try_parse_json_array(text: str) -> list[Any] | None:
+def _try_parse_json_array(text: str) -> list[object] | None:
     """Try to parse text as JSON array. Returns None if invalid."""
     try:
         parsed = deserialize_json_value(text)

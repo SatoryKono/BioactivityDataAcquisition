@@ -352,7 +352,7 @@ def _prepare_publication_business_data(
     context: PipelineContext,
     record: BronzeRecord,
     index: int,
-) -> tuple[str, Any, JsonDict] | None:
+) -> tuple[str, object, JsonDict] | None:
     """Prepare publication business data and validate the primary identifier."""
     transformer._pre_extract_validation(context, record, index)
     business_data = transformer._extract_business_data(record)
@@ -376,9 +376,12 @@ def _normalize_publication_business_data(
     business_data: JsonDict,
 ) -> JsonDict:
     """Normalize publication business data before legacy hash finalization."""
-    return RecordNormalizationProcessor(
+    normalized = RecordNormalizationProcessor(
         provider=transformer.provider,
     ).normalize_business_data(business_data)
+    if isinstance(business_data.get("issn"), list):
+        normalized["issn"] = list(business_data["issn"])
+    return normalized
 
 
 def _build_publication_silver_record(
@@ -399,4 +402,3 @@ def _build_publication_silver_record(
         **business_data,
     )
     return cast("SilverRecord", transformer.entity_to_silver_record(entity))
-
