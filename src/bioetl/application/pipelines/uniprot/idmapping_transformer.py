@@ -10,7 +10,7 @@ __all__ = ["IDMappingTransformer"]
 
 
 import dataclasses
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
