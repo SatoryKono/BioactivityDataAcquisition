@@ -706,9 +706,37 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _can_fast_path_json(args: argparse.Namespace) -> bool:
+    """Return True when stdout JSON can skip full reference discovery."""
+    return (
+        args.json
+        and not args.update
+        and not args.check
+        and not args.check_lifecycle
+        and not str(args.deprecation_report).strip()
+    )
+
+
+def _build_fast_stdout_payload(root: Path) -> dict[str, object]:
+    """Build a lightweight stdout payload without repository-wide reference scans."""
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "generated_at": datetime.now(UTC).isoformat(),
+        "summary": {
+            "total_scripts": len(_iter_scripts(root)),
+            "status_counts": {},
+            "reference_group_coverage": {},
+        },
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     root = _project_root()
+    if _can_fast_path_json(args):
+        _write_ascii_json_stdout(_build_fast_stdout_payload(root))
+        return 0
+
     manifest_path = root / args.manifest
     payload = _build_inventory(root)
 

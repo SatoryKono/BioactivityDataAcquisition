@@ -19,6 +19,7 @@ if TYPE_CHECKING:
         MetricsPort,
         TracingPort,
     )
+    from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -33,6 +34,7 @@ class GoldWriterRuntimeServices:
     metadata_writer: MetadataWriterPort
     metadata_coordinator: MetadataCoordinatorPort | None
     lineage_store: LineageStorePort | None
+    contract_rollout_policy: ContractRolloutPolicy | None = None
 
 
 def build_gold_writer_runtime_services(
@@ -44,6 +46,7 @@ def build_gold_writer_runtime_services(
     metadata_writer: MetadataWriterPort | None,
     metadata_coordinator: MetadataCoordinatorPort | None,
     lineage_store: LineageStorePort | None,
+    contract_rollout_policy: ContractRolloutPolicy | None = None,
 ) -> GoldWriterRuntimeServices:
     """Build grouped runtime collaborators while preserving default resolution."""
     return GoldWriterRuntimeServices(
@@ -54,4 +57,5 @@ def build_gold_writer_runtime_services(
         metadata_writer=metadata_writer or NoOpMetadataWriter(),
         metadata_coordinator=metadata_coordinator,
         lineage_store=lineage_store,
+        contract_rollout_policy=contract_rollout_policy,
     )

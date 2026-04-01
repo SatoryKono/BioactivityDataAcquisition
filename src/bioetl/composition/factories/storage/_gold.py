@@ -9,6 +9,7 @@ from bioetl.domain.ports.noop import (
     NoOpMetadataWriter,
     NoOpTracing,
 )
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
@@ -36,6 +37,7 @@ def create_gold_writer(
     transform_steps: tuple[str, ...] | None,
     flat_structure: bool,
     metrics: MetricsPort | None = None,
+    contract_rollout_policy: ContractRolloutPolicy | None = None,
 ) -> GoldWriter:
     """Create configured Gold writer.
 
@@ -77,6 +79,7 @@ def create_gold_writer(
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
             lineage_store=lineage_store,
+            contract_rollout_policy=contract_rollout_policy,
         ),
         # Keep legacy kwarg for constructor-call compatibility in tests and shims.
         csv_exporter=csv_exporter,

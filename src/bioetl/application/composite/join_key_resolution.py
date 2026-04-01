@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-__all__ = ["JoinKeyResolverService"]
-
-
 from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING
 
@@ -19,6 +16,9 @@ from bioetl.application.composite.join_key_resolution_helpers import (
 
 if TYPE_CHECKING:
     import polars as pl
+
+
+__all__ = ["JoinKeyResolverService"]
 
 
 class JoinKeyResolverService:

@@ -24,7 +24,10 @@ def _make_pipeline() -> MagicMock:
             active_version="2.0.0",
             hash_include=("doi", "publication_date"),
             hash_exclude=("publisher",),
-            rollout=SimpleNamespace(write_versions=("1.0.0", "2.0.0")),
+            rollout=SimpleNamespace(
+                write_versions=("1.0.0", "2.0.0"),
+                affects_hash=True,
+            ),
         ),
     )
     pipeline.config.pipeline_name = "chembl_activity"
@@ -45,6 +48,12 @@ def _make_pipeline() -> MagicMock:
 
 def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> None:
     pipeline = _make_pipeline()
+    active_schema = MagicMock(name="active_gold_schema")
+    shadow_schema = MagicMock(name="shadow_gold_schema")
+    pipeline.gold_schema_by_version = {
+        "1.0.0": shadow_schema,
+        "2.0.0": active_schema,
+    }
     callbacks = SimpleNamespace(
         transform=MagicMock(name="transform"),
         gold_filter=MagicMock(name="gold_filter"),
@@ -55,7 +64,7 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     create_record_processor_from_pipeline(
         pipeline=pipeline,
         silver_schema=None,
-        gold_schema=MagicMock(name="gold_schema"),
+        gold_schema=active_schema,
         callbacks=callbacks,
         create_record_processor_fn=create_fn,
         lock_validator=MagicMock(name="lock_validator"),
@@ -76,9 +85,16 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     )
     assert call_kwargs["content_hash_policy_by_version"] is not None
     assert call_kwargs["content_hash_policy_by_version"].active_version == "2.0.0"
+    assert call_kwargs["content_hash_policy_by_version"].affects_hash is True
     assert call_kwargs["content_hash_policy_by_version"].versions == (
         "1.0.0",
         "2.0.0",
+    )
+    assert call_kwargs["gold_schema_policy_by_version"] is not None
+    assert call_kwargs["gold_schema_policy_by_version"].active_schema is active_schema
+    assert (
+        call_kwargs["gold_schema_policy_by_version"].for_version("1.0.0")
+        is shadow_schema
     )
 
 
@@ -86,12 +102,18 @@ def test_build_record_processor_config_and_validator_forwards_paths_and_strict()
     None
 ):
     pipeline = _make_pipeline()
+    active_schema = MagicMock(name="active_gold_schema")
+    shadow_schema = MagicMock(name="shadow_gold_schema")
+    pipeline.gold_schema_by_version = {
+        "1.0.0": shadow_schema,
+        "2.0.0": active_schema,
+    }
     gold_validator_factory = MagicMock(return_value=MagicMock(name="validator"))
 
     config, validator = build_record_processor_config_and_validator(
         pipeline=pipeline,
         silver_schema=None,
-        gold_schema=MagicMock(name="gold_schema"),
+        gold_schema=active_schema,
         strict_gold_validation=False,
         bronze_output_path="/tmp/bronze",
         silver_output_path="/tmp/silver",
@@ -110,6 +132,37 @@ def test_build_record_processor_config_and_validator_forwards_paths_and_strict()
         {"journal", "publisher", "entity_id", "content_hash"}
     )
     assert config.content_hash_policy_by_version is not None
+    assert config.content_hash_policy_by_version.affects_hash is True
     assert config.content_hash_policy_by_version.versions == ("1.0.0", "2.0.0")
+    assert config.gold_schema_policy_by_version is not None
+    assert config.gold_schema_policy_by_version.versions == ("1.0.0", "2.0.0")
+    assert config.gold_schema_policy_by_version.active_schema is active_schema
+    assert config.gold_schema_policy_by_version.for_version("1.0.0") is shadow_schema
     assert validator is gold_validator_factory.return_value
+    assert gold_validator_factory.call_args.args[0] is active_schema
     assert gold_validator_factory.call_args.kwargs["strict"] is False
+
+
+def test_build_record_processor_config_tracks_non_hash_affecting_rollout_versions() -> None:
+    pipeline = _make_pipeline()
+    pipeline.transformer._contract_policy.rollout = SimpleNamespace(
+        write_versions=("1.0.0", "2.0.0"),
+        affects_hash=False,
+    )
+
+    config, _validator = build_record_processor_config_and_validator(
+        pipeline=pipeline,
+        silver_schema=None,
+        gold_schema=MagicMock(name="gold_schema"),
+        strict_gold_validation=True,
+        bronze_output_path=None,
+        silver_output_path=None,
+        gold_output_path=None,
+        flat_structure=False,
+        gold_validator_factory=MagicMock(return_value=MagicMock(name="validator")),
+    )
+
+    assert config.content_hash_policy_by_version is not None
+    assert config.content_hash_policy_by_version.versions == ("1.0.0", "2.0.0")
+    assert config.content_hash_policy_by_version.affects_hash is False
+    assert config.content_hash_policy_by_version.requires_projected_hashes is False

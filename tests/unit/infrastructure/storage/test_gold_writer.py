@@ -10,6 +10,11 @@ import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.pandas import Column, DataFrameSchema
 
+from bioetl.domain.types import GoldSchemaPolicyByVersion, GoldSchemaVersionPolicy
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+from bioetl.infrastructure.storage.gold.runtime_helpers import (
+    GoldWriterRuntimeServices,
+)
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     normalize_scd_config,
@@ -43,6 +48,18 @@ def non_strict_schema():
             "entity_id": Column(str, nullable=False),
         },
         strict=False,
+    )
+
+
+@pytest.fixture
+def legacy_schema():
+    """Create a legacy strict schema for versioned Gold dual-write tests."""
+    return DataFrameSchema(
+        {
+            "entity_id": Column(str, nullable=False),
+            "legacy_value": Column(str, nullable=False),
+        },
+        strict=True,
     )
 
 
@@ -272,6 +289,154 @@ class TestGoldWriterValidation:
                 mode="scd2",
                 scd_config=scd_config,
             )
+
+
+@pytest.mark.unit
+class TestGoldWriterDualWrite:
+    """Tests for Gold dual-write rollout semantics."""
+
+    async def test_write_gold_dual_write_dispatches_all_versioned_targets(
+        self,
+        noop_logger,
+        strict_schema,
+        legacy_schema,
+    ):
+        """Gold dual-write resolves versioned tables and schema per contract version."""
+        rollout_policy = ContractRolloutPolicy(
+            contract_ref="pubmed/publication",
+            active_version="2.0.0",
+            mode="dual_write",
+            read_order=("2.0.0", "1.0.0"),
+            write_versions=("1.0.0", "2.0.0"),
+        )
+        writer = GoldWriter(
+            base_path="s3://test-bucket/gold",
+            logger=noop_logger,
+            runtime_services=GoldWriterRuntimeServices(
+                csv_exporter=None,
+                tracing=MagicMock(),
+                metrics=None,
+                audit=None,
+                metadata_writer=MagicMock(),
+                metadata_coordinator=None,
+                lineage_store=None,
+                contract_rollout_policy=rollout_policy,
+            ),
+        )
+        writer._prepare_write_gold = AsyncMock(  # type: ignore[method-assign]
+            side_effect=lambda **kwargs: MagicMock(
+                table_name=kwargs["table_name"],
+                table_path=f"s3://test-bucket/gold/{kwargs['table_name'].replace('.', '/')}",
+                validated_mode=MagicMock(value=kwargs["mode"]),
+            )
+        )
+        writer._dispatch_write = AsyncMock()  # type: ignore[method-assign]
+        writer._post_write_gold = AsyncMock()  # type: ignore[method-assign]
+
+        await writer.write_gold(
+            table_name="test.table",
+            records=[
+                {
+                    "entity_id": "CHEMBL123",
+                    "legacy_value": "old",
+                    "value": 5.5,
+                    "extra": "drop_me",
+                }
+            ],
+            schema=GoldSchemaPolicyByVersion(
+                active_version="2.0.0",
+                policies=(
+                    GoldSchemaVersionPolicy(version="1.0.0", schema=legacy_schema),
+                    GoldSchemaVersionPolicy(version="2.0.0", schema=strict_schema),
+                ),
+            ),
+            mode="append",
+        )
+
+        prepare_calls = writer._prepare_write_gold.await_args_list
+        assert [call.kwargs["table_name"] for call in prepare_calls] == [
+            "test.table__v1_0_0",
+            "test.table__v2_0_0",
+        ]
+        assert prepare_calls[0].kwargs["records"] == [
+            {"entity_id": "CHEMBL123", "legacy_value": "old"}
+        ]
+        assert prepare_calls[1].kwargs["records"] == [
+            {"entity_id": "CHEMBL123", "value": 5.5}
+        ]
+        assert writer._dispatch_write.await_count == 2
+        assert writer._post_write_gold.await_count == 2
+
+    async def test_write_gold_dual_write_fails_logical_write_when_any_target_fails(
+        self,
+        noop_logger,
+        strict_schema,
+        legacy_schema,
+    ):
+        """Any versioned Gold target failure should fail the whole logical write."""
+        rollout_policy = ContractRolloutPolicy(
+            contract_ref="pubmed/publication",
+            active_version="2.0.0",
+            mode="dual_write",
+            read_order=("2.0.0", "1.0.0"),
+            write_versions=("1.0.0", "2.0.0"),
+        )
+        logger = MagicMock()
+        logger.bind = MagicMock(return_value=logger)
+        writer = GoldWriter(
+            base_path="s3://test-bucket/gold",
+            logger=logger,
+            runtime_services=GoldWriterRuntimeServices(
+                csv_exporter=None,
+                tracing=MagicMock(),
+                metrics=None,
+                audit=None,
+                metadata_writer=MagicMock(),
+                metadata_coordinator=None,
+                lineage_store=None,
+                contract_rollout_policy=rollout_policy,
+            ),
+        )
+        writer._prepare_write_gold = AsyncMock(  # type: ignore[method-assign]
+            side_effect=lambda **kwargs: MagicMock(
+                table_name=kwargs["table_name"],
+                table_path=f"s3://test-bucket/gold/{kwargs['table_name'].replace('.', '/')}",
+                validated_mode=MagicMock(value=kwargs["mode"]),
+            )
+        )
+        writer._dispatch_write = AsyncMock(  # type: ignore[method-assign]
+            side_effect=[None, RuntimeError("boom")]
+        )
+        writer._post_write_gold = AsyncMock()  # type: ignore[method-assign]
+
+        with pytest.raises(RuntimeError, match="boom"):
+            await writer.write_gold(
+                table_name="test.table",
+                records=[
+                    {
+                        "entity_id": "CHEMBL123",
+                        "legacy_value": "old",
+                        "value": 5.5,
+                    }
+                ],
+                schema=GoldSchemaPolicyByVersion(
+                    active_version="2.0.0",
+                    policies=(
+                        GoldSchemaVersionPolicy(version="1.0.0", schema=legacy_schema),
+                        GoldSchemaVersionPolicy(version="2.0.0", schema=strict_schema),
+                    ),
+                ),
+                mode="append",
+            )
+
+        logger.error.assert_called_once_with(
+            "gold_dual_write_failed",
+            logical_table="test.table",
+            failed_contract_version="2.0.0",
+            failed_target_table="test.table__v2_0_0",
+            active_contract_version="2.0.0",
+            write_versions=("1.0.0", "2.0.0"),
+        )
 
 
 @pytest.mark.unit

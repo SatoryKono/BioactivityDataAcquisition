@@ -82,6 +82,121 @@ if TYPE_CHECKING:
 __all__ = ["SilverWriteMode", "SilverWriter"]
 
 
+def _project_records_for_contract_version(
+    records: list[BronzeRecord],
+    *,
+    contract_version: str,
+) -> list[BronzeRecord]:
+    """Project write-time content hash for one target contract version."""
+    projected_records: list[BronzeRecord] = []
+    for record in records:
+        versioned_hashes = record.get("_content_hashes_by_version")
+        projected = dict(record)
+        if isinstance(versioned_hashes, dict):
+            selected_hash = versioned_hashes.get(contract_version)
+            if selected_hash is not None:
+                projected["content_hash"] = selected_hash
+        projected.pop("_content_hashes_by_version", None)
+        projected_records.append(projected)
+    return projected_records
+
+
+async def _write_single_target(
+    writer: "SilverWriter",
+    *,
+    table_name: str,
+    records: list[BronzeRecord],
+    primary_keys: list[str],
+    schema: pa.Schema,
+    mode: str,
+    partition_cols: list[str] | None,
+    on_schema_mismatch: Literal["error", "evolve", "ignore"],
+    column_order: list[str] | None,
+    bronze_refs: list["BronzeWriteResult"] | None,
+    key_nullability_rules: list["KeyNullabilityRule"] | None,
+) -> "SilverWriteResult | None":
+    """Execute one physical Silver write target with tracing."""
+    started_at, start_perf = datetime.now(UTC), time.perf_counter()
+    return await execute_silver_write_with_tracing(
+        tracing=writer._tracing,
+        module_name=__name__,
+        invocation=_SilverWriteInvocation(
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            schema=schema,
+            mode=mode,
+            partition_cols=partition_cols,
+            on_schema_mismatch=on_schema_mismatch,
+            column_order=column_order,
+            bronze_refs=bronze_refs,
+            key_nullability_rules=key_nullability_rules,
+        ),
+        started_at=started_at,
+        start_perf=start_perf,
+        execute_pipeline=writer._execute_silver_write_pipeline,
+    )
+
+
+async def _write_dual_targets(
+    writer: "SilverWriter",
+    *,
+    logical_table_name: str,
+    records: list[BronzeRecord],
+    primary_keys: list[str],
+    schema: pa.Schema,
+    mode: str,
+    partition_cols: list[str] | None,
+    on_schema_mismatch: Literal["error", "evolve", "ignore"],
+    column_order: list[str] | None,
+    bronze_refs: list["BronzeWriteResult"] | None,
+    key_nullability_rules: list["KeyNullabilityRule"] | None,
+) -> "SilverWriteResult | None":
+    """Write all versioned Silver targets and fail the logical write on any error."""
+    assert writer._contract_rollout_policy is not None  # guarded by caller
+
+    active_result: SilverWriteResult | None = None
+    write_targets = resolve_write_targets(
+        logical_table_name,
+        writer._contract_rollout_policy.write_versions,
+    )
+    for contract_version, physical_table in zip(
+        writer._contract_rollout_policy.write_versions,
+        write_targets,
+        strict=True,
+    ):
+        try:
+            result = await _write_single_target(
+                writer,
+                table_name=physical_table,
+                records=_project_records_for_contract_version(
+                    records,
+                    contract_version=contract_version,
+                ),
+                primary_keys=primary_keys,
+                schema=schema,
+                mode=mode,
+                partition_cols=partition_cols,
+                on_schema_mismatch=on_schema_mismatch,
+                column_order=column_order,
+                bronze_refs=bronze_refs,
+                key_nullability_rules=key_nullability_rules,
+            )
+        except Exception:
+            writer.logger.error(
+                "silver_dual_write_failed",
+                logical_table=logical_table_name,
+                failed_contract_version=contract_version,
+                failed_target_table=physical_table,
+                active_contract_version=writer._contract_rollout_policy.active_version,
+                write_versions=writer._contract_rollout_policy.write_versions,
+            )
+            raise
+        if contract_version == writer._contract_rollout_policy.active_version:
+            active_result = result
+    return active_result
+
+
 class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     SilverWriterArrowMixin,
     SilverWriterValidationMixin,
@@ -191,61 +306,6 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             "dual_read_write",
         } and len(self._contract_rollout_policy.write_versions) > 1
 
-    def _records_for_contract_version(
-        self,
-        records: list[BronzeRecord],
-        *,
-        contract_version: str,
-    ) -> list[BronzeRecord]:
-        """Project write-time content hash for one target contract version."""
-        projected_records: list[BronzeRecord] = []
-        for record in records:
-            versioned_hashes = record.get("_content_hashes_by_version")
-            projected = dict(record)
-            if isinstance(versioned_hashes, dict):
-                selected_hash = versioned_hashes.get(contract_version)
-                if selected_hash is not None:
-                    projected["content_hash"] = selected_hash
-            projected.pop("_content_hashes_by_version", None)
-            projected_records.append(projected)
-        return projected_records
-
-    async def _write_single_target(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        schema: pa.Schema,
-        mode: str,
-        partition_cols: list[str] | None,
-        on_schema_mismatch: Literal["error", "evolve", "ignore"],
-        column_order: list[str] | None,
-        bronze_refs: list[BronzeWriteResult] | None,
-        key_nullability_rules: list[KeyNullabilityRule] | None,
-    ) -> SilverWriteResult | None:
-        """Execute one physical Silver write target with tracing."""
-        started_at, start_perf = datetime.now(UTC), time.perf_counter()
-        return await execute_silver_write_with_tracing(
-            tracing=self._tracing,
-            module_name=__name__,
-            invocation=_SilverWriteInvocation(
-                table_name=table_name,
-                records=records,
-                primary_keys=primary_keys,
-                schema=schema,
-                mode=mode,
-                partition_cols=partition_cols,
-                on_schema_mismatch=on_schema_mismatch,
-                column_order=column_order,
-                bronze_refs=bronze_refs,
-                key_nullability_rules=key_nullability_rules,
-            ),
-            started_at=started_at,
-            start_perf=start_perf,
-            execute_pipeline=self._execute_silver_write_pipeline,
-        )
-
     def _enforce_write_policy(
         self,
         mode: SilverWriteMode,
@@ -317,7 +377,8 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             no records were provided.
         """
         if not self._should_dual_write():
-            return await self._write_single_target(
+            return await _write_single_target(
+                self,
                 table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,
@@ -330,35 +391,19 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 key_nullability_rules=key_nullability_rules,
             )
 
-        assert self._contract_rollout_policy is not None  # guarded by _should_dual_write
-        active_result: SilverWriteResult | None = None
-        write_targets = resolve_write_targets(
-            table_name,
-            self._contract_rollout_policy.write_versions,
+        return await _write_dual_targets(
+            self,
+            logical_table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            schema=schema,
+            mode=mode,
+            partition_cols=partition_cols,
+            on_schema_mismatch=on_schema_mismatch,
+            column_order=column_order,
+            bronze_refs=bronze_refs,
+            key_nullability_rules=key_nullability_rules,
         )
-        for contract_version, physical_table in zip(
-            self._contract_rollout_policy.write_versions,
-            write_targets,
-            strict=True,
-        ):
-            result = await self._write_single_target(
-                table_name=physical_table,
-                records=self._records_for_contract_version(
-                    records,
-                    contract_version=contract_version,
-                ),
-                primary_keys=primary_keys,
-                schema=schema,
-                mode=mode,
-                partition_cols=partition_cols,
-                on_schema_mismatch=on_schema_mismatch,
-                column_order=column_order,
-                bronze_refs=bronze_refs,
-                key_nullability_rules=key_nullability_rules,
-            )
-            if contract_version == self._contract_rollout_policy.active_version:
-                active_result = result
-        return active_result
 
     async def _execute_silver_write_pipeline(
         self,

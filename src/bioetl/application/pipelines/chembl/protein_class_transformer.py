@@ -26,7 +26,9 @@ from bioetl.domain.entities import ProteinClassification
 from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord, PrimaryId
+    from bioetl.application.core.pre_silver_record import PreSilverRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 # Declarative field groups for ProteinClassification entity
@@ -66,6 +68,34 @@ class ProteinClassTransformer(BaseChemblTransformer):
 
     entity_class = ProteinClassification
     primary_id_field = "protein_class_id"
+
+    @staticmethod
+    def _should_skip_record(record: BronzeRecord) -> bool:
+        """Skip the synthetic ChEMBL root node that violates domain invariants."""
+        protein_class_id = safe_int(record.get("protein_class_id"))
+        return protein_class_id is not None and protein_class_id <= 0
+
+    async def transform_pre_silver(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> PreSilverRecord | None:
+        """Skip ChEMBL's root classification before entity inflation."""
+        if self._should_skip_record(record):
+            return None
+        return await super().transform_pre_silver(context, record, index)
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Skip invalid root classifications in legacy direct-transform flows."""
+        if self._should_skip_record(record):
+            return None
+        return await super()._transform_impl(context, record, index)
 
     def _extract_business_data(
         self,

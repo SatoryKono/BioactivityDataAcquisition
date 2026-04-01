@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Awaitable, Callable
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.dq_report_models import (
     _DQ_REPORT_ERRORS,
@@ -26,10 +27,10 @@ if TYPE_CHECKING:
 async def generate_bronze_report(
     *,
     context: DQReportContext,
-    config: "BronzeDQConfigPort",
-    analyzer: "BronzeDQAnalyzerPort | None",
-    report_writer: "DQReportWriterPort | None",
-    logger: "LoggerPort",
+    config: BronzeDQConfigPort,
+    analyzer: BronzeDQAnalyzerPort | None,
+    report_writer: DQReportWriterPort | None,
+    logger: LoggerPort,
     emit_skipped_metric: Callable[[str, str, str], None],
     emit_generated_metric: Callable[[str, str], None],
 ) -> Path | None:
@@ -90,10 +91,10 @@ async def generate_bronze_report(
 async def generate_silver_report(
     *,
     context: DQReportContext,
-    config: "SilverDQConfigPort",
-    analyzer: "SilverDQAnalyzerPort | None",
-    report_writer: "DQReportWriterPort | None",
-    logger: "LoggerPort",
+    config: SilverDQConfigPort,
+    analyzer: SilverDQAnalyzerPort | None,
+    report_writer: DQReportWriterPort | None,
+    logger: LoggerPort,
     emit_skipped_metric: Callable[[str, str, str], None],
     emit_generated_metric: Callable[[str, str], None],
 ) -> Path | None:
@@ -160,10 +161,10 @@ async def generate_silver_report(
 async def generate_gold_report(
     *,
     context: DQReportContext,
-    config: "GoldDQConfigPort",
-    analyzer: "GoldDQAnalyzerPort | None",
-    report_writer: "DQReportWriterPort | None",
-    logger: "LoggerPort",
+    config: GoldDQConfigPort,
+    analyzer: GoldDQAnalyzerPort | None,
+    report_writer: DQReportWriterPort | None,
+    logger: LoggerPort,
     emit_skipped_metric: Callable[[str, str, str], None],
     emit_generated_metric: Callable[[str, str], None],
 ) -> Path | None:

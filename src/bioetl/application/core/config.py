@@ -5,6 +5,7 @@ from __future__ import annotations
 __all__ = [
     "ContentHashPolicyByVersion",
     "ContentHashVersionPolicy",
+    "GoldSchemaPolicyByVersion",
     "LockConfig",
     "RecordProcessorConfig",
 ]
@@ -16,7 +17,12 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
-from bioetl.domain.types import ArrowSchema, GoldSchemaType, ScdConfig
+from bioetl.domain.types import (
+    ArrowSchema,
+    GoldSchemaPolicyByVersion,
+    GoldSchemaType,
+    ScdConfig,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.composite.config import DataSchemaConfig
@@ -38,6 +44,7 @@ class ContentHashPolicyByVersion:
 
     active_version: str
     policies: tuple[ContentHashVersionPolicy, ...]
+    affects_hash: bool = False
 
     def __post_init__(self) -> None:
         """Validate version uniqueness and active-version presence."""
@@ -71,6 +78,11 @@ class ContentHashPolicyByVersion:
         """Whether the rollout needs multiple content hashes in one run."""
         return len(self.policies) > 1
 
+    @property
+    def requires_projected_hashes(self) -> bool:
+        """Whether the current rollout must compute per-version hash projections."""
+        return self.affects_hash and self.is_multi_version
+
 
 @dataclass(frozen=True)
 class RecordProcessorConfig:
@@ -101,6 +113,7 @@ class RecordProcessorConfig:
     content_hash_include_fields: frozenset[str] = field(default_factory=frozenset)
     content_hash_exclude_fields: frozenset[str] = field(default_factory=frozenset)
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None
+    gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None = None
 
 
 @dataclass(frozen=True, slots=True)
