@@ -160,17 +160,15 @@ class MoleculeTransformer(BaseChemblTransformer):
     entity_class = Molecule
     primary_id_field = "molecule_id"
 
-    async def _transform_impl(
+    def _prepare_record(
         self,
-        context: PipelineContext,
         record: BronzeRecord,
-        index: int,
-    ) -> SilverRecord | None:
+    ) -> BronzeRecord:
         """Support both unified and legacy molecule identifier field names."""
         if "molecule_id" not in record and record.get("molecule_chembl_id") is not None:
             record = dict(record)
             record["molecule_id"] = record.get("molecule_chembl_id")
-        return await super()._transform_impl(context, record, index)
+        return record
 
     def _extract_business_data(
         self,

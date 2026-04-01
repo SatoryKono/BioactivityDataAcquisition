@@ -156,17 +156,15 @@ class AssayTransformer(BaseChemblTransformer):
     entity_class = Assay
     primary_id_field = "assay_id"
 
-    async def _transform_impl(
+    def _prepare_record(
         self,
-        context: PipelineContext,
         record: BronzeRecord,
-        index: int,
-    ) -> SilverRecord | None:
+    ) -> BronzeRecord:
         """Support both unified and legacy assay identifier field names."""
         if "assay_id" not in record and record.get("assay_chembl_id") is not None:
             record = dict(record)
             record["assay_id"] = record.get("assay_chembl_id")
-        return await super()._transform_impl(context, record, index)
+        return record
 
     def _extract_business_data(
         self,

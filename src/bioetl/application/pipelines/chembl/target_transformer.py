@@ -48,17 +48,15 @@ class TargetTransformer(BaseChemblTransformer):
 
     _organism_classifier: OrganismClassificationService = _DEFAULT_ORGANISM_CLASSIFIER
 
-    async def _transform_impl(
+    def _prepare_record(
         self,
-        context: PipelineContext,
         record: BronzeRecord,
-        index: int,
-    ) -> SilverRecord | None:
+    ) -> BronzeRecord:
         """Support both unified and legacy target identifier field names."""
         if "target_id" not in record and record.get("target_chembl_id") is not None:
             record = dict(record)
             record["target_id"] = record.get("target_chembl_id")
-        return await super()._transform_impl(context, record, index)
+        return record
 
     def _flatten_target_components(
         self,

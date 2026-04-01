@@ -35,12 +35,10 @@ class CellLineTransformer(BaseChemblTransformer):
     entity_class = CellLine
     primary_id_field = "cell_id"
 
-    async def _transform_impl(
+    def _prepare_record(
         self,
-        context: PipelineContext,
         record: BronzeRecord,
-        index: int,
-    ) -> SilverRecord | None:
+    ) -> BronzeRecord:
         """Map cell_chembl_id → cell_id for Silver layer.
 
         ChEMBL API returns both cell_id (numeric internal ID like 449)
@@ -50,7 +48,7 @@ class CellLineTransformer(BaseChemblTransformer):
         if record.get("cell_chembl_id") is not None:
             record = dict(record)
             record["cell_id"] = record["cell_chembl_id"]
-        return await super()._transform_impl(context, record, index)
+        return record
 
     def _extract_business_data(
         self,

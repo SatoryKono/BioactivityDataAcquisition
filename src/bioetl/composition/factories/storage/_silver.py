@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.domain.ports.noop import NoOpMetadataWriter
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
@@ -45,6 +46,7 @@ def create_silver_writer(
     metrics: MetricsPort | None = None,
     metadata_atomic_retry_policy: AdaptiveRetryPolicy | None = None,
     merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
+    contract_rollout_policy: ContractRolloutPolicy | None = None,
 ) -> SilverWriter:
     """Create configured Silver writer.
 
@@ -96,6 +98,7 @@ def create_silver_writer(
         lineage_store=lineage_store,
         dq_calculator=None,
         merge_resilience_policy=merge_resilience_policy,
+        contract_rollout_policy=contract_rollout_policy,
     )
     return writer_cls(
         base_path=base_path,

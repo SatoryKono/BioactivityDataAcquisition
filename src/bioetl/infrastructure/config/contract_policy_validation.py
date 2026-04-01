@@ -3,15 +3,20 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import Protocol, cast
+
+import yaml
 
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
     PipelineContractPolicy,
 )
 
 __all__ = [
+    "load_contract_registry_entries",
     "resolve_silver_columns",
     "schema_columns",
+    "validate_contract_policy_registry_alignment",
     "validate_pipeline_contract_policy",
 ]
 
@@ -35,6 +40,66 @@ class _ArrowSchemaLike(Protocol):
     """Protocol for Arrow-like schema objects exposing ``names``."""
 
     names: list[str]
+
+
+def load_contract_registry_entries(
+    registry_path: Path | None = None,
+) -> dict[str, dict[str, object]]:
+    """Load contract registry entries from the canonical YAML file."""
+    effective_path = registry_path or Path("configs/base/contract_registry.yaml")
+    if not effective_path.exists():
+        return {}
+    try:
+        payload = yaml.safe_load(effective_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    entries = payload.get("entries")
+    return entries if isinstance(entries, dict) else {}
+
+
+def validate_contract_policy_registry_alignment(
+    policy: PipelineContractPolicy,
+    *,
+    registry_entries: dict[str, dict[str, object]] | None = None,
+) -> None:
+    """Validate rollout versions against registry governance metadata when present."""
+    if not hasattr(policy, "contract_ref") or not hasattr(policy, "active_version"):
+        return
+    entries = registry_entries or load_contract_registry_entries()
+    entry = entries.get(policy.contract_ref)
+    if not isinstance(entry, dict):
+        return
+
+    supported_versions = entry.get("supported_versions")
+    supported = (
+        {str(version) for version in supported_versions}
+        if isinstance(supported_versions, list)
+        else set()
+    )
+    rollout_versions = set(policy.read_order) | set(policy.write_versions)
+    unsupported_versions = sorted(version for version in rollout_versions if version not in supported)
+    if unsupported_versions:
+        raise ValueError(
+            f"Unsupported contract versions for {policy.contract_ref}: {unsupported_versions}"
+        )
+
+    migration_guides = entry.get("migration_guides")
+    guides = migration_guides if isinstance(migration_guides, dict) else {}
+    active_major = policy.active_version.split(".", 1)[0]
+    for version in rollout_versions:
+        if version == policy.active_version:
+            continue
+        if version.split(".", 1)[0] == active_major:
+            continue
+        forward_key = f"{version}->{policy.active_version}"
+        reverse_key = f"{policy.active_version}->{version}"
+        if forward_key not in guides and reverse_key not in guides:
+            raise ValueError(
+                f"Missing migration guide for major contract transition {policy.contract_ref}: "
+                f"{forward_key}"
+            )
 
 
 def schema_columns(schema_class: object) -> set[str]:
@@ -81,6 +146,7 @@ def validate_pipeline_contract_policy(
 ) -> None:
     """Check that policy keys exist in both Silver and Gold contracts."""
     policy = load_policy(provider, entity_type)
+    validate_contract_policy_registry_alignment(policy)
 
     silver_columns = resolve_silver_columns(
         provider=provider,

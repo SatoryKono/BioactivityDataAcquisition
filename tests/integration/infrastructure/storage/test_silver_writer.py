@@ -8,7 +8,11 @@ import pyarrow as pa
 import pytest
 from deltalake import DeltaTable
 
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.domain.transformations import generate_content_hash
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    build_silver_writer_runtime_services,
+)
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 
@@ -258,7 +262,6 @@ async def test_read_silver_returns_records(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test read_silver returns records from existing table."""
-    # First write some records
     await silver_writer.write_silver(
         table_name="test_read",
         records=sample_records,
@@ -266,12 +269,86 @@ async def test_read_silver_returns_records(
         schema=sample_schema,
     )
 
-    # Then read them back
     records = await silver_writer.read_silver("test_read")
 
     assert len(records) == 2
     assert any(r["id"] == "1" and r["val"] == "A" for r in records)
     assert any(r["id"] == "2" and r["val"] == "B" for r in records)
+
+
+@pytest.mark.asyncio
+async def test_write_silver_dual_write_routes_to_all_versioned_tables(
+    temp_delta_path: str,
+    noop_logger,
+) -> None:
+    """Dual-write should persist the same logical batch to all versioned tables."""
+    writer = SilverWriter(
+        base_path=temp_delta_path,
+        logger=noop_logger,
+        runtime_services=build_silver_writer_runtime_services(
+            csv_exporter=None,
+            tracing=None,
+            write_policy=None,
+            metrics=None,
+            audit=None,
+            silver_validator=None,
+            metadata_writer=None,
+            metadata_coordinator=None,
+            lineage_store=None,
+            dq_calculator=None,
+            merge_resilience_policy=None,
+            contract_rollout_policy=ContractRolloutPolicy(
+                contract_ref="chembl.activity",
+                active_version="2.0.0",
+                mode="dual_read_write",
+                read_order=("2.0.0", "1.0.0"),
+                write_versions=("1.0.0", "2.0.0"),
+                affects_hash=True,
+            ),
+        ),
+    )
+    schema = pa.schema(
+        [
+            ("id", pa.string()),
+            ("val", pa.string()),
+            ("content_hash", pa.string()),
+            ("_run_id", pa.string()),
+            ("_run_type", pa.string()),
+            ("_source_batch_id", pa.string()),
+            ("_ingestion_ts", pa.string()),
+        ]
+    )
+    records = [
+        {
+            "id": "1",
+            "val": "A",
+            "content_hash": "active-hash",
+            "_content_hashes_by_version": {
+                "1.0.0": "legacy-hash",
+                "2.0.0": "active-hash",
+            },
+            "_run_id": "run1",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch1",
+            "_ingestion_ts": "2023-01-01T00:00:00",
+        }
+    ]
+
+    result = await writer.write_silver(
+        table_name="chembl.activity",
+        records=records,
+        primary_keys=["id"],
+        schema=schema,
+        mode="append",
+    )
+
+    old_table = DeltaTable(f"{temp_delta_path}/chembl/activity__v1_0_0")
+    new_table = DeltaTable(f"{temp_delta_path}/chembl/activity__v2_0_0")
+
+    assert result is not None
+    assert result.table_name == "chembl.activity__v2_0_0"
+    assert old_table.to_pandas()["content_hash"].iloc[0] == "legacy-hash"
+    assert new_table.to_pandas()["content_hash"].iloc[0] == "active-hash"
 
 
 @pytest.mark.asyncio

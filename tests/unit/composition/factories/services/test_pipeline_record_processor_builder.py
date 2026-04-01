@@ -21,8 +21,10 @@ def _make_pipeline() -> MagicMock:
             _content_hash_exclude_fields={"journal"},
         ),
         _contract_policy=SimpleNamespace(
+            active_version="2.0.0",
             hash_include=("doi", "publication_date"),
             hash_exclude=("publisher",),
+            rollout=SimpleNamespace(write_versions=("1.0.0", "2.0.0")),
         ),
     )
     pipeline.config.pipeline_name = "chembl_activity"
@@ -72,6 +74,12 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     assert call_kwargs["content_hash_exclude_fields"] == frozenset(
         {"journal", "publisher", "entity_id", "content_hash"}
     )
+    assert call_kwargs["content_hash_policy_by_version"] is not None
+    assert call_kwargs["content_hash_policy_by_version"].active_version == "2.0.0"
+    assert call_kwargs["content_hash_policy_by_version"].versions == (
+        "1.0.0",
+        "2.0.0",
+    )
 
 
 def test_build_record_processor_config_and_validator_forwards_paths_and_strict() -> (
@@ -101,5 +109,7 @@ def test_build_record_processor_config_and_validator_forwards_paths_and_strict()
     assert config.content_hash_exclude_fields == frozenset(
         {"journal", "publisher", "entity_id", "content_hash"}
     )
+    assert config.content_hash_policy_by_version is not None
+    assert config.content_hash_policy_by_version.versions == ("1.0.0", "2.0.0")
     assert validator is gold_validator_factory.return_value
     assert gold_validator_factory.call_args.kwargs["strict"] is False

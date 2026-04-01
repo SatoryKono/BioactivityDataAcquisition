@@ -19,6 +19,7 @@ from bioetl.domain.ports.noop import (
     NoOpTracing,
 )
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
@@ -42,6 +43,7 @@ class SilverWriterRuntimeServices:
     lineage_store: LineageStorePort | None
     dq_calculator: DQMetricsCalculator
     merge_resilience_policy: SilverMergeResiliencePolicy
+    contract_rollout_policy: ContractRolloutPolicy | None = None
 
 
 def resolve_silver_writer_runtime(
@@ -84,6 +86,7 @@ def build_silver_writer_runtime_services(
     lineage_store: LineageStorePort | None,
     dq_calculator: DQMetricsCalculator | None,
     merge_resilience_policy: SilverMergeResiliencePolicy | None,
+    contract_rollout_policy: ContractRolloutPolicy | None = None,
 ) -> SilverWriterRuntimeServices:
     """Build grouped runtime collaborators while preserving default resolution."""
     (
@@ -113,4 +116,5 @@ def build_silver_writer_runtime_services(
         lineage_store=lineage_store,
         dq_calculator=resolved_dq_calculator,
         merge_resilience_policy=resolved_merge_resilience_policy,
+        contract_rollout_policy=contract_rollout_policy,
     )

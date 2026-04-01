@@ -67,6 +67,22 @@ def _rewrite_registry_owners(
     registry = load_exemptions_registry()
     registries = registry.get("registries", {})
     assert isinstance(registries, dict)
+    if all(isinstance(entries, dict) and not entries for entries in registries.values()):
+        for index, registry_name in enumerate(
+            sorted(registries)[: max(1, len(owner_cycle))]
+        ):
+            entries = registries.get(registry_name)
+            if not isinstance(entries, dict):
+                continue
+            entries[f"{registry_name}::synthetic-{index}"] = {
+                "value": 1,
+                "owner": owner_cycle[index % len(owner_cycle)],
+                "reason": "synthetic test seed for owner diversification coverage",
+                "classification": "technical_debt",
+                "linked_rf": "RF-TEST",
+                "expires_on": "2026-06-30",
+                "removal_step": "remove synthetic seed after scorecard evaluation",
+            }
     idx = 0
     for entries in registries.values():
         if not isinstance(entries, dict):
@@ -397,15 +413,7 @@ def test_owner_diversification_policy_blocks_single_owner_inventory_after_start(
     tmp_path: Path,
 ) -> None:
     """Inventory with one active owner should fail once diversification policy starts."""
-    registry = load_exemptions_registry()
-    registries = registry.get("registries", {})
-    assert isinstance(registries, dict)
-    for entries in registries.values():
-        if not isinstance(entries, dict):
-            continue
-        for entry in entries.values():
-            if isinstance(entry, dict):
-                entry["owner"] = "@bioetl-architecture"
+    registry = _rewrite_registry_owners(owner_cycle=("@bioetl-architecture",))
 
     tmp_registry = tmp_path / "architecture_metric_exemptions.single_owner.yaml"
     tmp_registry.write_text(yaml.safe_dump(registry), encoding="utf-8")
