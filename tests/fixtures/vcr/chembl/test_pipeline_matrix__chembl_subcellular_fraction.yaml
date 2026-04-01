@@ -39,4 +39,72 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&assay_chembl_id__in=CHEMBL615178%2CCHEMBL615210
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615178", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Rattus norvegicus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": "Membrane", "assay_tax_id": 10116, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000249", "bao_label": "cell membrane format", "cell_chembl_id":
+        null, "confidence_description": "Multiple direct protein targets may be assigned",
+        "confidence_score": 5, "description": "Selectivity ratio of binding affinity
+        towards mu to delta receptors of rat brain membranes", "document_chembl_id":
+        "CHEMBL1132373", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL2095155", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL615210", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Rattus norvegicus", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        "Microsome", "assay_tax_id": 10116, "assay_test_type": null, "assay_tissue":
+        "Liver", "assay_type": "B", "assay_type_description": "Binding", "bao_format":
+        "BAO_0000251", "bao_label": "microsome format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Compound was evaluated for the inhibition of microsomal 2,3-oxidosqualene
+        cyclase in rat liver microsomes", "document_chembl_id": "CHEMBL1125522", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3262", "tissue_chembl_id": "CHEMBL3559723",
+        "variant_sequence": null}], "page_meta": {"limit": 20, "next": null, "offset":
+        0, "previous": null, "total_count": 2}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '2026'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 01 Apr 2026 16:12:58 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'False'
+      X-ChEMBL-retrieval-time:
+      - '1.7591683864593506'
+    status:
+      code: 200
+      message: OK
 version: 1

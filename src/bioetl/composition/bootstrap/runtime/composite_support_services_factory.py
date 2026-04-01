@@ -7,16 +7,20 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
-from bioetl.application.composite.join_key_normalization import (
-    JOIN_KEY_NORMALIZATION_POLICIES,
-    validate_join_key_normalization_policies,
-)
 from bioetl.application.composite.cross_validator import (
     EnrichmentCrossValidator,
 )
 from bioetl.application.composite.join_execution import JoinHow
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+    validate_join_key_normalization_policies,
+)
 from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
+    bind_manifest_logger,
+    build_composite_control_plane_bundle,
+)
 from bioetl.composition.bootstrap.runtime.composite_support_service_builders import (
     build_execution_support_services,
     build_merge_dependencies,
@@ -35,6 +39,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.fsm_helper import FSMStateHelperService
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
         CompositeInfrastructureContext,
     )
@@ -56,6 +61,8 @@ class CompositeSupportServices:
     dq_report_service: DQReportService
     fsm_state_helper: FSMStateHelperService
     quarantine_port: QuarantinePort | None
+    manifest_id: str | None = None
+    run_ledger_service: RunLedgerService | None = None
 
 
 class CompositeSupportServicesFactory:
@@ -140,31 +147,42 @@ class CompositeSupportServicesFactory:
         Returns:
             CompositeSupportServices bundle with all services required by CompositePipelineRunner.
         """
-        delta_reader = self._create_delta_reader()
+        control_plane_bundle = build_composite_control_plane_bundle(
+            config=self._config,
+            runtime=self._runtime,
+            infra_context=self._infra,
+        )
+        logger = bind_manifest_logger(
+            self._infra.logger,
+            control_plane_bundle.manifest_id,
+        )
+        delta_reader = self._create_delta_reader(logger=logger)
         execution_services = build_execution_support_services(
             config=self._config,
-            logger=self._infra.logger,
+            logger=logger,
             delta_reader=delta_reader,
         )
         field_group_registry = self._load_field_group_registry(
             self._config.name,
-            self._infra.logger,
+            logger,
         )
-        cross_validator = self._create_cross_validator()
+        cross_validator = self._create_cross_validator(logger=logger)
         merger = self._create_merge_service(
             delta_reader=delta_reader,
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
+            logger=logger,
         )
         runtime_management_services = build_runtime_management_services(
             config=self._config,
             runtime=self._runtime,
             infra_context=self._infra,
             settings=self._infra.settings,
-            logger=self._infra.logger,
+            logger=logger,
             run_id=self._infra.run_id,
             checkpoint_manager_cls=self._checkpoint_manager_cls,
             create_dq_report_service=self._create_dq_report_service,
+            control_plane_bundle=control_plane_bundle,
         )
 
         return CompositeSupportServices(
@@ -176,21 +194,27 @@ class CompositeSupportServicesFactory:
             dq_report_service=runtime_management_services.dq_report_service,
             fsm_state_helper=runtime_management_services.fsm_state_helper,
             quarantine_port=runtime_management_services.quarantine_port,
+            manifest_id=control_plane_bundle.manifest_id,
+            run_ledger_service=control_plane_bundle.run_ledger_service,
         )
 
-    def _create_delta_reader(self) -> DeltaReader:
+    def _create_delta_reader(self, *, logger: LoggerPort) -> DeltaReader:
         silver_base_path = str(Path(self._infra.settings.data_dir) / "output")
         return DeltaReader(
             base_path=silver_base_path,
-            logger=self._infra.logger,
+            logger=logger,
         )
 
-    def _create_cross_validator(self) -> EnrichmentCrossValidator | None:
+    def _create_cross_validator(
+        self,
+        *,
+        logger: LoggerPort,
+    ) -> EnrichmentCrossValidator | None:
         if not self._config.cross_validation.enabled:
             return None
         return EnrichmentCrossValidator(
             config=self._config.cross_validation,
-            logger=self._infra.logger,
+            logger=logger,
         )
 
     def _create_merge_service(
@@ -199,10 +223,11 @@ class CompositeSupportServicesFactory:
         delta_reader: DeltaReader,
         field_group_registry: FieldGroupRegistry | None,
         cross_validator: EnrichmentCrossValidator | None,
+        logger: LoggerPort,
     ) -> MergeService:
         merge_dependencies = build_merge_dependencies(
             config=self._config,
-            logger=self._infra.logger,
+            logger=logger,
             resolve_join_how=self._resolve_join_how,
             normalization_policies=self._JOIN_KEY_NORMALIZATION_POLICIES,
             system_columns_to_drop=self._SYSTEM_COLUMNS_TO_DROP,
@@ -210,7 +235,7 @@ class CompositeSupportServicesFactory:
         return MergeService(
             merge_config=self._config.merge,
             storage=self._infra.storage,
-            logger=self._infra.logger,
+            logger=logger,
             delta_reader=delta_reader,
             silver_reader=self._infra.storage,
             field_group_registry=field_group_registry,

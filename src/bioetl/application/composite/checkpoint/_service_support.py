@@ -35,6 +35,7 @@ class ExpectedCheckpointContext:
     effective_config_hash: str = ""
     contract_ref: str = ""
     contract_version: str = ""
+    manifest_id: str = ""
     composite_run_identity: str = ""
 
 
@@ -43,6 +44,7 @@ def create_expected_checkpoint_context(
     effective_config_hash: str | None,
     contract_ref: str | None,
     contract_version: str | None,
+    manifest_id: str | None,
     composite_run_identity: str,
 ) -> ExpectedCheckpointContext:
     """Normalize nullable runtime anchors into a comparable checkpoint context."""
@@ -50,6 +52,7 @@ def create_expected_checkpoint_context(
         effective_config_hash=effective_config_hash or "",
         contract_ref=contract_ref or "",
         contract_version=contract_version or "",
+        manifest_id=manifest_id or "",
         composite_run_identity=composite_run_identity,
     )
 
@@ -165,6 +168,7 @@ def merge_expected_anchors(
         ),
         contract_ref=(state.contract_ref or anchors.contract_ref),
         contract_version=(anchors.contract_version or state.contract_version),
+        manifest_id=(state.manifest_id or anchors.manifest_id),
         composite_run_identity=(
             state.composite_run_identity or anchors.composite_run_identity
         ),
@@ -286,6 +290,7 @@ def fresh_checkpoint_state(
         effective_config_hash=anchors.effective_config_hash,
         contract_ref=anchors.contract_ref,
         contract_version=anchors.contract_version or "1.0.0",
+        manifest_id=anchors.manifest_id,
         composite_run_identity=anchors.composite_run_identity,
         created_at=datetime.now(tz=UTC),
     )

@@ -63,7 +63,7 @@ def _build_version_targets(
     contract_ref: str,
     active_version: str,
     versions: tuple[str, ...],
-) -> tuple["VersionedContractTarget", ...]:
+) -> tuple[VersionedContractTarget, ...]:
     """Build semantic contract targets for read or write execution."""
     return tuple(
         VersionedContractTarget(

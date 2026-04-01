@@ -72,6 +72,8 @@ class _CompositeRunnerHostProtocol(Protocol):
     _quarantine_port: object
     _metrics: object
     _fsm: object
+    _manifest_id: str | None
+    _run_ledger_service: object
     _run_id_str: str
     _run_id: RunID
     _started_at: object
@@ -114,6 +116,8 @@ def bind_runner_dependencies(host: object, deps: CompositeRunnerDependencies) ->
     runner_host._quarantine_port = deps.quarantine_port
     runner_host._metrics = deps.metrics
     runner_host._fsm = deps.fsm_state_helper
+    runner_host._manifest_id = deps.manifest_id
+    runner_host._run_ledger_service = deps.run_ledger_service
 
 
 def initialize_runner_runtime_state(host: object, run_id: str | None) -> None:

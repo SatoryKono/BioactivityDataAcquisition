@@ -12,10 +12,20 @@ from typing import Any
 
 from bioetl.domain.normalization.text import (
     normalize_abstract as _normalize_abstract,
+)
+from bioetl.domain.normalization.text import (
     normalize_oa_status as _normalize_oa_status,
+)
+from bioetl.domain.normalization.text import (
     normalize_string as _normalize_string,
+)
+from bioetl.domain.normalization.text import (
     normalize_title as _normalize_title,
+)
+from bioetl.domain.normalization.text import (
     normalize_to_string as _normalize_to_string,
+)
+from bioetl.domain.normalization.text import (
     strip_html_tags as _strip_html_tags,
 )
 

@@ -128,7 +128,10 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
         "chembl_subcellular_fraction",
         "chembl",
         "subcellular_fraction",
-        smoke_limit=100,
+        smoke_limit=2,
+        filter_ids=("CHEMBL615178", "CHEMBL615210"),
+        filter_field="assay_chembl_id",
+        cassette_candidates=("test_pipeline_matrix__chembl_subcellular_fraction",),
     ),
     PipelineE2ECase(
         "chembl_target",

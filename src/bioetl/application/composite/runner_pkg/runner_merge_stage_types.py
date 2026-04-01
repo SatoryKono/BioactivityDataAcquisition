@@ -123,6 +123,8 @@ class _CompositeRunnerMergeStageHostProtocol(Protocol):
         merge_result: MergeResult,
     ) -> None: ...
 
+    def _record_merge_stage_completed(self, merge_result: MergeResult) -> None: ...
+
 
 @dataclass(frozen=True, slots=True)
 class _PreparedMergeInputs:

@@ -13,7 +13,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.composite.checkpoint import _service_support as checkpoint_support
+from bioetl.application.composite.checkpoint import (
+    _service_support as checkpoint_support,
+)
 from bioetl.application.composite.checkpoint.service import CompositeCheckpointService
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.composite.state import CompositePipelineState
@@ -72,6 +74,7 @@ def _make_service(
     expected_effective_config_hash: str | None = None,
     expected_contract_ref: str | None = None,
     expected_contract_version: str | None = None,
+    expected_manifest_id: str | None = None,
 ) -> tuple[CompositeCheckpointService, MagicMock, MagicMock]:
     """Convenience factory — returns (service, storage_mock, logger_mock)."""
     s = storage if storage is not None else _make_storage()
@@ -85,6 +88,7 @@ def _make_service(
         expected_effective_config_hash=expected_effective_config_hash,
         expected_contract_ref=expected_contract_ref,
         expected_contract_version=expected_contract_version,
+        expected_manifest_id=expected_manifest_id,
     )
     return svc, s, lg
 
@@ -188,11 +192,13 @@ class TestFilenameFormat:
             expected_effective_config_hash="hash-123",
             expected_contract_ref="composite_publication",
             expected_contract_version="2.1.0",
+            expected_manifest_id="manifest-123",
         )
 
         assert svc.expected_effective_config_hash == "hash-123"
         assert svc.expected_contract_ref == "composite_publication"
         assert svc.expected_contract_version == "2.1.0"
+        assert svc.expected_manifest_id == "manifest-123"
 
 
 # ---------------------------------------------------------------------------
@@ -237,6 +243,19 @@ class TestLoadFreshStart:
         state = await svc.load()
 
         assert state.created_at is not None
+
+    @pytest.mark.asyncio
+    async def test_fresh_load_carries_expected_manifest_id(self) -> None:
+        """Fresh checkpoint state should retain manifest anchor from bootstrap."""
+        svc, storage, _ = _make_service(
+            resume=False,
+            expected_manifest_id="manifest-123",
+        )
+        storage.list_glob.return_value = []
+
+        state = await svc.load()
+
+        assert state.manifest_id == "manifest-123"
 
 
 # ---------------------------------------------------------------------------
@@ -720,11 +739,9 @@ class TestListAll:
 
         assert result == []
 
-
-# ---------------------------------------------------------------------------
-# 8. Stale Checkpoint Detection
-# ---------------------------------------------------------------------------
-
+    # ---------------------------------------------------------------------------
+    # 8. Stale Checkpoint Detection
+    # ---------------------------------------------------------------------------
 
     @pytest.mark.unit
     class TestStaleCheckpointDetection:

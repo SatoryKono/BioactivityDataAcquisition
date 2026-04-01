@@ -198,6 +198,8 @@ def create_runner(
     seed_runner: MockPipelineRunner | None = None,
     checkpoint_manager: AsyncMock | None = None,
     runtime: CompositeRuntimeConfig | None = None,
+    manifest_id: str | None = None,
+    run_ledger_service: MagicMock | None = None,
 ) -> CompositePipelineRunner:
     """Create a CompositePipelineRunner for testing."""
     if seed_runner is None:
@@ -224,6 +226,8 @@ def create_runner(
             config=config,
             run_id=run_id,
         ),
+        manifest_id=manifest_id,
+        run_ledger_service=run_ledger_service,
     )
     return CompositePipelineRunner(
         config=config,
@@ -295,6 +299,31 @@ class TestFSMSeedStateTransitions:
         seed_completed_state = save_calls[1][0][0]
         assert seed_completed_state.seed_result is not None
         assert seed_completed_state.seed_result.pipeline_name == "chembl_activity"
+
+    @pytest.mark.asyncio
+    async def test_records_control_plane_events_for_successful_run(self):
+        """Composite runner emits ledger lifecycle events when attached."""
+        checkpoint_manager = create_mock_checkpoint_manager()
+        run_ledger_service = MagicMock()
+        runner = create_runner(
+            checkpoint_manager=checkpoint_manager,
+            manifest_id="manifest-123",
+            run_ledger_service=run_ledger_service,
+        )
+
+        await runner.run()
+
+        assert runner.manifest_id == "manifest-123"
+        run_ledger_service.record_run_started.assert_called_once_with()
+        assert [
+            call.kwargs["stage"]
+            for call in run_ledger_service.record_stage_completed.call_args_list
+        ] == [
+            "seed",
+            "enrichment",
+            "merge",
+        ]
+        run_ledger_service.record_run_finished.assert_called_once()
 
 
 class TestFSMSeedFailure:
@@ -372,6 +401,26 @@ class TestFSMSeedFailure:
             c for c in logger.error.call_args_list if "Seed pipeline failed" in str(c)
         ]
         assert len(error_calls) >= 1, "Should log seed failure error"
+
+    @pytest.mark.asyncio
+    async def test_records_run_failed_when_seed_execution_raises(self):
+        """Composite runner emits run_failed when execution aborts."""
+        checkpoint_manager = create_mock_checkpoint_manager()
+        run_ledger_service = MagicMock()
+        runner = create_runner(
+            seed_runner=MockPipelineRunner(
+                should_fail=True,
+                error_message="boom",
+            ),
+            checkpoint_manager=checkpoint_manager,
+            run_ledger_service=run_ledger_service,
+        )
+
+        with pytest.raises(RuntimeError, match="boom"):
+            await runner.run()
+
+        run_ledger_service.record_run_started.assert_called_once_with()
+        run_ledger_service.record_run_failed.assert_called_once()
 
 
 class TestFSMSeedResume:

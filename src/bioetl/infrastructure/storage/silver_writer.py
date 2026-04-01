@@ -11,6 +11,7 @@ import pyarrow as pa
 from deltalake import DeltaTable as _DeltaTable
 from deltalake import write_deltalake as _write_deltalake
 
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
 from bioetl.domain.ports import (
     AuditPort,
@@ -102,7 +103,7 @@ def _project_records_for_contract_version(
 
 
 async def _write_single_target(
-    writer: "SilverWriter",
+    writer: SilverWriter,
     *,
     table_name: str,
     records: list[BronzeRecord],
@@ -112,9 +113,9 @@ async def _write_single_target(
     partition_cols: list[str] | None,
     on_schema_mismatch: Literal["error", "evolve", "ignore"],
     column_order: list[str] | None,
-    bronze_refs: list["BronzeWriteResult"] | None,
-    key_nullability_rules: list["KeyNullabilityRule"] | None,
-) -> "SilverWriteResult | None":
+    bronze_refs: list[BronzeWriteResult] | None,
+    key_nullability_rules: list[KeyNullabilityRule] | None,
+) -> SilverWriteResult | None:
     """Execute one physical Silver write target with tracing."""
     started_at, start_perf = datetime.now(UTC), time.perf_counter()
     return await execute_silver_write_with_tracing(
@@ -139,7 +140,7 @@ async def _write_single_target(
 
 
 async def _write_dual_targets(
-    writer: "SilverWriter",
+    writer: SilverWriter,
     *,
     logical_table_name: str,
     records: list[BronzeRecord],
@@ -149,9 +150,9 @@ async def _write_dual_targets(
     partition_cols: list[str] | None,
     on_schema_mismatch: Literal["error", "evolve", "ignore"],
     column_order: list[str] | None,
-    bronze_refs: list["BronzeWriteResult"] | None,
-    key_nullability_rules: list["KeyNullabilityRule"] | None,
-) -> "SilverWriteResult | None":
+    bronze_refs: list[BronzeWriteResult] | None,
+    key_nullability_rules: list[KeyNullabilityRule] | None,
+) -> SilverWriteResult | None:
     """Write all versioned Silver targets and fail the logical write on any error."""
     assert writer._contract_rollout_policy is not None  # guarded by caller
 
@@ -166,8 +167,7 @@ async def _write_dual_targets(
         strict=True,
     ):
         try:
-            result = await _write_single_target(
-                writer,
+            result = await writer._write_single_target(
                 table_name=physical_table,
                 records=_project_records_for_contract_version(
                     records,
@@ -182,7 +182,7 @@ async def _write_dual_targets(
                 bronze_refs=bronze_refs,
                 key_nullability_rules=key_nullability_rules,
             )
-        except Exception:
+        except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             writer.logger.error(
                 "silver_dual_write_failed",
                 logical_table=logical_table_name,
@@ -190,6 +190,7 @@ async def _write_dual_targets(
                 failed_target_table=physical_table,
                 active_contract_version=writer._contract_rollout_policy.active_version,
                 write_versions=writer._contract_rollout_policy.write_versions,
+                error_type=type(exc).__name__,
             )
             raise
         if contract_version == writer._contract_rollout_policy.active_version:
@@ -314,6 +315,64 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         """Delegate Silver write-mode enforcement to the validation mixin."""
         SilverWriterValidationMixin._enforce_write_policy(self, mode, table_name)
 
+    async def _write_single_target(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        schema: pa.Schema,
+        mode: str,
+        partition_cols: list[str] | None,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+        column_order: list[str] | None,
+        bronze_refs: list[BronzeWriteResult] | None,
+        key_nullability_rules: list[KeyNullabilityRule] | None,
+    ) -> SilverWriteResult | None:
+        """Compatibility seam for direct test patching and dual-write orchestration."""
+        return await _write_single_target(
+            self,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            schema=schema,
+            mode=mode,
+            partition_cols=partition_cols,
+            on_schema_mismatch=on_schema_mismatch,
+            column_order=column_order,
+            bronze_refs=bronze_refs,
+            key_nullability_rules=key_nullability_rules,
+        )
+
+    async def _write_dual_targets(
+        self,
+        *,
+        logical_table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        schema: pa.Schema,
+        mode: str,
+        partition_cols: list[str] | None,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+        column_order: list[str] | None,
+        bronze_refs: list[BronzeWriteResult] | None,
+        key_nullability_rules: list[KeyNullabilityRule] | None,
+    ) -> SilverWriteResult | None:
+        """Compatibility seam for direct test patching and dual-write orchestration."""
+        return await _write_dual_targets(
+            self,
+            logical_table_name=logical_table_name,
+            records=records,
+            primary_keys=primary_keys,
+            schema=schema,
+            mode=mode,
+            partition_cols=partition_cols,
+            on_schema_mismatch=on_schema_mismatch,
+            column_order=column_order,
+            bronze_refs=bronze_refs,
+            key_nullability_rules=key_nullability_rules,
+        )
+
     def _validate_silver_pandera(
         self,
         records: list[BronzeRecord],
@@ -377,8 +436,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             no records were provided.
         """
         if not self._should_dual_write():
-            return await _write_single_target(
-                self,
+            return await self._write_single_target(
                 table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,
@@ -391,8 +449,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 key_nullability_rules=key_nullability_rules,
             )
 
-        return await _write_dual_targets(
-            self,
+        return await self._write_dual_targets(
             logical_table_name=table_name,
             records=records,
             primary_keys=primary_keys,

@@ -33,6 +33,12 @@ from bioetl.application.services.checkpoint_service import (
 from bioetl.application.services.config_service import (
     ConfigService,
 )
+from bioetl.application.services.contract_migration_service import (
+    ContractMigrationAction,
+    ContractMigrationPlan,
+    ContractMigrationService,
+    ContractVersionTransition,
+)
 from bioetl.application.services.export_service import (
     ColumnInfo,
     ExportOptions,
@@ -85,6 +91,10 @@ __all__ = [
     "CheckpointService",
     "ColumnInfo",
     "ConfigService",
+    "ContractMigrationAction",
+    "ContractMigrationPlan",
+    "ContractMigrationService",
+    "ContractVersionTransition",
     "ExportOptions",
     "ExportResult",
     "ExportService",

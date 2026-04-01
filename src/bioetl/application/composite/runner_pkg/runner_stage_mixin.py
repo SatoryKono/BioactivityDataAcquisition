@@ -46,6 +46,16 @@ from bioetl.domain.ports import ExecutionMetricsRunnerPort
 __all__ = ["CompositeRunnerStageMixin"]
 
 
+def _record_dependencies_stage_completed_if_supported(
+    host: _CompositeRunnerStageHostProtocol,
+    dependency_results: dict[str, DependencyResult],
+) -> None:
+    """Record optional dependencies ledger event when host exposes callback."""
+    record = getattr(host, "_record_dependencies_stage_completed", None)
+    if callable(record):
+        record(dependency_results)
+
+
 class CompositeRunnerStageMixin(
     _CompositeRunnerStageEnrichmentMixin,
     _CompositeRunnerStageSupportMixin,
@@ -235,6 +245,10 @@ class CompositeRunnerStageMixin(
             state,
             succeeded=outcome.succeeded,
             failed=outcome.failed,
+        )
+        _record_dependencies_stage_completed_if_supported(
+            self,
+            outcome.dependency_results,
         )
         return completed_state, outcome.dependency_results
 

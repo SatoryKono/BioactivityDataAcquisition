@@ -12,6 +12,7 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake  # noqa: F401
 from deltalake.exceptions import TableNotFoundError  # noqa: F401
 
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import (
     AuditPort,
@@ -126,9 +127,9 @@ def _schema_column_names(schema: object) -> tuple[str, ...]:
         ):
             pass
     if hasattr(schema, "columns"):
-        columns = getattr(schema, "columns")
+        columns = schema.columns
         if isinstance(columns, Mapping):
-            return tuple(str(column) for column in columns.keys())
+            return tuple(str(column) for column in columns)
     return ()
 
 
@@ -373,7 +374,7 @@ class GoldWriter(
                         schema=cast("DataFrameSchema", target_schema),
                     )
                 )
-            except Exception:
+            except (BioETLError, OSError, RuntimeError, ValueError) as exc:
                 self.logger.error(
                     "gold_dual_write_failed",
                     logical_table=request.table_name,
@@ -381,6 +382,7 @@ class GoldWriter(
                     failed_target_table=physical_table,
                     active_contract_version=self._contract_rollout_policy.active_version,
                     write_versions=self._contract_rollout_policy.write_versions,
+                    error_type=type(exc).__name__,
                 )
                 raise
 

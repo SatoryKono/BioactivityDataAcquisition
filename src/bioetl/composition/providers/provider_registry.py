@@ -42,6 +42,7 @@ __all__ = [
     "create_provider_registry",
     "ensure_provider_registry_ready",
     "get_default_provider_registry",
+    "resolve_provider_registry",
 ]
 
 # Compatibility alias retained during the RF-008 terminology cleanup. New code
@@ -228,6 +229,22 @@ def ensure_provider_registry_ready(registry: ProviderRegistry) -> ProviderRegist
     """
     _ensure_registry_loaded(registry)
     return registry
+
+
+def resolve_provider_registry(
+    provider_registry: ProviderRegistry | None = None,
+    *,
+    ensure_ready: bool = False,
+) -> ProviderRegistry:
+    """Resolve explicit-or-default registry access through a public seam."""
+    resolved_registry = (
+        provider_registry
+        if provider_registry is not None
+        else get_default_provider_registry()
+    )
+    if ensure_ready:
+        return ensure_provider_registry_ready(resolved_registry)
+    return resolved_registry
 
 
 def create_provider_registry() -> ProviderRegistry:

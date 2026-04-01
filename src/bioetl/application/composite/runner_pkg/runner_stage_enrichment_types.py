@@ -114,6 +114,11 @@ class _CompositeRunnerStageEnrichmentHostProtocol(Protocol):
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState: ...
 
+    def _record_enrichment_stage_completed(
+        self,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> None: ...
+
     async def _save_failed_enrichment_state(
         self,
         state: CompositeCheckpointState,

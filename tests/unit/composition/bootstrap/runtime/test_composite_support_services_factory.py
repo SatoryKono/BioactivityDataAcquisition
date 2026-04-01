@@ -93,6 +93,7 @@ def test_create_merge_service_wires_join_planner_field_alias_resolver(
         delta_reader=MagicMock(),
         field_group_registry=None,
         cross_validator=None,
+        logger=factory._infra.logger,
     )
 
     assert result is merge_service
@@ -114,6 +115,9 @@ def test_create_merge_service_wires_join_planner_field_alias_resolver(
     "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
 )
 @patch(
+    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.build_composite_control_plane_bundle"
+)
+@patch(
     "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.EnrichmentCoordinatorService"
 )
 @patch(
@@ -130,6 +134,7 @@ def test_build_uses_canonical_composite_checkpoint_port(
     mock_key_extractor_cls: MagicMock,
     mock_dependency_coordinator_cls: MagicMock,
     mock_enrichment_coordinator_cls: MagicMock,
+    mock_build_control_plane_bundle: MagicMock,
     mock_fsm_state_helper_cls: MagicMock,
 ) -> None:
     checkpoint_manager = MagicMock(name="checkpoint_manager")
@@ -142,6 +147,13 @@ def test_build_uses_canonical_composite_checkpoint_port(
     merger = MagicMock(name="merger")
 
     mock_bootstrap_checkpoint_port.return_value = checkpoint_storage
+    mock_build_control_plane_bundle.return_value = SimpleNamespace(
+        manifest_id="manifest-123",
+        run_ledger_service=MagicMock(name="run_ledger_service"),
+        config_hash="hash-123",
+        contract_ref="composite_publication",
+        contract_version="1.0.0",
+    )
     mock_key_extractor_cls.return_value = MagicMock(name="key_extractor")
     mock_dependency_coordinator_cls.return_value = MagicMock(
         name="dependency_coordinator"
@@ -158,13 +170,20 @@ def test_build_uses_canonical_composite_checkpoint_port(
 
     assert result.checkpoint_manager is checkpoint_manager
     mock_bootstrap_checkpoint_port.assert_called_once_with()
+    factory._infra.logger.bind.assert_called_once_with(manifest_id="manifest-123")
     cast(MagicMock, checkpoint_manager_cls).assert_called_once_with(
         composite_name="composite_publication",
         run_id="run-123",
         storage=checkpoint_storage,
-        logger=factory._infra.logger,
+        logger=factory._infra.logger.bind.return_value,
         resume=False,
         expected_effective_config_hash="",
         expected_contract_ref="composite_publication",
         expected_contract_version="1.0.0",
+        expected_manifest_id="manifest-123",
+    )
+    assert result.manifest_id == "manifest-123"
+    assert (
+        result.run_ledger_service
+        is mock_build_control_plane_bundle.return_value.run_ledger_service
     )

@@ -21,13 +21,13 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.adapters.http._client_retry_models import (
-    _RequestAttemptOutcome,
-    _RetryRequestState,
-)
 from bioetl.infrastructure.adapters.http._client_retry_flow import (
     handle_request_exception,
     handle_response_attempt,
+)
+from bioetl.infrastructure.adapters.http._client_retry_models import (
+    _RequestAttemptOutcome,
+    _RetryRequestState,
 )
 from bioetl.infrastructure.adapters.http._client_retry_policy import (
     _can_retry,

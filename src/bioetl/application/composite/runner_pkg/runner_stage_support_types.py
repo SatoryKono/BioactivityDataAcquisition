@@ -69,6 +69,8 @@ class _CompositeRunnerStageSupportHostProtocol(Protocol):
         operation: str,
     ) -> bool: ...
 
+    def _record_seed_stage_completed(self, seed_result: SeedResult) -> None: ...
+
     def _transition_state_with_fsm_log(
         self,
         state: CompositeCheckpointState,

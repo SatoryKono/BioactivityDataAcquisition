@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     )
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
@@ -67,11 +68,12 @@ def _build_composite_runner_dependencies(
     fsm_state_helper: FSMStateHelperService,
     dq_report_service: DQReportService | None,
     preflight_validator: CompositePreflightValidator | None,
-    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
-    | None,
+    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner] | None,
     dependency_coordinator: DependencyCoordinatorService | None,
     quarantine_port: QuarantinePort | None,
     metrics: MetricsPort | None,
+    manifest_id: str | None,
+    run_ledger_service: RunLedgerService | None,
 ) -> CompositeRunnerDependencies:
     """Bundle runner dependencies before service construction."""
     return CompositeRunnerDependencies(
@@ -90,6 +92,8 @@ def _build_composite_runner_dependencies(
         dependency_coordinator=dependency_coordinator,
         quarantine_port=quarantine_port,
         metrics=metrics,
+        manifest_id=manifest_id,
+        run_ledger_service=run_ledger_service,
     )
 
 
@@ -114,6 +118,8 @@ def create_composite_runner_service(
     dependency_coordinator: DependencyCoordinatorService | None = None,
     quarantine_port: QuarantinePort | None = None,
     metrics: MetricsPort | None = None,
+    manifest_id: str | None = None,
+    run_ledger_service: RunLedgerService | None = None,
 ) -> CompositePipelineRunnerService:
     """Create composite runner service from fully resolved composition dependencies.
 
@@ -139,6 +145,8 @@ def create_composite_runner_service(
         dependency_coordinator=dependency_coordinator,
         quarantine_port=quarantine_port,
         metrics=metrics,
+        manifest_id=manifest_id,
+        run_ledger_service=run_ledger_service,
     )
     return CompositePipelineRunnerService(
         config=config,
@@ -183,6 +191,8 @@ def create_composite_runner(
         run_id=run_id,
         dq_report_service=support_services.dq_report_service,
         quarantine_port=support_services.quarantine_port,
+        manifest_id=getattr(support_services, "manifest_id", None),
+        run_ledger_service=getattr(support_services, "run_ledger_service", None),
     )
 
 

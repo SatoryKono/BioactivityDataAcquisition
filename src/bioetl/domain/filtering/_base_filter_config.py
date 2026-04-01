@@ -13,6 +13,7 @@ from bioetl.domain.filtering.list_filters import (
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
 from bioetl.domain.types import JsonDict
 
+from ._filter_decision import FilterDecision
 from ._filter_evaluator import (
     evaluate_column_filters,
     evaluate_exclude_if_present,
@@ -21,7 +22,6 @@ from ._filter_evaluator import (
     evaluate_range_filters,
     evaluate_required_fields,
 )
-from ._filter_decision import FilterDecision
 from ._filter_primitives import (
     check_column_filters,
     check_exclude_if_present,

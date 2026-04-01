@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.join_key_normalization import JoinKeyNormalizationPolicy
+from bioetl.application.composite.join_key_normalization import (
+    JoinKeyNormalizationPolicy,
+)
 from bioetl.application.composite.join_key_resolution_helpers import (
     find_join_key_column,
     normalize_join_key_columns,

@@ -11,6 +11,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
     bootstrap_config_service,
+    bootstrap_contract_migration_service,
     bootstrap_export_service,
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
@@ -30,6 +31,7 @@ if TYPE_CHECKING:
         BronzeCleanupService,
         CheckpointService,
         ConfigService,
+        ContractMigrationService,
         ExportService,
         HealthService,
         LineageInspectionService,
@@ -50,6 +52,7 @@ __all__ = [
     "get_bronze_cleanup_service",
     "get_checkpoint_service",
     "get_config_service",
+    "get_contract_migration_service",
     "get_export_service",
     "get_health_server_dependencies",
     "get_health_service",
@@ -72,12 +75,6 @@ def get_checkpoint_service() -> CheckpointService:
 
     Returns:
         CheckpointService instance.
-
-    Example:
-        >>> service = get_checkpoint_service()
-        >>> checkpoints = await service.list_checkpoints()
-        >>> for cp in checkpoints:
-        ...     logger.info("checkpoint", pipeline=cp.pipeline_name, metadata=cp.metadata)
     """
     _ensure_registrations()
     return bootstrap_checkpoint_service()
@@ -91,12 +88,6 @@ def get_quarantine_service() -> QuarantineService:
 
     Returns:
         QuarantineService instance.
-
-    Example:
-        >>> service = get_quarantine_service()
-        >>> records = await service.inspect("chembl_activity", limit=10)
-        >>> for rec in records:
-        ...     logger.info("quarantine_record", error_code=rec.error_code, payload=rec.payload)
     """
     _ensure_registrations()
     return bootstrap_quarantine_service()
@@ -107,14 +98,6 @@ def get_bronze_cleanup_service() -> BronzeCleanupService:
 
     Used for Bronze layer retention cleanup per RULES.md §2.1.
     This is the recommended way to manage Bronze cleanup from CLI.
-
-    Returns:
-        BronzeCleanupService instance.
-
-    Example:
-        >>> service = get_bronze_cleanup_service()
-        >>> result = await service.cleanup(retention_days=90, dry_run=True)
-        >>> logger.info("cleanup_preview", files_to_remove=result.files_removed)
     """
     _ensure_registrations()
     return bootstrap_bronze_cleanup_service()
@@ -125,15 +108,6 @@ def get_vacuum_service() -> VacuumService:
 
     Used for vacuuming multiple Delta tables at once.
     This is the recommended way to vacuum tables from CLI.
-
-    Returns:
-        VacuumService instance.
-
-    Example:
-        >>> service = get_vacuum_service()
-        >>> tables = service.collect_tables(layer="all")
-        >>> result = await service.vacuum_all(tables, retention_days=7)
-        >>> logger.info("vacuum_complete", files_removed=result.total_files_removed)
     """
     _ensure_registrations()
     return bootstrap_vacuum_service()
@@ -144,15 +118,6 @@ def get_export_service() -> ExportService:
 
     Used for exporting Silver/Gold Delta tables to CSV, XLSX, and TSV formats.
     This is the recommended way to export tables from CLI.
-
-    Returns:
-        ExportService instance.
-
-    Example:
-        >>> service = get_export_service()
-        >>> tables = service.list_tables(layer="silver")
-        >>> result = await service.export("chembl.activity", layer="silver")
-        >>> logger.info("export_complete", output=result.output_path)
     """
     _ensure_registrations()
     return bootstrap_export_service()
@@ -166,14 +131,6 @@ def get_lock_service() -> LockService:
 
     Note: Uses in-memory locking which only affects the current process.
     Lock operations are local to this process instance.
-
-    Returns:
-        LockService instance.
-
-    Example:
-        >>> service = get_lock_service()
-        >>> released = await service.release_lock("chembl_activity", run_id)
-        >>> logger.info("lock_released", pipeline="chembl_activity", released=released)
     """
     _ensure_registrations()
     return bootstrap_lock_service()
@@ -187,17 +144,6 @@ async def cleanup_bronze(
 
     Convenience function for Bronze cleanup operations.
     Removes files older than the specified retention period.
-
-    Args:
-        retention_days: Files older than this will be removed (default: 90).
-        dry_run: If True, only show what would be removed.
-
-    Returns:
-        BronzeCleanupResult with cleanup statistics.
-
-    Example:
-        >>> result = await cleanup_bronze(retention_days=90, dry_run=True)
-        >>> logger.info("cleanup_preview", files_to_remove=result.files_removed)
     """
     service = get_bronze_cleanup_service()
     result: BronzeCleanupResult = await service.cleanup(
@@ -249,6 +195,12 @@ def get_config_service() -> ConfigService:
     """
     _ensure_registrations()
     return bootstrap_config_service()
+
+
+def get_contract_migration_service() -> ContractMigrationService:
+    """Get the contract migration planner service."""
+    _ensure_registrations()
+    return bootstrap_contract_migration_service()
 
 
 def get_run_manifest_service() -> RunManifestInspectionService:

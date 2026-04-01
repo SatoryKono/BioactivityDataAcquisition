@@ -35,6 +35,7 @@ class CompositeCheckpointState:
     effective_config_hash: str = ""
     contract_ref: str = ""
     contract_version: str = "1.0.0"
+    manifest_id: str = ""
     composite_run_identity: str = ""
     created_at: datetime | None = None
     updated_at: datetime | None = None
