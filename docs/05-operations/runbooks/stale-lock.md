@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P1
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
----
+  Priority: P1
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Stale Lock Detected (P1)
 
@@ -62,6 +65,7 @@ Last verified: '2026-03-30'
    ```bash
    bioetl lock check --pipeline {pipeline-name} --run-id {run-id}
    ```
+
 - Use `bioetl lock release ...` only if you are debugging lock state in the same process that created it; it is not a cross-process stale-lock recovery tool.
 
 ### Prevention

@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P1
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
----
+  Priority: P1
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Pipeline Failure: High DQ Rate (P1)
 
@@ -47,7 +50,7 @@ Last verified: '2026-03-30'
    ```bash
    bioetl quarantine inspect --pipeline <pipeline-name> --limit 20
    ```
-2. **Analyze Error Types**:
+1. **Analyze Error Types**:
    - `SCHEMA-VIOLATION`: Source data doesn't match expected schema.
    - `MISSING-REQUIRED-FIELD`: Mandatory field is null/missing.
    - `INVALID-FORMAT`: Date/Number format is incorrect.
@@ -57,11 +60,11 @@ Last verified: '2026-03-30'
 1. **If Source Data is Bad**:
    - Contact data provider.
    - Wait for provider to fix data.
-2. **If Schema is Outdated**:
+1. **If Schema is Outdated**:
    - Update source-aligned contract/schema code in `src/bioetl/domain/contracts/gold/` or related validation/config modules.
    - Update Pandera-based validation surfaces used by the pipeline.
    - Deploy new version.
-3. **If Threshold is Too Strict**:
+1. **If Threshold is Too Strict**:
    - Temporarily increase threshold in `configs/entities/{provider}/{entity}.yaml`:
      ```yaml
      pipeline:
