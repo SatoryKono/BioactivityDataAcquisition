@@ -4,6 +4,7 @@ source_artifacts:
   - configs/quality/fixture_governance_ledger.yaml
   - configs/quality/ci_coverage_surface_matrix.yaml
   - configs/quality/environment_limited_green_policy.yaml
+  - configs/quality/integration_vcr_policy.yaml
   - configs/quality/debt_scorecard.yaml
   - docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml
 ranking_rule: >-
