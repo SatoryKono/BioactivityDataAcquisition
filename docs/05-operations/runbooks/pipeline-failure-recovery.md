@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P1
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-02'
----
+  Priority: P1
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-04-02'
+
+______________________________________________________________________
 
 # Pipeline Failure Recovery Runbook
 
@@ -66,13 +69,13 @@ Focus on:
 
 ### 3. Choose the recovery mode
 
-| Situation | Action |
-|---|---|
-| Interrupted run with valid checkpoint | Resume |
-| Recoverable failure after transient issue | Resume |
-| Checkpoint missing/corrupted/incompatible | Rebuild |
+| Situation                                    | Action              |
+| -------------------------------------------- | ------------------- |
+| Interrupted run with valid checkpoint        | Resume              |
+| Recoverable failure after transient issue    | Resume              |
+| Checkpoint missing/corrupted/incompatible    | Rebuild             |
 | Silver/Gold output is suspected inconsistent | Backup then rebuild |
-| `loading_strategy: full_scan_only` | Rebuild, not resume |
+| `loading_strategy: full_scan_only`           | Rebuild, not resume |
 
 ### 4. Resume when checkpoint is still trustworthy
 

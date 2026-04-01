@@ -38,7 +38,7 @@ Last verified: '2026-04-01'
 ### Incident Response
 | Runbook | Description | Priority |
 |---------|-------------|----------|
-| [Incident Response](incident-response.md) | General guide for handling any production alert | - |
+| [Incident Response](incident-response.md) | Coordination + routing layer for alert triage and escalation | P1 |
 | [Pipeline Failure - Critical](pipeline-failure-critical.md) | Critical pipeline failure handling | P0 |
 | [Pipeline Failure - DQ](pipeline-failure-dq.md) | Data Quality failure handling | P1 |
 | [Pipeline Failure Recovery](pipeline-failure-recovery.md) | General pipeline recovery procedures | P1 |
@@ -63,7 +63,7 @@ Last verified: '2026-04-01'
 ### Monitoring
 | Runbook | Description | Priority |
 |---------|-------------|----------|
-| [Observability Checklist](observability-checklist.md) | Metrics, logging, and alerting verification | - |
+| [Observability Checklist](observability-checklist.md) | Operator validation checklist for metrics, log correlation, dashboards, and diagnostics routing | P2 |
 | [Run Manifest Inspection](run-manifest-inspection.md) | Mandatory runbook for the supported RunManifest / RunLedger inspection surface | P1 |
 | [Traceability Signal Ownership](traceability-signal-ownership.md) | Signal ownership matrix for alert -> diagnostics -> escalation | P1 |
 | [Traceability Tabletop Drills](traceability-tabletop-drills.md) | Tabletop scenarios and scoring for operator adoption | P2 |

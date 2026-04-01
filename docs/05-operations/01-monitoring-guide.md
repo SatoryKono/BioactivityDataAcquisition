@@ -16,6 +16,11 @@ Last verified: '2026-03-29'
 
 BioETL использует стек **Prometheus + Grafana** для обеспечения полной наблюдаемости за процессом сбора и трансформации данных. Данный документ описывает структуру системы, доступные дашборды и способы интерпретации данных.
 
+`Observability Checklist` complements this guide: use this page for observability
+surface interpretation and shipped alert semantics, and use
+[runbooks/observability-checklist.md](runbooks/observability-checklist.md) for
+operator validation and incident-readiness checks.
+
 ## 1. Архитектура наблюдаемости
 
 Система мониторинга построена на принципе "Pull":

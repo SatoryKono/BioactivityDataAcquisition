@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-02'
----
+  Last verified: '2026-04-02'
+
+______________________________________________________________________
 
 # BioETL Kubernetes Manifests - Summary
 
@@ -25,7 +28,7 @@ This page is the compact index for the experimental Kubernetes subtree. It is
 not a second deployment guide. Use it to answer:
 
 1. Which manifest files exist here?
-2. Which document should I read for procedures and troubleshooting?
+1. Which document should I read for procedures and troubleshooting?
 
 For actual step-by-step deployment flow, use
 [deployment-guide.md](deployment-guide.md).
@@ -35,17 +38,20 @@ For actual step-by-step deployment flow, use
 ### Core manifests
 
 1. `k8s-deployment.yaml`
+
    - BioETL application deployment
    - service, PVC, ConfigMap, Secret
    - ServiceAccount and RBAC wiring
 
-2. `k8s-monitoring.yaml`
+1. `k8s-monitoring.yaml`
+
    - Prometheus deployment and service
    - Grafana deployment and service
    - monitoring ConfigMaps and secrets
    - monitoring PVCs
 
-3. `k8s-networking.yaml`
+1. `k8s-networking.yaml`
+
    - ingress and TLS routing
    - HPA and PodDisruptionBudget
    - NetworkPolicy and ResourceQuota
@@ -53,12 +59,14 @@ For actual step-by-step deployment flow, use
 ### Supporting docs and helpers
 
 4. [deployment-guide.md](deployment-guide.md)
+
    - prerequisites
    - image build/push flow
    - namespace and manifest apply steps
    - verification, rollout, backup, troubleshooting
 
-5. `scripts/ops/deploy-bioetl.sh`
+1. `scripts/ops/deploy-bioetl.sh`
+
    - helper automation for deploy/update/delete/status/logs
    - convenience wrapper around the experimental manifests
 
@@ -67,9 +75,9 @@ For actual step-by-step deployment flow, use
 If you are evaluating this experimental path, the intended reading order is:
 
 1. Read [deployment-guide.md](deployment-guide.md)
-2. Inspect the three YAML manifests
-3. Optionally use `scripts/ops/deploy-bioetl.sh`
-4. Return to standard runbooks for supported operations work
+1. Inspect the three YAML manifests
+1. Optionally use `scripts/ops/deploy-bioetl.sh`
+1. Return to standard runbooks for supported operations work
 
 ## Quick Orientation
 

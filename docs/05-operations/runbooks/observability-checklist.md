@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P2
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
+Last verified: '2026-04-02'
 ---
 
 # Observability Checklist
@@ -16,6 +16,7 @@ Last verified: '2026-03-30'
 
 - Run this checklist to verify logs, metrics, alerts, and dashboards for the local BioETL runtime.
 - Escalate according to the priority declared in metadata when operator ownership is unclear.
+- Use this page for operator-side validation and incident triage readiness, not for adapter implementation design.
 
 ## Impact
 
@@ -29,114 +30,61 @@ Last verified: '2026-03-30'
 
 ## Procedure
 
-### Adapter Requirements
+### Validation Scope
 
-- Every adapter in `src/bioetl/infrastructure/adapters/` **MUST** implement:
+This checklist validates that operators can:
 
-### 1. Health Check Method
+- scrape or inspect current metrics
+- navigate the shipped dashboards and alert-backed signal panels
+- correlate logs to the active run
+- route from alerts to run-manifest diagnostics and the correct runbook
 
-```python
-async def health_check(self) -> HealthStatus:
-    """Check if the external service is reachable.
+For observability design rules, metric naming policy, and adapter implementation
+requirements, use:
 
-    Returns:
-        HealthStatus (HEALTHY, DEGRADED, UNHEALTHY).
-    """
-```
+- [Monitoring Guide](../01-monitoring-guide.md)
+- [RULES.md](../../00-project/RULES.md)
+- [ADR-017](../../02-architecture/decisions/ADR-017-observability-architecture.md)
 
-- **Health Check Endpoints by Provider:**
+### 1. Metrics Endpoint / Scrape Surface
 
-| Provider | Health Check                                                     |
-| -------- | ---------------------------------------------------------------- |
-| ChEMBL   | `GET /chembl/api/data/status`                                    |
-| PubChem  | `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
-| UniProt  | Lightweight Search Probe                                         |
-| Generic  | `GET /` or `/status` with 5s timeout                             |
-
-### 2. Structured Logging
-
-- All log messages **MUST** include:
-
-| Field      | Required | Example                        |
-| ---------- | -------- | ------------------------------ |
-| `run_id`   | MUST     | UUID                           |
-| `pipeline` | MUST     | `chembl_activity`              |
-| `stage`    | MUST     | `extract`, `transform`, `load` |
-| `dataset`  | SHOULD   | `chembl/activity`              |
-
-- **Example:**
-
-```python
-self.logger.info(
-    "Fetching records",
-    run_id=ctx.run_id,
-    pipeline=ctx.pipeline_name,
-    stage="extract",
-    offset=offset,
-    limit=limit,
-)
-```
-
-### Pipeline Metrics
-
-- Reference: [RULES.md §3.2.2](../../00-project/RULES.md#322-prometheus-metrics)
-
-### Required Metrics (prefix: `bioetl_`)
-
-| Metric                      | Type      | Labels                            |
-| --------------------------- | --------- | --------------------------------- |
-| `pipeline_duration_seconds` | Histogram | pipeline, stage, status, run_type |
-| `records_processed_total`   | Counter   | pipeline, stage, run_type         |
-| `errors_total`              | Counter   | pipeline, stage, error_code       |
-| `batch_size_records`        | Histogram | pipeline, stage                   |
-
-### DQ Metrics
-
-| Metric                   | Type  | Labels                  |
-| ------------------------ | ----- | ----------------------- |
-| `dq_validation_score`    | Gauge | pipeline, entity |
-| `data_freshness_seconds` | Gauge | pipeline, entity |
-
-### Provider Health Metrics
-
-| Metric                        | Type    | Labels                                        |
-| ----------------------------- | ------- | --------------------------------------------- |
-| `provider_health_status`      | Gauge   | provider (0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY) |
-| `circuit_breaker_state`       | Gauge   | adapter (0=CLOSED, 1=HALF_OPEN, 2=OPEN)       |
-| `circuit_breaker_trips_total` | Counter | adapter                                        |
-| `circuit_breaker_success_total` | Counter | adapter                                      |
-| `circuit_breaker_failure_total` | Counter | adapter                                      |
-
-### Verification Commands
-
-### Check Metrics Endpoint
+- Confirm the local metrics endpoint responds and exports `bioetl_` metrics.
+- Confirm the active run publishes the expected pipeline/runtime series.
 
 ```bash
-# Start metrics server (default port 8000)
 curl http://localhost:8000/metrics | grep bioetl_
 ```
 
-### Verify Adapter Health Checks
+### 2. Log Correlation Contract
+
+- Confirm structured logs preserve the minimum correlation fields:
+  - `run_id`
+  - `pipeline`
+  - `pipeline_name`
+  - `manifest_id` where a manifest has already been created
+- Confirm the current incident or validation session can be traced from logs back
+  to the active run.
 
 ```bash
-# Run architecture test
-pytest tests/architecture/test_layer_dependencies.py::test_adapters_have_health_check -v
+cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_name)'
 ```
 
-### Validate Log Schema
+### 3. Dashboard / Alert Surface
 
-```bash
-# Check logs for required fields
-cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .stage)'
-```
+- Check that the shipped Grafana dashboards load and that the expected filters are
+  available for the active pipeline or provider.
+- Confirm the alert-condition panels in `2. Runtime` reflect the same symptom
+  family the operator is investigating.
+- If dashboard data is missing, stop and verify metrics publication before
+  troubleshooting alerts.
 
-### Validate Alert-to-Diagnostics Route
+### 4. Alert-to-Diagnostics Route
 
 ```bash
 bioetl run-manifest show <run-id|manifest-id> --format json
 ```
 
-- Checklist for incident triage payload:
+- Confirm the returned diagnostics payload is sufficient for incident routing:
 
 - `diagnostics.latest_status`
 - `diagnostics.latest_event_type`
@@ -146,29 +94,32 @@ bioetl run-manifest show <run-id|manifest-id> --format json
 
 - If `diagnostics.alert_signals.artifact_linkage_gap=true`, escalation must include artifact/linkage remediation before retry.
 
-### Adding New Adapters
+### 5. Drilldown and Recovery Readiness
 
-- When creating a new adapter:
+- Confirm the operator can move from the current alert or dashboard panel into
+  the matching detailed runbook:
+  - runtime / fatal pipeline failure -> `pipeline-failure-critical.md`
+  - DQ threshold or quarantine symptoms -> `pipeline-failure-dq.md`
+  - checkpoint / resume / ledger symptoms -> `run-manifest-inspection.md` or `checkpoint-debugging.md`
+- Confirm the current time window, run identifiers, and evidence snippets are
+  recorded before retry or resume is attempted.
 
-1. [ ] Implement `health_check()` method
-1. [ ] Use `LoggerPort` (injected via DI) for all logging
-1. [ ] Include `run_id`, `pipeline`, `stage` in all log messages (Log Schema §3.2.1)
-1. [ ] Add rate limiting (TokenBucket)
-1. [ ] Register metrics in composition layer (`bootstrap/runtime/observability.py`)
-1. [ ] Add integration test with VCR cassette
+### 6. Smoke Validation Commands
 
-### Architecture Test
+Use these checks after observability changes or when dashboards seem stale:
 
-- The following test enforces health_check presence:
-
-```python
-# tests/architecture/test_layer_dependencies.py
-def test_adapters_have_health_check(src_dir: Path) -> None:
-    """REQ-OBS-001: All adapters MUST implement health_check()."""
-    ...
+```bash
+uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
+uv run python -m scripts.docs check-links --links --specs --configs
 ```
 
-- Run with: `make test-architecture`
+### 7. Operator Sign-off
+
+- [ ] Metrics endpoint is reachable
+- [ ] Logs preserve correlation fields for the active run
+- [ ] Dashboard and alert-condition panels match the investigated symptom family
+- [ ] `run-manifest show` returns usable diagnostics
+- [ ] The next runbook in the incident path is unambiguous
 
 ## Compliance
 

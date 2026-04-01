@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Deployment & Tooling Extras
 
@@ -14,6 +17,7 @@ Last verified: '2026-03-29'
 >
 > This subtree is intentionally separated from the main operations runbooks.
 > It contains:
+>
 > - experimental runtime deployment material that does **not** define the
 >   supported ADR-010 operating model;
 > - auxiliary tooling setup notes that may use Docker or external services but
