@@ -2,6 +2,7 @@
 
 import json
 
+import pytest
 
 from bioetl.domain.services.schema_classifier import (
     SchemaClassifier,

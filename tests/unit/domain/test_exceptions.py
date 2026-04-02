@@ -43,7 +43,7 @@ def _build_missing_required_field_error(
     if record_id is not None:
         message += f" (record_id={record_id})"
     error = ValidationError(message, field=field).with_context(record_id=record_id)
-    error.error_type_override = ErrorType.MISSING_REQUIRED_FIELD
+    setattr(error, "error_type_override", ErrorType.MISSING_REQUIRED_FIELD)
     return error
 
 
@@ -61,7 +61,7 @@ def _build_invalid_data_format_error(
         value=value,
         expected_format=expected_format,
     )
-    error.error_type_override = ErrorType.INVALID_DATA
+    setattr(error, "error_type_override", ErrorType.INVALID_DATA)
     return error
 
 

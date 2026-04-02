@@ -14,6 +14,7 @@ import pytest
 from deltalake import DeltaTable, write_deltalake
 
 if TYPE_CHECKING:
+    from bioetl.domain.types import RunID
     from bioetl.infrastructure.schemas.pipeline_contract_policy import (
         PipelineContractPolicy,
     )

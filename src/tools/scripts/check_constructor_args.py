@@ -11,10 +11,10 @@ Usage:
 
 import ast
 import sys
-from datetime import UTC, date, datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
-UTC = UTC
+UTC = timezone.utc
 
 MAX_CONSTRUCTOR_ARGS = 8
 EXCLUDE_PATTERNS = ["test_", "conftest"]

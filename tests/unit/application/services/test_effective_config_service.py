@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict, List
 
 import pytest
 
@@ -32,12 +32,12 @@ class TestEffectiveConfigService:
 
     def test_create_simple_artifact(self) -> None:
         """Test creation of a simple artifact without DQ."""
-        pipeline_config: dict[str, Any] = {
+        pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "test_pipeline", "version": "1.0.0"},
             "settings": {"batch_size": 1000},
         }
 
-        source_refs: list[ConfigSourceRef] = [
+        source_refs: List[ConfigSourceRef] = [
             ConfigSourceRef(
                 source_type="file",
                 source_path="configs/base/pipeline.yaml",
@@ -63,7 +63,7 @@ class TestEffectiveConfigService:
 
     def test_create_artifact_with_dq_config(self) -> None:
         """Test creation of artifact with DQ configuration."""
-        pipeline_config: dict[str, Any] = {
+        pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "chembl_molecule", "version": "1.0.0"},
             "settings": {"batch_size": 5000},
         }
@@ -80,7 +80,7 @@ class TestEffectiveConfigService:
             strictness_mode="strict",
         )
 
-        source_refs: list[ConfigSourceRef] = [
+        source_refs: List[ConfigSourceRef] = [
             ConfigSourceRef(
                 source_type="file",
                 source_path="configs/providers/chembl.yaml",
@@ -107,7 +107,7 @@ class TestEffectiveConfigService:
 
     def test_create_artifact_with_runtime_overrides(self) -> None:
         """Test creation of artifact with runtime overrides."""
-        pipeline_config: dict[str, Any] = {
+        pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "test_pipeline", "version": "1.0.0"},
             "settings": {"batch_size": 1000, "timeout": 30},
         }
@@ -171,7 +171,7 @@ class TestEffectiveConfigService:
 
     def test_serialization_integration(self) -> None:
         """Test serialization integration."""
-        pipeline_config: dict[str, Any] = {
+        pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "test_pipeline", "version": "1.0.0"},
             "settings": {"batch_size": 1000},
         }
@@ -196,7 +196,7 @@ class TestEffectiveConfigService:
 
     def test_hash_computation_integration(self) -> None:
         """Test hash computation integration."""
-        pipeline_config: dict[str, Any] = {
+        pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "test_pipeline", "version": "1.0.0"},
             "settings": {"batch_size": 1000},
         }
@@ -271,7 +271,7 @@ class TestEffectiveConfigService:
 
     def test_convenience_method(self) -> None:
         """Test the convenience method for pipeline config."""
-        pipeline_config: dict[str, Any] = {
+        pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "chembl_molecule", "version": "1.0.0"},
             "settings": {"batch_size": 5000},
         }
@@ -307,7 +307,7 @@ class TestEffectiveConfigService:
 
     def test_composite_pipeline_artifact(self) -> None:
         """Test creation of composite pipeline artifact."""
-        composite_config: dict[str, Any] = {
+        composite_config: Dict[str, Any] = {
             "composite": {
                 "name": "activity_composite",
                 "version": "1.0.0",
@@ -462,7 +462,7 @@ class TestOverrideApplication:
 
     def test_deep_override_application(self) -> None:
         """Test deep nested override application."""
-        base_config: dict[str, Any] = {
+        base_config: Dict[str, Any] = {
             "pipeline": {"name": "test", "version": "1.0"},
             "settings": {
                 "batch": {"size": 1000, "timeout": 30},
@@ -494,7 +494,7 @@ class TestOverrideApplication:
 
     def test_multiple_override_sources(self) -> None:
         """Test override application from multiple sources."""
-        base_config: dict[str, Any] = {
+        base_config: Dict[str, Any] = {
             "pipeline": {"name": "test"},
             "settings": {"batch_size": 1000, "timeout": 30, "log_level": "INFO"},
         }

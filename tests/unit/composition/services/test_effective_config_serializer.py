@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List
 
+import pytest
 
 from bioetl.composition.services.effective_config_serializer import (
     EffectiveConfigSerializer,
@@ -192,7 +193,7 @@ class TestEffectiveConfigSerializer:
             )
         ]
 
-        config_data: dict[str, Any] = {
+        config_data: Dict[str, Any] = {
             "pipeline": {"name": "test"},
             "settings": {"batch_size": 1000, "timeout": 30},
         }
@@ -457,7 +458,7 @@ class TestEffectiveConfigSerializer:
             )
         ]
 
-        config_data: dict[str, Any] = {
+        config_data: Dict[str, Any] = {
             "pipeline": {"name": "test", "version": "1.0"},
             "settings": {
                 "batch_size": 1000,
@@ -597,7 +598,7 @@ class TestHashDeterminism:
         )
 
     def _create_test_artifact_with_config(
-        self, artifact_id: str, config_data: dict[str, Any]
+        self, artifact_id: str, config_data: Dict[str, Any]
     ) -> EffectiveConfigArtifact:
         """Helper to create a test artifact with specific config data."""
         fixed_timestamp = datetime(2023, 1, 1, 12, 0, 0)

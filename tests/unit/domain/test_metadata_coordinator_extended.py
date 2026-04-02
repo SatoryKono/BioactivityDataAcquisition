@@ -6,6 +6,7 @@ import pytest
 from datetime import datetime
 
 from bioetl.domain.ports.metadata.coordinator import (
+    BronzeMetadataInput,
     GoldMetadataInput,
     SilverMetadataInput,
 )

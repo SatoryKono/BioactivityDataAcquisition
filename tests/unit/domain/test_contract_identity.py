@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+import pytest
 
 from bioetl.domain.types.contract_identity import (
     CompatibilityLevel,

@@ -7,7 +7,8 @@ DQ configuration inspection and validation functionality.
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+import tempfile
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
 import pytest

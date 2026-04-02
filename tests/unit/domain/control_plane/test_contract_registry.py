@@ -1,5 +1,6 @@
 """Tests for contract registry implementation."""
 
+from pathlib import Path
 from datetime import datetime
 
 import pytest
@@ -393,7 +394,7 @@ class TestContractRegistry:
         assert output_file.exists()
 
         # Load data and verify structure
-        with open(output_file) as f:
+        with open(output_file, "r") as f:
             data = yaml.safe_load(f)
 
         assert data["version"] == "1.0"

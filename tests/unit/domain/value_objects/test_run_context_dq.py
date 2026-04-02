@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 import pytest
 
@@ -18,7 +18,7 @@ class TestRunContextDQIntegration:
         context = RunContext(
             run_id=RunID("test-run-123"),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC),
+            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
             pipeline_name="chembl_activity",
             provider="chembl",
             entity="activity",
@@ -35,7 +35,7 @@ class TestRunContextDQIntegration:
         context = RunContext(
             run_id=RunID("test-run-123"),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC),
+            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
             pipeline_name="chembl_activity",
             provider="chembl",
             entity="activity",
@@ -50,7 +50,7 @@ class TestRunContextDQIntegration:
         context = RunContext.create(
             run_id=RunID("test-run-123"),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC),
+            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
             provider="chembl",
             entity="activity",
         )
@@ -65,7 +65,7 @@ class TestRunContextDQIntegration:
         context = RunContext(
             run_id=RunID("test-run-123"),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC),
+            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
             pipeline_name="chembl_activity",
             provider="chembl",
             entity="activity",
@@ -95,7 +95,7 @@ class TestRunContextDQIntegration:
             RunContext(
                 run_id=RunID("test-run-123"),
                 run_type=RunType.INCREMENTAL,
-                started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC),
+                started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
                 pipeline_name="",  # Empty
                 provider="chembl",
                 entity="activity",
@@ -107,7 +107,7 @@ class TestRunContextDQIntegration:
         context1 = RunContext(
             run_id=RunID("test-run-123"),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC),
+            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
             pipeline_name="chembl_activity",
             provider="chembl",
             entity="activity",
@@ -117,7 +117,7 @@ class TestRunContextDQIntegration:
         context2 = RunContext(
             run_id=RunID("test-run-123"),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC),
+            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
             pipeline_name="chembl_activity",
             provider="chembl",
             entity="activity",
@@ -131,7 +131,7 @@ class TestRunContextDQIntegration:
         context3 = RunContext(
             run_id=RunID("test-run-123"),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC),
+            started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
             pipeline_name="chembl_activity",
             provider="chembl",
             entity="activity",

@@ -22,6 +22,7 @@ import ast
 import re
 from pathlib import Path
 
+import pytest
 
 
 def _discover_internal_port_modules(src_dir: Path) -> list[str]:
