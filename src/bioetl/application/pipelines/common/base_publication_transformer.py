@@ -24,6 +24,7 @@ from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
+from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
@@ -106,8 +107,12 @@ class BasePublicationTransformer(BaseTransformer):
         )
         # Fallback to self if strategies are not provided (legacy subclass support)
         self._data_extractor = data_extractor or cast("DataExtractorStrategy", self)
-        self._identifier_resolver = identifier_resolver or cast("IdentifierResolverStrategy", self)
-        self._metadata_strategy = metadata_strategy or cast("PublicationMetadataStrategy", self)
+        self._identifier_resolver = identifier_resolver or cast(
+            "IdentifierResolverStrategy", self
+        )
+        self._metadata_strategy = metadata_strategy or cast(
+            "PublicationMetadataStrategy", self
+        )
         self._record_normalizer = record_normalizer or RecordNormalizationProcessor(
             provider=provider
         )
@@ -116,7 +121,9 @@ class BasePublicationTransformer(BaseTransformer):
     # Strategy Interface Implementations (Fallback to legacy subclass methods)
     # =========================================================================
 
-    def pre_extract_validation(self, context: PipelineContext, record: BronzeRecord, index: int) -> None:
+    def pre_extract_validation(
+        self, context: PipelineContext, record: BronzeRecord, index: int
+    ) -> None:
         self._pre_extract_validation(context, record, index)
 
     def extract_business_data(self, record: BronzeRecord) -> JsonDict:
@@ -125,7 +132,9 @@ class BasePublicationTransformer(BaseTransformer):
     def get_primary_id_field(self) -> str:
         return self._get_primary_id_field()
 
-    def validate_primary_id(self, context: PipelineContext, business_data: JsonDict, index: int) -> tuple[str, Any] | None:
+    def validate_primary_id(
+        self, context: PipelineContext, business_data: JsonDict, index: int
+    ) -> tuple[str, Any] | None:
         return self._validate_primary_id(context, business_data, index)
 
     def get_entity_class(self) -> type[BaseEntity]:
