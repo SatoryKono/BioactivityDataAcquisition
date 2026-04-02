@@ -11,6 +11,8 @@ __all__ = ["PubMedXmlProcessor"]
 
 import xml.etree.ElementTree as ET
 
+import defusedxml.ElementTree as defused_ET
+
 from bioetl.domain.types import JsonDict
 
 
@@ -28,8 +30,8 @@ class PubMedXmlProcessor:
             Parsed XML root element, or None if parsing fails
         """
         try:
-            return ET.fromstring(xml_text)
-        except ET.ParseError:
+            return defused_ET.fromstring(xml_text)
+        except (ET.ParseError, defused_ET.EntitiesForbidden):
             return None
 
     @staticmethod
