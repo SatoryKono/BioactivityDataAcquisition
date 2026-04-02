@@ -394,6 +394,28 @@ class TestFSMSeedStateTransitions:
         runner._record_run_finished.assert_called_once_with(execution_context)
         assert completed is result
 
+    @pytest.mark.asyncio
+    async def test_records_shutdown_event_for_graceful_shutdown(self):
+        """Composite runner emits shutdown ledger event on graceful stop."""
+        checkpoint_manager = create_mock_checkpoint_manager()
+        run_ledger_service = MagicMock()
+        runner = create_runner(
+            checkpoint_manager=checkpoint_manager,
+            manifest_id="manifest-123",
+            run_ledger_service=run_ledger_service,
+        )
+        runner._lock.heartbeat.return_value = False
+
+        with pytest.raises(PipelineShutdownError):
+            await runner.run()
+
+        run_ledger_service.record_run_started.assert_called_once_with()
+        run_ledger_service.record_run_shutdown.assert_called_once_with(
+            metrics_snapshot={}
+        )
+        run_ledger_service.record_run_failed.assert_not_called()
+        run_ledger_service.record_run_finished.assert_not_called()
+
 
 class TestFSMSeedFailure:
     """Tests for FSM state transitions when seed fails."""
