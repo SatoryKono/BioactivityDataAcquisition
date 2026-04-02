@@ -51,10 +51,12 @@ execution_paths:
   live_contract:
     workflow_path: .github/workflows/contract-tests.yml
     gate_mode: scheduled
+    repository_guard: SatoryKono/BioactivityDataAcquisition
     required_env:
       BIOETL_LIVE_API_TESTS: "true"
       BIOETL_NETWORK_TESTS: "true"
     required_pytest_flag: --network
+    failure_issue_runbook_path: docs/03-guides/testing.md
 vcr_policy:
   canonical_root: tests/fixtures/vcr/{provider}/
   forbidden_locations:

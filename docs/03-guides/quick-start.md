@@ -1,11 +1,11 @@
 ---
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # Quick Start
@@ -14,6 +14,10 @@ TL;DR for setting up and running BioETL locally.
 
 > **Note**: BioETL использует **Local-Only** deployment (ADR-010).
 > Docker и внешние сервисы (Redis, MinIO) не требуются.
+>
+> **Boundary**: this page is the fastest supported bootstrap path. For the full
+> onboarding walkthrough, environment/config details, and broader first-time
+> troubleshooting, use [Getting Started](getting-started.md).
 
 ## Setup (3 minutes)
 
@@ -155,3 +159,4 @@ data/
 - [Getting Started](getting-started.md) - Full setup guide with troubleshooting
 - [Running Pipelines](running-pipelines.md) - Comprehensive CLI reference
 - [Add New Source](add-new-source.md) - Integrate a new data provider
+- [Guides Index](index.md) - Browse the full how-to surface

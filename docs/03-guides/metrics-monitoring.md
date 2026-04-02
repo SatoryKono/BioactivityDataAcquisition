@@ -1,19 +1,24 @@
 ---
-Version: 6.1.0
+Version: 6.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-02'
 ---
 
 # Metrics & Monitoring Guide
 
 Руководство по настройке и использованию системы метрик и мониторинга в BioETL.
 
-**Версия:** 6.1.0
-**Дата обновления:** 2026-03-26
+**Версия:** 6.2.0
+**Дата обновления:** 2026-04-02
+
+> **Boundary:** this guide focuses on local observability setup, metric
+> semantics, and implementation-facing monitoring usage. For shipped operator
+> dashboards and alert triage use [Monitoring Guide](../05-operations/01-monitoring-guide.md)
+> and [Observability Checklist](../05-operations/runbooks/observability-checklist.md).
 
 ---
 

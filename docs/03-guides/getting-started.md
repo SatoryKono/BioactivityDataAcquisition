@@ -1,11 +1,11 @@
 ---
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # Getting Started Guide
@@ -14,6 +14,10 @@ This guide will walk you through setting up a complete local development environ
 
 > **Note**: BioETL использует **Local-Only** deployment (ADR-010).
 > Docker и внешние сервисы (Redis, MinIO) не требуются.
+>
+> **Boundary**: use [Quick Start](quick-start.md) if you only need the shortest
+> supported bootstrap path and a first smoke run. This page remains the fuller
+> onboarding walkthrough.
 
 ## Prerequisites
 
@@ -238,5 +242,6 @@ Another pipeline instance may be running. Check for zombie Python processes or w
 - [Running Pipelines](running-pipelines.md) - Comprehensive guide to pipeline execution
 - [GitHub Local Workflow](github-local-workflow.md) - Local branch, verify, and PR routine
 - [Add New Source](add-new-source.md) - Integrate a new data provider
+- [Guides Index](index.md) - Browse the full how-to surface
 - [Project Navigator](../00-project/00-map.md) - Full documentation index
 - [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md) - Architecture decision details

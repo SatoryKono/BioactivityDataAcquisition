@@ -104,6 +104,11 @@ class _CompositeRunnerStageHostProtocol(Protocol):
         dependency_results: dict[str, DependencyResult],
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
 
+    def _record_dependencies_stage_started(
+        self,
+        dependency_pipeline_names: list[str],
+    ) -> None: ...
+
     def _record_dependencies_stage_completed(
         self,
         dependency_results: dict[str, DependencyResult],

@@ -194,6 +194,7 @@ nav:
                     -   "ADR-045 Data Quality Contract System": 02-architecture/decisions/ADR-045-dq-contract-system.md
                     -   "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
     -   Guides:
+            -   "Overview": 03-guides/index.md
             -   "Getting Started": 03-guides/getting-started.md
             -   "Quick Start": 03-guides/quick-start.md
             -   "Running Pipelines": 03-guides/running-pipelines.md

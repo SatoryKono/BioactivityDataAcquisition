@@ -13,12 +13,16 @@ from bioetl.application.services.run_manifest_service import (
     RunManifestCreateRequest,
     RunManifestService,
 )
+from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads import (
+    build_composite_launch_context_snapshot,
+    build_composite_planned_artifacts,
+    build_composite_source_refs,
+)
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
 )
 from bioetl.composition.services import compute_config_hash
 from bioetl.composition.services.versioning import get_git_commit
-from bioetl.domain.control_plane import RunArtifactRef, RunSourceRef
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 
@@ -89,11 +93,11 @@ def build_composite_control_plane_bundle(
             pipeline_name=config.name,
             provider="composite",
             entity=config.name,
-            launch_context=_build_launch_context_snapshot(config, runtime),
+            launch_context=build_composite_launch_context_snapshot(config, runtime),
             runtime_config=_normalize_object(runtime),
             resolved_config=_normalize_object(config),
-            source_refs=_build_source_refs(config),
-            planned_artifacts=_build_planned_artifacts(config),
+            source_refs=build_composite_source_refs(config),
+            planned_artifacts=build_composite_planned_artifacts(config),
             pipeline_version=contract_version or None,
             git_commit=get_git_commit(),
             config_hash=config_hash or None,
@@ -151,62 +155,6 @@ def _build_run_ledger_service(
         composite_run_id=infra_context.run_id,
     )
 
-
-def _build_launch_context_snapshot(
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-) -> dict[str, object]:
-    """Capture launch-time options that materially affect composite execution."""
-    return {
-        "pipeline_name": config.name,
-        "run_type": RunType.INCREMENTAL.value,
-        "resume": runtime.resume,
-        "dry_run": runtime.dry_run,
-        "required_only": runtime.required_only,
-        "force_enricher": runtime.force_enricher,
-        "seed_limit": runtime.seed_limit,
-        "enrich_only": list(runtime.enrich_only or ()),
-        "use_cached_bronze": runtime.use_cached_bronze,
-        "cached_bronze_path": runtime.cached_bronze_path,
-        "cached_bronze_date": runtime.cached_bronze_date,
-        "cached_bronze_enrichers": runtime.cached_bronze_enrichers,
-        "cached_bronze_dependencies": runtime.cached_bronze_dependencies,
-        "execution_context": "composite",
-    }
-
-
-def _build_source_refs(config: CompositeConfig) -> tuple[RunSourceRef, ...]:
-    """Capture seed, dependency, and enricher sources in manifest payload."""
-    pipeline_names = [config.seed.pipeline]
-    pipeline_names.extend(dep.pipeline for dep in config.dependencies)
-    pipeline_names.extend(enricher.pipeline for enricher in config.enrichers)
-    refs: list[RunSourceRef] = []
-    for pipeline_name in pipeline_names:
-        provider, entity = _resolve_provider_entity(pipeline_name)
-        refs.append(
-            RunSourceRef(
-                provider=provider,
-                entity=entity,
-                pipeline_name=pipeline_name,
-            )
-        )
-    return tuple(refs)
-
-
-def _build_planned_artifacts(config: CompositeConfig) -> tuple[RunArtifactRef, ...]:
-    """Capture planned composite artifacts for final materialization stages."""
-    return (
-        RunArtifactRef(layer="silver", path=config.merge.output_silver_path),
-        RunArtifactRef(layer="gold", path=config.merge.output_gold_path),
-    )
-
-
-def _resolve_provider_entity(pipeline_name: str) -> tuple[str, str]:
-    """Resolve provider/entity from a canonical pipeline name."""
-    if "_" not in pipeline_name:
-        return pipeline_name, pipeline_name
-    provider, entity = pipeline_name.split("_", 1)
-    return provider, entity
 
 
 def _resolve_effective_config_hash(config: CompositeConfig) -> str:

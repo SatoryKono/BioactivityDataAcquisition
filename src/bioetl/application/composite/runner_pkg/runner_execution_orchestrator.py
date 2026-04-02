@@ -27,16 +27,6 @@ __all__ = [
 ]
 
 
-def _record_enrichment_stage_completed_if_supported(
-    host: object,
-    enrichment_results: dict[str, EnrichmentResult],
-) -> None:
-    """Record optional enrichment ledger event when host exposes callback."""
-    record = getattr(host, "_record_enrichment_stage_completed", None)
-    if callable(record):
-        record(enrichment_results)
-
-
 class _CompositeLockedExecutionHostProtocol(Protocol):
     async def _execute_seed_phase(
         self,
@@ -100,7 +90,7 @@ async def execute_locked_run_phases(
     state, dependency_results = await host._execute_dependencies_phase(state, keys_df)
     state, enrichment_results = await host._execute_enrichment_phase(state, keys_df)
     state = await host._transition_to_enrichment_completed(state)
-    _record_enrichment_stage_completed_if_supported(host, enrichment_results)
+    host._record_enrichment_stage_completed(enrichment_results)
     state, merge_result = await host._execute_merge_stage(
         state,
         enrichment_results,

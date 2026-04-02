@@ -95,6 +95,11 @@ class CompositeRunnerMergeStageMixin:
     ) -> None:
         await self._write_cv_quarantine(merge_result)
 
+    def _record_merge_stage_started(
+        self: _CompositeRunnerMergeStageHostProtocol,
+    ) -> None:
+        """Default no-op seam for hosts without merge-stage ledger wiring."""
+
     def _record_merge_stage_completed(
         self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,

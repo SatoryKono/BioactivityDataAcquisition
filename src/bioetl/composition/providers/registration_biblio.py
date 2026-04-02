@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.datasource.crossref import (
@@ -115,6 +116,45 @@ def _create_pubmed_data_source(
     )
 
 
+def _create_mailto_batch_data_source(
+    *,
+    provider: str,
+    adapter_factory: Callable[..., DataSourcePort],
+    settings: ProviderSettingsProtocol,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None,
+    metrics: MetricsPort | None,
+    pipeline_name: str,
+    default_batch_size: int,
+    assembly_support: ProviderAssemblySupport | None,
+    include_settings: bool = False,
+) -> DataSourcePort:
+    """Create a mailto/batch driven HTTP data source for biblio providers."""
+    profile = _resolve_mailto_batch_profile(
+        settings,
+        pipeline_config,
+        batch_size=_get_batch_size_from_config(provider, default=default_batch_size),
+    )
+    extra_kwargs: dict[str, object] = {
+        "mailto": profile.mailto,
+        "batch_size": profile.batch_size,
+    }
+    if include_settings:
+        extra_kwargs["settings"] = settings
+    return _create_http_data_source(
+        provider=provider,
+        settings=settings,
+        logger=logger,
+        filter_config=filter_config,
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+        adapter_factory=adapter_factory,
+        extra_kwargs=extra_kwargs,
+        assembly_support=assembly_support,
+    )
+
+
 def _create_crossref_data_source(
     settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
@@ -125,31 +165,19 @@ def _create_crossref_data_source(
     *,
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
-    """Create CrossRef data source with optional CSV filtering.
-
-    CrossRef requires mailto for polite pool access (50 req/sec vs 1 req/sec).
-    Email is obtained from pipeline config or settings.default_email.
-    """
-    profile = _resolve_mailto_batch_profile(
-        settings,
-        pipeline_config,
-        batch_size=_get_batch_size_from_config("crossref", default=50),
-    )
-
-    return _create_http_data_source(
+    """Create CrossRef data source with optional CSV filtering."""
+    return _create_mailto_batch_data_source(
         provider="crossref",
+        adapter_factory=create_crossref_adapter,
         settings=settings,
+        pipeline_config=pipeline_config,
         logger=logger,
         filter_config=filter_config,
         metrics=metrics,
         pipeline_name=pipeline_name,
-        adapter_factory=create_crossref_adapter,
-        extra_kwargs={
-            "settings": settings,
-            "mailto": profile.mailto,
-            "batch_size": profile.batch_size,
-        },
+        default_batch_size=50,
         assembly_support=assembly_support,
+        include_settings=True,
     )
 
 
@@ -163,26 +191,17 @@ def _create_openalex_data_source(
     *,
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
-    """Create OpenAlex data source with optional CSV filtering.
-
-    OpenAlex requires mailto for polite pool access (10 req/sec).
-    Email is obtained from pipeline config or settings.default_email.
-    """
-    profile = _resolve_mailto_batch_profile(
-        settings,
-        pipeline_config,
-        batch_size=_get_batch_size_from_config("openalex", default=50),
-    )
-
-    return _create_http_data_source(
+    """Create OpenAlex data source with optional CSV filtering."""
+    return _create_mailto_batch_data_source(
         provider="openalex",
+        adapter_factory=OpenAlexAdapter,
         settings=settings,
+        pipeline_config=pipeline_config,
         logger=logger,
         filter_config=filter_config,
         metrics=metrics,
         pipeline_name=pipeline_name,
-        adapter_factory=OpenAlexAdapter,
-        extra_kwargs={"mailto": profile.mailto, "batch_size": profile.batch_size},
+        default_batch_size=50,
         assembly_support=assembly_support,
     )
 

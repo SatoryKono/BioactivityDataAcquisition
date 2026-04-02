@@ -60,6 +60,8 @@ class _CompositeRunnerMergeStageHostProtocol(Protocol):
 
     async def _call_write_cv_quarantine(self, merge_result: MergeResult) -> None: ...
 
+    def _record_merge_stage_started(self) -> None: ...
+
     def _transition_to_merging_state(
         self,
         state: CompositeCheckpointState,

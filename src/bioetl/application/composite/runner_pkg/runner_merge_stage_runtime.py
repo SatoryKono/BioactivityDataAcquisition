@@ -26,25 +26,6 @@ __all__ = [
 ]
 
 
-def _record_merge_stage_started_if_supported(
-    host: _CompositeRunnerMergeStageHostProtocol,
-) -> None:
-    """Record optional merge-stage start event when host exposes callback."""
-    record = getattr(host, "_record_merge_stage_started", None)
-    if callable(record):
-        record()
-
-
-def _record_merge_stage_completed_if_supported(
-    host: _CompositeRunnerMergeStageHostProtocol,
-    merge_result: MergeResult,
-) -> None:
-    """Record optional merge ledger event when host exposes callback."""
-    record = getattr(host, "_record_merge_stage_completed", None)
-    if callable(record):
-        record(merge_result)
-
-
 def transition_to_merging_state(
     host: _CompositeRunnerMergeStageHostProtocol,
     state: CompositeCheckpointState,
@@ -71,7 +52,7 @@ async def start_merge_phase(
     """Transition checkpoint/FSM to MERGING and persist checkpoint."""
     merging_state = transition_to_merging_state(host, state)
     await host._call_save_checkpoint_safe(merging_state, "merging")
-    _record_merge_stage_started_if_supported(host)
+    host._record_merge_stage_started()
     host._logger.info(
         PipelineEvent.phase_started("merge"),
         composite=host._config.name,
@@ -196,4 +177,4 @@ async def handle_merge_success(
     )
     await host._call_generate_dq_reports(merge_result)
     await host._call_write_cv_quarantine(merge_result)
-    _record_merge_stage_completed_if_supported(host, merge_result)
+    host._record_merge_stage_completed(merge_result)
