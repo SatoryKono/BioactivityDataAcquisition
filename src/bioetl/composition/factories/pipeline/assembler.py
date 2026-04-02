@@ -18,14 +18,15 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
-    _CreatePipelineWithServicesRequest,
-    _PipelineFactoryContext,
+    build_create_pipeline_with_services_request,
+    build_pipeline_factory_context,
     build_factory_services,
     create_factory_data_source,
     create_factory_runner,
     create_pipeline_instance_with_services,
     create_transformer_instance,
     extract_entity_type,
+    resolve_data_source_creator,
 )
 from bioetl.composition.factories.pipeline.runner_assembly import assemble_runner_impl
 from bioetl.composition.observability import ObservabilityBundle
@@ -58,16 +59,15 @@ _extract_entity_type = extract_entity_type
 _extract_dq_configs, _assemble_runner_impl = extract_dq_configs, assemble_runner_impl
 
 
-def _resolve_data_source_creator(
-    *,
-    provider: str,
-    provider_registry: ProviderRegistry | None,
-    data_source_creator: DataSourceCreatorProtocol | None,
-) -> DataSourceCreatorProtocol:
-    """Resolve the factory data-source creator from explicit or provider wiring."""
-    if data_source_creator is not None:
-        return data_source_creator
-    return get_data_source_creator(provider, provider_registry=provider_registry)
+def _factory_context(factory: "GenericPipelineFactory[BasePipeline]") -> object:
+    return build_pipeline_factory_context(
+        pipeline_name=factory.pipeline_name,
+        create_data_source_fn=factory._create_data_source,
+        pipeline_class=factory.pipeline_class,
+        provider=factory.provider,
+        transformer_class=factory.transformer_class,
+        pandera_silver_schema=factory.pandera_silver_schema,
+    )
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
@@ -96,20 +96,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
         self.provider_registry = provider_registry
-        self._create_data_source = _resolve_data_source_creator(
+        self._create_data_source = resolve_data_source_creator(
             provider=provider,
             provider_registry=provider_registry,
             data_source_creator=data_source_creator,
-        )
-
-    def _build_factory_context(self) -> _PipelineFactoryContext:
-        return _PipelineFactoryContext(
-            pipeline_name=self.pipeline_name,
-            create_data_source_fn=self._create_data_source,
-            pipeline_class=self.pipeline_class,
-            provider=self.provider,
-            transformer_class=self.transformer_class,
-            pandera_silver_schema=self.pandera_silver_schema,
+            get_data_source_creator_fn=get_data_source_creator,
         )
 
     def create_transformer(
@@ -166,7 +157,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
         return build_factory_services(
-            factory_context=self._build_factory_context(),
+            factory_context=_factory_context(self),
             request=_BuildFactoryServicesRequest(
                 settings,
                 logger,
@@ -175,41 +166,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 tracer,
                 dq_monitor,
             ),
-        )
-
-    def _build_create_with_services_request(
-        self,
-        run_id: RunID,
-        runtime: RuntimeConfig,
-        settings: Settings,
-        logger: LoggerPort,
-        manifest_id: str | None = None,
-        config_hash: str | None = None,
-        dq_contract_compatibility_hash: str | None = None,
-        effective_config_artifact_id: str | None = None,
-        config: PipelineYamlConfig | None = None,
-        filter_config: InputFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        dq_monitor: DQMonitorPort | None = None,
-        metrics: MetricsPort | None = None,
-        cached_bronze: CachedBronzeContext | None = None,
-    ) -> _CreatePipelineWithServicesRequest:
-        """Build the canonical request payload for pipeline/service assembly."""
-        return _CreatePipelineWithServicesRequest(
-            run_id,
-            runtime,
-            settings,
-            logger,
-            manifest_id,
-            config_hash,
-            dq_contract_compatibility_hash,
-            effective_config_artifact_id,
-            config,
-            filter_config,
-            tracer,
-            dq_monitor,
-            metrics,
-            cached_bronze,
         )
 
     def create_with_services(
@@ -232,8 +188,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         return cast(
             TPipeline,
             create_pipeline_instance_with_services(
-                factory_context=self._build_factory_context(),
-                request=self._build_create_with_services_request(
+                factory_context=_factory_context(self),
+                request=build_create_pipeline_with_services_request(
                     run_id,
                     runtime,
                     settings,
@@ -296,16 +252,9 @@ def create_pipeline_factory(
     provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     return GenericPipelineFactory(
-        pipeline_name=pipeline_name,
-        pipeline_class=pipeline_class,
-        provider=provider,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        pandera_silver_schema=pandera_silver_schema,
-        transformer_class=transformer_class,
-        provider_registry=provider_registry,
+        pipeline_name, pipeline_class, provider, silver_schema, gold_schema,
+        pandera_silver_schema, None, transformer_class, provider_registry,
     )
-
 
 def assemble_runner(
     pipeline: BasePipeline,
@@ -324,5 +273,7 @@ def assemble_runner(
         yaml_config=yaml_config,
         dq_configs_extractor=_extract_dq_configs,
     )
-__all__ = ["GenericPipelineFactory", "_assemble_runner_impl", "_extract_dq_configs"]
-__all__ += ["_extract_entity_type", "assemble_runner", "create_pipeline_factory"]
+__all__ = [
+    "GenericPipelineFactory", "_assemble_runner_impl", "_extract_dq_configs",
+    "_extract_entity_type", "assemble_runner", "create_pipeline_factory",
+]

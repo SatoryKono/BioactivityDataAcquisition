@@ -67,7 +67,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 83
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 84
 
 
 @pytest.mark.unit

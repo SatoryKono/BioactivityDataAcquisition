@@ -50,6 +50,7 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import (
     BioETLError,
 )
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
 if TYPE_CHECKING:
     import polars as pl
@@ -153,6 +154,20 @@ class CompositePipelineRunner(
         self._record_run_failed(error)
         self._log_failed_run(error, reason_code="unexpected_bioetl_error")
 
+    def _handle_shutdown(self, error: PipelineShutdownError) -> None:
+        """Map graceful shutdown to canonical terminal ledger/log semantics."""
+        self._mark_finished(CompositePipelineState.FAILED)
+        self._record_run_shutdown()
+        self._logger.warning(
+            PipelineEvent.SHUTDOWN,
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            error=str(error),
+            error_type=type(error).__name__,
+            reason=str(error.reason.value),
+            reason_code="composite_pipeline_shutdown",
+        )
+
     def _start_run_lifecycle(self) -> None:
         """Validate and log the start of one composite runner execution."""
         self._validate_config_consistency()
@@ -206,6 +221,9 @@ class CompositePipelineRunner(
 
         try:
             return await self._run_with_managed_lock()
+        except PipelineShutdownError as error:
+            self._handle_shutdown(error)
+            raise
         except pipeline_execution_errors as error:
             self._handle_pipeline_execution_failure(error)
             raise
@@ -251,14 +269,24 @@ class CompositePipelineRunner(
         )
         return locked_phase_result.state, locked_phase_result.execution_context
 
+    async def _complete_successful_run(
+        self,
+        state: CompositeCheckpointState,
+        execution_context: CompositeExecutionContext,
+    ) -> CompositeResult:
+        """Finalize state and emit canonical terminal success artifacts."""
+        await self._finalize_pipeline(state)
+        completion_context = self._prepare_composite_result_context(execution_context)
+        self._log_composite_completion(completion_context)
+        result = self._finalize_composite_result(completion_context)
+        self._record_run_finished(execution_context)
+        return result
+
     async def _run_with_lock(self) -> CompositeResult:
         """Execute pipeline stages while lock is held."""
         state = await self._prepare_run_state()
         state, execution_context = await self._execute_locked_run_phases(state)
-        await self._finalize_pipeline(state)
-        result = self._build_composite_result(execution_context)
-        self._record_run_finished(execution_context)
-        return result
+        return await self._complete_successful_run(state, execution_context)
 
 
 # Backward-compatible alias for iterative NAME-001 migration.

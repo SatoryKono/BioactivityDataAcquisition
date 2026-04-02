@@ -227,6 +227,17 @@ class CompositeRunnerControlPlaneMixin:
             ),
         )
 
+    def _record_run_shutdown(
+        self: _CompositeRunnerControlPlaneHostProtocol,
+    ) -> None:
+        """Append ``run_shutdown`` when control-plane ledger is attached."""
+        self._record_run_metrics_event(
+            metrics_snapshot={},
+            recorder=lambda ledger_service, metrics_snapshot: ledger_service.record_run_shutdown(
+                metrics_snapshot=metrics_snapshot,
+            ),
+        )
+
     def _record_seed_stage_started(
         self: _CompositeRunnerControlPlaneHostProtocol,
     ) -> None:
