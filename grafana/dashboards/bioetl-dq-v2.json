@@ -37,7 +37,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Logs (Loki)",
+      "title": "Explore Logs (Loki, tracing profile)",
       "tooltip": "",
       "type": "link",
       "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
@@ -49,7 +49,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Traces (Tempo)",
+      "title": "Explore Traces (Tempo, tracing profile)",
       "tooltip": "",
       "type": "link",
       "url": "/explore?left=%7B%22datasource%22:%22tempo%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22queryType%22:%22traceqlSearch%22,%22query%22:%22%7B%7D%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D"
@@ -133,11 +133,11 @@
         },
         "dataLinks": [
           {
-            "title": "Open Logs in Loki Explore",
+            "title": "Open Logs in Loki Explore (tracing profile)",
             "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
           },
           {
-            "title": "Open Traces in Tempo Explore",
+            "title": "Open Traces in Tempo Explore (tracing profile)",
             "url": "/explore?left=%7B%22datasource%22:%22tempo%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22queryType%22:%22traceqlSearch%22,%22query%22:%22%7B%7D%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D"
           }
         ]
@@ -204,12 +204,12 @@
       },
       "targets": [
         {
-          "expr": "avg(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}) or vector(0)",
+          "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"})) or vector(0)) / clamp_min((sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}) or vector(0)), 1))",
           "legendFormat": "Quality",
           "refId": "A"
         }
       ],
-      "title": "Data Quality Score",
+      "title": "Data Quality Score (Volume-weighted)",
       "type": "gauge"
     },
     {

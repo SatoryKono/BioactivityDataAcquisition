@@ -48,6 +48,13 @@ class _CompositeRunnerControlPlaneHostProtocol(Protocol):
         metrics_snapshot: dict[str, int],
     ) -> None: ...
 
+    def _record_run_metrics_event(
+        self,
+        *,
+        metrics_snapshot: dict[str, int],
+        recorder: Callable[[RunLedgerService, dict[str, int]], object],
+    ) -> None: ...
+
 
 def _count_dependency_status(
     results: dict[str, DependencyResult],
@@ -162,6 +169,17 @@ class CompositeRunnerControlPlaneMixin:
             return
         recorder(self._run_ledger_service)
 
+    def _record_run_metrics_event(
+        self: _CompositeRunnerControlPlaneHostProtocol,
+        *,
+        metrics_snapshot: dict[str, int],
+        recorder: Callable[[RunLedgerService, dict[str, int]], object],
+    ) -> None:
+        """Append one run-level ledger entry with an explicit metrics snapshot."""
+        self._record_with_ledger_service(
+            lambda ledger_service: recorder(ledger_service, metrics_snapshot)
+        )
+
     def _record_stage_started(
         self: _CompositeRunnerControlPlaneHostProtocol,
         *,
@@ -201,11 +219,12 @@ class CompositeRunnerControlPlaneMixin:
         error: Exception,
     ) -> None:
         """Append ``run_failed`` when control-plane ledger is attached."""
-        self._record_with_ledger_service(
-            lambda ledger_service: ledger_service.record_run_exception(
+        self._record_run_metrics_event(
+            metrics_snapshot={},
+            recorder=lambda ledger_service, metrics_snapshot: ledger_service.record_run_exception(
                 error=error,
-                metrics_snapshot={},
-            )
+                metrics_snapshot=metrics_snapshot,
+            ),
         )
 
     def _record_seed_stage_started(
@@ -251,10 +270,11 @@ class CompositeRunnerControlPlaneMixin:
         artifacts: CompositeExecutionContext,
     ) -> None:
         """Append ``run_finished`` when control-plane ledger is attached."""
-        self._record_with_ledger_service(
-            lambda ledger_service: ledger_service.record_run_finished(
-                metrics_snapshot=_run_completion_metrics(artifacts),
-            )
+        self._record_run_metrics_event(
+            metrics_snapshot=_run_completion_metrics(artifacts),
+            recorder=lambda ledger_service, metrics_snapshot: ledger_service.record_run_finished(
+                metrics_snapshot=metrics_snapshot,
+            ),
         )
 
     def _record_seed_stage_completed(

@@ -342,12 +342,26 @@ Windows PowerShell:
 What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
-- Registers `memory`, `filesystem`, `sequential-thinking`, `fetch`, `pdf`, `github`, `prometheus`, `grafana`, and `openaiDeveloperDocs` in Codex CLI.
-- Uses local observability defaults for BioETL when not overridden:
-  - `PROMETHEUS_URL=http://localhost:9090`
-  - `GRAFANA_URL=http://localhost:3000`
-  - Grafana auth prefers `GRAFANA_SERVICE_ACCOUNT_TOKEN`; otherwise it falls back to `GRAFANA_USERNAME` / `GRAFANA_PASSWORD`, and finally `admin` / `${GF_SECURITY_ADMIN_PASSWORD:-change_me}` for the local monitoring stack.
-- Does **not** store tokens in repository files.
+- Registers `memory`, `filesystem`, `sequential-thinking`, `fetch`, `pdf`, `github`, `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, `brave-search`, and `openaiDeveloperDocs` in Codex CLI.
+- Uses Docker-backed wrappers for `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, and `brave-search`.
+- Uses local defaults when not overridden:
+  - `PROMETHEUS_URL=http://host.docker.internal:9090`
+  - `GRAFANA_URL=http://host.docker.internal:3000`
+  - Grafana auth prefers `GRAFANA_SERVICE_ACCOUNT_TOKEN`; otherwise it can use `GRAFANA_USERNAME` / `GRAFANA_PASSWORD`.
+- Template variables for these MCP servers live in `.env.example`.
+- Does **not** store real tokens in repository files.
+
+Common MCP environment variables:
+
+```bash
+GITHUB_PERSONAL_ACCESS_TOKEN=
+PROMETHEUS_URL=http://host.docker.internal:9090
+GRAFANA_URL=http://host.docker.internal:3000
+GRAFANA_SERVICE_ACCOUNT_TOKEN=
+BRAVE_API_KEY=
+DOCKERHUB_USERNAME=
+HUB_PAT_TOKEN=
+```
 
 Before using GitHub MCP tools, set a token in your shell:
 

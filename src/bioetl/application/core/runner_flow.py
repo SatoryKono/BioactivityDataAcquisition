@@ -53,6 +53,17 @@ def _record_with_ledger_service(
     recorder(host._run_ledger_service)
 
 
+def _record_run_metrics_event(
+    host: _PipelineRunnerFlowHostProtocol,
+    recorder: Callable[[RunLedgerService, dict[str, int]], object],
+) -> None:
+    """Append one run-level ledger entry using the current execution metrics."""
+    _record_with_ledger_service(
+        host,
+        lambda ledger_service: recorder(ledger_service, host.execution_metrics),
+    )
+
+
 async def resolve_execution_offset(
     host: _PipelineRunnerFlowHostProtocol,
     load_checkpoint: Callable[
@@ -138,20 +149,20 @@ def record_stage_completed(
 
 def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append successful completion ledger entry."""
-    _record_with_ledger_service(
+    _record_run_metrics_event(
         host,
-        lambda ledger_service: ledger_service.record_run_finished(
-            metrics_snapshot=host.execution_metrics,
+        lambda ledger_service, metrics_snapshot: ledger_service.record_run_finished(
+            metrics_snapshot=metrics_snapshot,
         ),
     )
 
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append graceful shutdown ledger entry."""
-    _record_with_ledger_service(
+    _record_run_metrics_event(
         host,
-        lambda ledger_service: ledger_service.record_run_shutdown(
-            metrics_snapshot=host.execution_metrics,
+        lambda ledger_service, metrics_snapshot: ledger_service.record_run_shutdown(
+            metrics_snapshot=metrics_snapshot,
         ),
     )
 
@@ -161,10 +172,10 @@ def record_run_failed(
     exc: Exception,
 ) -> None:
     """Append failed completion ledger entry."""
-    _record_with_ledger_service(
+    _record_run_metrics_event(
         host,
-        lambda ledger_service: ledger_service.record_run_exception(
+        lambda ledger_service, metrics_snapshot: ledger_service.record_run_exception(
             error=exc,
-            metrics_snapshot=host.execution_metrics,
+            metrics_snapshot=metrics_snapshot,
         ),
     )
