@@ -53,7 +53,7 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 6. Добавлен operator drilldown surface:
 
 - `bioetl-overview-v2`, `bioetl-dq-v2`, `bioetl-provider-health-v2` теперь содержат
-  dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)`;
+  dashboard links `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`;
 - `overview.id=1`, `dq.id=1`, `provider.id=1` дублируют этот handoff через data links;
 - Loki links используют low-cardinality entrypoint `{job="bioetl"}` без encoded
   interpolation dashboard variables внутри Explore payload;
@@ -84,10 +84,24 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 - источником теперь служит доменная gauge-метрика `bioetl_data_freshness_seconds`,
   а не bookkeeping series клиента Prometheus.
 
+10. Исправлена семантика aggregate DQ score:
+
+- panel `Data Quality Score` переименована в `Data Quality Score (Volume-weighted)`;
+- aggregate score больше не является простым `avg(...)` по сущностям;
+- для weighting используется новая gauge-метрика
+  `bioetl_dq_validation_record_count`.
+
+11. Уточнён scope control-plane lookup panels:
+
+- `Control-plane Lookup Failures`, `Control-plane Lookup Outcomes` и
+  `Control-plane Lookup p95` переименованы в `Global ...`;
+- operator UI больше не намекает, что эти панели фильтруются по `$pipeline`,
+  потому что underlying metrics имеют только `store/operation/status`.
+
 8. Синхронизирована dashboard-навигация:
 
 - `1. Overview` содержит links `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `Explore Logs (Loki)`, `Explore Traces (Tempo)`;
+  `4. Data Quality`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`;
 - `2. Runtime`, `3. Provider Health` и `4. Data Quality` содержат `Back to Overview`
   и Explore links.
 

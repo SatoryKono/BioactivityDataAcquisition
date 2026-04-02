@@ -45,7 +45,7 @@ fi
 
 printf "=== MCP server list ===\n%s\n\n" "$list_out"
 
-for server in memory filesystem sequential-thinking fetch pdf github prometheus grafana brave-search openaiDeveloperDocs; do
+for server in memory filesystem sequential-thinking fetch pdf github docker docker-docs context7 paper-search dockerhub prometheus grafana brave-search openaiDeveloperDocs; do
   if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
     ok "Server '${server}' is registered"
   else
@@ -60,6 +60,11 @@ sequential_out="$(codex mcp get sequential-thinking 2>&1 || true)"
 fetch_out="$(codex mcp get fetch 2>&1 || true)"
 pdf_out="$(codex mcp get pdf 2>&1 || true)"
 github_out="$(codex mcp get github 2>&1 || true)"
+docker_out="$(codex mcp get docker 2>&1 || true)"
+docker_docs_out="$(codex mcp get docker-docs 2>&1 || true)"
+context7_out="$(codex mcp get context7 2>&1 || true)"
+paper_search_out="$(codex mcp get paper-search 2>&1 || true)"
+dockerhub_out="$(codex mcp get dockerhub 2>&1 || true)"
 prometheus_out="$(codex mcp get prometheus 2>&1 || true)"
 grafana_out="$(codex mcp get grafana 2>&1 || true)"
 brave_out="$(codex mcp get brave-search 2>&1 || true)"
@@ -71,6 +76,11 @@ require_contains "$sequential_out" "@modelcontextprotocol/server-sequential-thin
 require_contains "$fetch_out" "mcp-server-fetch==2025.4.7" "fetch is pinned to mcp-server-fetch==2025.4.7" || status=1
 require_contains "$pdf_out" "@modelcontextprotocol/server-pdf@1.3.1" "pdf is pinned to @1.3.1" || status=1
 require_contains "$github_out" "@modelcontextprotocol/server-github@2025.4.8" "github is pinned to @2025.4.8" || status=1
+require_contains "$docker_out" "mcp_docker_wrapper" "docker is routed through the project wrapper" || status=1
+require_contains "$docker_docs_out" "mcp_docker_docs_wrapper" "docker-docs is routed through the project wrapper" || status=1
+require_contains "$context7_out" "mcp_context7_wrapper" "context7 is routed through the project wrapper" || status=1
+require_contains "$paper_search_out" "mcp_paper_search_wrapper" "paper-search is routed through the project wrapper" || status=1
+require_contains "$dockerhub_out" "mcp_dockerhub_wrapper" "dockerhub is routed through the project wrapper" || status=1
 require_contains "$prometheus_out" "mcp_prometheus_wrapper" "prometheus is routed through the project wrapper" || status=1
 require_contains "$grafana_out" "mcp_grafana_wrapper" "grafana is routed through the project wrapper" || status=1
 require_contains "$brave_out" "mcp_brave_search_wrapper" "brave-search is routed through the project wrapper" || status=1

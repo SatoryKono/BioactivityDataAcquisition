@@ -23,6 +23,7 @@ __all__ = [
     "DQ_CHECK_DURATION_MS",
     "DQ_RECORDS_QUARANTINED_TOTAL",
     "DQ_VALIDATION_FAILURES_TOTAL",
+    "DQ_VALIDATION_RECORD_COUNT",
     "DQ_VALIDATION_SCORE",
     "ERRORS_TOTAL",
     "FILTER_IDS_DUPLICATES_TOTAL",
@@ -140,6 +141,12 @@ ARCHIVE_DURATION_SECONDS = Histogram(
 DQ_VALIDATION_SCORE = Gauge(
     "bioetl_dq_validation_score",
     "Data quality validation score (0.0-1.0, where 1.0 = all records valid)",
+    ["pipeline", "entity"],
+)
+
+DQ_VALIDATION_RECORD_COUNT = Gauge(
+    "bioetl_dq_validation_record_count",
+    "Record count associated with the latest entity-level DQ validation score",
     ["pipeline", "entity"],
 )
 

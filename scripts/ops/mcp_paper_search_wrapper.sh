@@ -6,9 +6,4 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "${script_dir}/docker_cli_resolver.sh"
 
 docker_bin="$(resolve_docker_bin)"
-prometheus_url="${PROMETHEUS_URL:-http://host.docker.internal:9090}"
-exec "${docker_bin}" run --rm -i \
-  ghcr.io/pab1it0/prometheus-mcp-server \
-  --transport stdio \
-  --prometheus-url "${prometheus_url}" \
-  "$@"
+exec "${docker_bin}" mcp gateway run --servers paper-search --transport stdio "$@"

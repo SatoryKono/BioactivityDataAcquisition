@@ -42,6 +42,11 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "fetch",
         "pdf",
         "github",
+        "docker",
+        "docker-docs",
+        "context7",
+        "paper-search",
+        "dockerhub",
         "prometheus",
         "grafana",
         "brave-search",
@@ -71,9 +76,19 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert servers["github"]["command"] == "powershell"
         assert ".claude" in servers["github"]["args"][-1]
         assert "github-mcp-wrapper.ps1" in servers["github"]["args"][-1]
+        assert servers["docker"]["command"] == "powershell"
+        assert servers["docker-docs"]["command"] == "powershell"
+        assert servers["context7"]["command"] == "powershell"
+        assert servers["paper-search"]["command"] == "powershell"
+        assert servers["dockerhub"]["command"] == "powershell"
         assert servers["prometheus"]["command"] == "powershell"
         assert servers["grafana"]["command"] == "powershell"
         assert servers["brave-search"]["command"] == "powershell"
+        assert "mcp_docker_wrapper.ps1" in servers["docker"]["args"][-1]
+        assert "mcp_docker_docs_wrapper.ps1" in servers["docker-docs"]["args"][-1]
+        assert "mcp_context7_wrapper.ps1" in servers["context7"]["args"][-1]
+        assert "mcp_paper_search_wrapper.ps1" in servers["paper-search"]["args"][-1]
+        assert "mcp_dockerhub_wrapper.ps1" in servers["dockerhub"]["args"][-1]
         assert "mcp_prometheus_wrapper.ps1" in servers["prometheus"]["args"][-1]
         assert "mcp_grafana_wrapper.ps1" in servers["grafana"]["args"][-1]
         assert "mcp_brave_search_wrapper.ps1" in servers["brave-search"]["args"][-1]
@@ -82,9 +97,29 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
             servers["github"]["args"][1]
             == "@modelcontextprotocol/server-github@2025.4.8"
         )
+        assert servers["docker"]["command"] == "bash"
+        assert servers["docker-docs"]["command"] == "bash"
+        assert servers["context7"]["command"] == "bash"
+        assert servers["paper-search"]["command"] == "bash"
+        assert servers["dockerhub"]["command"] == "bash"
         assert servers["prometheus"]["command"] == "bash"
         assert servers["grafana"]["command"] == "bash"
         assert servers["brave-search"]["command"] == "bash"
+        assert servers["docker"]["args"][-1].endswith(
+            "scripts/ops/mcp_docker_wrapper.sh"
+        )
+        assert servers["docker-docs"]["args"][-1].endswith(
+            "scripts/ops/mcp_docker_docs_wrapper.sh"
+        )
+        assert servers["context7"]["args"][-1].endswith(
+            "scripts/ops/mcp_context7_wrapper.sh"
+        )
+        assert servers["paper-search"]["args"][-1].endswith(
+            "scripts/ops/mcp_paper_search_wrapper.sh"
+        )
+        assert servers["dockerhub"]["args"][-1].endswith(
+            "scripts/ops/mcp_dockerhub_wrapper.sh"
+        )
         assert servers["prometheus"]["args"][-1].endswith(
             "scripts/ops/mcp_prometheus_wrapper.sh"
         )
