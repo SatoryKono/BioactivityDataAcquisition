@@ -8,6 +8,8 @@ import re
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
+import defusedxml.ElementTree as defused_ET
+
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
@@ -122,8 +124,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             raise ValueError("Missing or invalid _raw_xml field")
 
         try:
-            self._cached_xml_root = ET.fromstring(raw_xml)
-        except ET.ParseError as e:
+            self._cached_xml_root = defused_ET.fromstring(raw_xml)
+        except (ET.ParseError, defused_ET.EntitiesForbidden) as e:
             context.logger.warning(
                 "XML_parse_error",
                 error=str(e),
