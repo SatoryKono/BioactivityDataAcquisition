@@ -938,7 +938,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_silver_validation_failures_total{table=~\"$pipeline\"}[$__range])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
           "legendFormat": "Validation Failures",
           "refId": "A"
         }

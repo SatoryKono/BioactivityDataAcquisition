@@ -40,5 +40,5 @@ POLICY_VIOLATIONS_TOTAL = Counter(
 SILVER_VALIDATION_FAILURES_TOTAL = Counter(
     "bioetl_silver_validation_failures_total",
     "Total silver schema validation failures",
-    ["table"],
+    ["table", "pipeline"],
 )

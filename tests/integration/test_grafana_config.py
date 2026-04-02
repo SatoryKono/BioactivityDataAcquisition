@@ -549,6 +549,32 @@ def test_control_plane_lookup_panels_disclose_global_scope() -> None:
             )
 
 
+def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
+    """Silver validation queries should filter on a real pipeline label, not table-name regex."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Silver Validation Failures"
+        ),
+        None,
+    )
+    assert panel is not None, "DQ dashboard missing 'Silver Validation Failures' panel"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any('{pipeline=~"$pipeline"}' in expr for expr in expressions), (
+        "Silver Validation Failures must filter on the explicit pipeline label"
+    )
+    assert all('{table=~"$pipeline"}' not in expr for expr in expressions), (
+        "Silver Validation Failures must not rely on the table-to-pipeline naming convention"
+    )
+
+
 def test_provider_dashboard_uses_pipeline_filters():
     """Ensure provider dashboard uses pipeline variable directly (no provider regex hack)."""
     dashboard = load_dashboard(
