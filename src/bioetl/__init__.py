@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from importlib import import_module
-from types import ModuleType
+import typing
 
 __version__ = "6.1.0"
 
@@ -121,13 +120,14 @@ _PACKAGE_EXPORTS: dict[str, str] = {
 __all__ = ["__version__", *_PACKAGE_EXPORTS]
 
 
-def __getattr__(name: str) -> ModuleType:
+def __getattr__(name: str) -> typing.Any:
     """Lazily expose top-level package namespaces for patch/import stability."""
     try:
         module_name = _PACKAGE_EXPORTS[name]
     except KeyError as exc:  # pragma: no cover - standard attribute path
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
 
+    from importlib import import_module
     module = import_module(module_name)
     globals()[name] = module
     return module
