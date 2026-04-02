@@ -158,6 +158,15 @@ def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
     for row in executable_rows:
         file_to_rows.setdefault(row.file_path, []).append(row)
 
+    # Pre-compile unique patterns to bypass internal regex cache limits
+    # and avoid repeated function call and string interpolation overhead
+    compiled_patterns: dict[str, re.Pattern[str]] = {}
+    for row in executable_rows:
+        if row.old_name not in compiled_patterns:
+            compiled_patterns[row.old_name] = re.compile(
+                rf"\b{re.escape(row.old_name)}\b"
+            )
+
     total_matches = 0
     modified_files = 0
 
@@ -171,7 +180,7 @@ def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
         file_matches = 0
 
         for row in file_to_rows[file_path]:
-            pattern = re.compile(rf"\b{re.escape(row.old_name)}\b")
+            pattern = compiled_patterns[row.old_name]
             updated_text, count = pattern.subn(row.new_name, updated_text)
             file_matches += count
             if count:
