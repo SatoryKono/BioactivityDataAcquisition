@@ -224,6 +224,42 @@ class TestCreatePipelineInstanceWithServices:
             cached_bronze=request.cached_bronze,
         )
 
+    @patch(
+        "bioetl.composition.factories.pipeline.factory_method_helpers.create_pipeline_with_services"
+    )
+    def test_forwards_optional_control_plane_kwargs_only_when_present(
+        self,
+        mock_create_pipeline_with_services: MagicMock,
+    ) -> None:
+        """Optional control-plane kwargs should flow through only when provided."""
+        factory_context = _PipelineFactoryContext(
+            pipeline_name="chembl_activity",
+            create_data_source_fn=MagicMock(),
+            pipeline_class=MagicMock(),
+            provider="chembl",
+        )
+        request = _CreatePipelineWithServicesRequest(
+            run_id="run-1",
+            runtime=MagicMock(),
+            settings=MagicMock(),
+            logger=MagicMock(),
+            manifest_id="manifest-123",
+            config_hash="hash-123",
+            dq_contract_compatibility_hash="dq-hash-123",
+            effective_config_artifact_id="artifact-123",
+        )
+
+        create_pipeline_instance_with_services(
+            factory_context=factory_context,
+            request=request,
+        )
+
+        call_kwargs = mock_create_pipeline_with_services.call_args.kwargs
+        assert call_kwargs["manifest_id"] == "manifest-123"
+        assert call_kwargs["config_hash"] == "hash-123"
+        assert call_kwargs["dq_contract_compatibility_hash"] == "dq-hash-123"
+        assert call_kwargs["effective_config_artifact_id"] == "artifact-123"
+
 
 @pytest.mark.unit
 class TestCreateFactoryRunner:
@@ -289,3 +325,31 @@ class TestCreateFactoryRunner:
         create_fn.assert_called_once()
         call_kwargs = create_fn.call_args[1]
         assert call_kwargs["config"] is yaml_config
+
+    def test_forces_strict_gold_validation_in_prod(self) -> None:
+        """Prod runs should always force strict Gold validation."""
+        yaml_config = MagicMock()
+        create_fn = MagicMock(return_value=MagicMock())
+        assemble_fn = MagicMock(return_value=MagicMock())
+        settings = SimpleNamespace(env="prod", test_mode=False)
+        runtime = SimpleNamespace(strict_gold_validation=False)
+
+        create_factory_runner(
+            pipeline_name="test",
+            silver_schema=None,
+            gold_schema=MagicMock(),
+            run_id="r1",
+            runtime=runtime,
+            settings=settings,
+            observability=MagicMock(
+                logger=MagicMock(),
+                tracer=MagicMock(),
+                metrics=MagicMock(),
+                dq_monitor=None,
+            ),
+            create_with_services_fn=create_fn,
+            assemble_runner_fn=assemble_fn,
+            config=yaml_config,
+        )
+
+        assert assemble_fn.call_args.kwargs["strict_gold_validation"] is True

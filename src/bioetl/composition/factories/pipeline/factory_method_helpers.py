@@ -91,6 +91,36 @@ def extract_entity_type(pipeline_name: str) -> str | None:
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
+def _apply_optional_control_plane_kwargs(
+    kwargs: dict[str, object],
+    *,
+    manifest_id: str | None = None,
+    config_hash: str | None = None,
+    dq_contract_compatibility_hash: str | None = None,
+    effective_config_artifact_id: str | None = None,
+) -> None:
+    """Forward optional control-plane fields only when present."""
+    if manifest_id is not None:
+        kwargs["manifest_id"] = manifest_id
+    if config_hash is not None:
+        kwargs["config_hash"] = config_hash
+    if dq_contract_compatibility_hash is not None:
+        kwargs["dq_contract_compatibility_hash"] = dq_contract_compatibility_hash
+    if effective_config_artifact_id is not None:
+        kwargs["effective_config_artifact_id"] = effective_config_artifact_id
+
+
+def _resolve_strict_gold_validation(
+    *,
+    runtime: RuntimeConfig,
+    settings: Settings,
+) -> bool:
+    """Force strict Gold validation in prod unless explicit test mode is active."""
+    if settings.env == "prod" and not settings.test_mode:
+        return True
+    return runtime.strict_gold_validation
+
+
 def create_transformer_instance(
     *,
     transformer_class: type[BaseTransformer] | None,
@@ -200,18 +230,13 @@ def create_pipeline_instance_with_services(
         "metrics": request.metrics,
         "cached_bronze": cast("CachedBronzeContext | None", request.cached_bronze),
     }
-    if request.manifest_id is not None:
-        create_pipeline_kwargs["manifest_id"] = request.manifest_id
-    if request.config_hash is not None:
-        create_pipeline_kwargs["config_hash"] = request.config_hash
-    if request.dq_contract_compatibility_hash is not None:
-        create_pipeline_kwargs["dq_contract_compatibility_hash"] = (
-            request.dq_contract_compatibility_hash
-        )
-    if request.effective_config_artifact_id is not None:
-        create_pipeline_kwargs["effective_config_artifact_id"] = (
-            request.effective_config_artifact_id
-        )
+    _apply_optional_control_plane_kwargs(
+        create_pipeline_kwargs,
+        manifest_id=request.manifest_id,
+        config_hash=request.config_hash,
+        dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
+        effective_config_artifact_id=request.effective_config_artifact_id,
+    )
     return cast(
         "BasePipeline",
         cast(  # Any: compatibility seam forwards only present optional kwargs.
@@ -259,18 +284,13 @@ def create_factory_runner(
         "metrics": observability.metrics,
         "cached_bronze": cached_bronze,
     }
-    if manifest_id is not None:
-        create_with_services_kwargs["manifest_id"] = manifest_id
-    if config_hash is not None:
-        create_with_services_kwargs["config_hash"] = config_hash
-    if dq_contract_compatibility_hash is not None:
-        create_with_services_kwargs["dq_contract_compatibility_hash"] = (
-            dq_contract_compatibility_hash
-        )
-    if effective_config_artifact_id is not None:
-        create_with_services_kwargs["effective_config_artifact_id"] = (
-            effective_config_artifact_id
-        )
+    _apply_optional_control_plane_kwargs(
+        create_with_services_kwargs,
+        manifest_id=manifest_id,
+        config_hash=config_hash,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        effective_config_artifact_id=effective_config_artifact_id,
+    )
     pipeline = cast(  # Any: factory callback is intentionally open for test seams.
         "Any",  # Any: callback signature varies across mocked and concrete factories.
         create_with_services_fn,
@@ -285,10 +305,9 @@ def create_factory_runner(
         observability=observability,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
-        strict_gold_validation=(
-            runtime.strict_gold_validation
-            if settings.env != "prod" or settings.test_mode
-            else True
+        strict_gold_validation=_resolve_strict_gold_validation(
+            runtime=runtime,
+            settings=settings,
         ),
         yaml_config=yaml_config,
     )
