@@ -5,14 +5,14 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from collections.abc import Mapping
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_SNAPSHOTS_DIR = ROOT / "tests" / "fixtures" / "contracts"
-_PATH_TOKEN_RE = re.compile(r"([^\.\[]+)(?:\[(\d+)\])?")
+_PATH_TOKEN_RE = re.compile(r"([^\.\[]*)(?:\[(\d+)\])?")
 _ALLOWED_TYPE_NAMES = frozenset({"bool", "dict", "float", "int", "list", "null", "str"})
 
 
@@ -26,7 +26,7 @@ def load_provider_contract_snapshot(
     """Load provider contract snapshot from the canonical fixture registry."""
     snapshot_path = CONTRACT_SNAPSHOTS_DIR / provider / f"v{version}.json"
     with snapshot_path.open(encoding="utf-8") as handle:
-        return json.load(handle)
+        return cast(dict[str, Any], json.load(handle))
 
 
 def save_provider_contract_snapshot(
@@ -132,23 +132,26 @@ def _resolve_path(payload: Any, path: str) -> Any:
         if match is None:
             raise ContractPathResolutionError(f"unsupported path token {raw_part!r}")
         key, raw_index = match.groups()
-        if not isinstance(current, dict):
-            raise ContractPathResolutionError(
-                f"expected dict before key {key!r}, got {_infer_type_name(current)!r}"
-            )
-        if key not in current:
-            raise ContractPathResolutionError(f"missing key {key!r}")
-        current = current[key]
+        if key:
+            if not isinstance(current, dict):
+                raise ContractPathResolutionError(
+                    f"expected dict before key {key!r}, got {_infer_type_name(current)!r}"
+                )
+            if key not in current:
+                raise ContractPathResolutionError(f"missing key {key!r}")
+            current = current[key]
+        elif raw_index is None:
+            raise ContractPathResolutionError(f"empty path token {raw_part!r}")
         if raw_index is None:
             continue
         if not isinstance(current, list):
             raise ContractPathResolutionError(
-                f"expected list at {key!r}, got {_infer_type_name(current)!r}"
+                f"expected list at {raw_part!r}, got {_infer_type_name(current)!r}"
             )
         index = int(raw_index)
         if index >= len(current):
             raise ContractPathResolutionError(
-                f"list at {key!r} has length {len(current)}, missing index {index}"
+                f"list at {raw_part!r} has length {len(current)}, missing index {index}"
             )
         current = current[index]
     return current

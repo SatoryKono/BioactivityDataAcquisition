@@ -1029,17 +1029,25 @@ def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> No
 def test_explore_links_decode_to_valid_queries() -> None:
     """Explore links should decode to valid Loki/Tempo query payloads."""
     expectations = {
-        "bioetl-overview-v2.json": ("pipeline", "loki"),
-        "bioetl-dq-v2.json": ("pipeline", "loki"),
-        "bioetl-runtime.json": ("pipeline", "loki"),
-        "bioetl-provider-health-v2.json": ("provider", "loki"),
+        "bioetl-overview-v2.json": {
+            "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
+        },
+        "bioetl-dq-v2.json": {
+            "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
+        },
+        "bioetl-runtime.json": {
+            "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
+        },
+        "bioetl-provider-health-v2.json": {
+            "tempo_terms": ('span."bioetl.provider"',),
+        },
     }
 
-    for dashboard_name, (token, datasource_uid) in expectations.items():
+    for dashboard_name, config in expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         for link in _collect_dashboard_links(dashboard):
             url = link.get("url", "")
-            if "/explore?left=" not in url or datasource_uid not in url:
+            if "/explore?left=" not in url:
                 continue
             encoded = url.split("left=", 1)[1]
             payload = json.loads(unquote(encoded))
@@ -1049,6 +1057,47 @@ def test_explore_links_decode_to_valid_queries() -> None:
             if payload["datasource"] == "loki":
                 expr = payload["queries"][0]["expr"]
                 assert expr == '{job="bioetl"}'
+                continue
+
+            assert payload["queries"][0]["queryType"] == "traceqlSearch"
+            query = payload["queries"][0]["query"]
+            assert query != "{}", (
+                f"{dashboard_name} Tempo drilldown must be scoped to the current dashboard selection"
+            )
+            for term in config["tempo_terms"]:
+                assert term in query, (
+                    f"{dashboard_name} Tempo drilldown must include {term!r}"
+                )
+
+
+def test_tempo_drilldown_uses_contextual_traceql_filters() -> None:
+    """Tempo drilldown should preserve current dashboard scope via TraceQL."""
+    expectations = {
+        "bioetl-overview-v2.json": ("${pipeline:regex}", "${run_type:regex}"),
+        "bioetl-dq-v2.json": ("${pipeline:regex}", "${run_type:regex}"),
+        "bioetl-runtime.json": ("${pipeline:regex}", "${run_type:regex}"),
+        "bioetl-provider-health-v2.json": ("${provider:regex}",),
+    }
+
+    for dashboard_name, fragments in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        tempo_links = [
+            link
+            for link in _collect_dashboard_links(dashboard)
+            if "/explore?left=" in link.get("url", "")
+            and "tempo" in link.get("url", "")
+        ]
+        assert tempo_links, (
+            f"{dashboard_name} must expose at least one Tempo drilldown link"
+        )
+
+        for link in tempo_links:
+            payload = json.loads(unquote(link["url"].split("left=", 1)[1]))
+            query = payload["queries"][0]["query"]
+            for fragment in fragments:
+                assert fragment in query, (
+                    f"{dashboard_name} Tempo drilldown must preserve {fragment} in TraceQL"
+                )
 
 
 def test_explore_drilldown_titles_disclose_tracing_profile_dependency() -> None:

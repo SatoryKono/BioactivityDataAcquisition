@@ -44,7 +44,7 @@ Wrappers `run_pytest.ps1|.sh` по умолчанию добавляют фла�
 Текущее состояние rollout по ADR-042:
 - mutation testing в CI блокирует только `domain/` с порогом `70%`
 - `application/` mutation target (`60%`) задокументирован, но пока staged и не является blocking gate
-- VCR cassette metadata (`*_meta.yaml`) перешли в `partial` rollout: в репозитории уже есть seeded sidecar inventory и canonical backfill tool, но metadata coverage пока не repo-wide и потому enforcement остаётся неполным
+- VCR cassette metadata (`*_meta.yaml`) перешли в `partial` rollout: в `configs/quality/test_matrix.yaml` теперь явно объявлен current seeded sidecar slice, минимальный provider-coverage rule (`at least one sidecar per VCR-managed provider`) и текущие expected sidecar counts per provider, а canonical backfill tool уже зафиксирован как supported path, но metadata coverage пока не repo-wide и потому enforcement остаётся неполным
 - `vcr_cassette_max_age_days: 90` уже является нормативным stale-age threshold, а repo-wide age rollout теперь `partial`: архитектурные тесты требуют наличие `_meta.yaml` inventory, но CI пока не делает stale-age blocking gate для всего дерева
 - canonical VCR metadata catalog теперь существует как tracked artifact в `reports/quality/vcr-metadata-catalog.json`
 - canonical tooling paths активированы для partial rollout: `scripts/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/migrations/active/backfill_vcr_metadata_sidecars.py` служит canonical backfill entry point; при этом workflow-level automated backfill всё ещё не включён
@@ -55,7 +55,7 @@ Wrappers `run_pytest.ps1|.sh` по умолчанию добавляют фла�
 - для `semanticscholar` live governance теперь разделена:
   - `tests/contract/test_semanticscholar_contract.py` содержит promotion-grade путь;
   - `tests/contract/test_semanticscholar_contract_pilot.py` содержит richer pilot-soak проверки и требует `BIOETL_PILOT_SOAK_TESTS=true` или `--pilot-soak`
-- текущие silver schema snapshots уже живут в `tests/contract/silver_schemas/snapshots/`; внешний registry `tests/fixtures/contracts/{provider}/v{version}.json` остаётся future target из ADR-042
+- текущие silver schema snapshots уже живут в `tests/contract/silver_schemas/snapshots/`; внешний provider-facing registry `tests/fixtures/contracts/{provider}/v{version}.json` тоже уже активирован как bounded publication slice и не заменяет schema snapshots
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
 - extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
 
@@ -170,7 +170,7 @@ bash scripts/dev/run_pytest.sh tests/architecture/test_domain_unit_test_purity.p
 - **Storage**: Проверка записи в Delta Lake и Bronze хранилище (используются локальные временные пути).
 - **VCR Policy**: canonical machine-readable policy живёт в `configs/quality/integration_vcr_policy.yaml`. Кассеты хранятся в `tests/fixtures/vcr/`, а стандартный CI path использует `--vcr-record=none`.
 - **Compatibility Policy**: `pytest-vcr` должен импортироваться против locked `wrapt` dependency из активного окружения. Repo-root workaround'ы вроде `wrapt/` или `sitecustomize.py` не считаются поддерживаемым fix path; если импорт ломается, нужно чинить environment/lock, а не shadowing dependency.
-- **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy находятся в `partial` rollout. Репозиторий уже держит seeded sidecar inventory и canonical catalog, но глобальный enforcement ещё не repo-wide.
+- **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy находятся в `partial` rollout. Репозиторий уже держит matrix-declared seeded sidecar inventory и canonical catalog, но глобальный enforcement ещё не repo-wide.
 - **Catalog / Backfill Policy**: canonical VCR metadata catalog и canonical backfill script уже существуют, но automated workflow rollout всё ещё остаётся неполным; это состояние фиксируется matrix и architecture guard'ами.
 - **Live Contract Baseline**: live-network enforcement обязателен для `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar`; richer pilot-soak coverage for Semantic Scholar remains opt-in and does not redefine the enforced baseline.
 

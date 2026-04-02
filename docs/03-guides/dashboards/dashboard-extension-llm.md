@@ -66,12 +66,18 @@ sum(increase(metric_name[24h])) or vector(0)
 
 ### Tempo
 
-Используй:
+Используй минимальный, но contextual handoff:
 
 ```text
 datasource = tempo
 queryType = traceqlSearch
-query = {}
+query = { span."bioetl.pipeline" =~ "${pipeline:regex}" && span."bioetl.run_type" =~ "${run_type:regex}" }
+```
+
+Для provider-only dashboards замени pipeline/run_type filter на:
+
+```text
+query = { span."bioetl.provider" =~ "${provider:regex}" }
 ```
 
 ## 5. Docs cascade rule

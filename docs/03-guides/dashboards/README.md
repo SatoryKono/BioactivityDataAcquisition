@@ -22,6 +22,10 @@ Last verified: '2026-03-29'
 - `variables-guide.md` — фактические Grafana variables и их PromQL.
 - `dashboard-v2-updates.md` — что именно проверено и исправлено в JSON.
 
+Текущий shipped Explore handoff:
+- Loki использует безопасный baseline `{job="bioetl"}`.
+- Tempo использует contextual TraceQL filters по текущему dashboard scope (`pipeline/run_type` или `provider`).
+
 ## Legacy-документы
 
 Архивные материалы перемещены в `docs/03-guides/dashboards/legacy/`.

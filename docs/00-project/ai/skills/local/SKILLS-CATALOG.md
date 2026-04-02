@@ -1,13 +1,3 @@
----
-Version: 1.0.0
-Status: active
-Class: internal-published
-Owner: BioETL Team
-Reviewers:
-- BioETL Team
-Last verified: '2026-03-31'
----
-
 # Local Skills Catalog (BioETL Core)
 
 Consolidated registry of BioETL-focused local skills under `.codex/skills/`.
@@ -56,6 +46,16 @@ bash scripts/check_skills_mirror.sh --sync
 | `verify-architecture` | `.codex/skills/verify-architecture` | Quick/full architecture checks |
 | `vcr-record` | `.codex/skills/vcr-record` | VCR cassette recording/safety |
 
+### Observability
+
+| Skill | Path | Purpose |
+|------|------|---------|
+| `grafana-dashboard-extension` | `.codex/skills/grafana-dashboard-extension` | Edit and validate shipped Grafana dashboards |
+| `prometheus-metric-discovery` | `.codex/skills/prometheus-metric-discovery` | Discover real metrics, labels, and selectors |
+| `prometheus-query-debugger` | `.codex/skills/prometheus-query-debugger` | Debug PromQL semantics and empty-state behavior |
+| `prometheus-alert-rule-editor` | `.codex/skills/prometheus-alert-rule-editor` | Create and tune Prometheus-backed alert rules |
+| `prometheus-rule-testing` | `.codex/skills/prometheus-rule-testing` | Validate repo-backed Prometheus rules with `promtool` |
+
 ### Documentation
 
 | Skill | Path | Purpose |
@@ -100,6 +100,7 @@ bash scripts/check_skills_mirror.sh --sync
 - [deep-research](deep-research/SKILL.md)
 - [documentation-audit](documentation-audit/SKILL.md)
 - [documentation-cascade-audit](documentation-cascade-audit/SKILL.md)
+- [grafana-dashboard-extension](grafana-dashboard-extension/SKILL.md)
 - [generating-constrained-specs](generating-constrained-specs/SKILL.md)
 - [initializing-ledger](initializing-ledger/SKILL.md)
 - [making-decisions](making-decisions/SKILL.md)
@@ -112,6 +113,10 @@ bash scripts/check_skills_mirror.sh --sync
 - [py-doc-bot](py-doc-bot/SKILL.md)
 - [py-plan-bot](py-plan-bot/SKILL.md)
 - [py-review-orchestrator](py-review-orchestrator/SKILL.md)
+- [prometheus-alert-rule-editor](prometheus-alert-rule-editor/SKILL.md)
+- [prometheus-metric-discovery](prometheus-metric-discovery/SKILL.md)
+- [prometheus-query-debugger](prometheus-query-debugger/SKILL.md)
+- [prometheus-rule-testing](prometheus-rule-testing/SKILL.md)
 - [py-test-bot](py-test-bot/SKILL.md)
 - [py-test-swarm](py-test-swarm/SKILL.md)
 - [repo-config](repo-config/SKILL.md)

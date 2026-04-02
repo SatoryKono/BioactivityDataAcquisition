@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 import yaml
@@ -19,12 +20,13 @@ TESTS_DIR = ROOT / "tests"
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 WORKFLOWS_DIR = ROOT / ".github" / "workflows"
 ENTITY_CONFIGS_DIR = ROOT / "configs" / "entities"
+YamlMap = dict[str, Any]
 
 
-def _load_matrix() -> dict:
+def _load_matrix() -> YamlMap:
     """Load the test matrix configuration."""
     with MATRIX_PATH.open() as f:
-        return yaml.safe_load(f)
+        return cast(YamlMap, yaml.safe_load(f))
 
 
 def _iter_entity_configs() -> list[tuple[str, str, Path]]:
@@ -35,7 +37,7 @@ def _iter_entity_configs() -> list[tuple[str, str, Path]]:
     return configs
 
 
-def _ownership_paths(matrix: dict, entity_key: str) -> list[Path]:
+def _ownership_paths(matrix: YamlMap, entity_key: str) -> list[Path]:
     """Resolve owned test paths for a provider.entity key."""
     raw_paths = matrix.get("entity_test_ownership", {}).get(entity_key, [])
     if isinstance(raw_paths, str):
@@ -451,7 +453,7 @@ class TestContractSnapshotGovernance:
         providers = registry.get("providers", {})
 
         assert fixture_governance.get("rollout", {}).get("contract_snapshots") == "partial"
-        assert registry.get("scope") == "bounded_mvp"
+        assert registry.get("scope") == "bounded_publication_slice"
         assert registry.get("update_env_var") == "UPDATE_SNAPSHOTS"
 
         documentation_path = ROOT / registry["documentation"]
@@ -460,7 +462,7 @@ class TestContractSnapshotGovernance:
         assert documentation_path.exists()
         assert helper_module_path.exists()
         assert registry_test_path.exists()
-        assert set(providers) == {"crossref", "openalex"}
+        assert set(providers) == {"crossref", "openalex", "semanticscholar"}
 
         for provider, provider_config in providers.items():
             version = provider_config["version"]

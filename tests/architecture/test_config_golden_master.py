@@ -22,7 +22,7 @@ import os
 from dataclasses import asdict
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -64,7 +64,7 @@ def _convert_for_json(obj: Any) -> Any:
 def serialize_config(config: PipelineConfig) -> dict[str, Any]:
     """Serialize PipelineConfig to a dictionary for snapshotting."""
     raw_dict = asdict(config)
-    return _convert_for_json(raw_dict)
+    return cast(dict[str, Any], _convert_for_json(raw_dict))
 
 
 def load_snapshots() -> dict[str, Any]:
@@ -72,7 +72,7 @@ def load_snapshots() -> dict[str, Any]:
     if not SNAPSHOT_FILE.exists():
         return {}
     with open(SNAPSHOT_FILE) as f:
-        return json.load(f)
+        return cast(dict[str, Any], json.load(f))
 
 
 def save_snapshots(snapshots: dict[str, Any]) -> None:

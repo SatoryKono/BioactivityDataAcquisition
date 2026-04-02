@@ -46,4 +46,6 @@ warnings, unstructured logs и Prometheus-backed alert conditions. Он не
 Для incident drilldown канонический handoff теперь идёт через shipped Explore
 links в `bioetl-overview-v2`, `bioetl-dq-v2`, `bioetl-runtime` и
 `bioetl-provider-health-v2`: Loki для logs, Tempo для traces, с сохранением
-текущего time range.
+текущего time range. Loki handoff остаётся generic `{job="bioetl"}`, а Tempo
+handoff теперь открывается с contextual TraceQL filters по текущему dashboard
+scope.

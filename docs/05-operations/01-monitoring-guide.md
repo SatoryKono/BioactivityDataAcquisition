@@ -67,7 +67,7 @@ Pushgateway publication на завершении run. Это позволяет
   `layer/status` без использования high-cardinality labels.
 - **Drilldown**: dashboard links `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
   и data links у `Processing Volume by Stage` переводят оператора в Grafana Explore с тем
-  же временным окном.
+  же временным окном. Tempo handoff уже предфильтрован по текущим `$pipeline/$run_type`.
 
 #### 2. 2. Runtime
 Смешанный runtime/ops surface для triage log hygiene и alert-condition сигналов.
@@ -78,6 +78,7 @@ Pushgateway publication на завершении run. Это позволяет
 - **Top Warning Events**: быстрый range-based срез наиболее частых warning events.
 - **Log Hygiene Trend**: короткий timeseries-тренд warnings vs unstructured rows через `$__interval`.
 - **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)` и data links у `Log Hygiene Trend` ведут в Explore с тем же временным окном.
+  Для Tempo runtime surface использует TraceQL filter по текущим `$pipeline/$run_type`, а не пустой search.
 
 - **DQ Context Failures (24h) / DQ Reports Skipped (24h) / DQ Reports Generated (24h)**:
   lifecycle counters для DQ reporting. Используйте их, когда нужно быстро
@@ -106,7 +107,8 @@ Pushgateway publication на завершении run. Это позволяет
 - **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
   и data links у latency-панели открывают correlation path. Для Loki shipped
   baseline стартует с общего `{job="bioetl"}` stream, а дополнительное
-  сужение по `provider` оператор делает уже в Explore.
+  сужение по `provider` оператор делает уже в Explore. Tempo handoff здесь сразу
+  использует `span."bioetl.provider"` для текущего `$provider`.
 
 #### 4. 4. Data Quality
 Сфокусирован на чистоте данных и аномалиях.
@@ -118,6 +120,7 @@ Pushgateway publication на завершении run. Это позволяет
 - **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
   и data links у `Data Flow in Range: Bronze -> Silver -> Gold` переводят расследование
   DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
+  Tempo handoff уже ограничен текущими `$pipeline/$run_type`.
 
 ## 3. Alert-backed сигналы
 
