@@ -15,9 +15,13 @@ def test_parse_literal_valid_json():
     assert _parse_literal("123") == 123
 
 
-def test_parse_literal_invalid_json():
-    # Single quotes are not valid JSON
-    assert _parse_literal("['a', 'b']") is None
+def test_parse_literal_legacy_fallback():
+    # Single quotes are not valid JSON but should be handled by ast.literal_eval fallback
+    assert _parse_literal("['a', 'b']") == ["a", "b"]
+    assert _parse_literal("{'a': 1}") == {"a": 1}
+
+
+def test_parse_literal_invalid_data():
     # Completely invalid
     assert _parse_literal("not json") is None
     # None for non-string input
@@ -26,17 +30,17 @@ def test_parse_literal_invalid_json():
 
 
 def test_parse_composite_list_string():
-    # Now requires JSON (double quotes)
+    # Works with JSON (double quotes)
     assert parse_composite_list('["a", "b"]') == ["a", "b"]
-    # Single quotes fail
-    assert parse_composite_list("['a', 'b']") == []
+    # Works with legacy (single quotes)
+    assert parse_composite_list("['a', 'b']") == ["a", "b"]
 
 
 def test_parse_composite_status_string():
-    # Now requires JSON (double quotes)
+    # Works with JSON (double quotes)
     assert parse_composite_status('{"a": "success"}') == {"a": "success"}
-    # Single quotes fail
-    assert parse_composite_status("{'a': 'success'}") == {}
+    # Works with legacy (single quotes)
+    assert parse_composite_status("{'a': 'success'}") == {"a": "success"}
 
 
 def test_parse_composite_list_actual_list():

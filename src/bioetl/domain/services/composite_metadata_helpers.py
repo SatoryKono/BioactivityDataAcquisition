@@ -7,6 +7,7 @@ layer boundaries.
 
 from __future__ import annotations
 
+import ast
 import json
 from collections.abc import Mapping, Sequence
 from datetime import datetime
@@ -26,13 +27,17 @@ __all__ = [
 
 
 def _parse_literal(value: object) -> object | None:
-    """Parse a JSON literal from string payload, returning None on failure."""
+    """Parse a JSON literal from string payload with ast.literal_eval fallback."""
     if not isinstance(value, str):
         return None
     try:
         return cast("object", json.loads(value))
     except ValueError:
-        return None
+        # Fallback for legacy metadata using Python literals (single quotes)
+        try:
+            return cast("object", ast.literal_eval(value))
+        except (ValueError, SyntaxError, MemoryError):
+            return None
 
 
 def _normalize_composite_list(value: object) -> list[str]:
