@@ -1,11 +1,11 @@
 ---
-Version: 6.1.1
+Version: 6.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # CLI Reference
@@ -13,8 +13,8 @@ Last verified: '2026-04-01'
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 6.1.1
-**Дата обновления:** 2026-04-01
+**Версия:** 6.1.0
+**Дата обновления:** 2026-04-02
 
 ---
 
@@ -201,7 +201,7 @@ bioetl run-composite --composite <NAME> [OPTIONS]
 | Опция              | Тип  | По умолчанию | Описание                                             |
 |--------------------|------|--------------|------------------------------------------------------|
 | `--composite`      | str  | Required     | Имя композитного пайплайна                           |
-| `--resume`         | flag | False        | Продолжить с checkpoint                              |
+| `--resume`         | flag | False        | Продолжить с checkpoint snapshot + ledger replay     |
 | `--dry-run`        | flag | False        | Предпросмотр без записи                              |
 | `--seed-limit`     | int  | None         | Лимит записей для seed пайплайна                     |
 | `--enrich-only`    | str  | None         | Запустить только указанные enrichers (через запятую) |
@@ -234,6 +234,14 @@ bioetl run-composite --composite publication --required-only
 # Composite run из Bronze cache
 bioetl run-composite --composite publication --use-cached-bronze
 ```
+
+Composite resume semantics:
+
+- composite resume сначала загружает checkpoint snapshot;
+- затем runtime валидирует compatibility anchors;
+- когда ledger attached, composite path воспроизводит suffix событий строго
+  после `last_event_id`, чтобы восстановить coarse-grained lifecycle milestones
+  без фабрикации rich checkpoint payloads.
 
 ---
 
@@ -642,6 +650,56 @@ bioetl maintenance bronze-cleanup [OPTIONS]
 |--------------------------|------|--------------|-----------------------------|
 | `--retention-days`, `-r` | int  | 90           | Удалить файлы старше N дней |
 | `--dry-run`              | flag | False        | Предпросмотр                |
+
+#### `maintenance cleanup-preview` — Предпросмотр cleanup scope
+
+```bash
+bioetl maintenance cleanup-preview --pipeline <NAME>
+```
+
+Показывает dry-run scope для Silver/Gold cleanup по конкретному pipeline без
+фактического удаления данных.
+
+| Опция        | Тип | По умолчанию | Описание                                   |
+|--------------|-----|--------------|--------------------------------------------|
+| `--pipeline` | str | Required     | Имя pipeline (например, `chembl_activity`) |
+
+**Пример:**
+
+```bash
+bioetl maintenance cleanup-preview --pipeline chembl_activity
+```
+
+#### `maintenance plan` — План миграции контракта
+
+```bash
+bioetl maintenance plan <PIPELINE> [--format text|json|yaml]
+```
+
+Planner-only inspection command для versioned contract rollout. Команда не
+выполняет orchestration и не запускает backfill автоматически; она печатает
+transition summary, required actions и operator notes для выбранного pipeline.
+
+| Опция      | Тип    | По умолчанию | Описание                              |
+|------------|--------|--------------|---------------------------------------|
+| `--format` | choice | `text`       | Формат вывода: `text`, `json`, `yaml` |
+
+**Примеры:**
+
+```bash
+bioetl maintenance plan chembl_activity
+bioetl maintenance plan chembl_activity --format json
+bioetl maintenance plan chembl_activity --format yaml
+```
+
+Типичный planner output включает:
+
+- active contract version и rollout mode;
+- read/write/shadow versions;
+- migration transitions и migration guides, если они объявлены;
+- required actions. Для `affects_hash=true` planner возвращает как минимум:
+  `silver_backfill_rebuild`, `gold_backfill_rebuild`,
+  `verification_before_cutover`.
 
 ---
 

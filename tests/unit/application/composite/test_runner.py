@@ -31,6 +31,7 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.control_plane.run_ledger import COMPOSITE_RUN_LEDGER_STAGE_NAMES
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.locking import FencingToken
 
@@ -319,17 +320,17 @@ class TestFSMSeedStateTransitions:
             call.kwargs["stage"]
             for call in run_ledger_service.record_stage_started.call_args_list
         ] == [
-            "seed",
-            "enrichment",
-            "merge",
+            COMPOSITE_RUN_LEDGER_STAGE_NAMES[0],
+            COMPOSITE_RUN_LEDGER_STAGE_NAMES[2],
+            COMPOSITE_RUN_LEDGER_STAGE_NAMES[3],
         ]
         assert [
             call.kwargs["stage"]
             for call in run_ledger_service.record_stage_completed.call_args_list
         ] == [
-            "seed",
-            "enrichment",
-            "merge",
+            COMPOSITE_RUN_LEDGER_STAGE_NAMES[0],
+            COMPOSITE_RUN_LEDGER_STAGE_NAMES[2],
+            COMPOSITE_RUN_LEDGER_STAGE_NAMES[3],
         ]
         run_ledger_service.record_run_finished.assert_called_once()
 
@@ -431,7 +432,7 @@ class TestFSMSeedFailure:
         assert [
             call.kwargs["stage"]
             for call in run_ledger_service.record_stage_started.call_args_list
-        ] == ["seed"]
+        ] == [COMPOSITE_RUN_LEDGER_STAGE_NAMES[0]]
         run_ledger_service.record_run_failed.assert_called_once()
 
 

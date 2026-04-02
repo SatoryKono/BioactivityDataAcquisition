@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-02'
 ---
 
 # Title: Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
@@ -13,9 +13,17 @@ Last verified: '2026-03-29'
 - Исходная диаграмма: `foundation/29-composite-pipeline-workflow.mmd`
 
 ## Описание
-Диаграмма Title: Composite Pipeline Full Workflow — Seed to Gold (ADR-026) из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате flowchart и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 29-composite-pipeline-workflow. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §2.10 (Composite Pipelines), ADR-026. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Ключевые блоки/подграфы включают: Phase 1: Initialization, Phase 2: Seed Pipeline, Phase 3: Dependencies, Phase 3.5: Key Extraction, Phase 4: Fan-Out Enrichment. Их состав отражает главные границы ответственности и маршруты взаимодействия между подсистемами или слоями. Показательные узлы диаграммы: Phase 1: Initialization, [S] Load CompositeConfig from YAML, [S] CompositePreflightValidator • validate seed • validate enrichers • check silver tables, [S] bootstrap_composite_runner() → CompositePipelineRunner, Phase 2: Seed Pipeline, [S] Run Seed Pipeline (e.g., chembl_publication). Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма показывает полный composite workflow от seed до Gold с актуальной resume-моделью. После runtime bootstrap execution сначала проходит через resume gate: checkpoint snapshot загружается, anchors валидируются, а затем поверх snapshot применяется suffix replay из run ledger по `last_event_id`. Только после этого composite run продолжает нужную фазу.
+
+Важные точки схемы:
+- seed, dependencies, enrichment и merge остаются основными execution phases;
+- key extraction остаётся отдельной bridge-фазой между seed и fan-out enrichment;
+- checkpointing больше не трактуется как hidden FSM internals: отдельно показаны `load`, `save` и control-plane `ledger`;
+- Gold write теперь явно отмечен как version-aware contract/schema routing path, а не просто финальный write.
+
+Эта диаграмма особенно полезна для ревью composite resume semantics, control-plane observability и phase-by-phase persistence contract.
 
 ## Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Дата метаданных: `2026-04-02`

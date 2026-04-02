@@ -4,7 +4,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.24 (2026-03-13) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.6.0*
+*Синхронизировано с RULES.md v5.24 (2026-03-13) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.7.0*
 
 > **Runtime-specific note:** orchestration guidance for Claude lives in
 > `.claude/agents/ORCHESTRATION.md`. Codex keeps its own runtime-specific
@@ -36,6 +36,27 @@ make lint && make test
 
 `scripts/dev/dev_setup.sh` остаётся legacy placeholder и не считается
 поддерживаемым onboarding path.
+
+### Mixed Windows + WSL checkout
+
+Если один и тот же checkout используется из PowerShell и WSL, не дели одну
+`.venv` между ОС. Поддерживаемый путь:
+
+```powershell
+.\scripts\dev\setup_env_windows.ps1
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+```
+
+```bash
+bash scripts/dev/setup_env_wsl.sh
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
+```
+
+В mixed checkout `make lint` и `make test` остаются валидными repository checks,
+но wrappers предпочтительнее, потому что используют OS-specific окружение:
+`.venv-win` в PowerShell и `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` в WSL.
 
 **Главные ресурсы:**
 

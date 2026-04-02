@@ -24,7 +24,9 @@ Options:
   -h, --help             Show this help
 
 Environment:
-  GITHUB_PERSONAL_ACCESS_TOKEN   Fine-grained or classic token with issue write access
+  GITHUB_PERSONAL_ACCESS_TOKEN   Preferred fine-grained or classic token with issue write access
+  GH_TOKEN                       Alternative token env var
+  GITHUB_TOKEN                   Alternative token env var
 
 Examples:
   bash scripts/ops/update_github_issue.sh \
@@ -155,7 +157,27 @@ if [[ -z "$TITLE_TEXT" && -z "$TITLE_FILE" && -z "$BODY_TEXT" && -z "$BODY_FILE"
   exit 2
 fi
 
-: "${GITHUB_PERSONAL_ACCESS_TOKEN:?Set GITHUB_PERSONAL_ACCESS_TOKEN first}"
+resolve_auth_token() {
+  if [[ -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
+    printf '%s' "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+    return 0
+  fi
+  if [[ -n "${GH_TOKEN:-}" ]]; then
+    printf '%s' "${GH_TOKEN}"
+    return 0
+  fi
+  if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    printf '%s' "${GITHUB_TOKEN}"
+    return 0
+  fi
+  return 1
+}
+
+if ! AUTH_TOKEN="$(resolve_auth_token)"; then
+  printf '%s\n' \
+    'Missing GitHub token. Set one of: GITHUB_PERSONAL_ACCESS_TOKEN, GH_TOKEN, GITHUB_TOKEN' >&2
+  exit 1
+fi
 
 API="https://api.github.com/repos/${OWNER}/${REPO}"
 
@@ -171,20 +193,50 @@ api() {
     return 0
   fi
 
+  local response_file
+  response_file="$(mktemp)"
+  local http_code=""
+  trap 'rm -f "$response_file"' RETURN
+
   if [[ -n "$data" ]]; then
-    curl -fsS -X "$method" \
-      -H "Accept: application/vnd.github+json" \
-      -H "Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
-      -H "Content-Type: application/json" \
-      "${API}${path}" \
-      --data "$data" >/dev/null
+    http_code="$(
+      curl -sS -o "$response_file" -w "%{http_code}" -X "$method" \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        -H "Content-Type: application/json" \
+        "${API}${path}" \
+        --data "$data"
+    )"
   else
-    curl -fsS -X "$method" \
-      -H "Accept: application/vnd.github+json" \
-      -H "Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
-      "${API}${path}" >/dev/null
+    http_code="$(
+      curl -sS -o "$response_file" -w "%{http_code}" -X "$method" \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        "${API}${path}"
+    )"
+  fi
+
+  if [[ "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
+    printf '[FAIL] GitHub API %s %s returned HTTP %s\n' "$method" "$path" "$http_code" >&2
+    if [[ -s "$response_file" ]]; then
+      cat "$response_file" >&2
+      printf '\n' >&2
+    fi
+    if [[ "$http_code" == "401" ]]; then
+      printf '%s\n' \
+        'Authentication failed. Check that the token is valid and has issue write access to the target repository.' >&2
+    fi
+    if [[ "$http_code" == "403" ]]; then
+      printf '%s\n' \
+        'Authorization failed. The token may be missing Issues:write / Repository issues permissions or be blocked by repo policy.' >&2
+    fi
+    if [[ "$http_code" == "404" ]]; then
+      printf '%s\n' \
+        'Resource not found. Check owner/repo/issue number and confirm the token can access this repository.' >&2
+    fi
+    exit 1
   fi
 }
 

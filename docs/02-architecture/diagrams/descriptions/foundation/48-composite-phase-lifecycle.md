@@ -1,21 +1,29 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-02'
 ---
 
-# Title: Composite Pipeline Phase Lifecycle (FSM)
+# Title: Composite Pipeline Phase Lifecycle and Resume Semantics
 
 - Исходная диаграмма: `foundation/48-composite-phase-lifecycle.mmd`
 
 ## Описание
-Диаграмма Title: Composite Pipeline Phase Lifecycle (FSM) из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате stateDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 48-composite-phase-lifecycle. В комментариях исходника зафиксирован фокус диаграммы: Covers: domain/composite/state.py, application/composite/fsm_helper.py. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма фиксирует composite FSM уже в актуальной operational интерпретации: state machine управляет фазами seed/dependencies/enrichment/merge, а resume semantics строятся поверх checkpoint snapshot и suffix replay из run ledger. Это важное отличие от старых описаний, где checkpoint трактовался почти как единственный источник resume state.
+
+Что важно в текущей версии:
+- checkpoint snapshot хранит anchors, phase results и `last_event_id`;
+- `CompositeCheckpointLoadService` сначала валидирует совместимость anchors, затем применяет ledger replay suffix;
+- entering phases публикует `stage_started`, а успешное завершение — `stage_completed`;
+- published baseline intentionally не использует отдельный `stage_failed`: failure документируется через `run_failed` и terminal checkpoint state.
+
+Диаграмма нужна для ревью resumability, stage semantics и coarse-grained replay contract.
 
 ## Метаданные
 - Тип: `stateDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Дата метаданных: `2026-04-02`

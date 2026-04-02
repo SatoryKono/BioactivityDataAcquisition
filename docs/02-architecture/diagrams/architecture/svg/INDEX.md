@@ -1,16 +1,6 @@
----
-Version: 1.0.0
-Status: active
-Class: published
-Owner: BioETL Team
-Reviewers:
-- BioETL Team
-Last verified: '2026-03-29'
----
-
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-03-28T19:27:47+03:00_
+_Generated: 2026-04-02T10:18:11+03:00_
 
 ## High Level Hexagonal
 
@@ -353,3 +343,4 @@ _Generated: 2026-03-28T19:27:47+03:00_
 ![23-reproducible-run-contract](./23-reproducible-run-contract.svg)
 
 ---
+

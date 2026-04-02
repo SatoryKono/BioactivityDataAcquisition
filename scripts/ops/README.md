@@ -21,6 +21,7 @@ python -m scripts.ops <command> [args...]
 | `post-2597-progress` | `scripts/ops/post_issue_2597_progress.sh` | Post the current bounded progress update for issue `#2597` (dry-run by default) |
 | `close-2597` | `scripts/ops/close_issue_2597.sh` | Post the prepared closeout comment for issue `#2597` and close it (dry-run by default) |
 | `triage-issues` | `scripts/ops/triage_cleanup_issue_wave.sh` | Apply the cleanup/docs issue triage wave via GitHub API |
+| `post-rescope-comments` | `scripts/ops/post_issue_rescope_comments.sh` | Post the prepared re-scope comments for issues `#2600`, `#2516`, `#2515`, and `#2511` (dry-run by default) |
 | `close-ge-spike` | `scripts/ops/close_great_expectations_spike_issue.sh` | Close issue `#2595` with the completed Great Expectations spike memo |
 | `close-schema-drift` | `scripts/ops/close_pandera_schema_drift_issue.sh` | Close issue `#2594` with the completed Pandera schema drift gate summary |
 | `setup-agents` | `scripts/ops/setup_agents.sh` | Sync project Codex agents into `CODEX_HOME` |
@@ -44,6 +45,7 @@ python -m scripts.ops <command> [args...]
 | `post-2597-progress` | When the current `#2597` pure-transformation testing slice should be reported back to GitHub without retyping the comment body | Manual, maintainer utility |
 | `close-2597` | When the bounded `#2597` pure-transformation baseline slice is merged and the issue should be closed with a prepared summary | Manual, maintainer utility |
 | `triage-issues` | When the cleanup/docs GitHub issue wave must be applied from WSL with a PAT | Manual, maintainer utility |
+| `post-rescope-comments` | When the prepared re-scope comments for the current architecture/testing governance issues should be posted without retyping them by hand | Manual, maintainer utility |
 | `close-ge-spike` | When issue `#2595` should be closed after the spike memo is committed or ready for reference | Manual, maintainer utility |
 | `close-schema-drift` | When issue `#2594` should be closed after the representative Pandera schema drift gate is merged or ready for reference | Manual, maintainer utility |
 | `setup-agents` | After cloning repo or updating `.codex/agents/` profiles | Manual, initial setup |
@@ -68,6 +70,7 @@ python -m scripts.ops <command> [args...]
 | `scripts/ops/create_runmanifest_runledger_issue.sh` | Wrapper that creates the prepared RunManifest-and-Run-Ledger issue payload |
 | `scripts/ops/post_issue_2597_progress.sh` | Wrapper that posts the prepared progress comment for issue `#2597` |
 | `scripts/ops/close_issue_2597.sh` | Wrapper that posts the prepared closeout comment for issue `#2597` and closes it |
+| `scripts/ops/post_issue_rescope_comments.sh` | Wrapper that posts the prepared re-scope comments for issues `#2600`, `#2516`, `#2515`, and `#2511` |
 | `scripts/ops/close_great_expectations_spike_issue.sh` | Close issue `#2595` with a standard comment |
 | `scripts/ops/close_pandera_schema_drift_issue.sh` | Close issue `#2594` with a standard comment |
 | `scripts/ops/start-wsl-proxy.bat` | Start WSL proxy (Windows) |

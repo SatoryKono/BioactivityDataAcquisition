@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # Run Manifest and Run Ledger Contract
@@ -29,6 +29,7 @@ The current code owners / source-of-truth seams are:
 - `src/bioetl/application/services/run_manifest_diagnostics.py`
 - `src/bioetl/application/services/run_manifest_inspection_service.py`
 - `src/bioetl/application/core/lifecycle/checkpoint_runtime.py`
+- `src/bioetl/application/composite/checkpoint/load_service.py`
 - `src/bioetl/interfaces/cli/commands/run_manifest.py`
 - `src/bioetl/composition/bootstrap/cli/run_manifest.py`
 - `src/bioetl/composition/runtime_builders/run_manifest_builder.py`
@@ -88,6 +89,24 @@ Current rollout semantics:
 3. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
 4. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
    `observe` logs and continues, `soft_fail` blocks resume, `hard_fail` raises an error.
+
+## Composite Checkpoint Resume Semantics
+
+The current replay-enabled resume path is implemented for composite checkpoints.
+
+- checkpoint state remains snapshot-only;
+- the composite checkpoint snapshot carries replay watermark metadata through
+  `last_event_id` and `last_event_occurred_at`;
+- after the checkpoint snapshot is loaded and compatibility anchors are
+  validated, runtime replays only the ledger suffix strictly after
+  `last_event_id` via `RunLedgerPort.list_entries_after(manifest_id, last_event_id)`;
+- the replay projector is intentionally coarse-grained: it restores lifecycle
+  milestones such as `state`, `seed_completed`, `merge_completed`, and the
+  latest replay watermark, but does not fabricate rich checkpoint payloads such
+  as per-provider result maps;
+- if the replay watermark is missing from the append order for the current
+  `manifest_id`, runtime treats this as checkpoint incompatibility and raises a
+  checkpoint conflict instead of silently continuing.
 
 ## Run Manifest Contract
 
@@ -192,6 +211,8 @@ Event taxonomy behavior:
 4. `RunLedgerEntry` is append-only.
 5. Sidecars and runtime diagnostics reference `manifest_id` instead of embedding the full manifest payload.
 6. `run_id` lookup resolves to one `manifest_id` through the file index.
+7. Composite resume reuses checkpoint snapshot data and only replays ledger
+   events after the persisted watermark.
 
 ## CLI Inspection
 

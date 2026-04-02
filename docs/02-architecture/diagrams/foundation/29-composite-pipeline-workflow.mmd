@@ -1,13 +1,13 @@
 %% Title: Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
-%% Covers: application/composite runner, checkpoint service, runtime bootstrap
+%% Covers: application/composite runner, checkpoint snapshot + ledger replay, runtime bootstrap
 %% Rank: 4 (Score 8.88) — Most complex architectural feature
-%% Updated: 2026-03-16
+%% Updated: 2026-04-02
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-04-02
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-%% @nodes   17
+%% @nodes   19
 %% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
 %% @uniform-group init   nodes=CFG,PFV,BOOT
 %% @uniform-group seed   nodes=SP,SB
@@ -16,7 +16,7 @@
 %% @uniform-group enrich nodes=EC,ER,ES
 %% @uniform-group merge  nodes=MS,SHAPE
 %% @uniform-group gold   nodes=GW,GT
-%% @uniform-group ckp    nodes=GUARD
+%% @uniform-group ckp    nodes=LOAD,SAVE,LEDGER
 %% @uniform-width group
 
 %% @uniform width=280 groups=8 width_strategy=group
@@ -66,17 +66,19 @@ flowchart TB
 
     subgraph Gold["Phase 6: Gold Write"]
         direction LR
-        GW["[S] Gold validation + write<br/>cross-validate coverage<br/>GoldWriter.write_gold()"]:::size-md
+        GW["[S] Gold validation + version-aware write<br/>contract/schema aware routing<br/>GoldWriter.write_gold()"]:::size-md
         GT[("[D] Gold Table<br/>gold/composite/publication/"<br/>)]
     end
 
     subgraph CKP["Checkpointing (each phase)"]
-        GUARD["[S] Runtime guardrails<br/>checkpoint service + direct lock<br/>legacy FSM adapter on assembly path"]:::size-md
+        LOAD["[S] Resume gate<br/>load checkpoint + validate anchors +<br/>replay ledger suffix after last_event_id"]:::size-md
+        SAVE["[S] Checkpoint snapshot save<br/>state + phase results + anchors +<br/>last_event_id watermark"]:::size-md
+        LEDGER["[S] Control-plane ledger<br/>run_* + stage_started /<br/>stage_completed events"]:::size-md
     end
 
     %% Flow
     CFG ==> PFV ==> BOOT
-    BOOT ==> SP ==> SB
+    BOOT ==> LOAD ==> SP ==> SB
 
     SB -.-> DC ==> DOUT
 
@@ -92,8 +94,20 @@ flowchart TB
 
     SHAPE ==> GW ==> GT
 
-    GUARD -.->|"save / resume"| Seed & Deps & Enrich & Merge & Gold
-    GUARD -.-> BOOT
+    SAVE -.->|"persist phase snapshot"| SP
+    SAVE -.-> DC
+    SAVE -.-> EC
+    SAVE -.-> MS
+    SAVE -.-> GW
+    LEDGER -.->|"emit lifecycle + phase events"| SP
+    LEDGER -.-> DC
+    LEDGER -.-> EC
+    LEDGER -.-> MS
+    LEDGER -.-> GW
+    LOAD -.->|"resume branch"| DC
+    LOAD -.-> EC
+    LOAD -.-> MS
+    LOAD -.-> GW
 
     %% Layout constraints
     Init ~~~ Seed ~~~ Deps ~~~ Keys ~~~ Enrich ~~~ Merge ~~~ Gold ~~~ CKP
@@ -110,11 +124,13 @@ flowchart TB
     classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
     classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
 
-    class CFG,PFV,SP,DC,KE,KEYS,EC,ER,MS,SHAPE,GUARD layer_application;
+    class CFG,PFV,SP,DC,KE,KEYS,EC,ER,MS,SHAPE,LOAD,SAVE,LEDGER layer_application;
     class BOOT layer_composition;
     class SB,DOUT,ES,GW,GT layer_infrastructure;
 
     %% Click tooltips
-    click GUARD ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Composite checkpoints + direct lock path"
+    click LOAD ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Checkpoint compatibility + ledger replay gate"
+    click SAVE ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Snapshot checkpoint persisted between phases"
+    click LEDGER ../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md "Control-plane events recorded alongside phases"
     click MS ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Merges seed + enricher outputs"
     click KE ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Extracts join keys for fan-out"

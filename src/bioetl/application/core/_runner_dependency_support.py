@@ -1,0 +1,80 @@
+"""Private support helpers for :mod:`bioetl.application.core.runner`."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.batch_executor import BatchExecutor
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointManagerService,
+    )
+    from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+    from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
+    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.postrun.service import PostrunService
+    from bioetl.application.core.preflight.service import PreflightService
+    from bioetl.application.observability.observer import PipelineObserver
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
+    from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineRunnerDependencies:
+    """Grouped collaborators for PipelineRunner."""
+
+    executor: BatchExecutor
+    checkpoint_manager: CheckpointManagerService
+    lock_manager: LockCoordinator
+    preflight: PreflightService
+    postrun: PostrunService
+    lifecycle_service: MedallionLifecycleService
+    observer: PipelineObserver
+    shutdown_signal: ShutdownSignal
+
+
+def resolve_legacy_runner_dependencies(
+    legacy_kwargs: dict[str, object],
+) -> PipelineRunnerDependencies:
+    """Resolve legacy constructor kwargs into structured dependencies."""
+    values = {
+        "executor": legacy_kwargs.get("executor"),
+        "checkpoint_manager": legacy_kwargs.get("checkpoint_manager"),
+        "shutdown_signal": legacy_kwargs.get("shutdown_signal"),
+        "lock_manager": legacy_kwargs.get("lock_manager"),
+        "preflight": legacy_kwargs.get("preflight"),
+        "postrun": legacy_kwargs.get("postrun"),
+        "lifecycle_service": legacy_kwargs.get("lifecycle_service"),
+        "observer": legacy_kwargs.get("observer"),
+    }
+    missing = [name for name, value in values.items() if value is None]
+    if missing:
+        raise AssertionError("Legacy constructor path requires all legacy parameters")
+    return PipelineRunnerDependencies(
+        executor=cast("BatchExecutor", values["executor"]),
+        checkpoint_manager=cast(
+            "CheckpointManagerService", values["checkpoint_manager"]
+        ),
+        lock_manager=cast("LockCoordinator", values["lock_manager"]),
+        preflight=cast("PreflightService", values["preflight"]),
+        postrun=cast("PostrunService", values["postrun"]),
+        lifecycle_service=cast(
+            "MedallionLifecycleService",
+            values["lifecycle_service"],
+        ),
+        observer=cast("PipelineObserver", values["observer"]),
+        shutdown_signal=cast("ShutdownSignal", values["shutdown_signal"]),
+    )
+
+
+async def load_runner_checkpoint(
+    checkpoint_manager: CheckpointManagerService,
+) -> CheckpointMetadata | dict[str, object] | None:
+    """Load checkpoint with the current execution metadata."""
+    return await checkpoint_manager.load_checkpoint(
+        current_metadata=checkpoint_manager.current_metadata
+    )

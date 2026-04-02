@@ -14,6 +14,7 @@ __all__ = [
     "CANONICAL_RUN_LEDGER_STAGE_NAMES",
     "COMPOSITE_RUN_LEDGER_STAGE_NAMES",
     "ORDINARY_RUN_LEDGER_STAGE_NAMES",
+    "RUN_LEDGER_STAGE_EVENT_TYPES",
     "RunLedgerEntry",
     "RunLedgerReplayProjection",
     "canonicalize_run_ledger_stage_name",
@@ -42,6 +43,7 @@ _LEDGER_EVENT_FAMILY_SUFFIXES: tuple[tuple[str, str], ...] = (
     ("_started", "pipeline.phase"),
     ("_completed", "pipeline.phase"),
 )
+RUN_LEDGER_STAGE_EVENT_TYPES: frozenset[str] = frozenset({"stage_started", "stage_completed"})
 
 ORDINARY_RUN_LEDGER_STAGE_NAMES: tuple[str, ...] = ORDINARY_PIPELINE_STAGE_NAMES
 COMPOSITE_RUN_LEDGER_STAGE_NAMES: tuple[str, ...] = (
@@ -121,16 +123,23 @@ def infer_ledger_event_family(event_type: str) -> str:
     normalized_event_type = event_type.strip().lower()
     if not normalized_event_type:
         return "diagnostic"
-    exact_match = _LEDGER_EVENT_FAMILY_EXACT.get(normalized_event_type)
-    if exact_match is not None:
-        return exact_match
-    suffix_match = _match_ledger_event_family_by_suffix(normalized_event_type)
-    if suffix_match is not None:
-        return suffix_match
-    prefix_match = _match_ledger_event_family_by_prefix(normalized_event_type)
-    if prefix_match is not None:
-        return prefix_match
+    for family in (
+        _LEDGER_EVENT_FAMILY_EXACT.get(normalized_event_type),
+        _match_ledger_event_family_by_suffix(normalized_event_type),
+        _match_ledger_event_family_by_prefix(normalized_event_type),
+    ):
+        if family is not None:
+            return family
     return "diagnostic"
+
+
+def _normalize_run_ledger_stage(event_type: str, stage: str | None) -> str | None:
+    """Normalize canonical pipeline stages without touching non-pipeline vocabularies."""
+    if stage is None:
+        return None
+    if event_type not in RUN_LEDGER_STAGE_EVENT_TYPES:
+        return stage
+    return canonicalize_run_ledger_stage_name(stage)
 
 
 def slice_ledger_entries_after(
@@ -230,6 +239,11 @@ class RunLedgerEntry:
         if not normalized_event_type:
             normalized_event_type = "unknown_event"
         object.__setattr__(self, "event_type", normalized_event_type)
+        object.__setattr__(
+            self,
+            "stage",
+            _normalize_run_ledger_stage(normalized_event_type, self.stage),
+        )
         if self.event_family is None:
             object.__setattr__(
                 self,

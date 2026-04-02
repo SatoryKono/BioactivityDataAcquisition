@@ -14,11 +14,11 @@ Last verified: '2026-03-29'
 
 ## Summary
 
-- Scanned modules: `1415`
-- Internal import edges (raw): `5429`
+- Scanned modules: `1418`
+- Internal import edges (raw): `5442`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `261`
+- Cross-layer module-group edges (total): `262`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -30,8 +30,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|777 OK| application
-    application -->|849 OK| domain
+    application -->|784 OK| application
+    application -->|855 OK| domain
     composition -->|282 OK| application
     composition -->|372 OK| composition
     composition -->|282 OK| domain
@@ -49,8 +49,8 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 777 | allowed |
-| `application` | `domain` | 849 | allowed |
+| `application` | `application` | 784 | allowed |
+| `application` | `domain` | 855 | allowed |
 | `composition` | `application` | 282 | allowed |
 | `composition` | `composition` | 372 | allowed |
 | `composition` | `domain` | 282 | allowed |
@@ -71,7 +71,7 @@ flowchart LR
 | `composition.factories` | `application.core` | 111 |
 | `infrastructure.adapters` | `domain.types` | 106 |
 | `infrastructure.adapters` | `domain.ports` | 89 |
-| `application.core` | `domain.types` | 85 |
+| `application.core` | `domain.types` | 86 |
 | `application.pipelines` | `domain.types` | 76 |
 | `composition.bootstrap` | `application.composite` | 66 |
 | `application.core` | `domain.ports` | 62 |
@@ -79,8 +79,8 @@ flowchart LR
 | `composition.factories` | `domain.ports` | 51 |
 | `infrastructure.storage` | `domain.ports` | 48 |
 | `infrastructure.storage` | `domain.types` | 47 |
-| `application.services` | `domain.ports` | 44 |
-| `application.services` | `domain.types` | 39 |
+| `application.services` | `domain.ports` | 46 |
+| `application.services` | `domain.types` | 41 |
 | `interfaces.cli` | `application.services` | 37 |
 | `composition.factories` | `infrastructure.storage` | 35 |
 | `composition.bootstrap` | `infrastructure.config` | 34 |

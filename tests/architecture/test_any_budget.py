@@ -39,10 +39,6 @@ _IMPORT_RE = re.compile(r"^\s*from\s+typing.*\bAny\b|^\s*import\s+typing")
 _ANY_RE = re.compile(r"\bAny\b")
 
 
-def _py_files() -> list[Path]:
-    return sorted(p for p in SRC.rglob("*.py") if "__pycache__" not in p.parts)
-
-
 def _code_part(line: str) -> str:
     """Return the code portion of *line*, stripping inline comments."""
     # Split on ``  #`` (two-space comment separator per PEP 8).
@@ -75,11 +71,10 @@ def _strip_docstrings(text: str) -> dict[int, str]:
     return result
 
 
-def _collect_violations() -> list[str]:
+def _collect_violations(source_content_cache: dict[Path, str]) -> list[str]:
     """Collect all unjustified ``Any`` usages across src/bioetl/."""
     violations: list[str] = []
-    for path in _py_files():
-        text = path.read_text(encoding="utf-8")
+    for path, text in sorted(source_content_cache.items()):
         code_lines = _strip_docstrings(text)
         raw_lines = text.splitlines()
 
@@ -104,9 +99,9 @@ def _collect_violations() -> list[str]:
     return violations
 
 
-def test_any_budget_threshold() -> None:
+def test_any_budget_threshold(source_content_cache: dict[Path, str]) -> None:
     """Unjustified ``Any`` count must stay below the graduated threshold."""
-    violations = _collect_violations()
+    violations = _collect_violations(source_content_cache)
     count = len(violations)
 
     assert count <= MAX_UNJUSTIFIED, (
@@ -117,12 +112,12 @@ def test_any_budget_threshold() -> None:
     )
 
 
-def test_any_budget_no_regression() -> None:
+def test_any_budget_no_regression(source_content_cache: dict[Path, str]) -> None:
     """Ensure new code does not introduce bare ``Any`` without justification.
 
     This test prints the current count for tracking purposes.
     """
-    violations = _collect_violations()
+    violations = _collect_violations(source_content_cache)
     count = len(violations)
     # Informational — printed even when passing.
     print(f"\n[Any Budget] Unjustified: {count} / Threshold: {MAX_UNJUSTIFIED}")

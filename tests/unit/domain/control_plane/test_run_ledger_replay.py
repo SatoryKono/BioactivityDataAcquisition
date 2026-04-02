@@ -9,6 +9,8 @@ import pytest
 
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane.run_ledger import (
+    COMPOSITE_RUN_LEDGER_STAGE_NAMES,
+    ORDINARY_RUN_LEDGER_STAGE_NAMES,
     RunLedgerEntry,
     project_run_ledger_replay,
 )
@@ -129,3 +131,32 @@ class TestRunLedgerReplayProjection:
         assert projection.last_event_id is None
         assert projection.last_event_occurred_at is None
         assert projection.replayed_entry_count == 0
+
+    def test_stage_events_are_canonicalized_on_entry_creation(self) -> None:
+        entry = _entry(
+            entry_id="entry-stage",
+            event_type="stage_completed",
+            stage=" Seed ",
+            occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+        )
+
+        assert entry.stage == COMPOSITE_RUN_LEDGER_STAGE_NAMES[0]
+
+    def test_non_stage_event_preserves_non_pipeline_stage_vocabulary(self) -> None:
+        entry = _entry(
+            entry_id="entry-artifact",
+            event_type="artifact_published",
+            stage="silver",
+            occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+        )
+
+        assert entry.stage == "silver"
+
+    def test_canonical_stage_names_include_ordinary_execution_baseline(self) -> None:
+        assert ORDINARY_RUN_LEDGER_STAGE_NAMES == (
+            "preflight",
+            "prepare_medallion_layers",
+            "execute_pipeline",
+            "postrun",
+            "checkpoint_finalize",
+        )

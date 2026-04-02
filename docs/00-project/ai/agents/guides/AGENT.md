@@ -1,4 +1,4 @@
-# AGENT.md: Инструкции для Агента BioETL (v2.4)
+# AGENT.md: Инструкции для Агента BioETL (v2.5)
 
 *Статус: internal-published (Internal / Extended)*
 
@@ -102,6 +102,22 @@ uv run python -m scripts.dev setup-mcp
 
 - `.\scripts\dev\setup_env_windows.ps1` → `.venv-win`
 - `bash scripts/dev/setup_env_wsl.sh` → `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`
+- `.\scripts\dev\run_pytest.ps1` / `.\scripts\dev\run_mypy.ps1` в PowerShell
+- `bash scripts/dev/run_pytest.sh` / `bash scripts/dev/run_mypy.sh` в WSL
+
+Рекомендуемые mixed-checkout проверки:
+
+```powershell
+.\scripts\dev\setup_env_windows.ps1
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+```
+
+```bash
+bash scripts/dev/setup_env_wsl.sh
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
+```
 
 **Что делает bootstrap path:**
 

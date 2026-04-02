@@ -47,6 +47,7 @@ References:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -84,6 +85,8 @@ SKIP_DIRS = frozenset(
         "node_modules",
         "build",
         "dist",
+        "plans",
+        "reports",
         "site",
         "99-archive",
     }
@@ -567,11 +570,42 @@ def _load_nav_docs() -> list[Path]:
 
 def _collect_link_scan_files(root: Path) -> list[Path]:
     """Collect files for link checks: active tree + all existing nav docs."""
-    tree_docs = {
-        path.resolve() for path in root.rglob("*.md") if not _should_skip(path)
-    }
+    tree_docs = {path.resolve() for path in _iter_markdown_files(root)}
     nav_docs = {path.resolve() for path in _load_nav_docs() if path.exists()}
     return sorted(tree_docs | nav_docs)
+
+
+def _iter_markdown_files(root: Path) -> list[Path]:
+    """Yield markdown files while pruning skipped directories before descent.
+
+    `Path.rglob()` still descends into directories like `docs/site/` and
+    `docs/reports/` before `_should_skip()` can reject the resulting paths.
+    On mixed Windows + WSL checkouts that traversal becomes disproportionately
+    expensive. Walking with early directory pruning keeps `check-links --links`
+    bounded to the intended docs surface.
+    """
+    markdown_files: list[Path] = []
+    root = root.resolve()
+
+    for current_root, dirnames, filenames in os.walk(root):
+        current_path = Path(current_root)
+
+        # Prevent descending into skipped/generated trees at all.
+        dirnames[:] = [
+            dirname
+            for dirname in dirnames
+            if not _should_skip(current_path / dirname)
+        ]
+
+        for filename in filenames:
+            if not filename.endswith(".md"):
+                continue
+            candidate = current_path / filename
+            if _should_skip(candidate):
+                continue
+            markdown_files.append(candidate)
+
+    return markdown_files
 
 
 def check_missing_nav_docs() -> list[Path]:
@@ -590,7 +624,7 @@ def get_not_in_nav_docs(root: Path = DOCS_DIR) -> list[str]:
     """Return markdown docs that exist on disk but are absent from mkdocs nav."""
     all_docs = {
         path.relative_to(root).as_posix()
-        for path in root.rglob("*.md")
+        for path in _iter_markdown_files(root)
         if path.is_file() and not _is_generated_docs_artifact(path, root)
     }
     nav_docs = {

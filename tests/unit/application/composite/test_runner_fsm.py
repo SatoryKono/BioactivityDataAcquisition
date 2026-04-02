@@ -6,7 +6,6 @@ Tests for FSM state management during merge and completion phases.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
@@ -14,11 +13,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.checkpoint import (
-    CompositeCheckpointManager,
     CompositeCheckpointState,
-)
-from bioetl.infrastructure.storage.support.checkpoint_writer import (
-    FileCompositeCheckpointWriter,
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg import (
@@ -37,15 +32,70 @@ from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import RecoverableError
 from bioetl.domain.locking import FencingToken
 
-if TYPE_CHECKING:
-    from pathlib import Path
-
 _MOCK_TOKEN = FencingToken(
     sequence=1,
     key="lock:mock",
     owner_id=UUID("00000000-0000-0000-0000-000000000000"),
     issued_at=0.0,
 )
+
+
+class InMemoryCheckpointManager:
+    """Minimal checkpoint manager fake for CompositePipelineRunner unit tests."""
+
+    expected_effective_config_hash = ""
+    expected_contract_ref = ""
+    expected_contract_version = ""
+    expected_manifest_id = ""
+
+    def __init__(
+        self,
+        *,
+        composite_name: str,
+        run_id: str,
+        logger: MagicMock,
+        resume: bool = False,
+    ) -> None:
+        self._composite_name = composite_name
+        self._run_id = run_id
+        self._logger = logger
+        self._resume = resume
+        self._state = CompositeCheckpointState(
+            composite_name=composite_name,
+            run_id=run_id,
+            created_at=datetime.now(tz=UTC),
+        )
+
+    async def load(self) -> CompositeCheckpointState:
+        return self._state
+
+    async def save(self, state: CompositeCheckpointState) -> None:
+        self._state = state
+
+    async def delete(self) -> None:
+        return None
+
+    async def delete_orphaned(self) -> int:
+        return 0
+
+    async def list_all(self) -> list[str]:
+        return []
+
+
+def create_checkpoint_manager(
+    *,
+    composite_name: str,
+    run_id: str,
+    logger: MagicMock,
+    resume: bool = False,
+) -> InMemoryCheckpointManager:
+    """Create a lightweight checkpoint manager without filesystem I/O."""
+    return InMemoryCheckpointManager(
+        composite_name=composite_name,
+        run_id=run_id,
+        logger=logger,
+        resume=resume,
+    )
 
 
 @pytest.fixture
@@ -154,14 +204,12 @@ class TestFSMMergeStateTransitions:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Runner should transition to MERGING state before merge operation."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -217,17 +265,15 @@ class TestFSMMergeStateTransitions:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Runner should transition to FAILED state when merge fails."""
         # Make merge fail
         mock_merger.merge.side_effect = RuntimeError("Merge failed: disk full")
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -285,14 +331,12 @@ class TestFSMDryRunMode:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Dry-run merge skip helper should only log and keep checkpoint state intact."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -341,14 +385,12 @@ class TestFSMDryRunMode:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """In dry run mode, merge should be skipped but COMPLETED should be set."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -407,7 +449,6 @@ class TestMergeInputPolicy:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Merge stage should keep only mergeable enricher/dependency inputs."""
@@ -428,10 +469,9 @@ class TestMergeInputPolicy:
         mock_config.enrichers = [enricher_ok, enricher_skip]
         mock_config.dependencies = [dep_ok, dep_missing_table, dep_failed]
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -499,14 +539,12 @@ class TestMergeInputPolicy:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Merge transition helper should return MERGING state and emit merge_start FSM log."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -559,14 +597,12 @@ class TestFSMEnrichmentCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Skip helper should keep checkpoint state and return no enrichment results."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -614,14 +650,12 @@ class TestFSMEnrichmentCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Empty enrichment start helper should move state to ENRICHING and log the stage."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -670,14 +704,12 @@ class TestFSMEnrichmentCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Enrichment completion helper should save and log the completed enrichment stage."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -728,14 +760,12 @@ class TestFSMEnrichmentCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Enrichment result recording helper should persist only success/skipped results."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -802,17 +832,15 @@ class TestFSMEnrichmentCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """When no enrichers run, should transition through ENRICHING to ENRICHMENT_COMPLETED."""
         # Configure no enrichers
         mock_coordinator.run_enrichers.return_value = {}
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -869,7 +897,6 @@ class TestFSMDependenciesCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Dependency run-context helper should return runtime collaborators and dependency names."""
@@ -879,10 +906,9 @@ class TestFSMDependenciesCompletedTransition:
         dep_crossref.pipeline = "crossref"
         mock_config.dependencies = [dep_pubmed, dep_crossref]
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -924,7 +950,6 @@ class TestFSMDependenciesCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Dependency run helper should delegate to coordinator with configured dependencies and completed state."""
@@ -932,10 +957,9 @@ class TestFSMDependenciesCompletedTransition:
         dep_pubmed.pipeline = "pubmed"
         mock_config.dependencies = [dep_pubmed]
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -1002,14 +1026,12 @@ class TestFSMDependenciesCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Dependencies skip helper should keep checkpoint state and return no results."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -1053,14 +1075,12 @@ class TestFSMDependenciesCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Dependencies start helper should save and log the running dependencies stage."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -1123,14 +1143,12 @@ class TestFSMDependenciesCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Dependencies completion helper should save and log the completed dependencies stage."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -1186,14 +1204,12 @@ class TestFSMDependenciesCompletedTransition:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Dependency postprocess helper should record successful results and finalize the stage."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -1257,7 +1273,6 @@ class TestFSMResumeFromFailed:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """When resuming from FAILED state, should retry merge."""
@@ -1288,10 +1303,9 @@ class TestFSMResumeFromFailed:
         )
 
         # Write checkpoint to file
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=True,
         )
@@ -1350,14 +1364,12 @@ class TestFSMCheckpointDeletion:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """BioETL delete errors should log checkpoint_delete_failed reason code."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -1405,14 +1417,12 @@ class TestFSMCheckpointDeletion:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Checkpoint deletion error should not fail the pipeline."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -1465,14 +1475,12 @@ class TestFinalizationPolicy:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Already completed checkpoints should not emit another FSM transition."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -1521,14 +1529,12 @@ class TestFinalizationPolicy:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Completed-state persistence should always use the completed checkpoint op."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -1572,14 +1578,12 @@ class TestFinalizationPolicy:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Merge success should log first, then run DQ reports and quarantine writes."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )

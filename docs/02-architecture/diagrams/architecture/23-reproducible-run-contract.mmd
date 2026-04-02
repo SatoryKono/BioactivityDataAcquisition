@@ -1,12 +1,12 @@
 %% BioETL — Reproducible Run Contract
-%% Shows how source refs, resolved config, runtime overrides, and provenance collapse into a replay/comparison identity.
+%% Shows how config resolution, runtime descriptors, and control-plane provenance define one replay/comparison identity.
 
-%% @version 1.0.0
-%% @date    2026-03-28
+%% @version 1.1.0
+%% @date    2026-04-02
 %% @type    flowchart
 %% @level   System / Control Plane
-%% @nodes   19
-%% @reference  Complements 11-configuration-system, 20-data-traceability-runtime, and config-runtime-artifacts.md
+%% @nodes   23
+%% @reference  Complements 11-configuration-system, 19-control-plane-artifacts, and config-runtime-artifacts.md
 
 %%{init: {
   'flowchart': {
@@ -34,6 +34,11 @@ flowchart LR
         RMS["RunManifestService"]:::app
     end
 
+    subgraph Runtime["Runtime descriptors"]
+        PRUN["PipelineRunContext<br/>launch descriptor"]:::artifact
+        PCTX["PipelineContext<br/>in-run processing context"]:::artifact
+    end
+
     subgraph Artifacts["Published reproducibility artifacts"]
         RESOLVED["ResolvedConfigSnapshot"]:::artifact
         EFFECTIVE["EffectiveExecutionConfig"]:::artifact
@@ -47,11 +52,13 @@ flowchart LR
         ECH["effective_config_hash"]:::artifact
         DQCH["dq_contract_compatibility_hash"]:::artifact
         XFP["execution_fingerprint"]:::artifact
+        WTM["manifest_id + last_event_id"]:::artifact
     end
 
     subgraph Consumers["Replay / comparison consumers"]
-        CKPT["Checkpoint metadata"]:::app
+        CKPT["CompositeCheckpointState<br/>anchors + replay watermark"]:::app
         COMPAT["CheckpointCompatibilityService"]:::app
+        CLOAD["CompositeCheckpointLoadService"]:::app
         DIFF["run-manifest diff / inspection"]:::iface
     end
 
@@ -80,7 +87,15 @@ flowchart LR
     RMS --> XFP
     XFP --> MANIFEST
 
-    MANIFEST --> CKPT --> COMPAT
+    MANIFEST -->|manifest_id + contract anchors| PRUN
+    PRUN -->|launch-time resolution complete| PCTX
+    MANIFEST --> CKPT
+    ECH --> CKPT
+    DQCH --> CKPT
+    CKPT --> WTM
+    CKPT --> COMPAT
+    CKPT --> CLOAD
+    WTM --> CLOAD
     MANIFEST --> DIFF
     ECA --> DIFF
 
@@ -92,6 +107,6 @@ flowchart LR
 
     class YAML storage
     class LOAD comp
-    class ECS,RMS,CKPT,COMPAT app
-    class SRCREF,OVR,DQ,RESOLVED,EFFECTIVE,ECA,MANIFEST,SRCFP,RCH,ECH,DQCH,XFP artifact
+    class ECS,RMS,CKPT,COMPAT,CLOAD app
+    class SRCREF,OVR,DQ,PRUN,PCTX,RESOLVED,EFFECTIVE,ECA,MANIFEST,SRCFP,RCH,ECH,DQCH,XFP,WTM artifact
     class DIFF iface

@@ -1,13 +1,13 @@
-%% Title: YAML Configuration Resolution Chain
-%% Covers: unified config path plus canonical staged normalization flow
+%% Title: YAML Configuration and Contract Rollout Resolution Chain
+%% Covers: unified config path, contract rollout policy, and planner/runtime version routing
 %% Rank: 21 (Score 7.38) — Hierarchical config merge underpins every pipeline
-%% Updated: 2026-03-16
+%% Updated: 2026-04-02
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-04-02
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-%% @nodes   18
+%% @nodes   23
 %% @png-scale 6
 %% @png-dpi   600
 
@@ -44,6 +44,15 @@ flowchart TD
         FILTER_CONFIG["Input/Silver/Gold filters"]:::size-sm
     end
 
+    subgraph CONTRACTS["Contract / rollout policy"]
+        direction TB
+        CONTRACT_BLOCK["contracts block<br/>contract_ref + active_version + rollout"]:::size-md
+        CONTRACT_MODEL["PipelineContractPolicy<br/>typed Pydantic model"]:::size-md
+        ROLLOUT_VO["ContractRolloutPolicy<br/>pure runtime value object"]:::size-md
+        ROUTING["Version-aware routing<br/>read_order + write_versions + affects_hash"]:::size-md
+        PLANNER["ContractMigrationService +<br/>maintenance plan CLI"]:::size-md
+    end
+
     subgraph VALIDATION["Pydantic Validation Layer"]
         direction TB
         PIPELINE_YAML_CFG["PipelineYamlConfig<br/>Pydantic model"]
@@ -60,6 +69,13 @@ flowchart TD
     LEGACY_NORMALIZE ==>|"validate normalized payload"| PIPELINE_YAML_CFG
     PIPELINE_YAML_CFG ==>|"to_domain()"| PIPELINE_CONFIG
     PIPELINE_CONFIG -->|"contains"| TABLE_CONFIG
+    PIPELINE_YAML_CFG -->|"contracts section"| CONTRACT_BLOCK
+    CONTRACT_BLOCK --> CONTRACT_MODEL -->|"to_contract_rollout_policy()"| ROLLOUT_VO
+    CONTRACT_MODEL --> ROUTING
+    ROLLOUT_VO --> ROUTING
+    ROUTING -->|"version-aware schema/table resolvers"| TABLE_CONFIG
+    ROLLOUT_VO --> PLANNER
+    PIPELINE_CONFIG --> PLANNER
 
     %% DQ resolution
     DQ_HIER ==>|"layers 1-4"| DQ_CONFIG_LOADER
@@ -91,13 +107,14 @@ flowchart TD
 
     class BASE,PROVIDER_BASE,PIPELINE,SOURCE,DQ_HIER,FILTER_HIER storage
     class CONFIG_LOADER,BASE_CONFIG_LOADER,DQ_CONFIG_LOADER,FILTER_CONFIG_LOADER,YAML_LOADER adapter
-    class PIPELINE_CONFIG,TABLE_CONFIG,DQ_CONFIG,FILTER_CONFIG port
-    class PIPELINE_YAML_CFG,SOURCE_YAML_CFG,AUX_FILES,LEGACY_NORMALIZE process
+    class PIPELINE_CONFIG,TABLE_CONFIG,DQ_CONFIG,FILTER_CONFIG,ROLLOUT_VO port
+    class PIPELINE_YAML_CFG,SOURCE_YAML_CFG,AUX_FILES,LEGACY_NORMALIZE,CONTRACT_BLOCK,CONTRACT_MODEL,ROUTING,PLANNER process
     class DQ_CONFIG_LOADER,FILTER_CONFIG_LOADER,CONFIG_LOADER service
 
     style YAML_FILES fill:#f1f5f9,stroke:#64748b
-    style DQ_HIERARCHY fill:#f0fdf4,stroke:#16a34a
-    style FILTER_HIERARCHY fill:#eff6ff,stroke:#2563eb
+    style DQ_HIER fill:#f0fdf4,stroke:#16a34a
+    style FILTER_HIER fill:#eff6ff,stroke:#2563eb
     style LOADERS fill:#fff7ed,stroke:#f59e0b
     style DOMAIN_CONFIG fill:#fefce8,stroke:#ca8a04
+    style CONTRACTS fill:#eff6ff,stroke:#2563eb
     style VALIDATION fill:#f5f3ff,stroke:#7c3aed
