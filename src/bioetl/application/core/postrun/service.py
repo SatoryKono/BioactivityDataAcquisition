@@ -7,12 +7,12 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.postrun._service_collaborators import (
-    resolve_postrun_collaborators,
-)
 from bioetl.application.core.span_helpers import (
     build_pipeline_span_attributes,
     start_current_span,
+)
+from bioetl.application.core.postrun._service_collaborators import (
+    resolve_postrun_collaborators,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult

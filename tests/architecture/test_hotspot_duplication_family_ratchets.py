@@ -99,9 +99,7 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
     ]
     assert active_families, "Expected at least one active hotspot family ratchet"
 
-    required_clean_snapshots = int(
-        artifact_policy["confirming_clean_snapshots_required"]
-    )
+    required_clean_snapshots = int(artifact_policy["confirming_clean_snapshots_required"])
     for family in active_families:
         assert family.get("ratchet_scope") == "duplication-only"
         metrics = family.get("metrics", {})
@@ -116,12 +114,8 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
         assert isinstance(path_prefixes, list) and path_prefixes
         assert _family_is_clean(
             baseline_target_rows,
-            path_prefixes=[
-                prefix for prefix in path_prefixes if isinstance(prefix, str)
-            ],
-        ), (
-            f"Active family {family.get('name')} must stay at zero duplication in the latest baseline"
-        )
+            path_prefixes=[prefix for prefix in path_prefixes if isinstance(prefix, str)],
+        ), f"Active family {family.get('name')} must stay at zero duplication in the latest baseline"
 
         clean_history = [
             record
@@ -129,9 +123,7 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
             if isinstance(record.get("targets"), list)
             and _family_is_clean(
                 [row for row in record["targets"] if isinstance(row, dict)],
-                path_prefixes=[
-                    prefix for prefix in path_prefixes if isinstance(prefix, str)
-                ],
+                path_prefixes=[prefix for prefix in path_prefixes if isinstance(prefix, str)],
             )
         ]
         assert len(clean_history) >= required_clean_snapshots, (

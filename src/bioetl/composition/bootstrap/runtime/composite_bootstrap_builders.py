@@ -14,10 +14,8 @@ from bioetl.composition.bootstrap.runtime.runner_assembly import (
 from bioetl.composition.bootstrap.runtime.runtime_basics import (
     bootstrap_runtime_basics as _bootstrap_runtime_basics_impl,
 )
-from bioetl.composition.bootstrap.runtime.runtime_basics import (
-    build_runner_factories,
-    build_support_services,
-)
+from bioetl.composition.bootstrap.runtime.runtime_basics import build_runner_factories
+from bioetl.composition.bootstrap.runtime.runtime_basics import build_support_services
 
 __all__ = [
     "bootstrap_runtime_basics",

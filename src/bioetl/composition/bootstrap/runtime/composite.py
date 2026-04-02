@@ -32,22 +32,16 @@ from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServices,
 )
-from bioetl.composition.bootstrap.runtime.runner_assembly import (
-    create_composite_runner_with_legacy_fsm_adapter,
-)
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config.composite_config_api import (
     DEFAULT_COMPOSITE_CONFIG_DIR,
     DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
-)
-from bioetl.infrastructure.config.composite_config_api import (
     load_composite_config as _load_composite_config_impl,
-)
-from bioetl.infrastructure.config.composite_config_api import (
     resolve_composite_config_path as _resolve_composite_config_path_impl,
-)
-from bioetl.infrastructure.config.composite_config_api import (
     resolve_composite_gold_schema as _resolve_composite_gold_schema_impl,
+)
+from bioetl.composition.bootstrap.runtime.runner_assembly import (
+    create_composite_runner_with_legacy_fsm_adapter,
 )
 from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,

@@ -8,9 +8,6 @@ from bioetl.interfaces.cli.commands._compat import alias_module
 
 if TYPE_CHECKING:
     from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
-        RunAllCommandInput as RunAllCommandInput,
-    )
-    from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
         build_run_all_command_input as build_run_all_command_input,
     )
     from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
@@ -24,6 +21,9 @@ if TYPE_CHECKING:
     )
     from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
         run_all_command_flow as run_all_command_flow,
+    )
+    from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
+        RunAllCommandInput as RunAllCommandInput,
     )
 
 alias_module(__name__, "bioetl.interfaces.cli.commands.domains.run_all.command_policy")

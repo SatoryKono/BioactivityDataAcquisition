@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.application.core.batch_execution._contracts import (
     BatchExecutionStatePort,
-    BatchExecutionStatisticsState,
     BatchResultBuilderPort,
+    BatchExecutionStatisticsState,
 )
 from bioetl.application.core.batch_executor_helpers import (
     apply_processed_batch_outcome,

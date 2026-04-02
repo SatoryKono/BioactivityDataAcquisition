@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from bioetl.interfaces.cli.commands._compat import alias_module
 
 if TYPE_CHECKING:
+    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.interfaces.cli.commands.domains.composite.support import (
         emit_composite_startup as emit_composite_startup,
     )

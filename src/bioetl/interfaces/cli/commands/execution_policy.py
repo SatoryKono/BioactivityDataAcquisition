@@ -8,13 +8,13 @@ from bioetl.interfaces.cli.commands._compat import alias_module
 
 if TYPE_CHECKING:
     from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-        CLI_ENTRYPOINT_TYPED_ERRORS as CLI_ENTRYPOINT_TYPED_ERRORS,
-    )
-    from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
         BatchRunResultProtocol as BatchRunResultProtocol,
     )
     from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
         build_failure_context as build_failure_context,
+    )
+    from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
+        CLI_ENTRYPOINT_TYPED_ERRORS as CLI_ENTRYPOINT_TYPED_ERRORS,
     )
     from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
         handle_cli_failure as handle_cli_failure,
