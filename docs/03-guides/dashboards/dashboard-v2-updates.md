@@ -57,8 +57,9 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 - `overview.id=1`, `dq.id=1`, `provider.id=1` дублируют этот handoff через data links;
 - Loki links используют low-cardinality entrypoint `{job="bioetl"}` без encoded
   interpolation dashboard variables внутри Explore payload;
-- Tempo links сохраняют текущее time range и открывают trace search без попытки
-  вводить high-cardinality trace filters.
+- Tempo links сохраняют текущее time range и используют bounded TraceQL filters
+  по текущему dashboard scope: `pipeline/run_type` для pipeline dashboards и
+  `provider` для provider dashboard.
 
 7. Добавлен отдельный runtime dashboard:
 

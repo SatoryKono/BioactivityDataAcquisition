@@ -69,7 +69,7 @@ Use **AskUserQuestion** to get user's decision.
 
 ### Step 4: Create Decision Entry
 
-Write entry to `04-decisions/DECISIONS.yaml` using schema from `references/decision-ledger-schema.md`.
+Write entry to `04-decisions/DECISIONS.yaml` using schema from [references/decision-ledger-schema.md](references/decision-ledger-schema.md).
 
 <good-example>
 ```yaml
@@ -132,7 +132,7 @@ Each decision may create risks. For each identified risk:
 - Link back to creating decision
 - Document triggers and mitigations
 
-See `references/risk-ledger-schema.md` for schema.
+See [references/risk-ledger-schema.md](references/risk-ledger-schema.md) for schema.
 
 ### Step 6: Generate Ledger Files
 
@@ -227,5 +227,5 @@ Run `/ledger-spec` to generate constrained PRD and architecture.
 
 ## References
 
-- `references/decision-ledger-schema.md` - DECISIONS.yaml schema
-- `references/risk-ledger-schema.md` - RISKS.yaml schema
+- [references/decision-ledger-schema.md](references/decision-ledger-schema.md) - DECISIONS.yaml schema
+- [references/risk-ledger-schema.md](references/risk-ledger-schema.md) - RISKS.yaml schema

@@ -116,3 +116,29 @@ async def test_run_execution_cycle_passes_resolved_offset_to_executor() -> None:
     assert host.postrun_calls == [(host._executor, "dq-context")]
     assert host.started == list(ORDINARY_RUN_LEDGER_STAGE_NAMES[2:])
     assert host.completed == list(ORDINARY_RUN_LEDGER_STAGE_NAMES[2:])
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_run_execution_cycle_hands_resolved_context_to_named_stage_runner() -> None:
+    host = _ExecutionHost()
+    observed_context: object | None = None
+
+    async def _recording_run_execution_cycle_stages(
+        observed_host: object,
+        context: object,
+    ) -> None:
+        nonlocal observed_context
+        assert observed_host is host
+        observed_context = context
+
+    original_helper = runner_execution_flow._run_execution_cycle_stages
+    runner_execution_flow._run_execution_cycle_stages = _recording_run_execution_cycle_stages
+    try:
+        await runner_execution_flow.run_execution_cycle(cast(Any, host))
+    finally:
+        runner_execution_flow._run_execution_cycle_stages = original_helper
+
+    assert observed_context is not None
+    assert observed_context.offset == 17
+    assert host.order == ["resolve_offset"]

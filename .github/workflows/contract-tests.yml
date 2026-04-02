@@ -121,6 +121,7 @@ jobs:
             2. Identify which provider APIs have changed
             3. Update adapters and/or VCR cassettes as needed
             4. Re-run tests to verify fix
+            5. Follow the testing runbook in \`docs/03-guides/testing.md\`
 
             ### Common Causes
 
@@ -130,7 +131,7 @@ jobs:
             - Authentication changes
             - Rate limiting updates
 
-            See \`docs/RULES.md\` §4.2 for contract test policies.`,
+            See \`docs/03-guides/testing.md\` for the contract test runbook and policy guidance.`,
                 labels: ['contract-failure', 'api-change', 'automated']
               });
             }

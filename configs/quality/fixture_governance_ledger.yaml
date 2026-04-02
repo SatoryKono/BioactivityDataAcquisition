@@ -12,15 +12,16 @@ entries:
     current_evidence_paths:
       - configs/quality/test_matrix.yaml
       - tests/architecture/test_test_matrix_coverage.py
+      - tests/architecture/test_vcr_metadata_seed_registry.py
       - reports/quality/vcr-metadata-catalog.json
     artifact_paths:
       - tests/fixtures/vcr
       - reports/quality/vcr-metadata-catalog.json
       - scripts/migrations/active/backfill_vcr_metadata_sidecars.py
     next_step: >-
-      Expand *_meta.yaml coverage from the current seeded subset into the
-      managed VCR inventory and ratchet cassette_metadata_required only after
-      repo-wide metadata coverage is stable.
+      Expand *_meta.yaml coverage from the matrix-declared seeded sidecar slice
+      into the managed VCR inventory and ratchet cassette_metadata_required only
+      after repo-wide metadata coverage is stable.
     promotion_criteria: >-
       Canonical cassette metadata sidecars exist for the managed VCR inventory
       and architecture coverage can require metadata without introducing an
@@ -51,6 +52,7 @@ entries:
     current_evidence_paths:
       - reports/quality/vcr-metadata-catalog.json
       - scripts/qa/report_vcr_metadata_catalog.py
+      - tests/architecture/test_vcr_metadata_catalog_drift.py
       - tests/architecture/test_test_matrix_coverage.py
     artifact_paths:
       - reports/quality/vcr-metadata-catalog.json
@@ -68,6 +70,7 @@ entries:
     blocking_classification: missing_metadata_backfill
     current_evidence_paths:
       - scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+      - tests/architecture/test_vcr_metadata_seed_registry.py
       - tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain_meta.yaml
       - tests/architecture/test_test_matrix_coverage.py
     artifact_paths:
@@ -75,9 +78,9 @@ entries:
       - tests/fixtures/vcr
       - .github/workflows/tests.yml
     next_step: >-
-      Promote the sidecar backfill path from a seeded script plus partial
-      inventory into an explicit managed migration workflow for the remaining
-      cassette set.
+      Promote the sidecar backfill path from a seeded script plus
+      matrix-declared partial inventory into an explicit managed migration
+      workflow for the remaining cassette set.
     promotion_criteria: >-
       The repo has a canonical backfill path for the managed cassette inventory
       and rollout status no longer depends on a seeded subset of metadata files.
@@ -91,26 +94,30 @@ entries:
       - tests/contract/test_provider_contract_snapshot_registry.py
       - tests/contract/test_crossref_contract.py
       - tests/contract/test_openalex_contract.py
+      - tests/contract/test_semanticscholar_contract.py
       - tests/fixtures/contracts/README.md
       - tests/fixtures/contracts/crossref/v1.json
       - tests/fixtures/contracts/openalex/v1.json
+      - tests/fixtures/contracts/semanticscholar/v1.json
     artifact_paths:
       - tests/fixtures/contracts
       - tests/fixtures/contracts/README.md
       - tests/contract/_provider_contract_drift.py
       - tests/contract/test_crossref_contract.py
       - tests/contract/test_openalex_contract.py
+      - tests/contract/test_semanticscholar_contract.py
       - tests/contract/test_provider_contract_snapshot_registry.py
     next_step: >-
       Use the bounded matrix-declared snapshot registry as the canonical managed
-      slice for Crossref and OpenAlex, then intentionally expand the registry to
-      the next representative provider family with the same documented update
-      path and CI-visible drift diagnostics.
+      publication slice for Crossref, OpenAlex, and Semantic Scholar, then
+      intentionally expand the registry to the next representative provider
+      family with the same documented update path and CI-visible drift
+      diagnostics.
     promotion_criteria: >-
       The matrix-declared snapshot registry covers multiple representative
-      provider families beyond the initial publication pair, every adopted
-      provider keeps documented update guidance and drift tests, and rollout no
-      longer depends on the silver schema snapshot fallback alone.
+      publication providers beyond the initial pair, every adopted provider
+      keeps documented update guidance and drift tests, and rollout no longer
+      depends on the silver schema snapshot fallback alone.
   - field: golden_masters
     status: partial
     owner: "@bioetl-data-model"

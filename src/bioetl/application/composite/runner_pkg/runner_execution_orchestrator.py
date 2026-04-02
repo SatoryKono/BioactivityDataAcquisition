@@ -80,28 +80,86 @@ class CompositeLockedExecutionResult:
     execution_context: CompositeExecutionContext
 
 
+@dataclass(frozen=True, slots=True)
+class _CompositePreMergeExecutionResult:
+    """Resolved pre-merge phase outputs and checkpoint state."""
+
+    state: CompositeCheckpointState
+    seed_result: SeedResult
+    dependency_results: dict[str, DependencyResult]
+    enrichment_results: dict[str, EnrichmentResult]
+
+
+def _build_execution_context(
+    *,
+    seed_result: SeedResult,
+    dependency_results: dict[str, DependencyResult],
+    enrichment_results: dict[str, EnrichmentResult],
+    merge_result: MergeResult | None,
+) -> CompositeExecutionContext:
+    """Assemble the final composite execution context from phase outputs."""
+    return CompositeExecutionContext(
+        seed_result=seed_result,
+        dependency_results=dependency_results,
+        enrichment_results=enrichment_results,
+        merge_result=merge_result,
+    )
+
+
+async def _complete_enrichment_phase(
+    host: _CompositeLockedExecutionHostProtocol,
+    state: CompositeCheckpointState,
+    enrichment_results: dict[str, EnrichmentResult],
+) -> CompositeCheckpointState:
+    """Apply the canonical enrichment-completed transition and hook."""
+    completed_state = await host._transition_to_enrichment_completed(state)
+    host._record_enrichment_stage_completed(enrichment_results)
+    return completed_state
+
+
+async def _run_pre_merge_phases(
+    host: _CompositeLockedExecutionHostProtocol,
+    request: CompositeLockedExecutionContext,
+) -> _CompositePreMergeExecutionResult:
+    """Execute canonical seed/dependency/enrichment phases before merge."""
+    state, seed_result = await host._execute_seed_phase(request.state)
+    keys_df = await host._extract_enrichment_keys()
+    state, dependency_results = await host._execute_dependencies_phase(state, keys_df)
+    state, enrichment_results = await host._execute_enrichment_phase(state, keys_df)
+    state = await _complete_enrichment_phase(host, state, enrichment_results)
+    return _CompositePreMergeExecutionResult(
+        state=state,
+        seed_result=seed_result,
+        dependency_results=dependency_results,
+        enrichment_results=enrichment_results,
+    )
+
+
+async def _run_merge_phase(
+    host: _CompositeLockedExecutionHostProtocol,
+    pre_merge_result: _CompositePreMergeExecutionResult,
+) -> tuple[CompositeCheckpointState, MergeResult | None]:
+    """Execute canonical merge handoff from pre-merge phase outputs."""
+    return await host._execute_merge_stage(
+        pre_merge_result.state,
+        pre_merge_result.enrichment_results,
+        pre_merge_result.dependency_results,
+    )
+
+
 async def execute_locked_run_phases(
     host: _CompositeLockedExecutionHostProtocol,
     request: CompositeLockedExecutionContext,
 ) -> CompositeLockedExecutionResult:
     """Execute composite phases in the canonical lock-held order."""
-    state, seed_result = await host._execute_seed_phase(request.state)
-    keys_df = await host._extract_enrichment_keys()
-    state, dependency_results = await host._execute_dependencies_phase(state, keys_df)
-    state, enrichment_results = await host._execute_enrichment_phase(state, keys_df)
-    state = await host._transition_to_enrichment_completed(state)
-    host._record_enrichment_stage_completed(enrichment_results)
-    state, merge_result = await host._execute_merge_stage(
-        state,
-        enrichment_results,
-        dependency_results,
-    )
+    pre_merge_result = await _run_pre_merge_phases(host, request)
+    state, merge_result = await _run_merge_phase(host, pre_merge_result)
     return CompositeLockedExecutionResult(
         state=state,
-        execution_context=CompositeExecutionContext(
-            seed_result=seed_result,
-            dependency_results=dependency_results,
-            enrichment_results=enrichment_results,
+        execution_context=_build_execution_context(
+            seed_result=pre_merge_result.seed_result,
+            dependency_results=pre_merge_result.dependency_results,
+            enrichment_results=pre_merge_result.enrichment_results,
             merge_result=merge_result,
         ),
     )

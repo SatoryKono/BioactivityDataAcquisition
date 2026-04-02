@@ -3,7 +3,7 @@
 ## Raw event JSONL schema
 
 Store events in:
-- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/raw/events_<agent_id>.jsonl`
+- `reports/test-swarm/<task_id>/telemetry/raw/events_<agent_id>.jsonl`
 
 Example:
 

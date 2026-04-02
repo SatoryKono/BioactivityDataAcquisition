@@ -779,33 +779,28 @@ class TestFSMSeedResume:
             records_from_seed=100,
             records_enriched=10,
         )
+        execution_context = CompositeExecutionContext(
+            seed_result=seed_result,
+            dependency_results=dependency_results,
+            enrichment_results=enrichment_results,
+            merge_result=merge_result,
+        )
         expected_result = MagicMock(name="composite_result")
 
         runner._prepare_run_state = AsyncMock(return_value=state)
-        runner._execute_seed_phase = AsyncMock(return_value=(state, seed_result))
-        runner._key_extractor.extract = AsyncMock(return_value=keys_df)
-        runner._execute_dependencies_phase = AsyncMock(
-            return_value=(state, dependency_results)
+        runner._execute_locked_run_phases = AsyncMock(
+            return_value=(state, execution_context)
         )
-        runner._execute_enrichment_phase = AsyncMock(
-            return_value=(state, enrichment_results)
-        )
-        runner._transition_to_enrichment_completed = AsyncMock(return_value=state)
-        runner._execute_merge_stage = AsyncMock(return_value=(state, merge_result))
-        runner._finalize_pipeline = AsyncMock()
-        runner._build_composite_result = MagicMock(return_value=expected_result)
+        runner._complete_successful_run = AsyncMock(return_value=expected_result)
 
         result = await runner._run_with_lock()
 
         assert result is expected_result
-        runner._build_composite_result.assert_called_once()
-        execution_context = runner._build_composite_result.call_args.args[0]
-        assert isinstance(execution_context, CompositeExecutionContext)
-        assert execution_context.seed_result is seed_result
-        assert execution_context.dependency_results is dependency_results
-        assert execution_context.enrichment_results is enrichment_results
-        assert execution_context.merge_result is merge_result
-        runner._finalize_pipeline.assert_awaited_once_with(state)
+        runner._execute_locked_run_phases.assert_awaited_once_with(state)
+        runner._complete_successful_run.assert_awaited_once_with(
+            state,
+            execution_context,
+        )
 
 
 class TestFSMTransitionLogging:

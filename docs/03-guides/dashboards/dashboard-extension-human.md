@@ -67,14 +67,20 @@ sum(increase(metric_name[24h])) or vector(0)
 
 ### Tempo
 
-- Базовый handoff:
+- Базовый handoff должен быть contextual:
 
 ```text
 queryType = traceqlSearch
-query = {}
+query = { span."bioetl.pipeline" =~ "${pipeline:regex}" && span."bioetl.run_type" =~ "${run_type:regex}" }
 ```
 
-- Correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
+- Для provider-only surface используйте:
+
+```text
+query = { span."bioetl.provider" =~ "${provider:regex}" }
+```
+
+- Correlation по-прежнему идёт через `trace_id` / `span_id`, но shipped Explore handoff должен уже открываться в текущем dashboard scope, а не с пустым `{}`.
 
 ## 5. Минимальная проверка после изменений
 

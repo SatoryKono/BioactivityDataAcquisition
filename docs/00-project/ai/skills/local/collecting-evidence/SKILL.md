@@ -35,7 +35,7 @@ Read `01-pillars/PILLARS.md` to understand:
 - Specific research questions for this pillar
 - Any scope restrictions
 
-See `references/research-protocols.md` for pillar-specific protocols.
+See [references/research-protocols.md](references/research-protocols.md) for pillar-specific protocols.
 
 ### Step 2: Identify Evidence Sources
 
@@ -68,9 +68,9 @@ For each source:
 
 Write YAML files to `02-evidence/<pillar>/`.
 
-**Naming:** Use semantic IDs per `references/id-generation-rules.md`.
+**Naming:** Use semantic IDs per [references/id-generation-rules.md](references/id-generation-rules.md).
 
-**Schema:** See `references/evidence-object-schema.md`.
+**Schema:** See [references/evidence-object-schema.md](references/evidence-object-schema.md).
 
 <good-example>
 ```yaml
@@ -223,6 +223,6 @@ After evidence collection:
 
 ## References
 
-- `references/evidence-object-schema.md` - YAML schema
-- `references/research-protocols.md` - Pillar-specific research guidance
-- `references/id-generation-rules.md` - Semantic ID creation
+- [references/evidence-object-schema.md](references/evidence-object-schema.md) - YAML schema
+- [references/research-protocols.md](references/research-protocols.md) - Pillar-specific research guidance
+- [references/id-generation-rules.md](references/id-generation-rules.md) - Semantic ID creation

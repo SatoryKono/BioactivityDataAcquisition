@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 import yaml
@@ -11,21 +12,24 @@ ROOT = Path(__file__).resolve().parents[2]
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 
 
-def _load_yaml(path: Path) -> dict:
+YamlMap = dict[str, Any]
+
+
+def _load_yaml(path: Path) -> YamlMap:
     with path.open(encoding="utf-8") as handle:
-        return yaml.safe_load(handle)
+        return cast(YamlMap, yaml.safe_load(handle))
 
 
-def _load_matrix() -> dict:
+def _load_matrix() -> YamlMap:
     return _load_yaml(MATRIX_PATH)
 
 
-def _ledger_path(matrix: dict) -> Path:
-    fixture_governance = matrix.get("fixture_governance", {})
-    return ROOT / fixture_governance["governance_ledger_location"]
+def _ledger_path(matrix: YamlMap) -> Path:
+    fixture_governance = cast(YamlMap, matrix.get("fixture_governance", {}))
+    return ROOT / cast(str, fixture_governance["governance_ledger_location"])
 
 
-def _load_ledger(matrix: dict) -> dict:
+def _load_ledger(matrix: YamlMap) -> YamlMap:
     return _load_yaml(_ledger_path(matrix))
 
 

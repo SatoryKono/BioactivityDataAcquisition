@@ -63,6 +63,13 @@ class _TrackedStage:
     operation: Callable[[], Awaitable[None]]
 
 
+@dataclass(frozen=True, slots=True)
+class _ExecutionCycleContext:
+    """Resolved ordinary execution-cycle runtime inputs."""
+
+    offset: int | None
+
+
 async def _run_tracked_stage(
     host: _PipelineRunnerExecutionHostProtocol,
     stage_name: str,
@@ -121,6 +128,21 @@ def _execution_cycle_stages(
     )
 
 
+async def _resolve_execution_cycle_context(
+    host: _PipelineRunnerExecutionHostProtocol,
+) -> _ExecutionCycleContext:
+    """Resolve ordinary execution-cycle inputs before tracked stage execution."""
+    return _ExecutionCycleContext(offset=await host._resolve_execution_offset())
+
+
+async def _run_execution_cycle_stages(
+    host: _PipelineRunnerExecutionHostProtocol,
+    context: _ExecutionCycleContext,
+) -> None:
+    """Execute canonical extract/postrun/checkpoint stages from one context."""
+    await _run_tracked_stages(host, _execution_cycle_stages(host, offset=context.offset))
+
+
 async def run_managed_pipeline(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Run the validated pipeline lifecycle within managed contexts."""
     await _run_tracked_stages(host, _managed_pipeline_stages(host))
@@ -129,8 +151,8 @@ async def run_managed_pipeline(host: _PipelineRunnerExecutionHostProtocol) -> No
 
 async def run_execution_cycle(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Execute extraction, postrun, and checkpoint finalization."""
-    offset = await host._resolve_execution_offset()
-    await _run_tracked_stages(host, _execution_cycle_stages(host, offset=offset))
+    context = await _resolve_execution_cycle_context(host)
+    await _run_execution_cycle_stages(host, context)
 
 
 async def execute_pipeline(

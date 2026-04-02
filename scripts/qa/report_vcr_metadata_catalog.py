@@ -7,6 +7,7 @@ import argparse
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import cast
 
 import yaml
 
@@ -25,6 +26,16 @@ class CassetteCatalogRow:
     has_metadata_sidecar: bool
     metadata_rel_path: str | None
     metadata_status: str
+
+
+@dataclass
+class ProviderCatalogSummary:
+    """Aggregated provider-level metadata coverage summary."""
+
+    cassette_count: int = 0
+    metadata_sidecar_count: int = 0
+    without_metadata_count: int = 0
+    metadata_coverage_percent: float = 0.0
 
 
 def _parse_args() -> argparse.Namespace:
@@ -58,6 +69,12 @@ def _metadata_path_for(cassette_path: Path) -> Path:
     return cassette_path.with_name(f"{cassette_path.stem}_meta.yaml")
 
 
+def _is_cassette_file(path: Path) -> bool:
+    return path.is_file() and path.suffix.lower() in {".yaml", ".yml"} and not (
+        path.name.endswith("_meta.yaml") or path.name.endswith("_meta.yml")
+    )
+
+
 def _metadata_status(metadata_payload: object) -> str:
     if not isinstance(metadata_payload, dict):
         return "missing"
@@ -70,7 +87,7 @@ def _metadata_status(metadata_payload: object) -> str:
 def _load_metadata_payload(path: Path) -> object | None:
     if not path.exists():
         return None
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+    return cast(object | None, yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
 def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
@@ -80,9 +97,8 @@ def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
         return rows
 
     cassette_paths = sorted(
-        path
-        for path in vcr_root.rglob("*")
-        if path.is_file() and path.suffix.lower() in {".yaml", ".yml"}
+        (path for path in vcr_root.rglob("*") if _is_cassette_file(path)),
+        key=lambda path: (path.as_posix().lower(), path.as_posix()),
     )
 
     for cassette_path in cassette_paths:
@@ -110,36 +126,27 @@ def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
 def build_catalog(vcr_root: Path) -> dict[str, object]:
     """Build the canonical JSON catalog payload."""
     rows = iter_catalog_rows(vcr_root)
-    provider_summary: dict[str, dict[str, object]] = {}
+    provider_summary: dict[str, ProviderCatalogSummary] = {}
 
     for row in rows:
         summary = provider_summary.setdefault(
-            row.provider,
-            {
-                "cassette_count": 0,
-                "metadata_sidecar_count": 0,
-                "without_metadata_count": 0,
-            },
+            row.provider, ProviderCatalogSummary()
         )
-        summary["cassette_count"] = int(summary["cassette_count"]) + 1
+        summary.cassette_count += 1
         if row.has_metadata_sidecar:
-            summary["metadata_sidecar_count"] = (
-                int(summary["metadata_sidecar_count"]) + 1
-            )
+            summary.metadata_sidecar_count += 1
         else:
-            summary["without_metadata_count"] = (
-                int(summary["without_metadata_count"]) + 1
-            )
+            summary.without_metadata_count += 1
 
     for summary in provider_summary.values():
-        cassette_count = int(summary["cassette_count"])
-        metadata_sidecar_count = int(summary["metadata_sidecar_count"])
+        cassette_count = summary.cassette_count
+        metadata_sidecar_count = summary.metadata_sidecar_count
         coverage_percent = (
             round((metadata_sidecar_count / cassette_count) * 100.0, 2)
             if cassette_count
             else 0.0
         )
-        summary["metadata_coverage_percent"] = coverage_percent
+        summary.metadata_coverage_percent = coverage_percent
 
     return {
         "schema_version": CATALOG_SCHEMA_VERSION,
@@ -152,7 +159,10 @@ def build_catalog(vcr_root: Path) -> dict[str, object]:
             ),
             "provider_count": len(provider_summary),
         },
-        "providers": dict(sorted(provider_summary.items())),
+        "providers": {
+            provider: asdict(summary)
+            for provider, summary in sorted(provider_summary.items())
+        },
         "cassettes": [asdict(row) for row in rows],
     }
 

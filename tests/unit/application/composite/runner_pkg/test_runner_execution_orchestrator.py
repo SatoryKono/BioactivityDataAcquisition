@@ -91,6 +91,7 @@ class _ExecutionHost:
         enrichment_results: dict[str, EnrichmentResult],
     ) -> None:
         assert enrichment_results is self.enrichment_results
+        self.order.append("record_enrichment_completed")
 
     async def _execute_merge_stage(
         self,
@@ -121,6 +122,7 @@ async def test_execute_locked_run_phases_preserves_canonical_phase_order() -> No
         "dependencies",
         "enrichment",
         "transition",
+        "record_enrichment_completed",
         "merge",
     ]
     assert result.state is host.final_state

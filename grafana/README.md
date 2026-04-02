@@ -698,7 +698,9 @@ shipped pack.
 **Drilldown:** dashboard links `2. Runtime`, `3. Provider Health`,
 `4. Data Quality`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
 текущее временное окно. Panel `Processing Volume by Stage` дублирует Explore handoff
-через data links для быстрого перехода в Grafana Explore.
+через data links для быстрого перехода в Grafana Explore. Tempo handoff для
+pipeline dashboards использует TraceQL filter по `span."bioetl.pipeline"` и
+`span."bioetl.run_type"`.
 
 ---
 
@@ -734,7 +736,8 @@ shipped pack.
 **Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и
 `Explore Traces (Tempo, tracing profile)` используют текущее временное окно. Panel `Data Flow in
 Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
-incidents и freshness investigation.
+incidents и freshness investigation. Tempo drilldown предфильтрован по
+`span."bioetl.pipeline"` и `span."bioetl.run_type"`.
 
 ---
 
@@ -766,8 +769,9 @@ incidents и freshness investigation.
 Explore в том же time range.
 Loki drilldown стартует с безопасного `{job="bioetl"}` entrypoint без encoded
 dashboard-variable interpolation. Дополнительное сужение по `provider` или
-`pipeline` оператор делает уже в Explore, а trace correlation идёт через
-`trace_id` / `span_id`.
+`pipeline` оператор делает уже в Explore, а Tempo drilldown сразу фильтрует
+`span."bioetl.provider"` по текущему `$provider`; финальная correlation всё так
+же идёт через `trace_id` / `span_id`.
 
 ---
 
@@ -798,7 +802,8 @@ dashboard-variable interpolation. Дополнительное сужение п
 **Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и
 `Explore Traces (Tempo, tracing profile)` плюс data links у `Log Hygiene Trend` ведут в
 Explore с тем же time range. Как и в остальных shipped dashboards, Loki handoff
-стартует с безопасного `{job="bioetl"}` entrypoint.
+стартует с безопасного `{job="bioetl"}` entrypoint. Tempo handoff использует
+тот же dashboard scope через `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
 
 ---
 

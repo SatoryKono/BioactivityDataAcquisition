@@ -7,4 +7,24 @@ column ordering and matching.
 
 from __future__ import annotations
 
-__all__: list[str] = []
+from types import MappingProxyType
+
+LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE = "2026-06-30"
+LEGACY_PUBLICATION_FIELD_ALIASES = MappingProxyType(
+    {
+        "pubmed-id": "publication-pmid",
+        "doi": "publication-doi",
+        "doc-type": "publication-type",
+        "first-page": "page-first",
+        "last-page": "page-last",
+        "year": "publication-year",
+        "document-chembl-id": "publication-id",
+        "pmid": "publication-pmid",
+        "pmc-id": "publication-pmc-id",
+    }
+)
+
+__all__ = [
+    "LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE",
+    "LEGACY_PUBLICATION_FIELD_ALIASES",
+]
