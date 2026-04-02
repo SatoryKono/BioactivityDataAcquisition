@@ -1,7 +1,7 @@
 # Каталог Локальных Skills (Ядро BioETL)
 
 *Статус: internal-published (Internal / Extended)*
-*Обновлено: 2026-04-02 (Grafana dashboard extension added)*
+*Обновлено: 2026-04-02 (Grafana and Prometheus observability skills added)*
 
 Сводный реестр локальных BioETL-skills.
 
@@ -53,6 +53,16 @@
 | `verify-architecture` | Быстрые/полные архитектурные проверки |
 | `vcr-record` | Запись и безопасная поддержка VCR cassette |
 
+### Observability
+
+| Skill | Назначение |
+|-------|---------|
+| `grafana-dashboard-extension` | Расширение, правка и валидация shipped Grafana dashboards |
+| `prometheus-metric-discovery` | Поиск реальных Prometheus metrics, labels и selector-кандидатов |
+| `prometheus-query-debugger` | Отладка PromQL, empty-state semantics и aggregation mistakes |
+| `prometheus-alert-rule-editor` | Создание и безопасная правка Prometheus-backed alert rules |
+| `prometheus-rule-testing` | Детерминированная проверка repo-backed Prometheus rules через `promtool` |
+
 ### Документация
 
 | Skill | Назначение |
@@ -75,7 +85,6 @@
 | Skill | Назначение |
 |-------|---------|
 | `new-pipeline` | Создание provider/entity pipeline |
-| `grafana-dashboard-extension` | Расширение, правка и валидация shipped Grafana dashboards |
 | `technical-designer-mermaid` | Проектирование технических Mermaid-диаграмм |
 
 ## Wave 6 Consolidation (2026-03-12)
@@ -110,6 +119,10 @@
 - [py-doc-bot](local/py-doc-bot/SKILL.md)
 - [py-plan-bot](local/py-plan-bot/SKILL.md)
 - [py-review-orchestrator](local/py-review-orchestrator/SKILL.md)
+- [prometheus-alert-rule-editor](../../../../../.codex/skills/prometheus-alert-rule-editor/SKILL.md)
+- [prometheus-metric-discovery](../../../../../.codex/skills/prometheus-metric-discovery/SKILL.md)
+- [prometheus-query-debugger](../../../../../.codex/skills/prometheus-query-debugger/SKILL.md)
+- [prometheus-rule-testing](../../../../../.codex/skills/prometheus-rule-testing/SKILL.md)
 - [py-test-bot](local/py-test-bot/SKILL.md)
 - [py-test-swarm](local/py-test-swarm/SKILL.md)
 - [repo-config](local/repo-config/SKILL.md)

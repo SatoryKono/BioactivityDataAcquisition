@@ -106,7 +106,7 @@ class RunLedgerService:
         metrics_snapshot: dict[str, int],
     ) -> RunLedgerEntry:
         """Record successful run completion."""
-        return self._append(
+        return self._append_run_outcome(
             event_type="run_finished",
             status="success",
             metrics_snapshot=metrics_snapshot,
@@ -120,12 +120,12 @@ class RunLedgerService:
         metrics_snapshot: dict[str, int],
     ) -> RunLedgerEntry:
         """Record failed run completion."""
-        return self._append(
+        return self._append_run_outcome(
             event_type="run_failed",
             status="failed",
+            metrics_snapshot=metrics_snapshot,
             message=message,
             error_type=error_type,
-            metrics_snapshot=metrics_snapshot,
         )
 
     def record_run_shutdown(
@@ -134,7 +134,7 @@ class RunLedgerService:
         metrics_snapshot: dict[str, int],
     ) -> RunLedgerEntry:
         """Record graceful shutdown completion."""
-        return self._append(
+        return self._append_run_outcome(
             event_type="run_shutdown",
             status="shutdown",
             metrics_snapshot=metrics_snapshot,
@@ -246,3 +246,20 @@ class RunLedgerService:
         self.ledger_port.append(entry)
         return entry
 
+    def _append_run_outcome(
+        self,
+        *,
+        event_type: str,
+        status: str,
+        metrics_snapshot: dict[str, int],
+        message: str | None = None,
+        error_type: str | None = None,
+    ) -> RunLedgerEntry:
+        """Append one terminal run outcome with the canonical payload shape."""
+        return self._append(
+            event_type=event_type,
+            status=status,
+            message=message,
+            error_type=error_type,
+            metrics_snapshot=metrics_snapshot,
+        )

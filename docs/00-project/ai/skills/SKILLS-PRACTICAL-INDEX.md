@@ -55,6 +55,7 @@ Last verified: '2026-03-31'
 | Pipeline/config работа | `py-config-bot` → `data-engineer` → `schema-parity` |
 | Provider/VCR | `provider-health` → `vcr-record` → `py-test-bot` |
 | Grafana dashboard / observability UX | `grafana-dashboard-extension` → `documentation-audit` |
+| Prometheus query / alerting | `prometheus-metric-discovery` → `prometheus-query-debugger` → `prometheus-alert-rule-editor` → `prometheus-rule-testing` |
 | Docs drift | `documentation-audit` → `py-doc-bot` |
 | Большой review | `py-review-orchestrator` → `py-audit-bot` |
 | Branch cleanup / consolidation | `using-git-worktrees` → `git-workflow-manager` |
@@ -79,6 +80,10 @@ Last verified: '2026-03-31'
 | `vcr-record` | Управляет VCR-кассетами: запись, валидация, обновление, очистка. Держит HTTP tests воспроизводимыми и безопасными. | При работе с integration tests против внешних API. | `py-test-bot`, `verify-unit-tests` |
 | `new-pipeline` | Помогает добавить новый pipeline так, чтобы он сразу жил по правилам BioETL: configs, wiring, baseline verification. | При добавлении нового provider/entity pipeline. | `py-config-bot`, `data-engineer`, `verify-architecture` |
 | `grafana-dashboard-extension` | Специализированно ведёт правки shipped Grafana dashboards: панели, drilldowns, navigation, datasource semantics и docs cascade. | Когда меняются `grafana/dashboards/*.json`, monitoring UX или поведение drilldowns. | `documentation-audit`, `py-doc-bot` |
+| `prometheus-metric-discovery` | Быстро находит реальные metrics, label names и label values до того, как кто-то начнёт гадать про PromQL по памяти. Снижает риск ложных query fixes. | Когда работа начинается с вопроса “как вообще называется нужная метрика?”. | `prometheus-query-debugger`, `grafana-dashboard-extension` |
+| `prometheus-query-debugger` | Разбирает PromQL по смыслу: aggregation, `rate/increase`, empty-state, histogram и label matching. Помогает объяснить проблему, а не только переписать выражение. | Когда Prometheus-backed panel или alert expression ведут себя странно. | `prometheus-metric-discovery`, `prometheus-alert-rule-editor` |
+| `prometheus-alert-rule-editor` | Держит alert rules в инженерной форме: intent, threshold, `for`, severity, labels, annotations и distinction между repo-backed и Grafana-managed rules. | Когда создаются или меняются Prometheus-backed alerts. | `prometheus-query-debugger`, `prometheus-rule-testing` |
+| `prometheus-rule-testing` | Даёт детерминированную проверку repo-backed Prometheus rules через `promtool`, чтобы поведение алертов не оставалось на уровне интуиции. | После изменений в rule files и перед merge/release. | `prometheus-alert-rule-editor`, `py-test-bot` |
 | `verify-architecture` | Операционная архитектурная верификация через quick/full/category checks. Быстро подтверждает, что границы проекта не нарушены. | Перед commit/PR после структурных изменений. | `architecture-guardian`, `verify-implementation` |
 | `py-test-swarm` | Массовый test workflow для failures, flakiness, coverage и telemetry. Превращает большой тестовый хаос в управляемые кластеры. | Когда проблема уже шире одного локального теста. | `py-test-bot`, `py-review-orchestrator` |
 | `py-review-orchestrator` | Иерархический код-ревью workflow по секторам проекта. Собирает findings, severity и remediation в один обзор. | Для широкого project audit, release review, post-refactor review. | `py-audit-bot`, `architecture-guardian` |

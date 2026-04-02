@@ -172,6 +172,66 @@ def test_record_run_failed_captures_message_and_metrics() -> None:
     assert store.list_entries_by_run_id(run_id) == [entry]
 
 
+def test_record_run_finished_captures_success_metrics() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-run-finished",
+    )
+
+    entry = service.record_run_finished(
+        metrics_snapshot={"records_gold": 9},
+    )
+
+    assert entry.event_type == "run_finished"
+    assert entry.event_family == "pipeline.lifecycle"
+    assert entry.status == "success"
+    assert entry.metrics_snapshot == {"records_gold": 9}
+    assert entry.details == {
+        "_diagnostic": {
+            "contract_version": "v1",
+            "event_type": "run_finished",
+            "event_family": "pipeline.lifecycle",
+            "manifest_id": "manifest-1",
+            "run_id": str(run_id),
+            "status": "success",
+        }
+    }
+
+
+def test_record_run_shutdown_captures_shutdown_metrics() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-run-shutdown",
+    )
+
+    entry = service.record_run_shutdown(
+        metrics_snapshot={"records_silver": 3},
+    )
+
+    assert entry.event_type == "run_shutdown"
+    assert entry.event_family == "pipeline.lifecycle"
+    assert entry.status == "shutdown"
+    assert entry.metrics_snapshot == {"records_silver": 3}
+    assert entry.details == {
+        "_diagnostic": {
+            "contract_version": "v1",
+            "event_type": "run_shutdown",
+            "event_family": "pipeline.lifecycle",
+            "manifest_id": "manifest-1",
+            "run_id": str(run_id),
+            "status": "shutdown",
+        }
+    }
+
+
 def test_record_stage_completed_captures_stage_and_metrics() -> None:
     run_id = RunID(uuid4())
     store = _InMemoryRunLedgerStore()

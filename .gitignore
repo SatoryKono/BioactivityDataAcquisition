@@ -94,10 +94,11 @@ log_test.txt
 .codex/*
 !.codex/skills/
 .codex/skills/*
-!.codex/skills/grafana-dashboard-extension/
-!.codex/skills/grafana-dashboard-extension/SKILL.md
-!.codex/skills/grafana-dashboard-extension/agents/
-!.codex/skills/grafana-dashboard-extension/agents/openai.yaml
+!.codex/skills/SKILLS-CATALOG.md
+!.codex/skills/*/
+!.codex/skills/*/SKILL.md
+!.codex/skills/*/agents/
+!.codex/skills/*/agents/openai.yaml
 .gemini/
 .jules/
 .junie/
