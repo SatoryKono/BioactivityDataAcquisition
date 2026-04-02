@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.composite.lineage import CompositeLineageMetadata
 from bioetl.domain.lineage.models import (
     DatasetRef,
     LineageEdge,
@@ -13,6 +12,7 @@ from bioetl.domain.lineage.models import (
     SchemaRef,
     TransformRef,
 )
+from bioetl.domain.composite.lineage import CompositeLineageMetadata
 
 __all__ = [
     "CompositeLineageMetadata",

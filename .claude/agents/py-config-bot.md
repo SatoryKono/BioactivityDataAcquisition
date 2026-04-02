@@ -118,7 +118,7 @@ configs/
 ### A. Pipeline config (standard)
 
 ```yaml
-# configs/entities/{provider}/{entity}.yaml
+# configs/pipelines/{provider}/{entity}.yaml
 pipeline_name: {provider}_{entity}
 provider: {provider}
 entity_type: {entity}
@@ -153,7 +153,7 @@ sink:
 ### B. DQ rules (externalized)
 
 ```yaml
-# configs/quality/{provider}/{entity}.yaml
+# configs/quality/entities/{provider}/{entity}.yaml
 entity: {entity}
 provider: {provider}
 version: "1.0.0"
@@ -176,7 +176,7 @@ rules:
 ### C. Filter rules (externalized)
 
 ```yaml
-# configs/filters/{provider}/{entity}.yaml
+# configs/filters/entities/{provider}/{entity}.yaml
 entity: {entity}
 provider: {provider}
 version: "1.0.0"
@@ -190,7 +190,7 @@ gold_filters:
 ### D. Composite pipeline config
 
 ```yaml
-# configs/entities/composite/{name}.yaml
+# configs/pipelines/composite/{name}.yaml
 composite:
   name: composite_{entity}
   version: "1.0.0"
@@ -220,27 +220,27 @@ composite:
 ```bash
 python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 find configs/ -path "*/{provider}/*" -name "*.yaml" | sort
-cat configs/entities/_defaults.yaml 2>/dev/null
-cat configs/providers/{provider}.yaml 2>/dev/null
+cat configs/pipelines/_defaults.yaml 2>/dev/null
+cat configs/sources/{provider}.yaml 2>/dev/null
 ```
 
 ### После создания/изменения
 
 ```bash
 # YAML syntax
-python -c "import yaml; yaml.safe_load(open('configs/entities/{provider}/{entity}.yaml'))"
+python -c "import yaml; yaml.safe_load(open('configs/pipelines/{provider}/{entity}.yaml'))"
 
 # Gap analysis — 0 critical
 python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 
 # sort_by присутствует (ADR-014)
-grep -A3 "sort_by" configs/entities/{provider}/{entity}.yaml
+grep -A3 "sort_by" configs/pipelines/{provider}/{entity}.yaml
 
 # Нет inline DQ-порогов (ADR-027)
-grep -n "soft_fail_threshold\|hard_fail_threshold" configs/entities/{provider}/{entity}.yaml
+grep -n "soft_fail_threshold\|hard_fail_threshold" configs/pipelines/{provider}/{entity}.yaml
 
 # DQ externalized config существует
-test -f configs/quality/{provider}/{entity}.yaml && echo "OK" || echo "MISSING"
+test -f configs/quality/entities/{provider}/{entity}.yaml && echo "OK" || echo "MISSING"
 ```
 
 ---
@@ -274,7 +274,7 @@ test -f configs/quality/{provider}/{entity}.yaml && echo "OK" || echo "MISSING"
 #### Изменения
 | Файл | Действие | Описание |
 |------|----------|----------|
-| `configs/entities/chembl/activity.yaml` | created | Новый pipeline config |
+| `configs/pipelines/chembl/activity.yaml` | created | Новый pipeline config |
 
 #### Верификация
 ```bash
@@ -304,12 +304,12 @@ python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 | Поля Activity | `ChEMBL:get_bioactivity` | `molecule_chembl_id="CHEMBL25"` | Поля для activity config |
 | Поля Target | `ChEMBL:target_search` | `gene_symbol="EGFR"` | Поля для target config |
 
-### OpenAlex — reference для composite config
+### Open Targets — reference для composite config
 
 | Сценарий | Инструмент | Параметры | Результат |
 |----------|------------|-----------|-----------|
-| Available fields | `OpenAlex:get_open_targets_graphql_schema` | — | Поля для composite merge |
-| Join key validation | `OpenAlex:search_entities` | `query_strings=["EGFR"]` | Проверка join keys |
+| Available fields | `Open Targets:get_open_targets_graphql_schema` | — | Поля для composite merge |
+| Join key validation | `Open Targets:search_entities` | `query_strings=["EGFR"]` | Проверка join keys |
 
 ---
 
@@ -338,8 +338,8 @@ python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 
 | Ссылка | Описание | Verification |
 |--------|----------|-------------|
-| [ADR-014] | Deterministic Writes: sort_by обязателен в Silver sink | `find configs/entities/ -name "*.yaml" -exec grep -L "sort_by" {} \;` |
+| [ADR-014] | Deterministic Writes: sort_by обязателен в Silver sink | `find configs/pipelines/ -name "*.yaml" -exec grep -L "sort_by" {} \;` |
 | [ADR-025] | Pipeline Config Unification | `python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` |
 | [ADR-026] | Composite Pipeline Pattern: seed/enrichers/merge | Review composite config structure |
 | [ADR-027] | DQ Rules Externalization: no inline thresholds | `grep -rn "soft_fail_threshold" src/bioetl/ --include="*.py"` |
-| [ADR-028] | Filter Rules Externalization | `grep -rn "gold_filters" configs/entities/ --include="*.yaml"` |
+| [ADR-028] | Filter Rules Externalization | `grep -rn "gold_filters" configs/pipelines/ --include="*.yaml"` |
