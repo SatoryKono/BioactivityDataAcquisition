@@ -23,15 +23,15 @@ top-level domain facade; canonical callers should use
 
 from __future__ import annotations
 
-from bioetl.domain import composite, constants, contracts, control_plane, version  # noqa: F401
+from bioetl.domain import composite, constants, contracts, control_plane, version
 
 # Subpackage registrations (make them importable as bioetl.domain.<name>)
 from bioetl.domain import context_cached_bronze
 from bioetl.domain import context_filtering
 from bioetl.domain import lineage
-from bioetl.domain import mapping  # noqa: F401
+from bioetl.domain import mapping
 from bioetl.domain import observability_contract
-from bioetl.domain import registry  # noqa: F401
+from bioetl.domain import registry
 from bioetl.domain import types_config_validation
 
 # Events
@@ -45,6 +45,9 @@ __all__ = [
     "context_cached_bronze",
     "context_filtering",
     "get_version",
+    "mapping",
+    "registry",
+    "version",
     "lineage",
     "observability_contract",
     "types_config_validation",
