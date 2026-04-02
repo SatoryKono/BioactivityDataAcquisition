@@ -13,6 +13,9 @@ POLICY_PATH = ROOT / "configs" / "quality" / "integration_vcr_policy.yaml"
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 CONFTST_PATH = ROOT / "tests" / "conftest.py"
 TESTING_GUIDE_PATH = ROOT / "docs" / "03-guides" / "testing.md"
+DEV_README_PATH = ROOT / "scripts" / "dev" / "README.md"
+DATA_README_PATH = ROOT / "scripts" / "data" / "README.md"
+CONTRIBUTING_PATH = ROOT / ".github" / "CONTRIBUTING.md"
 
 
 def _load_yaml(path: Path) -> dict:
@@ -74,6 +77,42 @@ class TestIntegrationVcrPolicy:
             assert (ROOT / relative_path).exists(), (
                 f"integration/VCR execution path missing: {relative_path}"
             )
+
+        assert policy["supported_scopes"]["integration"]["supported_pipeline_families"]
+        assert (
+            policy["supported_scopes"]["e2e"]["representative_pipeline_families"]
+        )
+
+    def test_policy_declares_canonical_replay_and_refresh_examples(self) -> None:
+        policy = _load_yaml(POLICY_PATH)
+        windows = policy["execution_paths"]["local"]["windows"]
+        wsl = policy["execution_paths"]["local"]["wsl"]
+        ci_uv = policy["execution_paths"]["local"]["ci_uv"]
+        live_contract = policy["execution_paths"]["live_contract"]
+        refresh_protocol = policy["vcr_policy"]["refresh_protocol"]
+
+        for command in (
+            windows["replay_examples"]["integration"],
+            windows["replay_examples"]["e2e"],
+            windows["refresh_examples"]["targeted_integration"],
+            windows["refresh_examples"]["targeted_e2e"],
+            wsl["replay_examples"]["integration"],
+            wsl["replay_examples"]["e2e"],
+            wsl["refresh_examples"]["targeted_integration"],
+            wsl["refresh_examples"]["targeted_e2e"],
+            ci_uv["standard_replay_examples"]["control_plane_e2e"],
+            live_contract["manual_command_example"],
+        ):
+            assert "--vcr-record=none" in command or "--vcr-record=new_episodes" in command or "--network" in command
+
+        assert refresh_protocol["targeted_recording_only"] is True
+        assert refresh_protocol["preferred_refresh_mode"] == "new_episodes"
+        assert "python -m scripts.data check-vcr-secrets" in refresh_protocol[
+            "post_refresh_checks"
+        ]
+        assert "python -m scripts.qa report-vcr-metadata --check" in refresh_protocol[
+            "post_refresh_checks"
+        ]
 
     def test_policy_defaults_align_with_current_conftest_and_workflows(self) -> None:
         policy = _load_yaml(POLICY_PATH)
@@ -183,6 +222,11 @@ class TestIntegrationVcrPolicy:
             "BIOETL_LIVE_API_TESTS=true",
             "BIOETL_NETWORK_TESTS=true",
             live_contract["required_pytest_flag"],
+            "--vcr-record=none",
+            "--vcr-record=new_episodes",
+            "chembl_activity",
+            "pubchem_compound",
+            "uniprot_protein",
         )
 
         for expected_anchor in required_guide_anchors:
@@ -195,3 +239,27 @@ class TestIntegrationVcrPolicy:
             r"SatoryKono/BioactivityDataAcquisition(?!2)",
             testing_guide,
         )
+
+    def test_dev_and_data_readmes_publish_policy_backed_execution_paths(self) -> None:
+        policy = _load_yaml(POLICY_PATH)
+        dev_readme = DEV_README_PATH.read_text(encoding="utf-8")
+        data_readme = DATA_README_PATH.read_text(encoding="utf-8")
+        contributing = CONTRIBUTING_PATH.read_text(encoding="utf-8")
+
+        assert "configs/quality/integration_vcr_policy.yaml" in dev_readme
+        assert "docs/03-guides/testing.md" in dev_readme
+        assert policy["execution_paths"]["local"]["windows"]["replay_examples"][
+            "integration"
+        ] in dev_readme
+        assert policy["execution_paths"]["local"]["wsl"]["replay_examples"][
+            "integration"
+        ] in dev_readme
+        assert "--vcr-record=new_episodes" in dev_readme
+
+        assert "configs/quality/integration_vcr_policy.yaml" in data_readme
+        assert "python -m scripts.data check-vcr-placement" in data_readme
+        assert "python -m scripts.data check-vcr-secrets" in data_readme
+        assert "python -m scripts.qa report-vcr-metadata --check" in data_readme
+
+        assert "docs/03-guides/testing.md" in contributing
+        assert "configs/quality/integration_vcr_policy.yaml" in contributing

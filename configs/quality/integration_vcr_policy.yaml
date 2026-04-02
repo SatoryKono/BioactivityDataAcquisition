@@ -22,6 +22,28 @@ supported_scopes:
       Adapter-, pipeline-, config-, and storage-facing integration checks that use
       either VCR-backed HTTP replay or local temporary artifacts rather than live
       network execution by default.
+    supported_pipeline_families:
+      provider_adapter_replay:
+        - chembl
+        - pubchem
+        - pubmed
+        - semanticscholar
+        - uniprot
+      provider_adapter_mixed_mode:
+        - crossref
+        - openalex
+      pipeline_replay_smoke:
+        - chembl_activity
+        - chembl_cell_line
+        - chembl_compound_record
+        - chembl_target_component
+        - pubchem_compound
+        - uniprot_protein
+      governance_and_runtime_surfaces:
+        - control_plane
+        - data_quality
+        - grafana
+        - prometheus
   e2e:
     canonical_test_root: tests/e2e/
     required_marker: e2e
@@ -31,6 +53,26 @@ supported_scopes:
       recording refresh path is being used.
     ci_smoke_workflow_job: control-plane-e2e
     ci_smoke_target: tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle
+    representative_pipeline_families:
+      provider_runs:
+        - chembl_activity
+        - chembl_assay
+        - chembl_molecule
+        - chembl_publication
+        - chembl_publication_term
+        - chembl_target
+        - crossref_publication
+        - openalex_publication
+        - pubchem_compound
+        - pubmed_publication
+        - semanticscholar_publication
+        - uniprot_protein
+      scenario_runs:
+        - advanced_scenarios
+        - checkpoint
+        - full_pipeline
+        - full_pipeline_chain
+        - run_types
 execution_paths:
   local:
     windows:
@@ -39,15 +81,32 @@ execution_paths:
       supported_targets:
         integration: tests\integration\
         e2e: tests\e2e\
+      replay_examples:
+        integration: '.\scripts\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"'
+        e2e: '.\scripts\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none'
+      refresh_examples:
+        targeted_integration: '.\scripts\dev\run_pytest.ps1 tests\integration\adapters\test_pubmed.py --vcr-record=new_episodes -v'
+        targeted_e2e: '.\scripts\dev\run_pytest.ps1 tests\e2e\test_pubchem_compound_e2e.py -m e2e --vcr-record=new_episodes -v'
     wsl:
       bootstrap: scripts/dev/setup_env_wsl.sh
       pytest_runner: scripts/dev/run_pytest.sh
       supported_targets:
         integration: tests/integration/
         e2e: tests/e2e/
+      replay_examples:
+        integration: 'bash scripts/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"'
+        e2e: 'bash scripts/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none'
+      refresh_examples:
+        targeted_integration: 'bash scripts/dev/run_pytest.sh tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v'
+        targeted_e2e: 'bash scripts/dev/run_pytest.sh tests/e2e/test_pubchem_compound_e2e.py -m e2e --vcr-record=new_episodes -v'
     ci_uv:
       workflow_path: .github/workflows/tests.yml
-      preferred_command_pattern: uv run pytest
+      preferred_command_family:
+        - uv run pytest
+        - uv run python -m pytest
+      standard_replay_examples:
+        smoke_check: 'uv run pytest tests/smoke/ -v --tb=short'
+        control_plane_e2e: 'VCR_RECORD_MODE=none uv run pytest tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle --vcr-record=none -q --tb=short'
   live_contract:
     workflow_path: .github/workflows/contract-tests.yml
     gate_mode: scheduled
@@ -57,6 +116,7 @@ execution_paths:
       BIOETL_NETWORK_TESTS: "true"
     required_pytest_flag: --network
     failure_issue_runbook_path: docs/03-guides/testing.md
+    manual_command_example: 'uv run pytest tests/contract/ -v --tb=short --network'
 vcr_policy:
   canonical_root: tests/fixtures/vcr/{provider}/
   forbidden_locations:
@@ -79,6 +139,17 @@ vcr_policy:
   metadata_catalog_path: reports/quality/vcr-metadata-catalog.json
   metadata_catalog_script: scripts/qa/report_vcr_metadata_catalog.py
   metadata_backfill_script: scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+  refresh_protocol:
+    pre_refresh_checks:
+      - python -m scripts.data check-vcr-placement
+      - python -m scripts.data check-vcr-naming
+    targeted_recording_only: true
+    preferred_refresh_mode: new_episodes
+    post_refresh_checks:
+      - python -m scripts.data check-vcr-placement
+      - python -m scripts.data check-vcr-naming
+      - python -m scripts.data check-vcr-secrets
+      - python -m scripts.qa report-vcr-metadata --check
 governance_rules:
   refresh_triggers:
     - missing cassette for an already-supported integration or e2e path
@@ -91,6 +162,10 @@ governance_rules:
   ci_behavior:
     - standard CI paths must run with VCR replay locked to none
     - scheduled live contract coverage is separate from standard integration and e2e replay
+  stale_signals:
+    - cassette sidecar age exceeds 90 days where metadata exists
+    - canonical provider or pipeline path moved without policy artifact update
+    - cassette refresh changes sanitized request or pagination shape without review note
 incremental_extension_model:
   add_new_provider_or_pipeline_family:
     - add tests under canonical integration or e2e roots

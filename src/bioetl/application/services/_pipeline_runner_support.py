@@ -15,8 +15,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.pipeline_run_execution_service import (
         PipelineExecutionResult,
     )
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
-    from bioetl.domain.ports.clock import ClockPort
+    from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort
     from bioetl.domain.types import RunID
 
 

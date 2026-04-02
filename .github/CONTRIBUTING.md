@@ -95,6 +95,11 @@ For the full local GitHub workflow, including worktrees, sync/rebase, PR creatio
 
 **Coverage target:** ≥85% line coverage
 
+Canonical integration / E2E / VCR execution policy, including replay vs refresh
+rules and local/CI command paths, is documented in
+[docs/03-guides/testing.md](../docs/03-guides/testing.md) and tracked in
+`configs/quality/integration_vcr_policy.yaml`.
+
 ## Branch Protection (Required Status Checks)
 
 For PRs to `main`, configure GitHub branch protection/rulesets to require:

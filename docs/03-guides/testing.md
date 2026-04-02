@@ -1,11 +1,11 @@
 ---
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # Testing Guide
@@ -40,6 +40,30 @@ Wrappers `run_pytest.ps1|.sh` по умолчанию добавляют фла�
 `--cov=src/bioetl --cov-report=term -q --maxfail=1`, если запуск не был вызван
 с `--help` / `--version`. WSL-обёртка дополнительно вызывает
 `scripts/ops/setup_plugins.sh --pytest-only` перед запуском pytest.
+
+Supported policy slice for issue `#2598`:
+
+- **Integration**: canonical roots `tests/integration/adapters/`,
+  `tests/integration/chembl/`, `tests/integration/composite/`,
+  `tests/integration/config/`, `tests/integration/infrastructure/`,
+  `tests/integration/interfaces/`, `tests/integration/pipelines/`,
+  `tests/integration/validation/`, `tests/integration/ci/`.
+- **Integration provider families**: replay-first adapter coverage for `chembl`,
+  `pubchem`, `pubmed`, `semanticscholar`, `uniprot`; mixed replay/mock adapter
+  coverage for `crossref` and `openalex`; pipeline replay smoke for
+  `chembl_activity`, `chembl_cell_line`, `chembl_compound_record`,
+  `chembl_target_component`, `pubchem_compound`, `uniprot_protein`.
+- **E2E provider families**: `chembl_activity`, `chembl_assay`,
+  `chembl_molecule`, `chembl_publication`, `chembl_publication_term`,
+  `chembl_target`, `crossref_publication`, `openalex_publication`,
+  `pubchem_compound`, `pubmed_publication`, `semanticscholar_publication`,
+  `uniprot_protein`.
+- **E2E scenario families**: `advanced_scenarios`, `checkpoint`,
+  `full_pipeline`, `full_pipeline_chain`, `run_types`.
+- **Default replay mode**: local development should prefer replay with
+  `--vcr-record=none` for stable feedback loops. Targeted refresh is supported
+  via `--vcr-record=new_episodes`; broad cassette rewrites are not the
+  supported default path.
 
 Текущее состояние rollout по ADR-042:
 - mutation testing в CI блокирует только `domain/` с порогом `70%`
@@ -174,6 +198,49 @@ bash scripts/dev/run_pytest.sh tests/architecture/test_domain_unit_test_purity.p
 - **Catalog / Backfill Policy**: canonical VCR metadata catalog и canonical backfill script уже существуют, но automated workflow rollout всё ещё остаётся неполным; это состояние фиксируется matrix и architecture guard'ами.
 - **Live Contract Baseline**: live-network enforcement обязателен для `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar`; richer pilot-soak coverage for Semantic Scholar remains opt-in and does not redefine the enforced baseline.
 
+#### 2.2.1. Supported integration families
+
+В рамках tracked policy `#2598` проект явно поддерживает следующие integration
+surface areas:
+
+- `tests/integration/adapters/` — adapter-level HTTP replay и mixed-mode adapter
+  checks.
+- `tests/integration/pipelines/` — pipeline-level replay smoke для
+  `chembl_activity`, `chembl_cell_line`, `chembl_compound_record`,
+  `chembl_target_component`.
+- `tests/integration/test_pubchem_pipeline.py` и
+  `tests/integration/test_uniprot_pipeline.py` — репрезентативные provider
+  pipeline smoke paths.
+- `tests/integration/interfaces/`, `tests/integration/config/`,
+  `tests/integration/composite/`, `tests/integration/validation/`,
+  `tests/integration/ci/` — governance/runtime-facing integration surfaces,
+  которые не обязаны использовать VCR, но входят в canonical integration scope.
+
+CrossRef и OpenAlex допускают mixed replay/mock режим на adapter-level coverage.
+Это считается supported policy, а не отклонением, пока machine-readable policy и
+guide остаются синхронизированными.
+
+#### 2.2.2. Canonical replay and refresh commands
+
+```bash
+# CI / single-OS replay
+uv run python -m pytest tests/integration/ --vcr-record=none -m "integration and not e2e"
+
+# Windows replay
+.\scripts\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"
+
+# WSL replay
+bash scripts/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"
+
+# Targeted refresh only
+uv run python -m pytest tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v
+```
+
+`--vcr-record=once` остаётся локальным compatibility default в `tests/conftest.py`
+для ad-hoc runs без явного режима, но policy-first execution path для supported
+integration replay должен задавать `--vcr-record=none`. Это уменьшает риск
+случайной перезаписи кассет во время обычного dev feedback loop.
+
 ### 2.3. End-to-End (E2E) Tests (`tests/e2e/`)
 
 Тестирование полного цикла работы пайплайна.
@@ -181,6 +248,52 @@ bash scripts/dev/run_pytest.sh tests/architecture/test_domain_unit_test_purity.p
 - **Сценарий**: `Run ID` -> `Fetch` -> `Bronze` -> `Silver` -> `Gold`.
 - **Архитектура**: Local-Only (MemoryLock, LocalCheckpoint, FileSystem Storage).
 - **Запуск**: `uv run python -m pytest tests/e2e/ -m e2e -v`.
+
+#### 2.3.1. Supported E2E families
+
+Canonical provider-facing E2E families:
+
+- `chembl_activity`
+- `chembl_assay`
+- `chembl_molecule`
+- `chembl_publication`
+- `chembl_publication_term`
+- `chembl_target`
+- `crossref_publication`
+- `openalex_publication`
+- `pubchem_compound`
+- `pubmed_publication`
+- `semanticscholar_publication`
+- `uniprot_protein`
+
+Canonical scenario E2E families:
+
+- `advanced_scenarios`
+- `checkpoint`
+- `full_pipeline`
+- `full_pipeline_chain`
+- `run_types`
+
+Supported replay/refresh commands:
+
+```bash
+# Replay-first E2E run
+uv run python -m pytest tests/e2e/ -m e2e --vcr-record=none -v
+
+# Windows replay
+.\scripts\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none
+
+# WSL replay
+bash scripts/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none
+
+# Targeted refresh only
+uv run python -m pytest tests/e2e/test_pubchem_compound_e2e.py -m e2e --vcr-record=new_episodes -v
+```
+
+Standard CI replay path for E2E — это не полный `tests/e2e/` run, а
+control-plane smoke target
+`tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle` с
+`VCR_RECORD_MODE=none` и `--vcr-record=none`.
 
 ### 2.4. Architecture Tests (`tests/architecture/`)
 
@@ -240,12 +353,46 @@ bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
 # Запуск только архитектурных тестов
 make test-architecture
 
-# Запуск с обновлением VCR кассет
-uv run python -m pytest tests/integration/ --vcr-record=once -v
+# Точечное обновление VCR кассет
+uv run python -m pytest tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v
 
 # Генерация HTML coverage report после coverage-run
 uv run coverage html -d htmlcov
 ```
+
+### 4.2. Integration / E2E execution matrix
+
+| Surface | CI / single-OS | Windows PowerShell | WSL/Linux | Notes |
+| ------- | --------------- | ------------------ | --------- | ----- |
+| Integration replay | `uv run python -m pytest tests/integration/ --vcr-record=none -m "integration and not e2e"` | `.\scripts\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"` | `bash scripts/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"` | canonical stable feedback path |
+| E2E replay | `uv run python -m pytest tests/e2e/ -m e2e --vcr-record=none -v` | `.\scripts\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none` | `bash scripts/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none` | local-only execution, no live network |
+| Targeted cassette refresh | `uv run python -m pytest <target> --vcr-record=new_episodes -v` | `.\scripts\dev\run_pytest.ps1 <target> --vcr-record=new_episodes -v` | `bash scripts/dev/run_pytest.sh <target> --vcr-record=new_episodes -v` | supported refresh path |
+| Live contract verification | `uv run pytest tests/contract/ -v --tb=short --network` | n/a | n/a | scheduled/manual workflow path, separate from replay policy |
+
+### 4.3. Cassette lifecycle rules
+
+- **Standard CI** must keep VCR replay locked to `none`.
+- **Default local supported path** should also prefer explicit replay via
+  `--vcr-record=none`.
+- **Targeted refresh** should use `--vcr-record=new_episodes`; repo-wide
+  cassette rewrites are not the supported default path.
+- **Refresh triggers** include missing cassette for an already-supported path,
+  intentional adapter request-shape change, or replay divergence confirmed by a
+  contract/schema-drift investigation.
+- **Review is required** after refresh when request parameters, headers,
+  pagination shape, redaction coverage, or extensionless filename status
+  change.
+- **Stale signals** include `_meta.yaml` age above `90` days where metadata
+  exists, moved provider/pipeline paths without policy updates, or replay shape
+  changes without review note.
+- **Pre-refresh checks**:
+  - `python -m scripts.data check-vcr-placement`
+  - `python -m scripts.data check-vcr-naming`
+- **Post-refresh checks**:
+  - `python -m scripts.data check-vcr-placement`
+  - `python -m scripts.data check-vcr-naming`
+  - `python -m scripts.data check-vcr-secrets`
+  - `python -m scripts.qa report-vcr-metadata --check`
 
 ### 4.1. Быстрый старт для рекомендуемого локального прогона
 

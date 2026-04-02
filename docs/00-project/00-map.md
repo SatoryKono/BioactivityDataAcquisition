@@ -80,7 +80,7 @@ docs/
 │       └── 06-doc-publication-policy.md  # Documentation publication policy
 │
 ├── 01-requirements/             # Requirements
-│   └── REQUIREMENTS.md          # 156 testable requirements
+│   └── REQUIREMENTS.md          # Testable requirements catalog
 │
 ├── 02-architecture/             # Architecture & Decisions
 │   ├── 00-overview.md           # Architecture overview
@@ -301,13 +301,13 @@ src/bioetl/
 │   │   ├── field_groups.py      # Column ordering
 │   │   ├── config.py            # Composite config models
 │   │   └── aggregation.py       # Enricher aggregation
-│   ├── contracts/gold/          # Pandera Gold schemas
-│   │   ├── chembl.py            # ChEMBL Gold schemas
-│   │   ├── composite.py         # Composite Gold schemas
-│   │   ├── publications.py      # Publication Gold schemas
-│   │   ├── pubchem.py           # PubChem Gold schemas
-│   │   └── uniprot.py           # UniProt Gold schemas
-│   ├── entities/                # Domain entities (16+ files)
+│   ├── contracts/gold/          # Gold contract modules
+│   │   ├── chembl.py            # ChEMBL Gold contract exports
+│   │   ├── composite.py         # Composite Gold contract exports
+│   │   ├── publications.py      # Publication Gold contract exports
+│   │   ├── pubchem.py           # PubChem Gold contract exports
+│   │   └── uniprot.py           # UniProt Gold contract exports
+│   ├── entities/                # Domain entities
 │   ├── filtering/               # Filter domain models (ADR-028)
 │   │   ├── input_config.py      # InputFilterConfig
 │   │   ├── silver_config.py     # SilverFilterConfig
@@ -329,14 +329,14 @@ src/bioetl/
 │   │   ├── pubmed/              # PubMed schemas
 │   │   ├── semanticscholar/     # SemanticScholar schemas
 │   │   └── uniprot/             # UniProt schemas
-│   ├── services/                # Domain services (16 files)
+│   ├── services/                # Domain services
 │   │   ├── normalization_service.py     # Data normalization
 │   │   ├── identity_service.py          # Entity ID generation
 │   │   ├── text_similarity.py           # Text similarity
 │   │   ├── dq_metrics_calculator.py     # DQ metrics
 │   │   ├── unit_converter.py            # Unit conversion
 │   │   └── ...
-│   ├── value_objects/           # Value objects (20 files)
+│   ├── value_objects/           # Value objects
 │   │   ├── run_context.py       # RunContext
 │   │   ├── dq_result.py         # DQResult
 │   │   ├── silver_result.py     # SilverResult
@@ -344,8 +344,8 @@ src/bioetl/
 │   ├── transformations.py       # Pure transformation functions
 │   └── types.py                 # Shared types (RunType, HealthStatus, ErrorCode)
 │
-├── application/                 # Pipeline orchestration (§1.1) — 133 files
-│   ├── core/                    # Core pipeline infrastructure (28+ files)
+├── application/                 # Pipeline orchestration (§1.1)
+│   ├── core/                    # Core pipeline infrastructure
 │   │   ├── base.py              # Base pipeline primitives
 │   │   ├── base_transformer.py  # Base transformer contracts
 │   │   ├── batch_executor.py    # Batch executor
@@ -361,7 +361,7 @@ src/bioetl/
 │   ├── composite/               # Composite pipeline orchestration
 │   ├── pipelines/               # Concrete pipeline implementations
 │   │   ├── common/              # Shared pipeline helpers
-│   │   ├── chembl/              # 16 ChEMBL transformers
+│   │   ├── chembl/              # ChEMBL transformers and pipeline helpers
 │   │   │   ├── activity_transformer.py
 │   │   │   ├── assay_transformer.py
 │   │   │   ├── molecule_transformer.py
@@ -413,13 +413,13 @@ src/bioetl/
 ├── infrastructure/              # I/O adapters (§1.1)
 │   ├── adapters/                # External API clients
 │   │   ├── http/                # HTTP client infrastructure (rate limiter, circuit breaker)
-│   │   ├── chembl/              # ChEMBL API adapter (8 files)
-│   │   ├── crossref/            # CrossRef API adapter (6 files)
+│   │   ├── chembl/              # ChEMBL API adapter
+│   │   ├── crossref/            # CrossRef API adapter
 │   │   ├── openalex/            # OpenAlex API adapter
-│   │   ├── pubchem/             # PubChem API adapter (6 files)
-│   │   ├── pubmed/              # PubMed API adapter (9 files)
+│   │   ├── pubchem/             # PubChem API adapter
+│   │   ├── pubmed/              # PubMed API adapter
 │   │   ├── semanticscholar/     # Semantic Scholar API adapter
-│   │   ├── uniprot/             # UniProt API adapter (5 files)
+│   │   ├── uniprot/             # UniProt API adapter
 │   │   ├── common/              # Shared adapter utilities
 │   │   ├── decorators/          # circuit_breaker, retry decorators
 │   │   └── input/               # CSV filter reader
@@ -439,12 +439,12 @@ src/bioetl/
 │   │   ├── metadata_writer.py   # Metadata writer seam
 │   │   └── atomic.py            # Atomic file-write facade
 │   ├── config/                  # Config loaders (package)
-│   ├── locking/                 # Distributed locking
-│   │   └── memory_lock.py       # In-memory (local-only, ADR-010)
+│   ├── locking/                 # Local in-process locking
+│   │   └── memory_lock.py       # In-memory single-instance lock (ADR-010)
 │   ├── checkpoint/              # Checkpoint persistence
 │   ├── quarantine/              # DQ failure handling
-│   ├── observability/           # Metrics, logging (14+ files)
-│   ├── schemas/                 # Pydantic config schemas (10 files)
+│   ├── observability/           # Metrics, logging, tracing adapters
+│   ├── schemas/                 # Pydantic config schemas
 │   ├── security/                # PII hashing
 │   ├── serialization/           # JSON encoders
 │   ├── validation/              # Pandera validator
@@ -509,7 +509,7 @@ graph TD
 | `src/bioetl/infrastructure/config/composite_config_api.py` | Canonical composite-config loading seam |
 | `src/bioetl/infrastructure/config/`               | Infrastructure config loaders and normalization package |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
-| `docs/04-reference/contracts/gold/{provider}_{entity}_v{major}.{minor}.json` | Gold data contracts |
+| `docs/04-reference/contracts/gold/{provider}_{entity}_v{major}.{minor}.json` | Published Gold data contract exports |
 
 ---
 
