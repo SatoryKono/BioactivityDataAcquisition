@@ -107,6 +107,24 @@ def _get_default_registration_state() -> _PipelineFactoryRegistrationState:
     return _default_registration_state
 
 
+def _register_to_explicit_registry(registry: PipelineRegistry) -> None:
+    """Register factories into an explicit registry instance."""
+    _register_factories_to(registry)
+
+
+def _register_default_registry_once(
+    registration_state: _PipelineFactoryRegistrationState,
+) -> None:
+    """Register factories into the default registry exactly once."""
+    if registration_state._registered:
+        return
+    with registration_state._lock:
+        if registration_state._registered:
+            return
+        _register_factories_to(get_default_registry())
+        registration_state._registered = True
+
+
 def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
     """Explicitly register all pipeline factories with PipelineRegistry.
 
@@ -129,26 +147,10 @@ def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
     # For custom registries, register directly. _register_factories_to() is
     # idempotent at the registry level and skips already-registered pipelines.
     if registry is not None:
-        _register_factories_to(registry)
+        _register_to_explicit_registry(registry)
         return
 
-    registration_state = _get_default_registration_state()
-
-    # Default registry: use idempotency guard
-    # Fast path: already registered (no lock needed)
-    if registration_state._registered:
-        return
-
-    # Slow path: acquire lock and double-check
-    with registration_state._lock:
-        # Double-check after acquiring lock (TOCTOU prevention)
-        if registration_state._registered:
-            return
-
-        default_registry = get_default_registry()
-        _register_factories_to(default_registry)
-
-        registration_state._registered = True
+    _register_default_registry_once(_get_default_registration_state())
 
 
 def _register_factories_to(registry: PipelineRegistry) -> None:
@@ -165,6 +167,11 @@ def _register_factories_to(registry: PipelineRegistry) -> None:
         if pipeline_name in registered_pipelines:
             continue
         registry.register_factory(cast("PipelineFactoryPort", factory))
+
+
+def _list_pipeline_names() -> list[str]:
+    """Return available pipeline names in canonical sorted order."""
+    return sorted(_factories.keys())
 
 
 def is_registered() -> bool:
@@ -209,7 +216,7 @@ def get_factory(pipeline_name: str) -> GenericPipelineFactory[GenericPipeline]:
         KeyError: If pipeline_name is not found
     """
     if pipeline_name not in _factories:
-        available = sorted(_factories.keys())
+        available = _list_pipeline_names()
         raise KeyError(f"Unknown pipeline: {pipeline_name}. Available: {available}")
     return _factories[pipeline_name]
 
@@ -220,7 +227,7 @@ def list_available_pipelines() -> list[str]:
     Returns:
         Sorted list of pipeline names
     """
-    return sorted(_factories.keys())
+    return _list_pipeline_names()
 
 
 _PIPELINE_FACTORY_API = (

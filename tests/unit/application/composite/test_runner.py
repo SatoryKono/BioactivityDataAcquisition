@@ -450,11 +450,14 @@ class TestFSMSeedFailure:
             call.kwargs["stage"]
             for call in run_ledger_service.record_stage_started.call_args_list
         ] == [COMPOSITE_RUN_LEDGER_STAGE_NAMES[0]]
-        run_ledger_service.record_run_failed.assert_called_once_with(
-            message="boom",
-            error_type="RuntimeError",
-            metrics_snapshot={},
-        )
+        run_ledger_service.record_run_exception.assert_called_once()
+        error = run_ledger_service.record_run_exception.call_args.kwargs["error"]
+        assert isinstance(error, RuntimeError)
+        assert str(error) == "boom"
+        assert run_ledger_service.record_run_exception.call_args.kwargs[
+            "metrics_snapshot"
+        ] == {}
+        run_ledger_service.record_run_failed.assert_not_called()
 
 
 class TestFSMSeedResume:

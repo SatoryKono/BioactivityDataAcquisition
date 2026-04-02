@@ -202,9 +202,8 @@ class CompositeRunnerControlPlaneMixin:
     ) -> None:
         """Append ``run_failed`` when control-plane ledger is attached."""
         self._record_with_ledger_service(
-            lambda ledger_service: ledger_service.record_run_failed(
-                message=str(error),
-                error_type=type(error).__name__,
+            lambda ledger_service: ledger_service.record_run_exception(
+                error=error,
                 metrics_snapshot={},
             )
         )

@@ -144,12 +144,12 @@
       },
       "targets": [
         {
-          "expr": "bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}",
+          "expr": "sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
           "legendFormat": "{{pipeline}} / {{stage}}",
           "refId": "A"
         }
       ],
-      "title": "Data Flow: Bronze -> Silver -> Gold",
+      "title": "Data Flow in Range: Bronze -> Silver -> Gold",
       "type": "timeseries"
     },
     {
@@ -257,12 +257,13 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"})",
+          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
+          "instant": true,
           "legendFormat": "Bronze",
           "refId": "A"
         }
       ],
-      "title": "Source Records (Bronze)",
+      "title": "Source Records in Range (Bronze)",
       "type": "stat"
     },
     {
@@ -310,12 +311,13 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"})",
+          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
+          "instant": true,
           "legendFormat": "Gold",
           "refId": "A"
         }
       ],
-      "title": "Clean Records (Gold)",
+      "title": "Clean Records in Range (Gold)",
       "type": "stat"
     },
     {
@@ -370,12 +372,12 @@
       },
       "targets": [
         {
-          "expr": "avg(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
-          "legendFormat": "Validation Score",
+          "expr": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}) or vector(0)",
+          "legendFormat": "Worst Entity",
           "refId": "A"
         }
       ],
-      "title": "DQ Validation Score",
+      "title": "Worst-Entity DQ Score",
       "type": "gauge"
     },
     {
@@ -1057,12 +1059,12 @@
       },
       "targets": [
         {
-          "expr": "min(bioetl_records_processed_created{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}) * 1000",
-          "legendFormat": "Start Time",
+          "expr": "max(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 1000",
+          "legendFormat": "Latest Data",
           "refId": "A"
         }
       ],
-      "title": "Execution Timestamp",
+      "title": "Latest Data Timestamp",
       "type": "stat"
     }
   ],

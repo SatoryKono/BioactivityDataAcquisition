@@ -22,7 +22,7 @@ Last verified: '2026-03-29'
 ## Подтверждено по JSON
 
 - Все 4 дашборда используют `refresh: 30s`.
-- `time.from`: `1. Overview` / `4. Data Quality` = `now-7d`; `2. Runtime` / `3. Provider Health` = `now-12h`.
+- `time.from` для всех 4 shipped dashboards = `now-12h`.
 - Переменные `overview/dq/runtime`: `$pipeline`, `$run_type`.
 - Переменные `provider-health-v2`: `$provider`.
 - В JSON отсутствуют `$run_id` и `execution`.
@@ -47,7 +47,7 @@ sum(increase(bioetl_silver_validation_failures_total{table=~"$pipeline"}[24h]))
 5. Актуальный repeated latency gauge:
 
 ```promql
-histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_bucket{provider="$provider"}[5m])))
+histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))
 ```
 
 6. Добавлен operator drilldown surface:
@@ -55,18 +55,34 @@ histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_b
 - `bioetl-overview-v2`, `bioetl-dq-v2`, `bioetl-provider-health-v2` теперь содержат
   dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)`;
 - `overview.id=1`, `dq.id=1`, `provider.id=1` дублируют этот handoff через data links;
-- Loki links используют low-cardinality entrypoint `{job="bioetl"}` и regex filter
-  по JSON-полю `pipeline` или `provider`;
+- Loki links используют low-cardinality entrypoint `{job="bioetl"}` без encoded
+  interpolation dashboard variables внутри Explore payload;
 - Tempo links сохраняют текущее time range и открывают trace search без попытки
   вводить high-cardinality trace filters.
 
 7. Добавлен отдельный runtime dashboard:
 
-- `bioetl-runtime` собирает Loki-backed `Warnings (1h)` и `Unstructured Logs (1h)`;
-- Prometheus-backed панели `Alert Conditions` показывают условия из shipped rule pack,
-  а не реальный firing-state alert engine;
+- `bioetl-runtime` собирает Loki-backed `Warnings` и `Unstructured Logs` за выбранный
+  Grafana time range;
+- panel `Log Hygiene Trend` теперь действительно является timeseries и использует
+  adaptive bucket size через `$__interval`;
+- Prometheus-backed панели `Alert Conditions` привязаны к тем же fixed windows, что и
+  shipped rule pack, но по-прежнему не являются real firing-state alert engine;
 - runtime dashboard содержит `Back to Overview` и Explore surfaces; переходы
   к `3. Provider Health` и `4. Data Quality` идут через `1. Overview`.
+
+8. Исправлена selected-range семантика counter-панелей:
+
+- `bioetl-overview-v2` и `bioetl-dq-v2` больше не используют сырые cumulative
+  значения `bioetl_records_processed_total` для range-based KPI;
+- range summaries и distributions используют `increase(...[$__range])`, а trend-панели
+  используют `increase(...[$__interval])`.
+
+9. Убрана misleading зависимость от Prometheus `*_created`:
+
+- панели `Execution Timestamp` заменены на `Latest Data Timestamp`;
+- источником теперь служит доменная gauge-метрика `bioetl_data_freshness_seconds`,
+  а не bookkeeping series клиента Prometheus.
 
 8. Синхронизирована dashboard-навигация:
 

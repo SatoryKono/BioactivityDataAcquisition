@@ -675,8 +675,8 @@ shipped pack.
 **Файл:** `grafana/dashboards/bioetl-overview-v2.json`
 **UID:** `bioetl-overview-v2`
 **Refresh:** 30 секунд
-**Time range:** Последние 7 дней
-**Назначение:** Обзор, оптимизированный для анализа конкретного запуска. Включает информационные панели (Pipeline, Run Type), круговые диаграммы распределения, и gauge качества.
+**Time range:** Последние 12 часов
+**Назначение:** Обзор operator-facing selected-range сигналов: stage volume, distribution, yield, control-plane и lineage health.
 
 ### Панели
 
@@ -684,19 +684,19 @@ shipped pack.
 |---|---|---|---|---|
 | 99 | Pipeline | Stat | `max(label_values(bioetl_records_processed_total{...}, pipeline)) or vector(0)` | Информационная панель с именем текущего пайплайна. |
 | 100 | Run Type | Stat | `max(label_values(bioetl_records_processed_total{..., run_type=~"$run_type"}, run_type)) or vector(0)` | Информационная панель с текущим типом запуска. |
-| 1 | Processing Pipeline | Timeseries | `sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}) by (stage)` | Временная серия обработки по стадиям. |
-| 2 | Stage Distribution | Piechart | `sum(...) by (stage)` | Круговая диаграмма: распределение записей по Bronze/Silver/Gold/Quarantined. |
-| 3 | Pipeline Distribution | Piechart | `sum(...) by (pipeline)` | Круговая диаграмма: распределение записей по пайплайнам. |
-| 4 | Overall Quality | Gauge | `sum(...stage="gold") / sum(...stage="bronze")` | Gauge качества с 4-уровневой шкалой: <50% красный, 50-80% оранжевый, 80-95% жёлтый, >95% зелёный. |
-| 101 | Execution Timestamp | Stat | `min(bioetl_records_processed_created{pipeline=~"$pipeline", run_type=~"$run_type"})` | Timestamp начала выполнения (из автоматической метрики `_created`). |
+| 1 | Processing Volume by Stage | Timeseries | `sum by (stage) (increase(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Stage volume в пределах активного окна Grafana. |
+| 2 | Stage Distribution in Range | Piechart | `sum by (stage) (increase(...[$__range]))` | Распределение selected-range объёма по Bronze/Silver/Gold/Quarantined. |
+| 3 | Pipeline Distribution in Range | Piechart | `sum by (pipeline) (increase(...[$__range]))` | Распределение selected-range объёма по пайплайнам. |
+| 4 | Overall Yield (Selected Range) | Gauge | `gold[$__range] / clamp_min(bronze[$__range], 1)` | Gauge selected-range yield для выбранных pipeline/run_type. |
+| 101 | Latest Data Timestamp | Stat | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})` | Последний observed ingestion timestamp из доменной freshness-метрики. |
 | 118 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный shipped signal для Silver filter rejection за текущее временное окно Grafana; не смешивается с DQ quarantine. |
 | 119 | Silver Filter Reject Rate | Gauge | `filtered_out[$__range] / clamp_min(bronze[$__range], 1)` | Доля intentionally excluded Silver filters относительно Bronze input за текущее временное окно Grafana. |
 
-**Используемые метрики:** `records_processed_total`, `records_processed_created`.
+**Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
 **Drilldown:** dashboard links `2. Runtime`, `3. Provider Health`,
 `4. Data Quality`, `Explore Logs (Loki)` и `Explore Traces (Tempo)` используют
-текущее временное окно. Panel `Processing Pipeline` дублирует Explore handoff
+текущее временное окно. Panel `Processing Volume by Stage` дублирует Explore handoff
 через data links для быстрого перехода в Grafana Explore.
 
 ---
@@ -706,8 +706,8 @@ shipped pack.
 **Файл:** `grafana/dashboards/bioetl-dq-v2.json`
 **UID:** `bioetl-dq-v2`
 **Refresh:** 30 секунд
-**Time range:** Последние 7 дней
-**Назначение:** Data Quality мониторинг, оптимизированный для анализа конкретного запуска. Включает информационные панели, gauge качества, счётчики Bronze/Gold, и timestamp выполнения.
+**Time range:** Последние 12 часов
+**Назначение:** Data Quality мониторинг selected-range сигналов: flow volume, DQ score, quarantine, freshness и schema-validation failures.
 
 ### Панели
 
@@ -715,23 +715,24 @@ shipped pack.
 |---|---|---|---|---|
 | 99 | Pipeline | Stat | `max(label_values(..., pipeline)) or vector(0)` | Информационная панель пайплайна. |
 | 100 | Run Type | Stat | `max(label_values(..., run_type)) or vector(0)` | Информационная панель типа запуска. |
-| 1 | Data Flow | Timeseries | `bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}` | Полный поток данных: Bronze → Silver → Gold. Легенда: `{{pipeline}} / {{stage}}`. |
+| 1 | Data Flow in Range: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Selected-range поток данных Bronze → Silver → Gold. |
 | 2 | Data Quality Score | Gauge | `avg(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)` | Канонический DQ gauge на базе `bioetl_dq_validation_score`: красный (<50%), оранжевый (50-80%), жёлтый (80-95%), зелёный (>95%). |
-| 3 | Source Records (Bronze) | Stat | `sum(bioetl_records_processed_total{...stage="bronze"})` | Общее количество входных записей. |
-| 4 | Clean Records (Gold) | Stat | `sum(bioetl_records_processed_total{...stage="gold"})` | Общее количество финальных чистых записей. |
+| 3 | Source Records in Range (Bronze) | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))` | Объём Bronze input за активное Grafana окно. |
+| 4 | Clean Records in Range (Gold) | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))` | Объём Gold output за активное Grafana окно. |
+| 5 | Worst-Entity DQ Score | Gauge | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)` | Худший observed DQ score по сущностям внутри выбранного pipeline scope. |
 | 117 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный счётчик Silver filter rejects за текущее временное окно; не заменяет `Records Quarantined`. |
 | 118 | Silver Filter Rejects by Pipeline | Bar gauge | `sum by (pipeline) (increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))` | Breakdown intentional Silver exclusions по выбранным pipeline values за текущее временное окно. |
-| 101 | Execution Timestamp | Stat | `min(bioetl_records_processed_created{...})` | Timestamp начала выполнения. |
+| 101 | Latest Data Timestamp | Stat | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})` | Последний observed ingestion timestamp внутри выбранного pipeline scope. |
 
-**Используемые метрики:** `records_processed_total`, `records_processed_created`.
+**Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
 Важно: shipped DQ surface теперь явно различает два потока.
 - DQ quarantine = `bioetl_dq_records_quarantined_total`
 - Silver filter rejects = `bioetl_records_processed_total{stage="filtered_out"}`
 
 **Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и
-`Explore Traces (Tempo)` используют текущее временное окно. Panel `Data Flow:
-Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
+`Explore Traces (Tempo)` используют текущее временное окно. Panel `Data Flow in
+Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
 incidents и freshness investigation.
 
 ---
@@ -783,9 +784,9 @@ dashboard-variable interpolation. Дополнительное сужение п
 |---|---|---|---|---|
 | 2 | Warnings | Stat | Loki `count_over_time(... level=\"warning\" ... [$__range])` | Количество structured warning logs за текущее временное окно Grafana по `$pipeline`. |
 | 3 | Unstructured Logs | Stat | Loki `count_over_time(... | json | __error__!=\"\" ... [$__range])` | Объём строк, не соответствующих shipped JSON log contract, за текущее временное окно Grafana. |
-| 4 | DQ Alert Conditions | Stat | Prometheus | Суммарный triage-signal по soft-threshold, critical validation/anomaly и silver validation failures за текущее временное окно Grafana. |
-| 5 | Control-plane Alert Conditions | Stat | Prometheus | Failures по manifest writes, ledger appends, checkpoint incompatibility и missing lineage refs за текущее временное окно Grafana. |
-| 6 | Provider Alert Conditions | Stat | Prometheus | Provider failure-rate и retry-exhaustion conditions за текущее временное окно Grafana. |
+| 4 | DQ Alert Conditions | Stat | Prometheus | Суммарный triage-signal по shipped DQ alert families, привязанный к тем же fixed windows, что и rule pack (`15m`/`30m`). |
+| 5 | Control-plane Alert Conditions | Stat | Prometheus | Failures по manifest writes, ledger appends, checkpoint incompatibility и missing lineage refs, привязанные к shipped alert windows (`15m`/`30m`). |
+| 6 | Provider Alert Conditions | Stat | Prometheus | Provider failure-rate и retry-exhaustion conditions, привязанные к shipped alert windows (`15m` и `1h`). |
 | 7 | Freshness Alert Conditions | Stat | Prometheus | Количество freshness conditions старше 24h. |
 | 8 | Top Warning Events | Bar gauge | Loki | Наиболее частые warning events за текущее временное окно Grafana. |
 | 9 | Log Hygiene Trend | Timeseries | Loki | Тренд warnings против unstructured rows с adaptive bucket size через `$__interval`. |
@@ -1065,7 +1066,7 @@ Counter — монотонно возрастающая метрика. Знач
 
 **Особенности Counter в BioETL:**
 
-Prometheus client автоматически создаёт для каждого Counter дополнительную метрику `_created` с timestamp момента первого инкремента. Например, `bioetl_records_processed_total` порождает `bioetl_records_processed_created`. Эта метрика используется в v2-дашбордах для отображения времени начала выполнения пайплайна (панель "Execution Timestamp").
+Prometheus client автоматически создаёт для каждого Counter дополнительную метрику `_created` с timestamp момента первого инкремента. Например, `bioetl_records_processed_total` порождает `bioetl_records_processed_created`. Эти bookkeeping series не следует напрямую показывать в operator dashboards как доменное время выполнения пайплайна.
 
 При работе с Counter в PromQL почти всегда используется функция `rate()` или `increase()`, поскольку сырое значение Counter (кумулятивная сумма) менее информативно, чем скорость изменения.
 
@@ -1654,12 +1655,12 @@ open http://localhost:9090/alerts
 | Дашборд | UID | Версия | Panels | Refresh | Time Range | Метрики | Назначение |
 |---|---|---|---|---|---|---|---|
 | BioETL Overview | `bioetl-overview` | 1 | 8 | 30s | 6h | `records_processed_total`, `errors_total`, `pipeline_duration_seconds`, `batch_size_records`, `data_freshness_seconds`, `filter_ids_*` | Полный обзор пайплайнов |
-| 1. Overview | `bioetl-overview-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | Обзор конкретного запуска |
+| 1. Overview | `bioetl-overview-v2` | 2 | 7 | 30s | 12h | `records_processed_total`, `data_freshness_seconds` | Selected-range overview по pipeline/control-plane/lineage |
 | 2. Runtime | `bioetl-runtime` | 1 | 9 | 30s | 12h | `control_plane_*`, `dq_*`, `health_check_*`, `data_source_retry_exhausted_total` + Loki log hygiene queries | Runtime triage: warnings, unstructured logs, alert conditions |
 | BioETL Provider Health | `bioetl-provider-health` | 1 | 6 | 30s | 6h | `records_processed_total`, `batch_size_records` | Пропускная способность по стадиям |
 | 3. Provider Health | `bioetl-provider-health-v2` | 2 | 5 | 30s | 12h | `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам |
 | BioETL Data Quality | `bioetl-dq` | 1 | 4 | 30s | 6h | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records` | DQ мониторинг с перцентилями |
-| 4. Data Quality | `bioetl-dq-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | DQ для конкретного запуска |
+| 4. Data Quality | `bioetl-dq-v2` | 2 | 7 | 30s | 12h | `records_processed_total`, `data_freshness_seconds` | Selected-range DQ surface |
 
 ---
 

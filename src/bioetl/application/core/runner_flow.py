@@ -163,9 +163,8 @@ def record_run_failed(
     """Append failed completion ledger entry."""
     _record_with_ledger_service(
         host,
-        lambda ledger_service: ledger_service.record_run_failed(
-            message=str(exc),
-            error_type=type(exc).__name__,
+        lambda ledger_service: ledger_service.record_run_exception(
+            error=exc,
             metrics_snapshot=host.execution_metrics,
         ),
     )

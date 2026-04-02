@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import Any, cast
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
@@ -69,7 +70,7 @@ class TestBuildPostrunService:
 
     def test_build_postrun_service_constructs_data_quality_service(self) -> None:
         """DataQualityService should be constructed from pipeline wiring."""
-        pipeline = _make_pipeline()
+        pipeline = cast(Any, _make_pipeline())
         logger = MagicMock()
         lifecycle_service = MagicMock()
         dq_configs = DQConfigsContext(bronze=None, silver=None, gold=None)
@@ -123,7 +124,7 @@ class TestBuildPostrunService:
 
     def test_build_postrun_service_passes_outer_wiring_to_dependencies(self) -> None:
         """Dependency builder should receive pipeline services and DQ configs."""
-        pipeline = _make_pipeline()
+        pipeline = cast(Any, _make_pipeline())
         logger = MagicMock()
         lifecycle_service = MagicMock()
         bronze_config = MagicMock()

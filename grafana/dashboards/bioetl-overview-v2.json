@@ -174,12 +174,12 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}) by (stage)",
+          "expr": "sum by (stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
           "legendFormat": "{{stage}}",
           "refId": "A"
         }
       ],
-      "title": "Processing Pipeline",
+      "title": "Processing Volume by Stage",
       "type": "timeseries"
     },
     {
@@ -234,12 +234,13 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}) by (stage)",
+          "expr": "sum by (stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+          "instant": true,
           "legendFormat": "{{stage}}",
           "refId": "A"
         }
       ],
-      "title": "Stage Distribution",
+      "title": "Stage Distribution in Range",
       "type": "piechart"
     },
     {
@@ -294,12 +295,13 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}) by (pipeline)",
+          "expr": "sum by (pipeline) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+          "instant": true,
           "legendFormat": "{{pipeline}}",
           "refId": "A"
         }
       ],
-      "title": "Pipeline Distribution",
+      "title": "Pipeline Distribution in Range",
       "type": "piechart"
     },
     {
@@ -354,12 +356,13 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}) / clamp_min(sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}), 1)",
+          "expr": "((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0)), 1))",
+          "instant": true,
           "legendFormat": "Quality",
           "refId": "A"
         }
       ],
-      "title": "Overall Quality",
+      "title": "Overall Yield (Selected Range)",
       "type": "gauge"
     },
     {
@@ -414,12 +417,12 @@
       },
       "targets": [
         {
-          "expr": "min(bioetl_records_processed_created{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}) * 1000",
-          "legendFormat": "Start Time",
+          "expr": "max(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 1000",
+          "legendFormat": "Latest Data",
           "refId": "A"
         }
       ],
-      "title": "Execution Timestamp",
+      "title": "Latest Data Timestamp",
       "type": "stat"
     },
     {

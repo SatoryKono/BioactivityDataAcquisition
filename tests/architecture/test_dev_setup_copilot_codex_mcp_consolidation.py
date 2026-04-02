@@ -44,6 +44,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "github",
         "prometheus",
         "grafana",
+        "brave-search",
         "openaiDeveloperDocs",
     }
     assert servers["memory"]["command"] == "npx"
@@ -72,8 +73,10 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert "github-mcp-wrapper.ps1" in servers["github"]["args"][-1]
         assert servers["prometheus"]["command"] == "powershell"
         assert servers["grafana"]["command"] == "powershell"
+        assert servers["brave-search"]["command"] == "powershell"
         assert "mcp_prometheus_wrapper.ps1" in servers["prometheus"]["args"][-1]
         assert "mcp_grafana_wrapper.ps1" in servers["grafana"]["args"][-1]
+        assert "mcp_brave_search_wrapper.ps1" in servers["brave-search"]["args"][-1]
     else:
         assert (
             servers["github"]["args"][1]
@@ -81,11 +84,15 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         )
         assert servers["prometheus"]["command"] == "bash"
         assert servers["grafana"]["command"] == "bash"
+        assert servers["brave-search"]["command"] == "bash"
         assert servers["prometheus"]["args"][-1].endswith(
             "scripts/ops/mcp_prometheus_wrapper.sh"
         )
         assert servers["grafana"]["args"][-1].endswith(
             "scripts/ops/mcp_grafana_wrapper.sh"
+        )
+        assert servers["brave-search"]["args"][-1].endswith(
+            "scripts/ops/mcp_brave_search_wrapper.sh"
         )
     assert servers["openaiDeveloperDocs"]["type"] == "http"
     assert (

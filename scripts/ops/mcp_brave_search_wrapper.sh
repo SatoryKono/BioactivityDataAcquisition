@@ -24,10 +24,12 @@ resolve_docker_bin() {
   exit 1
 }
 
+if [[ -z "${BRAVE_API_KEY:-}" ]]; then
+  printf "BRAVE_API_KEY is required for brave-search MCP.\n" >&2
+  exit 1
+fi
+
 docker_bin="$(resolve_docker_bin)"
-prometheus_url="${PROMETHEUS_URL:-http://host.docker.internal:9090}"
 exec "${docker_bin}" run --rm -i \
-  ghcr.io/pab1it0/prometheus-mcp-server \
-  --transport stdio \
-  --prometheus-url "${prometheus_url}" \
-  "$@"
+  -e "BRAVE_API_KEY=${BRAVE_API_KEY}" \
+  mcp/brave-search "$@"

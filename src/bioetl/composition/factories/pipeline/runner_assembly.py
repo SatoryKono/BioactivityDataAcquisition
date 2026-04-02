@@ -241,26 +241,6 @@ def _create_pipeline_runner(
     )
 
 
-def _create_runner_from_assembly_parts(
-    *,
-    pipeline: BasePipeline,
-    observability: ObservabilityBundle,
-    assembly_parts: RunnerAssemblyParts,
-) -> PipelineRunner:
-    """Materialize a PipelineRunner from prebuilt assembly parts."""
-    return _create_pipeline_runner(
-        pipeline=pipeline,
-        observability=observability,
-        executor=assembly_parts.batch_executor,
-        checkpoint_manager=assembly_parts.checkpoint_manager,
-        lock_manager=assembly_parts.lock_manager,
-        preflight_service=assembly_parts.preflight_service,
-        postrun_service=assembly_parts.postrun_service,
-        lifecycle_service=assembly_parts.lifecycle_service,
-        observer=assembly_parts.observer,
-    )
-
-
 def _assemble_runner_parts(
     *,
     pipeline: BasePipeline,
@@ -340,20 +320,7 @@ def assemble_runner_impl(
     ],
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    """Assemble a PipelineRunner from a configured pipeline instance.
-
-    Args:
-        pipeline: Configured pipeline instance with services, context, and runtime.
-        observability: Bundle containing logger, tracer, metrics, and DQ monitor.
-        silver_schema: Optional PyArrow schema for Silver layer validation.
-        gold_schema: Pandera DataFrameModel class for Gold layer validation.
-        strict_gold_validation: If True, raises on Gold schema violations.
-        yaml_config: Optional pre-loaded pipeline YAML config for DQ path extraction.
-        dq_configs_extractor: Callable extracting DQ configs from YAML config.
-
-    Returns:
-        Fully wired PipelineRunner ready for execution.
-    """
+    """Assemble the fully wired PipelineRunner for one configured pipeline."""
     logger_port = observability.logger
     assembly_parts = _assemble_runner_parts(
         pipeline=pipeline,
@@ -365,8 +332,14 @@ def assemble_runner_impl(
         strict_gold_validation=strict_gold_validation,
         dq_configs_extractor=dq_configs_extractor,
     )
-    return _create_runner_from_assembly_parts(
+    return _create_pipeline_runner(
         pipeline=pipeline,
         observability=observability,
-        assembly_parts=assembly_parts,
+        executor=assembly_parts.batch_executor,
+        checkpoint_manager=assembly_parts.checkpoint_manager,
+        lock_manager=assembly_parts.lock_manager,
+        preflight_service=assembly_parts.preflight_service,
+        postrun_service=assembly_parts.postrun_service,
+        lifecycle_service=assembly_parts.lifecycle_service,
+        observer=assembly_parts.observer,
     )

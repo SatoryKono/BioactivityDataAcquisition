@@ -44,8 +44,8 @@ sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type",
 # Provider Health p95
 histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))
 
-# Provider repeat panel (ID 102)
-histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_bucket{provider="$provider"}[5m])))
+# Provider latency panel (ID 102)
+histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))
 ```
 
 ## Зависимости
