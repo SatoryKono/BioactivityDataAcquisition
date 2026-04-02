@@ -191,7 +191,7 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_bronze_records_written_total` | Counter | provider, entity | Записи в Bronze |
 | `bioetl_bronze_bytes_written_total` | Counter | provider, entity | Байты в Bronze |
 | `bioetl_policy_violations_total` | Counter | layer, mode | Нарушения политик |
-| `bioetl_silver_validation_failures_total` | Counter | table | Ошибки валидации Silver |
+| `bioetl_silver_validation_failures_total` | Counter | table, pipeline | Ошибки валидации Silver |
 
 #### Input Filter Metrics
 

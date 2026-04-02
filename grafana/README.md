@@ -600,7 +600,7 @@ Host Machine (Windows/macOS/Linux)
 | `bioetl_bronze_records_written_total` | Counter | `provider`, `entity` | Количество записей, записанных в Bronze. |
 | `bioetl_bronze_bytes_written_total` | Counter | `provider`, `entity` | Количество байт, записанных в Bronze (compressed). |
 | `bioetl_policy_violations_total` | Counter | `layer`, `mode` | Количество нарушений write policy. |
-| `bioetl_silver_validation_failures_total` | Counter | `table` | Количество ошибок валидации Silver schema. |
+| `bioetl_silver_validation_failures_total` | Counter | `table`, `pipeline` | Количество ошибок валидации Silver schema. |
 
 ### 5.9 Shutdown Metrics
 

@@ -292,6 +292,19 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
             )
 
 
+def test_silver_validation_alert_groups_by_pipeline_and_table() -> None:
+    payload = _load_rules()
+    rule_map = _build_rule_map(payload)
+
+    rule = rule_map["BioETLSilverValidationFailuresDetected"]
+    expr = rule.get("expr", "")
+    description = rule.get("annotations", {}).get("description", "")
+
+    assert "sum by (pipeline, table)" in expr
+    assert "{{ $labels.pipeline }}" in description
+    assert "{{ $labels.table }}" in description
+
+
 def test_threshold_smoke_examples_cover_warning_and_critical_boundaries() -> None:
     """Smoke representative threshold scenarios to guard boundary regressions."""
     quarantine_cases = [

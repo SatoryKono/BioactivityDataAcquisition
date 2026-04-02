@@ -233,7 +233,45 @@ class TestSilverWriterValidateSilverPandera:
         mock_metrics.increment_counter.assert_called_once_with(
             "silver_validation_failures_total",
             1,
-            {"table": "test.table"},
+            {"table": "test.table", "pipeline": "test_table"},
+        )
+
+    @pytest.mark.skipif(
+        PYTHON_314,
+        reason="Pandera 0.26.1 has compatibility issues with Python 3.14",
+    )
+    def test_validate_silver_pandera_uses_pipeline_label_for_versioned_tables(self):
+        """Validation failure metrics should expose canonical pipeline labels."""
+        import pandera as pa
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        schema = pa.DataFrameSchema(
+            {
+                "entity_id": pa.Column(str),
+                "value": pa.Column(float, checks=pa.Check.ge(0)),
+            }
+        )
+        validator = PanderaSilverValidator(schema=schema)
+        mock_metrics = MagicMock()
+        writer = SilverWriter(
+            base_path="/tmp/silver",
+            logger=NoOpLogger(),
+            silver_validator=validator,
+            metrics=mock_metrics,
+        )
+        records = [{"entity_id": "CHEMBL123", "value": -5.5}]
+
+        with pytest.raises(SchemaViolationError):
+            writer._validate_silver_pandera(records, "chembl.activity__v1_0_0")
+
+        mock_metrics.increment_counter.assert_called_once_with(
+            "silver_validation_failures_total",
+            1,
+            {
+                "table": "chembl.activity__v1_0_0",
+                "pipeline": "chembl_activity",
+            },
         )
 
 

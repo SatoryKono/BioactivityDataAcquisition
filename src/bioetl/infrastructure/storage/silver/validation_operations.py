@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+import re
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import pyarrow as pa
@@ -54,6 +55,8 @@ __all__ = [
     "_validate_silver_pandera",
     "_validate_write_mode_impl",
 ]  # NOTE: _check_schema_drift, _detect_schema_drift, _build_* re-exported from schema_drift_operations
+
+_VERSIONED_TABLE_SUFFIX_RE = re.compile(r"__v\d+_\d+_\d+$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,6 +121,12 @@ class _SilverWriterValidationHostProtocol(Protocol):
         list[BronzeRecord],
     ]
     _to_policy_write_mode: Callable[[SilverWriteMode], WriteMode]
+
+
+def _pipeline_name_from_table_name(table_name: str) -> str:
+    """Derive the canonical pipeline label from a logical or versioned table name."""
+    normalized_table = _VERSIONED_TABLE_SUFFIX_RE.sub("", table_name.strip())
+    return normalized_table.replace(".", "_").replace("/", "_")
     _validate_key_nullability: Callable[
         [
             list[BronzeRecord],
@@ -325,7 +334,10 @@ def _validate_silver_pandera(
             host._metrics.increment_counter(
                 "silver_validation_failures_total",
                 1,
-                {"table": table_name},
+                {
+                    "table": table_name,
+                    "pipeline": _pipeline_name_from_table_name(table_name),
+                },
             )
         raise SchemaViolationError(table_name, result.errors)
 

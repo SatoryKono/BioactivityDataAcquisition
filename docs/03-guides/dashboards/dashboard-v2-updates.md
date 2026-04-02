@@ -34,7 +34,7 @@ Last verified: '2026-03-29'
 3. Исправлен DQ panel `id=12`:
 
 ```promql
-sum(increase(bioetl_silver_validation_failures_total{table=~"$pipeline"}[24h]))
+sum(increase(bioetl_silver_validation_failures_total{pipeline=~"$pipeline"}[24h]))
 ```
 
 4. Упрощён `3. Provider Health`:
