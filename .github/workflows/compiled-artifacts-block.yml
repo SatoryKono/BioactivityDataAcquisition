@@ -1,4 +1,4 @@
-﻿name: Block Compiled Python Artifacts
+name: Block Compiled Python Artifacts
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Fail if *.pyc or __pycache__ exists
         run: |

@@ -1,4 +1,4 @@
-﻿name: Validate vendored Mermaid
+name: Validate vendored Mermaid
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -22,7 +22,7 @@ jobs:
         timeout-minutes: 5
         steps:
             -   name: Checkout repository
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Run mermaid check (warn, don't fail)
                 run: |
