@@ -9,7 +9,6 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
@@ -17,11 +16,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.checkpoint import (
-    CompositeCheckpointManager,
     CompositeCheckpointState,
-)
-from bioetl.infrastructure.storage.support.checkpoint_writer import (
-    FileCompositeCheckpointWriter,
 )
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
@@ -37,15 +32,70 @@ from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import RunnerAlreadyExecutedError
 from bioetl.domain.locking import FencingToken
 
-if TYPE_CHECKING:
-    from pathlib import Path
-
 _MOCK_TOKEN = FencingToken(
     sequence=1,
     key="lock:mock",
     owner_id=UUID("00000000-0000-0000-0000-000000000000"),
     issued_at=0.0,
 )
+
+
+class InMemoryCheckpointManager:
+    """Minimal checkpoint manager fake for CompositePipelineRunner unit tests."""
+
+    expected_effective_config_hash = ""
+    expected_contract_ref = ""
+    expected_contract_version = ""
+    expected_manifest_id = ""
+
+    def __init__(
+        self,
+        *,
+        composite_name: str,
+        run_id: str,
+        logger: MagicMock,
+        resume: bool = False,
+    ) -> None:
+        self._composite_name = composite_name
+        self._run_id = run_id
+        self._logger = logger
+        self._resume = resume
+        self._state = CompositeCheckpointState(
+            composite_name=composite_name,
+            run_id=run_id,
+            created_at=datetime.now(tz=UTC),
+        )
+
+    async def load(self) -> CompositeCheckpointState:
+        return self._state
+
+    async def save(self, state: CompositeCheckpointState) -> None:
+        self._state = state
+
+    async def delete(self) -> None:
+        return None
+
+    async def delete_orphaned(self) -> int:
+        return 0
+
+    async def list_all(self) -> list[str]:
+        return []
+
+
+def create_checkpoint_manager(
+    *,
+    composite_name: str,
+    run_id: str,
+    logger: MagicMock,
+    resume: bool = False,
+) -> InMemoryCheckpointManager:
+    """Create a lightweight checkpoint manager without filesystem I/O."""
+    return InMemoryCheckpointManager(
+        composite_name=composite_name,
+        run_id=run_id,
+        logger=logger,
+        resume=resume,
+    )
 
 
 # ============================================================================
@@ -154,7 +204,7 @@ def create_runner(
     mock_coordinator: AsyncMock,
     mock_key_extractor: AsyncMock,
     mock_seed_runner: AsyncMock,
-    checkpoint_manager: CompositeCheckpointManager,
+    checkpoint_manager: InMemoryCheckpointManager,
     test_run_id: str,
     runtime: CompositeRuntimeConfig | None = None,
     preflight_validator: MagicMock | None = None,
@@ -198,14 +248,12 @@ class TestDoubleExecutionProtection:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Running the same Runner twice should raise RunnerAlreadyExecutedError."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -245,17 +293,15 @@ class TestDoubleExecutionProtection:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Running a Runner again after failure should also raise error."""
         # Make merge fail
         mock_merger.merge.side_effect = RuntimeError("Merge failed")
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -292,14 +338,12 @@ class TestDoubleExecutionProtection:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Error message should include helpful context."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -345,14 +389,12 @@ class TestFSMTransitionValidation:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Valid FSM transitions should not log warnings."""
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -389,7 +431,6 @@ class TestFSMTransitionValidation:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Resume from FAILED should use allow_resume flag and not warn."""
@@ -411,10 +452,9 @@ class TestFSMTransitionValidation:
             created_at=datetime.now(tz=UTC),
         )
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=True,
         )
@@ -462,7 +502,6 @@ class TestConfigurationConsistency:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """When all enrichers are optional, should log info message."""
@@ -473,10 +512,9 @@ class TestConfigurationConsistency:
         mock_config.enrichers = [enricher1]
         mock_config.required_enrichers = []
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -513,7 +551,6 @@ class TestConfigurationConsistency:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Mismatch in required_enrichers should log warning."""
@@ -524,10 +561,9 @@ class TestConfigurationConsistency:
         mock_config.enrichers = [enricher1]
         mock_config.required_enrichers = []  # But required_enrichers is empty (inconsistent!)
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -569,15 +605,13 @@ class TestPreflightSkipPolicy:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Missing validator should skip preflight explicitly."""
         mock_config.merge.field_priorities = ["doi"]
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -606,15 +640,13 @@ class TestPreflightSkipPolicy:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Empty field priorities should skip preflight explicitly."""
         mock_config.merge.field_priorities = []
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -642,15 +674,13 @@ class TestPreflightSkipPolicy:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Configured validator and field priorities should allow preflight."""
         mock_config.merge.field_priorities = ["doi"]
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -688,7 +718,6 @@ class TestEdgeCases:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """Pipeline with no enrichers should still complete successfully."""
@@ -696,10 +725,9 @@ class TestEdgeCases:
         mock_config.required_enrichers = []
         mock_coordinator.run_enrichers.return_value = {}
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -731,7 +759,6 @@ class TestEdgeCases:
         mock_coordinator: AsyncMock,
         mock_key_extractor: AsyncMock,
         mock_seed_runner: AsyncMock,
-        tmp_path: Path,
         test_run_id: str,
     ) -> None:
         """required_only=True with no required enrichers should skip all."""
@@ -742,10 +769,9 @@ class TestEdgeCases:
         mock_config.required_enrichers = []
         mock_coordinator.run_enrichers.return_value = {}
 
-        checkpoint_manager = CompositeCheckpointManager(
+        checkpoint_manager = create_checkpoint_manager(
             composite_name="test_composite",
             run_id=test_run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )

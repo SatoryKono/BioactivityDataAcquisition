@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # ADR-044: Run Manifest and Run Ledger Control Plane
@@ -178,6 +178,12 @@ The enabled control-plane path follows these invariants:
 Manifest creation is wired into runtime assembly before runner creation.
 Ledger attachment happens during runner construction so lifecycle events are
 appended through one shared control-plane service.
+
+The current composite resume path uses checkpoint snapshot + ledger suffix
+replay. After checkpoint anchors are validated, runtime replays only entries
+strictly after `last_event_id`. This replay is intentionally coarse-grained: it
+restores lifecycle milestones and replay watermark metadata without
+reconstructing rich checkpoint payloads from ledger events.
 
 ## Compliance
 

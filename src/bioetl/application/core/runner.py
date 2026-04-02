@@ -18,9 +18,13 @@ __all__ = ["PipelineRunner"]
 
 from collections.abc import Generator
 from contextlib import contextmanager
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._runner_dependency_support import (
+    PipelineRunnerDependencies,
+    load_runner_checkpoint,
+    resolve_legacy_runner_dependencies,
+)
 from bioetl.application.core._span_helpers import (
     build_pipeline_span_attributes,
     start_current_span,
@@ -51,19 +55,7 @@ if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.batch_executor import BatchExecutor
-    from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
-    )
-    from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
-    from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.core.postrun.service import PostrunService
-    from bioetl.application.core.preflight.service import PreflightService
-    from bioetl.application.observability.observer import PipelineObserver
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
     from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
@@ -89,63 +81,6 @@ _METRICS_CLOSE_EXCEPTIONS = (
     TypeError,
     ValueError,
 )
-
-
-@dataclass(frozen=True, slots=True)
-class PipelineRunnerDependencies:
-    """Grouped collaborators for PipelineRunner."""
-
-    executor: BatchExecutor
-    checkpoint_manager: CheckpointManagerService
-    lock_manager: LockCoordinator
-    preflight: PreflightService
-    postrun: PostrunService
-    lifecycle_service: MedallionLifecycleService
-    observer: PipelineObserver
-    shutdown_signal: ShutdownSignal
-
-
-def _resolve_legacy_dependencies(
-    legacy_kwargs: dict[str, object],
-) -> PipelineRunnerDependencies:
-    """Resolve legacy constructor kwargs into structured dependencies."""
-    values = {
-        "executor": legacy_kwargs.get("executor"),
-        "checkpoint_manager": legacy_kwargs.get("checkpoint_manager"),
-        "shutdown_signal": legacy_kwargs.get("shutdown_signal"),
-        "lock_manager": legacy_kwargs.get("lock_manager"),
-        "preflight": legacy_kwargs.get("preflight"),
-        "postrun": legacy_kwargs.get("postrun"),
-        "lifecycle_service": legacy_kwargs.get("lifecycle_service"),
-        "observer": legacy_kwargs.get("observer"),
-    }
-    missing = [name for name, value in values.items() if value is None]
-    if missing:
-        raise AssertionError("Legacy constructor path requires all legacy parameters")
-    return PipelineRunnerDependencies(
-        executor=cast("BatchExecutor", values["executor"]),
-        checkpoint_manager=cast(
-            "CheckpointManagerService", values["checkpoint_manager"]
-        ),
-        lock_manager=cast("LockCoordinator", values["lock_manager"]),
-        preflight=cast("PreflightService", values["preflight"]),
-        postrun=cast("PostrunService", values["postrun"]),
-        lifecycle_service=cast(
-            "MedallionLifecycleService",
-            values["lifecycle_service"],
-        ),
-        observer=cast("PipelineObserver", values["observer"]),
-        shutdown_signal=cast("ShutdownSignal", values["shutdown_signal"]),
-    )
-
-
-async def _load_checkpoint(
-    checkpoint_manager: CheckpointManagerService,
-) -> CheckpointMetadata | dict[str, object] | None:
-    """Load checkpoint with the current execution metadata."""
-    return await checkpoint_manager.load_checkpoint(
-        current_metadata=checkpoint_manager.current_metadata
-    )
 
 
 class PipelineRunner:
@@ -199,7 +134,7 @@ class PipelineRunner:
         self._services = services
         self._context = context
         if dependencies is None:
-            dependencies = _resolve_legacy_dependencies(legacy_kwargs)
+            dependencies = resolve_legacy_runner_dependencies(legacy_kwargs)
         self._executor = dependencies.executor
         self._checkpoint_manager = dependencies.checkpoint_manager
         self._shutdown_signal = dependencies.shutdown_signal
@@ -343,7 +278,7 @@ class PipelineRunner:
         """Resolve the executor start offset from runtime overrides or checkpoint."""
         return await resolve_execution_offset(
             self,
-            _load_checkpoint,
+            load_runner_checkpoint,
         )
 
     def _extract_checkpoint_offset(

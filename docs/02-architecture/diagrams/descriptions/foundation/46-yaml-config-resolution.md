@@ -1,21 +1,30 @@
 ---
-Version: 1.0.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-02'
 ---
 
-# Title: YAML Configuration Resolution Chain
+# Title: YAML Configuration and Contract Rollout Resolution Chain
 
 - Исходная диаграмма: `foundation/46-yaml-config-resolution.mmd`
 
 ## Описание
-Диаграмма Title: YAML Configuration Resolution Chain из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате flowchart и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 46-yaml-config-resolution. В комментариях исходника зафиксирован фокус диаграммы: Covers: infrastructure/config/pipeline_config_api.py, infrastructure/config/, domain/config/. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Ключевые блоки/подграфы включают: YAML File Hierarchy, DQ Config Hierarchy (DQConfigLoader), Filter Config Hierarchy (FilterConfigLoader), Infrastructure Config Loaders, Domain Config Objects (Frozen). Их состав отражает главные границы ответственности и маршруты взаимодействия между подсистемами или слоями. Показательные узлы диаграммы: YAML File Hierarchy, configs/base/pipeline.yaml (global defaults), configs/providers/{provider}.yaml (provider defaults), configs/entities/{provider}/{entity}.yaml (pipeline config), configs/providers/{provider}.yaml (source config), DQ Config Hierarchy (DQConfigLoader). Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма описывает не только YAML merge path, но и то, как из `contracts`-секции выводятся typed contract policy, runtime rollout value object и planner/runtime routing semantics. Это делает схему актуальной для нынешней версии BioETL, где configuration resolution напрямую определяет version-aware Silver/Gold reads and writes.
+
+Ключевые участки:
+- layered merge base/provider/entity/source остаётся входом для `PipelineYamlConfig`;
+- DQ и filter hierarchies продолжают идти через отдельные loaders;
+- `PipelineContractPolicy` и `ContractRolloutPolicy` теперь явно выведены из того же resolved payload;
+- version-aware routing показывает смысл `read_order`, `write_versions` и `affects_hash`;
+- `ContractMigrationService` и CLI `maintenance plan` используют те же rollout anchors, но уже в planner-only режиме.
+
+Эта схема теперь служит bridge-документом между config resolution, contract rollout и maintenance planning.
 
 ## Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-27`
+- Дата метаданных: `2026-04-02`

@@ -136,187 +136,384 @@ violation, а drift в generated governance artifacts.
 
 ## RF-Style DAG
 
-| RF | Приоритет | Зависит от | Риск |
-|---|---:|---|---|
-| RF-010 Dependency-Map Freshness | completed | - | low |
-| RF-011 Full Verify + Coverage Snapshot | completed | RF-010 | medium |
-| RF-012 Config Topology Closeout | P1 | RF-010 | high |
-| RF-013 Registry Manifest Assembly-Only Guard | P1 | RF-012 | medium |
-| RF-014 Shared Adapter Hotspot 1 (cached bronze) | P2 | RF-011 | medium |
-| RF-015 Shared Adapter Hotspot 2 (title fallback) | P2 | RF-014 | medium |
-| RF-016 Shared Circuit Breaker Contract Unify | P2 | RF-015 | medium-high |
-| RF-017 Replace Smoke-Only Composition Coverage | P2.5 | RF-011 | medium |
-| RF-018 ProviderRegistry Compat Seam No-Growth Ratchet | P3 | RF-011 | low |
+ 1. Нормализовать lifecycle/stage model в RunLedger
+  Цель: сделать execution timeline воспроизводимой и одинаковой для ordinary runner и composite runner.
 
-## Протокол исполнения
+  Модули:
 
-1. Каждый RF исполняется **последовательно**, чтобы не создавать конфликтов по
-   файлам и не смешивать несколько structural волн.
-2. После каждого RF запускаются **параллельно** только два независимых блока:
-   `targeted tests` и `docs/governance checks`.
-3. Любые primary/double-check аудиты запускаются **последовательно**.
+  - src/bioetl/application/core/runner_flow.py
+  - src/bioetl/application/composite/runner_pkg/runner_control_plane_mixin.py
+  - src/bioetl/application/services/run_ledger_service.py
+  - src/bioetl/domain/control_plane/run_ledger.py
 
-## Приоритизированный план рефакторинга
+  Шаги:
 
-### RF-010. Dependency-Map Freshness
+  - Зафиксировать canonical stage taxonomy в domain-level contract.
+  - Свести ordinary/composite paths к одному набору stage names.
+  - Оставить minimal richer timeline: run_started, stage_started, stage_completed, run_finished, run_failed, run_shutdown.
+  - Не вводить новые event types без operational необходимости.
 
-Статус: completed on `2026-03-23`.
+  Риски:
 
-- **Цель:** убрать MUST-дрейф и вернуть доверие к governance artifacts.
-- **Конкретные правки:** обновить только generated файлы
-  [module-dependency-map.md](../02-architecture/generated/module-dependency-map.md)
-  и
-  [module-dependency-map.json](../02-architecture/generated/module-dependency-map.json)
-  через `scripts/qa/generate_architecture_dependency_map.py --update`.
-- **Риски:** можно “подкрасить” картину без понимания фактического изменения
-  графа.
-- **Минимизация рисков:** фиксировать это как generated refresh и не смешивать с
-  ручными doc edits.
-- **Definition of Done:** `generate_architecture_dependency_map.py --check`
-  зелёный, related drift guards зелёные.
+  - сломать inspection/reporting path;
+  - получить несовместимый event stream между old/new runs.
 
-Closeout:
+  Снижение риска:
 
-- dependency-map artifacts обновлены и повторно подтверждены `--check`;
-- generated docs больше не отстают от текущего import graph;
-- freshness дальше удерживается уже как operational ratchet, а не как active
-  refactor track.
+  - сначала ввести contract и canonicalizers;
+  - потом переключать producers;
+  - не менять append-only semantics.
 
-### RF-011. Full Verify + Coverage Snapshot
+  Проверка:
 
-Статус: completed on `2026-03-23`.
+  - tests/unit/application/services/test_run_ledger_service.py
+  - checkpoint/replay suite в tests/unit/application/composite/checkpoint
+  - architecture tests, связанные с execution context
 
-- **Цель:** получить текущий end-to-end confidence baseline после длинной серии
-  refactor waves.
-- **Конкретные правки:** прогнать `pytest tests -q`, собрать coverage snapshot
-  при необходимости, повторно подтвердить `ruff`, `mypy`, compatibility snapshot
-  и dependency-map checks.
-- **Риски:** long-running suite может открыть flaky или ordering-sensitive
-  tests.
-- **Минимизация рисков:** сначала секторные прогоны (`tests/architecture`,
-  `tests/unit`), затем full suite.
-- **Definition of Done:** полный verify bundle зелёный.
+  DoD:
 
-Closeout:
+  - оба runner path пишут одинаковую timeline model;
+  - replay и inspection не требуют special-case логики для composite runner.
 
-- секторные verify-прогоны (`tests/architecture`, `tests/unit`) доведены до
-  стабильного зелёного состояния;
-- полный `pytest tests -q` повторно подтверждён после targeted stability fixes
-  в compatibility/governance и scripts-inventory scan;
-- `ruff`, `mypy`, dependency-map check и compatibility snapshot check
-  повторно подтверждены;
-- отдельный coverage artifact не понадобился для closeout, потому что целевой
-  confidence baseline уже подтверждён полным verify bundle.
+  2. Разгрузить family hotspot в application/core
+  Цель: уменьшить orchestration density в главной pressure zone без top-level reorg.
 
-### RF-012. Config Topology Closeout
+  Модули:
 
-- **Цель:** сделать ownership читабельным как
-  `configs -> infrastructure/config (read/normalize/validate/map) -> composition`.
-- **Конкретные правки:** в
-  `src/bioetl/infrastructure/config/pipeline_config_loader.py`
-  и
-  `src/bioetl/infrastructure/config/dq_config_loader.py`
-  выделить внутренние стадии `reader`, `normalizer`, `validator`, `mapper`;
-  в
-  `src/bioetl/composition/factories/pipeline/registry_manifest.py`
-  оставить только assembly/wiring.
-- **Риски:** высокий blast radius, потому что loaders затрагивают почти весь
-  runtime.
-- **Минимизация рисков:** идти slice-by-slice, сохранить стабильный внешний API
-  loader’ов, использовать golden fixtures и targeted pipeline smoke.
-- **Definition of Done:** config-related tests зелёные, `composition` не владеет
-  normalization logic, ownership story читается без дополнительных compat
-  исключений.
+  - family src/bioetl/application/core
+  - стартовые кандидаты: execution/lifecycle/runner-support subfamilies вокруг runner flow и checkpoint lifecycle
 
-### RF-013. Registry Manifest Assembly-Only Guard
+  Шаги:
 
-- **Цель:** не дать
-  `src/bioetl/composition/factories/pipeline/registry_manifest.py`
-  стать вторым config-owner.
-- **Конкретные правки:** добавить architecture guard, запрещающий
-  `yaml`/config-normalization imports внутри manifest; добавить маленький
-  unit-test на то, что manifest only assembles.
-- **Риски:** guard может стать слишком жёстким.
-- **Минимизация рисков:** запрещать только IO/normalization, но не typed
-  contracts.
-- **Definition of Done:** новый guard зелёный, targeted tests зелёные.
+  - Сделать family map: execution flow, lifecycle, checkpoint support, diagnostics support.
+  - Выделить pure decision logic из крупных orchestration helpers в небольшие application-local modules.
+  - Сокращать coordination-heavy файлы не “по строкам”, а по семантическим seams.
 
-### RF-014. Shared Adapter Hotspot 1: Cached Bronze
+  Риски:
 
-- **Цель:** уменьшить coupling между cache policy, key-building и IO.
-- **Конкретные правки:** в
-  `src/bioetl/infrastructure/adapters/cached_bronze_data_source.py`
-  вынести decision logic в маленький pure helper, отдельно выделить cache-key
-  construction и policy seam.
-- **Риски:** можно незаметно изменить кэш-поведение.
-- **Минимизация рисков:** сначала unit-тесты на decision branches, затем
-  рефакторинг; при необходимости один integration/VCR test.
-- **Definition of Done:** behaviour не изменился, модуль стал уже по
-  ответственности, новые unit-тесты зелёные.
+  - создать лишнюю фрагментацию;
+  - ухудшить discoverability.
 
-### RF-015. Shared Adapter Hotspot 2: Title Fallback
+  Снижение риска:
 
-- **Цель:** сделать fallback behaviour расширяемым и менее плотным.
-- **Конкретные правки:** в
-  `src/bioetl/infrastructure/adapters/common/base_title_fallback.py`
-  выделить `TitleFallbackStrategy` как `Protocol` или маленький ABC, вынести
-  1-2 конкретные стратегии и оставить в основном модуле только оркестрацию.
-- **Риски:** переусложнение простого helper.
-- **Минимизация рисков:** выносить только реально повторяющиеся правила и не
-  дробить без выигрыша в читаемости.
-- **Definition of Done:** код стал проще читать, стратегии покрыты unit-тестами.
+  - дробить только по bounded responsibilities;
+  - после каждого шага смотреть на file size, fan-in, imports.
 
-### RF-016. Shared Circuit Breaker Contract Unify
+  Проверка:
 
-- **Цель:** убрать скрытую дубликацию state/decision semantics.
-- **Конкретные правки:** вынести общий typed seam для breaker-state и transition
-  logic, который будет использоваться и в
-  `src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py`,
-  и в
-  `src/bioetl/infrastructure/adapters/http/circuit_breaker.py`.
-- **Риски:** регрессии в resiliency path.
-- **Минимизация рисков:** сначала стабилизировать unit-тесты на state
-  transitions, публичные API не менять.
-- **Definition of Done:** shared typed contract существует, дублирование
-  уменьшено, unit/integration tests зелёные.
+  - tests/architecture/test_code_metrics.py
+  - tests/architecture/test_regression_metrics.py
+  - smoke unit suites по runner/checkpoint flows
 
-### RF-017. Replace Smoke-Only Composition Coverage
+  DoD:
 
-- **Цель:** перенести часть confidence с import-only smoke на поведенческие
-  unit-тесты.
-- **Конкретные правки:** взять 3-5 часто меняемых модулей из
-  `tests/smoke/test_smoke_composition.py`
-  и добавить unit-тесты формата “build returns expected port/bundle shape”,
-  “dependency injected”, “no import-time side effects”.
-- **Риски:** brittle wiring-tests.
-- **Минимизация рисков:** тестировать shape и contract, а не конкретные
-  реализации и не весь DI-graph.
-- **Definition of Done:** список модулей “без dedicated coverage” сокращён,
-  новые unit-тесты зелёные.
+  - hotspot family становится легче читать;
+  - крупные orchestration модули превращаются в thin coordinators.
 
-### RF-018. ProviderRegistry Compat Seam No-Growth Ratchet
+  3. Уменьшить coordination gravity в application services
+  Цель: не дать src/bioetl/application/services/run_ledger_service.py и src/bioetl/application/services/pipeline_runner_service.py стать god-service hubs.
 
-- **Цель:** удержать compat seam как watchlist, не открывая новую миграцию.
-- **Конкретные правки:** добавить/сохранить guard против новых raw
-  `ProviderRegistry.*` call sites в `src`, кроме уже санкционированных seams.
-- **Риски:** почти отсутствуют, если guard baseline-aware.
-- **Минимизация рисков:** не менять runtime semantics.
-- **Definition of Done:** compat seam не растёт, tests фиксируют non-growth.
+  Модули:
 
-## Метрики и ожидаемый рост балла
+  - src/bioetl/application/services/run_ledger_service.py
+  - src/bioetl/application/services/pipeline_runner_service.py
+  - связанные helper services рядом в application/services
 
-| Категория | Контрольные метрики и тесты | Целевой балл после ключевых шагов |
-|---|---|---:|
-| Layer Boundaries | `tests/architecture/test_forbidden_imports.py`, `tests/architecture/test_private_module_imports.py` | 9.0 |
-| Hexagonal + DDD Fit | `tests/architecture/test_domain_public_api.py`, отсутствие infra-imports в `domain/application` | 8.0 |
-| Dependency Injection | targeted review/grep на hard-coded constructors вне `composition`, composition tests | 8.0 |
-| Module Boundary Clarity | новые guards для `registry_manifest.py`, уменьшение responsibilities в config loaders | 8.0 |
-| Topology / Hotspots | bounded refactors в shared adapters, сохранение reduced-SCC state | 8.0 |
-| Testing + Quality Governance | `pytest tests -q`, новые unit-тесты вместо части smoke-only confidence | 9.5 |
-| Docs + Governance Freshness | `generate_architecture_dependency_map.py --check`, `generate_compatibility_facade_snapshot.py --check` | 8.0 |
-| Config Ownership Flow | focused tests на loaders, anti-leak guard для `composition` | 9.0 |
-| Naming + Package Consistency | `ruff`, `mypy`, architecture/doc guards без нового drift | 8.5 |
-| Extensibility / Maintainability | локализация shared adapter logic и более дешёвые изменения в `composition` | 8.0 |
+  Шаги:
 
-Если реализовать `RF-010..RF-017`, реалистичный целевой интегральный балл:
-**8.4-8.8 / 10.0**.
+  - Вынести payload normalization и diagnostic anchor assembly в private helpers/modules.
+  - Оставить сервисам orchestration role и thin public API.
+  - Отделить logger correlation, metrics/result normalization и policy branching.
+
+  Риски:
+
+  - размазать ответственность между слишком многими helper-модулями;
+  - случайно сломать public API сервисов.
+
+  Снижение риска:
+
+  - public methods не менять без необходимости;
+  - helper extraction делать только для pure logic.
+
+  Проверка:
+
+  - unit tests на сервисы;
+  - mypy strict на application/services;
+  - architecture checks на logging/structlog contracts
+
+  DoD:
+
+  - сервисы заметно короче и линейнее;
+  - behaviour unchanged;
+  - новые cross-cutting concerns не липнут обратно в сервисы.
+
+  4. Довести provider/composition seams до узкого и устойчивого вида
+  Цель: убрать остаточный abstraction pressure в provider registry / provider assembly.
+
+  Модули:
+
+  - src/bioetl/composition/providers/provider_registry.py
+  - src/bioetl/composition/providers/registration_bio.py
+  - src/bioetl/composition/providers/registration_biblio.py
+  - возможные shared helpers в composition/providers/_*.py
+
+  Шаги:
+
+  - Свести assembly modules к manifest-level declarations + узким helper seams.
+  - Не расширять compatibility obligations в provider_registry.py.
+  - Убрать оставшиеся implicit registry access patterns и дублирующий assembly plumbing.
+
+  Риски:
+
+  - regression в provider config tests;
+  - ломка старых registration expectations.
+
+  Снижение риска:
+
+  - держать migration через named seams;
+  - постоянно гонять provider registry contract tests.
+
+  Проверка:
+
+  - tests/architecture/test_registry_contracts.py
+  - tests/architecture/test_provider_registry_decomposition.py
+  - tests/unit/composition/providers/*
+
+  DoD:
+
+  - provider assembly читается как декларативная wiring layer;
+  - raw registry callsites и assembly drift не возвращаются.
+
+  5. Перевести file-growth и fan-in pressure в family-scoped ratchets
+  Цель: перестать только наблюдать рост сложности и начать ограничивать его тестами там, где evidence уже зрелое.
+
+  Модули:
+
+  - configs/quality/debt_scorecard.yaml
+  - regression/code metrics tests в tests/architecture
+  - quality configs для topology/hotspot tracking
+
+  Шаги:
+
+  - Выделить 2–3 hot families: application/core, composition/bootstrap/runtime, при необходимости application/services.
+  - Для каждой семьи ввести узкий budget на file size, fan-in или cross-layer edges.
+  - Избегать repo-wide tightening без family baseline.
+
+  Риски:
+
+  - noisy red CI;
+  - ложные блокировки на benign changes.
+
+  Снижение риска:
+
+  - ratchet only from current measured baseline;
+  - tightening маленькими шагами.
+
+  Проверка:
+
+  - tests/architecture/test_regression_metrics.py
+  - tests/architecture/test_code_metrics.py
+
+  DoD:
+
+  - ключевые hotspot families имеют собственные budgets;
+  - complexity drift ловится раньше, чем превращается в refactor wave.
+
+  6. Довести replay/fixture/contract governance до реально enforced состояния
+  Цель: завершить test-governance слой так, чтобы replay/fixture/contract surfaces были не просто описаны, а operationally managed.
+
+  Модули:
+
+  - configs/quality/test_matrix.yaml
+  - configs/quality/fixture_governance_ledger.yaml
+  - configs/quality/ci_coverage_surface_matrix.yaml
+  - contract/replay-related architecture tests
+
+  Шаги:
+
+  - Перевести наиболее зрелые rollout items из planned/partial в partial/enforced.
+  - Для каждого rollout surface привязать owner, next step, promotion criteria.
+  - Довести contract_snapshots до первого реального adoption slice.
+
+  Риски:
+
+  - governance станет слишком тяжёлой;
+  - обновление snapshots будет болезненным.
+
+  Снижение риска:
+
+  - идти provider-family slices, а не broad rollout;
+  - использовать documented update path.
+
+  Проверка:
+
+  - tests/architecture/test_fixture_governance_ledger.py
+  - tests/architecture/test_ci_coverage_surface_matrix.py
+  - tests/architecture/test_test_matrix_coverage.py
+
+  DoD:
+
+  - replay/fixture/contract governance не висит как “planned idea”;
+  - tracked ledgers и tests соответствуют реальному execution model.
+
+  7. Устранить drift между кодом, dependency artifacts и historical docs
+  Цель: сделать docs-as-code и generated artifacts надёжными, а не хрупкими.
+
+  Модули:
+
+  - generated dependency map workflow
+  - tests/architecture/test_architecture_dependency_docs_drift.py
+  - historical evidence/docs в docs/reports/evidence/*
+
+  Шаги:
+
+  - Зафиксировать canonical regeneration path для dependency artifacts.
+  - Обновить historical docs, где уже закрытые seams описаны как live backlog.
+  - Минимизировать ручной шаг между code change и generated artifact sync.
+
+  Риски:
+
+  - превратить документацию в шумный ritual;
+  - избыточные regen требования.
+
+  Снижение риска:
+
+  - синхронизировать только high-signal artifacts;
+  - не генерировать “всё подряд”.
+
+  Проверка:
+
+  - dependency docs drift test;
+  - docs/generator checks, уже используемые в repo
+
+  DoD:
+
+  - dependency artifact drift не всплывает как регулярная случайная поломка;
+  - исторические summary не противоречат текущей архитектуре.
+
+  8. Формализовать acceptance baseline как живой архитектурный контракт
+  Цель: собрать один curated acceptance slice, который описывает фактическую архитектуру, а не старый план.
+
+  Модули:
+
+  - tests/architecture/* curated subset
+  - tests/unit/application/services/test_run_ledger_service.py
+  - checkpoint suite
+  - logging correlation / manifest deprecation / no-structlog guards
+
+  Шаги:
+
+  - Сформировать узкий acceptance checklist.
+  - Привязать каждый acceptance пункт к конкретному test file.
+  - При необходимости добавить один aggregator doc или lightweight test manifest.
+
+  Риски:
+
+  - acceptance suite станет слишком широкой и дорогой;
+  - дублирование существующих guardrails.
+
+  Снижение риска:
+
+  - не писать новый большой test layer;
+  - собрать curated slice из уже существующих тестов.
+
+  Проверка:
+
+  - pytest tests/architecture/
+  - targeted unit suites
+  - mypy --strict
+
+  DoD:
+
+  - есть один воспроизводимый acceptance baseline;
+  - им можно завершать bounded refactor без споров о “настоящей” архитектуре.
+
+  Рекомендуемая последовательность
+
+  1. RunLedger timeline
+  2. application/core hotspot split
+  3. service gravity reduction
+  4. provider/composition seam narrowing
+  5. family-scoped ratchets
+  6. replay/fixture/contract governance
+  7. docs/artifact drift cleanup
+  8. acceptance baseline formalization
+
+  Что даст на практике
+
+  - После задач 1–4 снизится архитектурный риск и станет проще делать runtime-related изменения.
+  - После задач 5–6 проект начнёт не только замечать drift, но и системно ограничивать его.
+  - После задач 7–8 репозиторий получит более устойчивый operating model: меньше споров, меньше скрытого drift, быстрее bounded refactors.
+
+  Если хотите, следующим сообщением я превращу это в формат roadmap на 3 спринта с оценкой трудоёмкости и зависимостями.
+
+
+› какие задачи можно параллерить
+
+
+• Безопасно параллелить можно не всё. По текущему набору задач я бы разделил так.
+
+  Можно параллелить сразу
+
+  - Read-only анализ по задачам 5, 7, 8
+      - сбор baseline-метрик для family budgets;
+      - аудит historical docs и generated artifacts;
+      - сбор acceptance checklist из уже существующих тестов.
+  - Тесты + документация после завершения одной кодовой задачи
+      - например, после задачи 1 можно параллельно:
+          - гонять targeted tests;
+          - обновлять acceptance/docs/evidence.
+  - Задача 7 и задача 8
+      - если 7 ограничить docs/artifact drift cleanup,
+      - а 8 делать как curated acceptance mapping без правок в production-коде.
+  - Задача 5 и задача 7
+      - если 5 делать только как проектирование новых ratchets/budgets,
+      - а 7 как docs-only cleanup.
+      - Если 5 уже меняет tests/architecture и quality configs, лучше не параллелить.
+
+  Лучше делать последовательно
+
+  - 1. RunLedger timeline normalization
+  - 2. application/core hotspot split
+  - 3. service gravity reduction
+
+  Причина:
+
+  - 1 и 3 оба трогают src/bioetl/application/services/run_ledger_service.py
+  - 1 и 2 оба лезут в orchestration/runtime family
+  - 2 и 3 пересекаются по application-слою и легко дают merge conflicts и повторную переукладку одного и того же кода
+
+  Отдельным независимым потоком можно
+
+  - 4. provider/composition seam narrowing
+
+  Она хорошо изолирована от 1–3, потому что живёт в composition/providers/*. Если очень хочется ускориться, это лучший кандидат на отдельный worktree/исполнителя.
+
+  Условно можно параллелить, но только в отдельных worktree
+
+  - 1 и 4
+  - 3 и 4
+  - 6 и 7
+
+  Но только если заранее разделить ownership:
+
+  - кто-то трогает только application/*
+  - кто-то только composition/providers/*
+  - кто-то только docs/reports/*
+
+  Не стоит параллелить
+
+  - 5 с 8, если обе задачи меняют tests/architecture/*
+  - 6 с 8, если acceptance baseline будет включать те же governance tests/configs
+  - любые две задачи, которые одновременно меняют configs/quality/*
+
+  Практически лучший план распараллеливания
+
+  1. Последовательно: 1 -> 2 -> 3
+  2. Параллельно с этим в отдельном потоке: 4
+  3. После стабилизации кода параллельно:
+      - 5 metrics/ratchets
+      - 7 docs/artifact drift cleanup
+  4. Потом последовательно:
+      - 6 governance rollout
+      - 8 final acceptance baseline

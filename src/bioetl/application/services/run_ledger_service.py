@@ -7,6 +7,11 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from uuid import uuid4
 
+from bioetl.application.services._run_ledger_diagnostic_support import (
+    build_run_ledger_diagnostic_details,
+    sync_manifest_contract_defaults,
+    sync_manifest_runtime_defaults,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
     canonicalize_run_ledger_stage_name,
@@ -18,78 +23,6 @@ from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
 
 __all__ = ["RunLedgerService"]
-
-_LEDGER_DETAILS_CONTRACT_VERSION = "v1"
-
-
-def _coalesce_missing(current: str | None, default: str | None) -> str | None:
-    """Return default only when current value is missing."""
-    if current is None:
-        return default
-    return current
-
-
-def _apply_optional_diagnostic_anchor(
-    diagnostic: dict[str, object],
-    field_name: str,
-    value: str | None,
-) -> None:
-    """Attach one non-empty correlation anchor to diagnostic payload."""
-    if value is None:
-        return
-    if not value.strip():
-        return
-    diagnostic[field_name] = value
-
-
-def _sync_manifest_runtime_defaults(
-    service: RunLedgerService,
-    manifest: RunManifest,
-) -> None:
-    """Hydrate runtime correlation defaults from the immutable manifest."""
-    code_provenance = manifest.code_provenance
-    service.pipeline_name = _coalesce_missing(
-        service.pipeline_name, manifest.pipeline_name
-    )
-    service.provider = _coalesce_missing(service.provider, manifest.provider)
-    service.entity = _coalesce_missing(service.entity, manifest.entity)
-    service.run_type = _coalesce_missing(service.run_type, manifest.run_type.value)
-    service.effective_config_hash = _coalesce_missing(
-        service.effective_config_hash,
-        code_provenance.config_hash,
-    )
-
-
-def _sync_manifest_contract_defaults(
-    service: RunLedgerService,
-    manifest: RunManifest,
-) -> None:
-    """Hydrate contract/DQ correlation defaults from the immutable manifest."""
-    code_provenance = manifest.code_provenance
-    service.contract_ref = _coalesce_missing(
-        service.contract_ref,
-        code_provenance.contract_ref,
-    )
-    service.contract_version = _coalesce_missing(
-        service.contract_version,
-        code_provenance.contract_version,
-    )
-    service.dq_policy_ref = _coalesce_missing(
-        service.dq_policy_ref,
-        code_provenance.dq_policy_ref,
-    )
-    service.rule_bundle_version = _coalesce_missing(
-        service.rule_bundle_version,
-        code_provenance.rule_bundle_version,
-    )
-    service.dq_contract_compatibility_hash = _coalesce_missing(
-        service.dq_contract_compatibility_hash,
-        code_provenance.dq_contract_compatibility_hash,
-    )
-    service.effective_config_artifact_id = _coalesce_missing(
-        service.effective_config_artifact_id,
-        code_provenance.effective_config_artifact_id,
-    )
 
 
 @dataclass(slots=True)
@@ -118,7 +51,7 @@ class RunLedgerService:
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:
         """Record manifest creation as the first control-plane event."""
         # Keep the first event diagnostics stable around runtime anchors.
-        _sync_manifest_runtime_defaults(self, manifest)
+        sync_manifest_runtime_defaults(self, manifest)
         entry = self._append(
             event_type="manifest_created",
             status="created",
@@ -130,7 +63,7 @@ class RunLedgerService:
             },
         )
         # Contract/DQ anchors are still needed for subsequent lifecycle events.
-        _sync_manifest_contract_defaults(self, manifest)
+        sync_manifest_contract_defaults(self, manifest)
         return entry
 
     def record_run_started(self) -> RunLedgerEntry:
@@ -285,9 +218,23 @@ class RunLedgerService:
             dataset_ref=dataset_ref,
             lineage_fragment_id=lineage_fragment_id,
             metrics_snapshot=metrics_snapshot,
-            details=self._build_diagnostic_details(
+            details=build_run_ledger_diagnostic_details(
                 event_type=event_type,
                 event_family=event_family,
+                manifest_id=self.manifest_id,
+                run_id=self.run_id,
+                pipeline_name=self.pipeline_name,
+                provider=self.provider,
+                entity=self.entity,
+                run_type=self.run_type,
+                effective_config_hash=self.effective_config_hash,
+                contract_ref=self.contract_ref,
+                contract_version=self.contract_version,
+                dq_policy_ref=self.dq_policy_ref,
+                rule_bundle_version=self.rule_bundle_version,
+                dq_contract_compatibility_hash=self.dq_contract_compatibility_hash,
+                effective_config_artifact_id=self.effective_config_artifact_id,
+                composite_run_id=self.composite_run_id,
                 status=status,
                 stage=stage,
                 error_type=error_type,
@@ -299,88 +246,3 @@ class RunLedgerService:
         self.ledger_port.append(entry)
         return entry
 
-    def _build_diagnostic_details(
-        self,
-        *,
-        event_type: str,
-        event_family: str,
-        status: str | None,
-        stage: str | None,
-        error_type: str | None,
-        dataset_ref: str | None,
-        lineage_fragment_id: str | None,
-        details: dict[str, object] | None,
-    ) -> dict[str, object]:
-        """Attach stable diagnostic metadata contract for ledger tooling."""
-        normalized_details: dict[str, object] = {}
-        if details:
-            normalized_details.update(details)
-
-        diagnostic: dict[str, object] = {
-            "contract_version": _LEDGER_DETAILS_CONTRACT_VERSION,
-            "event_type": event_type,
-            "event_family": event_family,
-            "manifest_id": self.manifest_id,
-            "run_id": str(self.run_id),
-        }
-        _apply_optional_diagnostic_anchor(
-            diagnostic,
-            "pipeline",
-            self.pipeline_name,
-        )
-        _apply_optional_diagnostic_anchor(diagnostic, "provider", self.provider)
-        _apply_optional_diagnostic_anchor(diagnostic, "entity", self.entity)
-        _apply_optional_diagnostic_anchor(diagnostic, "run_type", self.run_type)
-        _apply_optional_diagnostic_anchor(
-            diagnostic,
-            "effective_config_hash",
-            self.effective_config_hash,
-        )
-        _apply_optional_diagnostic_anchor(
-            diagnostic,
-            "contract_ref",
-            self.contract_ref,
-        )
-        _apply_optional_diagnostic_anchor(
-            diagnostic,
-            "data_contract_version",
-            self.contract_version,
-        )
-        _apply_optional_diagnostic_anchor(
-            diagnostic,
-            "dq_policy_ref",
-            self.dq_policy_ref,
-        )
-        _apply_optional_diagnostic_anchor(
-            diagnostic,
-            "rule_bundle_version",
-            self.rule_bundle_version,
-        )
-        _apply_optional_diagnostic_anchor(
-            diagnostic,
-            "dq_contract_compatibility_hash",
-            self.dq_contract_compatibility_hash,
-        )
-        _apply_optional_diagnostic_anchor(
-            diagnostic,
-            "effective_config_artifact_id",
-            self.effective_config_artifact_id,
-        )
-        _apply_optional_diagnostic_anchor(
-            diagnostic,
-            "composite_run_id",
-            self.composite_run_id,
-        )
-        if status is not None:
-            diagnostic["status"] = status
-        if stage is not None:
-            diagnostic["stage"] = stage
-        if error_type is not None:
-            diagnostic["error_type"] = error_type
-        if dataset_ref is not None:
-            diagnostic["dataset_ref"] = dataset_ref
-        if lineage_fragment_id is not None:
-            diagnostic["lineage_fragment_id"] = lineage_fragment_id
-
-        normalized_details["_diagnostic"] = diagnostic
-        return normalized_details

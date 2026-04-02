@@ -36,26 +36,28 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
 
 def pytest_cmdline_main(config):
-    # Workaround for xdist serialization error with enums (like syrupy DiffMode)
-    # This must run early in pytest_cmdline_main before xdist plugins serialize the config
+    # Workaround for xdist serialization error with enum-valued options
+    # (historically syrupy's diff_mode). Avoid scanning every option attribute
+    # because collection startup cost compounds across large suites.
     if hasattr(config, "option"):
-        for attr in dir(config.option):
-            if attr.startswith("_"):
-                continue
-            try:
-                val = getattr(config.option, attr)
-                if isinstance(val, enum.Enum):
-                    setattr(config.option, attr, val.value)
-            except (AttributeError, TypeError, ValueError):
-                pass
+        _normalize_enum_option(config.option, "diff_mode")
 
 
 def pytest_configure(config):
     # Keep it here as well just in case
-    if hasattr(config.option, "diff_mode") and isinstance(
-        config.option.diff_mode, enum.Enum
-    ):
-        config.option.diff_mode = config.option.diff_mode.value
+    _normalize_enum_option(config.option, "diff_mode")
+
+
+def _normalize_enum_option(option_namespace: object, option_name: str) -> None:
+    """Convert a known enum option to its primitive value for xdist safety."""
+    if not hasattr(option_namespace, option_name):
+        return
+    try:
+        value = getattr(option_namespace, option_name)
+        if isinstance(value, enum.Enum):
+            setattr(option_namespace, option_name, value.value)
+    except (AttributeError, TypeError, ValueError):
+        return
 
 
 try:
@@ -78,6 +80,7 @@ _PUBLICATION_CLASSIFICATION_TEST_PREFIXES = (
     "tests/unit/application/pipelines/test_publication_similarity_transformer.py",
     "tests/unit/domain/mapping/test_publication_type_classification.py",
     "tests/unit/domain/mapping/test_publication_type_mapping.py",
+    "tests/integration/test_cross_provider_doi_normalization.py",
     "tests/integration/pipelines/test_crossref_date_normalization.py",
     "tests/integration/pipelines/test_pubmed_date_normalization.py",
     "tests/e2e/test_chembl_publication_e2e.py",
@@ -105,7 +108,9 @@ def _selected_tests_need_publication_type_classification(
     """Return True when the current selection needs classification bootstrap."""
     items = getattr(request.session, "items", ())
     if not items:
-        return True
+        # Collect-only and nested collection runs do not execute publication
+        # transformers and should avoid the global bootstrap cost.
+        return False
     return any(
         item.nodeid.startswith(_PUBLICATION_CLASSIFICATION_TEST_PREFIXES)
         for item in items
@@ -153,7 +158,7 @@ def default_vcr_record_mode() -> None:
     - Local runs default to `once` to allow recording missing interactions.
     - Explicit VCR_RECORD_MODE always has priority.
     """
-    if _load_vcrpy() is None or "VCR_RECORD_MODE" in os.environ:
+    if "VCR_RECORD_MODE" in os.environ:
         return
 
     os.environ["VCR_RECORD_MODE"] = "none" if os.getenv("CI") else "once"

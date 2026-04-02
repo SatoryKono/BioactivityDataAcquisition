@@ -15,7 +15,6 @@ hashing contract that includes provider identity.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -24,9 +23,6 @@ import pytest
 
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
-)
-from bioetl.composition.bootstrap.runtime.classification_init import (
-    initialize_publication_type_classification,
 )
 from bioetl.application.pipelines.crossref.transformer import (
     CrossRefPublicationTransformer,
@@ -43,12 +39,6 @@ from bioetl.application.pipelines.semanticscholar.transformer import (
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
-
-
-@pytest.fixture(scope="module", autouse=True)
-def publication_type_classification_initialized() -> None:
-    """Bootstrap publication-type classification for this integration suite."""
-    initialize_publication_type_classification(Path("configs"))
 
 
 @pytest.fixture

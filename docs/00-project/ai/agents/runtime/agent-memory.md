@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-31'
+Last verified: '2026-04-02'
 ---
 
 # Memory: BioETL (краткая выжимка)
@@ -40,6 +40,17 @@ Last verified: '2026-03-31'
 - Быстрый старт: `make install && make test-deps && make setup-plugins`.
 - Проверки: `make lint && make test` (локальный stable suite, без E2E).
 - Пример запуска: `bioetl run --pipeline chembl_activity --run-type incremental`.
+
+Если checkout используется из PowerShell и WSL одновременно, не дели одну
+`.venv` между ОС:
+
+- PowerShell: `.\scripts\dev\setup_env_windows.ps1`,
+  `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`
+- WSL/Linux: `bash scripts/dev/setup_env_wsl.sh`,
+  `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`
+- OS-specific runtimes:
+  `.venv-win` в PowerShell и
+  `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` в WSL
 
 ## Гигиена репозитория
 - Артефакты → `reports/` или `logs/`, временные дампы → `tmp/`.

@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-02'
 ---
 
 # Reproducible Run Contract
@@ -13,9 +13,17 @@ Last verified: '2026-03-29'
 - Исходная диаграмма: `architecture/23-reproducible-run-contract.mmd`
 
 ## Описание
-Диаграмма Reproducible Run Contract показывает, как source refs, resolved config, runtime overrides и provenance сворачиваются в replay/comparison identity, и использует нотацию flowchart. Она помогает проверить, что воспроизводимость запуска выражена явными артефактами и hash anchors, а не implicit runtime state. В исходном файле прямо зафиксирован контекст: how source refs, resolved config, runtime overrides, and provenance collapse into a replay/comparison identity. Ключевые подграфы: Configuration inputs, Resolution services, Published reproducibility artifacts, Identity anchors, Replay / comparison consumers. Показательные узлы: ConfigSourceRef[], EffectiveConfigService, EffectiveConfigArtifact, resolved_config_hash, execution_fingerprint, CheckpointCompatibilityService. По ним удобно сверять связку конфигурационного resolution path с manifest identity и replay/diff tooling.
+Диаграмма описывает текущий reproducible-run contract BioETL: одна воспроизводимая идентичность запуска собирается из source refs, resolved/effective config, DQ compatibility anchors и control-plane manifest. Схема теперь явно разводит runtime descriptors и provenance artifacts, чтобы воспроизводимость не зависела от implicit runtime state.
+
+Ключевые акценты:
+- `EffectiveConfigService` публикует `ResolvedConfigSnapshot`, `EffectiveExecutionConfig` и `EffectiveConfigArtifact`.
+- `RunManifestService` собирает `RunManifest` c `execution_fingerprint`, `effective_config_hash`, `dq_contract_compatibility_hash` и связью на effective-config artifact.
+- `PipelineRunContext` получает launch-time anchors для старта pipeline, а `PipelineContext` остаётся только in-run processing context.
+- `CompositeCheckpointState` хранит replay watermark (`manifest_id + last_event_id`) и проходит через `CheckpointCompatibilityService` и `CompositeCheckpointLoadService` при resume.
+
+Эта диаграмма нужна, чтобы проверять сразу три контракта: воспроизводимость запуска, валидность checkpoint resume и корректное разделение runtime contexts против control-plane provenance.
 
 ## Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Control Plane`
-- Дата метаданных: `2026-03-28`
+- Дата метаданных: `2026-04-02`

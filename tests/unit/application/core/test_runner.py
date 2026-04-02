@@ -25,6 +25,7 @@ from bioetl.application.services.medallion_lifecycle import (
 from bioetl.application.services.run_ledger_service import RunLedgerService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID, RunType
@@ -610,13 +611,7 @@ class TestPipelineRunnerRun:
         assert [
             call.kwargs["stage"]
             for call in ledger_service.record_stage_started.call_args_list
-        ] == [
-            "preflight",
-            "prepare_medallion_layers",
-            "execute_pipeline",
-            "postrun",
-            "checkpoint_finalize",
-        ]
+        ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES)
         assert ledger_service.record_stage_completed.call_count == 5
         ledger_service.record_run_finished.assert_called_once_with(
             metrics_snapshot=runner.execution_metrics
@@ -638,11 +633,7 @@ class TestPipelineRunnerRun:
         assert [
             call.kwargs["stage"]
             for call in ledger_service.record_stage_started.call_args_list
-        ] == [
-            "preflight",
-            "prepare_medallion_layers",
-            "execute_pipeline",
-        ]
+        ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES[:3])
         assert ledger_service.record_stage_completed.call_count == 2
         ledger_service.record_run_failed.assert_called_once_with(
             message="boom",
@@ -665,11 +656,7 @@ class TestPipelineRunnerRun:
         assert [
             call.kwargs["stage"]
             for call in ledger_service.record_stage_started.call_args_list
-        ] == [
-            "preflight",
-            "prepare_medallion_layers",
-            "execute_pipeline",
-        ]
+        ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES[:3])
         assert ledger_service.record_stage_completed.call_count == 2
         ledger_service.record_run_shutdown.assert_called_once_with(
             metrics_snapshot=runner.execution_metrics

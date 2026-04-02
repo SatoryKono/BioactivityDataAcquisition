@@ -41,22 +41,36 @@ APPLICATION_IMPORTS = {
 }
 
 
-def _check_imports_in_file(file_path: Path, disallowed: set[str]) -> list[str]:
-    """Check a file for disallowed imports.
+def _iter_python_content_under(
+    root_path: Path,
+    source_content_cache: dict[Path, str] | None = None,
+) -> list[tuple[Path, str]]:
+    """Return python file contents under ``root_path``, preferring session cache."""
+    if source_content_cache is not None:
+        return sorted(
+            (
+                (path, content)
+                for path, content in source_content_cache.items()
+                if root_path in path.parents
+            ),
+            key=lambda item: item[0],
+        )
+    return sorted(
+        (
+            (path, path.read_text(encoding="utf-8"))
+            for path in root_path.rglob("*.py")
+        ),
+        key=lambda item: item[0],
+    )
 
-    Args:
-        file_path: Path to the Python file to check
-        disallowed: Set of module names that should not be imported
 
-    Returns:
-        List of error messages for any disallowed imports found
-    """
+def _check_imports_in_content(
+    file_path: Path,
+    content: str,
+    disallowed: set[str],
+) -> list[str]:
+    """Check file content for disallowed imports."""
     errors = []
-    if not file_path.exists():
-        return errors  # Skip non-existent files (may be stale cache references)
-    with file_path.open(encoding="utf-8") as f:
-        content = f.read()
-
     for lib in disallowed:
         # Check for 'import lib' or 'from lib import ...'
         if re.search(rf"^\s*import\s+{re.escape(lib)}\b", content, re.MULTILINE):
@@ -67,7 +81,10 @@ def _check_imports_in_file(file_path: Path, disallowed: set[str]) -> list[str]:
     return errors
 
 
-def test_domain_layer_no_infrastructure_imports(src_dir: Path) -> None:
+def test_domain_layer_no_infrastructure_imports(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Domain layer must not import infrastructure/I/O libraries.
 
     REQ-ARCH-001: The domain layer should contain only pure business logic
@@ -77,14 +94,17 @@ def test_domain_layer_no_infrastructure_imports(src_dir: Path) -> None:
     assert domain_path.exists(), "Domain layer not found"
 
     all_errors = []
-    for py_file in domain_path.rglob("*.py"):
-        errors = _check_imports_in_file(py_file, INFRASTRUCTURE_IMPORTS)
+    for py_file, content in _iter_python_content_under(domain_path, source_content_cache):
+        errors = _check_imports_in_content(py_file, content, INFRASTRUCTURE_IMPORTS)
         all_errors.extend(errors)
 
     assert not all_errors, "\n".join(all_errors)
 
 
-def test_domain_layer_no_application_imports(src_dir: Path) -> None:
+def test_domain_layer_no_application_imports(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Domain layer must not import from application layer.
 
     REQ-ARCH-002: Domain layer should be independent of application layer
@@ -94,14 +114,17 @@ def test_domain_layer_no_application_imports(src_dir: Path) -> None:
     assert domain_path.exists(), "Domain layer not found"
 
     all_errors = []
-    for py_file in domain_path.rglob("*.py"):
-        errors = _check_imports_in_file(py_file, APPLICATION_IMPORTS)
+    for py_file, content in _iter_python_content_under(domain_path, source_content_cache):
+        errors = _check_imports_in_content(py_file, content, APPLICATION_IMPORTS)
         all_errors.extend(errors)
 
     assert not all_errors, "\n".join(all_errors)
 
 
-def test_domain_layer_no_infrastructure_layer_imports(src_dir: Path) -> None:
+def test_domain_layer_no_infrastructure_layer_imports(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Domain layer must not import from infrastructure layer.
 
     REQ-ARCH-003: Domain layer should not depend on infrastructure
@@ -111,8 +134,10 @@ def test_domain_layer_no_infrastructure_layer_imports(src_dir: Path) -> None:
     assert domain_path.exists(), "Domain layer not found"
 
     all_errors = []
-    for py_file in domain_path.rglob("*.py"):
-        errors = _check_imports_in_file(py_file, {"bioetl.infrastructure"})
+    for py_file, content in _iter_python_content_under(domain_path, source_content_cache):
+        errors = _check_imports_in_content(
+            py_file, content, {"bioetl.infrastructure"}
+        )
         all_errors.extend(errors)
 
     assert not all_errors, "\n".join(all_errors)
@@ -120,6 +145,7 @@ def test_domain_layer_no_infrastructure_layer_imports(src_dir: Path) -> None:
 
 def test_application_layer_no_common_infrastructure_adapter_imports(
     src_dir: Path,
+    source_content_cache: dict[Path, str],
 ) -> None:
     """Fast smoke check for historically regressed infrastructure imports.
 
@@ -141,10 +167,12 @@ def test_application_layer_no_common_infrastructure_adapter_imports(
     }
 
     all_errors = []
-    for py_file in application_path.rglob("*.py"):
+    for py_file, content in _iter_python_content_under(
+        application_path, source_content_cache
+    ):
         if py_file.name == "__init__.py":
             continue
-        errors = _check_imports_in_file(py_file, implementation_imports)
+        errors = _check_imports_in_content(py_file, content, implementation_imports)
         all_errors.extend(errors)
 
     assert not all_errors, "\n".join(all_errors)
@@ -246,7 +274,10 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
         )
 
 
-def test_infrastructure_does_not_import_application(src_dir: Path) -> None:
+def test_infrastructure_does_not_import_application(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Infrastructure layer must not import from application layer.
 
     REQ-ARCH-008: Infrastructure is at the outer layer and should only
@@ -258,17 +289,20 @@ def test_infrastructure_does_not_import_application(src_dir: Path) -> None:
     all_errors = []
     forbidden = {"bioetl.application"}
 
-    for py_file in infra_path.rglob("*.py"):
+    for py_file, content in _iter_python_content_under(infra_path, source_content_cache):
         # EXCEPTION: config.py can import PipelineConfig
         if py_file.name == "config.py":
             continue
-        errors = _check_imports_in_file(py_file, forbidden)
+        errors = _check_imports_in_content(py_file, content, forbidden)
         all_errors.extend(errors)
 
     assert not all_errors, "\n".join(all_errors)
 
 
-def test_no_empty_source_files(src_dir: Path) -> None:
+def test_no_empty_source_files(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Source tree must not contain empty Python files (except __init__.py).
 
     REQ-ARCH-011: Empty files indicate dead code or incomplete implementation.
@@ -278,14 +312,15 @@ def test_no_empty_source_files(src_dir: Path) -> None:
     assert bioetl_path.exists(), "bioetl source not found"
 
     empty_files = []
-    for py_file in bioetl_path.rglob("*.py"):
+    for py_file, raw_content in _iter_python_content_under(
+        bioetl_path, source_content_cache
+    ):
         # Skip __init__.py - allowed to be empty for package markers
         if py_file.name == "__init__.py":
             continue
 
         # Check if file is empty or contains only whitespace/comments
-        with py_file.open(encoding="utf-8") as f:
-            content = f.read().strip()
+        content = raw_content.strip()
 
         # Remove comments and docstrings for content check
         lines = [
@@ -303,7 +338,10 @@ def test_no_empty_source_files(src_dir: Path) -> None:
     )
 
 
-def test_no_orphan_directories(src_dir: Path) -> None:
+def test_no_orphan_directories(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Source tree must not contain orphan directories with only empty files.
 
     REQ-ARCH-012: Directories with only __init__.py or empty files are dead code.
@@ -314,12 +352,13 @@ def test_no_orphan_directories(src_dir: Path) -> None:
 
     def has_content_in_subtree(dir_path: Path) -> bool:
         """Check if directory or any subdirectory has real Python content."""
-        for py_file in dir_path.rglob("*.py"):
+        for py_file, content in _iter_python_content_under(
+            dir_path, source_content_cache
+        ):
             if py_file.name == "__init__.py":
                 continue
-            with py_file.open(encoding="utf-8") as f:
-                if f.read().strip():
-                    return True
+            if content.strip():
+                return True
         return False
 
     orphan_dirs = []
@@ -339,8 +378,7 @@ def test_no_orphan_directories(src_dir: Path) -> None:
         if not subdirs and py_files:
             init_file = dir_path / "__init__.py"
             if init_file.exists() and len(py_files) == 1:
-                with init_file.open(encoding="utf-8") as f:
-                    init_content = f.read().strip()
+                init_content = source_content_cache.get(init_file, "").strip()
                 # Allow if __init__.py re-exports or has __all__
                 if not init_content or (
                     "__all__" not in init_content and "import" not in init_content
@@ -452,7 +490,10 @@ def test_dead_code_vulture(src_dir: Path) -> None:
         )
 
 
-def test_application_layer_no_infrastructure_imports(src_dir: Path) -> None:
+def test_application_layer_no_infrastructure_imports(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Application layer must not import from infrastructure.
 
     REQ-ARCH-APP-002: Application layer depends on domain ports,
@@ -463,8 +504,9 @@ def test_application_layer_no_infrastructure_imports(src_dir: Path) -> None:
 
     violations = []
 
-    for py_file in application_path.rglob("*.py"):
-        content = py_file.read_text(encoding="utf-8")
+    for py_file, content in _iter_python_content_under(
+        application_path, source_content_cache
+    ):
         for i, line in enumerate(content.splitlines(), 1):
             stripped = line.strip()
 
@@ -521,6 +563,7 @@ _APPLICATION_FORBIDDEN_THIRD_PARTY = {
 
 def test_application_layer_no_third_party_infrastructure_libs(
     src_dir: Path,
+    source_content_cache: dict[Path, str],
 ) -> None:
     """Application layer must not import third-party infrastructure libraries.
 
@@ -532,8 +575,12 @@ def test_application_layer_no_third_party_infrastructure_libs(
     assert application_path.exists(), "Application layer not found"
 
     all_errors = []
-    for py_file in application_path.rglob("*.py"):
-        errors = _check_imports_in_file(py_file, _APPLICATION_FORBIDDEN_THIRD_PARTY)
+    for py_file, content in _iter_python_content_under(
+        application_path, source_content_cache
+    ):
+        errors = _check_imports_in_content(
+            py_file, content, _APPLICATION_FORBIDDEN_THIRD_PARTY
+        )
         all_errors.extend(errors)
 
     assert not all_errors, (
@@ -543,7 +590,10 @@ def test_application_layer_no_third_party_infrastructure_libs(
     )
 
 
-def test_infrastructure_does_not_import_interfaces(src_dir: Path) -> None:
+def test_infrastructure_does_not_import_interfaces(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Infrastructure layer must not import from interfaces layer.
 
     REQ-ARCH-015: Interfaces (Driving Adapters) depend on Infrastructure,
@@ -555,14 +605,17 @@ def test_infrastructure_does_not_import_interfaces(src_dir: Path) -> None:
     all_errors = []
     forbidden = {"bioetl.interfaces"}
 
-    for py_file in infra_path.rglob("*.py"):
-        errors = _check_imports_in_file(py_file, forbidden)
+    for py_file, content in _iter_python_content_under(infra_path, source_content_cache):
+        errors = _check_imports_in_content(py_file, content, forbidden)
         all_errors.extend(errors)
 
     assert not all_errors, "\n".join(all_errors)
 
 
-def test_infrastructure_does_not_import_composition(src_dir: Path) -> None:
+def test_infrastructure_does_not_import_composition(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Infrastructure layer must not import from composition layer.
 
     REQ-ARCH-017: Composition is the assembly layer. Infrastructure
@@ -575,8 +628,8 @@ def test_infrastructure_does_not_import_composition(src_dir: Path) -> None:
     all_errors = []
     forbidden = {"bioetl.composition"}
 
-    for py_file in infra_path.rglob("*.py"):
-        errors = _check_imports_in_file(py_file, forbidden)
+    for py_file, content in _iter_python_content_under(infra_path, source_content_cache):
+        errors = _check_imports_in_content(py_file, content, forbidden)
         all_errors.extend(errors)
 
     assert not all_errors, "Infrastructure must not import composition.\n" + "\n".join(
@@ -584,7 +637,10 @@ def test_infrastructure_does_not_import_composition(src_dir: Path) -> None:
     )
 
 
-def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
+def test_no_hasattr_duck_typing_in_application(
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> None:
     """Application layer should not use hasattr for port method checks.
 
     REQ-ARCH-017: The application layer should rely on explicit port contracts
@@ -622,12 +678,13 @@ def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
 
     violations = []
 
-    for py_file in application_path.rglob("*.py"):
-        with py_file.open(encoding="utf-8") as f:
-            try:
-                tree = ast.parse(f.read(), filename=str(py_file))
-            except SyntaxError:
-                continue
+    for py_file, content in _iter_python_content_under(
+        application_path, source_content_cache
+    ):
+        try:
+            tree = ast.parse(content, filename=str(py_file))
+        except SyntaxError:
+            continue
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):

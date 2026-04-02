@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P1
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # Run Manifest Inspection
@@ -141,6 +141,30 @@ Operational interpretation:
 - a successful run SHOULD have a manifest even if the ledger is disabled;
 - append-only means ledger history grows by new lines and existing entries are not rewritten.
 
+### 5a. Inspect composite resume / replay state when resume behavior matters
+
+Composite resume currently follows a checkpoint snapshot + ledger suffix replay
+model.
+
+Fast source-of-truth checks:
+
+```bash
+rg -n "last_event_id|last_event_occurred_at|list_entries_after|project_run_ledger_replay" \
+  src/bioetl/application/composite/checkpoint/load_service.py \
+  src/bioetl/domain/control_plane/run_ledger.py \
+  src/bioetl/domain/ports/control_plane/run_ledger.py
+```
+
+Interpretation:
+
+- replay is only applied after compatibility anchors are validated;
+- replay consumes only ledger entries strictly after `last_event_id`;
+- replay is intentionally coarse-grained: it restores lifecycle milestones and
+  watermark metadata, not rich checkpoint payloads;
+- a missing watermark entry for the current manifest indicates checkpoint
+  incompatibility and should be treated as a resume blocker on the fail-closed
+  path.
+
 ### 6. Check current event baseline
 
 For a healthy successful run with ledger enabled, expect the baseline event family to include:
@@ -191,6 +215,8 @@ Interpretation examples:
 - Manifest resolution works by `run_id` or `manifest_id`.
 - The returned manifest contains stable provenance anchors such as `config_hash`, `contract_ref`, `contract_version`, and `effective_config_artifact_id` when available.
 - Ledger history matches the observed run outcome and event baseline.
+- For composite resume, checkpoint watermark metadata and replayed ledger suffix
+  align with the latest observed lifecycle state.
 - Diagnostics interpretation is captured with evidence in incident notes or follow-up tasks.
 
 ## Rollback

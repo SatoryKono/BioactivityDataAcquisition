@@ -1,23 +1,23 @@
 {
   "summary": {
-    "scanned_modules": 1415,
-    "total_internal_imports": 5429,
+    "scanned_modules": 1418,
+    "total_internal_imports": 5442,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
-    "cross_layer_group_edges_total": 261,
+    "cross_layer_group_edges_total": 262,
     "violations": 0
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 777,
+      "imports": 784,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 849,
+      "imports": 855,
       "allowed": true
     },
     {
@@ -111,7 +111,7 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 85
+      "imports": 86
     },
     {
       "source": "application.pipelines",
@@ -151,12 +151,12 @@
     {
       "source": "application.services",
       "target": "domain.ports",
-      "imports": 44
+      "imports": 46
     },
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 39
+      "imports": 41
     },
     {
       "source": "interfaces.cli",
