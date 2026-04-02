@@ -1,4 +1,4 @@
-﻿name: Monthly Contract Tests
+name: Monthly Contract Tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
