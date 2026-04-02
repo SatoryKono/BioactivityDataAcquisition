@@ -199,6 +199,28 @@ def evaluate_governance_violations(
     return violations
 
 
+def _parse_hotspot_entry(
+    entry: dict[str, object],
+) -> tuple[str, tuple[str, ...], dict[str, int]] | None:
+    try:
+        hotspot_name = str(entry["name"])
+        path_prefixes = entry["path_prefixes"]
+        registry_budgets = entry["registry_budgets"]
+        if not isinstance(path_prefixes, list) or not isinstance(
+            registry_budgets, dict
+        ):
+            return None
+    except KeyError:
+        return None
+
+    typed_prefixes = tuple(str(prefix) for prefix in path_prefixes if prefix)
+    if not typed_prefixes:
+        return None
+
+    typed_budgets = {str(k): int(v) for k, v in registry_budgets.items()}
+    return (hotspot_name, typed_prefixes, typed_budgets)
+
+
 def _iter_hotspot_budget_entries(
     hotspot_budgets: object,
 ) -> list[tuple[str, tuple[str, ...], dict[str, int]]]:
@@ -208,30 +230,9 @@ def _iter_hotspot_budget_entries(
 
     typed_entries: list[tuple[str, tuple[str, ...], dict[str, int]]] = []
     for entry in hotspot_budgets:
-        if not isinstance(entry, dict):
-            continue
-        hotspot_name = entry.get("name")
-        path_prefixes = entry.get("path_prefixes")
-        registry_budgets = entry.get("registry_budgets")
-        if (
-            not isinstance(hotspot_name, str)
-            or not isinstance(path_prefixes, list)
-            or not isinstance(registry_budgets, dict)
-        ):
-            continue
-
-        typed_prefixes = tuple(
-            prefix for prefix in path_prefixes if isinstance(prefix, str) and prefix
-        )
-        if not typed_prefixes:
-            continue
-
-        typed_budgets = {
-            registry_name: int(budget)
-            for registry_name, budget in registry_budgets.items()
-            if isinstance(registry_name, str) and isinstance(budget, int)
-        }
-        typed_entries.append((hotspot_name, typed_prefixes, typed_budgets))
+        if isinstance(entry, dict):
+            if parsed := _parse_hotspot_entry(entry):
+                typed_entries.append(parsed)
     return typed_entries
 
 
