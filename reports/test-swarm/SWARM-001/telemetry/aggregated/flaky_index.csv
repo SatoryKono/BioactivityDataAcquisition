@@ -1,0 +1,2 @@
+test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+tests/integration/infrastructure/adapters/chembl/test_chembl_client.py::test_fetch_retry,5,1,0.2,quarantined,Network timeout
