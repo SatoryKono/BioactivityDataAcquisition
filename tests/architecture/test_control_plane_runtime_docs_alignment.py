@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from bioetl.domain.control_plane.run_ledger import RUN_LEDGER_BASELINE_EVENT_TYPES
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 CONTRACT_DOC = PROJECT_ROOT / "docs/04-reference/contracts/run-manifest-ledger.md"
@@ -20,17 +22,7 @@ PUBLISHED_CONTROL_PLANE_DOCS = (
     CLI_DOC,
     RUNBOOK_DOC,
 )
-CURRENT_BASELINE_EVENTS = (
-    "manifest_created",
-    "run_started",
-    "stage_started",
-    "stage_completed",
-    "artifact_published",
-    "run_finished",
-    "run_failed",
-    "run_shutdown",
-    "dq_policy_applied",
-)
+CURRENT_BASELINE_EVENTS = RUN_LEDGER_BASELINE_EVENT_TYPES
 
 
 def test_published_control_plane_docs_cover_current_baseline_events() -> None:

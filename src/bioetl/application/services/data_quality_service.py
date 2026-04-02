@@ -113,7 +113,9 @@ class DataQualityService:
         # Emit validation score gauge (1.0 - error_rate)
         if self._metrics:
             labels = {"pipeline": self._pipeline_name, "entity": self._entity_type}
+            record_count = max(metrics.get("record_count", 0.0), 0.0)
             self._metrics.set_gauge("dq_validation_score", 1.0 - error_rate, labels)
+            self._metrics.set_gauge("dq_validation_record_count", record_count, labels)
             # Store last-successful-ingestion timestamp in seconds.
             # Dashboards and alerts derive lag via:
             #   time() - bioetl_data_freshness_seconds

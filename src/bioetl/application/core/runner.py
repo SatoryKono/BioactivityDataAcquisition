@@ -55,6 +55,7 @@ if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
@@ -226,15 +227,14 @@ class PipelineRunner:
         try:
             shutdown_recorded = await self._run_pipeline_lifecycle()
         except PipelineShutdownError:
-            record_run_shutdown(self)
+            self._record_terminal_shutdown()
             raise
         except _RUN_FAILURE_EXCEPTIONS as exc:
             record_run_failed(self, exc)
             raise
         else:
             if not shutdown_recorded:
-                emit_pipeline_completion(self)
-                record_run_finished(self)
+                self._record_successful_completion()
         finally:
             await self._cleanup_after_run()
 
@@ -246,10 +246,19 @@ class PipelineRunner:
                 async with self._services, self._lock_manager:
                     await self._run_managed_pipeline()
             except PipelineShutdownError:
-                record_run_shutdown(self)
+                self._record_terminal_shutdown()
                 shutdown_recorded = True
                 raise
         return shutdown_recorded
+
+    def _record_terminal_shutdown(self) -> None:
+        """Append the canonical graceful-shutdown terminal ledger entry."""
+        record_run_shutdown(self)
+
+    def _record_successful_completion(self) -> None:
+        """Emit canonical completion log + ledger entries for successful runs."""
+        emit_pipeline_completion(self)
+        record_run_finished(self)
 
     async def _cleanup_after_run(self) -> None:
         """Run the always-on cleanup sequence for one pipeline run."""

@@ -270,6 +270,10 @@ class RecordingMetrics:
         """Get all calls to a specific histogram."""
         return [h for h in self.histograms if h[0] == name]
 
+    def get_gauge_calls(self, name: str) -> list[tuple[str, float, dict[str, str]]]:
+        """Get all calls to a specific gauge."""
+        return [g for g in self.gauges if g[0] == name]
+
 
 class RecordingLogger:
     """Test implementation of LoggerPort that records all log calls."""
@@ -405,6 +409,46 @@ class TestDataQualityServiceMetricsEmission:
 
         # Also verify the result has duration
         assert result.check_duration_ms >= 0
+
+    @pytest.mark.asyncio
+    async def test_validation_score_emits_volume_aware_gauges(
+        self,
+        recording_metrics: RecordingMetrics,
+        recording_logger: RecordingLogger,
+    ) -> None:
+        """DQ service should emit score and the matching record-count gauge."""
+        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.domain.config import DQConfig
+
+        config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
+        service = DataQualityService(
+            dq_monitor=None,
+            config=config,
+            logger=recording_logger,  # type: ignore
+            metrics=recording_metrics,
+            pipeline_name="test_integration_pipeline",
+            entity_type="test_entity",
+        )
+
+        service.evaluate({"error_rate": 0.02, "record_count": 250.0})
+
+        score_calls = recording_metrics.get_gauge_calls("dq_validation_score")
+        count_calls = recording_metrics.get_gauge_calls("dq_validation_record_count")
+
+        assert score_calls == [
+            (
+                "dq_validation_score",
+                0.98,
+                {"pipeline": "test_integration_pipeline", "entity": "test_entity"},
+            )
+        ]
+        assert count_calls == [
+            (
+                "dq_validation_record_count",
+                250.0,
+                {"pipeline": "test_integration_pipeline", "entity": "test_entity"},
+            )
+        ]
 
     @pytest.mark.asyncio
     async def test_dq_service_performs_check_with_monitor(

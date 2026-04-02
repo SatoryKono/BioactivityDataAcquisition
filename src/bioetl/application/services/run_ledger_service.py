@@ -14,10 +14,18 @@ from bioetl.application.services._run_ledger_diagnostic_support import (
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
+    ARTIFACT_PUBLISHED_EVENT,
+    DQ_POLICY_APPLIED_EVENT,
+    MANIFEST_CREATED_EVENT,
+    RUN_FAILED_EVENT,
+    RUN_FINISHED_EVENT,
+    RUN_SHUTDOWN_EVENT,
+    RUN_STARTED_EVENT,
+    STAGE_COMPLETED_EVENT,
+    STAGE_STARTED_EVENT,
     canonicalize_run_ledger_stage_name,
     infer_ledger_event_family,
 )
-from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
@@ -53,7 +61,7 @@ class RunLedgerService:
         # Keep the first event diagnostics stable around runtime anchors.
         sync_manifest_runtime_defaults(self, manifest)
         entry = self._append(
-            event_type="manifest_created",
+            event_type=MANIFEST_CREATED_EVENT,
             status="created",
             details={
                 "execution_fingerprint": manifest.execution_fingerprint,
@@ -68,7 +76,7 @@ class RunLedgerService:
 
     def record_run_started(self) -> RunLedgerEntry:
         """Record the transition into active execution."""
-        return self._append(event_type="run_started", status="running")
+        return self._append(event_type=RUN_STARTED_EVENT, status="running")
 
     def record_stage_started(
         self,
@@ -78,7 +86,7 @@ class RunLedgerService:
     ) -> RunLedgerEntry:
         """Record transition into one canonical execution stage."""
         return self._append(
-            event_type="stage_started",
+            event_type=STAGE_STARTED_EVENT,
             status="running",
             stage=canonicalize_run_ledger_stage_name(stage),
             details=details,
@@ -93,7 +101,7 @@ class RunLedgerService:
     ) -> RunLedgerEntry:
         """Record successful completion of one execution stage."""
         return self._append(
-            event_type="stage_completed",
+            event_type=STAGE_COMPLETED_EVENT,
             status="completed",
             stage=canonicalize_run_ledger_stage_name(stage),
             metrics_snapshot=metrics_snapshot,
@@ -107,7 +115,7 @@ class RunLedgerService:
     ) -> RunLedgerEntry:
         """Record successful run completion."""
         return self._append_run_outcome(
-            event_type="run_finished",
+            event_type=RUN_FINISHED_EVENT,
             status="success",
             metrics_snapshot=metrics_snapshot,
         )
@@ -121,7 +129,7 @@ class RunLedgerService:
     ) -> RunLedgerEntry:
         """Record failed run completion."""
         return self._append_run_outcome(
-            event_type="run_failed",
+            event_type=RUN_FAILED_EVENT,
             status="failed",
             metrics_snapshot=metrics_snapshot,
             message=message,
@@ -148,7 +156,7 @@ class RunLedgerService:
     ) -> RunLedgerEntry:
         """Record graceful shutdown completion."""
         return self._append_run_outcome(
-            event_type="run_shutdown",
+            event_type=RUN_SHUTDOWN_EVENT,
             status="shutdown",
             metrics_snapshot=metrics_snapshot,
         )
@@ -167,7 +175,7 @@ class RunLedgerService:
         if details:
             payload.update(details)
         return self._append(
-            event_type=PipelineEvent.ARTIFACT_PUBLISHED,
+            event_type=ARTIFACT_PUBLISHED_EVENT,
             status="published",
             stage=layer,
             dataset_ref=dataset_ref,
@@ -196,7 +204,7 @@ class RunLedgerService:
         if details:
             payload.update(details)
         return self._append(
-            event_type="dq_policy_applied",
+            event_type=DQ_POLICY_APPLIED_EVENT,
             status=status,
             stage=stage,
             details=payload,

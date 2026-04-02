@@ -388,7 +388,7 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Data Quality Score"),
+        ("bioetl-dq-v2.json", "Data Quality Score (Volume-weighted)"),
     ],
 )
 def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
@@ -408,6 +408,10 @@ def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
     assert any("bioetl_dq_validation_score" in expr for expr in expressions), (
         f"Panel '{panel_title}' in {dashboard_file} must use "
         "bioetl_dq_validation_score"
+    )
+    assert any("bioetl_dq_validation_record_count" in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must use "
+        "bioetl_dq_validation_record_count for volume-aware weighting"
     )
     assert any("or vector(0)" in expr for expr in expressions), (
         f"Panel '{panel_title}' in {dashboard_file} must stay zero-safe"
@@ -470,6 +474,7 @@ def test_dq_dashboard_contains_core_dq_metrics():
 
     required_metrics = [
         "bioetl_dq_validation_score",
+        "bioetl_dq_validation_record_count",
         "bioetl_dq_records_quarantined_total",
         "bioetl_dq_anomaly_detected",
         "bioetl_dq_check_duration_ms_bucket",
@@ -516,6 +521,32 @@ def test_overview_dashboard_contains_control_plane_and_lineage_metrics():
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Overview dashboard missing metrics: {missing}"
+
+
+def test_control_plane_lookup_panels_disclose_global_scope() -> None:
+    """Control-plane read panels must disclose that they are global, not pipeline-scoped."""
+    expectations = {
+        "bioetl-overview-v2.json": (
+            "Global Control-plane Lookup Failures",
+            "Global Control-plane Lookup p95",
+        ),
+        "bioetl-runtime.json": (
+            "Global Control-plane Lookup Outcomes",
+            "Global Control-plane Lookup p95",
+        ),
+    }
+
+    for dashboard_name, panel_titles in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for title in panel_titles:
+            assert title in panels, (
+                f"{dashboard_name} must expose {title!r} to avoid implying pipeline scope"
+            )
 
 
 def test_provider_dashboard_uses_pipeline_filters():
@@ -985,6 +1016,27 @@ def test_explore_links_decode_to_valid_queries() -> None:
             if payload["datasource"] == "loki":
                 expr = payload["queries"][0]["expr"]
                 assert expr == '{job="bioetl"}'
+
+
+def test_explore_drilldown_titles_disclose_tracing_profile_dependency() -> None:
+    """Loki/Tempo drilldown titles should warn that tracing profile is required."""
+    expectations = (
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-provider-health-v2.json",
+    )
+
+    for dashboard_name in expectations:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        for link in _collect_dashboard_links(dashboard):
+            url = link.get("url", "")
+            title = link.get("title", "")
+            if "/explore" not in url or ("loki" not in url and "tempo" not in url):
+                continue
+            assert "tracing" in title.lower(), (
+                f"{dashboard_name} Explore drilldown title must disclose tracing profile dependency"
+            )
 
 def test_loki_drilldown_uses_safe_generic_entrypoint() -> None:
     """Loki drilldown should avoid broken variable interpolation inside Explore."""

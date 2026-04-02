@@ -8,14 +8,27 @@ from typing import TypedDict
 from uuid import UUID
 
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.control_plane._run_ledger_event_family import (
+    infer_ledger_event_family,
+)
 from bioetl.domain.events import ORDINARY_PIPELINE_STAGE_NAMES
 from bioetl.domain.types import RunID
 
 __all__ = [
+    "ARTIFACT_PUBLISHED_EVENT",
     "CANONICAL_RUN_LEDGER_STAGE_NAMES",
     "COMPOSITE_RUN_LEDGER_STAGE_NAMES",
+    "DQ_POLICY_APPLIED_EVENT",
+    "MANIFEST_CREATED_EVENT",
     "ORDINARY_RUN_LEDGER_STAGE_NAMES",
+    "RUN_FAILED_EVENT",
+    "RUN_FINISHED_EVENT",
+    "RUN_LEDGER_BASELINE_EVENT_TYPES",
     "RUN_LEDGER_STAGE_EVENT_TYPES",
+    "RUN_SHUTDOWN_EVENT",
+    "RUN_STARTED_EVENT",
+    "STAGE_COMPLETED_EVENT",
+    "STAGE_STARTED_EVENT",
     "RunLedgerEntry",
     "RunLedgerReplayProjection",
     "canonicalize_run_ledger_stage_name",
@@ -23,28 +36,31 @@ __all__ = [
     "slice_ledger_entries_after",
 ]
 
-_LEDGER_EVENT_FAMILY_EXACT: dict[str, str] = {
-    "manifest_created": "diagnostic",
-    "run_started": "pipeline.lifecycle",
-    "run_finished": "pipeline.lifecycle",
-    "run_failed": "pipeline.lifecycle",
-    "run_shutdown": "pipeline.lifecycle",
-    "stage_started": "pipeline.phase",
-    "stage_completed": "pipeline.phase",
-    "artifact_published": "artifact",
-}
-_LEDGER_EVENT_FAMILY_PREFIXES: tuple[tuple[str, str], ...] = (
-    ("dq_", "dq"),
-    ("lineage_", "lineage"),
-    ("checkpoint_", "checkpoint"),
-    ("composite_", "composite"),
-    ("artifact_", "artifact"),
+MANIFEST_CREATED_EVENT = "manifest_created"
+RUN_STARTED_EVENT = "run_started"
+RUN_FINISHED_EVENT = "run_finished"
+RUN_FAILED_EVENT = "run_failed"
+RUN_SHUTDOWN_EVENT = "run_shutdown"
+STAGE_STARTED_EVENT = "stage_started"
+STAGE_COMPLETED_EVENT = "stage_completed"
+ARTIFACT_PUBLISHED_EVENT = "artifact_published"
+DQ_POLICY_APPLIED_EVENT = "dq_policy_applied"
+
+RUN_LEDGER_BASELINE_EVENT_TYPES: tuple[str, ...] = (
+    MANIFEST_CREATED_EVENT,
+    RUN_STARTED_EVENT,
+    STAGE_STARTED_EVENT,
+    STAGE_COMPLETED_EVENT,
+    ARTIFACT_PUBLISHED_EVENT,
+    RUN_FINISHED_EVENT,
+    RUN_FAILED_EVENT,
+    RUN_SHUTDOWN_EVENT,
+    DQ_POLICY_APPLIED_EVENT,
 )
-_LEDGER_EVENT_FAMILY_SUFFIXES: tuple[tuple[str, str], ...] = (
-    ("_started", "pipeline.phase"),
-    ("_completed", "pipeline.phase"),
+
+RUN_LEDGER_STAGE_EVENT_TYPES: frozenset[str] = frozenset(
+    {STAGE_STARTED_EVENT, STAGE_COMPLETED_EVENT}
 )
-RUN_LEDGER_STAGE_EVENT_TYPES: frozenset[str] = frozenset({"stage_started", "stage_completed"})
 
 ORDINARY_RUN_LEDGER_STAGE_NAMES: tuple[str, ...] = ORDINARY_PIPELINE_STAGE_NAMES
 COMPOSITE_RUN_LEDGER_STAGE_NAMES: tuple[str, ...] = (
@@ -87,35 +103,6 @@ def _normalize_ledger_scalar(value: object) -> object:
     if isinstance(value, UUID):
         return str(value)
     return value
-
-
-def _match_ledger_event_family_by_suffix(event_type: str) -> str | None:
-    for suffix, family in _LEDGER_EVENT_FAMILY_SUFFIXES:
-        if event_type.endswith(suffix):
-            return family
-    return None
-
-
-def _match_ledger_event_family_by_prefix(event_type: str) -> str | None:
-    for prefix, family in _LEDGER_EVENT_FAMILY_PREFIXES:
-        if event_type.startswith(prefix):
-            return family
-    return None
-
-
-def infer_ledger_event_family(event_type: str) -> str:
-    """Infer stable event-family taxonomy for ledger entries."""
-    normalized_event_type = event_type.strip().lower()
-    if not normalized_event_type:
-        return "diagnostic"
-    for family in (
-        _LEDGER_EVENT_FAMILY_EXACT.get(normalized_event_type),
-        _match_ledger_event_family_by_suffix(normalized_event_type),
-        _match_ledger_event_family_by_prefix(normalized_event_type),
-    ):
-        if family is not None:
-            return family
-    return "diagnostic"
 
 
 def _normalize_run_ledger_stage(event_type: str, stage: str | None) -> str | None:
@@ -198,11 +185,11 @@ def _apply_replay_entry(
         last_event_id=entry.entry_id,
         last_event_occurred_at=entry.occurred_at,
     )
-    if entry.event_type == "stage_completed":
+    if entry.event_type == STAGE_COMPLETED_EVENT:
         return _project_stage_completed(replayed, entry)
-    if entry.event_type == "run_finished":
+    if entry.event_type == RUN_FINISHED_EVENT:
         return replace(replayed, state=CompositePipelineState.COMPLETED)
-    if entry.event_type == "run_failed":
+    if entry.event_type == RUN_FAILED_EVENT:
         return replace(replayed, state=CompositePipelineState.FAILED)
     return replayed
 

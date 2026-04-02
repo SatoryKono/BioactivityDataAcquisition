@@ -18,7 +18,7 @@ Last verified: '2026-03-29'
 
 ## 1. Текущая карта дашбордов
 
-- `1. Overview` (`bioetl-overview-v2`) — главный hub. Держит ссылки на `2. Runtime`, `3. Provider Health`, `4. Data Quality`, а также `Explore Logs (Loki)` и `Explore Traces (Tempo)`.
+- `1. Overview` (`bioetl-overview-v2`) — главный hub. Держит ссылки на `2. Runtime`, `3. Provider Health`, `4. Data Quality`, а также `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`.
 - `2. Runtime` (`bioetl-runtime`) — runtime triage surface. Держит `Back to Overview` и Explore links.
 - `3. Provider Health` (`bioetl-provider-health-v2`) — health-check surface по провайдерам. Держит `Back to Overview` и Explore links.
 - `4. Data Quality` (`bioetl-dq-v2`) — DQ surface. Держит `Back to Overview` и Explore links.

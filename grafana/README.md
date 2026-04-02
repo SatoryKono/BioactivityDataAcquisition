@@ -529,7 +529,8 @@ Host Machine (Windows/macOS/Linux)
 | Метрика | Тип | Labels | Описание |
 |---|---|---|---|
 | `bioetl_dq_records_quarantined_total` | Counter | `pipeline`, `error_type`, `run_type` | Количество записей, отправленных на карантин из-за проблем качества. |
-| `bioetl_dq_validation_score` | Gauge | `pipeline`, `entity` | Оценка качества данных (0.0-1.0, где 1.0 = все записи валидны). |
+| `bioetl_dq_validation_score` | Gauge | `pipeline`, `entity` | Entity-level оценка качества данных (0.0-1.0, где 1.0 = все записи валидны). |
+| `bioetl_dq_validation_record_count` | Gauge | `pipeline`, `entity` | Record count для последнего entity-level DQ snapshot; используется для volume-weighted aggregate score. |
 | `bioetl_data_freshness_seconds` | Gauge | `pipeline`, `entity` | Unix timestamp последнего успешного ingestion для pipeline/entity; lag считается как `time() - metric`. |
 | `bioetl_dq_anomaly_detected` | Counter | `pipeline`, `metric`, `severity`, `anomaly_type` | Количество обнаруженных аномалий качества данных. |
 | `bioetl_dq_check_duration_ms` | Histogram | `pipeline` | Длительность проверок качества данных в миллисекундах. |
@@ -695,7 +696,7 @@ shipped pack.
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
 **Drilldown:** dashboard links `2. Runtime`, `3. Provider Health`,
-`4. Data Quality`, `Explore Logs (Loki)` и `Explore Traces (Tempo)` используют
+`4. Data Quality`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
 текущее временное окно. Panel `Processing Volume by Stage` дублирует Explore handoff
 через data links для быстрого перехода в Grafana Explore.
 
@@ -716,7 +717,7 @@ shipped pack.
 | 99 | Pipeline | Stat | `max(label_values(..., pipeline)) or vector(0)` | Информационная панель пайплайна. |
 | 100 | Run Type | Stat | `max(label_values(..., run_type)) or vector(0)` | Информационная панель типа запуска. |
 | 1 | Data Flow in Range: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Selected-range поток данных Bronze → Silver → Gold. |
-| 2 | Data Quality Score | Gauge | `avg(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)` | Канонический DQ gauge на базе `bioetl_dq_validation_score`: красный (<50%), оранжевый (50-80%), жёлтый (80-95%), зелёный (>95%). |
+| 2 | Data Quality Score (Volume-weighted) | Gauge | `sum(score * record_count) / clamp_min(sum(record_count), 1)` | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`, чтобы крупные сущности не смешивались с малыми через простой `avg(...)`. |
 | 3 | Source Records in Range (Bronze) | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))` | Объём Bronze input за активное Grafana окно. |
 | 4 | Clean Records in Range (Gold) | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))` | Объём Gold output за активное Grafana окно. |
 | 5 | Worst-Entity DQ Score | Gauge | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)` | Худший observed DQ score по сущностям внутри выбранного pipeline scope. |
@@ -730,8 +731,8 @@ shipped pack.
 - DQ quarantine = `bioetl_dq_records_quarantined_total`
 - Silver filter rejects = `bioetl_records_processed_total{stage="filtered_out"}`
 
-**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и
-`Explore Traces (Tempo)` используют текущее временное окно. Panel `Data Flow in
+**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и
+`Explore Traces (Tempo, tracing profile)` используют текущее временное окно. Panel `Data Flow in
 Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
 incidents и freshness investigation.
 
@@ -760,8 +761,8 @@ incidents и freshness investigation.
 
 **Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
 
-**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и
-`Explore Traces (Tempo)` плюс data links у latency-панели открывают Grafana
+**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и
+`Explore Traces (Tempo, tracing profile)` плюс data links у latency-панели открывают Grafana
 Explore в том же time range.
 Loki drilldown стартует с безопасного `{job="bioetl"}` entrypoint без encoded
 dashboard-variable interpolation. Дополнительное сужение по `provider` или
@@ -794,8 +795,8 @@ dashboard-variable interpolation. Дополнительное сужение п
 
 **Фильтрация:** `$pipeline`, `$run_type`.
 
-**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и
-`Explore Traces (Tempo)` плюс data links у `Log Hygiene Trend` ведут в
+**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и
+`Explore Traces (Tempo, tracing profile)` плюс data links у `Log Hygiene Trend` ведут в
 Explore с тем же time range. Как и в остальных shipped dashboards, Loki handoff
 стартует с безопасного `{job="bioetl"}` entrypoint.
 
@@ -1216,12 +1217,20 @@ BioETL использует трёхуровневую Medallion Architecture д
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 18.2 Data Quality Score
+### 18.2 Data Quality Score (Volume-weighted)
 
-Канонический показатель качества пайплайна — `bioetl_dq_validation_score`:
+Канонический aggregate-показатель качества пайплайна строится из двух
+entity-level gauge-метрик:
+
+- `bioetl_dq_validation_score`
+- `bioetl_dq_validation_record_count`
 
 ```promql
-avg(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)
+(
+  (sum(bioetl_dq_validation_score{pipeline=~"$pipeline"} * bioetl_dq_validation_record_count{pipeline=~"$pipeline"}) or vector(0))
+  /
+  clamp_min((sum(bioetl_dq_validation_record_count{pipeline=~"$pipeline"}) or vector(0)), 1)
+)
 ```
 
 Этот показатель используется в gauge-панели `4. Data Quality`
@@ -1233,6 +1242,11 @@ avg(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)
 | 50-80% | Оранжевый | Предупреждение: значительная потеря данных, требует внимания |
 | 80-95% | Жёлтый | Допустимо: небольшая потеря на валидации/дедупликации |
 | > 95% | Зелёный | Нормально: высокое качество данных |
+
+Entity-level gauge `bioetl_dq_validation_score` сохраняется отдельно и остаётся
+полезным для worst-case surface (`Worst-Entity DQ Score`), но aggregate panel
+больше не использует простой `avg(...)`, чтобы крупные сущности не
+приравнивались к малым.
 
 Типичное значение для здорового пайплайна: 95-99%. Снижение обычно объясняется:
 - Записями с невалидными полями и schema violations.
