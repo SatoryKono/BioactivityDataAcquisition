@@ -51,7 +51,7 @@ execution_paths:
   live_contract:
     workflow_path: .github/workflows/contract-tests.yml
     gate_mode: scheduled
-    repository_guard: SatoryKono/BioactivityDataAcquisition
+    repository_guard: SatoryKono/BioactivityDataAcquisition2
     required_env:
       BIOETL_LIVE_API_TESTS: "true"
       BIOETL_NETWORK_TESTS: "true"

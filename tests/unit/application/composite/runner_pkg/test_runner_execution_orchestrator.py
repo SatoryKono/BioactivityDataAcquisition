@@ -86,6 +86,12 @@ class _ExecutionHost:
         self.order.append("transition")
         return self.completed_enrichment_state
 
+    def _record_enrichment_stage_completed(
+        self,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> None:
+        assert enrichment_results is self.enrichment_results
+
     async def _execute_merge_stage(
         self,
         state: object,

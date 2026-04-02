@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 import pytest
 import yaml
@@ -190,4 +191,7 @@ class TestIntegrationVcrPolicy:
                 f"missing {expected_anchor!r}"
             )
 
-        assert "SatoryKono/BioactivityDataAcquisition2" not in testing_guide
+        assert not re.search(
+            r"SatoryKono/BioactivityDataAcquisition(?!2)",
+            testing_guide,
+        )

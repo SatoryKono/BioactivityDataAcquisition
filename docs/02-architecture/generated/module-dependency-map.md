@@ -14,8 +14,8 @@ Last verified: '2026-03-29'
 
 ## Summary
 
-- Scanned modules: `1419`
-- Internal import edges (raw): `5444`
+- Scanned modules: `1420`
+- Internal import edges (raw): `5448`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `262`
@@ -32,9 +32,9 @@ flowchart LR
     interfaces[interfaces]
     application -->|784 OK| application
     application -->|855 OK| domain
-    composition -->|282 OK| application
-    composition -->|373 OK| composition
-    composition -->|283 OK| domain
+    composition -->|283 OK| application
+    composition -->|374 OK| composition
+    composition -->|285 OK| domain
     composition -->|241 OK| infrastructure
     domain -->|839 OK| domain
     infrastructure -->|637 OK| domain
@@ -51,9 +51,9 @@ flowchart LR
 |---|---|---:|---|
 | `application` | `application` | 784 | allowed |
 | `application` | `domain` | 855 | allowed |
-| `composition` | `application` | 282 | allowed |
-| `composition` | `composition` | 373 | allowed |
-| `composition` | `domain` | 283 | allowed |
+| `composition` | `application` | 283 | allowed |
+| `composition` | `composition` | 374 | allowed |
+| `composition` | `domain` | 285 | allowed |
 | `composition` | `infrastructure` | 241 | allowed |
 | `domain` | `domain` | 839 | allowed |
 | `infrastructure` | `domain` | 637 | allowed |
@@ -73,7 +73,7 @@ flowchart LR
 | `infrastructure.adapters` | `domain.ports` | 89 |
 | `application.core` | `domain.types` | 86 |
 | `application.pipelines` | `domain.types` | 76 |
-| `composition.bootstrap` | `application.composite` | 66 |
+| `composition.bootstrap` | `application.composite` | 67 |
 | `application.core` | `domain.ports` | 62 |
 | `application.composite` | `domain.ports` | 57 |
 | `composition.factories` | `domain.ports` | 51 |
@@ -100,10 +100,10 @@ flowchart LR
 | `composition.factories` | `infrastructure.schemas` | 21 |
 | `infrastructure.storage` | `domain.medallion` | 21 |
 | `infrastructure.config` | `domain.types` | 20 |
+| `composition.bootstrap` | `domain.composite` | 19 |
 | `composition.factories` | `infrastructure.adapters` | 19 |
 | `composition.providers` | `infrastructure.adapters` | 19 |
 | `application.core` | `domain.config` | 18 |
-| `composition.bootstrap` | `domain.composite` | 18 |
 | `interfaces.cli` | `composition.services_api` | 18 |
 | `composition.factories` | `application.services` | 17 |
 | `composition.factories` | `domain.config` | 15 |

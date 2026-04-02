@@ -612,7 +612,10 @@ class TestPipelineRunnerRun:
             call.kwargs["stage"]
             for call in ledger_service.record_stage_started.call_args_list
         ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES)
-        assert ledger_service.record_stage_completed.call_count == 5
+        assert [
+            call.kwargs["stage"]
+            for call in ledger_service.record_stage_completed.call_args_list
+        ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES)
         ledger_service.record_run_finished.assert_called_once_with(
             metrics_snapshot=runner.execution_metrics
         )
@@ -634,7 +637,10 @@ class TestPipelineRunnerRun:
             call.kwargs["stage"]
             for call in ledger_service.record_stage_started.call_args_list
         ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES[:3])
-        assert ledger_service.record_stage_completed.call_count == 2
+        assert [
+            call.kwargs["stage"]
+            for call in ledger_service.record_stage_completed.call_args_list
+        ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES[:2])
         ledger_service.record_run_failed.assert_called_once_with(
             message="boom",
             error_type="RuntimeError",
@@ -657,7 +663,10 @@ class TestPipelineRunnerRun:
             call.kwargs["stage"]
             for call in ledger_service.record_stage_started.call_args_list
         ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES[:3])
-        assert ledger_service.record_stage_completed.call_count == 2
+        assert [
+            call.kwargs["stage"]
+            for call in ledger_service.record_stage_completed.call_args_list
+        ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES[:2])
         ledger_service.record_run_shutdown.assert_called_once_with(
             metrics_snapshot=runner.execution_metrics
         )
