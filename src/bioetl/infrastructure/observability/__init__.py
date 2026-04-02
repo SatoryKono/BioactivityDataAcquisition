@@ -34,12 +34,12 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.observability.prometheus_metrics import (
         PrometheusMetrics,
     )
-    from bioetl.infrastructure.observability.server import start_metrics_server
     from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
     from bioetl.infrastructure.observability.unified_logger import (
         UnifiedLogger,
         create_unified_logger,
     )
+    from bioetl.infrastructure.observability.server import start_metrics_server
 
 __all__ = [
     "MetricsServerAdapter",

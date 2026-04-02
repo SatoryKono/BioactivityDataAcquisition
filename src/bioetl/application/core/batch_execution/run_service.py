@@ -12,13 +12,13 @@ from bioetl.application.core.batch_execution._contracts import (
     BatchExecutionCountersSnapshot,
     BatchExecutionMemoryState,
 )
+from bioetl.application.core.batch_runtime_failure_policy import (
+    PIPELINE_EXECUTION_ERRORS,
+)
 from bioetl.application.core.batch_execution.lifecycle import (
     BatchExecutionContext,
     BatchExecutionLifecycleContext,
     BatchExecutionLifecycleService,
-)
-from bioetl.application.core.batch_runtime_failure_policy import (
-    PIPELINE_EXECUTION_ERRORS,
 )
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
