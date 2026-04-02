@@ -297,6 +297,7 @@ nav:
             -   "Observability Metrics": 04-reference/contracts/observability.md
             -   "Run Manifest & Ledger": 04-reference/contracts/run-manifest-ledger.md
     -   Reference:
+            -   "Reference Index": 04-reference/index.md
             -   CLI: 04-reference/cli.md
             -   Templates: 04-reference/templates/index.md
             -   API:
