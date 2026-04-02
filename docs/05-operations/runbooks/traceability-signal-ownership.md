@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P1
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
+Last verified: '2026-04-02'
 ---
 
 # Traceability Signal Ownership
@@ -43,6 +43,17 @@ Last verified: '2026-03-30'
 - [Run Manifest Inspection](run-manifest-inspection.md)
 - [Incident Response](incident-response.md)
 - [Observability Checklist](observability-checklist.md)
+- [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md)
+
+### Role Boundary
+
+- This page is the ownership and escalation reference.
+- Use [Traceability Tabletop Drills](traceability-tabletop-drills.md) for the
+  recurring drill catalog and scoring model.
+- Use [Traceability Adoption Checklist](traceability-adoption-checklist.md) for
+  readiness evidence and exit-gate tracking.
+- Use [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md)
+  as the canonical execution pack for the final manual gate.
 
 ### Canonical Correlation Anchors
 

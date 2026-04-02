@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P2
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
+Last verified: '2026-04-02'
 ---
 
 # Traceability Adoption Checklist
@@ -32,6 +32,16 @@ Last verified: '2026-03-30'
 ### Purpose
 
 - Capture objective operator-adoption evidence for Wave 4 Traceability Fabric and the final manual release-readiness gate referenced by Wave 5. This checklist is executed after tabletop drills and incident simulations.
+
+### Role Boundary
+
+- This page is the evidence and exit-gate checklist.
+- Use [Traceability Tabletop Drills](traceability-tabletop-drills.md) for the
+  recurring scenarios and scoring method.
+- Use [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md)
+  for the canonical bundled closeout flow.
+- Use [Traceability Signal Ownership](traceability-signal-ownership.md) when an
+  operator needs the owner or escalation route for a detected signal.
 
 ### Wave 5 Closeout Expectation
 

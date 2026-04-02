@@ -1,15 +1,12 @@
-______________________________________________________________________
-
-Version: 1.0.0
+---
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
-
 - BioETL Team
-  Last verified: '2026-03-29'
-
-______________________________________________________________________
+Last verified: '2026-04-02'
+---
 
 # Architecture Overview
 
@@ -18,6 +15,10 @@ ______________________________________________________________________
 ## Quick Navigation
 
 BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Medallion Architecture** for data layers.
+
+For published contracts, CLI surfaces, pipeline/provider specs, and package
+reference, use the [Reference Index](../04-reference/index.md). This
+architecture section focuses on structure, boundaries, and design rationale.
 
 ### Layer Documentation
 
@@ -141,3 +142,4 @@ ______________________________________________________________________
 - [RULES.md](../00-project/RULES.md) — Project rules (source of truth)
 - [00-map.md](../00-project/00-map.md) — Full project navigator
 - [glossary.md](../00-project/glossary.md) — Ubiquitous language terminology
+- [Reference Index](../04-reference/index.md) — Published reference surfaces

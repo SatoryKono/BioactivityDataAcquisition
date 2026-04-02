@@ -241,7 +241,7 @@ api() {
 }
 
 json_from_stdin_as_comment() {
-  python3 -c 'import json, sys; print(json.dumps({"body": sys.stdin.read()}))'
+  python3 -c 'import json, sys; print(json.dumps({"body": sys.stdin.read()}, ensure_ascii=True))'
 }
 
 build_issue_patch() {
@@ -262,18 +262,21 @@ elif body_file:
     payload["body"] = pathlib.Path(body_file).read_text(encoding="utf-8")
 if state:
     payload["state"] = state
-print(json.dumps(payload, ensure_ascii=False))
+print(json.dumps(payload, ensure_ascii=True))
 PY
 }
 
 if [[ -n "$COMMENT_TEXT" ]]; then
-  api POST "/issues/${ISSUE_NUMBER}/comments" "$(printf '%s' "$COMMENT_TEXT" | json_from_stdin_as_comment)"
+  comment_payload="$(printf '%s' "$COMMENT_TEXT" | json_from_stdin_as_comment)"
+  api POST "/issues/${ISSUE_NUMBER}/comments" "$comment_payload"
 elif [[ -n "$COMMENT_FILE" ]]; then
-  api POST "/issues/${ISSUE_NUMBER}/comments" "$(cat "$COMMENT_FILE" | json_from_stdin_as_comment)"
+  comment_payload="$(cat "$COMMENT_FILE" | json_from_stdin_as_comment)"
+  api POST "/issues/${ISSUE_NUMBER}/comments" "$comment_payload"
 fi
 
 if [[ -n "$TITLE_TEXT" || -n "$TITLE_FILE" || -n "$BODY_TEXT" || -n "$BODY_FILE" || -n "$STATE" ]]; then
-  api PATCH "/issues/${ISSUE_NUMBER}" "$(build_issue_patch)"
+  issue_patch="$(build_issue_patch)"
+  api PATCH "/issues/${ISSUE_NUMBER}" "$issue_patch"
 fi
 
 printf 'Done.\n'

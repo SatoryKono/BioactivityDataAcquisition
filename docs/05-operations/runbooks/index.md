@@ -65,10 +65,10 @@ Last verified: '2026-04-01'
 |---------|-------------|----------|
 | [Observability Checklist](observability-checklist.md) | Operator validation checklist for metrics, log correlation, dashboards, and diagnostics routing | P2 |
 | [Run Manifest Inspection](run-manifest-inspection.md) | Mandatory runbook for the supported RunManifest / RunLedger inspection surface | P1 |
-| [Traceability Signal Ownership](traceability-signal-ownership.md) | Signal ownership matrix for alert -> diagnostics -> escalation | P1 |
-| [Traceability Tabletop Drills](traceability-tabletop-drills.md) | Tabletop scenarios and scoring for operator adoption | P2 |
-| [Traceability Adoption Checklist](traceability-adoption-checklist.md) | Exit-gate checklist and session evidence log for operator adoption | P2 |
-| [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md) | One-pack execution guide for the final operator tabletop/adoption gate | P2 |
+| [Traceability Signal Ownership](traceability-signal-ownership.md) | Ownership and escalation matrix for traceability signals | P1 |
+| [Traceability Tabletop Drills](traceability-tabletop-drills.md) | Recurring drill catalog, cadence, and scoring model | P2 |
+| [Traceability Adoption Checklist](traceability-adoption-checklist.md) | Evidence log and exit-gate checklist for operator adoption | P2 |
+| [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md) | Canonical one-time execution pack for the final Wave 5 closeout gate | P2 |
 
 ### Control-Plane / Traceability Routing
 

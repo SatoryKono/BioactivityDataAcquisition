@@ -179,7 +179,7 @@ report_only_hotspot_families:
         duplication_clusters: 0
         files: 27
         total_loc: 3163
-        files_ge_250_loc: 3
+        files_ge_250_loc: 6
         helper_function_ratio: 0.333
         max_internal_fan_in: 5
         max_internal_fan_in_module: "bioetl.composition.bootstrap.runtime.observability"
@@ -200,7 +200,7 @@ report_only_hotspot_families:
         duplication_clusters: 0
         files: 22
         total_loc: 2589
-        files_ge_250_loc: 3
+        files_ge_250_loc: 4
         helper_function_ratio: 0.469
         max_internal_fan_in: 6
         max_internal_fan_in_module: "bioetl.composition.factories.pipeline.registry"

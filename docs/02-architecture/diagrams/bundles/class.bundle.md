@@ -992,13 +992,13 @@ Last verified: '2026-03-29'
 ![90-pkg-domain-control-plane](../class-diagrams/svg/90-pkg-domain-control-plane.svg)
 
 ### Описание
-Диаграмма «Package Family: domain/control_plane» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/control_plane; modules: effective_config_artifact, contract_registry_types, gold_contract, run_manifest, contract_registry_service, run_ledger.. Схема имеет плотность порядка 24 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: effective config artifact, contract registry types, gold contract, run manifest, contract registry service, run ledger. Показательные узлы для быстрого чтения: ConfigResolutionPolicy, ConfigSourceRef, DQPolicySnapshot, EffectiveConfigArtifact, EffectiveConfigHashes, EffectiveExecutionConfig. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: domain/control_plane» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/control_plane; modules: effective_config_artifact, contract_registry_types, gold_contract, run_manifest, contract_registry_service, run_ledger.. Схема имеет плотность порядка 25 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: effective config artifact, contract registry types, gold contract, run manifest, contract registry service, run ledger. Показательные узлы для быстрого чтения: ConfigResolutionPolicy, ConfigSourceRef, DQPolicySnapshot, EffectiveConfigArtifact, RunManifest, RunLedgerReplayProjection. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-03-27`
-- Узлы (metadata): `24`
+- Дата: `2026-04-02`
+- Узлы (metadata): `25`
 
 \newpage
 
@@ -1543,12 +1543,12 @@ Last verified: '2026-03-29'
 ![90-pkg-infrastructure-control-plane](../class-diagrams/svg/90-pkg-infrastructure-control-plane.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/control_plane» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/control_plane; modules: file_effective_config_artifact_store, file_lineage_store, file_run_ledger_store, file_run_manifest_store.. Схема имеет плотность порядка 4 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: file effective config artifact store, file lineage store, file run ledger store, file run manifest store. Показательные узлы для быстрого чтения: FileEffectiveConfigArtifactStore, FileLineageStore, FileRunLedgerStore, FileRunManifestStore. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: infrastructure/control_plane» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/control_plane; modules: file_effective_config_artifact_store, file_lineage_store, file_run_ledger_store, file_run_manifest_store.. Схема имеет плотность порядка 4 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: file effective config artifact store, file lineage store, file run ledger store, file run manifest store. Показательные узлы для быстрого чтения: FileEffectiveConfigArtifactStore, FileLineageStore, FileRunLedgerStore, FileRunManifestStore; у ledger store теперь явно показан replay-oriented surface `list_entries_after(...)`. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-03-27`
+- Дата: `2026-04-02`
 - Узлы (metadata): `4`
 
 \newpage
