@@ -382,15 +382,24 @@ class TestFSMSeedStateTransitions:
             run_id=runner.run_id,
         )
         execution_context = _composite_execution_context()
+        completion_context = MagicMock()
         result = MagicMock()
         runner._finalize_pipeline = AsyncMock()
-        runner._build_composite_result = MagicMock(return_value=result)
+        runner._prepare_composite_result_context = MagicMock(
+            return_value=completion_context
+        )
+        runner._log_composite_completion = MagicMock()
+        runner._finalize_composite_result = MagicMock(return_value=result)
         runner._record_run_finished = MagicMock()
 
         completed = await runner._complete_successful_run(state, execution_context)
 
         runner._finalize_pipeline.assert_awaited_once_with(state)
-        runner._build_composite_result.assert_called_once_with(execution_context)
+        runner._prepare_composite_result_context.assert_called_once_with(
+            execution_context
+        )
+        runner._log_composite_completion.assert_called_once_with(completion_context)
+        runner._finalize_composite_result.assert_called_once_with(completion_context)
         runner._record_run_finished.assert_called_once_with(execution_context)
         assert completed is result
 
