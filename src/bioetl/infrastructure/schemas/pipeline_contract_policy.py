@@ -81,9 +81,8 @@ class PipelineContractPolicy(BaseModel):
             raise ValueError("merge_keys must overlap with primary_key")
         return self
 
-    @model_validator(mode="after")
-    def validate_rollout_policy(self) -> PipelineContractPolicy:
-        """Validate rollout metadata for versioned contract handling."""
+    def _validate_basic_rollout_fields(self) -> None:
+        """Validate non-list fields in rollout policy."""
         allowed_modes = {"single", "dual_read", "dual_write", "dual_read_write"}
         if self.rollout.mode not in allowed_modes:
             allowed = ", ".join(sorted(allowed_modes))
@@ -94,6 +93,9 @@ class PipelineContractPolicy(BaseModel):
             raise ValueError("contract_ref must be a non-empty string")
         if not self.active_version.strip():
             raise ValueError("active_version must be a non-empty string")
+
+    def _validate_rollout_version_lists(self) -> None:
+        """Validate read_order and write_versions in rollout policy."""
         if self.active_version not in self.rollout.read_order:
             raise ValueError("active_version must be present in rollout.read_order")
         if self.active_version not in self.rollout.write_versions:
@@ -106,6 +108,13 @@ class PipelineContractPolicy(BaseModel):
             raise ValueError(
                 "rollout.write_versions must not contain duplicate versions"
             )
+
+    @model_validator(mode="after")
+    def validate_rollout_policy(self) -> PipelineContractPolicy:
+        """Validate rollout metadata for versioned contract handling."""
+        self._validate_basic_rollout_fields()
+        self._validate_rollout_version_lists()
+
         if self.rollout.mode == "single":
             if self.rollout.read_order != [self.active_version]:
                 raise ValueError(

@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1415,
-    "total_internal_imports": 5429,
+    "total_internal_imports": 5427,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 261,
@@ -11,7 +11,7 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 777,
+      "imports": 775,
       "allowed": true
     },
     {

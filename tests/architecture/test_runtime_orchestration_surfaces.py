@@ -6,8 +6,6 @@ from pathlib import Path
 
 
 ACTIVE_RUNTIME_ORCHESTRATION_FILES = (
-    Path(".codex/agents/ORCHESTRATION.md"),
-    Path(".codex/agents/CODEX-RUNTIME.md"),
     Path(".claude/agents/ORCHESTRATION.md"),
     Path(".claude/agents/README.md"),
     Path(".claude/rules/agent-orchestration-rules.md"),

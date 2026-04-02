@@ -36,6 +36,9 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
 
+      - name: Install dependencies for reporting
+        run: uv pip install lxml
+
       - name: Run mypy (strict mode, full gate)
         run: |
           set -o pipefail

@@ -23,6 +23,39 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
 
+def _get_manifest_updates(
+    *,
+    manifest_id: str,
+    config_hash: str | None = None,
+    dq_contract_compatibility_hash: str | None = None,
+    effective_config_artifact_id: str | None = None,
+    contract_ref: str | None = None,
+    contract_version: str | None = None,
+    contract_schema_hash: str | None = None,
+    dq_policy_ref: str | None = None,
+    rule_bundle_version: str | None = None,
+) -> dict[str, str]:
+    """Collate manifest updates into a flat dictionary."""
+    updates = {"manifest_id": manifest_id}
+    if config_hash is not None:
+        updates["config_hash"] = config_hash
+    if dq_contract_compatibility_hash is not None:
+        updates["dq_contract_compatibility_hash"] = dq_contract_compatibility_hash
+    if effective_config_artifact_id is not None:
+        updates["effective_config_artifact_id"] = effective_config_artifact_id
+    if contract_ref is not None:
+        updates["contract_ref"] = contract_ref
+    if contract_version is not None:
+        updates["contract_version"] = contract_version
+    if contract_schema_hash is not None:
+        updates["contract_schema_hash"] = contract_schema_hash
+    if dq_policy_ref is not None:
+        updates["dq_policy_ref"] = dq_policy_ref
+    if rule_bundle_version is not None:
+        updates["rule_bundle_version"] = rule_bundle_version
+    return updates
+
+
 def attach_manifest_id(
     ctx: PipelineRunContext,
     manifest_id: str,
@@ -37,51 +70,30 @@ def attach_manifest_id(
     rule_bundle_version: str | None = None,
 ) -> PipelineRunContext:
     """Return context carrying manifest/control-plane provenance values."""
+    updates = _get_manifest_updates(
+        manifest_id=manifest_id,
+        config_hash=config_hash,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        effective_config_artifact_id=effective_config_artifact_id,
+        contract_ref=contract_ref,
+        contract_version=contract_version,
+        contract_schema_hash=contract_schema_hash,
+        dq_policy_ref=dq_policy_ref,
+        rule_bundle_version=rule_bundle_version,
+    )
+
     if is_dataclass(ctx):
-        updates: dict[str, object] = {"manifest_id": manifest_id}
-        if config_hash is not None and hasattr(ctx, "config_hash"):
-            updates["config_hash"] = config_hash
-        if dq_contract_compatibility_hash is not None and hasattr(
-            ctx, "dq_contract_compatibility_hash"
-        ):
-            updates["dq_contract_compatibility_hash"] = dq_contract_compatibility_hash
-        if effective_config_artifact_id is not None and hasattr(
-            ctx, "effective_config_artifact_id"
-        ):
-            updates["effective_config_artifact_id"] = effective_config_artifact_id
-        if contract_ref is not None and hasattr(ctx, "contract_ref"):
-            updates["contract_ref"] = contract_ref
-        if contract_version is not None and hasattr(ctx, "contract_version"):
-            updates["contract_version"] = contract_version
-        if contract_schema_hash is not None and hasattr(ctx, "contract_schema_hash"):
-            updates["contract_schema_hash"] = contract_schema_hash
-        if dq_policy_ref is not None and hasattr(ctx, "dq_policy_ref"):
-            updates["dq_policy_ref"] = dq_policy_ref
-        if rule_bundle_version is not None and hasattr(ctx, "rule_bundle_version"):
-            updates["rule_bundle_version"] = rule_bundle_version
+        valid_updates = {k: v for k, v in updates.items() if hasattr(ctx, k)}
         return cast(
             "PipelineRunContext",
-            replace(cast("DataclassInstance", ctx), **updates),
+            replace(cast("DataclassInstance", ctx), **valid_updates),
         )
+
     if hasattr(ctx, "__dict__"):
-        ctx.manifest_id = manifest_id
-        if config_hash is not None:
-            ctx.config_hash = config_hash
-        if dq_contract_compatibility_hash is not None:
-            ctx.dq_contract_compatibility_hash = dq_contract_compatibility_hash
-        if effective_config_artifact_id is not None:
-            ctx.effective_config_artifact_id = effective_config_artifact_id
-        if contract_ref is not None:
-            ctx.contract_ref = contract_ref
-        if contract_version is not None:
-            ctx.contract_version = contract_version
-        if contract_schema_hash is not None:
-            ctx.contract_schema_hash = contract_schema_hash
-        if dq_policy_ref is not None:
-            ctx.dq_policy_ref = dq_policy_ref
-        if rule_bundle_version is not None:
-            ctx.rule_bundle_version = rule_bundle_version
+        for k, v in updates.items():
+            setattr(ctx, k, v)
         return ctx
+
     raise TypeError("PipelineRunContext must support manifest_id attachment")
 
 
