@@ -406,8 +406,7 @@ def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_dq_validation_score" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must use "
-        "bioetl_dq_validation_score"
+        f"Panel '{panel_title}' in {dashboard_file} must use bioetl_dq_validation_score"
     )
     assert any("bioetl_dq_validation_record_count" in expr for expr in expressions), (
         f"Panel '{panel_title}' in {dashboard_file} must use "
@@ -625,7 +624,7 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
     assert any("| json" in expr for expr in loki_exprs), (
         "Runtime dashboard Loki panels must parse structured JSON logs"
     )
-    assert any("__error__!=\"\"" in expr for expr in loki_exprs), (
+    assert any('__error__!=""' in expr for expr in loki_exprs), (
         "Runtime dashboard must expose unstructured-log hygiene signal"
     )
 
@@ -708,7 +707,9 @@ def test_provider_health_summary_panels_use_selected_time_range(
     panel_title: str, expected_snippet: str
 ) -> None:
     """Provider summary panels must respect the active Grafana time range."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
     panel = next(
         (
             item
@@ -885,8 +886,12 @@ def test_silver_filter_rejects_summary_panels_use_instant_queries(
     )
     assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_file}"
 
-    targets = [target for target in panel.get("targets", []) if isinstance(target, dict)]
-    assert targets, f"Panel '{panel_title}' in {dashboard_file} must define a query target"
+    targets = [
+        target for target in panel.get("targets", []) if isinstance(target, dict)
+    ]
+    assert targets, (
+        f"Panel '{panel_title}' in {dashboard_file} must define a query target"
+    )
     assert all(target.get("instant") is True for target in targets), (
         f"Panel '{panel_title}' in {dashboard_file} must use instant Prometheus queries"
     )
@@ -944,7 +949,9 @@ def test_empty_state_distribution_panels_use_explicit_placeholder_series(
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
-def test_dashboard_titles_do_not_expose_fixed_window_suffixes(dashboard_path: Path) -> None:
+def test_dashboard_titles_do_not_expose_fixed_window_suffixes(
+    dashboard_path: Path,
+) -> None:
     """Shipped dashboards should rely on Grafana window controls, not fixed time suffixes."""
     dashboard = load_dashboard(dashboard_path)
     titles = [
@@ -1064,6 +1071,7 @@ def test_explore_drilldown_titles_disclose_tracing_profile_dependency() -> None:
                 f"{dashboard_name} Explore drilldown title must disclose tracing profile dependency"
             )
 
+
 def test_loki_drilldown_uses_safe_generic_entrypoint() -> None:
     """Loki drilldown should avoid broken variable interpolation inside Explore."""
     sample_line = _emit_sample_structured_log(
@@ -1088,7 +1096,9 @@ def test_loki_drilldown_uses_safe_generic_entrypoint() -> None:
             for link in _collect_dashboard_links(dashboard)
             if "/explore?left=" in link.get("url", "") and "loki" in link.get("url", "")
         ]
-        assert loki_links, f"{dashboard_name} must expose at least one Loki drilldown link"
+        assert loki_links, (
+            f"{dashboard_name} must expose at least one Loki drilldown link"
+        )
 
         for link in loki_links:
             payload = json.loads(unquote(link["url"].split("left=", 1)[1]))
