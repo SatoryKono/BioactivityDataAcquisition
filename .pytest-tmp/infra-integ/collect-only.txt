@@ -1,0 +1,429 @@
+tests/integration/adapters/openalex/test_adapter.py: 7
+tests/integration/adapters/openalex/test_pipeline.py: 10
+tests/integration/adapters/test_chembl.py: 8
+tests/integration/adapters/test_crossref.py: 11
+tests/integration/adapters/test_crossref_vcr_rebalance.py: 15
+tests/integration/adapters/test_http_retry_semantics.py: 2
+tests/integration/adapters/test_openalex_vcr_rebalance.py: 15
+tests/integration/adapters/test_pubchem.py: 33
+tests/integration/adapters/test_pubmed.py: 2
+tests/integration/adapters/test_pubmed_coverage.py: 13
+tests/integration/adapters/test_pubmed_edge_cases.py: 12
+tests/integration/adapters/test_pubmed_vcr_rebalance.py: 15
+tests/integration/adapters/test_semanticscholar.py: 11
+tests/integration/adapters/test_semanticscholar_vcr_rebalance.py: 15
+tests/integration/adapters/test_uniprot.py: 3
+tests/integration/adapters/test_uniprot_idmapping.py: 7
+tests/integration/chembl/test_activity_extraction_params.py: 7
+tests/integration/chembl/test_assay_extraction_params.py: 7
+tests/integration/chembl/test_molecule_extraction_params.py: 7
+tests/integration/chembl/test_publication_extraction_params.py: 7
+tests/integration/chembl/test_target_extraction_params.py: 7
+tests/integration/composite/test_column_naming_integration.py: 16
+tests/integration/composite/test_composite_config_backward_compatibility.py: 2
+tests/integration/composite/test_molecule_pipeline.py: 12
+tests/integration/config/test_dq_config_loading.py: 28
+tests/integration/infrastructure/storage/test_silver_writer.py: 10
+tests/integration/pipelines/test_crossref_date_normalization.py: 18
+tests/integration/pipelines/test_pubmed_date_normalization.py: 12
+tests/integration/test_cross_provider_doi_normalization.py: 10
+tests/integration/test_dq_monitor_integration.py: 15
+tests/integration/test_dq_report_integration.py: 15
+tests/integration/test_grafana_config.py: 24
+tests/integration/test_preflight_health_modes.py: 3
+tests/integration/test_pubchem_pipeline.py: 5
+tests/integration/test_runner_lifecycle.py: 9
+tests/integration/test_uniprot_pipeline.py: 9
+tests/integration/validation/test_external_verification.py: 10
+tests/unit/infrastructure/adapters/chembl/test_chembl_client.py: 36
+tests/unit/infrastructure/adapters/chembl/test_chembl_client_coverage.py: 8
+tests/unit/infrastructure/adapters/chembl/test_deduplication.py: 6
+tests/unit/infrastructure/adapters/chembl/test_request_metadata.py: 5
+tests/unit/infrastructure/adapters/common/test_api_request_collector.py: 35
+tests/unit/infrastructure/adapters/common/test_base_title_fallback.py: 9
+tests/unit/infrastructure/adapters/common/test_composable_fallback.py: 7
+tests/unit/infrastructure/adapters/common/test_fallback_fetch_service.py: 3
+tests/unit/infrastructure/adapters/common/test_fetch_retry_policy.py: 6
+tests/unit/infrastructure/adapters/common/test_retry_reduction_policy.py: 3
+tests/unit/infrastructure/adapters/common/test_source_metadata_capability.py: 4
+tests/unit/infrastructure/adapters/common/test_title_matching.py: 27
+tests/unit/infrastructure/adapters/crossref/test_batch.py: 18
+tests/unit/infrastructure/adapters/crossref/test_compatibility.py: 2
+tests/unit/infrastructure/adapters/crossref/test_fallback.py: 26
+tests/unit/infrastructure/adapters/crossref/test_request_metadata.py: 3
+tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py: 14
+tests/unit/infrastructure/adapters/decorators/test_retry_decorator.py: 14
+tests/unit/infrastructure/adapters/decorators/test_wrap_with_resilience.py: 6
+tests/unit/infrastructure/adapters/http/test_client_context_mixin.py: 6
+tests/unit/infrastructure/adapters/http/test_client_retries.py: 2
+tests/unit/infrastructure/adapters/http/test_health_monitor.py: 39
+tests/unit/infrastructure/adapters/http/test_http_client.py: 28
+tests/unit/infrastructure/adapters/http/test_pagination.py: 4
+tests/unit/infrastructure/adapters/http/test_retry_config.py: 14
+tests/unit/infrastructure/adapters/openalex/test_adapter.py: 43
+tests/unit/infrastructure/adapters/openalex/test_client_helpers_adapter_mixin.py: 4
+tests/unit/infrastructure/adapters/openalex/test_fallback.py: 15
+tests/unit/infrastructure/adapters/openalex/test_fallback_orchestrator.py: 4
+tests/unit/infrastructure/adapters/openalex/test_request_metadata.py: 3
+tests/unit/infrastructure/adapters/openalex/test_response_parser.py: 14
+tests/unit/infrastructure/adapters/pubchem/test_adapter.py: 15
+tests/unit/infrastructure/adapters/pubchem/test_client_model_mixin.py: 11
+tests/unit/infrastructure/adapters/pubchem/test_entity_mapper.py: 18
+tests/unit/infrastructure/adapters/pubchem/test_fetch_flow.py: 5
+tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies.py: 28
+tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py: 3
+tests/unit/infrastructure/adapters/pubchem/test_policy_helper.py: 27
+tests/unit/infrastructure/adapters/pubchem/test_query_builder.py: 13
+tests/unit/infrastructure/adapters/pubchem/test_request_metadata.py: 2
+tests/unit/infrastructure/adapters/pubchem/test_response_mapper.py: 13
+tests/unit/infrastructure/adapters/pubmed/test_adapter_fallback.py: 13
+tests/unit/infrastructure/adapters/pubmed/test_fallback.py: 33
+tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py: 14
+tests/unit/infrastructure/adapters/pubmed/test_request_metadata.py: 3
+tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py: 21
+tests/unit/infrastructure/adapters/semanticscholar/test_batch_request_mixin.py: 5
+tests/unit/infrastructure/adapters/semanticscholar/test_fallback.py: 21
+tests/unit/infrastructure/adapters/semanticscholar/test_health_metadata_protocols.py: 4
+tests/unit/infrastructure/adapters/semanticscholar/test_request_metadata.py: 3
+tests/unit/infrastructure/adapters/test_adapter_error_classifier.py: 13
+tests/unit/infrastructure/adapters/test_adapter_error_logging.py: 12
+tests/unit/infrastructure/adapters/test_adapter_error_mapper.py: 20
+tests/unit/infrastructure/adapters/test_base_metrics.py: 10
+tests/unit/infrastructure/adapters/test_cached_bronze_data_source.py: 7
+tests/unit/infrastructure/adapters/test_client_error_paths.py: 9
+tests/unit/infrastructure/adapters/test_client_retry_mixin.py: 35
+tests/unit/infrastructure/adapters/test_csv_filter_reader.py: 35
+tests/unit/infrastructure/adapters/test_error_handling.py: 55
+tests/unit/infrastructure/adapters/test_fallback_policy.py: 17
+tests/unit/infrastructure/adapters/test_filterable_mixin.py: 3
+tests/unit/infrastructure/adapters/test_health_probe_policy.py: 2
+tests/unit/infrastructure/adapters/test_http_base.py: 10
+tests/unit/infrastructure/adapters/test_idmapping_csv_reader_adapter.py: 4
+tests/unit/infrastructure/adapters/test_provider_entrypoints.py: 6
+tests/unit/infrastructure/adapters/test_provider_fetch_contracts.py: 9
+tests/unit/infrastructure/adapters/test_provider_names.py: 2
+tests/unit/infrastructure/adapters/test_sync_base.py: 10
+tests/unit/infrastructure/adapters/test_validation.py: 26
+tests/unit/infrastructure/adapters/uniprot/test_adapter.py: 10
+tests/unit/infrastructure/adapters/uniprot/test_fallback_resolver.py: 4
+tests/unit/infrastructure/adapters/uniprot/test_fasta_parser.py: 21
+tests/unit/infrastructure/adapters/uniprot/test_idmapping_client.py: 18
+tests/unit/infrastructure/adapters/uniprot/test_request_metadata.py: 3
+tests/unit/infrastructure/adapters/uniprot/test_uniprot_client_coverage.py: 20
+tests/unit/infrastructure/adr/test_fs_adr_service.py: 39
+tests/unit/infrastructure/audit/test_file_audit.py: 16
+tests/unit/infrastructure/checkpoint/test_local_checkpoint.py: 22
+tests/unit/infrastructure/config/source_normalizers/test_source.py: 2
+tests/unit/infrastructure/config/test_config_merge.py: 5
+tests/unit/infrastructure/config/test_contract_policy_loader.py: 8
+tests/unit/infrastructure/config/test_contract_policy_validation.py: 4
+tests/unit/infrastructure/config/test_domain_config_resolver.py: 2
+tests/unit/infrastructure/config/test_dq_config_loader.py: 37
+tests/unit/infrastructure/config/test_dq_config_resolution.py: 3
+tests/unit/infrastructure/config/test_field_group_loader.py: 18
+tests/unit/infrastructure/config/test_filter_config_loader.py: 39
+tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py: 4
+tests/unit/infrastructure/config/test_pipeline_config_loader.py: 1
+tests/unit/infrastructure/config/test_pipeline_config_loader_extended.py: 34
+tests/unit/infrastructure/config/test_pipeline_normalizers.py: 14
+tests/unit/infrastructure/config/test_publication_type_classification_loader.py: 7
+tests/unit/infrastructure/config/test_source_config_legacy_normalization.py: 7
+tests/unit/infrastructure/config/test_source_normalizers.py: 31
+tests/unit/infrastructure/errors/test_domain_infra_exception_mapper.py: 6
+tests/unit/infrastructure/errors/test_exception_mapper.py: 2
+tests/unit/infrastructure/export/test_csv_exporter.py: 33
+tests/unit/infrastructure/export/test_dq_report_writer.py: 23
+tests/unit/infrastructure/export/test_export_catalog_adapter.py: 4
+tests/unit/infrastructure/export/test_export_writer_adapter.py: 2
+tests/unit/infrastructure/factories/test_factories.py: 5
+tests/unit/infrastructure/locking/test_memory_lock.py: 18
+tests/unit/infrastructure/locking/test_memory_lock_boost.py: 22
+tests/unit/infrastructure/observability/test_anomaly.py: 44
+tests/unit/infrastructure/observability/test_debug_adapters.py: 6
+tests/unit/infrastructure/observability/test_debug_adapters_boost.py: 17
+tests/unit/infrastructure/observability/test_logging.py: 11
+tests/unit/infrastructure/observability/test_logging_config.py: 24
+tests/unit/infrastructure/observability/test_metrics.py: 8
+tests/unit/infrastructure/observability/test_metrics_server_adapter.py: 13
+tests/unit/infrastructure/observability/test_noop_logger.py: 10
+tests/unit/infrastructure/observability/test_observability_parity.py: 4
+tests/unit/infrastructure/observability/test_prometheus_metric_registries.py: 5
+tests/unit/infrastructure/observability/test_prometheus_metrics.py: 21
+tests/unit/infrastructure/observability/test_server.py: 26
+tests/unit/infrastructure/observability/test_tracing.py: 20
+tests/unit/infrastructure/observability/test_unified_logger.py: 25
+tests/unit/infrastructure/observability/test_zscore_detector.py: 21
+tests/unit/infrastructure/quality/test_baseline_validation.py: 30
+tests/unit/infrastructure/quality/test_budget_evaluator.py: 20
+tests/unit/infrastructure/quality/test_debt_scorecard.py: 16
+tests/unit/infrastructure/quality/test_debt_scorecard_validation.py: 11
+tests/unit/infrastructure/quality/test_decomposition_validation.py: 54
+tests/unit/infrastructure/quality/test_exemptions_registry.py: 29
+tests/unit/infrastructure/quality/test_exemptions_registry_paths.py: 23
+tests/unit/infrastructure/quality/test_exemptions_registry_validation.py: 38
+tests/unit/infrastructure/quality/test_governance_validation.py: 13
+tests/unit/infrastructure/quality/test_grace_windows_validation.py: 27
+tests/unit/infrastructure/quality/test_inventory.py: 19
+tests/unit/infrastructure/quality/test_primitives.py: 28
+tests/unit/infrastructure/quality/test_quarterly_targets_validation.py: 15
+tests/unit/infrastructure/quality/test_registry_sync_service.py: 20
+tests/unit/infrastructure/quality/test_report_formatter.py: 33
+tests/unit/infrastructure/quality/test_scoring.py: 52
+tests/unit/infrastructure/quarantine/test_unified_quarantine.py: 35
+tests/unit/infrastructure/quarantine/test_unified_quarantine_security.py: 2
+tests/unit/infrastructure/schemas/test_base_schemas.py: 63
+tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py: 3
+tests/unit/infrastructure/schemas/test_composite_config_schema.py: 12
+tests/unit/infrastructure/schemas/test_config_to_domain_consolidation.py: 4
+tests/unit/infrastructure/schemas/test_dq_config.py: 40
+tests/unit/infrastructure/schemas/test_filter_config.py: 12
+tests/unit/infrastructure/schemas/test_gold.py: 73
+tests/unit/infrastructure/schemas/test_pipeline_sort_policy_schema.py: 2
+tests/unit/infrastructure/schemas/test_severity_enricher_mapping.py: 6
+tests/unit/infrastructure/schemas/test_silver.py: 142
+tests/unit/infrastructure/schemas/test_silver_pipeline_contracts.py: 64
+tests/unit/infrastructure/schemas/test_source_config_properties.py: 26
+tests/unit/infrastructure/security/test_pii_hasher.py: 31
+tests/unit/infrastructure/serialization/test_encoders.py: 2
+tests/unit/infrastructure/serialization/test_json_encoders.py: 46
+tests/unit/infrastructure/storage/silver_writer/test_silver_writer_core.py: 25
+tests/unit/infrastructure/storage/silver_writer/test_silver_writer_dq.py: 15
+tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py: 16
+tests/unit/infrastructure/storage/silver_writer/test_silver_writer_retry.py: 23
+tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py: 10
+tests/unit/infrastructure/storage/test_arrow_converter.py: 26
+tests/unit/infrastructure/storage/test_atomic.py: 29
+tests/unit/infrastructure/storage/test_atomic_boost.py: 13
+tests/unit/infrastructure/storage/test_base_delta_writer.py: 27
+tests/unit/infrastructure/storage/test_bronze_write_result_helpers.py: 1
+tests/unit/infrastructure/storage/test_bronze_writer.py: 60
+tests/unit/infrastructure/storage/test_bronze_writer_cleanup_and_sidecar.py: 26
+tests/unit/infrastructure/storage/test_bronze_writer_io_mixin_boost.py: 24
+tests/unit/infrastructure/storage/test_bronze_writer_metadata_mixin.py: 4
+tests/unit/infrastructure/storage/test_bronze_writer_metadata_operations.py: 3
+tests/unit/infrastructure/storage/test_bronze_writer_metadata_paths.py: 3
+tests/unit/infrastructure/storage/test_bronze_writer_metrics_mixin.py: 4
+tests/unit/infrastructure/storage/test_bronze_writer_pipeline_helpers.py: 2
+tests/unit/infrastructure/storage/test_bronze_writer_reporting_helpers.py: 2
+tests/unit/infrastructure/storage/test_bronze_writer_side_effects_mixin.py: 3
+tests/unit/infrastructure/storage/test_bronze_writer_validation_mixin.py: 12
+tests/unit/infrastructure/storage/test_composite_checkpoint_writer.py: 2
+tests/unit/infrastructure/storage/test_delta_reader.py: 29
+tests/unit/infrastructure/storage/test_deterministic_write.py: 8
+tests/unit/infrastructure/storage/test_gold_writer.py: 54
+tests/unit/infrastructure/storage/test_gold_writer_integration.py: 14
+tests/unit/infrastructure/storage/test_gold_writer_io_delta_mixins.py: 10
+tests/unit/infrastructure/storage/test_gold_writer_io_helpers.py: 4
+tests/unit/infrastructure/storage/test_gold_writer_metadata_mixin_boost.py: 16
+tests/unit/infrastructure/storage/test_gold_writer_metadata_operations.py: 12
+tests/unit/infrastructure/storage/test_gold_writer_metadata_payloads.py: 7
+tests/unit/infrastructure/storage/test_gold_writer_read_cleanup.py: 15
+tests/unit/infrastructure/storage/test_gold_writer_validation_mixin.py: 12
+tests/unit/infrastructure/storage/test_metadata_builder.py: 14
+tests/unit/infrastructure/storage/test_metadata_integration.py: 5
+tests/unit/infrastructure/storage/test_metadata_writer.py: 22
+tests/unit/infrastructure/storage/test_metadata_writer_boost.py: 22
+tests/unit/infrastructure/storage/test_metadata_writer_operations.py: 11
+tests/unit/infrastructure/storage/test_retention_dedup.py: 4
+tests/unit/infrastructure/storage/test_silver_writer_delta_mixin_boost.py: 24
+tests/unit/infrastructure/storage/test_silver_writer_dq_metrics.py: 13
+tests/unit/infrastructure/storage/test_silver_writer_key_nullability.py: 2
+tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py: 14
+tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py: 3
+tests/unit/infrastructure/storage/test_silver_writer_validation.py: 14
+tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py: 16
+tests/unit/infrastructure/storage/test_storage_exceptions.py: 4
+tests/unit/infrastructure/storage/test_write_resilience.py: 1
+tests/unit/infrastructure/storage/test_write_resilience_boost.py: 18
+tests/unit/infrastructure/system/test_memory_monitor.py: 37
+tests/unit/infrastructure/test_adapters.py: 18
+tests/unit/infrastructure/test_checkpoint.py: 13
+tests/unit/infrastructure/test_circuit_breaker.py: 25
+tests/unit/infrastructure/test_circuit_breaker_degradation.py: 26
+tests/unit/infrastructure/test_config.py: 28
+tests/unit/infrastructure/test_config_dynamic.py: 24
+tests/unit/infrastructure/test_config_loader_schema_path.py: 2
+tests/unit/infrastructure/test_config_settings.py: 17
+tests/unit/infrastructure/test_observability.py: 9
+tests/unit/infrastructure/test_quarantine.py: 3
+tests/unit/infrastructure/test_rate_limiter.py: 12
+tests/unit/infrastructure/test_storage.py: 15
+tests/unit/infrastructure/time/test_system_clock.py: 3
+tests/unit/infrastructure/validation/test_pandera_validator.py: 21
+
+=================================== ERRORS ====================================
+_ ERROR collecting tests/unit/infrastructure/adapters/crossref/test_crossref_client.py _
+ImportError while importing test module 'E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\unit\infrastructure\adapters\crossref\test_crossref_client.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests\unit\infrastructure\adapters\crossref\test_crossref_client.py:10: in <module>
+    from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
+src\bioetl\composition\factories\__init__.py:33: in <module>
+    from bioetl.composition.factories.pipeline import (
+src\bioetl\composition\factories\pipeline\__init__.py:17: in <module>
+    from bioetl.composition.factories.pipeline.assembler import (
+src\bioetl\composition\factories\pipeline\assembler.py:16: in <module>
+    from bioetl.composition.factories.pipeline.factory_method_helpers import (
+src\bioetl\composition\factories\pipeline\factory_method_helpers.py:11: in <module>
+    from bioetl.composition.factories.services.bundle import (
+src\bioetl\composition\factories\services\__init__.py:5: in <module>
+    from bioetl.composition.factories.pipeline.creation_api import (
+src\bioetl\composition\factories\pipeline\creation_api.py:5: in <module>
+    from bioetl.composition.factories.pipeline._creation_wiring import (
+src\bioetl\composition\factories\pipeline\_creation_wiring.py:49: in <module>
+    from bioetl.composition.factories.pipeline.contract_validator import (
+E   ImportError: cannot import name '_SchemaBuilder' from 'bioetl.composition.factories.pipeline.contract_validator' (E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\pipeline\contract_validator.py)
+_ ERROR collecting tests/unit/infrastructure/factories/test_storage_adapter.py _
+ImportError while importing test module 'E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\unit\infrastructure\factories\test_storage_adapter.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests\unit\infrastructure\factories\test_storage_adapter.py:12: in <module>
+    from bioetl.composition.factories.storage.adapter import StorageAdapter
+src\bioetl\composition\factories\__init__.py:33: in <module>
+    from bioetl.composition.factories.pipeline import (
+src\bioetl\composition\factories\pipeline\__init__.py:17: in <module>
+    from bioetl.composition.factories.pipeline.assembler import (
+src\bioetl\composition\factories\pipeline\assembler.py:16: in <module>
+    from bioetl.composition.factories.pipeline.factory_method_helpers import (
+src\bioetl\composition\factories\pipeline\factory_method_helpers.py:11: in <module>
+    from bioetl.composition.factories.services.bundle import (
+src\bioetl\composition\factories\services\__init__.py:5: in <module>
+    from bioetl.composition.factories.pipeline.creation_api import (
+src\bioetl\composition\factories\pipeline\creation_api.py:5: in <module>
+    from bioetl.composition.factories.pipeline._creation_wiring import (
+src\bioetl\composition\factories\pipeline\_creation_wiring.py:49: in <module>
+    from bioetl.composition.factories.pipeline.contract_validator import (
+E   ImportError: cannot import name '_SchemaBuilder' from 'bioetl.composition.factories.pipeline.contract_validator' (E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\pipeline\contract_validator.py)
+_____ ERROR collecting tests/unit/infrastructure/test_storage_factory.py ______
+ImportError while importing test module 'E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\unit\infrastructure\test_storage_factory.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests\unit\infrastructure\test_storage_factory.py:11: in <module>
+    from bioetl.composition.factories.storage import (
+src\bioetl\composition\factories\__init__.py:33: in <module>
+    from bioetl.composition.factories.pipeline import (
+src\bioetl\composition\factories\pipeline\__init__.py:17: in <module>
+    from bioetl.composition.factories.pipeline.assembler import (
+src\bioetl\composition\factories\pipeline\assembler.py:16: in <module>
+    from bioetl.composition.factories.pipeline.factory_method_helpers import (
+src\bioetl\composition\factories\pipeline\factory_method_helpers.py:11: in <module>
+    from bioetl.composition.factories.services.bundle import (
+src\bioetl\composition\factories\services\__init__.py:5: in <module>
+    from bioetl.composition.factories.pipeline.creation_api import (
+src\bioetl\composition\factories\pipeline\creation_api.py:5: in <module>
+    from bioetl.composition.factories.pipeline._creation_wiring import (
+src\bioetl\composition\factories\pipeline\_creation_wiring.py:49: in <module>
+    from bioetl.composition.factories.pipeline.contract_validator import (
+E   ImportError: cannot import name '_SchemaBuilder' from 'bioetl.composition.factories.pipeline.contract_validator' (E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\pipeline\contract_validator.py)
+________________ ERROR collecting tests/integration/interfaces ________________
+tests\integration\interfaces\conftest.py:17: in <module>
+    from bioetl.composition.factories.storage import StorageAdapter, StorageContext
+src\bioetl\composition\factories\__init__.py:33: in <module>
+    from bioetl.composition.factories.pipeline import (
+src\bioetl\composition\factories\pipeline\__init__.py:17: in <module>
+    from bioetl.composition.factories.pipeline.assembler import (
+src\bioetl\composition\factories\pipeline\assembler.py:16: in <module>
+    from bioetl.composition.factories.pipeline.factory_method_helpers import (
+src\bioetl\composition\factories\pipeline\factory_method_helpers.py:11: in <module>
+    from bioetl.composition.factories.services.bundle import (
+src\bioetl\composition\factories\services\__init__.py:5: in <module>
+    from bioetl.composition.factories.pipeline.creation_api import (
+src\bioetl\composition\factories\pipeline\creation_api.py:5: in <module>
+    from bioetl.composition.factories.pipeline._creation_wiring import (
+src\bioetl\composition\factories\pipeline\_creation_wiring.py:49: in <module>
+    from bioetl.composition.factories.pipeline.contract_validator import (
+E   ImportError: cannot import name '_SchemaBuilder' from 'bioetl.composition.factories.pipeline.contract_validator' (E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\pipeline\contract_validator.py)
+____ ERROR collecting tests/integration/pipelines/test_chembl_activity.py _____
+ImportError while importing test module 'E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\integration\pipelines\test_chembl_activity.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests\integration\pipelines\test_chembl_activity.py:30: in <module>
+    from bioetl.composition.factories.pipeline.registry import chembl_activity_factory
+src\bioetl\composition\factories\__init__.py:33: in <module>
+    from bioetl.composition.factories.pipeline import (
+src\bioetl\composition\factories\pipeline\__init__.py:17: in <module>
+    from bioetl.composition.factories.pipeline.assembler import (
+src\bioetl\composition\factories\pipeline\assembler.py:16: in <module>
+    from bioetl.composition.factories.pipeline.factory_method_helpers import (
+src\bioetl\composition\factories\pipeline\factory_method_helpers.py:11: in <module>
+    from bioetl.composition.factories.services.bundle import (
+src\bioetl\composition\factories\services\__init__.py:5: in <module>
+    from bioetl.composition.factories.pipeline.creation_api import (
+src\bioetl\composition\factories\pipeline\creation_api.py:5: in <module>
+    from bioetl.composition.factories.pipeline._creation_wiring import (
+src\bioetl\composition\factories\pipeline\_creation_wiring.py:49: in <module>
+    from bioetl.composition.factories.pipeline.contract_validator import (
+E   ImportError: cannot import name '_SchemaBuilder' from 'bioetl.composition.factories.pipeline.contract_validator' (E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\pipeline\contract_validator.py)
+____ ERROR collecting tests/integration/pipelines/test_chembl_cell_line.py ____
+ImportError while importing test module 'E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\integration\pipelines\test_chembl_cell_line.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests\integration\pipelines\test_chembl_cell_line.py:30: in <module>
+    from bioetl.composition.factories.pipeline.registry import (
+src\bioetl\composition\factories\__init__.py:33: in <module>
+    from bioetl.composition.factories.pipeline import (
+src\bioetl\composition\factories\pipeline\__init__.py:17: in <module>
+    from bioetl.composition.factories.pipeline.assembler import (
+src\bioetl\composition\factories\pipeline\assembler.py:16: in <module>
+    from bioetl.composition.factories.pipeline.factory_method_helpers import (
+src\bioetl\composition\factories\pipeline\factory_method_helpers.py:11: in <module>
+    from bioetl.composition.factories.services.bundle import (
+src\bioetl\composition\factories\services\__init__.py:5: in <module>
+    from bioetl.composition.factories.pipeline.creation_api import (
+src\bioetl\composition\factories\pipeline\creation_api.py:5: in <module>
+    from bioetl.composition.factories.pipeline._creation_wiring import (
+src\bioetl\composition\factories\pipeline\_creation_wiring.py:49: in <module>
+    from bioetl.composition.factories.pipeline.contract_validator import (
+E   ImportError: cannot import name '_SchemaBuilder' from 'bioetl.composition.factories.pipeline.contract_validator' (E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\pipeline\contract_validator.py)
+_ ERROR collecting tests/integration/pipelines/test_chembl_compound_record.py _
+ImportError while importing test module 'E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\integration\pipelines\test_chembl_compound_record.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests\integration\pipelines\test_chembl_compound_record.py:33: in <module>
+    from bioetl.composition.factories.pipeline.registry import (
+src\bioetl\composition\factories\__init__.py:33: in <module>
+    from bioetl.composition.factories.pipeline import (
+src\bioetl\composition\factories\pipeline\__init__.py:17: in <module>
+    from bioetl.composition.factories.pipeline.assembler import (
+src\bioetl\composition\factories\pipeline\assembler.py:16: in <module>
+    from bioetl.composition.factories.pipeline.factory_method_helpers import (
+src\bioetl\composition\factories\pipeline\factory_method_helpers.py:11: in <module>
+    from bioetl.composition.factories.services.bundle import (
+src\bioetl\composition\factories\services\__init__.py:5: in <module>
+    from bioetl.composition.factories.pipeline.creation_api import (
+src\bioetl\composition\factories\pipeline\creation_api.py:5: in <module>
+    from bioetl.composition.factories.pipeline._creation_wiring import (
+src\bioetl\composition\factories\pipeline\_creation_wiring.py:49: in <module>
+    from bioetl.composition.factories.pipeline.contract_validator import (
+E   ImportError: cannot import name '_SchemaBuilder' from 'bioetl.composition.factories.pipeline.contract_validator' (E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\pipeline\contract_validator.py)
+_ ERROR collecting tests/integration/pipelines/test_chembl_target_component.py _
+ImportError while importing test module 'E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\integration\pipelines\test_chembl_target_component.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests\integration\pipelines\test_chembl_target_component.py:32: in <module>
+    from bioetl.composition.factories.pipeline.registry import (
+src\bioetl\composition\factories\__init__.py:33: in <module>
+    from bioetl.composition.factories.pipeline import (
+src\bioetl\composition\factories\pipeline\__init__.py:17: in <module>
+    from bioetl.composition.factories.pipeline.assembler import (
+src\bioetl\composition\factories\pipeline\assembler.py:16: in <module>
+    from bioetl.composition.factories.pipeline.factory_method_helpers import (
+src\bioetl\composition\factories\pipeline\factory_method_helpers.py:11: in <module>
+    from bioetl.composition.factories.services.bundle import (
+src\bioetl\composition\factories\services\__init__.py:5: in <module>
+    from bioetl.composition.factories.pipeline.creation_api import (
+src\bioetl\composition\factories\pipeline\creation_api.py:5: in <module>
+    from bioetl.composition.factories.pipeline._creation_wiring import (
+src\bioetl\composition\factories\pipeline\_creation_wiring.py:49: in <module>
+    from bioetl.composition.factories.pipeline.contract_validator import (
+E   ImportError: cannot import name '_SchemaBuilder' from 'bioetl.composition.factories.pipeline.contract_validator' (E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\pipeline\contract_validator.py)
+=========================== short test summary info ===========================
+ERROR tests/unit/infrastructure/adapters/crossref/test_crossref_client.py
+ERROR tests/unit/infrastructure/factories/test_storage_adapter.py
+ERROR tests/unit/infrastructure/test_storage_factory.py
+ERROR tests/integration/interfaces - ImportError: cannot import name '_Schema...
+ERROR tests/integration/pipelines/test_chembl_activity.py
+ERROR tests/integration/pipelines/test_chembl_cell_line.py
+ERROR tests/integration/pipelines/test_chembl_compound_record.py
+ERROR tests/integration/pipelines/test_chembl_target_component.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 8 errors during collection !!!!!!!!!!!!!!!!!!!
