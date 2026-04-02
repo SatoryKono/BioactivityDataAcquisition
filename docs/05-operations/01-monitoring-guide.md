@@ -53,9 +53,9 @@ Pushgateway publication на завершении run. Это позволяет
 
 #### 1. 1. Overview
 Центральный дашборд для контроля за выполнением пайплайнов.
-- **Processing Pipeline**: динамика по стадиям (bronze/silver/gold/quarantined).
-- **Stage Distribution / Pipeline Distribution**: срезы распределения.
-- **Overall Quality**: `gold / clamp-min(bronze, 1)`.
+- **Processing Volume by Stage**: stage-volume trend за активное окно Grafana.
+- **Stage Distribution in Range / Pipeline Distribution in Range**: selected-range срезы распределения.
+- **Overall Yield (Selected Range)**: `gold[$__range] / clamp-min(bronze[$__range], 1)`.
 - **Control Plane & Lineage**: отдельная строка для `Manifest Writes (24h)`,
   `Ledger Appends (24h)`, `Checkpoint Incompatibilities (24h)` и
   `Lineage Fragment Failures (24h)`.
@@ -65,19 +65,18 @@ Pushgateway publication на завершении run. Это позволяет
 - **Lineage Fragment Outcomes (1h)**: тренд публикации lineage fragments по
   `layer/status` без использования high-cardinality labels.
 - **Drilldown**: dashboard links `Explore Logs (Loki)` / `Explore Traces (Tempo)`
-  и data links у `Processing Pipeline` переводят оператора в Grafana Explore с тем
+  и data links у `Processing Volume by Stage` переводят оператора в Grafana Explore с тем
   же временным окном.
 
 #### 2. 2. Runtime
 Смешанный runtime/ops surface для triage log hygiene и alert-condition сигналов.
-- **Warnings (1h)**: count structured warning logs по текущему `$pipeline`.
-- **Unstructured Logs (1h)**: объём строк, которые не распарсились как shipped JSON log contract.
+- **Warnings / Unstructured Logs**: range-based count structured warning logs и unstructured rows по текущему `$pipeline`.
 - **Pipeline / DQ / Control-plane / Provider / Freshness Alert Conditions**: Prometheus-backed stat panels, которые отражают те же условия, что и alert rules, но не притворяются real alert-state engine.
 - `Pipeline / DQ / Control-plane / Provider / Freshness Alert Conditions` теперь считают
   количество активных семейств условий, а не сырые суммы event counters.
-- **Top Warning Events (1h)**: быстрый срез наиболее частых warning events.
-- **Log Hygiene Trend (5m)**: короткий тренд warnings vs unstructured rows.
-- **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` / `Explore Traces (Tempo)` и data links у `Log Hygiene Trend (5m)` ведут в Explore с тем же временным окном.
+- **Top Warning Events**: быстрый range-based срез наиболее частых warning events.
+- **Log Hygiene Trend**: короткий timeseries-тренд warnings vs unstructured rows через `$__interval`.
+- **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` / `Explore Traces (Tempo)` и data links у `Log Hygiene Trend` ведут в Explore с тем же временным окном.
 
 - **DQ Context Failures (24h) / DQ Reports Skipped (24h) / DQ Reports Generated (24h)**:
   lifecycle counters для DQ reporting. Используйте их, когда нужно быстро
@@ -108,11 +107,12 @@ Pushgateway publication на завершении run. Это позволяет
 
 #### 4. 4. Data Quality
 Сфокусирован на чистоте данных и аномалиях.
-- **Data Quality Score**: `(gold + quarantined) / clamp-min(bronze, 1)`.
+- **Data Quality Score**: `avg(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)`.
+- **Worst-Entity DQ Score**: быстрый worst-case сигнал по сущностям в выбранном pipeline scope.
 - **Quarantine / Soft Threshold / Validation Failures**: контроль деградаций по окнам времени.
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы.
 - **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` / `Explore Traces (Tempo)`
-  и data links у `Data Flow: Bronze -> Silver -> Gold` переводят расследование
+  и data links у `Data Flow in Range: Bronze -> Silver -> Gold` переводят расследование
   DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
 
 ## 3. Alert-backed сигналы

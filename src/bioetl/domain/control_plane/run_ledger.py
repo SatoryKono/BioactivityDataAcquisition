@@ -144,13 +144,7 @@ def slice_ledger_entries_after(
 
 @dataclass(frozen=True, slots=True)
 class RunLedgerReplayProjection:
-    """Deterministic coarse-grained replay delta derived from ledger events.
-
-    The projection is intentionally snapshot-compatible: it only restores
-    durable lifecycle milestones and replay watermark metadata. Rich checkpoint
-    payloads such as ``seed_result`` or per-provider result maps remain owned by
-    the checkpoint snapshot and are never fabricated from ledger metrics.
-    """
+    """Deterministic replay delta for durable lifecycle milestones only."""
 
     state: CompositePipelineState | None = None
     seed_completed: bool | None = None

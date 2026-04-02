@@ -172,6 +172,28 @@ def test_record_run_failed_captures_message_and_metrics() -> None:
     assert store.list_entries_by_run_id(run_id) == [entry]
 
 
+def test_record_run_exception_uses_canonical_failure_payload() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-run-exception",
+    )
+
+    entry = service.record_run_exception(
+        error=RuntimeError("boom"),
+        metrics_snapshot={"records_fetched": 10},
+    )
+
+    assert entry.event_type == "run_failed"
+    assert entry.status == "failed"
+    assert entry.message == "boom"
+    assert entry.error_type == "RuntimeError"
+    assert entry.metrics_snapshot == {"records_fetched": 10}
+
+
 def test_record_run_finished_captures_success_metrics() -> None:
     run_id = RunID(uuid4())
     store = _InMemoryRunLedgerStore()

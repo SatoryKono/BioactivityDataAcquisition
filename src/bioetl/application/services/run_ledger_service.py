@@ -128,6 +128,19 @@ class RunLedgerService:
             error_type=error_type,
         )
 
+    def record_run_exception(
+        self,
+        *,
+        error: Exception,
+        metrics_snapshot: dict[str, int],
+    ) -> RunLedgerEntry:
+        """Record failed run completion directly from an exception instance."""
+        return self.record_run_failed(
+            message=str(error),
+            error_type=type(error).__name__,
+            metrics_snapshot=metrics_snapshot,
+        )
+
     def record_run_shutdown(
         self,
         *,

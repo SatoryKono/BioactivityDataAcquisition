@@ -30,25 +30,25 @@ Last verified: '2026-03-29'
 
 ## Что смотреть в первую очередь
 
-1. `bioetl-overview-v2`, panel `id=4`:
-`sum(gold) / clamp_min(sum(bronze), 1)`
+1. `bioetl-overview-v2`, panel `id=4` (`Overall Yield (Selected Range)`):
+`sum(increase(gold[$__range])) / clamp_min(sum(increase(bronze[$__range])), 1)`
 2. `bioetl-runtime`, panel `id=2`, `id=3`, `id=4`, `id=5`, `id=6`, `id=7`:
 warnings, unstructured logs и alert-condition сигналы по DQ/control-plane/provider/freshness.
 3. `bioetl-provider-health-v2`, panel `id=1`, `id=104`, `id=2`, `id=7`, `id=102`:
 p95 latency, failure-rate и 15-минутный объём health checks по провайдерам.
-4. `bioetl-dq-v2`, panel `id=2`:
-`(gold + quarantined) / clamp_min(bronze, 1)`
+4. `bioetl-dq-v2`, panel `id=2` (`Data Quality Score`):
+`avg(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)`
 5. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
-рост quarantine/threshold/failures за 24h.
+range-based quarantine/threshold/failures for the active Grafana window.
 6. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=115`:
 manifest/ledger failures, checkpoint incompatibilities, missing lineage refs и fragment outcomes по `layer/status`.
 
 ## Drilldown
 
-- `bioetl-overview-v2`: dashboard links `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki)` и `Explore Traces (Tempo)` открывают соседние dashboards и Grafana Explore в текущем time range. Panel `id=1` (`Processing Pipeline`) дублирует Explore handoff через data links.
-- `bioetl-runtime`: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и `Explore Traces (Tempo)` дают короткий путь из warning/unstructured-log spikes обратно в overview и в Explore. Panel `id=9` (`Log Hygiene Trend (5m)`) дублирует Explore handoff через data links.
+- `bioetl-overview-v2`: dashboard links `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki)` и `Explore Traces (Tempo)` открывают соседние dashboards и Grafana Explore в текущем time range. Panel `id=1` (`Processing Volume by Stage`) дублирует Explore handoff через data links.
+- `bioetl-runtime`: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и `Explore Traces (Tempo)` дают короткий путь из warning/unstructured-log spikes обратно в overview и в Explore. Panel `id=9` (`Log Hygiene Trend`) дублирует Explore handoff через data links.
 - `bioetl-provider-health-v2`: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и `Explore Traces (Tempo)` дают быстрый переход из provider health surface в overview и correlation flow. Panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
-- `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и `Explore Traces (Tempo)` дают тот же переход для DQ incidents и freshness investigation. Panel `id=1` (`Data Flow: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
+- `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `Explore Logs (Loki)` и `Explore Traces (Tempo)` дают тот же переход для DQ incidents и freshness investigation. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 
 ## Важные пороги (из JSON)

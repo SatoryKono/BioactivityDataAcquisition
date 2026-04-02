@@ -104,6 +104,7 @@ def _core_servers(root: Path) -> dict[str, dict[str, object]]:
         "github": _github_server(root),
         "prometheus": _wrapper_server(root, "mcp_prometheus_wrapper.sh"),
         "grafana": _wrapper_server(root, "mcp_grafana_wrapper.sh"),
+        "brave-search": _wrapper_server(root, "mcp_brave_search_wrapper.sh"),
         "openaiDeveloperDocs": {
             "type": "http",
             "url": OPENAI_DEVELOPER_DOCS_URL,

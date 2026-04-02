@@ -414,6 +414,55 @@ def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
     )
 
 
+def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
+    """Operator dashboards must not expose Prometheus client bookkeeping timestamps."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        expressions = get_panel_expressions(dashboard)
+        assert all("_created" not in expr for expr in expressions), (
+            f"Dashboard {dashboard_path.name} must not use Prometheus *_created series"
+        )
+
+
+def test_selected_range_kpis_do_not_use_raw_counters() -> None:
+    """Selected-range KPI panels must use windowed counter semantics."""
+    expected_panel_snippets = {
+        "bioetl-overview-v2.json": {
+            "Processing Volume by Stage": "increase(",
+            "Stage Distribution in Range": "increase(",
+            "Pipeline Distribution in Range": "increase(",
+            "Overall Yield (Selected Range)": "increase(",
+        },
+        "bioetl-dq-v2.json": {
+            "Data Flow in Range: Bronze -> Silver -> Gold": "increase(",
+            "Source Records in Range (Bronze)": "increase(",
+            "Clean Records in Range (Gold)": "increase(",
+        },
+    }
+
+    for dashboard_name, panel_expectations in expected_panel_snippets.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for panel_title, expected_snippet in panel_expectations.items():
+            panel = panels.get(panel_title)
+            assert panel is not None, (
+                f"Dashboard {dashboard_name} missing panel {panel_title!r}"
+            )
+            expressions = [
+                target.get("expr", "")
+                for target in panel.get("targets", [])
+                if isinstance(target.get("expr"), str)
+            ]
+            assert any(expected_snippet in expr for expr in expressions), (
+                f"Panel {panel_title!r} in {dashboard_name} must use "
+                f"{expected_snippet!r} rather than raw counter values"
+            )
+
+
 def test_dq_dashboard_contains_core_dq_metrics():
     """Ensure DQ dashboard visualizes key DQ metrics."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
@@ -639,16 +688,11 @@ def test_provider_health_summary_panels_use_selected_time_range(
         ("bioetl-dq-v2.json", "Lineage Refs Missing"),
         ("bioetl-runtime.json", "Warnings"),
         ("bioetl-runtime.json", "Unstructured Logs"),
-        ("bioetl-runtime.json", "Pipeline Alert Conditions"),
-        ("bioetl-runtime.json", "DQ Alert Conditions"),
-        ("bioetl-runtime.json", "Control-plane Alert Conditions"),
-        ("bioetl-runtime.json", "Provider Alert Conditions"),
         ("bioetl-runtime.json", "DQ Context Failures"),
         ("bioetl-runtime.json", "DQ Reports Skipped"),
         ("bioetl-runtime.json", "DQ Reports Generated"),
         ("bioetl-runtime.json", "Control-plane Lookup p95"),
         ("bioetl-runtime.json", "Top Warning Events"),
-        ("bioetl-runtime.json", "Log Hygiene Trend"),
         ("bioetl-runtime.json", "Trace-enabled Runs"),
     ],
 )
@@ -678,12 +722,62 @@ def test_range_aware_summary_panels_use_selected_time_range(
 
 
 @pytest.mark.parametrize(
+    ("panel_title", "expected_snippets"),
+    [
+        (
+            "Pipeline Alert Conditions",
+            ["[15m]", 'component="data_source"', 'status="failed"'],
+        ),
+        (
+            "DQ Alert Conditions",
+            ["[15m]", "[30m]", 'severity="critical"'],
+        ),
+        (
+            "Control-plane Alert Conditions",
+            ["[15m]", "[30m]", 'status="failed"'],
+        ),
+        (
+            "Provider Alert Conditions",
+            ["[15m]", "[1h]", "0.2"],
+        ),
+    ],
+)
+def test_runtime_alert_condition_panels_use_rule_windows(
+    panel_title: str, expected_snippets: list[str]
+) -> None:
+    """Runtime rule-summary panels should mirror shipped alert windows."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None, f"Panel '{panel_title}' not found in bioetl-runtime.json"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert expressions, f"Panel '{panel_title}' must define an expression"
+    for expected_snippet in expected_snippets:
+        assert any(expected_snippet in expr for expr in expressions), (
+            f"Panel '{panel_title}' must include {expected_snippet!r} to stay aligned "
+            "with shipped alert-rule windows"
+        )
+
+
+@pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
         ("bioetl-overview-v2.json", "Lineage Fragment Outcomes"),
         ("bioetl-dq-v2.json", "DQ Check Duration (p95)"),
         ("bioetl-dq-v2.json", "Anomalies Detected"),
         ("bioetl-runtime.json", "Control-plane Lookup Outcomes"),
+        ("bioetl-runtime.json", "Log Hygiene Trend"),
     ],
 )
 def test_adaptive_trend_panels_use_selected_interval(

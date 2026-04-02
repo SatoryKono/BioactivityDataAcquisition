@@ -112,17 +112,13 @@ def build_postrun_dependency_context(
     )
 
 
-def build_postrun_service(
+def _build_pipeline_dq_service(
     *,
     pipeline: BasePipeline,
     logger_port: LoggerPort,
-    lifecycle_service: MedallionLifecycleService,
-    dq_configs: DQConfigsContext,
-    tracer: TracingPort | None = None,
-) -> PostrunService:
-    """Build the postrun service and its collaborators in the composition layer."""
-    resolved_tracer = resolve_tracer(tracer)
-    dq_service = DataQualityService(
+) -> DataQualityService:
+    """Build the pipeline-scoped DataQualityService from outer wiring."""
+    return DataQualityService(
         dq_monitor=pipeline.services.dq_monitor,
         config=pipeline.config.dq,
         logger=logger_port,
@@ -130,7 +126,16 @@ def build_postrun_service(
         pipeline_name=pipeline.config.pipeline_name,
         entity_type=pipeline.config.entity_type,
     )
-    dependencies = build_postrun_dependency_context(
+
+
+def _build_pipeline_postrun_dependencies(
+    *,
+    pipeline: BasePipeline,
+    logger_port: LoggerPort,
+    dq_configs: DQConfigsContext,
+) -> PostrunDependencyContext:
+    """Build postrun dependencies from pipeline services and DQ config seams."""
+    return build_postrun_dependency_context(
         config=pipeline.config,
         runtime=pipeline.runtime,
         context=pipeline.context,
@@ -142,6 +147,27 @@ def build_postrun_service(
         gold_dq_config=dq_configs.gold,
         metadata_coordinator=pipeline.services.metadata_coordinator,
         metadata_writer=pipeline.services.metadata_writer,
+    )
+
+
+def build_postrun_service(
+    *,
+    pipeline: BasePipeline,
+    logger_port: LoggerPort,
+    lifecycle_service: MedallionLifecycleService,
+    dq_configs: DQConfigsContext,
+    tracer: TracingPort | None = None,
+) -> PostrunService:
+    """Build the postrun service and its collaborators in the composition layer."""
+    resolved_tracer = resolve_tracer(tracer)
+    dq_service = _build_pipeline_dq_service(
+        pipeline=pipeline,
+        logger_port=logger_port,
+    )
+    dependencies = _build_pipeline_postrun_dependencies(
+        pipeline=pipeline,
+        logger_port=logger_port,
+        dq_configs=dq_configs,
     )
     return PostrunService(
         config=pipeline.config,
