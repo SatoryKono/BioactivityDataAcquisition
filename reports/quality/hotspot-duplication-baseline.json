@@ -1,0 +1,19 @@
+{
+  "summary": {
+    "snapshot_date": "2026-03-24"
+  },
+  "targets": [
+    {
+      "target": "src/bioetl/application/core/example.py",
+      "duplicate_count": 0
+    },
+    {
+      "target": "src/bioetl/composition/bootstrap/runtime/example.py",
+      "duplicate_count": 0
+    },
+    {
+      "target": "src/bioetl/composition/factories/pipeline/example.py",
+      "duplicate_count": 0
+    }
+  ]
+}
