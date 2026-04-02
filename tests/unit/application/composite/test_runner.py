@@ -332,7 +332,24 @@ class TestFSMSeedStateTransitions:
             COMPOSITE_RUN_LEDGER_STAGE_NAMES[2],
             COMPOSITE_RUN_LEDGER_STAGE_NAMES[3],
         ]
-        run_ledger_service.record_run_finished.assert_called_once()
+        run_ledger_service.record_run_finished.assert_called_once_with(
+            metrics_snapshot={
+                "records_extracted": 100,
+                "records_silver": 95,
+                "keys_generated": 95,
+                "dependencies_total": 0,
+                "dependencies_succeeded": 0,
+                "dependencies_failed": 0,
+                "enrichers_total": 0,
+                "enrichers_succeeded": 0,
+                "enrichers_failed": 0,
+                "enrichers_skipped": 0,
+                "records_merged": 100,
+                "records_from_seed": 100,
+                "records_enriched": 0,
+                "records_fully_enriched": 0,
+            }
+        )
 
 
 class TestFSMSeedFailure:
@@ -433,7 +450,11 @@ class TestFSMSeedFailure:
             call.kwargs["stage"]
             for call in run_ledger_service.record_stage_started.call_args_list
         ] == [COMPOSITE_RUN_LEDGER_STAGE_NAMES[0]]
-        run_ledger_service.record_run_failed.assert_called_once()
+        run_ledger_service.record_run_failed.assert_called_once_with(
+            message="boom",
+            error_type="RuntimeError",
+            metrics_snapshot={},
+        )
 
 
 class TestFSMSeedResume:

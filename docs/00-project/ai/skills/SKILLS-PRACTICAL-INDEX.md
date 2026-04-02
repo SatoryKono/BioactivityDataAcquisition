@@ -11,7 +11,7 @@ Last verified: '2026-03-31'
 # Практический Индекс Skills
 
 *Статус: internal-working-reference*
-*Обновлено: 2026-03-20*
+*Обновлено: 2026-04-02*
 
 Этот документ собирает **уже описанные в рабочей сессии skills** в удобный практический индекс:
 
@@ -54,6 +54,7 @@ Last verified: '2026-03-31'
 | Архитектурный рефакторинг | `py-plan-bot` → `architecture-guardian` → `verify-architecture` |
 | Pipeline/config работа | `py-config-bot` → `data-engineer` → `schema-parity` |
 | Provider/VCR | `provider-health` → `vcr-record` → `py-test-bot` |
+| Grafana dashboard / observability UX | `grafana-dashboard-extension` → `documentation-audit` |
 | Docs drift | `documentation-audit` → `py-doc-bot` |
 | Большой review | `py-review-orchestrator` → `py-audit-bot` |
 | Branch cleanup / consolidation | `using-git-worktrees` → `git-workflow-manager` |
@@ -77,6 +78,7 @@ Last verified: '2026-03-31'
 | `suggest-users` | Подбирает reviewers и assignees по ownership, file expertise и активности. Делает review loop быстрее и точнее. | При создании PR, issue и re-request review. | `create-pr`, `repo-config` |
 | `vcr-record` | Управляет VCR-кассетами: запись, валидация, обновление, очистка. Держит HTTP tests воспроизводимыми и безопасными. | При работе с integration tests против внешних API. | `py-test-bot`, `verify-unit-tests` |
 | `new-pipeline` | Помогает добавить новый pipeline так, чтобы он сразу жил по правилам BioETL: configs, wiring, baseline verification. | При добавлении нового provider/entity pipeline. | `py-config-bot`, `data-engineer`, `verify-architecture` |
+| `grafana-dashboard-extension` | Специализированно ведёт правки shipped Grafana dashboards: панели, drilldowns, navigation, datasource semantics и docs cascade. | Когда меняются `grafana/dashboards/*.json`, monitoring UX или поведение drilldowns. | `documentation-audit`, `py-doc-bot` |
 | `verify-architecture` | Операционная архитектурная верификация через quick/full/category checks. Быстро подтверждает, что границы проекта не нарушены. | Перед commit/PR после структурных изменений. | `architecture-guardian`, `verify-implementation` |
 | `py-test-swarm` | Массовый test workflow для failures, flakiness, coverage и telemetry. Превращает большой тестовый хаос в управляемые кластеры. | Когда проблема уже шире одного локального теста. | `py-test-bot`, `py-review-orchestrator` |
 | `py-review-orchestrator` | Иерархический код-ревью workflow по секторам проекта. Собирает findings, severity и remediation в один обзор. | Для широкого project audit, release review, post-refactor review. | `py-audit-bot`, `architecture-guardian` |

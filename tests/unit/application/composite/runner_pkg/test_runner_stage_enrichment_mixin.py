@@ -118,6 +118,15 @@ class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
     ) -> Any:
         return state
 
+    def _record_enrichment_stage_started(self, enricher_names: list[str]) -> None:
+        del enricher_names
+
+    def _record_enrichment_stage_completed(
+        self,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> None:
+        del enrichment_results
+
 
 # ---------------------------------------------------------------------------
 # _prepare_enrichment_run_context

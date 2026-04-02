@@ -16,6 +16,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import shutil
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import replace
@@ -195,7 +196,7 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
 
     # Create Medallion subdirectories
     for subdir in ("bronze", "silver", "gold", "checkpoints", "quarantine"):
-        (data_dir / subdir).mkdir()
+        (data_dir / subdir).mkdir(exist_ok=True)
 
     previous_data_dir = os.environ.get("BIOETL_DATA_DIR")
     os.environ["BIOETL_DATA_DIR"] = str(data_dir)
@@ -217,6 +218,11 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
             os.environ["BIOETL_DATA_DIR"] = previous_data_dir
         get_settings.cache_clear()
         get_pipeline_config.cache_clear()
+
+
+def clone_e2e_data_dir_snapshot(snapshot_dir: Path, target_dir: Path) -> None:
+    """Clone prepared E2E data into a fresh temp directory for isolated reuse."""
+    shutil.copytree(snapshot_dir, target_dir)
 
 
 @pytest.fixture

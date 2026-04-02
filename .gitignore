@@ -90,7 +90,14 @@ log_test.txt
 # AI assistant configs (vendor-specific, not project code)
 .ai/
 .aiassistant/
-.codex/
+!.codex/
+.codex/*
+!.codex/skills/
+.codex/skills/*
+!.codex/skills/grafana-dashboard-extension/
+!.codex/skills/grafana-dashboard-extension/SKILL.md
+!.codex/skills/grafana-dashboard-extension/agents/
+!.codex/skills/grafana-dashboard-extension/agents/openai.yaml
 .gemini/
 .jules/
 .junie/

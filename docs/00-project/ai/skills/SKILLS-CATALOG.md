@@ -1,7 +1,7 @@
 # Каталог Локальных Skills (Ядро BioETL)
 
 *Статус: internal-published (Internal / Extended)*
-*Обновлено: 2026-03-12 (Wave 6 consolidation)*
+*Обновлено: 2026-04-02 (Grafana dashboard extension added)*
 
 Сводный реестр локальных BioETL-skills.
 
@@ -75,6 +75,7 @@
 | Skill | Назначение |
 |-------|---------|
 | `new-pipeline` | Создание provider/entity pipeline |
+| `grafana-dashboard-extension` | Расширение, правка и валидация shipped Grafana dashboards |
 | `technical-designer-mermaid` | Проектирование технических Mermaid-диаграмм |
 
 ## Wave 6 Consolidation (2026-03-12)
@@ -100,6 +101,7 @@
 - [deep-research](local/deep-research/SKILL.md)
 - [documentation-audit](local/documentation-audit/SKILL.md)
 - [documentation-cascade-audit](local/documentation-cascade-audit/SKILL.md)
+- [grafana-dashboard-extension](../../../../../.codex/skills/grafana-dashboard-extension/SKILL.md)
 - [new-pipeline](local/new-pipeline/SKILL.md)
 - [hierarchical-evidence-orchestration](local/hierarchical-evidence-orchestration/SKILL.md)
 - [py-audit-bot](local/py-audit-bot/SKILL.md)

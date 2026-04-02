@@ -100,6 +100,32 @@ class TestRunLedgerReplayProjection:
         assert projection.merge_completed is True
         assert projection.last_event_id == "entry-merge"
 
+    @pytest.mark.parametrize(
+        ("stage", "expected_state"),
+        [
+            ("dependencies", CompositePipelineState.DEPENDENCIES_COMPLETED),
+            ("enrichment", CompositePipelineState.ENRICHMENT_COMPLETED),
+        ],
+    )
+    def test_projects_intermediate_composite_stage_completion(
+        self,
+        stage: str,
+        expected_state: CompositePipelineState,
+    ) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id=f"entry-{stage}",
+                    event_type="stage_completed",
+                    stage=stage,
+                    occurred_at=datetime(2024, 6, 1, 13, 0, tzinfo=UTC),
+                )
+            ]
+        )
+
+        assert projection.state == expected_state
+        assert projection.last_event_id == f"entry-{stage}"
+
     def test_ignores_non_progress_events_except_for_watermark_advance(self) -> None:
         projection = project_run_ledger_replay(
             [

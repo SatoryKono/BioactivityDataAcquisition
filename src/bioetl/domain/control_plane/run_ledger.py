@@ -57,24 +57,6 @@ CANONICAL_RUN_LEDGER_STAGE_NAMES: tuple[str, ...] = (
     *COMPOSITE_RUN_LEDGER_STAGE_NAMES,
 )
 _CANONICAL_RUN_LEDGER_STAGE_NAME_SET = frozenset(CANONICAL_RUN_LEDGER_STAGE_NAMES)
-_REPLAY_STAGE_PROJECTION_UPDATES: dict[str, dict[str, object]] = {
-    "seed": {
-        "state": CompositePipelineState.SEED_COMPLETED,
-        "seed_completed": True,
-    },
-    "dependencies": {
-        "state": CompositePipelineState.DEPENDENCIES_COMPLETED,
-    },
-    "enrichment": {
-        "state": CompositePipelineState.ENRICHMENT_COMPLETED,
-    },
-    "merge": {
-        "state": CompositePipelineState.MERGING,
-        "merge_completed": True,
-    },
-}
-
-
 def canonicalize_run_ledger_stage_name(stage: str) -> str:
     """Normalize and validate canonical pipeline stage names for ledger events."""
     normalized_stage = stage.strip().lower()
@@ -180,10 +162,29 @@ def _project_stage_completed(
     entry: RunLedgerEntry,
 ) -> RunLedgerReplayProjection:
     stage = (entry.stage or "").strip().lower()
-    updates = _REPLAY_STAGE_PROJECTION_UPDATES.get(stage)
-    if updates is None:
-        return projection
-    return replace(projection, **updates)
+    if stage == "seed":
+        return replace(
+            projection,
+            state=CompositePipelineState.SEED_COMPLETED,
+            seed_completed=True,
+        )
+    if stage == "dependencies":
+        return replace(
+            projection,
+            state=CompositePipelineState.DEPENDENCIES_COMPLETED,
+        )
+    if stage == "enrichment":
+        return replace(
+            projection,
+            state=CompositePipelineState.ENRICHMENT_COMPLETED,
+        )
+    if stage == "merge":
+        return replace(
+            projection,
+            state=CompositePipelineState.MERGING,
+            merge_completed=True,
+        )
+    return projection
 
 
 def _apply_replay_entry(
