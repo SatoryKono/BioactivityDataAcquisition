@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # BioETL Project Navigator
@@ -21,6 +21,7 @@ Last verified: '2026-04-01'
 > - 2026-03-24: composition/domain references synced with RF-021 config ownership and RF-022 runtime port contracts
 > - 2026-03-27: navigator synced with ADR-044/ADR-045, GitHub local workflow guide, and active traceability runbooks
 > - 2026-04-01: control-plane documentation pack re-synced with RunManifest / RunLedger runtime, storage layout, rollout flags, inspection CLI, and event baseline
+> - 2026-04-02: navigator re-synced with `04-reference/index.md` and `05-operations/archive-index.md`
 
 ## Quick Links
 
@@ -32,6 +33,7 @@ Last verified: '2026-04-01'
 | Govern documentation    | [D-01](governance/01-documentation-governance-style-guide.md) |
 | Create a new pipeline   | [governance/04-extending-bioetl.md](governance/04-extending-bioetl.md)      |
 | Review a pipeline       | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |
+| Browse published reference docs | [index.md](../04-reference/index.md) |
 | Find doc templates      | [templates/index.md](../04-reference/templates/index.md) |
 | Inspect run traceability | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md) |
 | Use inspection CLI      | [cli.md](../04-reference/cli.md) |
@@ -39,6 +41,7 @@ Last verified: '2026-04-01'
 | Understand control-plane decision | [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md) |
 | Understand rollout / DQ decision | [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md) |
 | Handle a prod error     | [runbooks/index.md](../05-operations/runbooks/index.md)                           |
+| Browse historical ops material | [archive-index.md](../05-operations/archive-index.md) |
 | Understand architecture | [00-overview.md](../02-architecture/00-overview.md)                  |
 | Check data contracts    | [chembl_activity-v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)          |
 | Need historical context | Repository path `docs/99-archive/README.md` *(non-canonical)* |
@@ -90,6 +93,7 @@ docs/
 │   └── ... (User guides: getting-started, testing, etc.)
 │
 ├── 04-reference/                # Reference Documentation
+│   ├── index.md                 # Reference landing page
 │   ├── api/                     # API Reference
 │   ├── cli.md                   # CLI Reference
 │   ├── providers/               # Provider documentation (ChEMBL, PubMed, etc.)
@@ -99,6 +103,7 @@ docs/
 │   └── templates/               # Code & doc templates + published template index
 │
 ├── 05-operations/               # Operations & Runbooks
+│   ├── archive-index.md         # Historical / archive-only operations surface
 │   ├── runbooks/                # Incident response playbooks
 │   ├── verification/            # Data verification reports
 │   └── ... (Ops guides: vacuum, performance)
@@ -217,6 +222,7 @@ docs/
 | Control-Plane Contract | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md) | §2.4, §5.5 |
 | Inspection CLI    | [cli.md](../04-reference/cli.md)                                                  | §5.5     |
 | Run Traceability  | [run-manifest-inspection.md](../05-operations/runbooks/run-manifest-inspection.md) | §2.4, §5.5 |
+| Historical Ops Artifacts | [archive-index.md](../05-operations/archive-index.md) | §7 |
 | Cleanup           | [cleanup-policy.md](../03-guides/cleanup-policy.md)                                | §2.1.1   |
 
 ### Development
