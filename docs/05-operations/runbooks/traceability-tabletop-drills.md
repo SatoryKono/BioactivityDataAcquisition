@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P2
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
+Last verified: '2026-04-02'
 ---
 
 # Traceability Tabletop Drills
@@ -37,6 +37,15 @@ Last verified: '2026-03-30'
 - Validate operator adoption for Traceability Fabric by running short tabletop drills. Goal: confirm that on-call engineers can complete the path:
 
 - `alert -> run_id -> manifest -> diagnostics -> artifact/lineage evidence -> decision`
+
+### Role Boundary
+
+- This page defines the recurring drill catalog, cadence, scenario design, and
+  scoring model.
+- Use [Traceability Adoption Checklist](traceability-adoption-checklist.md) to
+  log outcomes and enforce the exit gate.
+- Use [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md)
+  when running the final bundled Wave 5 validation.
 
 ### Cadence
 

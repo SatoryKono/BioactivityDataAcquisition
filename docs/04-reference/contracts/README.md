@@ -19,6 +19,9 @@ Last verified: '2026-04-01'
 Этот registry является published index для contract surfaces в
 `docs/04-reference/contracts/`.
 
+Для верхнеуровневой навигации по всему reference-разделу используйте
+[`../index.md`](../index.md).
+
 - Gold contracts:
   generated JSON under `docs/04-reference/contracts/gold/*.json`
 - Control-plane contract:

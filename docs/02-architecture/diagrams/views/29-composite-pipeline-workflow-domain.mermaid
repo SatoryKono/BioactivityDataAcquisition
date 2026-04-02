@@ -1,7 +1,7 @@
 %% View: Domain-Focus | Parent: 29-composite-pipeline-workflow-full.mermaid
 %% @uniform width=168 height=56 max_title_len=16 max_desc_lines=1
 flowchart TB
-    BOOT["bootstrap + legacy FSM adapter"] -.-> SP["Seed runner"]
+    BOOT["runtime bootstrap + control-plane deps"] -.-> SP["Seed runner"]
     SP ==> KE["KeyExtractorService"]
     SP --> DC["DependencyCoordinatorService"]
     KE ==> EC["EnrichmentCoordinator"]

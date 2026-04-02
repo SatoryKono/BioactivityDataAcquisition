@@ -19,8 +19,8 @@ Last verified: '2026-04-02'
 - layered merge base/provider/entity/source остаётся входом для `PipelineYamlConfig`;
 - DQ и filter hierarchies продолжают идти через отдельные loaders;
 - `PipelineContractPolicy` и `ContractRolloutPolicy` теперь явно выведены из того же resolved payload;
-- version-aware routing показывает смысл `read_order`, `write_versions` и `affects_hash`;
-- `ContractMigrationService` и CLI `maintenance plan` используют те же rollout anchors, но уже в planner-only режиме.
+- version-aware routing показывает смысл `read_order`, `write_versions`, `shadow_versions` и `affects_hash`;
+- `ContractMigrationService` и CLI `maintenance plan` используют те же rollout anchors, но уже в planner-only режиме и разворачивают `transitions` + `required_actions`.
 
 Эта схема теперь служит bridge-документом между config resolution, contract rollout и maintenance planning.
 

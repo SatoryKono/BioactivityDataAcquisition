@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-02'
 ---
 
 # Operations Documentation
@@ -33,9 +33,8 @@ standard runbook path.
 | [Runbooks](runbooks/index.md) | Operational playbooks for incident response |
 | [Performance Baselines](performance-baselines.md) | Expected performance metrics |
 | [VACUUM Retention](vacuum-retention.md) | Delta Lake vacuum retention policies |
-| [Historical Release Checklist (v5.9)](release-checklist.md) | Historical example only; not the current release procedure |
+| [Operations Archive Index](archive-index.md) | Archive-only operational material, including historical release and verification evidence |
 | [Deployment & Tooling Extras](deployment/README.md) | Internal / Extended material for experimental Kubernetes and auxiliary Neo4j/MCP setup notes |
-| [VCR Provider Rebalancing](verification/vcr-provider-rebalancing.md) | Recording and validation workflow for provider cassette balance |
 
 ## Quick Links
 
@@ -60,6 +59,7 @@ standard runbook path.
 ### Extended / Non-Default Material
 
 - [Deployment & Tooling Extras](deployment/README.md) (Internal / Extended)
+- [Operations Archive Index](archive-index.md)
 
 ## Related Documentation
 

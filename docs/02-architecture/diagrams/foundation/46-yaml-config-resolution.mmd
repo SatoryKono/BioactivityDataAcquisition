@@ -49,8 +49,8 @@ flowchart TD
         CONTRACT_BLOCK["contracts block<br/>contract_ref + active_version + rollout"]:::size-md
         CONTRACT_MODEL["PipelineContractPolicy<br/>typed Pydantic model"]:::size-md
         ROLLOUT_VO["ContractRolloutPolicy<br/>pure runtime value object"]:::size-md
-        ROUTING["Version-aware routing<br/>read_order + write_versions + affects_hash"]:::size-md
-        PLANNER["ContractMigrationService +<br/>maintenance plan CLI"]:::size-md
+        ROUTING["Version-aware routing<br/>read_order + write_versions +<br/>shadow_versions + affects_hash"]:::size-md
+        PLANNER["ContractMigrationService +<br/>maintenance plan CLI<br/>transitions + required_actions"]:::size-md
     end
 
     subgraph VALIDATION["Pydantic Validation Layer"]

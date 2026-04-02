@@ -13,7 +13,7 @@ Last verified: '2026-04-02'
 - Исходная диаграмма: `foundation/29-composite-pipeline-workflow.mmd`
 
 ## Описание
-Диаграмма показывает полный composite workflow от seed до Gold с актуальной resume-моделью. После runtime bootstrap execution сначала проходит через resume gate: checkpoint snapshot загружается, anchors валидируются, а затем поверх snapshot применяется suffix replay из run ledger по `last_event_id`. Только после этого composite run продолжает нужную фазу.
+Диаграмма показывает полный composite workflow от seed до Gold с актуальной resume-моделью. Runtime bootstrap здесь больше не описывается как legacy FSM adapter path: `bootstrap_composite_runner()` собирает runner factories, support services и control-plane dependencies для manifest/ledger. После этого execution сначала проходит через resume gate: checkpoint snapshot загружается, anchors валидируются, а затем поверх snapshot применяется suffix replay из run ledger по `last_event_id`. Только после этого composite run продолжает нужную фазу.
 
 Важные точки схемы:
 - seed, dependencies, enrichment и merge остаются основными execution phases;

@@ -428,6 +428,7 @@ nav:
                                     -   "Neo4j Memory Setup": 05-operations/deployment/neo4j-memory-setup.md
                                     -   "MCP Neo4j Memory Summary": 05-operations/deployment/mcp-neo4j-memory-summary.md
                     -   "Historical Verification & Release Evidence":
+                            -   "Operations Archive Index": 05-operations/archive-index.md
                             -   "Release Checklist (v5.9)": 05-operations/release-checklist.md
                             -   "Endpoint Validation Checklist": 05-operations/verification/endpoint-validation-checklist.md
                             -   "VCR Provider Rebalancing": 05-operations/verification/vcr-provider-rebalancing.md

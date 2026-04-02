@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P2
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
+Last verified: '2026-04-02'
 ---
 
 # Traceability Wave 5 Closeout Pack
@@ -39,6 +39,17 @@ Last verified: '2026-03-30'
 - [Traceability Signal Ownership](traceability-signal-ownership.md)
 - [Traceability Tabletop Drills](traceability-tabletop-drills.md)
 - [Traceability Adoption Checklist](traceability-adoption-checklist.md)
+
+### Role Boundary
+
+- This page is the canonical one-time execution pack for the final manual Wave 5
+  closeout gate.
+- It depends on the ownership matrix from
+  [Traceability Signal Ownership](traceability-signal-ownership.md), the
+  scenario/scoring model from
+  [Traceability Tabletop Drills](traceability-tabletop-drills.md), and the
+  evidence capture surface from
+  [Traceability Adoption Checklist](traceability-adoption-checklist.md).
 
 ### Closeout Scope
 
