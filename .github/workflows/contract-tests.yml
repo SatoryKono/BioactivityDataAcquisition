@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 30
 
     # Only run on main repository, not forks
-    if: github.repository == 'SatoryKono/BioactivityDataAcquisition2'
+    if: github.repository == 'SatoryKono/BioactivityDataAcquisition'
 
     steps:
       - name: Checkout code
@@ -130,7 +130,7 @@ jobs:
             - Authentication changes
             - Rate limiting updates
 
-            See \`docs/RULES.md\` §4.2 for contract test policies.`,
+            See \`docs/03-guides/testing.md\` for contract test policies and supported execution paths.`,
                 labels: ['contract-failure', 'api-change', 'automated']
               });
             }

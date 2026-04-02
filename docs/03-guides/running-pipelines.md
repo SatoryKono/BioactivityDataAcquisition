@@ -1,19 +1,24 @@
 ---
-Version: 6.2.0
+Version: 6.3.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # Running Pipelines
 
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
-**Версия:** 6.2.0
-**Дата обновления:** 2026-04-01
+**Версия:** 6.3.0
+**Дата обновления:** 2026-04-02
+
+> **Boundary:** this guide owns execution and runtime control flow. For initial
+> environment bootstrap use [Quick Start](quick-start.md) or
+> [Getting Started](getting-started.md). For operator incident handling use
+> [Operations Runbooks](../05-operations/runbooks/index.md).
 
 ----------------------------------------------------------------------
 

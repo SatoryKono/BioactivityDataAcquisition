@@ -97,6 +97,11 @@ class TestIntegrationVcrPolicy:
         assert "--vcr-record=none" in tests_workflow
         assert "tests/contract/ -v --tb=short --network" in contract_workflow
         assert (
+            "github.repository == "
+            f"'{policy['execution_paths']['live_contract']['repository_guard']}'"
+            in contract_workflow
+        )
+        assert (
             policy["execution_paths"]["live_contract"]["required_pytest_flag"]
             in contract_workflow
         )
@@ -104,6 +109,11 @@ class TestIntegrationVcrPolicy:
             "required_env"
         ].items():
             assert f'{env_name}: "{env_value}"' in contract_workflow
+        assert (
+            policy["execution_paths"]["live_contract"]["failure_issue_runbook_path"]
+            in contract_workflow
+        )
+        assert "docs/RULES.md" not in contract_workflow
 
     def test_policy_matches_fixture_governance_and_contract_matrix(self) -> None:
         policy = _load_yaml(POLICY_PATH)

@@ -23,25 +23,6 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError, InvalidStateError
 
 
-def _record_seed_stage_started_if_supported(
-    host: _CompositeRunnerStageSupportHostProtocol,
-) -> None:
-    """Record optional seed-stage start event when host exposes the callback."""
-    record = getattr(host, "_record_seed_stage_started", None)
-    if callable(record):
-        record()
-
-
-def _record_seed_stage_completed_if_supported(
-    host: _CompositeRunnerStageSupportHostProtocol,
-    seed_result: SeedResult,
-) -> None:
-    """Record optional seed ledger event when host exposes the callback."""
-    record = getattr(host, "_record_seed_stage_completed", None)
-    if callable(record):
-        record(seed_result)
-
-
 def find_required_failures(
     host: _CompositeRunnerStageSupportHostProtocol,
     results: dict[str, DependencyResult],
@@ -112,7 +93,7 @@ async def start_seed_phase(
         stage="seed_start",
     )
     await host._call_save_checkpoint_safe(running_state, "seed_running")
-    _record_seed_stage_started_if_supported(host)
+    host._record_seed_stage_started()
     host._logger.info(
         PipelineEvent.phase_started("seed"),
         composite=host._config.name,
@@ -148,7 +129,7 @@ async def complete_seed_phase(
         records_silver=seed_result.records_silver,
     )
     await host._call_save_checkpoint_safe(completed_state, "seed_completed")
-    _record_seed_stage_completed_if_supported(host, seed_result)
+    host._record_seed_stage_completed(seed_result)
     return completed_state
 
 
