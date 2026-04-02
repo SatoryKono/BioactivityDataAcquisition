@@ -343,7 +343,7 @@ def _prepare_publication_business_data(
     if id_result is None:
         return None
     primary_id_field, primary_id = id_result
-    
+
     transformer._log_fallback_if_needed(
         context,
         business_data,

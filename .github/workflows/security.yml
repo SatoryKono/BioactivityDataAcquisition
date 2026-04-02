@@ -54,5 +54,7 @@ jobs:
           uv-extras: "dev"
 
       - name: Run pip-audit
-        run: uv run pip-audit --require-hashes --disable-pip --strict
+        run: |
+          uv export --format requirements-txt --hashes --output-file requirements-audit.txt
+          uv run pip-audit -r requirements-audit.txt --require-hashes --disable-pip --strict
 

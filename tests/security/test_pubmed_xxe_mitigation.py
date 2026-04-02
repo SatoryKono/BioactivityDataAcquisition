@@ -1,7 +1,6 @@
 """Security tests for XXE mitigation in PubMed pipeline."""
 
 import pytest
-from defusedxml import EntitiesForbidden
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 from bioetl.domain.context import PipelineContext
