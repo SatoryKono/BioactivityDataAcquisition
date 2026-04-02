@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Sequence
 from datetime import UTC, datetime
 
@@ -53,8 +54,8 @@ class MergeMetricsRecorderMixin:
         return df.with_columns(
             [
                 pl.lit(run_id).alias("_composite_run_id"),
-                pl.lit(str(sources_used)).alias("_source_providers"),
-                pl.lit(str(status_dict)).alias("_enrichment_status"),
+                pl.lit(json.dumps(sources_used)).alias("_source_providers"),
+                pl.lit(json.dumps(status_dict)).alias("_enrichment_status"),
                 pl.lit(datetime.now(tz=UTC).isoformat()).alias("_lineage_created_at"),
             ]
         )
