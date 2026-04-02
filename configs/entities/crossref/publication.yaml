@@ -96,14 +96,10 @@ schema:
     pattern: ^_dq_
   field_aliases:
     short_container_title: journal_name_short
-    year: publication_year
-    first_page: page_first
-    last_page: page_last
     citation_count: citations_received
     reference_count: citations_made
     subjects: subject_keywords
     source_type: publication_type
-    doi: publication_doi
   silver:
     include_groups:
     - system
