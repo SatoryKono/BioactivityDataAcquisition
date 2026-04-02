@@ -33,6 +33,7 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane.run_ledger import COMPOSITE_RUN_LEDGER_STAGE_NAMES
 from bioetl.domain.exceptions import StorageError
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.locking import FencingToken
 
 _MOCK_TOKEN = FencingToken(
@@ -238,6 +239,27 @@ def create_runner(
     )
 
 
+def _composite_execution_context() -> CompositeExecutionContext:
+    """Build a stable composite execution context for focused runner tests."""
+    return CompositeExecutionContext(
+        seed_result=SeedResult(
+            pipeline_name="chembl_activity",
+            records_extracted=100,
+            records_silver=95,
+            keys_generated=95,
+        ),
+        dependency_results={},
+        enrichment_results={},
+        merge_result=MergeResult(
+            records_merged=100,
+            records_from_seed=100,
+            records_enriched=0,
+            records_fully_enriched=0,
+            duration_seconds=1.0,
+        ),
+    )
+
+
 class TestFSMSeedStateTransitions:
     """Tests for FSM state transitions during seed execution."""
 
@@ -350,6 +372,27 @@ class TestFSMSeedStateTransitions:
                 "records_fully_enriched": 0,
             }
         )
+
+    @pytest.mark.asyncio
+    async def test_complete_successful_run_emits_terminal_success_hooks(self):
+        """Composite runner finalizes success through one canonical helper seam."""
+        runner = create_runner()
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=runner.run_id,
+        )
+        execution_context = _composite_execution_context()
+        result = MagicMock()
+        runner._finalize_pipeline = AsyncMock()
+        runner._build_composite_result = MagicMock(return_value=result)
+        runner._record_run_finished = MagicMock()
+
+        completed = await runner._complete_successful_run(state, execution_context)
+
+        runner._finalize_pipeline.assert_awaited_once_with(state)
+        runner._build_composite_result.assert_called_once_with(execution_context)
+        runner._record_run_finished.assert_called_once_with(execution_context)
+        assert completed is result
 
 
 class TestFSMSeedFailure:
