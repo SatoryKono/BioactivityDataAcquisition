@@ -25,7 +25,7 @@ def get_text(node: ET.Element | None) -> str | None:
         None otherwise.
 
     Example:
-        >>> import xml.etree.ElementTree as ET
+        >>> import defusedxml.ElementTree as ET
         >>> elem = ET.fromstring("<title>  PubMed Article  </title>")
         >>> get_text(elem)
         'PubMed Article'
@@ -55,7 +55,7 @@ def get_int(node: ET.Element | None) -> int | None:
         None otherwise (including for non-numeric text).
 
     Example:
-        >>> import xml.etree.ElementTree as ET
+        >>> import defusedxml.ElementTree as ET
         >>> year = ET.fromstring("<Year>2024</Year>")
         >>> get_int(year)
         2024
