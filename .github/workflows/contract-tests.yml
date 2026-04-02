@@ -1,4 +1,4 @@
-﻿name: Monthly Contract Tests
+name: Monthly Contract Tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -36,11 +36,11 @@ jobs:
     timeout-minutes: 30
 
     # Only run on main repository, not forks
-    if: github.repository == 'SatoryKono/BioactivityDataAcquisition'
+    if: github.repository == 'SatoryKono/BioactivityDataAcquisition2'
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -130,7 +130,7 @@ jobs:
             - Authentication changes
             - Rate limiting updates
 
-            See \`docs/03-guides/testing.md\` for contract test policies and supported execution paths.`,
+            See \`docs/RULES.md\` §4.2 for contract test policies.`,
                 labels: ['contract-failure', 'api-change', 'automated']
               });
             }

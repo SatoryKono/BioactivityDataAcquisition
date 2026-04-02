@@ -121,9 +121,6 @@ schema:
     structured_affiliations: affiliation_structured
     journal_title: journal_name
     journal_abbrev: journal_name_short
-    year: publication_year
-    first_page: page_first
-    last_page: page_last
     pages: page_range
     reference_count: citations_made
     mesh_terms: subject_mesh
