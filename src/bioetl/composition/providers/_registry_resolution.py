@@ -9,6 +9,8 @@ from bioetl.composition.providers._registry_protocols import (
 )
 from bioetl.composition.providers.provider_registry import (
     ProviderRegistry,
+)
+from bioetl.composition.providers.provider_registry import (
     resolve_provider_registry as _resolve_public_provider_registry,
 )
 

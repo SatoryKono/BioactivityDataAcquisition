@@ -19,6 +19,14 @@ PDF_MCP_VERSION = "1.3.1"
 
 
 def _github_server(root: Path) -> dict[str, object]:
+    if os.name != "nt":
+        wrapper_path = str((root / ".claude" / "github-mcp-wrapper.sh").resolve())
+        return {
+            "command": "bash",
+            "args": [wrapper_path],
+            "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
+        }
+
     if os.name == "nt":
         wrapper_path = str((root / ".claude" / "github-mcp-wrapper.ps1").resolve())
         return {
@@ -32,12 +40,6 @@ def _github_server(root: Path) -> dict[str, object]:
             ],
             "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
         }
-
-    return {
-        "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-github@2025.4.8"],
-        "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
-    }
 
 
 def _fetch_server() -> dict[str, object]:

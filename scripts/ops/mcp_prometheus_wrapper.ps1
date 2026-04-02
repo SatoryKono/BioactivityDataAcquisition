@@ -2,6 +2,10 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
+. (Join-Path $PSScriptRoot "load_repo_env.ps1")
+Import-BioetlRepoEnv -RepoRoot $repoRoot
+
 $prometheusUrl = if ($env:PROMETHEUS_URL) { $env:PROMETHEUS_URL } else { "http://host.docker.internal:9090" }
 $dockerArgs = @(
     "run",

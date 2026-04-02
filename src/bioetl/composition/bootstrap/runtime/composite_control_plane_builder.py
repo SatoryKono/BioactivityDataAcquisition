@@ -27,7 +27,6 @@ from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 
 if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (

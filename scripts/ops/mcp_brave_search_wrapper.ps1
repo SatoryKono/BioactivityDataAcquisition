@@ -2,6 +2,10 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
+. (Join-Path $PSScriptRoot "load_repo_env.ps1")
+Import-BioetlRepoEnv -RepoRoot $repoRoot
+
 if (-not $env:BRAVE_API_KEY) {
     throw "BRAVE_API_KEY is required for brave-search MCP."
 }

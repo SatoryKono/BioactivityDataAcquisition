@@ -15,27 +15,55 @@ if (-not $env:UV_LINK_MODE) {
 
 $PytestArgs = @($args)
 $NeedsDefaultFlags = $true
+$PytestNarrow = $false
+$FilteredArgs = @()
 
 foreach ($Arg in $PytestArgs) {
+    if ($Arg -eq "--narrow") {
+        $PytestNarrow = $true
+        continue
+    }
     if ($Arg -in @("--help", "-h", "--version", "-V")) {
         $NeedsDefaultFlags = $false
-        break
+    }
+    $FilteredArgs += $Arg
+}
+
+$PytestArgs = $FilteredArgs
+
+if ($NeedsDefaultFlags) {
+    if ($PytestNarrow) {
+        $PytestArgs = @("-q", "--maxfail=1") + $PytestArgs
+    } else {
+        $PytestArgs = @("--cov=src/bioetl", "--cov-report=term", "-q", "--maxfail=1") + $PytestArgs
     }
 }
 
-if ($NeedsDefaultFlags) {
-    $PytestArgs = @("--cov=src/bioetl", "--cov-report=term", "-q", "--maxfail=1") + $PytestArgs
+$PytestPluginArgs = @()
+if ($PytestNarrow) {
+    $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = "1"
+    $PluginModules = @(
+        "anyio.pytest_plugin",
+        "pytest_asyncio.plugin",
+        "_hypothesis_pytestplugin",
+        "pytest_timeout",
+        "syrupy",
+        "pytest_archon.plugin"
+    )
+    foreach ($Plugin in $PluginModules) {
+        $PytestPluginArgs += @("-p", $Plugin)
+    }
 }
 
 $WindowsVenvPython = Join-Path $RepoRoot ".venv-win/Scripts/python.exe"
 if (Test-Path $WindowsVenvPython) {
-    & $WindowsVenvPython -m pytest @PytestArgs
+    & $WindowsVenvPython -m pytest @PytestPluginArgs @PytestArgs
     exit $LASTEXITCODE
 }
 
 $VenvPython = Join-Path $RepoRoot ".venv/Scripts/python.exe"
 if (Test-Path $VenvPython) {
-    & $VenvPython -m pytest @PytestArgs
+    & $VenvPython -m pytest @PytestPluginArgs @PytestArgs
     exit $LASTEXITCODE
 }
 
@@ -45,12 +73,12 @@ if ((Test-Path (Join-Path $RepoRoot ".venv")) -or (Test-Path (Join-Path $RepoRoo
 }
 
 if (Get-Command uv -ErrorAction SilentlyContinue) {
-    uv run python -m pytest @PytestArgs
+    uv run python -m pytest @PytestPluginArgs @PytestArgs
     exit $LASTEXITCODE
 }
 
 if (Get-Command python -ErrorAction SilentlyContinue) {
-    python -m pytest @PytestArgs
+    python -m pytest @PytestPluginArgs @PytestArgs
     exit $LASTEXITCODE
 }
 

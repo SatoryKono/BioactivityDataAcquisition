@@ -16,6 +16,8 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def temp_delta_path(tmp_path):

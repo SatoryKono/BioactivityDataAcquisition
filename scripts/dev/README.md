@@ -47,6 +47,24 @@ bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
 bash scripts/dev/run_mypy.sh
 ```
 
+For fast, reproducible narrow slices during refactoring, use the explicit
+`--narrow` mode:
+
+```bash
+bash scripts/dev/run_pytest.sh --narrow --collect-only tests/architecture/test_boundary_assertions.py
+bash scripts/dev/run_pytest.sh --narrow tests/architecture/test_boundary_assertions.py
+bash scripts/dev/run_mypy.sh --narrow --config-file pyproject.toml --strict src/bioetl/domain/__init__.py
+python -m scripts.dev probe-quality --timeout 15
+```
+
+`--narrow` intentionally favors startup stability over full plugin/import graph
+coverage:
+
+- `run_pytest.* --narrow` disables plugin autoload and uses a minimal explicit
+  plugin allowlist suitable for narrow architecture and unit slices
+- `run_mypy.* --narrow` adds `--follow-imports=skip` so single-file strict
+  probes do not walk the whole repository graph
+
 `run_pytest.ps1` and `run_pytest.sh` both add default pytest flags unless you ask
 for help/version:
 
@@ -113,6 +131,7 @@ python -m scripts.dev <command> [args...]
 | `setup --quick` | `scripts/dev/dev_setup.sh` | Legacy placeholder mode; not recommended for current setup |
 | `setup --ci` | `scripts/dev/dev_setup.sh` | Legacy placeholder mode; not recommended for current setup |
 | `install-deps` | `scripts/dev/install_deps.py` | Auxiliary helper script, not a full project bootstrap |
+| `probe-quality` | `scripts/dev/quality_gate_probe.py` | Measure narrow pytest/mypy startup latency and timeout behavior |
 | `run-tests` | `scripts/dev/run_tests.py` | Run tests |
 | `mock-metrics` | `scripts/dev/metrics_mock_server.py` | Start mock metrics server |
 | `test-changed` | `scripts/dev/run_tests.py changed` | Run tests for changed files only |
@@ -141,6 +160,7 @@ python -m scripts.dev <command> [args...]
 | `scripts/dev/run_mypy.ps1` | Run mypy with local-environment fallbacks (PowerShell variant) |
 | `scripts/dev/run_pytest.sh` | Run pytest directly |
 | `scripts/dev/run_pytest.ps1` | Run pytest directly (PowerShell variant) |
+| `scripts/dev/quality_gate_probe.py` | Diagnose narrow pytest/mypy startup latency and timeout behavior |
 | `scripts/dev/setup_copilot_codex_mcp.sh` | Setup MCP (shell variant) |
 | `scripts/dev/setup_copilot_codex_mcp.ps1` | Setup MCP (PowerShell variant) |
 | `scripts/dev/setup_env_windows.ps1` | Create/update the stable Windows virtualenv at `.venv-win` |

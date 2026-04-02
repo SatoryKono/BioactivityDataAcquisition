@@ -7,9 +7,25 @@ cd "$REPO_ROOT"
 
 DEFAULT_ARGS=(--config-file pyproject.toml --strict src/bioetl)
 ARGS=("$@")
+MYPY_NARROW="${BIOETL_MYPY_NARROW:-0}"
+FILTERED_ARGS=()
+
+for arg in "${ARGS[@]}"; do
+    if [[ "$arg" == "--narrow" ]]; then
+        MYPY_NARROW=1
+        continue
+    fi
+    FILTERED_ARGS+=("$arg")
+done
+
+ARGS=("${FILTERED_ARGS[@]}")
 
 if [[ ${#ARGS[@]} -eq 0 ]]; then
     ARGS=("${DEFAULT_ARGS[@]}")
+fi
+
+if [[ "$MYPY_NARROW" == "1" ]]; then
+    ARGS=(--follow-imports=skip "${ARGS[@]}")
 fi
 
 export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"

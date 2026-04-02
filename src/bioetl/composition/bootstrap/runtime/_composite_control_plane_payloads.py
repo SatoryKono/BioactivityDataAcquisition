@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.domain.control_plane import RunArtifactRef, RunSourceRef
-from bioetl.domain.types import RunType
-
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.control_plane import RunArtifactRef, RunSourceRef
+from bioetl.domain.types import RunType
 
 __all__ = [
     "build_composite_launch_context_snapshot",

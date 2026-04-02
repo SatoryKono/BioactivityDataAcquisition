@@ -1,17 +1,20 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-02'
 ---
 
 # VCR Test Tasks
 
 > **Status:** Historical verification artifact (non-normative).
-> Use this report as dated evidence only; current policy source of truth is `docs/00-project/RULES.md` and active ADRs.
+> Use this report as dated evidence only; current policy source of truth is
+> `configs/quality/integration_vcr_policy.yaml`,
+> `docs/03-guides/testing.md`, `configs/quality/test_matrix.yaml`, and active
+> ADRs.
 
 *Generated: 2026-02-17 | Sync workflow Prompt 5 (vcr-tests)*
 

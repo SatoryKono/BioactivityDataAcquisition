@@ -14,6 +14,8 @@ from bioetl.application.core.record_normalization_processor import (
 )
 from bioetl.domain.value_objects.column_order import SemanticGroup
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def mock_logger() -> MagicMock:

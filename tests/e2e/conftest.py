@@ -8,7 +8,8 @@ E2E тесты используют локальное файловое хран
 
 Запуск:
     make test-e2e       # Все E2E тесты
-    pytest tests/e2e/ -v -m e2e  # Прямой запуск
+    uv run python -m pytest tests/e2e/ -v -m e2e --vcr-record=none
+    uv run python -m pytest tests/e2e/test_pubchem_compound_e2e.py -v -m e2e --vcr-record=new_episodes
 """
 
 from __future__ import annotations

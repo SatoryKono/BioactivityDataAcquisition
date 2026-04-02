@@ -220,6 +220,11 @@ CrossRef и OpenAlex допускают mixed replay/mock режим на adapte
 Это считается supported policy, а не отклонением, пока machine-readable policy и
 guide остаются синхронизированными.
 
+Concrete file-level inventory для canonical integration surface живёт в
+`configs/quality/integration_vcr_policy.yaml -> tracked_suite_inventory.integration`.
+Новые `tests/integration/test_*.py` и `tests/integration/**/test_*.py` должны либо
+попасть в этот inventory, либо считаться policy drift.
+
 #### 2.2.2. Canonical replay and refresh commands
 
 ```bash
@@ -265,6 +270,11 @@ Canonical provider-facing E2E families:
 - `pubmed_publication`
 - `semanticscholar_publication`
 - `uniprot_protein`
+
+Concrete file-level inventory для canonical E2E surface живёт в
+`configs/quality/integration_vcr_policy.yaml -> tracked_suite_inventory.e2e`.
+Это включает provider runs, scenario runs и tracked governance/resilience
+surfaces. Новый `tests/e2e/test_*.py` без inventory update считается policy drift.
 
 Canonical scenario E2E families:
 

@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+pytestmark = pytest.mark.integration
 
 
 def _load_rules() -> dict:

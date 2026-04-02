@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 
     from click.testing import CliRunner
 
+pytestmark = pytest.mark.integration
+
 
 class TestCliMaintenanceArchiveHelp:
     """Test archive command help and argument handling."""

@@ -19,8 +19,8 @@ from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
     build_create_pipeline_with_services_request,
-    build_pipeline_factory_context,
     build_factory_services,
+    build_pipeline_factory_context,
     create_factory_data_source,
     create_factory_runner,
     create_pipeline_instance_with_services,
@@ -59,7 +59,7 @@ _extract_entity_type = extract_entity_type
 _extract_dq_configs, _assemble_runner_impl = extract_dq_configs, assemble_runner_impl
 
 
-def _factory_context(factory: "GenericPipelineFactory[BasePipeline]") -> object:
+def _factory_context(factory: GenericPipelineFactory[BasePipeline]) -> object:
     return build_pipeline_factory_context(
         pipeline_name=factory.pipeline_name,
         create_data_source_fn=factory._create_data_source,

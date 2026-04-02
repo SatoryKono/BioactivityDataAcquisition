@@ -30,6 +30,8 @@ _MOCK_TOKEN = FencingToken(
 if TYPE_CHECKING:
     from click.testing import CliRunner
 
+pytestmark = pytest.mark.integration
+
 
 async def _yield_control(turns: int = 1) -> None:
     """Advance the loop without sleeping in real time."""

@@ -24,6 +24,8 @@ from .test_pipeline_matrix_e2e import (
     _resolve_cassette_name,
 )
 
+pytestmark = pytest.mark.e2e
+
 
 def test_build_e2e_skip_reason_is_deterministic() -> None:
     """Skip reason format must stay parseable for CI classification."""

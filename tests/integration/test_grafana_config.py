@@ -20,6 +20,8 @@ from bioetl.infrastructure.observability import metrics
 from bioetl.infrastructure.observability.logging_config import configure_logging
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
+pytestmark = pytest.mark.integration
+
 
 @cache
 def get_all_valid_metric_names() -> set[str]:

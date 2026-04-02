@@ -5,9 +5,22 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = Resolve-Path (Join-Path $ScriptDir "../..")
 Set-Location $RepoRoot
 
-$ArgsList = @($args)
+$ArgsList = @()
+$MypyNarrow = $false
+foreach ($Arg in $args) {
+    if ($Arg -eq "--narrow") {
+        $MypyNarrow = $true
+        continue
+    }
+    $ArgsList += $Arg
+}
+
 if ($ArgsList.Count -eq 0) {
     $ArgsList = @("--config-file", "pyproject.toml", "--strict", "src/bioetl")
+}
+
+if ($MypyNarrow) {
+    $ArgsList = @("--follow-imports=skip") + $ArgsList
 }
 
 if (-not $env:UV_CACHE_DIR) {

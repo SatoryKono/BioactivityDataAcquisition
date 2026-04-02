@@ -73,6 +73,118 @@ supported_scopes:
         - full_pipeline
         - full_pipeline_chain
         - run_types
+tracked_suite_inventory:
+  integration:
+    adapter_provider_surfaces:
+      chembl:
+        - tests/integration/adapters/test_chembl.py
+      crossref:
+        - tests/integration/adapters/test_crossref.py
+        - tests/integration/adapters/test_crossref_vcr_rebalance.py
+      openalex:
+        - tests/integration/adapters/openalex/test_adapter.py
+        - tests/integration/adapters/openalex/test_pipeline.py
+        - tests/integration/adapters/test_openalex_vcr_rebalance.py
+      pubchem:
+        - tests/integration/adapters/test_pubchem.py
+      pubmed:
+        - tests/integration/adapters/test_pubmed.py
+        - tests/integration/adapters/test_pubmed_coverage.py
+        - tests/integration/adapters/test_pubmed_edge_cases.py
+        - tests/integration/adapters/test_pubmed_vcr_rebalance.py
+      semanticscholar:
+        - tests/integration/adapters/test_semanticscholar.py
+        - tests/integration/adapters/test_semanticscholar_vcr_rebalance.py
+      uniprot:
+        - tests/integration/adapters/test_uniprot.py
+        - tests/integration/adapters/test_uniprot_idmapping.py
+      shared_http_behavior:
+        - tests/integration/adapters/test_http_retry_semantics.py
+    chembl_parameter_extraction_surfaces:
+      - tests/integration/chembl/test_activity_extraction_params.py
+      - tests/integration/chembl/test_assay_extraction_params.py
+      - tests/integration/chembl/test_molecule_extraction_params.py
+      - tests/integration/chembl/test_publication_extraction_params.py
+      - tests/integration/chembl/test_target_extraction_params.py
+    pipeline_replay_smoke:
+      chembl_activity: tests/integration/pipelines/test_chembl_activity.py
+      chembl_cell_line: tests/integration/pipelines/test_chembl_cell_line.py
+      chembl_compound_record: tests/integration/pipelines/test_chembl_compound_record.py
+      chembl_target_component: tests/integration/pipelines/test_chembl_target_component.py
+      pubchem_compound: tests/integration/test_pubchem_pipeline.py
+      uniprot_protein: tests/integration/test_uniprot_pipeline.py
+    normalization_and_pipeline_support:
+      - tests/integration/pipelines/test_crossref_date_normalization.py
+      - tests/integration/pipelines/test_pubmed_date_normalization.py
+      - tests/integration/test_cross_provider_doi_normalization.py
+    governance_and_runtime_surfaces:
+      control_plane:
+        - tests/integration/test_runner_lifecycle.py
+        - tests/integration/test_preflight_health_modes.py
+        - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
+      data_quality:
+        - tests/integration/test_dq_monitor_integration.py
+        - tests/integration/test_dq_report_integration.py
+      grafana:
+        - tests/integration/test_grafana_config.py
+      prometheus:
+        - tests/integration/test_prometheus_rules_config.py
+    composite_config_and_merge:
+      - tests/integration/composite/test_column_naming_integration.py
+      - tests/integration/composite/test_composite_config_backward_compatibility.py
+      - tests/integration/composite/test_molecule_pipeline.py
+    config_and_storage_surfaces:
+      - tests/integration/config/test_dq_config_loading.py
+      - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
+      - tests/integration/infrastructure/storage/test_gold_writer_versioning.py
+      - tests/integration/infrastructure/storage/test_silver_writer.py
+      - tests/integration/ci/test_config_stability.py
+    interface_cli_surfaces:
+      - tests/integration/interfaces/test_cli_checkpoint_list.py
+      - tests/integration/interfaces/test_cli_config_dq.py
+      - tests/integration/interfaces/test_cli_exit_code_matrix.py
+      - tests/integration/interfaces/test_cli_maintenance_archive.py
+      - tests/integration/interfaces/test_cli_maintenance_vacuum.py
+      - tests/integration/interfaces/test_cli_quarantine_inspect.py
+      - tests/integration/interfaces/test_cli_run_dry_run.py
+      - tests/integration/interfaces/test_cli_run_incremental.py
+      - tests/integration/interfaces/test_cli_shutdown_integration.py
+    external_validation_surfaces:
+      - tests/integration/validation/test_external_verification.py
+  e2e:
+    provider_runs:
+      chembl_activity: tests/e2e/test_chembl_activity_e2e.py
+      chembl_assay: tests/e2e/test_chembl_assay_e2e.py
+      chembl_molecule: tests/e2e/test_chembl_molecule_e2e.py
+      chembl_publication: tests/e2e/test_chembl_publication_e2e.py
+      chembl_publication_term: tests/e2e/test_chembl_publication_term_e2e.py
+      chembl_target: tests/e2e/test_chembl_target_e2e.py
+      crossref_publication: tests/e2e/test_crossref_publication_e2e.py
+      openalex_publication: tests/e2e/test_openalex_publication_e2e.py
+      pubchem_compound: tests/e2e/test_pubchem_compound_e2e.py
+      pubmed_publication: tests/e2e/test_pubmed_publication_e2e.py
+      semanticscholar_publication: tests/e2e/test_semanticscholar_publication_e2e.py
+      uniprot_protein: tests/e2e/test_uniprot_protein_e2e.py
+    scenario_runs:
+      advanced_scenarios: tests/e2e/test_advanced_scenarios_e2e.py
+      checkpoint: tests/e2e/test_checkpoint_e2e.py
+      full_pipeline: tests/e2e/test_full_pipeline.py
+      full_pipeline_chain: tests/e2e/test_full_pipeline_chain_e2e.py
+      run_types: tests/e2e/test_run_types_e2e.py
+    operational_and_governance_surfaces:
+      - tests/e2e/test_cli_safety.py
+      - tests/e2e/test_contract_rollout_e2e.py
+      - tests/e2e/test_contract_rollout_runtime_e2e.py
+      - tests/e2e/test_e2e_stability_policy.py
+      - tests/e2e/test_gold_layer_e2e.py
+      - tests/e2e/test_pipeline_matrix_e2e.py
+    resilience_and_failure_surfaces:
+      - tests/e2e/test_network_failure_e2e.py
+      - tests/e2e/test_pipeline_circuit_breaker_e2e.py
+      - tests/e2e/test_pipeline_graceful_shutdown_e2e.py
+      - tests/e2e/test_pipeline_with_dq_errors_e2e.py
+      - tests/e2e/test_pipeline_with_schema_drift_e2e.py
+      - tests/e2e/test_resilience_scenarios_e2e.py
 execution_paths:
   local:
     windows:

@@ -93,10 +93,8 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert "mcp_grafana_wrapper.ps1" in servers["grafana"]["args"][-1]
         assert "mcp_brave_search_wrapper.ps1" in servers["brave-search"]["args"][-1]
     else:
-        assert (
-            servers["github"]["args"][1]
-            == "@modelcontextprotocol/server-github@2025.4.8"
-        )
+        assert servers["github"]["command"] == "bash"
+        assert servers["github"]["args"][-1].endswith(".claude/github-mcp-wrapper.sh")
         assert servers["docker"]["command"] == "bash"
         assert servers["docker-docs"]["command"] == "bash"
         assert servers["context7"]["command"] == "bash"
@@ -152,3 +150,13 @@ def test_setup_ps1_wrapper_delegates_to_backend() -> None:
         encoding="utf-8"
     )
     assert "scripts/dev/setup_copilot_codex_mcp.py" in content
+
+
+def test_github_mcp_wrappers_load_repo_env() -> None:
+    """GitHub MCP wrappers should load repo .env before fallback auth."""
+    root = _project_root()
+    sh_content = (root / ".claude/github-mcp-wrapper.sh").read_text(encoding="utf-8")
+    ps_content = (root / ".claude/github-mcp-wrapper.ps1").read_text(encoding="utf-8")
+
+    assert "load_repo_env.sh" in sh_content
+    assert "load_repo_env.ps1" in ps_content

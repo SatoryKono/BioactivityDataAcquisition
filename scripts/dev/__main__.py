@@ -10,6 +10,7 @@ Commands:
     setup --quick      Fast setup, skip tests/linters (shell)
     setup --ci         CI mode, non-interactive (shell)
     install-deps       Install project dependencies
+    probe-quality      Measure narrow pytest/mypy startup and timeout behavior
     run-tests          Run tests (Python)
     mock-metrics       Start mock metrics server
     test-changed       Run tests for changed files only (Python backend)
@@ -24,6 +25,7 @@ from pathlib import Path
 
 COMMANDS: dict[str, str] = {
     "install-deps": "install_deps.py",
+    "probe-quality": "quality_gate_probe.py",
     "run-tests": "run_tests.py",
     "mock-metrics": "metrics_mock_server.py",
     "setup-mcp": "setup_copilot_codex_mcp.py",

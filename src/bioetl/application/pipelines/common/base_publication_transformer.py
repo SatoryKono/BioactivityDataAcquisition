@@ -13,14 +13,7 @@ Reduces code duplication by extracting shared logic:
 
 from __future__ import annotations
 
-from abc import abstractmethod
 from functools import partial
-
-from bioetl.domain.types import JsonDict
-
-__all__ = ["BasePublicationTransformer"]
-
-
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import (
@@ -31,18 +24,23 @@ from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
-from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
 from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.ports import (
+        DataExtractorStrategy,
+        IdentifierResolverStrategy,
+        MetricsPort,
+        PiiHasherPort,
+        PublicationMetadataStrategy,
+        TracingPort,
+    )
     from bioetl.domain.services import IdentityService
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, JsonDict, SilverRecord
 
 
 def _classification_payload(
@@ -70,7 +68,13 @@ def _classification_payload(
 
 
 class BasePublicationTransformer(BaseTransformer):
-    """Shared Template Method flow for publication transformers."""
+    """Shared facade flow for publication transformers.
+
+    Orchestrates execution of injected strategies:
+    - DataExtractorStrategy: Extracts business fields from Bronze.
+    - IdentifierResolverStrategy: Validates the primary ID.
+    - PublicationMetadataStrategy: Provides domain entity classes.
+    """
 
     def __init__(
         self,
@@ -83,6 +87,10 @@ class BasePublicationTransformer(BaseTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
+        data_extractor: DataExtractorStrategy | None = None,
+        identifier_resolver: IdentifierResolverStrategy | None = None,
+        metadata_strategy: PublicationMetadataStrategy | None = None,
+        record_normalizer: RecordNormalizationProcessor | None = None,
     ) -> None:
         """Initialize publication transformer with explicit DI seams."""
         super().__init__(
@@ -96,29 +104,52 @@ class BasePublicationTransformer(BaseTransformer):
             pii_hasher=pii_hasher,
             dependencies=dependencies,
         )
+        # Fallback to self if strategies are not provided (legacy subclass support)
+        self._data_extractor = data_extractor or cast("DataExtractorStrategy", self)
+        self._identifier_resolver = identifier_resolver or cast("IdentifierResolverStrategy", self)
+        self._metadata_strategy = metadata_strategy or cast("PublicationMetadataStrategy", self)
+        self._record_normalizer = record_normalizer or RecordNormalizationProcessor(
+            provider=provider
+        )
 
-    @property
-    def extraction_blocks(self) -> list[ExtractionBlock]:
-        """Optional list of declarative blocks to extract data.
+    # =========================================================================
+    # Strategy Interface Implementations (Fallback to legacy subclass methods)
+    # =========================================================================
 
-        Subclasses can override this to use the block architecture instead
-        of overriding _extract_business_data manually.
-        """
-        return []
+    def pre_extract_validation(self, context: PipelineContext, record: BronzeRecord, index: int) -> None:
+        self._pre_extract_validation(context, record, index)
+
+    def extract_business_data(self, record: BronzeRecord) -> JsonDict:
+        return self._extract_business_data(record)
+
+    def get_primary_id_field(self) -> str:
+        return self._get_primary_id_field()
+
+    def validate_primary_id(self, context: PipelineContext, business_data: JsonDict, index: int) -> tuple[str, Any] | None:
+        return self._validate_primary_id(context, business_data, index)
+
+    def get_entity_class(self) -> type[BaseEntity]:
+        return self._get_entity_class()
+
+    def should_log_fallback_lookup(self) -> bool:
+        return self._should_log_fallback_lookup()
+
+    # =========================================================================
+    # Legacy Protected Methods (For backward compatibility with subclasses)
+    # =========================================================================
+
+    def _pre_extract_validation(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> None:
+        """Optional pre-extraction validation hook."""
+        pass
 
     def _extract_business_data(self, record: BronzeRecord) -> JsonDict:
-        """Extract and normalize fields from bronze record.
-
-        Provider-specific extraction logic. Delegates to extraction_blocks if provided.
-
-        Args:
-            record: Raw Bronze record from provider API.
-
-        Returns:
-            Dictionary of extracted and normalized fields.
-
-        """
-        blocks = self.extraction_blocks
+        """Extract and normalize fields from bronze record."""
+        blocks = getattr(self, "extraction_blocks", [])
         if blocks:
             result: JsonDict = {}
             for block in blocks:
@@ -130,65 +161,35 @@ class BasePublicationTransformer(BaseTransformer):
             "or override _extract_business_data() method."
         )
 
-    @abstractmethod
     def _get_primary_id_field(self) -> str:
-        """Return the name of the primary identifier field.
+        """Return the name of the primary identifier field."""
+        raise NotImplementedError()
 
-        Examples:
-        - OpenAlex: 'openalex_id'
-        - SemanticScholar: 'paper_id'
-        - CrossRef: 'doi'
-
-        Returns:
-            Field name used as primary identifier in business_data.
-
-        """
-        ...
-
-    @abstractmethod
     def _get_entity_class(self) -> type[BaseEntity]:
-        """Return the domain entity class for this publication type.
-
-        Returns:
-            Domain entity class (e.g., OpenAlexPublicationEntity).
-
-        """
-        ...
-
-    def _pre_extract_validation(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-        index: int,
-    ) -> None:
-        """Optional pre-extraction validation hook.
-
-        Override to add validation before business data extraction.
-        Raise ValueError to skip the record with validation error logging.
-
-        Default implementation does nothing.
-
-        Args:
-            context: Pipeline context with run_id, run_type, logger.
-            record: Raw Bronze record from provider API.
-            index: Sequential index of the record in the pipeline run.
-
-        Raises:
-            ValueError: If validation fails (caught by BaseTransformer.transform).
-
-        """
+        """Return the domain entity class for this publication type."""
+        raise NotImplementedError()
 
     def _should_log_fallback_lookup(self) -> bool:
-        """Return True if fallback lookup logging is enabled.
-
-        Override to disable for providers without lookup metadata
-        (e.g., CrossRef which uses DOI-only lookup).
-
-        Returns:
-            True to log fallback usage, False to skip.
-
-        """
+        """Return True if fallback lookup logging is enabled."""
         return True
+
+    def _validate_primary_id(
+        self,
+        context: PipelineContext,
+        business_data: JsonDict,
+        index: int,
+    ) -> tuple[str, Any] | None:
+        """Validate primary ID presence."""
+        primary_id_field = self._get_primary_id_field()
+        primary_id = business_data.get(primary_id_field)
+        if not primary_id:
+            context.logger.warning(
+                "record_skipped_no_id",
+                index=index,
+                lookup_method=business_data.get("_lookup_method"),
+            )
+            return None
+        return primary_id_field, primary_id
 
     _CONTENT_FIELDS: tuple[str, ...] = ("abstract",)
     """Fields to normalize via ``strip_html_tags`` after extraction."""
@@ -221,29 +222,6 @@ class BasePublicationTransformer(BaseTransformer):
                 business_data[field] = self._data_normalizer.strip_html_tags(raw)
         return business_data
 
-    def _validate_primary_id(
-        self,
-        context: PipelineContext,
-        business_data: JsonDict,
-        index: int,
-    ) -> tuple[str, Any] | None:  # Any: PK value type varies by provider
-        """Validate primary ID presence.
-
-        Returns:
-            Tuple of (field_name, value) if valid, None if missing.
-
-        """
-        primary_id_field = self._get_primary_id_field()
-        primary_id = business_data.get(primary_id_field)
-        if not primary_id:
-            context.logger.warning(
-                "record_skipped_no_id",
-                index=index,
-                lookup_method=business_data.get("_lookup_method"),
-            )
-            return None
-        return primary_id_field, primary_id
-
     def _log_fallback_if_needed(
         self,
         context: PipelineContext,
@@ -252,7 +230,7 @@ class BasePublicationTransformer(BaseTransformer):
         primary_id: Any,  # Any: heterogeneous ID types across providers
     ) -> None:
         """Log fallback lookup usage when applicable."""
-        if self._should_log_fallback_lookup():
+        if self._metadata_strategy.should_log_fallback_lookup():
             lookup_method = business_data.get("_lookup_method", "unknown")
             if lookup_method in ("title_fallback", "title_only"):
                 context.logger.info(
@@ -314,7 +292,7 @@ class BasePublicationTransformer(BaseTransformer):
         record: BronzeRecord,
         index: int,
     ) -> SilverRecord | None:
-        """Unified publication transformation flow (Template Method)."""
+        """Unified publication transformation flow (Facade execution)."""
         prepared = _prepare_publication_business_data(self, context, record, index)
         if prepared is None:
             return None
@@ -345,6 +323,7 @@ class BasePublicationTransformer(BaseTransformer):
         """Classify publication type using the unified 3-level hierarchy."""
         return _classification_payload(provider, raw_type, raw_types_list)
 
+
 def _prepare_publication_business_data(
     transformer: BasePublicationTransformer,
     context: PipelineContext,
@@ -352,14 +331,19 @@ def _prepare_publication_business_data(
     index: int,
 ) -> tuple[str, object, JsonDict] | None:
     """Prepare publication business data and validate the primary identifier."""
-    transformer._pre_extract_validation(context, record, index)
-    business_data = transformer._extract_business_data(record)
+    # Execute extraction strategy
+    transformer._data_extractor.pre_extract_validation(context, record, index)
+    business_data = transformer._data_extractor.extract_business_data(record)
     transformer._normalize_content_fields(business_data)
 
-    id_result = transformer._validate_primary_id(context, business_data, index)
+    # Execute identity resolution strategy
+    id_result = transformer._identifier_resolver.validate_primary_id(
+        context, business_data, index
+    )
     if id_result is None:
         return None
     primary_id_field, primary_id = id_result
+    
     transformer._log_fallback_if_needed(
         context,
         business_data,
@@ -374,9 +358,8 @@ def _normalize_publication_business_data(
     business_data: JsonDict,
 ) -> JsonDict:
     """Normalize publication business data before legacy hash finalization."""
-    normalized = RecordNormalizationProcessor(
-        provider=transformer.provider,
-    ).normalize_business_data(business_data)
+    # Execute normalization strategy (injected)
+    normalized = transformer._record_normalizer.normalize_business_data(business_data)
     if isinstance(business_data.get("issn"), list):
         normalized["issn"] = list(business_data["issn"])
     return normalized
@@ -391,8 +374,9 @@ def _build_publication_silver_record(
     business_data: JsonDict,
 ) -> SilverRecord:
     """Build a finalized Silver record from normalized publication business data."""
+    entity_class = transformer._metadata_strategy.get_entity_class()
     entity = transformer._create_entity(
-        transformer._get_entity_class(),
+        entity_class,
         context,
         entity_id=entity_id,
         content_hash=content_hash,

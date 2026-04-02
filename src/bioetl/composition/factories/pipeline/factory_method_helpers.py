@@ -6,9 +6,16 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
-from bioetl.composition.factories.pipeline.creation_support import _PipelineCreationRequest
-from bioetl.composition.factories.pipeline.transformer_dependencies import build_transformer_dependencies
-from bioetl.composition.factories.services.bundle import build_pipeline_services, create_pipeline_with_services
+from bioetl.composition.factories.pipeline.creation_support import (
+    _PipelineCreationRequest,
+)
+from bioetl.composition.factories.pipeline.transformer_dependencies import (
+    build_transformer_dependencies,
+)
+from bioetl.composition.factories.services.bundle import (
+    build_pipeline_services,
+    create_pipeline_with_services,
+)
 from bioetl.domain.services import IdentityService
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
@@ -17,14 +24,22 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.base_transformer.types import TransformerDependencyContext
+    from bioetl.application.core.base_transformer.types import (
+        TransformerDependencyContext,
+    )
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.factories.datasource.data_source_factory import DataSourceCreatorProtocol
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorProtocol,
+    )
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig, SilverFilterConfig
+    from bioetl.domain.filtering import (
+        GoldFilterConfig,
+        InputFilterConfig,
+        SilverFilterConfig,
+    )
     from bioetl.domain.ports import (
         ContractPolicyPort,
         DataNormalizationPort,

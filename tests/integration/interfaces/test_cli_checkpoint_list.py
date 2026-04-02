@@ -18,6 +18,8 @@ from tests.fakes.checkpoint_fake import InMemoryCheckpoint
 if TYPE_CHECKING:
     from click.testing import CliRunner
 
+pytestmark = pytest.mark.integration
+
 
 class TestCliCheckpointList:
     """Test CLI checkpoint list command."""
