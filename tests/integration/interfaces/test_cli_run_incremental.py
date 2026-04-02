@@ -14,6 +14,8 @@ from click.testing import CliRunner
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.interfaces.cli import cli
 
+pytestmark = pytest.mark.integration
+
 
 class TestCliRunIncremental:
     """Test CLI run command for incremental pipeline runs."""

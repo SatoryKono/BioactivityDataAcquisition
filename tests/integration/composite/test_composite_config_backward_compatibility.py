@@ -11,6 +11,8 @@ from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
 
+pytestmark = pytest.mark.integration
+
 
 def _base_composite_yaml(with_version: bool) -> str:
     version_line = '  version: "1.0.0"\n' if with_version else ""

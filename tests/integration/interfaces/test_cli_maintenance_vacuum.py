@@ -15,6 +15,8 @@ from bioetl.interfaces.cli import cli
 if TYPE_CHECKING:
     from click.testing import CliRunner
 
+pytestmark = pytest.mark.integration
+
 
 class TestCliMaintenanceVacuumHelp:
     """Test vacuum command help and argument handling."""

@@ -17,6 +17,7 @@ from deltalake import DeltaTable
 
 # VCR cassette directory for ChEMBL pipeline tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
+pytestmark = pytest.mark.integration
 
 
 @pytest.fixture(scope="module")

@@ -9,6 +9,8 @@ from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli
 
+pytestmark = pytest.mark.e2e
+
 
 @pytest.fixture
 def cli_runner():

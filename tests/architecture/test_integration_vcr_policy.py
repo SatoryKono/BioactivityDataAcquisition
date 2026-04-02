@@ -16,6 +16,42 @@ TESTING_GUIDE_PATH = ROOT / "docs" / "03-guides" / "testing.md"
 DEV_README_PATH = ROOT / "scripts" / "dev" / "README.md"
 DATA_README_PATH = ROOT / "scripts" / "data" / "README.md"
 CONTRIBUTING_PATH = ROOT / ".github" / "CONTRIBUTING.md"
+VCR_TASKS_PATH = ROOT / "docs" / "05-operations" / "verification" / "vcr-test-tasks.md"
+CURATED_INTEGRATION_MARKER_FILES = (
+    Path("tests/integration/composite/test_column_naming_integration.py"),
+    Path("tests/integration/composite/test_composite_config_backward_compatibility.py"),
+    Path("tests/integration/infrastructure/storage/test_silver_writer.py"),
+    Path("tests/integration/interfaces/test_cli_checkpoint_list.py"),
+    Path("tests/integration/interfaces/test_cli_config_dq.py"),
+    Path("tests/integration/interfaces/test_cli_maintenance_archive.py"),
+    Path("tests/integration/interfaces/test_cli_maintenance_vacuum.py"),
+    Path("tests/integration/interfaces/test_cli_quarantine_inspect.py"),
+    Path("tests/integration/interfaces/test_cli_run_dry_run.py"),
+    Path("tests/integration/interfaces/test_cli_run_incremental.py"),
+    Path("tests/integration/interfaces/test_cli_shutdown_integration.py"),
+    Path("tests/integration/test_grafana_config.py"),
+    Path("tests/integration/test_prometheus_rules_config.py"),
+)
+CURATED_E2E_MARKER_FILES = (
+    Path("tests/e2e/test_cli_safety.py"),
+    Path("tests/e2e/test_e2e_stability_policy.py"),
+)
+
+
+def _iter_inventory_paths(node: object) -> list[str]:
+    if isinstance(node, str):
+        return [node]
+    if isinstance(node, list):
+        paths: list[str] = []
+        for item in node:
+            paths.extend(_iter_inventory_paths(item))
+        return paths
+    if isinstance(node, dict):
+        paths: list[str] = []
+        for item in node.values():
+            paths.extend(_iter_inventory_paths(item))
+        return paths
+    return []
 
 
 def _load_yaml(path: Path) -> dict:
@@ -114,6 +150,79 @@ class TestIntegrationVcrPolicy:
             "post_refresh_checks"
         ]
 
+    def test_tracked_suite_inventory_matches_supported_matrix_and_markers(self) -> None:
+        policy = _load_yaml(POLICY_PATH)
+        inventory = policy["tracked_suite_inventory"]
+
+        integration_smoke = policy["supported_scopes"]["integration"][
+            "supported_pipeline_families"
+        ]["pipeline_replay_smoke"]
+        assert set(inventory["integration"]["pipeline_replay_smoke"]) == set(
+            integration_smoke
+        )
+
+        e2e_provider_runs = policy["supported_scopes"]["e2e"][
+            "representative_pipeline_families"
+        ]["provider_runs"]
+        assert set(inventory["e2e"]["provider_runs"]) == set(e2e_provider_runs)
+
+        e2e_scenario_runs = policy["supported_scopes"]["e2e"][
+            "representative_pipeline_families"
+        ]["scenario_runs"]
+        assert set(inventory["e2e"]["scenario_runs"]) == set(e2e_scenario_runs)
+
+        for relative_path in inventory["integration"]["pipeline_replay_smoke"].values():
+            content = (ROOT / relative_path).read_text(encoding="utf-8")
+            assert "pytest.mark.integration" in content, (
+                "tracked integration pipeline replay surface must keep explicit integration marker: "
+                f"{relative_path}"
+            )
+
+        for family_paths in inventory["integration"][
+            "governance_and_runtime_surfaces"
+        ].values():
+            for relative_path in family_paths:
+                content = (ROOT / relative_path).read_text(encoding="utf-8")
+                assert "pytest.mark.integration" in content, (
+                    "tracked governance/runtime integration surface must keep explicit integration marker: "
+                    f"{relative_path}"
+                )
+
+        for relative_path in inventory["e2e"]["provider_runs"].values():
+            content = (ROOT / relative_path).read_text(encoding="utf-8")
+            assert "pytest.mark.e2e" in content, (
+                "tracked provider e2e surface must keep explicit e2e marker: "
+                f"{relative_path}"
+            )
+
+        for relative_path in inventory["e2e"]["scenario_runs"].values():
+            content = (ROOT / relative_path).read_text(encoding="utf-8")
+            assert "pytest.mark.e2e" in content, (
+                "tracked scenario e2e surface must keep explicit e2e marker: "
+                f"{relative_path}"
+            )
+
+    def test_every_test_surface_under_integration_and_e2e_is_in_tracked_inventory(
+        self,
+    ) -> None:
+        policy = _load_yaml(POLICY_PATH)
+        tracked_paths = {
+            path.replace("\\", "/")
+            for path in _iter_inventory_paths(policy["tracked_suite_inventory"])
+        }
+        repo_test_paths = {
+            str(path.relative_to(ROOT)).replace("\\", "/")
+            for root in (ROOT / "tests" / "integration", ROOT / "tests" / "e2e")
+            for path in root.rglob("test_*.py")
+        }
+
+        assert tracked_paths == repo_test_paths, (
+            "integration_vcr_policy tracked_suite_inventory must cover every "
+            "integration/e2e test surface exactly. "
+            f"missing={sorted(repo_test_paths - tracked_paths)} "
+            f"extra={sorted(tracked_paths - repo_test_paths)}"
+        )
+
     def test_policy_defaults_align_with_current_conftest_and_workflows(self) -> None:
         policy = _load_yaml(POLICY_PATH)
         tests_workflow = (
@@ -136,6 +245,8 @@ class TestIntegrationVcrPolicy:
         assert policy["supported_scopes"]["e2e"]["ci_smoke_target"] in tests_workflow
         assert "VCR_RECORD_MODE=none uv run pytest" in tests_workflow
         assert "--vcr-record=none" in tests_workflow
+        assert "python scripts/data/check_root_vcr_cassettes.py" in tests_workflow
+        assert "python scripts/data/check_vcr_filename_policy.py" in tests_workflow
         assert "tests/contract/ -v --tb=short --network" in contract_workflow
         assert (
             "github.repository == "
@@ -263,3 +374,26 @@ class TestIntegrationVcrPolicy:
 
         assert "docs/03-guides/testing.md" in contributing
         assert "configs/quality/integration_vcr_policy.yaml" in contributing
+
+    def test_curated_integration_and_e2e_surfaces_have_explicit_markers(self) -> None:
+        for relative_path in CURATED_INTEGRATION_MARKER_FILES:
+            content = (ROOT / relative_path).read_text(encoding="utf-8")
+            assert "pytest.mark.integration" in content, (
+                "canonical integration surface drifted away from explicit integration markers: "
+                f"{relative_path}"
+            )
+
+        for relative_path in CURATED_E2E_MARKER_FILES:
+            content = (ROOT / relative_path).read_text(encoding="utf-8")
+            assert "pytest.mark.e2e" in content, (
+                "canonical e2e surface drifted away from explicit e2e markers: "
+                f"{relative_path}"
+            )
+
+    def test_historical_vcr_tasks_doc_points_back_to_active_policy(self) -> None:
+        historical_report = VCR_TASKS_PATH.read_text(encoding="utf-8")
+
+        assert "Historical verification artifact (non-normative)" in historical_report
+        assert "configs/quality/integration_vcr_policy.yaml" in historical_report
+        assert "docs/03-guides/testing.md" in historical_report
+        assert "configs/quality/test_matrix.yaml" in historical_report

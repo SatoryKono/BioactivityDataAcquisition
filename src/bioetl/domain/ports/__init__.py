@@ -78,6 +78,11 @@ from bioetl.domain.ports.observability import (
     resolve_metric_labels,
 )
 from bioetl.domain.ports.pii import PiiHasherPort
+from bioetl.domain.ports.publication_strategy import (
+    DataExtractorStrategy,
+    IdentifierResolverStrategy,
+    PublicationMetadataStrategy,
+)
 from bioetl.domain.ports.quality import (
     BronzeDQAnalyzerPort,
     BronzeDQConfigPort,
@@ -155,6 +160,7 @@ __all__ = [
     "DQMonitorPort",
     "DQReportWriterPort",
     "DataNormalizationPort",
+    "DataExtractorStrategy",
     "DataSourceFactoryPort",
     "DataSourcePort",
     "DebugAction",
@@ -183,6 +189,7 @@ __all__ = [
     "IDMappingPort",
     "IDMappingSourceReaderPort",
     "InputFilterPort",
+    "IdentifierResolverStrategy",
     "JsonEncoderPort",
     "LineageStorePort",
     "LockPort",
@@ -226,6 +233,7 @@ __all__ = [
     "StorageMaintenancePort",
     "StoragePort",
     "TracingPort",
+    "PublicationMetadataStrategy",
     "resolve_metric_labels",
 ]
 

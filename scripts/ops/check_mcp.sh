@@ -4,6 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
 EXPECTED_MEMORY_PATH="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
+# shellcheck source=./load_repo_env.sh
+source "${SCRIPT_DIR}/load_repo_env.sh"
+
+load_repo_env_if_present
 
 ok() {
   printf "[OK] %s\n" "$1"
@@ -75,7 +79,7 @@ require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026
 require_contains "$sequential_out" "@modelcontextprotocol/server-sequential-thinking@2025.12.18" "sequential-thinking is pinned to @2025.12.18" || status=1
 require_contains "$fetch_out" "mcp-server-fetch==2025.4.7" "fetch is pinned to mcp-server-fetch==2025.4.7" || status=1
 require_contains "$pdf_out" "@modelcontextprotocol/server-pdf@1.3.1" "pdf is pinned to @1.3.1" || status=1
-require_contains "$github_out" "@modelcontextprotocol/server-github@2025.4.8" "github is pinned to @2025.4.8" || status=1
+require_contains "$github_out" "github-mcp-wrapper.sh" "github is routed through the project wrapper" || status=1
 require_contains "$docker_out" "mcp_docker_wrapper" "docker is routed through the project wrapper" || status=1
 require_contains "$docker_docs_out" "mcp_docker_docs_wrapper" "docker-docs is routed through the project wrapper" || status=1
 require_contains "$context7_out" "mcp_context7_wrapper" "context7 is routed through the project wrapper" || status=1

@@ -6,14 +6,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
-    from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointManagerService,
     )
     from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
-    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.postrun.service import PostrunService
     from bioetl.application.core.preflight.service import PreflightService
     from bioetl.application.observability.observer import PipelineObserver

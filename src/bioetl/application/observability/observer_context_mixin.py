@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Self
 from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
-from bioetl.domain.ports.noop import NoOpTracing
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -83,7 +82,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
 
     def _has_real_tracing(self) -> bool:
         """Return whether the observer uses a non-noop tracing implementation."""
-        return self._tracer is not None and not isinstance(self._tracer, NoOpTracing)
+        return self._tracer is not None and getattr(self._tracer, "is_noop", False) is not True
 
     def _build_trace_attributes(self) -> dict[str, object]:
         """Build span attributes with optional correlation anchors."""

@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
     from click.testing import CliRunner
 
+pytestmark = pytest.mark.integration
+
 
 class TestCliRunDryRun:
     """Test CLI run command with --dry-run flag."""

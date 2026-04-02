@@ -83,6 +83,8 @@ class _NoOpOtelTracer:
 class NoOpTracing:
     """No-op implementation of TracingPort (Null Object pattern)."""
 
+    is_noop = True
+
     def get_tracer(self, _name: str) -> _NoOpOtelTracer:
         """Return a no-op OTel-compatible tracer.
 

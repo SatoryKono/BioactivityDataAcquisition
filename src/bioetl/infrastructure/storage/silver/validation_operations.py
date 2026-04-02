@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-import re
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import pyarrow as pa
