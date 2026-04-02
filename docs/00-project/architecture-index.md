@@ -1,17 +1,21 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-02'
 ---
 
 # Архитектурные документы (канонические ссылки)
 
 Этот индекс фиксирует канонические ссылки на архитектурные документы, которые
 часто упоминаются в аудиторских шаблонах.
+
+Для published contracts, CLI surfaces, provider/pipeline specs и API reference
+используйте [Reference Index](../04-reference/index.md); этот индекс покрывает
+именно architecture-side entry points.
 
 | Запрошенный документ | Канонический документ |
 |---|---|

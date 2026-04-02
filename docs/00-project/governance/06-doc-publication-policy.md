@@ -141,6 +141,8 @@ consistency, а этот документ задаёт правила публи
   [`docs/05-operations/runbooks/run-manifest-inspection.md`](../../05-operations/runbooks/run-manifest-inspection.md)
 - CLI reference:
   [`docs/04-reference/cli.md`](../../04-reference/cli.md)
+- reference landing page:
+  [`docs/04-reference/index.md`](../../04-reference/index.md)
 - governing ADRs:
   [`ADR-044`](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md),
   [`ADR-045`](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
@@ -154,6 +156,9 @@ consistency, а этот документ задаёт правила публи
   layout, rollout flags, inspection commands или traceability invariants;
 - retired surface MUST сначала получить explicit deprecation / unsupported note в
   published docs, а не тихо переводиться в `internal` или `archive`.
+- archive-only published material SHOULD route through an explicit archive index
+  (for example `docs/05-operations/archive-index.md`) instead of being surfaced
+  as if it were current operator guidance.
 
 ## Publication Metadata Note
 

@@ -1,11 +1,11 @@
 ---
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-02'
 ---
 
 # Welcome to BioETL
@@ -45,6 +45,7 @@ Useful entry points for non-normative surfaces:
 - Repository path `docs/00-project/ai/README.md` — top-level AI docs map for agents, memory, prompts, and skills
 - Repository path `docs/00-project/ai/agents/README.md` — runtime-specific agent guidance
 - Repository path `docs/00-project/ai/skills/README.md` — skills mirror and indexes
+- [Operations Archive Index](../05-operations/archive-index.md) — published archive lane for historical ops evidence and auxiliary deployment notes
 
 ## Project Mission
 
@@ -59,7 +60,9 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 - [**Tools Hub**](TOOLS.md): Current script entry points, placement rules, and docs toolchain.
 - [**Quick Start Guide**](../03-guides/quick-start.md): Get your local development environment up and running in minutes.
 - [**Architecture Overview**](../02-architecture/00-overview.md): Understand the high-level design and data flow.
+- [**Reference Index**](../04-reference/index.md): Browse published CLI, contracts, provider, pipeline, API, and template reference surfaces.
 - [**How-To Guides**](../03-guides/getting-started.md): Guides for common tasks (adding sources, pipelines, troubleshooting).
+- [**Operations Archive Index**](../05-operations/archive-index.md): Historical ops evidence and archive-only operational material.
 - Repository path `docs/99-archive/README.md`: Historical and superseded materials for traceability only.
 
 ## Supported Local Workflows
@@ -150,4 +153,4 @@ bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
 
 ----------------------------------------------------------------------
 
-*Last updated: 2026-04-01*
+*Last updated: 2026-04-02*
