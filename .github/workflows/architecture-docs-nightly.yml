@@ -1,4 +1,4 @@
-﻿name: Architecture Docs Nightly
+name: Architecture Docs Nightly
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv

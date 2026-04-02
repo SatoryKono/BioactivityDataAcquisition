@@ -1,4 +1,4 @@
-﻿name: Mutation Testing
+name: Mutation Testing
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv

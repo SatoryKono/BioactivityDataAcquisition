@@ -79,17 +79,9 @@ class TestLegacyAliases:
         """LEGACY_PUBLICATION_ALIASES should be immutable."""
         assert isinstance(LEGACY_PUBLICATION_ALIASES, frozenset)
 
-    def test_legacy_aliases_include_document(self) -> None:
-        """Should include 'document' legacy alias."""
-        assert "document" in LEGACY_PUBLICATION_ALIASES
-
-    def test_legacy_aliases_include_document_similarity(self) -> None:
-        """Should include 'document_similarity' legacy alias."""
-        assert "document_similarity" in LEGACY_PUBLICATION_ALIASES
-
-    def test_legacy_aliases_include_document_term(self) -> None:
-        """Should include 'document_term' legacy alias."""
-        assert "document_term" in LEGACY_PUBLICATION_ALIASES
+    def test_legacy_aliases_are_empty_after_sunset(self) -> None:
+        """Legacy aliases should be removed after sunset date."""
+        assert len(LEGACY_PUBLICATION_ALIASES) == 0
 
     def test_legacy_aliases_exclude_canonical(self) -> None:
         """Legacy aliases should NOT include canonical names."""
@@ -133,14 +125,10 @@ class TestGetPublicationMapping:
         assert mapping.primary_key_field == "publication_id"
         assert mapping.is_legacy_alias is False
 
-    def test_get_legacy_document(self) -> None:
-        """Should return mapping for legacy 'document' alias."""
+    def test_get_legacy_document_returns_none_after_sunset(self) -> None:
+        """Should return None for legacy 'document' alias after sunset."""
         mapping = get_publication_mapping("document")
-
-        assert mapping is not None
-        assert mapping.canonical_name == "document"
-        assert mapping.api_resource == "document"
-        assert mapping.is_legacy_alias is True
+        assert mapping is None
 
     def test_get_unknown_entity(self) -> None:
         """Should return None for unknown entity type."""
@@ -164,14 +152,25 @@ class TestIsPublicationEntity:
             "publication",
             "publication_similarity",
             "publication_term",
-            "document",
-            "document_similarity",
-            "document_term",
         ],
     )
     def test_is_publication_entity_true(self, entity_type: str) -> None:
         """Should return True for all publication-related entities."""
         assert is_publication_entity(entity_type) is True
+
+    @pytest.mark.parametrize(
+        "entity_type",
+        [
+            "document",
+            "document_similarity",
+            "document_term",
+        ],
+    )
+    def test_is_publication_entity_false_for_legacy_after_sunset(
+        self, entity_type: str
+    ) -> None:
+        """Should return False for legacy entities after sunset."""
+        assert is_publication_entity(entity_type) is False
 
     @pytest.mark.parametrize(
         "entity_type",
@@ -200,9 +199,9 @@ class TestIsLegacyPublicationAlias:
             "document_term",
         ],
     )
-    def test_is_legacy_alias_true(self, entity_type: str) -> None:
-        """Should return True for legacy aliases."""
-        assert is_legacy_publication_alias(entity_type) is True
+    def test_is_legacy_alias_false_after_sunset(self, entity_type: str) -> None:
+        """Should return False for legacy aliases after sunset."""
+        assert is_legacy_publication_alias(entity_type) is False
 
     @pytest.mark.parametrize(
         "entity_type",
@@ -236,32 +235,24 @@ class TestGetPublicationEntityTypeValidationError:
 
         assert error is None
 
-    def test_validate_legacy_document_chembl_fails(self) -> None:
-        """Should fail validation for legacy 'document' with chembl provider."""
+    def test_validate_legacy_document_chembl_passes_after_sunset(self) -> None:
+        """Should pass validation for legacy 'document' (as unknown) after sunset."""
         error = get_publication_entity_type_validation_error("document", "chembl")
+        assert error is None
 
-        assert error is not None
-        assert "publication" in error
-        assert "document" in error
-        assert "ADR-024" in error
-
-    def test_validate_legacy_document_similarity_chembl_fails(self) -> None:
-        """Should fail validation for legacy 'document_similarity' with chembl."""
+    def test_validate_legacy_document_similarity_chembl_passes_after_sunset(
+        self,
+    ) -> None:
+        """Should pass validation for legacy 'document_similarity' after sunset."""
         error = get_publication_entity_type_validation_error(
             "document_similarity", "chembl"
         )
+        assert error is None
 
-        assert error is not None
-        assert "publication_similarity" in error
-        assert "document_similarity" in error
-
-    def test_validate_legacy_document_term_chembl_fails(self) -> None:
-        """Should fail validation for legacy 'document_term' with chembl."""
+    def test_validate_legacy_document_term_chembl_passes_after_sunset(self) -> None:
+        """Should pass validation for legacy 'document_term' after sunset."""
         error = get_publication_entity_type_validation_error("document_term", "chembl")
-
-        assert error is not None
-        assert "publication_term" in error
-        assert "document_term" in error
+        assert error is None
 
     def test_validate_non_chembl_provider_skips_validation(self) -> None:
         """Should skip validation for non-chembl providers."""
@@ -280,12 +271,12 @@ class TestGetPublicationEntityTypeValidationError:
 class TestAllPublicationEntityTypes:
     """Tests for ALL_PUBLICATION_ENTITY_TYPES set."""
 
-    def test_includes_canonical_and_legacy(self) -> None:
-        """Should include both canonical names and legacy aliases."""
+    def test_includes_only_canonical_after_sunset(self) -> None:
+        """Should include only canonical names after sunset."""
         assert "publication" in ALL_PUBLICATION_ENTITY_TYPES
-        assert "document" in ALL_PUBLICATION_ENTITY_TYPES
+        assert "document" not in ALL_PUBLICATION_ENTITY_TYPES
         assert "publication_similarity" in ALL_PUBLICATION_ENTITY_TYPES
-        assert "document_similarity" in ALL_PUBLICATION_ENTITY_TYPES
+        assert "document_similarity" not in ALL_PUBLICATION_ENTITY_TYPES
 
     def test_is_union_of_canonical_and_legacy(self) -> None:
         """Should be the union of canonical and legacy sets."""

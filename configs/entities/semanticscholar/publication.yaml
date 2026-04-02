@@ -94,15 +94,10 @@ schema:
     pattern: ^_dq_
   field_aliases:
     affiliations: affiliation_list
-    year: publication_year
-    first_page: page_first
-    last_page: page_last
     pages: page_range
     citation_count: citations_received
     reference_count: citations_made
     fields_of_study: subject_fields
-    doi: publication_doi
-    pmid: publication_pmid
   silver:
     include_groups:
     - system

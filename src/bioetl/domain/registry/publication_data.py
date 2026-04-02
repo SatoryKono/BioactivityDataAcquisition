@@ -39,29 +39,6 @@ _PUBLICATION_MAPPINGS: Final[tuple[PublicationMapping, ...]] = (
         primary_key_field="publication_id",
         primary_key_fields=("publication_id", "term_type", "term"),
     ),
-    PublicationMapping(
-        canonical_name="document",
-        api_resource="document",
-        plural_key="documents",
-        primary_key_field="document_chembl_id",
-        is_legacy_alias=True,
-    ),
-    PublicationMapping(
-        canonical_name="document_similarity",
-        api_resource="document_similarity",
-        plural_key="document_similarities",
-        primary_key_field="sim_id",
-        primary_key_fields=("doc_1", "doc_2", "sim_id"),
-        is_legacy_alias=True,
-    ),
-    PublicationMapping(
-        canonical_name="document_term",
-        api_resource="document",
-        plural_key="documents",
-        primary_key_field="document_chembl_id",
-        primary_key_fields=("document_chembl_id", "term_type", "term"),
-        is_legacy_alias=True,
-    ),
 )
 
 _PUBLICATION_MAPPING_INDEX: Final[dict[str, PublicationMapping]] = {

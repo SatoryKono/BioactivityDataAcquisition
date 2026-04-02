@@ -71,15 +71,6 @@ schema:
                 - creation_date
         -   name: dq
             pattern: ^_dq_
-    field_aliases:
-        year: publication_year
-        first_page: page_first
-        last_page: page_last
-        doc_type: publication_type
-        document_chembl_id: publication_id
-        doi: publication_doi
-        pmid: publication_pmid
-        pmc_id: publication_pmc_id
     silver:
         include_groups:
             - system

@@ -354,11 +354,14 @@ composite:
                     - chembl_release
                     - corpus_id
                     - dblp_id
-                    - publication_id
+                    - document_chembl_id
                     - mag_id
                     - nlm_unique_id
                     - openalex_id
                     - paper_id
+                    - pmc_id
+                    - pmid
+                    - publication_id
                     - publication_pmc_id
                     - publication_pmid
                     - src_id
@@ -379,6 +382,7 @@ composite:
                     - journal_iso_abbrev
                     - journal_issn_type
                     - journal_name_short
+                    - publication_doi
                     - publisher
                     - title
                     - venue
@@ -429,6 +433,7 @@ composite:
                     - pub_month
                     - publication_date
                     - publication_year
+                    - year
                 provider_order: [ chembl, crossref, openalex, pubmed, semanticscholar ]
 
             # === Subjects / Topics ===
