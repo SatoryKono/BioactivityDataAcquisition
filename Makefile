@@ -176,12 +176,12 @@ test-changed: ## Run tests for changed files (compared to main branch)
 
 test-architecture: ## Run architecture enforcement tests
 	@echo "$(BLUE)Running architecture tests...$(NC)"
-	$(RUN) pytest tests/architecture/ -v --tb=short
+	$(RUN) PYTHONPATH=src:.:scripts pytest tests/architecture/ -v --tb=short
 	@echo "$(GREEN)Architecture tests passed!$(NC)"
 
 test-architecture-strict: ## Run architecture tests with import-linter
 	@echo "$(BLUE)Running strict architecture checks...$(NC)"
-	$(RUN) pytest tests/architecture/ -v
+	$(RUN) PYTHONPATH=src:.:scripts pytest tests/architecture/ -v
 	@echo "$(BLUE)Running import-linter...$(NC)"
 	$(RUN) importlinter
 	@echo "$(GREEN)All architecture checks passed!$(NC)"
@@ -409,7 +409,7 @@ watch-logs: ## Watch structured logs (tail -f)
 # Architecture and Quality Checks
 arch-test: ## Run architecture tests (layer dependencies, determinism)
 	@echo "$(BLUE)Running architecture tests...$(NC)"
-	$(RUN) pytest tests/architecture/ -v --tb=short
+	$(RUN) PYTHONPATH=src:.:scripts pytest tests/architecture/ -v --tb=short
 	@echo "$(GREEN)Architecture tests passed!$(NC)"
 
 arch-lint: ## Run import-linter contracts
@@ -421,14 +421,14 @@ arch-all: arch-lint arch-test ## Run all architecture checks (lint + tests)
 
 qa-arch-fast: ## Run canonical fast architecture gate used by CI baseline
 	@echo "$(BLUE)Running canonical fast architecture gate...$(NC)"
-	HYPOTHESIS_PROFILE=$${HYPOTHESIS_PROFILE:-ci} $(RUN) pytest tests/architecture/ -m "not slow and not serial" -q --tb=short
+	HYPOTHESIS_PROFILE=$${HYPOTHESIS_PROFILE:-ci} $(RUN) PYTHONPATH=src:.:scripts pytest tests/architecture/ -m "not slow and not serial" -q --tb=short
 	$(PY_RUN) src/tools/scripts/check_architecture.py
 	$(PY_RUN) scripts/qa/generate_architecture_dependency_map.py --check
 	@echo "$(GREEN)Canonical fast architecture gate passed!$(NC)"
 
 qa-arch-full: ## Run canonical full architecture gate used by blocking CI jobs
 	@echo "$(BLUE)Running canonical full architecture gate...$(NC)"
-	$(RUN) pytest tests/architecture/ -v --tb=short
+	$(RUN) PYTHONPATH=src:.:scripts pytest tests/architecture/ -v --tb=short
 	$(RUN) lint-imports --config .importlinter
 	$(PY_RUN) src/tools/scripts/check_application_deps.py
 	$(PY_RUN) src/tools/scripts/check_architecture.py

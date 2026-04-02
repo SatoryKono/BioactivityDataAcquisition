@@ -199,6 +199,32 @@ def evaluate_governance_violations(
     return violations
 
 
+def _get_typed_prefixes(path_prefixes: list) -> tuple[str, ...]:
+    return tuple(p for p in path_prefixes if isinstance(p, str) and p)
+
+def _get_typed_budgets(registry_budgets: dict) -> dict[str, int]:
+    return {n: int(b) for n, b in registry_budgets.items() if isinstance(n, str) and isinstance(b, int)}
+
+def _parse_hotspot_entry(entry: dict[str, Any]) -> tuple[str, tuple[str, ...], dict[str, int]] | None:
+    hotspot_name = entry.get("name")
+    path_prefixes = entry.get("path_prefixes")
+    registry_budgets = entry.get("registry_budgets")
+
+    if not isinstance(hotspot_name, str) or not isinstance(path_prefixes, list) or not isinstance(registry_budgets, dict):
+        return None
+
+    typed_prefixes = _get_typed_prefixes(path_prefixes)
+    if not typed_prefixes:
+        return None
+
+    return hotspot_name, typed_prefixes, _get_typed_budgets(registry_budgets)
+
+def _extract_hotspot(entry: object) -> tuple[str, tuple[str, ...], dict[str, int]] | None:
+    if not isinstance(entry, dict):
+        return None
+    return _parse_hotspot_entry(entry)
+
+
 def _iter_hotspot_budget_entries(
     hotspot_budgets: object,
 ) -> list[tuple[str, tuple[str, ...], dict[str, int]]]:
@@ -208,33 +234,10 @@ def _iter_hotspot_budget_entries(
 
     typed_entries: list[tuple[str, tuple[str, ...], dict[str, int]]] = []
     for entry in hotspot_budgets:
-        if not isinstance(entry, dict):
-            continue
-        hotspot_name = entry.get("name")
-        path_prefixes = entry.get("path_prefixes")
-        registry_budgets = entry.get("registry_budgets")
-        if (
-            not isinstance(hotspot_name, str)
-            or not isinstance(path_prefixes, list)
-            or not isinstance(registry_budgets, dict)
-        ):
-            continue
-
-        typed_prefixes = tuple(
-            prefix for prefix in path_prefixes if isinstance(prefix, str) and prefix
-        )
-        if not typed_prefixes:
-            continue
-
-        typed_budgets = {
-            registry_name: int(budget)
-            for registry_name, budget in registry_budgets.items()
-            if isinstance(registry_name, str) and isinstance(budget, int)
-        }
-        typed_entries.append((hotspot_name, typed_prefixes, typed_budgets))
+        parsed = _extract_hotspot(entry)
+        if parsed:
+            typed_entries.append(parsed)
     return typed_entries
-
-
 def _count_hotspot_registry_entries(
     *,
     registries: dict[str, object],
