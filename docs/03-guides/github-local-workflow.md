@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-01'
 ---
 
 # GitHub Local Workflow
@@ -28,10 +28,30 @@ git config --get remote.origin.url
 Before opening a PR, run the project checks expected by the repository:
 
 ```bash
+# CI / single-OS checkout
 make lint
 make test
 uv run python -m mypy --strict src/bioetl/
 ```
+
+For mixed Windows + WSL checkout, prefer the OS-specific wrappers instead of a
+shared `.venv`:
+
+```powershell
+.\scripts\dev\setup_env_windows.ps1
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_mypy.ps1
+```
+
+```bash
+bash scripts/dev/setup_env_wsl.sh
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_mypy.sh
+```
+
+`make lint` and `make test` remain valid repository checks. The wrappers are
+the preferred route when the same checkout is used from both PowerShell and
+WSL.
 
 ## Recommended local Git defaults
 
@@ -199,3 +219,5 @@ git push origin --delete <branch-name>
 - The repository workflow assumes fast-forward-only sync on `main`.
 - For larger tasks, isolated `git worktree` usage is the preferred path.
 - For branch consolidation, prefer selective cherry-pick over merging noisy automation branches.
+- In mixed Windows + WSL work, do not share the same `.venv`; use `.venv-win`
+  in PowerShell and `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` in WSL.

@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-01'
 ---
 
 # Welcome to BioETL
@@ -62,6 +62,25 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 - [**How-To Guides**](../03-guides/getting-started.md): Guides for common tasks (adding sources, pipelines, troubleshooting).
 - Repository path `docs/99-archive/README.md`: Historical and superseded materials for traceability only.
 
+## Supported Local Workflows
+
+The repository currently supports three practical local execution modes:
+
+- **CI / single-OS checkout**: use `uv run python -m ...` and maintained Make
+  targets such as `make install`, `make test`, `make lint`.
+- **Windows PowerShell in a mixed Windows + WSL checkout**: bootstrap with
+  `.\scripts\dev\setup_env_windows.ps1`, then prefer
+  `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`, or
+  `.\.venv-win\Scripts\python.exe -m ...`.
+- **WSL/Linux in a mixed Windows + WSL checkout**: bootstrap with
+  `bash scripts/dev/setup_env_wsl.sh`, then prefer
+  `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`, or
+  `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...`.
+
+Do not reuse the same `.venv` between PowerShell and WSL. The maintained mixed
+checkout path uses `.venv-win` in PowerShell and an external WSL venv at
+`${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` by default.
+
 ## Key Features
 
 | Feature                    | Description                                          | ADR                                                                               |
@@ -117,6 +136,18 @@ bioetl run --pipeline chembl_activity --limit 100
 make test
 ```
 
+Mixed Windows + WSL checkout shortcuts:
+
+```powershell
+.\scripts\dev\setup_env_windows.ps1
+.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+```
+
+```bash
+bash scripts/dev/setup_env_wsl.sh
+bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+```
+
 ----------------------------------------------------------------------
 
-*Last updated: 2026-03-13*
+*Last updated: 2026-04-01*
