@@ -37,7 +37,7 @@ def test_start_metrics_server_success():
 
 
 def test_start_metrics_server_failure():
-    """Simulate server failure and verify graceful handling.
+    """Simulate server failure and verify graceful handling via interface.
 
     The server is designed to catch exceptions and return False (fail_fast=False by default)
     rather than raising exceptions, to allow pipelines to continue without metrics.
@@ -46,9 +46,38 @@ def test_start_metrics_server_failure():
         "bioetl.infrastructure.observability.server.start_http_server",
         side_effect=RuntimeError("Failed"),
     ):
-        # Server catches exceptions and returns False for graceful degradation
-        result = obs_server.start_metrics_server(port=8000, fail_fast=False)
+        # Interface should catch exceptions and return False for graceful degradation
+        result = observability.start_metrics_server(port=8000, fail_fast=False)
         assert result is False
+
+
+def test_start_metrics_server_fail_fast_propagation():
+    """Verify that fail_fast=True propagates MetricsServerError via interface."""
+    with mock.patch(
+        "bioetl.infrastructure.observability.server.start_http_server",
+        side_effect=RuntimeError("Failed"),
+    ):
+        with pytest.raises(domain_exceptions.MetricsServerError):
+            observability.start_metrics_server(port=8000, fail_fast=True)
+
+
+def test_start_metrics_server_default_arguments():
+    """Verify that default arguments are correctly passed through the interface."""
+    with mock.patch(
+        "bioetl.composition.observability_api.start_metrics_server",
+        return_value=True,
+    ) as mock_impl:
+        result = observability.start_metrics_server()
+
+        assert result is True
+        mock_impl.assert_called_once_with(
+            port=8000,
+            addr="0.0.0.0",
+            fail_fast=False,
+            retry_count=3,
+            retry_delay=1.0,
+            logger=None,
+        )
 
 
 def test_interface_re_exports_from_composition_observability_api():
