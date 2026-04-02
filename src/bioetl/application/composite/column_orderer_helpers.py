@@ -5,9 +5,6 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 
-from bioetl.application.core.publication_aliases import (
-    PUBLICATION_SCHEMA_FIELD_ALIASES,
-)
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.ports import LoggerPort
 
@@ -58,21 +55,7 @@ def resolve_publication_field_aliases(
     field_name: str,
 ) -> tuple[set[str], str | None, str | None]:
     """Return alias set plus optional legacy/canonical mapping for warnings."""
-    aliases = {field_name}
-    legacy_to_unified = PUBLICATION_SCHEMA_FIELD_ALIASES
-    legacy_field: str | None = None
-    canonical_field: str | None = None
-
-    if field_name in legacy_to_unified:
-        canonical_field = legacy_to_unified[field_name]
-        aliases.add(canonical_field)
-        legacy_field = field_name
-
-    for legacy, unified in legacy_to_unified.items():
-        if field_name == unified:
-            aliases.add(legacy)
-
-    return aliases, legacy_field, canonical_field
+    return {field_name}, None, None
 
 
 def collect_pattern_columns(
