@@ -50,7 +50,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Set up Python 3.11
                 uses: actions/setup-python@v5
@@ -98,7 +98,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -129,7 +129,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -192,7 +192,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -240,7 +240,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -273,7 +273,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -290,7 +290,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -318,7 +318,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -391,7 +391,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -445,7 +445,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -524,7 +524,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
