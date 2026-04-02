@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "configs" / "quality" / "integration_vcr_policy.yaml"
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 CONFTST_PATH = ROOT / "tests" / "conftest.py"
+TESTING_GUIDE_PATH = ROOT / "docs" / "03-guides" / "testing.md"
 
 
 def _load_yaml(path: Path) -> dict:
@@ -163,3 +164,30 @@ class TestIntegrationVcrPolicy:
             for rule in extension_rules
         )
         assert any("tests/fixtures/vcr/{provider}/" in rule for rule in extension_rules)
+
+    def test_testing_guide_matches_current_fixture_governance_and_live_contract_policy(
+        self,
+    ) -> None:
+        policy = _load_yaml(POLICY_PATH)
+        testing_guide = TESTING_GUIDE_PATH.read_text(encoding="utf-8")
+        live_contract = policy["execution_paths"]["live_contract"]
+
+        required_guide_anchors = (
+            "`partial` rollout",
+            "reports/quality/vcr-metadata-catalog.json",
+            "scripts/qa/report_vcr_metadata_catalog.py",
+            "scripts/migrations/active/backfill_vcr_metadata_sidecars.py",
+            ".github/vcr-noext-allowlist.txt",
+            live_contract["repository_guard"],
+            "BIOETL_LIVE_API_TESTS=true",
+            "BIOETL_NETWORK_TESTS=true",
+            live_contract["required_pytest_flag"],
+        )
+
+        for expected_anchor in required_guide_anchors:
+            assert expected_anchor in testing_guide, (
+                "testing guide drifted from the tracked integration/VCR policy: "
+                f"missing {expected_anchor!r}"
+            )
+
+        assert "SatoryKono/BioactivityDataAcquisition2" not in testing_guide

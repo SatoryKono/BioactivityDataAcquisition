@@ -228,6 +228,27 @@ fixture_governance:
     contract_snapshots: partial
     golden_masters: partial
     extensionless_filenames: partial
+  contract_snapshot_registry:
+    scope: bounded_mvp
+    documentation: tests/fixtures/contracts/README.md
+    helper_module: tests/contract/_provider_contract_drift.py
+    registry_test_module: tests/contract/test_provider_contract_snapshot_registry.py
+    update_env_var: UPDATE_SNAPSHOTS
+    providers:
+      crossref:
+        version: 1
+        test_module: tests/contract/test_crossref_contract.py
+        required_probes:
+          - work_lookup_by_doi
+          - works_query_endpoint
+          - agency_lookup_for_doi
+      openalex:
+        version: 1
+        test_module: tests/contract/test_openalex_contract.py
+        required_probes:
+          - works_filter_by_doi
+          - works_search_endpoint
+          - health_probe_shape
 
 contract_testing:
   workflow_present: true

@@ -17,6 +17,7 @@ import asyncio
 import json
 import os
 from collections.abc import Generator
+from contextlib import contextmanager
 from dataclasses import replace
 from functools import cache
 from pathlib import Path
@@ -180,6 +181,44 @@ def e2e_environment():
         pass
 
 
+@contextmanager
+def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
+    """Configure one temporary BIOETL_DATA_DIR with cache-safe lifecycle.
+
+    Supports both function-scoped and module-scoped test setups so expensive
+    E2E suites can share one data directory when they intentionally reuse the
+    same pipeline run output across multiple assertions.
+    """
+    from bioetl.infrastructure.config import get_pipeline_config, get_settings
+
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create Medallion subdirectories
+    for subdir in ("bronze", "silver", "gold", "checkpoints", "quarantine"):
+        (data_dir / subdir).mkdir()
+
+    previous_data_dir = os.environ.get("BIOETL_DATA_DIR")
+    os.environ["BIOETL_DATA_DIR"] = str(data_dir)
+
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+    settings = get_settings()
+    assert str(data_dir) in str(settings.bronze_path), (
+        f"Settings not using test data dir. Expected {data_dir} in {settings.bronze_path}"
+    )
+
+    try:
+        yield data_dir
+    finally:
+        if previous_data_dir is None:
+            os.environ.pop("BIOETL_DATA_DIR", None)
+        else:
+            os.environ["BIOETL_DATA_DIR"] = previous_data_dir
+        get_settings.cache_clear()
+        get_pipeline_config.cache_clear()
+
+
 @pytest.fixture
 def e2e_data_dir(tmp_path: Path, monkeypatch) -> Generator[Path, None, None]:
     """Создание временной директории данных с настройкой окружения.
@@ -190,39 +229,11 @@ def e2e_data_dir(tmp_path: Path, monkeypatch) -> Generator[Path, None, None]:
     - gold/
     - checkpoints/
     - quarantine/
-
-    IMPORTANT: Order matters:
-    1. Set env var first
-    2. Clear caches to ensure new value is picked up
-    3. Verify settings use correct path
     """
-    from bioetl.infrastructure.config import get_pipeline_config, get_settings
-
+    del monkeypatch  # kept for backward-compatible fixture signature
     data_dir = tmp_path / "bioetl_data"
-    data_dir.mkdir(parents=True, exist_ok=True)
-
-    # Create Medallion subdirectories
-    for subdir in ("bronze", "silver", "gold", "checkpoints", "quarantine"):
-        (data_dir / subdir).mkdir()
-
-    # 1. Set environment variable FIRST
-    monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
-
-    # 2. Clear caches to pick up new env var
-    get_settings.cache_clear()
-    get_pipeline_config.cache_clear()
-
-    # 3. Verify settings use correct path
-    settings = get_settings()
-    assert str(data_dir) in str(settings.bronze_path), (
-        f"Settings not using test data dir. Expected {data_dir} in {settings.bronze_path}"
-    )
-
-    yield data_dir
-
-    # Cleanup: clear caches
-    get_settings.cache_clear()
-    get_pipeline_config.cache_clear()
+    with managed_e2e_data_dir(data_dir) as prepared_dir:
+        yield prepared_dir
 
 
 @pytest.fixture

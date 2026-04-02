@@ -2,7 +2,7 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-Update note (2026-04-02): the `2026-03-24` table below remains the last reviewed duplication snapshot, but `composition/bootstrap/runtime` and `composition/factories/pipeline` now also carry bounded `files_ge_250_loc` caps at the current reviewed baseline (`6` and `4` respectively) while fan-in remains watch-only.
+Update note (2026-04-02): the `2026-03-24` table below remains the last reviewed duplication snapshot, but `composition/bootstrap/runtime` and `composition/factories/pipeline` now also carry bounded `files_ge_250_loc` caps at the current reviewed baseline (`6` and `4` respectively) while fan-in remains watch-only. The same governance wave also turned provider contract snapshots into an explicit bounded rollout slice: `fixture_governance.contract_snapshot_registry` now tracks the managed Crossref/OpenAlex snapshot set, its update path, and the canonical drift-test modules.
 
 **Создано объектов evidence:** 12
 **Gate Статус:** PASSED
@@ -38,6 +38,7 @@ Update note (2026-04-02): the `2026-03-24` table below remains the last reviewed
 - The new RF-023 layer now shows all three tracked families at zero duplication. `application/core` still carries the largest large-file tail and the highest local fan-in of the tracked families, so it remains the primary watch zone even after duplication cleanup reached zero.
 - The three tracked families still share the same duplication posture: zero current residue and an active family-level duplication ratchet, while overall governance stays report-only at the repo level. As of `2026-04-02`, the two composition families additionally hold bounded `files_ge_250_loc` caps at the reviewed baseline, while fan-in remains watch-only.
 - Governance is now more actionable because each tracked family has an owner, an expected action, and a stated ratchet posture instead of a raw number without follow-up.
+- Replay/fixture governance is also more explicit now: provider contract snapshots are no longer only implied by `partial` rollout state, but anchored to a matrix-declared bounded registry covering the current Crossref/OpenAlex slice together with its drift tests and update path.
 - Trend capture is now operationalized through an append-only hotspot history artifact, and the latest reviewed comparison point now totals `0` duplication clusters across the tracked families.
 - The latest reviewed hotspot report has no current `R0801` findings in the tracked families; the remaining governance pressure is now carried by file-growth and fan-in rather than duplication. The active duplication ratchet remains in place, and the composition-side file-growth tail now also has a bounded non-regression cap.
 
@@ -49,5 +50,6 @@ Update note (2026-04-02): the `2026-03-24` table below remains the last reviewed
 ## Оставшиеся пробелы
 
 - A bounded duplication-only ratchet is now active for the tracked families because the history artifact contains a second confirming clean snapshot. On `2026-04-02`, the governance wave tightened that posture for `composition/bootstrap/runtime` and `composition/factories/pipeline` by enforcing `files_ge_250_loc` at the reviewed baseline while keeping fan-in watch-only.
+- Provider contract snapshots are still only a bounded partial rollout. The current registry is intentionally limited to Crossref/OpenAlex, so the remaining gap is representative breadth rather than missing local drift diagnostics or an undefined update path.
 - Helper density is a lightweight heuristic based on underscore-prefixed functions; it is useful for prioritization, but not a standalone design-quality verdict.
 - Fan-in is currently a local import-based indicator, not a full SCC/dependency-cycle analysis.

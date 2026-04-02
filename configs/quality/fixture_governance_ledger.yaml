@@ -89,6 +89,9 @@ entries:
       - configs/quality/test_matrix.yaml
       - tests/architecture/test_test_matrix_coverage.py
       - tests/contract/test_provider_contract_snapshot_registry.py
+      - tests/contract/test_crossref_contract.py
+      - tests/contract/test_openalex_contract.py
+      - tests/fixtures/contracts/README.md
       - tests/fixtures/contracts/crossref/v1.json
       - tests/fixtures/contracts/openalex/v1.json
     artifact_paths:
@@ -99,13 +102,15 @@ entries:
       - tests/contract/test_openalex_contract.py
       - tests/contract/test_provider_contract_snapshot_registry.py
     next_step: >-
-      Expand the provider-facing contract snapshot registry beyond the initial
-      Crossref and OpenAlex slice, then tie each adopted provider family to a
-      stable update path and CI-visible drift diagnostics.
+      Use the bounded matrix-declared snapshot registry as the canonical managed
+      slice for Crossref and OpenAlex, then intentionally expand the registry to
+      the next representative provider family with the same documented update
+      path and CI-visible drift diagnostics.
     promotion_criteria: >-
-      Representative provider families own tracked external contract snapshots,
-      update guidance is documented, and rollout no longer depends on the
-      silver schema snapshot fallback alone.
+      The matrix-declared snapshot registry covers multiple representative
+      provider families beyond the initial publication pair, every adopted
+      provider keeps documented update guidance and drift tests, and rollout no
+      longer depends on the silver schema snapshot fallback alone.
   - field: golden_masters
     status: partial
     owner: "@bioetl-data-model"

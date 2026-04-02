@@ -4,6 +4,10 @@ This directory stores provider-facing contract snapshot baselines referenced by
 `configs/quality/test_matrix.yaml` via
 `tests/fixtures/contracts/{provider}/v{version}.json`.
 
+The current bounded rollout slice is declared in
+`fixture_governance.contract_snapshot_registry` inside
+`configs/quality/test_matrix.yaml`.
+
 Current MVP coverage:
 
 - `crossref/v1.json`
