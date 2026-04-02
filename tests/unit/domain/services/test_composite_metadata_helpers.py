@@ -5,10 +5,37 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from bioetl.domain.services.composite_metadata_helpers import (
+    _parse_literal,
     extract_composite_lineage_metadata,
     parse_composite_field_sources,
+    parse_composite_list,
+    parse_composite_status,
     summarize_composite_cv_dq,
 )
+
+
+def test_parse_literal_prefers_json_and_supports_legacy_literals() -> None:
+    """Composite metadata parsing should support both JSON and legacy string payloads."""
+    assert _parse_literal('["a", "b"]') == ["a", "b"]
+    assert _parse_literal('{"a": 1}') == {"a": 1}
+    assert _parse_literal("['a', 'b']") == ["a", "b"]
+    assert _parse_literal("{'a': 1}") == {"a": 1}
+    assert _parse_literal("not json") is None
+    assert _parse_literal(None) is None
+
+
+def test_parse_composite_list_accepts_json_and_legacy_strings() -> None:
+    """List metadata should parse from JSON strings and older Python literals."""
+    assert parse_composite_list('["a", "b"]') == ["a", "b"]
+    assert parse_composite_list("['a', 'b']") == ["a", "b"]
+    assert parse_composite_list(["a", "b"]) == ["a", "b"]
+
+
+def test_parse_composite_status_accepts_json_and_legacy_strings() -> None:
+    """Status metadata should parse from JSON strings and older Python literals."""
+    assert parse_composite_status('{"a": "success"}') == {"a": "success"}
+    assert parse_composite_status("{'a': 'success'}") == {"a": "success"}
+    assert parse_composite_status({"a": "success"}) == {"a": "success"}
 
 
 def test_parse_composite_field_sources_from_dict_and_stringified_dict() -> None:
