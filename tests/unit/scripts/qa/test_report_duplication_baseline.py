@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent.parent))
 
 from scripts.qa.report_duplication_baseline import _build_payload
 from scripts.qa.report_duplication_baseline import _build_trend_summary

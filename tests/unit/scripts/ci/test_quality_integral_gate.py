@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent.parent))
+
 from scripts.ci.quality_integral_gate import ArchitectureTestStats
 from scripts.ci.quality_integral_gate import (
     TestHealthClassification as HealthClassification,
