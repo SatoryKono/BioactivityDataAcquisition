@@ -57,3 +57,24 @@ def test_field_policy_resolver_includes_explicit_overlay_values() -> None:
     assert result.coercion_policy == "no_string_coercion"
     assert result.boolean_true_values == ("yes", "да")
     assert result.boolean_false_values == ("no", "нет")
+
+
+@pytest.mark.unit
+def test_field_policy_resolver_falls_back_to_default_for_unknown_coercion_policy() -> None:
+    resolver = FieldPolicyResolver.from_domain_config(
+        SimpleNamespace(
+            field_policy=(
+                SimpleNamespace(
+                    field="reviewed",
+                    optional=True,
+                    coercion_policy="unexpected_mode",
+                ),
+            ),
+            silver_filters=SilverFilterConfig(required_fields=("reviewed",)),
+            dq=DQConfig(),
+        )
+    )
+
+    result = resolver.resolve("reviewed")
+
+    assert result.coercion_policy == "default"

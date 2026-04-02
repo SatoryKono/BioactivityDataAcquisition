@@ -53,14 +53,11 @@ class FieldPolicyResolver:
                 optional_sources=resolved_optionality.sources,
             )
 
-        coercion_policy = getattr(explicit_policy, "coercion_policy", None)
-        if coercion_policy is None:
-            coercion_policy = "default"
         return ResolvedFieldPolicy(
             optional=resolved_optionality.optional,
             optional_sources=resolved_optionality.sources,
             empty_as_missing=getattr(explicit_policy, "empty_as_missing", None),
-            coercion_policy=coercion_policy,
+            coercion_policy=_resolve_field_coercion_policy(explicit_policy),
             boolean_true_values=tuple(
                 getattr(explicit_policy, "boolean_true_values", ())
             ),
@@ -86,3 +83,11 @@ __all__ = [
     "FieldPolicyResolver",
     "ResolvedFieldPolicy",
 ]
+
+
+def _resolve_field_coercion_policy(explicit_policy: object) -> FieldCoercionPolicy:
+    """Return one validated coercion policy with a conservative default."""
+    coercion_policy = getattr(explicit_policy, "coercion_policy", None)
+    if coercion_policy == "no_string_coercion":
+        return "no_string_coercion"
+    return "default"

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
 from datetime import datetime
+from typing import TypedDict
 from uuid import UUID
 
 from bioetl.domain.composite.state import CompositePipelineState
@@ -57,6 +58,8 @@ CANONICAL_RUN_LEDGER_STAGE_NAMES: tuple[str, ...] = (
     *COMPOSITE_RUN_LEDGER_STAGE_NAMES,
 )
 _CANONICAL_RUN_LEDGER_STAGE_NAME_SET = frozenset(CANONICAL_RUN_LEDGER_STAGE_NAMES)
+
+
 def canonicalize_run_ledger_stage_name(stage: str) -> str:
     """Normalize and validate canonical pipeline stage names for ledger events."""
     normalized_stage = stage.strip().lower()
@@ -157,34 +160,39 @@ class RunLedgerReplayProjection:
     replayed_entry_count: int = 0
 
 
+class _StageCompletionUpdate(TypedDict, total=False):
+    state: CompositePipelineState
+    seed_completed: bool
+    merge_completed: bool
+
+
+_STAGE_COMPLETION_UPDATES: dict[str, _StageCompletionUpdate] = {
+    "seed": {
+        "state": CompositePipelineState.SEED_COMPLETED,
+        "seed_completed": True,
+    },
+    "dependencies": {
+        "state": CompositePipelineState.DEPENDENCIES_COMPLETED,
+    },
+    "enrichment": {
+        "state": CompositePipelineState.ENRICHMENT_COMPLETED,
+    },
+    "merge": {
+        "state": CompositePipelineState.MERGING,
+        "merge_completed": True,
+    },
+}
+
+
 def _project_stage_completed(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
 ) -> RunLedgerReplayProjection:
     stage = (entry.stage or "").strip().lower()
-    if stage == "seed":
-        return replace(
-            projection,
-            state=CompositePipelineState.SEED_COMPLETED,
-            seed_completed=True,
-        )
-    if stage == "dependencies":
-        return replace(
-            projection,
-            state=CompositePipelineState.DEPENDENCIES_COMPLETED,
-        )
-    if stage == "enrichment":
-        return replace(
-            projection,
-            state=CompositePipelineState.ENRICHMENT_COMPLETED,
-        )
-    if stage == "merge":
-        return replace(
-            projection,
-            state=CompositePipelineState.MERGING,
-            merge_completed=True,
-        )
-    return projection
+    update = _STAGE_COMPLETION_UPDATES.get(stage)
+    if update is None:
+        return projection
+    return replace(projection, **update)
 
 
 def _apply_replay_entry(

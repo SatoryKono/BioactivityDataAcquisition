@@ -43,6 +43,16 @@ class _PipelineRunnerFlowHostProtocol(Protocol):
     def execution_metrics(self) -> dict[str, int]: ...
 
 
+def _record_with_ledger_service(
+    host: _PipelineRunnerFlowHostProtocol,
+    recorder: Callable[[RunLedgerService], object],
+) -> None:
+    """Run one ledger write only when control-plane wiring is attached."""
+    if host._run_ledger_service is None:
+        return
+    recorder(host._run_ledger_service)
+
+
 async def resolve_execution_offset(
     host: _PipelineRunnerFlowHostProtocol,
     load_checkpoint: Callable[
@@ -95,9 +105,10 @@ def emit_pipeline_completion(host: _PipelineRunnerFlowHostProtocol) -> None:
 
 def record_run_started(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append run_started ledger entry when control-plane ledger is attached."""
-    if host._run_ledger_service is None:
-        return
-    host._run_ledger_service.record_run_started()
+    _record_with_ledger_service(
+        host,
+        lambda ledger_service: ledger_service.record_run_started(),
+    )
 
 
 def record_stage_started(
@@ -105,9 +116,10 @@ def record_stage_started(
     stage: str,
 ) -> None:
     """Append stage_started ledger entry."""
-    if host._run_ledger_service is None:
-        return
-    host._run_ledger_service.record_stage_started(stage=stage)
+    _record_with_ledger_service(
+        host,
+        lambda ledger_service: ledger_service.record_stage_started(stage=stage),
+    )
 
 
 def record_stage_completed(
@@ -115,29 +127,32 @@ def record_stage_completed(
     stage: str,
 ) -> None:
     """Append stage_completed ledger entry."""
-    if host._run_ledger_service is None:
-        return
-    host._run_ledger_service.record_stage_completed(
-        stage=stage,
-        metrics_snapshot=host.execution_metrics,
+    _record_with_ledger_service(
+        host,
+        lambda ledger_service: ledger_service.record_stage_completed(
+            stage=stage,
+            metrics_snapshot=host.execution_metrics,
+        ),
     )
 
 
 def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append successful completion ledger entry."""
-    if host._run_ledger_service is None:
-        return
-    host._run_ledger_service.record_run_finished(
-        metrics_snapshot=host.execution_metrics,
+    _record_with_ledger_service(
+        host,
+        lambda ledger_service: ledger_service.record_run_finished(
+            metrics_snapshot=host.execution_metrics,
+        ),
     )
 
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append graceful shutdown ledger entry."""
-    if host._run_ledger_service is None:
-        return
-    host._run_ledger_service.record_run_shutdown(
-        metrics_snapshot=host.execution_metrics,
+    _record_with_ledger_service(
+        host,
+        lambda ledger_service: ledger_service.record_run_shutdown(
+            metrics_snapshot=host.execution_metrics,
+        ),
     )
 
 
@@ -146,10 +161,11 @@ def record_run_failed(
     exc: Exception,
 ) -> None:
     """Append failed completion ledger entry."""
-    if host._run_ledger_service is None:
-        return
-    host._run_ledger_service.record_run_failed(
-        message=str(exc),
-        error_type=type(exc).__name__,
-        metrics_snapshot=host.execution_metrics,
+    _record_with_ledger_service(
+        host,
+        lambda ledger_service: ledger_service.record_run_failed(
+            message=str(exc),
+            error_type=type(exc).__name__,
+            metrics_snapshot=host.execution_metrics,
+        ),
     )

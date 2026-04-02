@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -62,8 +63,11 @@ def _make_pipeline() -> SimpleNamespace:
 
 @pytest.mark.unit
 def test_assemble_runner_impl_uses_injected_dq_configs_extractor() -> None:
-    pipeline = _make_pipeline()
-    observability = SimpleNamespace(tracer=MagicMock(), logger=MagicMock())
+    pipeline = cast(Any, _make_pipeline())
+    observability = cast(
+        Any,
+        SimpleNamespace(tracer=MagicMock(), logger=MagicMock()),
+    )
     dq_configs = DQConfigsContext(
         bronze=MagicMock(name="bronze_dq"),
         silver=MagicMock(name="silver_dq"),
@@ -121,7 +125,7 @@ def test_assemble_runner_impl_uses_injected_dq_configs_extractor() -> None:
 
 @pytest.mark.unit
 def test_build_checkpoint_manager_uses_control_plane_policy() -> None:
-    pipeline = _make_pipeline()
+    pipeline = cast(Any, _make_pipeline())
     logger = MagicMock()
     pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = "observe"
 
@@ -147,7 +151,7 @@ def test_build_checkpoint_manager_uses_control_plane_policy() -> None:
 
 @pytest.mark.unit
 def test_build_checkpoint_manager_supports_hard_fail_policy() -> None:
-    pipeline = _make_pipeline()
+    pipeline = cast(Any, _make_pipeline())
     logger = MagicMock()
     pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = (
         "hard_fail"
@@ -175,7 +179,7 @@ def test_build_checkpoint_manager_supports_hard_fail_policy() -> None:
 
 @pytest.mark.unit
 def test_build_checkpoint_manager_fallbacks_to_soft_fail_on_invalid_policy() -> None:
-    pipeline = _make_pipeline()
+    pipeline = cast(Any, _make_pipeline())
     logger = MagicMock()
     pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = "invalid"
 

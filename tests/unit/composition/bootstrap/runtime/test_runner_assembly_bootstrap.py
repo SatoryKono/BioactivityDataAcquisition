@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import Any, cast
 from unittest.mock import MagicMock
 
 import pytest
 
 _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
 
+from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+    CompositeSupportServices,
+)
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
     bootstrap_composite_runner,
     create_composite_runner,
@@ -80,7 +84,7 @@ class TestCreateCompositeRunnerService:
                 checkpoint_manager=MagicMock(),
                 logger=MagicMock(),
                 lock=MagicMock(),
-                fsm_state_helper=None,
+                fsm_state_helper=cast(Any, None),
                 run_id=_VALID_RUN_ID,
             )
 
@@ -93,17 +97,20 @@ class TestCreateCompositeRunner:
         """create_composite_runner calls the provided runner_factory callable."""
         expected_runner = MagicMock()
         runner_factory = MagicMock(return_value=expected_runner)
-        support_services = SimpleNamespace(
-            key_extractor=MagicMock(),
-            dependency_coordinator=MagicMock(),
-            coordinator=MagicMock(),
-            merger=MagicMock(),
-            checkpoint_manager=MagicMock(),
-            fsm_state_helper=MagicMock(),
-            dq_report_service=MagicMock(),
-            quarantine_port=MagicMock(),
-            manifest_id="manifest-123",
-            run_ledger_service=MagicMock(),
+        support_services = cast(
+            CompositeSupportServices,
+            SimpleNamespace(
+                key_extractor=MagicMock(),
+                dependency_coordinator=MagicMock(),
+                coordinator=MagicMock(),
+                merger=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                fsm_state_helper=MagicMock(),
+                dq_report_service=MagicMock(),
+                quarantine_port=MagicMock(),
+                manifest_id="manifest-123",
+                run_ledger_service=MagicMock(),
+            ),
         )
 
         result = create_composite_runner(
@@ -130,17 +137,20 @@ class TestCreateCompositeRunner:
         dq_report_service = MagicMock()
         quarantine_port = MagicMock()
         fsm_state_helper = MagicMock()
-        support_services = SimpleNamespace(
-            key_extractor=key_extractor,
-            dependency_coordinator=dependency_coordinator,
-            coordinator=MagicMock(),
-            merger=MagicMock(),
-            checkpoint_manager=MagicMock(),
-            fsm_state_helper=fsm_state_helper,
-            dq_report_service=dq_report_service,
-            quarantine_port=quarantine_port,
-            manifest_id="manifest-123",
-            run_ledger_service=MagicMock(name="run_ledger_service"),
+        support_services = cast(
+            CompositeSupportServices,
+            SimpleNamespace(
+                key_extractor=key_extractor,
+                dependency_coordinator=dependency_coordinator,
+                coordinator=MagicMock(),
+                merger=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                fsm_state_helper=fsm_state_helper,
+                dq_report_service=dq_report_service,
+                quarantine_port=quarantine_port,
+                manifest_id="manifest-123",
+                run_ledger_service=MagicMock(name="run_ledger_service"),
+            ),
         )
 
         create_composite_runner(

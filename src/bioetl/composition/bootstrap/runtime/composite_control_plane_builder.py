@@ -87,22 +87,13 @@ def build_composite_control_plane_bundle(
         metrics=infra_context.metrics,
     )
     manifest = RunManifestService(manifest_port=manifest_store).create_manifest(
-        RunManifestCreateRequest(
-            run_id=_coerce_run_id(infra_context.run_id),
-            run_type=RunType.INCREMENTAL,
-            pipeline_name=config.name,
-            provider="composite",
-            entity=config.name,
-            launch_context=build_composite_launch_context_snapshot(config, runtime),
-            runtime_config=_normalize_object(runtime),
-            resolved_config=_normalize_object(config),
-            source_refs=build_composite_source_refs(config),
-            planned_artifacts=build_composite_planned_artifacts(config),
-            pipeline_version=contract_version or None,
-            git_commit=get_git_commit(),
-            config_hash=config_hash or None,
+        _build_composite_manifest_create_request(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+            config_hash=config_hash,
             contract_ref=contract_ref,
-            contract_version=contract_version or None,
+            contract_version=contract_version,
         )
     )
     run_ledger_service = _build_run_ledger_service(
@@ -119,6 +110,35 @@ def build_composite_control_plane_bundle(
     return CompositeControlPlaneBundle(
         manifest_id=manifest.manifest_id,
         run_ledger_service=run_ledger_service,
+        config_hash=config_hash or None,
+        contract_ref=contract_ref,
+        contract_version=contract_version or None,
+    )
+
+
+def _build_composite_manifest_create_request(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    infra_context: CompositeInfrastructureContext,
+    config_hash: str,
+    contract_ref: str,
+    contract_version: str,
+) -> RunManifestCreateRequest:
+    """Build the manifest creation payload for one composite execution."""
+    return RunManifestCreateRequest(
+        run_id=_coerce_run_id(infra_context.run_id),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name=config.name,
+        provider="composite",
+        entity=config.name,
+        launch_context=build_composite_launch_context_snapshot(config, runtime),
+        runtime_config=_normalize_object(runtime),
+        resolved_config=_normalize_object(config),
+        source_refs=build_composite_source_refs(config),
+        planned_artifacts=build_composite_planned_artifacts(config),
+        pipeline_version=contract_version or None,
+        git_commit=get_git_commit(),
         config_hash=config_hash or None,
         contract_ref=contract_ref,
         contract_version=contract_version or None,
@@ -188,7 +208,7 @@ def _normalize_object(value: object) -> dict[str, object]:
     elif hasattr(value, "model_dump"):
         payload = value.model_dump(mode="json", exclude_none=True)
     elif is_dataclass(value) and not isinstance(value, type):
-        payload = asdict(cast("DataclassInstance", value))
+        payload = asdict(value)
     elif hasattr(value, "__dict__"):
         payload = {
             key: item for key, item in vars(value).items() if not key.startswith("_")

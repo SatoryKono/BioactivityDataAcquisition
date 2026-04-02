@@ -97,6 +97,42 @@ def _build_composite_runner_dependencies(
     )
 
 
+def _create_composite_runner_from_support_services(
+    *,
+    runner_factory: CompositeRunnerFactory,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    run_id: str,
+    logger: LoggerPort,
+    lock: LockPort,
+    seed_runner_factory: Callable[[], PipelineRunner],
+    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    support_services: CompositeSupportServices,
+) -> CompositePipelineRunnerService:
+    """Call the runner factory with support-service wiring payloads."""
+    return runner_factory(
+        config=config,
+        runtime=runtime,
+        seed_runner_factory=seed_runner_factory,
+        dependencies_runner_factory=dependencies_runner_factory,
+        enricher_runner_factory=enricher_runner_factory,
+        key_extractor=support_services.key_extractor,
+        dependency_coordinator=support_services.dependency_coordinator,
+        coordinator=support_services.coordinator,
+        merger=support_services.merger,
+        checkpoint_manager=support_services.checkpoint_manager,
+        fsm_state_helper=support_services.fsm_state_helper,
+        logger=logger,
+        lock=lock,
+        run_id=run_id,
+        dq_report_service=support_services.dq_report_service,
+        quarantine_port=support_services.quarantine_port,
+        manifest_id=getattr(support_services, "manifest_id", None),
+        run_ledger_service=getattr(support_services, "run_ledger_service", None),
+    )
+
+
 def create_composite_runner_service(
     *,
     config: CompositeConfig,
@@ -174,25 +210,65 @@ def create_composite_runner(
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.
     """
-    return runner_factory(
+    return _create_composite_runner_from_support_services(
+        runner_factory=runner_factory,
         config=config,
         runtime=runtime,
+        run_id=run_id,
+        logger=logger,
+        lock=lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
-        key_extractor=support_services.key_extractor,
-        dependency_coordinator=support_services.dependency_coordinator,
-        coordinator=support_services.coordinator,
-        merger=support_services.merger,
-        checkpoint_manager=support_services.checkpoint_manager,
-        fsm_state_helper=support_services.fsm_state_helper,
+        support_services=support_services,
+    )
+
+
+def _build_bootstrap_support_services(
+    *,
+    build_support_services_fn: Callable[..., CompositeSupportServices],
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    settings: Settings,
+    logger: LoggerPort,
+    storage: object,
+    run_id: str,
+) -> CompositeSupportServices:
+    """Build support services from the runtime basics payload."""
+    return build_support_services_fn(
+        config=config,
+        runtime=runtime,
+        settings=settings,
+        logger=logger,
+        storage=storage,
+        run_id=run_id,
+    )
+
+
+def _create_bootstrapped_composite_runner(
+    *,
+    create_composite_runner_fn: Callable[..., CompositePipelineRunnerService],
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    run_id: str,
+    logger: LoggerPort,
+    lock: LockPort,
+    seed_runner_factory: Callable[[], PipelineRunner],
+    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    support_services: CompositeSupportServices,
+) -> CompositePipelineRunnerService:
+    """Create the final runner from already-assembled bootstrap components."""
+    return create_composite_runner_fn(
+        config=config,
+        runtime=runtime,
+        run_id=run_id,
         logger=logger,
         lock=lock,
-        run_id=run_id,
-        dq_report_service=support_services.dq_report_service,
-        quarantine_port=support_services.quarantine_port,
-        manifest_id=getattr(support_services, "manifest_id", None),
-        run_ledger_service=getattr(support_services, "run_ledger_service", None),
+        seed_runner_factory=seed_runner_factory,
+        dependencies_runner_factory=dependencies_runner_factory,
+        enricher_runner_factory=enricher_runner_factory,
+        support_services=support_services,
     )
 
 
@@ -241,7 +317,8 @@ def bootstrap_composite_runner(
         runtime=runtime,
         logger=logger,
     )
-    support_services = build_support_services_fn(
+    support_services = _build_bootstrap_support_services(
+        build_support_services_fn=build_support_services_fn,
         config=config,
         runtime=runtime,
         settings=settings,
@@ -249,7 +326,8 @@ def bootstrap_composite_runner(
         storage=storage,
         run_id=effective_run_id,
     )
-    return create_composite_runner_fn(
+    return _create_bootstrapped_composite_runner(
+        create_composite_runner_fn=create_composite_runner_fn,
         config=config,
         runtime=runtime,
         run_id=effective_run_id,

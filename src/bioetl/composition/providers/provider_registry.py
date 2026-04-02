@@ -49,12 +49,10 @@ __all__ = [
 # should use DataSourceCreatorProtocol directly.
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
-
 def _ensure_registry_loaded(registry: ProviderRegistry) -> None:
     """Late-bind registry loading to avoid hard import coupling into providers."""
     loading_module = import_module("bioetl.composition.providers._loading")
     loading_module.ensure_provider_registry_loaded(registry)
-
 
 class ProviderRegistry:
     """Unified data provider registry (thread-safe, instance-scoped)."""
@@ -76,6 +74,17 @@ class ProviderRegistry:
     @classmethod
     def _get_default(cls) -> ProviderRegistry:
         return get_default_provider_registry()
+
+    def _get_registered_config(
+        self,
+        name: str,
+        *,
+        allow_missing: bool = False,
+    ) -> ProviderConfig | None:
+        with self._lock:
+            if allow_missing and not self._store.is_registered(name):
+                return None
+            return self._store.get(name)
 
     @classmethod
     def ensure_loaded(cls) -> None:
@@ -109,11 +118,10 @@ class ProviderRegistry:
     @DefaultRegistryMethod
     def has_data_source_creator(self, name: str) -> bool:
         """Check whether a provider has a data_source_creator."""
-        with self._lock:
-            if not self._store.is_registered(name):
-                return False
-            config = self._store.get(name)
-            return self._creator.has_data_source_creator(config)
+        config = self._get_registered_config(name, allow_missing=True)
+        if config is None:
+            return False
+        return self._creator.has_data_source_creator(config)
 
     @DefaultRegistryMethod
     def clear(self) -> None:
@@ -131,8 +139,8 @@ class ProviderRegistry:
         **kwargs: object,
     ) -> DataSourcePort:
         """Create a provider adapter instance using registry metadata."""
-        with self._lock:
-            config = self._store.get(name)
+        config = self._get_registered_config(name)
+        assert config is not None
         return self._creator.create_adapter(
             name=name,
             config=config,
@@ -159,8 +167,8 @@ class ProviderRegistry:
         pipeline_name: str = "unknown",
     ) -> DataSourcePort:
         """Create a fully configured data source with filtering support."""
-        with self._lock:
-            config = self._store.get(name)
+        config = self._get_registered_config(name)
+        assert config is not None
         return self._creator.create_data_source(
             name=name,
             config=config,
@@ -178,8 +186,8 @@ class ProviderRegistry:
         if self is type(self)._get_default():
             type(self).ensure_loaded()
 
-        with self._lock:
-            config = self._store.get(name)
+        config = self._get_registered_config(name)
+        assert config is not None
         self._creator.require_data_source_creator(name=name, config=config)
 
         def create_data_source_for_provider(

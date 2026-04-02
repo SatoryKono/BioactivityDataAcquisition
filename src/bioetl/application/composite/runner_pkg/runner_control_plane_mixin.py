@@ -31,7 +31,7 @@ class _CompositeRunnerControlPlaneHostProtocol(Protocol):
 
     def _record_with_ledger_service(
         self,
-        recorder: Callable[[RunLedgerService], None],
+        recorder: Callable[[RunLedgerService], object],
     ) -> None: ...
 
     def _record_stage_started(
@@ -155,7 +155,7 @@ class CompositeRunnerControlPlaneMixin:
 
     def _record_with_ledger_service(
         self: _CompositeRunnerControlPlaneHostProtocol,
-        recorder: Callable[[RunLedgerService], None],
+        recorder: Callable[[RunLedgerService], object],
     ) -> None:
         """Run one ledger write only when control-plane wiring is attached."""
         if self._run_ledger_service is None:

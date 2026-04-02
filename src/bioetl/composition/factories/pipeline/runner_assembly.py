@@ -192,6 +192,29 @@ def _build_batch_executor(
     )
 
 
+def _build_postrun_service_for_pipeline(
+    *,
+    pipeline: BasePipeline,
+    logger_port: LoggerPort,
+    lifecycle_service: MedallionLifecycleService,
+    observability: ObservabilityBundle,
+    yaml_config: PipelineYamlConfig | None,
+    dq_configs_extractor: Callable[
+        [PipelineYamlConfig | None],
+        DQConfigsContext,
+    ],
+) -> PostrunService:
+    """Build the postrun service from YAML-derived DQ config seams."""
+    dq_configs = dq_configs_extractor(yaml_config)
+    return build_postrun_service(
+        pipeline=pipeline,
+        logger_port=logger_port,
+        lifecycle_service=lifecycle_service,
+        dq_configs=dq_configs,
+        tracer=observability.tracer,
+    )
+
+
 def _create_pipeline_runner(
     *,
     pipeline: BasePipeline,
@@ -215,6 +238,26 @@ def _create_pipeline_runner(
         postrun_service=postrun_service,
         lifecycle_service=lifecycle_service,
         observer=observer,
+    )
+
+
+def _create_runner_from_assembly_parts(
+    *,
+    pipeline: BasePipeline,
+    observability: ObservabilityBundle,
+    assembly_parts: RunnerAssemblyParts,
+) -> PipelineRunner:
+    """Materialize a PipelineRunner from prebuilt assembly parts."""
+    return _create_pipeline_runner(
+        pipeline=pipeline,
+        observability=observability,
+        executor=assembly_parts.batch_executor,
+        checkpoint_manager=assembly_parts.checkpoint_manager,
+        lock_manager=assembly_parts.lock_manager,
+        preflight_service=assembly_parts.preflight_service,
+        postrun_service=assembly_parts.postrun_service,
+        lifecycle_service=assembly_parts.lifecycle_service,
+        observer=assembly_parts.observer,
     )
 
 
@@ -251,13 +294,13 @@ def _assemble_runner_parts(
         pipeline=pipeline,
         logger_port=logger_port,
     )
-    dq_configs = dq_configs_extractor(yaml_config)
-    postrun_service = build_postrun_service(
+    postrun_service = _build_postrun_service_for_pipeline(
         pipeline=pipeline,
         logger_port=logger_port,
         lifecycle_service=lifecycle_service,
-        dq_configs=dq_configs,
-        tracer=observability.tracer,
+        observability=observability,
+        yaml_config=yaml_config,
+        dq_configs_extractor=dq_configs_extractor,
     )
     observer = _build_observer(
         pipeline=pipeline,
@@ -322,15 +365,8 @@ def assemble_runner_impl(
         strict_gold_validation=strict_gold_validation,
         dq_configs_extractor=dq_configs_extractor,
     )
-
-    return _create_pipeline_runner(
+    return _create_runner_from_assembly_parts(
         pipeline=pipeline,
         observability=observability,
-        executor=assembly_parts.batch_executor,
-        checkpoint_manager=assembly_parts.checkpoint_manager,
-        lock_manager=assembly_parts.lock_manager,
-        preflight_service=assembly_parts.preflight_service,
-        postrun_service=assembly_parts.postrun_service,
-        lifecycle_service=assembly_parts.lifecycle_service,
-        observer=assembly_parts.observer,
+        assembly_parts=assembly_parts,
     )
