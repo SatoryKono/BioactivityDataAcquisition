@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -48,6 +49,26 @@ __all__ = [
     "create_composite_runner",
     "create_composite_runner_service",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class _BootstrapRuntimeBasics:
+    """Resolved runtime-basics bundle used by bootstrap assembly."""
+
+    run_id: str
+    settings: Settings
+    logger: LoggerPort
+    storage: object
+    lock: LockPort
+
+
+@dataclass(frozen=True, slots=True)
+class _BootstrapRunnerFactories:
+    """Resolved phase runner factories used by composite bootstrap."""
+
+    seed_factory: Callable[[], PipelineRunner]
+    dependency_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+    enricher_factory: Callable[[str, pl.DataFrame], PipelineRunner]
 
 
 def _resolve_effective_run_id(run_id: str | None) -> str:
@@ -245,6 +266,55 @@ def _build_bootstrap_support_services(
     )
 
 
+def _resolve_bootstrap_runtime_basics(
+    *,
+    bootstrap_runtime_basics_fn: Callable[
+        ..., tuple[str, Settings, LoggerPort, object, LockPort]
+    ],
+    config: CompositeConfig,
+    run_id: str | None,
+) -> _BootstrapRuntimeBasics:
+    """Resolve the named runtime-basics bundle for bootstrap assembly."""
+    effective_run_id, settings, logger, storage, lock = bootstrap_runtime_basics_fn(
+        config=config,
+        run_id=run_id,
+    )
+    return _BootstrapRuntimeBasics(
+        run_id=effective_run_id,
+        settings=settings,
+        logger=logger,
+        storage=storage,
+        lock=lock,
+    )
+
+
+def _resolve_bootstrap_runner_factories(
+    *,
+    build_runner_factories_fn: Callable[
+        ...,
+        tuple[
+            Callable[[], PipelineRunner],
+            Callable[[str, pl.DataFrame], PipelineRunner],
+            Callable[[str, pl.DataFrame], PipelineRunner],
+        ],
+    ],
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    logger: LoggerPort,
+) -> _BootstrapRunnerFactories:
+    """Resolve the named phase-factory bundle for composite bootstrap."""
+    seed_factory, dependency_factory, enricher_factory = build_runner_factories_fn(
+        config=config,
+        runtime=runtime,
+        logger=logger,
+    )
+    return _BootstrapRunnerFactories(
+        seed_factory=seed_factory,
+        dependency_factory=dependency_factory,
+        enricher_factory=enricher_factory,
+    )
+
+
 def _create_bootstrapped_composite_runner(
     *,
     create_composite_runner_fn: Callable[..., CompositePipelineRunnerService],
@@ -308,33 +378,35 @@ def bootstrap_composite_runner(
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.
     """
-    effective_run_id, settings, logger, storage, lock = bootstrap_runtime_basics_fn(
+    runtime_basics = _resolve_bootstrap_runtime_basics(
+        bootstrap_runtime_basics_fn=bootstrap_runtime_basics_fn,
         config=config,
         run_id=run_id,
     )
-    seed_factory, dependency_factory, enricher_factory = build_runner_factories_fn(
+    runner_factories = _resolve_bootstrap_runner_factories(
+        build_runner_factories_fn=build_runner_factories_fn,
         config=config,
         runtime=runtime,
-        logger=logger,
+        logger=runtime_basics.logger,
     )
     support_services = _build_bootstrap_support_services(
         build_support_services_fn=build_support_services_fn,
         config=config,
         runtime=runtime,
-        settings=settings,
-        logger=logger,
-        storage=storage,
-        run_id=effective_run_id,
+        settings=runtime_basics.settings,
+        logger=runtime_basics.logger,
+        storage=runtime_basics.storage,
+        run_id=runtime_basics.run_id,
     )
     return _create_bootstrapped_composite_runner(
         create_composite_runner_fn=create_composite_runner_fn,
         config=config,
         runtime=runtime,
-        run_id=effective_run_id,
-        logger=logger,
-        lock=lock,
-        seed_runner_factory=seed_factory,
-        dependencies_runner_factory=dependency_factory,
-        enricher_runner_factory=enricher_factory,
+        run_id=runtime_basics.run_id,
+        logger=runtime_basics.logger,
+        lock=runtime_basics.lock,
+        seed_runner_factory=runner_factories.seed_factory,
+        dependencies_runner_factory=runner_factories.dependency_factory,
+        enricher_runner_factory=runner_factories.enricher_factory,
         support_services=support_services,
     )
