@@ -31,6 +31,11 @@ not_in_nav: |
     00-project/ai/prompts/*.md
     00-project/ai/skills/_references/**
     00-project/ai/skills/local/**/references/**
+    00-project/ai/skills/local/grafana-dashboard-extension/SKILL.md
+    00-project/ai/skills/local/prometheus-alert-rule-editor/SKILL.md
+    00-project/ai/skills/local/prometheus-metric-discovery/SKILL.md
+    00-project/ai/skills/local/prometheus-query-debugger/SKILL.md
+    00-project/ai/skills/local/prometheus-rule-testing/SKILL.md
     04-reference/templates/adr-template.md
     04-reference/templates/contract-spec-template.md
     04-reference/templates/control-plane-contract-spec-template.md
@@ -38,6 +43,7 @@ not_in_nav: |
     04-reference/templates/pipeline-spec-template.md
     04-reference/templates/provider-spec-template.md
     04-reference/templates/runbook-template.md
+    05-operations/deployment/mcp-neo4j-memory-final-summary.md
 # Rendered SVG/PNG diagram images may be generated locally or in CI
 # (render-diagrams job). Downgrade broken-link severity so `mkdocs build --strict`
 # does not abort on temporarily missing image targets. Real doc-link integrity is

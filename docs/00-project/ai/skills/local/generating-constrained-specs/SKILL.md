@@ -49,7 +49,7 @@ Build decision index for quick lookup.
 
 ### Step 2: Generate PRD
 
-Write `06-prd/PRD.md` using template from [references/prd-template.md](references/prd-template.md).
+Write `06-prd/PRD.md` using template from `references/prd-template.md`.
 
 **Constraint enforcement:**
 Every section heading must include decision reference:
@@ -75,7 +75,7 @@ Check every PRD section:
 
 ### Step 4: Generate Architecture
 
-Write `07-architecture/ARCHITECTURE.md` using template from [references/architecture-template.md](references/architecture-template.md).
+Write `07-architecture/ARCHITECTURE.md` using template from `references/architecture-template.md`.
 
 **Constraint enforcement:**
 ```markdown
@@ -103,7 +103,7 @@ This approach carries RISK-tech-cold-start. See risk register for mitigations.
 
 ## Constraint Rules
 
-See [references/constraint-rules.md](references/constraint-rules.md) for detailed rules.
+See `references/constraint-rules.md` for detailed rules.
 
 ### Citation Format
 
@@ -233,6 +233,6 @@ Run `/ledger-plan` to generate implementation backlog.
 
 ## References
 
-- [references/prd-template.md](references/prd-template.md) - PRD template
-- [references/architecture-template.md](references/architecture-template.md) - Architecture template
-- [references/constraint-rules.md](references/constraint-rules.md) - Detailed constraint rules
+- `references/prd-template.md` - PRD template
+- `references/architecture-template.md` - Architecture template
+- `references/constraint-rules.md` - Detailed constraint rules

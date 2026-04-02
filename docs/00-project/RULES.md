@@ -1450,12 +1450,12 @@ make run-local    # запуск сэмплового пайплайна (chembl
 
 | Источник     | Библиотека                        | Rate Limit               | Retry Strategy          | Auth Type       | Health Check                                                                  |
 | ------------ | --------------------------------- | ------------------------ | ----------------------- | --------------- | ----------------------------------------------------------------------------- |
-| **ChEMBL**   | `httpx` via `UnifiedHTTPClient`   | Нет явного лимита        | Exponential backoff     | Public          | `GET /chembl/api/data/status`                                                 |
+| **ChEMBL**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec                | Exponential backoff     | Public          | `GET /chembl/api/data/status.json`                                            |
 | **PubChem**  | `pubchempy` via `BaseSyncAdapter` | 5 req/sec                | 429 -> wait Retry-After | Public          | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
-| **UniProt**  | `httpx` via `UnifiedHTTPClient`   | 100 req/sec (c API key)  | Exponential backoff     | API Key         | Lightweight Search Probe                                                      |
-| **OpenAlex** | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (polite pool) | 429 -> backoff          | API Key (Email) | Generic Probe\*                                                               |
-| **Semantic** | `httpx` via `UnifiedHTTPClient`   | 100 req/5min             | Sliding window          | API Key         | Generic Probe\*                                                               |
-| **PubMed**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec (10 c key)     | 429 -> backoff          | API Key         | Generic Probe\*                                                               |
+| **UniProt**  | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (100 with API key) | Exponential backoff | API Key (optional) | Search probe query                                                         |
+| **OpenAlex** | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (polite pool) | 429 -> backoff          | Email (polite pool) | Generic Probe\*                                                            |
+| **Semantic** | `httpx` via `UnifiedHTTPClient`   | 0.1 req/sec (1.0 with API key) | Sliding window     | API Key         | Generic Probe\*                                                               |
+| **PubMed**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec (10 with API key) | 429 -> backoff       | API Key         | Generic Probe\*                                                               |
 | **Crossref** | `httpx` via `UnifiedHTTPClient`   | 50 req/sec (polite pool) | Exponential backoff     | Email           | Generic Probe\*                                                               |
 
 \* **Generic Probe**: Lightweight GET-запрос к базовому endpoint API (e.g., root или `/status`). Если API не предоставляет dedicated health endpoint, использовать минимальный запрос данных с timeout 5 секунд.

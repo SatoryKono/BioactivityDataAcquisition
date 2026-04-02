@@ -61,6 +61,34 @@ Behavior differs slightly by platform:
 - `.\scripts\dev\run_pytest.ps1` assumes `.venv-win` is already prepared via
   `.\scripts\dev\setup_env_windows.ps1` or `make setup-plugins`.
 
+## Integration And E2E Quick Paths
+
+For the tracked integration/VCR execution policy, prefer explicit replay for
+normal local runs and targeted `new_episodes` only when intentionally
+refreshing cassettes.
+
+```powershell
+# Windows PowerShell replay
+.\scripts\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"
+.\scripts\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none
+
+# Windows targeted cassette refresh
+.\scripts\dev\run_pytest.ps1 tests\integration\adapters\test_pubmed.py --vcr-record=new_episodes -v
+```
+
+```bash
+# WSL/Linux replay
+bash scripts/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"
+bash scripts/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none
+
+# WSL/Linux targeted cassette refresh
+bash scripts/dev/run_pytest.sh tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v
+```
+
+See `docs/03-guides/testing.md` and
+`configs/quality/integration_vcr_policy.yaml` for the canonical policy scope,
+supported test families, cassette lifecycle, and CI/live-contract split.
+
 If you need MkDocs commands such as `make docs-build` or `make docs-serve`,
 install the separate docs toolchain extra:
 

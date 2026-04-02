@@ -97,7 +97,9 @@ Silver слой использует стратегию **Merge/Upsert** для 
 ### 2.5. PII и Безопасность
 *   Поля, помеченные как чувствительные (PII), **ОБЯЗАНЫ** быть хэшированы перед записью в Silver.
 *   **Алгоритм**: `sha256(lowercase(value) + SALT)`.
-*   Соль управляется через Secrets Manager и ротируется (см. `RULES.md` §5.4.1).
+*   Соль подаётся через переменные окружения `BIOETL_PII_SALT_CURRENT`,
+    `BIOETL_PII_SALT_NEXT`, `BIOETL_SALT_ROTATION_ACTIVE`; ротация выполняется
+    без Secrets Manager в стандартном Local-Only профиле (см. `RULES.md` §5.4.1).
 
 ### 2.6. Партиционирование
 *   **Конфигурация**: Определяется через `partition-by` в `configs/entities/{provider}/{entity}.yaml`.
