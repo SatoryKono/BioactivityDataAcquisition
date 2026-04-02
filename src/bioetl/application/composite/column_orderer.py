@@ -23,9 +23,6 @@ from bioetl.application.composite.column_orderer_semantic import (
     get_ordered_columns,
     group_columns,
 )
-from bioetl.application.core.publication_aliases import (
-    LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
-)
 from bioetl.domain.value_objects.column_order import (
     DEFAULT_COLUMN_ORDER,
     ColumnOrderConfig,
@@ -54,7 +51,6 @@ class ColumnOrderer:
         self._logger = logger
         self._config = config or DEFAULT_COLUMN_ORDER
         self._column_groups = tuple(column_groups) if column_groups else None
-        self._warned_legacy_aliases: set[str] = set()
 
     # === Public API ===
 
@@ -163,22 +159,7 @@ class ColumnOrderer:
 
     def _field_aliases(self, field_name: str) -> set[str]:
         """Return compatibility aliases for evolving field names."""
-        aliases, legacy_field, canonical_field = resolve_publication_field_aliases(
-            field_name
-        )
-        if (
-            legacy_field is not None
-            and canonical_field is not None
-            and legacy_field not in self._warned_legacy_aliases
-        ):
-            self._logger.warning(
-                "Legacy publication field alias used on read path",
-                legacy_field=legacy_field,
-                canonical_field=canonical_field,
-                deprecation_cutoff_date=LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
-            )
-            self._warned_legacy_aliases.add(legacy_field)
-
+        aliases, _, _ = resolve_publication_field_aliases(field_name)
         return aliases
 
     def _apply_renames(

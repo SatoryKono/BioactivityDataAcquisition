@@ -1,4 +1,4 @@
-﻿name: Skills Consistency
+name: Skills Consistency
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Verify docs/00-project/ai/skills/local mirror
         run: bash scripts/ops/check_skills_mirror.sh --check
