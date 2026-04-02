@@ -7,7 +7,7 @@ layer boundaries.
 
 from __future__ import annotations
 
-import ast
+import json
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import cast
@@ -26,12 +26,12 @@ __all__ = [
 
 
 def _parse_literal(value: object) -> object | None:
-    """Parse a Python literal from string payload, returning None on failure."""
+    """Parse a JSON literal from string payload, returning None on failure."""
     if not isinstance(value, str):
         return None
     try:
-        return cast("object", ast.literal_eval(value))
-    except (ValueError, SyntaxError):
+        return cast("object", json.loads(value))
+    except ValueError:
         return None
 
 
