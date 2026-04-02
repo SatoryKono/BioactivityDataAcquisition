@@ -8,6 +8,7 @@ Validates that provider test coverage meets ADR-042 requirements:
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -437,6 +438,46 @@ class TestMutationTestingRollout:
         assert "THRESHOLD = 70.0" in workflow
         assert "--paths-to-mutate=src/bioetl/application/" not in workflow
         assert mutation.get("ci_gate_mode") == "partial"
+
+
+@pytest.mark.architecture
+class TestContractSnapshotGovernance:
+    """Validate the bounded provider contract snapshot rollout slice."""
+
+    def test_bounded_contract_snapshot_registry_matches_managed_slice(self) -> None:
+        matrix = _load_matrix()
+        fixture_governance = matrix.get("fixture_governance", {})
+        registry = fixture_governance.get("contract_snapshot_registry", {})
+        providers = registry.get("providers", {})
+
+        assert fixture_governance.get("rollout", {}).get("contract_snapshots") == "partial"
+        assert registry.get("scope") == "bounded_mvp"
+        assert registry.get("update_env_var") == "UPDATE_SNAPSHOTS"
+
+        documentation_path = ROOT / registry["documentation"]
+        helper_module_path = ROOT / registry["helper_module"]
+        registry_test_path = ROOT / registry["registry_test_module"]
+        assert documentation_path.exists()
+        assert helper_module_path.exists()
+        assert registry_test_path.exists()
+        assert set(providers) == {"crossref", "openalex"}
+
+        for provider, provider_config in providers.items():
+            version = provider_config["version"]
+            snapshot_path = TESTS_DIR / "fixtures" / "contracts" / provider / f"v{version}.json"
+            assert snapshot_path.exists(), (
+                f"bounded snapshot registry is missing canonical snapshot for '{provider}'"
+            )
+
+            snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+            assert snapshot["provider"] == provider
+            assert snapshot["version"] == version
+            assert set(provider_config["required_probes"]).issubset(snapshot["probes"])
+
+            test_module_path = ROOT / provider_config["test_module"]
+            assert test_module_path.exists(), (
+                f"bounded snapshot registry is missing drift test module for '{provider}'"
+            )
 
 
 @pytest.mark.architecture
