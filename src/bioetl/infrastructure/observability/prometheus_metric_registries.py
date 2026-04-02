@@ -46,6 +46,7 @@ from bioetl.infrastructure.observability.metrics import (
     DQ_REPORT_SKIPPED_TOTAL,
     DQ_SOFT_THRESHOLD_EXCEEDED,
     DQ_VALIDATION_FAILURES_TOTAL,
+    DQ_VALIDATION_RECORD_COUNT,
     DQ_VALIDATION_SCORE,
     ERRORS_TOTAL,
     FILTER_COMBINATIONS_LOADED_TOTAL,
@@ -205,6 +206,7 @@ DQ_VALIDATION_REGISTRY = MetricRegistryFamily(
     },
     gauges={
         "dq_baseline_samples": DQ_BASELINE_SAMPLES,
+        "dq_validation_record_count": DQ_VALIDATION_RECORD_COUNT,
         "dq_validation_score": DQ_VALIDATION_SCORE,
         "data_freshness_seconds": DATA_FRESHNESS_SECONDS,
     },

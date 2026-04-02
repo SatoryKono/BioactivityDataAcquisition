@@ -26,7 +26,7 @@ Grafana dashboards в BioETL.
 
 ## 2. Текущая модель shipped dashboards
 
-- `1. Overview` — hub: `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki)`, `Explore Traces (Tempo)`
+- `1. Overview` — hub: `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`
 - `2. Runtime` — `Back to Overview` + Explore links
 - `3. Provider Health` — `Back to Overview` + Explore links
 - `4. Data Quality` — `Back to Overview` + Explore links

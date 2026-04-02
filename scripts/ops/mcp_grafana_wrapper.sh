@@ -1,28 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-resolve_docker_bin() {
-  if command -v docker >/dev/null 2>&1; then
-    command -v docker
-    return
-  fi
-  if command -v docker.exe >/dev/null 2>&1; then
-    command -v docker.exe
-    return
-  fi
-  if command -v cmd.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
-    local docker_win_path
-    docker_win_path="$(
-      cmd.exe /c where docker 2>/dev/null | tr -d '\r' | grep -m1 'docker' || true
-    )"
-    if [[ -n "${docker_win_path}" ]]; then
-      wslpath -u "${docker_win_path}"
-      return
-    fi
-  fi
-  printf "Docker CLI not found. Install Docker Desktop or enable WSL integration.\n" >&2
-  exit 1
-}
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./docker_cli_resolver.sh
+source "${script_dir}/docker_cli_resolver.sh"
 
 docker_bin="$(resolve_docker_bin)"
 grafana_url="${GRAFANA_URL:-http://host.docker.internal:3000}"

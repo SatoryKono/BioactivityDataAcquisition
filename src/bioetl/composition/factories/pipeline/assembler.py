@@ -58,6 +58,18 @@ _extract_entity_type = extract_entity_type
 _extract_dq_configs, _assemble_runner_impl = extract_dq_configs, assemble_runner_impl
 
 
+def _resolve_data_source_creator(
+    *,
+    provider: str,
+    provider_registry: ProviderRegistry | None,
+    data_source_creator: DataSourceCreatorProtocol | None,
+) -> DataSourceCreatorProtocol:
+    """Resolve the factory data-source creator from explicit or provider wiring."""
+    if data_source_creator is not None:
+        return data_source_creator
+    return get_data_source_creator(provider, provider_registry=provider_registry)
+
+
 class GenericPipelineFactory(Generic[TPipeline]):
     def __init__(
         self,
@@ -84,8 +96,10 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
         self.provider_registry = provider_registry
-        self._create_data_source = data_source_creator or get_data_source_creator(
-            provider, provider_registry=provider_registry
+        self._create_data_source = _resolve_data_source_creator(
+            provider=provider,
+            provider_registry=provider_registry,
+            data_source_creator=data_source_creator,
         )
 
     def _build_factory_context(self) -> _PipelineFactoryContext:
@@ -163,6 +177,41 @@ class GenericPipelineFactory(Generic[TPipeline]):
             ),
         )
 
+    def _build_create_with_services_request(
+        self,
+        run_id: RunID,
+        runtime: RuntimeConfig,
+        settings: Settings,
+        logger: LoggerPort,
+        manifest_id: str | None = None,
+        config_hash: str | None = None,
+        dq_contract_compatibility_hash: str | None = None,
+        effective_config_artifact_id: str | None = None,
+        config: PipelineYamlConfig | None = None,
+        filter_config: InputFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        dq_monitor: DQMonitorPort | None = None,
+        metrics: MetricsPort | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
+    ) -> _CreatePipelineWithServicesRequest:
+        """Build the canonical request payload for pipeline/service assembly."""
+        return _CreatePipelineWithServicesRequest(
+            run_id,
+            runtime,
+            settings,
+            logger,
+            manifest_id,
+            config_hash,
+            dq_contract_compatibility_hash,
+            effective_config_artifact_id,
+            config,
+            filter_config,
+            tracer,
+            dq_monitor,
+            metrics,
+            cached_bronze,
+        )
+
     def create_with_services(
         self,
         run_id: RunID,
@@ -184,7 +233,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             TPipeline,
             create_pipeline_instance_with_services(
                 factory_context=self._build_factory_context(),
-                request=_CreatePipelineWithServicesRequest(
+                request=self._build_create_with_services_request(
                     run_id,
                     runtime,
                     settings,
