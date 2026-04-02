@@ -1,5 +1,6 @@
 # Tracked files allowed at repository root.
 # Any new root-level tracked file must be explicitly reviewed and added here.
+.cursorignore
 .dockerignore
 .editorconfig
 .setup_wsl_codex.sh
@@ -11,14 +12,17 @@
 .gitleaks.toml
 .importlinter
 .jscpd.json
+PLAN.md
 .pre-commit-config.yaml
 .secrets.baseline
 AGENTS.md
 CHANGELOG.md
+constructor_waivers.yaml
 Dockerfile
 LICENSE
 Makefile
 README.md
+signature_check.py
 commitlint.config.mjs
 docker-compose.monitoring.yml
 docker-compose.yml
