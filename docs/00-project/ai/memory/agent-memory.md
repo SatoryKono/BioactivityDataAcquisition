@@ -12,7 +12,7 @@ Last verified: '2026-04-01'
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.9 | Дата: 2026-04-01 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v5.24*
+*Версия: 1.0.9 | Дата: 2026-04-03 | Синхронизировано с ORCHESTRATION.md v4.2, RULES.md v6.1.0*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; Claude сохраняет отдельную runtime-specific copy в `.claude/agents/ORCHESTRATION.md` и может оставаться на другой версии без automatic drift claim.
 
@@ -340,30 +340,30 @@ reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 ### 5.1 Проектные Skills и entrypoints
 
 Механика вызова зависит от активного runtime. SSOT для проектных skills и
-workflow-ролей находится в `.codex/skills/` и `.codex/agents/`.
+workflow-ролей находится в `.gemini/skills/` и `.codex/agents/`.
 
 | Skill / entrypoint | Где смотреть SSOT | Назначение |
 |-------------------|-------------------|------------|
-| `agent-orchestration` | `.codex/skills/agent-orchestration/` | Координация multi-agent workflow |
-| `py-audit-bot` | `.codex/skills/py-audit-bot/` | Baseline/final audit |
-| `py-plan-bot` | `.codex/skills/py-plan-bot/` | RF-планирование |
-| `py-test-bot` | `.codex/skills/py-test-bot/` | Post-change verification |
-| `py-doc-bot` | `.codex/skills/py-doc-bot/` | Документационные правки |
-| `py-config-bot` | `.codex/skills/py-config-bot/` | Config/docs sync |
-| `py-debug-bot` | `.codex/skills/py-debug-bot/` | Failure triage |
-| `py-review-orchestrator` | `.codex/skills/py-review-orchestrator/` | Независимый double-check |
-| `py-test-swarm` | `.codex/skills/py-test-swarm/` | Иерархическое тестирование |
-| `new-pipeline` | `.codex/skills/new-pipeline/` | Scaffolding pipeline |
-| `verify-architecture` | `.codex/skills/verify-architecture/` | Архитектурные проверки |
-| `documentation-audit` | `.codex/skills/documentation-audit/` | Аудит документации |
-| `architecture-guardian` | `.codex/skills/public/architecture-guardian/` | Граничный архитектурный review |
+| `agent-orchestration` | `.gemini/skills/agent-orchestration/` | Координация multi-agent workflow |
+| `py-audit-bot` | `.gemini/skills/py-audit-bot/` | Baseline/final audit |
+| `py-plan-bot` | `.gemini/skills/py-plan-bot/` | RF-планирование |
+| `py-test-bot` | `.gemini/skills/py-test-bot/` | Post-change verification |
+| `py-doc-bot` | `.gemini/skills/py-doc-bot/` | Документационные правки |
+| `py-config-bot` | `.gemini/skills/py-config-bot/` | Config/docs sync |
+| `py-debug-bot` | `.gemini/skills/py-debug-bot/` | Failure triage |
+| `py-review-orchestrator` | `.gemini/skills/py-review-orchestrator/` | Независимый double-check |
+| `py-test-swarm` | `.gemini/skills/py-test-swarm/` | Иерархическое тестирование |
+| `new-pipeline` | `.gemini/skills/new-pipeline/` | Scaffolding pipeline |
+| `verify-architecture` | `.gemini/skills/verify-architecture/` | Архитектурные проверки |
+| `documentation-audit` | `.gemini/skills/documentation-audit/` | Аудит документации |
+| `architecture-guardian` | `.gemini/skills/public/architecture-guardian/` | Граничный архитектурный review |
 
 ### 5.2 Runtime-specific conveniences
 
 Claude slash-команды, built-in `Skill(...)` вызовы и прочие runtime-specific
 entrypoints допустимы только как дополнительное удобство. Их нельзя считать
 каноническим workflow для BioETL: приоритет у `.codex/agents/ORCHESTRATION.md`,
-`AGENTS.md` и `.codex/skills/`.
+`AGENTS.md` и `.gemini/skills/`.
 
 Если нужна фактическая команда для текущего runtime, смотри его собственный
 реестр команд/skills, а не эту память.
@@ -377,22 +377,22 @@ Runtime-конфигурация зависит от активного AI-кл�
 
 | Runtime | Что проверять |
 |---------|---------------|
-| Codex | `.codex/config.toml`, `.codex/settings.json`, `.codex/agents/`, `.codex/skills/` |
+| Codex | `.codex/config.toml`, `.codex/settings.json`, `.codex/agents/`, `.gemini/skills/` |
 | Claude | `.claude/settings.json`, `.claude/agents/`, `.claude/skills/` |
 | Copilot | `.github/copilot-instructions.md`, workspace MCP config |
 | Gemini | `.gemini/` |
 
 ### 6.1 MCP / Tool Policy
 
-- Для текущего набора MCP-серверов проверяй активный runtime-конфиг, а не docs mirror.
-- Для Codex используй `codex mcp list`, если нужен фактический список серверов в этой сессии.
+- Для текущего набораеров проверяй активный runtime-конфиг, а не docs mirror.
+- Для Gemini используй `codex mcp list`, если нужен фактический список серверов в этой сессии.
 - При расхождениях runtime-реестры имеют приоритет над документационными копиями.
 
 ---
 
-## 7. Native Agent Types (Codex Runtime)
+## 7. Native Agent Types (Gemini Runtime)
 
-В Codex runtime для логических профилей `py-*` используются native `agent_type`:
+В Gemini runtime для логических профилей `py-*` используются native `agent_type`:
 
 | `agent_type` | Назначение | Когда использовать |
 |--------------|------------|-------------------|
@@ -470,4 +470,8 @@ Claude-specific built-ins и plugin-инвентари допустимо хра
 
 *Этот файл — живой документ. Обновляй при изменении архитектуры, добавлении новых агентов или правил.*
 
-???????????????? ? ORCHESTRATION.md v4.2.0
+Синхронизировано с ORCHESTRATION.md v4.2.0
+md v4.2.0
+
+.0
+

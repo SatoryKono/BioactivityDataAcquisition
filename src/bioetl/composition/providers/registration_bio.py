@@ -217,8 +217,8 @@ def _create_uniprot_idmapping_data_source(
 def _resolve_uniprot_mapping_base_url(pipeline_config: PipelineYamlConfig) -> str:
     """Resolve UniProt ID Mapping base URL from config with safe default."""
     if pipeline_config.source.api and pipeline_config.source.api.base_url:
-        return pipeline_config.source.api.base_url
-    return UNIPROT_API_BASE
+        return str(pipeline_config.source.api.base_url)
+    return str(UNIPROT_API_BASE)
 
 
 def _resolve_uniprot_mapping_input_path(pipeline_config: PipelineYamlConfig) -> str:
@@ -316,4 +316,4 @@ def _get_bio_provider_configs(
         assembly_support=support,
         spec_builder=_build_bio_http_provider_specs,
     )
-    return configs | _build_bio_extra_provider_configs(rate_limits, support)
+    return dict(configs | _build_bio_extra_provider_configs(rate_limits, support))

@@ -17,9 +17,9 @@ Last verified: '2026-03-29'
 - Curated inventory rows: `16`
 - Transition debt rows: `0`
 - Retained public entrypoints: `16`
-- Measured tracked modules: `30`
-- Measured-only modules outside curated inventory: `14`
-- Discovered docstring-tracked modules: `14`
+- Measured tracked modules: `29`
+- Measured-only modules outside curated inventory: `13`
+- Discovered docstring-tracked modules: `13`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 
@@ -38,7 +38,6 @@ Last verified: '2026-03-29'
 - `src/bioetl/application/composite/merger.py`
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
 - `src/bioetl/composition/entrypoints.py`
-- `src/bioetl/composition/factories/pipeline/creation_api.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/normalization_authors.py`
 - `src/bioetl/domain/normalization_chembl.py`
@@ -69,7 +68,6 @@ Last verified: '2026-03-29'
 ## Measured-Only Allowlist
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py` — owner: `bioetl.application.pipelines.chembl`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export surface for ChEMBL pipeline marker classes.
-- `src/bioetl/composition/factories/pipeline/creation_api.py` — owner: `bioetl.composition.factories.pipeline`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Sanctioned compatibility shim for canonical pipeline creation wiring symbols.
 - `src/bioetl/interfaces/cli/commands/quarantine_execution.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for quarantine execution helper imports; first-party src should keep importing the canonical domains.quarantine.execution module directly.
 - `src/bioetl/interfaces/cli/commands/quarantine_rendering.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for quarantine rendering helper imports; first-party src should keep importing the canonical domains.quarantine.rendering module directly.
 - `src/bioetl/interfaces/cli/commands/quarantine_support.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing quarantine helper imports; first-party src should keep importing the canonical domains.quarantine.support module directly.
@@ -88,7 +86,6 @@ Last verified: '2026-03-29'
 ### Discovered Docstring-Tracked Modules
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
-- `src/bioetl/composition/factories/pipeline/creation_api.py`
 - `src/bioetl/domain/normalization_authors.py`
 - `src/bioetl/domain/normalization_chembl.py`
 - `src/bioetl/domain/normalization_dates.py`

@@ -53,7 +53,7 @@ class StorageAdapterMaintenanceMixin:
         try:
             from deltalake import DeltaTable
 
-            return DeltaTable(table_path).version()
+            return int(DeltaTable(table_path).version())
         except (OSError, RuntimeError, ValueError, ImportError):
             return None
 
@@ -205,7 +205,7 @@ class StorageAdapterMaintenanceMixin:
         Returns:
             Number of duplicate rows removed.
         """
-        return await self.silver.deduplicate_silver(table_name, primary_keys)
+        return int(await self.silver.deduplicate_silver(table_name, primary_keys))
 
     async def cleanup_bronze(
         self,
@@ -224,7 +224,9 @@ class StorageAdapterMaintenanceMixin:
         Returns:
             Dictionary with cleanup statistics.
         """
-        return await self.bronze.cleanup_old_files(
-            cutoff_date=cutoff_date,
-            dry_run=dry_run,
+        return dict(
+            await self.bronze.cleanup_old_files(
+                cutoff_date=cutoff_date,
+                dry_run=dry_run,
+            )
         )
