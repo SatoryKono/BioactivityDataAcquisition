@@ -137,4 +137,5 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
         result,
         registry_entries=registry_entries,
     )
-    return result
+    validated_policy: PipelineContractPolicy = result
+    return validated_policy

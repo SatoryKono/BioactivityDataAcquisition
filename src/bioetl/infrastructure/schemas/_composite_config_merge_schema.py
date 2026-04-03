@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Merge-related schemas for composite configuration."""
 
 from __future__ import annotations

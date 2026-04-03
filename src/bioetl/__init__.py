@@ -101,10 +101,10 @@ try:
         input_data_type = type(args[0])
         fn = _resolve_registered_dispatch_fn(self._function_registry, input_data_type)
         if fn is None:
-            return _orig_dispatcher_call(self, *args, **kwargs)  # type: ignore[no-untyped-call]
+            return _orig_dispatcher_call(self, *args, **kwargs)
         return fn(*args, **kwargs)
 
-    Dispatcher.__call__ = _dispatcher_call_with_any_fallback  # type: ignore[method-assign]
+    Dispatcher.__call__ = _dispatcher_call_with_any_fallback
 except (ImportError, AttributeError, TypeError, ValueError, RuntimeError):
     # Fail silently to avoid breaking the entire project if Pandera/Pandas are not present
     pass

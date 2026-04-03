@@ -223,10 +223,11 @@ def build_failure_context(
         subject key/value, and error type.
     """
     if isinstance(exc, BioETLError):
-        return exc.to_structured_context(
+        structured_context: dict[str, object] = exc.to_structured_context(
             reason_code=reason_code,
             **{subject_key: subject_value},
         )
+        return structured_context
 
     return {
         "message": str(exc),

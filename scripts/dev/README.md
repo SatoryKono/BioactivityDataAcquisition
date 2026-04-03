@@ -38,12 +38,12 @@ bash scripts/dev/setup_env_wsl.sh
 Preferred runners automatically select the OS-appropriate environment:
 
 ```powershell
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\dev\run_pytest.ps1 tests\unit --narrow --timeout=120 --lf
 .\scripts\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/dev/run_pytest.sh tests/unit --narrow --timeout=120 --lf
 bash scripts/dev/run_mypy.sh
 ```
 
@@ -66,7 +66,8 @@ coverage:
   probes do not walk the whole repository graph
 
 `run_pytest.ps1` and `run_pytest.sh` both add default pytest flags unless you ask
-for help/version:
+for help/version. `--collect-only` automatically drops coverage defaults to keep
+startup lightweight:
 
 ```text
 --cov=src/bioetl --cov-report=term -q --maxfail=1

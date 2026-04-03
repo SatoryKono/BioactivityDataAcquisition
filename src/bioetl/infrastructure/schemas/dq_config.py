@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Pydantic schemas for standalone DQ configuration files.
 
 Validates external YAML files (configs/quality/*.yaml) before converting

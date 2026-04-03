@@ -232,7 +232,8 @@ def normalize_string(value: str | None) -> str | None:
         None
 
     """
-    return _domain_normalize_string(value)
+    normalized_value: str | None = _domain_normalize_string(value)
+    return normalized_value
 
 
 def parse_date_field(
@@ -261,7 +262,8 @@ def parse_date_field(
         datetime.date(2024, 1, 15)
 
     """
-    return _domain_parse_date_field(value, fmt)
+    parsed_value: date | None = _domain_parse_date_field(value, fmt)
+    return parsed_value
 
 
 def validate_smiles(smiles: str | None) -> bool:
@@ -291,7 +293,8 @@ def validate_smiles(smiles: str | None) -> bool:
         False
 
     """
-    return _domain_validate_smiles(smiles)
+    is_valid: bool = _domain_validate_smiles(smiles)
+    return is_valid
 
 
 def safe_extract(
@@ -320,7 +323,8 @@ def safe_extract(
         'default'
 
     """
-    return record.get(key, default)
+    extracted_value: T | object | None = record.get(key, default)
+    return extracted_value
 
 
 # Re-export safe_float and safe_int for convenience

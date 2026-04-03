@@ -20,6 +20,7 @@ class HTTPClientContextMixin:
     read_timeout_multiplier: float
     max_connections: int
     max_keepalive_connections: int
+    trust_env: bool
 
     async def __aenter__(
         self,
@@ -48,6 +49,7 @@ class HTTPClientContextMixin:
                 max_connections=self.max_connections,
                 max_keepalive_connections=self.max_keepalive_connections,
             ),
+            trust_env=self.trust_env,
         )
         return self
 

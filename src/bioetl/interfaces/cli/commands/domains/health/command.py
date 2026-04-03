@@ -176,7 +176,8 @@ async def _run_health_checks(provider: tuple[str, ...]) -> dict[str, dict[str, s
     service = get_health_service()
     providers_list = list(provider) if provider else None
     summary = await service.check_providers(providers=providers_list)
-    return summary.to_dict()
+    results: dict[str, dict[str, str]] = summary.to_dict()
+    return results
 
 
 def _execute_health_checks(
@@ -255,19 +256,19 @@ def _render_health_results(
     sys.exit(ExitCode.FAIL)
 
 
-@click.group()
+@click.group()  # type: ignore[untyped-decorator]
 def health() -> None:
     """Health check and monitoring operations."""
 
 
-@health.command("server")
-@click.option(
+@health.command("server")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--host",
     default="127.0.0.1",
     help="Host to bind to. Use 0.0.0.0 to expose externally.",
     show_default=True,
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--port",
     "-p",
     default=8081,
@@ -297,14 +298,14 @@ def health_server_command(host: str, port: int) -> None:
     _execute_health_server(host, port)
 
 
-@health.command("check")
-@click.option(
+@health.command("check")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--provider",
     "-p",
     multiple=True,
     help="Provider(s) to check. If not specified, checks all configured providers.",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--json",
     "output_json",
     is_flag=True,

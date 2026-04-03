@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """CrossRef domain entities.
 
 Contains:

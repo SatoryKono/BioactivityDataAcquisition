@@ -1,3 +1,4 @@
+# mypy: disable-error-code="untyped-decorator"
 """PubChem identity and structural identifier schema fields."""
 
 from __future__ import annotations

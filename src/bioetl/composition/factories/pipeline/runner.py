@@ -120,7 +120,7 @@ class RunnerFactory:
             Sorted list of registered pipeline names.
         """
         self._ensure_registrations()
-        return cast(list[str], self._effective_registry.list_pipelines())
+        return self._effective_registry.list_pipelines()
 
     def contains(self, pipeline_name: str) -> bool:
         """Check if a pipeline is registered.

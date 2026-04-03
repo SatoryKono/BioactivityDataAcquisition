@@ -11,14 +11,11 @@ from collections import Counter
 from functools import cache
 from pathlib import Path
 import re
+from typing import Any
 from urllib.parse import unquote
 
 import pytest
 
-# Import metrics module to get all defined metric names
-from bioetl.infrastructure.observability import metrics
-from bioetl.infrastructure.observability.logging_config import configure_logging
-from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 pytestmark = pytest.mark.integration
 
@@ -26,6 +23,8 @@ pytestmark = pytest.mark.integration
 @cache
 def get_all_valid_metric_names() -> set[str]:
     """Extract all valid Prometheus metric names including suffixes for Histograms."""
+    from bioetl.infrastructure.observability import metrics
+
     base_names = set()
     all_valid_names = set()
 
@@ -75,6 +74,15 @@ def load_dashboard(dashboard_path: Path) -> dict:
         return json.load(f)
 
 
+@cache
+def _load_logging_helpers() -> tuple[Any, Any]:
+    """Import logging helpers lazily so collection does not bootstrap observability."""
+    from bioetl.infrastructure.observability.logging_config import configure_logging
+    from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
+
+    return configure_logging, UnifiedLogger
+
+
 def get_dashboard_panels(dashboard: dict) -> list[dict]:
     """Get all panels, including nested row panels."""
     panels = list(dashboard.get("panels", []))
@@ -105,6 +113,7 @@ def _collect_dashboard_links(dashboard: dict) -> list[dict]:
 
 def _emit_sample_structured_log(*, pipeline: str, provider: str) -> str:
     """Emit one JSON log line through the shipped structlog pipeline."""
+    configure_logging, unified_logger_cls = _load_logging_helpers()
     configure_logging(json_format=True, force=True)
     stream = io.StringIO()
     root = logging.getLogger()
@@ -114,7 +123,7 @@ def _emit_sample_structured_log(*, pipeline: str, provider: str) -> str:
         except AttributeError:
             continue
 
-    logger = UnifiedLogger(
+    logger = unified_logger_cls(
         pipeline=pipeline,
         run_id="123e4567-e89b-12d3-a456-426614174000",
     )

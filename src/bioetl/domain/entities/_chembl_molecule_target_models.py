@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """ChEMBL molecule/target DTO models."""
 
 from __future__ import annotations

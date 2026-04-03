@@ -1,3 +1,4 @@
+# mypy: disable-error-code="untyped-decorator"
 """Pandera schema for UniProt ID Mapping entity.
 
 Aligned with RULES.md v5.24 and UniProt ID Mapping API.

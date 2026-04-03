@@ -84,12 +84,13 @@ async def _run_composite_inner(
     runtime: CompositeRuntimeConfig,
 ) -> tuple[bool, str | None]:
     """Run composite pipeline execution logic."""
-    return await _run_composite_inner_impl(
+    result: tuple[bool, str | None] = await _run_composite_inner_impl(
         composite_name,
         runtime,
         load_config=load_composite_config,
         build_runner=bootstrap_composite_runner,
     )
+    return result
 
 
 async def _run_composite_async(
@@ -99,7 +100,7 @@ async def _run_composite_async(
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> tuple[bool, str | None]:
     """Run composite pipeline asynchronously with optional health server."""
-    return await _run_composite_async_impl(
+    result: tuple[bool, str | None] = await _run_composite_async_impl(
         composite_name,
         runtime,
         health_server_enabled=health_server_enabled,
@@ -108,6 +109,7 @@ async def _run_composite_async(
         metrics_starter=ensure_metrics_server_started,
         health_context_factory=health_server_context,
     )
+    return result
 
 
 def _handle_run_composite_exception(
@@ -130,7 +132,7 @@ def _run_composite_with_cli_policy(
     health_server: bool,
     health_port: int,
 ) -> tuple[bool, str | None]:
-    return _run_composite_with_cli_policy_impl(
+    result: tuple[bool, str | None] = _run_composite_with_cli_policy_impl(
         composite=composite,
         runtime=runtime,
         health_server=health_server,
@@ -144,6 +146,7 @@ def _run_composite_with_cli_policy(
             )
         ),
     )
+    return result
 
 
 def _echo_composite_startup(
@@ -171,88 +174,88 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
     _exit_with_composite_result_impl(success, error_message)
 
 
-@click.command(name="run-composite")
-@click.option(
+@click.command(name="run-composite")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--composite",
     callback=_validate_composite_name,
     required=True,
     help="Composite pipeline name (e.g., 'publication')",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--resume",
     is_flag=True,
     help="Resume from last checkpoint",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--dry-run",
     is_flag=True,
     help="Preview execution without writing data",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--seed-limit",
     type=int,
     help="Maximum records for seed pipeline",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--enrich-only",
     type=str,
     help="Run only specified enrichers (comma-separated)",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--required-only",
     is_flag=True,
     help="Skip optional enrichers",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--force-enricher",
     type=str,
     help="Force re-run of specified enricher (ignores checkpoint)",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--use-cached-bronze/--no-cached-bronze",
     "use_cached_bronze",
     default=False,
     help="Load data from Bronze cache instead of API",
     show_default=True,
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--cached-bronze-date",
     type=str,
     default=None,
     help="Filter Bronze cache by date (YYYY-MM-DD)",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--cached-bronze-path",
     type=click.Path(exists=True),
     default=None,
     help="Explicit path to Bronze cache directory",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--cached-bronze-enrichers/--no-cached-bronze-enrichers",
     "cached_bronze_enrichers",
     default=None,
     help="Override cached Bronze for enrichers (default: follow --use-cached-bronze)",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--cached-bronze-dependencies/--no-cached-bronze-dependencies",
     "cached_bronze_dependencies",
     default=False,
     help="Override cached Bronze for dependencies (default: use API)",
     show_default=True,
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--debug",
     is_flag=True,
     help="Enable DEBUG level logging",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--health-server/--no-health-server",
     "health_server",
     default=True,
     help="Enable/disable HTTP health server during execution.",
     show_default=True,
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--health-port",
     type=int,
     default=DEFAULT_HEALTH_SERVER_PORT,

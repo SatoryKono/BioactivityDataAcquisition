@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 from bioetl.domain.exceptions import StorageError
 
@@ -19,9 +20,10 @@ def build_storage_error(
 ) -> StorageError:
     """Build one contextualized ``StorageError`` for infrastructure call sites."""
     wrapped = StorageError(f"{message_prefix} {operation} failed for '{path}': {error}")
-    return wrapped.with_context(
+    contextualized = wrapped.with_context(
         operation=operation,
         path=str(path),
         original_error=str(error),
         **context,
     )
+    return cast(StorageError, contextualized)

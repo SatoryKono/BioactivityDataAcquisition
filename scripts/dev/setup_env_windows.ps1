@@ -55,4 +55,4 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
 
 Write-Host "[setup_env_windows][ok] Environment ready at .venv-win"
 Write-Host "[setup_env_windows][hint] Activate with: .\.venv-win\Scripts\Activate.ps1"
-Write-Host "[setup_env_windows][hint] Run tests with: .\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf"
+Write-Host "[setup_env_windows][hint] Run tests with: .\scripts\dev\run_pytest.ps1 tests\unit --narrow --timeout=120 --lf"

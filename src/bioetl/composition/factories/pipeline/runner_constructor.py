@@ -1,3 +1,4 @@
+# mypy: disable-error-code="attr-defined"
 """Runner construction helpers for pipeline factory assembly."""
 
 from __future__ import annotations

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import TypeAlias
 
 from prometheus_client.metrics import Counter, Gauge, Histogram
 
@@ -94,9 +95,9 @@ from bioetl.infrastructure.observability.metrics import (
     VACUUM_FILES_REMOVED_TOTAL,
 )
 
-PrometheusCounter = Counter
-PrometheusGauge = Gauge
-PrometheusHistogram = Histogram
+PrometheusCounter: TypeAlias = Counter
+PrometheusGauge: TypeAlias = Gauge
+PrometheusHistogram: TypeAlias = Histogram
 
 
 @dataclass(frozen=True, slots=True)

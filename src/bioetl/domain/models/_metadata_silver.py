@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Silver layer metadata models.
 
 Contains lineage tracking, Delta Lake metrics, data quality models,

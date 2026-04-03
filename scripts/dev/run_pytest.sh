@@ -46,6 +46,38 @@ _should_enable_benchmark_plugin() {
     return 1
 }
 
+_needs_cov_plugin() {
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+            --cov|--cov=*|--cov-report|--cov-report=*|--cov-config|--cov-config=*)
+                return 0
+                ;;
+        esac
+    done
+    return 1
+}
+
+_needs_xdist_plugin() {
+    local previous=""
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+            -n|--numprocesses|--dist|--dist=*|--tx|--tx=*)
+                return 0
+                ;;
+            -n*)
+                [[ "$arg" != "-q" ]] && return 0
+                ;;
+        esac
+        if [[ "$previous" == "-p" && "$arg" == "xdist.plugin" ]]; then
+            return 0
+        fi
+        previous="$arg"
+    done
+    return 1
+}
+
 if [[ "$PYTEST_NARROW" == "1" ]]; then
     export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
     DEFAULT_FLAGS=(-q --maxfail=1)
@@ -71,12 +103,16 @@ elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
     _core_pytest_plugins=(
         pytest_asyncio.plugin
         pytest_timeout
-        pytest_cov.plugin
-        xdist.plugin
         syrupy
         pytest_vcr
         _hypothesis_pytestplugin
     )
+    if _needs_cov_plugin "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"; then
+        _core_pytest_plugins+=(pytest_cov.plugin)
+    fi
+    if _needs_xdist_plugin "${PYTEST_ARGS[@]}"; then
+        _core_pytest_plugins+=(xdist.plugin)
+    fi
     for plugin in "${_core_pytest_plugins[@]}"; do
         PYTEST_PLUGIN_ARGS+=(-p "$plugin")
     done
@@ -92,9 +128,7 @@ for arg in "${PYTEST_ARGS[@]}"; do
             break
             ;;
         --collect-only|--co)
-            if [[ "$PYTEST_NARROW" == "1" ]]; then
-                DEFAULT_FLAGS=(-q --maxfail=1)
-            fi
+            DEFAULT_FLAGS=(-q --maxfail=1)
             ;;
     esac
 done

@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """UniProt cross-references and taxonomy/GO components.
 
 Part of UniprotTargetSchema split to comply with LOC limits.

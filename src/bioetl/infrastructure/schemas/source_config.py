@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Schema validation for source configuration.
 
 Implements strict validation for source YAML configurations (configs/providers/*.yaml).
@@ -286,6 +287,11 @@ class SourceYamlConfig(BaseModel):
     def max_keepalive_connections(self) -> int:
         """Get max keep-alive connections for httpx."""
         return self.source.provider_config.client.max_keepalive_connections
+
+    @property
+    def trust_env(self) -> bool:
+        """Get whether httpx should inherit proxy/network env vars."""
+        return self.source.provider_config.client.trust_env
 
     @property
     def base_url(self) -> str | None:

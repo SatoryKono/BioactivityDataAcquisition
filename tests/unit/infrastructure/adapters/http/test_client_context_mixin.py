@@ -22,6 +22,7 @@ class _ContextHarness(HTTPClientContextMixin):
         read_timeout_multiplier: float = 2.0,
         max_connections: int = 20,
         max_keepalive_connections: int = 10,
+        trust_env: bool = True,
     ) -> None:
         self._client = None
         self.user_agent = user_agent
@@ -31,6 +32,7 @@ class _ContextHarness(HTTPClientContextMixin):
         self.read_timeout_multiplier = read_timeout_multiplier
         self.max_connections = max_connections
         self.max_keepalive_connections = max_keepalive_connections
+        self.trust_env = trust_env
 
 
 @pytest.mark.asyncio
@@ -101,5 +103,16 @@ async def test_read_timeout_uses_custom_multiplier() -> None:
     client = harness._get_client()
 
     assert client.timeout.read == 30.0  # 10.0 * 3.0
+
+    await harness.__aexit__(None, None, None)
+
+
+@pytest.mark.asyncio
+async def test_aenter_passes_explicit_trust_env_flag_to_httpx() -> None:
+    harness = _ContextHarness(trust_env=False)
+    await harness.__aenter__()
+    client = harness._get_client()
+
+    assert client._trust_env is False
 
     await harness.__aexit__(None, None, None)

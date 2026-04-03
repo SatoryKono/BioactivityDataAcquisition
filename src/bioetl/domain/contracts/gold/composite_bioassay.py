@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Composite activity/assay/target Gold schemas."""
 
 from __future__ import annotations

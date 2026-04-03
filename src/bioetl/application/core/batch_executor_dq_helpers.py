@@ -95,17 +95,19 @@ def build_dataframe_from_records(
     try:
         import polars as pl
 
-        return pl.DataFrame(records, infer_schema_length=None)
+        dataframe: object = pl.DataFrame(records, infer_schema_length=None)
+        return dataframe
     except dataframe_error_types() as dataframe_error:
         normalized_records = normalize_records_for_polars(records)
         if normalized_records is not None:
             try:
                 import polars as pl
 
-                return pl.DataFrame(
+                normalized_dataframe: object = pl.DataFrame(
                     normalized_records,
                     infer_schema_length=None,
                 )
+                return normalized_dataframe
             except dataframe_error_types():
                 pass
         logger.warning(
@@ -145,10 +147,13 @@ def extract_dq_entity(config: RecordProcessorConfig) -> str:
     silver_table = table_config.silver_table
     entity_type = config.entity_type
     if silver_table and "_" in silver_table:
-        return silver_table.split("_", 1)[1]
+        underscore_entity: str = silver_table.split("_", 1)[1]
+        return underscore_entity
     if silver_table and "." in silver_table:
-        return silver_table.split(".")[-1]
-    return silver_table or entity_type
+        dotted_entity: str = silver_table.split(".")[-1]
+        return dotted_entity
+    resolved_entity: str = silver_table or entity_type
+    return resolved_entity
 
 
 def build_dq_report_context(

@@ -34,6 +34,21 @@ from ._filter_primitives import (
 __all__ = ["BaseFilterConfig", "FilterDecision"]
 
 
+def _iter_filter_decisions(
+    config: BaseFilterConfig,
+    record: JsonDict,
+) -> tuple[FilterDecision, ...]:
+    """Evaluate configured filters in order and collect their decisions."""
+    return (
+        evaluate_required_fields(config.required_fields, record),
+        evaluate_exclude_if_present(config.exclude_if_present, record),
+        evaluate_column_filters(config.column_filters, record),
+        evaluate_range_filters(config.range_filters, record),
+        evaluate_list_length_filters(config.list_length_filters, record),
+        evaluate_list_contains_filters(config.list_contains_filters, record),
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class BaseFilterConfig:
     """Base immutable filter configuration used by Silver and Gold layers."""
@@ -65,17 +80,7 @@ class BaseFilterConfig:
 
     def evaluate(self, record: JsonDict) -> FilterDecision:
         """Evaluate all filter rules and return the first blocking decision."""
-        evaluators_with_rules = (
-            (evaluate_required_fields, self.required_fields),
-            (evaluate_exclude_if_present, self.exclude_if_present),
-            (evaluate_column_filters, self.column_filters),
-            (evaluate_range_filters, self.range_filters),
-            (evaluate_list_length_filters, self.list_length_filters),
-            (evaluate_list_contains_filters, self.list_contains_filters),
-        )
-
-        for evaluator, rules in evaluators_with_rules:
-            decision = evaluator(rules, record)
+        for decision in _iter_filter_decisions(self, record):
             if not decision.include:
                 return decision
 

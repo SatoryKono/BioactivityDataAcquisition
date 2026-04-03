@@ -42,36 +42,36 @@ def get_pipeline_runner_service(
     return _impl(registry=registry)
 
 
-@click.command()
-@click.option(
+@click.command()  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--pipeline",
     callback=validate_pipeline_name,
     required=True,
     help="Pipeline to debug",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--breakpoints",
     type=str,
     default=None,
     help=f"Comma-separated breakpoints: {', '.join(_BREAKPOINT_CHOICES)}. "
     "Default: all breakpoints enabled.",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--limit", type=int, default=10, help="Max records to process (default: 10)"
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--mode",
     type=click.Choice(["interactive", "log"]),
     default="interactive",
     help="Debug mode: interactive (CLI prompts) or log (auto-continue with logging)",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--run-type",
     type=click.Choice(["incremental", "backfill", "rebuild"]),
     default="incremental",
     help="Type of run",
 )
-@click.pass_context
+@click.pass_context  # type: ignore[untyped-decorator]
 def debug(
     ctx: click.Context,
     pipeline: str,

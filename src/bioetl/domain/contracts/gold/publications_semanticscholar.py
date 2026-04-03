@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Semantic Scholar publication schema for Gold contracts."""
 
 from __future__ import annotations

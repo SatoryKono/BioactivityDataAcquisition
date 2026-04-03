@@ -79,7 +79,8 @@ def yaml_config_to_domain(
 
 
 def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
-    return _compute_config_hash_direct(config)
+    config_hash: str = _compute_config_hash_direct(config)
+    return config_hash
 
 
 @dataclass(frozen=True, slots=True)

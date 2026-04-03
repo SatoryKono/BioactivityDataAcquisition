@@ -73,7 +73,7 @@ def build_components_and_processing_service(
     quarantine_manager = QuarantineManagerService(
         quarantine_port=pipeline.services.quarantine,
         pipeline_name=processor_config.pipeline_name,
-        metrics=components.batch_metrics,
+        metrics=pipeline.services.metrics,
     )
     batch_processing_service = BatchProcessingService(
         services=pipeline.services,

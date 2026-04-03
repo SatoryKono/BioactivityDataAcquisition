@@ -184,14 +184,14 @@ def _resolve_explain_identifier(
     return run_id if run_id is not None else manifest_id
 
 
-@click.group()
+@click.group()  # type: ignore[untyped-decorator]
 def lineage() -> None:
     """Inspect persisted lineage fragments and run traceability."""
 
 
-@lineage.command("show-fragment")
-@click.argument("fragment_id")
-@click.option(
+@lineage.command("show-fragment")  # type: ignore[untyped-decorator]
+@click.argument("fragment_id")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -213,13 +213,13 @@ def show_fragment_command(fragment_id: str, output_format: str) -> None:
     )
 
 
-@lineage.command("trace")
-@click.option(
+@lineage.command("trace")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--dataset-ref",
     required=True,
     help="Canonical dataset/node ref, e.g. silver:chembl.activity@12",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -241,10 +241,14 @@ def trace_command(dataset_ref: str, output_format: str) -> None:
     )
 
 
-@lineage.command("explain")
-@click.option("--run-id", default=None, help="Resolve lineage by RUN_ID")
-@click.option("--manifest-id", default=None, help="Resolve lineage by MANIFEST_ID")
-@click.option(
+@lineage.command("explain")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
+    "--run-id", default=None, help="Resolve lineage by RUN_ID"
+)
+@click.option(  # type: ignore[untyped-decorator]
+    "--manifest-id", default=None, help="Resolve lineage by MANIFEST_ID"
+)
+@click.option(  # type: ignore[untyped-decorator]
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),

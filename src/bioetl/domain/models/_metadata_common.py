@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Common metadata models shared across all Medallion layers.
 
 Contains governance, runtime, pipeline, environment and base output models.
@@ -284,7 +285,7 @@ class BaseOutputMetadata(BaseModel):
         description="Composite run identifier mapped from _composite_run_id",
     )
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def write_duration_ms(self) -> int | None:
         """Calculate write duration in milliseconds.

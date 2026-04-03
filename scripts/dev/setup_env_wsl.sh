@@ -47,4 +47,4 @@ fi
 
 echo "[setup_env_wsl][ok] Environment ready at $VENV_DIR"
 echo "[setup_env_wsl][hint] Activate with: source \"$VENV_DIR/bin/activate\""
-echo "[setup_env_wsl][hint] Run tests with: bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf"
+echo "[setup_env_wsl][hint] Run tests with: bash scripts/dev/run_pytest.sh tests/unit --narrow --timeout=120 --lf"

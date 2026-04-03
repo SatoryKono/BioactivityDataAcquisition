@@ -61,6 +61,7 @@ class ResolvedHttpConfig:
     max_delay: float
     max_connections: int
     max_keepalive: int
+    trust_env: bool
 
 
 class HttpClientFactory:
@@ -158,6 +159,7 @@ class HttpClientFactory:
             max_delay = source_config.retry_max_delay
             max_connections = source_config.max_connections
             max_keepalive = source_config.max_keepalive_connections
+            trust_env = source_config.trust_env
         else:
             # Fallback defaults when no source YAML config is available
             _FALLBACK_TIMEOUT = 30.0
@@ -181,6 +183,7 @@ class HttpClientFactory:
                 timeout, max_retries = _FALLBACK_TIMEOUT, _FALLBACK_MAX_RETRIES
             base_delay, max_delay = 1.0, 60.0
             max_connections, max_keepalive = 50, 10
+            trust_env = True
 
         # Apply rate overrides based on settings (API key boosts)
         http_config = registry.get_http_config(provider)
@@ -202,6 +205,7 @@ class HttpClientFactory:
             max_delay=max_delay,
             max_connections=max_connections,
             max_keepalive=max_keepalive,
+            trust_env=trust_env,
         )
 
     @classmethod
@@ -255,6 +259,7 @@ class HttpClientFactory:
             run_id=run_id,
             max_connections=cfg.max_connections,
             max_keepalive_connections=cfg.max_keepalive,
+            trust_env=cfg.trust_env,
             tracer=tracer,
             metrics=metrics,
             logger=logger,

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from bioetl.application.composite.join_execution import JoinExecutorService
 
+PolarsJoinAdapter = JoinExecutorService
+
 __all__ = ["PolarsJoinAdapter"]
-
-
-class PolarsJoinAdapter(JoinExecutorService):
-    """DI-friendly alias for the composite join executor used in composition."""

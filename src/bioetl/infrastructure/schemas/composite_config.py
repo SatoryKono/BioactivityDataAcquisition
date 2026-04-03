@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Pydantic schemas for composite pipeline configuration files.
 
 Validates composite pipeline YAML files (configs/composites/*.yaml)

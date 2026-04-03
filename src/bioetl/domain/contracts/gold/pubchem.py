@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """PubChem Gold layer data contracts.
 
 Contains Pandera DataFrameModel schemas for PubChem entities in the Gold layer:

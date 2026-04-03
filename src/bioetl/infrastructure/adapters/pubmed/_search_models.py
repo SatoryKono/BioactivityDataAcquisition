@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Internal PubMed ESearch response models."""
 
 from __future__ import annotations

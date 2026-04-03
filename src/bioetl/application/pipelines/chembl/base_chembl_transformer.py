@@ -18,7 +18,6 @@ __all__ = ["BaseChemblTransformer"]
 
 
 from abc import abstractmethod
-from functools import partial
 from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.base_transformer import (
@@ -144,9 +143,9 @@ class BaseChemblTransformer(BaseTransformer):
         return PreSilverRecord(
             entity_id=entity_id,
             business_data=business_data,
-            build_silver_record=partial(_build_chembl_silver_record, self),
-            apply_structural_policy=self._apply_structural_policy,
-            apply_silver_filter=self._apply_silver_filter,
+            build_silver_record=self._build_pre_silver_json_record,
+            apply_structural_policy=self._apply_pre_silver_structural_policy,
+            apply_silver_filter=self._apply_pre_silver_filter,
         )
 
     async def _transform_impl(
@@ -178,6 +177,56 @@ class BaseChemblTransformer(BaseTransformer):
             content_hash,
             index,
             normalized_business_data,
+        )
+
+    def _build_pre_silver_json_record(
+        self,
+        context: PipelineContext,
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Adapt finalized Silver-record construction to the PreSilverRecord protocol."""
+        return cast(
+            JsonDict,
+            _build_chembl_silver_record(
+                self,
+                context,
+                entity_id,
+                content_hash,
+                index,
+                business_data,
+            ),
+        )
+
+    def _apply_pre_silver_structural_policy(
+        self,
+        context: PipelineContext,
+        record: JsonDict,
+        index: int,
+    ) -> JsonDict | None:
+        """Adapt structural policy application to the PreSilverRecord protocol."""
+        return cast(
+            JsonDict | None,
+            self._apply_structural_policy(
+                context,
+                cast("SilverRecord", record),
+                index,
+            ),
+        )
+
+    def _apply_pre_silver_filter(
+        self,
+        context: PipelineContext,
+        record: JsonDict,
+        index: int,
+    ) -> None:
+        """Adapt silver-filter application to the PreSilverRecord protocol."""
+        self._apply_silver_filter(
+            context,
+            cast("SilverRecord", record),
+            index,
         )
 
     @abstractmethod

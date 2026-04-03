@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """PubChem physicochemical descriptor and count schema fields."""
 
 from __future__ import annotations

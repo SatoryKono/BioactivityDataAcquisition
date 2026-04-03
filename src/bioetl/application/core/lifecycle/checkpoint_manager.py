@@ -188,7 +188,8 @@ class CheckpointManagerService:
             List of pipeline names with existing checkpoints.
 
         """
-        return await self._checkpoint.list_all()
+        checkpoint_names: list[str] = await self._checkpoint.list_all()
+        return checkpoint_names
 
 
 # Compatibility alias retained for legacy imports; new code should use

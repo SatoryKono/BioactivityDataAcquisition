@@ -109,7 +109,8 @@ class MergeIOMixin(MergeOutputWriterMixin, _MergeInputLoaderMixin):
         if len(quarantine_df) == 0:
             return []
 
-        return quarantine_df.to_dicts()
+        quarantined_records: list[dict[str, object]] = quarantine_df.to_dicts()
+        return quarantined_records
 
     async def _write_outputs(
         self,

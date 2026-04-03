@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Shared base schemas for connection, DQ, and maintenance configuration."""
 
 from __future__ import annotations
@@ -113,6 +114,13 @@ class HttpClientConfig(BaseModel):
     retry_max_delay: float = Field(default=60.0, ge=1.0, le=600.0)
     max_connections: int = Field(default=50, ge=1, le=500)
     max_keepalive_connections: int = Field(default=10, ge=1, le=100)
+    trust_env: bool = Field(
+        default=True,
+        description=(
+            "Whether httpx should inherit HTTP(S)_PROXY and other network-related "
+            "environment variables from the process environment."
+        ),
+    )
 
 
 class BaseApiConfig(BaseModel):

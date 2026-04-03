@@ -226,11 +226,14 @@ class RecordNormalizationProcessor:
         value: str,
     ) -> str | None:
         if field_name in self.rule_set.title_fields:
-            return normalize_title(value)
+            normalized_title: str | None = normalize_title(value)
+            return normalized_title
         if field_name in self.rule_set.abstract_fields:
-            return normalize_abstract(value)
+            normalized_abstract: str | None = normalize_abstract(value)
+            return normalized_abstract
         if field_name in self.rule_set.oa_status_fields:
-            return normalize_oa_status(value)
+            normalized_oa_status: str | None = normalize_oa_status(value)
+            return normalized_oa_status
         return None
 
     def _canonicalize_json_like_string(self, value: str) -> str:

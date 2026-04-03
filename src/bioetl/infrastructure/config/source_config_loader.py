@@ -70,7 +70,8 @@ def validate_source_config_payload(
     Returns:
         SourceYamlConfig instance validated from the canonical payload.
     """
-    return SourceYamlConfig.model_validate(payload)
+    validated_config: SourceYamlConfig = SourceYamlConfig.model_validate(payload)
+    return validated_config
 
 
 def map_source_config(validated_config: SourceYamlConfig) -> SourceYamlConfig:

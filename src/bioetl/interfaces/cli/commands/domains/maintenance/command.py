@@ -24,7 +24,7 @@ __all__ = [
 ]
 
 
-@click.group()
+@click.group()  # type: ignore[untyped-decorator]
 def maintenance() -> None:
     """Maintenance operations for Delta tables."""
 

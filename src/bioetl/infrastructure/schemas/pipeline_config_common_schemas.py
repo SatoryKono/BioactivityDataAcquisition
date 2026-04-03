@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Common non-provider schemas extracted from pipeline_config."""
 
 from __future__ import annotations

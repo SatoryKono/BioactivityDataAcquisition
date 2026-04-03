@@ -58,7 +58,11 @@ class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
             resolution fails and strict validation is disabled.
         """
         try:
-            return self._storage.get_table_version(table_path, layer=layer)
+            table_version: int | None = self._storage.get_table_version(
+                table_path,
+                layer=layer,
+            )
+            return table_version
         except self._warning_allowlist as error:
             apply_postrun_failure_policy_or_raise(
                 logger=self._logger,

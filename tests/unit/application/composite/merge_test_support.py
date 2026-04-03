@@ -3,29 +3,18 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
-from bioetl.application.composite.aggregator import EnricherAggregator
-from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.application.composite.column_orderer import ColumnOrderer
-from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrderer,
-)
-from bioetl.application.composite.column_renamer import ColumnRenamer
-from bioetl.application.composite.conflict_resolver import ConflictResolverService
-from bioetl.application.composite.dependency_joiner import DependencyJoinerService
-from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
-from bioetl.application.composite.join_key_normalization import (
-    JOIN_KEY_NORMALIZATION_POLICIES,
-)
-from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
-from bioetl.application.composite.join_planner import (
-    JoinPlannerService,
-    JoinPreparationCollaborators,
-)
-from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
-from bioetl.domain.composite.config import MergeConfig
+if TYPE_CHECKING:
+    from bioetl.application.composite.aggregator import EnricherAggregator
+    from bioetl.application.composite.column_renamer import ColumnRenamer
+    from bioetl.application.composite.conflict_resolver import ConflictResolverService
+    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+    from bioetl.application.composite.join_execution import JoinHow
+    from bioetl.application.composite.join_planner import JoinPlannerService
+    from bioetl.application.composite.merger import MergeService
+    from bioetl.domain.composite.config import MergeConfig
 
 
 def _default_field_alias_resolver(_pipeline: str) -> dict[str, str] | None:
@@ -50,6 +39,17 @@ def build_join_planner_service(
     join_type_resolver: Callable[[], JoinHow] | None = None,
 ) -> JoinPlannerService:
     """Create JoinPlannerService with canonical collaborator wiring for tests."""
+    from bioetl.application.composite.dependency_joiner import DependencyJoinerService
+    from bioetl.application.composite.join_execution import JoinExecutorService
+    from bioetl.application.composite.join_key_normalization import (
+        JOIN_KEY_NORMALIZATION_POLICIES,
+    )
+    from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
+    from bioetl.application.composite.join_planner import (
+        JoinPlannerService,
+        JoinPreparationCollaborators,
+    )
+
     if field_alias_resolver is None:
         field_alias_resolver = _default_field_alias_resolver
     if join_type_resolver is None:
@@ -96,6 +96,20 @@ def build_merge_service(
     storage: MagicMock,
 ) -> MergeService:
     """Create a fully wired MergeService for composite unit tests."""
+    from bioetl.application.composite.aggregator import EnricherAggregator
+    from bioetl.application.composite.coalesce_policy import CoalescePolicyService
+    from bioetl.application.composite.column_orderer import ColumnOrderer
+    from bioetl.application.composite.column_priority_orderer import (
+        ColumnPriorityOrderer,
+    )
+    from bioetl.application.composite.column_renamer import ColumnRenamer
+    from bioetl.application.composite.conflict_resolver import ConflictResolverService
+    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+    from bioetl.application.composite.merger import (
+        MergeCollaboratorGroup,
+        MergeService,
+    )
+
     deduplicator = EnricherDeduplicatorService(logger)
     aggregator = EnricherAggregator(logger)
     renamer = ColumnRenamer(logger)

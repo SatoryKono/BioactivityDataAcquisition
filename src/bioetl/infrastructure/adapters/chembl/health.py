@@ -64,6 +64,33 @@ class ChemblHealthMixin:
     _logger: LoggerPort
     _page_size: int
     _adapter_metrics: AdapterMetricsRecorder
+    _last_probe_health_status: HealthStatus | None
+
+    @staticmethod
+    def _max_health_status(
+        left: HealthStatus,
+        right: HealthStatus,
+    ) -> HealthStatus:
+        """Return the more severe of two health signals."""
+        severity = {
+            HealthStatus.HEALTHY: 0,
+            HealthStatus.DEGRADED: 1,
+            HealthStatus.UNHEALTHY: 2,
+        }
+        return left if severity[left] >= severity[right] else right
+
+    def _get_effective_health_status(self) -> HealthStatus:
+        """Combine circuit-breaker and last active probe health.
+
+        The preflight probe can detect an upstream degradation before the
+        first fetch attempt mutates the circuit breaker. Preserving the last
+        probe result lets the first page fetch react to that signal.
+        """
+        circuit_status = self._get_health_status()
+        probe_status = getattr(self, "_last_probe_health_status", None)
+        if probe_status is None:
+            return circuit_status
+        return self._max_health_status(circuit_status, probe_status)
 
     async def _probe_health(self) -> HealthStatus:
         """Perform ChEMBL-specific health probe.
@@ -74,10 +101,13 @@ class ChemblHealthMixin:
         try:
             with self._adapter_metrics.measure_request("/status"):
                 response = await self._http_client.get_once(CHEMBL_STATUS_URL)
-            return self._handle_health_response(response)
+            status = self._handle_health_response(response)
+            self._last_probe_health_status = status
+            return status
         except CHEMBL_HEALTH_ERRORS as exc:
             status_code = self._extract_http_status_code(exc)
             if status_code is not None and 500 <= status_code < 600:
+                self._last_probe_health_status = HealthStatus.DEGRADED
                 self._logger.warning(
                     "health_check_degraded",
                     provider=self.provider_name,
@@ -96,6 +126,7 @@ class ChemblHealthMixin:
                     httpx.WriteError,
                 ),
             ):
+                self._last_probe_health_status = HealthStatus.DEGRADED
                 self._logger.warning(
                     "health_check_degraded",
                     provider=self.provider_name,
@@ -128,7 +159,7 @@ class ChemblHealthMixin:
           can checkpoint and stop immediately rather than queue doomed
           requests.
         """
-        health_status = self._get_health_status()
+        health_status = self._get_effective_health_status()
         failure_count = self._http_client.circuit_breaker.get_failure_count()
 
         if health_status == HealthStatus.UNHEALTHY:
@@ -213,7 +244,7 @@ class ChemblHealthMixin:
         return {
             "circuit_breaker_failures": self._http_client.circuit_breaker.get_failure_count(),
             "circuit_breaker_state": self._http_client.circuit_breaker.get_state().value,
-            "health_status": self._get_health_status().value,
+            "health_status": self._get_effective_health_status().value,
         }
 
     def reset_circuit_breaker(self) -> None:

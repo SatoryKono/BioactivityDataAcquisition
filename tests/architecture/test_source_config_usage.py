@@ -174,6 +174,14 @@ class TestSourceConfigSchema:
         )
         assert config.page_size >= 100, "ChEMBL page_size should be at least 100"
 
+    def test_chembl_config_disables_env_proxy_inheritance(self) -> None:
+        """ChEMBL should not silently inherit shell proxy settings."""
+        from bioetl.infrastructure.config import load_source_config
+
+        config = load_source_config("chembl")
+
+        assert config.trust_env is False
+
     def test_source_config_batch_size_property(self) -> None:
         """batch_size property should prefer canonical pagination.id_batch_size."""
         from bioetl.infrastructure.schemas.source_config import SourceYamlConfig

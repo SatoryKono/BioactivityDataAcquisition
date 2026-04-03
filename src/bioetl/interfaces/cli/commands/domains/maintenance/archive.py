@@ -63,10 +63,10 @@ def _handle_archive_failure(
     )
 
 
-@click.command("archive")
-@click.argument("table")
-@click.argument("target_path")
-@click.option(
+@click.command("archive")  # type: ignore[untyped-decorator]
+@click.argument("table")  # type: ignore[untyped-decorator]
+@click.argument("target_path")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--remove-source",
     is_flag=True,
     help="Remove source table after archiving",

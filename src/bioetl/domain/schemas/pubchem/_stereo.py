@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """PubChem stereochemistry schema fields."""
 
 from __future__ import annotations

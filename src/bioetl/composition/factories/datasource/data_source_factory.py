@@ -63,7 +63,8 @@ class DataSourceRegistry:
     ) -> list[str]:
         """List providers that expose data-source creators."""
         registry = _resolve_provider_registry(provider_registry)
-        return registry.list_providers()
+        providers: list[str] = registry.list_providers()
+        return providers
 
     @classmethod
     def list_keys(cls) -> list[str]:
@@ -74,7 +75,8 @@ class DataSourceRegistry:
     def contains(cls, key: str) -> bool:
         """Check if provider is registered and has a data-source creator."""
         registry = _resolve_provider_registry()
-        return registry.has_data_source_creator(key)
+        contains_provider: bool = registry.has_data_source_creator(key)
+        return contains_provider
 
     @classmethod
     def clear(cls) -> None:
@@ -158,7 +160,8 @@ class DataSourceFactory:
     @classmethod
     def list_providers(cls) -> list[str]:
         """List all available providers."""
-        return _resolve_provider_registry().list_providers()
+        providers: list[str] = _resolve_provider_registry().list_providers()
+        return providers
 
 
 __all__ = [

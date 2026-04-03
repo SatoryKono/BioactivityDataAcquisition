@@ -158,9 +158,9 @@ class IDMappingTransformer(BaseTransformer):
         return PreSilverRecord(
             entity_id=entity_id,
             business_data=business_data,
-            build_silver_record=self._build_pre_silver_record,
-            apply_structural_policy=self._apply_structural_policy,
-            apply_silver_filter=self._apply_silver_filter,
+            build_silver_record=self._build_pre_silver_json_record,
+            apply_structural_policy=self._apply_pre_silver_structural_policy,
+            apply_silver_filter=self._apply_pre_silver_filter,
         )
 
     def _build_mapping_business_data(
@@ -204,7 +204,7 @@ class IDMappingTransformer(BaseTransformer):
         content_hash: str,
         index: int,
         business_data: JsonDict,
-    ) -> JsonDict:
+    ) -> SilverRecord:
         """Build a finalized Silver record from normalized ID mapping data."""
         entity = self._create_entity(
             IDMappingResult,
@@ -219,3 +219,52 @@ class IDMappingTransformer(BaseTransformer):
             business_data.get("mapping_status") == "not_found"
         )
         return cast("SilverRecord", silver_record)
+
+    def _build_pre_silver_json_record(
+        self,
+        context: PipelineContext,
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Adapt finalized Silver-record construction to the PreSilverRecord protocol."""
+        return cast(
+            JsonDict,
+            self._build_pre_silver_record(
+                context,
+                entity_id,
+                content_hash,
+                index,
+                business_data,
+            ),
+        )
+
+    def _apply_pre_silver_structural_policy(
+        self,
+        context: PipelineContext,
+        record: JsonDict,
+        index: int,
+    ) -> JsonDict | None:
+        """Adapt structural policy application to the PreSilverRecord protocol."""
+        return cast(
+            JsonDict | None,
+            self._apply_structural_policy(
+                context,
+                cast("SilverRecord", record),
+                index,
+            ),
+        )
+
+    def _apply_pre_silver_filter(
+        self,
+        context: PipelineContext,
+        record: JsonDict,
+        index: int,
+    ) -> None:
+        """Adapt silver-filter application to the PreSilverRecord protocol."""
+        self._apply_silver_filter(
+            context,
+            cast("SilverRecord", record),
+            index,
+        )

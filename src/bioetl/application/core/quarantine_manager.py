@@ -99,8 +99,21 @@ class QuarantineManagerService:
             ingestion_ts=ingestion_ts,
         )
         if self._metrics:
-            self._metrics.track_quarantined_records(error_type, 1)
-            self._metrics.track_processed_records("quarantined", 1)
+            self._metrics.increment_counter(
+                "dq_records_quarantined_total",
+                1,
+                {"pipeline": self._pipeline_name, "error_type": error_type.value},
+            )
+            self._metrics.increment_counter(
+                "records_processed_total",
+                1,
+                {"pipeline": self._pipeline_name, "stage": "quarantined"},
+            )
+            self._metrics.inc_quarantine_records(
+                pipeline=self._pipeline_name,
+                reason=error_type.value,
+                count=1,
+            )
 
     async def quarantine_records(
         self,

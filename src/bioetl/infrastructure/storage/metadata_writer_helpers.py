@@ -6,7 +6,6 @@ import asyncio
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import cast
 
 import yaml
 
@@ -47,26 +46,22 @@ def _derive_dataset_ref(
     layer = str(getattr(metadata, "layer", ""))
     if layer == "silver":
         output_ext = getattr(metadata, "output_ext", None)
-        return cast(
-            str,
-            DatasetRef(
-                layer="silver",
-                logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
-                version=getattr(output_ext, "delta_version_after", None),
-                provider=metadata.pipeline.provider,
-                entity=metadata.pipeline.entity,
-            ).node_id,
+        dataset_ref = DatasetRef(
+            layer="silver",
+            logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
+            version=getattr(output_ext, "delta_version_after", None),
+            provider=metadata.pipeline.provider,
+            entity=metadata.pipeline.entity,
         )
+        return dataset_ref.node_id
     if layer == "gold":
-        return cast(
-            str,
-            DatasetRef(
-                layer="gold",
-                logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
-                provider=metadata.pipeline.provider,
-                entity=metadata.pipeline.entity,
-            ).node_id,
+        dataset_ref = DatasetRef(
+            layer="gold",
+            logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
+            provider=metadata.pipeline.provider,
+            entity=metadata.pipeline.entity,
         )
+        return dataset_ref.node_id
     return None
 
 
@@ -150,8 +145,10 @@ def _load_existing_metadata_model(
     from bioetl.domain.models.metadata import GoldMetadata, SilverMetadata
 
     if layer == "silver":
-        return SilverMetadata.model_validate(payload)
-    return GoldMetadata.model_validate(payload)
+        silver_metadata: SilverMetadata = SilverMetadata.model_validate(payload)
+        return silver_metadata
+    gold_metadata: GoldMetadata = GoldMetadata.model_validate(payload)
+    return gold_metadata
 
 
 def _resolve_existing_metadata_path(

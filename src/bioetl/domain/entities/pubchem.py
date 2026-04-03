@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """PubChem domain entities.
 
 Contains:

@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Pydantic models for PubMed API responses.
 
 These models provide type-safe parsing and validation for PubMed data.

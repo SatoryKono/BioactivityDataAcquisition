@@ -60,7 +60,8 @@ class _WrappedDataSourceDelegationMixin:
     @property
     def provider_name(self: _HasWrappedDataSource) -> str:
         """Provider name from the wrapped data source."""
-        return self._data_source.provider_name
+        provider_name: str = self._data_source.provider_name
+        return provider_name
 
     async def __aenter__(self: WrappedDataSourceT) -> WrappedDataSourceT:
         """Enter async context and allow subclasses to reset wrapper state."""

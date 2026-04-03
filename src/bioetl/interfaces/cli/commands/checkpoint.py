@@ -24,7 +24,7 @@ __all__ = [
 ]
 
 
-@click.group()
+@click.group()  # type: ignore[untyped-decorator]
 def checkpoint() -> None:
     """Manage checkpoints."""
 
@@ -36,8 +36,8 @@ def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
     return _impl(pipeline)
 
 
-@checkpoint.command("list")
-@click.option("--pipeline", required=True, help="Pipeline name")
+@checkpoint.command("list")  # type: ignore[untyped-decorator]
+@click.option("--pipeline", required=True, help="Pipeline name")  # type: ignore[untyped-decorator]
 def checkpoint_list(pipeline: str) -> None:
     """List all checkpoints.
 

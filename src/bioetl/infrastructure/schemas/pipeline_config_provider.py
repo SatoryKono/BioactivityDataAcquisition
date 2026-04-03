@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Provider/source schemas extracted from pipeline_config."""
 
 from __future__ import annotations

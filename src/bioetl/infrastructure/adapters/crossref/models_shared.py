@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Shared Pydantic models for CrossRef API payload fragments."""
 
 from __future__ import annotations

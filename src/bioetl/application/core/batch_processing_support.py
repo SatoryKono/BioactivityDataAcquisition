@@ -166,7 +166,7 @@ class BatchProcessingSupportService:
     async def _safe_write_layer(
         self,
         layer: str,
-        records: list[dict],
+        records: list[dict[str, object]],
         batch_id: BatchID,
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None,

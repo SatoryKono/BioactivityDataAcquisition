@@ -57,3 +57,7 @@ class DefaultPublicationMetadataPolicy(PublicationMetadataStrategy):
 
     def should_log_fallback_lookup(self) -> bool:
         return self._log_fallback
+
+    def post_process_silver_record(self, silver_record: JsonDict) -> JsonDict:
+        """Return silver record as-is by default."""
+        return silver_record

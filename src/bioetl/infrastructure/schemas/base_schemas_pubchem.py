@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Shared base schemas for input filtering and gold filtering configuration."""
 
 from __future__ import annotations

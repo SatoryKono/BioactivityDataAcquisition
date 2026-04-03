@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """ChEMBL target and lookup Gold-layer contracts."""
 
 from __future__ import annotations

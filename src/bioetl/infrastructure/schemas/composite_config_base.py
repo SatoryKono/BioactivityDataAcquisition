@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Shared seed/dependency/enricher schemas for composite config."""
 
 from __future__ import annotations

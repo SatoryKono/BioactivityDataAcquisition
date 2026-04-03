@@ -185,7 +185,8 @@ def _resolve_effective_config_hash(config: CompositeConfig) -> str:
     if not isinstance(payload, dict):
         return ""
     try:
-        return cast(str, compute_config_hash(cast(dict[str, object], payload)))
+        payload_dict: dict[str, object] = payload
+        return compute_config_hash(payload_dict)
     except (TypeError, ValueError):
         return ""
 

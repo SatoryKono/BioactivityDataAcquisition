@@ -63,14 +63,14 @@ def _handle_cleanup_failure(
     )
 
 
-@click.command("bronze-cleanup")
-@click.option(
+@click.command("bronze-cleanup")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "-r",
     "--retention-days",
     default=90,
     help="Remove files older than N days",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--dry-run",
     is_flag=True,
     help="Show what would be removed",
@@ -127,8 +127,8 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
             coro.close()
 
 
-@click.command("cleanup-preview")
-@click.option(
+@click.command("cleanup-preview")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--pipeline",
     required=True,
     help="Pipeline name to preview (e.g., chembl_activity)",

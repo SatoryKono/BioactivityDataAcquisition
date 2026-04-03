@@ -114,13 +114,16 @@ def _apply_tracing_override(
         updated_observability = observability.model_copy(
             update={"tracing_enabled": enabled}
         )
-        return settings.model_copy(update={"observability": updated_observability})
+        copied_settings: Settings = settings.model_copy(
+            update={"observability": updated_observability}
+        )
+        return copied_settings
 
-    updated_settings = SimpleNamespace(**vars(settings))
-    updated_observability = SimpleNamespace(**vars(observability))
-    updated_observability.tracing_enabled = enabled
-    updated_settings.observability = updated_observability
-    return cast("Settings", updated_settings)
+    namespace_settings = SimpleNamespace(**vars(settings))
+    namespace_observability = SimpleNamespace(**vars(observability))
+    namespace_observability.tracing_enabled = enabled
+    namespace_settings.observability = namespace_observability
+    return cast("Settings", namespace_settings)
 
 
 def assemble_vacuum_settings(
