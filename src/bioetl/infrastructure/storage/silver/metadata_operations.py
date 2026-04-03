@@ -6,7 +6,7 @@ import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 from deltalake import DeltaTable
 
@@ -143,6 +143,30 @@ class _SilverWriteFinalizationHostProtocol(Protocol):
     async def _get_delta_version(self, table_path: str) -> int | None: ...
 
 
+def _emit_prepared_silver_metadata_metrics(
+    host: _SilverMetadataWriteHostProtocol,
+    prepared: _PreparedSilverMetadataWriteOperation,
+) -> None:
+    """Emit lineage/composite metrics for an already prepared metadata operation."""
+    pipeline_name = f"{prepared.provider_name}_{prepared.entity_name}"
+    if isinstance(prepared.request, _SilverMetadataWriteRequest):
+        if not prepared.request.bronze_refs:
+            emit_lineage_refs_missing_metric(
+                getattr(host, "_metrics", None),
+                pipeline_name=pipeline_name,
+                layer="silver",
+                ref_type="bronze_batch",
+            )
+        return
+    emit_composite_source_selection_metrics(
+        getattr(host, "_metrics", None),
+        pipeline_name=pipeline_name,
+        layer="silver",
+        sources_used=prepared.request.sources_used,
+        records=prepared.request.records,
+    )
+
+
 def _build_silver_write_result(
     *, table_name: str, table_path: str, version_after: int | None, records_count: int
 ) -> SilverWriteResult | None:
@@ -155,7 +179,7 @@ def _build_silver_write_result(
 
 def _read_delta_version(table_path: str) -> int:
     """Read the current Delta table version synchronously."""
-    return DeltaTable(table_path).version()
+    return cast(int, DeltaTable(table_path).version())
 
 
 async def _resolve_silver_metadata_context(
@@ -287,23 +311,7 @@ async def _execute_prepared_silver_metadata_write_operation(
         pipeline_name=f"{prepared.provider_name}_{prepared.entity_name}",
         layer="silver",
     )
-    pipeline_name = f"{prepared.provider_name}_{prepared.entity_name}"
-    if isinstance(prepared.request, _SilverMetadataWriteRequest):
-        if not prepared.request.bronze_refs:
-            emit_lineage_refs_missing_metric(
-                getattr(host, "_metrics", None),
-                pipeline_name=pipeline_name,
-                layer="silver",
-                ref_type="bronze_batch",
-            )
-        return
-    emit_composite_source_selection_metrics(
-        getattr(host, "_metrics", None),
-        pipeline_name=pipeline_name,
-        layer="silver",
-        sources_used=prepared.request.sources_used,
-        records=prepared.request.records,
-    )
+    _emit_prepared_silver_metadata_metrics(host, prepared)
 
 
 async def _execute_silver_metadata_write(

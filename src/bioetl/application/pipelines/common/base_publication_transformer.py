@@ -24,6 +24,11 @@ from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
+from bioetl.application.pipelines.common.publication_assembly import (
+    build_publication_silver_record,
+    normalize_publication_business_data,
+    prepare_publication_payload,
+)
 from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
@@ -273,10 +278,12 @@ class BasePublicationTransformer(BaseTransformer):
         index: int,
     ) -> PreSilverRecord | None:
         """Build an intermediate publication payload for application finalization."""
-        prepared = _prepare_publication_business_data(self, context, record, index)
+        prepared = prepare_publication_payload(self, context, record, index)
         if prepared is None:
             return None
-        primary_id_field, primary_id, business_data = prepared
+        primary_id_field = prepared.primary_id_field
+        primary_id = prepared.primary_id
+        business_data = prepared.business_data
         entity_id = self.compute_entity_id(
             source_id=primary_id,
             record={primary_id_field: primary_id},
@@ -285,7 +292,7 @@ class BasePublicationTransformer(BaseTransformer):
             entity_id=entity_id,
             business_data=business_data,
             build_silver_record=partial(
-                _build_publication_silver_record,
+                build_publication_silver_record,
                 self,
             ),
             apply_structural_policy=self._apply_structural_policy,
@@ -299,19 +306,20 @@ class BasePublicationTransformer(BaseTransformer):
         index: int,
     ) -> SilverRecord | None:
         """Unified publication transformation flow (Facade execution)."""
-        prepared = _prepare_publication_business_data(self, context, record, index)
+        prepared = prepare_publication_payload(self, context, record, index)
         if prepared is None:
             return None
-        primary_id_field, primary_id, business_data = prepared
-        normalized_business_data = _normalize_publication_business_data(
+        normalized_business_data = normalize_publication_business_data(
             self,
-            business_data,
+            prepared.business_data,
         )
         entity_id, content_hash = self._compute_identifiers(
-            primary_id_field, primary_id, normalized_business_data
+            prepared.primary_id_field,
+            prepared.primary_id,
+            normalized_business_data,
         )
 
-        return _build_publication_silver_record(
+        return build_publication_silver_record(
             self,
             context,
             entity_id,
@@ -328,65 +336,3 @@ class BasePublicationTransformer(BaseTransformer):
     ) -> dict[str, str | None]:
         """Classify publication type using the unified 3-level hierarchy."""
         return _classification_payload(provider, raw_type, raw_types_list)
-
-
-def _prepare_publication_business_data(
-    transformer: BasePublicationTransformer,
-    context: PipelineContext,
-    record: BronzeRecord,
-    index: int,
-) -> tuple[str, object, JsonDict] | None:
-    """Prepare publication business data and validate the primary identifier."""
-    # Execute extraction strategy
-    transformer._data_extractor.pre_extract_validation(context, record, index)
-    business_data = transformer._data_extractor.extract_business_data(record)
-    transformer._normalize_content_fields(business_data)
-
-    # Execute identity resolution strategy
-    id_result = transformer._identifier_resolver.validate_primary_id(
-        context, business_data, index
-    )
-    if id_result is None:
-        return None
-    primary_id_field, primary_id = id_result
-    
-    transformer._log_fallback_if_needed(
-        context,
-        business_data,
-        primary_id_field,
-        primary_id,
-    )
-    return primary_id_field, primary_id, business_data
-
-
-def _normalize_publication_business_data(
-    transformer: BasePublicationTransformer,
-    business_data: JsonDict,
-) -> JsonDict:
-    """Normalize publication business data before legacy hash finalization."""
-    # Execute normalization strategy (injected)
-    normalized = transformer._record_normalizer.normalize_business_data(business_data)
-    if isinstance(business_data.get("issn"), list):
-        normalized["issn"] = list(business_data["issn"])
-    return normalized
-
-
-def _build_publication_silver_record(
-    transformer: BasePublicationTransformer,
-    context: PipelineContext,
-    entity_id: str,
-    content_hash: str,
-    index: int,
-    business_data: JsonDict,
-) -> SilverRecord:
-    """Build a finalized Silver record from normalized publication business data."""
-    entity_class = transformer._metadata_strategy.get_entity_class()
-    entity = transformer._create_entity(
-        entity_class,
-        context,
-        entity_id=entity_id,
-        content_hash=content_hash,
-        index=index,
-        **business_data,
-    )
-    return cast("SilverRecord", transformer.entity_to_silver_record(entity))

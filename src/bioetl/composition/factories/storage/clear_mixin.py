@@ -65,7 +65,7 @@ class StorageAdapterClearMixin:
                 None, lambda: exporter.clear(table_name)
             )
             cleared += len(deleted)
-        return cleared
+        return int(cleared)
 
     async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files for Silver and Gold layers.

@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, Literal, Protocol, cast
 
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
@@ -56,8 +55,8 @@ class StorageAdapterMergedMixin:
             Table path.
         """
         if layer == "gold":
-            return self.gold.get_table_path(table_name)
-        return self.silver.get_table_path(table_name)
+            return cast(Path, self.gold.get_table_path(table_name))
+        return cast(Path, self.silver.get_table_path(table_name))
 
     async def read_silver(
         self,
@@ -78,7 +77,7 @@ class StorageAdapterMergedMixin:
         Raises:
             FileNotFoundError: If the table does not exist.
         """
-        return await self.silver.read_silver(table_name, columns=columns)
+        return list(await self.silver.read_silver(table_name, columns=columns))
 
     async def write_silver_merged(
         self,

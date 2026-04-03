@@ -1,5 +1,104 @@
 {
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
-  "entries": {}
+  "entries": {
+    "scripts/ai/code-reviewer.sh": {
+      "decision": "active",
+      "rationale": "Internal AI script, called via alias/direct execution, not yet linked in docs.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ai/data-engineer.sh": {
+      "decision": "active",
+      "rationale": "Internal AI script, called via alias/direct execution, not yet linked in docs.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ai/literature-researcher.sh": {
+      "decision": "active",
+      "rationale": "Internal AI script, called via alias/direct execution, not yet linked in docs.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/docker_cli_resolver.sh": {
+      "decision": "active",
+      "rationale": "Internal infrastructure helper for Docker environment resolution.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/load_repo_env.ps1": {
+      "decision": "active",
+      "rationale": "Infrastructure utility for Windows environment setup.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/load_repo_env.sh": {
+      "decision": "active",
+      "rationale": "Infrastructure utility for Unix environment setup.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/mcp_brave_search_wrapper.ps1": {
+      "decision": "active",
+      "rationale": "Internal MCP wrapper for Windows runtime.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/mcp_context7_wrapper.ps1": {
+      "decision": "active",
+      "rationale": "Internal MCP wrapper for Windows runtime.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/mcp_docker_docs_wrapper.ps1": {
+      "decision": "active",
+      "rationale": "Internal MCP wrapper for Windows runtime.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/mcp_docker_wrapper.ps1": {
+      "decision": "active",
+      "rationale": "Internal MCP wrapper for Windows runtime.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/mcp_dockerhub_wrapper.ps1": {
+      "decision": "active",
+      "rationale": "Internal MCP wrapper for Windows runtime.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/mcp_grafana_wrapper.ps1": {
+      "decision": "active",
+      "rationale": "Internal MCP wrapper for Windows runtime.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/mcp_paper_search_wrapper.ps1": {
+      "decision": "active",
+      "rationale": "Internal MCP wrapper for Windows runtime.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    },
+    "scripts/ops/mcp_prometheus_wrapper.ps1": {
+      "decision": "active",
+      "rationale": "Internal MCP wrapper for Windows runtime.",
+      "owner": "BioETL Team",
+      "next_step": "document",
+      "review_by": "2026-06-01"
+    }
+  }
 }

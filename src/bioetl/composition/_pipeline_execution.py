@@ -94,10 +94,12 @@ def push_metrics_to_gateway(
         grouping_key["pipeline"] = pipeline_name
     if run_type:
         grouping_key["run_type"] = run_type
-    return _push(
-        gateway=gateway,
-        run_label=run_label,
-        grouping_key=grouping_key,
+    return bool(
+        _push(
+            gateway=gateway,
+            run_label=run_label,
+            grouping_key=grouping_key,
+        )
     )
 
 
@@ -116,7 +118,7 @@ def ensure_metrics_server_started() -> bool:
         True  # Server started on configured port
     """
     settings = get_settings()
-    return maybe_start_metrics_server(settings)
+    return bool(maybe_start_metrics_server(settings))
 
 
 @dataclass(frozen=True)
