@@ -12,6 +12,7 @@ Current coverage:
 
 - `crossref/v1.json`
 - `openalex/v1.json`
+- `pubmed/v1.json`
 - `semanticscholar/v1.json`
 
 Update path:
@@ -23,3 +24,10 @@ Update path:
 These snapshots are intentionally narrower than the Silver schema snapshots:
 they protect a minimal external provider payload shape, not the full transformed
 schema surface.
+
+Recommended extension pattern:
+
+- prefer stable JSON probes over XML-heavy endpoints for the MVP slice
+- freeze only a few high-signal path/type expectations per probe
+- avoid full-payload snapshots when a smaller provider-facing shape contract is
+  enough to detect meaningful drift
