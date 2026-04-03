@@ -47,7 +47,7 @@ docs/
 ├── 01-requirements/
 │   └── REQUIREMENTS.md             # Testable requirements
 ├── 02-architecture/
-│   ├── decisions/                  # ADRs (ADR-001 through ADR-045)
+│   ├── decisions/                  # ADRs (verify live set before citing ranges)
 │   ├── diagrams/                   # Canonical diagram source/render/docs tree
 │   └── policies/                   # Architecture and review policies
 ├── 03-guides/                      # Guides & manuals
@@ -77,8 +77,8 @@ docs/
 ## 3. ADR Management
 
 ### Current State
-- 45 ADRs: ADR-001 through ADR-045 (all present, verified 2026-03-28)
-- All in status: Accepted (except ADR-008: Superseded)
+- ADR set: verify live from `docs/02-architecture/decisions/` before citing counts or ranges
+- Status pattern: generally Accepted; ADR-008 is historically Superseded
 - Location: `docs/02-architecture/decisions/`
 
 ### ADR Template

@@ -24,4 +24,4 @@ def strip_doi_transport_prefix(
         DOI string with supported transport prefixes removed.
     """
     _ = allow_uppercase_prefix
-    return strip_doi_prefix(doi)
+    return str(strip_doi_prefix(doi))

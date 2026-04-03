@@ -59,56 +59,79 @@ class BaseFilterConfig:
 
     def should_include(self, record: JsonDict) -> bool:
         """Check all filtering rules against a record."""
-        return self.evaluate(record).include
+        decision = self.evaluate(record)
+        include: bool = decision.include
+        return include
 
     def evaluate(self, record: JsonDict) -> FilterDecision:
         """Evaluate all filter rules and return the first blocking decision."""
-        evaluators = (
-            lambda payload: evaluate_required_fields(self.required_fields, payload),
-            lambda payload: evaluate_exclude_if_present(
-                self.exclude_if_present,
-                payload,
-            ),
-            lambda payload: evaluate_column_filters(self.column_filters, payload),
-            lambda payload: evaluate_range_filters(self.range_filters, payload),
-            lambda payload: evaluate_list_length_filters(
-                self.list_length_filters,
-                payload,
-            ),
-            lambda payload: evaluate_list_contains_filters(
-                self.list_contains_filters,
-                payload,
-            ),
+        required_fields_decision = evaluate_required_fields(self.required_fields, record)
+        if not required_fields_decision.include:
+            return required_fields_decision
+
+        exclude_if_present_decision = evaluate_exclude_if_present(
+            self.exclude_if_present,
+            record,
         )
-        for evaluator in evaluators:
-            decision = evaluator(record)
-            if not decision.include:
-                return decision
+        if not exclude_if_present_decision.include:
+            return exclude_if_present_decision
+
+        column_filter_decision = evaluate_column_filters(self.column_filters, record)
+        if not column_filter_decision.include:
+            return column_filter_decision
+
+        range_filter_decision = evaluate_range_filters(self.range_filters, record)
+        if not range_filter_decision.include:
+            return range_filter_decision
+
+        list_length_decision = evaluate_list_length_filters(
+            self.list_length_filters,
+            record,
+        )
+        if not list_length_decision.include:
+            return list_length_decision
+
+        list_contains_decision = evaluate_list_contains_filters(
+            self.list_contains_filters,
+            record,
+        )
+        if not list_contains_decision.include:
+            return list_contains_decision
+
         return FilterDecision.allowed()
 
     def _check_required_fields(self, record: JsonDict) -> bool:
         """Check that all required fields are present and non-empty."""
-        return check_required_fields(self.required_fields, record)
+        is_valid: bool = check_required_fields(self.required_fields, record)
+        return is_valid
 
     def _check_exclude_if_present(self, record: JsonDict) -> bool:
         """Check that exclusion fields are absent or empty."""
-        return check_exclude_if_present(self.exclude_if_present, record)
+        is_valid: bool = check_exclude_if_present(self.exclude_if_present, record)
+        return is_valid
 
     def _check_column_filters(self, record: JsonDict) -> bool:
         """Check that column values match the configured filters."""
-        return check_column_filters(self.column_filters, record)
+        is_valid: bool = check_column_filters(self.column_filters, record)
+        return is_valid
 
     def _check_range_filters(self, record: JsonDict) -> bool:
         """Check that values fall within the configured ranges."""
-        return check_range_filters(self.range_filters, record)
+        is_valid: bool = check_range_filters(self.range_filters, record)
+        return is_valid
 
     def _check_list_length_filters(self, record: JsonDict) -> bool:
         """Check list lengths in columns against configured bounds."""
-        return check_list_length_filters(self.list_length_filters, record)
+        is_valid: bool = check_list_length_filters(self.list_length_filters, record)
+        return is_valid
 
     def _check_list_contains_filters(self, record: JsonDict) -> bool:
         """Check list-contains filters against record values."""
-        return check_list_contains_filters(self.list_contains_filters, record)
+        is_valid: bool = check_list_contains_filters(
+            self.list_contains_filters,
+            record,
+        )
+        return is_valid
 
     def is_empty(self) -> bool:
         """Check whether the filter configuration is empty."""

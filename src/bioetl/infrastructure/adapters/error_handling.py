@@ -162,7 +162,7 @@ class ErrorService:
             should_retry=should_retry,
             decision_source="exception_type",
         )
-        return should_retry
+        return bool(should_retry)
 
     def should_retry_status(self, status_code: int) -> bool:
         """Determine if HTTP status code should be retried.
@@ -182,7 +182,7 @@ class ErrorService:
             should_retry=should_retry,
             decision_source="http_status",
         )
-        return should_retry
+        return bool(should_retry)
 
     def get_retry_after(self, response: Response) -> float | None:
         """Extract Retry-After header value from response.
@@ -193,7 +193,10 @@ class ErrorService:
         Returns:
             Retry-After value in seconds, or None if not present.
         """
-        return extract_retry_after(response)
+        retry_after = extract_retry_after(response)
+        if retry_after is None:
+            return None
+        return float(retry_after)
 
     def wrap_error(
         self,

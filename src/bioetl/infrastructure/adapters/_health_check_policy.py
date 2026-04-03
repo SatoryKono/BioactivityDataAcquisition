@@ -47,7 +47,7 @@ def resolve_failure_health_status(
 def get_consecutive_health_failures(circuit_breaker: CircuitBreakerPort) -> int:
     """Read circuit-breaker failure count with a conservative fallback."""
     try:
-        return circuit_breaker.get_failure_count()
+        return int(circuit_breaker.get_failure_count())
     except HEALTH_CHECK_ERRORS:
         return 1
 

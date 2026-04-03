@@ -76,11 +76,11 @@ class HTTPClientRetryMixin:
                 with suppress(ValueError):
                     delay = self.retry_config.clamp_retry_after(float(retry_after))
         await asyncio.sleep(delay)
-        return delay
+        return float(delay)
 
     def _can_retry(self, attempt: int, retries_used: int) -> bool:
         """Backward-compatible wrapper for retry-budget decision logic."""
-        return _can_retry(self.retry_config, attempt, retries_used)
+        return bool(_can_retry(self.retry_config, attempt, retries_used))
 
     def _record_retry_budget_exhausted(self, method: str, url: str) -> None:
         """Emit retry-budget exhaustion metrics and warning log."""
@@ -197,7 +197,7 @@ class HTTPClientRetryMixin:
         exc: Exception,
     ) -> bool:
         """Return True when exception is retryable by policy."""
-        return _is_retryable_error(self.retry_config, exc)
+        return bool(_is_retryable_error(self.retry_config, exc))
 
     async def _attempt_request(
         self,

@@ -43,7 +43,7 @@ model: sonnet
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze->Silver->Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
-- Текущее состояние: 45 ADR-файлов (ADR-001..ADR-045), включая исторически superseded ADR-008
+- Текущее состояние: используй текущий ADR set из `docs/02-architecture/decisions/`; ADR-008 исторически superseded
 
 **Ключевые файлы:**
 
@@ -122,7 +122,7 @@ docs/
 +-- 01-requirements/
 |   +-- REQUIREMENTS.md         # Testable requirements
 +-- 02-architecture/
-|   +-- decisions/              # ADRs (ADR-001 through ADR-045)
+|   +-- decisions/              # ADRs (verify live set before citing ranges)
 |   +-- diagrams/           # Canonical Mermaid sources and rendered views
 |   +-- policies/               # Architecture and review policies
 +-- 03-guides/

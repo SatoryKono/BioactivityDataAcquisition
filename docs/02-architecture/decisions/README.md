@@ -215,7 +215,7 @@ This directory contains Architecture Decision Records documenting significant ar
                                 └───────────┘
 ```
 
-### ADR-024..044 Relationships
+### ADR-024..045 Relationships
 
 ```
                     ┌─────────────────────────────────────────┐
@@ -234,6 +234,12 @@ This directory contains Architecture Decision Records documenting significant ar
                                 │  ADR-038  │                  │  ADR-028  │
                                 │Enum Extern│                  │Filter Ext │
                                 └───────────┘                  └───────────┘
+                                                                      │
+                                                                      ▼
+                                                               ┌───────────┐
+                                                               │  ADR-045  │
+                                                               │DQ Contract│
+                                                               └───────────┘
 
          ┌─────────────────────────────────────────────────────────────┐
          │                  Schema & Contracts                         │
@@ -289,6 +295,8 @@ This directory contains Architecture Decision Records documenting significant ar
 
 ADR-044 extends the lifecycle and metadata line by introducing a dedicated
 control-plane layer for immutable run manifests and append-only run ledgers.
+ADR-045 formalizes the Data Quality Contract System, building upon the
+externalization patterns defined in ADR-027 and ADR-028.
 
 ## Writing New ADRs
 

@@ -7,12 +7,20 @@ from typing import TypeVar
 from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.models.metadata import (
+    BronzeMetadata,
     FileOutputMetadata,
+    GoldMetadata,
+    SilverMetadata,
     SourceMetadata,
 )
 from bioetl.domain.ports import BronzeMetadataInput
 
-_MetadataT = TypeVar("_MetadataT")
+_MetadataT = TypeVar(
+    "_MetadataT",
+    BronzeMetadata,
+    SilverMetadata,
+    GoldMetadata,
+)
 
 
 def validate_records_present(
@@ -43,7 +51,10 @@ def build_bronze_source_metadata(input_data: BronzeMetadataInput) -> SourceMetad
     if input_data.source_metadata is not None:
         source = input_data.source_metadata
         if input_data.query_string and source.query_string is None:
-            return source.model_copy(update={"query_string": input_data.query_string})
+            updated_source: SourceMetadata = source.model_copy(
+                update={"query_string": input_data.query_string}
+            )
+            return updated_source
         return source
 
     return SourceMetadata(

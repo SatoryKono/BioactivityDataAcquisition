@@ -20,7 +20,7 @@ def is_retryable_exception(exc: Exception, retry_config: RetryConfig) -> bool:
         return False
     if isinstance(exc, RecoverableError):
         return True
-    return retry_config.is_retryable_exception(exc)
+    return bool(retry_config.is_retryable_exception(exc))
 
 
 def retryable_exception_types(
@@ -44,7 +44,7 @@ async def calculate_and_wait_retry_delay(
     """Calculate delay and sleep before the next retry attempt."""
     delay = retry_config.calculate_delay(attempt, url)
     await asyncio.sleep(delay)
-    return delay
+    return float(delay)
 
 
 def log_retry_attempt(

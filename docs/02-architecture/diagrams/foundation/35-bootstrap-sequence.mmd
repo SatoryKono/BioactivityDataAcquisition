@@ -71,8 +71,8 @@ flowchart TB
     end
 
     subgraph Step9["Step 9: Pipeline Creation & Runner"]
-        S9A["create_factory_runner()"]
-        S9B["create_pipeline_with_services()"]
+        S9A["GenericPipelineFactory.create_runner()"]
+        S9B["GenericPipelineFactory.create_with_services()"]
         S9C["creation_support / _creation_wiring"]
         S9D["assemble_runner() → PipelineRunner"]
     end

@@ -90,6 +90,40 @@ Current rollout semantics:
 4. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
    `observe` logs and continues, `soft_fail` blocks resume, `hard_fail` raises an error.
 
+## Supported Resume Modes
+
+The current control-plane contract intentionally supports two different resume
+modes:
+
+- ordinary resume uses checkpoint snapshot state and compatibility checks
+  without ledger suffix replay;
+- composite resume uses checkpoint snapshot state as the base and then replays
+  only the ledger suffix strictly after `last_event_id`.
+
+This asymmetry is intentional. The current contract finishes the existing
+composite replay model without requiring every runner to implement the same
+ledger-driven state projection.
+
+## Supported Execution Paths
+
+The current control-plane contract is defined against these supported execution
+paths:
+
+| Path | Resume model | Control-plane guarantees |
+|---|---|---|
+| `ordinary success` | none | Manifest exists before execution starts; ledger writes `manifest_created`, `run_started`, stage lifecycle events, and `run_finished` when ledger is enabled |
+| `ordinary failure` | none | Manifest exists before execution starts; ledger writes `manifest_created`, `run_started`, partial stage lifecycle events, and terminal failure semantics through `run_failed` / exception logging when ledger is enabled |
+| `ordinary shutdown` | none | Manifest exists before execution starts; ledger writes `manifest_created`, `run_started`, partial stage lifecycle events, and `run_shutdown` when ledger is enabled |
+| `ordinary resume` | checkpoint snapshot only | Manifest still exists before execution starts; resume relies on checkpoint snapshot state and compatibility checks without ledger suffix replay |
+| `composite success` | none | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and terminal success when ledger is enabled |
+| `composite failure` | none | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and terminal failure semantics when ledger is enabled |
+| `composite shutdown` | none | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and `run_shutdown` when ledger is enabled |
+| `composite resume` | checkpoint snapshot + ledger suffix replay | Manifest still exists before execution starts; resume restores checkpoint snapshot first and then replays only the ledger suffix strictly after `last_event_id` |
+
+No supported execution path may bypass manifest creation or, when
+`run_ledger_enabled=true`, ledger attachment. Runtime assembly coerces invalid
+flag combinations so that ledger cannot be enabled without manifest creation.
+
 ## Composite Checkpoint Resume Semantics
 
 The current replay-enabled resume path is implemented for composite checkpoints.
@@ -202,6 +236,27 @@ Event taxonomy behavior:
 - Prefix-based families are supported (`dq_*`, `lineage_*`, `checkpoint_*`,
   `composite_*`, `artifact_*`), and suffix-based phase events
   (`*_started`, `*_completed`) map to `pipeline.phase`.
+
+## Canonical Stage Sets
+
+When `event_type` is `stage_started` or `stage_completed`, the current contract
+freezes these canonical stage names:
+
+- ordinary runner stages:
+  - `preflight`
+  - `prepare_medallion_layers`
+  - `execute_pipeline`
+  - `postrun`
+  - `checkpoint_finalize`
+- composite runner stages:
+  - `seed`
+  - `dependencies`
+  - `enrichment`
+  - `merge`
+
+These stage sets are intentionally stable contract surface. Stage events are
+canonicalized to lowercase pipeline stage names, while non-stage events may use
+non-pipeline vocabulary such as artifact layer names in `stage`.
 
 ## Invariants
 

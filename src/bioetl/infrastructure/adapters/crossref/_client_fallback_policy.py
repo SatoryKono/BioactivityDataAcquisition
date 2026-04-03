@@ -37,7 +37,7 @@ class _CrossRefFallbackPolicyMixin:
 
     def _get_normalize_id_hook(self) -> NormalizeIdPort:
         """Return DOI normalization hook."""
-        return normalize_doi
+        return lambda value: normalize_doi(value)
 
     def _get_extract_record_id_hook(self) -> ExtractRecordIdPort:
         """Return hook extracting DOI from a CrossRef record."""

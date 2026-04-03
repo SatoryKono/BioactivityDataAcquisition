@@ -185,6 +185,17 @@ strictly after `last_event_id`. This replay is intentionally coarse-grained: it
 restores lifecycle milestones and replay watermark metadata without
 reconstructing rich checkpoint payloads from ledger events.
 
+The supported resume model is intentionally dual-mode:
+
+- ordinary resume uses checkpoint snapshot state and compatibility checks
+  without ledger suffix replay;
+- composite resume uses checkpoint snapshot state as the base and then replays
+  ledger entries strictly after `last_event_id`.
+
+ADR-044 therefore does not require one universal replay algorithm across all
+runner families. The stability requirement is a shared control-plane contract,
+not identical resume internals.
+
 ## Compliance
 
 - Reproducibility and deterministic execution: ADR-014

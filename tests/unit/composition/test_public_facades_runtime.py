@@ -23,27 +23,6 @@ def test_composite_api_reexports_bootstrap_entrypoints() -> None:
     assert compat_module.load_pipeline_config is target_module.load_pipeline_config
 
 
-@pytest.mark.unit
-def test_pipeline_creation_api_delegates_through_creation_support() -> None:
-    """creation_api should delegate sanctioned exports through creation_support."""
-    sys.modules.pop("bioetl.composition.factories.pipeline.creation_api", None)
-
-    compat_module = importlib.import_module(
-        "bioetl.composition.factories.pipeline.creation_api"
-    )
-    support_module = importlib.import_module(
-        "bioetl.composition.factories.pipeline.creation_support"
-    )
-
-    assert compat_module.__all__ == list(support_module.__all__)
-    for export_name in support_module.__all__:
-        assert getattr(compat_module, export_name) is getattr(
-            support_module, export_name
-        )
-
-    with pytest.raises(AttributeError, match="has no attribute 'missing_symbol'"):
-        getattr(compat_module, "missing_symbol")
-
 
 @pytest.mark.unit
 def test_pipeline_construction_module_reexports_canonical_builders() -> None:

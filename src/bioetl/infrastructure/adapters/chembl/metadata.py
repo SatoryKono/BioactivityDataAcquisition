@@ -54,4 +54,4 @@ class ChemblMetadataMixin:
     @property
     def request_count(self) -> int:
         """Number of recorded API requests since last clear."""
-        return get_request_count(collector=self._request_collector)
+        return int(get_request_count(collector=self._request_collector))

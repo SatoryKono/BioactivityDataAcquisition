@@ -49,17 +49,3 @@ def test_pipeline_configs_import_warns_and_reexports_registry_manifest() -> None
     assert PIPELINE_CONFIGS is not None
     assert PipelineFactoryConfig is not None
 
-
-def test_pipeline_creation_api_reexports_creation_wiring_symbols() -> None:
-    """Pipeline creation API should stay as a direct compatibility shim."""
-    from bioetl.composition.factories.pipeline._creation_wiring import (
-        _PipelineCreationInputs as CanonicalPipelineCreationInputs,
-        _create_pipeline_with_services_impl as canonical_create_pipeline,
-    )
-    from bioetl.composition.factories.pipeline.creation_api import (
-        _PipelineCreationInputs,
-        _create_pipeline_with_services_impl,
-    )
-
-    assert _PipelineCreationInputs is CanonicalPipelineCreationInputs
-    assert _create_pipeline_with_services_impl is canonical_create_pipeline

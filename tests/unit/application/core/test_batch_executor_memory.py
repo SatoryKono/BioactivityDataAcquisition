@@ -214,6 +214,7 @@ def _create_batch_executor(
             transformer=components.transformer,
             writer=components.writer,
             tracing=tracing_manager,
+            quarantine_manager=MagicMock(),
         ),
     )
     execution_lifecycle_service = BatchExecutionLifecycleService(

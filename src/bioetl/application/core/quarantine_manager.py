@@ -99,10 +99,8 @@ class QuarantineManagerService:
             ingestion_ts=ingestion_ts,
         )
         if self._metrics:
-            self._metrics.inc_quarantine_records(
-                pipeline=self._pipeline_name,
-                reason=error_type.value,
-            )
+            self._metrics.track_quarantined_records(error_type, 1)
+            self._metrics.track_processed_records("quarantined", 1)
 
     async def quarantine_records(
         self,
@@ -229,11 +227,12 @@ class QuarantineManagerService:
             List of quarantined records.
 
         """
-        return await self._quarantine.inspect(
+        records: list[JsonDict] = await self._quarantine.inspect(
             pipeline=self._pipeline_name,
             limit=limit,
             error_code=error_code,
         )
+        return records
 
     async def get_stats(
         self,

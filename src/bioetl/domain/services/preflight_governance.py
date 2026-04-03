@@ -2,6 +2,12 @@
 
 from __future__ import annotations
 
+__all__ = [
+    "GovernancePolicy",
+    "PreflightGovernanceConfig",
+    "PreflightGovernanceService",
+]
+
 from bioetl.domain.services._preflight_governance_helpers import (
     BLOCKING_POLICIES,
     apply_overrides_to_issues,
@@ -116,7 +122,11 @@ class PreflightGovernanceService:
         config: PreflightGovernanceConfig,
     ) -> list[ValidationIssue]:
         """Apply severity overrides to individual issues."""
-        return apply_overrides_to_issues(issues, config)
+        updated_issues: list[ValidationIssue] = apply_overrides_to_issues(
+            issues,
+            config,
+        )
+        return updated_issues
 
     def _determine_execution_decision(
         self,
@@ -156,11 +166,12 @@ class PreflightGovernanceService:
         policy: GovernancePolicy,
     ) -> tuple[bool, str]:
         """Resolve whether a policy blocks execution and why."""
-        return resolve_policy_block_state(
+        policy_state: tuple[bool, str] = resolve_policy_block_state(
             report_has_any_issues=report.has_any_issues(),
             has_effective_blockers=self._has_effective_blockers(report),
             policy=policy,
         )
+        return policy_state
 
     def _generate_governance_report(
         self,
@@ -188,10 +199,11 @@ class PreflightGovernanceService:
         execution_timestamp: str,
     ) -> JsonDict:
         """Build governance metadata for reporting."""
-        return build_governance_metadata(
+        metadata: JsonDict = build_governance_metadata(
             config,
             execution_timestamp=execution_timestamp,
         )
+        return metadata
 
     @staticmethod
     def _resolve_execution_timestamp(report: CompositeValidationReport) -> str:
@@ -203,7 +215,8 @@ class PreflightGovernanceService:
         )
         for result in candidates:
             if result is not None and result.timestamp:
-                return result.timestamp
+                timestamp: str = result.timestamp
+                return timestamp
         return ""
 
     def _format_detailed_issues(
@@ -213,7 +226,10 @@ class PreflightGovernanceService:
     ) -> list[JsonDict]:
         """Format issues for governance report."""
         all_issues = report.get_all_issues()
-        return [self._format_issue(issue, config) for issue in all_issues]
+        formatted_issues: list[JsonDict] = [
+            self._format_issue(issue, config) for issue in all_issues
+        ]
+        return formatted_issues
 
     def _format_issue(
         self,
@@ -231,7 +247,8 @@ class PreflightGovernanceService:
         """Determine if an issue is effectively a blocker after considering overrides."""
         if issue.severity != ValidationSeverity.BLOCKER:
             return False
-        return issue.is_blocker()
+        is_blocker: bool = issue.is_blocker()
+        return is_blocker
 
     def _determine_governance_impact(
         self,

@@ -161,6 +161,7 @@ def _make_service(
             transformer=transformer,
             writer=writer,
             tracing=tracing,
+            quarantine_manager=MagicMock(),
         ),
     )
 

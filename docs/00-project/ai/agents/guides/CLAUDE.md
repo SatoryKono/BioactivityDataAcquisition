@@ -159,17 +159,17 @@ ls tests/architecture/test-*.py
 | **Язык**               | Python 3.11+                             |
 | **Стиль документации** | Русский, RFC 2119 keywords               |
 
-### 1.1. Метрики Кодовой Базы (2026-03-04)
+### 1.1. Ориентиры Кодовой Базы (проверять live)
 
 | Метрика                   | Значение                                            |
 | ------------------------- | --------------------------------------------------- |
-| **Python-файлов**         | ~1,457 (712 src + 745 tests)                        |
-| **Строк кода**            | ~134,776 (src/bioetl/)                              |
-| **Тестов**                | ~11,227 (функций test_)                             |
-| **ADR**                   | ADR-001..ADR-045                                    |
+| **Python-файлы**          | Считай live для текущей ветки; для быстрого total используй `find ... -name '*.py'` с последующим подсчётом |
+| **Строки кода**           | Не полагайся на snapshot-оценки; измеряй live только для конкретного scope |
+| **Тестовый объём**        | Проверяй live через `pytest --collect-only` или подсчёт `test_`-функций в целевом дереве |
+| **ADR**                   | Используй текущий список файлов в `docs/02-architecture/decisions/`, не фиксируй диапазон без live-проверки |
 | **Провайдеров**           | 7                                                   |
-| **Pipeline-конфигураций** | 21                                                  |
-| **Конфиг-файлов всего**   | 51 (pipelines, quality, filters, sources, schemas)  |
+| **Pipeline-конфигурации** | Сверяй live по `configs/entities/` и `configs/composites/` |
+| **Конфиг-файлы всего**    | Считай live по актуальному набору `configs/**/*.yaml` |
 
 ----------------------------------------------------------------------
 
@@ -388,7 +388,8 @@ cat docs/99-archive/refactoring-plan.md | head -60
 
 **Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](../../../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 
-**Актуальный набор ADR (ADR-001..ADR-045)** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+**Актуальный набор ADR** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`  
+Перед ссылкой на номер ADR проверь текущий список файлов, а не исторический диапазон.
 (полный реестр в `docs/00-project/RULES.md` Приложение F)
 
 ----------------------------------------------------------------------
@@ -443,13 +444,14 @@ async def aclose() -> None                             # Graceful shutdown
 
 > **Полная документация**: См. `docs/00-project/RULES.md` §4.2 "Политика Тестирования"
 
-| Уровень          | Директория            | Тестов | Правила                          |
-| ---------------- | --------------------- | ------ | -------------------------------- |
-| **Unit**         | `tests/unit/`         | ~9,746 | In-memory fakes предпочтительны  |
-| **Integration**  | `tests/integration/`  | ~386   | VCR.py для HTTP                  |
+| Уровень          | Директория            | Масштаб | Правила                          |
+| ---------------- | --------------------- | ------- | -------------------------------- |
+| **Unit**         | `tests/unit/`         | live suite | In-memory fakes предпочтительны  |
+| **Integration**  | `tests/integration/`  | live suite | VCR.py для HTTP                  |
 | **Architecture** | `tests/architecture/` | active suite | Проверка слоёв, контракты портов |
 
-**Всего:** ~11,227 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
+**Всего:** не используй статический total; считай live для текущего tree и branch.  
+**Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
 ### Основные команды
 
@@ -547,8 +549,8 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | `docs/00-project/RULES.md`             | **Конституция проекта** — единственный источник истины для архитектурных правил |
 | `docs/00-project/ai/agents/guides/AGENT.md`      | Инструкции для агента (персона, workflow, специфика работы)                     |
 | `.claude/PROJECT_CONTEXT.md`           | Компактный контекст для быстрой справки                                         |
-| `docs/02-architecture/decisions/`      | ADR (001-045) — архитектурные решения                                           |
-| `docs/01-requirements/REQUIREMENTS.md` | 156 тестируемых требований                                                      |
+| `docs/02-architecture/decisions/`      | Актуальный набор ADR — архитектурные решения                                    |
+| `docs/01-requirements/REQUIREMENTS.md` | Тестируемые требования; при ссылке на total проверяй live по текущему документу |
 
 > **Иерархия документации**: При противоречиях приоритет имеет `docs/00-project/RULES.md`.
 > CLAUDE файл (`docs/00-project/ai/agents/guides/CLAUDE.md`) содержит специфику для Claude Code и протокол верификации.

@@ -448,6 +448,84 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     assert ledger_payload["event_type"] == "manifest_created"
 
 
+def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enabled(
+    tmp_path: Path,
+) -> None:
+    """Resume requests should still persist manifest + ledger control-plane state."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=True,
+        limit=25,
+        query="status=active",
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    result = runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        ensure_providers_loaded_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=lambda: SimpleNamespace(
+            data_dir=str(tmp_path),
+            pipeline=SimpleNamespace(heartbeat_interval=30),
+            test_mode=False,
+        ),
+        load_pipeline_config_fn=lambda _: SimpleNamespace(
+            provider="chembl",
+            entity_type="activity",
+            version="2.0.0",
+            maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        ),
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
+        ),
+        assemble_vacuum_settings_fn=lambda **_: "vacuum",
+        assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+            run_type="incremental",
+            limit=25,
+        ),
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert result == "runner-instance"
+    assert isinstance(fake_factory.kwargs, dict)
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    assert isinstance(manifest_id, str)
+
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
+    )
+    assert manifest_path.exists()
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    launch_context = payload["launch_context"]
+    assert isinstance(launch_context, dict)
+    assert launch_context["resume"] is True
+    assert launch_context["query"] == "status=active"
+    assert launch_context["pipeline_name"] == "chembl_activity"
+
+    ledger_path = (
+        tmp_path / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
+    )
+    assert ledger_path.exists()
+    ledger_payload = json.loads(ledger_path.read_text(encoding="utf-8").splitlines()[0])
+    assert ledger_payload["manifest_id"] == manifest_id
+    assert ledger_payload["event_type"] == "manifest_created"
+
+
 def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
     tmp_path: Path,
 ) -> None:

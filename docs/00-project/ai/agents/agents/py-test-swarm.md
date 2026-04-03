@@ -29,7 +29,7 @@ model: opus
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Стек: Python 3.13, uv, pytest, VCR.py, mypy --strict, Pandera, Delta Lake
 - 5 слоёв: domain, application, infrastructure, composition, interfaces
-- 550 production-файлов, 611 тестовых файлов, ~9,700 тестовых функций, ~190,000 строк тестового кода
+- Размер codebase и тестового дерева быстро меняется; перед декомпозицией считай live по текущему checkout (`find src/bioetl tests -type f -name '*.py' | wc -l`, `pytest --collect-only`, subtree counts)
 - Coverage threshold: ≥85% overall, ≥90% domain
 - 7 провайдеров: ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
 
@@ -45,17 +45,19 @@ model: opus
 **Структура тестов:**
 ```text
 tests/
-├── unit/              425 файлов  — Быстрые, in-memory fakes
-├── architecture/       58 файлов  — Layer boundaries, naming, contracts
-├── integration/        55 файлов  — VCR.py для HTTP, pipeline lifecycle
-├── e2e/                24 файла   — End-to-end (full pipeline chain)
-├── contract/           17 файлов  — API contract/schema stability tests
-├── benchmarks/          7 файлов  — Performance benchmarks
-├── security/            4 файла   — Security scanning
-├── performance/         2 файла   — Load tests
-├── smoke/               2 файла   — Quick sanity checks
-└── fixtures/                      — VCR cassettes, configs, input data
+├── unit/              — Быстрые, in-memory fakes
+├── architecture/      — Layer boundaries, naming, contracts
+├── integration/       — VCR.py для HTTP, pipeline lifecycle
+├── e2e/               — End-to-end (full pipeline chain)
+├── contract/          — API contract/schema stability tests
+├── benchmarks/        — Performance benchmarks
+├── security/          — Security scanning
+├── performance/       — Load tests
+├── smoke/             — Quick sanity checks
+└── fixtures/          — VCR cassettes, configs, input data
 ```
+
+Перед шардированием scope обязательно посчитай live число Python-файлов в нужных поддеревьях `tests/`.
 
 Провайдеры (по папкам тестов): chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot
 

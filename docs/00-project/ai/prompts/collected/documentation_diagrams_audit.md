@@ -49,8 +49,8 @@ Scope: `docs/` **без** `docs/00-project/ai/` (AI-конфигурация а�
     ├── 00-project/                    ← Правила, governance, glossary (БЕЗ 00-project/ai/)
     ├── 01-requirements/               ← Требования (REQUIREMENTS.md)
     ├── 02-architecture/               ← Архитектура, ADR, диаграммы
-    │   ├── decisions/                 ← 45 ADR (ADR-001..ADR-045)
-    │   ├── diagrams/                  ← 126 .mmd + ~170 .mermaid views
+    │   ├── decisions/                 ← актуальный ADR set (проверять live)
+    │   ├── diagrams/                  ← canonical .mmd/.mermaid trees (count live before reporting)
     │   │   ├── architecture/          ← Архитектурные диаграммы (01-18)
     │   │   ├── class-diagrams/        ← Class-диаграммы (01-16)
     │   │   ├── foundation/            ← Foundation-диаграммы (01-50)

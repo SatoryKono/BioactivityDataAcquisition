@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.composition.factories.pipeline import build_pipeline_services
-from bioetl.composition.factories.pipeline.creation_api import (
+from bioetl.composition.factories.pipeline._creation_wiring import (
     _PipelineCreationInputs as CanonicalPipelineCreationInputs,
     _create_pipeline_with_services_impl as canonical_create_pipeline,
 )

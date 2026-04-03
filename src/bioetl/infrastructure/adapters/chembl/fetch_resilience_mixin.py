@@ -101,7 +101,7 @@ class ChemblFetchResilienceMixin:
         error: Exception,
     ) -> bool:
         """Check if exception is a retry exhausted error (direct or wrapped)."""
-        return is_retry_exhausted_error(error)
+        return bool(is_retry_exhausted_error(error))
 
     async def _fetch_single_record_direct(
         self, entity_type: str, record_id: str
@@ -146,12 +146,14 @@ class ChemblFetchResilienceMixin:
         pk_fields: tuple[str, ...] | None = None,
     ) -> bool:
         """Return True when record is new and register its dedup key."""
-        return mark_record_as_seen(
-            cast(_ChemblFallbackHost, self),
-            record,
-            seen_ids,
-            pk_field,
-            pk_fields,
+        return bool(
+            mark_record_as_seen(
+                cast(_ChemblFallbackHost, self),
+                record,
+                seen_ids,
+                pk_field,
+                pk_fields,
+            )
         )
 
     async def _yield_deduplicated_filtered_records(

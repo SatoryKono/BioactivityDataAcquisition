@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
@@ -58,11 +59,29 @@ __all__ = [
 ]
 
 
+@dataclass(frozen=True, slots=True)
+class _RunnerAssemblyContext:
+    """Typed seam carrying the inputs shared across runner assembly helpers."""
+
+    pipeline: BasePipeline
+    observability: ObservabilityBundle
+    logger_port: LoggerPort
+    yaml_config: PipelineYamlConfig | None
+    silver_schema: pa.Schema | None
+    gold_schema: GoldSchemaType
+    strict_gold_validation: bool
+    dq_configs_extractor: Callable[
+        [PipelineYamlConfig | None],
+        DQConfigsContext,
+    ]
+
+
 def _build_checkpoint_manager(
     *,
     pipeline: BasePipeline,
     logger_port: LoggerPort,
 ) -> CheckpointManagerService:
+    """Backward-compatible seam for direct unit tests around policy selection."""
     current_metadata = _build_current_checkpoint_metadata(pipeline)
     compatibility_service = CheckpointCompatibilityService(
         logger=logger_port,
@@ -92,12 +111,12 @@ def _build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMeta
 
 
 def _build_lock_manager(
+    context: _RunnerAssemblyContext,
     *,
-    pipeline: BasePipeline,
-    logger_port: LoggerPort,
     checkpoint_manager: CheckpointManagerService,
     context_holder: LockContextHolder,
 ) -> LockCoordinator:
+    pipeline = context.pipeline
     return LockCoordinator.create(
         lock_port=pipeline.services.lock,
         run_id=pipeline.context.run_id,
@@ -108,7 +127,7 @@ def _build_lock_manager(
         wait_for_lock=pipeline.runtime.wait_for_lock,
         wait_timeout=pipeline.runtime.lock_wait_timeout,
         heartbeat_interval=pipeline.runtime.heartbeat_interval,
-        logger=logger_port,
+        logger=context.logger_port,
         shutdown_signal=pipeline.shutdown_signal,
         checkpoint_manager=checkpoint_manager,
         context_holder=context_holder,
@@ -116,25 +135,24 @@ def _build_lock_manager(
 
 
 def _build_preflight_service(
-    *,
-    pipeline: BasePipeline,
-    logger_port: LoggerPort,
+    context: _RunnerAssemblyContext,
 ) -> PreflightService:
+    pipeline = context.pipeline
     health_aggregator = HealthAggregator(
         metrics=pipeline.services.metrics,
-        logger=logger_port,
+        logger=context.logger_port,
         pipeline_name=pipeline.config.pipeline_name,
         health_check_mode=pipeline.runtime.health_check_mode,
     )
     medallion_validator = MedallionConfigValidator(
         config=pipeline.config,
-        logger=logger_port,
+        logger=context.logger_port,
         write_mode_policy=WriteModePolicy(),
     )
     return PreflightService(
         config=pipeline.config,
         context=pipeline.context,
-        logger=logger_port,
+        logger=context.logger_port,
         metrics=pipeline.services.metrics,
         health_aggregator=health_aggregator,
         medallion_validator=medallion_validator,
@@ -142,49 +160,42 @@ def _build_preflight_service(
 
 
 def _build_observer(
-    *,
-    pipeline: BasePipeline,
-    observability: ObservabilityBundle,
-    logger_port: LoggerPort,
+    context: _RunnerAssemblyContext,
 ) -> PipelineObserver:
-    context = pipeline.context
+    pipeline = context.pipeline
+    pipeline_context = pipeline.context
     return PipelineObserver(
         pipeline_name=pipeline.config.pipeline_name,
-        run_id=context.run_id,
+        run_id=pipeline_context.run_id,
         run_type=pipeline.runtime.run_type,
         metrics=pipeline.services.metrics,
-        logger=logger_port,
-        tracer=observability.tracer,
-        manifest_id=getattr(context, "manifest_id", None),
-        entity=getattr(context, "entity", None),
-        effective_config_hash=getattr(context, "config_hash", None),
-        contract_ref=getattr(context, "contract_ref", None),
-        contract_version=getattr(context, "contract_version", None),
-        composite_run_id=getattr(context, "composite_run_id", None),
+        logger=context.logger_port,
+        tracer=context.observability.tracer,
+        manifest_id=getattr(pipeline_context, "manifest_id", None),
+        entity=getattr(pipeline_context, "entity", None),
+        effective_config_hash=getattr(pipeline_context, "config_hash", None),
+        contract_ref=getattr(pipeline_context, "contract_ref", None),
+        contract_version=getattr(pipeline_context, "contract_version", None),
+        composite_run_id=getattr(pipeline_context, "composite_run_id", None),
     )
 
 
 def _build_batch_executor(
+    context: _RunnerAssemblyContext,
     *,
-    pipeline: BasePipeline,
-    yaml_config: PipelineYamlConfig | None,
-    silver_schema: pa.Schema | None,
-    gold_schema: GoldSchemaType,
-    strict_gold_validation: bool,
     checkpoint_manager: CheckpointManagerService,
     lock_manager: LockCoordinator,
-    observability: ObservabilityBundle,
 ) -> BatchExecutor:
-    dq_output_paths = extract_dq_output_paths(yaml_config)
+    dq_output_paths = extract_dq_output_paths(context.yaml_config)
     return ServicesBuilder.create_batch_executor_from_pipeline(
-        pipeline=pipeline,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
+        pipeline=context.pipeline,
+        silver_schema=context.silver_schema,
+        gold_schema=context.gold_schema,
         checkpoint_manager=checkpoint_manager,
-        shutdown_signal=pipeline.shutdown_signal,
-        strict_gold_validation=strict_gold_validation,
+        shutdown_signal=context.pipeline.shutdown_signal,
+        strict_gold_validation=context.strict_gold_validation,
         lock_validator=lock_manager.validate,
-        tracer=observability.tracer,
+        tracer=context.observability.tracer,
         bronze_output_path=dq_output_paths.bronze_path,
         silver_output_path=dq_output_paths.silver_path,
         gold_output_path=dq_output_paths.gold_path,
@@ -193,25 +204,18 @@ def _build_batch_executor(
 
 
 def _build_postrun_service_for_pipeline(
+    context: _RunnerAssemblyContext,
     *,
-    pipeline: BasePipeline,
-    logger_port: LoggerPort,
     lifecycle_service: MedallionLifecycleService,
-    observability: ObservabilityBundle,
-    yaml_config: PipelineYamlConfig | None,
-    dq_configs_extractor: Callable[
-        [PipelineYamlConfig | None],
-        DQConfigsContext,
-    ],
 ) -> PostrunService:
     """Build the postrun service from YAML-derived DQ config seams."""
-    dq_configs = dq_configs_extractor(yaml_config)
+    dq_configs = context.dq_configs_extractor(context.yaml_config)
     return build_postrun_service(
-        pipeline=pipeline,
-        logger_port=logger_port,
+        pipeline=context.pipeline,
+        logger_port=context.logger_port,
         lifecycle_service=lifecycle_service,
         dq_configs=dq_configs,
-        tracer=observability.tracer,
+        tracer=context.observability.tracer,
     )
 
 
@@ -242,60 +246,32 @@ def _create_pipeline_runner(
 
 
 def _assemble_runner_parts(
-    *,
-    pipeline: BasePipeline,
-    observability: ObservabilityBundle,
-    logger_port: LoggerPort,
-    yaml_config: PipelineYamlConfig | None,
-    silver_schema: pa.Schema | None,
-    gold_schema: GoldSchemaType,
-    strict_gold_validation: bool,
-    dq_configs_extractor: Callable[
-        [PipelineYamlConfig | None],
-        DQConfigsContext,
-    ],
+    context: _RunnerAssemblyContext,
 ) -> RunnerAssemblyParts:
     """Assemble runner collaborators before creating the PipelineRunner shell."""
     checkpoint_manager = _build_checkpoint_manager(
-        pipeline=pipeline,
-        logger_port=logger_port,
+        pipeline=context.pipeline,
+        logger_port=context.logger_port,
     )
     lifecycle_service = MedallionLifecycleService(
-        storage=pipeline.services.storage,
-        logger=logger_port,
+        storage=context.pipeline.services.storage,
+        logger=context.logger_port,
     )
     lock_manager = _build_lock_manager(
-        pipeline=pipeline,
-        logger_port=logger_port,
+        context,
         checkpoint_manager=checkpoint_manager,
         context_holder=LockContextHolder(),
     )
-    preflight_service = _build_preflight_service(
-        pipeline=pipeline,
-        logger_port=logger_port,
-    )
+    preflight_service = _build_preflight_service(context)
     postrun_service = _build_postrun_service_for_pipeline(
-        pipeline=pipeline,
-        logger_port=logger_port,
+        context,
         lifecycle_service=lifecycle_service,
-        observability=observability,
-        yaml_config=yaml_config,
-        dq_configs_extractor=dq_configs_extractor,
     )
-    observer = _build_observer(
-        pipeline=pipeline,
-        observability=observability,
-        logger_port=logger_port,
-    )
+    observer = _build_observer(context)
     batch_executor = _build_batch_executor(
-        pipeline=pipeline,
-        yaml_config=yaml_config,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        strict_gold_validation=strict_gold_validation,
+        context,
         checkpoint_manager=checkpoint_manager,
         lock_manager=lock_manager,
-        observability=observability,
     )
     return RunnerAssemblyParts(
         checkpoint_manager=checkpoint_manager,
@@ -321,17 +297,17 @@ def assemble_runner_impl(
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
     """Assemble the fully wired PipelineRunner for one configured pipeline."""
-    logger_port = observability.logger
-    assembly_parts = _assemble_runner_parts(
+    assembly_context = _RunnerAssemblyContext(
         pipeline=pipeline,
         observability=observability,
-        logger_port=logger_port,
+        logger_port=observability.logger,
         yaml_config=yaml_config,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
         dq_configs_extractor=dq_configs_extractor,
     )
+    assembly_parts = _assemble_runner_parts(assembly_context)
     return _create_pipeline_runner(
         pipeline=pipeline,
         observability=observability,

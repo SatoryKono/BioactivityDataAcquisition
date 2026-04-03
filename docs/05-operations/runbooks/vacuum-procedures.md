@@ -1,17 +1,14 @@
-______________________________________________________________________
-
+---
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
-
 - BioETL Team
-  Priority: P2
-  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-04-02'
-
-______________________________________________________________________
+Priority: P2
+Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+Last verified: '2026-04-03'
+---
 
 # VACUUM Procedures Runbook
 

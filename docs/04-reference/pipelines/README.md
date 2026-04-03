@@ -5,12 +5,12 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-03'
 ---
 
 # BioETL Pipeline Documentation
 
-*Updated: 2026-03-13 | Aligned with RULES.md v5.24*
+*Updated: 2026-04-03 | Aligned with RULES.md v6.1.0*
 
 This directory contains the active pipeline reference surface for BioETL,
 including composite pipelines.

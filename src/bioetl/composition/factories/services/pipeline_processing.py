@@ -69,6 +69,11 @@ def build_components_and_processing_service(
         tracer=tracer,
         lock_validator=lock_validator,
     )
+    quarantine_manager = QuarantineManagerService(
+        quarantine_port=pipeline.services.quarantine,
+        pipeline_name=processor_config.pipeline_name,
+        metrics=components.batch_metrics,
+    )
     batch_processing_service = BatchProcessingService(
         services=pipeline.services,
         context=pipeline.context,
@@ -83,6 +88,7 @@ def build_components_and_processing_service(
             transformer=components.transformer,
             writer=components.writer,
             tracing=tracing_manager,
+            quarantine_manager=quarantine_manager,
         ),
     )
     return components, batch_processing_service

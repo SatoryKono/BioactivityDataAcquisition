@@ -123,6 +123,13 @@ bioetl run --pipeline chembl_activity --use-cached-bronze
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=hard_fail`
   Прервать запуск ошибкой при несовместимости.
 
+Supported resume modes:
+
+- ordinary resume uses checkpoint snapshot state and compatibility checks
+  without ledger suffix replay;
+- composite resume uses checkpoint snapshot state as the base and then replays
+  the ledger suffix strictly after `last_event_id`.
+
 **Типы запуска:**
 
 | Тип           | Описание                                        | Очистка данных     |
@@ -272,6 +279,13 @@ Operational semantics:
   `hard_fail` и управляет resume-поведением при checkpoint identity mismatch.
 - при `run_manifest_enabled=false` runtime builder также эффективно отключает
   ledger attachment для новых запусков.
+
+Resume contract:
+
+- ordinary resume uses checkpoint snapshot state and compatibility checks
+  without ledger suffix replay;
+- composite resume uses checkpoint snapshot state as the base and then replays
+  the ledger suffix strictly after `last_event_id`.
 
 Canonical storage layout:
 
