@@ -55,6 +55,7 @@ class BatchProcessingSupportService:
         transformer: BatchTransformer,
         writer: BatchWriter,
         tracing: BatchTracingManagerService,
+        quarantine_manager: QuarantineManagerService,
     ) -> None:
         """Store shared collaborators for one batch-processing family slice."""
         self._services = services
@@ -63,6 +64,7 @@ class BatchProcessingSupportService:
         self._transformer = transformer
         self._writer = writer
         self._tracing = tracing
+        self._quarantine_manager = quarantine_manager
 
     def get_source_metadata(
         self,
@@ -114,10 +116,6 @@ class BatchProcessingSupportService:
             records=records,
             batch_id=batch_id,
             start_index=start_index,
-        )
-        self._batch_metrics.track_processed_records(
-            "quarantined",
-            transform_result.quarantined_count,
         )
         self._batch_metrics.track_processed_records(
             "silver",
@@ -206,12 +204,6 @@ class BatchProcessingSupportService:
                 layer=layer,
                 errors=e.errors,
             )
-            pipeline_name = f"{self._writer._provider}_{self._writer._entity_type}"
-            qm = QuarantineManagerService(
-                quarantine_port=self._services.quarantine,
-                pipeline_name=pipeline_name,
-                metrics=self._batch_metrics,
-            )
             entries = [
                 DQQuarantineEntry(
                     record=rec,
@@ -220,8 +212,7 @@ class BatchProcessingSupportService:
                 )
                 for rec in records
             ]
-            await qm.quarantine_records(entries, batch_id, ingestion_ts=ingestion_ts)
-            self._batch_metrics.track_processed_records("quarantined", len(records))
+            await self._quarantine_manager.quarantine_records(entries, batch_id, ingestion_ts=ingestion_ts)
 
     def finalize_batch_span(
         self,

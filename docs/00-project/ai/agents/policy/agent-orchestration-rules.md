@@ -71,7 +71,7 @@ Skills now inlined into commands — invoke directly via `/command-name`:
 
 | Command | Когда |
 |---------|-------|
-| `/verify-architecture` | Pre-commit проверка (43 теста) |
+| `/verify-architecture` | Pre-commit проверка архитектурного тестового набора |
 | `/architecture-guardian` | Аудит arch boundaries |
 | `/new-pipeline` | Scaffolding нового ETL pipeline |
 | `/new-composite` | Создание composite pipeline |

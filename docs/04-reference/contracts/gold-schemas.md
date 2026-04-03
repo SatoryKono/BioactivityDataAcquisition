@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-03'
 ---
 
 # Gold Layer Data Contracts
@@ -19,8 +19,8 @@ Last verified: '2026-03-29'
 > Ниже применяется snake_case нотация полей, синхронизированная с автогенерацией контрактов.
 
 > **Версия**: 1.1.0
-> **Последнее обновление**: 2026-02-04
-> **Связанные ADR**: [ADR-018](../../02-architecture/decisions/ADR-018-gold-strict-validation.md), [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
+> **Последнее обновление**: 2026-04-03
+> **Связанные ADR**: [ADR-018](../../02-architecture/decisions/ADR-018-gold-strict-validation.md), [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md), [ADR-045](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
 
 ---
 

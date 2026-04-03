@@ -36,10 +36,12 @@ class CompositeFilterExtractionService:
 
     def to_id_str(self, value: object, *, key: str) -> str:
         """Convert a join key to a canonical filter ID string."""
-        return stringify_join_key_value(
-            value,
-            key=key,
-            normalization_policies=self._normalization_policies,
+        return str(
+            stringify_join_key_value(
+                value,
+                key=key,
+                normalization_policies=self._normalization_policies,
+            )
         )
 
     def _deduplicate_filter_ids(

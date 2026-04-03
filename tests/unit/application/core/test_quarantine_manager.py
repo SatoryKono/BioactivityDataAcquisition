@@ -129,9 +129,13 @@ class TestQuarantineManagerBulkWrites:
         )
 
         quarantine_port.write.assert_awaited_once()
-        metrics.inc_quarantine_records.assert_called_once_with(
-            pipeline="chembl_activity",
-            reason=ErrorType.INVALID_DATA.value,
+        metrics.track_quarantined_records.assert_called_once_with(
+            ErrorType.INVALID_DATA,
+            1,
+        )
+        metrics.track_processed_records.assert_called_once_with(
+            "quarantined",
+            1,
         )
 
     @pytest.mark.asyncio

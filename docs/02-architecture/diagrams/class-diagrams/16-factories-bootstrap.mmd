@@ -17,6 +17,12 @@ classDiagram
         +list_providers(): list~str~
     }
 
+    class DataSourceRegistry {
+        <<Facade>>
+        +get(provider): DataSourceCreatorProtocol
+        +list_providers(): list~str~
+    }
+
     class DataSourceFactory {
         +create(provider, **kwargs): DataSourcePort
         +list_providers(): list~str~
@@ -58,6 +64,7 @@ classDiagram
         +run(): CompositeResult
     }
 
+    DataSourceRegistry --> ProviderRegistry : delegates to
     DataSourceFactory --> ProviderRegistry : delegates
     RunnerFactory --> PipelineRegistry : resolves pipelines
     RunnerFactory ..> ProviderRegistry : ensure providers loaded
@@ -67,6 +74,7 @@ classDiagram
     RunnerFactoryBuilderService --> CompositePipelineRunnerService : runner factories
 
     style ProviderRegistry fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style DataSourceRegistry fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
     style DataSourceFactory fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
     style PipelineRegistry fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
     style RunnerFactory fill:#fff7ed,stroke:#f59e0b,stroke-width:2px

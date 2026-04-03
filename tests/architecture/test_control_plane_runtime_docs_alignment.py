@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from bioetl.domain.control_plane.run_ledger import RUN_LEDGER_BASELINE_EVENT_TYPES
+from bioetl.domain.control_plane.run_ledger import (
+    COMPOSITE_RUN_LEDGER_STAGE_NAMES,
+    ORDINARY_RUN_LEDGER_STAGE_NAMES,
+    RUN_LEDGER_BASELINE_EVENT_TYPES,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -44,3 +48,59 @@ def test_published_control_plane_docs_do_not_describe_stage_failed_baseline() ->
             f"{path.relative_to(PROJECT_ROOT)} documents unsupported "
             "stage_failed baseline semantics."
         )
+
+
+def test_published_control_plane_docs_describe_dual_mode_resume_contract() -> None:
+    """Published docs must state the intentional ordinary/composite resume split."""
+    expected_fragments = (
+        "ordinary resume uses checkpoint snapshot state",
+        "composite resume uses checkpoint snapshot state as the base",
+        "last_event_id",
+    )
+    for path in PUBLISHED_CONTROL_PLANE_DOCS:
+        text = path.read_text(encoding="utf-8").lower()
+        missing = [fragment for fragment in expected_fragments if fragment not in text]
+        assert not missing, (
+            f"{path.relative_to(PROJECT_ROOT)} is missing dual-mode resume contract "
+            f"fragments: {missing}"
+        )
+
+
+def test_contract_doc_enumerates_supported_execution_paths() -> None:
+    """The published contract doc should freeze the supported execution matrix."""
+    text = CONTRACT_DOC.read_text(encoding="utf-8").lower()
+    expected_fragments = (
+        "## supported execution paths",
+        "`ordinary success`",
+        "`ordinary failure`",
+        "`ordinary shutdown`",
+        "`ordinary resume`",
+        "`composite success`",
+        "`composite failure`",
+        "`composite shutdown`",
+        "`composite resume`",
+        "manifest exists before execution starts",
+        "no supported execution path may bypass manifest creation",
+    )
+    missing = [fragment for fragment in expected_fragments if fragment not in text]
+    assert not missing, (
+        "docs/04-reference/contracts/run-manifest-ledger.md is missing supported "
+        f"execution-path contract fragments: {missing}"
+    )
+
+
+def test_contract_doc_freezes_canonical_stage_sets() -> None:
+    """Published contract doc should enumerate ordinary and composite stage sets."""
+    text = CONTRACT_DOC.read_text(encoding="utf-8").lower()
+    expected_fragments = (
+        "## canonical stage sets",
+        "ordinary runner stages",
+        "composite runner stages",
+        *ORDINARY_RUN_LEDGER_STAGE_NAMES,
+        *COMPOSITE_RUN_LEDGER_STAGE_NAMES,
+    )
+    missing = [fragment for fragment in expected_fragments if fragment not in text]
+    assert not missing, (
+        "docs/04-reference/contracts/run-manifest-ledger.md is missing canonical "
+        f"stage-set fragments: {missing}"
+    )

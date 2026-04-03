@@ -367,7 +367,7 @@ git commit -m "..."
 
 ## 9. Architecture Decision Records (ADR)
 
-> **Полный реестр**: См. `docs/00-project/RULES.md` Приложение F и текущий набор файлов в `docs/02-architecture/decisions/`
+> **Полный реестр**: См. `docs/00-project/RULES.md` Приложение F (ADR-001..ADR-045)
 
 **Ключевые ADR:**
 

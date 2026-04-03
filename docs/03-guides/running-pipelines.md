@@ -189,6 +189,13 @@ Resume-совместимость checkpoint управляется через
 Policy применяется к execution identity checkpoint, включая effective config hash
 и execution fingerprint.
 
+Supported resume modes:
+
+- ordinary `bioetl run --resume` uses checkpoint snapshot state and compatibility
+  checks without ledger suffix replay;
+- composite `bioetl run-composite --resume` uses checkpoint snapshot state as
+  the base and then replays ledger events strictly after `last_event_id`.
+
 ### Debug логирование
 
 ```bash

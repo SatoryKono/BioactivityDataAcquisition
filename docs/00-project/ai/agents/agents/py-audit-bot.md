@@ -42,7 +42,7 @@ Consolidation note (2026-03-08): `py-audit-bot` — канонический com
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
-- Текущее состояние: 45 ADR-файлов (`ADR-001..ADR-045`), latest: `ADR-045-dq-contract-system.md`
+- Текущее состояние: используй текущий ADR set в `docs/02-architecture/decisions/`; latest ADR проверяй live перед ссылкой
 
 **Ключевые файлы:**
 - Domain Ports: `src/bioetl/domain/ports/`

@@ -89,6 +89,10 @@ class RetryingDataSourceDecorator:
     retry_config: RetryConfig = field(default_factory=RetryConfig)
     logger: LoggerPort | None = None
     metrics: MetricsPort | None = None
+    _data_source: DataSourcePort = field(init=False, repr=False)
+    _retry_config: RetryConfig = field(init=False, repr=False)
+    _logger: LoggerPort | None = field(init=False, repr=False)
+    _metrics: MetricsPort | None = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         """Create private aliases for delegation pattern compliance."""
@@ -100,7 +104,7 @@ class RetryingDataSourceDecorator:
     @property
     def provider_name(self) -> str:
         """Delegate to wrapped data source."""
-        return self._data_source.provider_name
+        return str(self._data_source.provider_name)
 
     async def __aenter__(self) -> Self:
         """Enter async context by delegating to wrapped data source."""

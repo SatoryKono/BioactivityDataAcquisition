@@ -30,6 +30,7 @@ from bioetl.domain.mapping.publication_type_classification import (
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         DataExtractorStrategy,

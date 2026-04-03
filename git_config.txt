@@ -1,0 +1,74 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[submodule]
+	active = .
+[remote "origin"]
+	url = https://github.com/SatoryKono/BioactivityDataAcquisition.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+	gh-resolved = base
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+	vscode-merge-base = origin/main
+[lfs]
+	repositoryformatversion = 0
+[credential]
+	useHttpPath = true
+[push]
+	default = simple
+[fetch]
+	prune = true
+[pull]
+	ff = only
+[rebase]
+	autoStash = true
+	autosquash = true
+[rerere]
+	enabled = true
+[credential "https://github.com"]
+	useHttpPath = true
+[branch "chore/consolidate-recent-branches"]
+	remote = origin
+	merge = refs/heads/main
+[merge]
+	conflictstyle = diff3
+[branch]
+	autoSetupMerge = true
+	autoSetupRebase = always
+[branch "RunManifest-and-Run-Ledger"]
+	remote = origin
+	merge = refs/heads/RunManifest-and-Run-Ledger
+	rebase = true
+[branch "chore/consolidate-recent-branches-2"]
+	remote = origin
+	merge = refs/heads/chore/consolidate-recent-branches-2
+	rebase = true
+[branch "chore/merge-checkout-6"]
+	remote = origin
+	merge = refs/heads/main
+	rebase = true
+[branch "chore/consolidate-cleanups-20260402"]
+	remote = origin
+	merge = refs/heads/main
+	rebase = true
+[branch "fix/security-ast-json-loads-20260402"]
+	remote = origin
+	merge = refs/heads/main
+	rebase = true
+[branch "perf-rename-plan-regex-20260402"]
+	remote = origin
+	merge = refs/heads/main
+	rebase = true
+[branch "consolidation-quality-drift-20260402"]
+	remote = origin
+	merge = refs/heads/main
+	rebase = true
+[branch "consolidation-runtime-perf-20260402"]
+	remote = origin
+	merge = refs/heads/main
+	rebase = true

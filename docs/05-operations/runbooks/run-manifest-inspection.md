@@ -143,6 +143,13 @@ Operational interpretation:
 
 ### 5a. Inspect composite resume / replay state when resume behavior matters
 
+The supported resume contract is intentionally dual-mode:
+
+- ordinary resume uses checkpoint snapshot state and compatibility checks
+  without ledger suffix replay;
+- composite resume uses checkpoint snapshot state as the base and then applies
+  ledger suffix replay.
+
 Composite resume currently follows a checkpoint snapshot + ledger suffix replay
 model.
 
@@ -157,6 +164,8 @@ rg -n "last_event_id|last_event_occurred_at|list_entries_after|project_run_ledge
 
 Interpretation:
 
+- ordinary runs should not be diagnosed as if they were expected to replay
+  ledger suffix state; their supported resume source is the checkpoint snapshot;
 - replay is only applied after compatibility anchors are validated;
 - replay consumes only ledger entries strictly after `last_event_id`;
 - replay is intentionally coarse-grained: it restores lifecycle milestones and

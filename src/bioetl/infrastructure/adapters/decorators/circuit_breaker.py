@@ -97,7 +97,7 @@ class CircuitBreakerDataSourceDecorator:
     @property
     def provider_name(self) -> str:
         """Delegate to wrapped data source."""
-        return self.data_source.provider_name
+        return str(self.data_source.provider_name)
 
     async def __aenter__(self) -> Self:
         """Enter async context by delegating to wrapped data source."""
@@ -236,7 +236,7 @@ class CircuitBreakerDataSourceDecorator:
         Returns:
             Number of consecutive failures.
         """
-        return self.circuit_breaker.get_failure_count()
+        return int(self.circuit_breaker.get_failure_count())
 
     def reset_circuit(self) -> None:
         """Manually reset circuit breaker to CLOSED state.

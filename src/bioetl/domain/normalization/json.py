@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
@@ -88,11 +88,13 @@ def deserialize_json_value(data: str | bytes) -> JsonDict | list[object]:
     if _ORJSON_AVAILABLE:
         assert orjson is not None
         try:
-            return orjson.loads(data)
+            parsed_value = cast("JsonDict | list[object]", orjson.loads(data))
+            return parsed_value
         except orjson.JSONDecodeError as exc:
             raise ValueError(f"Invalid JSON: {exc}") from exc
     try:
-        return json.loads(data)
+        parsed_value = cast("JsonDict | list[object]", json.loads(data))
+        return parsed_value
     except json.JSONDecodeError as exc:
         raise ValueError(f"Invalid JSON: {exc}") from exc
 

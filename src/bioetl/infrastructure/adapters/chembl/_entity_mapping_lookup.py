@@ -66,7 +66,7 @@ def resolve_resource_name(entity_type: str) -> str | None:
     """Resolve ChEMBL API resource name for an entity type."""
     pub_mapping = get_publication_mapping(entity_type)
     if pub_mapping is not None:
-        return pub_mapping.api_resource
+        return str(pub_mapping.api_resource)
     return _NON_PUBLICATION_ENTITY_MAPPING.get(entity_type)
 
 
@@ -74,7 +74,7 @@ def resolve_plural_key(entity_type: str) -> str:
     """Resolve API response plural key for an entity type."""
     pub_mapping = get_publication_mapping(entity_type)
     if pub_mapping is not None:
-        return pub_mapping.plural_key
+        return str(pub_mapping.plural_key)
     resource = _NON_PUBLICATION_ENTITY_MAPPING.get(entity_type, entity_type)
     return _NON_PUBLICATION_ENTITY_PLURAL.get(resource, resource + "s")
 
@@ -83,7 +83,7 @@ def resolve_primary_key_field(entity_type: str) -> str:
     """Resolve primary key field name for an entity type."""
     pub_mapping = get_publication_mapping(entity_type)
     if pub_mapping is not None:
-        return pub_mapping.primary_key_field
+        return str(pub_mapping.primary_key_field)
 
     if entity_type in _NON_PUBLICATION_PK_FIELD_OVERRIDES:
         return _NON_PUBLICATION_PK_FIELD_OVERRIDES[entity_type]
@@ -96,13 +96,13 @@ def resolve_dedup_key_fields(entity_type: str) -> tuple[str, ...]:
     """Resolve deduplication key fields for an entity type."""
     pub_fields = get_dedup_key_fields(entity_type)
     if pub_fields is not None:
-        return pub_fields
+        return tuple(str(field) for field in pub_fields)
     return (resolve_primary_key_field(entity_type),)
 
 
 def has_entity_composite_key(entity_type: str) -> bool:
     """Return True when entity uses a composite deduplication key."""
-    return has_composite_key(entity_type)
+    return bool(has_composite_key(entity_type))
 
 
 def is_known_entity_type(entity_type: str) -> bool:

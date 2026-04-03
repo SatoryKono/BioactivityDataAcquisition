@@ -1,11 +1,11 @@
 ---
-Version: 5.24.0
+Version: 6.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-03'
 ---
 
 # BioETL: Правила Проекта
@@ -59,7 +59,7 @@ Last verified: '2026-03-29'
 
 ### 1.1. Слои и Контракты
 
-См. также [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md) для Composition Layer, [ADR-020](../02-architecture/decisions/ADR-020-basepipeline-decomposition.md) для BasePipeline, [ADR-021](../02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) для DDD Aggregates и [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для Composite Pipeline.
+См. также [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md) для Composition Layer, [ADR-020](../02-architecture/decisions/ADR-020-basepipeline-decomposition.md) для BasePipeline, [ADR-021](../02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) для DDD Aggregates, [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для Composite Pipeline и [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md) для DQ Contract System.
 
 - **Infrastructure (Инфраструктура/Адаптеры)**: Реализация взаимодействия с внешним миром (HTTP, БД, файловая система).
 - **Application (Приложение/Пайплайны)**: Оркестрация потоков данных. Определяет *когда* и *в каком порядке* вызываются порты.
@@ -407,7 +407,34 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Default behavior**: При `loading_strategy: null` разрешён checkpoint-based resume (стандартный incremental-поток).
 - **Checkpoint policy**: Для `full_scan_only` возобновление через checkpoint **MUST NOT** использоваться.
 
-### 2.8. Генерация ID Сущности (Entity ID)
+### 2.8. DQ Contract System
+
+Система контрактов качества данных обеспечивает сквозную валидацию, аудит и управляемость качеством данных. См. [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md).
+
+#### 2.8.1. Типы контрактов
+
+- **SCHEMA**: Структурная валидация (JSON Schema / Pandera).
+- **CONTENT**: Бизнес-правила качества (диапазоны, паттерны).
+- **CONSISTENCY**: Проверка согласованности между разными источниками.
+- **PROVENANCE**: Отслеживание происхождения и цепочки изменений (Git commit, config hash).
+
+#### 2.8.2. Обработка нарушений (Disposition)
+
+| Режим | Описание |
+|-------|----------|
+| **FAIL** | Остановка пайплайна при первом нарушении. Используется для критических схем. |
+| **WARN** | Логирование предупреждения, данные проходят дальше. |
+| **QUARANTINE** | Отправка битых записей в Quarantine, продолжение обработки валидных данных. |
+
+#### 2.8.3. Разрешение политик (Policy Resolution)
+
+При поиске активного контракта используется приоритетность:
+1. Точное совпадение (`contract_id` + `version`).
+2. Последняя (Latest) версия контракта.
+3. Контракт по умолчанию для типа сущности.
+4. Глобальная политика (Fallback).
+
+### 2.9. Генерация ID Сущности (Entity ID)
 
 См. [ADR-023](../02-architecture/decisions/ADR-023-entity-type-patterns.md) и [ADR-024](../02-architecture/decisions/ADR-024-entity-naming-unification.md) для паттернов типов и именования сущностей.
 
@@ -420,7 +447,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Canonical JSON**: `json.dumps(obj, sort-keys=True, separators=(',', ':'), ensure-ascii=True)`.
   - **Float Precision**: Все значения типа float принудительно округляются: `round(val, 10)` для нивелирования различий архитектур процессоров.
 
-### 2.8.1. Robust Content Hash
+### 2.9.1. Robust Content Hash
 
 Для обеспечения стабильности хэша перед генерацией ID данные должны быть нормализованы:
 

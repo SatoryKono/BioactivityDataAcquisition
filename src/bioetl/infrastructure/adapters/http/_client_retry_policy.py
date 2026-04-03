@@ -17,7 +17,7 @@ def _can_retry(
     """Return True when another retry attempt is allowed."""
     if retry_config.is_last_attempt(attempt):
         return False
-    return retries_used < retry_config.effective_retry_budget()
+    return bool(retries_used < retry_config.effective_retry_budget())
 
 
 def _record_request_metrics(
@@ -58,7 +58,7 @@ def _record_request_metrics(
 def _status_code_from_error(exc: Exception) -> int:
     """Extract HTTP status code from retryable errors when available."""
     if isinstance(exc, httpx.HTTPStatusError):
-        return exc.response.status_code
+        return int(exc.response.status_code)
     return 0
 
 
@@ -81,5 +81,5 @@ def _is_retryable_error(
     if isinstance(exc, RecoverableError):
         return True
     if isinstance(exc, httpx.HTTPStatusError):
-        return retry_config.is_retryable_status(exc.response.status_code)
-    return retry_config.is_retryable_exception(exc)
+        return bool(retry_config.is_retryable_status(exc.response.status_code))
+    return bool(retry_config.is_retryable_exception(exc))

@@ -59,15 +59,15 @@ class ProviderHealthTracker:
     @property
     def consecutive_failures(self) -> int:
         """Get consecutive failure count."""
-        return self.monitor.get_state(self.provider).consecutive_errors
+        return int(self.monitor.get_state(self.provider).consecutive_errors)
 
     def is_healthy(self) -> bool:
         """Check whether provider is healthy."""
-        return self.status == HealthStatus.HEALTHY
+        return bool(self.status == HealthStatus.HEALTHY)
 
     def is_unhealthy(self) -> bool:
         """Check whether provider is unhealthy."""
-        return self.status == HealthStatus.UNHEALTHY
+        return bool(self.status == HealthStatus.UNHEALTHY)
 
     def should_pause_pipeline(self) -> bool:
         """Check whether pipeline should be paused due to provider health."""

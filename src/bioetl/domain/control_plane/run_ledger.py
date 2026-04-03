@@ -32,6 +32,7 @@ __all__ = [
     "RunLedgerEntry",
     "RunLedgerReplayProjection",
     "canonicalize_run_ledger_stage_name",
+    "infer_ledger_event_family",
     "project_run_ledger_replay",
     "slice_ledger_entries_after",
 ]
