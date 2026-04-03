@@ -47,6 +47,9 @@ SERVICES_CREATION_API_COMPAT_MODULE_PATH = (
     / "services"
     / "creation_api.py"
 )
+PIPELINE_CREATION_API_COMPAT_MODULE = (
+    "bioetl.composition.factories.pipeline.creation_api"
+)
 PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE = (
     "bioetl.composition.factories.pipeline.config_resolution"
 )
