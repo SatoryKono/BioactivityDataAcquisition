@@ -128,7 +128,8 @@ class BaseTransformer(
         """Determine whether transformed record should be written to Silver."""
         if self._silver_filters is None or self._silver_filters.is_empty():
             return True
-        return self._silver_filters.should_include(record)
+        should_include: bool = self._silver_filters.should_include(record)
+        return should_include
 
     def should_write_gold(
         self,
@@ -138,4 +139,5 @@ class BaseTransformer(
         """Determine whether transformed record should be written to Gold."""
         if self._gold_filters is None or self._gold_filters.is_empty():
             return True
-        return self._gold_filters.should_include(record)
+        should_include: bool = self._gold_filters.should_include(record)
+        return should_include

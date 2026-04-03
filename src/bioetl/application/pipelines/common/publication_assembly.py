@@ -71,7 +71,7 @@ class PublicationAssemblyTransformer(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class PreparedPublicationPayload:
+class PreparedPublicationOutcome:
     """Typed seam shared by staged and legacy publication transformation flows."""
 
     primary_id_field: str
@@ -84,7 +84,7 @@ def prepare_publication_payload(
     context: PipelineContext,
     record: BronzeRecord,
     index: int,
-) -> PreparedPublicationPayload | None:
+) -> PreparedPublicationOutcome | None:
     """Prepare publication business data and validate the primary identifier."""
     transformer._data_extractor.pre_extract_validation(context, record, index)
     business_data = transformer._data_extractor.extract_business_data(record)
@@ -105,7 +105,7 @@ def prepare_publication_payload(
         primary_id_field,
         primary_id,
     )
-    return PreparedPublicationPayload(
+    return PreparedPublicationOutcome(
         primary_id_field=primary_id_field,
         primary_id=primary_id,
         business_data=business_data,

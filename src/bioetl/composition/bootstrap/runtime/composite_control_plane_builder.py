@@ -21,8 +21,8 @@ from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads impo
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
 )
-from bioetl.composition.services import compute_config_hash
 from bioetl.composition.services.versioning import get_git_commit
+from bioetl.composition.services.versioning import compute_config_hash
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 
@@ -185,7 +185,7 @@ def _resolve_effective_config_hash(config: CompositeConfig) -> str:
     if not isinstance(payload, dict):
         return ""
     try:
-        return compute_config_hash(payload)
+        return cast(str, compute_config_hash(cast(dict[str, object], payload)))
     except (TypeError, ValueError):
         return ""
 

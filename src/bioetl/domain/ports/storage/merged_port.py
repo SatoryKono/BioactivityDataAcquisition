@@ -56,7 +56,7 @@ class MergedStoragePort(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-        schema: DataFrameSchema | None = None,  # type: ignore[type-arg]
+        schema: DataFrameSchema | None = None,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 

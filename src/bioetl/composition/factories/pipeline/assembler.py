@@ -18,6 +18,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
+    _PipelineFactoryContext,
     build_create_pipeline_with_services_request,
     build_factory_services,
     build_pipeline_factory_context,
@@ -55,11 +56,7 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
-_extract_entity_type = extract_entity_type
-_extract_dq_configs, _assemble_runner_impl = extract_dq_configs, assemble_runner_impl
-
-
-def _factory_context(factory: GenericPipelineFactory[BasePipeline]) -> object:
+def _factory_context(factory: GenericPipelineFactory[BasePipeline]) -> _PipelineFactoryContext:
     return build_pipeline_factory_context(
         pipeline_name=factory.pipeline_name,
         create_data_source_fn=factory._create_data_source,
@@ -240,7 +237,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config=config,
             cached_bronze=cached_bronze,
         )
-
 def create_pipeline_factory(
     pipeline_name: str,
     pipeline_class: type[TPipeline],
@@ -255,7 +251,6 @@ def create_pipeline_factory(
         pipeline_name, pipeline_class, provider, silver_schema, gold_schema,
         pandera_silver_schema, None, transformer_class, provider_registry,
     )
-
 def assemble_runner(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
@@ -264,16 +259,13 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    return _assemble_runner_impl(
+    return assemble_runner_impl(
         pipeline=pipeline,
         observability=observability,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
         yaml_config=yaml_config,
-        dq_configs_extractor=_extract_dq_configs,
+        dq_configs_extractor=extract_dq_configs,
     )
-__all__ = [
-    "GenericPipelineFactory", "_assemble_runner_impl", "_extract_dq_configs",
-    "_extract_entity_type", "assemble_runner", "create_pipeline_factory",
-]
+__all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]

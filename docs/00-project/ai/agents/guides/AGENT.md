@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Синхронизировано с RULES.md v5.24 (2026-03-13) | Дедублировано: ссылки на RULES.md*
+*Синхронизировано с RULES.md v6.1 (2026-03-13) | Дедублировано: ссылки на RULES.md*
 
 > **Runtime-specific note:** если задача исполняется в Claude Code, считай
 > `.claude/agents/ORCHESTRATION.md` runtime-specific orchestration source.

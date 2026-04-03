@@ -32,16 +32,19 @@ def _schema_columns(
     schema_class: object,
 ) -> set[str]:
     """Compatibility wrapper over canonical schema-column extraction helper."""
-    return _schema_columns_impl(schema_class)
+    return cast(set[str], _schema_columns_impl(schema_class))
 
 
 def _resolve_silver_columns(config: PipelineFactoryConfig) -> set[str]:
     """Compatibility wrapper over canonical Silver schema resolution helper."""
-    return _resolve_silver_columns_impl(
-        provider=config.provider,
-        entity_type=config.entity_type,
-        pandera_silver_schema=config.pandera_silver_schema,
-        silver_schema=config.silver_schema,
+    return cast(
+        set[str],
+        _resolve_silver_columns_impl(
+            provider=config.provider,
+            entity_type=config.entity_type,
+            pandera_silver_schema=config.pandera_silver_schema,
+            silver_schema=config.silver_schema,
+        ),
     )
 
 

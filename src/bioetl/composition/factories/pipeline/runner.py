@@ -11,9 +11,9 @@ bootstrap details.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
-from bioetl.composition import PipelineRegistry, create_registry
+from bioetl.composition.registry import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
@@ -120,7 +120,7 @@ class RunnerFactory:
             Sorted list of registered pipeline names.
         """
         self._ensure_registrations()
-        return self._effective_registry.list_pipelines()
+        return cast(list[str], self._effective_registry.list_pipelines())
 
     def contains(self, pipeline_name: str) -> bool:
         """Check if a pipeline is registered.
@@ -132,7 +132,7 @@ class RunnerFactory:
             True if pipeline exists, False otherwise.
         """
         self._ensure_registrations()
-        return self._effective_registry.contains(pipeline_name)
+        return bool(self._effective_registry.contains(pipeline_name))
 
 
 class MetricsExtractor:

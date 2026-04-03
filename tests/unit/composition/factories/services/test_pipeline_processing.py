@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 
@@ -12,71 +12,89 @@ from bioetl.composition.factories.services.pipeline_processing import (
 )
 
 
-@pytest.mark.unit
 class TestBuildComponentsAndProcessingService:
-    """Contract-level tests for pipeline_processing helpers."""
-
-    @patch(
-        "bioetl.composition.factories.services.pipeline_processing.BatchProcessingSupportService"
-    )
-    @patch(
-        "bioetl.composition.factories.services.pipeline_processing.BatchProcessingService"
-    )
+    @patch("bioetl.composition.factories.services.pipeline_processing.BatchProcessingService")
+    @patch("bioetl.composition.factories.services.pipeline_processing.BatchProcessingSupportService")
+    @patch("bioetl.composition.factories.services.pipeline_processing.QuarantineManagerService")
+    @patch("bioetl.composition.factories.services.pipeline_processing.create_batch_processing_components")
     def test_delegates_component_build_and_wraps_processing_service(
         self,
-        mock_processing_service_cls: MagicMock,
-        mock_support_service_cls: MagicMock,
-    ) -> None:
-        """Assembly should preserve pipeline/callback wiring across both builders."""
+        mock_create_components,
+        mock_quarantine_manager_cls,
+        mock_support_service_cls,
+        mock_processing_service_cls,
+    ):
+        """Should coordinate component creation and service assembly."""
+        # Arrange
         pipeline = SimpleNamespace(
-            services=MagicMock(name="services"),
-            context=MagicMock(name="context"),
+            services=SimpleNamespace(
+                metrics=MagicMock(),
+                quarantine=MagicMock(),
+            ),
+            context=SimpleNamespace(
+                logger=MagicMock(),
+                run_type=MagicMock(value="incremental"),
+            ),
         )
-        callbacks = SimpleNamespace(
-            transform=MagicMock(name="transform"),
-            gold_transform=MagicMock(name="gold_transform"),
+        processor_config = SimpleNamespace(
+            pipeline_name="test_pipeline",
+            provider="test_provider",
+            entity_type="test_entity",
         )
-        components = MagicMock(name="components")
-        processing_service = MagicMock(name="processing_service")
-        support_service = MagicMock(name="support_service")
-        mock_processing_service_cls.return_value = processing_service
+        components = MagicMock()
+        mock_create_components.return_value = components
+        quarantine_manager = MagicMock()
+        mock_quarantine_manager_cls.return_value = quarantine_manager
+        support_service = MagicMock()
         mock_support_service_cls.return_value = support_service
-        create_components = MagicMock(return_value=components)
-        processor_config = MagicMock(name="processor_config")
-        error_classifier = MagicMock(name="error_classifier")
-        gold_filter = MagicMock(name="gold_filter")
-        gold_validator = MagicMock(name="gold_validator")
-        tracer = MagicMock(name="tracer")
-        lock_validator = MagicMock(name="lock_validator")
-        tracing_manager = MagicMock(name="tracing_manager")
-        batch_id_factory = MagicMock(name="batch_id_factory")
+        batch_processing_service = MagicMock()
+        mock_processing_service_cls.return_value = batch_processing_service
 
-        result = build_components_and_processing_service(
+        tracing_manager = MagicMock()
+        batch_id_factory = MagicMock()
+        error_classifier = MagicMock()
+        transform_callback = MagicMock()
+        gold_filter_callback = MagicMock()
+        gold_transform_callback = MagicMock()
+        gold_validator = MagicMock()
+        tracer = MagicMock()
+        lock_validator = MagicMock()
+
+        # Act
+        res_components, res_service = build_components_and_processing_service(
             pipeline=pipeline,
             processor_config=processor_config,
             error_classifier=error_classifier,
-            callbacks=callbacks,
-            gold_filter=gold_filter,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
             gold_validator=gold_validator,
-            tracer=tracer,
-            lock_validator=lock_validator,
             tracing_manager=tracing_manager,
             batch_id_factory=batch_id_factory,
-            create_batch_processing_components_fn=create_components,
+            tracer=tracer,
+            lock_validator=lock_validator,
         )
 
-        assert result == (components, processing_service)
-        create_components.assert_called_once_with(
+        # Assert
+        assert res_components == components
+        assert res_service == batch_processing_service
+
+        mock_create_components.assert_called_once_with(
             services=pipeline.services,
             context=pipeline.context,
             config=processor_config,
             error_classifier=error_classifier,
-            transform_callback=callbacks.transform,
-            gold_filter_callback=gold_filter,
-            gold_transform_callback=callbacks.gold_transform,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
             gold_validator=gold_validator,
             tracer=tracer,
             lock_validator=lock_validator,
+        )
+        mock_quarantine_manager_cls.assert_called_once_with(
+            quarantine_port=pipeline.services.quarantine,
+            pipeline_name=processor_config.pipeline_name,
+            metrics=pipeline.services.metrics,
         )
         mock_support_service_cls.assert_called_once_with(
             services=pipeline.services,
@@ -85,6 +103,7 @@ class TestBuildComponentsAndProcessingService:
             transformer=components.transformer,
             writer=components.writer,
             tracing=tracing_manager,
+            quarantine_manager=quarantine_manager,
         )
         mock_processing_service_cls.assert_called_once_with(
             services=pipeline.services,

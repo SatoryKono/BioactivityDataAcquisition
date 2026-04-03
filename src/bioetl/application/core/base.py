@@ -148,7 +148,8 @@ class BasePipeline(ABC):  # noqa: B024
     @property
     def logger(self) -> LoggerPort:
         """Access bound logger."""
-        return self._logger
+        logger: LoggerPort = self._logger
+        return logger
 
     @property
     def shutdown_signal(self) -> ShutdownSignal:
@@ -160,17 +161,20 @@ class BasePipeline(ABC):  # noqa: B024
     @property
     def pipeline_name(self) -> str:
         """Pipeline name (from config)."""
-        return self._config.pipeline_name
+        pipeline_name: str = self._config.pipeline_name
+        return pipeline_name
 
     @property
     def provider(self) -> str:
         """Provider name (from config)."""
-        return self._config.provider
+        provider: str = self._config.provider
+        return provider
 
     @property
     def entity_type(self) -> str:
         """Entity type (from config)."""
-        return self._config.entity_type
+        entity_type: str = self._config.entity_type
+        return entity_type
 
     @property
     def run_type(self) -> RunType:
@@ -180,12 +184,14 @@ class BasePipeline(ABC):  # noqa: B024
     @property
     def resume(self) -> bool:
         """Resume flag (from runtime)."""
-        return self._runtime.resume
+        resume: bool = self._runtime.resume
+        return resume
 
     @property
     def limit(self) -> int | None:
         """Record limit (from runtime)."""
-        return self._runtime.limit
+        limit: int | None = self._runtime.limit
+        return limit
 
     @property
     def transformer(self) -> BaseTransformer | None:

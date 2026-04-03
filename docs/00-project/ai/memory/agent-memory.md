@@ -37,7 +37,7 @@ Last verified: '2026-04-01'
 | Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.) |
 | ADR | Текущий набор в `docs/02-architecture/decisions/`; ADR-008 исторически superseded |
 | Coverage target | ≥85% overall, ≥90% domain |
-| RULES.md | v5.24 (2026-03-13) |
+| RULES.md | v6.1 (2026-03-13) |
 
 ### Ключевые файлы
 

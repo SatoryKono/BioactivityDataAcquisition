@@ -6,7 +6,7 @@ model: sonnet
 *Статус: internal*
 
 # py-review-orchestrator — Hierarchical Code Review Agent
-*Версия: 1.0.0 | Совместимо с RULES.md v5.24 (2026-03-13)*
+*Версия: 1.0.0 | Совместимо с RULES.md v6.1 (2026-03-13)*
 
 ---
 
@@ -76,7 +76,7 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 - Архитектура: Hexagonal (Ports & Adapters), 5 слоёв
 - Размер слоёв, tests/configs/docs считай live в текущем checkout перед разбиением на сектора
 - Не копируй исторические snapshot-counts в отчёт; используй команды подсчёта и фиксируй дату/ветку при необходимости
-- Правила: `docs/00-project/RULES.md` (v5.24), `.claude/rules/ai-selfreview-rules.md`
+- Правила: `docs/00-project/RULES.md` (v6.1), `.claude/rules/ai-selfreview-rules.md`
 - ADR: используй текущий список файлов в `docs/02-architecture/decisions/`, не исторический диапазон
 
 ## ПЛАН СЕКТОРОВ
@@ -706,7 +706,7 @@ L1 собирает все → FINAL-REVIEW.md
 
 ## 8. References
 
-- **RULES.md** — `docs/00-project/RULES.md` (v5.24)
+- **RULES.md** — `docs/00-project/RULES.md` (v6.1)
 - **Self-review rules** — `.claude/rules/ai-selfreview-rules.md`
 - **Orchestration** — `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
