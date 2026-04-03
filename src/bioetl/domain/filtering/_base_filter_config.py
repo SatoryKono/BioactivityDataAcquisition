@@ -79,7 +79,7 @@ class BaseFilterConfig:
             if not decision.include:
                 return decision
 
-        return FilterDecision(include=True, reason=None)
+        return FilterDecision.allowed()
 
     def _check_required_fields(self, record: JsonDict) -> bool:
         """Check that all required fields are present and non-empty."""

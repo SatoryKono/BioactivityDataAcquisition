@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import ANY, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -16,14 +16,12 @@ class TestBuildComponentsAndProcessingService:
     @patch("bioetl.composition.factories.services.pipeline_processing.BatchProcessingService")
     @patch("bioetl.composition.factories.services.pipeline_processing.BatchProcessingSupportService")
     @patch("bioetl.composition.factories.services.pipeline_processing.QuarantineManagerService")
-    @patch("bioetl.composition.factories.services.pipeline_processing.create_batch_processing_components")
     def test_delegates_component_build_and_wraps_processing_service(
         self,
-        mock_create_components,
-        mock_quarantine_manager_cls,
-        mock_support_service_cls,
-        mock_processing_service_cls,
-    ):
+        mock_quarantine_manager_cls: MagicMock,
+        mock_support_service_cls: MagicMock,
+        mock_processing_service_cls: MagicMock,
+    ) -> None:
         """Should coordinate component creation and service assembly."""
         # Arrange
         pipeline = SimpleNamespace(
@@ -41,8 +39,12 @@ class TestBuildComponentsAndProcessingService:
             provider="test_provider",
             entity_type="test_entity",
         )
+        callbacks = SimpleNamespace(
+            transform=MagicMock(name="transform"),
+            gold_transform=MagicMock(name="gold_transform"),
+        )
         components = MagicMock()
-        mock_create_components.return_value = components
+        create_components = MagicMock(return_value=components)
         quarantine_manager = MagicMock()
         mock_quarantine_manager_cls.return_value = quarantine_manager
         support_service = MagicMock()
@@ -53,9 +55,7 @@ class TestBuildComponentsAndProcessingService:
         tracing_manager = MagicMock()
         batch_id_factory = MagicMock()
         error_classifier = MagicMock()
-        transform_callback = MagicMock()
-        gold_filter_callback = MagicMock()
-        gold_transform_callback = MagicMock()
+        gold_filter = MagicMock()
         gold_validator = MagicMock()
         tracer = MagicMock()
         lock_validator = MagicMock()
@@ -65,28 +65,28 @@ class TestBuildComponentsAndProcessingService:
             pipeline=pipeline,
             processor_config=processor_config,
             error_classifier=error_classifier,
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            gold_transform_callback=gold_transform_callback,
+            callbacks=callbacks,
+            gold_filter=gold_filter,
             gold_validator=gold_validator,
             tracing_manager=tracing_manager,
             batch_id_factory=batch_id_factory,
             tracer=tracer,
             lock_validator=lock_validator,
+            create_batch_processing_components_fn=create_components,
         )
 
         # Assert
         assert res_components == components
         assert res_service == batch_processing_service
 
-        mock_create_components.assert_called_once_with(
+        create_components.assert_called_once_with(
             services=pipeline.services,
             context=pipeline.context,
             config=processor_config,
             error_classifier=error_classifier,
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            gold_transform_callback=gold_transform_callback,
+            transform_callback=callbacks.transform,
+            gold_filter_callback=gold_filter,
+            gold_transform_callback=callbacks.gold_transform,
             gold_validator=gold_validator,
             tracer=tracer,
             lock_validator=lock_validator,
@@ -94,7 +94,7 @@ class TestBuildComponentsAndProcessingService:
         mock_quarantine_manager_cls.assert_called_once_with(
             quarantine_port=pipeline.services.quarantine,
             pipeline_name=processor_config.pipeline_name,
-            metrics=pipeline.services.metrics,
+            metrics=components.batch_metrics,
         )
         mock_support_service_cls.assert_called_once_with(
             services=pipeline.services,

@@ -55,49 +55,30 @@ from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
-
 def _factory_context(factory: GenericPipelineFactory[BasePipeline]) -> _PipelineFactoryContext:
     return build_pipeline_factory_context(
-        pipeline_name=factory.pipeline_name,
-        create_data_source_fn=factory._create_data_source,
-        pipeline_class=factory.pipeline_class,
-        provider=factory.provider,
-        transformer_class=factory.transformer_class,
-        pandera_silver_schema=factory.pandera_silver_schema,
+        pipeline_name=factory.pipeline_name, create_data_source_fn=factory._create_data_source,
+        pipeline_class=factory.pipeline_class, provider=factory.provider,
+        transformer_class=factory.transformer_class, pandera_silver_schema=factory.pandera_silver_schema,
     )
-
 
 class GenericPipelineFactory(Generic[TPipeline]):
     def __init__(
-        self,
-        pipeline_name: str,
-        pipeline_class: type[TPipeline],
-        provider: str,
-        silver_schema: pa.Schema | None = None,
-        gold_schema: GoldSchemaType | None = None,
+        self, pipeline_name: str, pipeline_class: type[TPipeline], provider: str,
+        silver_schema: pa.Schema | None = None, gold_schema: GoldSchemaType | None = None,
         pandera_silver_schema: object | None = None,
         data_source_creator: DataSourceCreatorProtocol | None = None,
         transformer_class: type[BaseTransformer] | None = None,
         provider_registry: ProviderRegistry | None = None,
     ) -> None:
         if gold_schema is None:
-            raise ValueError(
-                f"gold_schema is required for pipeline '{pipeline_name}' "
-                "to enforce Gold validation."
-            )
-        self.pipeline_name = pipeline_name
-        self.pipeline_class = pipeline_class
-        self.provider = provider
-        self.silver_schema = silver_schema
-        self.gold_schema = gold_schema
-        self.pandera_silver_schema = pandera_silver_schema
-        self.transformer_class = transformer_class
-        self.provider_registry = provider_registry
+            raise ValueError(f"gold_schema is required for pipeline '{pipeline_name}' to enforce Gold validation.")
+        self.pipeline_name, self.pipeline_class, self.provider = pipeline_name, pipeline_class, provider
+        self.silver_schema, self.gold_schema, self.pandera_silver_schema = silver_schema, gold_schema, pandera_silver_schema
+        self.transformer_class, self.provider_registry = transformer_class, provider_registry
         self._create_data_source = resolve_data_source_creator(
-            provider=provider,
-            provider_registry=provider_registry,
-            data_source_creator=data_source_creator,
-            get_data_source_creator_fn=get_data_source_creator,
+            provider=provider, provider_registry=provider_registry,
+            data_source_creator=data_source_creator, get_data_source_creator_fn=get_data_source_creator,
         )
 
     def create_transformer(
