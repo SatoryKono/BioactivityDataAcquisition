@@ -25,29 +25,30 @@ def sort_columns_by_provider(
 ) -> list[str]:
     """Sort columns by provider prefix order."""
 
+    # Pre-compute indices for O(1) lookup instead of O(N) tuple.index()
+    provider_indices = {p: i + 1 for i, p in enumerate(provider_order)}
+    default_idx = len(provider_order) + 1
+
     def sort_key(col: str) -> tuple[int, str]:
         """Return (provider_index, name) placing seed columns first."""
-        parts = col.split(".")
-        if len(parts) < 3:
+        # Find index of first dot for faster provider extraction without splitting
+        idx = col.find(".")
+        if idx == -1 or col.find(".", idx + 1) == -1:
             return (0, col.lower())
 
-        provider = parts[0].lower()
-        try:
-            idx = provider_order.index(provider)
-            return (idx + 1, col.lower())
-        except ValueError:
-            return (len(provider_order) + 1, col.lower())
+        provider = col[:idx].lower()
+        return (provider_indices.get(provider, default_idx), col.lower())
 
     return sorted(columns, key=sort_key)
 
 
 def extract_field_from_qualified_name(column: str) -> str:
     """Extract field name from qualified column name."""
-    parts = column.split(".")
-    if len(parts) == 3:
-        return parts[2]
-    if len(parts) == 2:
-        return parts[1]
+    # Using maxsplit=3 limits allocation while preserving existing semantics
+    # which only extract the field if there are exactly 2 or 3 parts.
+    parts = column.split(".", 3)
+    if len(parts) in (2, 3):
+        return parts[-1]
     return column
 
 
