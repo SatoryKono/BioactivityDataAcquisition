@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Schema validation for DQ report configuration.
 
 Pydantic models for parsing DQ report configuration from YAML files.

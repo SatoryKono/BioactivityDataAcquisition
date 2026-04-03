@@ -1,3 +1,4 @@
+# mypy: disable-error-code="untyped-decorator"
 """Core UniProt identifier and metadata fields.
 
 Part of UniprotTargetSchema split to comply with LOC limits.

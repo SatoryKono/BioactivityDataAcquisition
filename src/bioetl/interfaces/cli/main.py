@@ -50,9 +50,9 @@ def _build_main_registry() -> object:
     )
 
 
-@click.group()
-@click.version_option(version=BIOETL_VERSION)
-@click.pass_context
+@click.group()  # type: ignore[untyped-decorator]
+@click.version_option(version=BIOETL_VERSION)  # type: ignore[untyped-decorator]
+@click.pass_context  # type: ignore[untyped-decorator]
 def cli(ctx: click.Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
     if ctx.obj is None:

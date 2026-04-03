@@ -121,7 +121,8 @@ def normalize_pipeline_config_payload(
 
 def validate_pipeline_config_payload(config: JsonDict) -> PipelineYamlConfig:
     """Validate normalized pipeline payload with the canonical schema."""
-    return PipelineYamlConfig.model_validate(config)
+    validated_config: PipelineYamlConfig = PipelineYamlConfig.model_validate(config)
+    return validated_config
 
 
 def map_pipeline_config(validated_config: PipelineYamlConfig) -> PipelineYamlConfig:

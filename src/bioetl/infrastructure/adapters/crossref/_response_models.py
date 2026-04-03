@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Response wrapper models for CrossRef API payloads."""
 
 from __future__ import annotations

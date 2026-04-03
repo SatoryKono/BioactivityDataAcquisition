@@ -9,9 +9,9 @@ Per RULES.md §2.4 and ADR-014.
 from __future__ import annotations
 
 from functools import cache
+from typing import Any
 
 import pytest
-import pyarrow as pa
 
 from bioetl.domain.schemas.column_order import (
     ALL_SYSTEM_FIELDS,
@@ -21,7 +21,6 @@ from bioetl.domain.schemas.column_order import (
     SYSTEM_FIELDS_PREFIX,
     canonical_column_order,
 )
-from bioetl.infrastructure.schemas import silver as silver_schemas
 
 # Schemas with custom column order (not alphabetical business fields)
 # These use PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS ordering
@@ -41,8 +40,12 @@ CUSTOM_ORDER_SCHEMAS = frozenset(
 
 
 @cache
-def get_all_pyarrow_schemas() -> list[tuple[str, pa.Schema]]:
+def get_all_pyarrow_schemas() -> list[tuple[str, Any]]:
     """Collect all PyArrow schema constants from silver module."""
+    import pyarrow as pa
+
+    from bioetl.infrastructure.schemas import silver as silver_schemas
+
     schemas = []
     for name in dir(silver_schemas):
         obj = getattr(silver_schemas, name)
@@ -131,7 +134,7 @@ class TestSchemaColumnOrder:
 
     @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
     def test_prefix_fields_in_correct_order(
-        self, schema_name: str, schema: pa.Schema
+        self, schema_name: str, schema: Any
     ) -> None:
         """System prefix fields MUST be in correct relative order."""
         column_names = schema.names
@@ -148,7 +151,7 @@ class TestSchemaColumnOrder:
         )
 
     @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
-    def test_prefix_fields_at_start(self, schema_name: str, schema: pa.Schema) -> None:
+    def test_prefix_fields_at_start(self, schema_name: str, schema: Any) -> None:
         """System prefix fields MUST be at the start of schema."""
         column_names = schema.names
 
@@ -165,7 +168,7 @@ class TestSchemaColumnOrder:
         )
 
     @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
-    def test_suffix_fields_at_end(self, schema_name: str, schema: pa.Schema) -> None:
+    def test_suffix_fields_at_end(self, schema_name: str, schema: Any) -> None:
         """DQ suffix fields MUST be last (if present)."""
         column_names = schema.names
 
@@ -183,7 +186,7 @@ class TestSchemaColumnOrder:
         )
 
     @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
-    def test_business_fields_sorted(self, schema_name: str, schema: pa.Schema) -> None:
+    def test_business_fields_sorted(self, schema_name: str, schema: Any) -> None:
         """Business fields SHOULD be sorted alphabetically.
 
         Custom-ordered schemas use PUBLICATION_METADATA_FIELDS and
@@ -231,7 +234,7 @@ class TestSchemaColumnOrder:
 
     @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
     def test_schema_matches_canonical_order(
-        self, schema_name: str, schema: pa.Schema
+        self, schema_name: str, schema: Any
     ) -> None:
         """Schema column order MUST match canonical_column_order() output.
 

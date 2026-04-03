@@ -55,6 +55,7 @@ class TestHttpClientFactory:
             retry_max_delay=9.0,
             max_connections=100,
             max_keepalive_connections=20,
+            trust_env=False,
         )
         client_ctor = MagicMock(return_value="client-from-source")
         registry = MagicMock()
@@ -84,6 +85,7 @@ class TestHttpClientFactory:
         assert kwargs["retry_config"].max_delay == 9.0
         assert kwargs["max_connections"] == 100
         assert kwargs["max_keepalive_connections"] == 20
+        assert kwargs["trust_env"] is False
 
     def test_create_applies_rate_override_from_settings(
         self, monkeypatch: pytest.MonkeyPatch
@@ -187,6 +189,7 @@ class TestResolvedHttpConfig:
             retry_max_delay=9.0,
             max_connections=100,
             max_keepalive_connections=20,
+            trust_env=False,
         )
         registry = MagicMock()
         registry.get_http_config.return_value = None
@@ -210,6 +213,7 @@ class TestResolvedHttpConfig:
         assert cfg.max_delay == 9.0
         assert cfg.max_connections == 100
         assert cfg.max_keepalive == 20
+        assert cfg.trust_env is False
 
     def test_resolve_fallback_to_registry(
         self, monkeypatch: pytest.MonkeyPatch
@@ -239,6 +243,7 @@ class TestResolvedHttpConfig:
         assert cfg.max_retries == 3
         assert cfg.base_delay == 1.0
         assert cfg.max_delay == 60.0
+        assert cfg.trust_env is True
 
     def test_resolve_applies_rate_override(
         self, monkeypatch: pytest.MonkeyPatch
@@ -281,6 +286,7 @@ class TestResolvedHttpConfig:
             max_delay=60.0,
             max_connections=50,
             max_keepalive=10,
+            trust_env=True,
         )
         with pytest.raises(AttributeError):
             cfg.rate = 99.0  # type: ignore[misc]

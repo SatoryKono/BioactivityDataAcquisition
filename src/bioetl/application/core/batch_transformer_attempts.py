@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
@@ -64,14 +64,20 @@ def _finalize_transformed_record(
             raise RuntimeError(
                 "PreSilverRecord requires RecordNormalizationProcessor"
             )
-        return normalization_processor.finalize_pre_silver(
+        finalized_record: dict[str, object] | None = (
+            normalization_processor.finalize_pre_silver(
             transformed,
             context,
             index,
+            )
         )
+        return finalized_record
     if normalization_processor is None:
         return transformed
-    return normalization_processor.normalize_record(transformed)
+    normalized_record: dict[str, object] | None = (
+        normalization_processor.normalize_record(transformed)
+    )
+    return normalized_record
 
 
 def _build_gold_record(
@@ -84,7 +90,11 @@ def _build_gold_record(
     """Create a Gold record when the finalized Silver record passes filtering."""
     if not gold_filter(context, silver_record):
         return None
-    return gold_transform(context, silver_record)
+    gold_record = cast(
+        dict[str, object] | None,
+        gold_transform(context, silver_record),
+    )
+    return gold_record
 
 
 async def transform_record_attempt(

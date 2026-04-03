@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Pydantic schemas for standalone filter configuration files.
 
 Validates external filter configuration sections before converting

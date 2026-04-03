@@ -112,7 +112,7 @@ def _build_silver_metadata_write_coro(
 
     silver_path = storage.get_table_path(silver_table, layer="silver")
     version_after = resolve_delta_version(str(silver_path), "silver")
-    return metadata_writer.finalize_silver_metadata(
+    silver_metadata_write: Awaitable[object] = metadata_writer.finalize_silver_metadata(
         str(silver_path),
         dq_report_path=resolve_report_path(dq_reports, layer="silver"),
         completed_at=completed_at,
@@ -120,6 +120,7 @@ def _build_silver_metadata_write_coro(
         provider=config.provider,
         entity=config.entity_type,
     )
+    return silver_metadata_write
 
 
 def _build_gold_metadata_write_coro(
@@ -147,10 +148,11 @@ def _build_gold_metadata_write_coro(
     if not storage.is_table_initialized(gold_table, layer="gold"):
         return None
     gold_path = storage.get_table_path(gold_table, layer="gold")
-    return metadata_writer.finalize_gold_metadata(
+    gold_metadata_write: Awaitable[object] = metadata_writer.finalize_gold_metadata(
         str(gold_path),
         dq_report_path=resolve_report_path(dq_reports, layer="gold"),
         completed_at=completed_at,
         provider=config.provider,
         entity=config.entity_type,
     )
+    return gold_metadata_write

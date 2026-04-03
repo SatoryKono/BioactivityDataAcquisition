@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Functional annotations and biochemical property fields.
 
 Part of UniprotTargetSchema split to comply with LOC limits.

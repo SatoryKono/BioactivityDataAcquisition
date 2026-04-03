@@ -2,19 +2,52 @@
 
 from __future__ import annotations
 
+from functools import cache
 from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.application.core.record_normalization_processor import (
-    RecordNormalizationProcessor,
-)
-from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunType
-from tests.helpers.transformer_dependencies import instantiate_test_transformer
+
+@cache
+def _uniprot_test_symbols() -> dict[str, object]:
+    """Import UniProt transformer dependencies lazily for faster collection."""
+    from bioetl.application.core.pre_silver_record import PreSilverRecord
+    from bioetl.application.core.record_normalization_processor import (
+        RecordNormalizationProcessor,
+    )
+    from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import RunType
+    from tests.helpers.transformer_dependencies import instantiate_test_transformer
+
+    return {
+        "PreSilverRecord": PreSilverRecord,
+        "RecordNormalizationProcessor": RecordNormalizationProcessor,
+        "UniProtProteinTransformer": UniProtProteinTransformer,
+        "PipelineContext": PipelineContext,
+        "RunType": RunType,
+        "instantiate_test_transformer": instantiate_test_transformer,
+    }
+
+
+def _build_transformer(**kwargs: object):
+    """Create a UniProt transformer without importing it during collection."""
+    symbols = _uniprot_test_symbols()
+    return symbols["instantiate_test_transformer"](
+        symbols["UniProtProteinTransformer"],
+        **kwargs,
+    )
+
+
+def _build_pipeline_context(mock_logger: MagicMock):
+    """Create a PipelineContext without importing runtime modules during collection."""
+    symbols = _uniprot_test_symbols()
+    return symbols["PipelineContext"](
+        run_id=uuid4(),
+        run_type=symbols["RunType"].INCREMENTAL,
+        logger=mock_logger,
+    )
 
 
 @pytest.fixture
@@ -23,11 +56,7 @@ def mock_context():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     mock_logger.warning = MagicMock()
-    return PipelineContext(
-        run_id=uuid4(),
-        run_type=RunType.INCREMENTAL,
-        logger=mock_logger,
-    )
+    return _build_pipeline_context(mock_logger)
 
 
 @pytest.mark.unit
@@ -37,10 +66,7 @@ class TestUniProtProteinTransformer:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return instantiate_test_transformer(
-            UniProtProteinTransformer,
-            provider="uniprot",
-        )
+        return _build_transformer(provider="uniprot")
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -263,7 +289,8 @@ class TestUniProtProteinTransformer:
 
         result = await transformer.transform_pre_silver(mock_context, record, index=0)
 
-        assert isinstance(result, PreSilverRecord)
+        symbols = _uniprot_test_symbols()
+        assert isinstance(result, symbols["PreSilverRecord"])
         assert result.entity_id == "uniprot:P12345"
         assert result.business_data["accession"] == "P12345"
         assert result.business_data["entry_name"] == "COX2_HUMAN"
@@ -286,8 +313,9 @@ class TestUniProtProteinTransformer:
         }
 
         pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
-        assert isinstance(pre_silver, PreSilverRecord)
-        staged_result = RecordNormalizationProcessor(
+        symbols = _uniprot_test_symbols()
+        assert isinstance(pre_silver, symbols["PreSilverRecord"])
+        staged_result = symbols["RecordNormalizationProcessor"](
             provider=transformer.provider,
         ).finalize_pre_silver(pre_silver, mock_context, 0)
         legacy_result = await transformer.transform(mock_context, record, index=0)
@@ -304,10 +332,7 @@ class TestUniProtProteinTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = instantiate_test_transformer(
-            UniProtProteinTransformer,
-            provider="custom_uniprot",
-        )
+        transformer = _build_transformer(provider="custom_uniprot")
         record = {
             "primaryAccession": "Q11111",
             "uniProtkbId": "CUST_HUMAN",
@@ -435,23 +460,17 @@ class TestUniProtProteinTransformer:
 
     def test_transformer_accepts_entity_type(self):
         """Transformer MUST accept entity_type parameter."""
-        transformer = instantiate_test_transformer(
-            UniProtProteinTransformer,
-            entity_type="protein",
-        )
+        transformer = _build_transformer(entity_type="protein")
         assert transformer.entity_type == "protein"
 
     def test_transformer_default_entity_type(self):
         """Transformer SHOULD default entity_type to 'protein'."""
-        transformer = instantiate_test_transformer(UniProtProteinTransformer)
+        transformer = _build_transformer()
         assert transformer.entity_type == "protein"
 
     def test_transformer_custom_entity_type(self):
         """Transformer MUST accept custom entity_type."""
-        transformer = instantiate_test_transformer(
-            UniProtProteinTransformer,
-            entity_type="custom_entity",
-        )
+        transformer = _build_transformer(entity_type="custom_entity")
         assert transformer.entity_type == "custom_entity"
 
     def test_transformer_accepts_pii_hasher(self):
@@ -459,17 +478,14 @@ class TestUniProtProteinTransformer:
         from bioetl.domain.ports.noop import NoOpPiiHasher
 
         hasher = NoOpPiiHasher()
-        transformer = instantiate_test_transformer(
-            UniProtProteinTransformer,
-            pii_hasher=hasher,
-        )
+        transformer = _build_transformer(pii_hasher=hasher)
         assert transformer._pii_hasher is hasher
 
     def test_transformer_default_pii_hasher(self):
         """Transformer SHOULD default pii_hasher to NoOpPiiHasher."""
         from bioetl.domain.ports.noop import NoOpPiiHasher
 
-        transformer = instantiate_test_transformer(UniProtProteinTransformer)
+        transformer = _build_transformer()
         assert isinstance(transformer._pii_hasher, NoOpPiiHasher)
 
 
@@ -480,10 +496,7 @@ class TestUniProtProteinTransformerExtendedFields:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return instantiate_test_transformer(
-            UniProtProteinTransformer,
-            provider="uniprot",
-        )
+        return _build_transformer(provider="uniprot")
 
     @pytest.mark.asyncio
     async def test_extract_entry_type_reviewed(self, transformer, mock_context):
@@ -1047,10 +1060,7 @@ class TestUniProtTransformerAuditDates:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return instantiate_test_transformer(
-            UniProtProteinTransformer,
-            provider="uniprot",
-        )
+        return _build_transformer(provider="uniprot")
 
     @pytest.mark.asyncio
     async def test_extract_entry_audit_dates(self, transformer, mock_context):
@@ -1201,10 +1211,7 @@ class TestUniProtCofactorsExtraction:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return instantiate_test_transformer(
-            UniProtProteinTransformer,
-            provider="uniprot",
-        )
+        return _build_transformer(provider="uniprot")
 
     @pytest.mark.asyncio
     async def test_extract_cofactors_with_chebi(self, transformer, mock_context):
@@ -1293,10 +1300,7 @@ class TestUniProtBiophysicochemicalExtraction:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return instantiate_test_transformer(
-            UniProtProteinTransformer,
-            provider="uniprot",
-        )
+        return _build_transformer(provider="uniprot")
 
     @pytest.mark.asyncio
     async def test_extract_ph_dependence(self, transformer, mock_context):
@@ -1437,10 +1441,7 @@ class TestUniProtInductionExtraction:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return instantiate_test_transformer(
-            UniProtProteinTransformer,
-            provider="uniprot",
-        )
+        return _build_transformer(provider="uniprot")
 
     @pytest.mark.asyncio
     async def test_extract_induction(self, transformer, mock_context):
@@ -1489,10 +1490,7 @@ class TestUniProtPDBExtraction:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return instantiate_test_transformer(
-            UniProtProteinTransformer,
-            provider="uniprot",
-        )
+        return _build_transformer(provider="uniprot")
 
     @pytest.mark.asyncio
     async def test_extract_pdb_xrefs(self, transformer, mock_context):

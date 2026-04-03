@@ -8,8 +8,9 @@ source:
         client:
             timeout_sec: 90.0
             max_retries: 6
+            trust_env: false
         pagination:
-            page_size: 100
+            page_size: 1000
             id_batch_size: 20
             strategy: offset
             max_url_length: 2000

@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
-    from bioetl.domain.types import BronzeRecord, JsonDict, SilverRecord
+    from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
 
 
 class _PublicationDataExtractor(Protocol):
@@ -28,7 +28,7 @@ class _PublicationIdentifierResolver(Protocol):
         context: PipelineContext,
         business_data: JsonDict,
         index: int,
-    ) -> tuple[str, Any] | None: ...
+    ) -> tuple[str, PrimaryId] | None: ...
 
 
 class _PublicationMetadataStrategy(Protocol):
@@ -49,7 +49,7 @@ class PublicationAssemblyTransformer(Protocol):
 
     def _normalize_content_fields(
         self,
-        business_data: dict[str, Any],
+        business_data: JsonDict,
     ) -> JsonDict: ...
 
     def _log_fallback_if_needed(
@@ -57,14 +57,14 @@ class PublicationAssemblyTransformer(Protocol):
         context: PipelineContext,
         business_data: JsonDict,
         primary_id_field: str,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> None: ...
 
     def _create_entity(
         self,
         entity_class: type[BaseEntity],
         context: PipelineContext,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> BaseEntity: ...
 
     def entity_to_silver_record(self, entity: BaseEntity) -> SilverRecord: ...
@@ -75,7 +75,7 @@ class PreparedPublicationOutcome:
     """Typed seam shared by staged and legacy publication transformation flows."""
 
     primary_id_field: str
-    primary_id: Any
+    primary_id: PrimaryId
     business_data: JsonDict
 
 
@@ -141,4 +141,5 @@ def build_publication_silver_record(
         index=index,
         **business_data,
     )
-    return cast("SilverRecord", transformer.entity_to_silver_record(entity))
+    silver_record = transformer.entity_to_silver_record(entity)
+    return transformer._metadata_strategy.post_process_silver_record(silver_record)

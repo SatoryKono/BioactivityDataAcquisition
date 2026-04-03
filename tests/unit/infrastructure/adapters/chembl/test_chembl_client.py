@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
 
+import httpx
 import pytest
 
 from bioetl.domain.exceptions import (
@@ -336,6 +337,43 @@ async def test_check_health_status_endpoint_500_returns_degraded(
 
     result = await adapter.check_health()
     assert result.status == HealthStatus.DEGRADED
+
+
+@pytest.mark.asyncio
+async def test_degraded_probe_reduces_first_fetch_batch_size(
+    mock_http_client, mock_logger
+) -> None:
+    """A degraded preflight probe should shrink the next page limit immediately."""
+    adapter = ChemblAdapter(
+        http_client=mock_http_client,
+        logger=mock_logger,
+        adapter_config=AdapterConfig(page_size=1000),
+    )
+    request = httpx.Request("GET", "https://www.ebi.ac.uk/chembl/api/data/status")
+    response = httpx.Response(status_code=500, request=request)
+    mock_http_client.get_once = AsyncMock(
+        side_effect=httpx.HTTPStatusError(
+            "status endpoint failed",
+            request=request,
+            response=response,
+        )
+    )
+
+    result = await adapter.check_health()
+
+    assert result.status == HealthStatus.DEGRADED
+    assert adapter._build_params(0, "activity")["limit"] == 500
+
+
+def test_effective_batch_size_prefers_probe_degradation_over_clean_circuit(
+    adapter, mock_http_client
+) -> None:
+    """Probe degradation should matter before any request failures hit the circuit breaker."""
+    mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
+    mock_http_client.circuit_breaker.get_failure_count.return_value = 0
+    adapter._last_probe_health_status = HealthStatus.DEGRADED
+
+    assert adapter._get_effective_batch_size() == 500
 
 
 @pytest.mark.unit

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from functools import cache
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pyarrow as pa
@@ -15,17 +16,27 @@ from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
 )
-from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     normalize_scd_config,
     set_gold_write_span_attributes,
 )
 
 
+@cache
+def _gold_writer_cls() -> type[GoldWriter]:
+    from bioetl.infrastructure.storage.gold_writer import GoldWriter
+
+    return GoldWriter
+
+
+def _build_gold_writer(**kwargs: object) -> GoldWriter:
+    return _gold_writer_cls()(**kwargs)
+
+
 @pytest.fixture
 def gold_writer(noop_logger):
     """Create a GoldWriter instance."""
-    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger)
+    return _build_gold_writer(base_path="s3://test-bucket/gold", logger=noop_logger)
 
 
 @pytest.fixture
@@ -118,7 +129,7 @@ class TestGoldWriterInit:
 
     def test_init_strips_trailing_slash(self, noop_logger):
         """Test that trailing slash is stripped from base_path."""
-        writer = GoldWriter(base_path="s3://bucket/gold/", logger=noop_logger)
+        writer = _build_gold_writer(base_path="s3://bucket/gold/", logger=noop_logger)
         assert writer.base_path == "s3://bucket/gold"
 
     def test_init_with_csv_exporter(self, noop_logger):
@@ -126,7 +137,7 @@ class TestGoldWriterInit:
         from unittest.mock import MagicMock
 
         mock_exporter = MagicMock()
-        writer = GoldWriter(
+        writer = _build_gold_writer(
             base_path="/tmp/gold",
             logger=noop_logger,
             csv_exporter=mock_exporter,
@@ -135,7 +146,7 @@ class TestGoldWriterInit:
 
     def test_init_without_csv_exporter(self, noop_logger):
         """Test initialization without CSV exporter."""
-        writer = GoldWriter(base_path="/tmp/gold", logger=noop_logger)
+        writer = _build_gold_writer(base_path="/tmp/gold", logger=noop_logger)
         assert writer.csv_exporter is None
 
 
@@ -309,7 +320,7 @@ class TestGoldWriterDualWrite:
             read_order=("2.0.0", "1.0.0"),
             write_versions=("1.0.0", "2.0.0"),
         )
-        writer = GoldWriter(
+        writer = _build_gold_writer(
             base_path="s3://test-bucket/gold",
             logger=noop_logger,
             runtime_services=GoldWriterRuntimeServices(
@@ -383,7 +394,7 @@ class TestGoldWriterDualWrite:
         )
         logger = MagicMock()
         logger.bind = MagicMock(return_value=logger)
-        writer = GoldWriter(
+        writer = _build_gold_writer(
             base_path="s3://test-bucket/gold",
             logger=logger,
             runtime_services=GoldWriterRuntimeServices(

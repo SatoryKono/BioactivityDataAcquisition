@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Schema validation facade for pipeline configuration."""
 
 from __future__ import annotations

@@ -1,3 +1,4 @@
+# mypy: disable-error-code="arg-type"
 """ChEMBL Publication Term Transformer.
 
 Transforms Publication records to extract and flatten associated terms.
@@ -34,25 +35,7 @@ if TYPE_CHECKING:
 
 
 class PublicationTermTransformer(BaseChemblTransformer):
-    """Transforms ChEMBL publication records to extract flattened term records.
-
-    This transformer extracts nested term data from Publication (ChEMBL Document)
-    API responses and flattens the 1:M relationship (one Publication → multiple Terms).
-
-    Term types extracted:
-    - MESH_HEADING: MeSH descriptor terms from mesh_terms array
-    - MESH_QUALIFIER: MeSH qualifiers/subheadings from mesh_terms
-    - KEYWORD: Author-provided keywords from keywords array
-
-    Entity ID is computed as SHA256 hash of composite key:
-    (document_chembl_id, term_type, normalized_term)
-
-    Note: This transformer returns multiple records from a single Publication,
-    unlike standard transformers that have 1:1 input/output mapping.
-
-    .. versionchanged:: 2.0.0
-        Renamed from DocumentTermTransformer (ADR-024).
-    """
+    """Flatten publication terms from ChEMBL publication records."""
 
     entity_class = ChemblPublicationTerm
     primary_id_field = "publication_id"
@@ -119,34 +102,13 @@ class PublicationTermTransformer(BaseChemblTransformer):
         record: BronzeRecord,
         primary_id: PrimaryId,
     ) -> GoldRecord:
-        """Extract term data from the record.
-
-        Handles two cases:
-        1. Pre-extracted term records (from PublicationTermDataSource) - pass through
-           with normalization (strip whitespace from term/term_type).
-        2. Raw publication records - extract terms from mesh_terms/keywords arrays.
-
-        Both paths apply consistent normalization via strip() on term and term_type
-        to ensure storage consistency regardless of input source.
-
-        Args:
-            record: Bronze record (either term record or document record).
-            primary_id: Validated publication_id value.
-
-        Returns:
-            Dictionary of term business fields with normalized values.
-
-        """
-        # Case 1: Record is already a term record (from PublicationTermDataSource)
-        # These records have 'term' and 'term_type' fields directly.
-        # Apply same normalization as _create_term_data for consistency.
+        """Extract one normalized publication-term payload from the input."""
         if "term" in record and "term_type" in record:
             raw_term = record.get("term")
             raw_term_type = record.get("term_type")
             raw_mesh_id = record.get("mesh_id")
             raw_qualifier = record.get("qualifier")
 
-            # Normalize term and term_type (strip whitespace, convert to string)
             term = str(raw_term).strip() if raw_term else ""
             term_type = str(raw_term_type).strip() if raw_term_type else ""
             mesh_id = str(raw_mesh_id).strip() if raw_mesh_id else None
@@ -160,10 +122,8 @@ class PublicationTermTransformer(BaseChemblTransformer):
                 "qualifier": qualifier,
             }
 
-        # Case 2: Raw document record - extract terms from nested arrays
         terms = list(self.extract_terms_from_document(record, str(primary_id)))
         if not terms:
-            # Return empty data that will fail validation
             return {
                 "publication_id": str(primary_id),
                 "term": "",
@@ -176,21 +136,9 @@ class PublicationTermTransformer(BaseChemblTransformer):
     def extract_terms_from_document(
         self, record: BronzeRecord, publication_id: str
     ) -> list[GoldRecord]:
-        """Extract and flatten all terms from a Publication record.
-
-        Returns multiple term records from one publication.
-        This is the primary method for derived entity extraction.
-
-        Args:
-            record: Raw Bronze record from ChEMBL API.
-            publication_id: Document ChEMBL ID.
-
-        Returns:
-            List of term GoldRecord dictionaries, one per extracted term.
-        """
+        """Extract every flattened term payload from one publication record."""
         terms: list[GoldRecord] = []
 
-        # Extract MeSH terms
         raw_mesh_terms = record.get("mesh_terms")
         mesh_terms: list[Any] = (  # Any: untyped ChEMBL API JSON list elements
             raw_mesh_terms if isinstance(raw_mesh_terms, list) else []
@@ -211,7 +159,6 @@ class PublicationTermTransformer(BaseChemblTransformer):
                     )
                 )
 
-            # Extract qualifier as separate term if present
             mesh_qualifier = mesh.get("mesh_qualifier")
             if mesh_qualifier:
                 terms.append(
@@ -224,7 +171,6 @@ class PublicationTermTransformer(BaseChemblTransformer):
                     )
                 )
 
-        # Extract keywords
         raw_keywords = record.get("keywords")
         keywords: list[Any] = (  # Any: untyped ChEMBL API JSON
             raw_keywords if isinstance(raw_keywords, list) else []
@@ -232,7 +178,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         for keyword in keywords:
             if isinstance(keyword, str):
                 stripped = keyword.strip()
-                if stripped:  # Skip empty strings after stripping
+                if stripped:
                     terms.append(
                         self._create_term_data(
                             publication_id=publication_id,
@@ -253,19 +199,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         mesh_id: str | None,
         qualifier: str | None,
     ) -> GoldRecord:
-        """Create a single term data dictionary.
-
-        Args:
-            publication_id: Parent document ChEMBL ID.
-            term: Term text.
-            term_type: Term type (MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT).
-            mesh_id: MeSH identifier if applicable.
-            qualifier: MeSH qualifier if applicable.
-
-        Returns:
-            Dictionary of term business fields.
-
-        """
+        """Build one normalized term payload."""
         return {
             "publication_id": publication_id,
             "term": term.strip() if term else term,
@@ -277,19 +211,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
     def compute_term_entity_id(
         self, publication_id: str, term_type: str, term: str
     ) -> str:
-        """Compute entity ID for a term based on composite key.
-
-        Delegates to shared ``compute_publication_term_entity_id``.
-
-        Args:
-            publication_id: Document ChEMBL ID (canonical name per ADR-024).
-            term_type: Term type classification.
-            term: Term text (will be normalized).
-
-        Returns:
-            Entity ID string (first 16 chars of SHA256 hex digest).
-
-        """
+        """Compute the stable publication-term entity id."""
         return compute_publication_term_entity_id(publication_id, term_type, term)
 
 

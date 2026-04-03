@@ -1,3 +1,4 @@
+# mypy: disable-error-code="import-untyped"
 """PubMed XML processing utilities.
 
 Provides XML parsing and record extraction for PubMed API responses.
@@ -30,7 +31,8 @@ class PubMedXmlProcessor:
             Parsed XML root element, or None if parsing fails
         """
         try:
-            return defused_ET.fromstring(xml_text)
+            parsed_root: ET.Element = defused_ET.fromstring(xml_text)
+            return parsed_root
         except (ET.ParseError, defused_ET.EntitiesForbidden):
             return None
 

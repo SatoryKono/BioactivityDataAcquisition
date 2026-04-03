@@ -264,7 +264,7 @@ def _augment_dq_summary_with_composite_cv(
     composite_provenance = _normalize_rule_provenance_entries(
         _coerce_rule_provenance_mappings(cv_summary["rule_provenance"])
     )
-    return dq_summary.model_copy(
+    updated_summary: DQSummary = dq_summary.model_copy(
         update={
             "valid_records": max(total_records - error_records, 0),
             "error_records": max(dq_summary.error_records, error_records),
@@ -275,6 +275,7 @@ def _augment_dq_summary_with_composite_cv(
             "rule_provenance": existing_provenance + composite_provenance,
         }
     )
+    return updated_summary
 
 
 def _build_runtime_duration(

@@ -84,15 +84,15 @@ def _handle_maintenance_failure(
     )
 
 
-@click.command("vacuum")
-@click.argument("table")
-@click.option(
+@click.command("vacuum")  # type: ignore[untyped-decorator]
+@click.argument("table")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--retention-days",
     "-r",
     default=7,
     help="Minimum age of files to remove (days)",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--dry-run",
     is_flag=True,
     help="Show what would be removed without removing",
@@ -167,19 +167,19 @@ def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
             coro.close()
 
 
-@click.command("vacuum-all")
-@click.option(
+@click.command("vacuum-all")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--retention-days",
     "-r",
     default=7,
     help="Minimum age of files to remove (days)",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--dry-run",
     is_flag=True,
     help="Show what would be removed without removing",
 )
-@click.option(
+@click.option(  # type: ignore[untyped-decorator]
     "--layer",
     type=click.Choice(["all", "silver", "gold"]),
     default="all",

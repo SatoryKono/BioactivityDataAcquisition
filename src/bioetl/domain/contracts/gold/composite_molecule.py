@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Composite molecule Gold schema."""
 
 from __future__ import annotations

@@ -135,6 +135,39 @@ run_python() {
     fi
 }
 
+pytest_only_stamp_file() {
+    printf '%s\n' "$REPO_ROOT/.pytest_cache/setup_plugins_pytest_only_${PYTHON_KIND}.stamp"
+}
+
+pytest_only_stamp_is_fresh() {
+    [[ "$PYTEST_ONLY" == true ]] || return 1
+
+    local stamp_file
+    stamp_file="$(pytest_only_stamp_file)"
+    [[ -f "$stamp_file" ]] || return 1
+
+    local tracked_files=("$REPO_ROOT/pyproject.toml" "$REPO_ROOT/uv.lock")
+    if [[ "$USE_UV" == false && -n "$PYTHON_BIN" ]]; then
+        tracked_files+=("$PYTHON_BIN")
+    fi
+
+    local tracked
+    for tracked in "${tracked_files[@]}"; do
+        [[ -e "$tracked" && "$tracked" -nt "$stamp_file" ]] && return 1
+    done
+
+    return 0
+}
+
+mark_pytest_only_stamp() {
+    [[ "$PYTEST_ONLY" == true ]] || return 0
+
+    local stamp_file
+    stamp_file="$(pytest_only_stamp_file)"
+    mkdir -p "$(dirname "$stamp_file")"
+    : > "$stamp_file"
+}
+
 install_dev_dependencies() {
     if [[ "$USE_UV" == true ]]; then
         log_info "Syncing dev/test dependencies via uv..."
@@ -236,9 +269,14 @@ Set-Location '$repo_root_win'
     fi
 }
 
-if ! check_pytest_plugins; then
-    install_dev_dependencies
-    check_pytest_plugins
+if pytest_only_stamp_is_fresh; then
+    log_ok "pytest plugin setup already verified"
+else
+    if ! check_pytest_plugins; then
+        install_dev_dependencies
+        check_pytest_plugins
+    fi
+    mark_pytest_only_stamp
 fi
 
 install_precommit

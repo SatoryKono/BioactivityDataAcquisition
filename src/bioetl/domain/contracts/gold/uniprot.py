@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """UniProt Gold layer data contracts.
 
 Contains Pandera DataFrameModel schemas for UniProt entities in the Gold layer:

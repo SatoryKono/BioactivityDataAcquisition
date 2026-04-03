@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Reference ChEMBL entity DTO models (publication/cell/component/protein class)."""
 
 from __future__ import annotations

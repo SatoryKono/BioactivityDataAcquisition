@@ -2,17 +2,11 @@
 
 from __future__ import annotations
 
+from functools import cache
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.composite.aggregator import EnricherAggregator
-from bioetl.application.composite.deduplication import EnricherDeduplicator
-from bioetl.application.composite.merger import (
-    MergeCollaboratorGroup,
-    MergeService,
-    _path_to_table_name,
-)
 from bioetl.domain.composite.config import DependencyConfig, EnricherConfig, MergeConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -23,6 +17,39 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.exceptions import BioETLError
 from tests.unit.application.composite.merge_test_support import build_merge_service
+
+
+@cache
+def _merge_runtime_symbols() -> dict[str, object]:
+    """Load composite runtime helpers lazily to reduce module-scope import cost."""
+    from bioetl.application.composite.aggregator import EnricherAggregator
+    from bioetl.application.composite.deduplication import EnricherDeduplicator
+    from bioetl.application.composite.merger import (
+        MergeCollaboratorGroup,
+        MergeService,
+        _path_to_table_name,
+    )
+
+    return {
+        "EnricherAggregator": EnricherAggregator,
+        "EnricherDeduplicator": EnricherDeduplicator,
+        "MergeCollaboratorGroup": MergeCollaboratorGroup,
+        "MergeService": MergeService,
+        "_path_to_table_name": _path_to_table_name,
+    }
+
+
+def _merge_service_cls() -> type[MergeService]:
+    return _merge_runtime_symbols()["MergeService"]  # type: ignore[return-value]
+
+
+def _merge_collaborator_group_cls() -> type[MergeCollaboratorGroup]:
+    return _merge_runtime_symbols()["MergeCollaboratorGroup"]  # type: ignore[return-value]
+
+
+def _path_to_table_name_helper(path: str) -> str:
+    helper = _merge_runtime_symbols()["_path_to_table_name"]
+    return helper(path)  # type: ignore[misc, operator]
 
 
 @pytest.fixture
@@ -44,13 +71,15 @@ def mock_logger():
 @pytest.fixture
 def deduplicator(mock_logger):
     """Create an EnricherDeduplicator instance."""
-    return EnricherDeduplicator(mock_logger)
+    deduplicator_cls = _merge_runtime_symbols()["EnricherDeduplicator"]
+    return deduplicator_cls(mock_logger)  # type: ignore[misc, operator]
 
 
 @pytest.fixture
 def aggregator(mock_logger):
     """Create an EnricherAggregator instance."""
-    return EnricherAggregator(mock_logger)
+    aggregator_cls = _merge_runtime_symbols()["EnricherAggregator"]
+    return aggregator_cls(mock_logger)  # type: ignore[misc, operator]
 
 
 @pytest.fixture
@@ -90,11 +119,11 @@ def test_merge_service_accepts_injected_internal_components(
     conflict_resolver = MagicMock()
     join_planner = MagicMock()
 
-    service = MergeService(
+    service = _merge_service_cls()(
         merge_config=merge_config,
         storage=mock_storage,
         logger=mock_logger,
-        collaborators=MergeCollaboratorGroup(
+        collaborators=_merge_collaborator_group_cls()(
             deduplicator=deduplicator,
             aggregator=aggregator,
             renamer=renamer,
@@ -122,21 +151,21 @@ class TestPathToTableName:
 
     def test_strips_silver_prefix(self):
         """Test silver prefix is stripped."""
-        assert _path_to_table_name("silver/chembl/activity") == "chembl/activity"
+        assert _path_to_table_name_helper("silver/chembl/activity") == "chembl/activity"
 
     def test_strips_gold_prefix(self):
         """Test gold prefix is stripped."""
         assert (
-            _path_to_table_name("gold/publication_enriched") == "publication_enriched"
+            _path_to_table_name_helper("gold/publication_enriched") == "publication_enriched"
         )
 
     def test_strips_bronze_prefix(self):
         """Test bronze prefix is stripped."""
-        assert _path_to_table_name("bronze/provider/entity") == "provider/entity"
+        assert _path_to_table_name_helper("bronze/provider/entity") == "provider/entity"
 
     def test_returns_unchanged_if_no_prefix(self):
         """Test path without prefix is unchanged."""
-        assert _path_to_table_name("some/path") == "some/path"
+        assert _path_to_table_name_helper("some/path") == "some/path"
 
 
 @pytest.mark.unit

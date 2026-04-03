@@ -38,7 +38,9 @@ def get_all_pipeline_configs() -> tuple[Path, ...]:
     if not PIPELINE_CONFIG_PATH.exists():
         return ()
     return tuple(
-        p for p in PIPELINE_CONFIG_PATH.rglob("*.yaml") if not p.name.startswith("_")
+        sorted(
+            p for p in PIPELINE_CONFIG_PATH.glob("*/*.yaml") if not p.name.startswith("_")
+        )
     )
 
 

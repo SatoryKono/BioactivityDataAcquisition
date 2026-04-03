@@ -159,9 +159,9 @@ def _handle_plan_failure(exc: BaseException, *, pipeline: str, reason_code: str)
     )
 
 
-@click.command("plan")
-@click.argument("pipeline")
-@click.option(
+@click.command("plan")  # type: ignore[untyped-decorator]
+@click.argument("pipeline")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),

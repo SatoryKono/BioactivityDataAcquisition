@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from bioetl.composition.factories.datasource.adapter_helpers import (
-    AdapterHelpersFactory,
-)
-from bioetl.domain.ports import LoggerPort, MetricsPort
-from bioetl.infrastructure.adapters.common import (
-    FallbackFetchOrchestratorService,
-    HttpAdapterDependencyContext,
-)
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.common import (
+        FallbackFetchOrchestratorService,
+        HttpAdapterDependencyContext,
+    )
 
 __all__ = [
     "HttpAdapterRuntimeBundle",
@@ -35,6 +34,10 @@ def build_http_adapter_runtime_bundle(
     metrics: MetricsPort | None = None,
 ) -> HttpAdapterRuntimeBundle:
     """Build the same HTTP adapter helper bundle as the composition root."""
+    from bioetl.composition.factories.datasource.adapter_helpers import (
+        AdapterHelpersFactory,
+    )
+
     helper_services = AdapterHelpersFactory.create_http_helpers(
         provider=provider,
         logger=logger,

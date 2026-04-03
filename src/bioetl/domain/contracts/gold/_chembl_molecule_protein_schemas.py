@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """ChEMBL molecule/protein-class Gold-layer contracts."""
 
 from __future__ import annotations

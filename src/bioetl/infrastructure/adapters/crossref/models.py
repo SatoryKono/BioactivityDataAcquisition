@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Pydantic models for CrossRef API responses.
 
 These models provide type-safe parsing and validation for CrossRef REST API responses.

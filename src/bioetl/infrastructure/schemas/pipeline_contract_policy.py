@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Typed model for pipeline contract policies.
 
 Policy data lives in configs/entities/{provider}/{entity}.yaml

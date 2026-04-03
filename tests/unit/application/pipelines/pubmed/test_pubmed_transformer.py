@@ -6,23 +6,13 @@ records into Silver-layer format.
 
 from __future__ import annotations
 
+from functools import cache
 import xml.etree.ElementTree as ET
 from typing import Any
 from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
-
-from bioetl.application.pipelines.pubmed.extractors import (
-    AuthorExtractor,
-    DateExtractor,
-)
-from bioetl.application.pipelines.pubmed.transformer import (
-    PubMedPublicationTransformer,
-)
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunType
-from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 # Sample PubMed XML for testing
 MINIMAL_PUBMED_XML = """<?xml version="1.0"?>
@@ -149,6 +139,50 @@ NO_ARTICLE_XML = """<?xml version="1.0"?>
 """
 
 
+@cache
+def _pubmed_test_symbols() -> dict[str, Any]:
+    """Import PubMed transformer collaborators lazily for faster collection."""
+    from bioetl.application.pipelines.pubmed.extractors import (
+        AuthorExtractor,
+        DateExtractor,
+    )
+    from bioetl.application.pipelines.pubmed.transformer import (
+        PubMedPublicationTransformer,
+    )
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import RunType
+    from tests.helpers.transformer_dependencies import instantiate_test_transformer
+
+    return {
+        "AuthorExtractor": AuthorExtractor,
+        "DateExtractor": DateExtractor,
+        "PubMedPublicationTransformer": PubMedPublicationTransformer,
+        "PipelineContext": PipelineContext,
+        "RunType": RunType,
+        "instantiate_test_transformer": instantiate_test_transformer,
+    }
+
+
+def _build_transformer(**kwargs: Any):
+    """Create a PubMed transformer without importing the stack during collection."""
+    symbols = _pubmed_test_symbols()
+    return symbols["instantiate_test_transformer"](
+        symbols["PubMedPublicationTransformer"],
+        provider="pubmed",
+        **kwargs,
+    )
+
+
+def _build_pipeline_context(mock_logger: MagicMock):
+    """Create a PipelineContext without importing it during collection."""
+    symbols = _pubmed_test_symbols()
+    return symbols["PipelineContext"](
+        run_id=uuid4(),
+        run_type=symbols["RunType"].INCREMENTAL,
+        logger=mock_logger,
+    )
+
+
 @pytest.fixture
 def mock_context() -> PipelineContext:
     """Create a mock pipeline context."""
@@ -156,11 +190,7 @@ def mock_context() -> PipelineContext:
     mock_logger.bind = MagicMock(return_value=mock_logger)
     mock_logger.warning = MagicMock()
     mock_logger.debug = MagicMock()
-    return PipelineContext(
-        run_id=uuid4(),
-        run_type=RunType.INCREMENTAL,
-        logger=mock_logger,
-    )
+    return _build_pipeline_context(mock_logger)
 
 
 @pytest.mark.unit
@@ -170,19 +200,15 @@ class TestPubMedPublicationTransformer:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     def test_init_accepts_injected_extractors(self) -> None:
         """Transformer should allow extractor overrides via DI."""
-        author_extractor = MagicMock(spec=AuthorExtractor)
-        date_extractor = MagicMock(spec=DateExtractor)
+        symbols = _pubmed_test_symbols()
+        author_extractor = MagicMock(spec=symbols["AuthorExtractor"])
+        date_extractor = MagicMock(spec=symbols["DateExtractor"])
 
-        transformer = instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
+        transformer = _build_transformer(
             author_extractor=author_extractor,
             date_extractor=date_extractor,
         )
@@ -192,14 +218,11 @@ class TestPubMedPublicationTransformer:
 
     def test_extract_author_block_uses_injected_author_extractor(self) -> None:
         """Author normalization should use injected extractor instance."""
-        author_extractor = MagicMock(spec=AuthorExtractor)
+        symbols = _pubmed_test_symbols()
+        author_extractor = MagicMock(spec=symbols["AuthorExtractor"])
         author_extractor.normalize.return_value = ["Smith, J"]
         author_extractor.parse_structured_affiliations.return_value = []
-        transformer = instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-            author_extractor=author_extractor,
-        )
+        transformer = _build_transformer(author_extractor=author_extractor)
 
         data_normalizer = MagicMock()
         data_normalizer.normalize_author_list.return_value = '["Smith, J"]'
@@ -446,10 +469,7 @@ class TestPubMedTransformerJournalExtraction:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     @pytest.mark.asyncio
     async def test_missing_journal_element(
@@ -516,10 +536,7 @@ class TestPubMedTransformerDateExtraction:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     @pytest.mark.asyncio
     async def test_year_only_date(
@@ -611,10 +628,7 @@ class TestPubMedTransformerIdentifierExtraction:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     @pytest.mark.asyncio
     async def test_doi_from_elocation(
@@ -692,10 +706,7 @@ class TestPubMedTransformerClassificationExtraction:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     @pytest.mark.asyncio
     async def test_empty_classification_lists(
@@ -752,10 +763,7 @@ class TestPubMedTransformerDoiNormalization:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     @staticmethod
     def _make_xml_with_doi(pmid: str, doi: str) -> str:
@@ -857,10 +865,7 @@ class TestPubMedTransformerUnifiedPageFields:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     @pytest.mark.asyncio
     async def test_unified_page_fields_in_transform(
@@ -886,10 +891,7 @@ class TestPubMedTransformerUnifiedDateFields:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     def test_compute_publication_date_from_epub(
         self,
@@ -1009,10 +1011,7 @@ class TestPubMedTransformerIdentifierNormalization:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     @staticmethod
     def _make_xml_with_identifiers(
@@ -1220,10 +1219,7 @@ class TestPubMedTransformerDateValidation:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     def test_is_valid_date_format_full_date(
         self,
@@ -1412,10 +1408,7 @@ class TestPubMedTransformerContentHashStability:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return instantiate_test_transformer(
-            PubMedPublicationTransformer,
-            provider="pubmed",
-        )
+        return _build_transformer()
 
     @pytest.mark.asyncio
     async def test_valid_record_content_hash_deterministic(
@@ -1488,10 +1481,7 @@ class TestPubMedTransformerContentHashStability:
 @pytest.fixture
 def _orphan_transformer() -> PubMedPublicationTransformer:
     """Create a PubMedPublicationTransformer instance (orphan fixture)."""
-    return instantiate_test_transformer(
-        PubMedPublicationTransformer,
-        provider="pubmed",
-    )
+    return _build_transformer()
 
 
 @pytest.fixture
@@ -1507,9 +1497,10 @@ def _orphan_pipeline_context(_orphan_mock_logger: MagicMock) -> PipelineContext:
     """Create a pipeline context for testing (orphan fixture)."""
     from uuid import UUID
 
-    return PipelineContext(
+    symbols = _pubmed_test_symbols()
+    return symbols["PipelineContext"](
         run_id=UUID("00000000-0000-0000-0000-000000000000"),
-        run_type=RunType.INCREMENTAL,
+        run_type=symbols["RunType"].INCREMENTAL,
         logger=_orphan_mock_logger,
     )
 

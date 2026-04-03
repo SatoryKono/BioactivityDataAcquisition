@@ -70,3 +70,7 @@ class PublicationMetadataStrategy(Protocol):
     def should_log_fallback_lookup(self) -> bool:
         """Return True if fallback lookup logging is enabled."""
         ...
+
+    def post_process_silver_record(self, silver_record: JsonDict) -> JsonDict:
+        """Apply provider-specific cleanup to the final Silver record."""
+        ...

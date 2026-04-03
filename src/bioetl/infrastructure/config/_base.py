@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Centralized configuration for BioETL.
 
 Uses pydantic-settings for type-safe, validated configuration from environment

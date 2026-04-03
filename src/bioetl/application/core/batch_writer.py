@@ -134,11 +134,24 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         self._error_classifier = error_classifier
         # Backward-compatible: allow direct legacy kwargs (tracer, lock_validator, etc.)
         if options is None:
+            tracer = cast("TracingPort | None", legacy_kwargs.get("tracer"))
+            lock_validator = cast(
+                "BatchWriterLockValidator | None",
+                legacy_kwargs.get("lock_validator"),
+            )
+            data_schema_config = cast(
+                "DataSchemaConfig | None",
+                legacy_kwargs.get("data_schema_config"),
+            )
+            column_orderer = cast(
+                "ColumnOrderer | None",
+                legacy_kwargs.get("column_orderer"),
+            )
             opts = BatchWriterOptions(
-                tracer=legacy_kwargs.get("tracer"),  # type: ignore[arg-type]
-                lock_validator=legacy_kwargs.get("lock_validator"),  # type: ignore[arg-type]
-                data_schema_config=legacy_kwargs.get("data_schema_config"),  # type: ignore[arg-type]
-                column_orderer=legacy_kwargs.get("column_orderer"),  # type: ignore[arg-type]
+                tracer=tracer,
+                lock_validator=lock_validator,
+                data_schema_config=data_schema_config,
+                column_orderer=column_orderer,
             )
         else:
             opts = options

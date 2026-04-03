@@ -64,7 +64,8 @@ def merge_dq_config_hierarchy(
 
 def validate_dq_config_payload(config: JsonDict) -> DQConfigFile:
     """Validate normalized DQ payload with the canonical schema."""
-    return DQConfigFile.model_validate(config)
+    validated_config: DQConfigFile = DQConfigFile.model_validate(config)
+    return validated_config
 
 
 def map_dq_config(validated_config: DQConfigFile) -> DQConfig:

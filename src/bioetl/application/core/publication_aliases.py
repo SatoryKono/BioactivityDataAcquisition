@@ -7,4 +7,10 @@ column ordering and matching.
 
 from __future__ import annotations
 
-__all__: list[str] = []
+from datetime import date
+from typing import Final
+
+LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE: Final[date] = date(2026, 3, 29)
+"""Date when legacy publication alias migration was considered complete."""
+
+__all__ = ["LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE"]

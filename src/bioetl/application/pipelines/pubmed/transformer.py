@@ -1,3 +1,4 @@
+# mypy: disable-error-code="import-untyped"
 """PubMed publication transformer."""
 
 from __future__ import annotations

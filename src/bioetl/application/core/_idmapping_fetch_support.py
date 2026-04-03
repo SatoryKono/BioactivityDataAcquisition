@@ -134,10 +134,11 @@ def build_mapping_record(
 
 async def read_chembl_ids(state: _IDMappingFetchState) -> list[str]:
     """Read source ChEMBL IDs through the injected source reader."""
-    return await state._id_source_reader.read_ids(
+    chembl_ids: list[str] = await state._id_source_reader.read_ids(
         source_path=state._input_path,
         id_column=state._id_column,
     )
+    return chembl_ids
 
 
 def format_repr(state: _IDMappingFetchState) -> str:

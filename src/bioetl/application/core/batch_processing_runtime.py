@@ -50,7 +50,10 @@ def get_source_metadata(
     if query_string:
         if source_metadata is not None:
             if source_metadata.query_string is None:
-                return source_metadata.model_copy(update={"query_string": query_string})
+                updated_metadata: SourceMetadata = source_metadata.model_copy(
+                    update={"query_string": query_string}
+                )
+                return updated_metadata
             return source_metadata
         return SourceMetadata(type="api", query_string=query_string)
 

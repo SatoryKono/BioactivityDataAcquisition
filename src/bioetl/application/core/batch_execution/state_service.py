@@ -59,15 +59,12 @@ class BatchExecutionStateService:
     ) -> _BatchResultT:
         """Project current cumulative counters into public batch result."""
         typed_state = cast(BatchExecutionStatisticsState, state)
-        batch_result = cast(
-            _BatchResultT,
-            build_batch_result_snapshot(
-                batch_result_type=batch_result_type,
-                records_bronze=typed_state.records_bronze,
-                records_silver=typed_state.records_silver,
-                records_gold=typed_state.records_gold,
-                records_quarantined=typed_state.records_quarantined,
-            ),
+        batch_result = build_batch_result_snapshot(
+            batch_result_type=batch_result_type,
+            records_bronze=typed_state.records_bronze,
+            records_silver=typed_state.records_silver,
+            records_gold=typed_state.records_gold,
+            records_quarantined=typed_state.records_quarantined,
         )
         return batch_result
 
@@ -78,16 +75,13 @@ class BatchExecutionStateService:
     ) -> dict[str, int | list[str]]:
         """Project deterministic run statistics from current executor state."""
         typed_state = cast(BatchExecutionStatisticsState, state)
-        statistics = cast(
-            dict[str, int | list[str]],
-            build_run_statistics(
-                records_fetched=typed_state.records_fetched,
-                records_bronze=typed_state.records_bronze,
-                records_silver=typed_state.records_silver,
-                records_gold=typed_state.records_gold,
-                records_quarantined=typed_state.records_quarantined,
-                records_filtered_out=typed_state.records_filtered_out,
-                source_batch_ids=typed_state._source_batch_ids,
-            ),
+        statistics = build_run_statistics(
+            records_fetched=typed_state.records_fetched,
+            records_bronze=typed_state.records_bronze,
+            records_silver=typed_state.records_silver,
+            records_gold=typed_state.records_gold,
+            records_quarantined=typed_state.records_quarantined,
+            records_filtered_out=typed_state.records_filtered_out,
+            source_batch_ids=typed_state._source_batch_ids,
         )
         return statistics

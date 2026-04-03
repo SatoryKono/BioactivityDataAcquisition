@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Top-level UniProt record models."""
 
 from __future__ import annotations

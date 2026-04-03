@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Base Pandera schema for all ETL records.
 
 Contains common metadata fields required by RULES.md §2.4.

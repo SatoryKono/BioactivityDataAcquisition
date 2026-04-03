@@ -37,7 +37,7 @@ def push_metrics_to_gateway(
     """Push metrics through composition on demand."""
     from bioetl.composition.execution_api import push_metrics_to_gateway as _impl
 
-    return _impl(run_label=run_label, pipeline_name=pipeline_name)
+    return bool(_impl(run_label=run_label, pipeline_name=pipeline_name))
 
 
 def emit_composite_startup(

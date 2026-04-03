@@ -55,8 +55,8 @@ class StorageAdapterMergedMixin:
             Table path.
         """
         if layer == "gold":
-            return cast(Path, self.gold.get_table_path(table_name))
-        return cast(Path, self.silver.get_table_path(table_name))
+            return self.gold.get_table_path(table_name)
+        return self.silver.get_table_path(table_name)
 
     async def read_silver(
         self,

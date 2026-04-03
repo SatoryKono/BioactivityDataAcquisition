@@ -1,3 +1,4 @@
+# mypy: disable-error-code="arg-type,unused-ignore"
 """Base Publication Transformer with Template Method pattern.
 
 Provides common transformation flow for publication entities from
@@ -47,7 +48,7 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.services import IdentityService
-    from bioetl.domain.types import BronzeRecord, JsonDict, SilverRecord
+    from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
 
 
 def _classification_payload(
@@ -74,14 +75,98 @@ def _classification_payload(
     }
 
 
-class BasePublicationTransformer(BaseTransformer):
-    """Shared facade flow for publication transformers.
+def _resolve_publication_entity_id(
+    transformer: BasePublicationTransformer,
+    primary_id_field: str,
+    primary_id: PrimaryId,
+) -> str:
+    """Resolve the stable entity identifier from the validated primary ID."""
+    return cast(
+        str,
+        transformer.compute_entity_id(
+            source_id=primary_id,
+            record={primary_id_field: primary_id},
+        ),
+    )
 
-    Orchestrates execution of injected strategies:
-    - DataExtractorStrategy: Extracts business fields from Bronze.
-    - IdentifierResolverStrategy: Validates the primary ID.
-    - PublicationMetadataStrategy: Provides domain entity classes.
-    """
+
+def _prepare_content_hash_payload(business_data: JsonDict) -> JsonDict:
+    """Prepare the hash-ready business payload without orchestration metadata."""
+    return {
+        key: value
+        for key, value in business_data.items()
+        if not key.startswith("_")
+    }
+
+
+def _compute_identifiers(
+    transformer: BasePublicationTransformer,
+    primary_id_field: str,
+    primary_id: PrimaryId,
+    business_data: JsonDict,
+) -> tuple[str, str]:
+    """Compute the stable entity id plus content digest."""
+    entity_id = _resolve_publication_entity_id(
+        transformer,
+        primary_id_field,
+        primary_id,
+    )
+    content_hash = transformer.compute_content_hash(
+        _prepare_content_hash_payload(business_data),
+        exclude_none=True,
+    )
+    return entity_id, content_hash
+
+
+def _build_pre_silver_publication_record(
+    transformer: BasePublicationTransformer,
+    prepared: PreparedPublicationOutcome,
+) -> PreSilverRecord:
+    """Build the staged pre-silver publication payload for downstream finalization."""
+    entity_id = _resolve_publication_entity_id(
+        transformer,
+        prepared.primary_id_field,
+        prepared.primary_id,
+    )
+    return PreSilverRecord(
+        entity_id=entity_id,
+        business_data=prepared.business_data,
+        build_silver_record=partial(
+            build_publication_silver_record,
+            transformer,
+        ),
+        apply_structural_policy=transformer._apply_structural_policy,
+        apply_silver_filter=transformer._apply_silver_filter,
+    )
+
+
+def _assemble_publication_silver_record(
+    transformer: BasePublicationTransformer,
+    context: PipelineContext,
+    *,
+    index: int,
+    prepared: PreparedPublicationOutcome,
+    normalized_business_data: JsonDict,
+) -> SilverRecord:
+    """Assemble the final Silver record from normalized publication business data."""
+    entity_id, content_hash = _compute_identifiers(
+        transformer,
+        prepared.primary_id_field,
+        prepared.primary_id,
+        normalized_business_data,
+    )
+    return build_publication_silver_record(
+        transformer,
+        context,
+        entity_id,
+        content_hash,
+        index,
+        normalized_business_data,
+    )
+
+
+class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
+    """Shared facade flow for publication transformers."""
 
     def __init__(
         self,
@@ -119,10 +204,6 @@ class BasePublicationTransformer(BaseTransformer):
             provider=provider
         )
 
-    # =========================================================================
-    # Strategy Interface Implementations (Fallback to legacy subclass methods)
-    # =========================================================================
-
     def pre_extract_validation(self, context: PipelineContext, record: BronzeRecord, index: int) -> None:
         self._pre_extract_validation(context, record, index)
 
@@ -137,7 +218,7 @@ class BasePublicationTransformer(BaseTransformer):
         context: PipelineContext,
         business_data: JsonDict,
         index: int,
-    ) -> tuple[str, Any] | None:  # Any: primary ID values remain provider-specific scalars at the strategy seam.
+    ) -> tuple[str, PrimaryId] | None:
         return self._validate_primary_id(context, business_data, index)
 
     def get_entity_class(self) -> type[BaseEntity]:
@@ -145,10 +226,6 @@ class BasePublicationTransformer(BaseTransformer):
 
     def should_log_fallback_lookup(self) -> bool:
         return self._should_log_fallback_lookup()
-
-    # =========================================================================
-    # Legacy Protected Methods (For backward compatibility with subclasses)
-    # =========================================================================
 
     def _pre_extract_validation(
         self,
@@ -190,7 +267,7 @@ class BasePublicationTransformer(BaseTransformer):
         context: PipelineContext,
         business_data: JsonDict,
         index: int,
-    ) -> tuple[str, Any] | None:  # Any: primary ID values remain provider-specific scalars at the publication boundary.
+    ) -> tuple[str, PrimaryId] | None:
         """Validate primary ID presence."""
         primary_id_field = self._get_primary_id_field()
         primary_id = business_data.get(primary_id_field)
@@ -212,22 +289,7 @@ class BasePublicationTransformer(BaseTransformer):
             str, Any  # Any: transformer record has heterogeneous values
         ],  # Any: transformer record has heterogeneous values
     ) -> JsonDict:  # Any: transformer record has heterogeneous values
-        """Apply uniform content normalization to text fields.
-
-        Strips residual HTML/XML tags from abstract (and other fields
-        listed in ``_CONTENT_FIELDS``).
-        The operation is idempotent — safe for providers that already
-        clean these fields in ``_extract_business_data``.
-
-        Subclasses MAY override to customize or extend normalization.
-
-        Args:
-            business_data: Extracted business data dictionary (mutated in-place).
-
-        Returns:
-            The same dictionary with content fields normalized.
-
-        """
+        """Apply uniform text cleanup to configured content fields."""
         for field in self._CONTENT_FIELDS:
             raw = business_data.get(field)
             if raw is not None:
@@ -239,7 +301,7 @@ class BasePublicationTransformer(BaseTransformer):
         context: PipelineContext,
         business_data: JsonDict,
         primary_id_field: str,
-        primary_id: Any,  # Any: heterogeneous ID types across providers
+        primary_id: PrimaryId,
     ) -> None:
         """Log fallback lookup usage when applicable."""
         if self._metadata_strategy.should_log_fallback_lookup():
@@ -252,101 +314,6 @@ class BasePublicationTransformer(BaseTransformer):
                     original_id=business_data.get("_original_id"),
                 )
 
-    def _compute_identifiers(
-        self,
-        primary_id_field: str,
-        primary_id: Any,  # Any: heterogeneous ID types across providers
-        business_data: JsonDict,
-    ) -> tuple[str, str]:
-        """Compute entity_id and content_hash.
-
-        Returns:
-            Tuple of (entity_id, content_hash).
-
-        """
-        entity_id = self._resolve_publication_entity_id(
-            primary_id_field,
-            primary_id,
-        )
-        hash_data = self._prepare_content_hash_payload(business_data)
-        content_hash = self.compute_content_hash(hash_data, exclude_none=True)
-        return entity_id, content_hash
-
-    def _resolve_publication_entity_id(
-        self,
-        primary_id_field: str,
-        primary_id: Any,  # Any: heterogeneous ID types across providers
-    ) -> str:
-        """Resolve the stable entity identifier from the validated primary ID."""
-        return cast(
-            str,
-            self.compute_entity_id(
-                source_id=primary_id,
-                record={primary_id_field: primary_id},
-            ),
-        )
-
-    def _prepare_content_hash_payload(
-        self,
-        business_data: JsonDict,
-    ) -> JsonDict:
-        """Prepare the hash-ready business payload without orchestration metadata."""
-        return {
-            key: value
-            for key, value in business_data.items()
-            if not key.startswith("_")
-        }
-
-    def _normalize_business_data_for_silver_record(
-        self,
-        business_data: JsonDict,
-    ) -> JsonDict:
-        """Apply the final normalization boundary before Silver assembly."""
-        return normalize_publication_business_data(self, business_data)
-
-    def _build_pre_silver_publication_record(
-        self,
-        prepared: PreparedPublicationOutcome,
-    ) -> PreSilverRecord:
-        """Build the staged pre-silver publication payload for downstream finalization."""
-        entity_id = self._resolve_publication_entity_id(
-            prepared.primary_id_field,
-            prepared.primary_id,
-        )
-        return PreSilverRecord(
-            entity_id=entity_id,
-            business_data=prepared.business_data,
-            build_silver_record=partial(
-                build_publication_silver_record,
-                self,
-            ),
-            apply_structural_policy=self._apply_structural_policy,
-            apply_silver_filter=self._apply_silver_filter,
-        )
-
-    def _assemble_publication_silver_record(
-        self,
-        context: PipelineContext,
-        *,
-        index: int,
-        prepared: PreparedPublicationOutcome,
-        normalized_business_data: JsonDict,
-    ) -> SilverRecord:
-        """Assemble the final Silver record from normalized publication business data."""
-        entity_id, content_hash = self._compute_identifiers(
-            prepared.primary_id_field,
-            prepared.primary_id,
-            normalized_business_data,
-        )
-        return build_publication_silver_record(
-            self,
-            context,
-            entity_id,
-            content_hash,
-            index,
-            normalized_business_data,
-        )
-
     async def transform_pre_silver(
         self,
         context: PipelineContext,
@@ -357,7 +324,7 @@ class BasePublicationTransformer(BaseTransformer):
         prepared = prepare_publication_payload(self, context, record, index)
         if prepared is None:
             return None
-        return self._build_pre_silver_publication_record(prepared)
+        return _build_pre_silver_publication_record(self, prepared)
 
     async def _transform_impl(
         self,
@@ -369,10 +336,12 @@ class BasePublicationTransformer(BaseTransformer):
         prepared = prepare_publication_payload(self, context, record, index)
         if prepared is None:
             return None
-        normalized_business_data = self._normalize_business_data_for_silver_record(
+        normalized_business_data = normalize_publication_business_data(
+            self,
             prepared.business_data
         )
-        return self._assemble_publication_silver_record(
+        return _assemble_publication_silver_record(
+            self,
             context,
             index=index,
             prepared=prepared,

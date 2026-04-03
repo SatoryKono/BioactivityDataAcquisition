@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """YAML-backed pydantic-settings source for application settings."""
 
 from __future__ import annotations

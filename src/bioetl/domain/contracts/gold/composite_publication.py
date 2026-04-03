@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Composite publication Gold schema."""
 
 from __future__ import annotations

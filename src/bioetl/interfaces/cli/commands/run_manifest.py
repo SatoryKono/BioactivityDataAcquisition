@@ -234,14 +234,14 @@ def _render_text_payload(payload: dict[str, object]) -> str:
     return json.dumps(payload, indent=2, default=str)
 
 
-@click.group()
+@click.group()  # type: ignore[untyped-decorator]
 def run_manifest() -> None:
     """Inspect control-plane run manifests and ledger history."""
 
 
-@run_manifest.command("show")
-@click.argument("identifier")
-@click.option(
+@run_manifest.command("show")  # type: ignore[untyped-decorator]
+@click.argument("identifier")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -263,10 +263,10 @@ def show_command(identifier: str, output_format: str) -> None:
     )
 
 
-@run_manifest.command("diff")
-@click.argument("left_identifier")
-@click.argument("right_identifier")
-@click.option(
+@run_manifest.command("diff")  # type: ignore[untyped-decorator]
+@click.argument("left_identifier")  # type: ignore[untyped-decorator]
+@click.argument("right_identifier")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),

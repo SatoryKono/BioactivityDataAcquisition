@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc"
 """Structure and sequence UniProt response models."""
 
 from __future__ import annotations

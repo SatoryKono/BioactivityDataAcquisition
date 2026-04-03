@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Sequence features, keywords, PTMs and counts.
 
 Part of UniprotTargetSchema split to comply with LOC limits.

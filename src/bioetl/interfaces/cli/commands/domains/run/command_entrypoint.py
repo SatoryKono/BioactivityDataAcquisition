@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import cast
 
 import click
 
@@ -15,6 +16,10 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     with_yes_option,
 )
 
+CommandCallback = Callable[..., object]
+CommandDecorator = Callable[[CommandCallback], CommandCallback]
+CommandDecoratorFactory = Callable[..., CommandDecorator]
+
 
 def build_run_click_command(
     *,
@@ -24,80 +29,94 @@ def build_run_click_command(
 ) -> click.Command:
     """Build the canonical Click command object for ``bioetl run``."""
 
-    @click.command()
-    @click.option(
+    typed_with_run_type_option = cast(CommandDecoratorFactory, with_run_type_option)
+    typed_with_limit_option = cast(CommandDecoratorFactory, with_limit_option)
+    typed_with_dry_run_option = cast(CommandDecoratorFactory, with_dry_run_option)
+    typed_with_yes_option = cast(CommandDecoratorFactory, with_yes_option)
+    typed_with_debug_option = cast(CommandDecoratorFactory, with_debug_option)
+    typed_with_health_server_options = cast(
+        CommandDecoratorFactory,
+        with_health_server_options,
+    )
+
+    @click.command()  # type: ignore[untyped-decorator]
+    @click.option(  # type: ignore[untyped-decorator]
         "--pipeline",
         callback=validate_pipeline_name,
         required=True,
         help="Pipeline to run",
     )
-    @with_run_type_option("Type of run")
-    @click.option("--resume", is_flag=True, help="Resume from last checkpoint")
-    @click.option(
+    @typed_with_run_type_option("Type of run")
+    @click.option(  # type: ignore[untyped-decorator]
+        "--resume", is_flag=True, help="Resume from last checkpoint"
+    )
+    @click.option(  # type: ignore[untyped-decorator]
         "--start-offset",
         type=int,
         default=None,
         help="Start extraction from specific record offset (skips checkpoint). "
         "Use after crash to resume from known position.",
     )
-    @with_limit_option("Maximum number of records to process")
-    @click.option(
+    @typed_with_limit_option("Maximum number of records to process")
+    @click.option(  # type: ignore[untyped-decorator]
         "--input-csv",
         type=click.Path(exists=True),
         help="Path to CSV file with filter IDs",
     )
-    @click.option(
+    @click.option(  # type: ignore[untyped-decorator]
         "--filter-column",
         type=str,
         help="Column name in CSV containing filter IDs (default: 'id')",
     )
-    @click.option(
+    @click.option(  # type: ignore[untyped-decorator]
         "--filter-field",
         type=str,
         help="API field name to filter by (default: 'molecule_chembl_id')",
     )
-    @with_dry_run_option("Preview cleanup without execution (for rebuild/backfill)")
-    @with_yes_option("Skip confirmation prompt for rebuild/backfill")
-    @click.option(
+    @typed_with_dry_run_option(
+        "Preview cleanup without execution (for rebuild/backfill)"
+    )
+    @typed_with_yes_option("Skip confirmation prompt for rebuild/backfill")
+    @click.option(  # type: ignore[untyped-decorator]
         "--vacuum-after-run",
         is_flag=True,
         default=None,
         help="Run VACUUM on Delta tables after successful run (overrides YAML config)",
     )
-    @click.option(
+    @click.option(  # type: ignore[untyped-decorator]
         "--vacuum-retention-days",
         type=int,
         default=None,
         help="Minimum age of files to remove during VACUUM (days, overrides YAML config)",
     )
-    @with_debug_option()
-    @with_health_server_options(default_health_server_port)
-    @click.option(
+    @typed_with_debug_option()
+    @typed_with_health_server_options(default_health_server_port)
+    @click.option(  # type: ignore[untyped-decorator]
         "--tracing/--no-tracing",
         "enable_tracing",
         default=None,
         help="Override distributed tracing for this run",
     )
-    @click.option(
+    @click.option(  # type: ignore[untyped-decorator]
         "--use-cached-bronze/--no-cached-bronze",
         "use_cached_bronze",
         default=False,
         help="Load data from Bronze cache instead of API",
         show_default=True,
     )
-    @click.option(
+    @click.option(  # type: ignore[untyped-decorator]
         "--cached-bronze-date",
         type=str,
         default=None,
         help="Filter Bronze cache by date (YYYY-MM-DD)",
     )
-    @click.option(
+    @click.option(  # type: ignore[untyped-decorator]
         "--cached-bronze-path",
         type=click.Path(exists=True),
         default=None,
         help="Explicit path to Bronze cache directory",
     )
-    @click.pass_context
+    @click.pass_context  # type: ignore[untyped-decorator]
     def run_command(
         ctx: click.Context,
         pipeline: str,

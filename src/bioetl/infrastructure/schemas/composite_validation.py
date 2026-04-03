@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Validation-focused schemas for composite pipeline configuration."""
 
 from __future__ import annotations

@@ -51,6 +51,7 @@ class UnifiedHTTPClient(
     provider: str = "unknown"
     max_connections: int = 50
     max_keepalive_connections: int = 10
+    trust_env: bool = True
     tracer: TracingPort | None = None
     metrics: MetricsPort | None = None
     logger: LoggerPort | None = None

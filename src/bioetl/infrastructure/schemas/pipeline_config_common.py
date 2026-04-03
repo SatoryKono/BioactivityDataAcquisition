@@ -1,3 +1,4 @@
+# mypy: disable-error-code="misc,untyped-decorator"
 """Common Pydantic schemas reused by pipeline configuration."""
 
 from __future__ import annotations

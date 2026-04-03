@@ -63,7 +63,8 @@ class BatchWriterIOMixin:
                 source_metadata=source_metadata,
             )
             self._end_span(span)
-            return bronze_result  # type: ignore[no-any-return]
+            persisted_bronze_result: BronzeWriteResult = bronze_result
+            return persisted_bronze_result
         except _WRITE_SPAN_ERRORS as error:
             self._end_span(span, error)
             raise
@@ -132,7 +133,8 @@ class BatchWriterIOMixin:
                 ),
             )
             self._end_span(span)
-            return silver_result  # type: ignore[no-any-return]
+            persisted_silver_result: SilverWriteResult | None = silver_result
+            return persisted_silver_result
         except _WRITE_SPAN_ERRORS as error:
             self._end_span(span, error)
             raise

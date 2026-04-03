@@ -67,7 +67,8 @@ class FilteredDataSource(
     @property
     def provider_name(self) -> str:
         """Provider name from the wrapped data source."""
-        return self._data_source.provider_name
+        provider_name: str = self._data_source.provider_name
+        return provider_name
 
     @property
     def filter_result(self) -> FilterLoadResult | None:

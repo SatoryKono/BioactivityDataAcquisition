@@ -41,7 +41,8 @@ class BatchMemoryManagerService:
             Number of records between memory monitor checks (defaults to 100).
         """
         if self._memory_config:
-            return self._memory_config.check_interval_records
+            check_interval: int = self._memory_config.check_interval_records
+            return check_interval
         return 100
 
     def check_pressure(
@@ -96,7 +97,8 @@ class BatchMemoryManagerService:
                     total_reductions=self.batch_size_reductions,
                 )
 
-        return new_size
+        adjusted_size: int = new_size
+        return adjusted_size
 
     def _estimate_from_config(self, current_size: int) -> int:
         """Estimate batch size without memory monitoring."""
@@ -107,14 +109,18 @@ class BatchMemoryManagerService:
         max_records = self._memory_config.max_batch_memory_mb * records_per_mb
 
         if current_size > max_records:
-            return max(max_records, self._memory_config.min_batch_size)
+            estimated_size: int = max(max_records, self._memory_config.min_batch_size)
+            return estimated_size
 
         return current_size
 
     def _try_recover(self, current_size: int) -> int:
         """Try to recover batch size after pressure is relieved."""
         if self._memory_monitor:
-            return self._memory_monitor.get_recommended_batch_size(current_size)
+            recovered_size: int = self._memory_monitor.get_recommended_batch_size(
+                current_size
+            )
+            return recovered_size
 
         if current_size < self._initial_batch_size:
             recovery_size = min(

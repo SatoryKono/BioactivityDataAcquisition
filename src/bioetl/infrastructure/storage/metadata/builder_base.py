@@ -127,7 +127,7 @@ class _MetadataBuilderBase:
 
         error_records = int(cv_summary["error_records"])
         warning_records = int(cv_summary["warning_records"])
-        return dq_summary.model_copy(
+        updated_summary: DQSummary = dq_summary.model_copy(
             update={
                 "valid_records": max(total_records - error_records, 0),
                 "error_records": error_records,
@@ -137,6 +137,7 @@ class _MetadataBuilderBase:
                 "rule_provenance": cv_summary["rule_provenance"],
             }
         )
+        return updated_summary
 
     @staticmethod
     def _build_environment_metadata() -> EnvironmentMetadata:
