@@ -6,6 +6,7 @@ import asyncio
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 
 import yaml
 
@@ -30,6 +31,7 @@ from bioetl.infrastructure.storage.support.atomic_ops import (
 
 _get_metadata_filename = _operations._get_metadata_filename
 ArtifactPublicationRecorder = Callable[[str, str, dict[str, object] | None], object]
+DEFAULT_METADATA_FILENAME: str = METADATA_FILENAME
 
 __all__ = [
     "_execute_prepared_metadata_write_operation",
@@ -45,21 +47,32 @@ def _derive_dataset_ref(
     layer = str(getattr(metadata, "layer", ""))
     if layer == "silver":
         output_ext = getattr(metadata, "output_ext", None)
-        return DatasetRef(
-            layer="silver",
-            logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
-            version=getattr(output_ext, "delta_version_after", None),
-            provider=metadata.pipeline.provider,
-            entity=metadata.pipeline.entity,
-        ).node_id
+        return cast(
+            str,
+            DatasetRef(
+                layer="silver",
+                logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
+                version=getattr(output_ext, "delta_version_after", None),
+                provider=metadata.pipeline.provider,
+                entity=metadata.pipeline.entity,
+            ).node_id,
+        )
     if layer == "gold":
-        return DatasetRef(
-            layer="gold",
-            logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
-            provider=metadata.pipeline.provider,
-            entity=metadata.pipeline.entity,
-        ).node_id
+        return cast(
+            str,
+            DatasetRef(
+                layer="gold",
+                logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
+                provider=metadata.pipeline.provider,
+                entity=metadata.pipeline.entity,
+            ).node_id,
+        )
     return None
+
+
+def _resolve_metadata_filename(provider: str | None, entity: str | None) -> str:
+    """Return the concrete metadata filename via a local typed facade."""
+    return str(_operations._get_metadata_filename(provider, entity))
 
 
 def _resolve_lineage_log_context(
@@ -153,10 +166,10 @@ def _resolve_existing_metadata_path(
     """Resolve an existing sidecar path without requiring a metadata payload."""
     path = Path(base_path)
     if provider and entity:
-        return path / _get_metadata_filename(provider, entity)
+        return path / _resolve_metadata_filename(provider, entity)
     if flat_structure and table_name:
         return path / f"{table_name}_metadata.yaml"
-    return path / METADATA_FILENAME
+    return path / DEFAULT_METADATA_FILENAME
 
 
 async def _execute_atomic_metadata_write(
@@ -208,7 +221,7 @@ async def _execute_atomic_metadata_write(
             "success_after_retry" if retry_state.count > 0 else "success_without_retry"
         ),
     )
-    return retry_state.count
+    return int(retry_state.count)
 
 
 def _finalize_metadata_write_operation(

@@ -30,6 +30,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     resolve_data_source_creator,
 )
 from bioetl.composition.factories.pipeline.runner_assembly import assemble_runner_impl
+from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.config import RuntimeConfig
@@ -61,6 +62,19 @@ def _factory_context(factory: GenericPipelineFactory[BasePipeline]) -> _Pipeline
         pipeline_class=factory.pipeline_class, provider=factory.provider,
         transformer_class=factory.transformer_class, pandera_silver_schema=factory.pandera_silver_schema,
     )
+
+
+def _extract_entity_type(pipeline_name: str) -> str | None:
+    """Compatibility wrapper for legacy unit tests expecting assembler-local helper."""
+    return extract_entity_type(pipeline_name)
+
+
+def _extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsContext:
+    """Compatibility wrapper for legacy unit tests expecting assembler-local helper."""
+    return extract_dq_configs(yaml_config)
+
+
+_assemble_runner_impl = assemble_runner_impl
 
 class GenericPipelineFactory(Generic[TPipeline]):
     def __init__(
@@ -240,13 +254,13 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    return assemble_runner_impl(
+    return _assemble_runner_impl(
         pipeline=pipeline,
         observability=observability,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
         yaml_config=yaml_config,
-        dq_configs_extractor=extract_dq_configs,
+        dq_configs_extractor=_extract_dq_configs,
     )
 __all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]
