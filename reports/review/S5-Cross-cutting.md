@@ -1,0 +1,64 @@
+# Code Review Report — S5: Cross-cutting
+**Date**: 2026-04-03
+**Scope**: src/bioetl
+**Files reviewed**: 1428
+**Total LOC**: 198407
+**Status**: PASS
+**Score**: 8.2/10.0
+
+---
+## Summary
+
+| Category | Issues | CRIT | HIGH | MED | LOW | Score |
+|----------|--------|------|------|-----|-----|-------|
+| Architecture | - | - | - | - | - | 4.0 |
+| Anti-Patterns | - | - | - | - | - | 10.0 |
+| DI Violations | - | - | - | - | - | 10.0 |
+| Naming | - | - | - | - | - | 10.0 |
+| Types | - | - | - | - | - | 10.0 |
+| Testing | - | - | - | - | - | 10.0 |
+| **TOTAL** | **6** | **0** | **6** | **0** | **0** | **8.2** |
+
+## Critical Issues
+
+## High Issues
+
+### ARCH-002: Domain purity violation
+- **Rule**: ARCH-002 (Domain Purity)
+- **Severity**: HIGH
+- **File**: `src/bioetl/domain/exceptions/__init__.py:61`
+- **Description**: Domain layer imports bioetl.domain.exceptions.infrastructure
+
+### ARCH-002: Domain purity violation
+- **Rule**: ARCH-002 (Domain Purity)
+- **Severity**: HIGH
+- **File**: `src/bioetl/domain/exceptions/bounded_context.py:13`
+- **Description**: Domain layer imports bioetl.domain.exceptions.infrastructure
+
+### ARCH-002: Domain purity violation
+- **Rule**: ARCH-002 (Domain Purity)
+- **Severity**: HIGH
+- **File**: `src/bioetl/domain/exceptions/infrastructure/_delta.py:7`
+- **Description**: Domain layer imports bioetl.domain.exceptions.infrastructure._storage
+
+### ARCH-002: Domain purity violation
+- **Rule**: ARCH-002 (Domain Purity)
+- **Severity**: HIGH
+- **File**: `src/bioetl/domain/exceptions/infrastructure/__init__.py:5`
+- **Description**: Domain layer imports bioetl.domain.exceptions.infrastructure._base
+
+### ARCH-002: Domain purity violation
+- **Rule**: ARCH-002 (Domain Purity)
+- **Severity**: HIGH
+- **File**: `src/bioetl/domain/exceptions/infrastructure/__init__.py:6`
+- **Description**: Domain layer imports bioetl.domain.exceptions.infrastructure._delta
+
+### ARCH-002: Domain purity violation
+- **Rule**: ARCH-002 (Domain Purity)
+- **Severity**: HIGH
+- **File**: `src/bioetl/domain/exceptions/infrastructure/__init__.py:15`
+- **Description**: Domain layer imports bioetl.domain.exceptions.infrastructure._storage
+
+## Medium Issues
+
+## Low Issues
