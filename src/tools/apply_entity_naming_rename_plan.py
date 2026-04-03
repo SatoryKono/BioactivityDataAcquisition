@@ -155,8 +155,16 @@ def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
     print(f"Skipped rows: {len(skipped_rows)}")
 
     file_to_rows: dict[Path, list[RenameRow]] = {}
+    unique_old_names: set[str] = set()
     for row in executable_rows:
         file_to_rows.setdefault(row.file_path, []).append(row)
+        unique_old_names.add(row.old_name)
+
+    # Pre-compile patterns to avoid re-compilation in the nested loop
+    # and bypass Python's internal regex cache limits.
+    patterns = {
+        name: re.compile(rf"\b{re.escape(name)}\b") for name in unique_old_names
+    }
 
     total_matches = 0
     modified_files = 0
@@ -171,7 +179,7 @@ def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
         file_matches = 0
 
         for row in file_to_rows[file_path]:
-            pattern = re.compile(rf"\b{re.escape(row.old_name)}\b")
+            pattern = patterns[row.old_name]
             updated_text, count = pattern.subn(row.new_name, updated_text)
             file_matches += count
             if count:
