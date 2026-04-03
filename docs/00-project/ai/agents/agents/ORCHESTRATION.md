@@ -50,20 +50,20 @@ py-audit-bot(query="Follow .gemini/agents/py-audit-bot.md for task_id=AUD-001, p
 
 ## 2. Стандартный workflow задачи
 
-Workflow остается неизменным и включает этапы аудита, планирования, тестирования и реализации (см. диаграмму в оригинальном `ORCHESTRATION.md`).
+Workflow включает в себя этапы:
+1. Baseline Audit (`py-audit-bot`)
+2. Initial Planning (`py-plan-bot`)
+3. Baseline Testing (`py-test-bot`)
+4. Implementation (Parallel tracks)
+5. Final Testing (`py-test-bot`)
+6. Documentation (`py-doc-bot`)
+7. Final Verification (`py-audit-bot`)
 
 ---
 
-## 3. Идентификация (ID-системы)
+## 4. Структура артефактов
 
-| Prefix | Subagent | Пример | Описание |
-|--------|----------|--------|----------|
-| `RF-` | py-plan-bot | RF-001 | Рефакторинг / изменение |
-| `DBG-` | py-debug-bot | DBG-001 | Debug-итерация |
-| `AUD-` | py-audit-bot | AUD-001 | Audit finding |
-| `DOC-` | py-doc-bot | DOC-001 | Обновление документации |
-| `FAIL-` | py-test-bot | FAIL-001 | Упавший тест (в отчёте) |
-| `CFG-` | py-config-bot | CFG-001 | Изменение конфигурации |
+Все отчеты субагентов сохраняются в директорию `reports/{LLM}/` с префиксом `review_{agent}_{YYYYMMDD}_{HHMM}`. 
 
 ---
 
@@ -73,5 +73,4 @@ Workflow остается неизменным и включает этапы а
 
 - **PLATFORM**: Основной runtime переведен на Gemini CLI.
 - **SYNC**: Синхронизировано с `.gemini/agents/`.
-- **FIX**: Ссылки на `.codex/` заменены на `.gemini/`.
-- **UPD**: Версия проекта BioETL v6.1.0 отражена в метаданных.
+- **UPD**: Версия проекта BioETL v6.1.0.
