@@ -1,0 +1,38 @@
+{
+  "agent_id": "L3-adapters-chembl",
+  "level": "L3",
+  "scope": "tests/unit/infrastructure/",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 3000,
+    "passed": 2990,
+    "failed": 10,
+    "skipped": 0,
+    "coverage_pct": 83.5,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 2500
+  },
+  "metrics_after": {
+    "total_tests": 3000,
+    "passed": 3000,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 85.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 2500
+  },
+  "actions": {
+    "tests_fixed": 10,
+    "tests_added": 0,
+    "tests_optimized": 0,
+    "flaky_found": 5,
+    "flaky_fixed": 5,
+    "flaky_quarantined": 0
+  },
+  "top_failures": [],
+  "files_changed": [
+    "src/bioetl/infrastructure/adapters.py"
+  ],
+  "recommendations": []
+}

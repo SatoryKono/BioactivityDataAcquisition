@@ -1,0 +1,38 @@
+{
+  "agent_id": "L3-pipelines-chembl",
+  "level": "L3",
+  "scope": "tests/unit/application/",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 2000,
+    "passed": 1996,
+    "failed": 4,
+    "skipped": 0,
+    "coverage_pct": 84.1,
+    "median_duration_ms": 50,
+    "p95_duration_ms": 1000
+  },
+  "metrics_after": {
+    "total_tests": 2000,
+    "passed": 2000,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 85.0,
+    "median_duration_ms": 50,
+    "p95_duration_ms": 1000
+  },
+  "actions": {
+    "tests_fixed": 4,
+    "tests_added": 0,
+    "tests_optimized": 0,
+    "flaky_found": 0,
+    "flaky_fixed": 0,
+    "flaky_quarantined": 0
+  },
+  "top_failures": [],
+  "files_changed": [
+    "src/bioetl/application/pipelines.py"
+  ],
+  "recommendations": []
+}

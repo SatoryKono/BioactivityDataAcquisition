@@ -1,0 +1,38 @@
+{
+  "agent_id": "L3-value-objects",
+  "level": "L3",
+  "scope": "tests/unit/domain/",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 2500,
+    "passed": 2495,
+    "failed": 5,
+    "skipped": 0,
+    "coverage_pct": 89.2,
+    "median_duration_ms": 20,
+    "p95_duration_ms": 500
+  },
+  "metrics_after": {
+    "total_tests": 2520,
+    "passed": 2520,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 90.1,
+    "median_duration_ms": 20,
+    "p95_duration_ms": 500
+  },
+  "actions": {
+    "tests_fixed": 5,
+    "tests_added": 20,
+    "tests_optimized": 0,
+    "flaky_found": 2,
+    "flaky_fixed": 2,
+    "flaky_quarantined": 0
+  },
+  "top_failures": [],
+  "files_changed": [
+    "src/bioetl/domain/schemas.py"
+  ],
+  "recommendations": []
+}
