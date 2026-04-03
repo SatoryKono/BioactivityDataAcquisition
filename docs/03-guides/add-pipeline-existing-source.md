@@ -66,14 +66,15 @@ Important consistency rules:
 
 ## 3. Implement Transformer
 
-Create transformer with `BaseTransformer`.
+Create transformer with `BaseTransformer`. For publication entities, use `BasePublicationTransformer` and compose it via Strategy interfaces (`DataExtractorStrategy`, `IdentifierResolverStrategy`, `PublicationMetadataStrategy`) rather than overriding protected methods.
 
 Start from template:
 - `docs/04-reference/templates/pipeline.py.tpl`
 
 Implementation requirements:
 - constructor should receive DI dependencies (tracer/metrics/filters/identity/normalizer)
-- implement `_transform_impl(context, record, index)`
+- implement `_transform_impl(context, record, index)` (for standard pipelines)
+- for publication pipelines, inject your extraction and resolution strategies via the constructor
 - compute:
   - `entity_id` via `compute_entity_id(...)`
   - `content_hash` via `compute_content_hash(...)`

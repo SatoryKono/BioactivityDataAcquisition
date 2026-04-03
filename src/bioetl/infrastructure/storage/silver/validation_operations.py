@@ -121,12 +121,6 @@ class _SilverWriterValidationHostProtocol(Protocol):
         list[BronzeRecord],
     ]
     _to_policy_write_mode: Callable[[SilverWriteMode], WriteMode]
-
-
-def _pipeline_name_from_table_name(table_name: str) -> str:
-    """Derive the canonical pipeline label from a logical or versioned table name."""
-    normalized_table = _VERSIONED_TABLE_SUFFIX_RE.sub("", table_name.strip())
-    return normalized_table.replace(".", "_").replace("/", "_")
     _validate_key_nullability: Callable[
         [
             list[BronzeRecord],
@@ -144,6 +138,12 @@ def _pipeline_name_from_table_name(table_name: str) -> str:
         records: list[BronzeRecord],
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
     ) -> None: ...
+
+
+def _pipeline_name_from_table_name(table_name: str) -> str:
+    """Derive the canonical pipeline label from a logical or versioned table name."""
+    normalized_table = _VERSIONED_TABLE_SUFFIX_RE.sub("", table_name.strip())
+    return normalized_table.replace(".", "_").replace("/", "_")
 
 
 def _validate_write_mode_impl(mode: str) -> SilverWriteMode:

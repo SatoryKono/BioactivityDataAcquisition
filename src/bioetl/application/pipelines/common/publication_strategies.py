@@ -29,7 +29,7 @@ class DefaultIdentifierResolver(IdentifierResolverStrategy):
         context: PipelineContext,
         business_data: JsonDict,
         index: int,
-    ) -> tuple[str, Any] | None:
+    ) -> tuple[str, Any] | None:  # Any: primary ID values remain provider-specific scalars at the strategy seam.
         primary_id = business_data.get(self._primary_id_field)
         if not primary_id:
             context.logger.warning(
@@ -41,7 +41,7 @@ class DefaultIdentifierResolver(IdentifierResolverStrategy):
         return self._primary_id_field, primary_id
 
 
-class DefaultPublicationMetadata(PublicationMetadataStrategy):
+class DefaultPublicationMetadataPolicy(PublicationMetadataStrategy):
     """Default metadata strategy."""
 
     def __init__(

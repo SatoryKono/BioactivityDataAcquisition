@@ -125,7 +125,12 @@ class BasePublicationTransformer(BaseTransformer):
     def get_primary_id_field(self) -> str:
         return self._get_primary_id_field()
 
-    def validate_primary_id(self, context: PipelineContext, business_data: JsonDict, index: int) -> tuple[str, Any] | None:
+    def validate_primary_id(
+        self,
+        context: PipelineContext,
+        business_data: JsonDict,
+        index: int,
+    ) -> tuple[str, Any] | None:  # Any: primary ID values remain provider-specific scalars at the strategy seam.
         return self._validate_primary_id(context, business_data, index)
 
     def get_entity_class(self) -> type[BaseEntity]:
@@ -178,7 +183,7 @@ class BasePublicationTransformer(BaseTransformer):
         context: PipelineContext,
         business_data: JsonDict,
         index: int,
-    ) -> tuple[str, Any] | None:
+    ) -> tuple[str, Any] | None:  # Any: primary ID values remain provider-specific scalars at the publication boundary.
         """Validate primary ID presence."""
         primary_id_field = self._get_primary_id_field()
         primary_id = business_data.get(primary_id_field)
