@@ -265,6 +265,20 @@ Execution note:
 
 - `Wave 5` ведётся параллельно после `Wave 0` и обновляется после каждой
   завершённой волны.
+- post-wave measured refresh captured in
+  `reports/quality/wave5-package-gates-refresh-2026-04-03.md`
+
+Current measured state after `Wave 1` / `Wave 2` / `Wave 3` / `Wave 4`:
+
+- `composition/bootstrap/runtime` -> `0` errors (`Wave 1` closed)
+- `composition/factories/pipeline` -> `0` errors (`Wave 1` closed)
+- `application/pipelines/common` -> `0` errors (`Wave 2` green and held)
+- `infrastructure/storage` -> `0` errors (`Wave 3` closed)
+- `domain/schemas/pubmed/publication.py` -> `0` errors (`Wave 4` closed)
+- remaining measured hotspots now concentrate in:
+  `application/core` (`26` errors) and `interfaces/cli` (`168` errors)
+- next measured action:
+  open the next bounded refactor inside `application/core`, not in `interfaces/cli`
 
 ### P1. Config topology closeout
 

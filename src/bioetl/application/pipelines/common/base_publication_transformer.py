@@ -25,6 +25,7 @@ from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
 from bioetl.application.pipelines.common.publication_assembly import (
+    PreparedPublicationOutcome,
     build_publication_silver_record,
     normalize_publication_business_data,
     prepare_publication_payload,
@@ -263,13 +264,88 @@ class BasePublicationTransformer(BaseTransformer):
             Tuple of (entity_id, content_hash).
 
         """
-        entity_id = self.compute_entity_id(
-            source_id=primary_id,
-            record={primary_id_field: primary_id},
+        entity_id = self._resolve_publication_entity_id(
+            primary_id_field,
+            primary_id,
         )
-        hash_data = {k: v for k, v in business_data.items() if not k.startswith("_")}
+        hash_data = self._prepare_content_hash_payload(business_data)
         content_hash = self.compute_content_hash(hash_data, exclude_none=True)
         return entity_id, content_hash
+
+    def _resolve_publication_entity_id(
+        self,
+        primary_id_field: str,
+        primary_id: Any,  # Any: heterogeneous ID types across providers
+    ) -> str:
+        """Resolve the stable entity identifier from the validated primary ID."""
+        return cast(
+            str,
+            self.compute_entity_id(
+                source_id=primary_id,
+                record={primary_id_field: primary_id},
+            ),
+        )
+
+    def _prepare_content_hash_payload(
+        self,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Prepare the hash-ready business payload without orchestration metadata."""
+        return {
+            key: value
+            for key, value in business_data.items()
+            if not key.startswith("_")
+        }
+
+    def _normalize_business_data_for_silver_record(
+        self,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Apply the final normalization boundary before Silver assembly."""
+        return normalize_publication_business_data(self, business_data)
+
+    def _build_pre_silver_publication_record(
+        self,
+        prepared: PreparedPublicationOutcome,
+    ) -> PreSilverRecord:
+        """Build the staged pre-silver publication payload for downstream finalization."""
+        entity_id = self._resolve_publication_entity_id(
+            prepared.primary_id_field,
+            prepared.primary_id,
+        )
+        return PreSilverRecord(
+            entity_id=entity_id,
+            business_data=prepared.business_data,
+            build_silver_record=partial(
+                build_publication_silver_record,
+                self,
+            ),
+            apply_structural_policy=self._apply_structural_policy,
+            apply_silver_filter=self._apply_silver_filter,
+        )
+
+    def _assemble_publication_silver_record(
+        self,
+        context: PipelineContext,
+        *,
+        index: int,
+        prepared: PreparedPublicationOutcome,
+        normalized_business_data: JsonDict,
+    ) -> SilverRecord:
+        """Assemble the final Silver record from normalized publication business data."""
+        entity_id, content_hash = self._compute_identifiers(
+            prepared.primary_id_field,
+            prepared.primary_id,
+            normalized_business_data,
+        )
+        return build_publication_silver_record(
+            self,
+            context,
+            entity_id,
+            content_hash,
+            index,
+            normalized_business_data,
+        )
 
     async def transform_pre_silver(
         self,
@@ -281,23 +357,7 @@ class BasePublicationTransformer(BaseTransformer):
         prepared = prepare_publication_payload(self, context, record, index)
         if prepared is None:
             return None
-        primary_id_field = prepared.primary_id_field
-        primary_id = prepared.primary_id
-        business_data = prepared.business_data
-        entity_id = self.compute_entity_id(
-            source_id=primary_id,
-            record={primary_id_field: primary_id},
-        )
-        return PreSilverRecord(
-            entity_id=entity_id,
-            business_data=business_data,
-            build_silver_record=partial(
-                build_publication_silver_record,
-                self,
-            ),
-            apply_structural_policy=self._apply_structural_policy,
-            apply_silver_filter=self._apply_silver_filter,
-        )
+        return self._build_pre_silver_publication_record(prepared)
 
     async def _transform_impl(
         self,
@@ -309,23 +369,14 @@ class BasePublicationTransformer(BaseTransformer):
         prepared = prepare_publication_payload(self, context, record, index)
         if prepared is None:
             return None
-        normalized_business_data = normalize_publication_business_data(
-            self,
-            prepared.business_data,
+        normalized_business_data = self._normalize_business_data_for_silver_record(
+            prepared.business_data
         )
-        entity_id, content_hash = self._compute_identifiers(
-            prepared.primary_id_field,
-            prepared.primary_id,
-            normalized_business_data,
-        )
-
-        return build_publication_silver_record(
-            self,
+        return self._assemble_publication_silver_record(
             context,
-            entity_id,
-            content_hash,
-            index,
-            normalized_business_data,
+            index=index,
+            prepared=prepared,
+            normalized_business_data=normalized_business_data,
         )
 
     def _classify_publication_type(
