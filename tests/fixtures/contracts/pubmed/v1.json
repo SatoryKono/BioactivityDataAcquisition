@@ -1,0 +1,30 @@
+{
+  "provider": "pubmed",
+  "version": 1,
+  "probes": {
+    "esearch_endpoint": {
+      "paths": {
+        "esearchresult": "dict",
+        "esearchresult.count": "str",
+        "esearchresult.idlist": "list",
+        "esearchresult.idlist[0]": "str"
+      }
+    },
+    "esummary_endpoint": {
+      "paths": {
+        "result": "dict",
+        "result.uids": "list",
+        "result.33408181": "dict",
+        "result.33408181.title": "str",
+        "result.33408181.pubdate": "str"
+      }
+    },
+    "einfo_database_list": {
+      "paths": {
+        "einforesult": "dict",
+        "einforesult.dblist": "list",
+        "einforesult.dblist[0]": "str"
+      }
+    }
+  }
+}

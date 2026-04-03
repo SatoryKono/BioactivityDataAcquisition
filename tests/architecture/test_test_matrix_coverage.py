@@ -462,7 +462,7 @@ class TestContractSnapshotGovernance:
         assert documentation_path.exists()
         assert helper_module_path.exists()
         assert registry_test_path.exists()
-        assert set(providers) == {"crossref", "openalex", "semanticscholar"}
+        assert set(providers) == {"crossref", "openalex", "pubmed", "semanticscholar"}
 
         for provider, provider_config in providers.items():
             version = provider_config["version"]
