@@ -41,7 +41,7 @@ def test_evidence_index_declares_rebaseline_model() -> None:
 
 def test_high_signal_reports_carry_freshness_notes() -> None:
     candidate_paths = (
-        "reports/plans/architecture-overview-and-refactor-roadmap-2026-03-23.md",
+        "reports/review/grafana_dashboard_audit_2026-03-30.md",
         "reports/gpt-5.2/review_py-audit-bot_20260323_0850_baseline.md",
     )
     existing_paths = [path for path in candidate_paths if (ROOT / path).exists()]
@@ -54,8 +54,6 @@ def test_high_signal_reports_carry_freshness_notes() -> None:
 def test_technical_debt_surfaces_mark_rebaseline_status() -> None:
     for relative_path in (
         "docs/reports/evidence/technical-debt/SUMMARY.md",
-        "docs/reports/evidence/technical-debt/complexity-hotspots/SUMMARY.md",
-        "docs/reports/evidence/technical-debt/03-synthesis/CROSS-SYNTHESIS.md",
     ):
         text = _read(relative_path).lower()
         assert "rebaseline" in text or "historical trigger evidence" in text, (

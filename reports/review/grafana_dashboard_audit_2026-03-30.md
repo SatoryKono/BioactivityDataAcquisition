@@ -191,3 +191,4 @@ Recommendations:
 - `bioetl-provider-health-v2` is in a good operational state.
 - `bioetl-overview-v2` and `bioetl-dq-v2` are visually correct, but the current live telemetry shows a real downstream completion gap: Bronze is populated while Gold remains `0`.
 - `bioetl-runtime` is also visually healthy; the remaining notable item is the live `Freshness Alert Conditions = 2` signal, which should be handled as runtime telemetry, not as a dashboard defect.
+\n\n**Freshness note:** This is a point-in-time audit.

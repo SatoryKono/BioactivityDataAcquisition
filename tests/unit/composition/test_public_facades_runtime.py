@@ -42,7 +42,7 @@ def test_pipeline_creation_api_delegates_through_creation_support() -> None:
         )
 
     with pytest.raises(AttributeError, match="has no attribute 'missing_symbol'"):
-        getattr(compat_module, "missing_symbol")
+        compat_module.missing_symbol
 
 
 @pytest.mark.unit
