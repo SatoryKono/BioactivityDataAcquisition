@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1426,
-    "total_internal_imports": 5461,
+    "total_internal_imports": 5468,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 261,
@@ -11,25 +11,25 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 782,
+      "imports": 784,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 855,
+      "imports": 860,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 286,
+      "imports": 287,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 377,
+      "imports": 376,
       "allowed": true
     },
     {
@@ -96,7 +96,7 @@
     {
       "source": "composition.factories",
       "target": "application.core",
-      "imports": 111
+      "imports": 112
     },
     {
       "source": "infrastructure.adapters",
@@ -116,7 +116,7 @@
     {
       "source": "application.pipelines",
       "target": "domain.types",
-      "imports": 76
+      "imports": 77
     },
     {
       "source": "composition.bootstrap",
@@ -209,14 +209,14 @@
       "imports": 28
     },
     {
+      "source": "application.pipelines",
+      "target": "domain.entities",
+      "imports": 26
+    },
+    {
       "source": "application.composite",
       "target": "domain.exceptions",
       "imports": 25
-    },
-    {
-      "source": "application.pipelines",
-      "target": "domain.entities",
-      "imports": 24
     },
     {
       "source": "application.services",
@@ -314,6 +314,11 @@
       "imports": 13
     },
     {
+      "source": "application.pipelines",
+      "target": "domain.context",
+      "imports": 12
+    },
+    {
       "source": "composition.bootstrap",
       "target": "infrastructure.observability",
       "imports": 12
@@ -335,11 +340,6 @@
     },
     {
       "source": "application.pipelines",
-      "target": "domain.context",
-      "imports": 11
-    },
-    {
-      "source": "application.pipelines",
       "target": "domain.services",
       "imports": 11
     },
@@ -352,6 +352,11 @@
       "source": "application.services",
       "target": "domain.services",
       "imports": 11
+    },
+    {
+      "source": "application.core",
+      "target": "domain.exceptions",
+      "imports": 10
     },
     {
       "source": "application.pipelines",
@@ -376,11 +381,6 @@
     {
       "source": "application.composite",
       "target": "domain.types",
-      "imports": 9
-    },
-    {
-      "source": "application.core",
-      "target": "domain.exceptions",
       "imports": 9
     },
     {

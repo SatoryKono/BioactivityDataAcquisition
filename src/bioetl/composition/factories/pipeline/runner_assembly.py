@@ -32,7 +32,8 @@ from bioetl.composition.factories.pipeline.postrun_assembly import (
 )
 from bioetl.composition.factories.pipeline.runner_constructor import (
     RunnerAssemblyParts,
-    create_pipeline_runner,
+    RunnerConstructorPayload,
+    create_pipeline_runner_from_payload,
 )
 from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.locking import LockContextHolder
@@ -220,28 +221,23 @@ def _build_postrun_service_for_pipeline(
 
 
 def _create_pipeline_runner(
+    payload: RunnerConstructorPayload,
+) -> PipelineRunner:
+    """Backward-compatible seam for unit tests that patch runner creation."""
+    return create_pipeline_runner_from_payload(payload)
+
+
+def _build_runner_constructor_payload(
     *,
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
-    executor: BatchExecutor,
-    checkpoint_manager: CheckpointManagerService,
-    lock_manager: LockCoordinator,
-    preflight_service: PreflightService,
-    postrun_service: PostrunService,
-    lifecycle_service: MedallionLifecycleService,
-    observer: PipelineObserver,
-) -> PipelineRunner:
-    """Backward-compatible seam for unit tests that patch runner creation."""
-    return create_pipeline_runner(
+    parts: RunnerAssemblyParts,
+) -> RunnerConstructorPayload:
+    """Package the final runner shell inputs into one typed constructor payload."""
+    return RunnerConstructorPayload(
         pipeline=pipeline,
         observability=observability,
-        executor=executor,
-        checkpoint_manager=checkpoint_manager,
-        lock_manager=lock_manager,
-        preflight_service=preflight_service,
-        postrun_service=postrun_service,
-        lifecycle_service=lifecycle_service,
-        observer=observer,
+        parts=parts,
     )
 
 
@@ -308,14 +304,9 @@ def assemble_runner_impl(
         dq_configs_extractor=dq_configs_extractor,
     )
     assembly_parts = _assemble_runner_parts(assembly_context)
-    return _create_pipeline_runner(
+    constructor_payload = _build_runner_constructor_payload(
         pipeline=pipeline,
         observability=observability,
-        executor=assembly_parts.batch_executor,
-        checkpoint_manager=assembly_parts.checkpoint_manager,
-        lock_manager=assembly_parts.lock_manager,
-        preflight_service=assembly_parts.preflight_service,
-        postrun_service=assembly_parts.postrun_service,
-        lifecycle_service=assembly_parts.lifecycle_service,
-        observer=assembly_parts.observer,
+        parts=assembly_parts,
     )
+    return _create_pipeline_runner(constructor_payload)

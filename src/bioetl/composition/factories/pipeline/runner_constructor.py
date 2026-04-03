@@ -35,6 +35,15 @@ class RunnerAssemblyParts:
     batch_executor: BatchExecutor
 
 
+@dataclass(frozen=True, slots=True)
+class RunnerConstructorPayload:
+    """Typed payload passed from assembly seams into final runner construction."""
+
+    pipeline: BasePipeline
+    observability: ObservabilityBundle
+    parts: RunnerAssemblyParts
+
+
 def create_pipeline_runner(
     *,
     pipeline: BasePipeline,
@@ -67,4 +76,21 @@ def create_pipeline_runner(
         dependencies=dependencies,
         pipeline=pipeline,
         tracer=resolved_tracer,
+    )
+
+
+def create_pipeline_runner_from_payload(
+    payload: RunnerConstructorPayload,
+) -> PipelineRunner:
+    """Build a PipelineRunner from a pre-assembled constructor payload."""
+    return create_pipeline_runner(
+        pipeline=payload.pipeline,
+        observability=payload.observability,
+        executor=payload.parts.batch_executor,
+        checkpoint_manager=payload.parts.checkpoint_manager,
+        lock_manager=payload.parts.lock_manager,
+        preflight_service=payload.parts.preflight_service,
+        postrun_service=payload.parts.postrun_service,
+        lifecycle_service=payload.parts.lifecycle_service,
+        observer=payload.parts.observer,
     )

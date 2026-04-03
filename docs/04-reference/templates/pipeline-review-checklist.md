@@ -10,7 +10,7 @@ Last verified: '2026-03-29'
 
 # Pipeline Review Checklist
 
-*Synced with RULES.md v5.24 (2026-03-13)*
+*Synced with RULES.md v6.1 (2026-03-13)*
 
 Use this checklist when reviewing new or modified pipelines.
 

@@ -65,17 +65,20 @@ class HealthCheckResult:
     @property
     def is_healthy(self) -> bool:
         """Return True if status is HEALTHY."""
-        return self.status == HealthStatus.HEALTHY
+        is_healthy: bool = self.status == HealthStatus.HEALTHY
+        return is_healthy
 
     @property
     def is_degraded(self) -> bool:
         """Return True if status is DEGRADED."""
-        return self.status == HealthStatus.DEGRADED
+        is_degraded: bool = self.status == HealthStatus.DEGRADED
+        return is_degraded
 
     @property
     def is_unhealthy(self) -> bool:
         """Return True if status is UNHEALTHY."""
-        return self.status == HealthStatus.UNHEALTHY
+        is_unhealthy: bool = self.status == HealthStatus.UNHEALTHY
+        return is_unhealthy
 
     def to_metric_labels(self) -> dict[str, str]:
         """Convert to metric labels for Prometheus export.

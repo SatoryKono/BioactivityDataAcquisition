@@ -10,7 +10,7 @@ Last verified: '2026-03-29'
 
 # System Context
 
-*Aligned with RULES.md v5.24 (Local-Only Deployment)*
+*Aligned with RULES.md v6.1 (Local-Only Deployment)*
 
 ## Overview
 

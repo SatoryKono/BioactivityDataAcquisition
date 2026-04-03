@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pydantic import ValidationError
 
@@ -86,16 +86,23 @@ class _CompositeBootstrapPlan:
 
 def _resolve_composite_gold_schema(composite_name: str) -> type | None:
     """Resolve composite Gold contract by composite pipeline name."""
-    return _resolve_composite_gold_schema_impl(
-        composite_name,
-        schema_registry=DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
+    return cast(
+        type | None,
+        _resolve_composite_gold_schema_impl(
+            composite_name,
+            schema_registry=DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
+        ),
     )
 
 
 def _resolve_composite_config_path(name: str) -> Path:
     """Resolve composite config path from canonical composites directory."""
-    return _resolve_composite_config_path_impl(
-        name, config_dir=DEFAULT_COMPOSITE_CONFIG_DIR
+    return cast(
+        Path,
+        _resolve_composite_config_path_impl(
+            name,
+            config_dir=DEFAULT_COMPOSITE_CONFIG_DIR,
+        ),
     )
 
 

@@ -10,7 +10,7 @@ Last verified: '2026-04-02'
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.24 | Last updated: 2026-04-01*
+*Synced with RULES.md v6.1 | Last updated: 2026-04-01*
 
 > **Documentation Update:** 2026-03-24
 > - Compatibility inventory synced with the current measured CLI shim registry
@@ -67,7 +67,7 @@ docs/
 ├── 00-project/                  # Project rules & governance
 │   ├── 00-map.md                # This file (Project Navigator)
 │   ├── index.md                 # Welcome page
-│   ├── RULES.md                 # Canonical rules document (v5.24)
+│   ├── RULES.md                 # Canonical rules document (v6.1)
 │   ├── glossary.md              # Ubiquitous Language terminology
 │   ├── TOOLS.md                 # Active tools hub & unified entry points
 │   ├── rules-summary.md         # TL;DR of RULES.md
@@ -533,11 +533,11 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-03-13   | v5.24 (Latest)               |
+| RULES.md                 | 2026-03-13   | v6.1 (Latest)               |
 | REQUIREMENTS.md          | 2026-03-13   | v1.8 (docs governance sync)  |
 | glossary.md              | 2026-03-08   | v2.7 (Ubiquitous Language)   |
 | 00-map.md                | 2026-03-24   | v8.3 Active navigator synced |
-| rules-summary.md         | 2026-03-13   | v5.24 Synced                 |
+| rules-summary.md         | 2026-03-13   | v6.1 Synced                 |
 | TOOLS.md                 | 2026-03-13   | v3.0 Active tools hub |
 | 03-guides/               | 2026-03-19   | Active guides index          |
 | 03-guides/development/   | 2026-01-26   | Config schema guidelines     |

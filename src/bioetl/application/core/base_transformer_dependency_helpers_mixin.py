@@ -37,12 +37,14 @@ class _BaseTransformerDependencyHelpersMixin:
     def hash_pii_value(self, value: str | None) -> str | None:
         """Hash a single PII value."""
         owner = cast("_TransformerDependencyOwner", self)
-        return owner._pii_hasher.hash_value(value)
+        hashed_value: str | None = owner._pii_hasher.hash_value(value)
+        return hashed_value
 
     def hash_pii_list(self, values: list[str] | None) -> list[str] | None:
         """Hash a list of PII values."""
         owner = cast("_TransformerDependencyOwner", self)
-        return owner._pii_hasher.hash_list(values)
+        hashed_values: list[str] | None = owner._pii_hasher.hash_list(values)
+        return hashed_values
 
     @staticmethod
     def validate_value_object(

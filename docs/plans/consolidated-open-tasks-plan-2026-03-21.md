@@ -1,6 +1,6 @@
 # Consolidated Open Tasks Plan
 
-Дата: 2026-03-21  
+Дата: 2026-03-21 (актуализировано 2026-04-03)  
 Статус: active consolidated plan  
 Язык: русский
 
@@ -93,6 +93,178 @@ Config-topology seams после `P1` closeout удерживаются как g
   уже удерживаются как measured-only / no-new-first-party-imports seams.
 
 ## Активная очередь
+
+### Execution refresh 2026-04-03: measured package-slice roadmap
+
+Статус: active measured execution queue.
+
+Этот refresh supersedes чисто `watch-mode` posture как ближайшую очередь
+исполнения. Исторические closeout-секции ниже сохраняются как context и
+guardrails, но следующий реальный execution cycle теперь должен идти через
+измеримый package-slice baseline и bounded family waves.
+
+#### Wave 0. Measurement baseline
+
+Цель:
+
+- до любого нового split/refactor получить измеримую карту
+  `package/file -> runtime -> status -> error_count`.
+
+Что делать:
+
+- прогнать `mypy --strict` по narrow package slices внутри `application`,
+  `composition`, `infrastructure`, `interfaces`;
+- отдельно замерить runtime на кандидатах следующих волн;
+- зафиксировать, какие slices завершаются, а какие упираются в timeout или
+  лавину ошибок;
+- удерживать baseline как живую таблицу выбора следующего bounded slice.
+
+Definition of Done:
+
+- есть таблица `slice -> runtime -> status -> error_count`;
+- следующий refactor выбирается по measured hotspots, а не по предположениям.
+
+Execution note:
+
+- baseline snapshot for the first run captured in
+  `reports/quality/wave0-mypy-slice-baseline-2026-04-03.md`
+
+#### Wave 1. Composition runner seams
+
+Цель:
+
+- разобрать самые плотные runner-assembly точки в `composition` и сделать их
+  более `wiring-only`.
+
+Primary candidates:
+
+- `src/bioetl/composition/bootstrap/runtime/runner_assembly.py`
+- `src/bioetl/composition/factories/pipeline/runner_assembly.py`
+
+Что выделять:
+
+- `dependency bundle construction`;
+- `checkpoint / preflight / observer / postrun assembly seams`;
+- `runtime bootstrap wiring payloads`.
+
+Ограничения:
+
+- не плодить новые top-level families;
+- использовать существующие соседние seams, если рядом уже есть
+  `runner_constructor.py`, `postrun_assembly.py`, `checkpoint_*_helpers.py`;
+- не нарушать import matrix и не переносить factory-вызовы вне `composition/`.
+
+Definition of Done:
+
+- assembly-файлы становятся тоньше и читаются как coordination/wiring слой;
+- narrow `mypy` по затронутому `composition` slice зелёный.
+
+#### Wave 2. Application publication transformer cleanup
+
+Цель:
+
+- дочистить orchestration seams в
+  `src/bioetl/application/pipelines/common/base_publication_transformer.py`
+  без новой broad rewrite.
+
+Что реально трогать:
+
+- `identifier/hash preparation seam`;
+- `final normalization boundary`;
+- `final silver-record assembly boundary`.
+
+Что не переписывать заново:
+
+- существующие `fallback / pre-silver / helper` seams, если они уже читаемы и
+  удерживаются текущими helper boundaries.
+
+Definition of Done:
+
+- файл становится короче и проще для чтения;
+- helper names отражают orchestration intent;
+- ближайшие publication transformer tests и narrow `mypy` зелёные.
+
+#### Wave 3. Storage family hotspot reduction
+
+Цель:
+
+- продолжать split внутри существующих storage families, а не перепридумывать
+  package topology.
+
+Не стартовать с:
+
+- фасадного "вынести всё из writer".
+
+Первые measured hotspots:
+
+- `silver`: `validation_operations.py`, `metadata_operations.py`,
+  `pipeline_helpers.py`, `merge_resilience_helpers.py`;
+- `gold`: `io_mixin.py`, `io_delta_runtime.py`, `metadata_operations.py`.
+
+Ограничения:
+
+- `src/bioetl/infrastructure/storage/silver_writer.py` и
+  `src/bioetl/infrastructure/storage/gold_writer.py` держать как thin
+  coordination layer;
+- topology storage family должна остаться прежней.
+
+Definition of Done:
+
+- hottest helper modules становятся меньше и понятнее;
+- storage slice `mypy` остаётся зелёным;
+- refactor не открывает новую topology migration wave.
+
+#### Wave 4. Typing frontier: один bounded family pack
+
+Цель:
+
+- выбрать один воспроизводимый typing pattern и довести bounded family pack до
+  зелёного состояния целиком.
+
+Лучший первый кандидат:
+
+- `src/bioetl/domain/schemas/pubmed/publication.py`
+
+Альтернативы:
+
+- `domain/contracts/gold/publications*.py`
+- `domain/models/*metadata*.py`
+
+Подход:
+
+- `typed alias / facade` только там, где это реально уменьшает ambiguity;
+- локальные `type: ignore[...]` только с явным обоснованием;
+- validator-heavy split только если он действительно нужен для typing и
+  читаемости, а не как самоцель.
+
+Definition of Done:
+
+- один family pack целиком зелёный;
+- strategy зафиксирована как повторяемый шаблон для следующего bounded pack.
+
+#### Wave 5. Package-level gates for remaining layers
+
+Цель:
+
+- превратить состояние "слой целиком не завершается" в серию завершаемых
+  package gates.
+
+Что делать:
+
+- продолжать package-slice прогоны по `application`, `composition`,
+  `infrastructure`, `interfaces`;
+- выбирать следующий refactor по `runtime + compactness of error list`;
+- исключать slices, конфликтующие с чужими незакоммиченными изменениями.
+
+Definition of Done:
+
+- есть живая карта `package -> runtime -> error_count -> next_action`;
+- следующие refactors выбираются по метрике, а не по ощущениям.
+
+Execution note:
+
+- `Wave 5` ведётся параллельно после `Wave 0` и обновляется после каждой
+  завершённой волны.
 
 ### P1. Config topology closeout
 
@@ -355,11 +527,22 @@ Execution note:
 
 ## Рекомендуемый порядок
 
-1. `watch-mode governance refresh` — обновлять hotspot history и summaries
-   только после intentional slices или reviewed drift
-2. `P3` — watchlist review только при появлении нового evidence
-3. затем новый snapshot backlog, а не автоматический переход к следующему
-   старому dated plan
+1. `Wave 0`, затем `Wave 1`
+2. затем `Wave 2`, если нужен быстрый выигрыш в `application` readability
+3. потом `Wave 3`, потому что storage topology уже подготовлена для точечной
+   работы внутри существующих families
+4. затем `Wave 4` как отдельный bounded typing experiment
+5. `Wave 5` вести параллельно после baseline и обновлять после каждой волны
+
+## Контроль после каждой волны
+
+- `py_compile` по изменённым файлам через проектный интерпретатор, а не через
+  системный `python3`
+- `bash scripts/dev/run_mypy.sh --narrow <changed package/file targets>`
+- `bash scripts/dev/run_pytest.sh --narrow <nearest tests>`
+- повторный package-slice `mypy` для всего затронутого подкластера
+- если менялся `composition` или `infrastructure`, добавлять ближайшие
+  `architecture`/`unit` tests, а не ограничиваться file-local smoke
 
 ## Definition Of Done Для Папки `docs/plans`
 

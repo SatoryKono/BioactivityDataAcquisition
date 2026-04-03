@@ -65,40 +65,21 @@ class BaseFilterConfig:
 
     def evaluate(self, record: JsonDict) -> FilterDecision:
         """Evaluate all filter rules and return the first blocking decision."""
-        required_fields_decision = evaluate_required_fields(self.required_fields, record)
-        if not required_fields_decision.include:
-            return required_fields_decision
-
-        exclude_if_present_decision = evaluate_exclude_if_present(
-            self.exclude_if_present,
-            record,
+        evaluators_with_rules = (
+            (evaluate_required_fields, self.required_fields),
+            (evaluate_exclude_if_present, self.exclude_if_present),
+            (evaluate_column_filters, self.column_filters),
+            (evaluate_range_filters, self.range_filters),
+            (evaluate_list_length_filters, self.list_length_filters),
+            (evaluate_list_contains_filters, self.list_contains_filters),
         )
-        if not exclude_if_present_decision.include:
-            return exclude_if_present_decision
 
-        column_filter_decision = evaluate_column_filters(self.column_filters, record)
-        if not column_filter_decision.include:
-            return column_filter_decision
+        for evaluator, rules in evaluators_with_rules:
+            decision = evaluator(rules, record)
+            if not decision.include:
+                return decision
 
-        range_filter_decision = evaluate_range_filters(self.range_filters, record)
-        if not range_filter_decision.include:
-            return range_filter_decision
-
-        list_length_decision = evaluate_list_length_filters(
-            self.list_length_filters,
-            record,
-        )
-        if not list_length_decision.include:
-            return list_length_decision
-
-        list_contains_decision = evaluate_list_contains_filters(
-            self.list_contains_filters,
-            record,
-        )
-        if not list_contains_decision.include:
-            return list_contains_decision
-
-        return FilterDecision.allowed()
+        return FilterDecision(include=True, reason=None)
 
     def _check_required_fields(self, record: JsonDict) -> bool:
         """Check that all required fields are present and non-empty."""

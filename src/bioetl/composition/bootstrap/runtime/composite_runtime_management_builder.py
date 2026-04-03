@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
@@ -13,7 +13,7 @@ from bioetl.composition.bootstrap.runtime.composite_support_service_bundles impo
     CompositeControlPlaneBundle,
     RuntimeManagementServicesBundle,
 )
-from bioetl.composition.services import compute_config_hash
+from bioetl.composition.services.versioning import compute_config_hash
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -99,7 +99,7 @@ def _resolve_expected_effective_config_hash(config: CompositeConfig) -> str:
     if not isinstance(payload, dict):
         return ""
     try:
-        return compute_config_hash(payload)
+        return cast(str, compute_config_hash(cast(dict[str, object], payload)))
     except (TypeError, ValueError):
         return ""
 
