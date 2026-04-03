@@ -30,7 +30,7 @@ class ResolvedRuntimeProjection:
 
 def resolve_heartbeat_interval_policy(*, settings: Settings) -> int:
     """Resolve heartbeat interval from canonical composition settings."""
-    return settings.pipeline.heartbeat_interval
+    return int(settings.pipeline.heartbeat_interval)
 
 
 def log_filter_config(

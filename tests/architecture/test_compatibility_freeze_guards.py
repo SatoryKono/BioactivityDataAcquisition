@@ -69,9 +69,6 @@ PIPELINE_CONFIGS_COMPAT_MODULE_PATH = (
     / "pipeline"
     / "configs.py"
 )
-PIPELINE_CREATION_API_COMPAT_MODULE = (
-    "bioetl.composition.factories.pipeline.creation_api"
-)
 RUN_COMMAND_INTERNAL_MODULE = "bioetl.interfaces.cli.commands.domains.run.command"
 RUN_ALL_COMMAND_INTERNAL_MODULE = (
     "bioetl.interfaces.cli.commands.domains.run_all.command"

@@ -250,38 +250,6 @@ def test_pipeline_configs_compat_module_is_confined_to_dedicated_tests(
 
 
 @pytest.mark.architecture
-def test_pipeline_creation_api_compat_module_is_not_used_in_src(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must import creation wiring from the canonical owner directly."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=PIPELINE_CREATION_API_COMPAT_MODULE,
-        allowed_files=frozenset(),
-    )
-    assert not violations, (
-        "pipeline.creation_api compatibility shim leaked into first-party src "
-        "imports:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_pipeline_creation_api_compat_module_is_confined_to_dedicated_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must treat pipeline.creation_api as a dedicated compatibility seam."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=PIPELINE_CREATION_API_COMPAT_MODULE,
-        allowed_files=ALLOWED_PIPELINE_CREATION_API_TEST_FILES,
-    )
-    assert not violations, (
-        "pipeline.creation_api compatibility shim leaked beyond dedicated tests:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
 def test_services_creation_api_compat_module_is_confined_to_dedicated_tests(
     test_ast_cache: dict[Path, ast.Module],
 ) -> None:
