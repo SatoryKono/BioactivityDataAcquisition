@@ -7,6 +7,7 @@ clean-architecture matrix explicit and CI-enforced for production imports.
 Covered edges:
 - domain -> composition
 - domain -> interfaces
+- application -> infrastructure
 - application -> composition
 - application -> interfaces
 - composition -> interfaces
@@ -41,21 +42,27 @@ EDGE_DEFINITIONS = (
     ),
     (
         "application",
+        "infrastructure",
+        ("bioetl.infrastructure",),
+        "REQ-ARCH-MATRIX-003",
+    ),
+    (
+        "application",
         "composition",
         ("bioetl.composition",),
-        "REQ-ARCH-MATRIX-003",
+        "REQ-ARCH-MATRIX-004",
     ),
     (
         "application",
         "interfaces",
         ("bioetl.interfaces",),
-        "REQ-ARCH-MATRIX-004",
+        "REQ-ARCH-MATRIX-005",
     ),
     (
         "composition",
         "interfaces",
         ("bioetl.interfaces",),
-        "REQ-ARCH-MATRIX-005",
+        "REQ-ARCH-MATRIX-006",
     ),
 )
 

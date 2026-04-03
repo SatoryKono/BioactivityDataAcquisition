@@ -25,21 +25,15 @@ from pathlib import Path
 import pytest
 
 
-def _discover_internal_port_modules(src_dir: Path) -> list[str]:
-    """Return all concrete domain ports submodules (excluding facade __init__)."""
-    ports_dir = src_dir / "bioetl" / "domain" / "ports"
-    if not ports_dir.exists():
-        return []
-    sanctioned_public_modules = {"bioetl.domain.ports.noop"}
-    return sorted(
-        "bioetl.domain.ports."
-        + ".".join(py_file.relative_to(ports_dir).with_suffix("").parts)
-        for py_file in ports_dir.rglob("*.py")
-        if py_file.stem != "__init__"
-        and "bioetl.domain.ports."
-        + ".".join(py_file.relative_to(ports_dir).with_suffix("").parts)
-        not in sanctioned_public_modules
-    )
+def _is_forbidden_port_import_target(module_name: str) -> bool:
+    """Return True for non-sanctioned port submodule imports.
+
+    Public imports must go through ``bioetl.domain.ports``. The only sanctioned
+    sub-facade is ``bioetl.domain.ports.noop`` for null-object helpers.
+    """
+    if not module_name.startswith("bioetl.domain.ports."):
+        return False
+    return module_name != "bioetl.domain.ports.noop"
 
 
 class TestLocalOnlyPolicy:
@@ -194,11 +188,6 @@ class TestPortImportFacade:
         Operational null objects are accessible via ``bioetl.domain.ports.noop``.
         Deeper internal modules remain forbidden to preserve clear public entry points.
         """
-        # Discover internal port modules dynamically to avoid stale allowlists.
-        # All modules under domain/ports (except __init__.py facade) are internal.
-        internal_port_modules = _discover_internal_port_modules(src_dir)
-        assert internal_port_modules, "No internal port modules found"
-
         violations = []
 
         # Check all layers except the ports package itself
@@ -208,17 +197,28 @@ class TestPortImportFacade:
                 continue
 
             for py_file in layer_path.rglob("*.py"):
-                content = py_file.read_text(encoding="utf-8")
-                for module in internal_port_modules:
-                    if f"from {module}" in content:
-                        relative_path = py_file.relative_to(src_dir)
-                        violations.append(f"{relative_path}: imports from {module}")
+                tree = ast.parse(py_file.read_text(encoding="utf-8"))
+                relative_path = py_file.relative_to(src_dir)
+
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Import):
+                        for alias in node.names:
+                            if _is_forbidden_port_import_target(alias.name):
+                                violations.append(
+                                    f"{relative_path}:{node.lineno} imports {alias.name}"
+                                )
+                    elif isinstance(node, ast.ImportFrom) and node.module:
+                        if _is_forbidden_port_import_target(node.module):
+                            violations.append(
+                                f"{relative_path}:{node.lineno} imports from {node.module}"
+                            )
 
         assert not violations, (
             "Ports must be imported only from sanctioned facades.\n"
             "Correct: from bioetl.domain.ports import StoragePort\n"
             "Correct: from bioetl.domain.ports.noop import NoOpMetrics\n"
-            "Wrong: from bioetl.domain.ports.storage import StoragePort\n\n"
+            "Wrong: from bioetl.domain.ports.runtime import ClockPort\n"
+            "Wrong: import bioetl.domain.ports.storage as storage_ports\n\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
         )
 
