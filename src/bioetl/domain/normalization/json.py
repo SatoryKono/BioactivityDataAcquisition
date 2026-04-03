@@ -88,13 +88,11 @@ def deserialize_json_value(data: str | bytes) -> JsonDict | list[object]:
     if _ORJSON_AVAILABLE:
         assert orjson is not None
         try:
-            result: JsonDict | list[object] = orjson.loads(data)
-            return result
+            return orjson.loads(data)
         except orjson.JSONDecodeError as exc:
             raise ValueError(f"Invalid JSON: {exc}") from exc
     try:
-        result: JsonDict | list[object] = json.loads(data)
-        return result
+        return json.loads(data)
     except json.JSONDecodeError as exc:
         raise ValueError(f"Invalid JSON: {exc}") from exc
 

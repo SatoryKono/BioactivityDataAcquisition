@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-
 from bioetl.domain.services.aggregation_validator import AggregationValidator
 from bioetl.domain.services.composite_validation_helpers import (
     _append_config_issue_if_invalid,
@@ -118,22 +117,24 @@ class CompositeValidationService:
                     {"missing_field": required_field},
                 )
             )
-        return build_validation_result(
+        result: ValidationResult = build_validation_result(
             issues=issues,
             validation_layer=ValidationLayer.STRUCTURAL,
             execution_context={"pipeline_name": config.pipeline_name},
         )
+        return result
 
     def _run_deep_preflight_validation(
         self,
         config: CompositeValidationConfig,
     ) -> ValidationResult:
         issues = self._deep_preflight_issues(config.composite_config)
-        return build_validation_result(
+        result: ValidationResult = build_validation_result(
             issues=issues,
             validation_layer=ValidationLayer.DEEP_PREFLIGHT,
             execution_context={"pipeline_name": config.pipeline_name},
         )
+        return result
 
     def _deep_preflight_issues(
         self, composite_config: JsonDict
@@ -237,11 +238,14 @@ class CompositeValidationService:
                     {"config": config},
                 )
             ]
-        validation_result = self._aggregation_validator.validate_aggregation_config(
+        validation_result: ValidationResult = (
+            self._aggregation_validator.validate_aggregation_config(
             aggregation_config,
             source_schema,
         )
-        return validation_result.issues
+        )
+        issues: list[ValidationIssue] = validation_result.issues
+        return issues
 
     def _validate_cross_validation_config(
         self, config: JsonDict, source_names: list[str]
@@ -250,12 +254,13 @@ class CompositeValidationService:
         if precheck_errors:
             return precheck_errors
         cross_val_config = _convert_to_cross_validation_config(config)
-        validation_result = (
+        validation_result: ValidationResult = (
             self._cross_validation_validator.validate_cross_validation_config(
                 cross_val_config, source_names
             )
         )
-        return validation_result.issues
+        issues: list[ValidationIssue] = validation_result.issues
+        return issues
 
     def _precheck_cross_validation_config(
         self,
@@ -283,12 +288,15 @@ class CompositeValidationService:
         ]
 
     def _is_valid_field_priorities(self, priorities: JsonDict) -> bool:
-        return _is_valid_field_priorities(priorities)
+        is_valid: bool = _is_valid_field_priorities(priorities)
+        return is_valid
 
     @staticmethod
     def _extract_priority(priority_config: object) -> object | None:
-        return _extract_priority(priority_config)
+        priority: object | None = _extract_priority(priority_config)
+        return priority
 
     @staticmethod
     def _is_valid_lineage_config(config: JsonDict) -> bool:
-        return _is_valid_lineage_config(config)
+        is_valid: bool = _is_valid_lineage_config(config)
+        return is_valid

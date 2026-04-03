@@ -31,6 +31,10 @@ Last verified: '2026-03-29'
 
 `src/bioetl/domain/ports/` содержит `Protocol`-контракты для Ports & Adapters:
 
+Сейчас пакет включает **15 top-level Python modules** в `domain/ports` (включая
+фасадный `__init__.py`), и это число синхронизируется архитектурным тестом
+`test_ports_count_matches_docs`.
+
 - источники и хранение (`DataSourcePort`, `StoragePort`, `CheckpointPort`, `LockPort`);
 - observability (`LoggerPort`, `MetricsPort`, `TracingPort`, `DQMonitorPort`);
 - качество данных (`BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort`, валидаторы, quarantine/report);

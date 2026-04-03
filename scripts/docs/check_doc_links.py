@@ -47,6 +47,7 @@ References:
 from __future__ import annotations
 
 import argparse
+from functools import lru_cache
 import os
 import re
 import sys
@@ -542,6 +543,7 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
     return broken
 
 
+@lru_cache(maxsize=None)
 def _load_nav_docs() -> list[Path]:
     """Load docs paths from mkdocs.yml navigation."""
     mkdocs_file = PROJECT_ROOT / "mkdocs.yml"
@@ -568,13 +570,18 @@ def _load_nav_docs() -> list[Path]:
     return [DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")]
 
 
+@lru_cache(maxsize=None)
 def _collect_link_scan_files(root: Path) -> list[Path]:
     """Collect files for link checks: active tree + all existing nav docs."""
-    tree_docs = {path.resolve() for path in _iter_markdown_files(root)}
-    nav_docs = {path.resolve() for path in _load_nav_docs() if path.exists()}
+    tree_docs = set(_iter_markdown_files(root))
+    # Missing nav docs are reported separately by ``check_missing_nav_docs()``.
+    # Avoid an additional exists()+resolve() sweep here: on mixed Windows/WSL
+    # checkouts that second pass dominates runtime for ``check-links --links``.
+    nav_docs = set(_load_nav_docs())
     return sorted(tree_docs | nav_docs)
 
 
+@lru_cache(maxsize=None)
 def _iter_markdown_files(root: Path) -> list[Path]:
     """Yield markdown files while pruning skipped directories before descent.
 
@@ -584,6 +591,8 @@ def _iter_markdown_files(root: Path) -> list[Path]:
     expensive. Walking with early directory pruning keeps `check-links --links`
     bounded to the intended docs surface.
     """
+    # Cache the walk per invocation. The same process reuses this file set for
+    # link checks, nav scope validation, and not-in-nav growth checks.
     markdown_files: list[Path] = []
     root = root.resolve()
 

@@ -217,6 +217,25 @@ def test_not_in_nav_growth_excludes_reports_prefixes(
     assert removed == []
 
 
+def test_collect_link_scan_files_keeps_nav_docs_without_prechecking_existence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _load_module()
+    tree_doc = tmp_path / "tree.md"
+    nav_doc = tmp_path / "nav.md"
+    missing_nav_doc = tmp_path / "missing-nav.md"
+    tree_doc.write_text("# Tree\n", encoding="utf-8")
+    nav_doc.write_text("# Nav\n", encoding="utf-8")
+
+    monkeypatch.setattr(module, "_iter_markdown_files", lambda root: [tree_doc])
+    monkeypatch.setattr(module, "_load_nav_docs", lambda: [nav_doc, missing_nav_doc])
+
+    collected = module._collect_link_scan_files(tmp_path)
+
+    assert collected == [missing_nav_doc, nav_doc, tree_doc]
+
+
 def test_has_any_heading_accepts_cli_inspection_alias() -> None:
     module = _load_module()
     headings = {"purpose", "cli inspection", "invariants"}

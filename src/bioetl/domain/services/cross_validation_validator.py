@@ -57,11 +57,12 @@ class CrossValidationValidator:
     ) -> ValidationResult:
         """Validate cross-source comparison rules before runtime execution."""
         issues = _collect_validation_issues(config, source_names)
-        return build_validation_result(
+        result: ValidationResult = build_validation_result(
             issues=issues,
             validation_layer=ValidationLayer.DEEP_PREFLIGHT,
             execution_context=execution_context or {},
         )
+        return result
 
     def apply_disposition(
         self,
@@ -76,19 +77,20 @@ class CrossValidationValidator:
         )
         if issues == validation_result.issues and runtime_context is None:
             return validation_result
-        return build_validation_result(
+        result: ValidationResult = build_validation_result(
             issues=issues,
             validation_layer=validation_result.validation_layer,
             execution_context=runtime_context or validation_result.execution_context,
             timestamp=validation_result.timestamp,
         )
+        return result
 
 
 def _collect_validation_issues(
     config: CrossValidationConfig,
     source_names: list[str],
 ) -> list[ValidationIssue]:
-    issues = _validate_pairs(config.pairs, source_names)
+    issues: list[ValidationIssue] = _validate_pairs(config.pairs, source_names)
     issues.extend(_validate_rules(config.rules))
     _append_threshold_issue(
         issues=issues,
@@ -169,10 +171,11 @@ def _build_disposed_issue(
     suffix: str,
     extra_details: JsonDict,
 ) -> ValidationIssue:
-    return _create_issue(
+    issue_result: ValidationIssue = _create_issue(
         code=issue.code,
         severity=severity,
         message=f"{issue.message} ({suffix})",
         details={**(issue.details or {}), **extra_details},
         location=issue.location,
     )
+    return issue_result

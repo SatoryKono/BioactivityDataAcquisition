@@ -20,8 +20,13 @@ from bioetl.application.core.batch_runtime_failure_policy import (
     PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.batch_transformer import TransformResult
+from bioetl.application.core.quarantine_manager import (
+    DQQuarantineEntry,
+    QuarantineManagerService,
+)
+from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.models.metadata import SourceMetadata
-from bioetl.domain.types import BatchID, BronzeRecord
+from bioetl.domain.types import BatchID, BronzeRecord, ErrorType
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -137,37 +142,86 @@ class BatchProcessingSupportService:
 
         if transform_result.silver_records:
             write_coros.append(
-                self._execute_with_span(
-                    "write_silver",
-                    self._writer.write_silver(
-                        transform_result.silver_records,
-                        batch_id,
-                        ingestion_ts,
-                        bronze_refs=bronze_refs,
-                    ),
+                self._safe_write_layer(
+                    "silver",
+                    transform_result.silver_records,
                     batch_id,
-                    len(transform_result.silver_records),
-                    on_error=lambda error: self._writer.log_and_track_write_error(
-                        "silver", error, batch_id
-                    ),
+                    ingestion_ts,
+                    bronze_refs,
                 )
             )
 
         if transform_result.gold_records:
             write_coros.append(
-                self._execute_with_span(
-                    "write_gold",
-                    self._writer.write_gold(transform_result.gold_records),
+                self._safe_write_layer(
+                    "gold",
+                    transform_result.gold_records,
                     batch_id,
-                    len(transform_result.gold_records),
-                    on_error=lambda error: self._writer.log_and_track_write_error(
-                        "gold", error, batch_id
-                    ),
+                    ingestion_ts,
+                    None,
                 )
             )
 
         if write_coros:
             await asyncio.gather(*write_coros)
+
+    async def _safe_write_layer(
+        self,
+        layer: str,
+        records: list[dict],
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+        bronze_refs: list[BronzeWriteResult] | None,
+    ) -> None:
+        """Execute layer write and quarantine records on SchemaViolationError."""
+        try:
+            if layer == "silver":
+                await self._execute_with_span(
+                    "write_silver",
+                    self._writer.write_silver(
+                        records,
+                        batch_id,
+                        ingestion_ts,
+                        bronze_refs=bronze_refs,
+                    ),
+                    batch_id,
+                    len(records),
+                    on_error=lambda error: self._writer.log_and_track_write_error(
+                        "silver", error, batch_id
+                    ),
+                )
+            else:
+                await self._execute_with_span(
+                    "write_gold",
+                    self._writer.write_gold(records),
+                    batch_id,
+                    len(records),
+                    on_error=lambda error: self._writer.log_and_track_write_error(
+                        "gold", error, batch_id
+                    ),
+                )
+        except SchemaViolationError as e:
+            self._logger.warning(
+                "schema_violation_quarantined",
+                layer=layer,
+                errors=e.errors,
+            )
+            pipeline_name = f"{self._writer._provider}_{self._writer._entity_type}"
+            qm = QuarantineManagerService(
+                quarantine_port=self._services.quarantine,
+                pipeline_name=pipeline_name,
+                metrics=self._batch_metrics,
+            )
+            entries = [
+                DQQuarantineEntry(
+                    record=rec,
+                    error_type=ErrorType.SCHEMA_VIOLATION,
+                    error_details=f"Schema violation in {layer}: {e.errors}",
+                )
+                for rec in records
+            ]
+            await qm.quarantine_records(entries, batch_id, ingestion_ts=ingestion_ts)
+            self._batch_metrics.track_processed_records("quarantined", len(records))
 
     def finalize_batch_span(
         self,

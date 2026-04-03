@@ -120,7 +120,7 @@ _PACKAGE_EXPORTS: dict[str, str] = {
 __all__ = ["__version__", *_PACKAGE_EXPORTS]
 
 
-def __getattr__(name: str) -> typing.Any:
+def __getattr__(name: str) -> typing.Any:  # Any: lazy package export returns heterogeneous submodules.
     """Lazily expose top-level package namespaces for patch/import stability."""
     try:
         module_name = _PACKAGE_EXPORTS[name]

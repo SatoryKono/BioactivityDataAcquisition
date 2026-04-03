@@ -56,11 +56,12 @@ class AggregationValidator:
         issues.extend(self._validate_aggregation_functions(config))
         issues.extend(self._validate_source_field(config, source_schema))
         issues.extend(self._check_field_shadowing(config))
-        return build_validation_result(
+        result: ValidationResult = build_validation_result(
             issues=issues,
             validation_layer=ValidationLayer.DEEP_PREFLIGHT,
             execution_context=execution_context or {},
         )
+        return result
 
     def _validate_group_by_fields(
         self,
@@ -202,11 +203,12 @@ class AggregationValidator:
             duplicate_groups=duplicate_groups,
             group_by_fields=group_by_fields,
         )
-        return build_validation_result(
+        result: ValidationResult = build_validation_result(
             issues=issues,
             validation_layer=ValidationLayer.RUNTIME_GUARD,
             execution_context={"validation_type": "post_aggregation_uniqueness"},
         )
+        return result
 
     def _collect_duplicate_groups(
         self,
