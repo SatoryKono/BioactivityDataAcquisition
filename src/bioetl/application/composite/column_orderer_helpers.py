@@ -25,25 +25,32 @@ def sort_columns_by_provider(
 ) -> list[str]:
     """Sort columns by provider prefix order."""
 
+    # ⚡ Bolt: Pre-compute dictionary for O(1) lookup inside the sorting key function
+    # instead of doing O(N) tuple.index() on every column
+    provider_order_map = {
+        provider.lower(): idx + 1 for idx, provider in enumerate(provider_order)
+    }
+    default_idx = len(provider_order) + 1
+
     def sort_key(col: str) -> tuple[int, str]:
         """Return (provider_index, name) placing seed columns first."""
-        parts = col.split(".")
+        # ⚡ Bolt: Safely limit list allocation overhead by using maxsplit
+        parts = col.split(".", maxsplit=2)
         if len(parts) < 3:
             return (0, col.lower())
 
         provider = parts[0].lower()
-        try:
-            idx = provider_order.index(provider)
-            return (idx + 1, col.lower())
-        except ValueError:
-            return (len(provider_order) + 1, col.lower())
+        idx = provider_order_map.get(provider, default_idx)
+        return (idx, col.lower())
 
     return sorted(columns, key=sort_key)
 
 
 def extract_field_from_qualified_name(column: str) -> str:
     """Extract field name from qualified column name."""
-    parts = column.split(".")
+    # ⚡ Bolt: safely limit list allocation overhead by using .split('.', maxsplit=3)
+    # while fully preserving exactly 2 or 3 parts behavior
+    parts = column.split(".", maxsplit=3)
     if len(parts) == 3:
         return parts[2]
     if len(parts) == 2:
