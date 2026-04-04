@@ -91,33 +91,45 @@ entries:
     current_evidence_paths:
       - configs/quality/test_matrix.yaml
       - tests/architecture/test_test_matrix_coverage.py
+      - tests/contract/test_chembl_contract.py
       - tests/contract/test_provider_contract_snapshot_registry.py
       - tests/contract/test_crossref_contract.py
       - tests/contract/test_openalex_contract.py
+      - tests/contract/test_pubchem_contract.py
+      - tests/contract/test_pubmed_contract.py
       - tests/contract/test_semanticscholar_contract.py
+      - tests/contract/test_uniprot_contract.py
       - tests/fixtures/contracts/README.md
+      - tests/fixtures/contracts/chembl/v1.json
       - tests/fixtures/contracts/crossref/v1.json
       - tests/fixtures/contracts/openalex/v1.json
+      - tests/fixtures/contracts/pubchem/v1.json
+      - tests/fixtures/contracts/pubmed/v1.json
       - tests/fixtures/contracts/semanticscholar/v1.json
+      - tests/fixtures/contracts/uniprot/v1.json
     artifact_paths:
       - tests/fixtures/contracts
       - tests/fixtures/contracts/README.md
       - tests/contract/_provider_contract_drift.py
+      - tests/contract/test_chembl_contract.py
       - tests/contract/test_crossref_contract.py
       - tests/contract/test_openalex_contract.py
+      - tests/contract/test_pubchem_contract.py
+      - tests/contract/test_pubmed_contract.py
       - tests/contract/test_semanticscholar_contract.py
+      - tests/contract/test_uniprot_contract.py
       - tests/contract/test_provider_contract_snapshot_registry.py
     next_step: >-
-      Use the bounded matrix-declared snapshot registry as the canonical managed
-      publication slice for Crossref, OpenAlex, and Semantic Scholar, then
-      intentionally expand the registry to the next representative provider
-      family with the same documented update path and CI-visible drift
-      diagnostics.
+      Keep the bounded matrix-declared snapshot registry aligned with the
+      current live-provider baseline and extend it only when a new provider or
+      probe family graduates into the enforced live contract surface with the
+      same documented update path and CI-visible drift diagnostics.
     promotion_criteria: >-
-      The matrix-declared snapshot registry covers multiple representative
-      publication providers beyond the initial pair, every adopted provider
-      keeps documented update guidance and drift tests, and rollout no longer
-      depends on the silver schema snapshot fallback alone.
+      The matrix-declared snapshot registry covers every provider in the current
+      enforced live-contract baseline, every adopted provider keeps documented
+      update guidance and drift tests, and rollout remains intentionally bounded
+      without depending on silver schema snapshots as the only external drift
+      signal.
   - field: golden_masters
     status: partial
     owner: "@bioetl-data-model"

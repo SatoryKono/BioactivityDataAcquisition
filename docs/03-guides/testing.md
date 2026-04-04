@@ -79,7 +79,7 @@ Supported policy slice for issue `#2598`:
 - для `semanticscholar` live governance теперь разделена:
   - `tests/contract/test_semanticscholar_contract.py` содержит promotion-grade путь;
   - `tests/contract/test_semanticscholar_contract_pilot.py` содержит richer pilot-soak проверки и требует `BIOETL_PILOT_SOAK_TESTS=true` или `--pilot-soak`
-- текущие silver schema snapshots уже живут в `tests/contract/silver_schemas/snapshots/`; внешний provider-facing registry `tests/fixtures/contracts/{provider}/v{version}.json` тоже уже активирован как bounded publication slice и не заменяет schema snapshots
+- текущие silver schema snapshots уже живут в `tests/contract/silver_schemas/snapshots/`; внешний provider-facing registry `tests/fixtures/contracts/{provider}/v{version}.json` тоже уже активирован как bounded live-provider baseline для `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar` и не заменяет schema snapshots
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
 - extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
 

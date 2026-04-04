@@ -10,12 +10,18 @@ See:
 
 from __future__ import annotations
 
+import os
+
 import httpx
 import pytest
 
+from tests.contract._provider_contract_drift import (
+    assert_provider_probe_matches_snapshot,
+)
 from tests.contract.conftest import UNIPROT_PROTEIN_REQUIRED_FIELDS
 
 UNIPROT_API_BASE = "https://rest.uniprot.org"
+UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 pytestmark = pytest.mark.network
 
 
@@ -68,6 +74,29 @@ class TestUniProtContract:
         assert not missing_fields, f"Missing required fields: {missing_fields}"
 
     @pytest.mark.asyncio
+    async def test_uniprotkb_search_snapshot_contract(self) -> None:
+        """Verify search payload matches the managed snapshot."""
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{UNIPROT_API_BASE}/uniprotkb/search",
+                params={
+                    "query": "ubiquitin",
+                    "size": 1,
+                    "format": "json",
+                },
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "uniprot",
+            "uniprotkb_search_endpoint",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
+
+    @pytest.mark.asyncio
     async def test_specific_protein_lookup(self) -> None:
         """Verify direct protein lookup by accession."""
         accession = "P0DTD1"  # SARS-CoV-2 Replicase polyprotein
@@ -85,6 +114,27 @@ class TestUniProtContract:
 
         assert data["primaryAccession"] == accession
         assert "sequence" in data
+
+    @pytest.mark.asyncio
+    async def test_specific_protein_lookup_snapshot_contract(self) -> None:
+        """Verify direct lookup payload matches the managed snapshot."""
+        accession = "P0DTD1"
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{UNIPROT_API_BASE}/uniprotkb/{accession}",
+                params={"format": "json"},
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "uniprot",
+            "specific_protein_lookup",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
 
     @pytest.mark.asyncio
     async def test_fasta_format_available(self) -> None:
@@ -145,6 +195,27 @@ class TestUniProtContract:
         assert "taxonId" in data
         assert data["taxonId"] == int(taxonomy_id)
         assert "scientificName" in data
+
+    @pytest.mark.asyncio
+    async def test_taxonomy_snapshot_contract(self) -> None:
+        """Verify taxonomy payload matches the managed snapshot."""
+        taxonomy_id = "9606"
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{UNIPROT_API_BASE}/taxonomy/{taxonomy_id}",
+                params={"format": "json"},
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "uniprot",
+            "taxonomy_endpoint",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
 
     @pytest.mark.asyncio
     async def test_pagination_headers(self) -> None:
