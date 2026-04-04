@@ -369,7 +369,7 @@ Before using GitHub MCP tools, set a token in your shell:
 export GITHUB_PERSONAL_ACCESS_TOKEN="<your_pat>"
 ```
 
-On Windows, the project wrapper `.claude/github-mcp-wrapper.ps1` can auto-read token from `gh auth token` when available.
+On Windows, the project GitHub MCP wrapper can auto-read token from `gh auth token` when available.
 
 ### Cursor: Run Codex via Tasks
 

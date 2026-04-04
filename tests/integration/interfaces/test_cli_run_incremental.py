@@ -11,10 +11,19 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.interfaces.cli import cli
-
 pytestmark = pytest.mark.integration
+
+
+def _get_cli():
+    from bioetl.interfaces.cli import cli
+
+    return cli
+
+
+def _register_all_pipelines() -> None:
+    from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+
+    register_all_pipelines()
 
 
 class TestCliRunIncremental:
@@ -23,11 +32,11 @@ class TestCliRunIncremental:
     @pytest.fixture(autouse=True)
     def setup_pipelines(self):
         """Register all pipelines before each test."""
-        register_all_pipelines()
+        _register_all_pipelines()
 
     def test_run_help_displays_options(self, cli_runner: CliRunner):
         """Test that run --help displays available options."""
-        result = cli_runner.invoke(cli, ["run", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["run", "--help"])
 
         assert result.exit_code == 0
         assert "--pipeline" in result.output
@@ -38,14 +47,14 @@ class TestCliRunIncremental:
 
     def test_run_requires_pipeline_option(self, cli_runner: CliRunner):
         """Test that run command requires --pipeline option."""
-        result = cli_runner.invoke(cli, ["run"])
+        result = cli_runner.invoke(_get_cli(), ["run"])
 
         assert result.exit_code != 0
         assert "Missing option" in result.output or "required" in result.output.lower()
 
     def test_run_rejects_unknown_pipeline(self, cli_runner: CliRunner):
         """Test that run command rejects unknown pipeline names."""
-        result = cli_runner.invoke(cli, ["run", "--pipeline", "nonexistent_pipeline"])
+        result = cli_runner.invoke(_get_cli(), ["run", "--pipeline", "nonexistent_pipeline"])
 
         assert result.exit_code != 0
         assert "Unknown pipeline" in result.output or "Invalid value" in result.output
@@ -53,7 +62,8 @@ class TestCliRunIncremental:
     def test_run_validates_run_type(self, cli_runner: CliRunner):
         """Test that run command validates run-type values."""
         result = cli_runner.invoke(
-            cli, ["run", "--pipeline", "chembl_activity", "--run-type", "invalid_type"]
+            _get_cli(),
+            ["run", "--pipeline", "chembl_activity", "--run-type", "invalid_type"]
         )
 
         assert result.exit_code != 0
@@ -62,7 +72,7 @@ class TestCliRunIncremental:
     def test_run_accepts_limit_option(self, cli_runner: CliRunner):
         """Test that run command accepts --limit option."""
         # Just verify the option is accepted (not the actual run)
-        result = cli_runner.invoke(cli, ["run", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["run", "--help"])
 
         assert "--limit" in result.output
         assert "Maximum number of records" in result.output
@@ -91,7 +101,7 @@ class TestCliRunIncremental:
             )
 
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["run", "--pipeline", "chembl_activity", "--limit", "5"],
             )
 
@@ -117,7 +127,7 @@ class TestCliRunIncremental:
             )
 
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 [
                     "run",
                     "--pipeline",
@@ -133,7 +143,7 @@ class TestCliRunIncremental:
 
     def test_run_shows_version(self, cli_runner: CliRunner):
         """Test that --version displays version info."""
-        result = cli_runner.invoke(cli, ["--version"])
+        result = cli_runner.invoke(_get_cli(), ["--version"])
 
         assert result.exit_code == 0
         assert "0.1.0" in result.output or "version" in result.output.lower()
@@ -145,11 +155,11 @@ class TestCliRunTypes:
     @pytest.fixture(autouse=True)
     def setup_pipelines(self):
         """Register all pipelines before each test."""
-        register_all_pipelines()
+        _register_all_pipelines()
 
     def test_run_type_incremental_is_default(self, cli_runner: CliRunner):
         """Test that incremental is the default run type."""
-        result = cli_runner.invoke(cli, ["run", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["run", "--help"])
 
         assert "incremental" in result.output
         assert "default" in result.output.lower()
@@ -161,7 +171,7 @@ class TestCliRunTypes:
     ):
         """Test that backfill run type prompts for confirmation."""
         result = cli_runner.invoke(
-            cli,
+            _get_cli(),
             ["run", "--pipeline", "chembl_activity", "--run-type", "backfill"],
             input="n\n",  # Answer 'no' to confirmation
         )
@@ -179,7 +189,7 @@ class TestCliRunTypes:
     ):
         """Test that rebuild run type prompts for confirmation."""
         result = cli_runner.invoke(
-            cli,
+            _get_cli(),
             ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild"],
             input="n\n",  # Answer 'no' to confirmation
         )
@@ -210,7 +220,7 @@ class TestCliRunTypes:
             )
 
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 [
                     "run",
                     "--pipeline",
@@ -237,7 +247,7 @@ class TestCliMain:
         runner = CliRunner()
 
         # Invoke main through the CLI
-        result = runner.invoke(cli, ["--help"])
+        result = runner.invoke(_get_cli(), ["--help"])
 
         assert result.exit_code == 0
         assert "run" in result.output

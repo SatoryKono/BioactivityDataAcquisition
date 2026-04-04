@@ -12,7 +12,7 @@ Create a new ETL pipeline for a provider/entity pair in BioETL.
 
 ## Source Of Truth
 - Codex SSOT: `.codex/skills/new-pipeline/SKILL.md`
-- Claude runtime: `.claude/commands/new-pipeline.md`
+- Claude runtime: runtime `new-pipeline` command entry
 
 ## Workflow
 1. Open and follow the SSOT skill file for your active runtime.

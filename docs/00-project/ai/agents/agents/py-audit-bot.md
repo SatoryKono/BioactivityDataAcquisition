@@ -52,7 +52,7 @@ Consolidation note (2026-03-08): `py-audit-bot` — канонический com
 - Composite configs: `configs/composites/{entity}.yaml`
 - ADR: `docs/02-architecture/decisions/`
 - RULES.md: `docs/00-project/RULES.md`
-- Self-review rules: `.claude/rules/ai-selfreview-rules.md`
+- Self-review rules: runtime self-review rules
 
 ---
 

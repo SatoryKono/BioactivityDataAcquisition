@@ -14,12 +14,16 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
-from bioetl.interfaces.cli import cli
-
 if TYPE_CHECKING:
     from click.testing import CliRunner
 
 pytestmark = pytest.mark.integration
+
+
+def _get_cli():
+    from bioetl.interfaces.cli import cli
+
+    return cli
 
 
 class TestCliDqCommands:
@@ -27,7 +31,7 @@ class TestCliDqCommands:
 
     def test_dq_help_displays_commands(self, cli_runner: CliRunner):
         """Test that dq --help displays available subcommands."""
-        result = cli_runner.invoke(cli, ["dq", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "--help"])
 
         assert result.exit_code == 0
         assert "show" in result.output
@@ -38,7 +42,7 @@ class TestCliDqCommands:
 
     def test_dq_show_help_displays_options(self, cli_runner: CliRunner):
         """Test that dq show --help displays options."""
-        result = cli_runner.invoke(cli, ["dq", "show", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "show", "--help"])
 
         assert result.exit_code == 0
         assert "PIPELINE" in result.output
@@ -46,7 +50,7 @@ class TestCliDqCommands:
 
     def test_dq_validate_help_displays_options(self, cli_runner: CliRunner):
         """Test that dq validate --help displays options."""
-        result = cli_runner.invoke(cli, ["dq", "validate", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "validate", "--help"])
 
         assert result.exit_code == 0
         assert "PIPELINE" in result.output
@@ -54,7 +58,7 @@ class TestCliDqCommands:
 
     def test_dq_show_effective_help_displays_options(self, cli_runner: CliRunner):
         """Test that dq show-effective --help displays options."""
-        result = cli_runner.invoke(cli, ["dq", "show-effective", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "show-effective", "--help"])
 
         assert result.exit_code == 0
         assert "PIPELINE" in result.output
@@ -63,7 +67,7 @@ class TestCliDqCommands:
 
     def test_dq_check_compatibility_help_displays_options(self, cli_runner: CliRunner):
         """Test that dq check-compatibility --help displays options."""
-        result = cli_runner.invoke(cli, ["dq", "check-compatibility", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "check-compatibility", "--help"])
 
         assert result.exit_code == 0
         assert "ARTIFACT1_FILE" in result.output
@@ -72,7 +76,7 @@ class TestCliDqCommands:
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
     def test_dq_show_requires_pipeline(self, mock_service, cli_runner: CliRunner):
         """Test that dq show requires pipeline argument."""
-        result = cli_runner.invoke(cli, ["dq", "show"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "show"])
 
         assert result.exit_code != 0
         assert (
@@ -94,7 +98,7 @@ class TestCliDqCommands:
         }
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "show", "chembl_activity"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "show", "chembl_activity"])
 
         assert result.exit_code == 0
         assert "contract_ref: chembl-v1" in result.output
@@ -121,7 +125,7 @@ class TestCliDqCommands:
         mock_service.return_value = mock_config_service
 
         result = cli_runner.invoke(
-            cli, ["dq", "show", "chembl_activity", "--format", "json"]
+            _get_cli(), ["dq", "show", "chembl_activity", "--format", "json"]
         )
 
         assert result.exit_code == 0
@@ -145,7 +149,7 @@ class TestCliDqCommands:
         }
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "validate", "chembl_activity"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "validate", "chembl_activity"])
 
         assert result.exit_code == 0
         assert "[OK] DQ configuration is valid" in result.output
@@ -175,7 +179,7 @@ class TestCliDqCommands:
         mock_service.return_value = mock_config_service
 
         result = cli_runner.invoke(
-            cli,
+            _get_cli(),
             ["dq", "validate", "chembl_activity", "--config-file", str(config_file)],
         )
 
@@ -197,7 +201,7 @@ class TestCliDqCommands:
         mock_service.return_value = mock_config_service
 
         result = cli_runner.invoke(
-            cli,
+            _get_cli(),
             ["dq", "validate", "chembl_activity", "--config-file", str(config_file)],
         )
 

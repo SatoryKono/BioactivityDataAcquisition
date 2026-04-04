@@ -10,7 +10,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import click
 import pytest
 
-from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.composition import PipelineRegistry
 from bioetl.interfaces.cli.commands.domains.run.support import (
     get_runner_logger,
@@ -62,7 +61,7 @@ class TestValidatePipelineName:
     def test_valid_pipeline_returns_value(self, mock_registry: MagicMock) -> None:
         """Test that a valid pipeline name is returned unchanged."""
         with patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+            "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
             return_value=mock_registry,
         ):
             result = validate_pipeline_name(None, None, "chembl_activity")
@@ -74,7 +73,7 @@ class TestValidatePipelineName:
     ) -> None:
         """Test that unknown pipeline raises click.BadParameter."""
         with patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+            "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
             return_value=mock_registry,
         ):
             with pytest.raises(click.BadParameter) as exc_info:
@@ -87,7 +86,7 @@ class TestValidatePipelineName:
     ) -> None:
         """Test that error includes list of available pipelines."""
         with patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+            "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
             return_value=mock_registry,
         ):
             with pytest.raises(click.BadParameter) as exc_info:
@@ -144,28 +143,18 @@ class TestHandleDestructiveRunConfirmation:
 
     def test_rebuild_dry_run_returns_false(self) -> None:
         """Test rebuild + dry_run shows preview and returns False."""
-        preview = CleanupPreview(
-            silver=LayerInfo(path="/tmp/silver", file_count=1, exists=True),
-            gold=LayerInfo(path="/tmp/gold", file_count=0, exists=False),
-            total_files=1,
-        )
-
         with patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.asyncio.run"
-        ) as mock_run:
-            mock_run.return_value = None
-            with patch(
-                "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
-                new=AsyncMock(return_value=preview),
-            ):
-                result = handle_destructive_run_confirmation(
-                    pipeline="chembl_activity",
-                    run_type="rebuild",
-                    dry_run=True,
-                    yes=False,
-                )
+            "bioetl.interfaces.cli.commands.domains.run.support.show_cleanup_preview"
+        ) as mock_show_cleanup_preview:
+            result = handle_destructive_run_confirmation(
+                pipeline="chembl_activity",
+                run_type="rebuild",
+                dry_run=True,
+                yes=False,
+            )
 
         assert result is False
+        mock_show_cleanup_preview.assert_called_once_with("chembl_activity")
 
     def test_rebuild_with_yes_flag_returns_true(self) -> None:
         """Test rebuild with --yes bypasses interactive confirmation."""
@@ -187,15 +176,10 @@ class TestShowCleanupPreview:
 
     def test_show_cleanup_preview_calls_async_preview(self) -> None:
         """Test that show_cleanup_preview invokes async preview logic."""
-        preview = CleanupPreview(
-            silver=LayerInfo(path="/tmp/silver", file_count=2, exists=True),
-            gold=LayerInfo(path="/tmp/gold", file_count=1, exists=True),
-            total_files=3,
-        )
-
         with patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
-            new=AsyncMock(return_value=preview),
-        ):
-            # Should not raise
+            "bioetl.interfaces.cli.commands.domains.run.support._preview_cleanup_async",
+            new_callable=AsyncMock,
+        ) as mock_preview:
             show_cleanup_preview("chembl_activity")
+
+        mock_preview.assert_awaited_once_with("chembl_activity")

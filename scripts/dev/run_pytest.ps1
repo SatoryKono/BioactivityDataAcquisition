@@ -13,6 +13,10 @@ if (-not $env:UV_LINK_MODE) {
     $env:UV_LINK_MODE = "copy"
 }
 
+if (-not $env:PYTHONPYCACHEPREFIX) {
+    $env:PYTHONPYCACHEPREFIX = Join-Path $env:TEMP "bioetl-pycache"
+}
+
 $PytestArgs = @($args)
 $NeedsDefaultFlags = $true
 $PytestNarrow = $false
@@ -108,6 +112,12 @@ if ($NeedsDefaultFlags) {
     } else {
         $PytestArgs = @("--cov=src/bioetl", "--cov-report=term", "-q", "--maxfail=1") + $PytestArgs
     }
+}
+
+if ((Test-CoveragePluginNeeded -Args $PytestArgs) -and -not $env:COVERAGE_FILE) {
+    $CoverageDir = Join-Path $env:TEMP "bioetl-coverage"
+    New-Item -ItemType Directory -Force -Path $CoverageDir | Out-Null
+    $env:COVERAGE_FILE = Join-Path $CoverageDir (".coverage.{0}.sqlite" -f $PID)
 }
 
 $PytestPluginArgs = @()

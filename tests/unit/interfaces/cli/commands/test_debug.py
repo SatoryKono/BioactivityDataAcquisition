@@ -87,7 +87,7 @@ class TestDebugCommand:
                 "bioetl.interfaces.cli.commands.debug.get_pipeline_runner_service"
             ):
                 with patch(
-                    "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+                    "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
                     return_value=mock_registry,
                 ):
                     result = cli_runner.invoke(
@@ -113,7 +113,7 @@ class TestDebugCommand:
                 "bioetl.interfaces.cli.commands.debug.get_pipeline_runner_service"
             ):
                 with patch(
-                    "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+                    "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
                     return_value=mock_registry,
                 ):
                     result = cli_runner.invoke(
@@ -131,7 +131,7 @@ class TestDebugCommand:
     ) -> None:
         """Test that an invalid breakpoint value causes CONFIG_ERROR exit."""
         with patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+            "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
             return_value=mock_registry,
         ):
             result = cli_runner.invoke(
@@ -158,7 +158,7 @@ class TestDebugCommand:
                 "bioetl.interfaces.cli.commands.debug.get_pipeline_runner_service"
             ):
                 with patch(
-                    "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+                    "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
                     return_value=mock_registry,
                 ):
                     result = cli_runner.invoke(
@@ -179,7 +179,7 @@ class TestDebugCommand:
                 "bioetl.interfaces.cli.commands.debug.get_pipeline_runner_service"
             ):
                 with patch(
-                    "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+                    "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
                     return_value=mock_registry,
                 ):
                     result = cli_runner.invoke(
@@ -198,7 +198,7 @@ class TestDebugCommand:
         registry.list_pipelines.return_value = ["other_pipeline"]
 
         with patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+            "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
             return_value=registry,
         ):
             result = cli_runner.invoke(

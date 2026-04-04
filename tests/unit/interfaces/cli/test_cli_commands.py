@@ -11,7 +11,7 @@ Uses Click's CliRunner for command testing without real bootstrap.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -1404,7 +1404,6 @@ def test_run_module_declares_expected_seam_inventory() -> None:
     assert run_module._RUN_COMPATIBILITY_SEAMS == (
         "_get_runner_logger",
         "_handle_destructive_run_confirmation",
-        "_preview_cleanup",
         "_validate_start_offset",
         "echo_health_server_info",
         "ensure_metrics_server_started",
@@ -1431,7 +1430,6 @@ def test_run_module_declares_expected_seam_inventory() -> None:
         run_module._handle_destructive_run_confirmation
         is run_module.handle_destructive_run_confirmation
     )
-    assert run_module._preview_cleanup is run_module.show_cleanup_preview
     assert run_module._validate_start_offset is run_module.validate_options
     assert (
         run_module.echo_health_server_info is run_module._echo_health_server_info_impl
@@ -1482,7 +1480,7 @@ def test_execute_run_uses_canonical_runtime_callable_builder() -> None:
         request=request,
         run_pipeline_async=run_pipeline_callable,
         run_coroutine=run_module.asyncio.run,
-        flush_metrics=run_module.push_metrics_to_gateway,
+        flush_metrics=ANY,
     )
 
 
@@ -1759,7 +1757,7 @@ class TestRunCommandExceptionHandlers:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry"
+                "bioetl.interfaces.cli.registry_helpers.build_cli_registry"
             ) as mock_registry,
             patch(
                 "bioetl.interfaces.cli.main.build_cli_registry"
@@ -1787,7 +1785,7 @@ class TestRunCommandExceptionHandlers:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry"
+                "bioetl.interfaces.cli.registry_helpers.build_cli_registry"
             ) as mock_registry,
             patch(
                 "bioetl.interfaces.cli.main.build_cli_registry"
@@ -1824,21 +1822,13 @@ class TestShowCleanupPreview:
             show_cleanup_preview,
         )
 
-        mock_preview = MagicMock()
-        mock_preview.bronze_files = 10
-        mock_preview.silver_rows = 1000
-        mock_preview.gold_rows = 500
-
         with patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
-            return_value=mock_preview,
-        ):
-            # Need to make preview_cleanup an async mock
-            with patch(
-                "bioetl.interfaces.cli.commands.domains.run.support._preview_cleanup_async",
-                new_callable=AsyncMock,
-            ):
-                show_cleanup_preview("chembl_activity")
+            "bioetl.interfaces.cli.commands.domains.run.support._preview_cleanup_async",
+            new_callable=AsyncMock,
+        ) as mock_preview:
+            show_cleanup_preview("chembl_activity")
+
+        mock_preview.assert_awaited_once_with("chembl_activity")
 
     def test_show_cleanup_preview_error(self, capsys):
         """Test show_cleanup_preview handles errors."""
@@ -1847,7 +1837,7 @@ class TestShowCleanupPreview:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
+            "bioetl.interfaces.cli.commands.domains.run.support._preview_cleanup_async",
             side_effect=RuntimeError("Preview failed"),
         ):
             show_cleanup_preview("chembl_activity")

@@ -23,8 +23,8 @@ Before executing workflows, discover what tools are available so commands can:
 ### Step 1: Scan for Custom Agents
 
 ```bash
-# Project-level Claude agents (preferred source of truth)
-ls .claude/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
+# Project-level Codex agents (preferred source of truth)
+ls .codex/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
 
 # Plugin agents
 ls plugins/*/agents/*.md 2>/dev/null | while read f; do
@@ -43,12 +43,6 @@ ls .codex/skills/*/SKILL.md 2>/dev/null | while read f; do
   echo "$skill"
 done
 
-# Legacy Claude skills (fallback only)
-ls .claude/skills/*/SKILL.md 2>/dev/null | while read f; do
-  skill=$(dirname $f | xargs basename)
-  echo "$skill"
-done
-
 # Plugin skills
 ls plugins/*/skills/*/SKILL.md 2>/dev/null | while read f; do
   plugin=$(echo $f | cut -d'/' -f2)
@@ -60,8 +54,8 @@ done
 ### Step 3: Scan for Custom Commands
 
 ```bash
-# Project-level commands
-ls .claude/commands/*.md 2>/dev/null | xargs -I {} basename {} .md
+# Project-level command registries
+ls scripts/*/__main__.py 2>/dev/null | xargs -I {} dirname {}
 
 # Plugin commands
 ls plugins/*/commands/*.md 2>/dev/null | while read f; do
@@ -83,8 +77,8 @@ sed -n '1,120p' .codex/config.toml 2>/dev/null
 # MCP server inventory
 sed -n '1,220p' .codex/settings.json 2>/dev/null
 
-# Legacy fallback
-grep -E "^(lint|test|check|format|typecheck|build):" .claude/CLAUDE.md 2>/dev/null
+# Active tools hub
+grep -E "scripts\\.|make |uv run python -m" docs/00-project/TOOLS.md 2>/dev/null
 ```
 
 ### Step 5: Detect Tech Stack
@@ -149,7 +143,7 @@ Based on capabilities:
 
 Before implementation:
 1. Invoke capability-discovery skill
-2. Note available `.claude/agents` and `.codex/skills`
+2. Note available `.codex/agents` and `.codex/skills`
 3. Note quality commands for Phase 3
 4. Store tech stack and Codex runtime constraints for appropriate tooling
 ```

@@ -8,8 +8,6 @@
 ## Surface Model
 
 - **Canonical runtime source**: `.codex/skills/`
-- **Parallel/legacy runtime surface**: `.claude/skills/`, only where a
-  Claude-specific workflow is intentionally still supported
 - **Published mirror**: `docs/00-project/ai/skills/local/`
 - **Curated snapshot**: `docs/00-project/ai/skills/global/`
 - **Reference mirror**: `docs/00-project/ai/skills/_references/`
@@ -17,7 +15,6 @@
 ## Канонические Правила
 
 - `.codex/skills/` — канонический источник runtime skills для текущего Codex workflow.
-- `.claude/skills/` — legacy/parallel runtime surface для Claude-specific flows, если такой workflow отдельно поддерживается.
 - `docs/00-project/ai/skills/local/` — опубликованное docs-mirror/compatibility layer; его нельзя считать основным authoring source.
 - `docs/00-project/ai/skills/global/` — курируемый snapshot выбранных глобальных skills.
 - `docs/00-project/ai/skills/_references/` — канонический источник reference-бандлов для overlay в `local/`.
@@ -89,7 +86,7 @@
 
 ## Wave 6 Consolidation (2026-03-12)
 
-Удалены 6 skills из `.claude/skills/` (runtime) и docs-зеркал:
+Удалены 6 skills из устаревшего parallel runtime surface и docs-зеркал:
 
 | Удалён | Причина |
 |--------|---------|

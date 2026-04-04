@@ -8,6 +8,7 @@ cd "$REPO_ROOT"
 export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
 export BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
+export PYTHONPYCACHEPREFIX="${PYTHONPYCACHEPREFIX:-/tmp/bioetl-pycache}"
 
 DEFAULT_FLAGS=(--cov=src/bioetl --cov-report=term -q --maxfail=1)
 PYTEST_ARGS=("$@")
@@ -24,6 +25,18 @@ for arg in "${PYTEST_ARGS[@]}"; do
 done
 
 PYTEST_ARGS=("${FILTERED_PYTEST_ARGS[@]}")
+
+for arg in "${PYTEST_ARGS[@]}"; do
+    case "$arg" in
+        --help|-h|--version|-V)
+            DEFAULT_FLAGS=()
+            break
+            ;;
+        --collect-only|--co)
+            DEFAULT_FLAGS=(-q --maxfail=1)
+            ;;
+    esac
+done
 
 _should_enable_benchmark_plugin() {
     local previous=""
@@ -78,6 +91,11 @@ _needs_xdist_plugin() {
     return 1
 }
 
+if _needs_cov_plugin "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}" && [[ -z "${COVERAGE_FILE:-}" ]]; then
+    mkdir -p /tmp/bioetl-coverage
+    export COVERAGE_FILE="/tmp/bioetl-coverage/.coverage.$$.sqlite"
+fi
+
 if [[ "$PYTEST_NARROW" == "1" ]]; then
     export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
     DEFAULT_FLAGS=(-q --maxfail=1)
@@ -120,18 +138,6 @@ elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
         PYTEST_PLUGIN_ARGS+=(-p pytest_benchmark.plugin)
     fi
 fi
-
-for arg in "${PYTEST_ARGS[@]}"; do
-    case "$arg" in
-        --help|-h|--version|-V)
-            DEFAULT_FLAGS=()
-            break
-            ;;
-        --collect-only|--co)
-            DEFAULT_FLAGS=(-q --maxfail=1)
-            ;;
-    esac
-done
 
 if [[ -f "scripts/ops/setup_plugins.sh" ]]; then
     bash scripts/ops/setup_plugins.sh --pytest-only

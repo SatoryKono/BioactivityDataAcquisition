@@ -9,7 +9,7 @@ Mirror of skill reference bundles used by CI validation scripts.
 This directory contains **read-only copies** of `references/` subdirectories
 from skills that use multi-file reference bundles (checklists, templates,
 schemas, playbooks). CI scripts verify that these mirrors stay in sync
-with the canonical sources under `.codex/skills/` and `.claude/skills/`.
+with the canonical sources under `.codex/skills/` and the active runtime skill surface.
 
 Treat this directory as a **reference mirror**, not as a canonical editing
 surface. If reference content and runtime skills diverge, the runtime source

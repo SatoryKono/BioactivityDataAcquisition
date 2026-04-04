@@ -63,14 +63,14 @@
         └── mcp-memory.json            ← MCP knowledge graph (semantic memory)
 
 **Приоритет при расхождениях:**
-1. Runtime-реестры (`.claude/agents/`, `.codex/agents/`) имеют приоритет над published agent-profile mirror `docs/00-project/ai/agents/agents/`.
+1. Runtime-реестры агентов имеют приоритет над published agent-profile mirror `docs/00-project/ai/agents/agents/`.
 2. `guides/` — канонический docs-layer для agent instructions.
 3. `.codex/skills/` — канонический источник локальных skills; `docs/00-project/ai/skills/` — documentation mirror/snapshot.
 4. `prompts/collected/` — read-only архивные копии, НЕ использовать как SSOT.
 
 #### Dot-директории агентов (runtime-конфигурации)
 
-    .claude/              ← Claude Code: settings.json, rules/, commands/, agents/, skills/
+    Claude runtime        ← Claude Code: settings, rules, commands, agents, skills
     .codex/               ← OpenAI Codex: config.toml, settings.json, agents/, skills/
     .gemini/              ← Gemini: GEMINI.md, settings.json
     .github/              ← Copilot: copilot-instructions.md
@@ -85,7 +85,7 @@
 
 | Агент | Guide (SSOT) | Runtime config |
 |-------|-------------|----------------|
-| Claude | `guides/CLAUDE.md` | `.claude/` (settings, rules, commands) |
+| Claude | `guides/CLAUDE.md` | Claude runtime registry (settings, rules, commands) |
 | Codex | `guides/CODEX.md` | `.codex/` (config.toml, settings) |
 | Gemini | `guides/GEMINI.md` | `.gemini/` (GEMINI.md, settings) |
 | Copilot | — | `.github/copilot-instructions.md` |
@@ -141,18 +141,18 @@
 |----------|---------|
 | Settings.json корректен | Проверить MCP-серверы, plugins, paths |
 | Память подключена | Все ссылки → `docs/00-project/ai/memory/` |
-| Скилы синхронизированы | `.claude/skills/` ↔ `docs/00-project/ai/skills/` |
-| Субагенты синхронизированы | `.claude/agents/py-*.md` ↔ `.codex/agents/py-*.md` |
+| Скилы синхронизированы | runtime skill registries ↔ `docs/00-project/ai/skills/` |
+| Субагенты синхронизированы | runtime agent registries ↔ `.codex/agents/py-*.md` |
 
 #### 2. Проверка путей памяти
 
 Все ссылки на память агентов ДОЛЖНЫ указывать на `docs/00-project/ai/memory/`.
 
     # Найти устаревшие ссылки на старые пути
-    grep -rl "\.ai/memory/" .claude/ .codex/ .gemini/ docs/ --include="*.md" --include="*.json" | grep -v "collected"
+    grep -rl "\.ai/memory/" .codex/ .gemini/ docs/ --include="*.md" --include="*.json" | grep -v "collected"
 
     # Проверить MCP memory path в settings.json
-    grep -r "MEMORY_FILE_PATH" .claude/settings.json .codex/settings.json .gemini/settings.json
+    grep -r "MEMORY_FILE_PATH" .codex/settings.json .gemini/settings.json
     # Ожидание: docs/00-project/ai/memory/mcp-memory.json
 
 Файлы памяти:
@@ -181,7 +181,7 @@
 
 #### 4. Проверка плагинов
 
-Claude Code plugins (в `.claude/settings.json` → `enabledPlugins`):
+Claude Code plugins (в runtime settings → `enabledPlugins`):
 
 | Plugin | Назначение |
 |--------|------------|
@@ -193,11 +193,11 @@ Claude Code plugins (в `.claude/settings.json` → `enabledPlugins`):
 
 #### 5. Проверка субагентов
 
-Субагенты загружаются из `.claude/agents/` (Claude) и `.codex/agents/` (Codex).
+Субагенты загружаются из runtime agent registries; локальный SSOT-каталог для проекта — `.codex/agents/`.
 Каждый субагент ДОЛЖЕН ссылаться на свой файл памяти:
 
     # Проверить что все py-* субагенты ссылаются на docs/00-project/ai/memory/
-    for agent in .claude/agents/py-*.md; do
+    for agent in .codex/agents/py-*.md; do
       name=$(basename "$agent" .md)
       if grep -q "docs/00-project/ai/memory/" "$agent"; then
         echo "OK: $name"
@@ -208,7 +208,7 @@ Claude Code plugins (в `.claude/settings.json` → `enabledPlugins`):
 
 #### 6. Проверка скилов
 
-Скилы загружаются из `.claude/skills/` (Claude) и `.codex/skills/` (Codex).
+Скилы загружаются из runtime skill registries; локальный SSOT-каталог для проекта — `.codex/skills/`.
 SSOT локальных skills: `.codex/skills/`.
 `docs/00-project/ai/skills/` — documentation mirror/snapshot.
 
@@ -240,7 +240,7 @@ compatibility/runtime entry может сохраняться в docs mirror и 
 Проверка:
 
     # Проверить что активные скилы ссылаются на правильные пути памяти
-    find .claude/skills/ .codex/skills/ -name "SKILL.md" -exec grep -l "\.ai/memory/" {} \;
+    find .codex/skills/ -name "SKILL.md" -exec grep -l "\.ai/memory/" {} \;
     # Ожидание: пустой вывод (все обновлены)
 
     # Проверить синхронизацию SSOT ↔ docs mirror для локальных skills
@@ -253,18 +253,18 @@ compatibility/runtime entry может сохраняться в docs mirror и 
 | `AGENTS.md` | Корень проекта | OpenAI Codex, generic agents | Сам файл (единственная копия) |
 | `.github/copilot-instructions.md` | `.github/` | GitHub Copilot | Сам файл |
 | `.gemini/GEMINI.md` | `.gemini/` | Gemini CLI | `docs/00-project/ai/agents/guides/GEMINI.md` |
-| `.claude/PROJECT_CONTEXT.md` | `.claude/` | Claude Code (автозагрузка) | Сам файл |
-| `.claude/rules/*.md` | `.claude/rules/` | Claude Code (автозагрузка) | Сами файлы |
+| Claude runtime project context file | Claude runtime registry | Claude Code (автозагрузка) | Runtime file |
+| Claude runtime rules | Claude runtime registry | Claude Code (автозагрузка) | Runtime files |
 
-Claude Code НЕ требует CLAUDE.md в корне — он читает `.claude/rules/` и `.claude/PROJECT_CONTEXT.md` автоматически.
+Claude Code НЕ требует `CLAUDE.md` в корне — он читает свой runtime project context и runtime rules автоматически.
 
 #### 8. Ограничения (что НЕЛЬЗЯ изменить)
 
 | Ограничение | Причина |
 |-------------|---------|
-| Claude auto-memory path (`C:\Users\{USER}\.claude\projects\...\memory\MEMORY.md`) | Хардкодирован в Claude Code |
-| `.claude/rules/` location | Claude Code загружает rules только из `.claude/rules/` |
-| `.claude/commands/` location | Slash-команды работают только из `.claude/commands/` |
+| Claude auto-memory path в профиле пользователя | Хардкодирован в Claude Code |
+| Claude runtime rules location | Claude Code загружает runtime rules из своего системного каталога |
+| Claude runtime slash-command location | Slash-команды работают из runtime command registry |
 | `AGENTS.md` в корне | Codex ищет его именно там |
 | `.github/copilot-instructions.md` | Copilot ищет его именно там |
 
@@ -328,10 +328,10 @@ Claude Code НЕ требует CLAUDE.md в корне — он читает `.
 
 > Добавь субагент {name} по шаблону из AI Workspace Setup.
 >
-> 1. Создай agent prompt: `.claude/agents/{name}.md` + `.codex/agents/{name}.md`
+> 1. Создай agent prompt в runtime agent registries и в `.codex/agents/{name}.md`
 > 2. Создай скил:
 >    - `.codex/skills/{name}/SKILL.md` (SSOT для локального skill)
->    - `.claude/skills/{name}/SKILL.md` (runtime copy)
+>    - runtime copy для других AI runtimes при необходимости
 >    - `docs/00-project/ai/skills/local/{name}/SKILL.md` (docs mirror)
 > 3. Создай файл памяти: `docs/00-project/ai/memory/memory-{name}.md`
 > 4. Добавь в ORCHESTRATION.md (`docs/00-project/ai/agents/agents/` + `.codex/agents/`)

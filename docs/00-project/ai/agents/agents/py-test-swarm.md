@@ -525,7 +525,7 @@ Task(
   subagent_type="py-test-swarm",
   description="L1 test swarm orchestrator",
   prompt="""
-  Прочитай файл `.claude/agents/py-test-swarm.md` и выполни роль L1-оркестратора.
+  Прочитай runtime profile `py-test-swarm` и выполни роль L1-оркестратора.
 
   Параметры:
   - task_id: SWARM-001

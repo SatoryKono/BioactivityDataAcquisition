@@ -12,7 +12,7 @@ Execute architecture validation checks and report blocking/non-blocking issues.
 
 ## Source Of Truth
 - Codex SSOT: `.codex/skills/verify-architecture/SKILL.md`
-- Claude runtime: `.claude/commands/verify-architecture.md`
+- Runtime mirrors: published docs or runtime-specific registries may exist, but Codex SSOT controls current workflow.
 
 ## Workflow
 1. Open and follow the SSOT skill file for your active runtime.

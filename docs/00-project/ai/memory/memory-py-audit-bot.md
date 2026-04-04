@@ -204,7 +204,7 @@ pytest tests/architecture/ -v --tb=short
 | What | Path |
 |------|------|
 | RULES.md (Constitution) | `docs/00-project/RULES.md` |
-| Self-review rules | `.claude/rules/ai-selfreview-rules.md` |
+| Self-review rules | runtime self-review rules |
 | Architecture tests | `tests/architecture/` |
 | Domain Ports | `src/bioetl/domain/ports/` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |

@@ -5,7 +5,7 @@
 *Синхронизировано с RULES.md v6.1 (2026-03-13) | Дедублировано: ссылки на RULES.md*
 
 > **Runtime-specific note:** если задача исполняется в Claude Code, считай
-> `.claude/agents/ORCHESTRATION.md` runtime-specific orchestration source.
+> runtime-specific orchestration source outside the Codex SSOT.
 > Для Codex используется отдельный `.codex/agents/ORCHESTRATION.md`; различия
 > между этими файлами не трактуются как автоматический drift без отдельной
 > сверки policy.
@@ -73,7 +73,7 @@ Operational rule:
 
 1. Прочти `docs/00-project/RULES.md` — это Конституция проекта.
 1. Проверь `guides/CLAUDE.md` — справочник для Claude Code.
-1. Изучи `.claude/PROJECT_CONTEXT.md` для быстрой справки.
+1. Изучи runtime project context file для быстрой справки.
 1. Ознакомься с `runtime/agent-memory.md` — краткая выжимка по проекту.
 1. Если задача затрагивает `grafana/dashboards/*.json`, прочитай `docs/03-guides/dashboards/dashboard-extension-llm.md`.
 1. Изучи существующий код в затрагиваемых модулях.
