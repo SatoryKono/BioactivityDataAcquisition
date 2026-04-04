@@ -17,7 +17,7 @@ Last verified: '2026-04-02'
 ## Overview
 
 This section contains operational documentation for managing the supported
-BioETL runtime, including long-running local and production-like operator
+BioETL runtime, including long-running local and staging-like operator
 profiles.
 
 Default operational guidance in this section assumes the supported ADR-010

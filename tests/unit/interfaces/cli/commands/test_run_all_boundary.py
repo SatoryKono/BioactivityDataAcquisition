@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import ast
-from pathlib import Path
+import importlib
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -43,18 +42,11 @@ def test_get_pipeline_runner_service_delegates_to_services_api() -> None:
 
 
 @pytest.mark.unit
-def test_cli_main_imports_run_all_via_public_command_seam() -> None:
-    """cli.main should wire the public run_all seam, not the internal owner module."""
-    path = Path("src/bioetl/interfaces/cli/main.py")
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+def test_cli_main_registers_run_all_via_public_command_seam() -> None:
+    """cli.main should resolve run-all through the lazy public command spec."""
+    cli_main = importlib.import_module("bioetl.interfaces.cli.main")
 
-    imported_modules = {
-        node.module
-        for node in tree.body
-        if isinstance(node, ast.ImportFrom) and node.module is not None
-    }
+    module_name, attribute_name, _help_text = cli_main._LAZY_COMMAND_SPECS["run-all"]
 
-    assert "bioetl.interfaces.cli.commands.run_all" in imported_modules
-    assert (
-        "bioetl.interfaces.cli.commands.domains.run_all.command" not in imported_modules
-    )
+    assert module_name == "bioetl.interfaces.cli.commands.run_all"
+    assert attribute_name == "run_all"
