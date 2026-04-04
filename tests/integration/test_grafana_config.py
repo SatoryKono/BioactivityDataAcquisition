@@ -288,6 +288,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Ledger Append Failures": "or vector(0)",
             "Checkpoint Incompatibilities": "or vector(0)",
             "Lineage Refs Missing": "or vector(0)",
+            "Composite Source Selections": "or vector(0)",
             "Silver Filter Rejects": "or vector(0)",
         },
         "bioetl-runtime.json": {
@@ -350,6 +351,7 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Ledger Append Failures": "round(",
             "Checkpoint Incompatibilities": "round(",
             "Lineage Refs Missing": "round(",
+            "Composite Source Selections": "round(",
             "Silver Filter Rejects": "round(",
         },
         "bioetl-provider-health-v2.json": {
@@ -528,6 +530,8 @@ def test_overview_dashboard_contains_control_plane_and_lineage_metrics():
         "bioetl_control_plane_read_duration_seconds",
         "bioetl_checkpoint_compatibility_events_total",
         "bioetl_lineage_fragments_emitted_total",
+        "bioetl_lineage_refs_missing_total",
+        "bioetl_composite_source_selection_total",
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Overview dashboard missing metrics: {missing}"
@@ -748,6 +752,7 @@ def test_provider_health_summary_panels_use_selected_time_range(
         ("bioetl-overview-v2.json", "Ledger Append Failures"),
         ("bioetl-overview-v2.json", "Checkpoint Incompatibilities"),
         ("bioetl-overview-v2.json", "Lineage Refs Missing"),
+        ("bioetl-overview-v2.json", "Composite Source Selections"),
         ("bioetl-overview-v2.json", "Global Control-plane Lookup Failures"),
         ("bioetl-overview-v2.json", "Global Control-plane Lookup p95"),
         ("bioetl-dq-v2.json", "Records Quarantined"),

@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-04'
 ---
 
 # Monitoring Docs Index
@@ -36,7 +36,8 @@ Last verified: '2026-03-29'
 
 Текущий `bioetl-overview-v2` также считается канонической точкой входа для
 control-plane и lineage health: manifest writes, ledger appends, checkpoint
-compatibility и lineage fragment outcomes.
+compatibility, lineage refs missing, composite source-selection decisions и
+lineage fragment outcomes.
 
 `bioetl-runtime` считается канонической triage-точкой для runtime hygiene:
 warnings, unstructured logs и Prometheus-backed alert conditions. Он не
