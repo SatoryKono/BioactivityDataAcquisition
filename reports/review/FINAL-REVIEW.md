@@ -14,9 +14,9 @@ Overall project health is reviewed.
 ### Key Metrics
 | Metric | Value |
 |--------|-------|
-| Total issues found | 11211 |
+| Total issues found | 11175 |
 | Critical issues | 0 |
-| High issues | 10407 |
+| High issues | 10371 |
 | Medium issues | 4 |
 | Low issues | 800 |
 | Sectors reviewed | 8 |
@@ -29,14 +29,14 @@ Overall project health is reviewed.
 | S3 Infrastructure Layer | src/bioetl/infrastructure | 392 | 48601 | 9.8 | PASS |
 | S4 Composition+Ifaces | ['src/bioetl/composition', 'src/bioetl/interfaces'] | 251 | 26056 | 9.0 | WARN |
 | S5 Cross-cutting Concerns | src/bioetl | 1429 | 166494 | 6.0 | WARN |
-| S6 Tests | tests | 1269 | 272152 | 8.2 | FAIL |
+| S6 Tests | tests | 1269 | 272152 | 8.6 | WARN |
 | S7 Configs | configs | 67 | 9998 | 10.0 | PASS |
 | S8 Documentation | docs | 845 | 80447 | 10.0 | PASS |
 ---
 ## Category Scores (aggregated across all sectors)
 | Category | Weight | Score | Issues | Status |
 |----------|--------|-------|--------|--------|
-| Architecture | -- | 0.0 | 77 | FAIL |
+| Architecture | -- | 0.0 | 41 | FAIL |
 | Anti-Patterns | -- | 9.0 | 1 | PASS |
 | DI Violations | -- | 10.0 | 0 | PASS |
 | Naming | -- | 0.0 | 800 | FAIL |
