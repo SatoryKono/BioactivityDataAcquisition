@@ -11,8 +11,8 @@ BioETL.
   operator aids or migration helpers.
 - **Historical prompts**: older orchestration or audit prompts retained for
   traceability and comparison.
-- **Collected prompts**: copied prompt artifacts gathered from other doc areas;
-  these are discoverability copies, not source-of-truth workflow policy.
+- **Collected prompts**: unique repo-only prompt snapshots retained under
+  `collected/` for discoverability and archive traceability.
 
 ## Authority Rules
 
@@ -27,8 +27,12 @@ BioETL.
 
 - [ai_workspace_setup.md](ai_workspace_setup.md) — internal setup and audit
   prompt for AI workspace configuration
+- [architecture_review_and_refactoring_assessment.md](architecture_review_and_refactoring_assessment.md)
+  — working prompt for read-only architecture review and refactoring assessment
+- [test_speed_optimization_loop.md](test_speed_optimization_loop.md) —
+  working prompt for test-speed optimization loops
 - [COLLECTED_PROMPTS_INDEX.md](COLLECTED_PROMPTS_INDEX.md) — discoverability
-  index for copied prompt artifacts
+  index for repo-only collected prompt snapshots
 - Historical prompts in this folder explicitly marked `internal-only
   (historical prompt)` should be treated as reference material, not as current
   workflow policy
@@ -38,3 +42,6 @@ BioETL.
 - This overview page is **repo-only** and excluded from MkDocs.
 - Published discoverability for this surface goes through
   `COLLECTED_PROMPTS_INDEX.md`, not through this README.
+- Root-level prompt files are the preferred local reference surface for working
+  and historical prompts; `collected/` is reserved for unique archive-only
+  artifacts that do not have a maintained root-level twin.

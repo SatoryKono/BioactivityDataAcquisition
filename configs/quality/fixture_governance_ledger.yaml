@@ -138,7 +138,7 @@ entries:
       The representative golden-master set is intentionally mapped to provider
       policy and the partial rollout no longer hides unexplained scope gaps.
   - field: extensionless_filenames
-    status: partial
+    status: enforced
     owner: "@bioetl-platform"
     blocking_classification: legacy_filename_inventory
     current_evidence_paths:
@@ -150,8 +150,8 @@ entries:
       - tests/fixtures/vcr
       - scripts/data/check_vcr_filename_policy.py
     next_step: >-
-      Burn down the remaining allowlisted extensionless cassette inventory until
-      the filename policy can be enforced without an exception list.
+      Keep the root VCR guard and filename policy checks active so extensionless
+      cassettes cannot regress back into the repository.
     promotion_criteria: >-
-      Extensionless cassette inventory reaches zero and the allowlist can be
-      removed while keeping the root VCR policy guard intact.
+      Extensionless cassette inventory stays at zero while CI filename policy
+      checks continue to enforce the canonical .yaml naming convention.

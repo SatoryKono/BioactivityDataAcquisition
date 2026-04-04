@@ -1,12 +1,18 @@
 *Статус: internal-only (historical prompt)*
 
+Текущая runtime-surface:
+- `python -m scripts.qa generate-debt-tasks`
+- `python -m scripts.qa reduce-architecture-debt`
+- `.codex/agents/py-architecture-debt-bot.md`
+- `configs/` изменения выполняются только через `py-config-bot`
+
 # Architecture Debt Reduction — Orchestration Prompt
 
 *Версия: 2.0.0 | Дата: 2026-03-08*
 
 ## Назначение
 
-Промт для Claude Code оркестратора: автоматическое устранение architecture debt
+автоматическое устранение architecture debt
 на основе задач из `tasks_architecture_metric_exemptions_*.json`.
 
 ---

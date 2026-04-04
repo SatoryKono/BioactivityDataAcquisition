@@ -1,6 +1,11 @@
-# Test Speed Optimization Loop Prompt
+# Test Speed Optimization Loop
 
 *Статус: internal (working prompt artifact)*
+
+> **Surface note:** this file is an internal working prompt, not canonical
+> workflow policy. For active project rules use `docs/00-project/RULES.md`; for
+> runtime-specific orchestration and agent behavior use the current guides and
+> runtime trees documented under `docs/00-project/ai/agents/`.
 
 Цель: ускорить запуск тестов в репозитории BioETL минимум на 30% без снижения
 надежности проверок.

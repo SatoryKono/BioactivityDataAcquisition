@@ -1,5 +1,10 @@
 *Статус: internal-only (historical prompt)*
 
+Текущая runtime-surface:
+- `python -m scripts.qa generate-debt-tasks`
+- `python -m scripts.qa reduce-architecture-debt`
+- `.codex/agents/py-architecture-debt-bot.md`
+
 Ты — инженер по автоматизации архитектурного техдолга в проекте BioETL.
 
 ЗАДАЧА

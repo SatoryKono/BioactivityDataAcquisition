@@ -30,6 +30,7 @@ bash scripts/check_skills_mirror.sh --sync
 |------|------|---------|
 | `py-audit-bot` | `.codex/skills/py-audit-bot` | Audit profile workflow |
 | `py-code-bot` | `.codex/skills/py-code-bot` | Deprecated compatibility profile for historical references |
+| `py-architecture-debt-bot` | `.codex/skills/py-architecture-debt-bot` | Full architecture-debt reduction workflow |
 | `py-config-bot` | `.codex/skills/py-config-bot` | Config profile workflow |
 | `py-debug-bot` | `.codex/skills/py-debug-bot` | Debug profile workflow |
 | `py-doc-bot` | `.codex/skills/py-doc-bot` | Documentation profile workflow |
@@ -107,6 +108,7 @@ bash scripts/check_skills_mirror.sh --sync
 - [nci-analysis](nci-analysis/SKILL.md)
 - [new-pipeline](new-pipeline/SKILL.md)
 - [py-audit-bot](py-audit-bot/SKILL.md)
+- [py-architecture-debt-bot](py-architecture-debt-bot/SKILL.md)
 - [py-code-bot](py-code-bot/SKILL.md)
 - [py-config-bot](py-config-bot/SKILL.md)
 - [py-debug-bot](py-debug-bot/SKILL.md)

@@ -1,11 +1,11 @@
 ---
-Version: 1.2.0
+Version: 1.2.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-02'
+Last verified: '2026-04-04'
 ---
 
 # Getting Started Guide
@@ -167,6 +167,10 @@ bash scripts/dev/run_mypy.sh
 ```
 
 If all tests pass, your environment is ready!
+
+For published docs checks, drift review, and the strict site-build path, use
+the dedicated [Docs Verification](docs-verification.md) guide instead of
+copying ad-hoc commands from older notes.
 
 ## 5. Running Your First Pipeline
 

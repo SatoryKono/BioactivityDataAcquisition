@@ -84,6 +84,7 @@ The domain layer implements Domain-Driven Design patterns:
 | [RULES.md](docs/00-project/RULES.md)                      | Canonical active governance and requirements |
 | [Project Map](docs/00-project/00-map.md)                  | Primary navigator for active project docs   |
 | [Tools Hub](docs/00-project/TOOLS.md)                     | Current tool entry points and placement rules |
+| [Docs Verification Guide](docs/03-guides/docs-verification.md) | Published checklist for docs checks, drift review, and strict builds |
 | [CLI Reference](docs/04-reference/cli.md)                 | Command-line interface documentation        |
 | [Run Manifest Contract](docs/04-reference/contracts/run-manifest-ledger.md) | Published control-plane manifest and ledger schema |
 | [Operations Runbooks](docs/05-operations/runbooks/)       | Incident response and procedures            |
@@ -120,6 +121,9 @@ repo-wide reorganization wave.
 - **Docker**: Optional, only for `docker-compose` extras such as Neo4j and monitoring; not required for the Local-Only runtime.
 - **Node.js**: Optional, for Mermaid diagram rendering and related docs tooling.
 
+The supported dependency/bootstrap path is uv-first. `pip` remains a manual
+fallback when `uv` is unavailable.
+
 ### Installation
 
 #### Option A: Supported Make-Based Setup (Recommended)
@@ -142,6 +146,7 @@ Notes:
 - `make setup-plugins` configures local pytest/pre-commit tooling.
 - `make setup-skills` syncs repository-local Codex `skills` and their paired `agents` into `$CODEX_HOME` (default `~/.codex`).
 - If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.dev setup-mcp` is also valid.
+- For docs verification and strict site builds, use the published [Docs Verification Guide](docs/03-guides/docs-verification.md).
 - `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
 #### Mixed Windows + WSL Development

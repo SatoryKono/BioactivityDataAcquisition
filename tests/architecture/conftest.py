@@ -23,6 +23,22 @@ import yaml
 _CACHE_VERSION = 2
 
 
+def _list_python_files(root: Path) -> list[Path]:
+    """Collect Python files under ``root`` faster than ``Path.rglob`` on /mnt/*."""
+    python_files: list[Path] = []
+    for current_root, dirnames, filenames in os.walk(root):
+        dirnames[:] = [
+            dirname
+            for dirname in dirnames
+            if dirname not in {"__pycache__", ".worktrees"}
+        ]
+        current_path = Path(current_root)
+        for filename in filenames:
+            if filename.endswith(".py"):
+                python_files.append(current_path / filename)
+    return sorted(python_files)
+
+
 def _cache_dir(project_root: Path) -> Path:
     """Return persistent cache directory for architecture fixture artifacts."""
     cache_dir = project_root / ".pytest_cache" / "bioetl_architecture"
@@ -211,7 +227,7 @@ def _build_yaml_cache(
 def src_python_files(src_dir: Path) -> list[Path]:
     """Sorted list of all *.py files under src/bioetl/ (no __pycache__)."""
     bioetl = src_dir / "bioetl"
-    return sorted(p for p in bioetl.rglob("*.py") if "__pycache__" not in p.parts)
+    return _list_python_files(bioetl)
 
 
 @pytest.fixture(scope="session")
@@ -243,11 +259,7 @@ def source_ast_cache(
 def test_python_files(project_root: Path) -> list[Path]:
     """Sorted list of all *.py test files (no __pycache__, no worktrees)."""
     tests_root = project_root / "tests"
-    return sorted(
-        p
-        for p in tests_root.rglob("*.py")
-        if "__pycache__" not in p.parts and ".worktrees" not in p.parts
-    )
+    return _list_python_files(tests_root)
 
 
 @pytest.fixture(scope="session")

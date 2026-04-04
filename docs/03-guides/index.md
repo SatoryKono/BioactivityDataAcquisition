@@ -26,6 +26,7 @@ for published contracts, CLI surfaces, and specs.
 | Bootstrap quickly | [quick-start.md](quick-start.md) |
 | Full local setup walkthrough | [getting-started.md](getting-started.md) |
 | Run and resume pipelines | [running-pipelines.md](running-pipelines.md) |
+| Verify docs and strict site build | [docs-verification.md](docs-verification.md) |
 | Understand pipeline lifecycle | [pipeline-lifecycle.md](pipeline-lifecycle.md) |
 | Configure pipelines | [pipeline-configuration.md](pipeline-configuration.md) |
 | Configure DQ behavior | [dq-configuration.md](dq-configuration.md) |
@@ -42,6 +43,9 @@ for published contracts, CLI surfaces, and specs.
   prerequisites, environment setup, configuration, and initial troubleshooting.
 - [Running Pipelines](running-pipelines.md): execution, run types, resume,
   cached bronze, and control-plane inspection commands.
+- [Docs Verification](docs-verification.md): published docs checks, strict
+  build flow, mixed-environment notes, and recurring documentation audit
+  checklist.
 - [Metrics & Monitoring](metrics-monitoring.md): local observability setup and
   metric catalog.
 - [Testing](testing.md): test strategy, local execution paths, and governance.
@@ -52,4 +56,3 @@ for published contracts, CLI surfaces, and specs.
 - [Architecture Overview](../02-architecture/00-overview.md)
 - [Reference Index](../04-reference/index.md)
 - [Operations Runbooks](../05-operations/runbooks/index.md)
-

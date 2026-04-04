@@ -246,7 +246,7 @@ fixture_governance:
     cassette_metadata_backfill: partial
     contract_snapshots: partial
     golden_masters: partial
-    extensionless_filenames: partial
+    extensionless_filenames: enforced
   contract_snapshot_registry:
     scope: bounded_publication_slice
     documentation: tests/fixtures/contracts/README.md

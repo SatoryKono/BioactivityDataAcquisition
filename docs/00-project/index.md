@@ -1,5 +1,5 @@
 ---
-Version: 1.2.1
+Version: 1.2.4
 Status: active
 Class: published
 Owner: BioETL Team
@@ -19,6 +19,7 @@ This is the central documentation hub for the BioETL project.
 | Current project rules | [RULES.md](RULES.md) |
 | Active documentation navigator | [Project Navigator](00-map.md) |
 | Current tool commands and placement rules | [Tools Hub](TOOLS.md) |
+| Verify published docs and strict build flow | [Docs Verification](../03-guides/docs-verification.md) |
 | Historical context only | Repository path `docs/99-archive/README.md` |
 
 Active guidance lives under `docs/00-05`. Materials in `docs/99-archive/`
@@ -39,7 +40,7 @@ Use the repository docs with the following priority:
 
 Useful entry points for non-normative surfaces:
 
-- Repository path `docs/plans/README.md` — active and retained planning artifacts (repo-only working surface, not published in MkDocs)
+- Repository path `docs/plans/README.md` — indexed retained planning artifacts (repo-only working surface, not published in MkDocs)
 - Repository path `docs/reports/index.md` — curated evidence and internal reports (repo-only working surface, not published in MkDocs)
 - Repository path `reports/README.md` — generated or working analysis outputs before curation
 - Repository path `docs/00-project/ai/README.md` — top-level AI docs map for agents, memory, prompts, and skills
@@ -59,6 +60,7 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 - [**Project Navigator**](00-map.md): Full documentation map with links to all resources.
 - [**Project Rules**](RULES.md): The constitution of our project (SSOT). All contributions **MUST** adhere to these rules.
 - [**Tools Hub**](TOOLS.md): Current script entry points, placement rules, and docs toolchain.
+- [**Docs Verification**](../03-guides/docs-verification.md): Published docs checks, drift review, mixed-environment notes, and strict build workflow.
 - [**Quick Start Guide**](../03-guides/quick-start.md): Get your local development environment up and running in minutes.
 - [**Architecture Overview**](../02-architecture/00-overview.md): Understand the high-level design and data flow.
 - [**Reference Index**](../04-reference/index.md): Browse published CLI, contracts, provider, pipeline, API, and template reference surfaces.

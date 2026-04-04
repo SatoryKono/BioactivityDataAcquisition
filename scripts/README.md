@@ -142,6 +142,8 @@ check-naming       Naming convention audit
 check-c901         C901 complexity baseline enforcement
 check-naming-pkg   Package naming consistency check
 check-exemptions   Quality exemptions audit
+generate-debt-tasks Generate architecture debt task backlog from registry
+reduce-architecture-debt Build execution plan from latest architecture debt tasks
 check-terminology  Terminology linting
 report-dep-map     Generate/check architecture dependency map
 report-vcr-metadata Generate/check canonical VCR metadata catalog
@@ -153,6 +155,8 @@ calibrate-hotspots Calibrate hotspot budgets
 Notes:
 
 - `check-c901` is a blocking complexity baseline gate for new structural debt.
+- `generate-debt-tasks` is the canonical backlog generator for architecture metric exemptions.
+- `reduce-architecture-debt` is the canonical execution-plan builder consumed by the debt-reduction agent.
 - `report-hotspots` and `calibrate-hotspots` are **performance** tools backed by benchmark observations. They do **not** describe the repo-wide source-tree size tail.
 - `report-duplication-baseline` is a **report-only structural** tool for duplication visibility in `composition` and `application`. It is intended to create a baseline artifact before any blocking ratchet is considered.
 - `scripts/qa/report_duplication_baseline.py` is the canonical direct script path behind `python -m scripts.qa report-duplication-baseline`.

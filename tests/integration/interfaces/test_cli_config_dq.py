@@ -270,7 +270,9 @@ class TestCliDqCommands:
         }
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "show-effective", "chembl_activity"])
+        result = cli_runner.invoke(
+            _get_cli(), ["dq", "show-effective", "chembl_activity"]
+        )
 
         assert result.exit_code == 0
         assert "artifact_id: test-artifact-123" in result.output
@@ -296,7 +298,7 @@ class TestCliDqCommands:
         mock_service.return_value = mock_config_service
 
         result = cli_runner.invoke(
-            cli,
+            _get_cli(),
             ["dq", "show-effective", "chembl_activity", "--override", "batch_size=100"],
         )
 
@@ -345,7 +347,8 @@ class TestCliDqCommands:
         mock_service.return_value = mock_config_service
 
         result = cli_runner.invoke(
-            cli, ["dq", "check-compatibility", str(artifact1_file), str(artifact2_file)]
+            _get_cli(),
+            ["dq", "check-compatibility", str(artifact1_file), str(artifact2_file)],
         )
 
         assert result.exit_code == 0
@@ -385,7 +388,8 @@ class TestCliDqCommands:
         mock_service.return_value = mock_config_service
 
         result = cli_runner.invoke(
-            cli, ["dq", "check-compatibility", str(artifact1_file), str(artifact2_file)]
+            _get_cli(),
+            ["dq", "check-compatibility", str(artifact1_file), str(artifact2_file)],
         )
 
         assert result.exit_code == 0
@@ -401,7 +405,7 @@ class TestCliDqCommands:
         )
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "show", "nonexistent_pipeline"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "show", "nonexistent_pipeline"])
 
         assert result.exit_code == 0  # Command succeeds but shows error
         assert "Config file not found" in result.output
@@ -416,7 +420,7 @@ class TestCliDqCommands:
         mock_config_service.get_dq_config.side_effect = ValueError("Invalid config")
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "validate", "invalid_pipeline"])
+        result = cli_runner.invoke(_get_cli(), ["dq", "validate", "invalid_pipeline"])
 
         assert result.exit_code == 0  # Command succeeds but shows error
         assert "DQ Configuration invalid" in result.output

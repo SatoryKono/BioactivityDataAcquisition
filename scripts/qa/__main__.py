@@ -10,6 +10,8 @@ Commands:
     check-c901           C901 complexity baseline enforcement
     check-naming-pkg     Package naming consistency check
     check-exemptions     Quality exemptions audit
+    generate-debt-tasks  Generate architecture debt task backlog from exemptions registry
+    reduce-architecture-debt  Build execution plan from latest architecture debt tasks JSON
     check-terminology    Terminology linting
     report-dep-map       Generate/check architecture dependency map
     report-vcr-metadata  Generate/check canonical VCR metadata catalog
@@ -28,6 +30,8 @@ COMMANDS: dict[str, str] = {
     "check-c901": "check_c901_baseline.py",
     "check-naming-pkg": "check_naming_package_consistency.py",
     "check-exemptions": "check_quality_exemptions.py",
+    "generate-debt-tasks": "generate_architecture_debt_tasks.py",
+    "reduce-architecture-debt": "reduce_architecture_debt.py",
     "check-terminology": "lint_terminology.py",
     "report-dep-map": "generate_architecture_dependency_map.py",
     "report-vcr-metadata": "report_vcr_metadata_catalog.py",

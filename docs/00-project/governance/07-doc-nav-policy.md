@@ -1,11 +1,11 @@
 ---
-Version: 1.9.0
+Version: 1.9.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-31'
+Last verified: '2026-04-04'
 ---
 
 # Documentation Navigation Policy

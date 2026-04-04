@@ -93,7 +93,7 @@ while IFS= read -r skill_file; do
 
     needs_frontmatter=false
     case "$relative_path" in
-        agent-orchestration/SKILL.md|documentation-audit/SKILL.md|documentation-cascade-audit/SKILL.md|new-pipeline/SKILL.md|public/architecture-guardian/SKILL.md|py-audit-bot/SKILL.md|py-code-bot/SKILL.md|py-config-bot/SKILL.md|py-debug-bot/SKILL.md|py-doc-bot/SKILL.md|py-plan-bot/SKILL.md|py-review-orchestrator/SKILL.md|py-test-bot/SKILL.md|py-test-swarm/SKILL.md|technical-designer-mermaid/SKILL.md|vcr-record/SKILL.md|verify-architecture/SKILL.md)
+        agent-orchestration/SKILL.md|documentation-audit/SKILL.md|documentation-cascade-audit/SKILL.md|new-pipeline/SKILL.md|public/architecture-guardian/SKILL.md|py-audit-bot/SKILL.md|py-architecture-debt-bot/SKILL.md|py-code-bot/SKILL.md|py-config-bot/SKILL.md|py-debug-bot/SKILL.md|py-doc-bot/SKILL.md|py-plan-bot/SKILL.md|py-review-orchestrator/SKILL.md|py-test-bot/SKILL.md|py-test-swarm/SKILL.md|technical-designer-mermaid/SKILL.md|vcr-record/SKILL.md|verify-architecture/SKILL.md)
             needs_frontmatter=true
             ;;
     esac

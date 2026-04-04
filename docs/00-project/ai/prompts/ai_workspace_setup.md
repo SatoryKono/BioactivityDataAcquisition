@@ -49,14 +49,15 @@
     │   ├── local/                     ← Сгенерированное зеркало локальных skills
     │   └── _references/               ← Общие справочные материалы для overlays/reference bundles
     ├── prompts/                       ← Промты оркестрации
-    │   ├── architecture_debt_reduction_orchestration.md
-    │   ├── refactor_orchestration_prompt.md     ← Канонический refactor prompt (active)
-    │   ├── refactor_orchestration_prompt_1-2.md ← Deprecated stale duplicate, reference only
-    │   ├── architecture_metric_exemptions_tasks_json_prompt.md
-    │   ├── scripts_inventory_consolidation_cleanup_prompt.md
-    │   ├── documentation_diagrams_audit.md  ← Аудит docs/ и диаграмм
     │   ├── ai_workspace_setup.md      ← Этот промт
-    │   └── collected/                 ← Исторические промты (non-SSOT)
+    │   ├── architecture_review_and_refactoring_assessment.md ← Working prompt для read-only архитектурного обзора
+    │   ├── test_speed_optimization_loop.md ← Working prompt для ускорения тестового контура
+    │   ├── architecture_debt_reduction_orchestration.md ← Исторический orchestration prompt
+    │   ├── architecture_metric_exemptions_tasks_json_prompt.md ← Исторический JSON-task generator prompt
+    │   ├── scripts_inventory_consolidation_cleanup_prompt.md ← Исторический cleanup/inventory prompt
+    │   ├── documentation_diagrams_audit.md  ← Исторический docs/diagram audit prompt
+    │   ├── refactor_orchestration_prompt.md ← Исторический refactor orchestration prompt
+    │   └── collected/                 ← Уникальные архивные prompt snapshots (repo-only)
     └── memory/                        ← Память агентов
         ├── agent-memory.md            ← Общий контекст проекта
         ├── memory-py-{name}.md        ← Специализированная память субагента
@@ -66,7 +67,7 @@
 1. Runtime-реестры агентов имеют приоритет над published agent-profile mirror `docs/00-project/ai/agents/agents/`.
 2. `guides/` — канонический docs-layer для agent instructions.
 3. `.codex/skills/` — канонический источник локальных skills; `docs/00-project/ai/skills/` — documentation mirror/snapshot.
-4. `prompts/collected/` — read-only архивные копии, НЕ использовать как SSOT.
+4. `prompts/collected/` — read-only архив уникальных snapshot-промтов, НЕ использовать как SSOT.
 
 #### Dot-директории агентов (runtime-конфигурации)
 
@@ -126,13 +127,14 @@
 
 | Файл | Назначение |
 |------|------------|
-| `architecture_debt_reduction_orchestration.md` | Оркестрация снижения архитектурного долга |
-| `refactor_orchestration_prompt.md` | Канонический промт для рефакторинг-оркестрации |
-| `refactor_orchestration_prompt_1-2.md` | Deprecated stale duplicate для фаз 1-2; reference only, не использовать как SSOT |
-| `architecture_metric_exemptions_tasks_json_prompt.md` | Задачи рефакторинга metric exemptions |
-| `scripts_inventory_consolidation_cleanup_prompt.md` | Инвентаризация и очистка скриптов |
-| `documentation_diagrams_audit.md` | Аудит документации и диаграмм (docs/ без ai/) |
+| `architecture_review_and_refactoring_assessment.md` | Working prompt для read-only архитектурного обзора и плана рефакторинга |
+| `test_speed_optimization_loop.md` | Working prompt для ускорения тестового контура без потери надёжности |
 | `ai_workspace_setup.md` | Этот промт (настройка AI workspace) |
+| `architecture_debt_reduction_orchestration.md` | Исторический orchestration prompt для снижения architecture debt |
+| `refactor_orchestration_prompt.md` | Исторический refactor orchestration prompt |
+| `architecture_metric_exemptions_tasks_json_prompt.md` | Исторический prompt для генерации metric-exemption task JSON |
+| `scripts_inventory_consolidation_cleanup_prompt.md` | Исторический prompt для инвентаризации и очистки скриптов |
+| `documentation_diagrams_audit.md` | Исторический prompt для аудита документации и диаграмм (docs/ без ai/) |
 | `COLLECTED_PROMPTS_INDEX.md` | Индекс архивных промтов |
 
 ##### 1e. Runtime-конфигурации vs SSOT

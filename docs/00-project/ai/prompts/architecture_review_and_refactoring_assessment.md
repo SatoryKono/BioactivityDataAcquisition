@@ -1,6 +1,11 @@
-# Architecture Review And Refactoring Assessment Prompt
+# Architecture Review And Refactoring Assessment
 
 *Статус: internal (working prompt artifact)*
+
+> **Surface note:** this file is an internal working prompt, not canonical
+> workflow policy. For active project rules use `docs/00-project/RULES.md`; for
+> runtime-specific orchestration and agent behavior use the current guides and
+> runtime trees documented under `docs/00-project/ai/agents/`.
 
 Цель: выполнить архитектурный обзор проекта, количественно оценить качество
 кода и архитектуры, выявить ключевые проблемы и подготовить детальный,
