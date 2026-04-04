@@ -6,6 +6,18 @@ import pytest
 
 
 @pytest.mark.unit
+def test_value_objects_facade_resolves_exports_lazily() -> None:
+    """Facade should not eagerly import every value-object symbol on package import."""
+    import bioetl.domain.value_objects as facade
+    from bioetl.domain.value_objects.base import ValueObject as CanonicalValueObject
+
+    assert "ValueObject" not in facade.__dict__
+
+    assert facade.ValueObject is CanonicalValueObject
+    assert "ValueObject" in facade.__dict__
+
+
+@pytest.mark.unit
 def test_activity_values_facade_reexports_canonical_symbols() -> None:
     """activity_values should remain the public entrypoint over split modules."""
     from bioetl.domain.value_objects.activity_concentration import (

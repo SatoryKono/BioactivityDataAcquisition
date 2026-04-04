@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from functools import cache
 from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.composition import PipelineRegistry
 from bioetl.domain.exceptions import BioETLError
 
 __all__ = [
@@ -22,7 +22,6 @@ __all__ = [
     "show_cleanup_preview",
     "validate_pipeline_name",
 ]
-from bioetl.composition.resources_api import preview_cleanup
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
     build_failure_context,
@@ -36,11 +35,19 @@ from bioetl.interfaces.cli.formatters import (
     echo_info,
     echo_warning,
 )
-from bioetl.interfaces.cli.registry_helpers import build_cli_registry
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.composition import PipelineRegistry
     from bioetl.domain.ports import LoggerPort
+
+
+@cache
+def _load_pipeline_registry_type() -> type["PipelineRegistry"]:
+    """Resolve PipelineRegistry lazily so command imports stay lightweight."""
+    from bioetl.composition import PipelineRegistry
+
+    return PipelineRegistry
 
 
 def resolve_context_registry(
@@ -49,7 +56,11 @@ def resolve_context_registry(
     """Return the explicit registry carried by Click context, if any."""
     if click_context is None:
         click_context = click.get_current_context(silent=True)
-    if click_context is None or not isinstance(click_context.obj, PipelineRegistry):
+    pipeline_registry_type = _load_pipeline_registry_type()
+    if click_context is None or not isinstance(
+        click_context.obj,
+        pipeline_registry_type,
+    ):
         return None
     return click_context.obj
 
@@ -73,7 +84,11 @@ def validate_pipeline_name(
     Raises:
         click.BadParameter: If pipeline name is not in registry.
     """
-    registry = resolve_context_registry(click_context) or build_cli_registry()
+    registry = resolve_context_registry(click_context)
+    if registry is None:
+        from bioetl.interfaces.cli.registry_helpers import build_cli_registry
+
+        registry = build_cli_registry()
     available = registry.list_pipelines()
     if value not in available:
         raise click.BadParameter(f"Unknown pipeline: {value}. Available: {available}")
@@ -101,6 +116,8 @@ async def _preview_cleanup_async(pipeline: str) -> None:
     Args:
         pipeline: Pipeline name.
     """
+    from bioetl.composition.resources_api import preview_cleanup
+
     preview_result = await preview_cleanup(pipeline)
     echo_cleanup_preview(preview_result)
 

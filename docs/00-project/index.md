@@ -1,11 +1,11 @@
 ---
-Version: 1.2.0
+Version: 1.2.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-02'
+Last verified: '2026-04-04'
 ---
 
 # Welcome to BioETL
@@ -43,7 +43,8 @@ Useful entry points for non-normative surfaces:
 - Repository path `docs/reports/index.md` — curated evidence and internal reports (repo-only working surface, not published in MkDocs)
 - Repository path `reports/README.md` — generated or working analysis outputs before curation
 - Repository path `docs/00-project/ai/README.md` — top-level AI docs map for agents, memory, prompts, and skills
-- Repository path `docs/00-project/ai/agents/README.md` — runtime-specific agent guidance
+- Repository path `.codex/agents/ORCHESTRATION.md` — Codex source-of-truth orchestration
+- Repository path `docs/00-project/ai/agents/README.md` — published agent mirror and runtime guides
 - Repository path `docs/00-project/ai/skills/README.md` — skills mirror and indexes
 - [Operations Archive Index](../05-operations/archive-index.md) — published archive lane for historical ops evidence and auxiliary deployment notes
 

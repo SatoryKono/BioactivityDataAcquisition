@@ -41,57 +41,82 @@ See also:
 
 from __future__ import annotations
 
-from bioetl.domain.value_objects.academic_ids import (
-    ISSN,
-    ORCID,
-    OpenAlexId,
-    SemanticScholarId,
-)
-from bioetl.domain.value_objects.activity import (
-    ActivityValue,
-    ConfidenceScore,
-    RelationOperator,
-)
-from bioetl.domain.value_objects.activity_values import (
-    ActivityType,
-    Concentration,
-    ConcentrationUnit,
-    PChemblValue,
-)
-from bioetl.domain.value_objects.base import ValueObject
-from bioetl.domain.value_objects.chemical import (
-    SMILES,
-    InChIKey,
-    MolecularWeight,
-    PublicationYear,
-)
-from bioetl.domain.value_objects.compound_ids import (
-    AssayId,
-    CompoundId,
-    CompoundSource,
-)
-from bioetl.domain.value_objects.dq_result import DQEvaluationStatus
-from bioetl.domain.value_objects.identifiers import (
-    ChemblId,
-    PubChemCid,
-    UniProtId,
-)
-from bioetl.domain.value_objects.inchi import InChI
-from bioetl.domain.value_objects.molecular_descriptors import (
-    HeavyAtomCount,
-    HydrogenBondCount,
-    LogP,
-    PolarSurfaceArea,
-    RotatableBondCount,
-)
-from bioetl.domain.value_objects.publications import (
-    DOI,
-    PubMedId,
-)
-from bioetl.domain.value_objects.taxonomy_id import (
-    TaxonomyId,
-    validate_taxonomy_id,
-)
+from importlib import import_module
+
+_LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
+    "DOI": ("bioetl.domain.value_objects.publications", "DOI"),
+    "ISSN": ("bioetl.domain.value_objects.academic_ids", "ISSN"),
+    "ORCID": ("bioetl.domain.value_objects.academic_ids", "ORCID"),
+    "SMILES": ("bioetl.domain.value_objects.chemical", "SMILES"),
+    "ActivityType": ("bioetl.domain.value_objects.activity_values", "ActivityType"),
+    "ActivityValue": ("bioetl.domain.value_objects.activity", "ActivityValue"),
+    "AssayId": ("bioetl.domain.value_objects.compound_ids", "AssayId"),
+    "ChemblId": ("bioetl.domain.value_objects.identifiers", "ChemblId"),
+    "CompoundId": ("bioetl.domain.value_objects.compound_ids", "CompoundId"),
+    "CompoundSource": (
+        "bioetl.domain.value_objects.compound_ids",
+        "CompoundSource",
+    ),
+    "Concentration": (
+        "bioetl.domain.value_objects.activity_values",
+        "Concentration",
+    ),
+    "ConcentrationUnit": (
+        "bioetl.domain.value_objects.activity_values",
+        "ConcentrationUnit",
+    ),
+    "ConfidenceScore": ("bioetl.domain.value_objects.activity", "ConfidenceScore"),
+    "DQEvaluationStatus": (
+        "bioetl.domain.value_objects.dq_result",
+        "DQEvaluationStatus",
+    ),
+    "HeavyAtomCount": (
+        "bioetl.domain.value_objects.molecular_descriptors",
+        "HeavyAtomCount",
+    ),
+    "HydrogenBondCount": (
+        "bioetl.domain.value_objects.molecular_descriptors",
+        "HydrogenBondCount",
+    ),
+    "InChI": ("bioetl.domain.value_objects.inchi", "InChI"),
+    "InChIKey": ("bioetl.domain.value_objects.chemical", "InChIKey"),
+    "LogP": ("bioetl.domain.value_objects.molecular_descriptors", "LogP"),
+    "MolecularWeight": (
+        "bioetl.domain.value_objects.chemical",
+        "MolecularWeight",
+    ),
+    "OpenAlexId": ("bioetl.domain.value_objects.academic_ids", "OpenAlexId"),
+    "PChemblValue": ("bioetl.domain.value_objects.activity_values", "PChemblValue"),
+    "PolarSurfaceArea": (
+        "bioetl.domain.value_objects.molecular_descriptors",
+        "PolarSurfaceArea",
+    ),
+    "PubChemCid": ("bioetl.domain.value_objects.identifiers", "PubChemCid"),
+    "PubMedId": ("bioetl.domain.value_objects.publications", "PubMedId"),
+    "PublicationYear": (
+        "bioetl.domain.value_objects.chemical",
+        "PublicationYear",
+    ),
+    "RelationOperator": (
+        "bioetl.domain.value_objects.activity",
+        "RelationOperator",
+    ),
+    "RotatableBondCount": (
+        "bioetl.domain.value_objects.molecular_descriptors",
+        "RotatableBondCount",
+    ),
+    "SemanticScholarId": (
+        "bioetl.domain.value_objects.academic_ids",
+        "SemanticScholarId",
+    ),
+    "TaxonomyId": ("bioetl.domain.value_objects.taxonomy_id", "TaxonomyId"),
+    "UniProtId": ("bioetl.domain.value_objects.identifiers", "UniProtId"),
+    "ValueObject": ("bioetl.domain.value_objects.base", "ValueObject"),
+    "validate_taxonomy_id": (
+        "bioetl.domain.value_objects.taxonomy_id",
+        "validate_taxonomy_id",
+    ),
+}
 
 __all__ = [
     "DOI",
@@ -128,3 +153,20 @@ __all__ = [
     "ValueObject",
     "validate_taxonomy_id",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Resolve public value-object facade exports lazily."""
+    try:
+        module_name, attribute_name = _LAZY_ATTRIBUTE_EXPORTS[name]
+    except KeyError as exc:  # pragma: no cover - standard attribute path
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+
+    value = getattr(import_module(module_name), attribute_name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    """Return stable facade exports for introspection."""
+    return sorted(set(globals()) | set(__all__))

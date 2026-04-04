@@ -1,29 +1,16 @@
 """Main CLI entry point for BioETL.
 
-This module provides the main Click group and registers all command groups.
-It serves as the thin orchestration layer that delegates to Application services.
+This module provides the main Click group and registers command groups lazily.
+It keeps import-time overhead low for targeted CLI tests and single-command use.
 """
 
 from __future__ import annotations
 
+from importlib import import_module
+
 import click
 
 from bioetl import __version__ as BIOETL_VERSION
-from bioetl.interfaces.cli.commands.adr import adr
-from bioetl.interfaces.cli.commands.checkpoint import checkpoint
-from bioetl.interfaces.cli.commands.config import config
-from bioetl.interfaces.cli.commands.config_dq import dq
-from bioetl.interfaces.cli.commands.debug import debug
-from bioetl.interfaces.cli.commands.export import export_command
-from bioetl.interfaces.cli.commands.health import health
-from bioetl.interfaces.cli.commands.lineage import lineage
-from bioetl.interfaces.cli.commands.lock import lock
-from bioetl.interfaces.cli.commands.maintenance import maintenance
-from bioetl.interfaces.cli.commands.quarantine import quarantine
-from bioetl.interfaces.cli.commands.run import run
-from bioetl.interfaces.cli.commands.run_all import run_all
-from bioetl.interfaces.cli.commands.run_composite import run_composite
-from bioetl.interfaces.cli.commands.run_manifest import run_manifest
 from bioetl.interfaces.cli.registry_helpers import (
     _build_registered_registry,
     build_cli_registry,
@@ -35,6 +22,131 @@ __all__ = [
     "cli",
     "main",
 ]
+
+_LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
+    "adr": ("bioetl.interfaces.cli.commands.adr", "adr", "ADR tooling"),
+    "checkpoint": (
+        "bioetl.interfaces.cli.commands.checkpoint",
+        "checkpoint",
+        "Manage pipeline checkpoints",
+    ),
+    "config": (
+        "bioetl.interfaces.cli.commands.config",
+        "config",
+        "Inspect and validate configuration",
+    ),
+    "dq": (
+        "bioetl.interfaces.cli.commands.config_dq",
+        "dq",
+        "Data quality configuration commands",
+    ),
+    "debug": (
+        "bioetl.interfaces.cli.commands.debug",
+        "debug",
+        "Run a pipeline with breakpoints",
+    ),
+    "export": (
+        "bioetl.interfaces.cli.commands.export",
+        "export_command",
+        "Export pipeline artifacts",
+    ),
+    "health": (
+        "bioetl.interfaces.cli.commands.health",
+        "health",
+        "Health checks and diagnostics",
+    ),
+    "lineage": (
+        "bioetl.interfaces.cli.commands.lineage",
+        "lineage",
+        "Inspect pipeline lineage",
+    ),
+    "lock": (
+        "bioetl.interfaces.cli.commands.lock",
+        "lock",
+        "Manage distributed locks",
+    ),
+    "maintenance": (
+        "bioetl.interfaces.cli.commands.maintenance",
+        "maintenance",
+        "Maintenance operations",
+    ),
+    "quarantine": (
+        "bioetl.interfaces.cli.commands.quarantine",
+        "quarantine",
+        "Manage quarantine records",
+    ),
+    "run": (
+        "bioetl.interfaces.cli.commands.run",
+        "run",
+        "Run a configured pipeline",
+    ),
+    "run-all": (
+        "bioetl.interfaces.cli.commands.run_all",
+        "run_all",
+        "Run all configured pipelines",
+    ),
+    "run-composite": (
+        "bioetl.interfaces.cli.commands.run_composite",
+        "run_composite",
+        "Run a composite pipeline",
+    ),
+    "run-manifest": (
+        "bioetl.interfaces.cli.commands.run_manifest",
+        "run_manifest",
+        "Apply a run manifest",
+    ),
+}
+
+
+def _load_cli_command(command_name: str) -> click.Command | click.Group | None:
+    """Import a CLI command module only when the command is requested."""
+    spec = _LAZY_COMMAND_SPECS.get(command_name)
+    if spec is None:
+        return None
+
+    module_name, attribute_name, _help_text = spec
+    command = getattr(import_module(module_name), attribute_name)
+    if getattr(command, "name", command_name) != command_name:
+        command.name = command_name
+    return command
+
+
+class _LazyCliGroup(click.Group):
+    """Click group that resolves BioETL subcommands on demand."""
+
+    def list_commands(self, ctx: click.Context) -> list[str]:
+        del ctx
+        return sorted(_LAZY_COMMAND_SPECS)
+
+    def get_command(
+        self,
+        ctx: click.Context,
+        cmd_name: str,
+    ) -> click.Command | click.Group | None:
+        del ctx
+        if cmd_name in self.commands:
+            return self.commands[cmd_name]
+
+        command = _load_cli_command(cmd_name)
+        if command is not None:
+            self.commands[cmd_name] = command
+        return command
+
+    def format_commands(
+        self,
+        ctx: click.Context,
+        formatter: click.HelpFormatter,
+    ) -> None:
+        del ctx
+        rows = [
+            (name, help_text)
+            for name, (_module_name, _attribute_name, help_text) in sorted(
+                _LAZY_COMMAND_SPECS.items()
+            )
+        ]
+        if rows:
+            with formatter.section("Commands"):
+                formatter.write_dl(rows)
 
 
 def _build_main_registry() -> object:
@@ -50,31 +162,13 @@ def _build_main_registry() -> object:
     )
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group(cls=_LazyCliGroup)  # type: ignore[untyped-decorator]
 @click.version_option(version=BIOETL_VERSION)  # type: ignore[untyped-decorator]
 @click.pass_context  # type: ignore[untyped-decorator]
 def cli(ctx: click.Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
     if ctx.obj is None:
         ctx.obj = build_cli_registry()
-
-
-# Register commands
-cli.add_command(run)
-cli.add_command(run_all)
-cli.add_command(run_composite)
-cli.add_command(run_manifest)
-cli.add_command(lineage)
-cli.add_command(adr)
-cli.add_command(export_command, name="export")
-cli.add_command(quarantine)
-cli.add_command(checkpoint)
-cli.add_command(config)
-cli.add_command(dq)
-cli.add_command(debug)
-cli.add_command(health)
-cli.add_command(lock)
-cli.add_command(maintenance)
 
 
 def main() -> None:

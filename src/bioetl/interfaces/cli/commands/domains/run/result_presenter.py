@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.services import PipelineRunResult, RunResult
+from bioetl.application.services.pipeline_runner_models import (
+    PipelineRunResult,
+    RunResult,
+)
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
 __all__ = ["echo_run_result"]

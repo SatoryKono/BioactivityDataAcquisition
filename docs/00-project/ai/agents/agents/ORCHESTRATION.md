@@ -1,29 +1,38 @@
 ---
-Version: 4.2.0
+Version: 4.2.1
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-03'
+Last verified: '2026-04-04'
 ---
 
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
-*Версия: 4.2 | Дата: 2026-04-03 | Supersedes v4.1 | Платформа: Gemini CLI*
+*Версия: 4.2.1 | Дата: 2026-04-04 | Supersedes v4.2 | Платформа: Published mirror (Codex source-of-truth)*
 
 ## 1. Обзор
 
-Команда из **8 активных субагентов** (6 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Gemini CLI) выступает оркестратором, делегируя работу субагентам через специализированные инструменты субагентов, соответствующие логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Команда из **8 активных субагентов** (6 core + 2 orchestrator/swarm)
+обеспечивает полный жизненный цикл задачи разработки BioETL. Для текущего
+Codex workflow source-of-truth orchestration живёт в
+`.codex/agents/ORCHESTRATION.md`; parallel runtime copies могут существовать в
+`.claude/agents/` и `.gemini/agents/` для соответствующих сред. Production-код
+пишется напрямую оркестратором (без отдельного `py-code-bot`).
 
-**Запуск логического профиля в Gemini runtime:**
+**Запуск логического профиля в Codex runtime:**
 ```text
-py-audit-bot(query="Follow .gemini/agents/py-audit-bot.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/.")
+spawn_agent(
+  agent_type="default",
+  message="Follow .codex/agents/py-audit-bot.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/."
+)
 ```
 
-> Runtime mapping: см. `.gemini/agents/GEMINI-RUNTIME.md`.
+> Runtime mapping: см. `.codex/agents/CODEX-RUNTIME.md`. Для Claude/Gemini
+> используй их собственные runtime registries и orchestration copies.
 
-| # | Субагент (`tool_name`) | Model | Роль | Артефакт |
+| # | Субагент (`subagent_type` / logical profile) | Model | Роль | Артефакт |
 |:-:|----------------------------|-------|------|----------|
 | I | **py-audit-bot** | opus | Baseline/final аудит, code review, arch guardian, API validation | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md` |
 | II | **py-plan-bot** | opus | Планирование, декомпозиция, composite design | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md` |
@@ -69,8 +78,9 @@ Workflow включает в себя этапы:
 
 ## 11. Changelog (ORCHESTRATION.md)
 
-### v4.2 (2026-04-03)
+### v4.2.1 (2026-04-04)
 
-- **PLATFORM**: Основной runtime переведен на Gemini CLI.
-- **SYNC**: Синхронизировано с `.gemini/agents/`.
+- **SYNC**: Published mirror re-synced with Codex source-of-truth orchestration.
+- **CLARITY**: Parallel Claude/Gemini runtime copies are now described as
+  runtime-specific surfaces instead of the canonical orchestration owner.
 - **UPD**: Версия проекта BioETL v6.1.0.

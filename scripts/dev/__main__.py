@@ -9,6 +9,7 @@ Commands:
     setup              Full developer environment setup (shell)
     setup --quick      Fast setup, skip tests/linters (shell)
     setup --ci         CI mode, non-interactive (shell)
+    pytest-sharded     Run the recommended path-based pytest shards (shell)
     install-deps       Install project dependencies
     probe-quality      Measure narrow pytest/mypy startup and timeout behavior
     run-tests          Run tests (Python)
@@ -33,6 +34,7 @@ COMMANDS: dict[str, str] = {
 
 SHELL_COMMANDS: dict[str, str] = {
     "setup": "dev_setup.sh",
+    "pytest-sharded": "run_pytest_sharded.sh",
 }
 
 _DIR = Path(__file__).parent

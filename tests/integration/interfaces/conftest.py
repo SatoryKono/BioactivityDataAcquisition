@@ -12,25 +12,46 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
-from click.testing import CliRunner
-
-from bioetl.composition.factories.storage import StorageAdapter, StorageContext
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.infrastructure.storage.silver_writer import SilverWriter
-from tests.fakes.checkpoint_fake import InMemoryCheckpoint
-from tests.fakes.quarantine_fake import InMemoryQuarantine
 
 if TYPE_CHECKING:
+    from click.testing import CliRunner
+
+    from bioetl.composition.factories.storage import StorageContext
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from tests.fakes.checkpoint_fake import InMemoryCheckpoint
+    from tests.fakes.quarantine_fake import InMemoryQuarantine
+
+
+def _create_cli_runner() -> "CliRunner":
+    from click.testing import CliRunner
+
+    return CliRunner()
+
+
+def _create_in_memory_checkpoint() -> "InMemoryCheckpoint":
+    from tests.fakes.checkpoint_fake import InMemoryCheckpoint
+
+    return InMemoryCheckpoint()
+
+
+def _create_in_memory_quarantine() -> "InMemoryQuarantine":
+    from tests.fakes.quarantine_fake import InMemoryQuarantine
+
+    return InMemoryQuarantine()
 
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
     """Create a Click CLI runner for testing."""
-    return CliRunner()
+    return _create_cli_runner()
+
+
+@pytest.fixture
+def cli_entrypoint():
+    """Import the Click CLI lazily so collect-only avoids command bootstrap."""
+    from bioetl.interfaces.cli import cli
+
+    return cli
 
 
 @pytest.fixture
@@ -42,13 +63,13 @@ def run_id():
 @pytest.fixture
 def fake_checkpoint() -> InMemoryCheckpoint:
     """Create an in-memory checkpoint store."""
-    return InMemoryCheckpoint()
+    return _create_in_memory_checkpoint()
 
 
 @pytest.fixture
 def fake_quarantine() -> InMemoryQuarantine:
     """Create an in-memory quarantine store."""
-    return InMemoryQuarantine()
+    return _create_in_memory_quarantine()
 
 
 @pytest.fixture
@@ -105,6 +126,13 @@ def create_local_storage_context(
     logger: Any = None,
 ) -> StorageContext:
     """Create a StorageContext pointing to local temp paths."""
+    from bioetl.composition.factories.storage import StorageAdapter, StorageContext
+    from bioetl.domain.ports.noop import NoOpMetrics
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+    from bioetl.infrastructure.storage.gold_writer import GoldWriter
+    from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
     if logger is None:
         logger = NoOpLogger()
 
@@ -177,6 +205,14 @@ def patch_quarantine(fake_quarantine: InMemoryQuarantine):
         return_value=fake_quarantine,
     ):
         yield fake_quarantine
+
+
+@pytest.fixture
+def registered_pipelines() -> None:
+    """Register pipelines lazily for tests that exercise CLI run commands."""
+    from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+
+    register_all_pipelines()
 
 
 @pytest.fixture(scope="module")

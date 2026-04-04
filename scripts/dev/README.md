@@ -45,6 +45,7 @@ Preferred runners automatically select the OS-appropriate environment:
 ```bash
 bash scripts/dev/run_pytest.sh tests/unit --narrow --timeout=120 --lf
 bash scripts/dev/run_mypy.sh
+bash scripts/dev/run_pytest_sharded.sh
 ```
 
 For fast, reproducible narrow slices during refactoring, use the explicit
@@ -134,6 +135,7 @@ python -m scripts.dev <command> [args...]
 | `install-deps` | `scripts/dev/install_deps.py` | Auxiliary helper script, not a full project bootstrap |
 | `probe-quality` | `scripts/dev/quality_gate_probe.py` | Measure narrow pytest/mypy startup latency and timeout behavior |
 | `run-tests` | `scripts/dev/run_tests.py` | Run tests |
+| `pytest-sharded` | `scripts/dev/run_pytest_sharded.sh` | Run the recommended path-based pytest shards |
 | `mock-metrics` | `scripts/dev/metrics_mock_server.py` | Start mock metrics server |
 | `test-changed` | `scripts/dev/run_tests.py changed` | Run tests for changed files only |
 | `setup-mcp` | `scripts/dev/setup_copilot_codex_mcp.py` | Setup Copilot/Codex MCP integration |
@@ -147,6 +149,7 @@ python -m scripts.dev <command> [args...]
 | `setup --ci` | Legacy compatibility entrypoint only; CI should use the maintained repo commands | CI migration/legacy compatibility only |
 | `install-deps` | Specialized helper for one auxiliary package; not for normal repo setup | Manual, rare maintenance task |
 | `run-tests` | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `cov` | Manual, during development |
+| `pytest-sharded` | Faster local feedback for the large pytest suite by running stable path-based shards through the maintained wrapper | Manual, during development |
 | `mock-metrics` | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data | Manual, during dashboard development |
 | `test-changed` | Quick feedback during development; canonical changed-file runner with fast unit fallback | Manual, during development |
 | `setup-mcp` | One-time AI tooling setup; configures Copilot/Codex MCP integration | Manual, initial setup |
@@ -161,6 +164,7 @@ python -m scripts.dev <command> [args...]
 | `scripts/dev/run_mypy.ps1` | Run mypy with local-environment fallbacks (PowerShell variant) |
 | `scripts/dev/run_pytest.sh` | Run pytest directly |
 | `scripts/dev/run_pytest.ps1` | Run pytest directly (PowerShell variant) |
+| `scripts/dev/run_pytest_sharded.sh` | Run the recommended path-based pytest shard plan (shell variant) |
 | `scripts/dev/quality_gate_probe.py` | Diagnose narrow pytest/mypy startup latency and timeout behavior |
 | `scripts/dev/setup_copilot_codex_mcp.sh` | Setup MCP (shell variant) |
 | `scripts/dev/setup_copilot_codex_mcp.ps1` | Setup MCP (PowerShell variant) |

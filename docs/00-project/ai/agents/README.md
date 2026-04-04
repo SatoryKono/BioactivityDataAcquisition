@@ -1,24 +1,30 @@
 ---
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-03'
+Last verified: '2026-04-04'
 ---
 
 # Agent Catalog — BioETL (Mirror)
 
-*Статус: internal-published | Docs mirror (2026-04-03)*
+*Статус: internal-published | Docs mirror (2026-04-04)*
 
 Этот каталог является зеркалом документации по агентам для разных рантаймов AI в BioETL.
 
 ## Surface Note
 
 - Это **публикуемое зеркало** документации.
-- Актуальные runtime-определения живут в `.gemini/agents/` (для Gemini CLI).
-- Логические профили `py-*` реализованы как инструменты в Gemini runtime.
+- Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`
+  и связанных `.codex/agents/py-*.md`.
+- Параллельные runtime copies могут жить в `.claude/agents/` и
+  `.gemini/agents/`; использовать их нужно только внутри соответствующего
+  runtime.
+- Логические профили `py-*` отображаются на native runtime mechanisms
+  (`spawn_agent` roles в Codex, runtime-specific agent tools/registries в других
+  средах).
 
 ## BioETL Core (8 активных агентов)
 
@@ -35,6 +41,10 @@ Last verified: '2026-04-03'
 
 ## Related Files
 
-- [ORCHESTRATION.md](agents/ORCHESTRATION.md) — Multi-agent workflow
+- Repository path `.codex/agents/ORCHESTRATION.md` — Codex source-of-truth orchestration
+- Repository path `.claude/agents/ORCHESTRATION.md` — Claude runtime copy
+- Repository path `.gemini/agents/ORCHESTRATION.md` — Gemini runtime copy
+- [ORCHESTRATION.md](agents/ORCHESTRATION.md) — published mirror for documentation/navigation
 - [AGENT.md](guides/AGENT.md) — Core Engineering Guide
+- [CLAUDE.md](guides/CLAUDE.md) — Claude CLI specific guide
 - [GEMINI.md](guides/GEMINI.md) — Gemini CLI specific guide

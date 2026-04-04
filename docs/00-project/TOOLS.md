@@ -42,7 +42,7 @@ Last verified: '2026-03-29'
 uv run python -m scripts.docs check-links --links --specs --configs
 uv run python -m scripts.docs check-drift --ports --classes
 uv run python -m scripts.docs check-docstrings --summary
-uv run bash scripts/docs/build_docs_site.sh --strict
+bash scripts/docs/build_docs_site.sh --strict
 ```
 - `make docs-build` remains a convenient wrapper for a non-strict site build when
   you only need a local rendered preview.

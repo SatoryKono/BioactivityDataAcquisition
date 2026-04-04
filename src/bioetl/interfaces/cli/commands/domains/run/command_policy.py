@@ -3,19 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import NoReturn, Protocol
+from typing import TYPE_CHECKING, NoReturn, Protocol
 
 import click
 
-from bioetl.application.services import (
+from bioetl.application.services.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
-)
-from bioetl.application.services.cli_run_orchestration_models import (
-    RunExecutionRequest,
-)
-from bioetl.application.services.cli_run_orchestration_service import (
-    CliRunOrchestrationService,
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.run.support import (
@@ -33,6 +27,14 @@ from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
+
+if TYPE_CHECKING:
+    from bioetl.application.services.cli_run_orchestration_models import (
+        RunExecutionRequest,
+    )
+    from bioetl.application.services.cli_run_orchestration_service import (
+        CliRunOrchestrationService,
+    )
 
 __all__ = [
     "RunCommandInput",

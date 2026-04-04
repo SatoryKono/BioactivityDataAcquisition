@@ -46,6 +46,8 @@ def pytest_cmdline_main(config):
 def pytest_configure(config):
     # Keep it here as well just in case
     _normalize_enum_option(config.option, "diff_mode")
+    if _selected_paths_need_hypothesis(config):
+        _configure_hypothesis_profiles()
 
 
 def _normalize_enum_option(option_namespace: object, option_name: str) -> None:
@@ -59,17 +61,6 @@ def _normalize_enum_option(option_namespace: object, option_name: str) -> None:
     except (AttributeError, TypeError, ValueError):
         return
 
-
-try:
-    from hypothesis import settings as _hyp_settings
-
-    _hyp_settings.register_profile("ci", max_examples=10)
-    _hyp_settings.register_profile("fast", max_examples=5)
-    _hyp_settings.register_profile("dev", max_examples=50)
-    _hyp_settings.register_profile("thorough", max_examples=200)
-    _hyp_settings.load_profile(os.getenv("HYPOTHESIS_PROFILE", "fast"))
-except ImportError:  # pragma: no cover
-    pass
 
 _PUBLICATION_CLASSIFICATION_TEST_PREFIXES = (
     "tests/unit/application/pipelines/common/test_publication_parity.py",
@@ -90,6 +81,50 @@ _PUBLICATION_CLASSIFICATION_TEST_PREFIXES = (
     "tests/e2e/test_pubmed_publication_e2e.py",
     "tests/e2e/test_semanticscholar_publication_e2e.py",
 )
+
+_HYPOTHESIS_TEST_PREFIXES = (
+    "tests/unit/domain/",
+    "tests/architecture/",
+    "tests/unit/application/composite/test_join_key_resolution_property.py",
+)
+
+
+def _selected_paths_need_hypothesis(config: pytest.Config) -> bool:
+    """Load Hypothesis profiles only when the selected paths can execute them."""
+    selected_args = getattr(config, "args", ())
+    if not selected_args:
+        return True
+
+    normalized_args = []
+    for arg in selected_args:
+        if arg.startswith("-"):
+            continue
+        normalized = arg.split("::", 1)[0].replace("\\", "/")
+        if normalized in {"tests", "tests/", "."}:
+            return True
+        normalized_args.append(normalized)
+
+    if not normalized_args:
+        return True
+
+    return any(
+        any(path.startswith(prefix) for prefix in _HYPOTHESIS_TEST_PREFIXES)
+        for path in normalized_args
+    )
+
+
+def _configure_hypothesis_profiles() -> None:
+    """Register project Hypothesis profiles lazily during pytest startup."""
+    try:
+        from hypothesis import settings as _hyp_settings
+    except ImportError:  # pragma: no cover
+        return
+
+    _hyp_settings.register_profile("ci", max_examples=10)
+    _hyp_settings.register_profile("fast", max_examples=5)
+    _hyp_settings.register_profile("dev", max_examples=50)
+    _hyp_settings.register_profile("thorough", max_examples=200)
+    _hyp_settings.load_profile(os.getenv("HYPOTHESIS_PROFILE", "fast"))
 
 
 @cache

@@ -6,8 +6,8 @@ source:
         base_url: https://www.ebi.ac.uk/chembl/api/data
         auth_type: public
         client:
-            timeout_sec: 90.0
-            max_retries: 6
+            timeout_sec: 120.0
+            max_retries: 8
             trust_env: false
         pagination:
             page_size: 1000
@@ -17,12 +17,12 @@ source:
         api_version: null
     circuit_breaker:
         failure_threshold: 3
-        recovery_timeout: 300
+        recovery_timeout: 3000
     rate_limit:
-        requests_per_second: 3
-        burst: 3
+        requests_per_second: 0.1
+        burst: 1
     health_check:
-        endpoint: /chembl/api/data/status.json
+        endpoint: null
         timeout: 15
     retry:
         use_retry_after: false

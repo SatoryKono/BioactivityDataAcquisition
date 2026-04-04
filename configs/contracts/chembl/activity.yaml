@@ -18,4 +18,4 @@ report:
   enabled: true
   format: "json"
   include_sample_failures: true
-  sample_size: 10
+  sample_size: 1000
