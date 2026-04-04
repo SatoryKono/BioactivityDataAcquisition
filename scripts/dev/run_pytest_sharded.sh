@@ -49,6 +49,11 @@ declare -A SHARD_PATHS=(
     ["S6-crosscutting-core"]="tests/unit/infrastructure/config tests/unit/infrastructure/quality tests/unit/infrastructure/observability tests/unit/infrastructure/schemas tests/integration/pipelines tests/integration/chembl tests/architecture tests/contract tests/smoke"
 )
 
+declare -A SHARD_WORKERS_OVERRIDE=(
+    ["S1-domain"]="0"
+    ["S6-crosscutting-core"]="0"
+)
+
 usage() {
     cat <<'EOF'
 Usage:
@@ -213,6 +218,15 @@ build_selected_shards() {
     printf '%s\n' "${selected[@]}"
 }
 
+workers_for_shard() {
+    local shard="$1"
+    if [[ -n "${SHARD_WORKERS_OVERRIDE[$shard]:-}" ]]; then
+        printf '%s\n' "${SHARD_WORKERS_OVERRIDE[$shard]}"
+        return 0
+    fi
+    printf '%s\n' "$WORKERS_PER_SHARD"
+}
+
 selected_python() {
     if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
         printf '%s\n' "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
@@ -233,11 +247,50 @@ selected_python() {
     return 1
 }
 
+is_wsl_mounted_checkout() {
+    [[ "$REPO_ROOT" == /mnt/* ]]
+}
+
+default_tmp_coverage_dir() {
+    local repo_name
+    repo_name="$(basename "$REPO_ROOT")"
+    printf '/tmp/%s-sharded-coverage\n' "$repo_name"
+}
+
+normalize_coverage_dir_for_environment() {
+    if [[ "$COVERAGE_DIR" != "$DEFAULT_COVERAGE_DIR" ]]; then
+        return 0
+    fi
+
+    if ! is_wsl_mounted_checkout; then
+        return 0
+    fi
+
+    COVERAGE_DIR="$(default_tmp_coverage_dir)"
+    echo \
+        "[run_pytest_sharded][info] Using temp coverage dir $COVERAGE_DIR for mounted WSL checkout $REPO_ROOT" \
+        >&2
+}
+
 cleanup_coverage_dir() {
     if [[ "$KEEP_COVERAGE_FILES" == "1" ]]; then
         return 0
     fi
-    rm -rf "$COVERAGE_DIR"
+    if rm -rf "$COVERAGE_DIR" 2>/dev/null; then
+        return 0
+    fi
+
+    if [[ "$COVERAGE_DIR" == "$DEFAULT_COVERAGE_DIR" ]]; then
+        local fallback_dir="/tmp/bioetl-sharded-coverage-$(date +%Y%m%d-%H%M%S)-$$"
+        echo \
+            "[run_pytest_sharded][warn] Could not clean $DEFAULT_COVERAGE_DIR; using fallback coverage dir $fallback_dir" \
+            >&2
+        COVERAGE_DIR="$fallback_dir"
+        return 0
+    fi
+
+    echo "[run_pytest_sharded][error] Could not clean coverage dir: $COVERAGE_DIR" >&2
+    return 1
 }
 
 start_log_tailer() {
@@ -278,13 +331,17 @@ run_wave() {
         local coverage_file="$COVERAGE_DIR/.coverage.$shard"
         local log_file="$COVERAGE_DIR/logs/$shard.log"
         local -a cmd=(bash "$RUNNER")
+        local shard_workers
         local path
 
         # shellcheck disable=SC2206
         local -a paths=( $paths_string )
         cmd+=("${paths[@]}")
-        cmd+=(-n "$WORKERS_PER_SHARD")
-        if [[ -n "$DIST_MODE" ]]; then
+        shard_workers="$(workers_for_shard "$shard")"
+        if [[ "$shard_workers" =~ ^[0-9]+$ ]] && (( shard_workers > 0 )); then
+            cmd+=(-n "$shard_workers")
+        fi
+        if [[ -n "$DIST_MODE" && "$shard_workers" =~ ^[0-9]+$ && "$shard_workers" -gt 0 ]]; then
             cmd+=(--dist="$DIST_MODE")
         fi
         cmd+=("${EXTRA_PYTEST_ARGS[@]}")
@@ -376,6 +433,7 @@ combine_coverage() {
 
 main() {
     parse_args "$@"
+    normalize_coverage_dir_for_environment
 
     if [[ "$LIST_ONLY" == "1" ]]; then
         print_plan

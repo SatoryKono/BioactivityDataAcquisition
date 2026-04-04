@@ -63,7 +63,7 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
     "lock": (
         "bioetl.interfaces.cli.commands.lock",
         "lock",
-        "Manage distributed locks",
+        "Inspect and manage local runtime locks",
     ),
     "maintenance": (
         "bioetl.interfaces.cli.commands.maintenance",
@@ -93,7 +93,7 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
     "run-manifest": (
         "bioetl.interfaces.cli.commands.run_manifest",
         "run_manifest",
-        "Apply a run manifest",
+        "Inspect run manifests and ledgers",
     ),
 }
 

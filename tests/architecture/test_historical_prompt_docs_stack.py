@@ -8,10 +8,6 @@ from pathlib import Path
 HISTORICAL_PROMPT_FILES = (
     Path("docs/00-project/ai/prompts/documentation_diagrams_audit.md"),
     Path("docs/00-project/ai/prompts/refactor_orchestration_prompt.md"),
-    Path("docs/00-project/ai/prompts/refactor_orchestration_prompt_1-2.md"),
-    Path("docs/00-project/ai/prompts/collected/documentation_diagrams_audit.md"),
-    Path("docs/00-project/ai/prompts/collected/refactor_orchestration_prompt.md"),
-    Path("docs/00-project/ai/prompts/collected/refactor_orchestration_prompt_1-2.md"),
 )
 
 

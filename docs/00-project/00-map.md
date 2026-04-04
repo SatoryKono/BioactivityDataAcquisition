@@ -1,11 +1,11 @@
 ---
-Version: 1.1.0
+Version: 1.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-02'
+Last verified: '2026-04-04'
 ---
 
 # BioETL Project Navigator
@@ -22,6 +22,7 @@ Last verified: '2026-04-02'
 > - 2026-03-27: navigator synced with ADR-044/ADR-045, GitHub local workflow guide, and active traceability runbooks
 > - 2026-04-01: control-plane documentation pack re-synced with RunManifest / RunLedger runtime, storage layout, rollout flags, inspection CLI, and event baseline
 > - 2026-04-02: navigator re-synced with `04-reference/index.md` and `05-operations/archive-index.md`
+> - 2026-04-04: published docs verification guide added to active entrypoints and mixed-environment workflow references
 
 ## Quick Links
 
@@ -30,6 +31,7 @@ Last verified: '2026-04-02'
 | Understand the rules    | [RULES.md](RULES.md)                 |
 | Look up terminology     | [glossary.md](glossary.md)           |
 | Find tool commands      | [TOOLS.md](TOOLS.md)                 |
+| Verify docs quality gates | [docs-verification.md](../03-guides/docs-verification.md) |
 | Govern documentation    | [D-01](governance/01-documentation-governance-style-guide.md) |
 | Create a new pipeline   | [governance/04-extending-bioetl.md](governance/04-extending-bioetl.md)      |
 | Review a pipeline       | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |

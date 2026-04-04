@@ -9,7 +9,7 @@
 
 ## 1. Обзор
 
-Команда из **8 активных субагентов** (6 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Agent` tool с параметром `subagent_type`. Production-код пишется напрямую оркестратором (без отдельного py-code-bot).
+Команда из **9 активных субагентов** (7 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Agent` tool с параметром `subagent_type`. Production-код пишется напрямую оркестратором (без отдельного py-code-bot).
 
 **Запуск субагента:**
 ```
@@ -19,13 +19,14 @@ Agent(subagent_type="py-audit-bot", prompt="...", model="opus")
 | # | Субагент (`subagent_type`) | Model | Роль | Артефакт |
 |:-:|----------------------------|-------|------|----------|
 | I | **py-audit-bot** | opus | Baseline/final аудит, code review, arch guardian, API validation | `00-audit-baseline.md`, `07-audit-final.md` |
-| II | **py-plan-bot** | opus | Планирование, декомпозиция, composite design | `01-plan-initial.md`, `03-plan-updated.md` |
-| III | **py-test-bot** | sonnet | Тестирование | `02-test-baseline.md`, `05-test-final.md` |
-| IV | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `04a-config-log.md` |
-| V | **py-debug-bot** | opus | Отладка падений | `04-refactoring-log.md` (debug-секции) |
-| VI | **py-doc-bot** | sonnet | Документация, ADR, диаграммы (Mermaid) | `06-doc-update-log.md` |
-| VII | **py-test-swarm** | opus | Иерархическое тестирование (L1→L2→L3) | test reports |
-| VIII | **py-review-orchestrator** | opus | Иерархический code review (S1-S8) | review reports |
+| II | **py-architecture-debt-bot** | opus | Полный workflow устранения архитектурного долга: generate -> plan -> execute -> verify | `review_py-architecture-debt-bot_{YYYYMMDD}_{HHMM}.md` |
+| III | **py-plan-bot** | opus | Планирование, декомпозиция, composite design | `01-plan-initial.md`, `03-plan-updated.md` |
+| IV | **py-test-bot** | sonnet | Тестирование | `02-test-baseline.md`, `05-test-final.md` |
+| V | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `04a-config-log.md` |
+| VI | **py-debug-bot** | opus | Отладка падений | `04-refactoring-log.md` (debug-секции) |
+| VII | **py-doc-bot** | sonnet | Документация, ADR, диаграммы (Mermaid) | `06-doc-update-log.md` |
+| VIII | **py-test-swarm** | opus | Иерархическое тестирование (L1→L2→L3) | test reports |
+| IX | **py-review-orchestrator** | opus | Иерархический code review (S1-S8) | review reports |
 
 > **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
 

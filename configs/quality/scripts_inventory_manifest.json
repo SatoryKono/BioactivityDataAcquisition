@@ -662,7 +662,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -3232,12 +3232,6 @@
           "text": "bash \"$REPO_ROOT/scripts/diagrams/validate_mermaid_syntax.sh\" \\"
         },
         {
-          "path": "docs/00-project/ai/prompts/collected/documentation_diagrams_audit.md",
-          "line": 166,
-          "source_group": "docs",
-          "text": "bash scripts/diagrams/validate_mermaid_syntax.sh"
-        },
-        {
           "path": "docs/00-project/ai/prompts/documentation_diagrams_audit.md",
           "line": 166,
           "source_group": "docs",
@@ -3760,7 +3754,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
@@ -4983,12 +4977,6 @@
         },
         {
           "path": "docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md",
-          "line": 131,
-          "source_group": "docs",
-          "text": "- `python scripts/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/collected/architecture_metric_exemptions_tasks_json_prompt.md",
           "line": 131,
           "source_group": "docs",
           "text": "- `python scripts/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`"

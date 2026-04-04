@@ -1,11 +1,11 @@
 ---
-Version: 1.7.0
+Version: 1.7.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-01'
+Last verified: '2026-04-04'
 ---
 
 # Documentation Publication Policy

@@ -3,11 +3,12 @@
 Agent registry after consolidation (2026-03-12).
 See `ORCHESTRATION.md` for workflow and write-zone rules.
 
-## BioETL Core (8 active agents)
+## BioETL Core (9 active agents)
 
 | Agent | Model | Role |
 |-------|-------|------|
 | [py-audit-bot](py-audit-bot.md) | opus | Code/architecture audit, RULES.md compliance |
+| [py-architecture-debt-bot](py-architecture-debt-bot.md) | opus | End-to-end architecture debt reduction workflow |
 | [py-plan-bot](py-plan-bot.md) | opus | Task planning, RF-* decomposition |
 | [py-test-bot](py-test-bot.md) | sonnet | Tests (baseline/final/retest), coverage |
 | [py-config-bot](py-config-bot.md) | sonnet | YAML configs (pipeline/DQ/filter) |

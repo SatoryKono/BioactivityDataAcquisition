@@ -40,6 +40,10 @@ make setup-plugins
 
 `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
+`uv` is the preferred package/environment manager for supported bootstrap and
+docs verification flows. `pip` remains the fallback only when `uv` is
+unavailable.
+
 ### Option B: Mixed Windows + WSL Checkout
 
 If you open the same repository from both Windows PowerShell and WSL, keep the
@@ -137,6 +141,7 @@ make lint
 | Run tests via wrappers | `run_pytest.ps1` / `run_pytest.sh`                |
 | Run all tests          | `make test`                                       |
 | Run linting            | `make lint`                                       |
+| Verify docs surface    | `uv run python -m scripts.docs check-links --links --specs --configs` |
 | Run sample pipeline    | `make run-local`                                  |
 | List pipelines         | `bioetl config list-pipelines`                    |
 | Full rebuild           | `bioetl run --pipeline <name> --run-type rebuild` |
@@ -158,5 +163,6 @@ data/
 
 - [Getting Started](getting-started.md) - Full setup guide with troubleshooting
 - [Running Pipelines](running-pipelines.md) - Comprehensive CLI reference
+- [Docs Verification](docs-verification.md) - Published docs quality gates and recurring audit checklist
 - [Add New Source](add-new-source.md) - Integrate a new data provider
 - [Guides Index](index.md) - Browse the full how-to surface

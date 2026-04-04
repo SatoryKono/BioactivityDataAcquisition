@@ -48,6 +48,10 @@ This reduces discoverability and increases naming drift risk.
 5. `m365-admin` -> `sp-microsoft-365-admin`
 6. `architecture-techdebt-automation` -> `py-architecture-debt-bot` (if core) or `sp-architecture-debt-engineer` (if specialist)
 
+Implementation status update:
+- Runtime consolidation now uses `py-architecture-debt-bot` as the canonical BioETL architecture-debt workflow surface.
+- `architecture-techdebt-automation` remains only as a deprecated generator-only compatibility profile.
+
 ### 3.2 Priority P2 (deduplicate semantics)
 
 1. `ml-engineer` -> alias/deprecate to `sp-ai-engineer`

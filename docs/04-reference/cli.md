@@ -1,11 +1,11 @@
 ---
-Version: 6.1.0
+Version: 6.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-02'
+Last verified: '2026-04-04'
 ---
 
 # CLI Reference
@@ -13,8 +13,8 @@ Last verified: '2026-04-02'
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 6.1.0
-**Дата обновления:** 2026-04-02
+**Версия:** 6.1.1
+**Дата обновления:** 2026-04-04
 
 ---
 
@@ -597,7 +597,11 @@ bioetl health check --json
 
 ---
 
-### `lock` — Управление блокировками
+### `lock` — Inspect and manage local runtime locks
+
+Inspection and manual release surface for the Local-Only runtime lock files.
+This CLI group does **not** represent a distributed lock manager or external
+coordinator.
 
 #### `lock release` — Освобождение блокировки
 
