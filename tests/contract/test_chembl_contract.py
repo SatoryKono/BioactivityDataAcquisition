@@ -10,9 +10,14 @@ See:
 
 from __future__ import annotations
 
+import os
+
 import httpx
 import pytest
 
+from tests.contract._provider_contract_drift import (
+    assert_provider_probe_matches_snapshot,
+)
 from tests.contract.conftest import (
     CHEMBL_ACTIVITY_REQUIRED_FIELDS,
     CHEMBL_MOLECULE_REQUIRED_FIELDS,
@@ -20,6 +25,7 @@ from tests.contract.conftest import (
 )
 
 CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
+UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 pytestmark = pytest.mark.network
 
 
@@ -65,6 +71,23 @@ class TestChemblContract:
         assert not missing_fields, f"Missing required fields: {missing_fields}"
 
     @pytest.mark.asyncio
+    async def test_activity_snapshot_contract(self) -> None:
+        """Verify the provider-facing activity payload matches the snapshot."""
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"{CHEMBL_API_BASE}/activity.json",
+                params={"limit": 1},
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "chembl",
+            "activity_endpoint_schema",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
+
+    @pytest.mark.asyncio
     async def test_molecule_endpoint_schema(self) -> None:
         """Verify molecule endpoint returns expected schema."""
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -85,6 +108,23 @@ class TestChemblContract:
         assert not missing_fields, f"Missing required fields: {missing_fields}"
 
     @pytest.mark.asyncio
+    async def test_molecule_snapshot_contract(self) -> None:
+        """Verify the provider-facing molecule payload matches the snapshot."""
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"{CHEMBL_API_BASE}/molecule.json",
+                params={"limit": 1},
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "chembl",
+            "molecule_endpoint_schema",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
+
+    @pytest.mark.asyncio
     async def test_target_endpoint_schema(self) -> None:
         """Verify target endpoint returns expected schema."""
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -103,6 +143,23 @@ class TestChemblContract:
         target = targets[0]
         missing_fields = CHEMBL_TARGET_REQUIRED_FIELDS - set(target.keys())
         assert not missing_fields, f"Missing required fields: {missing_fields}"
+
+    @pytest.mark.asyncio
+    async def test_target_snapshot_contract(self) -> None:
+        """Verify the provider-facing target payload matches the snapshot."""
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"{CHEMBL_API_BASE}/target.json",
+                params={"limit": 1},
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "chembl",
+            "target_endpoint_schema",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
 
     @pytest.mark.asyncio
     async def test_assay_endpoint_schema(self) -> None:
