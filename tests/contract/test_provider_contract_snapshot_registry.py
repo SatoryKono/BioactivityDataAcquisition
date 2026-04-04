@@ -13,7 +13,18 @@ from tests.contract._provider_contract_drift import (
 pytestmark = pytest.mark.no_api
 
 
-@pytest.mark.parametrize("provider", ["crossref", "openalex", "pubmed", "semanticscholar"])
+@pytest.mark.parametrize(
+    "provider",
+    [
+        "chembl",
+        "crossref",
+        "openalex",
+        "pubchem",
+        "pubmed",
+        "semanticscholar",
+        "uniprot",
+    ],
+)
 def test_provider_snapshot_registry_shape(provider: str) -> None:
     snapshot = load_provider_contract_snapshot(provider)
     assert_provider_snapshot_registry_shape(snapshot)
