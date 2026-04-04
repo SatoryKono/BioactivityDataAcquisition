@@ -17,6 +17,10 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
     REGISTERED_PROMETHEUS_METRIC_NAMES,
 )
 
+_FORBIDDEN_LABELS = frozenset(
+    {"run_id", "manifest_id", "path", "file_path", "dataset_hash", "source_batch_id"}
+)
+
 
 @pytest.mark.unit
 def test_metric_registry_family_inventory_has_expected_families() -> None:
@@ -84,3 +88,22 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "lineage_fragments_emitted_total" in COUNTERS
     assert "lineage_refs_missing_total" in COUNTERS
     assert "composite_source_selection_total" in COUNTERS
+
+
+@pytest.mark.unit
+def test_control_plane_and_lineage_metric_labels_avoid_forbidden_identity_fields() -> None:
+    metric_names = (
+        "control_plane_manifest_writes_total",
+        "control_plane_ledger_appends_total",
+        "checkpoint_compatibility_events_total",
+        "lineage_fragments_emitted_total",
+        "lineage_refs_missing_total",
+        "composite_source_selection_total",
+    )
+
+    for metric_name in metric_names:
+        metric = COUNTERS[metric_name]
+        assert _FORBIDDEN_LABELS.isdisjoint(metric._labelnames), (
+            f"{metric_name} exposes forbidden labels: "
+            f"{sorted(_FORBIDDEN_LABELS.intersection(metric._labelnames))}"
+        )
