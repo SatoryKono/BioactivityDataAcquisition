@@ -227,6 +227,15 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
     def should_log_fallback_lookup(self) -> bool:
         return self._should_log_fallback_lookup()
 
+    def post_process_silver_record(self, silver_record: SilverRecord) -> SilverRecord:
+        """Apply the publication post-processing hook expected by assembly helpers.
+
+        Publication assembly still treats the metadata strategy as the last step
+        before returning a finalized Silver record. Most publication transformers
+        do not need extra work here, so the default behavior is a no-op.
+        """
+        return self._post_process_silver_record(silver_record)
+
     def _pre_extract_validation(
         self,
         context: PipelineContext,
@@ -261,6 +270,14 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
     def _should_log_fallback_lookup(self) -> bool:
         """Return True if fallback lookup logging is enabled."""
         return True
+
+    def _post_process_silver_record(self, silver_record: SilverRecord) -> SilverRecord:
+        """Finalize a Silver record after entity inflation.
+
+        Subclasses can override this hook for compatibility-sensitive cleanup,
+        but the common publication path should preserve the record unchanged.
+        """
+        return silver_record
 
     def _validate_primary_id(
         self,

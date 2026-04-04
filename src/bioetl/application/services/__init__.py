@@ -23,67 +23,67 @@ directly from their defining submodules:
 
 from __future__ import annotations
 
-from bioetl.application.services.bronze_cleanup_service import (
-    BronzeCleanupResult,
-    BronzeCleanupService,
-)
-from bioetl.application.services.checkpoint_service import (
-    CheckpointService,
-)
-from bioetl.application.services.config_service import (
-    ConfigService,
-)
-from bioetl.application.services.contract_migration_service import (
-    ContractMigrationAction,
-    ContractMigrationPlan,
-    ContractMigrationService,
-    ContractVersionTransition,
-)
-from bioetl.application.services.export_service import (
-    ColumnInfo,
-    ExportOptions,
-    ExportResult,
-    ExportService,
-    TableInfo,
-    TablePreview,
-)
-from bioetl.application.services.health_service import (
-    HealthService,
-)
-from bioetl.application.services.lineage_inspection_service import (
-    LineageFragmentInspectionResult,
-    LineageInspectionService,
-    LineageNodeRelation,
-    LineageRunExplanationResult,
-    LineageTraceResult,
-)
-from bioetl.application.services.metrics_service import (
-    MetricsService,
-)
-from bioetl.application.services.pipeline_run_lifecycle_service import (
-    PipelineRunLifecycleService,
-)
-from bioetl.application.services.pipeline_runner_service import (
-    PipelineNotFoundError,
-    PipelineRunnerService,
-    PipelineRunResult,
-    RunOptions,
-    RunResult,
-)
-from bioetl.application.services.quarantine_service import (
-    QuarantineService,
-)
-from bioetl.application.services.run_manifest_inspection_service import (
-    RunManifestDiffEntry,
-    RunManifestDiffResult,
-    RunManifestInspectionResult,
-    RunManifestInspectionService,
-)
-from bioetl.application.services.vacuum_service import (
-    TableVacuumResult,
-    VacuumAllResult,
-    VacuumService,
-)
+from importlib import import_module
+
+_LAZY_EXPORT_MODULES: dict[str, str] = {
+    "BronzeCleanupResult": "bioetl.application.services.bronze_cleanup_service",
+    "BronzeCleanupService": "bioetl.application.services.bronze_cleanup_service",
+    "CheckpointService": "bioetl.application.services.checkpoint_service",
+    "ColumnInfo": "bioetl.application.services.export_service",
+    "ConfigService": "bioetl.application.services.config_service",
+    "ContractMigrationAction": (
+        "bioetl.application.services.contract_migration_service"
+    ),
+    "ContractMigrationPlan": "bioetl.application.services.contract_migration_service",
+    "ContractMigrationService": (
+        "bioetl.application.services.contract_migration_service"
+    ),
+    "ContractVersionTransition": (
+        "bioetl.application.services.contract_migration_service"
+    ),
+    "ExportOptions": "bioetl.application.services.export_service",
+    "ExportResult": "bioetl.application.services.export_service",
+    "ExportService": "bioetl.application.services.export_service",
+    "HealthService": "bioetl.application.services.health_service",
+    "LineageFragmentInspectionResult": (
+        "bioetl.application.services.lineage_inspection_service"
+    ),
+    "LineageInspectionService": (
+        "bioetl.application.services.lineage_inspection_service"
+    ),
+    "LineageNodeRelation": "bioetl.application.services.lineage_inspection_service",
+    "LineageRunExplanationResult": (
+        "bioetl.application.services.lineage_inspection_service"
+    ),
+    "LineageTraceResult": "bioetl.application.services.lineage_inspection_service",
+    "MetricsService": "bioetl.application.services.metrics_service",
+    "PipelineNotFoundError": "bioetl.application.services.pipeline_runner_service",
+    "PipelineRunLifecycleService": (
+        "bioetl.application.services.pipeline_run_lifecycle_service"
+    ),
+    "PipelineRunResult": "bioetl.application.services.pipeline_runner_service",
+    "PipelineRunnerService": "bioetl.application.services.pipeline_runner_service",
+    "QuarantineService": "bioetl.application.services.quarantine_service",
+    "RunManifestDiffEntry": (
+        "bioetl.application.services.run_manifest_inspection_service"
+    ),
+    "RunManifestDiffResult": (
+        "bioetl.application.services.run_manifest_inspection_service"
+    ),
+    "RunManifestInspectionResult": (
+        "bioetl.application.services.run_manifest_inspection_service"
+    ),
+    "RunManifestInspectionService": (
+        "bioetl.application.services.run_manifest_inspection_service"
+    ),
+    "RunOptions": "bioetl.application.services.pipeline_runner_service",
+    "RunResult": "bioetl.application.services.pipeline_runner_service",
+    "TableInfo": "bioetl.application.services.export_service",
+    "TablePreview": "bioetl.application.services.export_service",
+    "TableVacuumResult": "bioetl.application.services.vacuum_service",
+    "VacuumAllResult": "bioetl.application.services.vacuum_service",
+    "VacuumService": "bioetl.application.services.vacuum_service",
+}
 
 __all__ = [
     "BronzeCleanupResult",
@@ -122,3 +122,20 @@ __all__ = [
     "VacuumAllResult",
     "VacuumService",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Resolve service facade exports lazily to avoid broad import fan-out."""
+    try:
+        module_name = _LAZY_EXPORT_MODULES[name]
+    except KeyError as exc:  # pragma: no cover - standard attribute path
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+
+    value = getattr(import_module(module_name), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    """Return stable service exports for introspection."""
+    return sorted(set(globals()) | set(__all__))

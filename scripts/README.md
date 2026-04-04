@@ -66,7 +66,7 @@ Available groups and example commands:
 | `docs` | `python -m scripts.docs check-drift` | Documentation checks |
 | `diagrams` | `python -m scripts.diagrams lint` | Diagram tooling |
 | `ops` | `python -m scripts.ops salt-rotate` | Operational automation |
-| `dev` | `python -m scripts.dev setup --quick` | Developer workflows |
+| `dev` | `python -m scripts.dev run-tests unit` | Developer workflows |
 | `diagnostics` | `python -m scripts.diagnostics cleanup` | Debug & diagnostics |
 
 Each script also remains standalone-executable:

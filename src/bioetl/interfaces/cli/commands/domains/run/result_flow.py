@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, NoReturn
 
-from bioetl.application.services import RunResult
 from bioetl.application.services.cli_run_orchestration_models import (
     RunExecutionRequest,
 )
+from bioetl.application.services.pipeline_runner_models import RunResult
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     echo_health_server_info,
 )
@@ -15,7 +15,7 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.application.services import PipelineRunResult
+    from bioetl.application.services.pipeline_runner_models import PipelineRunResult
     from bioetl.interfaces.cli.exit_codes import ExitCode
 
 

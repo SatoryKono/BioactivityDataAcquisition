@@ -11,7 +11,7 @@ bootstrap details.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines

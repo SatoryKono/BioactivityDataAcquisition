@@ -70,6 +70,43 @@ class QuarantineManagerService:
         self._pipeline_name = pipeline_name
         self._metrics = metrics
 
+    def _track_quarantine_metrics(self, error_type: ErrorType, count: int) -> None:
+        """Emit quarantine metrics through both legacy and current metric APIs."""
+        if self._metrics is None:
+            return
+
+        track_quarantined_records = getattr(
+            self._metrics, "track_quarantined_records", None
+        )
+        if callable(track_quarantined_records):
+            track_quarantined_records(error_type, count)
+
+        self._metrics.increment_counter(
+            "dq_records_quarantined_total",
+            count,
+            {"pipeline": self._pipeline_name, "error_type": error_type.value},
+        )
+        self._metrics.inc_quarantine_records(
+            pipeline=self._pipeline_name,
+            reason=error_type.value,
+            count=count,
+        )
+
+    def _track_processed_quarantined(self, count: int) -> None:
+        """Emit processed-record metrics for the quarantine stage."""
+        if self._metrics is None:
+            return
+
+        track_processed_records = getattr(self._metrics, "track_processed_records", None)
+        if callable(track_processed_records):
+            track_processed_records("quarantined", count)
+
+        self._metrics.increment_counter(
+            "records_processed_total",
+            count,
+            {"pipeline": self._pipeline_name, "stage": "quarantined"},
+        )
+
     async def quarantine_record(
         self,
         record: JsonDict,  # Any: quarantine record has heterogeneous values
@@ -98,22 +135,8 @@ class QuarantineManagerService:
             metadata={"error_details": {"message": error_details}},
             ingestion_ts=ingestion_ts,
         )
-        if self._metrics:
-            self._metrics.increment_counter(
-                "dq_records_quarantined_total",
-                1,
-                {"pipeline": self._pipeline_name, "error_type": error_type.value},
-            )
-            self._metrics.increment_counter(
-                "records_processed_total",
-                1,
-                {"pipeline": self._pipeline_name, "stage": "quarantined"},
-            )
-            self._metrics.inc_quarantine_records(
-                pipeline=self._pipeline_name,
-                reason=error_type.value,
-                count=1,
-            )
+        self._track_quarantine_metrics(error_type, 1)
+        self._track_processed_quarantined(1)
 
     async def quarantine_records(
         self,
@@ -139,17 +162,11 @@ class QuarantineManagerService:
         ]
         await self._quarantine.write_many(write_requests)
         if self._metrics:
-            counts_by_reason: dict[str, int] = {}
+            counts_by_reason: dict[ErrorType, int] = {}
             for _, error_type, _ in records:
-                counts_by_reason[error_type.value] = (
-                    counts_by_reason.get(error_type.value, 0) + 1
-                )
+                counts_by_reason[error_type] = counts_by_reason.get(error_type, 0) + 1
             for reason, count in counts_by_reason.items():
-                self._metrics.inc_quarantine_records(
-                    pipeline=self._pipeline_name,
-                    reason=reason,
-                    count=count,
-                )
+                self._track_quarantine_metrics(reason, count)
 
     async def quarantine_filtered_record(
         self,

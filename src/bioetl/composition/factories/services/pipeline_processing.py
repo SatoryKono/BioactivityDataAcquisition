@@ -73,7 +73,16 @@ def build_components_and_processing_service(
     quarantine_manager = QuarantineManagerService(
         quarantine_port=pipeline.services.quarantine,
         pipeline_name=processor_config.pipeline_name,
-        metrics=pipeline.services.metrics,
+        metrics=components.batch_metrics,
+    )
+    support_service = BatchProcessingSupportService(
+        services=pipeline.services,
+        logger=pipeline.context.logger,
+        batch_metrics=components.batch_metrics,
+        transformer=components.transformer,
+        writer=components.writer,
+        tracing=tracing_manager,
+        quarantine_manager=quarantine_manager,
     )
     batch_processing_service = BatchProcessingService(
         services=pipeline.services,
@@ -82,14 +91,6 @@ def build_components_and_processing_service(
         components=components,
         tracing_manager=tracing_manager,
         batch_id_factory=batch_id_factory,
-        support_service=BatchProcessingSupportService(
-            services=pipeline.services,
-            logger=pipeline.context.logger,
-            batch_metrics=components.batch_metrics,
-            transformer=components.transformer,
-            writer=components.writer,
-            tracing=tracing_manager,
-            quarantine_manager=quarantine_manager,
-        ),
+        support_service=support_service,
     )
     return components, batch_processing_service

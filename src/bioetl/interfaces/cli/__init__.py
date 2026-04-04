@@ -18,14 +18,21 @@ Structure:
 
 from __future__ import annotations
 
+from importlib import import_module
 from typing import TYPE_CHECKING
-
-from bioetl.interfaces.cli.commands.domains.run.support import validate_pipeline_name
-from bioetl.interfaces.cli.main import cli, main
 
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions
     from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+_LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
+    "cli": ("bioetl.interfaces.cli.main", "cli"),
+    "main": ("bioetl.interfaces.cli.main", "main"),
+    "validate_pipeline_name": (
+        "bioetl.interfaces.cli.commands.domains.run.support",
+        "validate_pipeline_name",
+    ),
+}
 
 
 def create_pipeline_runner(
@@ -40,6 +47,23 @@ def create_pipeline_runner(
     from bioetl.composition.execution_api import create_pipeline_runner as _impl
 
     return _impl(name, options)
+
+
+def __getattr__(name: str) -> object:
+    """Load heavyweight CLI exports only when a caller needs them."""
+    try:
+        module_name, attribute_name = _LAZY_ATTRIBUTE_EXPORTS[name]
+    except KeyError as exc:  # pragma: no cover - normal attribute lookup path
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+
+    value = getattr(import_module(module_name), attribute_name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    """Return stable CLI exports for introspection."""
+    return sorted(set(globals()) | set(__all__))
 
 
 __all__ = [

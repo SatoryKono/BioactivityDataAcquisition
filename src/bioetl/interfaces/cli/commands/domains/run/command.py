@@ -5,25 +5,10 @@ from __future__ import annotations
 import asyncio
 import sys
 from functools import partial
-from typing import NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 import click
 
-from bioetl.application.services import (
-    RunOptions,
-    RunResult,
-)
-from bioetl.application.services.cli_run_orchestration_models import (
-    RunExecutionRequest,
-)
-from bioetl.application.services.cli_run_orchestration_service import (
-    CliRunOrchestrationService,
-)
-from bioetl.composition import PipelineRegistry
-from bioetl.composition.execution_api import push_metrics_to_gateway
-from bioetl.composition.services_api import (
-    get_pipeline_runner_service as _get_pipeline_runner_service_impl,
-)
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started as _ensure_metrics_server_started_impl,
 )
@@ -82,6 +67,16 @@ from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
+if TYPE_CHECKING:
+    from bioetl.application.services import RunOptions, RunResult
+    from bioetl.application.services.cli_run_orchestration_models import (
+        RunExecutionRequest,
+    )
+    from bioetl.application.services.cli_run_orchestration_service import (
+        CliRunOrchestrationService,
+    )
+    from bioetl.composition import PipelineRegistry
+
 __all__ = [
     "build_run_options",
     "execute_run",
@@ -118,6 +113,15 @@ _RUN_COMPATIBILITY_SEAMS = (
 def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
     """Return process-local run orchestration service (lazy cached accessor seam)."""
     return _get_cli_run_orchestration_service_impl()
+
+
+def get_pipeline_runner_service() -> object:
+    """Resolve the pipeline runner service lazily for runtime helpers."""
+    from bioetl.composition.services_api import (
+        get_pipeline_runner_service as _impl,
+    )
+
+    return _impl()
 
 
 def _exit_with_code(code: int | str | None = None) -> NoReturn:
@@ -181,6 +185,8 @@ def execute_run(
     registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Execute run and flush metrics at command boundary."""
+    from bioetl.composition.execution_api import push_metrics_to_gateway
+
     return get_cli_run_orchestration_service().execute_pipeline(
         request=request,
         run_pipeline_async=_build_run_pipeline_callable(
@@ -328,7 +334,6 @@ run = build_run_click_command(
 echo_health_server_info = _echo_health_server_info_impl
 ensure_metrics_server_started = _ensure_metrics_server_started_impl
 health_server_context = _health_server_context_impl
-get_pipeline_runner_service = _get_pipeline_runner_service_impl
 _get_runner_logger = get_runner_logger
 _handle_destructive_run_confirmation = handle_destructive_run_confirmation
 _preview_cleanup = show_cleanup_preview

@@ -13,7 +13,10 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Protocol, TypeVar
 
-from bioetl.application.services import PipelineNotFoundError, PipelineRunResult
+from bioetl.application.services.pipeline_runner_models import (
+    PipelineNotFoundError,
+    PipelineRunResult,
+)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
 from bioetl.interfaces.cli.formatters import echo_error, echo_warning

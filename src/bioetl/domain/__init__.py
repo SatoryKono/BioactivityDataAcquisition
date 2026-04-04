@@ -23,20 +23,30 @@ top-level domain facade; canonical callers should use
 
 from __future__ import annotations
 
-from bioetl.domain import composite, constants, contracts, control_plane, version  # noqa: F401
+from importlib import import_module
 
-# Subpackage registrations (make them importable as bioetl.domain.<name>)
-from bioetl.domain import context_cached_bronze
-from bioetl.domain import context_filtering
-from bioetl.domain import lineage
-from bioetl.domain import mapping  # noqa: F401
-from bioetl.domain import observability_contract
-from bioetl.domain import registry  # noqa: F401
-from bioetl.domain import types_config_validation
-
-# Events
-from bioetl.domain.events import PipelineEvent
-from bioetl.domain.version import get_version
+_LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
+    "PipelineEvent": ("bioetl.domain.events", "PipelineEvent"),
+    "composite": ("bioetl.domain.composite", "composite"),
+    "constants": ("bioetl.domain.constants", "constants"),
+    "contracts": ("bioetl.domain.contracts", "contracts"),
+    "control_plane": ("bioetl.domain.control_plane", "control_plane"),
+    "context_cached_bronze": (
+        "bioetl.domain.context_cached_bronze",
+        "context_cached_bronze",
+    ),
+    "context_filtering": ("bioetl.domain.context_filtering", "context_filtering"),
+    "get_version": ("bioetl.domain.version", "get_version"),
+    "lineage": ("bioetl.domain.lineage", "lineage"),
+    "observability_contract": (
+        "bioetl.domain.observability_contract",
+        "observability_contract",
+    ),
+    "types_config_validation": (
+        "bioetl.domain.types_config_validation",
+        "types_config_validation",
+    ),
+}
 
 __all__ = [
     "PipelineEvent",
@@ -53,3 +63,33 @@ __all__ = [
     # Constants
     "constants",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Resolve public domain facade exports lazily."""
+    try:
+        module_name, attribute_name = _LAZY_ATTRIBUTE_EXPORTS[name]
+    except KeyError as exc:  # pragma: no cover - standard attribute path
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+
+    if name in {
+        "composite",
+        "constants",
+        "contracts",
+        "control_plane",
+        "context_cached_bronze",
+        "context_filtering",
+        "lineage",
+        "observability_contract",
+        "types_config_validation",
+    }:
+        value = import_module(module_name)
+    else:
+        value = getattr(import_module(module_name), attribute_name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    """Return stable domain facade exports for introspection."""
+    return sorted(set(globals()) | set(__all__))

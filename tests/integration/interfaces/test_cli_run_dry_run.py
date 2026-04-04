@@ -11,9 +11,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.interfaces.cli import cli
-
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -22,17 +19,29 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.integration
 
 
+def _get_cli():
+    from bioetl.interfaces.cli import cli
+
+    return cli
+
+
+def _register_all_pipelines() -> None:
+    from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+
+    register_all_pipelines()
+
+
 class TestCliRunDryRun:
     """Test CLI run command with --dry-run flag."""
 
     @pytest.fixture(autouse=True)
     def setup_pipelines(self):
         """Register all pipelines before each test."""
-        register_all_pipelines()
+        _register_all_pipelines()
 
     def test_dry_run_option_available(self, cli_runner: CliRunner):
         """Test that --dry-run option is available."""
-        result = cli_runner.invoke(cli, ["run", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["run", "--help"])
 
         assert result.exit_code == 0
         assert "--dry-run" in result.output
@@ -61,7 +70,7 @@ class TestCliRunDryRun:
             )
 
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["run", "--pipeline", "chembl_activity", "--dry-run"],
             )
 
@@ -96,7 +105,7 @@ class TestCliRunDryRun:
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 [
                     "run",
                     "--pipeline",
@@ -135,7 +144,7 @@ class TestCliRunDryRun:
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 [
                     "run",
                     "--pipeline",
@@ -175,7 +184,7 @@ class TestCliRunDryRun:
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 [
                     "run",
                     "--pipeline",
@@ -215,7 +224,7 @@ class TestCliRunDryRun:
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 [
                     "run",
                     "--pipeline",

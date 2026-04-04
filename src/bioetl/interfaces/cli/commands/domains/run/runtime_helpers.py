@@ -5,12 +5,10 @@ from __future__ import annotations
 from contextlib import AbstractAsyncContextManager
 from typing import TYPE_CHECKING
 
-from bioetl.application.services import RunOptions, RunResult
 from bioetl.application.services.cli_run_orchestration_models import (
     RunExecutionRequest,
 )
-from bioetl.composition import PipelineRegistry
-from bioetl.composition.services_api import get_pipeline_runner_service
+from bioetl.application.services.pipeline_runner_models import RunOptions, RunResult
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started,
 )
@@ -27,6 +25,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.cli_run_orchestration_contracts import (
         RunPreparedPipelineCallable,
     )
+    from bioetl.composition import PipelineRegistry
 
     class PipelineRunnerService(Protocol):
         """Protocol for pipeline runner services used by CLI runtime helpers."""
@@ -37,6 +36,15 @@ if TYPE_CHECKING:
             *,
             options: RunOptions,
         ) -> RunResult: ...
+
+
+def get_pipeline_runner_service(
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunnerService:
+    """Resolve the pipeline runner service lazily for CLI runtime helpers."""
+    from bioetl.composition.services_api import get_pipeline_runner_service as _impl
+
+    return _impl(registry=registry)
 
 
 def build_run_command_input(

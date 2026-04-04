@@ -68,7 +68,7 @@ HEALTH_CHECK_MODE_LATENCY_MS = Histogram(
 
 HEALTH_CHECK_SUCCESS_TOTAL = Counter(
     "bioetl_health_check_success_total",
-    "Total health checks that returned HEALTHY",
+    "Total successful health checks",
     ["provider"],
 )
 
