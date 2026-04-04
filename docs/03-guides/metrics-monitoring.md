@@ -1,19 +1,19 @@
 ---
-Version: 6.2.0
+Version: 6.2.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-02'
+Last verified: '2026-04-04'
 ---
 
 # Metrics & Monitoring Guide
 
 Руководство по настройке и использованию системы метрик и мониторинга в BioETL.
 
-**Версия:** 6.2.0
-**Дата обновления:** 2026-04-02
+**Версия:** 6.2.1
+**Дата обновления:** 2026-04-04
 
 > **Boundary:** this guide focuses on local observability setup, metric
 > semantics, and implementation-facing monitoring usage. For shipped operator
@@ -168,11 +168,17 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_control_plane_ledger_appends_total` | Counter | pipeline, event_type, status | Попытки append в run ledger |
 | `bioetl_checkpoint_compatibility_events_total` | Counter | pipeline, disposition | Исходы compatibility policy при resume |
 | `bioetl_lineage_fragments_emitted_total` | Counter | pipeline, layer, status | Попытки публикации lineage fragments |
+| `bioetl_lineage_refs_missing_total` | Counter | pipeline, layer, ref_type | Missing upstream lineage references during persistence |
+| `bioetl_composite_source_selection_total` | Counter | pipeline, decision_type, selected_source | Low-cardinality composite source-selection decisions during composite persistence |
 
 > Guardrail: для control-plane/traceability метрик нельзя использовать
 > `run_id`, `manifest_id`, paths и другие high-cardinality идентификаторы как
 > Prometheus labels. Детализация по конкретному запуску выполняется через
 > `bioetl run-manifest show ...`, а не через labels.
+>
+> `selected_source` для `bioetl_composite_source_selection_total` остаётся
+> допустимым label, потому что это bounded provider/source vocabulary, а не
+> per-run или per-record идентификатор.
 
 #### Transformer Metrics
 

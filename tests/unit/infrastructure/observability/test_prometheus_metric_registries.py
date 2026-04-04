@@ -84,3 +84,39 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "lineage_fragments_emitted_total" in COUNTERS
     assert "lineage_refs_missing_total" in COUNTERS
     assert "composite_source_selection_total" in COUNTERS
+
+
+@pytest.mark.unit
+def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> None:
+    forbidden_labels = {
+        "run_id",
+        "manifest_id",
+        "path",
+        "file_path",
+        "filesystem_path",
+        "hash",
+        "dataset_hash",
+        "batch_id",
+        "source_batch_id",
+    }
+    expected_labels = {
+        "control_plane_manifest_writes_total": {"pipeline", "run_type", "status"},
+        "control_plane_ledger_appends_total": {"pipeline", "event_type", "status"},
+        "checkpoint_compatibility_events_total": {"pipeline", "disposition"},
+        "lineage_fragments_emitted_total": {"pipeline", "layer", "status"},
+        "lineage_refs_missing_total": {"pipeline", "layer", "ref_type"},
+        "composite_source_selection_total": {
+            "pipeline",
+            "decision_type",
+            "selected_source",
+        },
+    }
+
+    for metric_name, labels in expected_labels.items():
+        metric = COUNTERS[metric_name]
+        actual_labels = set(metric._labelnames)
+        assert actual_labels == labels
+        assert not (actual_labels & forbidden_labels), (
+            f"{metric_name} must not use forbidden high-cardinality labels: "
+            f"{sorted(actual_labels & forbidden_labels)}"
+        )

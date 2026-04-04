@@ -129,6 +129,10 @@ def test_control_plane_traceability_alerts_reference_expected_metrics() -> None:
             "bioetl_lineage_fragments_emitted_total",
             "docs/05-operations/runbooks/traceability-signal-ownership.md",
         ),
+        "BioETLLineageRefsMissing": (
+            "bioetl_lineage_refs_missing_total",
+            "docs/05-operations/runbooks/traceability-signal-ownership.md",
+        ),
     }
 
     missing = [name for name in expected if name not in rule_map]

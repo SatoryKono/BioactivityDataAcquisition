@@ -5,12 +5,12 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-04'
 ---
 
 # BioETL Observability Specification (DD)
 
-Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-03-29**.
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-04**.
 
 - Статус: `active`
 - Версия: `3.3.0`
@@ -86,7 +86,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py` и экспортируется через `metrics_definitions.py`.
 
-Текущий размер каталога: **80** метрик (`metrics_export_names.py`).
+Текущий размер каталога: **84** метрики (`metrics_export_names.py`).
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
 
@@ -99,6 +99,8 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 | `bioetl_control_plane_ledger_appends_total` | Counter | `pipeline,event_type,status` | Попытки append в run ledger |
 | `bioetl_checkpoint_compatibility_events_total` | Counter | `pipeline,disposition` | Итоги resume/checkpoint compatibility policy |
 | `bioetl_lineage_fragments_emitted_total` | Counter | `pipeline,layer,status` | Попытки публикации lineage fragments |
+| `bioetl_lineage_refs_missing_total` | Counter | `pipeline,layer,ref_type` | Missing upstream lineage references detected during persistence |
+| `bioetl_composite_source_selection_total` | Counter | `pipeline,decision_type,selected_source` | Low-cardinality composite source-selection decisions recorded during persistence |
 | `bioetl_records_processed_total` | Counter | `pipeline,stage,run_type` | throughput |
 | `bioetl_errors_total` | Counter | `pipeline,stage,error_code` | taxonomy входа |
 | `bioetl_http_request_duration_seconds` | Histogram | `provider,method,status` | HTTP latency |
@@ -186,9 +188,15 @@ Guardrail для новых метрик control-plane/traceability:
 | `time() - bioetl_data_freshness_seconds` | `>72h` | P1 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
 | `bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}` | `increase(...) > 0` за `30m` | P2 | `docs/05-operations/runbooks/checkpoint-debugging.md` |
 | `bioetl_lineage_fragments_emitted_total{status="failed"}` | `increase(...) > 0` за `15m` | P2 | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
+| `bioetl_lineage_refs_missing_total` | `increase(...) > 0` за `15m` | P2 | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
 | `bioetl_data_source_retry_exhausted_total` | `1-2` exhaustions за `1h` | P2 | `docs/05-operations/runbooks/incident-response.md` |
 | `bioetl_data_source_retry_exhausted_total` | `>=3` exhaustions за `1h` | P1 | `docs/05-operations/runbooks/incident-response.md` |
 | `bioetl_rate_limiter_wait_seconds` | `histogram_quantile(0.95, ...) > 1` за `10m` | P3 | `docs/05-operations/runbooks/observability-checklist.md` |
+
+`bioetl_composite_source_selection_total` intentionally remains a dashboard/reporting
+signal rather than a shipped Prometheus alert baseline. It tracks bounded
+composite arbitration activity (`decision_type`, `selected_source`) but does
+not, by itself, indicate an incident condition.
 
 ## 7. Error Taxonomy (domain canonical)
 

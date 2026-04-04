@@ -10,7 +10,7 @@ Last verified: '2026-04-04'
 
 # BioETL Dashboards v2: Usage
 
-Дата сверки: **2026-03-29**  
+Дата сверки: **2026-04-04**  
 Источник истины: `grafana/dashboards/*.json`
 
 ## Какие дашборды использовать
@@ -41,8 +41,9 @@ p95 latency, failure-rate и 15-минутный объём health checks по �
 `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`
 5. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
 range-based quarantine/threshold/failures for the active Grafana window.
-6. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=115`:
-manifest/ledger failures, checkpoint incompatibilities, missing lineage refs и fragment outcomes по `layer/status`.
+6. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=120`, `id=115`:
+manifest/ledger failures, checkpoint incompatibilities, missing lineage refs,
+composite source selections и fragment outcomes по `layer/status`.
 
 ## Silver Filter Rejects workflow
 
