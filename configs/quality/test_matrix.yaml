@@ -248,12 +248,19 @@ fixture_governance:
     golden_masters: partial
     extensionless_filenames: enforced
   contract_snapshot_registry:
-    scope: bounded_publication_slice
+    scope: bounded_live_provider_baseline
     documentation: tests/fixtures/contracts/README.md
     helper_module: tests/contract/_provider_contract_drift.py
     registry_test_module: tests/contract/test_provider_contract_snapshot_registry.py
     update_env_var: UPDATE_SNAPSHOTS
     providers:
+      chembl:
+        version: 1
+        test_module: tests/contract/test_chembl_contract.py
+        required_probes:
+          - activity_endpoint_schema
+          - molecule_endpoint_schema
+          - target_endpoint_schema
       crossref:
         version: 1
         test_module: tests/contract/test_crossref_contract.py
@@ -268,6 +275,13 @@ fixture_governance:
           - works_filter_by_doi
           - works_search_endpoint
           - health_probe_shape
+      pubchem:
+        version: 1
+        test_module: tests/contract/test_pubchem_contract.py
+        required_probes:
+          - compound_by_molecule_id
+          - compound_property_endpoint
+          - smiles_search
       pubmed:
         version: 1
         test_module: tests/contract/test_pubmed_contract.py
@@ -281,6 +295,13 @@ fixture_governance:
         required_probes:
           - paper_search_endpoint
           - paper_batch_lookup_by_doi
+      uniprot:
+        version: 1
+        test_module: tests/contract/test_uniprot_contract.py
+        required_probes:
+          - uniprotkb_search_endpoint
+          - specific_protein_lookup
+          - taxonomy_endpoint
 
 contract_testing:
   workflow_present: true

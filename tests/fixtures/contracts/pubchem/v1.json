@@ -1,0 +1,30 @@
+{
+  "probes": {
+    "compound_by_molecule_id": {
+      "paths": {
+        "PC_Compounds": "list",
+        "PC_Compounds[0].id": "dict",
+        "PC_Compounds[0].id.id": "dict",
+        "PC_Compounds[0].id.id.cid": "int"
+      }
+    },
+    "compound_property_endpoint": {
+      "paths": {
+        "PropertyTable": "dict",
+        "PropertyTable.Properties": "list",
+        "PropertyTable.Properties[0].CID": "int",
+        "PropertyTable.Properties[0].MolecularFormula": "str",
+        "PropertyTable.Properties[0].MolecularWeight": "str"
+      }
+    },
+    "smiles_search": {
+      "paths": {
+        "IdentifierList": "dict",
+        "IdentifierList.CID": "list",
+        "IdentifierList.CID[0]": "int"
+      }
+    }
+  },
+  "provider": "pubchem",
+  "version": 1
+}
