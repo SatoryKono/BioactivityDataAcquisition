@@ -249,16 +249,20 @@ class QuarantineManagerService:
 
     async def get_stats(
         self,
+        error_code: str | None = None,
     ) -> JsonDict:  # Any: quarantine record has heterogeneous values
         """Get statistics about quarantined records for this pipeline.
 
         Delegates to QuarantinePort.get_stats() for CLI reporting.
 
+        Args:
+            error_code: Optional error code to scope the statistics.
+
         Returns:
             Dictionary with quarantine statistics.
 
         """
-        return await self._quarantine.get_stats(self._pipeline_name)
+        return await self._quarantine.get_stats(self._pipeline_name, error_code)
 
 
 QuarantineManager = QuarantineManagerService

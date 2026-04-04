@@ -125,9 +125,37 @@ def echo_quarantine_record(
         record: Dictionary with quarantine record data.
     """
     error_code = record.get("error_code") or "UNKNOWN"
+    payload_hash = record.get("payload_hash")
+    dq_status = record.get("dq_status") or "UNKNOWN"
+    ingestion_ts = record.get("ingestion_ts")
     payload = record.get("payload")
     payload_display = payload if payload is not None else "—"
-    click.echo(f"Error: {error_code} | Payload: {payload_display}")
+    header_parts = [f"Error: {error_code}", f"Status: {dq_status}"]
+    if isinstance(payload_hash, str) and payload_hash:
+        header_parts.append(f"Hash: {payload_hash[:16]}...")
+    if ingestion_ts:
+        header_parts.append(f"Ingested: {ingestion_ts}")
+    click.echo(" | ".join(header_parts))
+
+    error_details = record.get("error_details")
+    if isinstance(error_details, dict) and error_details:
+        if error_details.get("message"):
+            click.echo(f"Reason: {error_details['message']}")
+        for label, key in (
+            ("Reason Code", "reason_code"),
+            ("Rule Type", "rule_type"),
+            ("Field", "field"),
+            ("Operator", "operator"),
+            ("Expected", "expected"),
+            ("Actual", "actual"),
+        ):
+            value = error_details.get(key)
+            if value is None or value == "":
+                continue
+            click.echo(f"{label}: {value}")
+
+    click.echo(f"Payload: {payload_display}")
+    click.echo("")
 
 
 def echo_checkpoint(checkpoint: str) -> None:

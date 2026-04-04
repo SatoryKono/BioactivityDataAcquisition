@@ -716,11 +716,25 @@ class TestEchoFunctions:
 
     def test_echo_quarantine_record(self, cli_runner):
         """Test echo_quarantine_record formats record."""
-        record = {"error_code": "VALIDATION_ERROR", "payload": '{"id": 1}'}
+        record = {
+            "error_code": "FILTERED_OUT_SILVER",
+            "payload_hash": "abc123def4567890abc123def4567890",
+            "dq_status": "NEW",
+            "payload": '{"id": 1}',
+            "error_details": {
+                "message": "Missing required field",
+                "reason_code": "missing_required_field",
+                "field": "publication_year",
+                "rule_type": "required_fields",
+            },
+        }
         result = cli_runner.invoke(
             click.command()(lambda: echo_quarantine_record(record)), []
         )
-        assert "VALIDATION_ERROR" in result.output
+        assert "FILTERED_OUT_SILVER" in result.output
+        assert "Reason: Missing required field" in result.output
+        assert "Reason Code: missing_required_field" in result.output
+        assert "Field: publication_year" in result.output
         assert '{"id": 1}' in result.output
 
     def test_echo_quarantine_record_with_defaults(self, cli_runner):
@@ -730,7 +744,7 @@ class TestEchoFunctions:
             click.command()(lambda: echo_quarantine_record(record)), []
         )
         assert "UNKNOWN" in result.output
-        # Uses em-dash for missing values instead of sentinel "N/A"
+        assert "Status: UNKNOWN" in result.output
         assert "—" in result.output
 
 

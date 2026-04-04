@@ -20,7 +20,7 @@ def build_quarantine_stats_lines(stats: JsonDict, *, pipeline: str) -> list[str]
         f"{'=' * 50}",
     ]
 
-    total = stats.get("total_count", 0)
+    total = stats.get("total_count", stats.get("total_records", 0))
     lines.append(f"\n  Total Records: {total}")
 
     by_error = stats.get("by_error_code", {})
@@ -36,6 +36,31 @@ def build_quarantine_stats_lines(stats: JsonDict, *, pipeline: str) -> list[str]
         for status, count in sorted(by_status.items()):
             pct = (count / total * 100) if total > 0 else 0
             lines.append(f"    - {status}: {count} ({pct:.1f}%)")
+
+    silver_filter_stats = stats.get("silver_filter_rejects", {})
+    if isinstance(silver_filter_stats, dict):
+        silver_total = silver_filter_stats.get("total_count", 0)
+        if isinstance(silver_total, int) and silver_total > 0:
+            pct = (silver_total / total * 100) if total > 0 else 0
+            lines.append(
+                f"\n  Silver Filter Rejects: {silver_total} ({pct:.1f}% of quarantine)"
+            )
+            for title, key in (
+                ("By Reason Code", "by_reason_code"),
+                ("By Field", "by_field"),
+                ("By Rule Type", "by_rule_type"),
+                ("By Operator", "by_operator"),
+            ):
+                values = silver_filter_stats.get(key, {})
+                if not isinstance(values, dict) or not values:
+                    continue
+                lines.append(f"\n  {title}:")
+                for label, count in sorted(
+                    values.items(),
+                    key=lambda item: (-item[1], item[0]),
+                )[:10]:
+                    pct = (count / silver_total * 100) if silver_total > 0 else 0
+                    lines.append(f"    - {label}: {count} ({pct:.1f}%)")
 
     lines.append(f"\n{'=' * 50}\n")
     return lines

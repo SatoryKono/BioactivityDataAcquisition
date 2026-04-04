@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-04'
 ---
 
 # BioETL Dashboards v2: Usage
@@ -43,6 +43,23 @@ p95 latency, failure-rate и 15-минутный объём health checks по �
 range-based quarantine/threshold/failures for the active Grafana window.
 6. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=115`:
 manifest/ledger failures, checkpoint incompatibilities, missing lineage refs и fragment outcomes по `layer/status`.
+
+## Silver Filter Rejects workflow
+
+- Для быстрых summary используйте shipped panels `Silver Filter Rejects` и
+  `Silver Filter Rejects by Pipeline` в `bioetl-overview-v2`, `bioetl-dq-v2`,
+  `bioetl-runtime`.
+- Эти панели отвечают на вопросы:
+  - растёт ли объём `filtered_out`;
+  - в каком `$pipeline` проблема сильнее;
+  - это локальный всплеск или устойчивый тренд в выбранном time range.
+- Для ответа на вопрос "почему именно записи были исключены" переходите в CLI:
+  ```bash
+  bioetl quarantine stats --pipeline <pipeline> --silver-filter-only
+  bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --limit 20
+  ```
+- Grafana в текущей shipped конфигурации — summary/trend surface.
+  Record-level причины и exact by-reason drilldown остаются задачей quarantine CLI.
 
 ## Drilldown
 

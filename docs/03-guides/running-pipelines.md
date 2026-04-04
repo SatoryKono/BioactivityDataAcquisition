@@ -1,19 +1,19 @@
 ---
-Version: 6.3.0
+Version: 6.4.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-02'
+Last verified: '2026-04-04'
 ---
 
 # Running Pipelines
 
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
-**Версия:** 6.3.0
-**Дата обновления:** 2026-04-02
+**Версия:** 6.4.0
+**Дата обновления:** 2026-04-04
 
 > **Boundary:** this guide owns execution and runtime control flow. For initial
 > environment bootstrap use [Quick Start](quick-start.md) or
@@ -491,6 +491,8 @@ bioetl maintenance bronze-cleanup --retention-days 60 --dry-run
 ## Карантин (Quarantine)
 
 Записи, не прошедшие валидацию, помещаются в карантин для анализа.
+Silver filter rejects используют тот же unified quarantine table, но обычно
+разбираются отдельно от DQ validation failures.
 
 ### Просмотр карантина
 
@@ -503,7 +505,43 @@ bioetl quarantine inspect --pipeline chembl_activity --limit 50
 
 # Фильтрация по коду ошибки
 bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIELD
+
+# Только Silver filter rejects
+bioetl quarantine stats --pipeline chembl_activity --silver-filter-only
+bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --limit 20
 ```
+
+`bioetl quarantine stats --silver-filter-only` показывает:
+
+- общее количество Silver rejects в quarantine;
+- breakdown по `reason_code`;
+- breakdown по `field`;
+- breakdown по `rule_type`;
+- breakdown по `operator`.
+
+`bioetl quarantine inspect --silver-filter-only` показывает для каждой записи:
+
+- `payload_hash`, `dq_status`, `ingestion_ts`;
+- human-readable `Reason`;
+- structured fields `reason_code`, `rule_type`, `field`, `operator`,
+  `expected`, `actual`;
+- исходный `payload`.
+
+### Grafana и Silver filter rejects
+
+Для быстрого operator triage используйте shipped dashboards:
+
+- `bioetl-overview-v2` и `bioetl-runtime` для общего объёма и динамики
+  `filtered_out`;
+- `bioetl-dq-v2` для DQ/quarantine summary по выбранному `$pipeline` и
+  `$run_type`.
+
+Рекомендуемый workflow:
+
+1. Сначала проверить summary и trend в Grafana.
+2. Затем перейти к `bioetl quarantine stats --silver-filter-only`.
+3. Если нужна причина конкретной записи, использовать
+   `bioetl quarantine inspect --silver-filter-only`.
 
 ### Повторная обработка
 
