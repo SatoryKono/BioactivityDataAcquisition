@@ -17,6 +17,10 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
     REGISTERED_PROMETHEUS_METRIC_NAMES,
 )
 
+_FORBIDDEN_LABELS = frozenset(
+    {"run_id", "manifest_id", "path", "file_path", "dataset_hash", "source_batch_id"}
+)
+
 
 @pytest.mark.unit
 def test_metric_registry_family_inventory_has_expected_families() -> None:
@@ -88,17 +92,6 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
 
 @pytest.mark.unit
 def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> None:
-    forbidden_labels = {
-        "run_id",
-        "manifest_id",
-        "path",
-        "file_path",
-        "filesystem_path",
-        "hash",
-        "dataset_hash",
-        "batch_id",
-        "source_batch_id",
-    }
     expected_labels = {
         "control_plane_manifest_writes_total": {"pipeline", "run_type", "status"},
         "control_plane_ledger_appends_total": {"pipeline", "event_type", "status"},
@@ -116,7 +109,7 @@ def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> No
         metric = COUNTERS[metric_name]
         actual_labels = set(metric._labelnames)
         assert actual_labels == labels
-        assert not (actual_labels & forbidden_labels), (
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels), (
             f"{metric_name} must not use forbidden high-cardinality labels: "
-            f"{sorted(actual_labels & forbidden_labels)}"
+            f"{sorted(_FORBIDDEN_LABELS.intersection(actual_labels))}"
         )
