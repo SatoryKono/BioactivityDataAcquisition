@@ -462,7 +462,7 @@ arch-all: arch-lint arch-test ## Run all architecture checks (lint + tests)
 qa-arch-fast: ## Run canonical fast architecture gate used by CI baseline
 	@echo "$(BLUE)Running canonical fast architecture gate...$(NC)"
 	HYPOTHESIS_PROFILE=$${HYPOTHESIS_PROFILE:-ci} $(RUN) pytest tests/architecture/ -m "not slow and not serial" -q --tb=short
-	$(PY_RUN) src/tools/scripts/check_architecture.py
+	$(PY_RUN) -m scripts.qa check-architecture
 	$(PY_RUN) scripts/qa/generate_architecture_dependency_map.py --check
 	@echo "$(GREEN)Canonical fast architecture gate passed!$(NC)"
 
@@ -470,8 +470,8 @@ qa-arch-full: ## Run canonical full architecture gate used by blocking CI jobs
 	@echo "$(BLUE)Running canonical full architecture gate...$(NC)"
 	$(RUN) pytest tests/architecture/ -v --tb=short
 	$(RUN) lint-imports --config .importlinter
-	$(PY_RUN) src/tools/scripts/check_application_deps.py
-	$(PY_RUN) src/tools/scripts/check_architecture.py
+	$(PY_RUN) -m scripts.qa check-app-deps
+	$(PY_RUN) -m scripts.qa check-architecture
 	@echo "$(GREEN)Canonical full architecture gate passed!$(NC)"
 
 qa-types: ## Run canonical strict type-checking gate used by CI

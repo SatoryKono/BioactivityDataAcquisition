@@ -14,10 +14,12 @@ Commands:
     generate-artifacts     Generate schema artifacts
     generate-pubtype       Generate publication type classification artifacts
     generate-contracts     Generate contracts
+    generate-config-matrix Generate unified entity/composite config comparison matrix
     generate-unified-map   Generate unified Bronze→Silver→Gold schema map CSV
     generate-field-diagnostics Generate field-level schema diagnostics CSV
     generate-field-spec    Generate deterministic field transformation spec CSV
     validate-configs       Validate unified pipeline YAML configs
+    validate-unified-configs Validate legacy unified entity config structure
     analyze-gaps           Config gap analysis
 """
 from __future__ import annotations
@@ -35,10 +37,12 @@ COMMANDS: dict[str, str] = {
     "generate-artifacts": "generate_schema_artifacts.py",
     "generate-pubtype": "generate_publication_type_classification_artifacts.py",
     "generate-contracts": "generate_contracts.py",
+    "generate-config-matrix": "generate_config_matrix.py",
     "generate-unified-map": "generate_unified_schema_map.py",
     "generate-field-diagnostics": "generate_field_level_diagnostics.py",
     "generate-field-spec": "generate_field_transformation_spec.py",
     "validate-configs": "validate_pipeline_configs.py",
+    "validate-unified-configs": "validate_unified_configs.py",
     "analyze-gaps": "config_gap_analysis.py",
 }
 

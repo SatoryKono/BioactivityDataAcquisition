@@ -37,21 +37,21 @@ _BREAKPOINT_CHOICES = (
 )
 
 
-def _load_stage_breakpoint() -> type["StageBreakpoint"]:
+def _load_stage_breakpoint() -> type[StageBreakpoint]:
     """Resolve StageBreakpoint lazily to avoid command import fan-out."""
     from bioetl.domain.ports import StageBreakpoint
 
     return StageBreakpoint
 
 
-def _load_run_options_type() -> type["RunOptions"]:
+def _load_run_options_type() -> type[RunOptions]:
     """Resolve RunOptions lazily to keep CLI imports lightweight."""
     from bioetl.application.services import RunOptions
 
     return RunOptions
 
 
-def _load_debug_abort_error_type() -> type["DebugAbortError"]:
+def _load_debug_abort_error_type() -> type[DebugAbortError]:
     """Resolve DebugAbortError lazily to keep CLI imports lightweight."""
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
 
@@ -60,7 +60,7 @@ def _load_debug_abort_error_type() -> type["DebugAbortError"]:
 
 def _resolve_context_registry(
     ctx: click.Context | None,
-) -> "PipelineRegistry | None":
+) -> PipelineRegistry | None:
     """Proxy to the shared run support helper without importing it eagerly."""
     from bioetl.interfaces.cli.commands.domains.run.support import (
         resolve_context_registry,

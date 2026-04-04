@@ -204,7 +204,7 @@ jobs:
           python-version: "3.11"
 
       - name: Check constructor argument counts
-        run: python src/tools/scripts/check_constructor_args.py --warn-only
+        run: python -m scripts.qa check-constructor-args --warn-only
 
   executor-complexity:
     name: Executor Complexity Check

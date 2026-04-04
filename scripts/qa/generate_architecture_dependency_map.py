@@ -50,6 +50,40 @@ GROUP_EDGE_LIMIT = 60
 _FRONTMATTER_DELIMITER = "---"
 
 
+def _render_markdown_table(
+    headers: list[str],
+    rows: list[list[str]],
+    *,
+    right_align_columns: frozenset[int] = frozenset(),
+) -> list[str]:
+    """Render a stable aligned markdown table."""
+    widths = [len(header) for header in headers]
+    for row in rows:
+        for index, cell in enumerate(row):
+            widths[index] = max(widths[index], len(cell))
+
+    def _format_row(row: list[str]) -> str:
+        formatted_cells: list[str] = []
+        for index, cell in enumerate(row):
+            width = widths[index]
+            if index in right_align_columns:
+                formatted_cells.append(cell.rjust(width))
+            else:
+                formatted_cells.append(cell.ljust(width))
+        return f"| {' | '.join(formatted_cells)} |"
+
+    separator_cells: list[str] = []
+    for index, width in enumerate(widths):
+        if index in right_align_columns:
+            separator_cells.append("-" * max(width - 1, 1) + ":")
+        else:
+            separator_cells.append("-" * width)
+
+    rendered = [_format_row(headers), f"| {' | '.join(separator_cells)} |"]
+    rendered.extend(_format_row(row) for row in rows)
+    return rendered
+
+
 @dataclass(frozen=True)
 class LayerEdge:
     """Aggregated dependency between architecture layers."""
@@ -283,33 +317,49 @@ def build_markdown(snapshot: DependencySnapshot) -> str:
             "",
             "## Layer Edge Table",
             "",
-            "| From | To | Imports | Policy |",
-            "|---|---|---:|---|",
         ]
     )
 
-    for edge in snapshot.layer_edges:
-        policy = "allowed" if edge.allowed else "violation"
-        lines.append(
-            f"| `{edge.source}` | `{edge.target}` | {edge.imports} | {policy} |"
+    layer_rows = [
+        [
+            f"`{edge.source}`",
+            f"`{edge.target}`",
+            str(edge.imports),
+            "allowed" if edge.allowed else "violation",
+        ]
+        for edge in snapshot.layer_edges
+    ]
+    if not layer_rows:
+        layer_rows.append(["`-`", "`-`", "0", "-"])
+    lines.extend(
+        _render_markdown_table(
+            ["From", "To", "Imports", "Policy"],
+            layer_rows,
+            right_align_columns=frozenset({2}),
         )
-    if not snapshot.layer_edges:
-        lines.append("| `-` | `-` | 0 | - |")
+    )
 
     lines.extend(
         [
             "",
             "## Cross-Layer Module-Group Edges (Compact)",
             "",
-            "| From Group | To Group | Imports |",
-            "|---|---|---:|",
         ]
     )
 
-    for edge in snapshot.cross_layer_group_edges:
-        lines.append(f"| `{edge.source}` | `{edge.target}` | {edge.imports} |")
-    if not snapshot.cross_layer_group_edges:
-        lines.append("| `-` | `-` | 0 |")
+    group_rows = [
+        [f"`{edge.source}`", f"`{edge.target}`", str(edge.imports)]
+        for edge in snapshot.cross_layer_group_edges
+    ]
+    if not group_rows:
+        group_rows.append(["`-`", "`-`", "0"])
+    lines.extend(
+        _render_markdown_table(
+            ["From Group", "To Group", "Imports"],
+            group_rows,
+            right_align_columns=frozenset({2}),
+        )
+    )
 
     lines.extend(["", "## Policy Violations", ""])
     if snapshot.violations:

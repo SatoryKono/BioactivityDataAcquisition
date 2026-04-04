@@ -19,6 +19,30 @@ from hypothesis import strategies as st
 from bioetl.domain.services.identity_service import META_FIELDS, IdentityService
 
 
+_HASH_SAFE_TEXT = st.text(
+    alphabet=st.characters(
+        whitelist_categories=("Ll", "Lu", "Nd"),
+        whitelist_characters="-.:/ ",
+    ),
+    max_size=32,
+)
+_BUSINESS_KEY_TEXT = st.text(
+    min_size=1,
+    max_size=20,
+    alphabet=st.characters(
+        whitelist_categories=("Ll", "Lu", "Nd"),
+        whitelist_characters="-.:/ ",
+    ),
+)
+_HASH_SAFE_SCALAR = st.one_of(
+    st.none(),
+    st.booleans(),
+    st.integers(min_value=-(2**31), max_value=2**31 - 1),
+    st.floats(allow_nan=False, allow_infinity=False, width=32),
+    _HASH_SAFE_TEXT,
+)
+
+
 class TestIdentityServiceDeterminism:
     """Test determinism of content hash generation."""
 
@@ -154,33 +178,17 @@ class TestMetaFieldExclusion:
         assert META_FIELDS == expected
 
     @pytest.mark.hypothesis
-    @settings(suppress_health_check=[HealthCheck.too_slow])
+    # The invariant only depends on metadata exclusion, not on full-Unicode or
+    # giant numeric domains. Keep the strategy broad enough for mixed scalars
+    # while avoiding expensive Hypothesis constant discovery in the full suite.
+    @settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
     @given(
         business_record=st.dictionaries(
-            keys=st.text(
-                min_size=1,
-                max_size=20,
-                alphabet=st.characters(
-                    blacklist_characters="_",
-                    blacklist_categories=("Cs",),
-                ),
-            ),
-            values=st.one_of(
-                st.none(),
-                st.booleans(),
-                st.integers(min_value=-(2**63), max_value=2**63 - 1),
-                st.floats(allow_nan=False, allow_infinity=False),
-                st.text(),
-            ),
-            max_size=10,
+            keys=_BUSINESS_KEY_TEXT.filter(lambda key: not key.startswith("_")),
+            values=_HASH_SAFE_SCALAR,
+            max_size=6,
         ),
-        meta_value=st.one_of(
-            st.none(),
-            st.booleans(),
-            st.integers(),
-            st.floats(allow_nan=False, allow_infinity=False),
-            st.text(),
-        ),
+        meta_value=_HASH_SAFE_SCALAR,
     )
     def test_hash_is_stable_when_only_metadata_changes(
         self,

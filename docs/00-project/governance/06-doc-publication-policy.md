@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.7.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-04'
----
+  Last verified: '2026-04-04'
+
+______________________________________________________________________
 
 # Documentation Publication Policy
 
@@ -22,6 +25,7 @@ consistency, а этот документ задаёт правила публи
 ## Классы документации
 
 1. `published`
+
 - Документ входит в `mkdocs.yml` nav.
 - Требования:
   - актуальные пути/команды;
@@ -31,6 +35,7 @@ consistency, а этот документ задаёт правила публи
   user guides, но и published contracts, CLI reference и обязательные runbooks.
 
 2. `internal-published`
+
 - Документ включён в `mkdocs.yml` nav как non-normative internal surface
   (обычно в ветке `Internal / Extended`).
 - Назначение: curated mirrors, runtime-facing guides, служебные каталоги и
@@ -41,6 +46,7 @@ consistency, а этот документ задаёт правила публи
   - не использовать как источник истины для архитектурных/продуктовых контрактов.
 
 3. `internal`
+
 - Документ хранится в `docs/`, но не включён в nav.
 - Назначение: рабочие заметки, промежуточные черновики.
 - Требования:
@@ -48,6 +54,7 @@ consistency, а этот документ задаёт правила публи
   - не использовать как источник истины для публичных инструкций.
 
 4. `repo-only`
+
 - Документ хранится в репозитории как рабочий или curated extended surface, но
   намеренно исключён из MkDocs publication.
 - Назначение: `docs/plans/**`, `docs/reports/**`, excluded AI entrypoints и
@@ -62,6 +69,7 @@ consistency, а этот документ задаёт правила публи
     references, inline code paths или curated summaries.
 
 5. `archive`
+
 - Исторические материалы, superseded ADR/планы/отчёты.
 - Рекомендуемое размещение: `docs/99-archive/`.
 - Требования:
@@ -69,6 +77,7 @@ consistency, а этот документ задаёт правила публи
   - допускаются legacy пути/команды только как историческая справка.
 
 6. `internal-generated` (non-nav)
+
 - Генерируемые или вариантные материалы, которые не должны перегружать публичную навигацию.
 - Размещение: `docs/` вне `mkdocs.yml` nav.
 - Примеры:
@@ -86,11 +95,11 @@ consistency, а этот документ задаёт правила публи
 Это применяется только если одновременно выполнены все условия:
 
 1. семейство уже ratified в governance policy;
-2. у семейства есть discoverable entrypoint (`README`, `INDEX`, `SUMMARY` или
+1. у семейства есть discoverable entrypoint (`README`, `INDEX`, `SUMMARY` или
    каталог в nav / repository path);
-3. документы не используются как первичный источник архитектурной,
+1. документы не используются как первичный источник архитектурной,
    продуктовой или операционной политики;
-4. bulk family целиком рассматривается как `repo-only` или
+1. bulk family целиком рассматривается как `repo-only` или
    `internal-generated`.
 
 Текущие ratified path-classified family buckets:
@@ -109,17 +118,17 @@ consistency, а этот документ задаёт правила публи
 
 1. Документы класса `published` являются нормативными и должны отражать текущее состояние репозитория.
    Для текущего project guidance источником истины остаются активные docs в `docs/00-05`.
-2. Документы класса `internal-published` публикуются для удобства команды, но не являются нормативным источником требований.
-3. Документы класса `repo-only` остаются discoverable через repository-path ссылки и curated summaries, но не должны маскироваться под nav-published guidance.
-4. Path-classified bulk families MAY inherit class from governance policy and
+1. Документы класса `internal-published` публикуются для удобства команды, но не являются нормативным источником требований.
+1. Документы класса `repo-only` остаются discoverable через repository-path ссылки и curated summaries, но не должны маскироваться под nav-published guidance.
+1. Path-classified bulk families MAY inherit class from governance policy and
    entrypoint without per-file frontmatter, если они не претендуют на
    normative status.
-5. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published`, затем `repo-only` и `internal`.
-6. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
-7. Для активных docs использовать автоматические проверки `check_doc_links` и nav/strict-build guardrails в CI.
-8. Документы по runtime, который не является стандартным или default-supported, могут быть `published`, `internal-published` или `repo-only` только при явной пометке experimental/disclaimer и без конфликта с ADR-010 Local-Only posture.
-9. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
-10. Материалы в `docs/99-archive/` сохраняются для traceability, но не являются нормативными для текущего поведения проекта.
+1. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published`, затем `repo-only` и `internal`.
+1. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
+1. Для активных docs использовать автоматические проверки `check_doc_links` и nav/strict-build guardrails в CI.
+1. Документы по runtime, который не является стандартным или default-supported, могут быть `published`, `internal-published` или `repo-only` только при явной пометке experimental/disclaimer и без конфликта с ADR-010 Local-Only posture.
+1. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
+1. Материалы в `docs/99-archive/` сохраняются для traceability, но не являются нормативными для текущего поведения проекта.
 
 ## Published Control-Plane & Feature-Rollout Pack
 
@@ -129,9 +138,9 @@ consistency, а этот документ задаёт правила публи
 Обязательный published pack для такой surface включает:
 
 1. contract-spec в `docs/04-reference/contracts/`;
-2. CLI reference entry в `docs/04-reference/cli.md`;
-3. operations runbook в `docs/05-operations/runbooks/`;
-4. связанные ADR, которые фиксируют runtime semantics и rollout posture.
+1. CLI reference entry в `docs/04-reference/cli.md`;
+1. operations runbook в `docs/05-operations/runbooks/`;
+1. связанные ADR, которые фиксируют runtime semantics и rollout posture.
 
 Текущий ratified пример такого пакета:
 
@@ -189,12 +198,12 @@ governance и navigator pages.
 ### 2. Refresh order
 
 1. Сначала обновлять `published` docs в `docs/00-05`.
-2. Затем обновлять high-signal `internal-published` indexes/summaries и
+1. Затем обновлять high-signal `internal-published` indexes/summaries и
    `repo-only` entrypoints, если они:
    - используются в planning/review;
    - ссылаются на уже закрытые волны как на текущие;
    - содержат current-tense рекомендации, переставшие быть актуальными.
-3. Исторические raw/evidence/archive материалы не переписывать без необходимости;
+1. Исторические raw/evidence/archive материалы не переписывать без необходимости;
    вместо этого обновлять верхний `SUMMARY.md`, `INDEX.md` или добавлять
    явный freshness / rebaseline note.
 
@@ -219,13 +228,14 @@ governance и navigator pages.
 Перед merge для changeset, затрагивающего docs/governance surfaces:
 
 1. Проверить, не остались ли current-tense рекомендации для уже закрытых waves.
-2. Проверить, что active indexes (`docs/plans`, `docs/reports`, evidence indexes)
+1. Проверить, что active indexes (`docs/plans`, `docs/reports`, evidence indexes)
    не ведут к stale interpretation без rebaseline note.
-3. Для path-classified bulk families проверить, что entrypoint / catalog /
+1. Для path-classified bulk families проверить, что entrypoint / catalog /
    `SUMMARY.md` остаются достаточными для discoverability и не ведут к stale
    interpretation.
-3. Для generated surfaces прогнать owner `--check`.
-4. Для runtime/governance freshness прогнать:
+1. Для generated surfaces прогнать owner `--check`.
+1. Для runtime/governance freshness прогнать:
+
 ```bash
 uv run python -m scripts.docs check-drift --freshness
 ./.venv/Scripts/python.exe scripts/check_doc_drift.py --freshness
@@ -234,21 +244,27 @@ uv run python -m scripts.docs check-drift --freshness
 ## Минимальный чек-лист перед merge
 
 1. Прогнать базовую docs-проверку:
+
 ```bash
 uv run python -m scripts.docs check-links
 ```
+
 2. При изменениях вокруг nav/non-nav проверить рост вне навигации:
+
 ```bash
 uv run python -m scripts.docs check-links --not-in-nav-growth
 ```
+
 3. Проверить, что docs-site всё ещё собирается в strict-режиме:
+
 ```bash
 uv run bash scripts/docs/build_docs_site.sh --strict
 ```
+
 4. Если менялись active internal-published или repo-only summaries/indexes,
    проверить, что они либо refreshed, либо снабжены явной freshness/rebaseline
    note.
- 
+
 ## Связанный документ
 
 - [D-01: Governance & Style Guide документации BioETL](01-documentation-governance-style-guide.md)

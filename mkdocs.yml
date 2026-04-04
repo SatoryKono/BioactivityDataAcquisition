@@ -28,8 +28,19 @@ exclude_docs: |
     reports/docs-export-report-*.md
     **/~$*.docx
 not_in_nav: |
+    00-project/ai/README.md
+    00-project/ai/agents/CLAUDE.md
+    00-project/ai/agents/agents/py-*.md
+    00-project/ai/agents/agents/sp-*.md
+    00-project/ai/agents/orchestration/**
+    00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
+    00-project/ai/agents/runtime/orchestration/**
+    00-project/ai/memory/README.md
+    00-project/ai/memory/memory-*.md
     00-project/ai/prompts/*.md
+    00-project/ai/skills/SKILLS-CATALOG.md
     00-project/ai/skills/_references/**
+    00-project/ai/skills/global/.system/**
     00-project/ai/skills/local/**/references/**
     00-project/ai/skills/local/grafana-dashboard-extension/SKILL.md
     00-project/ai/skills/local/prometheus-alert-rule-editor/SKILL.md

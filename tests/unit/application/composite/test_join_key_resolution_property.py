@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from bioetl.application.composite.join_key_normalization import (
@@ -18,6 +18,7 @@ _IDENT = st.builds(
     st.sampled_from(tuple(_LOWER_ALPHA)),
     st.text(alphabet=_LOWER_ALNUM, min_size=0, max_size=7),
 )
+_PROPERTY_TEST_SETTINGS = settings(suppress_health_check=[HealthCheck.too_slow])
 
 
 def _build_resolver() -> JoinKeyResolverService:
@@ -27,6 +28,7 @@ def _build_resolver() -> JoinKeyResolverService:
     )
 
 
+@_PROPERTY_TEST_SETTINGS
 @given(provider=_IDENT, entity=_IDENT, key=_IDENT)
 def test_find_join_key_column_prefers_qualified_when_available(
     provider: str,
@@ -41,6 +43,7 @@ def test_find_join_key_column_prefers_qualified_when_available(
     assert resolver.find_join_key_column(key, columns, pipeline) == qualified
 
 
+@_PROPERTY_TEST_SETTINGS
 @given(key=_IDENT)
 def test_find_join_key_column_falls_back_to_unqualified_for_invalid_pipeline(
     key: str,
@@ -51,6 +54,7 @@ def test_find_join_key_column_falls_back_to_unqualified_for_invalid_pipeline(
     assert resolver.find_join_key_column(key, columns, "invalidpipeline") == key
 
 
+@_PROPERTY_TEST_SETTINGS
 @given(provider=_IDENT, entity=_IDENT, key=_IDENT)
 def test_resolve_join_key_names_uses_qualified_seed_when_present(
     provider: str,
@@ -73,6 +77,7 @@ def test_resolve_join_key_names_uses_qualified_seed_when_present(
     assert seed_qualified == qualified
 
 
+@_PROPERTY_TEST_SETTINGS
 @given(
     left_provider=_IDENT,
     left_entity=_IDENT,
@@ -109,6 +114,7 @@ def test_resolve_join_key_names_asymmetric_preserves_left_qualification(
     assert resolved_right == f"{right_provider}.{right_entity}.{right_key}"
 
 
+@_PROPERTY_TEST_SETTINGS
 @given(
     left_provider=_IDENT,
     left_entity=_IDENT,
@@ -139,3 +145,6 @@ def test_resolve_composite_join_keys_preserves_key_cardinality(
     assert len(right_keys) == len(join_keys)
     assert set(left_keys).issubset(join_key_set)
     assert set(right_keys).issubset(join_key_set)
+
+
+_PROPERTY_TEST_SETTINGS = settings(suppress_health_check=[HealthCheck.too_slow])

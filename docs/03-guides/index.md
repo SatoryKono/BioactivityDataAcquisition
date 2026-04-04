@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-02'
----
+  Last verified: '2026-04-02'
+
+______________________________________________________________________
 
 # Guides Index
 
@@ -21,19 +24,19 @@ for published contracts, CLI surfaces, and specs.
 
 ## Common Entry Points
 
-| Need | Entry point |
-|---|---|
-| Bootstrap quickly | [quick-start.md](quick-start.md) |
-| Full local setup walkthrough | [getting-started.md](getting-started.md) |
-| Run and resume pipelines | [running-pipelines.md](running-pipelines.md) |
-| Verify docs and strict site build | [docs-verification.md](docs-verification.md) |
-| Understand pipeline lifecycle | [pipeline-lifecycle.md](pipeline-lifecycle.md) |
-| Configure pipelines | [pipeline-configuration.md](pipeline-configuration.md) |
-| Configure DQ behavior | [dq-configuration.md](dq-configuration.md) |
-| Run tests and local verification | [testing.md](testing.md) |
-| Debug common local problems | [troubleshooting.md](troubleshooting.md) |
-| Metrics and local monitoring setup | [metrics-monitoring.md](metrics-monitoring.md) |
-| Dashboard usage and extension | [dashboards/README.md](dashboards/README.md) |
+| Need                               | Entry point                                            |
+| ---------------------------------- | ------------------------------------------------------ |
+| Bootstrap quickly                  | [quick-start.md](quick-start.md)                       |
+| Full local setup walkthrough       | [getting-started.md](getting-started.md)               |
+| Run and resume pipelines           | [running-pipelines.md](running-pipelines.md)           |
+| Verify docs and strict site build  | [docs-verification.md](docs-verification.md)           |
+| Understand pipeline lifecycle      | [pipeline-lifecycle.md](pipeline-lifecycle.md)         |
+| Configure pipelines                | [pipeline-configuration.md](pipeline-configuration.md) |
+| Configure DQ behavior              | [dq-configuration.md](dq-configuration.md)             |
+| Run tests and local verification   | [testing.md](testing.md)                               |
+| Debug common local problems        | [troubleshooting.md](troubleshooting.md)               |
+| Metrics and local monitoring setup | [metrics-monitoring.md](metrics-monitoring.md)         |
+| Dashboard usage and extension      | [dashboards/README.md](dashboards/README.md)           |
 
 ## Role Boundaries
 

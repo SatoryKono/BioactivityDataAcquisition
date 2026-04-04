@@ -23,7 +23,7 @@ top-level domain facade; canonical callers should use
 
 from __future__ import annotations
 
-from importlib import import_module
+from importlib import import_module as _import_module
 
 _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
     "PipelineEvent": ("bioetl.domain.events", "PipelineEvent"),
@@ -83,9 +83,9 @@ def __getattr__(name: str) -> object:
         "observability_contract",
         "types_config_validation",
     }:
-        value = import_module(module_name)
+        value = _import_module(module_name)
     else:
-        value = getattr(import_module(module_name), attribute_name)
+        value = getattr(_import_module(module_name), attribute_name)
     globals()[name] = value
     return value
 

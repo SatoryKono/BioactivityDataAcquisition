@@ -105,6 +105,12 @@ foreach ($Arg in $PytestArgs) {
 }
 
 $PytestArgs = $FilteredArgs
+$QuietRequested = $false
+foreach ($Arg in $PytestArgs) {
+    if ($Arg -in @("-q", "--quiet", "-qq", "-qqq")) {
+        $QuietRequested = $true
+    }
+}
 
 if ($NeedsDefaultFlags) {
     if ($PytestNarrow -or $CollectOnly) {
@@ -112,6 +118,11 @@ if ($NeedsDefaultFlags) {
     } else {
         $PytestArgs = @("--cov=src/bioetl", "--cov-report=term", "-q", "--maxfail=1") + $PytestArgs
     }
+}
+
+if ($env:BIOETL_PYTEST_LIVE_OUTPUT -eq "1" -and -not $QuietRequested) {
+    $PytestArgs = @($PytestArgs | Where-Object { $_ -ne "-q" })
+    $PytestArgs += @("-o", "console_output_style=progress")
 }
 
 if ((Test-CoveragePluginNeeded -Args $PytestArgs) -and -not $env:COVERAGE_FILE) {

@@ -1,6 +1,7 @@
 *Статус: internal-only (historical prompt)*
 
 Текущая runtime-surface:
+
 - `python -m scripts.qa generate-debt-tasks`
 - `python -m scripts.qa reduce-architecture-debt`
 - `.codex/agents/py-architecture-debt-bot.md`
@@ -15,28 +16,28 @@
 автоматическое устранение architecture debt
 на основе задач из `tasks_architecture_metric_exemptions_*.json`.
 
----
+______________________________________________________________________
 
 ## 1. Инициализация
 
 ### 1.1 Загрузка задач
 
 1. Найди все файлы `tasks_architecture_metric_exemptions_*.json` в корне проекта.
-2. При наличии нескольких файлов — используй файл с **наиболее поздней датой** в имени.
-3. Прочитай JSON и извлеки массив `tasks[]`.
+1. При наличии нескольких файлов — используй файл с **наиболее поздней датой** в имени.
+1. Прочитай JSON и извлеки массив `tasks[]`.
 
 ### 1.2 Фильтрация и классификация задач
 
 Разбей задачи на **категории действий** по `registry` и `status`:
 
-| Категория | Условие | Действие |
-|-----------|---------|----------|
-| **STALE_EXEMPTION** | `status == "within_limit"` И `current_value` значительно ниже layer default limit (файл/класс уже не нарушает базовый лимит слоя) | Удалить exemption из YAML, обновить debt_scorecard baseline |
-| **REDUCE_TO_LIMIT** | `status == "over_limit"` ИЛИ `delta_to_limit >= 0` | Рефакторинг: уменьшить LOC/CC до допустимого порога |
-| **GOD_OBJECT** | `registry == "god_object"` | Увеличить delegation patterns (≥3 уникальных `self._component.method()`) |
-| **COMPLEXITY** | `registry in ["function_complexity", "domain_complexity"]` | Снизить CC через ранние выходы, extract method, strategy dispatch |
-| **NEAR_LIMIT** | `status == "within_limit"` И `delta_to_limit` в диапазоне [-5, 0] | Приоритетная задача: небольшой рост LOC сделает exemption stale. Уменьшить значение, затем удалить exemption |
-| **SAFE_MARGIN** | `status == "within_limit"` И `delta_to_limit < -15` | Низкий приоритет. Exemption жива, значение далеко от лимита. Можно отложить |
+| Категория           | Условие                                                                                                                           | Действие                                                                                                     |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **STALE_EXEMPTION** | `status == "within_limit"` И `current_value` значительно ниже layer default limit (файл/класс уже не нарушает базовый лимит слоя) | Удалить exemption из YAML, обновить debt_scorecard baseline                                                  |
+| **REDUCE_TO_LIMIT** | `status == "over_limit"` ИЛИ `delta_to_limit >= 0`                                                                                | Рефакторинг: уменьшить LOC/CC до допустимого порога                                                          |
+| **GOD_OBJECT**      | `registry == "god_object"`                                                                                                        | Увеличить delegation patterns (≥3 уникальных `self._component.method()`)                                     |
+| **COMPLEXITY**      | `registry in ["function_complexity", "domain_complexity"]`                                                                        | Снизить CC через ранние выходы, extract method, strategy dispatch                                            |
+| **NEAR_LIMIT**      | `status == "within_limit"` И `delta_to_limit` в диапазоне [-5, 0]                                                                 | Приоритетная задача: небольшой рост LOC сделает exemption stale. Уменьшить значение, затем удалить exemption |
+| **SAFE_MARGIN**     | `status == "within_limit"` И `delta_to_limit < -15`                                                                               | Низкий приоритет. Exemption жива, значение далеко от лимита. Можно отложить                                  |
 
 ### 1.3 Определение layer default limits
 
@@ -66,38 +67,38 @@ god_object:
 Порядок обработки задач:
 
 1. **STALE_EXEMPTION** (быстрый выигрыш: просто удалить запись)
-2. **GOD_OBJECT** (архитектурный дефект)
-3. **COMPLEXITY** (domain purity)
-4. **NEAR_LIMIT** (превентивный рефакторинг)
-5. **REDUCE_TO_LIMIT** (активные нарушения)
-6. **SAFE_MARGIN** (можно отложить)
+1. **GOD_OBJECT** (архитектурный дефект)
+1. **COMPLEXITY** (domain purity)
+1. **NEAR_LIMIT** (превентивный рефакторинг)
+1. **REDUCE_TO_LIMIT** (активные нарушения)
+1. **SAFE_MARGIN** (можно отложить)
 
----
+______________________________________________________________________
 
 ## 2. Выбор агента по типу задачи
 
 ### 2.1 Таблица агентов
 
-| Категория задачи | Агент-исполнитель | `subagent_type` | `model` | Пояснение |
-|---|---|---|---|---|
-| **STALE_EXEMPTION** | Оркестратор (ты сам) | — | — | Простое удаление записи из YAML. Не требует агента. |
-| **GOD_OBJECT** | Production code напрямую | — | — | Добавить delegation patterns. Малые изменения — пиши сам. Большие — используй `py-debug-bot` |
-| **COMPLEXITY** | Production code напрямую | — | — | Extract method, simplify branching. Малые изменения. |
-| **REDUCE_TO_LIMIT** (file_size) | Production code напрямую | — | — | Декомпозиция файла: extract module, move helpers |
-| **REDUCE_TO_LIMIT** (class_size) | Production code напрямую | — | — | Extract mixin, extract strategy |
-| **NEAR_LIMIT** | Production code напрямую | — | — | Trim LOC через удаление пустых строк, объединение imports |
+| Категория задачи                 | Агент-исполнитель        | `subagent_type` | `model` | Пояснение                                                                                    |
+| -------------------------------- | ------------------------ | --------------- | ------- | -------------------------------------------------------------------------------------------- |
+| **STALE_EXEMPTION**              | Оркестратор (ты сам)     | —               | —       | Простое удаление записи из YAML. Не требует агента.                                          |
+| **GOD_OBJECT**                   | Production code напрямую | —               | —       | Добавить delegation patterns. Малые изменения — пиши сам. Большие — используй `py-debug-bot` |
+| **COMPLEXITY**                   | Production code напрямую | —               | —       | Extract method, simplify branching. Малые изменения.                                         |
+| **REDUCE_TO_LIMIT** (file_size)  | Production code напрямую | —               | —       | Декомпозиция файла: extract module, move helpers                                             |
+| **REDUCE_TO_LIMIT** (class_size) | Production code напрямую | —               | —       | Extract mixin, extract strategy                                                              |
+| **NEAR_LIMIT**                   | Production code напрямую | —               | —       | Trim LOC через удаление пустых строк, объединение imports                                    |
 
 > **Правило**: Production-код пишет оркестратор напрямую (без субагента).
 > Субагенты используются для **тестирования**, **документации** и **аудита**.
 
 ### 2.2 Агенты сопровождения (после каждой задачи)
 
-| Роль | `subagent_type` | `model` | Когда запускать |
-|---|---|---|---|
-| **Тестирование** | `py-test-bot` | `sonnet` | После каждого исполнителя. Проверяет, что изменения не сломали тесты. |
-| **Doc-sync** | `py-doc-bot` | `haiku` | После каждого исполнителя. Синхронизирует docstrings/docs с изменениями. |
-| **Финальный аудит (arch)** | `py-audit-bot` | `opus` | После завершения ВСЕХ задач. Полная проверка архитектуры. |
-| **Финальный аудит (review)** | `py-review-orchestrator` | `opus` | После завершения ВСЕХ задач. Code review изменений. |
+| Роль                         | `subagent_type`          | `model`  | Когда запускать                                                          |
+| ---------------------------- | ------------------------ | -------- | ------------------------------------------------------------------------ |
+| **Тестирование**             | `py-test-bot`            | `sonnet` | После каждого исполнителя. Проверяет, что изменения не сломали тесты.    |
+| **Doc-sync**                 | `py-doc-bot`             | `haiku`  | После каждого исполнителя. Синхронизирует docstrings/docs с изменениями. |
+| **Финальный аудит (arch)**   | `py-audit-bot`           | `opus`   | После завершения ВСЕХ задач. Полная проверка архитектуры.                |
+| **Финальный аудит (review)** | `py-review-orchestrator` | `opus`   | После завершения ВСЕХ задач. Code review изменений.                      |
 
 ### 2.3 Шаблоны промтов для субагентов
 
@@ -122,28 +123,28 @@ task_id={task.id}-TEST, phase=final
 
 **Выбор `{specific_test_files}`:**
 
-| Слой target_file | Тестовый путь |
-|---|---|
-| `infrastructure/storage/` | `tests/unit/infrastructure/storage/ -k "{module_name}"` |
-| `infrastructure/adapters/chembl/` | `tests/unit/infrastructure/adapters/chembl/` |
-| `infrastructure/adapters/http/` | `tests/unit/infrastructure/adapters/http/` |
-| `infrastructure/adapters/common/` | `tests/unit/infrastructure/adapters/common/` |
-| `infrastructure/adapters/decorators/` | `tests/unit/infrastructure/adapters/` |
-| `application/composite/` | `tests/unit/application/composite/` |
-| `application/core/` | `tests/unit/application/core/` |
-| `domain/` | `tests/unit/domain/` |
-| `composition/` | `tests/unit/composition/` |
-| `interfaces/` | `tests/unit/interfaces/` |
+| Слой target_file                      | Тестовый путь                                           |
+| ------------------------------------- | ------------------------------------------------------- |
+| `infrastructure/storage/`             | `tests/unit/infrastructure/storage/ -k "{module_name}"` |
+| `infrastructure/adapters/chembl/`     | `tests/unit/infrastructure/adapters/chembl/`            |
+| `infrastructure/adapters/http/`       | `tests/unit/infrastructure/adapters/http/`              |
+| `infrastructure/adapters/common/`     | `tests/unit/infrastructure/adapters/common/`            |
+| `infrastructure/adapters/decorators/` | `tests/unit/infrastructure/adapters/`                   |
+| `application/composite/`              | `tests/unit/application/composite/`                     |
+| `application/core/`                   | `tests/unit/application/core/`                          |
+| `domain/`                             | `tests/unit/domain/`                                    |
+| `composition/`                        | `tests/unit/composition/`                               |
+| `interfaces/`                         | `tests/unit/interfaces/`                                |
 
 **Выбор `{relevant_test_class}`:**
 
-| Registry | Test class |
-|---|---|
-| `file_size_limits` | `TestFileSizeLimits` |
-| `class_size` | `TestClassSize` |
+| Registry                                    | Test class               |
+| ------------------------------------------- | ------------------------ |
+| `file_size_limits`                          | `TestFileSizeLimits`     |
+| `class_size`                                | `TestClassSize`          |
 | `function_complexity` / `domain_complexity` | `TestFunctionComplexity` |
-| `function_length` | `TestFunctionLength` |
-| `god_object` | `TestGodObjectDetection` |
+| `function_length`                           | `TestFunctionLength`     |
+| `god_object`                                | `TestGodObjectDetection` |
 
 #### py-doc-bot (синхронизация документации)
 
@@ -202,7 +203,7 @@ Code review изменений architecture debt reduction.
 НЕ создавай файлы в корне проекта.
 ```
 
----
+______________________________________________________________________
 
 ## 3. Execution Workflow
 
@@ -264,11 +265,12 @@ Code review изменений architecture debt reduction.
 После ЛЮБЫХ изменений в exemptions:
 
 1. **architecture_metric_exemptions.yaml** — удалить/обновить записи
-2. **debt_scorecard.yaml** — пересчитать:
+1. **debt_scorecard.yaml** — пересчитать:
    - `baseline.total_exemptions` = сумма всех `by_registry.*`
    - `baseline.by_registry.{registry}` = количество записей в соответствующем registry
 
 **Правило подсчёта:**
+
 ```
 total = file_size_limits + function_complexity + function_length
       + class_size + class_method_count + god_object + domain_complexity
@@ -281,51 +283,51 @@ total = file_size_limits + function_complexity + function_length
 Каждый агент-исполнитель **MUST** соблюдать:
 
 1. **Поведение не изменено** — все существующие тесты проходят
-2. **Публичные интерфейсы не изменены** — signatures, return types, __all__ exports
-3. **Docstrings не удалены** — разрешено только редактирование для актуализации
-4. **Import boundaries** — соблюдать матрицу ARCH-001
-5. **mypy --strict** — после изменений файл проходит strict type checking
+1. **Публичные интерфейсы не изменены** — signatures, return types, __all__ exports
+1. **Docstrings не удалены** — разрешено только редактирование для актуализации
+1. **Import boundaries** — соблюдать матрицу ARCH-001
+1. **mypy --strict** — после изменений файл проходит strict type checking
 
 ### 3.5 Стратегии рефакторинга по типу задачи
 
 #### file_size_limits (уменьшение LOC файла)
 
-| Приём | Когда | Экономия LOC |
-|-------|-------|-------------|
-| Удалить избыточные пустые строки | Всегда | 5-15 |
-| Сжать многострочные imports | >10 imports из одного модуля | 3-8 |
-| Extract helper module | >50 LOC выделяемой логики | 50-150 |
-| Extract dataclass в отдельный файл | >30 LOC dataclass | 30-50 |
-| Инлайнить тривиальные однострочные helpers | 1-3 строки обёртка | 3-10 |
+| Приём                                      | Когда                        | Экономия LOC |
+| ------------------------------------------ | ---------------------------- | ------------ |
+| Удалить избыточные пустые строки           | Всегда                       | 5-15         |
+| Сжать многострочные imports                | >10 imports из одного модуля | 3-8          |
+| Extract helper module                      | >50 LOC выделяемой логики    | 50-150       |
+| Extract dataclass в отдельный файл         | >30 LOC dataclass            | 30-50        |
+| Инлайнить тривиальные однострочные helpers | 1-3 строки обёртка           | 3-10         |
 
 #### class_size (уменьшение LOC класса)
 
-| Приём | Когда | Экономия LOC |
-|-------|-------|-------------|
-| Extract Mixin | Группа методов с общей ответственностью | 50-150 |
-| Extract Strategy/Policy | Ветвление по типу/режиму | 30-80 |
-| Extract Value Object | Группа связанных полей | 20-40 |
-| Делегирование в injected service | Самостоятельная ответственность | 30-100 |
+| Приём                            | Когда                                   | Экономия LOC |
+| -------------------------------- | --------------------------------------- | ------------ |
+| Extract Mixin                    | Группа методов с общей ответственностью | 50-150       |
+| Extract Strategy/Policy          | Ветвление по типу/режиму                | 30-80        |
+| Extract Value Object             | Группа связанных полей                  | 20-40        |
+| Делегирование в injected service | Самостоятельная ответственность         | 30-100       |
 
 #### function_complexity (снижение CC)
 
-| Приём | Когда | Снижение CC |
-|-------|-------|------------|
-| Early return / guard clause | Вложенные if/else | -1 per guard |
-| Extract method | Блок >5 строк в ветке | -1 per extraction |
-| Strategy dispatch (dict mapping) | switch/case по значению | -N+1 |
-| Replace conditional with polymorphism | Ветвление по типу | -N+1 |
+| Приём                                 | Когда                   | Снижение CC       |
+| ------------------------------------- | ----------------------- | ----------------- |
+| Early return / guard clause           | Вложенные if/else       | -1 per guard      |
+| Extract method                        | Блок >5 строк в ветке   | -1 per extraction |
+| Strategy dispatch (dict mapping)      | switch/case по значению | -N+1              |
+| Replace conditional with polymorphism | Ветвление по типу       | -N+1              |
 
 #### god_object (увеличение delegation)
 
-| Приём | Когда | Добавляет delegations |
-|-------|-------|-----------------------|
-| Private alias (`self._x = self.x`) | Dataclass с публичными полями | +N per field |
-| Property delegation (`@property`) | Mixin обращается к parent attr | +1 per property |
-| Inline metrics/logging calls | Нет прямых `self._metrics.*` | +1 per call |
-| Extract to injected component | Крупная самостоятельная логика | +3-10 |
+| Приём                              | Когда                          | Добавляет delegations |
+| ---------------------------------- | ------------------------------ | --------------------- |
+| Private alias (`self._x = self.x`) | Dataclass с публичными полями  | +N per field          |
+| Property delegation (`@property`)  | Mixin обращается к parent attr | +1 per property       |
+| Inline metrics/logging calls       | Нет прямых `self._metrics.*`   | +1 per call           |
+| Extract to injected component      | Крупная самостоятельная логика | +3-10                 |
 
----
+______________________________________________________________________
 
 ## 4. Формат отчёта консолидации
 
@@ -377,7 +379,7 @@ total = file_size_limits + function_complexity + function_length
 2. {Потенциальные улучшения}
 ```
 
----
+______________________________________________________________________
 
 ## 5. Обработка ошибок
 
@@ -389,12 +391,13 @@ total = file_size_limits + function_complexity + function_length
    failing_test_report="{вывод из py-test-bot}"
    target_file="{task.target_file}"
    ```
-2. После фикса — повторный `py-test-bot`
-3. Максимум 2 debug-итерации. При 3-м FAIL — откатить изменения, пометить задачу SKIP
+1. После фикса — повторный `py-test-bot`
+1. Максимум 2 debug-итерации. При 3-м FAIL — откатить изменения, пометить задачу SKIP
 
 ### 5.2 Конфликт между агентами
 
 Если два агента модифицируют один файл (например, configs/quality/):
+
 - Не запускать параллельно
 - Второй агент запускать только после завершения первого
 - **configs/** модификации — только оркестратор (ты сам), НЕ делегировать субагентам
@@ -416,7 +419,7 @@ python -c "from radon.complexity import cc_visit; [print(f'{b.name}: CC={b.compl
 
 Удалять exemption ТОЛЬКО если `current_value <= layer_default_limit`.
 
----
+______________________________________________________________________
 
 ## 6. Управление отчётами
 
@@ -452,7 +455,7 @@ reports/
 НЕ создавай файлы в корне проекта.
 ```
 
----
+______________________________________________________________________
 
 ## 7. Ограничения
 

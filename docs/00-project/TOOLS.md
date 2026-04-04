@@ -1,16 +1,19 @@
----
+______________________________________________________________________
+
 Version: 3.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # BioETL: Утилиты Проекта
 
----
+______________________________________________________________________
 
 > Этот документ — активный hub для текущих tool entry points и правил размещения.
 > Исторические детали и superseded notes не являются источником истины:
@@ -18,18 +21,18 @@ Last verified: '2026-03-29'
 > `scripts/<group>/README.md`, для исторического контекста —
 > repository path `docs/99-archive/README.md`.
 
----
+______________________________________________________________________
 
 ## Разграничение src/tools/ и scripts/
 
 Согласно [03-file-policy.md](governance/03-file-policy.md):
 
-| Директория | Назначение | Критерий |
-|------------|------------|----------|
-| `src/tools/` | Утилиты проекта | **Импортирует** `bioetl` модули |
-| `scripts/` | CI/операционные скрипты | **Standalone**, НЕ импортирует `bioetl` |
+| Директория   | Назначение              | Критерий                                |
+| ------------ | ----------------------- | --------------------------------------- |
+| `src/tools/` | Утилиты проекта         | **Импортирует** `bioetl` модули         |
+| `scripts/`   | CI/операционные скрипты | **Standalone**, НЕ импортирует `bioetl` |
 
----
+______________________________________________________________________
 
 ## Docs Toolchain
 
@@ -38,18 +41,20 @@ Last verified: '2026-03-29'
 - Preferred invocation after `uv sync` is `uv run python -m scripts.<group> ...`.
   With an activated virtual environment, `python -m scripts.<group> ...` remains a valid fallback.
 - Standard docs checks:
+
 ```bash
 uv run python -m scripts.docs check-links --links --specs --configs
 uv run python -m scripts.docs check-drift --ports --classes
 uv run python -m scripts.docs check-docstrings --summary
 bash scripts/docs/build_docs_site.sh --strict
 ```
+
 - Published workflow guide: [Docs Verification](../03-guides/docs-verification.md)
 - `make docs-build` remains a convenient wrapper for a non-strict site build when
   you only need a local rendered preview.
 - Migration to MkDocs 2.x must be tracked as a dedicated task with explicit compatibility validation.
 
----
+______________________________________________________________________
 
 ## Unified Entry Points
 
@@ -68,78 +73,79 @@ uv run python -m scripts.ci quality-gate
 
 Каждый скрипт также можно запустить напрямую (см. `scripts/<group>/README.md`).
 
----
+______________________________________________________________________
 
 ## Сводная таблица
 
-| Файл | Директория | bioetl? | Unified command | Make-цель | Описание |
-|------|------------|---------|-----------------|-----------|----------|
-| `create_pipeline.py` | src/tools/ | Да | — | — | Генерация boilerplate для новых пайплайнов |
-| `verify_schema_parity.py` | src/tools/ | Да | — | — | Верификация Silver↔Gold schema parity |
-| `file_merger.py` | src/tools/ | Нет | — | — | Объединение файлов с метаданными |
-| `cleanup_project.py` | scripts/diagnostics/ | Нет | — | `make clean` | Очистка кэшей и артефактов |
-| `cleanup_consolidate.py` | scripts/diagnostics/ | Нет | — | — | Консолидированный аудит очистки |
-| `audit_structure.py` | scripts/diagnostics/ | Нет | — | — | Аудит соответствия File Policy |
-| `vacuum_delta.py` | scripts/data/ | Нет | `uv run python -m scripts.data vacuum` | — | VACUUM Delta Lake таблиц |
-| `dq_baseline_update.py` | scripts/data/ | Нет | `uv run python -m scripts.data dq-baseline` | — | Пересчёт DQ baseline |
-| `verify_checksums.py` | scripts/data/ | Нет | `uv run python -m scripts.data checksums` | — | Верификация контрольных сумм |
-| `salt_rotate.py` | scripts/ops/ | Нет | — | — | Ротация PII-соли |
-| `naming_audit.py` | scripts/qa/ | Нет | `uv run python -m scripts.qa check-naming` | — | Аудит naming conventions |
-| `lint_terminology.py` | scripts/qa/ | Нет | `uv run python -m scripts.qa check-terminology` | — | Линтер терминологии |
-| `config_gap_analysis.py` | scripts/schema/ | Нет | `uv run python -m scripts.schema analyze-gaps` | — | Анализ расхождений конфигов |
-| `validate_pipeline_configs.py` | scripts/schema/ | Нет | `uv run python -m scripts.schema validate-configs` | — | Валидация configs vs JSON Schema |
+| Файл                           | Директория           | bioetl? | Unified command                                    | Make-цель    | Описание                                   |
+| ------------------------------ | -------------------- | ------- | -------------------------------------------------- | ------------ | ------------------------------------------ |
+| `create_pipeline.py`           | src/tools/           | Да      | —                                                  | —            | Генерация boilerplate для новых пайплайнов |
+| `verify_schema_parity.py`      | src/tools/           | Да      | —                                                  | —            | Верификация Silver↔Gold schema parity      |
+| `file_merger.py`               | src/tools/           | Нет     | —                                                  | —            | Объединение файлов с метаданными           |
+| `cleanup_project.py`           | scripts/diagnostics/ | Нет     | —                                                  | `make clean` | Очистка кэшей и артефактов                 |
+| `cleanup_consolidate.py`       | scripts/diagnostics/ | Нет     | —                                                  | —            | Консолидированный аудит очистки            |
+| `audit_structure.py`           | scripts/diagnostics/ | Нет     | —                                                  | —            | Аудит соответствия File Policy             |
+| `vacuum_delta.py`              | scripts/data/        | Нет     | `uv run python -m scripts.data vacuum`             | —            | VACUUM Delta Lake таблиц                   |
+| `dq_baseline_update.py`        | scripts/data/        | Нет     | `uv run python -m scripts.data dq-baseline`        | —            | Пересчёт DQ baseline                       |
+| `verify_checksums.py`          | scripts/data/        | Нет     | `uv run python -m scripts.data checksums`          | —            | Верификация контрольных сумм               |
+| `salt_rotate.py`               | scripts/ops/         | Нет     | —                                                  | —            | Ротация PII-соли                           |
+| `naming_audit.py`              | scripts/qa/          | Нет     | `uv run python -m scripts.qa check-naming`         | —            | Аудит naming conventions                   |
+| `lint_terminology.py`          | scripts/qa/          | Нет     | `uv run python -m scripts.qa check-terminology`    | —            | Линтер терминологии                        |
+| `config_gap_analysis.py`       | scripts/schema/      | Нет     | `uv run python -m scripts.schema analyze-gaps`     | —            | Анализ расхождений конфигов                |
+| `validate_pipeline_configs.py` | scripts/schema/      | Нет     | `uv run python -m scripts.schema validate-configs` | —            | Валидация configs vs JSON Schema           |
 
 > Для детального описания каждого скрипта, параметров и примеров: `scripts/<group>/README.md`.
 
----
+______________________________________________________________________
 
 ## Бенчмарки
 
 Директория `src/tools/benchmarks/` содержит performance-тесты:
 
-| Файл | Назначение |
-|------|------------|
-| `test_bronze_write.py` | Бенчмарки записи Bronze слоя |
-| `test_delta_write.py` | Бенчмарки Delta Lake операций |
+| Файл                         | Назначение                                 |
+| ---------------------------- | ------------------------------------------ |
+| `test_bronze_write.py`       | Бенчмарки записи Bronze слоя               |
+| `test_delta_write.py`        | Бенчмарки Delta Lake операций              |
 | `test_json_serialization.py` | Сравнение JSON encoders (stdlib vs orjson) |
 
 ```bash
 pytest src/tools/benchmarks/ -v --benchmark-only
 ```
 
----
+______________________________________________________________________
 
 ## Добавление нового инструмента
 
 Шаблоны и governance playbook: [04-extending-bioetl.md](governance/04-extending-bioetl.md).
 
 Критерий размещения:
-1. Скрипт импортирует `bioetl` → **src/tools/**
-2. Скрипт standalone → **scripts/**
 
----
+1. Скрипт импортирует `bioetl` → **src/tools/**
+1. Скрипт standalone → **scripts/**
+
+______________________________________________________________________
 
 ## Связи с документацией
 
-| Документ | Связанные инструменты |
-|----------|----------------------|
-| [03-file-policy.md](governance/03-file-policy.md) | `audit_structure.py`, `create_pipeline.py` |
-| [cleanup-policy.md](../03-guides/cleanup-policy.md) | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |
-| RULES.md §2 | `naming_audit.py` |
-| RULES.md §2.1.1 | `vacuum_delta.py` |
-| RULES.md §3.4.1 | `dq_baseline_update.py` |
-| RULES.md §5.4.1 | `salt_rotate.py` |
-| [glossary.md](glossary.md) | `lint_terminology.py` |
-| [03-file-policy.md](governance/03-file-policy.md) (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py` |
+| Документ                                                    | Связанные инструменты                                          |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| [03-file-policy.md](governance/03-file-policy.md)           | `audit_structure.py`, `create_pipeline.py`                     |
+| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |
+| RULES.md §2                                                 | `naming_audit.py`                                              |
+| RULES.md §2.1.1                                             | `vacuum_delta.py`                                              |
+| RULES.md §3.4.1                                             | `dq_baseline_update.py`                                        |
+| RULES.md §5.4.1                                             | `salt_rotate.py`                                               |
+| [glossary.md](glossary.md)                                  | `lint_terminology.py`                                          |
+| [03-file-policy.md](governance/03-file-policy.md) (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py`       |
 
----
+______________________________________________________________________
 
 ## История изменений
 
-| Версия | Дата | Изменения |
-|--------|------|-----------|
-| 3.0 | 2026-03-13 | Навигационный hub: детали в `scripts/<group>/README.md`, шаблоны в `04-extending-bioetl.md` |
-| 2.4 | 2026-03-12 | Unified entry points (`python -m scripts.<group>`) для всех доменов |
-| 2.0 | 2026-01-07 | Разделение на src/tools/ и scripts/ по критерию импорта bioetl |
-| 1.1 | 2026-01-07 | Добавлены все инструменты |
-| 1.0 | 2025-01-07 | Начальная версия |
+| Версия | Дата       | Изменения                                                                                   |
+| ------ | ---------- | ------------------------------------------------------------------------------------------- |
+| 3.0    | 2026-03-13 | Навигационный hub: детали в `scripts/<group>/README.md`, шаблоны в `04-extending-bioetl.md` |
+| 2.4    | 2026-03-12 | Unified entry points (`python -m scripts.<group>`) для всех доменов                         |
+| 2.0    | 2026-01-07 | Разделение на src/tools/ и scripts/ по критерию импорта bioetl                              |
+| 1.1    | 2026-01-07 | Добавлены все инструменты                                                                   |
+| 1.0    | 2025-01-07 | Начальная версия                                                                            |

@@ -1,43 +1,44 @@
-*Статус: internal-only (historical prompt)*
+*Статус: internal-working prompt*
 
-# Documentation & Diagrams Audit — Промт для аудита и обновления документации
+# Documentation & Diagrams Audit
 
-*Версия: 1.0.0 | Дата: 2026-03-08*
+*Версия: 2.0.0 | Дата: 2026-04-04*
 
 ## Назначение
 
-Промт для комплексного аудита и обновления проектной документации и диаграмм BioETL.
-Scope: `docs/` **без** `docs/00-project/ai/` (AI-конфигурация аудитируется отдельно через `ai_workspace_setup.md`).
+Рабочий промт для комплексного аудита и обновления документации и диаграмм
+BioETL. Промт выровнен с текущей структурой репозитория и подходит для Codex,
+Claude Code и других агентных сред.
 
----
+Основной scope: `docs/` без `docs/00-project/ai/`.
+AI-конфигурация и runtime-поведение аудитируются отдельно через
+`docs/00-project/ai/prompts/ai_workspace_setup.md`.
 
-## Набор агентов
+## Рекомендуемый состав агентов
 
-### Рекомендуемый состав
+| # | Агент | Surface | Роль |
+|---|-------|---------|------|
+| A1 | Cross-Reference Auditor | `documentation-audit` | Битые ссылки, nav, orphan docs |
+| A2 | Code-Docs Sync Checker | `py-doc-bot` | Соответствие docs ↔ code/configs |
+| A3 | ADR Auditor | `py-audit-bot` | ADR completeness, status, conflicts |
+| A4 | Diagram Validator | `py-doc-bot` + `technical-designer-mermaid` | Mermaid syntax, ADR-040, code sync |
+| A5 | Content Freshness Analyzer | `documentation-cascade-audit` | Freshness, drift, archive candidates |
 
-| # | Агент | Surface | Model | Зона ответственности |
-|---|-------|---------|-------|---------------------|
-| A1 | Cross-Reference Auditor | `documentation-audit` | skill | Битые ссылки, навигация mkdocs.yml, dead links |
-| A2 | Code-Docs Sync Checker | `py-doc-bot` | sonnet | Соответствие docs ↔ код (API ref, layer docs, configs) |
-| A3 | ADR Auditor | `py-audit-bot` | opus | Полнота ADR, статусы, отсутствующие решения |
-| A4 | Diagram Validator | `py-doc-bot` | sonnet | Mermaid синтаксис, ADR-040, соответствие коду |
-| A5 | Content Freshness Analyzer | `documentation-cascade-audit` | skill | Устаревший контент, drift detection, архив-кандидаты |
+## Рекомендуемые режимы
 
-### Когда какой агент
-
-| Сценарий | Агенты | Параллельность |
-|----------|--------|---------------|
+| Сценарий | Агенты | Порядок |
+|----------|--------|---------|
 | Быстрый pre-PR аудит | A2 + A4 | Параллельно |
-| Полный аудит | A1 → (A2 ∥ A3 ∥ A4) → A5 | A1 первый, затем параллельно, A5 последний |
-| Только диаграммы | A4 | Один |
-| Только ADR | A3 | Один |
+| Полный аудит | A1 -> (A2, A3, A4) -> A5 | A1 блокирующий, затем параллельно |
+| Только диаграммы | A4 | Один агент |
+| Только ADR | A3 | Один агент |
 | Post-refactoring sync | A2 + A4 + A5 | Параллельно |
 
 ---
 
-## Промт
+## Готовый промт
 
-> Скопируй текст ниже (от `---BEGIN---` до `---END---`) и передай AI-агенту.
+Скопируй текст ниже от `---BEGIN---` до `---END---` и передай AI-агенту.
 
 ---BEGIN---
 
@@ -45,278 +46,361 @@ Scope: `docs/` **без** `docs/00-project/ai/` (AI-конфигурация а�
 
 ### Scope
 
-    docs/                              ← Весь каталог
-    ├── 00-project/                    ← Правила, governance, glossary (БЕЗ 00-project/ai/)
-    ├── 01-requirements/               ← Требования (REQUIREMENTS.md)
-    ├── 02-architecture/               ← Архитектура, ADR, диаграммы
-    │   ├── decisions/                 ← актуальный ADR set (проверять live)
-    │   ├── diagrams/                  ← canonical .mmd/.mermaid trees (count live before reporting)
-    │   │   ├── architecture/          ← Архитектурные диаграммы (01-18)
-    │   │   ├── class-diagrams/        ← Class-диаграммы (01-16)
-    │   │   ├── foundation/            ← Foundation-диаграммы (01-50)
-    │   │   └── views/                 ← Decomposed views (.mermaid)
-    │   └── policies/                  ← Архитектурные политики
-    ├── 03-guides/                     ← Руководства разработчика
-    ├── 04-reference/                  ← API ref, contracts, pipelines, schemas
-    ├── 05-operations/                 ← Runbooks, deployment, monitoring
-    ├── 99-archive/                    ← Архив (read-only, не аудитировать содержимое)
-    ├── plans/                         ← Планы (проверить актуальность)
-    └── mkdocs.yml                     ← Навигация MkDocs (корень проекта)
+Аудитировать:
 
-**Исключения:** `docs/00-project/ai/`, `docs/exports/`, `docs/reports/`, `docs/site/`
+```text
+docs/
+├── 00-project/                    # правила, glossary, governance
+├── 01-requirements/
+├── 02-architecture/
+│   ├── decisions/
+│   ├── diagrams/
+│   │   ├── architecture/
+│   │   ├── class-diagrams/
+│   │   ├── foundation/
+│   │   └── views/
+│   └── policies/
+├── 03-guides/
+├── 04-reference/
+├── 05-operations/
+├── 99-archive/                    # read-only, содержимое не менять
+└── plans/
 
-### Задачи аудита
+mkdocs.yml                         # root-level artifact, проверять отдельно
+README.md                          # root-level doc entrypoint
+```
 
-#### Фаза 1: Cross-Reference Audit (A1)
+Исключения:
+- `docs/00-project/ai/`
+- `docs/exports/`
+- `docs/reports/`
+- `docs/site/`
 
-##### 1.1. Битые ссылки
+### Общие правила
 
-    # Найти все markdown-ссылки и проверить targets
-    uv run python -m scripts.docs check-links --links
+- Документируй реальное текущее состояние репозитория, а не желаемое.
+- Не редактируй production code, если задача только про аудит docs.
+- Не редактируй содержимое `docs/99-archive/`.
+- Если предлагается архивирование, только пометь кандидатов и обоснуй.
+- Все high/critical findings должны иметь evidence: `file`, `line`, `command`.
+- При утверждениях о структуре репозитория сначала проверь live tree, не делай
+  предположений по старым counts или naming snapshots.
 
-    # Проверить что все файлы из mkdocs.yml nav существуют
-    grep "\.md" mkdocs.yml | sed 's/.*: //' | while read f; do
-      [ -f "docs/$f" ] || echo "MISSING in mkdocs nav: docs/$f"
-    done
+## Фаза 1: Cross-Reference Audit
 
-##### 1.2. Навигация mkdocs.yml
+### 1.1. Битые ссылки
+
+Выполни:
+
+```bash
+uv run python -m scripts.docs check-links --links --specs --configs
+```
+
+Дополнительно проверь, что все Markdown targets из `mkdocs.yml` существуют.
+Учитывай, что `mkdocs.yml` находится в корне репозитория, а не внутри `docs/`.
+
+### 1.2. Навигация MkDocs
 
 Проверь:
-- Все .md файлы из docs/ (кроме исключений) включены в nav
-- Нет дублей в nav
-- Порядок секций соответствует Johnny Decimal (00→05, 99)
-- Нет ссылок на удалённые/перемещённые файлы
+- все publishable `.md` файлы из scope включены в `mkdocs.yml` nav либо
+  осознанно исключены;
+- нет dead entries в nav;
+- нет дублей nav-entries;
+- порядок разделов соответствует текущей информационной архитектуре
+  (`00-project` -> `05-operations` -> `99-archive`);
+- нет ссылок на удалённые или перемещённые файлы.
 
-##### 1.3. Orphan-файлы
+### 1.3. Orphan docs
 
-Найди .md файлы в docs/, которые:
-- Не включены в mkdocs.yml nav
-- Не ссылаются ни из одного другого .md
-- Не являются README.md или index.md
+Найди `.md` файлы в scope, которые:
+- не включены в `mkdocs.yml`;
+- не referenced из других `.md`;
+- не являются `README.md`, `INDEX.md`, `index.md`;
+- не относятся к repo-only internal surfaces, исключённым из публикации.
 
-#### Фаза 2: Code-Docs Sync (A2)
+## Фаза 2: Code-Docs Sync
 
-##### 2.1. Layer documentation
+### 2.1. Layer documentation
 
-Проверь соответствие кода и описания для каждого слоя:
+Проверь соответствие между layer docs и кодом:
 
-| Doc | Код | Проверка |
-|-----|-----|----------|
-| `02-architecture/01-domain-layer.md` | `src/bioetl/domain/` | Ports, entities, value objects |
-| `02-architecture/02-application-layer.md` | `src/bioetl/application/` | Services, pipelines |
-| `02-architecture/03-infrastructure-layer.md` | `src/bioetl/infrastructure/` | Adapters, storage |
-| `02-architecture/04-interfaces-layer.md` | `src/bioetl/interfaces/` | CLI commands |
-| `02-architecture/05-composition-layer.md` | `src/bioetl/composition/` | Bootstrap, factories |
+| Doc | Code |
+|-----|------|
+| `docs/02-architecture/01-domain-layer.md` | `src/bioetl/domain/` |
+| `docs/02-architecture/02-application-layer.md` | `src/bioetl/application/` |
+| `docs/02-architecture/03-infrastructure-layer.md` | `src/bioetl/infrastructure/` |
+| `docs/02-architecture/04-interfaces-layer.md` | `src/bioetl/interfaces/` |
+| `docs/02-architecture/05-composition-layer.md` | `src/bioetl/composition/` |
 
-Для каждого:
-- Упомянутые классы/модули существуют в коде?
-- Новые классы/модули в коде отражены в docs?
-- Import-пути корректны?
+Для каждого файла проверь:
+- упомянутые классы и модули существуют;
+- новые значимые модули отражены в docs;
+- import paths и package names корректны;
+- описания не противоречат текущим архитектурным ограничениям.
 
-##### 2.2. API Reference
+### 2.2. API Reference
 
-    # Сравнить documented modules vs actual
-    ls src/bioetl/domain/ports/*.py | sed 's|.*/||;s|\.py||' | sort > /tmp/actual_ports
-    grep -oP '\w+_port' docs/04-reference/api/domain.md | sort -u > /tmp/documented_ports
-    diff /tmp/actual_ports /tmp/documented_ports
+Сравни фактический API surface с reference docs.
 
-##### 2.3. Pipeline docs
+Особое внимание:
+- `docs/04-reference/api/domain/ports.md`
+- `docs/04-reference/api/domain/*.md`
+- `docs/04-reference/api/application/*.md`
+- `docs/04-reference/api/infrastructure/*.md`
+- `docs/04-reference/api/composition/*.md`
 
-Для каждого pipeline в `docs/04-reference/pipelines/`:
-- Config path (`configs/entities/`) существует?
-- Описанные entity types совпадают с реальными?
-- Transformer class существует?
+Не предполагай, что вся domain API reference живёт только в
+`docs/04-reference/api/domain.md`; используй подфайлы как primary surface.
 
-##### 2.4. Contracts
+Для портов сравни с:
+- `src/bioetl/domain/ports/**/*.py`
 
-Проверить `docs/04-reference/contracts/gold-schemas.md`:
-- Документированные поля совпадают с `src/bioetl/domain/schemas/gold/`?
-- Версии контрактов актуальны?
+### 2.3. Pipeline docs
 
-#### Фаза 3: ADR Audit (A3)
+Аудируй обе формы layout:
+- `docs/04-reference/pipelines/*.md`
+- `docs/04-reference/pipelines/*/*.md`
 
-##### 3.1. Полнота ADR
+Для каждого pipeline/doc entry проверь:
+- связанный config path существует (`configs/entities/`, `configs/composites/`,
+  либо provider-specific config where applicable);
+- entity/pipeline naming совпадает с текущим кодом и config topology;
+- если упомянут transformer/service/class, он существует;
+- xwalk/spec docs не противоречат реальным pipeline inputs/outputs.
 
-    # Список всех ADR
-    ls docs/02-architecture/decisions/ADR-*.md | sort
+### 2.4. Contracts
 
-Для каждого ADR проверь:
-- Заголовок и структура (Title, Status, Context, Decision, Consequences)
-- Status актуален (Accepted / Superseded / Deprecated)
-- Ссылки на код/конфиги валидны
-- Нет дублирующих/конфликтующих ADR
+Проверь `docs/04-reference/contracts/gold-schemas.md`.
 
-##### 3.2. Отсутствующие ADR
+Source of truth:
+- `src/bioetl/domain/contracts/gold/`
 
-Проверь, есть ли архитектурные решения в коде без ADR:
-- Новые паттерны без документации
-- Значимые `# ADR:` комментарии в коде без соответствующего ADR файла
+Дополнительно проверь:
+- `docs/04-reference/contracts/gold/*.json`
 
-##### 3.3. Superseded ADR в 99-archive
+Нужно проверить:
+- актуальность contract inventory;
+- версии, `Last verified`, linked ADRs;
+- согласованность полей и contract grouping с кодом.
 
-Проверь что superseded ADR из `docs/02-architecture/decisions/` перемещены в `docs/99-archive/decisions/`.
+Не использовать `src/bioetl/domain/schemas/gold/` как source of truth, если
+репозиторий фактически хранит Gold contracts в `domain/contracts/gold/`.
 
-#### Фаза 4: Diagram Validation (A4)
+## Фаза 3: ADR Audit
 
-##### 4.1. Синтаксис Mermaid
+### 3.1. Полнота ADR
 
-    # Валидация синтаксиса всех .mmd файлов
-    make validate-diagrams-syntax
-    # или
-    bash scripts/diagrams/validate_mermaid_syntax.sh
+Для live ADR set в `docs/02-architecture/decisions/ADR-*.md` проверь:
+- наличие базовой структуры: Title, Status, Context, Decision, Consequences;
+- валидность ссылок на code/config/docs;
+- отсутствие конфликтующих решений;
+- соответствие status реальному состоянию репозитория.
 
-##### 4.2. ADR-040 Compliance
+### 3.2. Missing ADRs
 
-Для каждой .mmd диаграммы проверь (см. `docs/02-architecture/diagrams/governance/policy.md`):
-- Метаданные: `@version`, `@date`, `@type`, `@level`, `@nodes`
-- Density: ≤15 ideal, 16-20 soft limit, >20 нужен ELK renderer
-- Палитра: только канонические цвета ADR-040 (без ad-hoc hex)
-- Нет emoji в subgraph labels
+Проверь, есть ли архитектурно значимые решения в коде/документации без ADR:
+- новые стабильные patterns;
+- явные `ADR` references в комментариях/текстах без соответствующего ADR;
+- крупные governance decisions, описанные только в code/docs.
 
-##### 4.3. Code-Diagram Sync
+### 3.3. Superseded ADR handling
 
-Для ключевых диаграмм (architecture/01-18):
-- Классы и модули на диаграмме существуют в коде?
-- Связи (imports, зависимости) корректны?
-- Новые компоненты в коде отражены на диаграммах?
+Если существует `docs/99-archive/decisions/`, проверь корректность переноса
+superseded ADR туда.
 
-##### 4.4. Orphan-диаграммы
+Если такого каталога нет:
+- не считать это ошибкой само по себе;
+- проверить, как помечены superseded ADR в live tree;
+- перечислить archive candidates и inconsistencies в status/links.
 
-Найди .mmd/.mermaid файлы, на которые не ссылается ни один .md документ.
+## Фаза 4: Diagram Validation
 
-#### Фаза 5: Content Freshness (A5)
+### 4.1. Mermaid syntax
 
-##### 5.1. Drift Detection
+Выполни:
 
-Для каждого docs-файла оцени:
-- Дата последнего обновления (git log)
-- Расхождение с текущим кодом (drift score: LOW/MEDIUM/HIGH)
+```bash
+make validate-diagrams-syntax
+```
 
-##### 5.2. Архив-кандидаты
+или:
 
-Файлы для перемещения в `docs/99-archive/`:
-- Документы о завершённых миграциях
-- Устаревшие планы из `docs/plans/`
-- Verification reports старше 3 месяцев из `docs/05-operations/verification/`
+```bash
+bash scripts/diagrams/validate_mermaid_syntax.sh
+```
 
-##### 5.3. Glossary Sync
+### 4.2. ADR-040 compliance
+
+Проверяй относительно:
+- `docs/02-architecture/decisions/ADR-040-diagram-governance.md`
+- связанных policy/guidance файлов в `docs/02-architecture/diagrams/`
+- текущих diagram tooling rules в `scripts/diagrams/`
+
+Для диаграмм проверь:
+- обязательные metadata markers;
+- naming и file placement;
+- palette/style consistency;
+- отсутствие ad-hoc цветов и emoji в labels там, где это запрещено;
+- соответствие quality budget и density rules актуальному governance.
+
+### 4.3. Code-Diagram Sync
+
+Для ключевых diagram families проверь:
+- referenced modules/classes существуют;
+- relationships не противоречат реальным imports/dependencies;
+- новые значимые компоненты отражены там, где диаграмма должна быть canonical.
+
+Не ограничивайся только `architecture/01-18`, если canonical diagrams
+фактически распределены по нескольким subtrees.
+
+### 4.4. Orphan diagrams
+
+Найди `.mmd` / `.mermaid` файлы, на которые не ссылается ни один publishable
+`.md`, и раздели их на:
+- canonical but indirectly consumed;
+- generated/support artifacts;
+- true orphan candidates.
+
+## Фаза 5: Content Freshness
+
+### 5.1. Drift detection
+
+Для каждого docs-файла в scope оцени:
+- last meaningful update via git history;
+- drift score (`LOW`, `MEDIUM`, `HIGH`);
+- factual drift vs editorial/style debt.
+
+### 5.2. Archive candidates
+
+Отдельно выдели кандидатов на перенос в `docs/99-archive/`:
+- завершённые migration docs;
+- устаревшие планы из `docs/plans/`;
+- stale verification/runbook support docs, если они больше не operationally
+  relevant.
+
+Не перемещай автоматически, только предложи.
+
+### 5.3. Glossary sync
 
 Проверь `docs/00-project/glossary.md`:
-- Все ключевые термины из RULES.md есть в glossary?
-- Нет устаревших терминов?
+- ключевые термины из active docs и rules присутствуют;
+- определения не устарели;
+- нет лишних deprecated terms without note.
 
-### Формат отчёта
+## Формат отчёта
 
-Отчёт сохранять в `reports/docs-audit/`:
+Сохраняй артефакты в:
 
-    reports/docs-audit/
-    ├── {date}-summary.md              ← Сводный отчёт
-    ├── {date}-crossref.md             ← Фаза 1: битые ссылки, orphans
-    ├── {date}-code-sync.md            ← Фаза 2: drift код ↔ docs
-    ├── {date}-adr-audit.md            ← Фаза 3: ADR
-    ├── {date}-diagrams.md             ← Фаза 4: диаграммы
-    └── {date}-freshness.md            ← Фаза 5: устаревший контент
+```text
+reports/docs-audit/
+├── {date}-summary.md
+├── {date}-crossref.md
+├── {date}-code-sync.md
+├── {date}-adr-audit.md
+├── {date}-diagrams.md
+└── {date}-freshness.md
+```
 
-Сводный отчёт:
+### Сводный отчёт
 
-    ## Documentation & Diagrams Audit Report
+```md
+## Documentation & Diagrams Audit Report
 
-    **Дата**: YYYY-MM-DD
-    **Scope**: docs/ (без docs/00-project/ai/)
+**Дата**: YYYY-MM-DD
+**Scope**: docs/ (excluding docs/00-project/ai/) + root mkdocs.yml + README.md
 
-    ### Summary
+### Summary
 
-    | Фаза | Статус | Issues | Critical | Рекомендации |
-    |------|:------:|:------:|:--------:|-------------|
-    | 1. Cross-References | ✅/⚠️/❌ | N | N | ... |
-    | 2. Code-Docs Sync | ✅/⚠️/❌ | N | N | ... |
-    | 3. ADR Audit | ✅/⚠️/❌ | N | N | ... |
-    | 4. Diagrams | ✅/⚠️/❌ | N | N | ... |
-    | 5. Freshness | ✅/⚠️/❌ | N | N | ... |
+| Фаза | Статус | Issues | Critical | Рекомендации |
+|------|:------:|:------:|:--------:|-------------|
+| 1. Cross-References | ✅/⚠️/❌ | N | N | ... |
+| 2. Code-Docs Sync | ✅/⚠️/❌ | N | N | ... |
+| 3. ADR Audit | ✅/⚠️/❌ | N | N | ... |
+| 4. Diagrams | ✅/⚠️/❌ | N | N | ... |
+| 5. Freshness | ✅/⚠️/❌ | N | N | ... |
 
-    **Total**: N issues (N critical, N high, N medium, N low)
+**Total**: N issues (N critical, N high, N medium, N low)
 
-    ### Critical Issues (Must Fix)
+### Critical Issues (Must Fix)
 
-    1. **[PHASE-ID]** {описание} — `{file:line}` → {рекомендация}
+1. **[PHASE-ID]** {описание} — `{file:line}` → {рекомендация}
 
-    ### Archive Candidates
+### Archive Candidates
 
-    | Файл | Причина | Действие |
-    |------|---------|----------|
-    | ... | ... | Move to 99-archive/ |
+| Файл | Причина | Действие |
+|------|---------|----------|
+| ... | ... | Move to 99-archive/ |
 
-    ### Actions
+### Actions
 
-    - [ ] Fix N broken links
-    - [ ] Update N stale docs
-    - [ ] Archive N outdated files
-    - [ ] Re-render N diagrams
-    - [ ] Add N missing ADRs
+- [ ] Fix N broken links
+- [ ] Update N stale docs
+- [ ] Reconcile N code-doc drifts
+- [ ] Re-render N diagrams
+- [ ] Add or update N ADRs
+```
 
-### Ограничения
+## Ограничения
 
-- **НЕ** редактировать `docs/00-project/ai/` (отдельный scope)
-- **НЕ** редактировать `docs/exports/`, `docs/reports/`, `docs/site/` (генерируемые)
-- **НЕ** редактировать `docs/99-archive/` (read-only)
-- **НЕ** создавать файлы в корне проекта
-- Отчёты → `reports/docs-audit/`
-- При обновлении docs/mkdocs.yml — проверить `mkdocs build --strict`
+- Не редактировать `docs/00-project/ai/`.
+- Не редактировать `docs/exports/`, `docs/reports/`, `docs/site/`.
+- Не редактировать `docs/99-archive/`.
+- Не создавать файлы в корне проекта.
+- Если обновляется `mkdocs.yml` или publishable docs, после изменений проверить:
 
----END---
+```bash
+mkdocs build --strict
+```
 
----
+или project-preferred equivalent через текущий env wrapper.
 
-## Вариации использования
+## Режимы использования
 
-### Быстрый pre-PR аудит (фазы 2+4)
+### Быстрый pre-PR аудит
 
-> Проведи быстрый аудит документации по фазам 2 (Code-Docs Sync) и 4 (Diagrams)
-> из промта Documentation & Diagrams Audit. Только проверка, без изменений.
+Проведи только:
+- Фаза 2: Code-Docs Sync
+- Фаза 4: Diagram Validation
+
+Только проверка, без изменений.
 
 ### Полный аудит + исправление
 
-> Проведи полный аудит по промту Documentation & Diagrams Audit (фазы 1-5).
-> Исправь найденные проблемы. Покажи отчёт.
+Проведи полный аудит по фазам 1-5.
+Исправь найденные проблемы в разрешённом scope.
+Покажи итоговый отчёт и список изменений.
 
 ### Только ADR
 
-> Проведи аудит ADR по фазе 3 из промта Documentation & Diagrams Audit.
-> Проверь полноту, статусы, отсутствующие решения.
+Проведи только фазу 3: ADR Audit.
 
 ### Только диаграммы
 
-> Проведи аудит диаграмм по фазе 4 из промта Documentation & Diagrams Audit.
-> Проверь синтаксис, ADR-040 compliance, соответствие коду.
+Проведи только фазу 4: Diagram Validation.
 
 ### Post-refactoring sync
 
-> После рефакторинга `src/bioetl/{layer}/` обнови документацию:
->
-> 1. Фаза 2: Code-Docs Sync — обнови layer docs и API ref
-> 2. Фаза 4: Diagram Validation — обнови затронутые диаграммы
-> 3. Фаза 5: Content Freshness — отметь обновлённые docs
+После рефакторинга слоя `src/bioetl/{layer}/`:
+1. Обнови layer docs и API reference.
+2. Обнови затронутые диаграммы.
+3. Отметь обновлённые docs как re-verified.
 
-### Обновление mkdocs.yml
+## Оркестрация
 
-> Синхронизируй mkdocs.yml nav с фактическим содержимым docs/:
->
-> 1. Найди orphan-файлы (не в nav)
-> 2. Найди dead entries (в nav, но файл не существует)
-> 3. Предложи обновлённую секцию nav
-> 4. Проверь: `mkdocs build --strict`
+Если агентная среда поддерживает subagents:
+- сначала выполни A1;
+- затем параллельно A2, A3, A4;
+- после этого выполни A5;
+- затем нормализуй findings в один consolidated summary.
 
-## Оркестрация (для Claude Code)
+Если subagents недоступны:
+- выполни те же фазы последовательно в том же порядке.
 
-Запуск полного аудита через актуальные skill / subagent surfaces:
+---END---
 
-    # Фаза 1: Cross-Reference (блокирующая)
-    /documentation-audit task_id=DOCAUDIT-001 mode=crossref scope="docs/ excluding docs/00-project/ai/"
+## Примечания по актуальности
 
-    # Фазы 2-4: параллельно
-    Agent(subagent_type="py-doc-bot", prompt="task_id=DOCAUDIT-002, mode=code_sync, scope=docs/02-architecture/ docs/04-reference/")
-    Agent(subagent_type="py-audit-bot", prompt="task_id=DOCAUDIT-003, mode=adr_audit, scope=docs/02-architecture/decisions/")
-    Agent(subagent_type="py-doc-bot", prompt="task_id=DOCAUDIT-004, mode=diagram_validation, scope=docs/02-architecture/diagrams/")
-
-    # Фаза 5: после завершения 2-4
-    /documentation-cascade-audit task_id=DOCAUDIT-005 mode=freshness scope="docs/"
+- Этот промт исключает `docs/00-project/ai/` из audit scope, но сам хранится в
+  AI prompt surface как repo-only working artifact.
+- При конфликте между этим промтом и текущими runtime/skill instructions
+  приоритет у актуальных skill docs, agent guides и active project docs.

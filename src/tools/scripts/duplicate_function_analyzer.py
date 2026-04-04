@@ -50,10 +50,13 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Примеры:
-  python src/tools/scripts/duplicate_function_analyzer.py
-  python src/tools/scripts/duplicate_function_analyzer.py \\
+  python -m scripts.qa analyze-duplicate-functions
+  python -m scripts.qa analyze-duplicate-functions \\
     --pattern src/bioetl/application/**/utils.py \\
     --pattern src/bioetl/infrastructure/**/utils.py
+
+Совместимый legacy path:
+  python src/tools/scripts/duplicate_function_analyzer.py
         """,
     )
     parser.add_argument(

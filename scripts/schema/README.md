@@ -28,10 +28,12 @@ python -m scripts.schema <command> [args...]
 | `generate-artifacts` | `scripts/schema/generate_schema_artifacts.py` | Generate schema artifacts |
 | `generate-pubtype` | `scripts/schema/generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts |
 | `generate-contracts` | `scripts/schema/generate_contracts.py` | Generate contracts |
+| `generate-config-matrix` | `scripts/schema/generate_config_matrix.py` | Compatibility wrapper for the legacy entity/composite config comparison matrix |
 | `generate-unified-map` | `scripts/schema/generate_unified_schema_map.py` | Generate unified Bronze→Silver→Gold schema map CSV |
 | `generate-field-diagnostics` | `scripts/schema/generate_field_level_diagnostics.py` | Generate field-level schema drift diagnostics CSV |
 | `generate-field-spec` | `scripts/schema/generate_field_transformation_spec.py` | Generate deterministic per-field transformation specification CSV |
 | `validate-configs` | `scripts/schema/validate_pipeline_configs.py` | Validate unified pipeline YAML configs against JSON Schema |
+| `validate-unified-configs` | `scripts/schema/validate_unified_configs.py` | Compatibility wrapper for the legacy structural unified-config validator |
 | `analyze-gaps` | `scripts/schema/config_gap_analysis.py` | Config gap analysis between configs and code |
 
 ## When to Use
@@ -46,10 +48,12 @@ python -m scripts.schema <command> [args...]
 | `generate-artifacts` | After changing domain models (enums, lookup tables) | Manual, after model changes |
 | `generate-pubtype` | After changing publication type classification logic | Manual, after classification changes |
 | `generate-contracts` | Before release; auto-generates JSON contracts from Pandera DataFrameModel schemas | Manual, pre-release |
+| `generate-config-matrix` | When you need the older comparison matrix/report for entity and composite YAMLs without calling `src/tools/scripts/config_matrix_generator.py` directly | Manual, audit/reporting |
 | `generate-unified-map` | When you need one reproducible cross-layer inventory of entity configs, Silver schemas, and Gold contracts | Manual, audit/reporting |
 | `generate-field-diagnostics` | When you need per-field type drift, JSON storage pattern, nullable conflicts, or alias redundancy diagnostics across Bronze/Silver/Gold | Manual, audit/reporting |
 | `generate-field-spec` | When you need deterministic per-field normalization specs with canonical JSON/DOI/PMID/date rules and conservative hash impact flags | Manual, audit/reporting |
 | `validate-configs` | After editing any entity YAML config; validates against JSON Schema | Pre-commit hook (on config changes) |
+| `validate-unified-configs` | When you need the older structure-oriented unified entity config audit without switching validator semantics | Manual, migration/compatibility use |
 | `analyze-gaps` | When adding new pipelines; identifies missing entity configs or inconsistencies | Manual, on-demand |
 
 ## `effective_optional_v1` Precedence
@@ -63,6 +67,13 @@ Runtime optionality currently resolves in this order:
    - DQ `not_null`
    - DQ `key_nullability(nullable=false)`
 3. Default optional
+
+Validator distinction:
+
+- `python -m scripts.schema validate-configs` is the maintained JSON Schema / agent-canonical validator.
+- `python -m scripts.schema validate-unified-configs` is a compatibility façade over the older standalone structural validator from `src/tools/scripts/validate_unified_configs.py`.
+- `python -m scripts.schema generate-config-matrix` is a compatibility façade over the older comparison-matrix generator from `src/tools/scripts/config_matrix_generator.py`.
+- Keep them separate until their contracts are intentionally unified.
 
 This keeps structural policy compatible with today's configs while allowing
 incremental migration toward explicit field-level policy overlays.

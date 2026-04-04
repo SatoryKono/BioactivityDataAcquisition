@@ -18,6 +18,7 @@ python -m scripts.ci <command> [args...]
 | `e2e-skip-rate` | `scripts/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold |
 | `e2e-rerun` | `scripts/ci/check_e2e_rerun_stability.py` | Check E2E rerun stability |
 | `debt-report` | `scripts/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report |
+| `apply-ci-fixes` | `scripts/ci/apply_ci_fixes.py` | One-off GitHub-hosted workflow repair helper requiring explicit token input |
 
 ## When to Use
 
@@ -33,6 +34,7 @@ Canonical taxonomy:
 | `e2e-skip-rate` | After E2E test runs; validates skip rate against SLO, classifies infra_flaky vs code_regression | CI gate (`e2e-matrix-health.yml`) |
 | `e2e-rerun` | After multi-run E2E validation; detects non-deterministic test outcomes across repeated runs | CI gate (`e2e-matrix-health.yml`) |
 | `debt-report` | Weekly debt tracking; generates architecture debt snapshot (JSON + Markdown) | Scheduled weekly (Monday 4:45 UTC) |
+| `apply-ci-fixes` | Exceptional maintenance only; applies pre-authored GitHub workflow fixes against the hosted repository via PAT | Manual, maintainer-only |
 
 ## Other Files
 

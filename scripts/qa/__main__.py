@@ -7,6 +7,9 @@ Usage:
 
 Commands:
     check-naming         Naming convention audit
+    check-architecture   Infrastructure architecture compatibility check
+    check-app-deps       Application dependency compatibility check
+    check-constructor-args Constructor argument compatibility check
     check-c901           C901 complexity baseline enforcement
     check-naming-pkg     Package naming consistency check
     check-exemptions     Quality exemptions audit
@@ -17,8 +20,10 @@ Commands:
     report-vcr-metadata  Generate/check canonical VCR metadata catalog
     report-hotspots      Generate hotspot degradation report
     report-duplication-baseline  Generate report-only duplication baseline
+    analyze-duplicate-functions Analyze duplicate function names across selected code areas
     calibrate-hotspots   Calibrate hotspot budgets
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -27,6 +32,9 @@ from pathlib import Path
 
 COMMANDS: dict[str, str] = {
     "check-naming": "naming_audit.py",
+    "check-architecture": "check_architecture.py",
+    "check-app-deps": "check_application_deps.py",
+    "check-constructor-args": "check_constructor_args.py",
     "check-c901": "check_c901_baseline.py",
     "check-naming-pkg": "check_naming_package_consistency.py",
     "check-exemptions": "check_quality_exemptions.py",
@@ -37,6 +45,7 @@ COMMANDS: dict[str, str] = {
     "report-vcr-metadata": "report_vcr_metadata_catalog.py",
     "report-hotspots": "generate_hotspot_degradation_report.py",
     "report-duplication-baseline": "report_duplication_baseline.py",
+    "analyze-duplicate-functions": "analyze_duplicate_functions.py",
     "calibrate-hotspots": "calibrate_hotspot_budgets.py",
 }
 

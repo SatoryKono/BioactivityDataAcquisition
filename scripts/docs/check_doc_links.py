@@ -25,6 +25,8 @@ Checks:
  10. Provider specs / runbooks / published control-plane contracts contain
      required governance metadata
  11. Version frontmatter uses SemVer format
+ 12. Local skill mirror pages are explicitly classified via mkdocs `nav` or
+     `not_in_nav`
 
 Usage:
     python scripts/check_doc_links.py          # Full check
@@ -47,10 +49,11 @@ References:
 from __future__ import annotations
 
 import argparse
-from functools import lru_cache
 import os
 import re
 import sys
+from fnmatch import fnmatch
+from functools import cache, lru_cache
 from pathlib import Path
 
 import yaml
@@ -70,6 +73,7 @@ CANONICAL_GOVERNANCE_DIR = DOCS_DIR / "00-project" / "governance"
 NOT_IN_NAV_BASELINE_FILE = (
     PROJECT_ROOT / "scripts" / "baselines" / "not_in_nav_baseline.txt"
 )
+LOCAL_SKILLS_DIR = DOCS_DIR / "00-project" / "ai" / "skills" / "local"
 
 # Directories to skip in full-tree checks.
 # NOTE: docs published in mkdocs nav are always included in link checks
@@ -363,8 +367,7 @@ def _control_plane_contract_spec_files() -> list[Path]:
     candidates = sorted(
         path
         for path in CONTRACTS_DOC_DIR.glob("*.md")
-        if path.is_file()
-        and path.name.lower() not in {"readme.md", "gold-schemas.md"}
+        if path.is_file() and path.name.lower() not in {"readme.md", "gold-schemas.md"}
     )
     control_plane_files: list[Path] = []
     for md_file in candidates:
@@ -373,8 +376,7 @@ def _control_plane_contract_spec_files() -> list[Path]:
             continue
         stem = md_file.stem.casefold()
         if any(
-            token in stem
-            for token in ("run-manifest", "run-ledger", "control-plane")
+            token in stem for token in ("run-manifest", "run-ledger", "control-plane")
         ):
             control_plane_files.append(md_file)
     return control_plane_files
@@ -543,34 +545,50 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
     return broken
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_nav_docs() -> list[Path]:
     """Load docs paths from mkdocs.yml navigation."""
+    nav_paths = _load_mkdocs_path_block("nav")
+    return [
+        DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")
+    ]
+
+
+@cache
+def _load_mkdocs_path_block(block_name: str) -> list[str]:
+    """Load markdown path tokens from a top-level mkdocs block scalar."""
     mkdocs_file = PROJECT_ROOT / "mkdocs.yml"
     if not mkdocs_file.exists():
         return []
 
     raw = mkdocs_file.read_text(encoding="utf-8", errors="replace")
     lines = raw.splitlines()
-    nav_lines: list[str] = []
-    in_nav = False
+    block_lines: list[str] = []
+    in_block = False
 
     for line in lines:
         stripped = line.strip()
-        if not in_nav:
-            if stripped == "nav:":
-                in_nav = True
+        if not in_block:
+            if stripped in {f"{block_name}:", f"{block_name}: |", f"{block_name}: |-"}:
+                in_block = True
             continue
 
         if line and not line.startswith((" ", "\t")) and ":" in line:
             break
-        nav_lines.append(line.split(" #")[0] if " #" in line else line)
+        if not stripped or stripped.startswith("#"):
+            continue
+        block_lines.append(line.split(" #")[0] if " #" in line else line)
 
-    nav_paths = sorted(set(MD_PATH_RE.findall("\n".join(nav_lines))))
-    return [DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")]
+    return sorted(set(MD_PATH_RE.findall("\n".join(block_lines))))
 
 
-@lru_cache(maxsize=None)
+@cache
+def _load_not_in_nav_patterns() -> list[str]:
+    """Load mkdocs not_in_nav patterns."""
+    return _load_mkdocs_path_block("not_in_nav")
+
+
+@cache
 def _collect_link_scan_files(root: Path) -> list[Path]:
     """Collect files for link checks: active tree + all existing nav docs."""
     tree_docs = set(_iter_markdown_files(root))
@@ -581,7 +599,7 @@ def _collect_link_scan_files(root: Path) -> list[Path]:
     return sorted(tree_docs | nav_docs)
 
 
-@lru_cache(maxsize=None)
+@cache
 def _iter_markdown_files(root: Path) -> list[Path]:
     """Yield markdown files while pruning skipped directories before descent.
 
@@ -601,9 +619,7 @@ def _iter_markdown_files(root: Path) -> list[Path]:
 
         # Prevent descending into skipped/generated trees at all.
         dirnames[:] = [
-            dirname
-            for dirname in dirnames
-            if not _should_skip(current_path / dirname)
+            dirname for dirname in dirnames if not _should_skip(current_path / dirname)
         ]
 
         for filename in filenames:
@@ -688,6 +704,26 @@ def check_not_in_nav_growth(
     added = sorted(current - baseline)
     removed = sorted(baseline - current)
     return len(current), len(baseline), added, removed, baseline_exists
+
+
+def check_local_skill_nav_classification() -> list[str]:
+    """Return local skill docs missing explicit mkdocs nav classification."""
+    nav_docs = {
+        path.relative_to(DOCS_DIR).as_posix()
+        for path in _load_nav_docs()
+        if path.exists() and DOCS_DIR in path.parents
+    }
+    not_in_nav_patterns = _load_not_in_nav_patterns()
+    skill_docs = sorted(
+        path.relative_to(DOCS_DIR).as_posix()
+        for path in LOCAL_SKILLS_DIR.glob("*/SKILL.md")
+    )
+    return [
+        rel_path
+        for rel_path in skill_docs
+        if rel_path not in nav_docs
+        and not any(fnmatch(rel_path, pattern) for pattern in not_in_nav_patterns)
+    ]
 
 
 def check_legacy_paths_in_nav_docs(
@@ -980,6 +1016,24 @@ def main() -> int:
         else:
             print("Nav link scope: OK (all nav docs are included in link checks)")
 
+        unclassified_local_skill_docs = check_local_skill_nav_classification()
+        if unclassified_local_skill_docs:
+            print(f"\n{'=' * 60}")
+            print(
+                "LOCAL SKILL NAV CLASSIFICATION VIOLATIONS "
+                f"({len(unclassified_local_skill_docs)} found)"
+            )
+            print(f"{'=' * 60}")
+            for rel_path in unclassified_local_skill_docs:
+                print(f"  docs/{rel_path}")
+            print("  Fix by adding the page to mkdocs nav or to mkdocs not_in_nav.")
+            violations += len(unclassified_local_skill_docs)
+        else:
+            print(
+                "Local skill nav classification: OK "
+                "(all local skill pages are in nav or not_in_nav)"
+            )
+
     if run_all or args.specs:
         missing_specs = check_spec_files()
         if missing_specs:
@@ -1044,7 +1098,9 @@ def main() -> int:
         provider_doc_violations = check_provider_spec_governance()
         if provider_doc_violations:
             print(f"\n{'=' * 60}")
-            print(f"PROVIDER SPEC GOVERNANCE VIOLATIONS ({len(provider_doc_violations)} found)")
+            print(
+                f"PROVIDER SPEC GOVERNANCE VIOLATIONS ({len(provider_doc_violations)} found)"
+            )
             print(f"{'=' * 60}")
             for filepath, message in provider_doc_violations:
                 rel = filepath.relative_to(PROJECT_ROOT)

@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "type": "local",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:/Users/Fedor",
+        "E:/g-drive"
+      ]
+    },
+    "fetch": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+    },
+    "git": {
+      "type": "local",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git",
+        "--repository",
+        "E:/g-drive/05_AI/github/BioactivityDataAcquisition2"
+      ]
+    }
+  }
+}

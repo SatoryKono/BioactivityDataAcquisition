@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.10
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-04'
----
+  Last verified: '2026-04-04'
+
+______________________________________________________________________
 
 # Agent Memory — BioETL Project
 
@@ -24,61 +27,62 @@ Last verified: '2026-04-04'
 > При старте новой сессии — попроси агент прочитать этот файл:
 > `Прочитай docs/00-project/ai/memory/agent-memory.md и следуй его инструкциям.`
 
----
+______________________________________________________________________
 
 ## 1. Проект BioETL — Краткая Справка
 
 **Назначение**: ETL-фреймворк для данных биоактивности из научных баз данных.
 
-| Аспект | Значение |
-|--------|----------|
-| Архитектура | Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD |
-| Deployment | Local-Only (ADR-010) — без Docker/Redis в runtime |
-| Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.) |
-| ADR | Текущий набор в `docs/02-architecture/decisions/`; ADR-008 исторически superseded |
-| Coverage target | ≥85% overall, ≥90% domain |
-| RULES.md | v6.1 (2026-03-13) |
+| Аспект          | Значение                                                                          |
+| --------------- | --------------------------------------------------------------------------------- |
+| Архитектура     | Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD               |
+| Deployment      | Local-Only (ADR-010) — без Docker/Redis в runtime                                 |
+| Провайдеры      | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.)     |
+| ADR             | Текущий набор в `docs/02-architecture/decisions/`; ADR-008 исторически superseded |
+| Coverage target | ≥85% overall, ≥90% domain                                                         |
+| RULES.md        | v6.1 (2026-03-13)                                                                 |
 
 ### Ключевые файлы
 
-| Артефакт | Путь |
-|----------|------|
-| Правила проекта (Конституция) | `docs/00-project/RULES.md` |
-| Правила оркестратора и runtime policy | `AGENTS.md` |
-| Инструкции для Claude | `docs/00-project/ai/agents/guides/CLAUDE.md` |
-| Персона агента | `docs/00-project/ai/agents/guides/AGENT.md` |
-| Claude compact context (runtime-specific) | runtime project context file |
-| Claude self-review rules (runtime-specific) | runtime self-review rules file |
-| Оркестрация субагентов | `.codex/agents/ORCHESTRATION.md` |
-| Папка с промтами проекта | `docs/00-project/ai/prompts/` |
-| Глоссарий | `docs/00-project/glossary.md` |
-| ADR | `docs/02-architecture/decisions/` |
-| Domain Ports | `src/bioetl/domain/ports/` |
-| Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
-| Pipelines | `src/bioetl/application/pipelines/` |
-| Bootstrap | `src/bioetl/composition/bootstrap/` |
-| Configs (unified) | `configs/entities/{provider}/{entity}.yaml` |
-| Configs (composite) | `configs/composites/{entity}.yaml` |
-| Dashboard extension guide (LLM) | `docs/03-guides/dashboards/dashboard-extension-llm.md` |
+| Артефакт                                    | Путь                                                   |
+| ------------------------------------------- | ------------------------------------------------------ |
+| Правила проекта (Конституция)               | `docs/00-project/RULES.md`                             |
+| Правила оркестратора и runtime policy       | `AGENTS.md`                                            |
+| Инструкции для Claude                       | `docs/00-project/ai/agents/guides/CLAUDE.md`           |
+| Персона агента                              | `docs/00-project/ai/agents/guides/AGENT.md`            |
+| Claude compact context (runtime-specific)   | runtime project context file                           |
+| Claude self-review rules (runtime-specific) | runtime self-review rules file                         |
+| Оркестрация субагентов                      | `.codex/agents/ORCHESTRATION.md`                       |
+| Папка с промтами проекта                    | `docs/00-project/ai/prompts/`                          |
+| Глоссарий                                   | `docs/00-project/glossary.md`                          |
+| ADR                                         | `docs/02-architecture/decisions/`                      |
+| Domain Ports                                | `src/bioetl/domain/ports/`                             |
+| Adapters                                    | `src/bioetl/infrastructure/adapters/{provider}/`       |
+| Pipelines                                   | `src/bioetl/application/pipelines/`                    |
+| Bootstrap                                   | `src/bioetl/composition/bootstrap/`                    |
+| Configs (unified)                           | `configs/entities/{provider}/{entity}.yaml`            |
+| Configs (composite)                         | `configs/composites/{entity}.yaml`                     |
+| Dashboard extension guide (LLM)             | `docs/03-guides/dashboards/dashboard-extension-llm.md` |
 
 ### Evidence anchors
 
 При структурных выводах и roadmap-решениях сначала сверяйся с актуальными evidence packs:
 
-| Topic | File |
-|-------|------|
-| File structure baseline | `docs/reports/evidence/project-file-structure/SUMMARY.md` |
-| File structure decisions | `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md` |
-| Package topology baseline | `docs/reports/evidence/project-package-topology/SUMMARY.md` |
-| Package topology synthesis | `docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md` |
-| Topology vs governance cross-synthesis | `docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md` |
-| Package topology decisions | `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md` |
-| Governance signals baseline | `docs/reports/evidence/governance-signals/SUMMARY.md` |
-| Governance signals decisions | `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md` |
-| Compatibility registry refactor evidence | `docs/reports/evidence/compatibility-registry-refactor/SUMMARY.md` |
-| Compatibility registry refactor decisions | `docs/reports/evidence/compatibility-registry-refactor/04-decisions/SUMMARY.md` |
+| Topic                                     | File                                                                                                            |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| File structure baseline                   | `docs/reports/evidence/project-file-structure/SUMMARY.md`                                                       |
+| File structure decisions                  | `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md`                                          |
+| Package topology baseline                 | `docs/reports/evidence/project-package-topology/SUMMARY.md`                                                     |
+| Package topology synthesis                | `docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md`                   |
+| Topology vs governance cross-synthesis    | `docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md` |
+| Package topology decisions                | `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`                                        |
+| Governance signals baseline               | `docs/reports/evidence/governance-signals/SUMMARY.md`                                                           |
+| Governance signals decisions              | `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md`                                              |
+| Compatibility registry refactor evidence  | `docs/reports/evidence/compatibility-registry-refactor/SUMMARY.md`                                              |
+| Compatibility registry refactor decisions | `docs/reports/evidence/compatibility-registry-refactor/04-decisions/SUMMARY.md`                                 |
 
 Короткая operational rule:
+
 - package count сам по себе не запускает structural wave;
 - hotspot calibration по умолчанию идёт на уровне package family, а не whole layer;
 - topology подсказывает, где смотреть; governance signals подсказывают, где действовать.
@@ -117,18 +121,18 @@ bash scripts/dev/run_mypy.sh
 `.venv-win` в PowerShell и `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` в WSL.
 При активированном подходящем окружении допускается и прямой `python -m ...`.
 
-| Group | Entry Point | Назначение |
-|-------|-------------|------------|
-| `scripts.qa` | `uv run python -m scripts.qa` | Quality checks: naming, C901, terminology |
-| `scripts.ci` | `uv run python -m scripts.ci` | CI pipeline: pytest runner, quality gates |
-| `scripts.schema` | `uv run python -m scripts.schema` | Schema/config validation и генерация |
-| `scripts.data` | `uv run python -m scripts.data` | Data integrity: VCR, checksums, delta |
-| `scripts.docs` | `uv run python -m scripts.docs` | Documentation: links, drift, docstrings |
-| `scripts.diagrams` | `uv run python -m scripts.diagrams` | Diagram lint, check, fix, render |
-| `scripts.repo` | `uv run python -m scripts.repo` | Repo hygiene: inventory, catalog, versions |
-| `scripts.ops` | `uv run python -m scripts.ops` | Ops: salt rotation, Grafana, deploy |
-| `scripts.dev` | `uv run python -m scripts.dev` | Dev setup, test runner, mock metrics |
-| `scripts.diagnostics` | `uv run python -m scripts.diagnostics` | Debug: cleanup, pandera, storage |
+| Group                 | Entry Point                            | Назначение                                 |
+| --------------------- | -------------------------------------- | ------------------------------------------ |
+| `scripts.qa`          | `uv run python -m scripts.qa`          | Quality checks: naming, C901, terminology  |
+| `scripts.ci`          | `uv run python -m scripts.ci`          | CI pipeline: pytest runner, quality gates  |
+| `scripts.schema`      | `uv run python -m scripts.schema`      | Schema/config validation и генерация       |
+| `scripts.data`        | `uv run python -m scripts.data`        | Data integrity: VCR, checksums, delta      |
+| `scripts.docs`        | `uv run python -m scripts.docs`        | Documentation: links, drift, docstrings    |
+| `scripts.diagrams`    | `uv run python -m scripts.diagrams`    | Diagram lint, check, fix, render           |
+| `scripts.repo`        | `uv run python -m scripts.repo`        | Repo hygiene: inventory, catalog, versions |
+| `scripts.ops`         | `uv run python -m scripts.ops`         | Ops: salt rotation, Grafana, deploy        |
+| `scripts.dev`         | `uv run python -m scripts.dev`         | Dev setup, test runner, mock metrics       |
+| `scripts.diagnostics` | `uv run python -m scripts.diagnostics` | Debug: cleanup, pandera, storage           |
 
 Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/qa/naming_audit.py`.
 
@@ -172,19 +176,19 @@ drilldown в Loki/Tempo или operator flow между `1. Overview`, `2. Runti
 
 - `docs/03-guides/dashboards/dashboard-extension-llm.md`
 
----
+______________________________________________________________________
 
 ## 2. Архитектурные Инварианты (CRITICAL)
 
 ### 2.1 Матрица импортов
 
-| From \ To | domain | application | infrastructure | composition | interfaces |
-|-----------|:---:|:---:|:---:|:---:|:---:|
-| **domain** | OK | NO | NO | NO | NO |
-| **application** | OK | OK | NO | NO | NO |
-| **infrastructure** | OK | NO | OK | NO | NO |
-| **composition** | OK | OK | OK | OK | NO |
-| **interfaces** | OK | OK | OK | OK | OK |
+| From \\ To         | domain | application | infrastructure | composition | interfaces |
+| ------------------ | :----: | :---------: | :------------: | :---------: | :--------: |
+| **domain**         |   OK   |     NO      |       NO       |     NO      |     NO     |
+| **application**    |   OK   |     OK      |       NO       |     NO      |     NO     |
+| **infrastructure** |   OK   |     NO      |       OK       |     NO      |     NO     |
+| **composition**    |   OK   |     OK      |       OK       |     OK      |     NO     |
+| **interfaces**     |   OK   |     OK      |       OK       |     OK      |     OK     |
 
 > Infrastructure может импортировать ВСЁ из domain (ports, types, exceptions, entities, config).
 > Ports MUST импортироваться через фасад: `from bioetl.domain.ports import X`.
@@ -218,7 +222,7 @@ drilldown в Loki/Tempo или operator flow между `1. Overview`, `2. Runti
 - Large files с proper delegation
 - `domain.types` / `domain.exceptions` everywhere
 
----
+______________________________________________________________________
 
 ## 3. Субагенты — Как Вызывать
 
@@ -226,14 +230,14 @@ drilldown в Loki/Tempo или operator flow между `1. Overview`, `2. Runti
 
 Вызов: `spawn_agent(agent_type="default" | "explorer" | "worker", message="...")`
 
-| # | `subagent_type` | Модель | Зона записи | Назначение |
-|:-:|-----------------|--------|-------------|------------|
-| I | `py-audit-bot` | opus | read-only | Baseline/final аудит, code review, arch boundaries, API validation |
-| II | `py-plan-bot` | opus | read-only | Декомпозиция на RF-*, DAG зависимостей, composite pipeline design |
-| III | `py-test-bot` | sonnet | `tests/` | Baseline/final/retest тесты, coverage ≥85%, VCR |
-| IV | `py-config-bot` | sonnet | `configs/` | Pipeline/DQ/filter YAML configs, composite, gap remediation |
-| V | `py-debug-bot` | opus | `src/bioetl/`, `tests/` (fixes) | RCA падений, DBG-* итерации (макс 5), mypy/import/runtime |
-| VI | `py-doc-bot` | sonnet | `docs/`, docstrings | ADR, CHANGELOG, docstrings, diagrams, doc-code sync |
+|  #  | `subagent_type` | Модель | Зона записи                     | Назначение                                                         |
+| :-: | --------------- | ------ | ------------------------------- | ------------------------------------------------------------------ |
+|  I  | `py-audit-bot`  | opus   | read-only                       | Baseline/final аудит, code review, arch boundaries, API validation |
+| II  | `py-plan-bot`   | opus   | read-only                       | Декомпозиция на RF-\*, DAG зависимостей, composite pipeline design |
+| III | `py-test-bot`   | sonnet | `tests/`                        | Baseline/final/retest тесты, coverage ≥85%, VCR                    |
+| IV  | `py-config-bot` | sonnet | `configs/`                      | Pipeline/DQ/filter YAML configs, composite, gap remediation        |
+|  V  | `py-debug-bot`  | opus   | `src/bioetl/`, `tests/` (fixes) | RCA падений, DBG-\* итерации (макс 5), mypy/import/runtime         |
+| VI  | `py-doc-bot`    | sonnet | `docs/`, docstrings             | ADR, CHANGELOG, docstrings, diagrams, doc-code sync                |
 
 > Production-код пишем напрямую через Edit/Write (без отдельного субагента).
 
@@ -266,14 +270,14 @@ docs/00-project/ai/memory/memory-py-doc-bot.md     — doc structure, ADR manage
 
 При вызове `spawn_agent(...)` или соответствующего runtime wrapper включай в `message`:
 
-| Субагент | MUST в prompt |
-|----------|---------------|
-| py-audit-bot | `task_id`, `phase` (baseline/final/targeted), `scope` (файлы/модули) |
-| py-plan-bot | `task_id`, `task_description`, опционально `user_plan`, `audit_baseline` |
-| py-test-bot | `task_id`, `phase` (baseline/final/retest/new_tests), `plan`, `rf_ids` |
+| Субагент      | MUST в prompt                                                                      |
+| ------------- | ---------------------------------------------------------------------------------- |
+| py-audit-bot  | `task_id`, `phase` (baseline/final/targeted), `scope` (файлы/модули)               |
+| py-plan-bot   | `task_id`, `task_description`, опционально `user_plan`, `audit_baseline`           |
+| py-test-bot   | `task_id`, `phase` (baseline/final/retest/new_tests), `plan`, `rf_ids`             |
 | py-config-bot | `task_id`, `mode` (create/update/composite/validate/migrate), `provider`, `entity` |
-| py-debug-bot | `task_id`, `failing_test_report`, `stack_traces`, `rf_ids`, `phase` |
-| py-doc-bot | `task_id`, `plan`, `refactoring_log`, `rf_ids` |
+| py-debug-bot  | `task_id`, `failing_test_report`, `stack_traces`, `rf_ids`, `phase`                |
+| py-doc-bot    | `task_id`, `plan`, `refactoring_log`, `rf_ids`                                     |
 
 ### 3.4 Выходы (артефакты)
 
@@ -282,6 +286,7 @@ reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 ```
 
 Единый контракт для итоговых отчётов:
+
 - Все `py-*` профили сохраняют итоговые отчёты по пути выше.
 - `phase` используется только там, где профиль явно различает `baseline` / `final` / `targeted` в имени файла.
 - `LLM` = вызывающая модель, `agent` = логический профиль/skill.
@@ -289,16 +294,16 @@ reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 
 ### 3.5 ID-системы
 
-| Prefix | Субагент | Пример |
-|--------|----------|--------|
-| `RF-` | py-plan-bot | RF-001 — рефакторинг/изменение |
-| `DBG-` | py-debug-bot | DBG-001 — debug-итерация |
-| `AUD-` | py-audit-bot | AUD-001 — audit finding |
-| `DOC-` | py-doc-bot | DOC-001 — doc update |
-| `FAIL-` | py-test-bot | FAIL-001 — упавший тест |
-| `CFG-` | py-config-bot | CFG-001 — config change |
+| Prefix  | Субагент      | Пример                         |
+| ------- | ------------- | ------------------------------ |
+| `RF-`   | py-plan-bot   | RF-001 — рефакторинг/изменение |
+| `DBG-`  | py-debug-bot  | DBG-001 — debug-итерация       |
+| `AUD-`  | py-audit-bot  | AUD-001 — audit finding        |
+| `DOC-`  | py-doc-bot    | DOC-001 — doc update           |
+| `FAIL-` | py-test-bot   | FAIL-001 — упавший тест        |
+| `CFG-`  | py-config-bot | CFG-001 — config change        |
 
----
+______________________________________________________________________
 
 ## 4. Стандартный Workflow
 
@@ -319,13 +324,13 @@ reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 
 ### 4.1 Упрощённые режимы
 
-| Режим | Workflow |
-|-------|---------|
-| **Quick-fix** | test(baseline) → code(fix) → test(final) → doc(docstring only) |
-| **Doc-only** | doc-bot → audit(targeted, docs) |
-| **Config-only** | audit(targeted, config) → plan → config-bot → test(final) → audit(final) |
-| **New entity** | plan → orchestrator(scaffold) → config-bot(3 configs) → test(new+final) → doc → audit |
-| **Composite pipeline** | audit(baseline) → plan(composite) → config-bot → orchestrator → test → doc → audit |
+| Режим                  | Workflow                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------- |
+| **Quick-fix**          | test(baseline) → code(fix) → test(final) → doc(docstring only)                        |
+| **Doc-only**           | doc-bot → audit(targeted, docs)                                                       |
+| **Config-only**        | audit(targeted, config) → plan → config-bot → test(final) → audit(final)              |
+| **New entity**         | plan → orchestrator(scaffold) → config-bot(3 configs) → test(new+final) → doc → audit |
+| **Composite pipeline** | audit(baseline) → plan(composite) → config-bot → orchestrator → test → doc → audit    |
 
 ### 4.2 Параллелизация
 
@@ -333,7 +338,7 @@ reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 - `orchestrator` || `py-config-bot` — разные файловые зоны
 - `py-doc-bot` || `py-audit-bot (final)` — если doc не влияет на code audit
 
----
+______________________________________________________________________
 
 ## 5. Skills (Навыки)
 
@@ -344,21 +349,21 @@ workflow-ролей в текущем репозитории находится 
 `.codex/agents/`. Published mirrors под `docs/00-project/ai/skills/` и
 runtime-specific copies в других деревьях не переопределяют этот источник.
 
-| Skill / entrypoint | Где смотреть SSOT | Назначение |
-|-------------------|-------------------|------------|
-| `agent-orchestration` | `.codex/skills/agent-orchestration/` | Координация multi-agent workflow |
-| `py-audit-bot` | `.codex/skills/py-audit-bot/` | Baseline/final audit |
-| `py-plan-bot` | `.codex/skills/py-plan-bot/` | RF-планирование |
-| `py-test-bot` | `.codex/skills/py-test-bot/` | Post-change verification |
-| `py-doc-bot` | `.codex/skills/py-doc-bot/` | Документационные правки |
-| `py-config-bot` | `.codex/skills/py-config-bot/` | Config/docs sync |
-| `py-debug-bot` | `.codex/skills/py-debug-bot/` | Failure triage |
-| `py-review-orchestrator` | `.codex/skills/py-review-orchestrator/` | Независимый double-check |
-| `py-test-swarm` | `.codex/skills/py-test-swarm/` | Иерархическое тестирование |
-| `new-pipeline` | `.codex/skills/new-pipeline/` | Scaffolding pipeline |
-| `verify-architecture` | `.codex/skills/verify-architecture/` | Архитектурные проверки |
-| `documentation-audit` | `.codex/skills/documentation-audit/` | Аудит документации |
-| `architecture-guardian` | `.codex/skills/public/architecture-guardian/` | Граничный архитектурный review |
+| Skill / entrypoint       | Где смотреть SSOT                             | Назначение                       |
+| ------------------------ | --------------------------------------------- | -------------------------------- |
+| `agent-orchestration`    | `.codex/skills/agent-orchestration/`          | Координация multi-agent workflow |
+| `py-audit-bot`           | `.codex/skills/py-audit-bot/`                 | Baseline/final audit             |
+| `py-plan-bot`            | `.codex/skills/py-plan-bot/`                  | RF-планирование                  |
+| `py-test-bot`            | `.codex/skills/py-test-bot/`                  | Post-change verification         |
+| `py-doc-bot`             | `.codex/skills/py-doc-bot/`                   | Документационные правки          |
+| `py-config-bot`          | `.codex/skills/py-config-bot/`                | Config/docs sync                 |
+| `py-debug-bot`           | `.codex/skills/py-debug-bot/`                 | Failure triage                   |
+| `py-review-orchestrator` | `.codex/skills/py-review-orchestrator/`       | Независимый double-check         |
+| `py-test-swarm`          | `.codex/skills/py-test-swarm/`                | Иерархическое тестирование       |
+| `new-pipeline`           | `.codex/skills/new-pipeline/`                 | Scaffolding pipeline             |
+| `verify-architecture`    | `.codex/skills/verify-architecture/`          | Архитектурные проверки           |
+| `documentation-audit`    | `.codex/skills/documentation-audit/`          | Аудит документации               |
+| `architecture-guardian`  | `.codex/skills/public/architecture-guardian/` | Граничный архитектурный review   |
 
 ### 5.2 Runtime-specific conveniences
 
@@ -370,19 +375,19 @@ workflow для BioETL: приоритет у `.codex/agents/ORCHESTRATION.md`,
 Если нужна фактическая команда для текущего runtime, смотри его собственный
 реестр команд/skills, а не эту память.
 
----
+______________________________________________________________________
 
 ## 6. Runtime Integrations
 
 Runtime-конфигурация зависит от активного AI-клиента и должна читаться из
 его реестров, а не из статического списка в этой памяти.
 
-| Runtime | Что проверять |
-|---------|---------------|
-| Codex | `.codex/config.toml`, `.codex/settings.json`, `.codex/agents/`, `.codex/skills/` |
-| Claude | runtime-specific settings, agent registry, and skill registry |
-| Gemini | `.gemini/agents/`, `.gemini/skills/`, runtime helper docs |
-| Copilot | `.github/copilot-instructions.md`, workspace MCP config |
+| Runtime | Что проверять                                                                    |
+| ------- | -------------------------------------------------------------------------------- |
+| Codex   | `.codex/config.toml`, `.codex/settings.json`, `.codex/agents/`, `.codex/skills/` |
+| Claude  | runtime-specific settings, agent registry, and skill registry                    |
+| Gemini  | `.gemini/agents/`, `.gemini/skills/`, runtime helper docs                        |
+| Copilot | `.github/copilot-instructions.md`, workspace MCP config                          |
 
 ### 6.1 MCP / Tool Policy
 
@@ -391,73 +396,73 @@ Runtime-конфигурация зависит от активного AI-кл�
 - Для других runtimes ориентируйся на их собственные registry/settings surfaces.
 - При расхождениях runtime-реестры имеют приоритет над документационными копиями.
 
----
+______________________________________________________________________
 
 ## 7. Native Agent Roles (Codex Runtime)
 
 В Codex runtime для логических профилей `py-*` используются native agent roles:
 
-| `agent_type` | Назначение | Когда использовать |
-|--------------|------------|-------------------|
-| `default` | Аудит, планирование, оркестрация, review | Baseline/final audit, RF-plan, docs/code review |
-| `explorer` | Read-only discovery | Инвентаризация, поиск фактов, узкие проверки |
-| `worker` | Изолированная write-zone работа | Docs/config/test edits с явной зоной владения |
+| `agent_type` | Назначение                               | Когда использовать                              |
+| ------------ | ---------------------------------------- | ----------------------------------------------- |
+| `default`    | Аудит, планирование, оркестрация, review | Baseline/final audit, RF-plan, docs/code review |
+| `explorer`   | Read-only discovery                      | Инвентаризация, поиск фактов, узкие проверки    |
+| `worker`     | Изолированная write-zone работа          | Docs/config/test edits с явной зоной владения   |
 
 Runtime-specific helpers вне Codex допустимо хранить как parallel runtime context.
 Для текущего project workflow BioETL их нельзя считать SSOT: приоритет у
 `.codex/agents/ORCHESTRATION.md` и `AGENTS.md`.
 
----
+______________________________________________________________________
 
 ## 8. Naming Conventions (Быстрая Справка)
 
 ### Классы
 
-| Тип | Suffix | Пример |
-|-----|--------|--------|
-| Factory | `*Factory` | `PipelineFactory` |
-| Client | `*Client` | `ChEMBLClient` |
-| Port | `*Port` | `DataSourcePort` |
-| Service | `*Service` | `ValidationService` |
+| Тип         | Suffix         | Пример                |
+| ----------- | -------------- | --------------------- |
+| Factory     | `*Factory`     | `PipelineFactory`     |
+| Client      | `*Client`      | `ChEMBLClient`        |
+| Port        | `*Port`        | `DataSourcePort`      |
+| Service     | `*Service`     | `ValidationService`   |
 | Transformer | `*Transformer` | `CompoundTransformer` |
-| Error | `*Error` | `ValidationError` |
-| Schema | `*Schema` | `CompoundGoldSchema` |
-| Config | `*Config` | `RuntimeConfig` |
+| Error       | `*Error`       | `ValidationError`     |
+| Schema      | `*Schema`      | `CompoundGoldSchema`  |
+| Config      | `*Config`      | `RuntimeConfig`       |
 
 ### Функции
 
-| Prefix | Назначение |
-|--------|-----------|
-| `get_*` | Локальные данные |
-| `fetch_*` | Сетевые/I/O операции |
-| `iter_*` | Генераторы |
-| `create_*` / `build_*` | Создание объектов |
-| `validate_*` | Валидация |
-| `is_*` / `has_*` / `can_*` | Boolean queries |
+| Prefix                     | Назначение           |
+| -------------------------- | -------------------- |
+| `get_*`                    | Локальные данные     |
+| `fetch_*`                  | Сетевые/I/O операции |
+| `iter_*`                   | Генераторы           |
+| `create_*` / `build_*`     | Создание объектов    |
+| `validate_*`               | Валидация            |
+| `is_*` / `has_*` / `can_*` | Boolean queries      |
 
----
+______________________________________________________________________
 
 ## 9. Протокол Двойной Верификации
 
 > **ОБЯЗАТЕЛЬНО** перед любым утверждением об архитектуре:
 
 1. Прочитай **реальный код** (не предполагай)
-2. Проверь каждый finding **дважды** (размер, структура, делегирование)
-3. Указывай **точные ссылки** `файл:строка`
-4. Сверяйся со списком **Valid Exceptions** (§2.5)
+1. Проверь каждый finding **дважды** (размер, структура, делегирование)
+1. Указывай **точные ссылки** `файл:строка`
+1. Сверяйся со списком **Valid Exceptions** (§2.5)
 
----
+______________________________________________________________________
 
 ## 10. Что Делать в Первую Очередь в Новом Чате
 
 1. **Прочитать этот файл** — ты уже здесь
-2. **Прочитать `AGENTS.md`** — правила оркестратора, ограничения и tooling
-3. **Прочитать `.codex/agents/ORCHESTRATION.md`** — текущий workflow и роли
-4. **При использовании логического профиля** — прочитать `.codex/agents/py-{name}.md`
-5. **При scaffolding** — использовать workflow `new-pipeline`
-6. **Перед завершением code/docs changes** — прогнать `verify-architecture` или эквивалентный project check
-7. **Только если активный runtime = Claude** — дополнительно прочитать runtime project context file
-8. **Только если активный runtime = Claude** — дополнительно прочитать runtime self-review rules file
+1. **Прочитать `AGENTS.md`** — правила оркестратора, ограничения и tooling
+1. **Прочитать `.codex/agents/ORCHESTRATION.md`** — текущий workflow и роли
+1. **При использовании логического профиля** — прочитать `.codex/agents/py-{name}.md`
+1. **При scaffolding** — использовать workflow `new-pipeline`
+1. **Перед завершением code/docs changes** — прогнать `verify-architecture` или эквивалентный project check
+1. **Только если активный runtime = Claude** — дополнительно прочитать runtime project context file
+1. **Только если активный runtime = Claude** — дополнительно прочитать runtime self-review rules file
 
 ### Команда для загрузки полного контекста:
 
@@ -469,11 +474,8 @@ Runtime-specific helpers вне Codex допустимо хранить как p
 4. .codex/agents/py-{name}.md  # если используется логический профиль
 ```
 
----
+______________________________________________________________________
 
 *Этот файл — живой документ. Обновляй при изменении архитектуры, добавлении новых агентов или правил.*
 
-Синхронизировано с ORCHESTRATION.md v4.2.0
-md v4.2.0
-
-.0
+Синхронизировано с ORCHESTRATION.md v4.2
