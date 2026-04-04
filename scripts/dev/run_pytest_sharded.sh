@@ -13,6 +13,8 @@ DEFAULT_COVERAGE_DIR="$REPO_ROOT/.coverage-sharded"
 WORKERS_PER_SHARD="$DEFAULT_WORKERS_PER_SHARD"
 DIST_MODE="$DEFAULT_DIST_MODE"
 COVERAGE_DIR="$DEFAULT_COVERAGE_DIR"
+STREAM_LOGS=0
+TAIL_LOGS=0
 DRY_RUN=0
 LIST_ONLY=0
 KEEP_COVERAGE_FILES=0
@@ -63,12 +65,17 @@ Options:
   --workers-per-shard N     xdist workers per shard (default: 2)
   --dist MODE               xdist distribution mode (default: loadfile)
   --coverage-dir PATH       Directory for per-shard coverage files
+  --stream                  Stream live shard output to console and log file
+  --tail                    Tail shard log files live with shard prefixes
+                            Ignored when --stream is also set
   --dry-run                 Print commands without executing them
   --keep-coverage-files     Do not clean the coverage directory before/after
   -h, --help                Show this help
 
 Examples:
   bash scripts/dev/run_pytest_sharded.sh
+  bash scripts/dev/run_pytest_sharded.sh --stream
+  bash scripts/dev/run_pytest_sharded.sh --tail
   bash scripts/dev/run_pytest_sharded.sh --wave 2
   bash scripts/dev/run_pytest_sharded.sh --shard S3-app-foundation -- --lf
 EOF
@@ -135,6 +142,14 @@ parse_args() {
                 }
                 COVERAGE_DIR="$2"
                 shift 2
+                ;;
+            --stream)
+                STREAM_LOGS=1
+                shift
+                ;;
+            --tail)
+                TAIL_LOGS=1
+                shift
                 ;;
             --dry-run)
                 DRY_RUN=1
@@ -225,6 +240,25 @@ cleanup_coverage_dir() {
     rm -rf "$COVERAGE_DIR"
 }
 
+start_log_tailer() {
+    local shard="$1"
+    local log_file="$2"
+
+    touch "$log_file"
+    tail -n +1 -f "$log_file" 2>/dev/null | sed -u "s/^/[${shard}] /" &
+    printf '%s\n' "$!"
+}
+
+stop_log_tailers() {
+    local tail_pid
+    for tail_pid in "$@"; do
+        if [[ -n "$tail_pid" ]] && kill -0 "$tail_pid" 2>/dev/null; then
+            kill "$tail_pid" 2>/dev/null || true
+            wait "$tail_pid" 2>/dev/null || true
+        fi
+    done
+}
+
 run_wave() {
     local wave="$1"
     shift
@@ -232,6 +266,7 @@ run_wave() {
     local -a pids=()
     local -a labels=()
     local -a logs=()
+    local -a tail_pids=()
     local shard
 
     mkdir -p "$COVERAGE_DIR/logs"
@@ -265,10 +300,24 @@ run_wave() {
         fi
 
         printf "[run_pytest_sharded] %s -> %s\n" "$shard" "$log_file"
-        (
-            export COVERAGE_FILE="$coverage_file"
-            "${cmd[@]}"
-        ) >"$log_file" 2>&1 &
+        : >"$log_file"
+
+        if [[ "$TAIL_LOGS" == "1" && "$STREAM_LOGS" != "1" ]]; then
+            tail_pids+=("$(start_log_tailer "$shard" "$log_file")")
+        fi
+
+        if [[ "$STREAM_LOGS" == "1" ]]; then
+            (
+                set -o pipefail
+                export COVERAGE_FILE="$coverage_file"
+                "${cmd[@]}" 2>&1 | tee "$log_file" | sed -u "s/^/[${shard}] /"
+            ) &
+        else
+            (
+                export COVERAGE_FILE="$coverage_file"
+                "${cmd[@]}"
+            ) >"$log_file" 2>&1 &
+        fi
 
         pids+=("$!")
         labels+=("$shard")
@@ -290,6 +339,10 @@ run_wave() {
             printf "[run_pytest_sharded][ok] %s completed\n" "${labels[$i]}"
         fi
     done
+
+    if ((${#tail_pids[@]} > 0)); then
+        stop_log_tailers "${tail_pids[@]}"
+    fi
 
     if [[ "$failures" != "0" ]]; then
         return 1

@@ -46,6 +46,8 @@ Preferred runners automatically select the OS-appropriate environment:
 bash scripts/dev/run_pytest.sh tests/unit --narrow --timeout=120 --lf
 bash scripts/dev/run_mypy.sh
 bash scripts/dev/run_pytest_sharded.sh
+bash scripts/dev/run_pytest_sharded.sh --stream
+bash scripts/dev/run_pytest_sharded.sh --tail
 ```
 
 For fast, reproducible narrow slices during refactoring, use the explicit

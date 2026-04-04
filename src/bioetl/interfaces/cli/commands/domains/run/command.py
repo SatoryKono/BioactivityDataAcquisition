@@ -101,7 +101,6 @@ _RUN_CANONICAL_BOUNDARY_SEAMS = (
 _RUN_COMPATIBILITY_SEAMS = (
     "_get_runner_logger",
     "_handle_destructive_run_confirmation",
-    "_preview_cleanup",
     "_validate_start_offset",
     "echo_health_server_info",
     "ensure_metrics_server_started",
@@ -115,13 +114,15 @@ def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
     return _get_cli_run_orchestration_service_impl()
 
 
-def get_pipeline_runner_service() -> object:
+def get_pipeline_runner_service(
+    registry: PipelineRegistry | None = None,
+) -> object:
     """Resolve the pipeline runner service lazily for runtime helpers."""
     from bioetl.composition.services_api import (
         get_pipeline_runner_service as _impl,
     )
 
-    return _impl()
+    return _impl(registry=registry)
 
 
 def _exit_with_code(code: int | str | None = None) -> NoReturn:
@@ -202,6 +203,7 @@ def execute_run(
 _build_run_command_input = _build_run_command_input_impl
 _map_status_to_exit_code = map_status_to_exit_code
 _build_run_pipeline_callable = _build_run_pipeline_callable_impl
+_get_pipeline_runner_service_impl = get_pipeline_runner_service
 
 
 def _present_run_health_info(request: RunExecutionRequest) -> None:
@@ -336,5 +338,4 @@ ensure_metrics_server_started = _ensure_metrics_server_started_impl
 health_server_context = _health_server_context_impl
 _get_runner_logger = get_runner_logger
 _handle_destructive_run_confirmation = handle_destructive_run_confirmation
-_preview_cleanup = show_cleanup_preview
 _validate_start_offset = validate_options

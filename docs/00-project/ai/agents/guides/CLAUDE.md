@@ -7,7 +7,7 @@
 *Синхронизировано с RULES.md v6.1 (2026-03-13) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.7.0*
 
 > **Runtime-specific note:** orchestration guidance for Claude lives in
-> `.claude/agents/ORCHESTRATION.md`. Codex keeps its own runtime-specific
+> runtime-specific orchestration copy. Codex keeps its own runtime-specific
 > source-of-truth in `.codex/agents/ORCHESTRATION.md`, so version skew between
 > those files is not automatically a docs defect.
 
@@ -61,7 +61,7 @@ bash scripts/dev/run_mypy.sh
 **Главные ресурсы:**
 
 1. `docs/00-project/RULES.md` — Конституция проекта (RFC 2119 keywords)
-1. `.claude/PROJECT_CONTEXT.md` — Компактный контекст
+1. runtime project context file — Компактный контекст
 1. `AGENT.md` — Детальные инструкции для агента
 1. `docs/03-guides/dashboards/dashboard-extension-llm.md` — если задача затрагивает `grafana/dashboards/*.json`, links или drilldown в Grafana
 1. `docs/99-archive/refactoring-plan.md` — Архив плана рефакторинга (исторический справочник, optional)
@@ -548,7 +548,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | -------------------------------------- | ------------------------------------------------------------------------------- |
 | `docs/00-project/RULES.md`             | **Конституция проекта** — единственный источник истины для архитектурных правил |
 | `docs/00-project/ai/agents/guides/AGENT.md`      | Инструкции для агента (персона, workflow, специфика работы)                     |
-| `.claude/PROJECT_CONTEXT.md`           | Компактный контекст для быстрой справки                                         |
+| runtime project context file           | Компактный контекст для быстрой справки                                         |
 | `docs/02-architecture/decisions/`      | Актуальный набор ADR — архитектурные решения                                    |
 | `docs/01-requirements/REQUIREMENTS.md` | Тестируемые требования; при ссылке на total проверяй live по текущему документу |
 

@@ -12,7 +12,7 @@ Manage VCR cassette lifecycle for provider integration tests.
 
 ## Source Of Truth
 - Codex SSOT: `.codex/skills/vcr-record/SKILL.md`
-- Claude runtime: `.claude/commands/vcr-record.md`
+- Runtime mirrors: published docs or runtime-specific registries may exist, but Codex SSOT controls current workflow.
 
 ## Workflow
 1. Open and follow the SSOT skill file for your active runtime.

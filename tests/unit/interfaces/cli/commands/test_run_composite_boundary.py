@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import ast
-from pathlib import Path
+import importlib
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -65,19 +64,13 @@ def test_bootstrap_composite_runner_delegates_to_composite_api() -> None:
 
 
 @pytest.mark.unit
-def test_cli_main_imports_run_composite_via_public_command_seam() -> None:
-    """cli.main should wire the public run_composite seam, not the internal owner."""
-    path = Path("src/bioetl/interfaces/cli/main.py")
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+def test_cli_main_registers_run_composite_via_public_command_seam() -> None:
+    """cli.main should resolve run-composite through the lazy public command spec."""
+    cli_main = importlib.import_module("bioetl.interfaces.cli.main")
 
-    imported_modules = {
-        node.module
-        for node in tree.body
-        if isinstance(node, ast.ImportFrom) and node.module is not None
-    }
+    module_name, attribute_name, _help_text = cli_main._LAZY_COMMAND_SPECS[
+        "run-composite"
+    ]
 
-    assert "bioetl.interfaces.cli.commands.run_composite" in imported_modules
-    assert (
-        "bioetl.interfaces.cli.commands.domains.composite.command"
-        not in imported_modules
-    )
+    assert module_name == "bioetl.interfaces.cli.commands.run_composite"
+    assert attribute_name == "run_composite"

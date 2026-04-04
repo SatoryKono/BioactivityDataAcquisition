@@ -74,7 +74,7 @@ def mock_registry_main():
     ]
     with (
         patch(
-            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+            "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
             return_value=mock,
         ),
         patch(

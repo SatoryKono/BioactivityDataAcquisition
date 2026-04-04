@@ -23,7 +23,7 @@ profiles в BioETL.
 ## Relationship To Other AI Surfaces
 
 - Runtime orchestration и live agent registries остаются в
-  `.codex/agents/` и `.claude/agents/`.
+  `.codex/agents/` и other runtime agent registries.
 - Published mirror и assistant-facing guides живут в
   `docs/00-project/ai/agents/`.
 - Prompts живут в `docs/00-project/ai/prompts/`.
@@ -35,7 +35,7 @@ runtime source и canonical governance docs:
 - `docs/00-project/RULES.md`
 - `docs/01-requirements/REQUIREMENTS.md`
 - accepted ADRs in `docs/02-architecture/decisions/`
-- runtime registries in `.codex/agents/` and `.claude/agents/`
+- runtime registries in `.codex/agents/` and other runtime agent registries
 
 ## Practical Reading Order
 

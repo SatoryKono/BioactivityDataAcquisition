@@ -18,7 +18,7 @@ Last verified: '2026-04-04'
 обеспечивает полный жизненный цикл задачи разработки BioETL. Для текущего
 Codex workflow source-of-truth orchestration живёт в
 `.codex/agents/ORCHESTRATION.md`; parallel runtime copies могут существовать в
-`.claude/agents/` и `.gemini/agents/` для соответствующих сред. Production-код
+других runtime trees для соответствующих сред. Production-код
 пишется напрямую оркестратором (без отдельного `py-code-bot`).
 
 **Запуск логического профиля в Codex runtime:**
@@ -29,7 +29,7 @@ spawn_agent(
 )
 ```
 
-> Runtime mapping: см. `.codex/agents/CODEX-RUNTIME.md`. Для Claude/Gemini
+> Runtime mapping: см. `.codex/agents/CODEX-RUNTIME.md`. Для других runtimes
 > используй их собственные runtime registries и orchestration copies.
 
 | # | Субагент (`subagent_type` / logical profile) | Model | Роль | Артефакт |

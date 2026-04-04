@@ -13,9 +13,9 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 1. Read memory:
 - `../../../docs/00-project/ai/memory/agent-memory.md`
 - `../../../docs/00-project/ai/memory/memory-py-test-bot.md`
-- `../../../.claude/agents/ORCHESTRATION.md` (sections 2-7)
+- `../../../.codex/agents/ORCHESTRATION.md` (sections 2-7)
 2. Read profile:
-- `../../../.claude/agents/py-test-swarm.md`
+- `../../../.codex/agents/py-test-swarm.md`
 3. Confirm input contract:
 - `task_id` (required)
 - `mode` (required): `full_audit | fix_failures | coverage_boost | optimize | flakiness_scan`

@@ -17,7 +17,7 @@ Consolidated agent registry for published docs navigation.
 ## Surface Note
 
 - This page is a **published mirror index**, not a canonical runtime registry.
-- Claude runtime source of truth remains under `.claude/agents/`.
+- Claude runtime source of truth remains in its runtime-specific agent registry.
 - Codex keeps its own runtime-specific orchestration and related agent context
   under `.codex/agents/`.
 - Use this catalog for discoverability; verify live runtime behavior in the

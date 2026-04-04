@@ -76,7 +76,7 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 - Архитектура: Hexagonal (Ports & Adapters), 5 слоёв
 - Размер слоёв, tests/configs/docs считай live в текущем checkout перед разбиением на сектора
 - Не копируй исторические snapshot-counts в отчёт; используй команды подсчёта и фиксируй дату/ветку при необходимости
-- Правила: `docs/00-project/RULES.md` (v6.1), `.claude/rules/ai-selfreview-rules.md`
+- Правила: `docs/00-project/RULES.md` (v6.1), runtime self-review rules
 - ADR: используй текущий список файлов в `docs/02-architecture/decisions/`, не исторический диапазон
 
 ## ПЛАН СЕКТОРОВ
@@ -131,8 +131,8 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 
 ### 2A.1. Загрузи правила
 Прочитай эти файлы для понимания критериев:
-- `.claude/rules/ai-selfreview-rules.md` — правила ревью и scoring
-- `.claude/PROJECT_CONTEXT.md` — контекст проекта
+- runtime self-review rules — правила ревью и scoring
+- runtime project context file — контекст проекта
 
 ### 2A.2. Проведи ревью по категориям
 Для каждого файла в scope проверь применимые правила:
@@ -655,7 +655,7 @@ sector_weights:
 Вставьте в чат:
 
 ```text
-Прочитай .claude/agents/py-review-orchestrator.md и выполни полное
+Прочитай runtime profile `py-review-orchestrator` и выполни полное
 иерархическое ревью проекта согласно инструкции L1 Orchestrator (раздел 3).
 Отчёты создавай в reports/review/.
 ```
@@ -667,7 +667,7 @@ Task(
     subagent_type="general-purpose",
     description="L1 Review Orchestrator",
     prompt="""Ты — L1 Review Orchestrator. Прочитай файл
-    .claude/agents/py-review-orchestrator.md и выполни полное
+    runtime profile `py-review-orchestrator` и выполни полное
     иерархическое ревью проекта BioETL.
     Шаги:
     1. Создай директорию reports/review/
@@ -707,9 +707,9 @@ L1 собирает все → FINAL-REVIEW.md
 ## 8. References
 
 - **RULES.md** — `docs/00-project/RULES.md` (v6.1)
-- **Self-review rules** — `.claude/rules/ai-selfreview-rules.md`
+- **Self-review rules** — runtime self-review rules
 - **Orchestration** — `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
 - **Architecture tests** — `tests/architecture/`
-- **Audit bot** — `.claude/agents/py-audit-bot.md`
-- **Project context** — `.claude/PROJECT_CONTEXT.md`
+- **Audit bot** — runtime profile `py-audit-bot`
+- **Project context** — runtime project context file

@@ -88,7 +88,7 @@ Reduce duplicate specialist profiles by keeping one canonical profile per functi
 
 | Area | Change | Status |
 | --- | --- | --- |
-| Full consolidation | Deleted 77 generic agents from `.claude/agents/` (runtime) | done |
+| Full consolidation | Deleted 77 generic agents from the legacy runtime agent surface | done |
 | Mirror sync | Deleted 77 `sp-*` mirrors from `docs/00-project/ai/agents/agents/` | done |
 | Alias retirement | All aliases removed (ahead of 2026-06-30 schedule) | done |
 | Retained generic | 12 `sp-*` profiles kept (relevant to Python ETL project) | done |
@@ -118,7 +118,7 @@ Reduce duplicate specialist profiles by keeping one canonical profile per functi
 
 ## Exit Criteria For Wave 6
 
-1. `.claude/agents/` contains exactly 23 files (9 py-* + 12 generic + 2 service).
+1. The legacy runtime agent surface contains exactly 23 files (9 py-* + 12 generic + 2 service).
 2. `docs/00-project/ai/agents/agents/` mirrors the same 23 files (with sp-* prefix for generic).
 3. No broken references in ORCHESTRATION.md, rules, or skills.
 4. README.md in both locations updated to reflect new inventory.

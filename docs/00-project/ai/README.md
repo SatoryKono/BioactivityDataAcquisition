@@ -17,7 +17,7 @@ supporting internal artifacts.
 ## Surface Types
 
 - **Runtime source**: live orchestration, agent registries и runtime-specific
-  instructions живут в `.codex/agents/` и `.claude/agents/`.
+  instructions живут в `.codex/agents/` и parallel runtime registries.
 - **Published mirrors and guides**: `docs/00-project/ai/agents/` хранит
   discoverable docs mirrors, guides и runtime-facing helper docs.
 - **Memory surface**: `docs/00-project/ai/memory/` хранит project memory entry
@@ -31,7 +31,7 @@ supporting internal artifacts.
 
 При чтении AI docs используй такой приоритет:
 
-1. runtime source в `.codex/agents/` и `.claude/agents/`
+1. runtime source в `.codex/agents/` и parallel runtime registries
 2. canonical governance docs:
    - `docs/00-project/RULES.md`
    - `docs/01-requirements/REQUIREMENTS.md`

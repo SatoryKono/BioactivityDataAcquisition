@@ -116,7 +116,7 @@ class _LazyCliGroup(click.Group):
 
     def list_commands(self, ctx: click.Context) -> list[str]:
         del ctx
-        return sorted(_LAZY_COMMAND_SPECS)
+        return list(_LAZY_COMMAND_SPECS)
 
     def get_command(
         self,
@@ -140,7 +140,7 @@ class _LazyCliGroup(click.Group):
         del ctx
         rows = [
             (name, help_text)
-            for name, (_module_name, _attribute_name, help_text) in sorted(
+            for name, (_module_name, _attribute_name, help_text) in (
                 _LAZY_COMMAND_SPECS.items()
             )
         ]

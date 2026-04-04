@@ -3,7 +3,7 @@
 *Статус: internal-published (Internal / Extended)*
 
 Date: 2026-03-08
-Scope constraint: documentation-only in `docs/00-project/ai/**` (no runtime file renames in `.claude/agents` / `.codex/agents`).
+Scope constraint: documentation-only in `docs/00-project/ai/**` (no runtime file renames in parallel runtime agent trees or `.codex/agents`).
 
 ## 1. Problem Statement
 
@@ -100,7 +100,7 @@ Compatibility aliases are retained at old paths as deprecated stubs.
 ## 6. Wave 6 Update (2026-03-12)
 
 All P1 renames and P2 deduplication are now superseded by full consolidation:
-- 77 generic agents removed from `.claude/agents/` (runtime) and `docs/.../agents/` (mirror)
+- 77 generic agents removed from the legacy runtime agent surface and `docs/.../agents/` (mirror)
 - 12 generic agents retained (relevant to Python ETL project)
 - All alias profiles removed (ahead of 2026-06-30 schedule)
 - See `AGENT_CONSOLIDATION_MATRIX_2026-03-08.md` Wave 6 for details

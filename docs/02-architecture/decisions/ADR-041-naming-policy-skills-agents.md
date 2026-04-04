@@ -18,7 +18,7 @@ Last verified: '2026-03-30'
 
 ## Context
 
-Критический аудит `.claude/skills/`, `.claude/agents/`, `.claude/commands/` выявил
+Критический аудит historical runtime skills, agents, and command surfaces выявил
 **системные расхождения** в наименованиях, форматах файлов и языковой политике.
 Отсутствие формализованной naming policy затрудняет обнаружение skills/agents
 автоматическими сканерами (capability-discovery), создаёт путаницу в маппинге
@@ -40,7 +40,7 @@ Last verified: '2026-03-30'
 | `{role}` | Функциональная роль, kebab-case | `audit`, `plan`, `test`, `debug`, `doc`, `config`, `review` |
 | `{type}` | Архитектурный тип | `bot` (single agent), `swarm` (hierarchical L1→L2→L3), `orchestrator` (sector-based) |
 
-**Filename:** `.claude/agents/{subagent_type}.md` (1:1 mapping)
+**Filename:** `.codex/agents/{subagent_type}.md` (1:1 mapping for the current Codex workflow)
 
 **Frontmatter (REQUIRED):**
 ```yaml
@@ -51,7 +51,7 @@ model: opus | sonnet | haiku   # Abstract alias, NOT versioned ID
 ---
 ```
 
-#### 1.2 Skills (`.claude/skills/`)
+#### 1.2 Skills (`.codex/skills/`)
 
 **Pattern:** `{verb}-{noun}` или `{noun}-{noun}` в kebab-case
 
@@ -74,11 +74,11 @@ agent: general-purpose | specific-type
 ---
 ```
 
-#### 1.3 Commands (`.claude/commands/`)
+#### 1.3 Commands (runtime command registry)
 
 **Pattern:** `{action}` или `{action}-{object}` в kebab-case
 
-**Filename:** `.claude/commands/{command-name}.md`
+**Identifier:** `{command-name}` in the active runtime command registry
 
 **Frontmatter (REQUIRED):**
 ```yaml
@@ -91,9 +91,9 @@ description: "..."            # Russian for BioETL-specific, English for generic
 
 | Entity | Name Resolution |
 |--------|----------------|
-| Slash command `/X` | File `.claude/commands/X.md` |
-| Skill `X` | Dir `.claude/skills/X/SKILL.md`, frontmatter `name: X` |
-| Agent `Y` | File `.claude/agents/Y.md`, frontmatter `name: Y` |
+| Slash command `/X` | Runtime command entry `X` |
+| Skill `X` | Dir `.codex/skills/X/SKILL.md`, frontmatter `name: X` |
+| Agent `Y` | File `.codex/agents/Y.md`, frontmatter `name: Y` |
 
 **Critical invariant:** Если command делегирует agent'у, маппинг документируется
 в теле command файла через `subagent_type: py-{role}-{type}`.
@@ -127,20 +127,20 @@ description: "..."            # Russian for BioETL-specific, English for generic
 
 | ID | Issue | Severity | Location |
 |----|-------|----------|----------|
-| NP-001 | `py-test-swarm.md` missing YAML frontmatter | CRITICAL | `.claude/agents/py-test-swarm.md` |
-| NP-002 | `py-review-orchestrator.md` uses hardcoded model `claude-3-5-sonnet-20241022` instead of abstract alias | HIGH | `.claude/agents/py-review-orchestrator.md` |
-| NP-003 | `deep-research/SKILL.md` name mismatch: dir=`deep-research`, frontmatter=`conducting-deep-research` | HIGH | `.claude/skills/deep-research/SKILL.md` |
-| NP-004 | `nci-analysis/SKILL.md` name mismatch: dir=`nci-analysis`, frontmatter=`nci-manipulation-analysis` | HIGH | `.claude/skills/nci-analysis/SKILL.md` |
-| NP-005 | `create-pr/SKILL.md` missing `name:` in frontmatter | HIGH | `.claude/skills/create-pr/SKILL.md` |
-| NP-006 | `architecture-guardian.openai.yaml` — non-standard format | MEDIUM | `.claude/skills/architecture-guardian.openai.yaml` |
-| NP-007 | `documentation-audit.openai.yaml` — non-standard format | MEDIUM | `.claude/skills/documentation-audit.openai.yaml` |
-| NP-008 | `documentation-cascade-audit.skill.md` — non-standard flat format | MEDIUM | `.claude/skills/documentation-cascade-audit.skill.md` |
+| NP-001 | `py-test-swarm.md` missing YAML frontmatter | CRITICAL | `agents/py-test-swarm.md` |
+| NP-002 | `py-review-orchestrator.md` uses hardcoded model `claude-3-5-sonnet-20241022` instead of abstract alias | HIGH | `agents/py-review-orchestrator.md` |
+| NP-003 | `deep-research/SKILL.md` name mismatch: dir=`deep-research`, frontmatter=`conducting-deep-research` | HIGH | `skills/deep-research/SKILL.md` |
+| NP-004 | `nci-analysis/SKILL.md` name mismatch: dir=`nci-analysis`, frontmatter=`nci-manipulation-analysis` | HIGH | `skills/nci-analysis/SKILL.md` |
+| NP-005 | `create-pr/SKILL.md` missing `name:` in frontmatter | HIGH | `skills/create-pr/SKILL.md` |
+| NP-006 | `architecture-guardian.openai.yaml` — non-standard format | MEDIUM | `skills/architecture-guardian.openai.yaml` |
+| NP-007 | `documentation-audit.openai.yaml` — non-standard format | MEDIUM | `skills/documentation-audit.openai.yaml` |
+| NP-008 | `documentation-cascade-audit.skill.md` — non-standard flat format | MEDIUM | `skills/documentation-cascade-audit.skill.md` |
 
 ### Warnings (SHOULD fix)
 
 | ID | Issue | Severity |
 |----|-------|----------|
-| NP-009 | `capability-discovery` scanner uses `ls .claude/skills/*/SKILL.md` — misses `.yaml` and `.skill.md` | LOW |
+| NP-009 | `capability-discovery` scanner used a legacy skills-only glob and missed `.yaml` and `.skill.md` formats | LOW |
 | NP-010 | 3 redundant definition layers for `documentation-cascade-audit` (skill + command + agent) | LOW |
 | NP-011 | Generic skills (ledger, NCI, deep-research) mixed with BioETL-specific in same directory | LOW |
 
@@ -181,7 +181,7 @@ description: "..."            # Russian for BioETL-specific, English for generic
 
 | Step | Action | Files |
 |------|--------|-------|
-| 5.1 | Update `agent-orchestration-rules.md` with naming policy reference | `.claude/rules/agent-orchestration-rules.md` |
+| 5.1 | Update `agent-orchestration-rules.md` with naming policy reference | `rules/agent-orchestration-rules.md` |
 | 5.2 | Add this ADR to index | `docs/02-architecture/decisions/` |
 
 ---

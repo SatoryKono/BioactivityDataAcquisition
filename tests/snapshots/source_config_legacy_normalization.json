@@ -14,7 +14,8 @@
           "max_retries": 3,
           "retry_base_delay": 1.0,
           "retry_max_delay": 60.0,
-          "timeout_sec": 60.0
+          "timeout_sec": 60.0,
+          "trust_env": true
         },
         "pagination": {
           "id_batch_size": 25,
@@ -43,7 +44,8 @@
           "max_retries": 3,
           "retry_base_delay": 1.0,
           "retry_max_delay": 60.0,
-          "timeout_sec": 60.0
+          "timeout_sec": 60.0,
+          "trust_env": true
         },
         "pagination": {
           "max_url_length": 2200,

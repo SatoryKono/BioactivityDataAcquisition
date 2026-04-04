@@ -16,8 +16,10 @@ import click
 from bioetl.domain.exceptions import BioETLError
 
 __all__ = [
+    "build_cli_registry",
     "get_runner_logger",
     "handle_destructive_run_confirmation",
+    "preview_cleanup",
     "resolve_context_registry",
     "show_cleanup_preview",
     "validate_pipeline_name",
@@ -48,6 +50,20 @@ def _load_pipeline_registry_type() -> type["PipelineRegistry"]:
     from bioetl.composition import PipelineRegistry
 
     return PipelineRegistry
+
+
+def build_cli_registry() -> PipelineRegistry:
+    """Compatibility seam for tests that patch CLI registry construction."""
+    from bioetl.interfaces.cli.registry_helpers import build_cli_registry as _impl
+
+    return _impl()
+
+
+async def preview_cleanup(pipeline: str) -> object:
+    """Compatibility seam for cleanup preview patched by CLI dry-run tests."""
+    from bioetl.composition.resources_api import preview_cleanup as _impl
+
+    return await _impl(pipeline)
 
 
 def resolve_context_registry(
@@ -86,8 +102,6 @@ def validate_pipeline_name(
     """
     registry = resolve_context_registry(click_context)
     if registry is None:
-        from bioetl.interfaces.cli.registry_helpers import build_cli_registry
-
         registry = build_cli_registry()
     available = registry.list_pipelines()
     if value not in available:
@@ -116,8 +130,6 @@ async def _preview_cleanup_async(pipeline: str) -> None:
     Args:
         pipeline: Pipeline name.
     """
-    from bioetl.composition.resources_api import preview_cleanup
-
     preview_result = await preview_cleanup(pipeline)
     echo_cleanup_preview(preview_result)
 

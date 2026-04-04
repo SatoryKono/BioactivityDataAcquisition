@@ -14,7 +14,7 @@ Last verified: '2026-04-04'
 
 *Версия: 1.0.10 | Дата: 2026-04-04 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.0*
 
-> **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; Claude сохраняет отдельную runtime-specific copy в `.claude/agents/ORCHESTRATION.md` и может оставаться на другой версии без automatic drift claim.
+> **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; другие runtimes могут сохранять отдельные runtime-specific copies и не обязаны совпадать побайтно с Codex surface.
 
 > **Surface note:** этот файл является project memory entry point внутри
 > `docs/00-project/ai/memory/`; role-specific `memory-py-*.md` sheets дополняют
@@ -47,8 +47,8 @@ Last verified: '2026-04-04'
 | Правила оркестратора и runtime policy | `AGENTS.md` |
 | Инструкции для Claude | `docs/00-project/ai/agents/guides/CLAUDE.md` |
 | Персона агента | `docs/00-project/ai/agents/guides/AGENT.md` |
-| Claude compact context (runtime-specific) | `.claude/PROJECT_CONTEXT.md` |
-| Claude self-review rules (runtime-specific) | `.claude/rules/ai-selfreview-rules.md` |
+| Claude compact context (runtime-specific) | runtime project context file |
+| Claude self-review rules (runtime-specific) | runtime self-review rules file |
 | Оркестрация субагентов | `.codex/agents/ORCHESTRATION.md` |
 | Папка с промтами проекта | `docs/00-project/ai/prompts/` |
 | Глоссарий | `docs/00-project/glossary.md` |
@@ -362,7 +362,7 @@ runtime-specific copies в других деревьях не переопред
 
 ### 5.2 Runtime-specific conveniences
 
-Claude/Gemini built-ins, slash-команды и прочие runtime-specific entrypoints
+Другие runtime built-ins, slash-команды и прочие runtime-specific entrypoints
 допустимы только как дополнительное удобство. Их нельзя считать каноническим
 workflow для BioETL: приоритет у `.codex/agents/ORCHESTRATION.md`,
 `.codex/skills/` и `AGENTS.md`.
@@ -380,7 +380,7 @@ Runtime-конфигурация зависит от активного AI-кл�
 | Runtime | Что проверять |
 |---------|---------------|
 | Codex | `.codex/config.toml`, `.codex/settings.json`, `.codex/agents/`, `.codex/skills/` |
-| Claude | `.claude/settings.json`, `.claude/agents/`, `.claude/skills/` |
+| Claude | runtime-specific settings, agent registry, and skill registry |
 | Gemini | `.gemini/agents/`, `.gemini/skills/`, runtime helper docs |
 | Copilot | `.github/copilot-instructions.md`, workspace MCP config |
 
@@ -403,7 +403,7 @@ Runtime-конфигурация зависит от активного AI-кл�
 | `explorer` | Read-only discovery | Инвентаризация, поиск фактов, узкие проверки |
 | `worker` | Изолированная write-zone работа | Docs/config/test edits с явной зоной владения |
 
-Claude/Gemini-specific helpers допустимо хранить как parallel runtime context.
+Runtime-specific helpers вне Codex допустимо хранить как parallel runtime context.
 Для текущего project workflow BioETL их нельзя считать SSOT: приоритет у
 `.codex/agents/ORCHESTRATION.md` и `AGENTS.md`.
 
@@ -456,8 +456,8 @@ Claude/Gemini-specific helpers допустимо хранить как parallel
 4. **При использовании логического профиля** — прочитать `.codex/agents/py-{name}.md`
 5. **При scaffolding** — использовать workflow `new-pipeline`
 6. **Перед завершением code/docs changes** — прогнать `verify-architecture` или эквивалентный project check
-7. **Только если активный runtime = Claude** — дополнительно прочитать `.claude/PROJECT_CONTEXT.md`
-8. **Только если активный runtime = Claude** — дополнительно прочитать `.claude/rules/ai-selfreview-rules.md`
+7. **Только если активный runtime = Claude** — дополнительно прочитать runtime project context file
+8. **Только если активный runtime = Claude** — дополнительно прочитать runtime self-review rules file
 
 ### Команда для загрузки полного контекста:
 

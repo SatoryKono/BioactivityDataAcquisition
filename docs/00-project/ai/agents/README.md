@@ -19,9 +19,8 @@ Last verified: '2026-04-04'
 - Это **публикуемое зеркало** документации.
 - Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`
   и связанных `.codex/agents/py-*.md`.
-- Параллельные runtime copies могут жить в `.claude/agents/` и
-  `.gemini/agents/`; использовать их нужно только внутри соответствующего
-  runtime.
+- Параллельные runtime copies могут жить в других runtime trees; использовать
+  их нужно только внутри соответствующего runtime.
 - Логические профили `py-*` отображаются на native runtime mechanisms
   (`spawn_agent` roles в Codex, runtime-specific agent tools/registries в других
   средах).
@@ -42,7 +41,6 @@ Last verified: '2026-04-04'
 ## Related Files
 
 - Repository path `.codex/agents/ORCHESTRATION.md` — Codex source-of-truth orchestration
-- Repository path `.claude/agents/ORCHESTRATION.md` — Claude runtime copy
 - Repository path `.gemini/agents/ORCHESTRATION.md` — Gemini runtime copy
 - [ORCHESTRATION.md](agents/ORCHESTRATION.md) — published mirror for documentation/navigation
 - [AGENT.md](guides/AGENT.md) — Core Engineering Guide

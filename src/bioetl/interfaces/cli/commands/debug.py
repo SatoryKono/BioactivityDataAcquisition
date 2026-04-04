@@ -12,25 +12,74 @@ from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.application.services import RunOptions, RunResult
-from bioetl.application.services.pipeline_debug_service import DebugAbortError
-from bioetl.domain.ports import StageBreakpoint
-from bioetl.interfaces.cli.commands.domains.run.support import (
-    resolve_context_registry,
-    validate_pipeline_name,
-)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
+    from bioetl.application.services.pipeline_debug_service import DebugAbortError
+    from bioetl.application.services.pipeline_runner_service import RunOptions, RunResult
     from bioetl.application.services.pipeline_runner_service import (
         PipelineRunnerService,
     )
     from bioetl.composition import PipelineRegistry
+    from bioetl.domain.ports import StageBreakpoint
 
 __all__ = ["debug"]
 
-_BREAKPOINT_CHOICES = [bp.value for bp in StageBreakpoint]
+_BREAKPOINT_CHOICES = (
+    "after_preflight",
+    "after_bronze",
+    "after_silver",
+    "after_gold",
+    "after_dq",
+    "on_error",
+    "on_quarantine",
+)
+
+
+def _load_stage_breakpoint() -> type["StageBreakpoint"]:
+    """Resolve StageBreakpoint lazily to avoid command import fan-out."""
+    from bioetl.domain.ports import StageBreakpoint
+
+    return StageBreakpoint
+
+
+def _load_run_options_type() -> type["RunOptions"]:
+    """Resolve RunOptions lazily to keep CLI imports lightweight."""
+    from bioetl.application.services.pipeline_runner_service import RunOptions
+
+    return RunOptions
+
+
+def _load_debug_abort_error_type() -> type["DebugAbortError"]:
+    """Resolve DebugAbortError lazily to keep CLI imports lightweight."""
+    from bioetl.application.services.pipeline_debug_service import DebugAbortError
+
+    return DebugAbortError
+
+
+def _resolve_context_registry(
+    ctx: click.Context | None,
+) -> "PipelineRegistry | None":
+    """Proxy to the shared run support helper without importing it eagerly."""
+    from bioetl.interfaces.cli.commands.domains.run.support import (
+        resolve_context_registry,
+    )
+
+    return resolve_context_registry(ctx)
+
+
+def _validate_pipeline_name(
+    click_context: click.Context | None,
+    param: click.Parameter | None,
+    value: str,
+) -> str:
+    """Proxy to the shared pipeline validator without eager imports."""
+    from bioetl.interfaces.cli.commands.domains.run.support import (
+        validate_pipeline_name,
+    )
+
+    return validate_pipeline_name(click_context, param, value)
 
 
 def get_pipeline_runner_service(
@@ -45,7 +94,7 @@ def get_pipeline_runner_service(
 @click.command()  # type: ignore[untyped-decorator]
 @click.option(  # type: ignore[untyped-decorator]
     "--pipeline",
-    callback=validate_pipeline_name,
+    callback=_validate_pipeline_name,
     required=True,
     help="Pipeline to debug",
 )
@@ -88,9 +137,10 @@ def debug(
     # Parse breakpoints
     enabled_breakpoints: set[StageBreakpoint] | None = None
     if breakpoints:
+        stage_breakpoint = _load_stage_breakpoint()
         try:
             enabled_breakpoints = {
-                StageBreakpoint(bp.strip()) for bp in breakpoints.split(",")
+                stage_breakpoint(bp.strip()) for bp in breakpoints.split(",")
             }
         except ValueError as exc:
             echo_error(
@@ -106,13 +156,15 @@ def debug(
     else:
         echo_info("Breakpoints: all stages enabled")
 
-    options = RunOptions(
+    run_options_type = _load_run_options_type()
+    options = run_options_type(
         run_type=run_type,
         limit=limit,
         dry_run=False,
         log_level="DEBUG",
     )
-    registry = resolve_context_registry(ctx)
+    registry = _resolve_context_registry(ctx)
+    debug_abort_error = _load_debug_abort_error_type()
 
     try:
         result = asyncio.run(
@@ -130,7 +182,7 @@ def debug(
             f"silver={result.records_silver}, "
             f"quarantined={result.records_quarantined}"
         )
-    except DebugAbortError:
+    except debug_abort_error:
         echo_info("Pipeline aborted by user at breakpoint")
         sys.exit(ExitCode.SIGINT)
     except KeyboardInterrupt:

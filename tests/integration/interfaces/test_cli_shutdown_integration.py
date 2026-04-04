@@ -16,9 +16,7 @@ from bioetl.application.core.lifecycle.shutdown import (
     PipelineShutdownError,
     ShutdownSignal,
 )
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.domain.locking import FencingToken
-from bioetl.interfaces.cli import cli
 
 _MOCK_TOKEN = FencingToken(
     sequence=1,
@@ -31,6 +29,18 @@ if TYPE_CHECKING:
     from click.testing import CliRunner
 
 pytestmark = pytest.mark.integration
+
+
+def _get_cli():
+    from bioetl.interfaces.cli import cli
+
+    return cli
+
+
+def _register_all_pipelines() -> None:
+    from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+
+    register_all_pipelines()
 
 
 async def _yield_control(turns: int = 1) -> None:
@@ -90,7 +100,7 @@ class TestCliGracefulShutdownExitCode:
     @pytest.fixture(autouse=True)
     def setup_pipelines(self):
         """Register all pipelines before each test."""
-        register_all_pipelines()
+        _register_all_pipelines()
 
     def test_shutdown_error_returns_exit_code_130(
         self,
@@ -112,7 +122,7 @@ class TestCliGracefulShutdownExitCode:
             )
 
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["run", "--pipeline", "chembl_activity"],
             )
 
@@ -138,7 +148,7 @@ class TestCliGracefulShutdownExitCode:
             )
 
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["run", "--pipeline", "chembl_activity"],
             )
 
@@ -163,7 +173,7 @@ class TestCliGracefulShutdownExitCode:
             ),
         ):
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["run", "--pipeline", "chembl_activity"],
             )
 
@@ -215,7 +225,7 @@ class TestRunnerShutdownIntegration:
     @pytest.fixture(autouse=True)
     def setup_pipelines(self):
         """Register all pipelines before each test."""
-        register_all_pipelines()
+        _register_all_pipelines()
 
     def test_runner_logs_graceful_shutdown(
         self,
@@ -237,7 +247,7 @@ class TestRunnerShutdownIntegration:
             )
 
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["run", "--pipeline", "chembl_activity"],
             )
 
@@ -267,7 +277,7 @@ class TestRunnerShutdownIntegration:
             )
 
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["run", "--pipeline", "chembl_activity"],
             )
 
@@ -282,7 +292,7 @@ class TestLockReleaseOnShutdown:
     @pytest.fixture(autouse=True)
     def setup_pipelines(self):
         """Register all pipelines before each test."""
-        register_all_pipelines()
+        _register_all_pipelines()
 
     def test_lock_released_after_shutdown(
         self,
@@ -304,7 +314,7 @@ class TestLockReleaseOnShutdown:
             )
 
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["run", "--pipeline", "chembl_activity"],
             )
 

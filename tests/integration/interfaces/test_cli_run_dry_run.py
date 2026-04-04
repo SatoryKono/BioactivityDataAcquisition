@@ -248,7 +248,7 @@ class TestCliDryRunErrorHandling:
     @pytest.fixture(autouse=True)
     def setup_pipelines(self):
         """Register all pipelines before each test."""
-        register_all_pipelines()
+        _register_all_pipelines()
 
     def test_dry_run_handles_preview_error(
         self,
@@ -261,7 +261,7 @@ class TestCliDryRunErrorHandling:
             new=AsyncMock(side_effect=RuntimeError("Preview failed")),
         ):
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 [
                     "run",
                     "--pipeline",
@@ -282,7 +282,7 @@ class TestCliDryRunErrorHandling:
     ):
         """Test that --dry-run with invalid pipeline fails appropriately."""
         result = cli_runner.invoke(
-            cli,
+            _get_cli(),
             ["run", "--pipeline", "nonexistent", "--run-type", "rebuild", "--dry-run"],
         )
 

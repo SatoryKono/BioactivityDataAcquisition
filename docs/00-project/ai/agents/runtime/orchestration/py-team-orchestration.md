@@ -3,7 +3,7 @@
 > **DEPRECATED (2026-02-25):** Этот файл — устаревшая адаптированная копия для Codex/Jules.
 > Published docs mirror: `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
 > Runtime copies:
-> - Claude Code: `.claude/agents/ORCHESTRATION.md`
+> - Parallel runtime orchestration copy: runtime-specific orchestration registry
 > - Codex: `.codex/agents/ORCHESTRATION.md`
 > При расхождении приоритет у published mirror и runtime-реестров; этот файл сохраняется только как legacy alias.
 >

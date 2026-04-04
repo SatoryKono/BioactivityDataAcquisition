@@ -12,13 +12,23 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.interfaces.cli import cli
-from tests.fakes.checkpoint_fake import InMemoryCheckpoint
-
 if TYPE_CHECKING:
     from click.testing import CliRunner
+    from tests.fakes.checkpoint_fake import InMemoryCheckpoint
 
 pytestmark = pytest.mark.integration
+
+
+def _get_cli():
+    from bioetl.interfaces.cli import cli
+
+    return cli
+
+
+def _create_in_memory_checkpoint() -> "InMemoryCheckpoint":
+    from tests.fakes.checkpoint_fake import InMemoryCheckpoint
+
+    return InMemoryCheckpoint()
 
 
 class TestCliCheckpointList:
@@ -26,7 +36,7 @@ class TestCliCheckpointList:
 
     def test_checkpoint_help_displays_commands(self, cli_runner: CliRunner):
         """Test that checkpoint --help displays available subcommands."""
-        result = cli_runner.invoke(cli, ["checkpoint", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["checkpoint", "--help"])
 
         assert result.exit_code == 0
         assert "list" in result.output
@@ -34,14 +44,14 @@ class TestCliCheckpointList:
 
     def test_checkpoint_list_help_displays_options(self, cli_runner: CliRunner):
         """Test that checkpoint list --help displays options."""
-        result = cli_runner.invoke(cli, ["checkpoint", "list", "--help"])
+        result = cli_runner.invoke(_get_cli(), ["checkpoint", "list", "--help"])
 
         assert result.exit_code == 0
         assert "--pipeline" in result.output
 
     def test_checkpoint_list_requires_pipeline(self, cli_runner: CliRunner):
         """Test that checkpoint list requires --pipeline option."""
-        result = cli_runner.invoke(cli, ["checkpoint", "list"])
+        result = cli_runner.invoke(_get_cli(), ["checkpoint", "list"])
 
         assert result.exit_code != 0
         assert "Missing option" in result.output or "required" in result.output.lower()
@@ -60,7 +70,7 @@ class TestCliCheckpointList:
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["checkpoint", "list", "--pipeline", "chembl_activity"],
             )
 
@@ -87,7 +97,7 @@ class TestCliCheckpointList:
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["checkpoint", "list", "--pipeline", "chembl_activity"],
             )
 
@@ -113,7 +123,7 @@ class TestCliCheckpointList:
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["checkpoint", "list", "--pipeline", "chembl_activity"],
             )
 
@@ -129,7 +139,7 @@ class TestCliCheckpointListWithFake:
     @pytest.fixture
     async def populated_checkpoint(self) -> InMemoryCheckpoint:
         """Create a checkpoint fake with pre-populated data."""
-        checkpoint = InMemoryCheckpoint()
+        checkpoint = _create_in_memory_checkpoint()
 
         # Add test checkpoints
         await checkpoint.save(
@@ -242,7 +252,7 @@ class TestCliCheckpointIntegration:
             return_value=mock_manager,
         ) as mock_bootstrap:
             result = cli_runner.invoke(
-                cli,
+                _get_cli(),
                 ["checkpoint", "list", "--pipeline", "any_pipeline"],
             )
 
