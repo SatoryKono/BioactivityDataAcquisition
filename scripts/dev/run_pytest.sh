@@ -26,6 +26,15 @@ done
 
 PYTEST_ARGS=("${FILTERED_PYTEST_ARGS[@]}")
 
+QUIET_REQUESTED=0
+for arg in "${PYTEST_ARGS[@]}"; do
+    case "$arg" in
+        -q|--quiet|-qq|-qqq)
+            QUIET_REQUESTED=1
+            ;;
+    esac
+done
+
 for arg in "${PYTEST_ARGS[@]}"; do
     case "$arg" in
         --help|-h|--version|-V)
@@ -37,6 +46,13 @@ for arg in "${PYTEST_ARGS[@]}"; do
             ;;
     esac
 done
+
+if [[ "${BIOETL_PYTEST_LIVE_OUTPUT:-0}" == "1" && "$QUIET_REQUESTED" != "1" ]]; then
+    if [[ "${DEFAULT_FLAGS[*]}" == *" -q "* || "${DEFAULT_FLAGS[*]}" == "-q "* || "${DEFAULT_FLAGS[*]}" == *" -q" ]]; then
+        DEFAULT_FLAGS=("${DEFAULT_FLAGS[@]/-q}")
+    fi
+    DEFAULT_FLAGS+=(-o console_output_style=progress)
+fi
 
 _should_enable_benchmark_plugin() {
     local previous=""

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-04'
----
+  Last verified: '2026-04-04'
+
+______________________________________________________________________
 
 # Collected Prompts Index
 
@@ -52,10 +55,10 @@ Contains time-bound repository state and should not be treated as active policy.
 ## Usage Rules
 
 1. Do not treat collected prompts as source-of-truth policy.
-2. If a collected prompt conflicts with active docs, active docs win.
-3. Prefer using this page as the single published entrypoint for the collected
+1. If a collected prompt conflicts with active docs, active docs win.
+1. Prefer using this page as the single published entrypoint for the collected
    prompt surface instead of promoting raw archive snapshots into MkDocs nav.
-4. If a collected prompt gets a maintained root-level counterpart, prefer the
+1. If a collected prompt gets a maintained root-level counterpart, prefer the
    root-level file and remove the duplicate collected copy.
 
 ## Related Entry Points

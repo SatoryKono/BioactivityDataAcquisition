@@ -19,11 +19,11 @@ import re
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Final
 
-UTC = timezone.utc
+UTC = UTC
 
 SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
     ".py",
@@ -97,6 +97,9 @@ MODULE_REF_TOKENS: Final[tuple[str, ...]] = (
 )
 SCRIPT_PATH_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:scripts|src/tools)/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
+)
+BASENAME_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r"[A-Za-z0-9._-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
 )
 MODULE_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:uv\s+run\s+)?(?:python(?:3(?:\.\d+)?)?|py)\s+-m\s+"
@@ -227,6 +230,7 @@ def _source_group(rel_path: str) -> str:
 def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidence]]:
     rel_scripts = [path.relative_to(root).as_posix() for path in scripts]
     script_set = set(rel_scripts)
+    basename_map = _build_basename_map(rel_scripts)
     refs: dict[str, list[RefEvidence]] = {item: [] for item in rel_scripts}
     search_files = _iter_search_files(root)
 
@@ -235,6 +239,7 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
             root=root,
             file_path=file_path,
             script_set=script_set,
+            basename_map=basename_map,
         )
         if not discovered:
             continue
@@ -243,10 +248,18 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
     return refs
 
 
+def _build_basename_map(script_paths: list[str]) -> dict[str, tuple[str, ...]]:
+    grouped: dict[str, list[str]] = defaultdict(list)
+    for script_path in script_paths:
+        grouped[Path(script_path).name].append(script_path)
+    return {basename: tuple(sorted(paths)) for basename, paths in grouped.items()}
+
+
 def _discover_refs_in_file(
     root: Path,
     file_path: Path,
     script_set: set[str],
+    basename_map: dict[str, tuple[str, ...]],
 ) -> list[tuple[str, RefEvidence]]:
     rel = file_path.relative_to(root).as_posix()
     try:
@@ -257,7 +270,10 @@ def _discover_refs_in_file(
     normalized_text = text.replace("\\", "/")
     has_script_path_refs = any(token in normalized_text for token in SCRIPT_PATH_TOKENS)
     has_module_refs = any(token in normalized_text for token in MODULE_REF_TOKENS)
-    if not has_script_path_refs and not has_module_refs:
+    has_basename_refs = _line_has_basename_script_candidate(
+        normalized_text, basename_map
+    )
+    if not has_script_path_refs and not has_module_refs and not has_basename_refs:
         return []
 
     source_group = _source_group(rel)
@@ -268,8 +284,10 @@ def _discover_refs_in_file(
         zip(original_lines, normalized_lines),
         start=1,
     ):
-        if not any(token in normalized_line for token in SCRIPT_PATH_TOKENS) and not any(
-            token in normalized_line for token in MODULE_REF_TOKENS
+        if (
+            not any(token in normalized_line for token in SCRIPT_PATH_TOKENS)
+            and not any(token in normalized_line for token in MODULE_REF_TOKENS)
+            and not _line_has_basename_script_candidate(normalized_line, basename_map)
         ):
             continue
         discovered.extend(
@@ -280,9 +298,19 @@ def _discover_refs_in_file(
                 normalized_line=normalized_line,
                 source_group=source_group,
                 script_set=script_set,
+                basename_map=basename_map,
             )
         )
     return discovered
+
+
+def _line_has_basename_script_candidate(
+    normalized_text: str, basename_map: dict[str, tuple[str, ...]]
+) -> bool:
+    for match in BASENAME_REF_CANDIDATE_PATTERN.finditer(normalized_text):
+        if match.group(0) in basename_map:
+            return True
+    return False
 
 
 def _discover_refs_from_line(
@@ -293,6 +321,7 @@ def _discover_refs_from_line(
     normalized_line: str,
     source_group: str,
     script_set: set[str],
+    basename_map: dict[str, tuple[str, ...]],
 ) -> list[tuple[str, RefEvidence]]:
     discovered: list[tuple[str, RefEvidence]] = []
     for script_rel in set(SCRIPT_PATH_CANDIDATE_PATTERN.findall(normalized_line)):
@@ -326,7 +355,50 @@ def _discover_refs_from_line(
                 ),
             )
         )
+    for basename in {
+        match.group(0)
+        for match in BASENAME_REF_CANDIDATE_PATTERN.finditer(normalized_line)
+    }:
+        for candidate_path in _resolve_basename_candidates(
+            rel=rel,
+            basename=basename,
+            basename_map=basename_map,
+        ):
+            if candidate_path not in script_set or rel == candidate_path:
+                continue
+            discovered.append(
+                (
+                    candidate_path,
+                    RefEvidence(
+                        path=rel,
+                        line=line_no,
+                        text=raw_line.strip()[:200],
+                        source_group=source_group,
+                    ),
+                )
+            )
     return discovered
+
+
+def _resolve_basename_candidates(
+    *,
+    rel: str,
+    basename: str,
+    basename_map: dict[str, tuple[str, ...]],
+) -> tuple[str, ...]:
+    candidates = basename_map.get(basename, ())
+    if len(candidates) <= 1:
+        return candidates
+
+    rel_parent = Path(rel).parent.as_posix()
+    same_parent = tuple(
+        candidate
+        for candidate in candidates
+        if Path(candidate).parent.as_posix() == rel_parent
+    )
+    if same_parent:
+        return same_parent
+    return ()
 
 
 def _dedupe_refs(refs: list[RefEvidence]) -> list[RefEvidence]:

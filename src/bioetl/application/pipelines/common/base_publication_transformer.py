@@ -37,7 +37,7 @@ from bioetl.domain.mapping.publication_type_classification import (
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.entities import BaseEntity
+    from bioetl.domain.entities.base import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         DataExtractorStrategy,
@@ -93,9 +93,7 @@ def _resolve_publication_entity_id(
 def _prepare_content_hash_payload(business_data: JsonDict) -> JsonDict:
     """Prepare the hash-ready business payload without orchestration metadata."""
     return {
-        key: value
-        for key, value in business_data.items()
-        if not key.startswith("_")
+        key: value for key, value in business_data.items() if not key.startswith("_")
     }
 
 
@@ -198,13 +196,19 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         )
         # Fallback to self if strategies are not provided (legacy subclass support)
         self._data_extractor = data_extractor or cast("DataExtractorStrategy", self)
-        self._identifier_resolver = identifier_resolver or cast("IdentifierResolverStrategy", self)
-        self._metadata_strategy = metadata_strategy or cast("PublicationMetadataStrategy", self)
+        self._identifier_resolver = identifier_resolver or cast(
+            "IdentifierResolverStrategy", self
+        )
+        self._metadata_strategy = metadata_strategy or cast(
+            "PublicationMetadataStrategy", self
+        )
         self._record_normalizer = record_normalizer or RecordNormalizationProcessor(
             provider=provider
         )
 
-    def pre_extract_validation(self, context: PipelineContext, record: BronzeRecord, index: int) -> None:
+    def pre_extract_validation(
+        self, context: PipelineContext, record: BronzeRecord, index: int
+    ) -> None:
         self._pre_extract_validation(context, record, index)
 
     def extract_business_data(self, record: BronzeRecord) -> JsonDict:
@@ -354,8 +358,7 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         if prepared is None:
             return None
         normalized_business_data = normalize_publication_business_data(
-            self,
-            prepared.business_data
+            self, prepared.business_data
         )
         return _assemble_publication_silver_record(
             self,

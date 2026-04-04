@@ -5,9 +5,9 @@ Validates that code uses canonical terminology as defined in docs/glossary.md.
 This script is part of the code quality CI pipeline.
 
 Usage:
-    python src/tools/scripts/lint_terminology.py src/bioetl/
-    python src/tools/scripts/lint_terminology.py --strict src/bioetl/domain/
-    python src/tools/scripts/lint_terminology.py --check
+    python -m scripts.qa check-terminology src/bioetl/
+    python -m scripts.qa check-terminology --strict src/bioetl/domain/
+    python -m scripts.qa check-terminology --check
 
 Exit codes:
     0: No violations found

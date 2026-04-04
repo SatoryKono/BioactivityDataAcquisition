@@ -22,6 +22,8 @@ This directory uses a **canonical-by-domain** structure.
 
 - `scripts/archive/` — retired or superseded scripts preserved for traceability.
 - `scripts/baselines/` — baseline/reference artifacts used by selected quality workflows.
+- `scripts/ai/` — internal agent-launcher compatibility scripts retained outside
+  the canonical grouped entrypoint surface.
 
 ## Root Directory Policy
 
@@ -34,12 +36,14 @@ in the domain directories above, while the root retains only:
   (`generate_architecture_dependency_map.py`, `rerender_grafana_screenshots.py`)
 
 Canonical root-level direct paths retained for compatibility:
+
 - `scripts/run_pytest.sh`
 - `scripts/run_pytest.ps1`
 - `scripts/generate_architecture_dependency_map.py`
 - `scripts/rerender_grafana_screenshots.py`
 
 Rules:
+
 - New scripts must be placed in the appropriate canonical subdirectory.
 - Do not add new long-lived scripts to `scripts/` root unless they are
   explicitly approved as compatibility wrappers.
@@ -56,20 +60,21 @@ python -m scripts.<group> --help          # list available commands
 
 Available groups and example commands:
 
-| Group | Example | Description |
-|-------|---------|-------------|
-| `repo` | `python -m scripts.repo check-inventory --check` | Repository governance |
-| `ci` | `python -m scripts.ci quality-gate` | CI orchestration |
-| `qa` | `python -m scripts.qa check-c901 --target src/bioetl` | Quality checks |
-| `schema` | `python -m scripts.schema validate-configs` | Schema validation |
-| `data` | `python -m scripts.data check-vcr-naming` | Data integrity |
-| `docs` | `python -m scripts.docs check-drift` | Documentation checks |
-| `diagrams` | `python -m scripts.diagrams lint` | Diagram tooling |
-| `ops` | `python -m scripts.ops salt-rotate` | Operational automation |
-| `dev` | `python -m scripts.dev run-tests unit` | Developer workflows |
-| `diagnostics` | `python -m scripts.diagnostics cleanup` | Debug & diagnostics |
+| Group         | Example                                               | Description            |
+| ------------- | ----------------------------------------------------- | ---------------------- |
+| `repo`        | `python -m scripts.repo check-inventory --check`      | Repository governance  |
+| `ci`          | `python -m scripts.ci quality-gate`                   | CI orchestration       |
+| `qa`          | `python -m scripts.qa check-c901 --target src/bioetl` | Quality checks         |
+| `schema`      | `python -m scripts.schema validate-configs`           | Schema validation      |
+| `data`        | `python -m scripts.data check-vcr-naming`             | Data integrity         |
+| `docs`        | `python -m scripts.docs check-drift`                  | Documentation checks   |
+| `diagrams`    | `python -m scripts.diagrams lint`                     | Diagram tooling        |
+| `ops`         | `python -m scripts.ops salt-rotate`                   | Operational automation |
+| `dev`         | `python -m scripts.dev run-tests unit`                | Developer workflows    |
+| `diagnostics` | `python -m scripts.diagnostics cleanup`               | Debug & diagnostics    |
 
 Each script also remains standalone-executable:
+
 ```bash
 python scripts/qa/check_c901_baseline.py --target src/bioetl  # still works
 ```
@@ -102,8 +107,8 @@ uv run python -m scripts.docs check-links --configs
 Canonical repair flow:
 
 1. `dependency-map drift` -> regenerate only through `scripts/qa/generate_architecture_dependency_map.py --update`.
-2. `compatibility/documentation drift` -> verify against `docs/02-architecture/07-compatibility-facade-inventory.md` and rerun the targeted architecture tests above.
-3. Historical files under `docs/reports/` explain past waves, but active repair guidance lives in `docs/02-architecture/**`, `docs/03-guides/**`, and this `scripts/README.md`.
+1. `compatibility/documentation drift` -> verify against `docs/02-architecture/07-compatibility-facade-inventory.md` and rerun the targeted architecture tests above.
+1. Historical files under `docs/reports/` explain past waves, but active repair guidance lives in `docs/02-architecture/**`, `docs/03-guides/**`, and this `scripts/README.md`.
 
 ## Launcher
 
@@ -133,12 +138,16 @@ quality-gate       Integral quality gate for CI
 e2e-skip-rate      Check E2E matrix skip rate against threshold
 e2e-rerun          Check E2E rerun stability
 debt-report        Generate weekly quality debt report
+apply-ci-fixes     Apply one-off hosted GitHub workflow fixes
 ```
 
 ### scripts.qa
 
 ```
 check-naming       Naming convention audit
+check-architecture Infrastructure architecture compatibility check
+check-app-deps     Application dependency compatibility check
+check-constructor-args Constructor argument compatibility check
 check-c901         C901 complexity baseline enforcement
 check-naming-pkg   Package naming consistency check
 check-exemptions   Quality exemptions audit
@@ -149,6 +158,7 @@ report-dep-map     Generate/check architecture dependency map
 report-vcr-metadata Generate/check canonical VCR metadata catalog
 report-hotspots    Generate performance hotspot degradation report
 report-duplication-baseline Generate report-only duplication baseline
+analyze-duplicate-functions Analyze duplicate function names across selected code areas
 calibrate-hotspots Calibrate hotspot budgets
 ```
 
@@ -214,7 +224,9 @@ generate-pipeline  Generate pipeline JSON schema
 generate-artifacts Generate schema artifacts
 generate-pubtype   Generate publication type classification artifacts
 generate-contracts Generate contracts
+generate-config-matrix Generate unified entity/composite config comparison matrix
 validate-configs   Validate unified pipeline YAML configs
+validate-unified-configs Validate legacy unified entity config structure
 analyze-gaps       Config gap analysis
 ```
 

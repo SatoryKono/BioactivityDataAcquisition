@@ -2,7 +2,7 @@
 """Generate Gold JSON contracts from Pandera DataFrameModel schemas.
 
 Usage:
-    python src/tools/scripts/generate_contracts.py
+    python -m scripts.schema generate-contracts
 """
 
 from __future__ import annotations

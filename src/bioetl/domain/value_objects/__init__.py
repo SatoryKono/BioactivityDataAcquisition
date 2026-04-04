@@ -41,7 +41,7 @@ See also:
 
 from __future__ import annotations
 
-from importlib import import_module
+from importlib import import_module as _import_module
 
 _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
     "DOI": ("bioetl.domain.value_objects.publications", "DOI"),
@@ -162,7 +162,7 @@ def __getattr__(name: str) -> object:
     except KeyError as exc:  # pragma: no cover - standard attribute path
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
 
-    value = getattr(import_module(module_name), attribute_name)
+    value = getattr(_import_module(module_name), attribute_name)
     globals()[name] = value
     return value
 

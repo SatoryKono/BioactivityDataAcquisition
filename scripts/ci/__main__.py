@@ -11,6 +11,7 @@ Commands:
     e2e-skip-rate   Check E2E matrix skip rate against threshold
     e2e-rerun       Check E2E rerun stability
     debt-report     Generate weekly quality debt report
+    apply-ci-fixes  Apply one-off hosted GitHub workflow fixes
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ COMMANDS: dict[str, str] = {
     "e2e-skip-rate": "check_e2e_matrix_skip_rate.py",
     "e2e-rerun": "check_e2e_rerun_stability.py",
     "debt-report": "report_quality_debt_weekly.py",
+    "apply-ci-fixes": "apply_ci_fixes.py",
 }
 
 _DIR = Path(__file__).parent

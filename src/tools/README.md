@@ -11,6 +11,9 @@ Utility scripts for BioETL project maintenance and development.
 - **Environment setup** is `uv`-first: use `uv sync --extra dev --extra tests --extra tracing`.
 - **Legacy wrappers** should be kept minimal and removed once all call-sites are
   migrated to canonical grouped entrypoints.
+- Legacy `src/tools/scripts/check_*.py` validators should migrate toward
+  grouped commands under `scripts.qa` / `scripts.schema`, with the old direct
+  paths kept only as compatibility facades during the migration window.
 - **Temporary files** (e.g., `_gen*.py`, `.cursor_tmp_*`) should be reviewed and cleaned up
   explicitly as part of a dedicated cleanup pass.
 
@@ -260,8 +263,11 @@ Generates a cross-config comparison matrix and discrepancy report for entity and
 **Typical usage:**
 
 ```bash
-python src/tools/scripts/config_matrix_generator.py
+python -m scripts.schema generate-config-matrix
 ```
+
+The direct legacy path remains available for compatibility:
+`python src/tools/scripts/config_matrix_generator.py`
 
 ### scripts/validate_unified_configs.py
 
@@ -272,10 +278,23 @@ Legacy standalone validator for unified entity YAML configs.
 **Typical usage:**
 
 ```bash
-python src/tools/scripts/validate_unified_configs.py
+python -m scripts.schema validate-unified-configs
 ```
 
-Prefer the maintained grouped entrypoint `python -m scripts.schema validate-configs` for regular contributor workflows.
+The direct legacy path remains available for compatibility:
+`python src/tools/scripts/validate_unified_configs.py`
+
+Use `python -m scripts.schema validate-configs` only for the maintained JSON
+Schema / agent-canonical validation flow.
+
+### Legacy architecture/dependency check scripts
+
+The following direct paths remain available for compatibility, but new
+integrations should prefer the grouped QA entrypoints:
+
+- `python -m scripts.qa check-architecture`
+- `python -m scripts.qa check-app-deps`
+- `python -m scripts.qa check-constructor-args`
 
 ### duplicate_function_analyzer.py
 
@@ -288,11 +307,14 @@ AST-анализатор дубликатов функций в выбранно
 
 ```bash
 # Default scope
-python src/tools/scripts/duplicate_function_analyzer.py
+python -m scripts.qa analyze-duplicate-functions
 
 # Custom scope
-python src/tools/scripts/duplicate_function_analyzer.py \
+python -m scripts.qa analyze-duplicate-functions \
   --pattern src/bioetl/application/**/utils.py \
   --pattern src/bioetl/infrastructure/**/utils.py \
   --report reports/duplicate_function_report.md
 ```
+
+The direct legacy path remains available for compatibility:
+`python src/tools/scripts/duplicate_function_analyzer.py`

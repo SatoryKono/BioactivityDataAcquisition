@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-02'
----
+  Last verified: '2026-04-02'
+
+______________________________________________________________________
 
 # Quick Start
 
@@ -132,20 +135,20 @@ make lint
 
 ## Common Commands
 
-| Task                   | Command                                           |
-| ---------------------- | ------------------------------------------------- |
-| Install dependencies   | `make install`                                    |
-| Mixed-checkout bootstrap | `setup_env_windows.ps1` / `setup_env_wsl.sh`    |
-| Configure plugins      | `make setup-plugins`                              |
-| Verify dependencies    | `make test-deps`                                  |
-| Run tests via wrappers | `run_pytest.ps1` / `run_pytest.sh`                |
-| Run all tests          | `make test`                                       |
-| Run linting            | `make lint`                                       |
-| Verify docs surface    | `uv run python -m scripts.docs check-links --links --specs --configs` |
-| Run sample pipeline    | `make run-local`                                  |
-| List pipelines         | `bioetl config list-pipelines`                    |
-| Full rebuild           | `bioetl run --pipeline <name> --run-type rebuild` |
-| Resume from checkpoint | `bioetl run --pipeline <name> --resume`           |
+| Task                     | Command                                                               |
+| ------------------------ | --------------------------------------------------------------------- |
+| Install dependencies     | `make install`                                                        |
+| Mixed-checkout bootstrap | `setup_env_windows.ps1` / `setup_env_wsl.sh`                          |
+| Configure plugins        | `make setup-plugins`                                                  |
+| Verify dependencies      | `make test-deps`                                                      |
+| Run tests via wrappers   | `run_pytest.ps1` / `run_pytest.sh`                                    |
+| Run all tests            | `make test`                                                           |
+| Run linting              | `make lint`                                                           |
+| Verify docs surface      | `uv run python -m scripts.docs check-links --links --specs --configs` |
+| Run sample pipeline      | `make run-local`                                                      |
+| List pipelines           | `bioetl config list-pipelines`                                        |
+| Full rebuild             | `bioetl run --pipeline <name> --run-type rebuild`                     |
+| Resume from checkpoint   | `bioetl run --pipeline <name> --resume`                               |
 
 ## Project Structure (Data)
 

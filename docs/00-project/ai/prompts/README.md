@@ -27,14 +27,16 @@ BioETL.
 
 - [ai_workspace_setup.md](ai_workspace_setup.md) — internal setup and audit
   prompt for AI workspace configuration
+- [documentation_diagrams_audit.md](documentation_diagrams_audit.md) —
+  working prompt for full documentation and diagram audits aligned to the live
+  BioETL repo structure
 - [architecture_review_and_refactoring_assessment.md](architecture_review_and_refactoring_assessment.md)
   — working prompt for read-only architecture review and refactoring assessment
 - [test_speed_optimization_loop.md](test_speed_optimization_loop.md) —
   working prompt for test-speed optimization loops
 - [COLLECTED_PROMPTS_INDEX.md](COLLECTED_PROMPTS_INDEX.md) — discoverability
   index for repo-only collected prompt snapshots
-- Historical prompts in this folder explicitly marked `internal-only
-  (historical prompt)` should be treated as reference material, not as current
+- Historical prompts in this folder explicitly marked `internal-only (historical prompt)` should be treated as reference material, not as current
   workflow policy
 
 ## Notes

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.4
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-04'
----
+  Last verified: '2026-04-04'
+
+______________________________________________________________________
 
 # Welcome to BioETL
 
@@ -14,13 +17,13 @@ This is the central documentation hub for the BioETL project.
 
 ## Start Here
 
-| Need | Current entry point |
-| --- | --- |
-| Current project rules | [RULES.md](RULES.md) |
-| Active documentation navigator | [Project Navigator](00-map.md) |
-| Current tool commands and placement rules | [Tools Hub](TOOLS.md) |
+| Need                                        | Current entry point                                    |
+| ------------------------------------------- | ------------------------------------------------------ |
+| Current project rules                       | [RULES.md](RULES.md)                                   |
+| Active documentation navigator              | [Project Navigator](00-map.md)                         |
+| Current tool commands and placement rules   | [Tools Hub](TOOLS.md)                                  |
 | Verify published docs and strict build flow | [Docs Verification](../03-guides/docs-verification.md) |
-| Historical context only | Repository path `docs/99-archive/README.md` |
+| Historical context only                     | Repository path `docs/99-archive/README.md`            |
 
 Active guidance lives under `docs/00-05`. Materials in `docs/99-archive/`
 remain useful for traceability, but they are not normative for current project
@@ -102,15 +105,15 @@ checkout path uses `.venv-win` in PowerShell and an external WSL venv at
 
 ## Supported Providers (7)
 
-| Provider            | Entities                                                                    | Status     | Rate Limit   |
-| ------------------- | --------------------------------------------------------------------------- | ---------- | ------------ |
-| **ChEMBL**          | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity, Subcellular Fraction, Tissue | Production | 3 req/sec    |
-| **PubChem**         | Compound                                                                    | Production | 5 req/sec    |
-| **UniProt**         | Protein, ID Mapping                                                         | Production | 10 req/sec (100 req/sec with API key) |
-| **PubMed**          | Publication                                                                 | Production | 3 req/sec    |
-| **CrossRef**        | Publication                                                                 | Production | Polite pool  |
-| **OpenAlex**        | Publication                                                                 | Production | ~10 req/sec  |
-| **Semantic Scholar** | Publication                                                                | Production | 0.1 req/sec (1 req/sec with API key) |
+| Provider             | Entities                                                                                                                                                               | Status     | Rate Limit                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------- |
+| **ChEMBL**           | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity, Subcellular Fraction, Tissue | Production | 3 req/sec                             |
+| **PubChem**          | Compound                                                                                                                                                               | Production | 5 req/sec                             |
+| **UniProt**          | Protein, ID Mapping                                                                                                                                                    | Production | 10 req/sec (100 req/sec with API key) |
+| **PubMed**           | Publication                                                                                                                                                            | Production | 3 req/sec                             |
+| **CrossRef**         | Publication                                                                                                                                                            | Production | Polite pool                           |
+| **OpenAlex**         | Publication                                                                                                                                                            | Production | ~10 req/sec                           |
+| **Semantic Scholar** | Publication                                                                                                                                                            | Production | 0.1 req/sec (1 req/sec with API key)  |
 
 ### Composite Pipeline (ADR-026)
 
@@ -154,6 +157,6 @@ bash scripts/dev/setup_env_wsl.sh
 bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 *Last updated: 2026-04-02*

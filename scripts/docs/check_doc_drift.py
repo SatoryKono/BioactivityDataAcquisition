@@ -119,7 +119,7 @@ LAST_UPDATED_PATTERN = re.compile(r"Последнее обновление:\s*(
 RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
     RuntimeMirrorRule(
         name="orchestration",
-        canonical=Path(".gemini/agents/ORCHESTRATION.md"),
+        canonical=Path(".codex/agents/ORCHESTRATION.md"),
         mirror=Path("docs/00-project/ai/agents/agents/ORCHESTRATION.md"),
         sections=(
             "## 1. Обзор",

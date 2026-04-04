@@ -6,9 +6,9 @@ Usage:
     python -m scripts.dev --help
 
 Commands:
-    setup              Full developer environment setup (shell)
-    setup --quick      Fast setup, skip tests/linters (shell)
-    setup --ci         CI mode, non-interactive (shell)
+    setup              Legacy compatibility setup facade (shell)
+    setup --quick      Legacy quick-mode guidance facade (shell)
+    setup --ci         Legacy CI-mode guidance facade (shell)
     pytest-sharded     Run the recommended path-based pytest shards (shell)
     install-deps       Install project dependencies
     probe-quality      Measure narrow pytest/mypy startup and timeout behavior

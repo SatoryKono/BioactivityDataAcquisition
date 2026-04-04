@@ -56,10 +56,7 @@ def _iter_python_content_under(
             key=lambda item: item[0],
         )
     return sorted(
-        (
-            (path, path.read_text(encoding="utf-8"))
-            for path in root_path.rglob("*.py")
-        ),
+        ((path, path.read_text(encoding="utf-8")) for path in root_path.rglob("*.py")),
         key=lambda item: item[0],
     )
 
@@ -94,7 +91,9 @@ def test_domain_layer_no_infrastructure_imports(
     assert domain_path.exists(), "Domain layer not found"
 
     all_errors = []
-    for py_file, content in _iter_python_content_under(domain_path, source_content_cache):
+    for py_file, content in _iter_python_content_under(
+        domain_path, source_content_cache
+    ):
         errors = _check_imports_in_content(py_file, content, INFRASTRUCTURE_IMPORTS)
         all_errors.extend(errors)
 
@@ -114,7 +113,9 @@ def test_domain_layer_no_application_imports(
     assert domain_path.exists(), "Domain layer not found"
 
     all_errors = []
-    for py_file, content in _iter_python_content_under(domain_path, source_content_cache):
+    for py_file, content in _iter_python_content_under(
+        domain_path, source_content_cache
+    ):
         errors = _check_imports_in_content(py_file, content, APPLICATION_IMPORTS)
         all_errors.extend(errors)
 
@@ -134,10 +135,10 @@ def test_domain_layer_no_infrastructure_layer_imports(
     assert domain_path.exists(), "Domain layer not found"
 
     all_errors = []
-    for py_file, content in _iter_python_content_under(domain_path, source_content_cache):
-        errors = _check_imports_in_content(
-            py_file, content, {"bioetl.infrastructure"}
-        )
+    for py_file, content in _iter_python_content_under(
+        domain_path, source_content_cache
+    ):
+        errors = _check_imports_in_content(py_file, content, {"bioetl.infrastructure"})
         all_errors.extend(errors)
 
     assert not all_errors, "\n".join(all_errors)
@@ -289,7 +290,9 @@ def test_infrastructure_does_not_import_application(
     all_errors = []
     forbidden = {"bioetl.application"}
 
-    for py_file, content in _iter_python_content_under(infra_path, source_content_cache):
+    for py_file, content in _iter_python_content_under(
+        infra_path, source_content_cache
+    ):
         # EXCEPTION: config.py can import PipelineConfig
         if py_file.name == "config.py":
             continue
@@ -350,16 +353,18 @@ def test_no_orphan_directories(
     bioetl_path = src_dir / "bioetl"
     assert bioetl_path.exists(), "bioetl source not found"
 
-    def has_content_in_subtree(dir_path: Path) -> bool:
-        """Check if directory or any subdirectory has real Python content."""
-        for py_file, content in _iter_python_content_under(
-            dir_path, source_content_cache
-        ):
-            if py_file.name == "__init__.py":
-                continue
-            if content.strip():
-                return True
-        return False
+    contentful_dirs: set[Path] = set()
+    for py_file, content in _iter_python_content_under(
+        bioetl_path, source_content_cache
+    ):
+        if py_file.name == "__init__.py" or not content.strip():
+            continue
+        current = py_file.parent
+        while current != bioetl_path.parent:
+            contentful_dirs.add(current)
+            if current == bioetl_path:
+                break
+            current = current.parent
 
     orphan_dirs = []
     for dir_path in bioetl_path.rglob("*"):
@@ -367,7 +372,7 @@ def test_no_orphan_directories(
             continue
 
         # Skip if this directory has content anywhere in its subtree
-        if has_content_in_subtree(dir_path):
+        if dir_path in contentful_dirs:
             continue
 
         # Check if this is a leaf directory with only __init__.py
@@ -605,7 +610,9 @@ def test_infrastructure_does_not_import_interfaces(
     all_errors = []
     forbidden = {"bioetl.interfaces"}
 
-    for py_file, content in _iter_python_content_under(infra_path, source_content_cache):
+    for py_file, content in _iter_python_content_under(
+        infra_path, source_content_cache
+    ):
         errors = _check_imports_in_content(py_file, content, forbidden)
         all_errors.extend(errors)
 
@@ -628,7 +635,9 @@ def test_infrastructure_does_not_import_composition(
     all_errors = []
     forbidden = {"bioetl.composition"}
 
-    for py_file, content in _iter_python_content_under(infra_path, source_content_cache):
+    for py_file, content in _iter_python_content_under(
+        infra_path, source_content_cache
+    ):
         errors = _check_imports_in_content(py_file, content, forbidden)
         all_errors.extend(errors)
 

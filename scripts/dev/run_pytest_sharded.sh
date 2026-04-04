@@ -18,40 +18,52 @@ TAIL_LOGS=0
 DRY_RUN=0
 LIST_ONLY=0
 KEEP_COVERAGE_FILES=0
+DISABLE_COVERAGE=0
 SELECTED_WAVE=""
 SELECTED_SHARDS=()
 EXTRA_PYTEST_ARGS=()
 
 SHARD_ORDER=(
-    "S1-domain"
+    "S1-domain-core"
+    "S1-domain-services"
     "S2-comp-iface"
     "S3-app-foundation"
     "S4-app-services"
     "S5-infra-adapters"
-    "S6-crosscutting-core"
+    "S6-crosscutting-unit"
+    "S7-crosscutting-architecture"
+    "S8-crosscutting-governance"
 )
 
 declare -A SHARD_WAVE=(
-    ["S1-domain"]="1"
+    ["S1-domain-core"]="1"
+    ["S1-domain-services"]="1"
     ["S2-comp-iface"]="1"
     ["S3-app-foundation"]="2"
     ["S4-app-services"]="2"
     ["S5-infra-adapters"]="3"
-    ["S6-crosscutting-core"]="3"
+    ["S6-crosscutting-unit"]="3"
+    ["S7-crosscutting-architecture"]="3"
+    ["S8-crosscutting-governance"]="3"
 )
 
 declare -A SHARD_PATHS=(
-    ["S1-domain"]="tests/unit/domain"
+    ["S1-domain-core"]="tests/unit/domain/value_objects tests/unit/domain/schemas tests/unit/domain/entities tests/unit/domain/composite tests/unit/domain/filtering tests/unit/domain/types tests/unit/domain/ports tests/unit/domain/aggregates tests/unit/domain/validation tests/unit/domain/mapping tests/unit/domain/models tests/unit/domain/exceptions tests/unit/domain/transformations tests/unit/domain/lineage tests/unit/domain/hash_policy"
+    ["S1-domain-services"]="tests/unit/domain/services tests/unit/domain/control_plane tests/unit/domain/config tests/unit/domain/configs tests/unit/domain/registry tests/unit/domain/test_*.py"
     ["S2-comp-iface"]="tests/unit/composition tests/unit/interfaces"
     ["S3-app-foundation"]="tests/unit/application/composite tests/unit/application/core"
     ["S4-app-services"]="tests/unit/application/services tests/unit/application/pipelines"
     ["S5-infra-adapters"]="tests/unit/infrastructure/adapters tests/unit/infrastructure/storage tests/integration/adapters tests/integration/interfaces"
-    ["S6-crosscutting-core"]="tests/unit/infrastructure/config tests/unit/infrastructure/quality tests/unit/infrastructure/observability tests/unit/infrastructure/schemas tests/integration/pipelines tests/integration/chembl tests/architecture tests/contract tests/smoke"
+    ["S6-crosscutting-unit"]="tests/unit/infrastructure/config tests/unit/infrastructure/quality tests/unit/infrastructure/observability tests/unit/infrastructure/schemas"
+    ["S7-crosscutting-architecture"]="tests/architecture"
+    ["S8-crosscutting-governance"]="tests/integration/pipelines tests/integration/chembl tests/contract tests/smoke"
 )
 
 declare -A SHARD_WORKERS_OVERRIDE=(
-    ["S1-domain"]="0"
-    ["S6-crosscutting-core"]="0"
+    ["S1-domain-core"]="0"
+    ["S1-domain-services"]="0"
+    ["S7-crosscutting-architecture"]="0"
+    ["S8-crosscutting-governance"]="0"
 )
 
 usage() {
@@ -254,7 +266,10 @@ is_wsl_mounted_checkout() {
 default_tmp_coverage_dir() {
     local repo_name
     repo_name="$(basename "$REPO_ROOT")"
-    printf '/tmp/%s-sharded-coverage\n' "$repo_name"
+    printf '/tmp/%s-sharded-coverage-%s-%s\n' \
+        "$repo_name" \
+        "$(date +%Y%m%d-%H%M%S)" \
+        "$$"
 }
 
 normalize_coverage_dir_for_environment() {
@@ -269,6 +284,10 @@ normalize_coverage_dir_for_environment() {
     COVERAGE_DIR="$(default_tmp_coverage_dir)"
     echo \
         "[run_pytest_sharded][info] Using temp coverage dir $COVERAGE_DIR for mounted WSL checkout $REPO_ROOT" \
+        >&2
+    DISABLE_COVERAGE=1
+    echo \
+        "[run_pytest_sharded][info] Disabling pytest-cov for mounted WSL checkout to avoid coverage realpath timeouts under /mnt/*" \
         >&2
 }
 
@@ -344,6 +363,9 @@ run_wave() {
         if [[ -n "$DIST_MODE" && "$shard_workers" =~ ^[0-9]+$ && "$shard_workers" -gt 0 ]]; then
             cmd+=(--dist="$DIST_MODE")
         fi
+        if [[ "$DISABLE_COVERAGE" == "1" ]]; then
+            cmd+=(--no-cov)
+        fi
         cmd+=("${EXTRA_PYTEST_ARGS[@]}")
 
         if [[ "$DRY_RUN" == "1" ]]; then
@@ -367,11 +389,17 @@ run_wave() {
             (
                 set -o pipefail
                 export COVERAGE_FILE="$coverage_file"
+                export PYTHONUNBUFFERED=1
+                export BIOETL_PYTEST_LIVE_OUTPUT=1
                 "${cmd[@]}" 2>&1 | tee "$log_file" | sed -u "s/^/[${shard}] /"
             ) &
         else
             (
                 export COVERAGE_FILE="$coverage_file"
+                if [[ "$TAIL_LOGS" == "1" ]]; then
+                    export PYTHONUNBUFFERED=1
+                    export BIOETL_PYTEST_LIVE_OUTPUT=1
+                fi
                 "${cmd[@]}"
             ) >"$log_file" 2>&1 &
         fi
@@ -409,6 +437,11 @@ run_wave() {
 
 combine_coverage() {
     [[ "$DRY_RUN" == "0" ]] || return 0
+
+    if [[ "$DISABLE_COVERAGE" == "1" ]]; then
+        echo "[run_pytest_sharded][info] Coverage combine skipped because pytest-cov is disabled for this environment." >&2
+        return 0
+    fi
 
     local python_bin
     python_bin="$(selected_python)" || {
