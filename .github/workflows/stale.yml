@@ -1,4 +1,4 @@
-﻿name: Stale
+name: Stale
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           stale-pr-message: >
             This PR has been inactive for 14 days and is now marked as stale.
