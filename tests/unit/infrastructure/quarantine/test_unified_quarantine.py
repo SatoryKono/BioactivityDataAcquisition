@@ -538,6 +538,7 @@ class TestUnifiedQuarantineGetStats:
 
         result = await quarantine.get_stats(pipeline="test")
 
+        assert result["total_count"] == 0
         assert result["total_records"] == 0
         assert result["by_error_code"] == {}
         assert result["by_status"] == {}
@@ -559,6 +560,7 @@ class TestUnifiedQuarantineGetStats:
 
         result = await quarantine.get_stats(pipeline="test")
 
+        assert result["total_count"] == 0
         assert result["total_records"] == 0
 
     @pytest.mark.asyncio
@@ -582,11 +584,80 @@ class TestUnifiedQuarantineGetStats:
 
         result = await quarantine.get_stats(pipeline="test")
 
+        assert result["total_count"] == 3
         assert result["total_records"] == 3
         assert result["by_error_code"]["INVALID_DATA"] == 2
         assert result["by_error_code"]["SCHEMA_ERROR"] == 1
         assert result["by_status"]["new"] == 2
         assert result["by_status"]["ignored"] == 1
+
+    @pytest.mark.asyncio
+    async def test_get_stats_builds_silver_filter_breakdown(
+        self, quarantine, mock_delta_table
+    ):
+        """Test get_stats derives structured Silver reject aggregations."""
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.__len__ = MagicMock(return_value=2)
+        mock_arrow_table.to_pylist.return_value = [
+            {
+                "error_code": "FILTERED_OUT_SILVER",
+                "dq_status": "new",
+                "error_details": '{"reason_code":"missing_required_field","rule_type":"required_fields","field":"publication_year","operator":"required"}',
+            },
+            {
+                "error_code": "FILTERED_OUT_SILVER",
+                "dq_status": "new",
+                "error_details": '{"reason_code":"missing_required_field","rule_type":"required_fields","field":"publication_year","operator":"required"}',
+            },
+        ]
+        mock_pandas_df = MagicMock()
+        mock_pandas_df.__getitem__ = MagicMock(return_value=MagicMock())
+        mock_pandas_df["ingestion_ts"].min.return_value = "2025-01-01T00:00:00"
+        mock_pandas_df["ingestion_ts"].max.return_value = "2025-01-15T00:00:00"
+        mock_arrow_table.to_pandas.return_value = mock_pandas_df
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.get_stats(pipeline="test")
+
+        silver = result["silver_filter_rejects"]
+        assert silver["total_count"] == 2
+        assert silver["by_reason_code"]["missing_required_field"] == 2
+        assert silver["by_field"]["publication_year"] == 2
+        assert silver["by_rule_type"]["required_fields"] == 2
+        assert silver["by_operator"]["required"] == 2
+
+    @pytest.mark.asyncio
+    async def test_get_stats_honors_error_code_filter(
+        self, quarantine, mock_delta_table
+    ):
+        """Test get_stats scopes statistics when one error code is requested."""
+        mock_table = MagicMock()
+        filtered_table = MagicMock()
+        filtered_table.__len__ = MagicMock(return_value=1)
+        filtered_table.to_pylist.return_value = [
+            {
+                "error_code": "FILTERED_OUT_SILVER",
+                "dq_status": "new",
+                "error_details": "{}",
+            }
+        ]
+        mock_pandas_df = MagicMock()
+        mock_pandas_df.__getitem__ = MagicMock(return_value=MagicMock())
+        mock_pandas_df["ingestion_ts"].min.return_value = "2025-01-01T00:00:00"
+        mock_pandas_df["ingestion_ts"].max.return_value = "2025-01-15T00:00:00"
+        filtered_table.to_pandas.return_value = mock_pandas_df
+        mock_table.to_pyarrow_table.return_value = filtered_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.get_stats(
+            pipeline="test", error_code="FILTERED_OUT_SILVER"
+        )
+
+        assert result["total_count"] == 1
+        assert result["by_error_code"]["FILTERED_OUT_SILVER"] == 1
+        mock_table.to_pyarrow_table.assert_called_once()
 
 
 @pytest.mark.unit

@@ -50,7 +50,7 @@ class _QuarantineManager(Protocol):
         """Return quarantined records."""
         ...
 
-    async def get_stats(self) -> JsonDict:
+    async def get_stats(self, error_code: str | None = None) -> JsonDict:
         """Return aggregate quarantine statistics."""
         ...
 
@@ -183,12 +183,13 @@ def _show_quarantine_stats(
     *,
     pipeline: str,
     output_json: bool,
+    error_code: str | None,
 ) -> None:
     """Display quarantine statistics for one pipeline."""
     context = _QuarantineCommandContext(pipeline=pipeline)
 
     async def _stats() -> JsonDict:
-        return await manager.get_stats()
+        return await manager.get_stats(error_code=error_code)
 
     stats = context.run_async(
         _stats(),

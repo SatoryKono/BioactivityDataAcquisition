@@ -1,5 +1,5 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P2
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
+Last verified: '2026-04-04'
 ---
 
 # Quarantine Management
@@ -32,6 +32,8 @@ Last verified: '2026-03-30'
 ### Overview
 
 - Records that fail Data Quality (DQ) checks are sent to the Quarantine table (`common.quarantine`) instead of crashing the pipeline.
+- Silver filter rejects also land in `common.quarantine` with `error_code=FILTERED_OUT_SILVER`,
+  `classification=filter_rejection`, and `quarantine_category=silver_filter`.
 
 ### Routine Tasks (Weekly)
 
@@ -40,6 +42,22 @@ Last verified: '2026-03-30'
 ```bash
 bioetl quarantine inspect --pipeline {pipeline-name} --limit 50
 ```
+
+- For Silver-only triage, start with:
+```bash
+bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only
+bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --limit 20
+```
+
+- `stats --silver-filter-only` is the fastest way to see:
+  - total Silver rejects;
+  - top `reason_code`;
+  - top rejected `field`;
+  - `rule_type` / `operator` distribution.
+
+- `inspect --silver-filter-only` is the right drilldown when you need the exact
+  reason for one record. The CLI renders `Reason`, `reason_code`, `rule_type`,
+  `field`, `operator`, `expected`, `actual`, and the original payload.
 
 ### 2. Triage Errors
 - **Systemic Error**: Bug in parser or schema. -> **Fix Code**.
@@ -64,6 +82,15 @@ bioetl quarantine purge --pipeline {pipeline-name}
 
 - `dq-records-quarantined-total`: Total records sent to quarantine.
 - `dq-quarantine-size-bytes`: Storage size of quarantine table.
+
+### Grafana
+
+- Use Grafana first for summary/trend investigation:
+  - `bioetl-overview-v2`: high-level `filtered_out` volume.
+  - `bioetl-runtime`: runtime triage and warning correlation.
+  - `bioetl-dq-v2`: DQ/quarantine summary for selected `$pipeline` and `$run_type`.
+- Use CLI/quarantine for record-level causes. Grafana is the summary surface;
+  quarantine CLI is the drilldown surface.
 
 ### Retention
 

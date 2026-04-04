@@ -159,7 +159,7 @@ class TestQuarantineServiceGetStats:
 
         assert result["total_count"] == 100
         assert result["by_error_code"]["DQ_MISSING_FIELD"] == 60
-        mock_quarantine_port.get_stats.assert_called_once_with("pipeline1")
+        mock_quarantine_port.get_stats.assert_called_once_with("pipeline1", None)
 
 
 @pytest.mark.unit
