@@ -18,6 +18,8 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _show_quarantine_stats,
 )
 
+SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
+
 
 @click.group()  # type: ignore[untyped-decorator]
 def quarantine() -> None:
@@ -34,13 +36,24 @@ def quarantine() -> None:
 @click.option(  # type: ignore[untyped-decorator]
     "--error-code", help="Filter by error code"
 )
-def quarantine_inspect(pipeline: str, limit: int, error_code: str | None) -> None:
+@click.option(  # type: ignore[untyped-decorator]
+    "--silver-filter-only",
+    is_flag=True,
+    help="Shortcut for --error-code FILTERED_OUT_SILVER",
+)
+def quarantine_inspect(
+    pipeline: str,
+    limit: int,
+    error_code: str | None,
+    silver_filter_only: bool,
+) -> None:
     """Inspect quarantined records for a pipeline."""
+    resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
     _inspect_quarantine(
         get_quarantine_manager(pipeline),
         pipeline=pipeline,
         limit=limit,
-        error_code=error_code,
+        error_code=resolved_error_code,
     )
 
 
@@ -51,12 +64,27 @@ def quarantine_inspect(pipeline: str, limit: int, error_code: str | None) -> Non
 @click.option(  # type: ignore[untyped-decorator]
     "--json", "output_json", is_flag=True, help="Output as JSON"
 )
-def quarantine_stats(pipeline: str, output_json: bool) -> None:
+@click.option(  # type: ignore[untyped-decorator]
+    "--error-code", help="Scope stats to one error code"
+)
+@click.option(  # type: ignore[untyped-decorator]
+    "--silver-filter-only",
+    is_flag=True,
+    help="Shortcut for --error-code FILTERED_OUT_SILVER",
+)
+def quarantine_stats(
+    pipeline: str,
+    output_json: bool,
+    error_code: str | None,
+    silver_filter_only: bool,
+) -> None:
     """Show quarantine statistics dashboard for a pipeline."""
+    resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
     _show_quarantine_stats(
         get_quarantine_manager(pipeline),
         pipeline=pipeline,
         output_json=output_json,
+        error_code=resolved_error_code,
     )
 
 

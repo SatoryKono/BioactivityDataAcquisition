@@ -120,6 +120,7 @@ class TestShowQuarantineStats:
                 manager,
                 pipeline="chembl_activity",
                 output_json=True,
+                error_code=None,
             )
 
         output_calls = [str(c) for c in mock_echo.call_args_list]
@@ -143,6 +144,7 @@ class TestShowQuarantineStats:
                 manager,
                 pipeline="chembl_activity",
                 output_json=False,
+                error_code=None,
             )
 
         output = " ".join(str(c) for c in mock_echo.call_args_list)
@@ -158,6 +160,7 @@ class TestShowQuarantineStats:
                 manager,
                 pipeline="chembl_activity",
                 output_json=False,
+                error_code=None,
             )
 
         assert exc_info.value.code == ExitCode.FAIL

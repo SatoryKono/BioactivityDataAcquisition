@@ -254,7 +254,9 @@ class TestQuarantinePortProtocol:
             ) -> list[dict[str, Any]]:
                 return []
 
-            async def get_stats(self, pipeline: str) -> dict[str, Any]:
+            async def get_stats(
+                self, pipeline: str, error_code: str | None = None
+            ) -> dict[str, Any]:
                 return {}
 
             def replay(
@@ -304,7 +306,9 @@ class TestQuarantinePortProtocol:
             ) -> list[dict[str, Any]]:
                 return []
 
-            async def get_stats(self, pipeline: str) -> dict[str, Any]:
+            async def get_stats(
+                self, pipeline: str, error_code: str | None = None
+            ) -> dict[str, Any]:
                 return {}
 
             def replay(

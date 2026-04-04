@@ -23,6 +23,41 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
+def _normalize_error_details(record: JsonDict) -> JsonDict:
+    """Return structured error details for one quarantine row."""
+    error_details = record.get("error_details")
+    if isinstance(error_details, str):
+        decoded = deserialize_from_json(error_details)
+        if isinstance(decoded, dict):
+            return decoded
+        return {}
+    if isinstance(error_details, dict):
+        return error_details
+    return {}
+
+
+def _increment_counter(counter: dict[str, int], value: object) -> None:
+    """Increment a string-keyed counter when the value is populated."""
+    if not isinstance(value, str):
+        return
+    normalized = value.strip()
+    if not normalized:
+        return
+    counter[normalized] = counter.get(normalized, 0) + 1
+
+
+def _build_reason_signature(error_details: JsonDict) -> str | None:
+    """Build a stable aggregation key for one structured Silver filter reason."""
+    parts: list[str] = []
+    for key in ("reason_code", "rule_type", "field", "operator"):
+        value = error_details.get(key)
+        if isinstance(value, str) and value.strip():
+            parts.append(value.strip())
+    if not parts:
+        return None
+    return " | ".join(parts)
+
+
 def inspect_records(
     base_path: str,
     storage_options: dict[str, str] | None,
@@ -127,6 +162,7 @@ def get_statistics(
     base_path: str,
     storage_options: dict[str, str] | None,
     pipeline: str,
+    error_code: str | None = None,
 ) -> JsonDict:  # Any: quarantine record has heterogeneous values
     """Get quarantine statistics for a pipeline.
 
@@ -139,11 +175,20 @@ def get_statistics(
         Statistics.
     """
     empty_stats = {
+        "total_count": 0,
         "total_records": 0,
         "by_error_code": {},
         "by_status": {},
         "oldest_record": None,
         "newest_record": None,
+        "silver_filter_rejects": {
+            "total_count": 0,
+            "by_reason_code": {},
+            "by_field": {},
+            "by_rule_type": {},
+            "by_operator": {},
+            "by_reason_signature": {},
+        },
     }
 
     try:
@@ -151,7 +196,13 @@ def get_statistics(
     except TableNotFoundError:
         return empty_stats
 
-    arrow_table = dt.to_pyarrow_table(partitions=[("pipeline", "=", pipeline)])
+    filters: list[tuple[str, str, object]] = []
+    if error_code:
+        filters.append(("error_code", "=", error_code))
+    arrow_table = dt.to_pyarrow_table(
+        partitions=[("pipeline", "=", pipeline)],
+        filters=filters or None,
+    )
     if len(arrow_table) == 0:
         return empty_stats
 
@@ -160,23 +211,51 @@ def get_statistics(
 
     by_error_code: dict[str, int] = {}
     by_status: dict[str, int] = {}
+    by_reason_code: dict[str, int] = {}
+    by_field: dict[str, int] = {}
+    by_rule_type: dict[str, int] = {}
+    by_operator: dict[str, int] = {}
+    by_reason_signature: dict[str, int] = {}
+    silver_filter_total = 0
 
     for record in df:
-        error_code = record["error_code"]
+        record_error_code = record["error_code"]
         status = record["dq_status"]
-        by_error_code[error_code] = by_error_code.get(error_code, 0) + 1
+        by_error_code[record_error_code] = by_error_code.get(record_error_code, 0) + 1
         by_status[status] = by_status.get(status, 0) + 1
+        if record_error_code != "FILTERED_OUT_SILVER":
+            continue
+        silver_filter_total += 1
+        error_details = _normalize_error_details(record)
+        _increment_counter(by_reason_code, error_details.get("reason_code"))
+        _increment_counter(by_field, error_details.get("field"))
+        _increment_counter(by_rule_type, error_details.get("rule_type"))
+        _increment_counter(by_operator, error_details.get("operator"))
+        reason_signature = _build_reason_signature(error_details)
+        if reason_signature:
+            by_reason_signature[reason_signature] = (
+                by_reason_signature.get(reason_signature, 0) + 1
+            )
 
     df_pandas = arrow_table.to_pandas()
     oldest_record = df_pandas["ingestion_ts"].min()
     newest_record = df_pandas["ingestion_ts"].max()
 
     return {
+        "total_count": total_records,
         "total_records": total_records,
         "by_error_code": by_error_code,
         "by_status": by_status,
         "oldest_record": oldest_record,
         "newest_record": newest_record,
+        "silver_filter_rejects": {
+            "total_count": silver_filter_total,
+            "by_reason_code": by_reason_code,
+            "by_field": by_field,
+            "by_rule_type": by_rule_type,
+            "by_operator": by_operator,
+            "by_reason_signature": by_reason_signature,
+        },
     }
 
 

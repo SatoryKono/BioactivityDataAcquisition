@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-04'
 ---
 
 # Руководство по устранению неполадок
@@ -65,6 +65,25 @@ Last verified: '2026-03-29'
         ```
     2.  Проанализируйте `error-code` и `payload`, чтобы определить первопричину (например, неожиданные `null` или неверные SMILES).
     3.  Скорректируйте правила качества данных или логику трансформации в соответствующем адаптере.
+
+### Высокая доля `Silver filter rejects`
+*   **Симптом**: В сводке запуска или Grafana растёт `Silver filter rejects` / `filtered_out`.
+*   **Причина**: Silver filters массово исключают записи по одному или нескольким правилам.
+*   **Решение**:
+    1.  Проверьте summary в Grafana:
+        - `bioetl-overview-v2`
+        - `bioetl-runtime`
+        - `bioetl-dq-v2`
+    2.  Получите агрегаты по причинам:
+        ```bash
+        bioetl quarantine stats --pipeline your-pipeline-name --silver-filter-only
+        ```
+    3.  Посмотрите конкретные записи и точную причину исключения:
+        ```bash
+        bioetl quarantine inspect --pipeline your-pipeline-name --silver-filter-only --limit 20
+        ```
+    4.  Ориентируйтесь прежде всего на structured поля `reason_code`, `field`,
+        `rule_type`, `operator`, `expected`, `actual`, а не только на текст `Reason`.
 
 ## См. также
 

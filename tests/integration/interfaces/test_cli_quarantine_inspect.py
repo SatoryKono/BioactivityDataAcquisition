@@ -38,6 +38,7 @@ class TestCliQuarantineInspect:
         assert result.exit_code == 0
         assert "--pipeline" in result.output
         assert "--limit" in result.output
+        assert "--silver-filter-only" in result.output
 
     def test_quarantine_inspect_requires_pipeline(self, cli_runner: CliRunner):
         """Test that quarantine inspect requires --pipeline option."""
@@ -190,6 +191,56 @@ class TestCliQuarantineInspect:
         # Check payload content is displayed
         assert "Payload:" in result.output or "payload" in result.output.lower()
 
+    def test_quarantine_inspect_displays_structured_reason_details(
+        self,
+        cli_runner: CliRunner,
+        temp_env: dict[str, str],
+    ):
+        """Test that quarantine inspect surfaces structured Silver reject reasons."""
+        sample_records = [
+            {
+                "error_code": "FILTERED_OUT_SILVER",
+                "dq_status": "NEW",
+                "payload_hash": "abc123def4567890abc123def4567890",
+                "payload": {"activity_id": "CHEMBL1"},
+                "error_details": {
+                    "message": "Missing required field",
+                    "reason_code": "missing_required_field",
+                    "rule_type": "required_fields",
+                    "field": "publication_year",
+                    "operator": "required",
+                    "expected": "non-null",
+                    "actual": None,
+                },
+            }
+        ]
+
+        mock_manager = MagicMock()
+        mock_manager.inspect = AsyncMock(return_value=sample_records)
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_manager,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "quarantine",
+                    "inspect",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--silver-filter-only",
+                ],
+            )
+
+        assert result.exit_code == 0
+        assert "Reason: Missing required field" in result.output
+        assert "Reason Code: missing_required_field" in result.output
+        assert "Field: publication_year" in result.output
+        mock_manager.inspect.assert_called_once_with(
+            limit=100, error_code="FILTERED_OUT_SILVER"
+        )
+
     def test_quarantine_inspect_multiple_pipelines(
         self,
         cli_runner: CliRunner,
@@ -277,5 +328,6 @@ class TestCliQuarantineInspectWithFake:
         stats = await populated_quarantine.get_stats("chembl_activity")
 
         assert stats["total"] == 3
+        assert stats["total_count"] == 3
         assert stats["by_error_code"]["VALIDATION_ERROR"] == 2
         assert stats["by_error_code"]["SCHEMA_ERROR"] == 1

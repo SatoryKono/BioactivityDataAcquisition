@@ -82,18 +82,42 @@ class InMemoryQuarantine:
 
         return records[:limit]
 
-    async def get_stats(self, pipeline: str) -> dict[str, Any]:
+    async def get_stats(
+        self,
+        pipeline: str,
+        error_code: str | None = None,
+    ) -> dict[str, Any]:
         """Get quarantine statistics for a pipeline."""
         records = self._records.get(pipeline, [])
+        if error_code:
+            records = [record for record in records if record["error_code"] == error_code]
 
         # Count by error code
         by_error_code: dict[str, int] = defaultdict(int)
+        by_status: dict[str, int] = defaultdict(int)
         for record in records:
             by_error_code[record["error_code"]] += 1
+            by_status[record["dq_status"]] += 1
 
         return {
             "total": len(records),
+            "total_count": len(records),
             "by_error_code": dict(by_error_code),
+            "by_status": dict(by_status),
+            "silver_filter_rejects": {
+                "total_count": len(
+                    [
+                        record
+                        for record in records
+                        if record["error_code"] == "FILTERED_OUT_SILVER"
+                    ]
+                ),
+                "by_reason_code": {},
+                "by_field": {},
+                "by_rule_type": {},
+                "by_operator": {},
+                "by_reason_signature": {},
+            },
         }
 
     async def aclose(self) -> None:
