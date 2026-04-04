@@ -103,11 +103,16 @@ class QuarantinePort(Protocol):
         """
         ...
 
-    async def get_stats(self, pipeline: str) -> MetaDict:
+    async def get_stats(
+        self,
+        pipeline: str,
+        error_code: str | None = None,
+    ) -> MetaDict:
         """Get statistics about the quarantined records for a pipeline.
 
         Args:
             pipeline: The name of the pipeline.
+            error_code: Optional error code to scope the statistics.
 
         Returns:
             A dictionary of statistics (e.g., count by error code).

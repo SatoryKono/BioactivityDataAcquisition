@@ -70,6 +70,7 @@ class TestQuarantineInspect:
         assert "--pipeline" in result.output
         assert "--limit" in result.output
         assert "--error-code" in result.output
+        assert "--silver-filter-only" in result.output
 
     def test_inspect_requires_pipeline(self, cli_runner: CliRunner) -> None:
         """Test that quarantine inspect requires --pipeline option."""
@@ -188,6 +189,34 @@ class TestQuarantineInspect:
         )
         assert result.exit_code == 0
 
+    def test_inspect_with_silver_filter_shortcut(
+        self,
+        cli_runner: CliRunner,
+        mock_quarantine_manager: MagicMock,
+    ) -> None:
+        """Test quarantine inspect with --silver-filter-only shortcut."""
+        mock_quarantine_manager.inspect = AsyncMock(return_value=[])
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "quarantine",
+                    "inspect",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--silver-filter-only",
+                ],
+            )
+
+        mock_quarantine_manager.inspect.assert_called_once_with(
+            limit=100, error_code="FILTERED_OUT_SILVER"
+        )
+        assert result.exit_code == 0
+
 
 class TestQuarantineStats:
     """Test the quarantine stats subcommand."""
@@ -199,6 +228,8 @@ class TestQuarantineStats:
         assert result.exit_code == 0
         assert "--pipeline" in result.output
         assert "--json" in result.output
+        assert "--error-code" in result.output
+        assert "--silver-filter-only" in result.output
 
     def test_stats_requires_pipeline(self, cli_runner: CliRunner) -> None:
         """Test that quarantine stats requires --pipeline option."""
@@ -258,6 +289,52 @@ class TestQuarantineStats:
         assert "60.0%" in result.output
         assert "By Error Code:" in result.output
         assert "By Status:" in result.output
+
+    def test_stats_with_silver_filter_shortcut(
+        self,
+        cli_runner: CliRunner,
+        mock_quarantine_manager: MagicMock,
+    ) -> None:
+        """Test quarantine stats with --silver-filter-only shortcut."""
+        mock_quarantine_manager.get_stats = AsyncMock(
+            return_value={
+                "total_count": 3,
+                "by_error_code": {"FILTERED_OUT_SILVER": 3},
+                "by_status": {"NEW": 3},
+                "silver_filter_rejects": {
+                    "total_count": 3,
+                    "by_reason_code": {"missing_required_field": 2},
+                    "by_field": {"publication_year": 2},
+                    "by_rule_type": {"required_fields": 2},
+                    "by_operator": {"required": 2},
+                    "by_reason_signature": {
+                        "missing_required_field | required_fields | publication_year | required": 2
+                    },
+                },
+            }
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "quarantine",
+                    "stats",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--silver-filter-only",
+                ],
+            )
+
+        mock_quarantine_manager.get_stats.assert_called_once_with(
+            error_code="FILTERED_OUT_SILVER"
+        )
+        assert result.exit_code == 0
+        assert "Silver Filter Rejects: 3" in result.output
+        assert "missing_required_field" in result.output
 
     def test_stats_json_output(
         self,

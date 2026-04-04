@@ -277,17 +277,20 @@ class UnifiedQuarantineAdapter:
         return True
 
     async def get_stats(
-        self, pipeline: str
+        self,
+        pipeline: str,
+        error_code: str | None = None,
     ) -> JsonDict:  # Any: quarantine record has heterogeneous values
         """Get quarantine statistics for a pipeline.
 
         Args:
             pipeline: Pipeline name to compute statistics for.
+            error_code: Optional error code to scope the statistics.
 
         Returns:
             Dict with counts by error code, status distribution, and totals.
         """
-        return get_statistics(self.base_path, None, pipeline)
+        return get_statistics(self.base_path, None, pipeline, error_code)
 
     async def aclose(self) -> None:
         """Close resources."""
