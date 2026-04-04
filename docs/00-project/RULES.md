@@ -1441,6 +1441,7 @@ grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 
 ```bash
 make install      # создание venv, установка зависимостей
+make setup-plugins  # локальная настройка pytest/pre-commit tooling
 make test         # локальный стабильный suite с coverage (без E2E)
 make lint         # ruff + mypy
 make run-local    # запуск сэмплового пайплайна (chembl_activity, limit=10)
@@ -1455,7 +1456,7 @@ make run-local    # запуск сэмплового пайплайна (chembl
 - **Storage**: Локальная файловая система (`data/output/bronze`, `data/output/silver`, `data/output/gold`)
 - **Locking**: In-memory (`MemoryLock`)
 - **Checkpoints**: Локальные файлы (`data/output/checkpoints`)
-- **Зависимости**: Только Python 3.11+ и pip
+- **Зависимости**: Python 3.11+; `uv` является preferred package/environment manager, `pip` допустим как manual fallback
 
 **Для распределённого развёртывания (будущее):**
 

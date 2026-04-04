@@ -10,7 +10,9 @@ Last verified: '2026-04-02'
 
 # Getting Started Guide
 
-This guide will walk you through setting up a complete local development environment for BioETL. By the end of this guide, you will have a running instance of the platform and be able to execute data pipelines.
+This guide walks through setting up a complete local development environment for
+BioETL. By the end, you will have a working local runtime/tooling environment
+and be able to execute data pipelines.
 
 > **Note**: BioETL использует **Local-Only** deployment (ADR-010).
 > Docker и внешние сервисы (Redis, MinIO) не требуются.
