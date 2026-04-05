@@ -21,9 +21,7 @@ import pytest
 # Legacy header example: *Версия: 5.10 (TTL/Heartbeat Values Correction), 2026-01-06*
 # Canonical frontmatter example: Version: 5.24.0
 RULES_VERSION_PATTERN = re.compile(r"\*Версия:\s*(\d+\.\d+)")
-RULES_FRONTMATTER_VERSION_PATTERN = re.compile(
-    r"^Version:\s*(\d+\.\d+)(?:\.\d+)?\s*$"
-)
+RULES_FRONTMATTER_VERSION_PATTERN = re.compile(r"^Version:\s*(\d+\.\d+)(?:\.\d+)?\s*$")
 RULES_FRONTMATTER_VERIFIED_PATTERN = re.compile(
     r"^Last verified:\s*'?\d{4}-\d{2}-\d{2}'?\s*$"
 )
@@ -349,9 +347,7 @@ class TestVersionFormat:
         )
         lines = content.split("\n")[:12]
 
-        legacy_header_found = any(
-            legacy_header_pattern.search(line) for line in lines
-        )
+        legacy_header_found = any(legacy_header_pattern.search(line) for line in lines)
         frontmatter_version_found = any(
             RULES_FRONTMATTER_VERSION_PATTERN.search(line) for line in lines
         )

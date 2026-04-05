@@ -1,6 +1,7 @@
 import os
-from pathlib import Path
 import traceback
+from pathlib import Path
+
 
 def check_writable(dir_path):
     path = Path(dir_path)
@@ -18,10 +19,11 @@ def check_writable(dir_path):
         print(f"  FAILED: {type(e).__name__}: {e}")
         return False
 
+
 paths = [
     "data/output/bronze/chembl/molecule",
     "data/output/silver/chembl/molecule",
-    "data/output/gold/chembl/molecule"
+    "data/output/gold/chembl/molecule",
 ]
 
 print("Starting BioETL Storage Health Debug...")

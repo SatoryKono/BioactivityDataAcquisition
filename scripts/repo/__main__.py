@@ -13,6 +13,7 @@ Commands:
     split-testing-roadmap  Create or preview #2511 child issues
     all                Run all checks sequentially
 """
+
 from __future__ import annotations
 
 import subprocess

@@ -320,7 +320,10 @@ def _validate_silver_pandera(
     cleaned_records = (
         records
         if preserve_state
-        else [{key: value for key, value in record.items() if key != "_state"} for record in records]
+        else [
+            {key: value for key, value in record.items() if key != "_state"}
+            for record in records
+        ]
     )
 
     result = host._silver_validator.validate(cleaned_records)

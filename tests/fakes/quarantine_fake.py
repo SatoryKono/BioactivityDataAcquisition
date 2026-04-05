@@ -90,7 +90,9 @@ class InMemoryQuarantine:
         """Get quarantine statistics for a pipeline."""
         records = self._records.get(pipeline, [])
         if error_code:
-            records = [record for record in records if record["error_code"] == error_code]
+            records = [
+                record for record in records if record["error_code"] == error_code
+            ]
 
         # Count by error code
         by_error_code: dict[str, int] = defaultdict(int)

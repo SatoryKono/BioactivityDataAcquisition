@@ -106,10 +106,16 @@ def _is_date_field(field_name: str) -> bool:
     )
 
 
-def _normalized_target_type(field_name: str, base_type: str, row: dict[str, str]) -> str:
+def _normalized_target_type(
+    field_name: str, base_type: str, row: dict[str, str]
+) -> str:
     if _is_json_field(row):
         return "string"
-    if _is_doi_field(field_name) or _is_pmid_field(field_name) or _is_date_field(field_name):
+    if (
+        _is_doi_field(field_name)
+        or _is_pmid_field(field_name)
+        or _is_date_field(field_name)
+    ):
         return "string"
     return base_type
 
@@ -175,7 +181,9 @@ def _load_entity_configs() -> dict[tuple[str, str], dict[str, Any]]:
         provider = row["provider"]
         entity = row["entity"]
         config_path = PROJECT_ROOT / row["config_path"]
-        configs[(provider, entity)] = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        configs[(provider, entity)] = yaml.safe_load(
+            config_path.read_text(encoding="utf-8")
+        )
     return configs
 
 
@@ -237,7 +245,9 @@ def _affects_hash(row: dict[str, str], config: dict[str, Any]) -> bool:
     if sets["content_include"]:
         return bool(names & sets["content_include"])
 
-    if names & (sets["explicit_exclude"] | sets["contract_exclude"] | sets["content_exclude"]):
+    if names & (
+        sets["explicit_exclude"] | sets["contract_exclude"] | sets["content_exclude"]
+    ):
         return False
 
     return bool(names & sets["key_fields"])
@@ -285,8 +295,12 @@ def build_field_transformation_rows() -> list[dict[str, str]]:
         silver_type = _silver_type(field_row)
         gold_type = _gold_type(field_row)
 
-        bronze_to_silver_target = _normalized_target_type(field_name, silver_type, field_row)
-        silver_to_gold_target = _normalized_target_type(field_name, gold_type, field_row)
+        bronze_to_silver_target = _normalized_target_type(
+            field_name, silver_type, field_row
+        )
+        silver_to_gold_target = _normalized_target_type(
+            field_name, gold_type, field_row
+        )
 
         rows.append(
             _spec_row(
@@ -314,7 +328,12 @@ def build_field_transformation_rows() -> list[dict[str, str]]:
         )
 
     rows.sort(
-        key=lambda row: (row["provider"], row["entity"], row["field"], row["layer_transition"])
+        key=lambda row: (
+            row["provider"],
+            row["entity"],
+            row["field"],
+            row["layer_transition"],
+        )
     )
     return rows
 

@@ -49,9 +49,7 @@ _SOURCE_NORMALIZATION_DETAILS: Final[dict[str, str]] = {
     "derived_from_nested; trim; controlled_vocabulary": (
         "nested extract; trim; enum source"
     ),
-    "trim; blank_to_null; identifier_normalized": (
-        "trim; blank->null; id normalized"
-    ),
+    "trim; blank_to_null; identifier_normalized": ("trim; blank->null; id normalized"),
     "trim; controlled_vocabulary": "trim; enum source",
 }
 
@@ -88,8 +86,12 @@ def _arg_parser() -> argparse.ArgumentParser:
             "canonical ChEMBL matrix workbook."
         )
     )
-    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="Input workbook.")
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook.")
+    parser.add_argument(
+        "--input", type=Path, default=DEFAULT_INPUT, help="Input workbook."
+    )
+    parser.add_argument(
+        "--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook."
+    )
     return parser
 
 
@@ -122,7 +124,8 @@ def _sheet_targets(archive: zipfile.ZipFile) -> dict[str, str]:
     workbook = ET.fromstring(archive.read("xl/workbook.xml"))
     rels = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
     rel_map = {
-        rel.attrib["Id"]: rel.attrib["Target"] for rel in rels.findall("pr:Relationship", NS)
+        rel.attrib["Id"]: rel.attrib["Target"]
+        for rel in rels.findall("pr:Relationship", NS)
     }
     targets: dict[str, str] = {}
     for sheet in workbook.find("a:sheets", NS).findall("a:sheet", NS):
@@ -200,10 +203,13 @@ def _token_clauses(tokens: list[str], row: dict[str, str]) -> list[str]:
     silver_column = row.get("Silver column", "")
 
     for token in tokens:
-        if token == "renamed" and source_field and silver_column and source_field != silver_column:
-            clauses.append(
-                f"`{source_field}` -> `{silver_column}`"
-            )
+        if (
+            token == "renamed"
+            and source_field
+            and silver_column
+            and source_field != silver_column
+        ):
+            clauses.append(f"`{source_field}` -> `{silver_column}`")
             continue
         clause = _TOKEN_DETAILS.get(token)
         if clause:
@@ -377,7 +383,9 @@ def main() -> int:
             sheet_targets=sheet_targets,
         )
 
-        with zipfile.ZipFile(temp_output_path, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+        with zipfile.ZipFile(
+            temp_output_path, "w", compression=zipfile.ZIP_DEFLATED
+        ) as zout:
             for info in zin.infolist():
                 data = zin.read(info.filename)
                 if info.filename not in sheet_targets:

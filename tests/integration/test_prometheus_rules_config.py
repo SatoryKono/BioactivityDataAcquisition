@@ -27,7 +27,9 @@ def _build_rule_map(payload: dict) -> dict[str, dict]:
     return rule_map
 
 
-def _classify_quarantine_rate(*, bronze_records: int, quarantine_rate: float) -> str | None:
+def _classify_quarantine_rate(
+    *, bronze_records: int, quarantine_rate: float
+) -> str | None:
     """Return expected alert severity for quarantine-rate thresholds."""
     if bronze_records < 20 or quarantine_rate <= 0.05:
         return None

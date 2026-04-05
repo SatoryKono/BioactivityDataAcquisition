@@ -14,6 +14,7 @@ Commands:
     debug-storage      Debug storage health checks
     inspect-vcr        Temporary VCR cassette inspector
 """
+
 from __future__ import annotations
 
 import subprocess

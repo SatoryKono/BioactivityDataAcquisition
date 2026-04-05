@@ -13,8 +13,8 @@ from bioetl.infrastructure.storage.gold.io_delta_runtime import (
     _execute_prepared_scd2_gold_write,
     _execute_prepared_simple_gold_write,
     _GoldWriteAsyncioProtocol,
-    _GoldWriteRetryModuleProtocol,
     _GoldWriterDeltaModuleProtocol,
+    _GoldWriteRetryModuleProtocol,
     _prepare_scd2_gold_write,
     _SimpleGoldWriteRequest,
 )
@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldRecord, ScdConfig
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
+
 
 class _GoldWriterExecutorArrowMixin:
     """Executor and Arrow conversion primitives reused by IO helpers."""

@@ -12,13 +12,13 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
 
-def _build_token_bucket_rate_limiter() -> "TokenBucketRateLimiter":
+def _build_token_bucket_rate_limiter() -> TokenBucketRateLimiter:
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
     return TokenBucketRateLimiter(rate=10.0, capacity=100)
 
 
-def _build_circuit_breaker_guard() -> "CircuitBreakerGuard":
+def _build_circuit_breaker_guard() -> CircuitBreakerGuard:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 
     return CircuitBreakerGuard(provider="integration_test")

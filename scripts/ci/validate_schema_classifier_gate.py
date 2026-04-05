@@ -253,8 +253,7 @@ def _major_transition_issues(
                 contract_ref=contract_ref,
                 artifact_path=None,
                 message=(
-                    "migration_guides missing required transition key "
-                    f"{transition_key}"
+                    f"migration_guides missing required transition key {transition_key}"
                 ),
             )
         )
@@ -396,8 +395,7 @@ def main() -> int:
     changed_sources = sorted(
         path
         for path in changed
-        if path.startswith("src/bioetl/domain/contracts/")
-        and path.endswith(".py")
+        if path.startswith("src/bioetl/domain/contracts/") and path.endswith(".py")
     )
     artifact_index = _contract_artifact_index(
         repo_root=repo_root,

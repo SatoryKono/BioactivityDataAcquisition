@@ -22,6 +22,7 @@ Commands:
     deploy             Deploy BioETL (shell)
     delete-branches    Delete stale git branches (shell)
 """
+
 from __future__ import annotations
 
 import subprocess

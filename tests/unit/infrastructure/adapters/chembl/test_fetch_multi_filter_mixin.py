@@ -62,9 +62,7 @@ class _TestChemblFetchMultiFilterAdapter(ChemblFetchMultiFilterMixin):
                 params[f"{key}__in"] = value
         return params
 
-    def _get_projected_url_length(
-        self, url: str, params: dict[str, object]
-    ) -> int:
+    def _get_projected_url_length(self, url: str, params: dict[str, object]) -> int:
         assert url.startswith("https://example.test/")
         assert "entity_type" in params
         return self.projected_lengths.pop(0)
@@ -120,7 +118,9 @@ def test_determine_multi_filter_batch_size_keeps_size_when_url_fits() -> None:
     adapter._logger.info.assert_not_called()
 
 
-def test_determine_multi_filter_batch_size_returns_one_without_projection_checks() -> None:
+def test_determine_multi_filter_batch_size_returns_one_without_projection_checks() -> (
+    None
+):
     adapter = _TestChemblFetchMultiFilterAdapter()
     adapter._filter_batch_size = 1
 
@@ -226,7 +226,8 @@ async def test_fetch_multi_filtered_returns_nothing_for_empty_filters() -> None:
     adapter = _TestChemblFetchMultiFilterAdapter()
 
     records = [
-        record async for record in adapter.fetch_multi_filtered("activity", {}, limit=None)
+        record
+        async for record in adapter.fetch_multi_filtered("activity", {}, limit=None)
     ]
 
     assert records == []
@@ -270,7 +271,9 @@ async def test_fetch_multi_filtered_batches_filters_and_honors_limit() -> None:
     assert _collect_ids(records) == ["M1", "M2", "T1"]
     assert len(adapter.loop_calls) == 1
 
-    loop_url, loop_params, loop_entity_type, loop_pk_field, loop_seen = adapter.loop_calls[0]
+    loop_url, loop_params, loop_entity_type, loop_pk_field, loop_seen = (
+        adapter.loop_calls[0]
+    )
     assert loop_url == "https://example.test/activity"
     assert loop_entity_type == "activity"
     assert loop_pk_field == "chembl_id"
@@ -282,7 +285,9 @@ async def test_fetch_multi_filtered_batches_filters_and_honors_limit() -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch_multi_filtered_exhausts_all_batch_combinations_without_limit() -> None:
+async def test_fetch_multi_filtered_exhausts_all_batch_combinations_without_limit() -> (
+    None
+):
     adapter = _TestChemblFetchMultiFilterAdapter()
     adapter._filter_batch_size = 2
     adapter.projected_lengths = [800]

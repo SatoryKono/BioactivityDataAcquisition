@@ -93,7 +93,9 @@ class BatchWriterIOMixin:
         try:
             batch_id_str = str(batch_id)
             run_id = str(self._context.run_id)
-            run_type = str(getattr(self._context.run_type, "value", self._context.run_type))
+            run_type = str(
+                getattr(self._context.run_type, "value", self._context.run_type)
+            )
             ingestion_ts_value = ingestion_ts.isoformat()
             for record in records:
                 if not record.get("_source_batch_id"):

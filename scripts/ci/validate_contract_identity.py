@@ -117,9 +117,7 @@ def _build_identity_issues(registry: ContractRegistry) -> list[RegistryValidatio
         ):
             issues.append(
                 RegistryValidationIssue(
-                    message=(
-                        "rule_bundle_version mismatch between identity and entry"
-                    ),
+                    message=("rule_bundle_version mismatch between identity and entry"),
                     severity=RegistryValidationSeverity.BLOCKING,
                     contract_ref=contract_ref,
                     field="rule_bundle_version",
@@ -176,7 +174,9 @@ def main() -> int:
 
     try:
         registry = ContractRegistry(registry_path)
-        print(f"::notice::Loaded contract registry with {len(registry.entries)} entries")
+        print(
+            f"::notice::Loaded contract registry with {len(registry.entries)} entries"
+        )
 
         issues = _build_identity_issues(registry)
         blocking_issues = [

@@ -316,11 +316,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.pipelines:
             selected = set(args.pipelines)
             pipeline_by_path = _pipeline_names_for_paths(all_paths)
-            paths = [
-                path
-                for path in all_paths
-                if pipeline_by_path[path] in selected
-            ]
+            paths = [path for path in all_paths if pipeline_by_path[path] in selected]
         else:
             paths = all_paths
 
@@ -329,7 +325,9 @@ def main(argv: list[str] | None = None) -> int:
             for violation in violations:
                 print(violation, file=sys.stderr)
             return 1
-        print("INV-CFG-008: PASS (effective_optional_v1 matches current config surface)")
+        print(
+            "INV-CFG-008: PASS (effective_optional_v1 matches current config surface)"
+        )
         return 0
 
     rows = build_optionality_audit_rows(

@@ -118,7 +118,9 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     repo_root = Path.cwd()
-    manifest = args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    manifest = (
+        args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    )
 
     try:
         rel_paths = load_manifest(manifest)
@@ -129,7 +131,10 @@ def main() -> int:
         return 2
 
     if changed:
-        print("[ERROR] Visual smoke regression detected in baseline SVG(s):", file=sys.stderr)
+        print(
+            "[ERROR] Visual smoke regression detected in baseline SVG(s):",
+            file=sys.stderr,
+        )
         for path in changed:
             print(f"  - {path}", file=sys.stderr)
         print(

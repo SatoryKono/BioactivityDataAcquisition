@@ -39,7 +39,9 @@ class SeedKeyResolver:
     def __init__(
         self,
         logger: LoggerPort,
-        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+        normalization_policies: Mapping[
+            str, JoinKeyNormalizationPolicy
+        ] = JOIN_KEY_NORMALIZATION_POLICIES,
     ) -> None:
         self._logger = logger
         self._normalization_policies = normalization_policies
@@ -82,7 +84,9 @@ class ChainedKeyResolver:
     def __init__(
         self,
         logger: LoggerPort,
-        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+        normalization_policies: Mapping[
+            str, JoinKeyNormalizationPolicy
+        ] = JOIN_KEY_NORMALIZATION_POLICIES,
     ) -> None:
         self._logger = logger
         self._normalization_policies = normalization_policies
@@ -261,7 +265,9 @@ class ChainedKeyResolver:
 
 def create_seed_key_resolver(
     logger: LoggerPort,
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> SeedKeyResolver:
     """Create default seed-key resolver.
 
@@ -276,7 +282,9 @@ def create_seed_key_resolver(
 
 def create_chained_key_resolver(
     logger: LoggerPort,
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> ChainedKeyResolver:
     """Create default chained-key resolver.
 

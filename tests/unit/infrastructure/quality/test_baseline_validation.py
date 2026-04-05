@@ -218,9 +218,9 @@ class TestValidateHistoricalBaselineSection:
         assert any("missing enforceable registries" in e for e in errors)
         assert any("not present in baseline" in e for e in errors)
 
-    def test_historical_totals_and_registry_counts_cannot_drop_below_baseline(self) -> (
-        None
-    ):
+    def test_historical_totals_and_registry_counts_cannot_drop_below_baseline(
+        self,
+    ) -> None:
         """Historical baseline must not go below enforceable totals or registry counts."""
         raw = {
             "historical_baseline": {
@@ -239,7 +239,9 @@ class TestValidateHistoricalBaselineSection:
             errors=errors,
         )
 
-        assert any("total_exemptions must be greater than or equal" in e for e in errors)
+        assert any(
+            "total_exemptions must be greater than or equal" in e for e in errors
+        )
         assert any("historical_baseline.by_registry.reg_a" in e for e in errors)
 
 

@@ -435,12 +435,44 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
         "scripts/ops/close_great_expectations_spike_issue.sh",
         "scripts/ops/close_pandera_schema_drift_issue.sh",
     }
+    unknown_internal_ai_launchers = {
+        "scripts/ai/code-reviewer.sh",
+        "scripts/ai/data-engineer.sh",
+        "scripts/ai/literature-researcher.sh",
+    }
+    legacy_archive_scripts = {
+        "scripts/archive/migrations/migrate_openalex_citation_count.py",
+        "scripts/archive/migrations/migrate_pmid_to_string.py",
+        "scripts/archive/migrations/rename_structure_fields.py",
+    }
+    legacy_named_scripts = {
+        "scripts/dev/dev_setup.sh",
+        "scripts/diagnostics/_tmp_inspect_vcr.py",
+    }
+    legacy_src_tools_wrappers = {
+        "src/tools/scripts/generate_contracts.py",
+        "src/tools/scripts/lint_terminology.py",
+    }
+    deprecated_legacy_paths = {
+        "scripts/qa/generate_reports.py",
+        "src/tools/scripts/check_architecture.py",
+        "src/tools/scripts/check_application_deps.py",
+        "src/tools/scripts/check_constructor_args.py",
+    }
 
     if script_rel in legacy_root_wrappers:
         return "active" if groups & strong_active_groups else "legacy"
     if script_rel in legacy_manual_ops_scripts:
         return "active" if groups & strong_active_groups else "legacy"
     if script_rel in legacy_issue_specific_ops_scripts:
+        return "active" if groups & strong_active_groups else "legacy"
+    if script_rel in unknown_internal_ai_launchers:
+        return "active" if groups & strong_active_groups else "unknown"
+    if script_rel in legacy_archive_scripts or script_rel in legacy_named_scripts:
+        return "active" if groups & strong_active_groups else "legacy"
+    if script_rel in legacy_src_tools_wrappers:
+        return "active" if groups & strong_active_groups else "legacy"
+    if script_rel in deprecated_legacy_paths:
         return "active" if groups & strong_active_groups else "legacy"
 
     if not refs:

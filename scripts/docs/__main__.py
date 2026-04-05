@@ -21,6 +21,7 @@ Commands:
     fix-link-warnings  Fix link warnings in specified files
     audit-sentence     Sentence-level documentation audit
 """
+
 from __future__ import annotations
 
 import subprocess

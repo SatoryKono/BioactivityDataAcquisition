@@ -31,7 +31,9 @@ def check_column_filters(
     record: JsonDict,
 ) -> bool:
     """Check that column values match the configured filters."""
-    return all(check_single_column(record, column_filter) for column_filter in column_filters)
+    return all(
+        check_single_column(record, column_filter) for column_filter in column_filters
+    )
 
 
 def check_range_filters(
@@ -39,7 +41,9 @@ def check_range_filters(
     record: JsonDict,
 ) -> bool:
     """Check that values fall within the configured ranges."""
-    return all(check_single_range(record, range_filter) for range_filter in range_filters)
+    return all(
+        check_single_range(record, range_filter) for range_filter in range_filters
+    )
 
 
 def check_list_length_filters(

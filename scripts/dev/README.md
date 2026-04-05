@@ -13,7 +13,7 @@ make setup-plugins
 python -m scripts.dev setup-mcp  # optional MCP tooling
 ```
 
-`dev_setup.sh` is still wired into `python -m scripts.dev setup`, but it is currently a legacy placeholder rather than the supported bootstrap path.
+`dev_setup.sh` is still wired into `python -m scripts.dev setup`, but it is currently a legacy placeholder rather than the supported bootstrap path. Repository-local references to that path should be treated as compatibility evidence, not as proof that it is a canonical onboarding command.
 
 ## Stable Dual-OS Environments
 

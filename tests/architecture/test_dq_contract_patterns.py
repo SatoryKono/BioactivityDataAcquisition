@@ -13,10 +13,6 @@ REQ-DQ-030: Policy resolution must be deterministic
 
 from __future__ import annotations
 
-import ast
-import re
-from pathlib import Path
-from typing import Any
 
 import pytest
 

@@ -237,7 +237,9 @@ def _check_lifecycle_coverage(
     if enforce_known_registry_paths:
         for path in sorted(entries):
             if path not in manifest_paths:
-                violations.append(f"stale lifecycle entry not found in manifest: {path}")
+                violations.append(
+                    f"stale lifecycle entry not found in manifest: {path}"
+                )
 
 
 def main(argv: list[str] | None = None) -> int:

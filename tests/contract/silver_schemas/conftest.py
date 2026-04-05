@@ -247,7 +247,10 @@ def assert_schema_matches_snapshot(
         snapshot_field = snapshot[field_name]
 
         for attr in ["dtype", "nullable", "required"]:
-            if field_name in allowed_attr_diffs and attr in allowed_attr_diffs[field_name]:
+            if (
+                field_name in allowed_attr_diffs
+                and attr in allowed_attr_diffs[field_name]
+            ):
                 continue
             if current_field.get(attr) != snapshot_field.get(attr):
                 pytest.fail(

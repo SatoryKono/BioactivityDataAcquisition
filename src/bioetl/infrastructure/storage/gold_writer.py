@@ -259,10 +259,14 @@ class GoldWriter(
         """Return True when rollout policy requires Gold shadow writes."""
         if self._contract_rollout_policy is None:
             return False
-        return self._contract_rollout_policy.mode in {
-            "dual_write",
-            "dual_read_write",
-        } and len(self._contract_rollout_policy.write_versions) > 1
+        return (
+            self._contract_rollout_policy.mode
+            in {
+                "dual_write",
+                "dual_read_write",
+            }
+            and len(self._contract_rollout_policy.write_versions) > 1
+        )
 
     def __init__(
         self,
@@ -299,15 +303,20 @@ class GoldWriter(
             raise TypeError(f"Unexpected GoldWriter options: {unexpected}")
 
         super().__init__(base_path, logger, flat_structure=flat_structure)
-        services = runtime_services or build_gold_writer_runtime_services(
-            csv_exporter=csv_exporter,
-            tracing=tracing,
-            metrics=metrics,
-            audit=audit,
-            metadata_writer=metadata_writer,
-            metadata_coordinator=metadata_coordinator,
-            lineage_store=lineage_store,
-            contract_rollout_policy=cast("Any", contract_rollout_policy),  # Any: rollout policy protocol narrows only after runtime service assembly.
+        services = (
+            runtime_services
+            or build_gold_writer_runtime_services(
+                csv_exporter=csv_exporter,
+                tracing=tracing,
+                metrics=metrics,
+                audit=audit,
+                metadata_writer=metadata_writer,
+                metadata_coordinator=metadata_coordinator,
+                lineage_store=lineage_store,
+                contract_rollout_policy=cast(
+                    "Any", contract_rollout_policy
+                ),  # Any: rollout policy protocol narrows only after runtime service assembly.
+            )
         )
         self.csv_exporter = services.csv_exporter
         self._metrics = services.metrics

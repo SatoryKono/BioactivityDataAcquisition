@@ -266,8 +266,8 @@ Generates a cross-config comparison matrix and discrepancy report for entity and
 python -m scripts.schema generate-config-matrix
 ```
 
-The direct legacy path remains available for compatibility:
-`python src/tools/scripts/config_matrix_generator.py`
+The direct legacy path remains available for compatibility during the migration
+window, but the canonical command above should be used for new integrations.
 
 ### scripts/validate_unified_configs.py
 
@@ -281,8 +281,8 @@ Legacy standalone validator for unified entity YAML configs.
 python -m scripts.schema validate-unified-configs
 ```
 
-The direct legacy path remains available for compatibility:
-`python src/tools/scripts/validate_unified_configs.py`
+The direct legacy path remains available for compatibility during the migration
+window, but the canonical command above should be used for new integrations.
 
 Use `python -m scripts.schema validate-configs` only for the maintained JSON
 Schema / agent-canonical validation flow.
@@ -316,5 +316,5 @@ python -m scripts.qa analyze-duplicate-functions \
   --report reports/duplicate_function_report.md
 ```
 
-The direct legacy path remains available for compatibility:
-`python src/tools/scripts/duplicate_function_analyzer.py`
+The direct legacy path remains available for compatibility during the migration
+window, but the canonical command above should be used for new integrations.

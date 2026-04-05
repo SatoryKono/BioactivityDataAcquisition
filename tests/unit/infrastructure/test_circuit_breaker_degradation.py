@@ -230,7 +230,6 @@ class TestRecoveryUnderLoad:
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
-
         # Due to lock, concurrent calls are serialized
         # First will be probe, subsequent behavior depends on probe result
         probe_started = asyncio.Event()

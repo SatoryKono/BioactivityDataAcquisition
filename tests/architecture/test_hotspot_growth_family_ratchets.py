@@ -61,7 +61,9 @@ def test_active_hotspot_family_file_growth_budgets_hold_reviewed_baseline() -> N
         path_prefixes = family.get("path_prefixes", [])
         assert isinstance(path_prefixes, list) and path_prefixes
         files = _iter_family_python_files(
-            path_prefixes=[prefix for prefix in path_prefixes if isinstance(prefix, str)]
+            path_prefixes=[
+                prefix for prefix in path_prefixes if isinstance(prefix, str)
+            ]
         )
         actual_count = _count_files_ge_loc(files=files, min_lines=250)
         budget = family["bounded_growth_budgets"].get("files_ge_250_loc")

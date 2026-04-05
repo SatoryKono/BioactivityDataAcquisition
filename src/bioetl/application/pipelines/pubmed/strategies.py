@@ -28,8 +28,18 @@ class PubMedDataExtractor(DataExtractorStrategy):
     )
 
     _MONTH_MAP: ClassVar[dict[str, int]] = {
-        "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
-        "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+        "jan": 1,
+        "feb": 2,
+        "mar": 3,
+        "apr": 4,
+        "may": 5,
+        "jun": 6,
+        "jul": 7,
+        "aug": 8,
+        "sep": 9,
+        "oct": 10,
+        "nov": 11,
+        "dec": 12,
     }
 
     def __init__(
@@ -70,5 +80,6 @@ class PubMedDataExtractor(DataExtractorStrategy):
         # It needs to provide all the logic that was previously in PubMedPublicationTransformer.
         # For the sake of this migration step, we'll keep it compatible.
         pass
+
 
 # We will refine this after we see how to handle the shared methods.

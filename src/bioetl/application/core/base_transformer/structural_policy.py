@@ -201,8 +201,7 @@ class SchemaAwareStructuralPolicy:
         if contract.optional:
             events.extend(_build_optional_nonnullable_events(details))
             reason = (
-                "Optional non-nullable field "
-                f"'{contract.field_name}' has invalid type"
+                f"Optional non-nullable field '{contract.field_name}' has invalid type"
             )
         else:
             reason = f"Required field '{contract.field_name}' has invalid type"

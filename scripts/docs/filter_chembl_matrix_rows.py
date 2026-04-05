@@ -12,8 +12,12 @@ from typing import Final
 from xml.etree import ElementTree as ET
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
-DEFAULT_INPUT: Final[Path] = PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
-DEFAULT_OUTPUT: Final[Path] = PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+DEFAULT_INPUT: Final[Path] = (
+    PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+)
+DEFAULT_OUTPUT: Final[Path] = (
+    PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+)
 NS: Final[dict[str, str]] = {
     "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
     "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
@@ -28,8 +32,12 @@ def _arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Remove workbook rows matching a value in specified columns."
     )
-    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="Input workbook.")
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook.")
+    parser.add_argument(
+        "--input", type=Path, default=DEFAULT_INPUT, help="Input workbook."
+    )
+    parser.add_argument(
+        "--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook."
+    )
     parser.add_argument(
         "--columns",
         nargs="+",
@@ -72,7 +80,10 @@ def _load_shared_strings(archive: zipfile.ZipFile) -> list[str]:
 def _sheet_targets(archive: zipfile.ZipFile) -> set[str]:
     workbook = ET.fromstring(archive.read("xl/workbook.xml"))
     rels = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
-    rel_map = {rel.attrib["Id"]: rel.attrib["Target"] for rel in rels.findall("pr:Relationship", NS)}
+    rel_map = {
+        rel.attrib["Id"]: rel.attrib["Target"]
+        for rel in rels.findall("pr:Relationship", NS)
+    }
     targets: set[str] = set()
     for sheet in workbook.find("a:sheets", NS).findall("a:sheet", NS):
         rel_id = sheet.attrib[f"{{{REL_NS}}}id"]
@@ -124,7 +135,9 @@ def main() -> int:
         shared_strings = _load_shared_strings(zin)
         sheet_targets = _sheet_targets(zin)
 
-        with zipfile.ZipFile(temp_output_path, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+        with zipfile.ZipFile(
+            temp_output_path, "w", compression=zipfile.ZIP_DEFLATED
+        ) as zout:
             for info in zin.infolist():
                 data = zin.read(info.filename)
                 if info.filename not in sheet_targets:
@@ -147,11 +160,15 @@ def main() -> int:
 
                 for row in rows[1:]:
                     row_map = {
-                        header_map[_column_index(cell.attrib["r"])]: _cell_text(cell, shared_strings)
+                        header_map[_column_index(cell.attrib["r"])]: _cell_text(
+                            cell, shared_strings
+                        )
                         for cell in row.findall("a:c", NS)
                         if _column_index(cell.attrib["r"]) in header_map
                     }
-                    if any(row_map.get(column) == args.value for column in args.columns):
+                    if any(
+                        row_map.get(column) == args.value for column in args.columns
+                    ):
                         continue
                     kept_rows.append(row)
 

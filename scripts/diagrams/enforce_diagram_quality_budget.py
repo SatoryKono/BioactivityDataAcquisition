@@ -92,7 +92,9 @@ def lint_counts(lint_payload: dict[str, Any]) -> tuple[int, int]:
     return errors, warnings
 
 
-def build_check(metric: str, value: int, limit: int, source: str, message: str) -> BudgetCheck:
+def build_check(
+    metric: str, value: int, limit: int, source: str, message: str
+) -> BudgetCheck:
     return BudgetCheck(
         metric=metric,
         value=value,
@@ -281,12 +283,20 @@ def main() -> int:
     }
 
     if args.json_out is not None:
-        out_path = args.json_out if args.json_out.is_absolute() else REPO_ROOT / args.json_out
+        out_path = (
+            args.json_out if args.json_out.is_absolute() else REPO_ROOT / args.json_out
+        )
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+        out_path.write_text(
+            json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8"
+        )
 
     if args.markdown_out is not None:
-        out_path = args.markdown_out if args.markdown_out.is_absolute() else REPO_ROOT / args.markdown_out
+        out_path = (
+            args.markdown_out
+            if args.markdown_out.is_absolute()
+            else REPO_ROOT / args.markdown_out
+        )
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(render_markdown(report), encoding="utf-8")
 

@@ -80,7 +80,11 @@ def analyze_svg(path: Path) -> tuple[SvgMetrics, list[str]]:
             foreign_objects += 1
         if name == "g" and "edgeLabel" in _class_tokens(elem):
             edge_groups.append(elem)
-        if name == "text" and "fo-fallback" in _class_tokens(elem) and _has_nonempty_text(elem):
+        if (
+            name == "text"
+            and "fo-fallback" in _class_tokens(elem)
+            and _has_nonempty_text(elem)
+        ):
             fallback_text_nodes += 1
 
     edge_with_text = 0
@@ -91,15 +95,23 @@ def analyze_svg(path: Path) -> tuple[SvgMetrics, list[str]]:
             if child_name == "foreignObject" and _has_nonempty_text(child):
                 has_text = True
                 break
-            if child_name == "text" and "fo-fallback" in _class_tokens(child) and _has_nonempty_text(child):
+            if (
+                child_name == "text"
+                and "fo-fallback" in _class_tokens(child)
+                and _has_nonempty_text(child)
+            ):
                 has_text = True
                 break
         if has_text:
             edge_with_text += 1
 
     style_text = _collect_style_text(root)
-    has_edge_label_color_css = ".edgeLabel span" in style_text and "#111827" in style_text
-    has_fallback_color_css = "text.fo-fallback" in style_text and "#111827" in style_text
+    has_edge_label_color_css = (
+        ".edgeLabel span" in style_text and "#111827" in style_text
+    )
+    has_fallback_color_css = (
+        "text.fo-fallback" in style_text and "#111827" in style_text
+    )
 
     metrics = SvgMetrics(
         file=str(path),
@@ -123,7 +135,9 @@ def analyze_svg(path: Path) -> tuple[SvgMetrics, list[str]]:
             "missing edge-label text safeguards: no .edgeLabel color CSS and no fallback text"
         )
     if metrics.fallback_text_nodes > 0 and not metrics.has_fallback_color_css:
-        issues.append("fallback text nodes exist but text.fo-fallback CSS color rule is missing")
+        issues.append(
+            "fallback text nodes exist but text.fo-fallback CSS color rule is missing"
+        )
 
     return metrics, issues
 
@@ -187,7 +201,9 @@ def _collect_targets(args: argparse.Namespace, repo_root: Path) -> list[Path]:
     if args.file or args.dir:
         targets: list[Path] = []
         for file_path in args.file or []:
-            targets.append(file_path if file_path.is_absolute() else repo_root / file_path)
+            targets.append(
+                file_path if file_path.is_absolute() else repo_root / file_path
+            )
         for directory in args.dir or []:
             abs_dir = directory if directory.is_absolute() else repo_root / directory
             if abs_dir.is_dir():
@@ -202,7 +218,9 @@ def _collect_targets(args: argparse.Namespace, repo_root: Path) -> list[Path]:
                 seen.add(key)
         return unique
 
-    manifest = args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    manifest = (
+        args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    )
     rel_paths = load_manifest(manifest)
     return [repo_root / rel for rel in rel_paths]
 
@@ -224,7 +242,11 @@ def main() -> int:
     failures: list[tuple[str, list[str]]] = []
 
     for path in targets:
-        rel = str(path.relative_to(repo_root)) if path.is_absolute() and str(path).startswith(str(repo_root)) else str(path)
+        rel = (
+            str(path.relative_to(repo_root))
+            if path.is_absolute() and str(path).startswith(str(repo_root))
+            else str(path)
+        )
         if not path.exists():
             failures.append((rel, ["file not found"]))
             continue

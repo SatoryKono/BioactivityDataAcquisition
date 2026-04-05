@@ -32,16 +32,18 @@ def load_schema(schema_path: Path) -> dict[str, Any]:
 
 
 def _find_entity_files(entities_dir: Path) -> list[Path]:
-    return [p for p in sorted(entities_dir.rglob("*.yaml")) if not p.name.startswith("_")]
+    return [
+        p for p in sorted(entities_dir.rglob("*.yaml")) if not p.name.startswith("_")
+    ]
 
 
 def _find_composite_files(composites_dir: Path) -> list[Path]:
-    return [p for p in sorted(composites_dir.glob("*.yaml")) if not p.name.startswith("_")]
+    return [
+        p for p in sorted(composites_dir.glob("*.yaml")) if not p.name.startswith("_")
+    ]
 
 
-def _validate_yaml_schema(
-    payload: Any, schema: dict[str, Any]
-) -> tuple[bool, str]:
+def _validate_yaml_schema(payload: Any, schema: dict[str, Any]) -> tuple[bool, str]:
     try:
         jsonschema.validate(payload, schema)
         return True, ""

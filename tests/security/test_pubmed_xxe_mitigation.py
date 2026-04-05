@@ -1,12 +1,12 @@
 """Security tests for XXE mitigation in PubMed pipeline."""
 
 import pytest
-from defusedxml import EntitiesForbidden
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 from bioetl.domain.context import PipelineContext
 from unittest.mock import MagicMock
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
+
 
 def test_transformer_xxe_mitigation():
     """Verify that PubMedPublicationTransformer blocks XXE via defusedxml."""
@@ -29,6 +29,7 @@ def test_transformer_xxe_mitigation():
     with pytest.raises(ValueError, match="XML parse error"):
         transformer._pre_extract_validation(context, record, 0)
 
+
 def test_xml_processor_xxe_mitigation():
     """Verify that PubMedXmlProcessor blocks XXE via defusedxml."""
     # Payload with DTD entity
@@ -42,6 +43,7 @@ def test_xml_processor_xxe_mitigation():
     # and returns None.
     result = PubMedXmlProcessor.parse_response(xxe_payload)
     assert result is None
+
 
 def test_transformer_billion_laughs_mitigation():
     """Verify that PubMedPublicationTransformer blocks Entity Expansion (Billion Laughs)."""

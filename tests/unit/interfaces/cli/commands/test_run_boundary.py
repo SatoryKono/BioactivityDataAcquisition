@@ -54,7 +54,9 @@ def test_cli_main_imports_run_via_public_command_seam() -> None:
     }
 
     if "bioetl.interfaces.cli.commands.run" in imported_modules:
-        assert "bioetl.interfaces.cli.commands.domains.run.command" not in imported_modules
+        assert (
+            "bioetl.interfaces.cli.commands.domains.run.command" not in imported_modules
+        )
         return
 
     lazy_specs = next(
@@ -64,8 +66,7 @@ def test_cli_main_imports_run_via_public_command_seam() -> None:
             if (
                 isinstance(node, ast.Assign)
                 and any(
-                    isinstance(target, ast.Name)
-                    and target.id == "_LAZY_COMMAND_SPECS"
+                    isinstance(target, ast.Name) and target.id == "_LAZY_COMMAND_SPECS"
                     for target in node.targets
                 )
             )

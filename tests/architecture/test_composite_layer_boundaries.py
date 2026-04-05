@@ -142,7 +142,9 @@ class TestCoordinatorIsolation:
         coordinator_file = (
             src_dir / "bioetl" / "application" / "composite" / "coordinator.py"
         )
-        assert coordinator_file.exists(), "application/composite/coordinator.py not found"
+        assert coordinator_file.exists(), (
+            "application/composite/coordinator.py not found"
+        )
 
         content = coordinator_file.read_text(encoding="utf-8")
 
@@ -162,7 +164,9 @@ class TestCoordinatorIsolation:
         coordinator_file = (
             src_dir / "bioetl" / "application" / "composite" / "coordinator.py"
         )
-        assert coordinator_file.exists(), "application/composite/coordinator.py not found"
+        assert coordinator_file.exists(), (
+            "application/composite/coordinator.py not found"
+        )
 
         content = coordinator_file.read_text(encoding="utf-8")
 
@@ -252,7 +256,9 @@ class TestKeyExtractorIsolation:
         key_extractor_file = (
             src_dir / "bioetl" / "application" / "composite" / "key_extractor.py"
         )
-        assert key_extractor_file.exists(), "application/composite/key_extractor.py not found"
+        assert key_extractor_file.exists(), (
+            "application/composite/key_extractor.py not found"
+        )
 
         content = key_extractor_file.read_text(encoding="utf-8")
 
@@ -272,7 +278,9 @@ class TestRunnerFSMOwnership:
         It must import the state enum from domain layer.
         """
         runner_file = _get_composite_runner_file(src_dir)
-        assert runner_file.exists(), "application/composite/runner_pkg/runner.py not found"
+        assert runner_file.exists(), (
+            "application/composite/runner_pkg/runner.py not found"
+        )
 
         content = runner_file.read_text(encoding="utf-8")
 
@@ -292,7 +300,9 @@ class TestRunnerFSMOwnership:
         REQ-ARCH-FSM-010: Runner should have methods for state transitions.
         """
         runner_file = _get_composite_runner_file(src_dir)
-        assert runner_file.exists(), "application/composite/runner_pkg/runner.py not found"
+        assert runner_file.exists(), (
+            "application/composite/runner_pkg/runner.py not found"
+        )
 
         content = runner_file.read_text(encoding="utf-8")
 

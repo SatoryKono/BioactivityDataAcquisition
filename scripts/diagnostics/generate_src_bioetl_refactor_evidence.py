@@ -14,12 +14,19 @@ import ast
 import json
 import shutil
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 LAYERS = ("application", "composition", "domain", "infrastructure", "interfaces")
-SHARDS = ("root", "application", "composition", "domain", "infrastructure", "interfaces")
+SHARDS = (
+    "root",
+    "application",
+    "composition",
+    "domain",
+    "infrastructure",
+    "interfaces",
+)
 TOPIC_ID = "src-bioetl-refactor-facts"
 
 BRANCH_NODES = (
@@ -221,7 +228,9 @@ def _collect_import_targets(module_name: str, tree: ast.Module) -> list[str]:
                 targets.append(alias.name)
         elif isinstance(node, ast.ImportFrom):
             if node.level:
-                targets.append(_resolve_relative_import(module_name, node.level, node.module))
+                targets.append(
+                    _resolve_relative_import(module_name, node.level, node.module)
+                )
             elif node.module:
                 targets.append(node.module)
     return targets
@@ -338,7 +347,9 @@ def _file_facts(
             "method_count": object_counts.get("method", 0),
             "async_method_count": object_counts.get("async_method", 0),
             "nested_function_count": object_counts.get("nested_function", 0),
-            "nested_async_function_count": object_counts.get("nested_async_function", 0),
+            "nested_async_function_count": object_counts.get(
+                "nested_async_function", 0
+            ),
         },
     )
 
@@ -446,7 +457,9 @@ def _analyze_file(src_root: Path, path: Path) -> tuple[FileFact, list[ObjectFact
         )
         for node, qualname, parent_name, kind in _iter_code_objects(list(tree.body))
     ]
-    file_fact = _file_facts(src_root=src_root, path=path, tree=tree, code_objects=object_facts)
+    file_fact = _file_facts(
+        src_root=src_root, path=path, tree=tree, code_objects=object_facts
+    )
     return file_fact, object_facts
 
 
@@ -480,7 +493,9 @@ def _yaml_lines(key: str, value: object, indent: int) -> list[str]:
                 lines.append(f"{prefix}  -")
                 if isinstance(item, dict):
                     for child_key, child_value in item.items():
-                        lines.extend(_yaml_lines(str(child_key), child_value, indent + 4))
+                        lines.extend(
+                            _yaml_lines(str(child_key), child_value, indent + 4)
+                        )
                 else:
                     for child in item:
                         lines.append(f"{prefix}    - {_yaml_scalar(child)}")
@@ -614,26 +629,48 @@ def _build_parent_pillars(parent_root: Path) -> None:
     _write_text(parent_root / "01-pillars" / "PILLARS.md", content)
 
 
-def _summarise_shard(file_facts: list[FileFact], object_facts: list[ObjectFact]) -> dict[str, object]:
+def _summarise_shard(
+    file_facts: list[FileFact], object_facts: list[ObjectFact]
+) -> dict[str, object]:
     file_count = len(file_facts)
     object_count = len(object_facts)
     family_by_files = Counter(f.family for f in file_facts)
-    family_by_objects = Counter(f.family for f in file_facts for _ in range(int(f.metrics["object_count"])))
+    family_by_objects = Counter(
+        f.family for f in file_facts for _ in range(int(f.metrics["object_count"]))
+    )
     object_kinds = Counter(obj.kind for obj in object_facts)
-    file_docstrings = sum(1 for fact in file_facts if bool(fact.metrics["module_docstring"]))
-    object_docstrings = sum(1 for fact in object_facts if bool(fact.metrics["docstring"]))
+    file_docstrings = sum(
+        1 for fact in file_facts if bool(fact.metrics["module_docstring"])
+    )
+    object_docstrings = sum(
+        1 for fact in object_facts if bool(fact.metrics["docstring"])
+    )
     annotated_functions = sum(
         1
         for fact in object_facts
         if fact.kind
-        in {"function", "async_function", "method", "async_method", "nested_function", "nested_async_function"}
+        in {
+            "function",
+            "async_function",
+            "method",
+            "async_method",
+            "nested_function",
+            "nested_async_function",
+        }
         and bool(fact.metrics.get("return_annotation"))
     )
     callable_count = sum(
         1
         for fact in object_facts
         if fact.kind
-        in {"function", "async_function", "method", "async_method", "nested_function", "nested_async_function"}
+        in {
+            "function",
+            "async_function",
+            "method",
+            "async_method",
+            "nested_function",
+            "nested_async_function",
+        }
     )
     largest_file = max(file_facts, key=lambda fact: int(fact.metrics["line_count"]))
     densest_file = max(file_facts, key=lambda fact: int(fact.metrics["object_count"]))
@@ -776,18 +813,21 @@ Method: AST inventory for all `src/bioetl` Python files assigned to shard `{shar
 
 ## Top Families By File Count
 
-""" + "\n".join(f"- `{name}`: `{count}` files" for name, count in top_families)
+"""
+        + "\n".join(f"- `{name}`: `{count}` files" for name, count in top_families)
         + "\n\n## Top Families By Object Density\n\n"
-        + "\n".join(f"- `{name}`: `{count}` objects" for name, count in top_object_families)
+        + "\n".join(
+            f"- `{name}`: `{count}` objects" for name, count in top_object_families
+        )
         + f"""
 
 ## Largest File
 
-- `{largest_file.path}`: `{largest_file.metrics['line_count']}` lines, `{largest_file.metrics['object_count']}` objects
+- `{largest_file.path}`: `{largest_file.metrics["line_count"]}` lines, `{largest_file.metrics["object_count"]}` objects
 
 ## Densest File
 
-- `{densest_file.path}`: `{densest_file.metrics['object_count']}` objects, `{densest_file.metrics['line_count']}` lines
+- `{densest_file.path}`: `{densest_file.metrics["object_count"]}` objects, `{densest_file.metrics["line_count"]}` lines
 
 ## Hottest Object By Branch Count
 
@@ -799,8 +839,8 @@ Method: AST inventory for all `src/bioetl` Python files assigned to shard `{shar
 
 ## Artifacts
 
-- `{paths['file_jsonl']}`
-- `{paths['object_jsonl']}`
+- `{paths["file_jsonl"]}`
+- `{paths["object_jsonl"]}`
 """,
     )
 
@@ -938,15 +978,16 @@ Method: AST inventory for all `src/bioetl` Python files assigned to shard `{shar
 
 ## Ключевые выводы
 
-- Shard `{shard}` содержит `{summary['file_count']}` файлов и `{summary['object_count']}` code objects.
+- Shard `{shard}` содержит `{summary["file_count"]}` файлов и `{summary["object_count"]}` code objects.
 - Самая широкая family по файлам: `{top_families[0][0]}` (`{top_families[0][1]}` files).
 - Самая плотная family по объектам: `{top_object_families[0][0]}` (`{top_object_families[0][1]}` objects).
-- Самый большой файл: `{largest_file.path}` (`{largest_file.metrics['line_count']}` lines).
-- Самый ветвистый объект: `{hottest_object.qualified_name if hottest_object is not None else 'нет объектов'}` (`{hottest_object.metrics['branch_count'] if hottest_object is not None else 0}` branches).
+- Самый большой файл: `{largest_file.path}` (`{largest_file.metrics["line_count"]}` lines).
+- Самый ветвистый объект: `{hottest_object.qualified_name if hottest_object is not None else "нет объектов"}` (`{hottest_object.metrics["branch_count"] if hottest_object is not None else 0}` branches).
 
 ## Object Kind Mix
 
-""" + "\n".join(f"- `{kind}`: `{count}`" for kind, count in top_kinds.most_common())
+"""
+        + "\n".join(f"- `{kind}`: `{count}`" for kind, count in top_kinds.most_common())
         + "\n\n## Gaps\n\n- Этот shard фиксирует структуру и сложность по коду, но не включает runtime profiling.\n- Историческая изменчивость и ownership не измерялись.\n",
     )
 
@@ -959,17 +1000,17 @@ Evidence analyzed: {len(evidence_payloads)} primary evidence objects + full file
 
 ## Executive Summary
 
-- `{shard}` содержит `{summary['file_count']}` файлов и `{summary['object_count']}` code objects. (`EV-{shard}-file-count-{summary['file_count']}`, `EV-{shard}-object-count-{summary['object_count']}`)
-- Основная плотность shard-а концентрируется в family `{top_object_families[0][0]}`. (`EV-{shard}-largest-family-{top_families[0][0].replace('/', '-')}`)
+- `{shard}` содержит `{summary["file_count"]}` файлов и `{summary["object_count"]}` code objects. (`EV-{shard}-file-count-{summary["file_count"]}`, `EV-{shard}-object-count-{summary["object_count"]}`)
+- Основная плотность shard-а концентрируется в family `{top_object_families[0][0]}`. (`EV-{shard}-largest-family-{top_families[0][0].replace("/", "-")}`)
 - Файловый hotspot: `{largest_file.path}` по размеру и `{densest_file.path}` по концентрации объектов. (`EV-{shard}-largest-file-{_slug(largest_file.path)}`, `EV-{shard}-densest-file-{_slug(densest_file.path)}`)
-- Объектный hotspot: `{hottest_object.qualified_name if hottest_object is not None else 'нет объектов в shard'}` сочетает наибольшую branch density. (`{"EV-" + shard + "-branchiest-object-" + _slug(hottest_object.qualified_name) if hottest_object is not None else "EV-" + shard + "-object-surface-empty"}`)
+- Объектный hotspot: `{hottest_object.qualified_name if hottest_object is not None else "нет объектов в shard"}` сочетает наибольшую branch density. (`{"EV-" + shard + "-branchiest-object-" + _slug(hottest_object.qualified_name) if hottest_object is not None else "EV-" + shard + "-object-surface-empty"}`)
 
 ## Key Insights
 
 ### Insight 1: Breadth and density are not the same signal
 
 Observation:
-Shard `{shard}` has `{summary['file_count']}` files, but the densest file by object count is `{densest_file.path}` with `{densest_file.metrics['object_count']}` objects. (`EV-{shard}-file-count-{summary['file_count']}`, `EV-{shard}-densest-file-{_slug(densest_file.path)}`)
+Shard `{shard}` has `{summary["file_count"]}` files, but the densest file by object count is `{densest_file.path}` with `{densest_file.metrics["object_count"]}` objects. (`EV-{shard}-file-count-{summary["file_count"]}`, `EV-{shard}-densest-file-{_slug(densest_file.path)}`)
 
 Implication:
 Refactor planning should prioritize density hotspots before raw file-count breadth, because review and change coordination cost concentrates in dense modules.
@@ -977,7 +1018,7 @@ Refactor planning should prioritize density hotspots before raw file-count bread
 ### Insight 2: Family clustering shows where to inspect first
 
 Observation:
-The broadest family by file count is `{top_families[0][0]}` and the broadest family by object count is `{top_object_families[0][0]}`. (`EV-{shard}-largest-family-{top_families[0][0].replace('/', '-')}`)
+The broadest family by file count is `{top_families[0][0]}` and the broadest family by object count is `{top_object_families[0][0]}`. (`EV-{shard}-largest-family-{top_families[0][0].replace("/", "-")}`)
 
 Implication:
 Family-level planning is a better calibration unit than shard-level breadth. This aligns with the project evidence baseline that family topology matters more than whole-layer package count.
@@ -985,7 +1026,7 @@ Family-level planning is a better calibration unit than shard-level breadth. Thi
 ### Insight 3: Branch-heavy objects are likely the best optimization probes
 
 Observation:
-`{hottest_object.qualified_name if hottest_object is not None else 'No object surface is present in this shard'}` has `{hottest_object.metrics['branch_count'] if hottest_object is not None else 0}` branch nodes over `{hottest_object.metrics['span'] if hottest_object is not None else 0}` lines. (`{"EV-" + shard + "-branchiest-object-" + _slug(hottest_object.qualified_name) if hottest_object is not None else "EV-" + shard + "-object-surface-empty"}`)
+`{hottest_object.qualified_name if hottest_object is not None else "No object surface is present in this shard"}` has `{hottest_object.metrics["branch_count"] if hottest_object is not None else 0}` branch nodes over `{hottest_object.metrics["span"] if hottest_object is not None else 0}` lines. (`{"EV-" + shard + "-branchiest-object-" + _slug(hottest_object.qualified_name) if hottest_object is not None else "EV-" + shard + "-object-surface-empty"}`)
 
 Implication:
 If optimization work is needed, branch-heavy objects are better first probes than arbitrary large files because they concentrate conditional behavior and likely hidden coupling. When a shard has no code objects, the better probe is module surface and import role instead.
@@ -1139,7 +1180,9 @@ def _write_parent_pack(
     for payload in parent_evidence:
         _yaml_dump(parent_evidence_root / f"{payload['id']}.yaml", payload)
 
-    total_shard_evidence = sum(int(result["evidence_count"]) for result in shard_results.values())
+    total_shard_evidence = sum(
+        int(result["evidence_count"]) for result in shard_results.values()
+    )
     _write_text(
         parent_evidence_root / f"RAW-{topic_id}-{date_str}.md",
         f"""# RAW Evidence: {topic_id}
@@ -1151,16 +1194,21 @@ Shard strategy: `by-layer`
 
 ## Totals
 
-{_format_table([
-    ("Python files", len(file_facts)),
-    ("Code objects", len(object_facts)),
-    ("Shard evidence objects", total_shard_evidence),
-    ("Parent evidence objects", len(parent_evidence)),
-])}
+{
+            _format_table(
+                [
+                    ("Python files", len(file_facts)),
+                    ("Code objects", len(object_facts)),
+                    ("Shard evidence objects", total_shard_evidence),
+                    ("Parent evidence objects", len(parent_evidence)),
+                ]
+            )
+        }
 
 ## Shard Counts
 
-""" + "\n".join(
+"""
+        + "\n".join(
             f"- `{shard}`: `{result['file_count']}` files, `{result['object_count']}` objects, `{result['evidence_count']}` EV files"
             for shard, result in shard_results.items()
         )
@@ -1179,12 +1227,13 @@ Shard strategy: `by-layer`
 - Parent evidence required: `5`
 - Parent evidence collected: `{len(parent_evidence)}`
 - All shard gates: `PASSED`
-- File coverage with `>=3` facts: `{'PASSED' if file_coverage_ok else 'FAILED'}`
-- Object coverage with `>=3` facts: `{'PASSED' if object_coverage_ok else 'FAILED'}`
+- File coverage with `>=3` facts: `{"PASSED" if file_coverage_ok else "FAILED"}`
+- Object coverage with `>=3` facts: `{"PASSED" if object_coverage_ok else "FAILED"}`
 
 ## Shards
 
-""" + "\n".join(
+"""
+        + "\n".join(
             f"- `{shard}`: `{result['file_count']}` files, `{result['object_count']}` objects, `{result['evidence_count']}` EV files"
             for shard, result in shard_results.items()
         )
@@ -1215,7 +1264,7 @@ Evidence analyzed: {len(parent_evidence)} parent evidence objects + shard synthe
 ## Executive Summary
 
 - `src/bioetl` покрыт полным file/object inventory: `{len(file_facts)}` файлов и `{len(object_facts)}` code objects. (`EV-{topic_id}-total-file-count-{len(file_facts)}`, `EV-{topic_id}-total-object-count-{len(object_facts)}`)
-- Условие пользователя о минимум трёх фактах выполнено для каждого файла и каждого code object. (`EV-{topic_id}-file-facts-coverage-{'passed' if file_coverage_ok else 'failed'}`, `EV-{topic_id}-object-facts-coverage-{'passed' if object_coverage_ok else 'failed'}`)
+- Условие пользователя о минимум трёх фактах выполнено для каждого файла и каждого code object. (`EV-{topic_id}-file-facts-coverage-{"passed" if file_coverage_ok else "failed"}`, `EV-{topic_id}-object-facts-coverage-{"passed" if object_coverage_ok else "failed"}`)
 - Самые широкие слои по файлам и объектам нужно интерпретировать как зоны поиска, а не как автоматические дефекты. (`EV-{topic_id}-broadest-layer-by-files-{layer_by_files.most_common(1)[0][0]}`, `EV-{topic_id}-broadest-layer-by-objects-{layer_by_objects.most_common(1)[0][0]}`)
 
 ## Cross-Shard Patterns
@@ -1241,7 +1290,7 @@ Optimization backlog should track at least two hotspot classes:
 ### Pattern 3: Structural coverage is now complete enough for decision work
 
 Observation:
-The evidence wave covers every file and every code object with minimum-fact records, so the baseline is strong enough for a later `making-decisions` or refactor-planning phase. (`EV-{topic_id}-file-facts-coverage-{'passed' if file_coverage_ok else 'failed'}`, `EV-{topic_id}-object-facts-coverage-{'passed' if object_coverage_ok else 'failed'}`)
+The evidence wave covers every file and every code object with minimum-fact records, so the baseline is strong enough for a later `making-decisions` or refactor-planning phase. (`EV-{topic_id}-file-facts-coverage-{"passed" if file_coverage_ok else "failed"}`, `EV-{topic_id}-object-facts-coverage-{"passed" if object_coverage_ok else "failed"}`)
 
 Implication:
 Future planning can move from “where is the code?” to “which families and objects are worth intervention first?” without needing another completeness pass.
@@ -1284,7 +1333,9 @@ def generate(repo_root: Path, output_root: Path, topic_id: str) -> None:
         grouped_files[file_fact.shard].append(file_fact)
         grouped_objects[file_fact.shard].extend(file_objects)
 
-    _build_orchestration(parent_root=parent_root, topic_id=topic_id, output_root=output_root)
+    _build_orchestration(
+        parent_root=parent_root, topic_id=topic_id, output_root=output_root
+    )
     _build_parent_pillars(parent_root)
 
     shard_results: dict[str, dict[str, object]] = {}
@@ -1321,7 +1372,9 @@ def generate(repo_root: Path, output_root: Path, topic_id: str) -> None:
             for shard, result in shard_results.items()
         },
     }
-    _write_text(parent_root / "report.json", json.dumps(report, indent=2, ensure_ascii=False))
+    _write_text(
+        parent_root / "report.json", json.dumps(report, indent=2, ensure_ascii=False)
+    )
 
 
 def main() -> int:

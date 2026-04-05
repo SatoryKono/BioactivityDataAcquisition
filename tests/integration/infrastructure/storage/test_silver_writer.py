@@ -169,10 +169,7 @@ async def test_write_silver_merge_is_idempotent_for_identical_input(
     dt = DeltaTable(f"{temp_delta_path}/test_merge_idempotent")
     first_df = dt.to_pandas().sort_values("id").reset_index(drop=True)
     first_rows = first_df.to_dict(orient="records")
-    first_identity = {
-        (row["id"], row["content_hash"])
-        for row in first_rows
-    }
+    first_identity = {(row["id"], row["content_hash"]) for row in first_rows}
 
     await silver_writer.write_silver(
         table_name="test_merge_idempotent",
@@ -184,10 +181,7 @@ async def test_write_silver_merge_is_idempotent_for_identical_input(
     dt = DeltaTable(f"{temp_delta_path}/test_merge_idempotent")
     second_df = dt.to_pandas().sort_values("id").reset_index(drop=True)
     second_rows = second_df.to_dict(orient="records")
-    second_identity = {
-        (row["id"], row["content_hash"])
-        for row in second_rows
-    }
+    second_identity = {(row["id"], row["content_hash"]) for row in second_rows}
 
     assert len(second_df) == len(first_df)
     assert second_rows == first_rows

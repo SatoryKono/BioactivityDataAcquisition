@@ -134,7 +134,9 @@ def _print_report(
             print(f"  | {line_content[:120]}")
     if total:
         print(f"\n{total} legacy config path reference(s) found.")
-        print("Replace '../../dq/' with '../../quality/' and '../../filter/' with '../../filters/'.")
+        print(
+            "Replace '../../dq/' with '../../quality/' and '../../filter/' with '../../filters/'."
+        )
     else:
         print("No legacy config path references found.")
     return total

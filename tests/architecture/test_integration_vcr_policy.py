@@ -90,9 +90,7 @@ class TestIntegrationVcrPolicy:
 
         e2e_root = ROOT / policy["supported_scopes"]["e2e"]["canonical_test_root"]
         assert e2e_root.exists()
-        assert (
-            policy["supported_scopes"]["e2e"]["required_marker"] == "e2e"
-        )
+        assert policy["supported_scopes"]["e2e"]["required_marker"] == "e2e"
         ci_smoke_target = policy["supported_scopes"]["e2e"]["ci_smoke_target"]
         ci_smoke_file = ci_smoke_target.split("::", 1)[0]
         assert (ROOT / ci_smoke_file).exists()
@@ -115,9 +113,7 @@ class TestIntegrationVcrPolicy:
             )
 
         assert policy["supported_scopes"]["integration"]["supported_pipeline_families"]
-        assert (
-            policy["supported_scopes"]["e2e"]["representative_pipeline_families"]
-        )
+        assert policy["supported_scopes"]["e2e"]["representative_pipeline_families"]
 
     def test_policy_declares_canonical_replay_and_refresh_examples(self) -> None:
         policy = _load_yaml(POLICY_PATH)
@@ -139,16 +135,22 @@ class TestIntegrationVcrPolicy:
             ci_uv["standard_replay_examples"]["control_plane_e2e"],
             live_contract["manual_command_example"],
         ):
-            assert "--vcr-record=none" in command or "--vcr-record=new_episodes" in command or "--network" in command
+            assert (
+                "--vcr-record=none" in command
+                or "--vcr-record=new_episodes" in command
+                or "--network" in command
+            )
 
         assert refresh_protocol["targeted_recording_only"] is True
         assert refresh_protocol["preferred_refresh_mode"] == "new_episodes"
-        assert "python -m scripts.data check-vcr-secrets" in refresh_protocol[
-            "post_refresh_checks"
-        ]
-        assert "python -m scripts.qa report-vcr-metadata --check" in refresh_protocol[
-            "post_refresh_checks"
-        ]
+        assert (
+            "python -m scripts.data check-vcr-secrets"
+            in refresh_protocol["post_refresh_checks"]
+        )
+        assert (
+            "python -m scripts.qa report-vcr-metadata --check"
+            in refresh_protocol["post_refresh_checks"]
+        )
 
     def test_tracked_suite_inventory_matches_supported_matrix_and_markers(self) -> None:
         policy = _load_yaml(POLICY_PATH)
@@ -275,8 +277,7 @@ class TestIntegrationVcrPolicy:
         vcr_policy = policy["vcr_policy"]
 
         assert (
-            vcr_policy["canonical_root"]
-            == fixture_governance["canonical_vcr_location"]
+            vcr_policy["canonical_root"] == fixture_governance["canonical_vcr_location"]
         )
         assert (
             vcr_policy["extensionless_allowlist"]
@@ -359,12 +360,16 @@ class TestIntegrationVcrPolicy:
 
         assert "configs/quality/integration_vcr_policy.yaml" in dev_readme
         assert "docs/03-guides/testing.md" in dev_readme
-        assert policy["execution_paths"]["local"]["windows"]["replay_examples"][
-            "integration"
-        ] in dev_readme
-        assert policy["execution_paths"]["local"]["wsl"]["replay_examples"][
-            "integration"
-        ] in dev_readme
+        assert (
+            policy["execution_paths"]["local"]["windows"]["replay_examples"][
+                "integration"
+            ]
+            in dev_readme
+        )
+        assert (
+            policy["execution_paths"]["local"]["wsl"]["replay_examples"]["integration"]
+            in dev_readme
+        )
         assert "--vcr-record=new_episodes" in dev_readme
 
         assert "configs/quality/integration_vcr_policy.yaml" in data_readme

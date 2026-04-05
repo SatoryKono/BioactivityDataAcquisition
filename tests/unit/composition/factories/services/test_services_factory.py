@@ -38,7 +38,9 @@ def test_extract_pipeline_callbacks_uses_transformer_when_present() -> None:
 
 
 @pytest.mark.unit
-def test_extract_pipeline_callbacks_prefers_pre_silver_transform_when_available() -> None:
+def test_extract_pipeline_callbacks_prefers_pre_silver_transform_when_available() -> (
+    None
+):
     transformer = SimpleNamespace(
         transform=MagicMock(name="transform"),
         transform_pre_silver=MagicMock(name="transform_pre_silver"),

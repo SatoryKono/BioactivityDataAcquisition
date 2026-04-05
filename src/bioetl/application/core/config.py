@@ -59,7 +59,9 @@ class ContentHashPolicyGroup:
 
     def for_version(self, version: str) -> ContentHashVersionPolicy | None:
         """Return the policy for one contract version when present."""
-        return next((policy for policy in self.policies if policy.version == version), None)
+        return next(
+            (policy for policy in self.policies if policy.version == version), None
+        )
 
     @property
     def active_policy(self) -> ContentHashVersionPolicy:

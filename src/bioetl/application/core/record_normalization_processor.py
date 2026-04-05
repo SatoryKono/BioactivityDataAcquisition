@@ -115,15 +115,21 @@ class RecordNormalizationProcessor:
     ) -> tuple[set[str] | None, set[str]]:
         policy = None
         if self.content_hash_policy_by_version is not None:
-            target_version = contract_version or self.content_hash_policy_by_version.active_version
+            target_version = (
+                contract_version or self.content_hash_policy_by_version.active_version
+            )
             policy = self.content_hash_policy_by_version.for_version(target_version)
             if policy is None:
                 policy = self.content_hash_policy_by_version.active_policy
         include_source = (
-            policy.include_fields if policy is not None else self.content_hash_include_fields
+            policy.include_fields
+            if policy is not None
+            else self.content_hash_include_fields
         )
         exclude_source = (
-            policy.exclude_fields if policy is not None else self.content_hash_exclude_fields
+            policy.exclude_fields
+            if policy is not None
+            else self.content_hash_exclude_fields
         )
         include_fields = set(include_source) if include_source else None
         exclude_fields = set(exclude_source) | {
@@ -140,8 +146,12 @@ class RecordNormalizationProcessor:
         index: int,
     ) -> JsonDict | None:
         """Finalize an intermediate pre-silver payload into a Silver record."""
-        normalized_business_data = self.normalize_business_data(pre_silver.business_data)
-        version_hashes = self.compute_content_hashes_by_version(normalized_business_data)
+        normalized_business_data = self.normalize_business_data(
+            pre_silver.business_data
+        )
+        version_hashes = self.compute_content_hashes_by_version(
+            normalized_business_data
+        )
         content_hash = (
             version_hashes.get(self.content_hash_policy_by_version.active_version)
             if self.content_hash_policy_by_version is not None

@@ -50,7 +50,9 @@ service_mod = _load_config_dq_service_module()
 ConfigDQService = service_mod.ConfigDQService
 
 
-def _sample_artifact_dict(*, effective_hash: str = "effective-hash") -> dict[str, object]:
+def _sample_artifact_dict(
+    *, effective_hash: str = "effective-hash"
+) -> dict[str, object]:
     return {
         "artifact_id": "artifact-1",
         "pipeline_name": "crossref_publication",
@@ -124,7 +126,9 @@ class _StubEffectiveConfigService:
         self.create_calls: list[dict[str, object]] = []
         self.compatibility_result = True
 
-    def create_effective_config_artifact(self, **kwargs: object) -> EffectiveConfigArtifact:
+    def create_effective_config_artifact(
+        self, **kwargs: object
+    ) -> EffectiveConfigArtifact:
         self.create_calls.append(kwargs)
         return EffectiveConfigArtifact(
             artifact_id="artifact-1",
@@ -310,7 +314,10 @@ def test_get_effective_config_artifact_handles_present_and_missing_dq_config() -
     dq_config = DQConfig(contract_ref="dq.crossref")
     service = ConfigDQService(
         logger=logger,
-        _pipeline_yaml_getter=lambda pipeline_name: {"provider": "crossref", "entity": "publication"},
+        _pipeline_yaml_getter=lambda pipeline_name: {
+            "provider": "crossref",
+            "entity": "publication",
+        },
         _dq_config_loader=lambda pipeline_name: dq_config,
         _effective_config_service=effective_service,
     )
@@ -333,7 +340,9 @@ def test_get_effective_config_artifact_handles_present_and_missing_dq_config() -
     missing_service = ConfigDQService(
         logger=logger,
         _pipeline_yaml_getter=lambda pipeline_name: {"provider": "crossref"},
-        _dq_config_loader=lambda pipeline_name: (_ for _ in ()).throw(FileNotFoundError()),
+        _dq_config_loader=lambda pipeline_name: (_ for _ in ()).throw(
+            FileNotFoundError()
+        ),
         _effective_config_service=effective_service,
     )
     missing_service.get_effective_config_artifact("crossref_publication")
@@ -389,5 +398,7 @@ def test_check_config_compatibility_returns_false_for_invalid_artifacts() -> Non
         _effective_config_service=_StubEffectiveConfigService(_sample_artifact_dict()),
     )
 
-    assert service.check_config_compatibility({"broken": True}, {"broken": True}) is False
+    assert (
+        service.check_config_compatibility({"broken": True}, {"broken": True}) is False
+    )
     logger.error.assert_called_once()

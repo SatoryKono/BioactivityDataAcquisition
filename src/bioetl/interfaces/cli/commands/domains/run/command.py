@@ -58,7 +58,6 @@ from bioetl.interfaces.cli.commands.domains.run.support import (
     get_runner_logger,
     handle_destructive_run_confirmation,
     resolve_context_registry,
-    show_cleanup_preview,
     validate_pipeline_name,
 )
 from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (

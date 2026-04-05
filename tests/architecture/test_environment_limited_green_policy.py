@@ -27,7 +27,9 @@ class TestEnvironmentLimitedGreenPolicy:
         policy = _load_yaml(POLICY_PATH)
 
         assert policy.get("policy_scope") == "environment_limited_green_interpretation"
-        assert policy.get("taxonomy_path") == "configs/quality/test_health_reporting.yaml"
+        assert (
+            policy.get("taxonomy_path") == "configs/quality/test_health_reporting.yaml"
+        )
         assert policy.get("classifier_source") == "scripts/ci/quality_integral_gate.py"
         assert (ROOT / policy["taxonomy_path"]).exists()
         assert (ROOT / policy["classifier_source"]).exists()
@@ -43,7 +45,9 @@ class TestEnvironmentLimitedGreenPolicy:
     def test_current_baseline_policy_matches_live_provider_matrix(self) -> None:
         policy = _load_yaml(POLICY_PATH)
         matrix = _load_yaml(MATRIX_PATH)
-        baseline = matrix.get("contract_testing", {}).get("live_api_minimum_baseline", {})
+        baseline = matrix.get("contract_testing", {}).get(
+            "live_api_minimum_baseline", {}
+        )
         current_baseline = policy.get("current_baseline", {})
 
         assert current_baseline.get("enforced_provider_count") == len(
@@ -74,13 +78,23 @@ class TestEnvironmentLimitedGreenPolicy:
 
     def test_reason_postures_distinguish_policy_from_reopened_gap(self) -> None:
         policy = _load_yaml(POLICY_PATH)
-        entries = {entry["skip_class"]: entry for entry in policy.get("reason_policy", [])}
+        entries = {
+            entry["skip_class"]: entry for entry in policy.get("reason_policy", [])
+        }
 
-        assert entries["live_network_opt_in_gate"]["posture"] == "accepted_steady_state_policy"
-        assert entries["live_api_gate_mode_non_always"]["posture"] == "accepted_steady_state_policy"
+        assert (
+            entries["live_network_opt_in_gate"]["posture"]
+            == "accepted_steady_state_policy"
+        )
+        assert (
+            entries["live_api_gate_mode_non_always"]["posture"]
+            == "accepted_steady_state_policy"
+        )
         assert entries["architecture_suite_skips"]["posture"] == "transitional_debt"
         assert entries["pilot_provider_count"]["posture"] == "reopened_baseline_gap"
         assert entries["vcr_only_provider_count"]["posture"] == "reopened_baseline_gap"
 
         assert entries["pilot_provider_count"]["allowed_in_current_baseline"] is False
-        assert entries["vcr_only_provider_count"]["allowed_in_current_baseline"] is False
+        assert (
+            entries["vcr_only_provider_count"]["allowed_in_current_baseline"] is False
+        )

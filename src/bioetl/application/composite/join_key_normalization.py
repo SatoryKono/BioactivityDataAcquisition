@@ -53,23 +53,27 @@ def iter_configured_join_keys(config: CompositeConfig) -> Iterable[str]:
         yield from dependency.join_keys
 
 
-
 def get_join_key_normalization_policy(
     key: str,
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> JoinKeyNormalizationPolicy | None:
     """Return normalization policy for one logical join key."""
     return normalization_policies.get(key)
 
 
-
 def validate_join_key_normalization_policies(
     config: CompositeConfig,
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> None:
     """Ensure every configured composite join key has an explicit policy."""
     configured_keys = set(iter_configured_join_keys(config))
-    missing = sorted(key for key in configured_keys if key not in normalization_policies)
+    missing = sorted(
+        key for key in configured_keys if key not in normalization_policies
+    )
     if missing:
         missing_keys = ", ".join(missing)
         raise ValueError(
@@ -78,12 +82,13 @@ def validate_join_key_normalization_policies(
         )
 
 
-
 def normalize_join_key_text(
     value: str,
     *,
     key: str,
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> str:
     """Apply canonical trim/casing transforms to one string join key value."""
     policy = get_join_key_normalization_policy(
@@ -97,12 +102,13 @@ def normalize_join_key_text(
     return normalized.lower() if policy.lowercase else normalized
 
 
-
 def normalize_join_key_scalar(
     value: object,
     *,
     key: str,
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> object:
     """Normalize one scalar join key while preserving non-string types."""
     if isinstance(value, str):
@@ -114,12 +120,13 @@ def normalize_join_key_scalar(
     return value
 
 
-
 def stringify_join_key_value(
     value: object,
     *,
     key: str,
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> str:
     """Convert a join key to a stable filter ID string with normalization."""
     if value is None:
@@ -134,12 +141,13 @@ def stringify_join_key_value(
     return str(normalized)
 
 
-
 def build_join_key_normalization_expr(
     *,
     column: str,
     key: str,
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> pl.Expr | None:
     """Build a Polars expression that normalizes one resolved join-key column."""
     import polars as pl
@@ -159,12 +167,13 @@ def build_join_key_normalization_expr(
     return expr.alias(column)
 
 
-
 def normalize_join_key_dataframe_columns(
     *,
     df: pl.DataFrame,
     join_keys: Iterable[str],
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> pl.DataFrame:
     """Normalize exact-name join key columns in a DataFrame."""
     expressions = [
@@ -177,7 +186,8 @@ def normalize_join_key_dataframe_columns(
                 key=key,
                 normalization_policies=normalization_policies,
             )
-        ) is not None
+        )
+        is not None
     ]
     if not expressions:
         return df

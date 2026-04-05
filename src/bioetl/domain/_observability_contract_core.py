@@ -28,6 +28,8 @@ __all__ = [
     "normalize_observability_context",
     "normalize_observability_metric_labels",
 ]
+
+
 @dataclass(frozen=True)
 class ObservabilityContractPayload:
     """Validated event payload with canonical metric labels."""

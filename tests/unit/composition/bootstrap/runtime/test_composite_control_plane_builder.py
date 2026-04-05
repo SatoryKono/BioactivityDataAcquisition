@@ -51,7 +51,9 @@ class _RichMockCompositeConfig(_MockCompositeConfig):
             "version": self.version,
             "seed": {"pipeline": self.seed.pipeline},
             "dependencies": [{"pipeline": dep.pipeline} for dep in self.dependencies],
-            "enrichers": [{"pipeline": enricher.pipeline} for enricher in self.enrichers],
+            "enrichers": [
+                {"pipeline": enricher.pipeline} for enricher in self.enrichers
+            ],
             "merge": {
                 "output_silver_path": self.merge.output_silver_path,
                 "output_gold_path": self.merge.output_gold_path,
@@ -120,7 +122,9 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.contract_version == "1.0.0"
 
 
-def test_resolve_composite_control_plane_flags_disables_ledger_when_manifest_disabled() -> None:
+def test_resolve_composite_control_plane_flags_disables_ledger_when_manifest_disabled() -> (
+    None
+):
     settings = SimpleNamespace(
         pipeline=SimpleNamespace(
             control_plane=SimpleNamespace(

@@ -54,7 +54,9 @@ class TestCliRunIncremental:
 
     def test_run_rejects_unknown_pipeline(self, cli_runner: CliRunner):
         """Test that run command rejects unknown pipeline names."""
-        result = cli_runner.invoke(_get_cli(), ["run", "--pipeline", "nonexistent_pipeline"])
+        result = cli_runner.invoke(
+            _get_cli(), ["run", "--pipeline", "nonexistent_pipeline"]
+        )
 
         assert result.exit_code != 0
         assert "Unknown pipeline" in result.output or "Invalid value" in result.output
@@ -63,7 +65,7 @@ class TestCliRunIncremental:
         """Test that run command validates run-type values."""
         result = cli_runner.invoke(
             _get_cli(),
-            ["run", "--pipeline", "chembl_activity", "--run-type", "invalid_type"]
+            ["run", "--pipeline", "chembl_activity", "--run-type", "invalid_type"],
         )
 
         assert result.exit_code != 0

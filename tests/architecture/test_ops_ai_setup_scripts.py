@@ -69,6 +69,6 @@ def test_setup_plugins_prefers_local_venv_and_windows_git_fallback() -> None:
     content = (root / "scripts/ops/setup_plugins.sh").read_text(encoding="utf-8")
 
     assert 'if [[ -x ".venv/Scripts/python.exe" ]]; then' in content
-    assert 'elif command -v uv >/dev/null 2>&1; then' in content
+    assert "elif command -v uv >/dev/null 2>&1; then" in content
     assert "\\$env:Path='C:\\\\Program Files\\\\Git\\\\cmd;'+\\$env:Path" in content
     assert "\\$env:PRE_COMMIT_HOME=" in content

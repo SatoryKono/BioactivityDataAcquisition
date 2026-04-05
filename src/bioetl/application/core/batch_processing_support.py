@@ -212,7 +212,9 @@ class BatchProcessingSupportService:
                 )
                 for rec in records
             ]
-            await self._quarantine_manager.quarantine_records(entries, batch_id, ingestion_ts=ingestion_ts)
+            await self._quarantine_manager.quarantine_records(
+                entries, batch_id, ingestion_ts=ingestion_ts
+            )
 
     def finalize_batch_span(
         self,

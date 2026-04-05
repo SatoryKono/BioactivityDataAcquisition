@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -85,7 +85,7 @@ class TestResolvedConfigSnapshot:
 
     def test_resolved_config_snapshot_creation(self) -> None:
         """Test ResolvedConfigSnapshot creation."""
-        config_data: Dict[str, Any] = {
+        config_data: dict[str, Any] = {
             "pipeline": {"name": "test", "version": "1.0"},
             "settings": {"batch_size": 1000},
         }
@@ -134,7 +134,7 @@ class TestEffectiveExecutionConfig:
 
     def test_effective_execution_config_creation(self) -> None:
         """Test EffectiveExecutionConfig creation."""
-        config_data: Dict[str, Any] = {
+        config_data: dict[str, Any] = {
             "pipeline": {"name": "test", "version": "1.0"},
             "settings": {"batch_size": 2000},  # Overridden value
             "runtime": {"auto_adjust": True},
@@ -196,7 +196,7 @@ class TestEffectiveConfigArtifact:
     def test_effective_config_artifact_creation(self) -> None:
         """Test EffectiveConfigArtifact creation with all fields."""
         # Create source refs
-        source_refs: List[ConfigSourceRef] = [
+        source_refs: list[ConfigSourceRef] = [
             ConfigSourceRef(
                 source_type="file",
                 source_path="configs/base/pipeline.yaml",
@@ -244,7 +244,7 @@ class TestEffectiveConfigArtifact:
         )
 
         # Create DQ policy refs
-        dq_policy_refs: List[DQPolicyRef] = [
+        dq_policy_refs: list[DQPolicyRef] = [
             DQPolicyRef(
                 contract_ref="chembl_molecule",
                 contract_version="1.0.0",

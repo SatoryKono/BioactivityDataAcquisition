@@ -126,7 +126,9 @@ def check_file(path: Path) -> FileCheckResult:
     diagram_type = detect_diagram_type(lines)
     if diagram_type not in TARGET_DIAGRAM_TYPES:
         return FileCheckResult(path=path, diagram_type=diagram_type)
-    return FileCheckResult(path=path, diagram_type=diagram_type, issues=_collect_issues(lines))
+    return FileCheckResult(
+        path=path, diagram_type=diagram_type, issues=_collect_issues(lines)
+    )
 
 
 def fix_file(path: Path, *, dry_run: bool) -> int:
@@ -205,9 +207,7 @@ def main(argv: list[str] | None = None) -> int:
         for result in offending:
             print(f"[INVALID] {_display_path(result.path)}")
             for issue in result.issues:
-                print(
-                    f"  L{issue.line_no}: {issue.operator} :: {issue.line}"
-                )
+                print(f"  L{issue.line_no}: {issue.operator} :: {issue.line}")
         print(
             "Summary: "
             f"files_scanned={len(source_files)} "

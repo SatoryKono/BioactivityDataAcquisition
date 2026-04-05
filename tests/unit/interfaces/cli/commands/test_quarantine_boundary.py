@@ -31,9 +31,7 @@ def test_cli_main_registers_quarantine_via_public_command_seam() -> None:
     """cli.main should resolve quarantine through the lazy public command spec."""
     cli_main = importlib.import_module("bioetl.interfaces.cli.main")
 
-    module_name, attribute_name, _help_text = cli_main._LAZY_COMMAND_SPECS[
-        "quarantine"
-    ]
+    module_name, attribute_name, _help_text = cli_main._LAZY_COMMAND_SPECS["quarantine"]
 
     assert module_name == "bioetl.interfaces.cli.commands.quarantine"
     assert attribute_name == "quarantine"

@@ -62,9 +62,7 @@ class CheckpointManagerService:
         self._loading_strategy = loading_strategy
         self._compatibility_service = checkpoint_compatibility_service
         self._current_metadata = current_metadata
-        self._compatibility_policy = validate_compatibility_policy(
-            compatibility_policy
-        )
+        self._compatibility_policy = validate_compatibility_policy(compatibility_policy)
 
     @property
     def current_metadata(self) -> CheckpointMetadata | None:

@@ -52,9 +52,7 @@ KPI_EXCLUDED_PREFIXES = (
     "reports/",
     "00-project/ai/",
 )
-KPI_INCLUDED_PREFIXES = (
-    "00-project/ai/skills/global/.system/",
-)
+KPI_INCLUDED_PREFIXES = ("00-project/ai/skills/global/.system/",)
 
 DEFAULT_TARGET_NOT_IN_NAV = 120
 DEFAULT_HARD_LIMIT_NOT_IN_NAV = 135
@@ -148,7 +146,11 @@ def _collect_orphans(all_docs: list[Path], not_in_nav: set[str]) -> list[str]:
             line_for_links = INLINE_CODE_RE.sub("", line)
             for match in MD_LINK_RE.finditer(line_for_links):
                 raw_target = match.group(1).strip()
-                if not raw_target or raw_target.startswith("*") or raw_target.startswith("{"):
+                if (
+                    not raw_target
+                    or raw_target.startswith("*")
+                    or raw_target.startswith("{")
+                ):
                     continue
                 resolved = (source.parent / raw_target).resolve()
                 try:
@@ -186,7 +188,9 @@ def _evaluate_status(
     if orphan_count > max_orphans:
         breaches.append(f"orphan_budget_exceeded ({orphan_count} > {max_orphans})")
     if baseline_count and not_in_nav_count > baseline_count:
-        breaches.append(f"baseline_growth_detected ({not_in_nav_count} > {baseline_count})")
+        breaches.append(
+            f"baseline_growth_detected ({not_in_nav_count} > {baseline_count})"
+        )
 
     if breaches:
         return "breach", breaches

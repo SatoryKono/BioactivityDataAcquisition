@@ -22,8 +22,6 @@ import ast
 import re
 from pathlib import Path
 
-import pytest
-
 
 def _is_forbidden_port_import_target(module_name: str) -> bool:
     """Return True for non-sanctioned port submodule imports.

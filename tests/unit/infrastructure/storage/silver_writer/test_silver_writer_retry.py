@@ -147,7 +147,9 @@ class TestSilverWriterSchemaEvolutionRetry:
         from bioetl.infrastructure.storage.delta.resilience import (
             DEFAULT_SILVER_MERGE_POLICY,
         )
-        from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+        from bioetl.infrastructure.storage.silver.delta_helpers import (
+            _DeltaWriteRequest,
+        )
         from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
             _execute_merge_write_request,
         )
@@ -197,7 +199,9 @@ class TestSilverWriterSchemaEvolutionRetry:
         from bioetl.infrastructure.storage.delta.resilience import (
             DEFAULT_SILVER_MERGE_POLICY,
         )
-        from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+        from bioetl.infrastructure.storage.silver.delta_helpers import (
+            _DeltaWriteRequest,
+        )
         from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
             _execute_merge_write_request,
         )
@@ -213,7 +217,9 @@ class TestSilverWriterSchemaEvolutionRetry:
         )
         merge_records = AsyncMock(
             side_effect=[
-                Exception("External error: Schema error: Duplicate field name: new_field"),
+                Exception(
+                    "External error: Schema error: Duplicate field name: new_field"
+                ),
                 None,
             ]
         )

@@ -61,14 +61,12 @@ def _finalize_transformed_record(
         return None
     if isinstance(transformed, PreSilverRecord):
         if normalization_processor is None:
-            raise RuntimeError(
-                "PreSilverRecord requires RecordNormalizationProcessor"
-            )
+            raise RuntimeError("PreSilverRecord requires RecordNormalizationProcessor")
         finalized_record: dict[str, object] | None = (
             normalization_processor.finalize_pre_silver(
-            transformed,
-            context,
-            index,
+                transformed,
+                context,
+                index,
             )
         )
         return finalized_record

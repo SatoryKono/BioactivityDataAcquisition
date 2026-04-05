@@ -35,7 +35,10 @@ def _iter_compat_import_violations(
     for py_file, tree in sorted(ast_cache.items()):
         rel_path = py_file.relative_to(ROOT).as_posix()
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module in LEGACY_NORMALIZATION_MODULES:
+            if (
+                isinstance(node, ast.ImportFrom)
+                and node.module in LEGACY_NORMALIZATION_MODULES
+            ):
                 violations.append(f"{rel_path}:{node.lineno} imports {node.module}")
             elif (
                 isinstance(node, ast.ImportFrom)

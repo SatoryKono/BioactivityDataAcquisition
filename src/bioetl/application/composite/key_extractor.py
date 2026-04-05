@@ -49,7 +49,9 @@ class KeyExtractorService:
         self,
         delta_reader: DeltaReaderPort,
         logger: LoggerPort,
-        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+        normalization_policies: Mapping[
+            str, JoinKeyNormalizationPolicy
+        ] = JOIN_KEY_NORMALIZATION_POLICIES,
     ) -> None:
         """Initialize key extractor service.
 

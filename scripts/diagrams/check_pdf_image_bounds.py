@@ -62,9 +62,7 @@ def validate_pdf(pdf_path: Path, max_overflow_ratio: float) -> list[BoundsIssue]
         page_width = float(rect.width)
         page_height = float(rect.height)
         content = (
-            page.get_text("dict")
-            if hasattr(page, "get_text")
-            else page.getText("dict")
+            page.get_text("dict") if hasattr(page, "get_text") else page.getText("dict")
         )
         image_blocks = [b for b in content.get("blocks", []) if b.get("type") == 1]
 

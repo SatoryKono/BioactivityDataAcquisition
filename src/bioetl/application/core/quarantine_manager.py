@@ -97,7 +97,9 @@ class QuarantineManagerService:
         if self._metrics is None:
             return
 
-        track_processed_records = getattr(self._metrics, "track_processed_records", None)
+        track_processed_records = getattr(
+            self._metrics, "track_processed_records", None
+        )
         if callable(track_processed_records):
             track_processed_records("quarantined", count)
 

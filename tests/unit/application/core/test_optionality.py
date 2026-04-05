@@ -41,7 +41,9 @@ def test_optionality_resolver_marks_dq_required_fields_as_non_optional() -> None
             silver_filters=SilverFilterConfig(required_fields=()),
             dq=DQConfig(
                 field_validations=(
-                    FieldValidation(field="publication_year", validation_type="required"),
+                    FieldValidation(
+                        field="publication_year", validation_type="required"
+                    ),
                 )
             ),
         )
@@ -79,7 +81,9 @@ def test_optionality_resolver_marks_nonnullable_key_fields_as_non_optional() -> 
             silver_filters=SilverFilterConfig(required_fields=()),
             dq=DQConfig(
                 key_nullability_rules=(
-                    KeyNullabilityRule(field="record_id", key_type="merge", nullable=False),
+                    KeyNullabilityRule(
+                        field="record_id", key_type="merge", nullable=False
+                    ),
                 )
             ),
         )
@@ -124,7 +128,9 @@ def test_optionality_resolver_accumulates_multiple_sources() -> None:
 
 
 @pytest.mark.unit
-def test_optionality_resolver_explicit_optional_false_overrides_default_optional() -> None:
+def test_optionality_resolver_explicit_optional_false_overrides_default_optional() -> (
+    None
+):
     resolver = ConfigSurfaceOptionalityResolver.from_domain_config(
         SimpleNamespace(
             field_policy=(FieldPolicyConfig(field="curation_flag", optional=False),),
@@ -140,7 +146,9 @@ def test_optionality_resolver_explicit_optional_false_overrides_default_optional
 
 
 @pytest.mark.unit
-def test_optionality_resolver_explicit_optional_true_overrides_required_signals() -> None:
+def test_optionality_resolver_explicit_optional_true_overrides_required_signals() -> (
+    None
+):
     resolver = ConfigSurfaceOptionalityResolver.from_domain_config(
         SimpleNamespace(
             field_policy=(FieldPolicyConfig(field="activity_id", optional=True),),

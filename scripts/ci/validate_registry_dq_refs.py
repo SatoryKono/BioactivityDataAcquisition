@@ -94,7 +94,8 @@ def _validate_entry(
     identity = entry.get("identity")
     expected_version = (
         identity.get("contract_version")
-        if isinstance(identity, dict) and isinstance(identity.get("contract_version"), str)
+        if isinstance(identity, dict)
+        and isinstance(identity.get("contract_version"), str)
         else None
     )
     expected_rule_bundle = _expected_ref(entry, "rule_bundle_version")

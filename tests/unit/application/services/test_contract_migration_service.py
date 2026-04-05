@@ -113,8 +113,6 @@ def test_plan_pipeline_requires_rebuilds_when_hash_changes() -> None:
         "gold_backfill_rebuild",
         "verification_before_cutover",
     ]
-    assert plan.transitions == (
-        plan.transitions[0],
-    )
+    assert plan.transitions == (plan.transitions[0],)
     assert plan.transitions[0].affects_hash is True
     assert any("historical Silver" in note for note in plan.notes)

@@ -150,6 +150,7 @@ FILE_POLICY_PATH = Path("docs/00-project/governance/03-file-policy.md")
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _collect_classes(directory: Path) -> set[str]:
     """Collect all class names defined under *directory*."""
     classes: set[str] = set()
@@ -231,12 +232,15 @@ def _extract_runtime_version(text: str) -> str | None:
 # Check: Port protocols
 # ---------------------------------------------------------------------------
 
+
 def check_ports(report: DriftReport) -> None:
     """Verify port classes referenced in domain-layer docs exist in code."""
     ports_dir = SRC_DIR / "domain" / "ports"
     if not ports_dir.exists():
         report.add(
-            "ports", "ERROR", "src/bioetl/domain/ports/",
+            "ports",
+            "ERROR",
+            "src/bioetl/domain/ports/",
             "Ports directory does not exist",
         )
         return
@@ -248,7 +252,9 @@ def check_ports(report: DriftReport) -> None:
     doc_text = _read_doc(doc_path)
     if not doc_text:
         report.add(
-            "ports", "WARNING", str(doc_path.relative_to(PROJECT_ROOT)),
+            "ports",
+            "WARNING",
+            str(doc_path.relative_to(PROJECT_ROOT)),
             "Domain layer doc not found — cannot verify port references",
         )
         return
@@ -260,7 +266,8 @@ def check_ports(report: DriftReport) -> None:
     for port_name in sorted(port_refs):
         if port_name not in code_classes:
             report.add(
-                "ports", "ERROR",
+                "ports",
+                "ERROR",
                 str(doc_path.relative_to(PROJECT_ROOT)),
                 f"Port `{port_name}` referenced in docs but not found in domain/ports/",
             )
@@ -272,7 +279,8 @@ def check_ports(report: DriftReport) -> None:
         for port_name in sorted(port_refs):
             if port_name in code_classes and port_name not in init_text:
                 report.add(
-                    "ports", "WARNING",
+                    "ports",
+                    "WARNING",
                     "src/bioetl/domain/ports/__init__.py",
                     f"Port `{port_name}` exists but not re-exported in ports facade",
                 )
@@ -281,6 +289,7 @@ def check_ports(report: DriftReport) -> None:
 # ---------------------------------------------------------------------------
 # Check: Key architecture classes
 # ---------------------------------------------------------------------------
+
 
 def check_classes(report: DriftReport) -> None:
     """Verify key classes referenced in architecture docs exist."""
@@ -292,19 +301,31 @@ def check_classes(report: DriftReport) -> None:
         (
             DOCS_DIR / "02-architecture" / "02-application-layer.md",
             [
-                "BasePipeline", "BaseTransformer", "RecordProcessor",
-                "BatchExecutor", "PipelineRunner", "PipelineService",
-                "LockCoordinator", "PreflightService", "BatchMetricsRecorderService",
-                "FilteredDataSource", "CompositePipelineRunner",
+                "BasePipeline",
+                "BaseTransformer",
+                "RecordProcessor",
+                "BatchExecutor",
+                "PipelineRunner",
+                "PipelineService",
+                "LockCoordinator",
+                "PreflightService",
+                "BatchMetricsRecorderService",
+                "FilteredDataSource",
+                "CompositePipelineRunner",
                 "EnrichmentCoordinatorService",
             ],
         ),
         (
             DOCS_DIR / "02-architecture" / "03-infrastructure-layer.md",
             [
-                "BronzeWriter", "SilverWriter", "GoldWriter",
-                "BaseHttpAdapter", "UnifiedHTTPClient",
-                "TokenBucketRateLimiter", "CircuitBreakerGuard", "MemoryLock",
+                "BronzeWriter",
+                "SilverWriter",
+                "GoldWriter",
+                "BaseHttpAdapter",
+                "UnifiedHTTPClient",
+                "TokenBucketRateLimiter",
+                "CircuitBreakerGuard",
+                "MemoryLock",
             ],
         ),
         (
@@ -318,7 +339,8 @@ def check_classes(report: DriftReport) -> None:
     for doc_path, expected_classes in doc_checks:
         if not doc_path.exists():
             report.add(
-                "classes", "WARNING",
+                "classes",
+                "WARNING",
                 str(doc_path.relative_to(PROJECT_ROOT)),
                 "Architecture doc not found — cannot verify class references",
             )
@@ -330,14 +352,16 @@ def check_classes(report: DriftReport) -> None:
         for cls_name in expected_classes:
             if cls_name not in all_classes:
                 report.add(
-                    "classes", "ERROR",
+                    "classes",
+                    "ERROR",
                     str(doc_path.relative_to(PROJECT_ROOT)),
                     f"Class `{cls_name}` expected from docs but not found in codebase",
                 )
             elif cls_name not in doc_refs:
                 # Class exists but not mentioned — possible doc gap
                 report.add(
-                    "classes", "WARNING",
+                    "classes",
+                    "WARNING",
                     str(doc_path.relative_to(PROJECT_ROOT)),
                     f"Class `{cls_name}` exists in code but not referenced in doc",
                 )
@@ -346,6 +370,7 @@ def check_classes(report: DriftReport) -> None:
 # ---------------------------------------------------------------------------
 # Check: Module paths referenced in docs
 # ---------------------------------------------------------------------------
+
 
 def check_modules(report: DriftReport) -> None:
     """Verify module paths referenced in architecture docs resolve."""
@@ -363,9 +388,12 @@ def check_modules(report: DriftReport) -> None:
         for match in module_pattern.finditer(text):
             mod_path = match.group(1)
             # Check if any module starts with this path (could be a package)
-            if not any(m == mod_path or m.startswith(mod_path + ".") for m in all_modules):
+            if not any(
+                m == mod_path or m.startswith(mod_path + ".") for m in all_modules
+            ):
                 report.add(
-                    "modules", "ERROR",
+                    "modules",
+                    "ERROR",
                     str(md_file.relative_to(PROJECT_ROOT)),
                     f"Module path `{mod_path}` referenced but not found in src/",
                 )
@@ -375,6 +403,7 @@ def check_modules(report: DriftReport) -> None:
 # Check: Provider registry
 # ---------------------------------------------------------------------------
 
+
 def check_providers(report: DriftReport) -> None:
     """Verify documented providers match actual adapter directories."""
     adapters_dir = SRC_DIR / "infrastructure" / "adapters"
@@ -382,9 +411,15 @@ def check_providers(report: DriftReport) -> None:
         return
 
     # Utility sub-packages that are NOT data providers
-    _NON_PROVIDER_DIRS = frozenset({
-        "common", "decorators", "http", "input", "__pycache__",
-    })
+    _NON_PROVIDER_DIRS = frozenset(
+        {
+            "common",
+            "decorators",
+            "http",
+            "input",
+            "__pycache__",
+        }
+    )
 
     actual_providers = {
         d.name
@@ -408,7 +443,8 @@ def check_providers(report: DriftReport) -> None:
     for provider in sorted(actual_providers):
         if provider not in doc_text and provider.replace("_", "-") not in doc_text:
             report.add(
-                "providers", "WARNING",
+                "providers",
+                "WARNING",
                 "docs/04-reference/providers/README.md",
                 f"Provider `{provider}` has adapter but not referenced in provider docs",
             )
@@ -417,6 +453,7 @@ def check_providers(report: DriftReport) -> None:
 # ---------------------------------------------------------------------------
 # Check: Glossary terms
 # ---------------------------------------------------------------------------
+
 
 def check_glossary(report: DriftReport) -> None:
     """Verify glossary class/module references still exist."""
@@ -452,7 +489,8 @@ def check_glossary(report: DriftReport) -> None:
     for cls_name in sorted(set(class_refs)):
         if cls_name not in all_classes:
             report.add(
-                "glossary", "WARNING",
+                "glossary",
+                "WARNING",
                 "docs/00-project/glossary.md",
                 f"Glossary references `{cls_name}` which no longer exists in codebase",
             )
@@ -461,6 +499,7 @@ def check_glossary(report: DriftReport) -> None:
 # ---------------------------------------------------------------------------
 # Check: Runtime doc mirrors
 # ---------------------------------------------------------------------------
+
 
 def check_runtime_mirrors(report: DriftReport) -> None:
     """Verify critical published runtime mirrors stay aligned with canonical docs."""
@@ -528,9 +567,9 @@ def check_runtime_mirrors(report: DriftReport) -> None:
                 )
                 continue
 
-            if _normalize_markdown_block(canonical_section) != _normalize_markdown_block(
-                mirror_section
-            ):
+            if _normalize_markdown_block(
+                canonical_section
+            ) != _normalize_markdown_block(mirror_section):
                 report.add(
                     "runtime-mirrors",
                     "ERROR",
@@ -542,6 +581,7 @@ def check_runtime_mirrors(report: DriftReport) -> None:
 # ---------------------------------------------------------------------------
 # Check: Freshness markers
 # ---------------------------------------------------------------------------
+
 
 def check_freshness(report: DriftReport) -> None:
     """Verify active docs use consistent freshness/version metadata."""
@@ -566,7 +606,10 @@ def check_freshness(report: DriftReport) -> None:
                 _rel(PROJECT_ROOT / AGENT_MEMORY_PATH),
                 "Agent memory is missing the ORCHESTRATION sync marker",
             )
-        elif current_orchestration_version and sync_match.group(1) != current_orchestration_version:
+        elif (
+            current_orchestration_version
+            and sync_match.group(1) != current_orchestration_version
+        ):
             report.add(
                 "freshness",
                 "ERROR",
@@ -616,6 +659,7 @@ def check_freshness(report: DriftReport) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
+
 def print_report(report: DriftReport) -> None:
     """Print human-readable drift report."""
     print("Documentation Drift Report")
@@ -638,10 +682,7 @@ def print_report(report: DriftReport) -> None:
             print(f"         {issue.detail}")
 
     print()
-    print(
-        f"Summary: {report.error_count} errors, "
-        f"{report.warning_count} warnings"
-    )
+    print(f"Summary: {report.error_count} errors, {report.warning_count} warnings")
 
 
 def main() -> int:
@@ -651,7 +692,9 @@ def main() -> int:
     )
     parser.add_argument("--ports", action="store_true", help="Check port drift only")
     parser.add_argument("--classes", action="store_true", help="Check class drift only")
-    parser.add_argument("--modules", action="store_true", help="Check module path drift only")
+    parser.add_argument(
+        "--modules", action="store_true", help="Check module path drift only"
+    )
     parser.add_argument(
         "--runtime-mirrors",
         action="store_true",
@@ -663,7 +706,9 @@ def main() -> int:
         help="Check freshness/version markers in active runtime/governance docs",
     )
     parser.add_argument(
-        "--json", action="store_true", dest="json_output",
+        "--json",
+        action="store_true",
+        dest="json_output",
         help="Output machine-readable JSON",
     )
     args = parser.parse_args()

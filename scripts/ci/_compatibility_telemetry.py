@@ -48,6 +48,7 @@ class CompatibilitySurfaceSnapshot:
             "retained_entrypoints": self.retained_entrypoints,
         }
 
+
 def collect_compatibility_surface_snapshot(
     *,
     registry_path: Path = DEFAULT_REGISTRY_PATH,

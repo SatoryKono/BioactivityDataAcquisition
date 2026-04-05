@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-05T07:53:20.453208+00:00",
+  "generated_at": "2026-04-05T08:47:20.839755+00:00",
   "summary": {
     "total_scripts": 227,
     "status_counts": {
-      "active": 221,
-      "legacy": 4,
-      "orphan": 2
+      "active": 200,
+      "legacy": 24,
+      "unknown": 3
     },
     "reference_group_coverage": {
       "agents": 10,
       "build": 30,
       "ci": 46,
       "docs": 93,
-      "scripts": 207,
+      "scripts": 210,
       "skills": 9,
       "tests": 79
     }
@@ -22,84 +22,114 @@
     {
       "path": "scripts/ai/code-reviewer.sh",
       "type": "sh",
-      "status": "active",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/README.md",
-          "line": 19,
+          "line": 22,
           "source_group": "scripts",
           "text": "- `scripts/ai/code-reviewer.sh`"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 439,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/code-reviewer.sh\","
         }
       ]
     },
     {
       "path": "scripts/ai/data-engineer.sh",
       "type": "sh",
-      "status": "active",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/README.md",
-          "line": 20,
+          "line": 23,
           "source_group": "scripts",
           "text": "- `scripts/ai/data-engineer.sh`"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 440,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/data-engineer.sh\","
         }
       ]
     },
     {
       "path": "scripts/ai/literature-researcher.sh",
       "type": "sh",
-      "status": "active",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/README.md",
-          "line": 21,
+          "line": 24,
           "source_group": "scripts",
           "text": "- `scripts/ai/literature-researcher.sh`"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 441,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/literature-researcher.sh\","
         }
       ]
     },
     {
       "path": "scripts/archive/migrations/migrate_openalex_citation_count.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/archive/migrations/README.md",
-          "line": 16,
+          "line": 19,
           "source_group": "scripts",
           "text": "- `scripts/archive/migrations/migrate_openalex_citation_count.py`"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 444,
+          "source_group": "scripts",
+          "text": "\"scripts/archive/migrations/migrate_openalex_citation_count.py\","
         }
       ]
     },
     {
       "path": "scripts/archive/migrations/migrate_pmid_to_string.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/archive/migrations/README.md",
-          "line": 17,
+          "line": 20,
           "source_group": "scripts",
           "text": "- `scripts/archive/migrations/migrate_pmid_to_string.py`"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 445,
+          "source_group": "scripts",
+          "text": "\"scripts/archive/migrations/migrate_pmid_to_string.py\","
         }
       ]
     },
     {
       "path": "scripts/archive/migrations/rename_structure_fields.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/04-reference/schemas/domain/chembl/molecule-schema.md",
@@ -115,9 +145,15 @@
         },
         {
           "path": "scripts/archive/migrations/README.md",
-          "line": 18,
+          "line": 21,
           "source_group": "scripts",
           "text": "- `scripts/archive/migrations/rename_structure_fields.py`"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 446,
+          "source_group": "scripts",
+          "text": "\"scripts/archive/migrations/rename_structure_fields.py\","
         }
       ]
     },
@@ -319,7 +355,7 @@
         },
         {
           "path": "scripts/ci/__main__.py",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         }
@@ -358,7 +394,7 @@
         },
         {
           "path": "scripts/ci/__main__.py",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -403,7 +439,7 @@
         },
         {
           "path": "scripts/ci/__main__.py",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -754,7 +790,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "\"check-delta\": \"check_delta_integrity.py\","
         }
@@ -793,13 +829,13 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "\"check-vcr-placement\": \"check_root_vcr_cassettes.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 248,
+          "line": 250,
           "source_group": "tests",
           "text": "assert \"python scripts/data/check_root_vcr_cassettes.py\" in tests_workflow"
         },
@@ -844,13 +880,13 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "\"check-vcr-naming\": \"check_vcr_filename_policy.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 249,
+          "line": 251,
           "source_group": "tests",
           "text": "assert \"python scripts/data/check_vcr_filename_policy.py\" in tests_workflow"
         },
@@ -877,7 +913,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "\"check-vcr-secrets\": \"check_vcr_secrets.py\","
         }
@@ -922,7 +958,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"dq-baseline\": \"dq_baseline_update.py\","
         }
@@ -943,7 +979,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"report-null-fields\": \"extract_null_fields.py\","
         }
@@ -964,7 +1000,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"report-content-hash\": \"generate_content_hash_comparison_report.py\","
         }
@@ -1054,7 +1090,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 31,
+          "line": 32,
           "source_group": "scripts",
           "text": "\"check-data-dir\": \"validate_data_dir.py\","
         }
@@ -1099,7 +1135,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"checksums\": \"verify_checksums.py\","
         }
@@ -1237,9 +1273,9 @@
     {
       "path": "scripts/dev/dev_setup.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -1767,13 +1803,13 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 80,
+          "line": 88,
           "source_group": "scripts",
           "text": "| `scripts/ops/setup_copilot_codex_mcp.ps1` | PowerShell Copilot/Codex MCP setup |"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 149,
+          "line": 146,
           "source_group": "tests",
           "text": "content = (root / \"scripts/dev/setup_copilot_codex_mcp.ps1\").read_text("
         }
@@ -1830,7 +1866,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 143,
+          "line": 140,
           "source_group": "tests",
           "text": "assert \"scripts/dev/setup_copilot_codex_mcp.py\" in content"
         }
@@ -1851,7 +1887,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 140,
+          "line": 137,
           "source_group": "tests",
           "text": "content = (root / \"scripts/dev/setup_copilot_codex_mcp.sh\").read_text("
         }
@@ -2046,9 +2082,9 @@
     {
       "path": "scripts/diagnostics/_tmp_inspect_vcr.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/diagnostics/README.md",
@@ -2057,10 +2093,22 @@
           "text": "| `inspect-vcr` | `scripts/diagnostics/_tmp_inspect_vcr.py` | Temporary VCR cassette inspector |"
         },
         {
+          "path": "scripts/diagnostics/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "`_tmp_inspect_vcr.py`; repository-local references to it should be treated as"
+        },
+        {
           "path": "scripts/diagnostics/__main__.py",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "\"inspect-vcr\": \"_tmp_inspect_vcr.py\","
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 450,
+          "source_group": "scripts",
+          "text": "\"scripts/diagnostics/_tmp_inspect_vcr.py\","
         }
       ]
     },
@@ -2079,7 +2127,7 @@
         },
         {
           "path": "scripts/diagnostics/__main__.py",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "\"ast-inventory\": \"ast_inventory.py\","
         }
@@ -2169,7 +2217,7 @@
         },
         {
           "path": "scripts/diagnostics/__main__.py",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "\"cleanup-audit\": \"cleanup_consolidate.py\","
         }
@@ -2214,7 +2262,7 @@
         },
         {
           "path": "scripts/diagnostics/__main__.py",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "\"cleanup\": \"cleanup_project.py\","
         },
@@ -2241,7 +2289,7 @@
         },
         {
           "path": "scripts/diagnostics/__main__.py",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "\"debug-pandera\": \"debug_pandera.py\","
         }
@@ -2262,7 +2310,7 @@
         },
         {
           "path": "scripts/diagnostics/__main__.py",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "\"debug-storage\": \"debug_storage_health.py\","
         }
@@ -2277,7 +2325,7 @@
       "references": [
         {
           "path": "scripts/diagnostics/README.md",
-          "line": 40,
+          "line": 45,
           "source_group": "scripts",
           "text": "| `scripts/diagnostics/generate_src_bioetl_refactor_evidence.py` | Generate evidence artifacts for focused `src/bioetl` refactor investigations |"
         }
@@ -4092,7 +4140,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"check-docstrings\": \"check_docstring_coverage.py\","
         }
@@ -4128,7 +4176,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"enrich-matrix-normalization-details\": \"enrich_chembl_matrix_normalization_details.py\","
         }
@@ -4149,7 +4197,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"export-matrix-structural-contract\": \"export_chembl_matrix_structural_contract.py\","
         }
@@ -4170,7 +4218,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"filter-matrix-rows\": \"filter_chembl_matrix_rows.py\","
         }
@@ -4191,7 +4239,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"fix-links-auto\": \"fix_doc_links_auto.py\","
         }
@@ -4212,7 +4260,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"fix-links-explicit\": \"fix_doc_links_explicit.py\","
         }
@@ -4233,7 +4281,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"fix-link-warnings\": \"fix_link_warnings.py\","
         }
@@ -4254,7 +4302,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"build-matrix-dicts\": \"generate_chembl_matrix_dictionaries.py\","
         }
@@ -4275,7 +4323,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"normalize-matrix-values\": \"normalize_chembl_matrix_workbook.py\","
         }
@@ -4353,7 +4401,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"audit-sentence\": \"sentence_doc_audit.py\","
         }
@@ -4374,7 +4422,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"sync-matrix-structural-policy\": \"sync_chembl_matrix_structural_policy.py\","
         }
@@ -4464,7 +4512,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 330,
+          "line": 331,
           "source_group": "tests",
           "text": "\"scripts/migrations/active/backfill_vcr_metadata_sidecars.py\","
         }
@@ -4584,7 +4632,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"check-skills\": \"check_ai_skills_layout.sh\","
         }
@@ -4605,7 +4653,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"check-mcp\": \"check_mcp.sh\","
         }
@@ -4671,39 +4719,51 @@
     {
       "path": "scripts/ops/close_duplicate_prs_wave2.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ops/README.md",
-          "line": 67,
+          "line": 75,
           "source_group": "scripts",
           "text": "| `scripts/ops/close_duplicate_prs_wave2.sh` | Close duplicate PRs (wave 2) |"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 427,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/close_duplicate_prs_wave2.sh\","
         }
       ]
     },
     {
       "path": "scripts/ops/close_duplicate_prs_wave3.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ops/README.md",
-          "line": 68,
+          "line": 76,
           "source_group": "scripts",
           "text": "| `scripts/ops/close_duplicate_prs_wave3.sh` | Close duplicate PRs (wave 3) |"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 428,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/close_duplicate_prs_wave3.sh\","
         }
       ]
     },
     {
       "path": "scripts/ops/close_great_expectations_spike_issue.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ops/README.md",
@@ -4713,24 +4773,30 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 77,
+          "line": 85,
           "source_group": "scripts",
           "text": "| `scripts/ops/close_great_expectations_spike_issue.sh` | Close issue `#2595` with a standard comment |"
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"close-ge-spike\": \"close_great_expectations_spike_issue.sh\","
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 435,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/close_great_expectations_spike_issue.sh\","
         }
       ]
     },
     {
       "path": "scripts/ops/close_issue_2597.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/README.md",
@@ -4740,18 +4806,24 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 74,
+          "line": 82,
           "source_group": "scripts",
           "text": "| `scripts/ops/close_issue_2597.sh` | Wrapper that posts the prepared closeout comment for issue `#2597` and closes it |"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 432,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/close_issue_2597.sh\","
         }
       ]
     },
     {
       "path": "scripts/ops/close_pandera_schema_drift_issue.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ops/README.md",
@@ -4761,30 +4833,42 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 78,
+          "line": 86,
           "source_group": "scripts",
           "text": "| `scripts/ops/close_pandera_schema_drift_issue.sh` | Close issue `#2594` with a standard comment |"
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"close-schema-drift\": \"close_pandera_schema_drift_issue.sh\","
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 436,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/close_pandera_schema_drift_issue.sh\","
         }
       ]
     },
     {
       "path": "scripts/ops/close_superseded_prs.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ops/README.md",
-          "line": 66,
+          "line": 74,
           "source_group": "scripts",
           "text": "| `scripts/ops/close_superseded_prs.sh` | Close superseded PRs |"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 426,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/close_superseded_prs.sh\","
         }
       ]
     },
@@ -4821,7 +4905,7 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 70,
+          "line": 78,
           "source_group": "scripts",
           "text": "| `scripts/ops/codex-exec.bat` | Windows Codex exec launcher |"
         },
@@ -4890,7 +4974,7 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 69,
+          "line": 77,
           "source_group": "scripts",
           "text": "| `scripts/ops/codex.bat` | Windows Codex launcher |"
         },
@@ -4917,7 +5001,7 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 72,
+          "line": 80,
           "source_group": "scripts",
           "text": "| `scripts/ops/create_runmanifest_runledger_issue.sh` | Wrapper that creates the prepared RunManifest-and-Run-Ledger issue payload |"
         }
@@ -4938,7 +5022,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"delete-branches\": \"delete-stale-branches.sh\","
         }
@@ -5073,7 +5157,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"fix-grafana\": \"fix_grafana_dashboards.py\","
         }
@@ -5112,7 +5196,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 162,
+          "line": 159,
           "source_group": "tests",
           "text": "assert \"load_repo_env.ps1\" in ps_content"
         }
@@ -5199,7 +5283,7 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 114,
+          "line": 125,
           "source_group": "scripts",
           "text": "\"brave-search\": _wrapper_server(root, \"mcp_brave_search_wrapper.sh\"),"
         },
@@ -5235,7 +5319,7 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 109,
+          "line": 120,
           "source_group": "scripts",
           "text": "\"context7\": _wrapper_server(root, \"mcp_context7_wrapper.sh\"),"
         },
@@ -5271,7 +5355,7 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 108,
+          "line": 119,
           "source_group": "scripts",
           "text": "\"docker-docs\": _wrapper_server(root, \"mcp_docker_docs_wrapper.sh\"),"
         },
@@ -5307,7 +5391,7 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 107,
+          "line": 118,
           "source_group": "scripts",
           "text": "\"docker\": _wrapper_server(root, \"mcp_docker_wrapper.sh\"),"
         },
@@ -5343,7 +5427,7 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 111,
+          "line": 122,
           "source_group": "scripts",
           "text": "\"dockerhub\": _wrapper_server(root, \"mcp_dockerhub_wrapper.sh\"),"
         },
@@ -5379,7 +5463,7 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 113,
+          "line": 124,
           "source_group": "scripts",
           "text": "\"grafana\": _wrapper_server(root, \"mcp_grafana_wrapper.sh\"),"
         },
@@ -5415,7 +5499,7 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 110,
+          "line": 121,
           "source_group": "scripts",
           "text": "\"paper-search\": _wrapper_server(root, \"mcp_paper_search_wrapper.sh\"),"
         },
@@ -5451,7 +5535,7 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 112,
+          "line": 123,
           "source_group": "scripts",
           "text": "\"prometheus\": _wrapper_server(root, \"mcp_prometheus_wrapper.sh\"),"
         },
@@ -5466,9 +5550,9 @@
     {
       "path": "scripts/ops/post_issue_2597_progress.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/README.md",
@@ -5478,18 +5562,24 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 73,
+          "line": 81,
           "source_group": "scripts",
           "text": "| `scripts/ops/post_issue_2597_progress.sh` | Wrapper that posts the prepared progress comment for issue `#2597` |"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 431,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/post_issue_2597_progress.sh\","
         }
       ]
     },
     {
       "path": "scripts/ops/post_issue_rescope_comments.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/README.md",
@@ -5499,9 +5589,15 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 75,
+          "line": 83,
           "source_group": "scripts",
           "text": "| `scripts/ops/post_issue_rescope_comments.sh` | Wrapper that posts the prepared re-scope comments for issues `#2600`, `#2516`, `#2515`, and `#2511` |"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 433,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/post_issue_rescope_comments.sh\","
         }
       ]
     },
@@ -5559,7 +5655,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 32,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"salt_rotate.py\","
         }
@@ -5592,7 +5688,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"setup_agents.sh\","
         },
@@ -5694,7 +5790,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"setup-skills\": \"setup_skills.sh\","
         },
@@ -5751,7 +5847,7 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 79,
+          "line": 87,
           "source_group": "scripts",
           "text": "| `scripts/ops/start-wsl-proxy.bat` | Start WSL proxy (Windows) |"
         },
@@ -5778,7 +5874,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"triage-issues\": \"triage_cleanup_issue_wave.sh\","
         }
@@ -5799,13 +5895,13 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 71,
+          "line": 79,
           "source_group": "scripts",
           "text": "| `scripts/ops/update_github_issue.sh` | Generic issue edit helper for comment/title/body/state updates |"
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"update-issue\": \"update_github_issue.sh\","
         },
@@ -5838,9 +5934,9 @@
     {
       "path": "scripts/ops/update_issue_rescope_bodies.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/README.md",
@@ -5850,9 +5946,15 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 76,
+          "line": 84,
           "source_group": "scripts",
           "text": "| `scripts/ops/update_issue_rescope_bodies.sh` | Wrapper that replaces the prepared re-scope bodies for issues `#2600`, `#2516`, `#2515`, and `#2511` |"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 434,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/update_issue_rescope_bodies.sh\","
         }
       ]
     },
@@ -6019,25 +6121,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/qa/README.md",
           "line": 18,
           "source_group": "scripts",
           "text": "| `check-app-deps`              | `check_application_deps.py`               | Canonical compatibility wrapper for the legacy application dependency check                       |"
-        },
-        {
-          "path": "scripts/qa/README.md",
-          "line": 39,
-          "source_group": "scripts",
-          "text": "| `check-app-deps`              | When reproducing or migrating the legacy application dependency check without calling `src/tools/scripts/check_application_deps.py` directly      | Manual, Makefile m"
-        },
-        {
-          "path": "scripts/qa/README.md",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "`src/tools/scripts/check_architecture.py`, `check_application_deps.py`, and"
         },
         {
           "path": "scripts/qa/__main__.py",
@@ -6052,25 +6142,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/qa/README.md",
           "line": 17,
           "source_group": "scripts",
           "text": "| `check-architecture`          | `check_architecture.py`                   | Canonical compatibility wrapper for the legacy infrastructure architecture check                  |"
-        },
-        {
-          "path": "scripts/qa/README.md",
-          "line": 38,
-          "source_group": "scripts",
-          "text": "| `check-architecture`          | When reproducing or migrating the legacy infrastructure architecture check without calling `src/tools/scripts/check_architecture.py` directly     | Manual, Makefile m"
-        },
-        {
-          "path": "scripts/qa/README.md",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "`src/tools/scripts/check_architecture.py`, `check_application_deps.py`, and"
         },
         {
           "path": "scripts/qa/__main__.py",
@@ -6124,25 +6202,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/qa/README.md",
           "line": 19,
           "source_group": "scripts",
           "text": "| `check-constructor-args`      | `check_constructor_args.py`               | Canonical compatibility wrapper for the legacy constructor argument audit                         |"
-        },
-        {
-          "path": "scripts/qa/README.md",
-          "line": 40,
-          "source_group": "scripts",
-          "text": "| `check-constructor-args`      | When reproducing or migrating the legacy constructor-args audit without calling `src/tools/scripts/check_constructor_args.py` directly            | CI migration path,"
-        },
-        {
-          "path": "scripts/qa/README.md",
-          "line": 83,
-          "source_group": "scripts",
-          "text": "`check_constructor_args.py` remain supported as legacy direct paths during the"
         },
         {
           "path": "scripts/qa/__main__.py",
@@ -6443,10 +6509,17 @@
     {
       "path": "scripts/qa/generate_reports.py",
       "type": "py",
-      "status": "orphan",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 457,
+          "source_group": "scripts",
+          "text": "\"scripts/qa/generate_reports.py\","
+        }
+      ]
     },
     {
       "path": "scripts/qa/lint_terminology.py",
@@ -6877,7 +6950,7 @@
         },
         {
           "path": "scripts/repo/__main__.py",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "\"check-catalog\": \"check_scripts_catalog.py\","
         },
@@ -6985,7 +7058,7 @@
         },
         {
           "path": "scripts/repo/__main__.py",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         }
@@ -7063,7 +7136,7 @@
         },
         {
           "path": "scripts/repo/__main__.py",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         },
@@ -7312,7 +7385,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"audit-optionality\": \"audit_effective_optionality.py\","
         }
@@ -7345,7 +7418,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 32,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"check-invariants\": \"check_config_invariants.py\","
         }
@@ -7366,7 +7439,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"check-required-fields\": \"check_required_filter_fields.py\","
         }
@@ -7444,7 +7517,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"generate-config-matrix\": \"generate_config_matrix.py\","
         }
@@ -7522,7 +7595,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"generate-field-diagnostics\": \"generate_field_level_diagnostics.py\","
         }
@@ -7543,7 +7616,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"generate-field-spec\": \"generate_field_transformation_spec.py\","
         }
@@ -7570,7 +7643,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"generate-pipeline\": \"generate_pipeline_schema.py\","
         }
@@ -7591,7 +7664,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"generate-pubtype\": \"generate_publication_type_classification_artifacts.py\","
         },
@@ -7681,7 +7754,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"generate-unified-map\": \"generate_unified_schema_map.py\","
         }
@@ -7702,7 +7775,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"check-config-paths\": \"lint_config_paths.py\","
         }
@@ -7770,7 +7843,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
@@ -7779,14 +7852,8 @@
           "text": "| `validate-unified-configs` | `scripts/schema/validate_unified_configs.py` | Compatibility wrapper for the legacy structural unified-config validator |"
         },
         {
-          "path": "scripts/schema/README.md",
-          "line": 74,
-          "source_group": "scripts",
-          "text": "- `python -m scripts.schema validate-unified-configs` is a compatibility façade over the older standalone structural validator from `src/tools/scripts/validate_unified_configs.py`."
-        },
-        {
           "path": "scripts/schema/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"validate-unified-configs\": \"validate_unified_configs.py\","
         }
@@ -8119,51 +8186,45 @@
     {
       "path": "src/tools/scripts/check_application_deps.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/qa/README.md",
-          "line": 39,
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 459,
           "source_group": "scripts",
-          "text": "| `check-app-deps`              | When reproducing or migrating the legacy application dependency check without calling `src/tools/scripts/check_application_deps.py` directly      | Manual, Makefile m"
+          "text": "\"src/tools/scripts/check_application_deps.py\","
         }
       ]
     },
     {
       "path": "src/tools/scripts/check_architecture.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
-          "path": "scripts/qa/README.md",
-          "line": 38,
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 458,
           "source_group": "scripts",
-          "text": "| `check-architecture`          | When reproducing or migrating the legacy infrastructure architecture check without calling `src/tools/scripts/check_architecture.py` directly     | Manual, Makefile m"
-        },
-        {
-          "path": "scripts/qa/README.md",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "`src/tools/scripts/check_architecture.py`, `check_application_deps.py`, and"
+          "text": "\"src/tools/scripts/check_architecture.py\","
         }
       ]
     },
     {
       "path": "src/tools/scripts/check_constructor_args.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/qa/README.md",
-          "line": 40,
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 460,
           "source_group": "scripts",
-          "text": "| `check-constructor-args`      | When reproducing or migrating the legacy constructor-args audit without calling `src/tools/scripts/check_constructor_args.py` directly            | CI migration path,"
+          "text": "\"src/tools/scripts/check_constructor_args.py\","
         }
       ]
     },
@@ -8172,20 +8233,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "scripts/schema/README.md",
-          "line": 51,
-          "source_group": "scripts",
-          "text": "| `generate-config-matrix` | When you need the older comparison matrix/report for entity and composite YAMLs without calling `src/tools/scripts/config_matrix_generator.py` directly | Manual, audit/rep"
-        },
-        {
-          "path": "scripts/schema/README.md",
-          "line": 75,
-          "source_group": "scripts",
-          "text": "- `python -m scripts.schema generate-config-matrix` is a compatibility façade over the older comparison-matrix generator from `src/tools/scripts/config_matrix_generator.py`."
-        },
         {
           "path": "scripts/schema/generate_config_matrix.py",
           "line": 13,
@@ -8203,12 +8252,6 @@
           "line": 261,
           "source_group": "scripts",
           "text": "**Location:** `src/tools/scripts/config_matrix_generator.py`"
-        },
-        {
-          "path": "src/tools/README.md",
-          "line": 270,
-          "source_group": "scripts",
-          "text": "`python src/tools/scripts/config_matrix_generator.py`"
         }
       ]
     },
@@ -8217,14 +8260,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "scripts/qa/README.md",
-          "line": 51,
-          "source_group": "scripts",
-          "text": "| `analyze-duplicate-functions` | When you need the older duplicate-function AST report without calling `src/tools/scripts/duplicate_function_analyzer.py` directly                | Manual, audit/repor"
-        },
         {
           "path": "scripts/qa/analyze_duplicate_functions.py",
           "line": 13,
@@ -8242,30 +8279,37 @@
           "line": 304,
           "source_group": "scripts",
           "text": "**Location:** `src/tools/scripts/duplicate_function_analyzer.py`"
-        },
-        {
-          "path": "src/tools/README.md",
-          "line": 320,
-          "source_group": "scripts",
-          "text": "`python src/tools/scripts/duplicate_function_analyzer.py`"
         }
       ]
     },
     {
       "path": "src/tools/scripts/generate_contracts.py",
       "type": "py",
-      "status": "orphan",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 453,
+          "source_group": "scripts",
+          "text": "\"src/tools/scripts/generate_contracts.py\","
+        }
+      ]
     },
     {
       "path": "src/tools/scripts/lint_terminology.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 454,
+          "source_group": "scripts",
+          "text": "\"src/tools/scripts/lint_terminology.py\","
+        },
         {
           "path": "tests/architecture/test_lint_terminology_script.py",
           "line": 37,
@@ -8279,25 +8323,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/schema/README.md",
-          "line": 74,
-          "source_group": "scripts",
-          "text": "- `python -m scripts.schema validate-unified-configs` is a compatibility façade over the older standalone structural validator from `src/tools/scripts/validate_unified_configs.py`."
-        },
         {
           "path": "src/tools/README.md",
           "line": 276,
           "source_group": "scripts",
           "text": "**Location:** `src/tools/scripts/validate_unified_configs.py`"
-        },
-        {
-          "path": "src/tools/README.md",
-          "line": 285,
-          "source_group": "scripts",
-          "text": "`python src/tools/scripts/validate_unified_configs.py`"
         }
       ]
     },

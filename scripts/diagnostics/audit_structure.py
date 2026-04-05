@@ -98,7 +98,7 @@ ALLOWED_PYTHON_PATHS: tuple[str, ...] = (
     "tests/",
     "scripts/",
     "docs/00-project/ai/skills/",  # Agent skills scripts
-    ".ai/mcp/",      # MCP server implementations
+    ".ai/mcp/",  # MCP server implementations
 )
 
 # Allowed root-level Python files

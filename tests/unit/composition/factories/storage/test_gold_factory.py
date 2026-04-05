@@ -159,6 +159,4 @@ class TestCreateGoldWriter:
         )
 
         call_kwargs = writer_cls.call_args[1]
-        assert (
-            call_kwargs["runtime_services"].contract_rollout_policy == rollout_policy
-        )
+        assert call_kwargs["runtime_services"].contract_rollout_policy == rollout_policy

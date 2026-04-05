@@ -120,7 +120,9 @@ class FieldPolicyConfigSchema(BaseModel):
             value.strip().lower() for value in self.boolean_true_values if value.strip()
         }
         false_values = {
-            value.strip().lower() for value in self.boolean_false_values if value.strip()
+            value.strip().lower()
+            for value in self.boolean_false_values
+            if value.strip()
         }
         overlap = true_values & false_values
         if overlap:

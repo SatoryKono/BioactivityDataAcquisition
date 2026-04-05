@@ -60,7 +60,9 @@ def test_field_policy_resolver_includes_explicit_overlay_values() -> None:
 
 
 @pytest.mark.unit
-def test_field_policy_resolver_falls_back_to_default_for_unknown_coercion_policy() -> None:
+def test_field_policy_resolver_falls_back_to_default_for_unknown_coercion_policy() -> (
+    None
+):
     resolver = FieldPolicyResolver.from_domain_config(
         SimpleNamespace(
             field_policy=(

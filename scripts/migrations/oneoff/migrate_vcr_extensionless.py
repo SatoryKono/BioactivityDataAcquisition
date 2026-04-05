@@ -82,12 +82,16 @@ def main() -> int:
     if solo:
         sys.stdout.write("Solo files (can be migrated safely):\n")
         for source, target in solo:
-            sys.stdout.write(f"  - {source.relative_to(ROOT)} -> {target.relative_to(ROOT)}\n")
+            sys.stdout.write(
+                f"  - {source.relative_to(ROOT)} -> {target.relative_to(ROOT)}\n"
+            )
 
     if not args.apply:
         if args.sync_allowlist:
             _rewrite_allowlist(extensionless)
-            sys.stdout.write("Allowlist synchronized (dry-run mode for file renames).\n")
+            sys.stdout.write(
+                "Allowlist synchronized (dry-run mode for file renames).\n"
+            )
         return 0
 
     migrated = 0

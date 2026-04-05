@@ -22,7 +22,9 @@ def _get_last_day_of_month(year: int, month: int) -> int:
     return monthrange(year, month)[1]
 
 
-def _extract_date_parts(date_parts: Sequence[Sequence[int]] | None) -> Sequence[int] | None:
+def _extract_date_parts(
+    date_parts: Sequence[Sequence[int]] | None,
+) -> Sequence[int] | None:
     """Extract first date-parts array if valid, else None."""
     if not date_parts:
         return None

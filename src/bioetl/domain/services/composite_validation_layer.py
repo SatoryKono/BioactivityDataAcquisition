@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+
 from bioetl.domain.services.aggregation_validator import AggregationValidator
 from bioetl.domain.services.composite_validation_helpers import (
     _append_config_issue_if_invalid,
@@ -39,6 +40,7 @@ from bioetl.domain.types.validation_severity import (
 @dataclass(frozen=True)
 class CompositeValidationConfig:
     """Inputs and governance knobs for composite validation."""
+
     pipeline_name: str
     composite_config: JsonDict
     execution_context: JsonDict | None = None
@@ -240,9 +242,9 @@ class CompositeValidationService:
             ]
         validation_result: ValidationResult = (
             self._aggregation_validator.validate_aggregation_config(
-            aggregation_config,
-            source_schema,
-        )
+                aggregation_config,
+                source_schema,
+            )
         )
         issues: list[ValidationIssue] = validation_result.issues
         return issues

@@ -186,7 +186,9 @@ class TestOpenTelemetryTracerSpanAdapter:
         context_manager.__exit__.return_value = None
         otel_tracer = MagicMock()
         otel_tracer.start_as_current_span.return_value = context_manager
-        monkeypatch.setattr(tracing.trace, "get_tracer", MagicMock(return_value=otel_tracer))
+        monkeypatch.setattr(
+            tracing.trace, "get_tracer", MagicMock(return_value=otel_tracer)
+        )
 
         tracer = tracing.OpenTelemetryTracer("test_service")
         span = tracer.get_tracer("bioetl.test").start_as_current_span(

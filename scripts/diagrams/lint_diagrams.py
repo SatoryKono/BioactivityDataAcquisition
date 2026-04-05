@@ -32,6 +32,7 @@ References:
     - docs/**/*.mermaid
     - excludes docs/99-archive/**
 """
+
 from __future__ import annotations
 
 import argparse
@@ -47,9 +48,7 @@ DIAGRAM_DIRS = [
 ]
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 EXCLUDED_PATH_PARTS = {"99-archive"}
-NAMING_PATTERN = re.compile(
-    r"^\d{2}[a-z]?-[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mmd|mermaid)$"
-)
+NAMING_PATTERN = re.compile(r"^\d{2}[a-z]?-[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mmd|mermaid)$")
 PLACEHOLDER_MARKERS = ["placeholder", "TODO", "FIXME", "stub"]
 
 # ── Layout rules (ADR-040 adaptive layout) ────────────────────────────────────
@@ -96,15 +95,24 @@ WARNING_STALE_DAYS = 180
 DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
 # Canonical ADR-040 palette values that must not be flagged by COLOUR-001.
 CANONICAL_PALETTE = {
-    "#f5f3ff", "#7c3aed",  # Domain
-    "#f0fdf4", "#16a34a",  # Application
-    "#fff1f2", "#dc2626",  # Infrastructure
-    "#fff7ed", "#f59e0b",  # Composition / Bronze
-    "#eff6ff", "#2563eb",  # Interfaces
-    "#f1f5f9", "#64748b",  # External
-    "#f8fafc", "#475569",  # Silver
-    "#fefce8", "#ca8a04",  # Gold
-    "#ffe4e6", "#e11d48",  # Quarantine
+    "#f5f3ff",
+    "#7c3aed",  # Domain
+    "#f0fdf4",
+    "#16a34a",  # Application
+    "#fff1f2",
+    "#dc2626",  # Infrastructure
+    "#fff7ed",
+    "#f59e0b",  # Composition / Bronze
+    "#eff6ff",
+    "#2563eb",  # Interfaces
+    "#f1f5f9",
+    "#64748b",  # External
+    "#f8fafc",
+    "#475569",  # Silver
+    "#fefce8",
+    "#ca8a04",  # Gold
+    "#ffe4e6",
+    "#e11d48",  # Quarantine
 }
 # Legacy palette values blocked in style/classDef rules.
 DEPRECATED_PALETTE = {
@@ -212,8 +220,7 @@ def find_diagram_files(base: Path) -> list[Path]:
         f
         for f in list(base.rglob("*.mmd")) + list(base.rglob("*.mermaid"))
         if (
-            not f.name.startswith("_")
-            and not EXCLUDED_PATH_PARTS.intersection(f.parts)
+            not f.name.startswith("_") and not EXCLUDED_PATH_PARTS.intersection(f.parts)
         )
     )
 
@@ -244,8 +251,7 @@ def check_metadata_headers(path: Path, lines: list[str]) -> list[Issue]:
             )
     else:
         has_view = any(
-            line.strip().startswith("%% View:")
-            or line.strip().startswith("%% @view")
+            line.strip().startswith("%% View:") or line.strip().startswith("%% @view")
             for line in lines
         )
         if not has_view:
@@ -302,9 +308,7 @@ def check_placeholder_content(path: Path, lines: list[str]) -> list[Issue]:
 
     # Check for files that are too short to be real diagrams
     non_comment_lines = [
-        line
-        for line in lines
-        if line.strip() and not line.strip().startswith("%%")
+        line for line in lines if line.strip() and not line.strip().startswith("%%")
     ]
     if len(non_comment_lines) < 3:
         issues.append(
@@ -399,10 +403,7 @@ def check_colour_policy(path: Path, lines: list[str]) -> list[Issue]:
             continue
         for color in _HEX_COLOR_RE.findall(line):
             normalized = color.lower()
-            if (
-                normalized in DEPRECATED_PALETTE
-                and normalized not in CANONICAL_PALETTE
-            ):
+            if normalized in DEPRECATED_PALETTE and normalized not in CANONICAL_PALETTE:
                 found.add(normalized)
 
     if found:
@@ -567,8 +568,7 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
             edge_routing = match.group(1).upper()
             break
     allow_polyline = any(
-        "@allow-polyline-routing" in ln or "@allow-polyline" in ln
-        for ln in lines
+        "@allow-polyline-routing" in ln or "@allow-polyline" in ln for ln in lines
     )
 
     if not has_elk and nodes > ELK_ERROR_THRESHOLD:
@@ -697,9 +697,7 @@ def check_linkstyle_index_fragility(path: Path, lines: list[str]) -> list[Issue]
     # Warn on brittle patterns only:
     # - many singleton linkStyle lines (index-by-index mapping), or
     # - many style lines with very low style diversity (typically repetitive copy-paste).
-    if (
-        len(groups) >= 20 and singleton_ratio >= 0.85 and unique_styles <= 3
-    ) or (
+    if (len(groups) >= 20 and singleton_ratio >= 0.85 and unique_styles <= 3) or (
         len(groups) >= 12 and singleton_ratio == 1.0 and unique_styles == 1
     ):
         issues.append(
@@ -946,6 +944,7 @@ def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
     sequenceDiagram files only.  classDiagram and other types are skipped.
     """
     import sys as _sys
+
     _sys.path.insert(0, str(Path(__file__).parent))
     try:
         from prune_orphan_nodes import (
@@ -1088,12 +1087,8 @@ def format_text(result: LintResult) -> str:
         for file, issues in sorted(by_file.items()):
             lines.append(f"  {file}")
             for issue in issues:
-                marker = {"ERROR": "E", "WARNING": "W", "INFO": "I"}[
-                    issue.severity
-                ]
-                lines.append(
-                    f"    [{marker}] {issue.rule}: {issue.message}"
-                )
+                marker = {"ERROR": "E", "WARNING": "W", "INFO": "I"}[issue.severity]
+                lines.append(f"    [{marker}] {issue.rule}: {issue.message}")
             lines.append("")
 
     lines.append(f"Files checked: {result.files_checked}")

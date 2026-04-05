@@ -21,13 +21,11 @@ from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads impo
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
 )
-from bioetl.composition.services.versioning import get_git_commit
-from bioetl.composition.services.versioning import compute_config_hash
+from bioetl.composition.services.versioning import compute_config_hash, get_git_commit
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 
 if TYPE_CHECKING:
-
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
         CompositeInfrastructureContext,
@@ -173,7 +171,6 @@ def _build_run_ledger_service(
         contract_version=contract_version or None,
         composite_run_id=infra_context.run_id,
     )
-
 
 
 def _resolve_effective_config_hash(config: CompositeConfig) -> str:

@@ -38,9 +38,7 @@ class PipelineContractPolicy(BaseModel):
     rename_map: dict[str, str] = Field(default_factory=dict)
     contract_ref: str = Field(default="")
     active_version: str = Field(default="")
-    rollout: PipelineContractRollout = Field(
-        default_factory=PipelineContractRollout
-    )
+    rollout: PipelineContractRollout = Field(default_factory=PipelineContractRollout)
 
     @property
     def rollout_mode(self) -> str:
@@ -98,9 +96,7 @@ class PipelineContractPolicy(BaseModel):
         if self.active_version not in self.rollout.read_order:
             raise ValueError("active_version must be present in rollout.read_order")
         if self.active_version not in self.rollout.write_versions:
-            raise ValueError(
-                "active_version must be present in rollout.write_versions"
-            )
+            raise ValueError("active_version must be present in rollout.write_versions")
         if len(self.rollout.read_order) != len(set(self.rollout.read_order)):
             raise ValueError("rollout.read_order must not contain duplicate versions")
         if len(self.rollout.write_versions) != len(set(self.rollout.write_versions)):

@@ -1,8 +1,8 @@
 """Script to inject Grafana variables and fix PromQL queries for BioETL pipelines."""
 
 import json
-from pathlib import Path
 import re
+from pathlib import Path
 
 PIPELINE_VAR = {
     "allValue": None,
@@ -17,7 +17,7 @@ PIPELINE_VAR = {
     "options": [],
     "query": {
         "query": "label_values(bioetl_records_processed_total, pipeline)",
-        "refId": "StandardVariableQuery"
+        "refId": "StandardVariableQuery",
     },
     "refresh": 1,
     "regex": "",
@@ -27,14 +27,14 @@ PIPELINE_VAR = {
     "tags": [],
     "tagsQuery": "",
     "type": "query",
-    "useTags": False
+    "useTags": False,
 }
 
 RUN_ID_VAR = {
     "allValue": None,
     "current": {},
     "datasource": "Prometheus",
-    "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+    "definition": 'label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_id)',
     "hide": 0,
     "includeAll": True,
     "label": "Run ID",
@@ -42,8 +42,8 @@ RUN_ID_VAR = {
     "name": "run_id",
     "options": [],
     "query": {
-        "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
-        "refId": "StandardVariableQuery"
+        "query": 'label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_id)',
+        "refId": "StandardVariableQuery",
     },
     "refresh": 1,
     "regex": "",
@@ -53,8 +53,9 @@ RUN_ID_VAR = {
     "tags": [],
     "tagsQuery": "",
     "type": "query",
-    "useTags": False
+    "useTags": False,
 }
+
 
 def fix_dashboard(path):
     print(f"Processing {path}...")
@@ -76,32 +77,38 @@ def fix_dashboard(path):
 
     for panel in panels:
         targets = panel.get("targets", [])
-        if not targets: continue
-        
+        if not targets:
+            continue
+
         for target in targets:
             expr = target.get("expr", "")
-            if not expr or ("bioetl_" not in expr): 
+            if not expr or ("bioetl_" not in expr):
                 continue
-            
-            # Complex replacement: 
-            metrics_found = re.findall(r'bioetl_[a-z0-9_]+', expr)
+
+            # Complex replacement:
+            metrics_found = re.findall(r"bioetl_[a-z0-9_]+", expr)
             new_expr = expr
-            
+
             for m in metrics_found:
                 # If metric already has $pipeline filter, skip it
-                if '$pipeline' in new_expr:
+                if "$pipeline" in new_expr:
                     continue
-                    
+
                 if f"{m}{{" in new_expr:
-                    new_expr = new_expr.replace(f"{m}{{", f"{m}{{pipeline=~\"$pipeline\", run_id=~\"$run_id\", ")
+                    new_expr = new_expr.replace(
+                        f"{m}{{", f'{m}{{pipeline=~"$pipeline", run_id=~"$run_id", '
+                    )
                 else:
-                    new_expr = new_expr.replace(m, f"{m}{{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}}")
-            
+                    new_expr = new_expr.replace(
+                        m, f'{m}{{pipeline=~"$pipeline", run_id=~"$run_id"}}'
+                    )
+
             new_expr = new_expr.replace(", }", "}").replace(",,", ",")
             target["expr"] = new_expr
 
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
+
 
 if __name__ == "__main__":
     dashboard_dir = Path("grafana/dashboards")

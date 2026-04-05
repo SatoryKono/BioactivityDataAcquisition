@@ -33,6 +33,11 @@ python -m scripts.diagnostics <command> [args...]
 | `debug-storage` | When storage operations fail; checks writability of data storage directories | Manual, troubleshooting |
 | `inspect-vcr` | When VCR cassette contents need examination for debugging test failures | Manual, troubleshooting |
 
+`inspect-vcr` is intentionally a temporary diagnostic surface backed by
+`_tmp_inspect_vcr.py`; repository-local references to it should be treated as
+legacy troubleshooting evidence rather than as proof of a stable long-term
+workflow command.
+
 ## Other Files
 
 | File | Description |

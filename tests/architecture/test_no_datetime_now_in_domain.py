@@ -70,9 +70,7 @@ class TestNoDatetimeNowInDomain:
         base = _domain_base()
         return list(base.rglob("*.py"))
 
-    def test_no_datetime_now_in_domain(
-        self, domain_python_files: list[Path]
-    ) -> None:
+    def test_no_datetime_now_in_domain(self, domain_python_files: list[Path]) -> None:
         """Domain MUST NOT call datetime.now() outside sanctioned seams."""
         violations: list[str] = []
 
@@ -95,8 +93,7 @@ class TestNoDatetimeNowInDomain:
     ) -> None:
         """Verify path-based domain exceptions remain explicit and basename-unique."""
         existing_paths = {
-            _relative_domain_path(py_file)
-            for py_file in domain_python_files
+            _relative_domain_path(py_file) for py_file in domain_python_files
         }
         missing = ALLOWED_PATHS - existing_paths
 
@@ -125,8 +122,7 @@ class TestNoDatetimeNowInDomain:
     ) -> None:
         """Force removal of allowlist entries once datetime usage is refactored away."""
         file_by_path = {
-            _relative_domain_path(py_file): py_file
-            for py_file in domain_python_files
+            _relative_domain_path(py_file): py_file for py_file in domain_python_files
         }
         stale_exemptions = [
             allowed_path

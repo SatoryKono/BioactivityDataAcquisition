@@ -528,9 +528,10 @@ class TestFSMSeedFailure:
         error = run_ledger_service.record_run_exception.call_args.kwargs["error"]
         assert isinstance(error, RuntimeError)
         assert str(error) == "boom"
-        assert run_ledger_service.record_run_exception.call_args.kwargs[
-            "metrics_snapshot"
-        ] == {}
+        assert (
+            run_ledger_service.record_run_exception.call_args.kwargs["metrics_snapshot"]
+            == {}
+        )
         run_ledger_service.record_run_failed.assert_not_called()
 
 

@@ -26,10 +26,7 @@ except ImportError:  # pragma: no cover - direct script execution
 SVG_NS = "http://www.w3.org/2000/svg"
 ET.register_namespace("", SVG_NS)
 
-SVG_DIRS = [
-    render_dir(family, "svg")
-    for family in SOURCE_FAMILIES
-]
+SVG_DIRS = [render_dir(family, "svg") for family in SOURCE_FAMILIES]
 
 
 def _local_name(tag: str) -> str:
@@ -74,11 +71,17 @@ def main() -> int:
         description="Remove foreignObject elements from Mermaid SVG files.",
     )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--check", action="store_true", help="Exit 1 if stripping is needed")
+    group.add_argument(
+        "--check", action="store_true", help="Exit 1 if stripping is needed"
+    )
     group.add_argument("--fix", action="store_true", help="Write changes in place")
     group.add_argument("--dry-run", action="store_true", help="Show what would change")
-    parser.add_argument("-f", "--file", type=Path, action="append", help="Specific SVG file(s)")
-    parser.add_argument("--dir", type=Path, action="append", help="Specific directory(ies)")
+    parser.add_argument(
+        "-f", "--file", type=Path, action="append", help="Specific SVG file(s)"
+    )
+    parser.add_argument(
+        "--dir", type=Path, action="append", help="Specific directory(ies)"
+    )
     args = parser.parse_args()
 
     mode = "check" if args.check else ("dry-run" if args.dry_run else "fix")

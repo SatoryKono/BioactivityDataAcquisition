@@ -215,16 +215,16 @@ class HealthCheckProviderMixin(HealthCheckMixin):
     async def health_check(self) -> HealthStatus:
         """Check API health status using Template Method pattern.
 
-        Calls _probe_health() for provider-specific probe, falling back
-        to _fallback_health_status() on any exception.
+            Calls _probe_health() for provider-specific probe, falling back
+            to _fallback_health_status() on any exception.
 
-        Observability (via HealthCheckMixin):
-    - HEALTHY: DEBUG log, healthy counter, latency histogram
-    - DEGRADED: WARNING log, degraded counter, latency histogram
-    - FAILED/UNHEALTHY: WARNING log with details, failure counter, latency histogram
+            Observability (via HealthCheckMixin):
+        - HEALTHY: DEBUG log, healthy counter, latency histogram
+        - DEGRADED: WARNING log, degraded counter, latency histogram
+        - FAILED/UNHEALTHY: WARNING log with details, failure counter, latency histogram
 
-        Returns:
-            HealthStatus from probe or fallback.
+            Returns:
+                HealthStatus from probe or fallback.
 
         """
         ctx = self._start_health_check()

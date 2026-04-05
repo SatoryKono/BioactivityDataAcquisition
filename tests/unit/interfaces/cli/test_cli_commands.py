@@ -1663,7 +1663,9 @@ def test_run_all_with_cli_policy_wires_registry_and_cli_seams() -> None:
             "resolve_context_registry",
             return_value=registry,
         ) as mock_resolve_registry,
-        patch.object(run_all_module, "run_all_command_flow") as mock_run_all_command_flow,
+        patch.object(
+            run_all_module, "run_all_command_flow"
+        ) as mock_run_all_command_flow,
     ):
         run_all_module._run_all_with_cli_policy(ctx, cli_input)
 
@@ -1672,7 +1674,10 @@ def test_run_all_with_cli_policy_wires_registry_and_cli_seams() -> None:
     kwargs = mock_run_all_command_flow.call_args.kwargs
     assert kwargs["cli_input"] is cli_input
     assert kwargs["registry"] is registry
-    assert kwargs["destructive_confirmation"] is run_all_module._handle_destructive_confirmation
+    assert (
+        kwargs["destructive_confirmation"]
+        is run_all_module._handle_destructive_confirmation
+    )
     assert kwargs["listing_emitter"] is run_all_module.emit_run_all_listing
     assert kwargs["preview_emitter"] is run_all_module.emit_run_all_preview
     assert kwargs["health_info_presenter"] is run_all_module.echo_health_server_info

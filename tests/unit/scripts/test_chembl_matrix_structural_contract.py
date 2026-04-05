@@ -40,9 +40,7 @@ def test_required_typed_field_gets_presence_and_type_quarantine_tokens() -> None
         "structural:presence_required",
         "structural:type_strict",
     )
-    assert semantics.validation_fail_action_prefixes == (
-        "quarantine_filter_rejection",
-    )
+    assert semantics.validation_fail_action_prefixes == ("quarantine_filter_rejection",)
     assert semantics.filter_fail_sink == QUARANTINE
 
 
@@ -83,9 +81,7 @@ def test_optional_nonnullable_typed_field_gets_quarantine_semantics() -> None:
     assert semantics.silver_validation_tokens == (
         "structural:type_proposed_null_warn_error_then_quarantine",
     )
-    assert semantics.silver_normalisation_tokens == (
-        "proposed_null_then_quarantine",
-    )
+    assert semantics.silver_normalisation_tokens == ("proposed_null_then_quarantine",)
     assert semantics.validation_fail_action_prefixes == (
         "propose_null_warn_error_then_quarantine",
     )
@@ -118,7 +114,9 @@ def test_resolve_required_display_preserves_richer_non_optional_label() -> None:
         resolve_required_display("runtime, filters, schema", optional=False)
         == "runtime, filters, schema"
     )
-    assert resolve_required_display("optional", optional=False) == DEFAULT_REQUIRED_LABEL
+    assert (
+        resolve_required_display("optional", optional=False) == DEFAULT_REQUIRED_LABEL
+    )
     assert resolve_required_display("", optional=False) == DEFAULT_REQUIRED_LABEL
     assert resolve_required_display("filters, schema", optional=True) == "optional"
 
@@ -136,11 +134,15 @@ def test_overlay_tokens_are_added_to_structural_validation() -> None:
         is_framework_field=False,
     )
 
-    assert STRUCTURAL_CUSTOM_EMPTY_SEMANTICS_VALIDATION in semantics.silver_validation_tokens
-    assert STRUCTURAL_NO_STRING_COERCION_VALIDATION in semantics.silver_validation_tokens
     assert (
-        STRUCTURAL_BOOLEAN_VOCABULARY_VALIDATION
+        STRUCTURAL_CUSTOM_EMPTY_SEMANTICS_VALIDATION
         in semantics.silver_validation_tokens
+    )
+    assert (
+        STRUCTURAL_NO_STRING_COERCION_VALIDATION in semantics.silver_validation_tokens
+    )
+    assert (
+        STRUCTURAL_BOOLEAN_VOCABULARY_VALIDATION in semantics.silver_validation_tokens
     )
 
 

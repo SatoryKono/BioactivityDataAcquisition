@@ -1381,7 +1381,9 @@ class TestPublicationTermTransformer:
             "term_type": "  KEYWORD  ",
         }
 
-        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        pre_silver = await transformer.transform_pre_silver(
+            mock_context, record, index=0
+        )
         assert isinstance(pre_silver, PreSilverRecord)
         staged_result = RecordNormalizationProcessor(
             provider=transformer.provider,

@@ -144,12 +144,20 @@ def test_finalize_pre_silver_attaches_active_and_versioned_content_hashes() -> N
     )
 
     assert silver_record is not None
-    assert silver_record["content_hash"] == silver_record["_content_hashes_by_version"]["2.0.0"]
-    assert silver_record["_content_hashes_by_version"]["1.0.0"] != silver_record["content_hash"]
+    assert (
+        silver_record["content_hash"]
+        == silver_record["_content_hashes_by_version"]["2.0.0"]
+    )
+    assert (
+        silver_record["_content_hashes_by_version"]["1.0.0"]
+        != silver_record["content_hash"]
+    )
 
 
 @pytest.mark.unit
-def test_finalize_pre_silver_skips_versioned_hash_projection_when_rollout_does_not_affect_hash() -> None:
+def test_finalize_pre_silver_skips_versioned_hash_projection_when_rollout_does_not_affect_hash() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="crossref",
         content_hash_policy_by_version=ContentHashPolicyByVersion(

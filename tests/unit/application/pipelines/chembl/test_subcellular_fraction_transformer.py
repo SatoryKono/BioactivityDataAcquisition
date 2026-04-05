@@ -259,7 +259,9 @@ class TestSubcellularFractionTransformer:
             "assay_subcellular_fraction": "  Microsomes  ",
         }
 
-        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        pre_silver = await transformer.transform_pre_silver(
+            mock_context, record, index=0
+        )
         assert isinstance(pre_silver, PreSilverRecord)
         staged_result = RecordNormalizationProcessor(
             provider=transformer.provider,
@@ -268,7 +270,10 @@ class TestSubcellularFractionTransformer:
 
         assert staged_result is not None
         assert legacy_result is not None
-        assert legacy_result["subcellular_fraction"] == staged_result["subcellular_fraction"]
+        assert (
+            legacy_result["subcellular_fraction"]
+            == staged_result["subcellular_fraction"]
+        )
         assert legacy_result["example_assay_id"] == staged_result["example_assay_id"]
         assert legacy_result["assay_count"] == staged_result["assay_count"]
         assert legacy_result["entity_id"] == staged_result["entity_id"]

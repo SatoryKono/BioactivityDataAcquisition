@@ -10,7 +10,9 @@ import pytest
 @pytest.mark.unit
 def test_push_metrics_to_gateway_delegates_to_execution_api() -> None:
     """Run-composite helpers should lazily delegate metrics pushing."""
-    from bioetl.interfaces.cli.commands.domains.composite import support as helpers_module
+    from bioetl.interfaces.cli.commands.domains.composite import (
+        support as helpers_module,
+    )
 
     with patch(
         "bioetl.composition.execution_api.push_metrics_to_gateway",

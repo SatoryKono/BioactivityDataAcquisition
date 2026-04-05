@@ -25,7 +25,7 @@ def _get_cli():
     return cli
 
 
-def _create_in_memory_checkpoint() -> "InMemoryCheckpoint":
+def _create_in_memory_checkpoint() -> InMemoryCheckpoint:
     from tests.fakes.checkpoint_fake import InMemoryCheckpoint
 
     return InMemoryCheckpoint()

@@ -140,7 +140,9 @@ async def _run_execution_cycle_stages(
     context: _ExecutionCycleContext,
 ) -> None:
     """Execute canonical extract/postrun/checkpoint stages from one context."""
-    await _run_tracked_stages(host, _execution_cycle_stages(host, offset=context.offset))
+    await _run_tracked_stages(
+        host, _execution_cycle_stages(host, offset=context.offset)
+    )
 
 
 async def run_managed_pipeline(host: _PipelineRunnerExecutionHostProtocol) -> None:

@@ -169,10 +169,15 @@ def test_diagnostics_helpers_summarize_results_and_policies() -> None:
     assert report["passed_checks"] == 2
     assert report["failed_checks"] == 1
     assert report["pass_rates"]["fixture_governance"] == 0.5
-    assert report["enforcement_policies"]["fixture_governance"]["current_stage"] == "soft_fail"
+    assert (
+        report["enforcement_policies"]["fixture_governance"]["current_stage"]
+        == "soft_fail"
+    )
 
 
-def test_engine_register_result_generate_report_and_block_ci_only_on_hard_fail() -> None:
+def test_engine_register_result_generate_report_and_block_ci_only_on_hard_fail() -> (
+    None
+):
     engine = StagedEnforcementEngine()
     engine.results = []
 

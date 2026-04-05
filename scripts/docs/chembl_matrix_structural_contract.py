@@ -25,7 +25,9 @@ DEFAULT_CONTRACT_EXPORT: Final[Path] = (
     PROJECT_ROOT / "docs/reports/generated/chembl_matrix_structural_contract_v1.json"
 )
 CHEMBL_SOURCE_DB: Final[str] = "ChEMBL"
-BUSINESS_TYPED_FIELDS: Final[frozenset[str]] = frozenset({"integer", "float", "boolean"})
+BUSINESS_TYPED_FIELDS: Final[frozenset[str]] = frozenset(
+    {"integer", "float", "boolean"}
+)
 STRUCTURAL_PRESENCE_GUARD: Final[str] = "structural_presence_guard"
 STRUCTURAL_TYPE_GUARD: Final[str] = "structural_type_guard"
 STRUCTURAL_PRESENCE_VALIDATION: Final[str] = "structural:presence_required"
@@ -37,9 +39,7 @@ STRUCTURAL_OPTIONAL_NONNULLABLE_VALIDATION: Final[str] = (
 STRUCTURAL_CUSTOM_EMPTY_SEMANTICS_VALIDATION: Final[str] = (
     "structural:custom_empty_semantics"
 )
-STRUCTURAL_NO_STRING_COERCION_VALIDATION: Final[str] = (
-    "structural:no_string_coercion"
-)
+STRUCTURAL_NO_STRING_COERCION_VALIDATION: Final[str] = "structural:no_string_coercion"
 STRUCTURAL_BOOLEAN_VOCABULARY_VALIDATION: Final[str] = (
     "structural:boolean_vocabulary_override"
 )
@@ -96,7 +96,9 @@ def chembl_pipeline_names() -> list[str]:
     return sorted({config.pipeline_name for config in CHEMBL_PIPELINE_CONFIGS})
 
 
-def contract_lookup_key(source_db: str, source_table: str, silver_column: str) -> tuple[str, str, str]:
+def contract_lookup_key(
+    source_db: str, source_table: str, silver_column: str
+) -> tuple[str, str, str]:
     """Normalize workbook/export row identity for lookups."""
     return (
         source_db.strip().lower(),
@@ -184,9 +186,7 @@ def build_structural_workbook_semantics(
                 *overlay_validation_tokens,
             ),
             silver_normalisation_tokens=(PROPOSED_NULL_THEN_QUARANTINE,),
-            validation_fail_action_prefixes=(
-                PROPOSE_NULL_WARN_ERROR_THEN_QUARANTINE,
-            ),
+            validation_fail_action_prefixes=(PROPOSE_NULL_WARN_ERROR_THEN_QUARANTINE,),
             filter_fail_sink=QUARANTINE,
         )
 
@@ -282,7 +282,9 @@ def serialize_runtime_contract_rows(
     return [asdict(row) for row in rows]
 
 
-def write_runtime_contract_export(path: Path = DEFAULT_CONTRACT_EXPORT) -> list[MatrixStructuralContractRow]:
+def write_runtime_contract_export(
+    path: Path = DEFAULT_CONTRACT_EXPORT,
+) -> list[MatrixStructuralContractRow]:
     """Build and persist the canonical ChEMBL runtime structural contract export."""
     rows = build_runtime_contract_rows()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -290,11 +292,15 @@ def write_runtime_contract_export(path: Path = DEFAULT_CONTRACT_EXPORT) -> list[
         "version": 1,
         "rows": serialize_runtime_contract_rows(rows),
     }
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return rows
 
 
-def load_runtime_contract_export(path: Path = DEFAULT_CONTRACT_EXPORT) -> list[MatrixStructuralContractRow]:
+def load_runtime_contract_export(
+    path: Path = DEFAULT_CONTRACT_EXPORT,
+) -> list[MatrixStructuralContractRow]:
     """Load the persisted runtime structural contract export."""
     payload = json.loads(path.read_text(encoding="utf-8"))
     raw_rows = payload.get("rows", [])
@@ -310,7 +316,9 @@ def load_runtime_contract_export(path: Path = DEFAULT_CONTRACT_EXPORT) -> list[M
                 physical_type=str(raw_row["physical_type"]),
                 nullable=bool(raw_row["nullable"]),
                 optional=bool(raw_row["optional"]),
-                optionality_sources=tuple(str(source) for source in raw_row["optionality_sources"]),
+                optionality_sources=tuple(
+                    str(source) for source in raw_row["optionality_sources"]
+                ),
                 empty_as_missing=raw_row.get("empty_as_missing"),
                 coercion_policy=str(raw_row.get("coercion_policy", "default")),
                 boolean_true_values=tuple(
@@ -320,7 +328,9 @@ def load_runtime_contract_export(path: Path = DEFAULT_CONTRACT_EXPORT) -> list[M
                     str(token) for token in raw_row.get("boolean_false_values", [])
                 ),
                 is_framework_field=bool(raw_row["is_framework_field"]),
-                silver_filter_tokens=tuple(str(token) for token in raw_row["silver_filter_tokens"]),
+                silver_filter_tokens=tuple(
+                    str(token) for token in raw_row["silver_filter_tokens"]
+                ),
                 silver_validation_tokens=tuple(
                     str(token) for token in raw_row["silver_validation_tokens"]
                 ),

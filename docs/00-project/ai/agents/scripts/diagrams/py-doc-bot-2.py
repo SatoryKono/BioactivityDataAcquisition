@@ -165,7 +165,7 @@ def main() -> int:
     for input_md in input_paths:
         try:
             output_docx = render_one(input_md=input_md, reference_doc=reference_doc)
-        except Exception as exc:  # noqa: BLE001 - CLI boundary
+        except Exception as exc:
             print(f"[ERROR] {exc}", file=sys.stderr)
             return 1
         rendered.append(output_docx)
