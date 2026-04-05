@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.0.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-04-05'
 
 ______________________________________________________________________
 
@@ -149,6 +149,18 @@ Pushgateway publication на завершении run. Это позволяет
   DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
   Tempo handoff уже ограничен текущими `$pipeline/$run_type`.
 
+#### Silver Filter Rejects Handoff
+
+- Используйте `1. Overview` или `2. Runtime` как summary surface, чтобы
+  подтвердить spike по `Silver Filter Rejects` в активном Grafana time range.
+- После подтверждения переходите в `4. Data Quality`, где
+  `Top Silver Reject Reasons` и `Top Silver Reject Fields` дают bounded cause
+  summary без raw quarantine text.
+- Если нужен exact record-level drilldown, stable reason signature или
+  inspection конкретных записей, переходите в quarantine CLI:
+  `bioetl quarantine stats --pipeline <pipeline> --silver-filter-only` и
+  `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --limit 20`.
+
 ## 3. Alert-backed сигналы
 
 Для shipped observability baseline дополнительно отслеживаются:
@@ -213,6 +225,12 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
 ## 5. Что делать если... (Runbook Lite)
 
 - **График "Error Rate" покраснел**: Используйте `structlog` для получения деталей исключений.
+- **Вырос `Silver Filter Rejects`**:
+  1. Подтвердите spike в `1. Overview` или `2. Runtime`.
+  1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
+     `Top Silver Reject Fields`.
+  1. Если нужна exact причина по записям, используйте quarantine CLI с
+     `--silver-filter-only`.
 - **Дашборд пустой**:
   1. Проверьте, что пайплайн-процесс запущен и не завершился с ошибкой.
   1. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).

@@ -55,6 +55,13 @@ composite source selections и fragment outcomes по `layer/status`.
   bounded cause breakdown.
 - Для bounded cause summary используйте `Top Silver Reject Reasons` и
   `Top Silver Reject Fields` в `bioetl-dq-v2`.
+- Короткая triage sequence:
+  1. Начните с `1. Overview` или `2. Runtime`, чтобы подтвердить spike по
+     `Silver Filter Rejects` в текущем time range.
+  2. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
+     `Top Silver Reject Fields`, чтобы сузить проблему до bounded cause summary.
+  3. Перейдите в quarantine CLI, если нужен exact record-level drilldown,
+     stable reason signature или inspection конкретных записей.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
   - в каком `$pipeline` проблема сильнее;

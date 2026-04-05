@@ -123,6 +123,16 @@ bioetl quarantine purge --pipeline {pipeline-name}
 - Use CLI/quarantine for record-level causes and exact reason signatures. Grafana is
   the summary surface; quarantine CLI is the drilldown surface.
 
+### Silver Rejects Triage Sequence
+
+1. Open `1. Overview` or `2. Runtime` and confirm that `Silver Filter Rejects`
+   is actually spiking in the active Grafana time window.
+2. Pivot to `4. Data Quality` and inspect `Top Silver Reject Reasons` plus
+   `Top Silver Reject Fields` to reduce the issue to a bounded cause summary.
+3. Run `bioetl quarantine stats ... --silver-filter-only` and
+   `bioetl quarantine inspect ... --silver-filter-only` when you need exact
+   record-level evidence, stable reason signatures, or per-record payload context.
+
 ### Retention
 
 - Quarantine data is retained for **30 days** by default. Cleanup is executed via explicit purge operations (`bioetl quarantine purge`).
