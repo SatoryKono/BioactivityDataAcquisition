@@ -11,21 +11,21 @@ def _project_root() -> Path:
 
 
 def _skill_files(root: Path) -> list[Path]:
-    return sorted((root / ".claude" / "skills").glob("*/SKILL.md"))
+    return sorted((root / ".codex" / "skills").glob("*/SKILL.md"))
 
 
 def test_codex_skills_must_not_reference_removed_codex_agents_dir() -> None:
-    """Prevent regressions to deprecated `.claude/agents` paths."""
+    """Prevent regressions to deprecated `.codex/agents` paths."""
     root = _project_root()
     offenders: list[str] = []
 
     for skill_path in _skill_files(root):
         content = skill_path.read_text(encoding="utf-8")
-        if ".claude/agents/" in content:
+        if ".codex/agents/" in content:
             offenders.append(skill_path.relative_to(root).as_posix())
 
     assert offenders == [], (
-        "Deprecated '.claude/agents/' references found in skill files: "
+        "Deprecated '.codex/agents/' references found in skill files: "
         + ", ".join(offenders)
     )
 

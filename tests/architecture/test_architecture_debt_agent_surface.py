@@ -6,9 +6,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-CODEX_AGENT = ROOT / ".claude" / "agents" / "py-architecture-debt-bot.md"
+CODEX_AGENT = ROOT / ".codex" / "agents" / "py-architecture-debt-bot.md"
 CLAUDE_AGENT = ROOT / ".claude" / "agents" / "py-architecture-debt-bot.md"
-SKILL_FILE = ROOT / ".claude" / "skills" / "py-architecture-debt-bot" / "SKILL.md"
+SKILL_FILE = ROOT / ".codex" / "skills" / "py-architecture-debt-bot" / "SKILL.md"
 PROMPT_FILES = (
     ROOT
     / "docs"
