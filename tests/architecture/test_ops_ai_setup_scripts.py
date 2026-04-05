@@ -14,7 +14,7 @@ def _project_root() -> Path:
 def test_setup_agents_dry_run_lists_expected_agent_entries(tmp_path: Path) -> None:
     """setup_agents dry-run should enumerate the agent surface it will sync."""
     root = _project_root()
-    env = os.environ | {"CODEX_HOME": str(tmp_path / ".codex-home")}
+    env = os.environ | {"CODEX_HOME": str(tmp_path / ".claude-home")}
 
     result = subprocess.run(
         ["bash", "scripts/ops/setup_agents.sh", "--dry-run"],
@@ -28,8 +28,7 @@ def test_setup_agents_dry_run_lists_expected_agent_entries(tmp_path: Path) -> No
     assert result.returncode == 0, result.stderr
     assert "Would sync:" in result.stdout
     assert "ORCHESTRATION.md" in result.stdout
-    assert "py-test-bot.md" in result.stdout
-    assert "subagents" in result.stdout
+    assert "py-test-swarm.md" in result.stdout
 
 
 def test_setup_skills_dry_run_includes_paired_agent_sync_by_default(
@@ -37,7 +36,7 @@ def test_setup_skills_dry_run_includes_paired_agent_sync_by_default(
 ) -> None:
     """setup_skills should announce paired agent sync unless disabled."""
     root = _project_root()
-    env = os.environ | {"CODEX_HOME": str(tmp_path / ".codex-home")}
+    env = os.environ | {"CODEX_HOME": str(tmp_path / ".claude-home")}
 
     result = subprocess.run(
         ["bash", "scripts/ops/setup_skills.sh", "--dry-run"],
@@ -50,9 +49,9 @@ def test_setup_skills_dry_run_includes_paired_agent_sync_by_default(
 
     assert result.returncode == 0, result.stderr
     assert "Would sync:" in result.stdout
-    assert "py-test-bot ->" in result.stdout
+    assert "test-automator.md ->" in result.stdout
     assert "would also sync paired agents" in result.stdout
-    assert "py-test-bot.md" in result.stdout
+    assert "py-test-swarm.md" in result.stdout
 
 
 def test_setup_plugins_uses_repo_root_from_ops_directory() -> None:
