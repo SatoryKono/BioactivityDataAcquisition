@@ -413,18 +413,19 @@ class TestMainEntryPoint:
     """Tests for main() entry point."""
 
     @patch("bioetl.interfaces.cli.main.cli")
-    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    def test_main_registers_pipelines(self, mock_register, mock_cli):
-        """Test that main() registers all pipelines before CLI."""
+    @patch("bioetl.interfaces.cli.main._build_main_registry")
+    def test_main_does_not_prebuild_registry(self, mock_build_registry, mock_cli):
+        """Test that main() avoids eager registry construction."""
         main()
 
-        mock_register.assert_called_once()
-        mock_cli.assert_called_once()
+        mock_build_registry.assert_not_called()
+        mock_cli.assert_called_once_with()
 
     @patch("bioetl.interfaces.cli.main.cli")
-    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    def test_main_calls_cli(self, mock_register, mock_cli):
+    @patch("bioetl.interfaces.cli.main._build_main_registry")
+    def test_main_calls_cli(self, mock_build_registry, mock_cli):
         """Test that main() invokes CLI group."""
         main()
 
-        mock_cli.assert_called_once()
+        mock_build_registry.assert_not_called()
+        mock_cli.assert_called_once_with()
