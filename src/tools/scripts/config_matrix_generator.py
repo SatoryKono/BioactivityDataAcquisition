@@ -90,7 +90,7 @@ def main() -> None:
     partial = [k for k in all_keys if k not in common]
     print(f"Inconsistent parameters: {len(partial)}")
 
-    report_path = Path("docs/config_discrepancies_report.md")
+    report_path = Path("docs/config-discrepancies-report.md")
     with report_path.open("w", encoding="utf-8") as f:
         f.write("# Config Discrepancies Report\n\n")
         f.write(f"Total configs: {len(configs)}\n")

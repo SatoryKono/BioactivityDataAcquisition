@@ -66,6 +66,10 @@ declare -A SHARD_WORKERS_OVERRIDE=(
     ["S8-crosscutting-governance"]="0"
 )
 
+declare -A SHARD_EXTRA_PYTEST_ARGS=(
+    ["S7-crosscutting-architecture"]="--timeout=300"
+)
+
 usage() {
     cat <<'EOF'
 Usage:
@@ -350,11 +354,15 @@ run_wave() {
         local coverage_file="$COVERAGE_DIR/.coverage.$shard"
         local log_file="$COVERAGE_DIR/logs/$shard.log"
         local -a cmd=(bash "$RUNNER")
+        local shard_extra_args_string="${SHARD_EXTRA_PYTEST_ARGS[$shard]:-}"
         local shard_workers
         local path
+        local extra_arg
 
         # shellcheck disable=SC2206
         local -a paths=( $paths_string )
+        # shellcheck disable=SC2206
+        local -a shard_extra_args=( $shard_extra_args_string )
         cmd+=("${paths[@]}")
         shard_workers="$(workers_for_shard "$shard")"
         if [[ "$shard_workers" =~ ^[0-9]+$ ]] && (( shard_workers > 0 )); then
@@ -366,6 +374,7 @@ run_wave() {
         if [[ "$DISABLE_COVERAGE" == "1" ]]; then
             cmd+=(--no-cov)
         fi
+        cmd+=("${shard_extra_args[@]}")
         cmd+=("${EXTRA_PYTEST_ARGS[@]}")
 
         if [[ "$DRY_RUN" == "1" ]]; then
