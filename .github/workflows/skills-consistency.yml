@@ -8,13 +8,6 @@ permissions:
 
 on:
   push:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.claude/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
     branches: [ main ]
     paths:
       - ".codex/skills/**"
@@ -27,13 +20,6 @@ on:
       - "scripts/ops/check_ai_skills_layout.sh"
       - ".github/workflows/skills-consistency.yml"
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.claude/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
     branches: [ main ]
     paths:
       - ".codex/skills/**"
@@ -52,7 +38,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Verify docs/00-project/ai/skills/local mirror
         run: bash scripts/ops/check_skills_mirror.sh --check
