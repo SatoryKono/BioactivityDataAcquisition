@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Superseded (signal handlers removed; shutdown handled in canonical CLI domain command modules and application/core/lifecycle/shutdown.py)
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-008: Graceful Shutdown Strategy
 
@@ -14,6 +17,7 @@ Last verified: '2026-03-30'
 **Status:** Superseded (signal handlers removed; shutdown handled in canonical CLI domain command modules and application/core/lifecycle/shutdown.py)
 **Last updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
+
 > **Superseded:** Signal handlers удалены 2025-12-31.
 > Graceful shutdown обрабатывается в canonical CLI domain command modules
 > (`interfaces/cli/commands/domains/run/command.py`,
@@ -244,13 +248,13 @@ The 5-minute grace period allows:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-008-graceful-shutdown-strategy.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Superseded (signal handlers removed; shutdown handled in canonical CLI domain command modules and application/core/lifecycle/shutdown.py)` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                                                                                                                    |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-008-graceful-shutdown-strategy.md`                                                                                                     |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Superseded (signal handlers removed; shutdown handled in canonical CLI domain command modules and application/core/lifecycle/shutdown.py)` |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                                                                                                                            |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`                                                                                                        |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                                                                                                                                |
 
 ## Rollout
 

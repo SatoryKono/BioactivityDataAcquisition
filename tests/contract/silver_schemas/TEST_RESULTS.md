@@ -4,7 +4,7 @@
 **Test Suite Version:** 2.0.0 (All aspirational failures resolved)
 **Total Tests:** 536 (451 passed, 0 failed, 85 skipped)
 
----
+______________________________________________________________________
 
 ## Summary
 
@@ -12,22 +12,23 @@ The Silver Schema Contract Test Suite has achieved **100% pass rate** with **451
 
 ### Test Results
 
-| Category | Tests | Status |
-|----------|-------|--------|
-| **Passed** | 451 | ✅ **100%** 🎉 |
-| **Failed** | 0 | ✅ All resolved |
-| **Skipped** | 85 | ℹ️ Conditional |
-| **Total** | 536 | 🎯 Production ready |
+| Category    | Tests | Status              |
+| ----------- | ----- | ------------------- |
+| **Passed**  | 451   | ✅ **100%** 🎉      |
+| **Failed**  | 0     | ✅ All resolved     |
+| **Skipped** | 85    | ℹ️ Conditional      |
+| **Total**   | 536   | 🎯 Production ready |
 
 **Achievement:** From 67% (v1.0.1) → **100% (v2.0.0)** pass rate! 🚀
 
----
+______________________________________________________________________
 
 ## Schema Coverage
 
 All 18 Silver schemas are fully covered:
 
 ### ChEMBL (12 schemas)
+
 - ✅ chembl_activity
 - ✅ chembl_assay
 - ✅ chembl_assay_parameters *(enum validation added)*
@@ -42,20 +43,23 @@ All 18 Silver schemas are fully covered:
 - ✅ chembl_target_component
 
 ### PubChem (1 schema)
+
 - ✅ pubchem_compound *(molecule_id type corrected: int64 → str)*
 
 ### UniProt (2 schemas)
+
 - ✅ uniprot_protein *(date fields validated)*
 - ✅ uniprot_idmapping
 
 ### Publications (5 schemas)
+
 - ✅ pubmed_publication *(validation check renamed)*
 - ✅ crossref_publication
 - ✅ openalex_publication *(fwci made optional)*
 - ✅ semanticscholar_publication *(corpus_id, citation_count made optional)*
 - ✅ chembl_publication
 
----
+______________________________________________________________________
 
 ## Snapshot Baseline Established
 
@@ -87,7 +91,7 @@ tests/contract/silver_schemas/snapshots/
 **Total:** 190 KB of schema metadata captured
 **Updated:** 5 snapshots to reflect intentional schema improvements
 
----
+______________________________________________________________________
 
 ## Implementation Phases
 
@@ -96,19 +100,21 @@ tests/contract/silver_schemas/snapshots/
 **Problem:** Schemas intentionally changed but snapshots were outdated.
 
 **Changes Accepted:**
+
 1. `pubchem_compound.molecule_id`: int64 → str (correct! IDs should be strings)
-2. `semanticscholar_publication.influential_citation_count`: required → optional
-3. `openalex_publication.fwci`: required → optional
-4. `pubmed_publication.title`: validation check renamed (`_check_title` → `title_not_empty`)
+1. `semanticscholar_publication.influential_citation_count`: required → optional
+1. `openalex_publication.fwci`: required → optional
+1. `pubmed_publication.title`: validation check renamed (`_check_title` → `title_not_empty`)
 
 **Command:**
+
 ```bash
 UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 ```
 
 **Result:** 19 snapshots updated, 4 failures resolved
 
----
+______________________________________________________________________
 
 ### Phase 2: Test Exclusions (4 failures → 0) ✅
 
@@ -119,10 +125,11 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 **File:** `tests/contract/silver_schemas/test_field_types.py`
 
 Added to `numeric_id_fields` whitelist:
+
 ```python
-"corpus_id",   # Semantic Scholar internal corpus ID
-"parent_id",   # Protein class parent ID - internal hierarchy
-"toid",        # Target organism ID - ChEMBL numeric taxonomy ID
+"corpus_id",  # Semantic Scholar internal corpus ID
+"parent_id",  # Protein class parent ID - internal hierarchy
+"toid",  # Target organism ID - ChEMBL numeric taxonomy ID
 ```
 
 **Rationale:** Internal numeric IDs that never have prefixes or leading zeros.
@@ -132,17 +139,18 @@ Added to `numeric_id_fields` whitelist:
 **File:** `tests/contract/silver_schemas/test_field_types.py`
 
 Added `date_only_fields` exclusion:
+
 ```python
 "sequence_modified",  # UniProt sequence modification date
-"entry_created",      # UniProt entry creation date
-"entry_modified",     # UniProt entry modification date
+"entry_created",  # UniProt entry creation date
+"entry_modified",  # UniProt entry modification date
 ```
 
 **Rationale:** API provides calendar dates without time components. Using `date` type is semantically correct and memory-efficient.
 
 **Result:** 4 failures resolved through documented exclusions
 
----
+______________________________________________________________________
 
 ### Phase 3: Enum Validation (1 failure → 0) ✅
 
@@ -153,14 +161,38 @@ Added `date_only_fields` exclusion:
 **File:** `src/bioetl/domain/schemas/constants.py`
 
 ```python
-ASSAY_PARAMETER_STANDARD_TYPES: frozenset[str] = frozenset([
-    # Measurement types
-    "IC50", "EC50", "Ki", "Kd", "AC50", "GI50", "Potency",
-    "Inhibition", "% Inhibition", "Activity", "Ratio", "ED50", "ID50",
-    # Parameter-specific types
-    "CONC", "PH", "TEMP", "TIME", "DOSE", "VOLUME", "WAVELENGTH",
-    "PERCENT", "PRESSURE", "HUMIDITY", "CELL_COUNT", "CELL_DENSITY", "SERUM",
-])
+ASSAY_PARAMETER_STANDARD_TYPES: frozenset[str] = frozenset(
+    [
+        # Measurement types
+        "IC50",
+        "EC50",
+        "Ki",
+        "Kd",
+        "AC50",
+        "GI50",
+        "Potency",
+        "Inhibition",
+        "% Inhibition",
+        "Activity",
+        "Ratio",
+        "ED50",
+        "ID50",
+        # Parameter-specific types
+        "CONC",
+        "PH",
+        "TEMP",
+        "TIME",
+        "DOSE",
+        "VOLUME",
+        "WAVELENGTH",
+        "PERCENT",
+        "PRESSURE",
+        "HUMIDITY",
+        "CELL_COUNT",
+        "CELL_DENSITY",
+        "SERUM",
+    ]
+)
 ```
 
 #### 3.2 Added Schema Validation
@@ -184,11 +216,12 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 
 **Result:** 1 failure resolved, data quality validation added
 
----
+______________________________________________________________________
 
 ## Passing Tests (451) ✅
 
 ### Schema Stability (95 tests) ✅
+
 - ✅ All 19 schema snapshots validated
 - ✅ Schema field structure verified
 - ✅ ETL metadata fields present
@@ -197,9 +230,10 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 
 **Pass Rate:** 95/95 (100%)
 
----
+______________________________________________________________________
 
 ### Field Type Tests (133 tests) ✅
+
 - ✅ No inappropriate `object` dtype usage
 - ✅ ID fields consistently use `str` type (with documented exceptions)
 - ✅ Numeric nullable fields use `Union[T, None]` syntax
@@ -210,9 +244,10 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 
 **Pass Rate:** 133/133 (100%) 🎉
 
----
+______________________________________________________________________
 
 ### Validation Tests (154 tests) ✅
+
 - ✅ ChEMBL ID patterns validated
 - ✅ PMID patterns validated
 - ✅ Year ranges checked
@@ -224,9 +259,10 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 
 **Note:** Primary key nullability tests (19) are intentionally skipped because they cannot reliably distinguish primary keys from foreign keys.
 
----
+______________________________________________________________________
 
 ### Naming Convention Tests (154 tests) ✅
+
 - ✅ All fields use snake_case
 - ✅ No camelCase violations
 - ✅ No undocumented abbreviations
@@ -240,129 +276,139 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 
 **Pass Rate:** 154/154 (100%) 🎉
 
----
+______________________________________________________________________
 
 ## Key Achievements
 
 ### 1. Perfect Pass Rate
+
 - ✅ **100% pass rate** (451/451 tests)
 - ✅ **Zero false positives**
 - ✅ **Zero aspirational failures** remaining
 - ✅ All edge cases handled with documented exclusions
 
 ### 2. Schema Quality Improvements
+
 - ✅ Enum validation added (`ASSAY_PARAMETER_STANDARD_TYPES`)
 - ✅ ID field types corrected (pubchem_compound.molecule_id)
 - ✅ Optional fields properly marked (fwci, corpus_id, influential_citation_count)
 - ✅ Validation check names improved (title_not_empty)
 
 ### 3. Test Suite Maturity
+
 - ✅ Comprehensive documentation of exclusions
 - ✅ Clear rationale for each exception
 - ✅ Snapshot system protecting against acmolecule_idental changes
 - ✅ Fast execution (~1.8 seconds)
 
 ### 4. Maintainability
+
 - ✅ Centralized validation constants
 - ✅ Self-documenting exclusion lists
 - ✅ Updated snapshots reflect current state
 - ✅ Zero technical debt
 
----
+______________________________________________________________________
 
 ## Test Categories Breakdown
 
 ### 1. Schema Stability Tests (95 tests)
-| Test | Result |
-|------|--------|
-| `test_schema_fields_unchanged` | 19 passed ✅ |
-| `test_primary_key_field_exists` | 19 passed ✅ |
+
+| Test                               | Result       |
+| ---------------------------------- | ------------ |
+| `test_schema_fields_unchanged`     | 19 passed ✅ |
+| `test_primary_key_field_exists`    | 19 passed ✅ |
 | `test_etl_metadata_fields_present` | 19 passed ✅ |
-| `test_schema_has_docstring` | 19 passed ✅ |
-| `test_fields_have_descriptions` | 19 passed ✅ |
+| `test_schema_has_docstring`        | 19 passed ✅ |
+| `test_fields_have_descriptions`    | 19 passed ✅ |
 
 **Pass Rate:** 95/95 (100%) 🎉
 
----
+______________________________________________________________________
 
 ### 2. Field Type Tests (133 tests)
-| Test | Result |
-|------|--------|
-| `test_no_object_dtype_without_reason` | 19 passed ✅ |
-| `test_id_fields_are_strings` | 19 passed ✅ |
+
+| Test                                             | Result       |
+| ------------------------------------------------ | ------------ |
+| `test_no_object_dtype_without_reason`            | 19 passed ✅ |
+| `test_id_fields_are_strings`                     | 19 passed ✅ |
 | `test_numeric_fields_not_nullable_without_union` | 19 passed ✅ |
-| `test_boolean_fields_use_bool_type` | 19 passed ✅ |
-| `test_timestamp_fields_use_datetime` | 19 passed ✅ |
-| `test_year_fields_are_int` | 19 passed ✅ |
-| `test_coerce_used_appropriately` | 19 passed ✅ |
+| `test_boolean_fields_use_bool_type`              | 19 passed ✅ |
+| `test_timestamp_fields_use_datetime`             | 19 passed ✅ |
+| `test_year_fields_are_int`                       | 19 passed ✅ |
+| `test_coerce_used_appropriately`                 | 19 passed ✅ |
 
 **Pass Rate:** 133/133 (100%) 🎉
 
----
+______________________________________________________________________
 
 ### 3. Validation Tests (154 tests)
-| Test | Result |
-|------|--------|
-| `test_chembl_id_pattern_consistent` | 19 passed ✅ |
-| `test_pmid_pattern_if_present` | 19 passed ✅ |
-| `test_year_fields_have_range_check` | 19 passed ✅ |
-| `test_enum_fields_have_isin_check` | 19 passed ✅ |
-| `test_primary_keys_not_nullable` | 19 skipped ℹ️ |
-| `test_pchembl_value_range_if_present` | 19 passed/skipped ✅ |
-| `test_publication_doi_validation_consistent` | 1 passed ✅ |
-| `test_publication_year_range_consistent` | 1 passed ✅ |
-| `test_activity_standard_value_range` | 19 passed ✅ |
-| `test_molecule_mw_range_if_present` | 19 passed ✅ |
+
+| Test                                         | Result               |
+| -------------------------------------------- | -------------------- |
+| `test_chembl_id_pattern_consistent`          | 19 passed ✅         |
+| `test_pmid_pattern_if_present`               | 19 passed ✅         |
+| `test_year_fields_have_range_check`          | 19 passed ✅         |
+| `test_enum_fields_have_isin_check`           | 19 passed ✅         |
+| `test_primary_keys_not_nullable`             | 19 skipped ℹ️        |
+| `test_pchembl_value_range_if_present`        | 19 passed/skipped ✅ |
+| `test_publication_doi_validation_consistent` | 1 passed ✅          |
+| `test_publication_year_range_consistent`     | 1 passed ✅          |
+| `test_activity_standard_value_range`         | 19 passed ✅         |
+| `test_molecule_mw_range_if_present`          | 19 passed ✅         |
 
 **Pass Rate:** 135/135 non-skipped tests (100%) 🎉
 **Skipped:** 19 tests (cannot distinguish PKs from FKs)
 
----
+______________________________________________________________________
 
 ### 4. Naming Convention Tests (154 tests)
-| Test | Result |
-|------|--------|
-| `test_field_names_are_snake_case` | 19 passed ✅ |
-| `test_no_camelcase_fields` | 19 passed ✅ |
-| `test_no_abbreviations_without_glossary` | 19 passed ✅ |
-| `test_boolean_fields_start_with_is_has_can` | 19 passed ✅ |
-| `test_metadata_fields_start_with_underscore` | 19 passed ✅ |
-| `test_foreign_keys_have_id_suffix` | 19 passed ✅ |
-| `test_chembl_fk_naming_consistency` | 12 passed, 7 skipped ✅ |
-| `test_common_fields_same_name_across_publications` | 1 passed ✅ |
-| `test_id_field_naming_by_provider` | 1 passed ✅ |
-| `test_no_legacy_dq_field_names` | 19 passed ✅ |
+
+| Test                                               | Result                  |
+| -------------------------------------------------- | ----------------------- |
+| `test_field_names_are_snake_case`                  | 19 passed ✅            |
+| `test_no_camelcase_fields`                         | 19 passed ✅            |
+| `test_no_abbreviations_without_glossary`           | 19 passed ✅            |
+| `test_boolean_fields_start_with_is_has_can`        | 19 passed ✅            |
+| `test_metadata_fields_start_with_underscore`       | 19 passed ✅            |
+| `test_foreign_keys_have_id_suffix`                 | 19 passed ✅            |
+| `test_chembl_fk_naming_consistency`                | 12 passed, 7 skipped ✅ |
+| `test_common_fields_same_name_across_publications` | 1 passed ✅             |
+| `test_id_field_naming_by_provider`                 | 1 passed ✅             |
+| `test_no_legacy_dq_field_names`                    | 19 passed ✅            |
 
 **Pass Rate:** 147/147 non-skipped tests (100%) 🎉
 **Skipped:** 7 tests (non-ChEMBL schemas)
 
----
+______________________________________________________________________
 
 ## Skipped Tests (85) ℹ️
 
 Tests skipped due to conditional logic:
 
-| Reason | Count | Example |
-|--------|-------|---------|
-| Non-ChEMBL schemas | 7 | `test_chembl_fk_naming_consistency` |
-| Missing optional fields | 57 | `test_pchembl_value_range_if_present` |
-| Cannot distinguish PKs from FKs | 19 | `test_primary_keys_not_nullable` |
-| Not implemented yet | 1 | Range value extraction |
-| Non-publication schemas | 1 | Cross-publication consistency |
+| Reason                          | Count | Example                               |
+| ------------------------------- | ----- | ------------------------------------- |
+| Non-ChEMBL schemas              | 7     | `test_chembl_fk_naming_consistency`   |
+| Missing optional fields         | 57    | `test_pchembl_value_range_if_present` |
+| Cannot distinguish PKs from FKs | 19    | `test_primary_keys_not_nullable`      |
+| Not implemented yet             | 1     | Range value extraction                |
+| Non-publication schemas         | 1     | Cross-publication consistency         |
 
 **Note:** All skips are intentional and documented.
 
----
+______________________________________________________________________
 
 ## Running the Tests
 
 ### Full Suite
+
 ```bash
 pytest tests/contract/silver_schemas/ -v
 # Expected: 451 passed, 85 skipped in ~1.8s
 ```
 
 ### By Category
+
 ```bash
 # Schema stability (snapshot tests)
 pytest tests/contract/silver_schemas/test_schema_stability.py -v
@@ -378,16 +424,18 @@ pytest tests/contract/silver_schemas/test_naming_conventions.py -v
 ```
 
 ### Single Schema
+
 ```bash
 pytest tests/contract/silver_schemas/ -v -k chembl_activity
 ```
 
 ### Update Snapshots (After Intentional Schema Changes)
+
 ```bash
 UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 ```
 
----
+______________________________________________________________________
 
 ## Documentation
 
@@ -396,28 +444,29 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 - **Fix Plan:** `tests/contract/silver_schemas/FIX_PLAN.md`
 - **This Report:** `tests/contract/silver_schemas/TEST_RESULTS.md`
 
----
+______________________________________________________________________
 
 ## Metrics
 
-| Metric | Value |
-|--------|-------|
-| **Test Count** | 536 |
-| **Pass Rate** | **100%** ✅ |
-| **Schema Coverage** | 100% (18/18) |
-| **Snapshot Coverage** | 100% (19/19) |
-| **Type Safety** | 100% ✅ |
-| **Naming Consistency** | 100% ✅ |
-| **Validation Coverage** | 100% ✅ |
-| **Execution Time** | ~1.8 seconds |
-| **LOC (tests)** | ~2,300 lines |
-| **False Positives** | 0 ✅ |
+| Metric                  | Value        |
+| ----------------------- | ------------ |
+| **Test Count**          | 536          |
+| **Pass Rate**           | **100%** ✅  |
+| **Schema Coverage**     | 100% (18/18) |
+| **Snapshot Coverage**   | 100% (19/19) |
+| **Type Safety**         | 100% ✅      |
+| **Naming Consistency**  | 100% ✅      |
+| **Validation Coverage** | 100% ✅      |
+| **Execution Time**      | ~1.8 seconds |
+| **LOC (tests)**         | ~2,300 lines |
+| **False Positives**     | 0 ✅         |
 
----
+______________________________________________________________________
 
 ## Version History
 
 ### v2.0.0 (2026-02-10) - **100% Pass Rate Achieved** 🎉
+
 - ✅ Resolved all 9 remaining aspirational failures
 - ✅ Phase 1: Updated 5 snapshots for intentional schema changes
 - ✅ Phase 2: Added documented exclusions for numeric IDs and date fields
@@ -428,6 +477,7 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 - **Pass Rate:** 100% (451/451 tests)
 
 ### v1.0.1 (2026-02-10) - Baseline with ETL Metadata Fix
+
 - ✅ Fixed ETL metadata field name expectations
 - ✅ Added abbreviations to glossary
 - ✅ Excluded ETL metadata from boolean naming checks
@@ -435,22 +485,24 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 - **Pass Rate:** 82% (439/536 tests)
 
 ### v1.0.0 (2026-02-10) - Initial Release
+
 - ✅ Created comprehensive 536-test suite
 - ✅ Established snapshot baseline for all 18 schemas
 - ✅ Implemented 4 test categories
 - **Pass Rate:** 67% (362/536 tests)
 
----
+______________________________________________________________________
 
 ## Conclusion
 
 The Silver Schema Contract Test Suite has achieved **production-ready status** with **100% pass rate**. All aspirational failures have been resolved through a combination of:
 
 1. **Schema Quality Improvements:** Added missing validations, corrected field types
-2. **Documented Exclusions:** Legitimate exceptions clearly documented with rationale
-3. **Snapshot Updates:** Accepted intentional schema improvements
+1. **Documented Exclusions:** Legitimate exceptions clearly documented with rationale
+1. **Snapshot Updates:** Accepted intentional schema improvements
 
 **Key Strengths:**
+
 - ✅ Perfect pass rate (100%)
 - ✅ Zero false positives
 - ✅ Comprehensive coverage (18 schemas, 536 tests)
@@ -460,6 +512,7 @@ The Silver Schema Contract Test Suite has achieved **production-ready status** w
 - ✅ Snapshot-protected schema stability
 
 **Quality Gates:**
+
 - ✅ Type safety: 100%
 - ✅ Naming consistency: 100%
 - ✅ Validation coverage: 100%
@@ -467,7 +520,7 @@ The Silver Schema Contract Test Suite has achieved **production-ready status** w
 
 The test suite will **prevent acmolecule_idental schema breakage** while **documenting valid design decisions** through clear exclusions and comprehensive validation.
 
----
+______________________________________________________________________
 
 **Generated:** 2026-02-10
 **Test Suite:** v2.0.0 - Production Ready

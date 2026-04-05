@@ -5,14 +5,13 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 ## Созданные объекты evidence
 
 1. `EV-architecture-doc-drift-domain-services-diagram-understates-current-surface`
-2. `EV-architecture-doc-drift-application-core-diagram-understates-current-surface`
-3. `EV-architecture-doc-drift-adapters-diagram-understates-adapter-surface`
-4. `EV-architecture-doc-drift-storage-diagram-understates-storage-surface`
-5. `EV-architecture-doc-drift-cli-architecture-guide-understates-command-surface`
+1. `EV-architecture-doc-drift-application-core-diagram-understates-current-surface`
+1. `EV-architecture-doc-drift-adapters-diagram-understates-adapter-surface`
+1. `EV-architecture-doc-drift-storage-diagram-understates-storage-surface`
+1. `EV-architecture-doc-drift-cli-architecture-guide-understates-command-surface`
 
 ## Проверка gate
 

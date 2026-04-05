@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Pipeline Review Checklist
 
@@ -14,7 +17,7 @@ Last verified: '2026-03-29'
 
 Use this checklist when reviewing new or modified pipelines.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 1. Architecture & Structure (RULES.md §1)
 
@@ -184,7 +187,7 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Тяжёлые/временные локальные артефакты вынесены в `data/local/` или `tmp/`
 - [ ] В релиз не попадают локальные артефакты (`data/local/**`, `tmp/**`)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Sign-off
 
@@ -194,7 +197,7 @@ Use this checklist when reviewing new or modified pipelines.
 | Reviewer      |      |      | [ ]      |
 | Data Engineer |      |      | [ ]      |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Notes
 

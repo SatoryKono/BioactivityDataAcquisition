@@ -1,7 +1,7 @@
 # Consolidated Open Tasks Plan
 
-Дата: 2026-03-21 (актуализировано 2026-04-03)  
-Статус: active consolidated plan  
+Дата: 2026-03-21 (актуализировано 2026-04-03)
+Статус: active consolidated plan
 Язык: русский
 
 > Этот документ — repo-only planning surface. Он описывает текущую

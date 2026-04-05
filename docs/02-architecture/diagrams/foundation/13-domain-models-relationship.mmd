@@ -22,20 +22,20 @@ classDiagram
         +ingestion_ts: datetime
         +source_batch_id: BatchID
         +dq_warn: bool = False
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class Activity {
@@ -51,16 +51,16 @@ classDiagram
         +data_validity_comment: str | None
         +activity_comment: str | None
         +potential_duplicate: bool | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 
     class Assay {
@@ -75,17 +75,17 @@ classDiagram
         +document_id: str | None
         +src_id: int | None
         +confidence_score: int | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class Target {
@@ -98,19 +98,19 @@ classDiagram
         +gene_names: list~str~ | None
         +target_components: list~str~ | None
         +species_group_flag: bool | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class Molecule {
@@ -131,11 +131,11 @@ classDiagram
         +hbd: int | None
         +num_ro5_violations: int | None
         +parent_molecule_id: str | None
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class PublicationEntityBase {
@@ -170,22 +170,22 @@ classDiagram
         +src_id: int | None
         +chembl_release: str | None
         +creation_date: str | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class PubMedPublication {
@@ -197,20 +197,20 @@ classDiagram
         +subject_keywords: list~str~
         +publication_types: list~str~
         +author_count: int | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class CrossRefPublication {
@@ -221,21 +221,21 @@ classDiagram
         +subject_keywords: list~str~
         +author_details: str | None
         +references: str | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class OpenAlexPublication {
@@ -246,21 +246,21 @@ classDiagram
         +subject_topics: list | None
         +primary_topic: dict | None
         +author_openalex_ids: str | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class SemanticScholarPublication {
@@ -271,21 +271,21 @@ classDiagram
         +influential_citation_count: int | None
         +author_s2_ids: str | None
         +author_h_indices: str | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class UniprotTarget {
@@ -300,17 +300,17 @@ classDiagram
         +go_terms: list~str~ | None
         +features: dict | None
         +subcellular_locations: list~str~ | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class PubchemMolecule {
@@ -331,11 +331,11 @@ classDiagram
         +h_bond_acceptor_count: int
         +rotatable_bond_count: int | None
         +heavy_atom_count: int | None
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class QuarantineRecord {
@@ -348,19 +348,19 @@ classDiagram
         +bronze_batch_id: BatchID
         +bronze_file_uri: str
         +dq_status: str = "NEW"
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class LineageLogEntry {
@@ -370,22 +370,22 @@ classDiagram
         +transform_version: str
         +run_params: dict
         +created_at: datetime
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     %% Inheritance from BaseEntity

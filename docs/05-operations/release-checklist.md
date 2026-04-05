@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Release Checklist v5.9.0
 
@@ -20,13 +23,13 @@ This checklist documents the pre-release verification completed for BioETL v5.9.
 
 ### 5.1. Build & Test Verification
 
-| Command                | Status  | Notes                                                |
-| ---------------------- | ------- | ---------------------------------------------------- |
-| `make clean`           | ✅ Pass | Build artifacts cleaned                              |
+| Command                | Status  | Notes                                                    |
+| ---------------------- | ------- | -------------------------------------------------------- |
+| `make clean`           | ✅ Pass | Build artifacts cleaned                                  |
 | `make clean-preflight` | ✅ Pass | Extended cleanup via `scripts/repo/preflight_cleanup.sh` |
-| `make install`         | ✅ Pass | Dependencies installed via uv                        |
-| `make lint`            | ✅ Pass | ruff and mypy checks were green at verification time |
-| `make test`            | ✅ Pass | Stable local test suite was green at verification time |
+| `make install`         | ✅ Pass | Dependencies installed via uv                            |
+| `make lint`            | ✅ Pass | ruff and mypy checks were green at verification time     |
+| `make test`            | ✅ Pass | Stable local test suite was green at verification time   |
 
 ### 5.2. Smoke Tests
 
@@ -48,13 +51,13 @@ This checklist documents the pre-release verification completed for BioETL v5.9.
 
 ## Code Quality
 
-| Metric                      | Target   | Actual            | Status  |
-| --------------------------- | -------- | ----------------- | ------- |
+| Metric                      | Target   | Actual                      | Status  |
+| --------------------------- | -------- | --------------------------- | ------- |
 | Coverage                    | ≥85%     | 88.43% at verification time | ✅ Pass |
-| mypy --strict               | 0 errors | 0 errors          | ✅ Pass |
-| Ruff                        | 0 errors | 0 errors          | ✅ Pass |
-| All tests green             | Yes      | Yes, at verification time | ✅ Pass |
-| No TODO/FIXME without issue | N/A      | Verified          | ✅ Pass |
+| mypy --strict               | 0 errors | 0 errors                    | ✅ Pass |
+| Ruff                        | 0 errors | 0 errors                    | ✅ Pass |
+| All tests green             | Yes      | Yes, at verification time   | ✅ Pass |
+| No TODO/FIXME without issue | N/A      | Verified                    | ✅ Pass |
 
 ## Security
 
@@ -114,7 +117,7 @@ performance SLA.
 1. ⏳ Push tag: `git push origin v5.9.0`
 1. ⏳ Create GitHub Release with release notes
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 *Verified: 2026-01-13*
 *Version: 5.9.0*

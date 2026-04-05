@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-05T08:47:20.839755+00:00",
+  "generated_at": "2026-04-05T08:55:02.356630+00:00",
   "summary": {
     "total_scripts": 227,
     "status_counts": {
       "active": 200,
-      "legacy": 24,
-      "unknown": 3
+      "legacy": 27
     },
     "reference_group_coverage": {
       "agents": 10,
@@ -22,13 +21,13 @@
     {
       "path": "scripts/ai/code-reviewer.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "legacy",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/README.md",
-          "line": 22,
+          "line": 23,
           "source_group": "scripts",
           "text": "- `scripts/ai/code-reviewer.sh`"
         },
@@ -43,13 +42,13 @@
     {
       "path": "scripts/ai/data-engineer.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "legacy",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/README.md",
-          "line": 23,
+          "line": 24,
           "source_group": "scripts",
           "text": "- `scripts/ai/data-engineer.sh`"
         },
@@ -64,13 +63,13 @@
     {
       "path": "scripts/ai/literature-researcher.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "legacy",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/README.md",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "- `scripts/ai/literature-researcher.sh`"
         },

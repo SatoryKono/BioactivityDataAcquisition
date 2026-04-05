@@ -10,9 +10,9 @@ Last verified: '2026-03-30'
 
 # ADR-XXX: <Decision Title>
 
-**Date:** <YYYY-MM-DD>  
-**Status:** <Proposed|Accepted|Superseded|Rejected>  
-**Decision makers:** <role-or-team>  
+**Date:** <YYYY-MM-DD>
+**Status:** <Proposed|Accepted|Superseded|Rejected>
+**Decision makers:** <role-or-team>
 **Related:** <ADR-010>, <ADR-014>, <issue-or-pr>
 
 ## Context

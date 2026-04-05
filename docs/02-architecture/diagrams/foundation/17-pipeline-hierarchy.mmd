@@ -51,14 +51,14 @@ classDiagram
         #_normalize_chembl_id(id: str) str
         #_normalize_units(value, units) tuple
         #_parse_chembl_date(date_str) date
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
     }
 
     class ActivityTransformer {
@@ -66,15 +66,15 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_normalize_activity_value(record) float
         -_extract_target_info(record) dict
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
     }
 
     class MoleculeTransformer {
@@ -82,31 +82,31 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_normalize_smiles(smiles) str
         -_extract_properties(record) dict
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
     }
 
     class AssayTransformer {
         +entity: str = "assay"
         #_transform_impl(record) SilverRecord
         -_normalize_assay_type(type) str
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 
     class TargetTransformer {
@@ -114,79 +114,79 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_extract_uniprot_accessions(record) list
         -_extract_gene_names(record) list
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
     }
 
     class DocumentTransformer {
         +entity: str = "document"
         #_transform_impl(record) SilverRecord
         -_parse_authors(authors) list
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 
     class BasePubchemTransformer {
         <<abstract>>
         +provider: str = "pubchem"
         #_normalize_cid(cid) str
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 
     class CompoundTransformer {
         +entity: str = "compound"
         #_transform_impl(record) SilverRecord
         -_extract_properties(record) dict
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 
     class BaseUniprotTransformer {
         <<abstract>>
         +provider: str = "uniprot"
         #_normalize_accession(acc) str
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 
     class ProteinTransformer {
@@ -194,31 +194,31 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_extract_features(record) dict
         -_extract_go_terms(record) list
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
     }
 
     class BasePubmedTransformer {
         <<abstract>>
         +provider: str = "pubmed"
         #_normalize_pmid(pmid) str
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 
     class PublicationTransformer {
@@ -226,15 +226,15 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_parse_authors(authors) list
         -_extract_mesh_terms(record) list
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
     }
 
     %% Inheritance - Transformers

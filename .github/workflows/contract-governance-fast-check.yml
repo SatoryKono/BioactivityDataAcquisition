@@ -63,7 +63,7 @@ jobs:
           IDENTITY_EXIT_CODE=$?
           set -e
           echo "::endgroup::"
-          
+
           if [ $IDENTITY_EXIT_CODE -eq 0 ]; then
             echo "contract_identity_verdict=passed" >> $GITHUB_OUTPUT
           else
@@ -79,7 +79,7 @@ jobs:
           REGISTRY_EXIT_CODE=$?
           set -e
           echo "::endgroup::"
-          
+
           if [ $REGISTRY_EXIT_CODE -eq 0 ]; then
             echo "registry_consistency_verdict=passed" >> $GITHUB_OUTPUT
           else
@@ -101,7 +101,7 @@ jobs:
           CLASSIFIER_EXIT_CODE=$?
           set -e
           echo "::endgroup::"
-          
+
           if [ $CLASSIFIER_EXIT_CODE -eq 0 ]; then
             echo "classifier_verdict=passed" >> $GITHUB_OUTPUT
           else
@@ -117,7 +117,7 @@ jobs:
           REGISTRY_DQ_EXIT_CODE=$?
           set -e
           echo "::endgroup::"
-          
+
           if [ $REGISTRY_DQ_EXIT_CODE -eq 0 ]; then
             echo "registry_dq_verdict=passed" >> $GITHUB_OUTPUT
           else
@@ -129,25 +129,25 @@ jobs:
         run: |
           # Count failures
           FAILED_CHECKS=0
-          
+
           if [ "${{ steps.identity-check.outputs.contract_identity_verdict }}" = "failed" ]; then
             FAILED_CHECKS=$((FAILED_CHECKS + 1))
           fi
-          
+
           if [ "${{ steps.registry-check.outputs.registry_consistency_verdict }}" = "failed" ]; then
             FAILED_CHECKS=$((FAILED_CHECKS + 1))
           fi
-          
+
           if [ "${{ steps.classifier-check.outputs.classifier_verdict }}" = "failed" ]; then
             FAILED_CHECKS=$((FAILED_CHECKS + 1))
           fi
-          
+
           if [ "${{ steps.registry-dq-check.outputs.registry_dq_verdict }}" = "failed" ]; then
             FAILED_CHECKS=$((FAILED_CHECKS + 1))
           fi
-          
+
           echo "failed_checks=$FAILED_CHECKS" >> $GITHUB_OUTPUT
-          
+
           # Hard-gate policy: any failed governance check blocks the workflow.
           if [ "$FAILED_CHECKS" -ge 1 ]; then
             STAGE="hard_fail"
@@ -156,7 +156,7 @@ jobs:
             STAGE="pass"
             MESSAGE="All contract governance checks passed"
           fi
-          
+
           echo "enforcement_stage=$STAGE" >> $GITHUB_OUTPUT
           echo "enforcement_message=$MESSAGE" >> $GITHUB_OUTPUT
 
@@ -196,7 +196,7 @@ jobs:
           - **Failed Checks**: ${{ steps.enforcement.outputs.failed_checks }}
 
           **Message**: ${{ steps.enforcement.outputs.enforcement_message }}
-          
+
           ### Artifacts
           - [Contract Governance Diagnostics](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           EOF

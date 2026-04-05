@@ -1,34 +1,37 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Variables Guide (Grafana Dashboards)
 
-Дата сверки: **2026-03-29**  
+Дата сверки: **2026-03-29**
 Источник истины: `grafana/dashboards/*.json`
 
 ## Переменные по дашбордам
 
-| Dashboard UID | Переменные |
-|---|---|
-| `bioetl-overview-v2` | `$pipeline`, `$run_type` |
-| `bioetl-dq-v2` | `$pipeline`, `$run_type` |
-| `bioetl-runtime` | `$pipeline`, `$run_type` |
-| `bioetl-provider-health-v2` | `$provider` |
+| Dashboard UID               | Переменные               |
+| --------------------------- | ------------------------ |
+| `bioetl-overview-v2`        | `$pipeline`, `$run_type` |
+| `bioetl-dq-v2`              | `$pipeline`, `$run_type` |
+| `bioetl-runtime`            | `$pipeline`, `$run_type` |
+| `bioetl-provider-health-v2` | `$provider`              |
 
 ## Определения переменных
 
-| Variable | Query | Multi | Include All | Refresh |
-|---|---|---|---|---|
-| `$pipeline` | `label_values(bioetl_records_processed_total, pipeline)` | Yes | Yes | On dashboard load (`1`) |
-| `$run_type` | `label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)` | Yes | Yes | On dashboard load (`1`) |
-| `$provider` | `label_values({__name__=~"bioetl_health_check_(success\|degraded\|failures)_total"}, provider)` | Yes | Yes | On dashboard load (`1`) |
+| Variable    | Query                                                                                           | Multi | Include All | Refresh                 |
+| ----------- | ----------------------------------------------------------------------------------------------- | ----- | ----------- | ----------------------- |
+| `$pipeline` | `label_values(bioetl_records_processed_total, pipeline)`                                        | Yes   | Yes         | On dashboard load (`1`) |
+| `$run_type` | `label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)`                 | Yes   | Yes         | On dashboard load (`1`) |
+| `$provider` | `label_values({__name__=~"bioetl_health_check_(success\|degraded\|failures)_total"}, provider)` | Yes   | Yes         | On dashboard load (`1`) |
 
 ## Важно
 

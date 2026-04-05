@@ -10,10 +10,10 @@ Last verified: '2026-04-01'
 
 # Data Contract Specification: <Provider> <Entity> v<major>.<minor>
 
-**Template type:** `data-contract-spec`  
-**Contract ID:** `<provider>_<entity>_v<major>.<minor>`  
-**Source of truth:** `<code path>`  
-**Published export:** `docs/04-reference/contracts/<subdir>/<provider>_<entity>_v<major>.<minor>.<ext>`  
+**Template type:** `data-contract-spec`
+**Contract ID:** `<provider>_<entity>_v<major>.<minor>`
+**Source of truth:** `<code path>`
+**Published export:** `docs/04-reference/contracts/<subdir>/<provider>_<entity>_v<major>.<minor>.<ext>`
 **Schema dialect:** `<JSON Schema Draft-07|other>`
 
 ## Purpose

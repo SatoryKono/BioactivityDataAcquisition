@@ -47,4 +47,3 @@ jobs:
             /tmp/architecture-docs-status.txt
             /tmp/architecture-docs-summary.txt
           retention-days: 14
-

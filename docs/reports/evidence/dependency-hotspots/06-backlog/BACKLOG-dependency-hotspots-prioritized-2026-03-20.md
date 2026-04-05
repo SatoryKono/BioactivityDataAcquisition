@@ -1,7 +1,7 @@
 # Prioritized Hotspot Backlog
 
 Date: 2026-03-21
-Status: Proposed  
+Status: Proposed
 Source pillar: `dependency-hotspots`
 
 This backlog turns the current hotspot evidence into an execution-oriented queue. It follows the proposed prioritization model:
@@ -23,7 +23,7 @@ Historical note: the current hotspot snapshot has since shifted to 82 files abov
 
 ## Wave 0: Guardrails and Baseline
 
-**Goal**  
+**Goal**
 Freeze the prioritization baseline before code movement starts.
 
 **Scope**
@@ -37,7 +37,7 @@ Freeze the prioritization baseline before code movement starts.
 
 ## Wave 1: Infrastructure Adapter Concentration
 
-**Priority**  
+**Priority**
 `P0`
 
 **Why first**
@@ -64,7 +64,7 @@ Freeze the prioritization baseline before code movement starts.
 
 ## Wave 2: CLI and Application Pressure Seams
 
-**Priority**  
+**Priority**
 `P0` for CLI, `P1` for application overlap hotspots
 
 **Why second**
@@ -89,7 +89,7 @@ Freeze the prioritization baseline before code movement starts.
 
 ## Wave 3: Infrastructure Storage, Config, Quality, and Schemas
 
-**Priority**  
+**Priority**
 `P1`
 
 **Why third**
@@ -114,7 +114,7 @@ Freeze the prioritization baseline before code movement starts.
 
 ## Wave 4: Size-Only Tail in Pressure-Seam Modules
 
-**Priority**  
+**Priority**
 `P2`
 
 **Why fourth**
@@ -139,7 +139,7 @@ Freeze the prioritization baseline before code movement starts.
 
 ## Residual Long Tail
 
-**Priority**  
+**Priority**
 `P3`
 
 **Scope**

@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 Примечание о rebaseline: the current repo state still matches the current-state reading in this pack; no new evidence objects were needed to preserve the trigger-vs-baseline distinction.
 
 ## Текущая интерпретация
@@ -38,14 +37,14 @@ Collected: `6`
 
 ## Сводка evidence
 
-| ID | Claim Summary | Confidence |
-|----|---------------|------------|
-| EV-compatibility-registry-curated-ssot-drift-inventory-doc-exposes-curated-and-measured-ledgers | Inventory doc now mixes curated ledger and measured registry snapshot | 0.97 |
-| EV-compatibility-registry-curated-ssot-drift-test-hardcodes-retained-entrypoint-path-set | Inventory test hardcodes retained-entrypoint paths and duplicates the ledger in code | 0.96 |
-| EV-compatibility-registry-curated-ssot-drift-test-builds-measured-registry-from-docstring-prefixes | Inventory test synthesizes a measured registry from docstring prefixes | 0.95 |
-| EV-compatibility-registry-curated-ssot-drift-telemetry-script-hardcodes-tracked-docstring-prefixes | CI telemetry hardcodes tracked prefixes and builds its own snapshot logic | 0.95 |
-| EV-compatibility-registry-curated-ssot-drift-telemetry-reporting-test-replays-inventory-counts | Telemetry reporting test replays inventory counts and status totals | 0.94 |
-| EV-compatibility-registry-curated-ssot-drift-freeze-guards-hardcode-separate-compatibility-allowlists | Freeze guards carry separate hand-maintained allowlists for compatibility policy | 0.93 |
+| ID                                                                                                    | Claim Summary                                                                        | Confidence |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------- |
+| EV-compatibility-registry-curated-ssot-drift-inventory-doc-exposes-curated-and-measured-ledgers       | Inventory doc now mixes curated ledger and measured registry snapshot                | 0.97       |
+| EV-compatibility-registry-curated-ssot-drift-test-hardcodes-retained-entrypoint-path-set              | Inventory test hardcodes retained-entrypoint paths and duplicates the ledger in code | 0.96       |
+| EV-compatibility-registry-curated-ssot-drift-test-builds-measured-registry-from-docstring-prefixes    | Inventory test synthesizes a measured registry from docstring prefixes               | 0.95       |
+| EV-compatibility-registry-curated-ssot-drift-telemetry-script-hardcodes-tracked-docstring-prefixes    | CI telemetry hardcodes tracked prefixes and builds its own snapshot logic            | 0.95       |
+| EV-compatibility-registry-curated-ssot-drift-telemetry-reporting-test-replays-inventory-counts        | Telemetry reporting test replays inventory counts and status totals                  | 0.94       |
+| EV-compatibility-registry-curated-ssot-drift-freeze-guards-hardcode-separate-compatibility-allowlists | Freeze guards carry separate hand-maintained allowlists for compatibility policy     | 0.93       |
 
 ## Ключевые выводы
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-04'
----
+  Last verified: '2026-04-04'
+
+______________________________________________________________________
 
 # BioETL Observability Specification (DD)
 
@@ -90,26 +93,26 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
 
-| Metric | Type | Labels | Notes |
-|---|---|---|---|
-| `bioetl_pipeline_runs_total` | Counter | `pipeline,run_type,status` | `status` в коде: `success`, `failed`, `shutdown` |
-| `bioetl_pipeline_duration_seconds` | Histogram | `pipeline,stage,status,run_type` | Длительности run/stage |
-| `bioetl_phase_duration_seconds` | Histogram | `pipeline,phase,status` | Lifecycle-фазы |
-| `bioetl_control_plane_manifest_writes_total` | Counter | `pipeline,run_type,status` | Попытки записи immutable run manifest |
-| `bioetl_control_plane_ledger_appends_total` | Counter | `pipeline,event_type,status` | Попытки append в run ledger |
-| `bioetl_checkpoint_compatibility_events_total` | Counter | `pipeline,disposition` | Итоги resume/checkpoint compatibility policy |
-| `bioetl_lineage_fragments_emitted_total` | Counter | `pipeline,layer,status` | Попытки публикации lineage fragments |
-| `bioetl_lineage_refs_missing_total` | Counter | `pipeline,layer,ref_type` | Missing upstream lineage references detected during persistence |
-| `bioetl_composite_source_selection_total` | Counter | `pipeline,decision_type,selected_source` | Low-cardinality composite source-selection decisions recorded during persistence |
-| `bioetl_records_processed_total` | Counter | `pipeline,stage,run_type` | throughput |
-| `bioetl_errors_total` | Counter | `pipeline,stage,error_code` | taxonomy входа |
-| `bioetl_http_request_duration_seconds` | Histogram | `provider,method,status` | HTTP latency |
-| `bioetl_http_request_errors_total` | Counter | `provider,method,error_type` | HTTP errors |
-| `bioetl_data_source_retry_exhausted_total` | Counter | `provider,operation` | exhausted retries |
-| `bioetl_provider_health_status` | Gauge | `provider` | см. mapping ниже |
-| `bioetl_circuit_breaker_state` | Gauge | `adapter` | 0/1/2 mapping |
-| `bioetl_dq_validation_score` | Gauge | `pipeline,entity` | 0..1 |
-| `bioetl_data_freshness_seconds` | Gauge | `pipeline,entity` | unix timestamp последнего успешного ingestion; age считается как `time() - metric` |
+| Metric                                         | Type      | Labels                                   | Notes                                                                              |
+| ---------------------------------------------- | --------- | ---------------------------------------- | ---------------------------------------------------------------------------------- |
+| `bioetl_pipeline_runs_total`                   | Counter   | `pipeline,run_type,status`               | `status` в коде: `success`, `failed`, `shutdown`                                   |
+| `bioetl_pipeline_duration_seconds`             | Histogram | `pipeline,stage,status,run_type`         | Длительности run/stage                                                             |
+| `bioetl_phase_duration_seconds`                | Histogram | `pipeline,phase,status`                  | Lifecycle-фазы                                                                     |
+| `bioetl_control_plane_manifest_writes_total`   | Counter   | `pipeline,run_type,status`               | Попытки записи immutable run manifest                                              |
+| `bioetl_control_plane_ledger_appends_total`    | Counter   | `pipeline,event_type,status`             | Попытки append в run ledger                                                        |
+| `bioetl_checkpoint_compatibility_events_total` | Counter   | `pipeline,disposition`                   | Итоги resume/checkpoint compatibility policy                                       |
+| `bioetl_lineage_fragments_emitted_total`       | Counter   | `pipeline,layer,status`                  | Попытки публикации lineage fragments                                               |
+| `bioetl_lineage_refs_missing_total`            | Counter   | `pipeline,layer,ref_type`                | Missing upstream lineage references detected during persistence                    |
+| `bioetl_composite_source_selection_total`      | Counter   | `pipeline,decision_type,selected_source` | Low-cardinality composite source-selection decisions recorded during persistence   |
+| `bioetl_records_processed_total`               | Counter   | `pipeline,stage,run_type`                | throughput                                                                         |
+| `bioetl_errors_total`                          | Counter   | `pipeline,stage,error_code`              | taxonomy входа                                                                     |
+| `bioetl_http_request_duration_seconds`         | Histogram | `provider,method,status`                 | HTTP latency                                                                       |
+| `bioetl_http_request_errors_total`             | Counter   | `provider,method,error_type`             | HTTP errors                                                                        |
+| `bioetl_data_source_retry_exhausted_total`     | Counter   | `provider,operation`                     | exhausted retries                                                                  |
+| `bioetl_provider_health_status`                | Gauge     | `provider`                               | см. mapping ниже                                                                   |
+| `bioetl_circuit_breaker_state`                 | Gauge     | `adapter`                                | 0/1/2 mapping                                                                      |
+| `bioetl_dq_validation_score`                   | Gauge     | `pipeline,entity`                        | 0..1                                                                               |
+| `bioetl_data_freshness_seconds`                | Gauge     | `pipeline,entity`                        | unix timestamp последнего успешного ingestion; age считается как `time() - metric` |
 
 Guardrail для новых метрик control-plane/traceability:
 
@@ -155,15 +158,15 @@ Guardrail для новых метрик control-plane/traceability:
 
 Значения ниже берутся из `configs/providers/*.yaml` и отражают **текущую конфигурацию репозитория**, не внешние SLA провайдеров.
 
-| Provider | Base RPS | Burst | API-key override |
-|---|---:|---:|---|
-| chembl | 3 | 10 | - |
-| pubchem | 5.0 | 10 | - |
-| pubmed | 3.0 | 5 | `10 / 20` |
-| crossref | 50 | 100 | polite pool flag |
-| openalex | 10 | 20 | polite pool flag |
-| semanticscholar | 0.1 | 1 | `1.0 / 5` |
-| uniprot | 10.0 | 20 | `100 / 200` |
+| Provider        | Base RPS | Burst | API-key override |
+| --------------- | -------: | ----: | ---------------- |
+| chembl          |        3 |    10 | -                |
+| pubchem         |      5.0 |    10 | -                |
+| pubmed          |      3.0 |     5 | `10 / 20`        |
+| crossref        |       50 |   100 | polite pool flag |
+| openalex        |       10 |    20 | polite pool flag |
+| semanticscholar |      0.1 |     1 | `1.0 / 5`        |
+| uniprot         |     10.0 |    20 | `100 / 200`      |
 
 ## 6. Alert Threshold Baseline
 
@@ -173,25 +176,25 @@ Guardrail для новых метрик control-plane/traceability:
 на `pipeline` / `provider` labels, а не на отдельные per-pipeline packs вроде
 `chembl_assay`-only alert groups.
 
-| Metric | Condition | Severity | Runbook |
-|---|---|---|---|
-| `bioetl_pipeline_runs_total{status="failed"}` | `increase(...) > 0` за `15m` | P1 | `docs/05-operations/runbooks/pipeline-failure-critical.md` |
-| `bioetl_control_plane_manifest_writes_total{status="failed"}` | `increase(...) > 0` за `15m` | P1 | `docs/05-operations/runbooks/run-manifest-inspection.md` |
-| `bioetl_control_plane_ledger_appends_total{status="failed"}` | `increase(...) > 0` за `15m` | P1 | `docs/05-operations/runbooks/run-manifest-inspection.md` |
-| `bioetl_pipeline_health_check_passed` | `== 0` за `5m` | P1 | `docs/05-operations/runbooks/pipeline-failure-critical.md` |
-| `bioetl_provider_health_status` | `== 0` за `5m` | P2 | `docs/05-operations/runbooks/incident-response.md` |
-| `bioetl_circuit_breaker_state` | `== 2` за `5m` | P2 | `docs/05-operations/runbooks/incident-response.md` |
-| `bioetl_dq_validation_score` | `< 0.80` на запуск | P2 | `docs/05-operations/runbooks/pipeline-failure-dq.md` |
-| `bioetl_dq_records_quarantined_total` | `>5%` и `<=20%` за `30m` при `bronze>=20` | P2 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
-| `bioetl_dq_records_quarantined_total` | `>20%` за `15m` при `bronze>=20` | P1 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
-| `time() - bioetl_data_freshness_seconds` | `>24h` и `<=72h` | P2 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
-| `time() - bioetl_data_freshness_seconds` | `>72h` | P1 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
-| `bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}` | `increase(...) > 0` за `30m` | P2 | `docs/05-operations/runbooks/checkpoint-debugging.md` |
-| `bioetl_lineage_fragments_emitted_total{status="failed"}` | `increase(...) > 0` за `15m` | P2 | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
-| `bioetl_lineage_refs_missing_total` | `increase(...) > 0` за `15m` | P2 | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
-| `bioetl_data_source_retry_exhausted_total` | `1-2` exhaustions за `1h` | P2 | `docs/05-operations/runbooks/incident-response.md` |
-| `bioetl_data_source_retry_exhausted_total` | `>=3` exhaustions за `1h` | P1 | `docs/05-operations/runbooks/incident-response.md` |
-| `bioetl_rate_limiter_wait_seconds` | `histogram_quantile(0.95, ...) > 1` за `10m` | P3 | `docs/05-operations/runbooks/observability-checklist.md` |
+| Metric                                                                         | Condition                                    | Severity | Runbook                                                        |
+| ------------------------------------------------------------------------------ | -------------------------------------------- | -------- | -------------------------------------------------------------- |
+| `bioetl_pipeline_runs_total{status="failed"}`                                  | `increase(...) > 0` за `15m`                 | P1       | `docs/05-operations/runbooks/pipeline-failure-critical.md`     |
+| `bioetl_control_plane_manifest_writes_total{status="failed"}`                  | `increase(...) > 0` за `15m`                 | P1       | `docs/05-operations/runbooks/run-manifest-inspection.md`       |
+| `bioetl_control_plane_ledger_appends_total{status="failed"}`                   | `increase(...) > 0` за `15m`                 | P1       | `docs/05-operations/runbooks/run-manifest-inspection.md`       |
+| `bioetl_pipeline_health_check_passed`                                          | `== 0` за `5m`                               | P1       | `docs/05-operations/runbooks/pipeline-failure-critical.md`     |
+| `bioetl_provider_health_status`                                                | `== 0` за `5m`                               | P2       | `docs/05-operations/runbooks/incident-response.md`             |
+| `bioetl_circuit_breaker_state`                                                 | `== 2` за `5m`                               | P2       | `docs/05-operations/runbooks/incident-response.md`             |
+| `bioetl_dq_validation_score`                                                   | `< 0.80` на запуск                           | P2       | `docs/05-operations/runbooks/pipeline-failure-dq.md`           |
+| `bioetl_dq_records_quarantined_total`                                          | `>5%` и `<=20%` за `30m` при `bronze>=20`    | P2       | `docs/05-operations/runbooks/dq-failure-investigation.md`      |
+| `bioetl_dq_records_quarantined_total`                                          | `>20%` за `15m` при `bronze>=20`             | P1       | `docs/05-operations/runbooks/dq-failure-investigation.md`      |
+| `time() - bioetl_data_freshness_seconds`                                       | `>24h` и `<=72h`                             | P2       | `docs/05-operations/runbooks/dq-failure-investigation.md`      |
+| `time() - bioetl_data_freshness_seconds`                                       | `>72h`                                       | P1       | `docs/05-operations/runbooks/dq-failure-investigation.md`      |
+| `bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}` | `increase(...) > 0` за `30m`                 | P2       | `docs/05-operations/runbooks/checkpoint-debugging.md`          |
+| `bioetl_lineage_fragments_emitted_total{status="failed"}`                      | `increase(...) > 0` за `15m`                 | P2       | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
+| `bioetl_lineage_refs_missing_total`                                            | `increase(...) > 0` за `15m`                 | P2       | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
+| `bioetl_data_source_retry_exhausted_total`                                     | `1-2` exhaustions за `1h`                    | P2       | `docs/05-operations/runbooks/incident-response.md`             |
+| `bioetl_data_source_retry_exhausted_total`                                     | `>=3` exhaustions за `1h`                    | P1       | `docs/05-operations/runbooks/incident-response.md`             |
+| `bioetl_rate_limiter_wait_seconds`                                             | `histogram_quantile(0.95, ...) > 1` за `10m` | P3       | `docs/05-operations/runbooks/observability-checklist.md`       |
 
 `bioetl_composite_source_selection_total` intentionally remains a dashboard/reporting
 signal rather than a shipped Prometheus alert baseline. It tracks bounded
@@ -208,9 +211,9 @@ not, by itself, indicate an incident condition.
 
 ## 8. Known Drifts and Required Follow-ups
 
-| ID | Severity | Drift | Evidence |
-|---|---|---|---|
-| OBS-001 | HIGH | Часть docs использует `bioetl-...` вместо `bioetl_...` | `docs/02-architecture/observability-layers.md`, `docs/05-operations/runbooks/observability-checklist.md` |
+| ID      | Severity | Drift                                                  | Evidence                                                                                                 |
+| ------- | -------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| OBS-001 | HIGH     | Часть docs использует `bioetl-...` вместо `bioetl_...` | `docs/02-architecture/observability-layers.md`, `docs/05-operations/runbooks/observability-checklist.md` |
 
 ## 9. Definition of Done for observability doc sync
 

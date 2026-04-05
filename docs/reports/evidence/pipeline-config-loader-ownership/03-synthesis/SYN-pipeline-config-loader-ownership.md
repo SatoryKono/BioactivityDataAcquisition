@@ -27,10 +27,10 @@ Rebaseline note: the current repo still supports the retain-and-thin reading for
 
 **Observation:** `pipeline_config_api.py` explicitly owns the staged
 `read -> normalize -> validate -> map` flow, and `domain_config_resolver.py`
-explicitly owns the YAML + DQ -> domain bridge.  
+explicitly owns the YAML + DQ -> domain bridge.
 **Implication:** Treating `PipelineConfigLoader` as the canonical owner would now
-fight the actual architecture that has already been established.  
-**Confidence:** 0.97  
+fight the actual architecture that has already been established.
+**Confidence:** 0.97
 **Evidence:** `EV-pipeline-config-api-now-owns-staged-yaml-loading`,
 `EV-domain-config-resolver-now-owns-yaml-plus-dq-domain-bridge`
 
@@ -38,21 +38,21 @@ fight the actual architecture that has already been established.
 
 **Observation:** Integration tests still exercise `PipelineConfigLoader`
 directly for `load_pipeline_config()`, `resolve_dq_config()`, and
-`clear_cache()`.  
+`clear_cache()`.
 **Implication:** The class should not be deleted in this wave. Its current value
-is as a local infrastructure convenience seam, not as the main topology owner.  
-**Confidence:** 0.95  
+is as a local infrastructure convenience seam, not as the main topology owner.
+**Confidence:** 0.95
 **Evidence:** `EV-pipeline-config-loader-still-provides-tested-convenience-surface`
 
 ### Insight 3: The correct next move is to retain and thin, not to re-center
 
 **Observation:** DQ helper behavior has already been extracted into
 `pipeline_dq_resolution.py`, and the active RF-FS-004 plan still flags the
-loader as a mixed hotspot rather than a settled owner.  
+loader as a mixed hotspot rather than a settled owner.
 **Implication:** The safest interpretation is to keep `PipelineConfigLoader`
 available while continuing to tighten ownership around function-based canonical
-modules.  
-**Confidence:** 0.93  
+modules.
+**Confidence:** 0.93
 **Evidence:** `EV-dq-resolution-extraction-shows-loader-can-thin-without-owning-logic`,
 `EV-rf-fs-004-governance-still-treats-loader-as-mixed-hotspot`
 
@@ -61,6 +61,7 @@ modules.
 ### Tension 1: If the class is still tested directly, should it remain the owner?
 
 **Evidence in tension**
+
 - `EV-pipeline-config-loader-still-provides-tested-convenience-surface`
 - `EV-pipeline-config-api-now-owns-staged-yaml-loading`
 - `EV-domain-config-resolver-now-owns-yaml-plus-dq-domain-bridge`
@@ -72,6 +73,7 @@ ownership has already moved to narrower modules.
 ### Tension 2: Would removing the class simplify the topology further?
 
 **Evidence in tension**
+
 - `EV-higher-layers-model-loading-and-mapping-as-separate-seams`
 - `EV-pipeline-config-loader-still-provides-tested-convenience-surface`
 

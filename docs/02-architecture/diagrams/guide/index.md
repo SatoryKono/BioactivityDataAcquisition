@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Diagrams
 
@@ -137,4 +140,4 @@ stateDiagram-v2
 
 For a more detailed look at the runtime instances and interactions between the services, see the C4 Container Diagram.
 
-*   **[C4: Диаграмма Контейнеров](container-reference.md)**
+- **[C4: Диаграмма Контейнеров](container-reference.md)**

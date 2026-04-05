@@ -10,9 +10,9 @@ Last verified: '2026-03-30'
 
 # <Provider> <Entity> Pipeline Specification
 
-**Pipeline ID:** `<provider_entity>`  
-**Provider:** `<provider>`  
-**Entity:** `<entity>`  
+**Pipeline ID:** `<provider_entity>`
+**Provider:** `<provider>`
+**Entity:** `<entity>`
 **Runtime posture:** `<ADR-010 local-only note>`
 
 ## Identification

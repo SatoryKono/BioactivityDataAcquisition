@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: UniProt ID Mapping
 
@@ -15,7 +18,7 @@ Last verified: '2026-03-30'
 **Сущность:** `idmapping`
 **Версия схемы:** 1.0.0
 
----
+______________________________________________________________________
 
 ## 1. Описание
 
@@ -24,8 +27,8 @@ Last verified: '2026-03-30'
 ### Основные сценарии использования
 
 1. **Маппинг ChEMBL → UniProt** — получение UniProt accession для ChEMBL targets
-2. **Обогащение данных об активности** — связь bioactivity records с белковыми структурами
-3. **Graceful Not Found** — корректная обработка targets без маппинга
+1. **Обогащение данных об активности** — связь bioactivity records с белковыми структурами
+1. **Graceful Not Found** — корректная обработка targets без маппинга
 
 ### Особенности реализации
 
@@ -34,36 +37,36 @@ Last verified: '2026-03-30'
 - **DQ Warning:** Записи без маппинга (`not_found`) сохраняются с `_dq_warn=True`
 - **Bronze Disabled:** Данные идут напрямую из API, минуя Bronze-слой
 
----
+______________________________________________________________________
 
 ## 2. Ключевые Поля
 
 ### Идентификаторы
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `entity_id` | `str` | ❌ | Формат: `chembl:uniprot:{target_id}` |
-| `target_id` | `str` | ❌ | ChEMBL Target ID (e.g., CHEMBL204) — первичный ключ |
-| `uniprot_accession` | `str` | ✅ | UniProt Accession (e.g., P00742), null если не найден |
+| Поле                | Тип   | Nullable | Описание                                              |
+| ------------------- | ----- | -------- | ----------------------------------------------------- |
+| `entity_id`         | `str` | ❌       | Формат: `chembl:uniprot:{target_id}`                  |
+| `target_id`         | `str` | ❌       | ChEMBL Target ID (e.g., CHEMBL204) — первичный ключ   |
+| `uniprot_accession` | `str` | ✅       | UniProt Accession (e.g., P00742), null если не найден |
 
 ### Статус маппинга
 
-| Поле | Тип | Значения | Описание |
-|------|-----|----------|----------|
-| `mapping_status` | `str` | `found`, `not_found`, `error`, `multiple` | Результат маппинга |
-| `_dq_warn` | `bool` | `True`, `False` | DQ предупреждение (`True` для `not_found`) |
+| Поле             | Тип    | Значения                                  | Описание                                   |
+| ---------------- | ------ | ----------------------------------------- | ------------------------------------------ |
+| `mapping_status` | `str`  | `found`, `not_found`, `error`, `multiple` | Результат маппинга                         |
+| `_dq_warn`       | `bool` | `True`, `False`                           | DQ предупреждение (`True` для `not_found`) |
 
 ### Lineage Metadata
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `content_hash` | `str` | SHA256 от business data |
-| `_run_id` | `str` | UUID запуска пайплайна |
-| `_run_type` | `str` | `incremental`, `backfill`, `rebuild` |
-| `_ingestion_ts` | `str` | Timestamp ingestion (ISO 8601) |
-| `_index` | `int` | Порядковый номер записи |
+| Поле            | Тип   | Описание                             |
+| --------------- | ----- | ------------------------------------ |
+| `content_hash`  | `str` | SHA256 от business data              |
+| `_run_id`       | `str` | UUID запуска пайплайна               |
+| `_run_type`     | `str` | `incremental`, `backfill`, `rebuild` |
+| `_ingestion_ts` | `str` | Timestamp ingestion (ISO 8601)       |
+| `_index`        | `int` | Порядковый номер записи              |
 
----
+______________________________________________________________________
 
 ## 3. Конфигурация
 
@@ -101,7 +104,7 @@ filters:
       - mapping_status
 ```
 
----
+______________________________________________________________________
 
 ## 4. Процесс (ETL)
 
@@ -112,46 +115,47 @@ filters:
 - **Batch Size:** 500 IDs per job
 - **API Flow:**
   1. `POST /idmapping/run` — submit job, получить `jobId`
-  2. `GET /idmapping/status/{jobId}` — poll пока `FINISHED`
-  3. `GET /idmapping/results/{jobId}` — fetch results (с пагинацией)
+  1. `GET /idmapping/status/{jobId}` — poll пока `FINISHED`
+  1. `GET /idmapping/results/{jobId}` — fetch results (с пагинацией)
 
 ### 4.2. Transform
 
 **Transformer:** `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py`
 
 1. Извлечение `target_id` и `uniprot_accession` из API response
-2. Определение `mapping_status`: `found` | `not_found`
-3. Генерация `entity_id`: `chembl:uniprot:{target_id}`
-4. Вычисление `content_hash` (SHA256)
-5. Установка `_dq_warn=True` для `not_found`
+1. Определение `mapping_status`: `found` | `not_found`
+1. Генерация `entity_id`: `chembl:uniprot:{target_id}`
+1. Вычисление `content_hash` (SHA256)
+1. Установка `_dq_warn=True` для `not_found`
 
 ### 4.3. Load
 
-| Слой | Формат | Стратегия | Путь |
-|------|--------|-----------|------|
-| **Bronze** | — | Disabled | — |
+| Слой       | Формат  | Стратегия            | Путь                                   |
+| ---------- | ------- | -------------------- | -------------------------------------- |
+| **Bronze** | —       | Disabled             | —                                      |
 | **Silver** | `delta` | Merge по `target_id` | `data/output/silver/uniprot/idmapping` |
-| **Gold** | `delta` | Overwrite | `data/output/gold/uniprot/idmapping` |
+| **Gold**   | `delta` | Overwrite            | `data/output/gold/uniprot/idmapping`   |
 
----
+______________________________________________________________________
 
 ## 5. Качество Данных (DQ)
 
 ### Пороги
 
-| Порог | Значение | Действие |
-|-------|----------|----------|
+| Порог    | Значение        | Действие        |
+| -------- | --------------- | --------------- |
 | **Soft** | 30% `not_found` | Warning в логах |
-| **Hard** | 80% `not_found` | Fail batch |
+| **Hard** | 80% `not_found` | Fail batch      |
 
 ### Обоснование elevated thresholds
 
 Многие ChEMBL targets не имеют прямого маппинга на UniProt:
+
 - Комплексные мишени (multi-protein complexes)
 - Семейства белков (protein families)
 - Non-protein targets (nucleic acids, lipids)
 
----
+______________________________________________________________________
 
 ## 6. API Reference
 
@@ -160,10 +164,12 @@ filters:
 **Документация:** https://www.uniprot.org/help/id-mapping
 
 **Поддерживаемые базы данных:**
+
 - `ChEMBL` → `UniProtKB` (основной сценарий)
 - Полный список: GET `/configure/idmapping/fields`
 
 **Ограничения:**
+
 - Max 100,000 IDs per job
 - Job results хранятся 7 дней
 - Min polling interval: 3 секунды
@@ -175,7 +181,7 @@ filters:
 await client.health_check()  # Returns HealthStatus.HEALTHY
 ```
 
----
+______________________________________________________________________
 
 ## 7. Примеры
 
@@ -213,21 +219,21 @@ CHEMBL9999999
 ]
 ```
 
----
+______________________________________________________________________
 
 ## 8. Связанные Компоненты
 
-| Компонент | Путь |
-|-----------|------|
-| **Config** | `configs/entities/uniprot/idmapping.yaml` |
-| **Transformer** | `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py` |
-| **Client** | `src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py` |
-| **Silver Schema** | `src/bioetl/domain/schemas/uniprot/idmapping.py` |
-| **Gold Schema** | `src/bioetl/domain/schemas/uniprot/idmapping.py` |
-| **Unit Tests** | `tests/unit/application/pipelines/test_idmapping_transformer.py` |
-| **Integration Tests** | `tests/integration/adapters/test_uniprot_idmapping.py` |
+| Компонент             | Путь                                                                |
+| --------------------- | ------------------------------------------------------------------- |
+| **Config**            | `configs/entities/uniprot/idmapping.yaml`                           |
+| **Transformer**       | `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py` |
+| **Client**            | `src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py`    |
+| **Silver Schema**     | `src/bioetl/domain/schemas/uniprot/idmapping.py`                    |
+| **Gold Schema**       | `src/bioetl/domain/schemas/uniprot/idmapping.py`                    |
+| **Unit Tests**        | `tests/unit/application/pipelines/test_idmapping_transformer.py`    |
+| **Integration Tests** | `tests/integration/adapters/test_uniprot_idmapping.py`              |
 
----
+______________________________________________________________________
 
 ## 9. См. также
 
@@ -236,28 +242,28 @@ CHEMBL9999999
 - [Running Pipelines](../../../03-guides/running-pipelines.md) — Запуск пайплайнов
 - [Project Rules](../../../00-project/RULES.md) — Правила обработки данных
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [uniprot_idmapping_v1.0.json](../../contracts/gold/uniprot_idmapping_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [uniprot_idmapping_v1.0.json](../../contracts/gold/uniprot_idmapping_v1.0.json)          |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
----
+______________________________________________________________________
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface описан в разделах `Конфигурация`, `Процесс (ETL)`, `Связанные Компоненты` |
-| Contract linkage | Pass | [uniprot_idmapping_v1.0.json](../../contracts/gold/uniprot_idmapping_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                  |
+| ----------------- | ------ | --------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                  |
+| Runtime alignment | Pass   | Активный config/runtime surface описан в разделах `Конфигурация`, `Процесс (ETL)`, `Связанные Компоненты` |
+| Contract linkage  | Pass   | [uniprot_idmapping_v1.0.json](../../contracts/gold/uniprot_idmapping_v1.0.json)                           |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                     |
 
----
+______________________________________________________________________
 
 ## API Compliance
 

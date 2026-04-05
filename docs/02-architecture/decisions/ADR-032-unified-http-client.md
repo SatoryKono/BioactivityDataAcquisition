@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-032: Unified HTTP Client Pattern
 
@@ -17,12 +20,14 @@ Last verified: '2026-03-30'
 ## Context
 
 All data source adapters require HTTP communication with external APIs (ChEMBL, PubChem, UniProt, CrossRef, OpenAlex, PubMed, Semantic Scholar). Each API has different requirements for:
+
 - Rate limiting (1-100 requests/second depending on provider)
 - Authentication (API keys, email headers)
 - Retry strategies (different transient error patterns)
 - Circuit breaking (different failure thresholds)
 
 Without unification, each adapter would implement its own HTTP handling, leading to:
+
 - Duplicated rate limiting and retry logic
 - Inconsistent error handling
 - Difficulty in applying cross-cutting concerns (tracing, metrics)
@@ -35,9 +40,9 @@ We have implemented **`UnifiedHTTPClient`** in `infrastructure/adapters/http/cli
 ### Design Principles
 
 1. **Composition over Inheritance**: Client accepts injected ports (RateLimiterPort, CircuitBreakerPort)
-2. **SRP Compliance**: Each concern handled by dedicated component
-3. **Observability Built-in**: Tracing and metrics integrated via ports
-4. **Async-first**: Uses httpx for async HTTP
+1. **SRP Compliance**: Each concern handled by dedicated component
+1. **Observability Built-in**: Tracing and metrics integrated via ports
+1. **Async-first**: Uses httpx for async HTTP
 
 ### Architecture
 
@@ -60,14 +65,14 @@ We have implemented **`UnifiedHTTPClient`** in `infrastructure/adapters/http/cli
 
 ### Key Features
 
-| Feature | Implementation |
-|---------|----------------|
-| Rate Limiting | TokenBucket algorithm via RateLimiterPort |
-| Circuit Breaker | 5 consecutive errors → Open 5 min (ADR-007) |
-| Retry | Exponential backoff with jitter (RetryConfig) |
-| Tracing | OpenTelemetry spans per request |
-| Metrics | http-request-duration-seconds, http-request-errors-total |
-| Correlation | X-Correlation-ID header from run-id |
+| Feature         | Implementation                                           |
+| --------------- | -------------------------------------------------------- |
+| Rate Limiting   | TokenBucket algorithm via RateLimiterPort                |
+| Circuit Breaker | 5 consecutive errors → Open 5 min (ADR-007)              |
+| Retry           | Exponential backoff with jitter (RetryConfig)            |
+| Tracing         | OpenTelemetry spans per request                          |
+| Metrics         | http-request-duration-seconds, http-request-errors-total |
+| Correlation     | X-Correlation-ID header from run-id                      |
 
 ## Justification
 
@@ -95,6 +100,7 @@ client = HttpClientFactory.create-for-provider("chembl", settings)
 ### 2. Consistent Observability
 
 All HTTP requests automatically get:
+
 - Tracing spans with provider/method/status attributes
 - Latency histogram for SLA monitoring
 - Error counters for alerting
@@ -116,13 +122,13 @@ adapter = ChEMBLAdapter(http-client=mock-client)
 ```python
 @dataclass
 class UnifiedHTTPClient:
-    rate-limiter: RateLimiterPort
-    circuit-breaker: CircuitBreakerPort
-    retry-config: RetryConfig = field(default-factory=RetryConfig)
+    rate - limiter: RateLimiterPort
+    circuit - breaker: CircuitBreakerPort
+    retry - config: RetryConfig = field(default - factory=RetryConfig)
     timeout: float = 30.0
-    run-id: RunID | None = None
-    user-agent: str = "BioETL/5.0.0"
-    contact-email: str | None = None
+    run - id: RunID | None = None
+    user - agent: str = "BioETL/5.0.0"
+    contact - email: str | None = None
     provider: str = "unknown"
     tracer: TracingPort | None = None
     metrics: MetricsPort | None = None
@@ -167,15 +173,15 @@ class ChemblAdapter(BaseHttpAdapter):
 ### Positive
 
 1. **Consistency**: All adapters use same HTTP patterns
-2. **Observability**: Unified metrics and tracing
-3. **Maintainability**: Single place to update HTTP behavior
-4. **Testability**: Easy to mock and test
-5. **Configuration**: Provider settings in YAML, not code
+1. **Observability**: Unified metrics and tracing
+1. **Maintainability**: Single place to update HTTP behavior
+1. **Testability**: Easy to mock and test
+1. **Configuration**: Provider settings in YAML, not code
 
 ### Negative
 
 1. **Indirection**: Additional layer between adapter and HTTP
-2. **Learning curve**: Developers must understand client API
+1. **Learning curve**: Developers must understand client API
 
 ### Mitigation
 
@@ -194,13 +200,13 @@ class ChemblAdapter(BaseHttpAdapter):
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-032-unified-http-client.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-032-unified-http-client.md`     |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                           |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                         |
 
 ## Rollout
 

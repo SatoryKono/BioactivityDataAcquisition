@@ -35,9 +35,9 @@ python -m scripts.qa <command> [args...]
 | Command                       | When                                                                                                                                             | Trigger                                    |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
 | `check-naming`                | After adding/renaming classes, functions, or modules; enforces NAME-001..009 rules                                                               | CI gate (`architecture.yml`, every PR)     |
-| `check-architecture`          | When reproducing or migrating the legacy infrastructure architecture check through the canonical QA entrypoint                                     | Manual, Makefile migration path            |
-| `check-app-deps`              | When reproducing or migrating the legacy application dependency check through the canonical QA entrypoint                                          | Manual, Makefile migration path            |
-| `check-constructor-args`      | When reproducing or migrating the legacy constructor-args audit through the canonical QA entrypoint                                                | CI migration path, manual use              |
+| `check-architecture`          | When reproducing or migrating the legacy infrastructure architecture check through the canonical QA entrypoint                                   | Manual, Makefile migration path            |
+| `check-app-deps`              | When reproducing or migrating the legacy application dependency check through the canonical QA entrypoint                                        | Manual, Makefile migration path            |
+| `check-constructor-args`      | When reproducing or migrating the legacy constructor-args audit through the canonical QA entrypoint                                              | CI migration path, manual use              |
 | `check-c901`                  | After modifying complex functions; prevents new C901 violations above baseline                                                                   | CI gate (`import-linter.yml`, every PR)    |
 | `check-naming-pkg`            | After restructuring packages or adding new modules; enforces factory isolation                                                                   | CI gate (`architecture.yml`)               |
 | `check-exemptions`            | After modifying quality exemption registry                                                                                                       | CI gate (`architecture.yml`)               |
@@ -48,7 +48,7 @@ python -m scripts.qa <command> [args...]
 | `report-vcr-metadata`         | When updating VCR fixture governance rollout or sidecar inventory; use `--check` for drift detection, `--update` to regenerate                   | Architecture / test-governance maintenance |
 | `report-hotspots`             | After performance benchmark runs; generates degradation report from JSONL observations                                                           | Manual, on-demand                          |
 | `report-duplication-baseline` | When reviewing duplication pressure in `composition` or `application`; generates report-only baseline artifacts without creating a blocking gate | Manual, on-demand                          |
-| `analyze-duplicate-functions` | When you need the older duplicate-function AST report through the canonical QA entrypoint                                                          | Manual, audit/reporting                    |
+| `analyze-duplicate-functions` | When you need the older duplicate-function AST report through the canonical QA entrypoint                                                        | Manual, audit/reporting                    |
 | `calibrate-hotspots`          | After collecting new performance observations; recalculates budget thresholds                                                                    | Manual, on-demand                          |
 
 Important distinction:

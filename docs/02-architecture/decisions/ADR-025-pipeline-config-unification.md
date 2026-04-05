@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted (partially superseded by ADR-039)
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-025: Pipeline Configuration Unification
 
@@ -18,15 +21,16 @@ Last verified: '2026-03-30'
 ## Context
 
 Pipeline configs имели следующие проблемы:
+
 1. Плоские пути без иерархии `{provider}/{entity}`
-2. Отсутствие `sort-by` у 78% entity configs (нарушение ADR-014)
-3. Нестандартные `batch-size` без документации
-4. Отсутствие автоматической валидации конфигов
-5. Разрозненные DQ-правила без централизации
+1. Отсутствие `sort-by` у 78% entity configs (нарушение ADR-014)
+1. Нестандартные `batch-size` без документации
+1. Отсутствие автоматической валидации конфигов
+1. Разрозненные DQ-правила без централизации
 
 ## Decision
 
-### 1. Единый _base.yaml (v2.0.0)
+### 1. Единый \_base.yaml (v2.0.0)
 
 Файл `_base.yaml` является единым источником defaults для всех pipeline configs:
 
@@ -75,18 +79,20 @@ configs/
 data/output/{layer}/{provider}/{entity}/
 ```
 
-| Слой | Паттерн | Пример |
-|------|---------|--------|
+| Слой   | Паттерн                                   | Пример                                |
+| ------ | ----------------------------------------- | ------------------------------------- |
 | Bronze | `data/output/bronze/{provider}/{entity}/` | `data/output/bronze/chembl/activity/` |
 | Silver | `data/output/silver/{provider}/{entity}/` | `data/output/silver/chembl/activity/` |
-| Gold | `data/output/gold/{provider}/{entity}/` | `data/output/gold/chembl/activity/` |
+| Gold   | `data/output/gold/{provider}/{entity}/`   | `data/output/gold/chembl/activity/`   |
 
 **Bronze file layout (contract):**
+
 ```
 data/output/bronze/{provider}/{entity}/{YYYY-MM-DD}/{filename}.jsonl.zst
 ```
 
 **CSV Export** использует тот же путь, что и Delta:
+
 ```yaml
 csv-export:
   path: "data/output/silver/chembl/activity"  # Рядом с Delta таблицей
@@ -127,6 +133,7 @@ python scripts/schema/validate_pipeline_configs.py
 ```
 
 Schema проверяет:
+
 - **Обязательные поля**: `pipeline-name`, `provider`, `entity_type`, `version`, `primary-keys`, `silver-table`, `gold-table`, `sink`
 - **Формат `pipeline-name`**: `^[a-z]+-[a-z-]+$`
 - **Допустимые `provider`**: `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar`
@@ -135,12 +142,12 @@ Schema проверяет:
 
 ### 5. Naming Conventions
 
-| Элемент | Паттерн | Пример |
-|---------|---------|--------|
-| `pipeline-name` | `<provider>-<entity>` | `chembl_activity` |
-| `silver-table` | `<provider>-<entity>` | `chembl_activity` |
-| `gold-table` | `<provider>-<entity>` | `chembl_activity` |
-| Config path | `configs/entities/<provider>/<entity>.yaml` | `configs/entities/chembl/activity.yaml` |
+| Элемент         | Паттерн                                     | Пример                                  |
+| --------------- | ------------------------------------------- | --------------------------------------- |
+| `pipeline-name` | `<provider>-<entity>`                       | `chembl_activity`                       |
+| `silver-table`  | `<provider>-<entity>`                       | `chembl_activity`                       |
+| `gold-table`    | `<provider>-<entity>`                       | `chembl_activity`                       |
+| Config path     | `configs/entities/<provider>/<entity>.yaml` | `configs/entities/chembl/activity.yaml` |
 
 **Статус**: Консистентность по всем 21 entity configs + 5 composite (верифицировано 2026-02-17).
 
@@ -166,6 +173,7 @@ source:
 ```
 
 Entity configs ссылаются через `source-file`:
+
 ```yaml
 # configs/entities/chembl/activity.yaml
 source-file: ../../providers/chembl.yaml
@@ -185,9 +193,10 @@ configs/
 ```
 
 Entity configs могут:
+
 1. Ссылаться на DQ файл: `dq-config-file: ../../entities/chembl/activity.yaml`
-2. Определять inline правила в `dq-overrides:`
-3. Комбинировать оба подхода (inline overrides поверх файла)
+1. Определять inline правила в `dq-overrides:`
+1. Комбинировать оба подхода (inline overrides поверх файла)
 
 ```yaml
 # configs/entities/chembl/activity.yaml
@@ -206,12 +215,12 @@ dq-overrides:
 ### Positive
 
 1. **Единый источник defaults**: `_base.yaml` v2.0.0 — нет дублирования
-2. **Детерминизм выходных данных**: `sort-by` во всех 21 entity configs (ADR-014)
-3. **Автоматическая валидация**: Pydantic schemas валидируют структуру
-4. **Консистентные пути**: `{layer}/{provider}/{entity}` упрощает навигацию
-5. **Provider knowledge captured**: API limits, auth requirements в source configs
-6. **Иерархические DQ правила**: Централизация через unified hierarchy (`configs/base|providers|entities`) (ADR-027)
-7. **Separation of concerns**: Source configs отделены от pipeline configs
+1. **Детерминизм выходных данных**: `sort-by` во всех 21 entity configs (ADR-014)
+1. **Автоматическая валидация**: Pydantic schemas валидируют структуру
+1. **Консистентные пути**: `{layer}/{provider}/{entity}` упрощает навигацию
+1. **Provider knowledge captured**: API limits, auth requirements в source configs
+1. **Иерархические DQ правила**: Централизация через unified hierarchy (`configs/base|providers|entities`) (ADR-027)
+1. **Separation of concerns**: Source configs отделены от pipeline configs
 
 ### Negative
 
@@ -221,13 +230,14 @@ dq-overrides:
 ### Neutral
 
 1. **21 entity configs + 5 composite**: Все используют единый формат и наследование от `_base.yaml`
-2. **7 source configs**: Один на провайдера, DRY для API settings
+1. **7 source configs**: Один на провайдера, DRY для API settings
 
 ## Alternatives Considered
 
 ### A. YAML Anchors for Inheritance
 
 Use YAML anchors/aliases for config inheritance:
+
 ```yaml
 <<: *defaults
 pipeline-name: chembl_activity
@@ -255,18 +265,18 @@ pipeline-name: chembl_activity
 
 ## Compliance
 
-| Requirement | Status | Notes |
-|-------------|--------|-------|
-| `sink.silver.format: delta` | ✅ PASS | All configs inherit from `_base.yaml` |
-| `sink.silver.primary-key` | ✅ PASS | All 21 entity configs specify (auto-propagated) |
-| `sink.silver.sort-by` | ✅ PASS | All 21 entity configs (ADR-014, auto-propagated from primary-keys) |
-| `sink.gold.sort-by` | ✅ PASS | All 21 entity configs (ADR-014, auto-propagated from primary-keys) |
-| `dq-overrides` thresholds | ✅ PASS | 0.05/0.20 in `_base.yaml` defaults |
-| `circuit-breaker` settings | ✅ PASS | 5/300 in `_base.yaml` and source configs |
-| `rate-limit` per provider | ✅ PASS | In 7 source configs |
-| No hardcoded secrets | ✅ PASS | Uses `${ENV-VAR}` syntax where needed |
-| `pipeline-name` format | ✅ PASS | All match `^[a-z]+-[a-z-]+$` |
-| Hierarchical paths | ✅ PASS | All use `{layer}/{provider}/{entity}` |
+| Requirement                 | Status  | Notes                                                              |
+| --------------------------- | ------- | ------------------------------------------------------------------ |
+| `sink.silver.format: delta` | ✅ PASS | All configs inherit from `_base.yaml`                              |
+| `sink.silver.primary-key`   | ✅ PASS | All 21 entity configs specify (auto-propagated)                    |
+| `sink.silver.sort-by`       | ✅ PASS | All 21 entity configs (ADR-014, auto-propagated from primary-keys) |
+| `sink.gold.sort-by`         | ✅ PASS | All 21 entity configs (ADR-014, auto-propagated from primary-keys) |
+| `dq-overrides` thresholds   | ✅ PASS | 0.05/0.20 in `_base.yaml` defaults                                 |
+| `circuit-breaker` settings  | ✅ PASS | 5/300 in `_base.yaml` and source configs                           |
+| `rate-limit` per provider   | ✅ PASS | In 7 source configs                                                |
+| No hardcoded secrets        | ✅ PASS | Uses `${ENV-VAR}` syntax where needed                              |
+| `pipeline-name` format      | ✅ PASS | All match `^[a-z]+-[a-z-]+$`                                       |
+| Hierarchical paths          | ✅ PASS | All use `{layer}/{provider}/{entity}`                              |
 
 ## References
 
@@ -280,23 +290,23 @@ pipeline-name: chembl_activity
 
 ## Changelog
 
-| Date | Author | Change |
-|------|--------|--------|
-| 2026-01-13 | Claude Code | Initial version |
-| 2026-01-14 | Claude Code | Added: Hierarchical paths `{layer}/{provider}/{entity}` |
-| 2026-01-14 | Claude Code | Added: Mandatory `sort-by` for ADR-014 compliance |
-| 2026-01-14 | Claude Code | Added: JSON Schema validation via `_schema.json` |
-| 2026-01-19 | Claude Code | Fixed: Corrected file structure (`_base.yaml` is the defaults file, not `_defaults.yaml`) |
-| 2026-01-19 | Claude Code | Added: Source config separation (`configs/providers/`) |
-| 2026-01-19 | Claude Code | Added: Hierarchical DQ configuration reference (ADR-027) |
-| 2026-01-19 | Claude Code | Updated: Compliance matrix with verification status |
-| 2026-02-03 | Claude Code | Fixed: Config counts (19 entity + 2 composite = 21 total) |
-| 2026-02-03 | Claude Code | Added: Reference to ADR-026 for composite pipelines |
-| 2026-02-03 | Claude Code | Fixed: ChEMBL has 12 entity configs, pubmed uses publication.yaml |
-| 2026-02-17 | Claude Code | Fixed: Config counts (21 entity + 5 composite), ChEMBL has 14 entity configs |
-| 2026-02-17 | Claude Code | Fixed: DQ path `configs/dq/` migrated to hierarchical DQ configs (ADR-027) |
-| 2026-02-17 | Claude Code | Fixed: Removed `_schema.json` reference (validation via Pydantic schemas) |
-| 2026-02-17 | Claude Code | Fixed: Composite directory listing (activity, assay, molecule, publication, target) |
+| Date       | Author      | Change                                                                                                                                                                                                                   |
+| ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-01-13 | Claude Code | Initial version                                                                                                                                                                                                          |
+| 2026-01-14 | Claude Code | Added: Hierarchical paths `{layer}/{provider}/{entity}`                                                                                                                                                                  |
+| 2026-01-14 | Claude Code | Added: Mandatory `sort-by` for ADR-014 compliance                                                                                                                                                                        |
+| 2026-01-14 | Claude Code | Added: JSON Schema validation via `_schema.json`                                                                                                                                                                         |
+| 2026-01-19 | Claude Code | Fixed: Corrected file structure (`_base.yaml` is the defaults file, not `_defaults.yaml`)                                                                                                                                |
+| 2026-01-19 | Claude Code | Added: Source config separation (`configs/providers/`)                                                                                                                                                                   |
+| 2026-01-19 | Claude Code | Added: Hierarchical DQ configuration reference (ADR-027)                                                                                                                                                                 |
+| 2026-01-19 | Claude Code | Updated: Compliance matrix with verification status                                                                                                                                                                      |
+| 2026-02-03 | Claude Code | Fixed: Config counts (19 entity + 2 composite = 21 total)                                                                                                                                                                |
+| 2026-02-03 | Claude Code | Added: Reference to ADR-026 for composite pipelines                                                                                                                                                                      |
+| 2026-02-03 | Claude Code | Fixed: ChEMBL has 12 entity configs, pubmed uses publication.yaml                                                                                                                                                        |
+| 2026-02-17 | Claude Code | Fixed: Config counts (21 entity + 5 composite), ChEMBL has 14 entity configs                                                                                                                                             |
+| 2026-02-17 | Claude Code | Fixed: DQ path `configs/dq/` migrated to hierarchical DQ configs (ADR-027)                                                                                                                                               |
+| 2026-02-17 | Claude Code | Fixed: Removed `_schema.json` reference (validation via Pydantic schemas)                                                                                                                                                |
+| 2026-02-17 | Claude Code | Fixed: Composite directory listing (activity, assay, molecule, publication, target)                                                                                                                                      |
 | 2026-02-24 | Claude Code | Superseded (partially): Entity configs consolidated into unified format (see ADR-039). Config path `configs/entities/{p}/{e}.yaml` replaced by `configs/entities/{p}/{e}.yaml`. Legacy directories removed (RF-CFG-035). |
 
 ## Rollout

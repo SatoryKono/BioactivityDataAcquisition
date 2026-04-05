@@ -1,9 +1,6 @@
----
-name: skill-creator
-description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Codex's capabilities with specialized knowledge, workflows, or tool integrations.
-metadata:
-  short-description: Create or update a skill
----
+______________________________________________________________________
+
+## name: skill-creator description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Codex's capabilities with specialized knowledge, workflows, or tool integrations. metadata: short-description: Create or update a skill
 
 # Skill Creator
 
@@ -24,9 +21,9 @@ equipped with procedural knowledge that no model can fully possess.
 ### What Skills Provide
 
 1. Specialized workflows - Multi-step procedures for specific domains
-2. Tool integrations - Instructions for working with specific file formats or APIs
-3. Domain expertise - Company-specific knowledge, schemas, business logic
-4. Bundled resources - Scripts, references, and assets for complex and repetitive tasks
+1. Tool integrations - Instructions for working with specific file formats or APIs
+1. Domain expertise - Company-specific knowledge, schemas, business logic
+1. Bundled resources - Scripts, references, and assets for complex and repetitive tasks
 
 ## Core Principles
 
@@ -134,8 +131,8 @@ The skill should only contain the information needed for an AI agent to do the j
 Skills use a three-level loading system to manage context efficiently:
 
 1. **Metadata (name + description)** - Always in context (~100 words)
-2. **SKILL.md body** - When skill triggers (<5k words)
-3. **Bundled resources** - As needed by Codex (Unlimited because scripts can be executed without reading into context window)
+1. **SKILL.md body** - When skill triggers (\<5k words)
+1. **Bundled resources** - As needed by Codex (Unlimited because scripts can be executed without reading into context window)
 
 #### Progressive Disclosure Patterns
 
@@ -222,11 +219,11 @@ Codex reads REDLINING.md or OOXML.md only when the user needs those features.
 Skill creation involves these steps:
 
 1. Understand the skill with concrete examples
-2. Plan reusable skill contents (scripts, references, assets)
-3. Initialize the skill (run init-skill.py)
-4. Edit the skill (implement resources and write SKILL.md)
-5. Validate the skill (run quick-validate.py)
-6. Iterate based on real usage
+1. Plan reusable skill contents (scripts, references, assets)
+1. Initialize the skill (run init-skill.py)
+1. Edit the skill (implement resources and write SKILL.md)
+1. Validate the skill (run quick-validate.py)
+1. Iterate based on real usage
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
@@ -260,22 +257,22 @@ Conclude this step when there is a clear sense of the functionality the skill sh
 To turn concrete examples into an effective skill, analyze each example by:
 
 1. Considering how to execute on the example from scratch
-2. Identifying what scripts, references, and assets would be helpful when executing these workflows repeatedly
+1. Identifying what scripts, references, and assets would be helpful when executing these workflows repeatedly
 
 Example: When building a `pdf-editor` skill to handle queries like "Help me rotate this PDF," the analysis shows:
 
 1. Rotating a PDF requires re-writing the same code each time
-2. A `scripts/rotate-pdf.py` script would be helpful to store in the skill
+1. A `scripts/rotate-pdf.py` script would be helpful to store in the skill
 
 Example: When designing a `frontend-webapp-builder` skill for queries like "Build me a todo app" or "Build me a dashboard to track my steps," the analysis shows:
 
 1. Writing a frontend webapp requires the same boilerplate HTML/React each time
-2. An `assets/hello-world/` template containing the boilerplate HTML/React project files would be helpful to store in the skill
+1. An `assets/hello-world/` template containing the boilerplate HTML/React project files would be helpful to store in the skill
 
 Example: When building a `big-query` skill to handle queries like "How many users have logged in today?" the analysis shows:
 
 1. Querying BigQuery requires re-discovering the table schemas and relationships each time
-2. A `references/schema.md` file documenting the table schemas would be helpful to store in the skill
+1. A `references/schema.md` file documenting the table schemas would be helpful to store in the skill
 
 To establish the skill's contents, analyze each concrete example to create a list of the reusable resources to include: scripts, references, and assets.
 
@@ -368,6 +365,6 @@ After testing the skill, users may request improvements. Often this happens righ
 **Iteration workflow:**
 
 1. Use the skill on real tasks
-2. Notice struggles or inefficiencies
-3. Identify how SKILL.md or bundled resources should be updated
-4. Implement changes and test again
+1. Notice struggles or inefficiencies
+1. Identify how SKILL.md or bundled resources should be updated
+1. Implement changes and test again

@@ -26,8 +26,8 @@ classDiagram
         #_start_health_check(...)
         #_handle_health_check_success(...)
         #_handle_health_check_failure(...)
-        
-        
+
+
     }
 
     class HealthCheckProviderMixin {
@@ -81,48 +81,48 @@ classDiagram
         +email
         +api_key
         +batch_size
-        
-        
+
+
     }
 
     class UniProtAdapter {
         +api_key
         +base_url
-        
-        
-        
+
+
+
     }
 
     class CrossRefAdapter {
         +mailto
         +batch_size
-        
-        
-        
+
+
+
     }
 
     class OpenAlexAdapter {
         +mailto
         +batch_size
-        
-        
-        
+
+
+
     }
 
     class SemanticScholarAdapter {
         +api_key
         +batch_size
         +fields
-        
-        
+
+
     }
 
     class PubChemAdapter {
         Uses pubchempy (sync)
         ThreadPoolExecutor wrapper
-        
-        
-        
+
+
+
     }
 
     class CircuitBreaker {
@@ -145,19 +145,19 @@ classDiagram
         +acquire(tokens)
         +try_acquire()
         +available_tokens()
-        
+
     }
 
     class AdapterMetrics {
         +metrics
         +provider
         +measure_request()
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
     }
 
     class CircuitBreakerDataSourceDecorator {

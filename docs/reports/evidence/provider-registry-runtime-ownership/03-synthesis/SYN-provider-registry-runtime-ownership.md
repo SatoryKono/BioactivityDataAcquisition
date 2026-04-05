@@ -14,37 +14,37 @@ Rebaseline note: the current repo still supports stopping at the named runtime b
 
 ### Insight 1: The main runtime risk has already been reduced from hidden class-level access to an explicit bootstrap seam
 
-**Observation:** The four deferred runtime files now use `ensure_providers_loaded()` or `ensure_providers_loaded_fn` instead of raw `ProviderRegistry.ensure_loaded()` calls.  
-**Implication:** The original runtime problem was primarily a hidden dependency seam. That specific problem has been materially reduced already, even without explicit `ProviderRegistry` instance ownership.  
-**Confidence:** 0.96  
+**Observation:** The four deferred runtime files now use `ensure_providers_loaded()` or `ensure_providers_loaded_fn` instead of raw `ProviderRegistry.ensure_loaded()` calls.
+**Implication:** The original runtime problem was primarily a hidden dependency seam. That specific problem has been materially reduced already, even without explicit `ProviderRegistry` instance ownership.
+**Confidence:** 0.96
 **Evidence:** `EV-provider-registry-runtime-bootstrap-now-flows-through-named-seam`
 
 ### Insight 2: The new seam is now operationally real because tests and ratchets are aligned with it
 
-**Observation:** Runtime tests patch or inject the named seam directly, and `test_registry_contracts.py` now blocks regression to raw class-level bootstrap in the migrated runtime files.  
-**Implication:** The named seam is no longer just an internal cleanup detail; it has become part of the enforceable runtime contract. This sharply reduces the urgency of pushing farther into explicit instance threading without stronger evidence.  
-**Confidence:** 0.95  
+**Observation:** Runtime tests patch or inject the named seam directly, and `test_registry_contracts.py` now blocks regression to raw class-level bootstrap in the migrated runtime files.
+**Implication:** The named seam is no longer just an internal cleanup detail; it has become part of the enforceable runtime contract. This sharply reduces the urgency of pushing farther into explicit instance threading without stronger evidence.
+**Confidence:** 0.95
 **Evidence:** `EV-provider-registry-runtime-tests-now-bind-to-the-named-bootstrap-seam`, `EV-provider-registry-runtime-ratchet-already-prevents-raw-regression`
 
 ### Insight 3: Explicit registry ownership is a good pattern, but only where ownership is already local
 
-**Observation:** In datasource and adjacent pipeline-factory seams, explicit `provider_registry` threading now works well because those code paths already own provider lookup, config resolution, and creator construction.  
-**Implication:** The evidence supports explicit instance ownership as a selective pattern, not yet as a universal migration target. The pattern has clear value in local factory seams, but that does not automatically transfer to runtime/bootstrap orchestration.  
-**Confidence:** 0.95  
+**Observation:** In datasource and adjacent pipeline-factory seams, explicit `provider_registry` threading now works well because those code paths already own provider lookup, config resolution, and creator construction.
+**Implication:** The evidence supports explicit instance ownership as a selective pattern, not yet as a universal migration target. The pattern has clear value in local factory seams, but that does not automatically transfer to runtime/bootstrap orchestration.
+**Confidence:** 0.95
 **Evidence:** `EV-provider-registry-explicit-instance-threading-already-pays-off-in-local-factory-seams`
 
 ### Insight 4: Runtime/bootstrap still lacks a strong natural owner for a ProviderRegistry instance
 
-**Observation:** Runtime signatures expose `PipelineRegistry`, registry factories, and bootstrap callables, but not an obvious caller that should own and thread a `ProviderRegistry` instance.  
-**Implication:** Forcing explicit runtime registry ownership now would risk adding new plumbing without a correspondingly clear gain in locality, reasoning, or test isolation. The current seam may already be the right stopping point for this wave.  
-**Confidence:** 0.91  
+**Observation:** Runtime signatures expose `PipelineRegistry`, registry factories, and bootstrap callables, but not an obvious caller that should own and thread a `ProviderRegistry` instance.
+**Implication:** Forcing explicit runtime registry ownership now would risk adding new plumbing without a correspondingly clear gain in locality, reasoning, or test isolation. The current seam may already be the right stopping point for this wave.
+**Confidence:** 0.91
 **Evidence:** `EV-provider-registry-runtime-callers-do-not-yet-own-provider-instance-lifecycle`
 
 ### Insight 5: Governance intent still favors stopping after seam stabilization unless stronger evidence appears
 
-**Observation:** The active RF-07 plan explicitly separates “make bootstrap explicit” from “decide whether runtime should own a registry instance.”  
-**Implication:** The current project policy already assumes that explicit runtime instance ownership is optional and should be justified later, not pursued automatically. This aligns with the current code and test evidence rather than contradicting it.  
-**Confidence:** 0.86  
+**Observation:** The active RF-07 plan explicitly separates “make bootstrap explicit” from “decide whether runtime should own a registry instance.”
+**Implication:** The current project policy already assumes that explicit runtime instance ownership is optional and should be justified later, not pursued automatically. This aligns with the current code and test evidence rather than contradicting it.
+**Confidence:** 0.86
 **Evidence:** `EV-provider-registry-governance-still-defers-runtime-instance-ownership-decision`
 
 ## Contradictions and Resolutions

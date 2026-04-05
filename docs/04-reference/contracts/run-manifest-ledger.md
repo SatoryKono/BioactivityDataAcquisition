@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-02'
----
+  Last verified: '2026-04-02'
+
+______________________________________________________________________
 
 # Run Manifest and Run Ledger Contract
 
@@ -58,12 +61,12 @@ and provenance artifact at the same time.
 
 File-backed control-plane persistence uses the following canonical paths:
 
-| Artifact | Path |
-|---|---|
-| Manifest payload | `data/output/control/run_manifest/{manifest_id}.json` |
+| Artifact              | Path                                                       |
+| --------------------- | ---------------------------------------------------------- |
+| Manifest payload      | `data/output/control/run_manifest/{manifest_id}.json`      |
 | Manifest run-id index | `data/output/control/run_manifest/_by_run_id/{run_id}.txt` |
-| Ledger payload | `data/output/control/run_ledger/{manifest_id}.jsonl` |
-| Ledger run-id index | `data/output/control/run_ledger/_by_run_id/{run_id}.txt` |
+| Ledger payload        | `data/output/control/run_ledger/{manifest_id}.jsonl`       |
+| Ledger run-id index   | `data/output/control/run_ledger/_by_run_id/{run_id}.txt`   |
 
 `run_manifest` and `run_ledger` stores are bootstrapped from
 `Path(settings.data_dir) / "output" / "control" / <leaf>` and are therefore
@@ -76,18 +79,18 @@ The control-plane runtime is governed by the runtime object path
 `PipelineSettings.ControlPlaneSettings` in
 `src/bioetl/infrastructure/config/_base.py`.
 
-| Setting | Default | Effect |
-|---|---:|---|
-| `run_manifest_enabled` | `true` | Create immutable manifest before runner assembly / execution starts |
-| `run_ledger_enabled` | `true` | Append lifecycle and inspection events keyed by `manifest_id` |
+| Setting                           |     Default | Effect                                                                                            |
+| --------------------------------- | ----------: | ------------------------------------------------------------------------------------------------- |
+| `run_manifest_enabled`            |      `true` | Create immutable manifest before runner assembly / execution starts                               |
+| `run_ledger_enabled`              |      `true` | Append lifecycle and inspection events keyed by `manifest_id`                                     |
 | `checkpoint_compatibility_policy` | `soft_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`) |
 
 Current rollout semantics:
 
 1. `run_manifest_enabled=false` disables both manifest creation and ledger attachment for new runs because runtime assembly coerces the effective flag set to `(False, False)`.
-2. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes.
-3. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
-4. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
+1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes.
+1. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
+1. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
    `observe` logs and continues, `soft_fail` blocks resume, `hard_fail` raises an error.
 
 ## Supported Resume Modes
@@ -109,16 +112,16 @@ ledger-driven state projection.
 The current control-plane contract is defined against these supported execution
 paths:
 
-| Path | Resume model | Control-plane guarantees |
-|---|---|---|
-| `ordinary success` | none | Manifest exists before execution starts; ledger writes `manifest_created`, `run_started`, stage lifecycle events, and `run_finished` when ledger is enabled |
-| `ordinary failure` | none | Manifest exists before execution starts; ledger writes `manifest_created`, `run_started`, partial stage lifecycle events, and terminal failure semantics through `run_failed` / exception logging when ledger is enabled |
-| `ordinary shutdown` | none | Manifest exists before execution starts; ledger writes `manifest_created`, `run_started`, partial stage lifecycle events, and `run_shutdown` when ledger is enabled |
-| `ordinary resume` | checkpoint snapshot only | Manifest still exists before execution starts; resume relies on checkpoint snapshot state and compatibility checks without ledger suffix replay |
-| `composite success` | none | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and terminal success when ledger is enabled |
-| `composite failure` | none | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and terminal failure semantics when ledger is enabled |
-| `composite shutdown` | none | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and `run_shutdown` when ledger is enabled |
-| `composite resume` | checkpoint snapshot + ledger suffix replay | Manifest still exists before execution starts; resume restores checkpoint snapshot first and then replays only the ledger suffix strictly after `last_event_id` |
+| Path                 | Resume model                               | Control-plane guarantees                                                                                                                                                                                                 |
+| -------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ordinary success`   | none                                       | Manifest exists before execution starts; ledger writes `manifest_created`, `run_started`, stage lifecycle events, and `run_finished` when ledger is enabled                                                              |
+| `ordinary failure`   | none                                       | Manifest exists before execution starts; ledger writes `manifest_created`, `run_started`, partial stage lifecycle events, and terminal failure semantics through `run_failed` / exception logging when ledger is enabled |
+| `ordinary shutdown`  | none                                       | Manifest exists before execution starts; ledger writes `manifest_created`, `run_started`, partial stage lifecycle events, and `run_shutdown` when ledger is enabled                                                      |
+| `ordinary resume`    | checkpoint snapshot only                   | Manifest still exists before execution starts; resume relies on checkpoint snapshot state and compatibility checks without ledger suffix replay                                                                          |
+| `composite success`  | none                                       | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and terminal success when ledger is enabled                                                                       |
+| `composite failure`  | none                                       | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and terminal failure semantics when ledger is enabled                                                             |
+| `composite shutdown` | none                                       | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and `run_shutdown` when ledger is enabled                                                                         |
+| `composite resume`   | checkpoint snapshot + ledger suffix replay | Manifest still exists before execution starts; resume restores checkpoint snapshot first and then replays only the ledger suffix strictly after `last_event_id`                                                          |
 
 No supported execution path may bypass manifest creation or, when
 `run_ledger_enabled=true`, ledger attachment. Runtime assembly coerces invalid
@@ -147,23 +150,23 @@ The current replay-enabled resume path is implemented for composite checkpoints.
 `RunManifest` is immutable and captures launch-time intent plus reproducibility
 provenance.
 
-| Field | Type | Required | Notes |
-|---|---|---:|---|
-| `manifest_id` | `str` | yes | Stable identifier of the manifest record |
-| `execution_fingerprint` | `str` | yes | Digest of reproducibility-significant fields |
-| `schema_version` | `str` | yes | Control-plane schema version |
-| `created_at` | `datetime` | yes | Manifest creation timestamp |
-| `run_id` | `uuid` | yes | Execution run identifier |
-| `run_type` | `str` | yes | `incremental`, `backfill`, `rebuild` |
-| `pipeline_name` | `str` | yes | Canonical pipeline ID |
-| `provider` | `str` | yes | Source provider |
-| `entity` | `str` | yes | Domain entity |
-| `launch_context` | `object` | yes | Launch options relevant to execution |
-| `runtime_config` | `object` | yes | Runtime-only settings snapshot |
-| `resolved_config` | `object` | yes | Effective resolved pipeline config |
-| `code_provenance` | `object` | yes | See the full `RunCodeProvenance` field set below |
-| `source_refs` | `array` | no | Canonical input/source references |
-| `planned_artifacts` | `array` | no | Intended output locations by layer |
+| Field                   | Type       | Required | Notes                                            |
+| ----------------------- | ---------- | -------: | ------------------------------------------------ |
+| `manifest_id`           | `str`      |      yes | Stable identifier of the manifest record         |
+| `execution_fingerprint` | `str`      |      yes | Digest of reproducibility-significant fields     |
+| `schema_version`        | `str`      |      yes | Control-plane schema version                     |
+| `created_at`            | `datetime` |      yes | Manifest creation timestamp                      |
+| `run_id`                | `uuid`     |      yes | Execution run identifier                         |
+| `run_type`              | `str`      |      yes | `incremental`, `backfill`, `rebuild`             |
+| `pipeline_name`         | `str`      |      yes | Canonical pipeline ID                            |
+| `provider`              | `str`      |      yes | Source provider                                  |
+| `entity`                | `str`      |      yes | Domain entity                                    |
+| `launch_context`        | `object`   |      yes | Launch options relevant to execution             |
+| `runtime_config`        | `object`   |      yes | Runtime-only settings snapshot                   |
+| `resolved_config`       | `object`   |      yes | Effective resolved pipeline config               |
+| `code_provenance`       | `object`   |      yes | See the full `RunCodeProvenance` field set below |
+| `source_refs`           | `array`    |       no | Canonical input/source references                |
+| `planned_artifacts`     | `array`    |       no | Intended output locations by layer               |
 
 ### `RunCodeProvenance` field set
 
@@ -184,22 +187,22 @@ provenance.
 
 `RunLedgerEntry` is append-only and records what actually happened.
 
-| Field | Type | Required | Notes |
-|---|---|---:|---|
-| `entry_id` | `str` | yes | Stable ledger-entry ID |
-| `manifest_id` | `str` | yes | Foreign key to manifest |
-| `run_id` | `uuid` | yes | Execution run identifier |
-| `event_type` | `str` | yes | Lifecycle / diagnostic event name |
-| `occurred_at` | `datetime` | yes | Event timestamp |
-| `event_family` | `str` | no | Stable event taxonomy (`diagnostic`, `pipeline.lifecycle`, `pipeline.phase`, `artifact`, `dq`, `lineage`, `checkpoint`, `composite`) |
-| `status` | `str` | no | Outcome/status snapshot |
-| `stage` | `str` | no | Stage identifier when applicable |
-| `message` | `str` | no | Human-readable event note |
-| `error_type` | `str` | no | Error class/category for failures |
-| `dataset_ref` | `str` | no | Dataset identity anchor for published artifacts |
-| `lineage_fragment_id` | `str` | no | Lineage fragment identity anchor |
-| `metrics_snapshot` | `object` | no | Numeric metrics captured at event time |
-| `details` | `object` | no | Additional structured payload |
+| Field                 | Type       | Required | Notes                                                                                                                                |
+| --------------------- | ---------- | -------: | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `entry_id`            | `str`      |      yes | Stable ledger-entry ID                                                                                                               |
+| `manifest_id`         | `str`      |      yes | Foreign key to manifest                                                                                                              |
+| `run_id`              | `uuid`     |      yes | Execution run identifier                                                                                                             |
+| `event_type`          | `str`      |      yes | Lifecycle / diagnostic event name                                                                                                    |
+| `occurred_at`         | `datetime` |      yes | Event timestamp                                                                                                                      |
+| `event_family`        | `str`      |       no | Stable event taxonomy (`diagnostic`, `pipeline.lifecycle`, `pipeline.phase`, `artifact`, `dq`, `lineage`, `checkpoint`, `composite`) |
+| `status`              | `str`      |       no | Outcome/status snapshot                                                                                                              |
+| `stage`               | `str`      |       no | Stage identifier when applicable                                                                                                     |
+| `message`             | `str`      |       no | Human-readable event note                                                                                                            |
+| `error_type`          | `str`      |       no | Error class/category for failures                                                                                                    |
+| `dataset_ref`         | `str`      |       no | Dataset identity anchor for published artifacts                                                                                      |
+| `lineage_fragment_id` | `str`      |       no | Lineage fragment identity anchor                                                                                                     |
+| `metrics_snapshot`    | `object`   |       no | Numeric metrics captured at event time                                                                                               |
+| `details`             | `object`   |       no | Additional structured payload                                                                                                        |
 
 ### `details._diagnostic` anchor contract
 
@@ -261,12 +264,12 @@ non-pipeline vocabulary such as artifact layer names in `stage`.
 ## Invariants
 
 1. When the control-plane contract is enabled, `no manifest, no run` applies to the documented execution path.
-2. Manifest creation happens before execution starts.
-3. `RunManifest` is immutable after persistence.
-4. `RunLedgerEntry` is append-only.
-5. Sidecars and runtime diagnostics reference `manifest_id` instead of embedding the full manifest payload.
-6. `run_id` lookup resolves to one `manifest_id` through the file index.
-7. Composite resume reuses checkpoint snapshot data and only replays ledger
+1. Manifest creation happens before execution starts.
+1. `RunManifest` is immutable after persistence.
+1. `RunLedgerEntry` is append-only.
+1. Sidecars and runtime diagnostics reference `manifest_id` instead of embedding the full manifest payload.
+1. `run_id` lookup resolves to one `manifest_id` through the file index.
+1. Composite resume reuses checkpoint snapshot data and only replays ledger
    events after the persisted watermark.
 
 ## CLI Inspection

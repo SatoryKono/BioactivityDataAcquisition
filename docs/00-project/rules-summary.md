@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Rules Summary
 
@@ -22,19 +25,19 @@ Last verified: '2026-03-29'
 
 ## Quick Reference
 
-| Задача                              | Раздел RULES.md | Инструмент                  |
-|-------------------------------------|-----------------|-----------------------------|
-| Создать новый пайплайн              | App D           | YAML config                 |
-| Добавить поле в схему               | 2.2, App E      | Pydantic model              |
-| Ошибка в проде (Alert)              | App C           | Runbook                     |
-| Удалить битые данные                | 2.6             | `bioetl quarantine purge --pipeline ...` |
-| Подготовить staging-like local profile | 5.6.1        | Environment isolation       |
-| Восстановление при аварии           | 5.5             | DR Runbook                  |
-| Откат релиза                        | 7.2             | Rollback Strategy           |
-| Безопасность                        | 5.4             | Security Policy             |
-| Forensic retention для таблицы      | 2.1.1, App D    | Config `forensic-retention` |
-| Backfill с эксклюзивной блокировкой | 2.4             | Lock Mechanism              |
-| Deprecation поля                    | 7.1, App E      | Schema Evolution            |
+| Задача                                 | Раздел RULES.md | Инструмент                               |
+| -------------------------------------- | --------------- | ---------------------------------------- |
+| Создать новый пайплайн                 | App D           | YAML config                              |
+| Добавить поле в схему                  | 2.2, App E      | Pydantic model                           |
+| Ошибка в проде (Alert)                 | App C           | Runbook                                  |
+| Удалить битые данные                   | 2.6             | `bioetl quarantine purge --pipeline ...` |
+| Подготовить staging-like local profile | 5.6.1           | Environment isolation                    |
+| Восстановление при аварии              | 5.5             | DR Runbook                               |
+| Откат релиза                           | 7.2             | Rollback Strategy                        |
+| Безопасность                           | 5.4             | Security Policy                          |
+| Forensic retention для таблицы         | 2.1.1, App D    | Config `forensic-retention`              |
+| Backfill с эксклюзивной блокировкой    | 2.4             | Lock Mechanism                           |
+| Deprecation поля                       | 7.1, App E      | Schema Evolution                         |
 
 ## 1. Архитектура
 
@@ -46,11 +49,11 @@ Last verified: '2026-03-29'
 
 ## 2. Medallion Architecture
 
-| Уровень    | Формат        | Валидация               | Retention             | Идемпотентность                                                          |
-|------------|---------------|-------------------------|-----------------------|--------------------------------------------------------------------------|
-| **Bronze** | JSONL + zstd  | Мин./Нет                | 90 дней hot → Archive | Append-only. Path: `bronze/{provider}/{entity}/{date}/`                 |
-| **Silver** | Delta Lake    | Мягкая (дрейф схемы)    | Постоянно             | **Merge/Upsert**. Raw Parquet **MUST NOT**.                              |
-| **Gold**   | Delta Lake    | Строгая (`strict=True`) | Постоянно             | SCD Type 2 или партиции по дате                                          |
+| Уровень    | Формат       | Валидация               | Retention             | Идемпотентность                                         |
+| ---------- | ------------ | ----------------------- | --------------------- | ------------------------------------------------------- |
+| **Bronze** | JSONL + zstd | Мин./Нет                | 90 дней hot → Archive | Append-only. Path: `bronze/{provider}/{entity}/{date}/` |
+| **Silver** | Delta Lake   | Мягкая (дрейф схемы)    | Постоянно             | **Merge/Upsert**. Raw Parquet **MUST NOT**.             |
+| **Gold**   | Delta Lake   | Строгая (`strict=True`) | Постоянно             | SCD Type 2 или партиции по дате                         |
 
 ### Delta Maintenance
 
@@ -61,7 +64,7 @@ Last verified: '2026-03-29'
 ## 3. Обработка Ошибок
 
 | Тип          | Поведение             | Пример                             |
-|--------------|-----------------------|------------------------------------|
+| ------------ | --------------------- | ---------------------------------- |
 | Critical     | Падение пайплайна     | Auth failure, Gold schema mismatch |
 | Recoverable  | Retry N раз (Backoff) | 429, 502/504, сетевой сбой         |
 | Data Quality | Лог + Пропуск записи  | Невалидный SMILES                  |
@@ -75,7 +78,7 @@ Last verified: '2026-03-29'
 ### Circuit Breaker
 
 | Параметр      | Значение                                       |
-|---------------|------------------------------------------------|
+| ------------- | ---------------------------------------------- |
 | Trigger       | 5 consecutive errors                           |
 | Open Duration | 5 минут                                        |
 | Recovery      | Half-Open → 1 пробный запрос                   |
@@ -83,14 +86,15 @@ Last verified: '2026-03-29'
 
 ## 4. Блокировки (Local-Only)
 
-| Параметр      | Значение                                 |
-|---------------|------------------------------------------|
-| Механизм      | `MemoryLock` (in-process)                |
-| TTL           | `heartbeat-interval * 3` = 90s           |
-| Heartbeat     | 30s                                      |
-| Max Duration  | 4 часа                                   |
+| Параметр     | Значение                       |
+| ------------ | ------------------------------ |
+| Механизм     | `MemoryLock` (in-process)      |
+| TTL          | `heartbeat-interval * 3` = 90s |
+| Heartbeat    | 30s                            |
+| Max Duration | 4 часа                         |
 
 **Invariant**: Потеря блокировки = Потеря права на запись.
+
 - Distributed locks (`RedisLockAdapter`) запрещены (ADR-010 Local-Only).
 - Для `backfill/rebuild` используется эксклюзивный lock-key (`:exclusive`).
 
@@ -104,18 +108,18 @@ Last verified: '2026-03-29'
 
 ### Disaster Recovery
 
-| Параметр  | Значение            |
-|-----------|---------------------|
-| RPO       | 24 часа             |
-| RTO       | 4 часа              |
+| Параметр       | Значение                |
+| -------------- | ----------------------- |
+| RPO            | 24 часа                 |
+| RTO            | 4 часа                  |
 | Restore drills | **SHOULD** периодически |
 
 ### Graceful Shutdown (SIGTERM/SIGINT)
 
 1. Прекратить fetch новых записей
-2. Дождаться завершения текущего батча
-3. Сохранить чекпоинт
-4. Выйти с кодом 0
+1. Дождаться завершения текущего батча
+1. Сохранить чекпоинт
+1. Выйти с кодом 0
 
 ## 6. Код и Качество
 
@@ -138,13 +142,13 @@ Last verified: '2026-03-29'
 ## TL;DR
 
 1. RFC 2119: MUST = блокер, SHOULD = обоснование в PR, MAY = опционально.
-2. Medallion: Bronze (JSONL) → Silver (Delta Lake, merge) → Gold (strict).
-3. Quarantine: `common.quarantine`, retention 30 дней, sentinel values запрещены.
-4. Locks: только `MemoryLock` (local), TTL 90s, Heartbeat 30s, Max 4h, Redis lock запрещён.
-5. DR: RPO 24h, RTO 4h, периодические restore drills.
-6. Schema Evolution: 14-дневный deprecation period, dual-write.
-7. Coverage ≥85%, `mypy --strict`, deterministic writes.
+1. Medallion: Bronze (JSONL) → Silver (Delta Lake, merge) → Gold (strict).
+1. Quarantine: `common.quarantine`, retention 30 дней, sentinel values запрещены.
+1. Locks: только `MemoryLock` (local), TTL 90s, Heartbeat 30s, Max 4h, Redis lock запрещён.
+1. DR: RPO 24h, RTO 4h, периодические restore drills.
+1. Schema Evolution: 14-дневный deprecation period, dual-write.
+1. Coverage ≥85%, `mypy --strict`, deterministic writes.
 
----
+______________________________________________________________________
 
 *Полная версия: [RULES.md](RULES.md)*

@@ -5,7 +5,7 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 
 Примечание о rebaseline: the current adapter-construction state still matches the same seam-alignment pressure points, so the pack remains a current baseline for decision work.
 
-**Создано объектов evidence:** 10  
+**Создано объектов evidence:** 10
 **Gate Статус:** PASSED
 
 ## Сводка evidence

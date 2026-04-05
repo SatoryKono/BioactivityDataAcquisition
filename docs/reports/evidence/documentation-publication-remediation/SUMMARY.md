@@ -1,6 +1,6 @@
 # Сбор evidence завершён: documentation-publication-remediation
 
-Дата: 2026-03-23  
+Дата: 2026-03-23
 Статус: актуализировано
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.

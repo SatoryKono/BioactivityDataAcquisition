@@ -435,7 +435,7 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
         "scripts/ops/close_great_expectations_spike_issue.sh",
         "scripts/ops/close_pandera_schema_drift_issue.sh",
     }
-    unknown_internal_ai_launchers = {
+    legacy_internal_ai_launchers = {
         "scripts/ai/code-reviewer.sh",
         "scripts/ai/data-engineer.sh",
         "scripts/ai/literature-researcher.sh",
@@ -466,8 +466,8 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
         return "active" if groups & strong_active_groups else "legacy"
     if script_rel in legacy_issue_specific_ops_scripts:
         return "active" if groups & strong_active_groups else "legacy"
-    if script_rel in unknown_internal_ai_launchers:
-        return "active" if groups & strong_active_groups else "unknown"
+    if script_rel in legacy_internal_ai_launchers:
+        return "active" if groups & strong_active_groups else "legacy"
     if script_rel in legacy_archive_scripts or script_rel in legacy_named_scripts:
         return "active" if groups & strong_active_groups else "legacy"
     if script_rel in legacy_src_tools_wrappers:

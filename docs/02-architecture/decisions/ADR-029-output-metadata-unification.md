@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-029: Output Metadata Unification
 
@@ -18,19 +21,19 @@ Last verified: '2026-03-30'
 
 Bronze/Silver/Gold Medallion layers использовали разные структуры для `output`-метаданных в sidecar-файлах:
 
-| Layer | Класс | Поля |
-|-------|-------|------|
-| Bronze | `OutputMetadata` | `total_records`, `total_bytes`, `files`, `format`, `compression` |
-| Silver | `SilverOutputMetadata` | `record_count`, `content_hash` |
-| Gold | `GoldOutputMetadata` | `record_count`, `partition_count`, `total_bytes`, `format` |
+| Layer  | Класс                  | Поля                                                             |
+| ------ | ---------------------- | ---------------------------------------------------------------- |
+| Bronze | `OutputMetadata`       | `total_records`, `total_bytes`, `files`, `format`, `compression` |
+| Silver | `SilverOutputMetadata` | `record_count`, `content_hash`                                   |
+| Gold   | `GoldOutputMetadata`   | `record_count`, `partition_count`, `total_bytes`, `format`       |
 
 ### Проблемы
 
 1. **Несогласованное именование**: `total_records` vs `record_count`
-2. **Отсутствует общий контракт**: Усложняет downstream-аналитику и мониторинг
-3. **Пропущенные поля**: `total_bytes` отсутствует в Silver
-4. **Нет timestamps записи**: Отсутствуют `write_started_at`/`write_completed_at`
-5. **Дублирование delta-version**: В Silver версии есть в `DeltaMetrics`, но не в output
+1. **Отсутствует общий контракт**: Усложняет downstream-аналитику и мониторинг
+1. **Пропущенные поля**: `total_bytes` отсутствует в Silver
+1. **Нет timestamps записи**: Отсутствуют `write_started_at`/`write_completed_at`
+1. **Дублирование delta-version**: В Silver версии есть в `DeltaMetrics`, но не в output
 
 ## Decision
 
@@ -64,9 +67,11 @@ class BronzeOutputExt(BaseModel):
     format: str = "jsonl+zstd"
     compression: str = "zstd"
 
+
 class SilverOutputExt(BaseModel):
-    delta-version_before: int | None
-    delta-version-after: int | None
+    delta - version_before: int | None
+    delta - version - after: int | None
+
 
 class GoldOutputExt(BaseModel):
     partition_count: int = 0
@@ -77,16 +82,18 @@ class GoldOutputExt(BaseModel):
 
 ```python
 class BronzeMetadata(BaseModel):
-    output: BaseOutputMetadata          # Unified base
-    output_ext: BronzeOutputExt         # Layer-specific
+    output: BaseOutputMetadata  # Unified base
+    output_ext: BronzeOutputExt  # Layer-specific
+
 
 class SilverMetadata(BaseModel):
-    output: BaseOutputMetadata          # Unified base
-    output_ext: SilverOutputExt         # Layer-specific
+    output: BaseOutputMetadata  # Unified base
+    output_ext: SilverOutputExt  # Layer-specific
+
 
 class GoldMetadata(BaseModel):
-    output: BaseOutputMetadata          # Unified base
-    output_ext: GoldOutputExt           # Layer-specific
+    output: BaseOutputMetadata  # Unified base
+    output_ext: GoldOutputExt  # Layer-specific
 ```
 
 ### Metadata Schema Version Bump
@@ -120,15 +127,15 @@ class OutputMetadata(BaseModel):
 ### Positive
 
 1. **Unified analytics**: Все слои экспортируют одинаковые базовые метрики
-2. **Duration tracking**: `write-duration-ms` доступен через computed field
-3. **Change detection**: `content_hash` доступен на всех слоях
-4. **Monitoring consistency**: Prometheus/Grafana dashboards могут использовать единый набор метрик
-5. **Type safety**: `extra="forbid"` предотвращает случайные поля
+1. **Duration tracking**: `write-duration-ms` доступен через computed field
+1. **Change detection**: `content_hash` доступен на всех слоях
+1. **Monitoring consistency**: Prometheus/Grafana dashboards могут использовать единый набор метрик
+1. **Type safety**: `extra="forbid"` предотвращает случайные поля
 
 ### Negative
 
 1. **Breaking change**: Существующий код использующий `output.total_records` (Bronze) требует обновления
-2. **Schema migration**: Существующие sidecar-файлы v1.0 не совместимы с v1.1
+1. **Schema migration**: Существующие sidecar-файлы v1.0 не совместимы с v1.1
 
 ### Neutral
 
@@ -140,21 +147,26 @@ class OutputMetadata(BaseModel):
 ### Files Modified
 
 **Domain Models:**
-- `src/bioetl/domain/models/metadata.py` — BaseOutputMetadata, *OutputExt классы
+
+- `src/bioetl/domain/models/metadata.py` — BaseOutputMetadata, \*OutputExt классы
 
 **DTOs:**
+
 - `src/bioetl/domain/ports/metadata_coordinator.py` — Добавлены `version_before`, `total_bytes`, `partition_count`
 
 **Services:**
-- `src/bioetl/application/services/metadata_coordinator.py` — Обновлены create_*_metadata методы
+
+- `src/bioetl/application/services/metadata_coordinator.py` — Обновлены create\_\*\_metadata методы
 
 **Infrastructure:**
-- `src/bioetl/infrastructure/storage/bronze_writer.py` — _build_full_bronze_metadata
+
+- `src/bioetl/infrastructure/storage/bronze_writer.py` — \_build_full_bronze_metadata
 - `src/bioetl/infrastructure/storage/metadata_builder.py` — Silver/Gold builders
 
 ### JSON Output Format
 
 **Before (v1.0):**
+
 ```json
 {
   "output": {
@@ -166,6 +178,7 @@ class OutputMetadata(BaseModel):
 ```
 
 **After (v1.1):**
+
 ```json
 {
   "output": {
@@ -187,7 +200,7 @@ class OutputMetadata(BaseModel):
 
 ### Unit Tests
 
-- `tests/unit/domain/models/test_metadata_output.py` — BaseOutputMetadata, *OutputExt
+- `tests/unit/domain/models/test_metadata_output.py` — BaseOutputMetadata, \*OutputExt
 
 ### Architecture Tests
 
@@ -201,13 +214,13 @@ class OutputMetadata(BaseModel):
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-029-output-metadata-unification.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                 |
+| ------------ | -------------------------------------------------------------------------- | ------ | ---------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-029-output-metadata-unification.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                               |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                         |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`     |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                             |
 
 ## Rollout
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Local Storage Layout
 
@@ -61,81 +64,89 @@ data/
 
 ### Bronze Layer
 
-| Aspect | Value |
-|--------|-------|
-| Format | JSONL + zstd compression |
+| Aspect       | Value                                            |
+| ------------ | ------------------------------------------------ |
+| Format       | JSONL + zstd compression                         |
 | Path Pattern | `data/output/bronze/{provider}/{entity}/{date}/` |
-| File Pattern | `batch-{YYYY-MM-DD}-{batch-id}.jsonl.zst` |
-| Retention | 90 days (manual cleanup) |
-| Idempotency | Append-only |
+| File Pattern | `batch-{YYYY-MM-DD}-{batch-id}.jsonl.zst`        |
+| Retention    | 90 days (manual cleanup)                         |
+| Idempotency  | Append-only                                      |
 
 **Example paths:**
+
 ```
 data/output/bronze/chembl/activity/2025-01-15/batch-2025-01-15-a1b2c3d4.jsonl.zst
 data/output/bronze/pubchem/compound/2025-01-15/batch-2025-01-15-e5f6g7h8.jsonl.zst
 ```
 
 **Sidecar files (optional):**
+
 - `{provider}-{entity}-metadata.yaml` - Batch metadata (record counts, timestamps)
 - `batch-{date}-{provider}-{entity}-dq-report.json` - Data quality report
 
 ### Silver Layer
 
-| Aspect | Value |
-|--------|-------|
-| Format | Delta Lake (delta-rs) |
+| Aspect       | Value                                     |
+| ------------ | ----------------------------------------- |
+| Format       | Delta Lake (delta-rs)                     |
 | Path Pattern | `data/output/silver/{provider}/{entity}/` |
-| Retention | Permanent |
-| Idempotency | Merge/Upsert by `content-hash` |
+| Retention    | Permanent                                 |
+| Idempotency  | Merge/Upsert by `content-hash`            |
 
 **Key characteristics:**
+
 - ACID transactions via Delta Lake
 - Contains full JSON fields for forensic analysis
 - Time travel available via `version` parameter
 
 **Sidecar files:**
+
 - `{provider}-{entity}-metadata.yaml` - Table metadata with lineage
 - `silver-{provider}-{entity}-dq-report.json` - Data quality report
 
 **Reading Silver data:**
+
 ```python
 import polars as pl
 
 # Current version
-df = pl.read-delta("data/output/silver/chembl/activity")
+df = pl.read - delta("data/output/silver/chembl/activity")
 
 # Historical version (time travel)
-df = pl.read-delta("data/output/silver/chembl/activity", version=5)
+df = pl.read - delta("data/output/silver/chembl/activity", version=5)
 ```
 
 ### Gold Layer
 
-| Aspect | Value |
-|--------|-------|
-| Format | Delta Lake (flattened schema) |
+| Aspect       | Value                                   |
+| ------------ | --------------------------------------- |
+| Format       | Delta Lake (flattened schema)           |
 | Path Pattern | `data/output/gold/{provider}/{entity}/` |
-| Retention | Permanent |
-| Idempotency | SCD Type 2 or partition overwrite |
+| Retention    | Permanent                               |
+| Idempotency  | SCD Type 2 or partition overwrite       |
 
 **Key characteristics:**
+
 - Flattened structure (no nested JSON)
 - Excludes fields from `GOLD-EXCLUDE-FIELDS`
 - Optimized for analytics queries
 
 **Sidecar files:**
+
 - `{provider}-{entity}-metadata.yaml` - Table metadata with SCD info
 - `gold-{provider}-{entity}-dq-report.json` - Data quality report
 
 ### Checkpoints
 
-| Aspect | Value |
-|--------|-------|
-| Format | JSON |
-| Path Pattern | `data/output/checkpoints/{pipeline-name}.json` |
+| Aspect            | Value                                                              |
+| ----------------- | ------------------------------------------------------------------ |
+| Format            | JSON                                                               |
+| Path Pattern      | `data/output/checkpoints/{pipeline-name}.json`                     |
 | Composite Pattern | `data/output/checkpoints/composite/composite-{name}-{run-id}.json` |
-| Purpose | Resume interrupted pipelines |
+| Purpose           | Resume interrupted pipelines                                       |
 
 **Flat structure** (not nested):
+
 ```
 	data/output/checkpoints/
 	├── chembl_activity.json
@@ -147,6 +158,7 @@ df = pl.read-delta("data/output/silver/chembl/activity", version=5)
 Checkpoint files use a flat layout: `data/output/checkpoints/{pipeline}.json`.
 
 **Checkpoint structure:**
+
 ```json
 {
   "pipeline": "chembl_activity",
@@ -166,8 +178,8 @@ ignore checkpoint resume even when `--resume` is passed.
 All file writes use atomic patterns to prevent data corruption:
 
 1. Write to temporary file (`.tmp` suffix)
-2. Fsync to ensure durability
-3. Atomic rename to final path
+1. Fsync to ensure durability
+1. Atomic rename to final path
 
 See `src/bioetl/infrastructure/storage/support/atomic_ops.py` for implementation.
 
@@ -234,6 +246,7 @@ sink:
 ```
 
 **Resolution logic** (`src/bioetl/infrastructure/config/pipeline_payload_normalization.py`):
+
 ```python
 layer.setdefault("path", f"data/output/{layer_name}/{provider}/{entity_type}")
 ```
@@ -296,12 +309,12 @@ configs/
 
 ### Unified Config Layers
 
-| Layer | Path | Purpose |
-|-------|------|---------|
-| Global defaults | `configs/base/*.yaml` | Common runtime and DQ defaults |
-| Provider config | `configs/providers/{provider}.yaml` | Provider endpoint/auth/rate-limit settings |
-| Entity config | `configs/entities/{provider}/{entity}.yaml` | Unified pipeline + schema + quality + filters + contracts |
-| Composite config | `configs/composites/{entity}.yaml` | Multi-provider enrichment orchestration |
+| Layer            | Path                                        | Purpose                                                   |
+| ---------------- | ------------------------------------------- | --------------------------------------------------------- |
+| Global defaults  | `configs/base/*.yaml`                       | Common runtime and DQ defaults                            |
+| Provider config  | `configs/providers/{provider}.yaml`         | Provider endpoint/auth/rate-limit settings                |
+| Entity config    | `configs/entities/{provider}/{entity}.yaml` | Unified pipeline + schema + quality + filters + contracts |
+| Composite config | `configs/composites/{entity}.yaml`          | Multi-provider enrichment orchestration                   |
 
 For details, see [DQ Configuration Guide](dq-configuration.md) and [Pipeline Configuration Guide](pipeline-configuration.md).
 
@@ -320,7 +333,7 @@ pipelines visible and actionable.
 If migrating from a previous S3-based deployment:
 
 1. Download S3 data: `aws s3 sync s3://bioetl-bronze/ data/output/bronze/`
-2. Update environment: Remove `AWS-*` variables
-3. Reinstall: `pip install -e .[dev]`
+1. Update environment: Remove `AWS-*` variables
+1. Reinstall: `pip install -e .[dev]`
 
 See [ADR-010 Migration Notes](../02-architecture/decisions/ADR-010-local-only-deployment.md#migration-notes).

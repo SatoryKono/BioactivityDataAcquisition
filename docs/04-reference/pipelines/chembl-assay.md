@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Pipeline: ChEMBL Assay
 
@@ -14,14 +17,14 @@ Last verified: '2026-03-29'
 
 ## Overview
 
-| Property           | Value                                 |
-| ------------------ | ------------------------------------- |
-| **Pipeline Name**  | `chembl_assay`                        |
-| **Provider**       | ChEMBL                                |
-| **Entity**         | Assay                                 |
+| Property           | Value                                |
+| ------------------ | ------------------------------------ |
+| **Pipeline Name**  | `chembl_assay`                       |
+| **Provider**       | ChEMBL                               |
+| **Entity**         | Assay                                |
 | **Configuration**  | `configs/entities/chembl/assay.yaml` |
-| **Primary Key**    | `assay_id`                            |
-| **Config Version** | 1.2.0                                 |
+| **Primary Key**    | `assay_id`                           |
+| **Config Version** | 1.2.0                                |
 
 ## Description
 
@@ -109,6 +112,6 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 | Data Quality   | `configs/entities/chembl/assay.yaml#quality`                   |
 | Silver Schema  | `src/bioetl/infrastructure/schemas/silver.py`                  |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 *See [full documentation in Russian](../providers/chembl/assay.md) for complete schema details, normalization rules, and data flow diagrams.*

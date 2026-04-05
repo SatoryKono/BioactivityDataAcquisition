@@ -1,16 +1,17 @@
----
-name: architecture-guardian
-description: "Validate BioETL architecture boundaries, ADR compliance, naming conventions, and anti-patterns. Use after any code changes affecting layer structure (domain, application, infrastructure, composition, interfaces), during refactors, or when reviewing PRs for architectural compliance."
----
+______________________________________________________________________
+
+## name: architecture-guardian description: "Validate BioETL architecture boundaries, ADR compliance, naming conventions, and anti-patterns. Use after any code changes affecting layer structure (domain, application, infrastructure, composition, interfaces), during refactors, or when reviewing PRs for architectural compliance."
 
 # Architecture Guardian
 
 *Статус: internal-published (Internal / Extended)*
 
 ## Objective
+
 Protect the BioETL hexagonal architecture by auditing code changes for boundary violations, DI issues, naming conventions, and ADR compliance.
 
 ## Core Responsibilities
+
 - Validate import rules across layers.
 - Check naming conventions for classes, functions, and modules.
 - Detect anti-patterns (DI violations, direct logging, sentinel values, print usage, hardcoded secrets).
@@ -18,50 +19,56 @@ Protect the BioETL hexagonal architecture by auditing code changes for boundary 
 - Audit structural consistency (type annotations, module naming, delegation).
 
 ## Layer Structure (Hexagonal + DDD)
+
 ```
 interfaces/ -> composition/ -> application/ -> domain/ <- infrastructure/
 ```
 
 ## Import Rules Matrix (Critical)
-| From \ To | domain | application | infrastructure | composition | interfaces |
-|---|---|---|---|---|---|
-| domain | OK | NO | NO | NO | NO |
-| application | OK | OK | NO | NO | NO |
-| infrastructure | OK (ports only) | NO | OK | NO | NO |
-| composition | OK | OK | OK | OK | NO |
-| interfaces | OK | OK | OK | OK | OK |
+
+| From \\ To     | domain          | application | infrastructure | composition | interfaces |
+| -------------- | --------------- | ----------- | -------------- | ----------- | ---------- |
+| domain         | OK              | NO          | NO             | NO          | NO         |
+| application    | OK              | OK          | NO             | NO          | NO         |
+| infrastructure | OK (ports only) | NO          | OK             | NO          | NO         |
+| composition    | OK              | OK          | OK             | OK          | NO         |
+| interfaces     | OK              | OK          | OK             | OK          | OK         |
 
 ## Allowed Exceptions
+
 - Allow `TYPE-CHECKING` imports (type hints only, no runtime dependency).
 - Allow `domain.ports` imports in infrastructure (port protocols are contracts).
 - Allow `domain.types` and `domain.exceptions` imports everywhere.
 
 ## DI Violations (Critical)
-| ID | Pattern | Example | Detection |
-|---|---|---|---|
-| DI-V001 | Hard-coded constructor | `self.client = ConcreteClass()` | `rg "self\\.[a-z-]* = [A-Z][a-zA-Z]*\\(" src/bioetl/application -g "*.py"` |
-| DI-V002 | Method-level instantiation | `def run(): client = Client()` | Inspect method bodies |
-| DI-V003 | Service locator | `ServiceLocator.get()`, `Container.resolve()` | `rg "Locator|Container\\.resolve" src/bioetl -g "*.py"` |
-| DI-V004 | Import-time side effects | `logger = structlog.get-logger()` at module level | Inspect module-level assignments |
-| DI-V005 | Factory in business logic | Factory calls outside composition | Ensure factories exist only in `composition/` |
+
+| ID      | Pattern                    | Example                                           | Detection                                                                  |
+| ------- | -------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| DI-V001 | Hard-coded constructor     | `self.client = ConcreteClass()`                   | `rg "self\\.[a-z-]* = [A-Z][a-zA-Z]*\\(" src/bioetl/application -g "*.py"` |
+| DI-V002 | Method-level instantiation | `def run(): client = Client()`                    | Inspect method bodies                                                      |
+| DI-V003 | Service locator            | `ServiceLocator.get()`, `Container.resolve()`     | \`rg "Locator                                                              |
+| DI-V004 | Import-time side effects   | `logger = structlog.get-logger()` at module level | Inspect module-level assignments                                           |
+| DI-V005 | Factory in business logic  | Factory calls outside composition                 | Ensure factories exist only in `composition/`                              |
 
 ## Validation Workflow
+
 1. Read the target files (focus on changed files).
-2. Check imports against the matrix above (ignore `TYPE-CHECKING`).
-3. Verify naming conventions:
+1. Check imports against the matrix above (ignore `TYPE-CHECKING`).
+1. Verify naming conventions:
    - Classes: PascalCase + suffix (Factory, Client, Protocol, Service, Transformer, Port, Error, Schema, Config).
    - Functions: snake-case + prefix (get-, fetch-, create-, validate-, is-, has-, can-, iter-).
    - Modules: lowercase-snake-case, no abbreviations.
-4. Detect anti-patterns:
+1. Detect anti-patterns:
    - Dependencies created inside classes (should be injected).
    - Direct `import structlog` in application/interfaces (use LoggerPort).
    - Sentinel values like `-1` or `"N/A"` (prefer `None`/Optional).
    - `print()` usage (use structured logging).
    - Hardcoded secrets.
-5. Verify type annotations on public functions and methods.
-6. Generate a structured report with exact file:line references.
+1. Verify type annotations on public functions and methods.
+1. Generate a structured report with exact file:line references.
 
 ## Valid Patterns (Do Not Flag)
+
 - Optional parameters with defaults, for example `policy: Policy | None = None`.
 - NoOp implementations (Null Object pattern for optional observability).
 - Re-exports for compatibility, for example `from module import X; --all-- = ["X"]`.
@@ -70,6 +77,7 @@ interfaces/ -> composition/ -> application/ -> domain/ <- infrastructure/
 - Int to float coercion in Gold schemas for nullable integers.
 
 ## Verification Commands
+
 ```bash
 # Import violations
 rg "from bioetl\\.infrastructure" src/bioetl/application -g "*.py" | rg -v "TYPE-CHECKING"
@@ -89,7 +97,8 @@ mypy src/bioetl/ --strict
 ```
 
 ## Report Format
-```markdown
+
+````markdown
 ## Architecture Validation Report
 
 **Date**: {YYYY-MM-DD HH:MM}
@@ -119,7 +128,8 @@ After fixes, run:
 pytest tests/architecture/ -v
 mypy src/bioetl/ --strict
 make lint
-```
+````
+
 ```
 
 ## Constraints
@@ -152,3 +162,4 @@ make lint
 ## Operational Notes
 - Prefer model "opus" if the harness supports model selection.
 - UI accent color is green (configured via `agents/openai.yaml`).
+```

@@ -22,19 +22,19 @@ graph TD
     A --> C[Policy Resolver]
     A --> D[Validation Engine]
     A --> E[Provenance Service]
-    
+
     B --> F[Schema Contracts]
     B --> G[Content Contracts]
     B --> H[Consistency Contracts]
-    
+
     C --> I[Version-Aware Resolution]
     C --> J[Fallback Mechanisms]
-    
+
     D --> K[Schema Validation]
     D --> L[Content Validation]
     D --> M[Consistency Validation]
     D --> N[Provenance Validation]
-    
+
     E --> O[Lineage Tracking]
     E --> P[Audit Logging]
     E --> Q[Metrics Collection]

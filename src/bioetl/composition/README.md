@@ -49,44 +49,44 @@ composition/
 
 ## Key Entry Points
 
-| What you want to do | Start here |
-|---------------------|------------|
-| Run a single pipeline | `entrypoints.run_pipeline()` |
-| Bootstrap a composite pipeline runtime | `entrypoints.load_composite_config()` (stable access seam over `infrastructure.config`) + `entrypoints.bootstrap_composite_runner()` |
-| Look up a pipeline by provider+entity | `registry.PipelineRegistry` |
-| Create an HTTP adapter for a provider | `providers.provider_registry.ProviderRegistry` |
-| Wire storage (Bronze/Silver/Gold) | `factories/storage/storage_factory.StorageFactory` |
-| Wire DQ services | `factories/dq/dq_services_factory.DQServicesFactory` |
-| Assemble a full pipeline with runner | `factories/pipeline/pipeline_assembler.GenericPipelineFactory` |
-| Bootstrap observability (logger+tracer+metrics) | `runtime_builders/observability_builder` |
-| Bootstrap CLI commands | `bootstrap/cli/` (one module per concern) |
+| What you want to do                             | Start here                                                                                                                           |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Run a single pipeline                           | `entrypoints.run_pipeline()`                                                                                                         |
+| Bootstrap a composite pipeline runtime          | `entrypoints.load_composite_config()` (stable access seam over `infrastructure.config`) + `entrypoints.bootstrap_composite_runner()` |
+| Look up a pipeline by provider+entity           | `registry.PipelineRegistry`                                                                                                          |
+| Create an HTTP adapter for a provider           | `providers.provider_registry.ProviderRegistry`                                                                                       |
+| Wire storage (Bronze/Silver/Gold)               | `factories/storage/storage_factory.StorageFactory`                                                                                   |
+| Wire DQ services                                | `factories/dq/dq_services_factory.DQServicesFactory`                                                                                 |
+| Assemble a full pipeline with runner            | `factories/pipeline/pipeline_assembler.GenericPipelineFactory`                                                                       |
+| Bootstrap observability (logger+tracer+metrics) | `runtime_builders/observability_builder`                                                                                             |
+| Bootstrap CLI commands                          | `bootstrap/cli/` (one module per concern)                                                                                            |
 
 ## bootstrap/runtime/ — Detailed Map
 
 This is the most complex sub-package. It handles pipeline runtime assembly:
 
-| Module | Responsibility |
-|--------|---------------|
-| `assembly.py` | Pure functions: build RuntimeConfig, FilterConfig, ResolvedVacuumSettings |
-| `pipeline.py` | Assemble BasePipeline subclass instances |
-| `runner.py` | Assemble PipelineRunner with all dependencies |
-| `runner_assembly.py` | RunnerAssembly helpers |
-| `runner_factory_builder_service.py` | RunnerFactoryBuilderService |
-| `composite.py` | Composite pipeline assembly |
-| `composite_bootstrap_builders.py` | Composite-specific builder helpers |
-| `composite_support_services_factory.py` | Support services for composite pipelines |
-| `composite_filter_extraction_service.py` | Filter extraction for composites |
-| `composite_support_helpers.py` | Utility helpers for composite support |
-| `composite_support_service_builders.py` | Service builders for composite support |
-| `observability.py` | Observability bootstrap (logger, tracer, metrics) |
-| `observability_bundle.py` | ObservabilityBundle assembly |
-| `logger_bootstrap.py` | StructlogLogger bootstrap |
-| `tracing_bootstrap.py` | OpenTelemetryTracer bootstrap |
-| `metrics_bootstrap.py` | PrometheusMetrics bootstrap |
-| `dq_bootstrap.py` | DQ services bootstrap |
-| `classification_init.py` | Publication type classification init |
-| `runtime_basics.py` | CompositeRuntimeBasics container |
-| `pipeline_runner_service_bootstrap.py` | PipelineRunnerService bootstrap |
+| Module                                   | Responsibility                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------------- |
+| `assembly.py`                            | Pure functions: build RuntimeConfig, FilterConfig, ResolvedVacuumSettings |
+| `pipeline.py`                            | Assemble BasePipeline subclass instances                                  |
+| `runner.py`                              | Assemble PipelineRunner with all dependencies                             |
+| `runner_assembly.py`                     | RunnerAssembly helpers                                                    |
+| `runner_factory_builder_service.py`      | RunnerFactoryBuilderService                                               |
+| `composite.py`                           | Composite pipeline assembly                                               |
+| `composite_bootstrap_builders.py`        | Composite-specific builder helpers                                        |
+| `composite_support_services_factory.py`  | Support services for composite pipelines                                  |
+| `composite_filter_extraction_service.py` | Filter extraction for composites                                          |
+| `composite_support_helpers.py`           | Utility helpers for composite support                                     |
+| `composite_support_service_builders.py`  | Service builders for composite support                                    |
+| `observability.py`                       | Observability bootstrap (logger, tracer, metrics)                         |
+| `observability_bundle.py`                | ObservabilityBundle assembly                                              |
+| `logger_bootstrap.py`                    | StructlogLogger bootstrap                                                 |
+| `tracing_bootstrap.py`                   | OpenTelemetryTracer bootstrap                                             |
+| `metrics_bootstrap.py`                   | PrometheusMetrics bootstrap                                               |
+| `dq_bootstrap.py`                        | DQ services bootstrap                                                     |
+| `classification_init.py`                 | Publication type classification init                                      |
+| `runtime_basics.py`                      | CompositeRuntimeBasics container                                          |
+| `pipeline_runner_service_bootstrap.py`   | PipelineRunnerService bootstrap                                           |
 
 ## factories/storage/ — Mixin Architecture
 

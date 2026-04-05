@@ -314,8 +314,9 @@ class GoldWriter(
                 metadata_coordinator=metadata_coordinator,
                 lineage_store=lineage_store,
                 contract_rollout_policy=cast(
-                    "Any", contract_rollout_policy
-                ),  # Any: rollout policy protocol narrows only after runtime service assembly.
+                    "Any",  # Any: rollout policy protocol narrows only after runtime service assembly.
+                    contract_rollout_policy,
+                ),
             )
         )
         self.csv_exporter = services.csv_exporter

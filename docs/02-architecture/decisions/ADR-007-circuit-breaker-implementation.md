@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-007: Circuit Breaker Implementation
 
@@ -24,9 +27,9 @@ External API calls (ChEMBL, PubChem, UniProt) can experience temporary failures,
 We have implemented a **state machine-based Circuit Breaker** in `infrastructure/adapters/http/circuit_breaker.py` with the following characteristics:
 
 1. **Three-state machine**: CLOSED → OPEN → HALF-OPEN → CLOSED
-2. **Configurable thresholds**: `failure-threshold=5`, `recovery-timeout=300s`
-3. **Selective triggering**: Only infrastructure errors (5xx, 429, timeouts) trip the breaker
-4. **Thread-safe**: Uses `asyncio.Lock` for concurrent access
+1. **Configurable thresholds**: `failure-threshold=5`, `recovery-timeout=300s`
+1. **Selective triggering**: Only infrastructure errors (5xx, 429, timeouts) trip the breaker
+1. **Thread-safe**: Uses `asyncio.Lock` for concurrent access
 
 This decision implements RULES.md Section 3.1.4.
 
@@ -60,6 +63,7 @@ This decision implements RULES.md Section 3.1.4.
 ### 1. Fail-Fast Principle
 
 When a service is down, continuing to retry wastes:
+
 - Network bandwidth
 - API rate limits
 - Processing time
@@ -70,6 +74,7 @@ The circuit breaker allows immediate failure with `CircuitBreakerOpenError`, let
 ### 2. Self-Healing
 
 The HALF-OPEN state enables automatic recovery probing:
+
 - After `recovery-timeout` (5 minutes), one probe request is allowed
 - If successful, circuit closes and normal operation resumes
 - If failed, circuit reopens for another timeout period
@@ -78,13 +83,13 @@ The HALF-OPEN state enables automatic recovery probing:
 
 Not all errors should trip the circuit:
 
-| Error Type | Trips Circuit | Rationale |
-|------------|---------------|-----------|
-| 5xx Server Error | Yes | Server-side issue, retrying won't help |
-| 429 Rate Limit | Yes | Need to back off significantly |
-| Connection Timeout | Yes | Network/server issue |
-| 4xx Client Error | No | Client bug, fix code not circuit |
-| Validation Error | No | Data issue, not infrastructure |
+| Error Type         | Trips Circuit | Rationale                              |
+| ------------------ | ------------- | -------------------------------------- |
+| 5xx Server Error   | Yes           | Server-side issue, retrying won't help |
+| 429 Rate Limit     | Yes           | Need to back off significantly         |
+| Connection Timeout | Yes           | Network/server issue                   |
+| 4xx Client Error   | No            | Client bug, fix code not circuit       |
+| Validation Error   | No            | Data issue, not infrastructure         |
 
 ```python
 def is-circuit-breaker-error(exc: Exception) -> bool:
@@ -98,6 +103,7 @@ def is-circuit-breaker-error(exc: Exception) -> bool:
 ### 4. Metrics Integration
 
 The circuit breaker exposes metrics for observability:
+
 - `circuit-breaker-state{adapter}`: Current state (0=Closed, 1=Half-Open, 2=Open)
 - `circuit-breaker-trips-total{adapter}`: Total OPEN transitions
 - `circuit-breaker-success-total{adapter}`: Successful calls
@@ -105,12 +111,13 @@ The circuit breaker exposes metrics for observability:
 
 ## Configuration
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `failure-threshold` | 5 | Consecutive failures before opening |
-| `recovery-timeout` | 300s | Time in OPEN before probing |
+| Parameter           | Default | Description                         |
+| ------------------- | ------- | ----------------------------------- |
+| `failure-threshold` | 5       | Consecutive failures before opening |
+| `recovery-timeout`  | 300s    | Time in OPEN before probing         |
 
 These defaults balance between:
+
 - **Too sensitive** (threshold=1): Normal transient failures trip circuit
 - **Too tolerant** (threshold=20): Wastes resources on prolonged outages
 - **Too short recovery** (10s): Hammers service during partial outages
@@ -121,6 +128,7 @@ These defaults balance between:
 ### 1. Simple Retry with Backoff Only
 
 Rejected because:
+
 - Doesn't prevent hammering during prolonged outages
 - No state awareness across requests
 - Memory waste from queued retries
@@ -128,6 +136,7 @@ Rejected because:
 ### 2. External Service (Resilience4j, Polly via sidecar)
 
 Rejected because:
+
 - Adds infrastructure dependency
 - Overkill for single-service CLI tool
 - Language boundary complexity
@@ -135,6 +144,7 @@ Rejected because:
 ### 3. Rolling Window (failures in last N seconds)
 
 Considered but deferred:
+
 - More complex implementation
 - Current consecutive-failures approach works well for API patterns
 - Can be added later if needed
@@ -142,12 +152,14 @@ Considered but deferred:
 ## Consequences
 
 ### Positive
+
 - Prevents cascading failures during API outages
 - Automatic recovery without manual intervention
 - Observable via metrics
 - Thread-safe for concurrent requests
 
 ### Negative
+
 - **Single circuit per provider**: All endpoints share one circuit. If `/compound` fails but `/activity` works, both are blocked. Acceptable tradeoff for simplicity.
 - **No persistent state**: Circuit resets on process restart. Acceptable for batch pipelines.
 
@@ -171,13 +183,13 @@ async def fetch-activity(activity-id: int) -> dict:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-007-circuit-breaker-implementation.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                    |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-007-circuit-breaker-implementation.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                                  |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                            |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`        |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                                |
 
 ## Rollout
 

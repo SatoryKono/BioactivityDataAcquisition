@@ -31,9 +31,9 @@ classDiagram
             +post(url, data, **kwargs) Response
             -_handle_retry(error, attempt) None
             -_should_retry(status_code) bool
-            
-            
-            
+
+
+
         }
 
         class CircuitBreaker {
@@ -66,12 +66,12 @@ classDiagram
             +try_acquire() bool
             +available_tokens() int
             -_refill() None
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
         }
 
         class RetryPolicy {
@@ -80,17 +80,17 @@ classDiagram
             +jitter_range: tuple
             +retriable_status_codes: set
             +calculate_delay(attempt) float
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
+
+
+
         }
     }
 
@@ -106,12 +106,12 @@ classDiagram
             +health_check() HealthStatus
             +aclose() None
             -_adapt_batch_size(health) int
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
         }
 
         class PubchemAdapter {
@@ -122,15 +122,15 @@ classDiagram
             +health_check() HealthStatus
             +aclose() None
             -_run_in_executor(func) T
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
+
         }
 
         class UniprotAdapter {
@@ -139,17 +139,17 @@ classDiagram
             +fetch(query) AsyncIterator~BronzeRecord~
             +health_check() HealthStatus
             +aclose() None
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
+
+
+
         }
 
         class PubmedAdapter {
@@ -159,16 +159,16 @@ classDiagram
             +fetch(query) AsyncIterator~BronzeRecord~
             +health_check() HealthStatus
             +aclose() None
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
+
+
         }
     }
 
@@ -185,11 +185,11 @@ classDiagram
             +write(record, provider, entity) BronzeWriteResult
             -_compress(data) bytes
             -_build_path(provider, entity, date) str
-            
-            
-            
-            
-            
+
+
+
+
+
         }
 
         class SilverWriter {
@@ -206,9 +206,9 @@ classDiagram
             +vacuum(table, retention_days) None
             -_validate_lock() bool
             -_to_arrow_table(records) pa.Table
-            
-            
-            
+
+
+
         }
 
         class GoldWriter {
@@ -221,32 +221,32 @@ classDiagram
             +write_gold(records, table, schema) WriteResult
             +clear_data(table) int
             -_validate_schema(df, schema) ValidationResult
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
         }
 
         class CsvExporter {
             -_base_path: str
             -_logger: LoggerPort
             +export(df, path) str
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
+
+
+
+
+
         }
     }
 
@@ -262,12 +262,12 @@ classDiagram
             +aclose() None
             -_ttl_checker_loop() None
             -_is_expired(lock_entry) bool
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
         }
     }
 
@@ -281,14 +281,14 @@ classDiagram
             +get_stats(pipeline) QuarantineStats
             +aclose() None
             -_truncate_payload(payload) str
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
         }
     }
 
@@ -301,15 +301,15 @@ classDiagram
             +list_all() list~str~
             +delete(key) None
             -_get_path(key) Path
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
+
         }
     }
 
@@ -322,15 +322,15 @@ classDiagram
             +error(msg, **kwargs) None
             +debug(msg, **kwargs) None
             +exception(msg, **kwargs) None
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
+
         }
 
         class PrometheusMetrics {
@@ -342,14 +342,14 @@ classDiagram
             +increment_counter(name, labels, value) None
             +set_gauge(name, value, labels) None
             +close() None
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
         }
 
         class NoOpMetrics {
@@ -357,18 +357,18 @@ classDiagram
             +increment_counter(name, labels, value) None
             +set_gauge(name, value, labels) None
             +close() None
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
+
+
+
+
         }
     }
 

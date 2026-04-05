@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Слой Domain (Домен)
 
@@ -80,11 +83,11 @@ from bioetl.domain.ports.storage import StoragePort
 
 #### 2.2.1. Таблица агрегатов
 
-| Aggregate | Root | Children (VO/Entity) | Инварианты | State machine |
-|---|---|---|---|---|
-| `Batch` | `Batch` | `BatchRecord` (VO), `BatchStatus` | `start_index >= 0`; запись/карантин только в `OPEN`; переходы только `OPEN -> SEALED -> WRITING -> COMMITTED/FAILED` | `OPEN -> SEALED -> WRITING -> COMMITTED/FAILED` |
-| `PipelineRun` | `PipelineRun` | `StageResult` (VO), `PipelineRunState`, `StageStatus` | запуск только из `PENDING`; завершение только при наличии стадий и отсутствии `FAILED`; после terminal состояния переходы запрещены | `PENDING -> RUNNING -> COMPLETED/FAILED/SHUTDOWN` |
-| `QuarantineEntry` | `QuarantineEntry` | `ResolutionInfo` (VO), `QuarantineStatus` | обязательны `entry_id`, `pipeline_name`, `error_code`, `payload`, `payload_hash`; resolve разрешён только из `NEW/UNDER_REVIEW`; `new_record_id` обязателен для `REPROCESSED` | `NEW -> UNDER_REVIEW -> IGNORED/REPROCESSED`, а также `NEW/UNDER_REVIEW -> EXPIRED` |
+| Aggregate         | Root              | Children (VO/Entity)                                  | Инварианты                                                                                                                                                                    | State machine                                                                       |
+| ----------------- | ----------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `Batch`           | `Batch`           | `BatchRecord` (VO), `BatchStatus`                     | `start_index >= 0`; запись/карантин только в `OPEN`; переходы только `OPEN -> SEALED -> WRITING -> COMMITTED/FAILED`                                                          | `OPEN -> SEALED -> WRITING -> COMMITTED/FAILED`                                     |
+| `PipelineRun`     | `PipelineRun`     | `StageResult` (VO), `PipelineRunState`, `StageStatus` | запуск только из `PENDING`; завершение только при наличии стадий и отсутствии `FAILED`; после terminal состояния переходы запрещены                                           | `PENDING -> RUNNING -> COMPLETED/FAILED/SHUTDOWN`                                   |
+| `QuarantineEntry` | `QuarantineEntry` | `ResolutionInfo` (VO), `QuarantineStatus`             | обязательны `entry_id`, `pipeline_name`, `error_code`, `payload`, `payload_hash`; resolve разрешён только из `NEW/UNDER_REVIEW`; `new_record_id` обязателен для `REPROCESSED` | `NEW -> UNDER_REVIEW -> IGNORED/REPROCESSED`, а также `NEW/UNDER_REVIEW -> EXPIRED` |
 
 #### 2.2.2. Машины состояний
 
@@ -141,17 +144,17 @@ stateDiagram-v2
 `src/bioetl/domain/value_objects/` содержит неизменяемые доменные примитивы с валидацией. Ключевые идентификаторы
 публикаций и белков:
 
-| Value object | Минимальные правила валидации |
-|---|---|
-| `DOI` | `10.<digits>/<suffix>`, удаление `doi.org`/`doi:`, lowercase |
-| `PubMedId` | только цифры, `> 0`, ограничение верхней границы |
-| `OpenAlexId` | формат `W<digits>`, поддержка URL-входа |
-| `SemanticScholarId` | ровно 40 hex-символов |
-| `ISSN` | формат `NNNN-NNNN` (check-digit может быть `X`) |
-| `ORCID` | формат `NNNN-NNNN-NNNN-NNNX`, поддержка URL-входа |
-| `UniProtId` | паттерны accession UniProt, длина 6 или 10 |
-| `ChemblId` | `CHEMBL<number>`, нормализация регистра и числа |
-| `PubChemCid` | положительный целочисленный CID |
+| Value object        | Минимальные правила валидации                                |
+| ------------------- | ------------------------------------------------------------ |
+| `DOI`               | `10.<digits>/<suffix>`, удаление `doi.org`/`doi:`, lowercase |
+| `PubMedId`          | только цифры, `> 0`, ограничение верхней границы             |
+| `OpenAlexId`        | формат `W<digits>`, поддержка URL-входа                      |
+| `SemanticScholarId` | ровно 40 hex-символов                                        |
+| `ISSN`              | формат `NNNN-NNNN` (check-digit может быть `X`)              |
+| `ORCID`             | формат `NNNN-NNNN-NNNN-NNNX`, поддержка URL-входа            |
+| `UniProtId`         | паттерны accession UniProt, длина 6 или 10                   |
+| `ChemblId`          | `CHEMBL<number>`, нормализация регистра и числа              |
+| `PubChemCid`        | положительный целочисленный CID                              |
 
 Дополнительно: activity/chemical/molecular/DQ/result value objects, а также объекты для field groups и run context.
 
@@ -256,27 +259,27 @@ domain surface. Runtime execution остаётся на `PipelineRunContext` и
 
 ### Навигация по Слоям
 
-| <- Предыдущий | Текущий | Следующий -> |
-|---|---|---|
-| - | **Domain** | [Application Layer](02-application-layer.md) |
+| \<- Предыдущий | Текущий    | Следующий ->                                 |
+| -------------- | ---------- | -------------------------------------------- |
+| -              | **Domain** | [Application Layer](02-application-layer.md) |
 
 ### Связанные диаграммы
 
-| Диаграмма | Файл | Описание |
-|---|---|---|
-| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/foundation/04-domain-layer-class-diagram.mmd) | Порты, сущности, типы |
-| Domain DDD | [08-domain-ddd.mermaid](diagrams/foundation/08-domain-ddd.mmd) | Агрегаты и доменные события |
-| Domain Models | [13-domain-models-relationship.mermaid](diagrams/foundation/13-domain-models-relationship.mmd) | Связи доменных моделей |
-| Ports Architecture | [26-hexagonal-ports-adapters.mermaid](diagrams/foundation/26-hexagonal-ports-adapters.mmd) | Карта портов и адаптеров |
+| Диаграмма            | Файл                                                                                           | Описание                    |
+| -------------------- | ---------------------------------------------------------------------------------------------- | --------------------------- |
+| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/foundation/04-domain-layer-class-diagram.mmd) | Порты, сущности, типы       |
+| Domain DDD           | [08-domain-ddd.mermaid](diagrams/foundation/08-domain-ddd.mmd)                                 | Агрегаты и доменные события |
+| Domain Models        | [13-domain-models-relationship.mermaid](diagrams/foundation/13-domain-models-relationship.mmd) | Связи доменных моделей      |
+| Ports Architecture   | [26-hexagonal-ports-adapters.mermaid](diagrams/foundation/26-hexagonal-ports-adapters.mmd)     | Карта портов и адаптеров    |
 
 ### Связанные ADR
 
-| ADR | Тема |
-|---|---|
-| [ADR-004](decisions/ADR-004-pydantic-vs-dataclasses.md) | Dataclasses/Pydantic в домене |
-| [ADR-014](decisions/ADR-014-deterministic-writes.md) | Детерминизм пайплайнов |
+| ADR                                                        | Тема                          |
+| ---------------------------------------------------------- | ----------------------------- |
+| [ADR-004](decisions/ADR-004-pydantic-vs-dataclasses.md)    | Dataclasses/Pydantic в домене |
+| [ADR-014](decisions/ADR-014-deterministic-writes.md)       | Детерминизм пайплайнов        |
 | [ADR-017](decisions/ADR-017-observability-architecture.md) | Observability source of truth |
-| [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md) | Внедрение DDD-агрегатов |
+| [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md)    | Внедрение DDD-агрегатов       |
 
 ### Смежные разделы документации
 

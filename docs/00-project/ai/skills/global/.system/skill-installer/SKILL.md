@@ -1,9 +1,6 @@
----
-name: skill-installer
-description: Install Codex skills into $CODEX-HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
-metadata:
-  short-description: Install curated skills from openai/skills or other repos
----
+______________________________________________________________________
+
+## name: skill-installer description: Install Codex skills into $CODEX-HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos). metadata: short-description: Install curated skills from openai/skills or other repos
 
 # Skill Installer
 
@@ -14,6 +11,7 @@ Helps install skills. By default these are from https://github.com/openai/skills
 - [Skill Creator](../skill-creator/SKILL.md)
 
 Use the helper scripts based on the task:
+
 - List skills when the user asks what is available, or if the user uses this skill without specifying what to do. Default listing is `.curated`, but you can pass `--path skills/.experimental` when they ask about experimental skills.
 - Install from the curated list when the user provides a skill name.
 - Install from another repo when the user provides a GitHub repo/path (including private repos).
@@ -25,11 +23,12 @@ Install skills with the helper scripts.
 When listing skills, output approximately as follows, depending on the context of the user's request. If they ask about experimental skills, list from `.experimental` instead of `.curated` and label the source accordingly:
 """
 Skills from {repo}:
+
 1. skill-1
-2. skill-2 (already installed)
-3. ...
-Which ones would you like installed?
-"""
+1. skill-2 (already installed)
+1. ...
+   Which ones would you like installed?
+   """
 
 After installing a skill, tell the user: "Restart Codex to pick up new skills."
 

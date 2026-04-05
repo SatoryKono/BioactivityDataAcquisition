@@ -3,8 +3,8 @@
 This pack collects **hierarchical architecture evidence** in three layers:
 
 1. `layers-and-boundaries` — what each top-level project layer is responsible for
-2. `architecture-patterns` — which core architectural patterns the repo explicitly uses
-3. `enforcement-guardrails` — how those boundaries and patterns are kept enforceable
+1. `architecture-patterns` — which core architectural patterns the repo explicitly uses
+1. `enforcement-guardrails` — how those boundaries and patterns are kept enforceable
 
 ## layers-and-boundaries
 
@@ -17,10 +17,10 @@ This pack collects **hierarchical architecture evidence** in three layers:
 ### Research Questions
 
 1. What responsibilities are assigned to each of the five top-level layers?
-2. Which layer is explicitly treated as the pure business-logic core?
-3. Which layer is responsible for external adapters and storage implementations?
-4. Why is `composition/` separate from `interfaces/`?
-5. What is the intended role of the `interfaces/` layer relative to application and composition?
+1. Which layer is explicitly treated as the pure business-logic core?
+1. Which layer is responsible for external adapters and storage implementations?
+1. Why is `composition/` separate from `interfaces/`?
+1. What is the intended role of the `interfaces/` layer relative to application and composition?
 
 ## architecture-patterns
 
@@ -33,10 +33,10 @@ This pack collects **hierarchical architecture evidence** in three layers:
 ### Research Questions
 
 1. Does the repository explicitly define itself as Hexagonal / Ports & Adapters?
-2. How is Medallion architecture represented in active docs and storage flow?
-3. Which DDD primitives are part of the domain layer?
-4. How is Dependency Injection expected to work in practice?
-5. Is there a registry/factory-based assembly pattern for pipelines and providers?
+1. How is Medallion architecture represented in active docs and storage flow?
+1. Which DDD primitives are part of the domain layer?
+1. How is Dependency Injection expected to work in practice?
+1. Is there a registry/factory-based assembly pattern for pipelines and providers?
 
 ## enforcement-guardrails
 
@@ -49,7 +49,7 @@ This pack collects **hierarchical architecture evidence** in three layers:
 ### Research Questions
 
 1. Does the current dependency map show any layer-policy violations?
-2. Do the current layer dependency tests pass on the active baseline?
-3. Do bootstrap/composition boundary tests pass on the active baseline?
-4. Do interface dependency and DI-hardening tests pass on the active baseline?
-5. Is the import matrix merely documented, or also backed by executable guardrails?
+1. Do the current layer dependency tests pass on the active baseline?
+1. Do bootstrap/composition boundary tests pass on the active baseline?
+1. Do interface dependency and DI-hardening tests pass on the active baseline?
+1. Is the import matrix merely documented, or also backed by executable guardrails?

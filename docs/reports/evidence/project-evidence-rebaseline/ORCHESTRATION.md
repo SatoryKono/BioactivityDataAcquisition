@@ -10,6 +10,7 @@ Repo-wide re-baseline of mutable evidence layers under `docs/reports/evidence/` 
 current code and documentation state.
 
 Special rule for this wave:
+
 - refresh `RAW-*` and `EV-*` packs in place under their existing evidence roots;
 - refresh `SUMMARY`, `SYN-*`, `CROSS-SYNTHESIS`, and decision/backlog layers where needed;
 - preserve historical meaning, but let current-state evidence replace outdated baselines;
@@ -17,25 +18,25 @@ Special rule for this wave:
 
 ## Shards
 
-| Shard | Scope | Output Root | Status |
-|---|---|---|---|
-| `evidence-rebaseline-naming` | naming-drift families and parent naming packs | `docs/reports/evidence/` | completed |
-| `evidence-rebaseline-documentation` | documentation-drift families and parent documentation packs | `docs/reports/evidence/` | completed |
-| `evidence-rebaseline-compatibility-governance` | compatibility, import-governance, ownership, loader/runtime seam packs | `docs/reports/evidence/` | completed |
-| `evidence-rebaseline-structure-topology` | file-structure, package-topology, topology-recursive, layer package packs | `docs/reports/evidence/` | completed |
-| `evidence-rebaseline-architecture-diagrams` | architecture, diagram-state, artifact-surface packs | `docs/reports/evidence/` | completed |
-| `evidence-rebaseline-quality-health` | dependency, debt, test-health, duplication, broader quality evidence packs | `docs/reports/evidence/` | completed |
+| Shard                                          | Scope                                                                      | Output Root              | Status    |
+| ---------------------------------------------- | -------------------------------------------------------------------------- | ------------------------ | --------- |
+| `evidence-rebaseline-naming`                   | naming-drift families and parent naming packs                              | `docs/reports/evidence/` | completed |
+| `evidence-rebaseline-documentation`            | documentation-drift families and parent documentation packs                | `docs/reports/evidence/` | completed |
+| `evidence-rebaseline-compatibility-governance` | compatibility, import-governance, ownership, loader/runtime seam packs     | `docs/reports/evidence/` | completed |
+| `evidence-rebaseline-structure-topology`       | file-structure, package-topology, topology-recursive, layer package packs  | `docs/reports/evidence/` | completed |
+| `evidence-rebaseline-architecture-diagrams`    | architecture, diagram-state, artifact-surface packs                        | `docs/reports/evidence/` | completed |
+| `evidence-rebaseline-quality-health`           | dependency, debt, test-health, duplication, broader quality evidence packs | `docs/reports/evidence/` | completed |
 
 ## Agent Ownership
 
-| Shard | Owner |
-|---|---|
-| `evidence-rebaseline-naming` | `Copernicus` |
-| `evidence-rebaseline-documentation` | `Volta` |
-| `evidence-rebaseline-compatibility-governance` | `Tesla` |
-| `evidence-rebaseline-structure-topology` | `Chandrasekhar` |
-| `evidence-rebaseline-architecture-diagrams` | `Halley` |
-| `evidence-rebaseline-quality-health` | `Bohr` |
+| Shard                                          | Owner           |
+| ---------------------------------------------- | --------------- |
+| `evidence-rebaseline-naming`                   | `Copernicus`    |
+| `evidence-rebaseline-documentation`            | `Volta`         |
+| `evidence-rebaseline-compatibility-governance` | `Tesla`         |
+| `evidence-rebaseline-structure-topology`       | `Chandrasekhar` |
+| `evidence-rebaseline-architecture-diagrams`    | `Halley`        |
+| `evidence-rebaseline-quality-health`           | `Bohr`          |
 
 ## Output Roots
 
@@ -64,10 +65,10 @@ Parent artifacts produced by the L1 orchestrator:
 ## Aggregation Plan
 
 1. Refresh child evidence families in parallel by shard.
-2. Validate refreshed evidence layers and gate status per shard.
-3. Refresh shard-level synthesis and backlog/decision wording where needed.
-4. Build one parent cross-synthesis for repo-wide evidence re-baseline.
-5. Publish parent summary with completed shard list and remaining stale families, if any.
+1. Validate refreshed evidence layers and gate status per shard.
+1. Refresh shard-level synthesis and backlog/decision wording where needed.
+1. Build one parent cross-synthesis for repo-wide evidence re-baseline.
+1. Publish parent summary with completed shard list and remaining stale families, if any.
 
 ## Closeout
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-005: Composition Layer as Separate Module (Not Part of Interfaces)
 
@@ -40,10 +43,10 @@ src/bioetl/
 
 ### 1. Different Responsibilities (Single Responsibility Principle)
 
-| Layer | Responsibility | Knows About |
-|-------|----------------|-------------|
-| `interfaces/` | Handle incoming requests (CLI commands, HTTP, events) | domain, application, composition |
-| `composition/` | Wire dependencies, create object graph | **ALL layers** (domain, application, infrastructure, interfaces) |
+| Layer          | Responsibility                                        | Knows About                                                      |
+| -------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
+| `interfaces/`  | Handle incoming requests (CLI commands, HTTP, events) | domain, application, composition                                 |
+| `composition/` | Wire dependencies, create object graph                | **ALL layers** (domain, application, infrastructure, interfaces) |
 
 Composition Root has a unique privilege: it is the **only place** that knows about concrete infrastructure implementations and how to assemble them. Merging it into `interfaces/` would blur this distinction.
 
@@ -64,6 +67,7 @@ interfaces             ✅        ✅             ✅             ✅           
 > **Note (2026-01-05):** The import matrix allows `interfaces → infrastructure`. This is intentional
 > and consistent with CLAUDE.md §2.1. The `interfaces` layer (CLI, API handlers) may occasionally
 > need direct infrastructure access for:
+>
 > - Health monitoring endpoints (`health.py` → `health-monitor`, `prometheus-metrics`)
 > - Observability setup (`observability.py` → infrastructure adapters)
 >
@@ -72,6 +76,7 @@ interfaces             ✅        ✅             ✅             ✅           
 > `tests/architecture/test_interfaces_no_infrastructure.py` for tracked legacy violations.
 
 Key observation: `composition/` remains the primary DI layer. While `interfaces/` *can* import from `infrastructure/`, it *should prefer* using `composition/` to get fully assembled objects. If we merge composition into interfaces, we:
+
 - Lose the explicit separation of wiring concern
 - Make it harder to identify where dependency assembly happens
 
@@ -82,10 +87,12 @@ The `bootstrap` module is used by multiple entry points:
 ```python
 # CLI (interfaces/cli/main.py)
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+
 runner = bootstrap_pipeline_runner(...)
 
 # Integration Tests
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+
 runner = bootstrap_pipeline_runner(...)
 
 # Future: HTTP API, Lambda handlers, etc.
@@ -100,6 +107,7 @@ In Clean Architecture (Robert C. Martin), the Composition Root is explicitly cal
 > "The Composition Root is the place where all the modules are composed together. It is the only place where the concrete implementations are known."
 
 This is distinct from:
+
 - **Controllers/Presenters** (our `interfaces/`) — handle I/O
 - **Use Cases** (our `application/`) — orchestrate business logic
 - **Gateways** (our `infrastructure/`) — implement ports
@@ -133,6 +141,7 @@ interfaces/
 ```
 
 **Rejected because:**
+
 - Violates SRP — interfaces would have two responsibilities
 - Requires complex import rules (bootstrap can import infrastructure, but cli/main.py cannot)
 - Less explicit about DI location
@@ -147,6 +156,7 @@ application/
 ```
 
 **Rejected because:**
+
 - Application layer should not know about concrete infrastructure
 - Breaks the "application depends only on ports" rule
 - Would require import-linter exceptions
@@ -165,6 +175,7 @@ src/bioetl/
 ## Consequences
 
 ### Positive
+
 - Clear separation of concerns
 - Import rules are simple and enforceable
 - Self-documenting architecture
@@ -172,10 +183,12 @@ src/bioetl/
 - Testability — can test composition separately from interfaces
 
 ### Negative
+
 - One additional top-level directory (5 instead of 4)
 - Developers must understand the distinction between composition and interfaces
 
 ### Neutral
+
 - No performance impact
 - No additional dependencies
 
@@ -196,13 +209,13 @@ src/bioetl/
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-005-composition-layer-separation.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                  |
+| ------------ | -------------------------------------------------------------------------- | ------ | ----------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-005-composition-layer-separation.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                                |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                          |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`      |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                              |
 
 ## Rollout
 

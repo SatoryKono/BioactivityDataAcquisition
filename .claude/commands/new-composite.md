@@ -1,10 +1,11 @@
----
-description: "Создание нового composite pipeline BioETL. Генерирует YAML-конфиг с seed, enrichers, merge strategy."
----
+______________________________________________________________________
+
+## description: "Создание нового composite pipeline BioETL. Генерирует YAML-конфиг с seed, enrichers, merge strategy."
 
 # /new-composite
 
 ## Использование
+
 ```
 /new-composite [name]
 ```
@@ -12,20 +13,26 @@ description: "Создание нового composite pipeline BioETL. Гене�
 ## Инструкции
 
 ### Шаг 1: Сбор информации
+
 Ask via AskUserQuestion: composite name (snake_case), seed pipeline, output keys, enrichers, merge strategy (`left_outer`|`inner`|`union`), conflict resolution (`seed_priority`|`enricher_priority`|`coalesce`).
 
 ### Шаг 2: Валидация
+
 - `configs/composites/{name}.yaml` must NOT exist
 - Seed and enricher pipelines must exist in `configs/entities/`
 
 ### Шаг 3: Study existing
+
 ```bash
 ls configs/composites/
 ```
+
 Read one for reference. Load `configs/_schema/composite.json`.
 
 ### Шаг 4: Generate config
+
 Create `configs/composites/{name}.yaml`:
+
 ```yaml
 composite:
   name: composite_{name}
@@ -57,6 +64,7 @@ composite:
 ```
 
 ### Шаг 5: Validate
+
 ```bash
 uv run python -c "
 import json, yaml, jsonschema
@@ -68,6 +76,7 @@ print('OK')
 ```
 
 ### Шаг 6: Update golden master
+
 ```bash
 UPDATE_SNAPSHOTS=1 uv run python -m pytest tests/architecture/test_config_golden_master.py -v
 ```

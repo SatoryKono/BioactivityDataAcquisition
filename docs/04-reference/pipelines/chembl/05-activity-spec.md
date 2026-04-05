@@ -1,42 +1,45 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-03'
----
+  Last verified: '2026-04-03'
+
+______________________________________________________________________
 
 # ChEMBL Activity Pipeline Specification
 
 *Version 2.0.0 | Updated: 2026-03-10 | Current-state reference*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-| --- | --- |
-| **Pipeline ID** | `chembl_activity` |
-| **Provider** | `chembl` |
-| **Entity** | `activity` |
-| **Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/activity` |
-| **HTTP stack** | Unified httpx-based adapters in `src/bioetl/infrastructure/adapters/chembl/` |
-| **Auth type** | Public API |
-| **Rate limit** | `3 req/sec` (`configs/providers/chembl.yaml`) |
-| **Architecture** | Local-Only runtime (ADR-010) |
+| Parameter        | Value                                                                        |
+| ---------------- | ---------------------------------------------------------------------------- |
+| **Pipeline ID**  | `chembl_activity`                                                            |
+| **Provider**     | `chembl`                                                                     |
+| **Entity**       | `activity`                                                                   |
+| **Endpoint**     | `https://www.ebi.ac.uk/chembl/api/data/activity`                             |
+| **HTTP stack**   | Unified httpx-based adapters in `src/bioetl/infrastructure/adapters/chembl/` |
+| **Auth type**    | Public API                                                                   |
+| **Rate limit**   | `3 req/sec` (`configs/providers/chembl.yaml`)                                |
+| **Architecture** | Local-Only runtime (ADR-010)                                                 |
 
 ## 2. Current Runtime Behavior
 
 `chembl_activity` is an active Bronze + Silver pipeline. The current config
 does **not** emit Gold output.
 
-| Layer | Status | Source of truth |
-| --- | --- | --- |
-| **Bronze** | Enabled | Provider fetch + raw persistence |
-| **Silver** | Enabled | `configs/entities/chembl/activity.yaml` |
-| **Gold** | Disabled | `pipeline.sink.gold.enabled: false` |
+| Layer      | Status   | Source of truth                         |
+| ---------- | -------- | --------------------------------------- |
+| **Bronze** | Enabled  | Provider fetch + raw persistence        |
+| **Silver** | Enabled  | `configs/entities/chembl/activity.yaml` |
+| **Gold**   | Disabled | `pipeline.sink.gold.enabled: false`     |
 
 Key active config:
 
@@ -128,15 +131,15 @@ the live entity config and contract sources before describing Gold behavior.
 
 ## 6. Source Files
 
-| Component | Path |
-| --- | --- |
-| Pipeline config | `configs/entities/chembl/activity.yaml` |
-| Provider config | `configs/providers/chembl.yaml` |
-| Transformer | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
-| Domain entity | `src/bioetl/domain/entities/bioactivity/_entity.py` |
-| ChEMBL adapters | `src/bioetl/infrastructure/adapters/chembl/` |
-| Canonical Gold contracts | `src/bioetl/domain/contracts/gold/` |
-| Generated contract exports | `docs/04-reference/contracts/gold/` |
+| Component                  | Path                                                              |
+| -------------------------- | ----------------------------------------------------------------- |
+| Pipeline config            | `configs/entities/chembl/activity.yaml`                           |
+| Provider config            | `configs/providers/chembl.yaml`                                   |
+| Transformer                | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
+| Domain entity              | `src/bioetl/domain/entities/bioactivity/_entity.py`               |
+| ChEMBL adapters            | `src/bioetl/infrastructure/adapters/chembl/`                      |
+| Canonical Gold contracts   | `src/bioetl/domain/contracts/gold/`                               |
+| Generated contract exports | `docs/04-reference/contracts/gold/`                               |
 
 ## 7. CLI Usage
 
@@ -172,18 +175,18 @@ bioetl run --pipeline chembl_activity \
 
 ## Contract References
 
-| Artifact | Link |
-| --- | --- |
-| Provider reference | [activity.md](../../providers/chembl/activity.md) |
-| Gold contract export | [chembl_activity_v1.0.json](../../contracts/gold/chembl_activity_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Artifact             | Link                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Provider reference   | [activity.md](../../providers/chembl/activity.md)                                        |
+| Gold contract export | [chembl_activity_v1.0.json](../../contracts/gold/chembl_activity_v1.0.json)              |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
 ## Compliance
 
-| Control | Status | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Canonical source traceability | Pass | Page delegates current contract to the linked canonical source and active config surface |
-| Contract linkage | Pass | [chembl_activity_v1.0.json](../../contracts/gold/chembl_activity_v1.0.json) |
-| Published-page role | Pass | Historical deep spec or summary is explicitly bounded by current canonical sources |
+| Control                       | Status | Evidence                                                                                 |
+| ----------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface |
+| Contract linkage              | Pass   | [chembl_activity_v1.0.json](../../contracts/gold/chembl_activity_v1.0.json)              |
+| Published-page role           | Pass   | Historical deep spec or summary is explicitly bounded by current canonical sources       |

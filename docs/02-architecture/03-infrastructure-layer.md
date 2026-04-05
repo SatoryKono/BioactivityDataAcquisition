@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Слой Infrastructure (Инфраструктура)
 
@@ -183,110 +186,110 @@ PubMedAdapter                         (pubchempy)
 
 #### 2.2.1. BronzeWriter Mixin Decomposition
 
-| Файл                              | Назначение                                    |
-| --------------------------------- | --------------------------------------------- |
-| `bronze_writer.py`                | Главный `BronzeWriter`                        |
-| `bronze_writer_io_mixin.py`       | I/O операции (JSONL write, compression)       |
-| `bronze_writer_metadata_mixin.py` | Генерация Bronze metadata sidecar             |
-| `bronze_writer_metrics_mixin.py`  | Метрики Bronze write операций                 |
-| `bronze_writer_side_effects_mixin.py` | Side effects (checksum, notifications)    |
-| `bronze_writer_validation_mixin.py`| Валидация входных данных                     |
-| `bronze_write_result_helpers.py`  | Helper functions для write result              |
+| Файл                                  | Назначение                              |
+| ------------------------------------- | --------------------------------------- |
+| `bronze_writer.py`                    | Главный `BronzeWriter`                  |
+| `bronze_writer_io_mixin.py`           | I/O операции (JSONL write, compression) |
+| `bronze_writer_metadata_mixin.py`     | Генерация Bronze metadata sidecar       |
+| `bronze_writer_metrics_mixin.py`      | Метрики Bronze write операций           |
+| `bronze_writer_side_effects_mixin.py` | Side effects (checksum, notifications)  |
+| `bronze_writer_validation_mixin.py`   | Валидация входных данных                |
+| `bronze_write_result_helpers.py`      | Helper functions для write result       |
 
 #### 2.2.2. SilverWriter Mixin Decomposition
 
-| Файл                                    | Назначение                                    |
-| ---------------------------------------- | --------------------------------------------- |
-| `silver_writer.py`                       | Главный `SilverWriter`                        |
-| `silver_writer_arrow_mixin.py`           | PyArrow conversion и schema alignment         |
-| `silver_writer_delta_mixin.py`           | Delta Lake write/merge operations             |
-| `silver_writer_merged_mixin.py`          | Post-merge reconciliation                     |
-| `silver_writer_metadata_mixin.py`        | Silver metadata sidecar generation            |
-| `silver_writer_postwrite_mixin.py`       | Post-write operations (VACUUM, stats)         |
-| `silver_writer_validation_mixin.py`      | Schema validation и data quality              |
-| `silver_writer_maintenance_mixin.py`     | Maintenance operations (OPTIMIZE, Z-ORDER)    |
-| `silver_writer_delta_helpers.py`         | Delta Lake helper functions                   |
+| Файл                                        | Назначение                                 |
+| ------------------------------------------- | ------------------------------------------ |
+| `silver_writer.py`                          | Главный `SilverWriter`                     |
+| `silver_writer_arrow_mixin.py`              | PyArrow conversion и schema alignment      |
+| `silver_writer_delta_mixin.py`              | Delta Lake write/merge operations          |
+| `silver_writer_merged_mixin.py`             | Post-merge reconciliation                  |
+| `silver_writer_metadata_mixin.py`           | Silver metadata sidecar generation         |
+| `silver_writer_postwrite_mixin.py`          | Post-write operations (VACUUM, stats)      |
+| `silver_writer_validation_mixin.py`         | Schema validation и data quality           |
+| `silver_writer_maintenance_mixin.py`        | Maintenance operations (OPTIMIZE, Z-ORDER) |
+| `silver_writer_delta_helpers.py`            | Delta Lake helper functions                |
 | `silver_writer_merge_resilience_helpers.py` | Merge retry и resilience logic             |
-| `silver_writer_pipeline_helpers.py`      | Pipeline-specific helpers                     |
-| `silver/runtime_helpers.py`              | Runtime configuration helpers                 |
+| `silver_writer_pipeline_helpers.py`         | Pipeline-specific helpers                  |
+| `silver/runtime_helpers.py`                 | Runtime configuration helpers              |
 
 #### 2.2.3. GoldWriter Mixin Decomposition
 
-| Файл                              | Назначение                                    |
-| --------------------------------- | --------------------------------------------- |
-| `gold_writer.py`                  | Главный `GoldWriter`                          |
-| `gold/io_mixin.py`                | I/O operations (Delta write)                  |
-| `gold/io_delta_mixins.py`         | Delta-specific I/O (merge, overwrite)         |
-| `gold/metadata_mixin.py`          | Gold metadata sidecar generation              |
-| `gold/validation_mixin.py`        | Pandera schema validation                     |
-| `gold/read_cleanup_mixin.py`      | Read и cleanup operations                     |
-| `gold/io_helpers.py`              | I/O helper functions                          |
-| `gold/metadata_audit.py`          | Metadata audit trail                          |
-| `gold/pipeline_helpers.py`        | Pipeline-specific helpers                     |
-| `gold/runtime_helpers.py`         | Runtime configuration helpers                 |
-| `gold/metadata_operations.py`     | Metadata sidecar write operations             |
-| `gold/metadata_payloads.py`       | Metadata payload normalization helpers        |
+| Файл                          | Назначение                             |
+| ----------------------------- | -------------------------------------- |
+| `gold_writer.py`              | Главный `GoldWriter`                   |
+| `gold/io_mixin.py`            | I/O operations (Delta write)           |
+| `gold/io_delta_mixins.py`     | Delta-specific I/O (merge, overwrite)  |
+| `gold/metadata_mixin.py`      | Gold metadata sidecar generation       |
+| `gold/validation_mixin.py`    | Pandera schema validation              |
+| `gold/read_cleanup_mixin.py`  | Read и cleanup operations              |
+| `gold/io_helpers.py`          | I/O helper functions                   |
+| `gold/metadata_audit.py`      | Metadata audit trail                   |
+| `gold/pipeline_helpers.py`    | Pipeline-specific helpers              |
+| `gold/runtime_helpers.py`     | Runtime configuration helpers          |
+| `gold/metadata_operations.py` | Metadata sidecar write operations      |
+| `gold/metadata_payloads.py`   | Metadata payload normalization helpers |
 
 #### 2.2.4. Storage Support
 
 **Delta Lake infrastructure:**
 
-| Файл                     | Компонент            | Назначение                                    |
-| ------------------------ | -------------------- | --------------------------------------------- |
-| `base_delta_writer.py`   | `BaseDeltaWriter`    | Базовый класс для Silver/Gold writers         |
-| `silver_writer.py`       | `SilverWriter`       | Канонический Delta Lake writer для Silver layer |
-| `delta_reader.py`        | `DeltaReader`        | Чтение Delta Lake таблиц                      |
-| `delta/arrow_converter.py` | `ArrowDataConverter` | PyArrow conversion utilities                |
-| `delta/resilience.py`    | `AdaptiveRetryPolicy` | Retry/backoff policy objects for storage writes |
-| `atomic.py`              | `atomic_write_text`  | Public atomic-write facade                    |
-| `support/atomic_ops.py`  | `AtomicWriteGroup`   | Internal atomic file write and replace-retry  |
+| Файл                       | Компонент             | Назначение                                      |
+| -------------------------- | --------------------- | ----------------------------------------------- |
+| `base_delta_writer.py`     | `BaseDeltaWriter`     | Базовый класс для Silver/Gold writers           |
+| `silver_writer.py`         | `SilverWriter`        | Канонический Delta Lake writer для Silver layer |
+| `delta_reader.py`          | `DeltaReader`         | Чтение Delta Lake таблиц                        |
+| `delta/arrow_converter.py` | `ArrowDataConverter`  | PyArrow conversion utilities                    |
+| `delta/resilience.py`      | `AdaptiveRetryPolicy` | Retry/backoff policy objects for storage writes |
+| `atomic.py`                | `atomic_write_text`   | Public atomic-write facade                      |
+| `support/atomic_ops.py`    | `AtomicWriteGroup`    | Internal atomic file write and replace-retry    |
 
 **Metadata infrastructure:**
 
-| Файл                                  | Компонент          | Назначение                                    |
-| -------------------------------------- | ------------------ | --------------------------------------------- |
-| `metadata_writer.py`                  | `MetadataWriter`   | Запись metadata sidecar YAML                  |
-| `metadata/writer_operations.py`       | Internal operations| Подготовка, telemetry, retry для metadata     |
-| `metadata_builder.py`                 | `MetadataBuilder`  | Сборка metadata моделей                       |
-| `metadata/builder_base.py`            | Base builder       | Базовые функции сборки metadata               |
-| `metadata_builder_composite_helpers.py`| Compatibility wrapper | Transitional wrapper over canonical `bioetl.domain.services.composite_metadata_helpers` |
+| Файл                                    | Компонент             | Назначение                                                                              |
+| --------------------------------------- | --------------------- | --------------------------------------------------------------------------------------- |
+| `metadata_writer.py`                    | `MetadataWriter`      | Запись metadata sidecar YAML                                                            |
+| `metadata/writer_operations.py`         | Internal operations   | Подготовка, telemetry, retry для metadata                                               |
+| `metadata_builder.py`                   | `MetadataBuilder`     | Сборка metadata моделей                                                                 |
+| `metadata/builder_base.py`              | Base builder          | Базовые функции сборки metadata                                                         |
+| `metadata_builder_composite_helpers.py` | Compatibility wrapper | Transitional wrapper over canonical `bioetl.domain.services.composite_metadata_helpers` |
 
 **Other storage:**
 
-| Файл                           | Компонент                  | Назначение                              |
-| ------------------------------ | -------------------------- | --------------------------------------- |
-| `support/retention.py`         | `RetentionPolicy`          | VACUUM retention и Delta maintenance    |
-| `support/checkpoint_writer.py` | `FileCompositeCheckpointWriter` | Запись composite checkpoint         |
+| Файл                           | Компонент                       | Назначение                           |
+| ------------------------------ | ------------------------------- | ------------------------------------ |
+| `support/retention.py`         | `RetentionPolicy`               | VACUUM retention и Delta maintenance |
+| `support/checkpoint_writer.py` | `FileCompositeCheckpointWriter` | Запись composite checkpoint          |
 
 #### 2.1.3. Adapter Support Infrastructure
 
 **Error handling:**
 
-| Файл                         | Компонент                   | Назначение                                    |
-| ---------------------------- | --------------------------- | --------------------------------------------- |
-| `adapter_error_classifier.py`| `AdapterErrorClassifier`    | Классификация ошибок адаптеров (retryable и др.) |
-| `adapter_error_mapper.py`    | `AdapterErrorMapper`        | Маппинг HTTP-ошибок на domain exceptions      |
-| `error_handling.py`          | Error handling utilities    | Общие утилиты обработки ошибок                |
+| Файл                          | Компонент                | Назначение                                       |
+| ----------------------------- | ------------------------ | ------------------------------------------------ |
+| `adapter_error_classifier.py` | `AdapterErrorClassifier` | Классификация ошибок адаптеров (retryable и др.) |
+| `adapter_error_mapper.py`     | `AdapterErrorMapper`     | Маппинг HTTP-ошибок на domain exceptions         |
+| `error_handling.py`           | Error handling utilities | Общие утилиты обработки ошибок                   |
 
 **Health monitoring:**
 
-| Файл                      | Компонент                | Назначение                                    |
-| ------------------------- | ------------------------ | --------------------------------------------- |
-| `health_check_mixin.py`   | `HealthCheckMixin`       | Mixin для реализации `health_check()` в адаптерах |
-| `health_check_contract.py`| `HealthCheckContext`     | Контракт health check response                |
-| `health_probe_policy.py`  | `HealthProbePolicy`      | Политика health probes (interval, timeout)    |
-| `health_status_policy.py` | `HealthStatusPolicy`     | Политика определения статуса по результатам   |
+| Файл                       | Компонент            | Назначение                                        |
+| -------------------------- | -------------------- | ------------------------------------------------- |
+| `health_check_mixin.py`    | `HealthCheckMixin`   | Mixin для реализации `health_check()` в адаптерах |
+| `health_check_contract.py` | `HealthCheckContext` | Контракт health check response                    |
+| `health_probe_policy.py`   | `HealthProbePolicy`  | Политика health probes (interval, timeout)        |
+| `health_status_policy.py`  | `HealthStatusPolicy` | Политика определения статуса по результатам       |
 
 **Base classes and mixins:**
 
-| Файл                        | Компонент              | Назначение                                    |
-| --------------------------- | ---------------------- | --------------------------------------------- |
-| `base.py`                   | `BaseHttpAdapter`      | Базовый класс для async HTTP адаптеров        |
-| `sync_base.py`              | `BaseSyncAdapter`      | Базовый класс для sync адаптеров (pubchempy)  |
-| `base_metrics.py`           | Adapter metrics        | Метрики адаптеров (requests, latency)         |
-| `filterable_mixin.py`       | `FilterableMixin`      | Mixin для фильтрации по ID-спискам            |
-| `cached_bronze_data_source.py` | `CachedBronzeDataSource` | Кеширование Bronze данных               |
-| `validation.py`             | Validation utilities   | Валидация параметров адаптеров                |
+| Файл                           | Компонент                | Назначение                                   |
+| ------------------------------ | ------------------------ | -------------------------------------------- |
+| `base.py`                      | `BaseHttpAdapter`        | Базовый класс для async HTTP адаптеров       |
+| `sync_base.py`                 | `BaseSyncAdapter`        | Базовый класс для sync адаптеров (pubchempy) |
+| `base_metrics.py`              | Adapter metrics          | Метрики адаптеров (requests, latency)        |
+| `filterable_mixin.py`          | `FilterableMixin`        | Mixin для фильтрации по ID-спискам           |
+| `cached_bronze_data_source.py` | `CachedBronzeDataSource` | Кеширование Bronze данных                    |
+| `validation.py`                | Validation utilities     | Валидация параметров адаптеров               |
 
 **Subpackages:** `http/` (UnifiedHTTPClient, rate limiter, circuit breaker), `common/` (shared adapter utilities), `input/` (input data sources), `decorators/` (adapter decorators).
 
@@ -324,7 +327,7 @@ PubMedAdapter                         (pubchempy)
 - **Инверсия зависимостей:** Классы из `Infrastructure` зависят от абстракций (`Protocol`) из `Domain`, а не наоборот. Это позволяет подменять реализации без изменения ядра системы.
 - **Конфигурация:** Все необходимые параметры (API-ключи, пути, адреса серверов) адаптеры получают через DI из конфигурационных объектов.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 4. Связанные Материалы
 
@@ -336,13 +339,13 @@ PubMedAdapter                         (pubchempy)
 
 ### Связанные Диаграммы
 
-| Диаграмма              | Файл                                                                                                            | Описание                                         |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Диаграмма              | Файл                                                                                                       | Описание                                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | Infrastructure Classes | [10-infrastructure-layer-class-diagram.mmd](diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | Классы слоя Infrastructure                       |
-| Provider Adapters      | [30-port-adapter-mapping.mmd](diagrams/foundation/30-port-adapter-mapping.mmd)                                  | Обзор 7 провайдеров и их rate limits             |
+| Provider Adapters      | [30-port-adapter-mapping.mmd](diagrams/foundation/30-port-adapter-mapping.mmd)                             | Обзор 7 провайдеров и их rate limits             |
 | HTTP Infrastructure    | [10-infrastructure-layer-class-diagram.mmd](diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
 | Circuit Breaker        | [07-circuit-breaker-states.mmd](diagrams/foundation/07-circuit-breaker-states.mmd)                         | Состояния Circuit Breaker                        |
-| Storage Architecture   | [19-delta-lake-write-sequence.mmd](diagrams/foundation/19-delta-lake-write-sequence.mmd)                    | Bronze, Silver, Gold writers                     |
+| Storage Architecture   | [19-delta-lake-write-sequence.mmd](diagrams/foundation/19-delta-lake-write-sequence.mmd)                   | Bronze, Silver, Gold writers                     |
 | MemoryLock             | [16-memory-lock-class.mmd](diagrams/foundation/16-memory-lock-class.mmd)                                   | Класс MemoryLock                                 |
 
 ### Связанные ADR

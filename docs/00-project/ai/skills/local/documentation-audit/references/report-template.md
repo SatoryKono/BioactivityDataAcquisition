@@ -11,30 +11,30 @@
 
 ## Findings by severity
 ### Critical
-- 
+-
 
 ### High
-- 
+-
 
 ### Medium
-- 
+-
 
 ### Low
-- 
+-
 
 ## Proposed changes (prioritized)
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Required decisions
-- 
+-
 
 ## Updated files (if changes applied)
-- 
+-
 
 ## Dead or orphan docs (candidates)
-- 
+-
 
 ## Verification
 - RULES.md and REQUIREMENTS.md sync:

@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 Примечание о rebaseline: completed runtime and CLI cleanup passes plus
 `vacuum_enabled_override` moved this pack firmly into historical-trigger mode;
 remaining work is now optional and narrow.
@@ -13,12 +12,12 @@ remaining work is now optional and narrow.
 ## Созданные объекты evidence
 
 1. `EV-variable-naming-drift-pipeline-bootstrap-ctx-abbreviation-hides-context-object`
-2. `EV-variable-naming-drift-run-all-registry-resolution-uses-opaque-ctx-and-candidate-temporaries`
-3. `EV-variable-naming-drift-gold-dq-dispatch-uses-handler-and-result-temporaries`
-4. `EV-variable-naming-drift-pipelinecontext-vacuum-enabled-is-tristate-but-reads-like-bool`
-5. `EV-variable-naming-drift-tests-reinforce-ctx-shorthand-in-pipelinecontext-fixtures`
-6. `EV-variable-naming-drift-composite-runner-preflight-uses-generic-context-and-result-temporaries`
-7. `EV-variable-naming-drift-rules-canonicalize-pipelinecontext-but-code-uses-ctx-shorthand`
+1. `EV-variable-naming-drift-run-all-registry-resolution-uses-opaque-ctx-and-candidate-temporaries`
+1. `EV-variable-naming-drift-gold-dq-dispatch-uses-handler-and-result-temporaries`
+1. `EV-variable-naming-drift-pipelinecontext-vacuum-enabled-is-tristate-but-reads-like-bool`
+1. `EV-variable-naming-drift-tests-reinforce-ctx-shorthand-in-pipelinecontext-fixtures`
+1. `EV-variable-naming-drift-composite-runner-preflight-uses-generic-context-and-result-temporaries`
+1. `EV-variable-naming-drift-rules-canonicalize-pipelinecontext-but-code-uses-ctx-shorthand`
 
 ## Проверка gate
 

@@ -46,4 +46,3 @@ Replace placeholder decision IDs with real `DEC-*` references before finalizing 
 - Question:
 - What decision or evidence is missing:
 ```
-

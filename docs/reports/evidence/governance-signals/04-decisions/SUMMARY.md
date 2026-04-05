@@ -1,7 +1,7 @@
 # Decisions Complete: governance-signals
 
-**Decisions Made:** 4  
-**Статус:** 4 accepted, 0 provisional  
+**Decisions Made:** 4
+**Статус:** 4 accepted, 0 provisional
 **Risks Identified:** 5
 
 ## Решения Summary

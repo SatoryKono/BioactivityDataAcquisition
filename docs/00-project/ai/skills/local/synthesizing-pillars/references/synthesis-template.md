@@ -32,4 +32,3 @@ Use this template for `03-synthesis/SYN-<pillar>.md`.
 - Topic requiring explicit `DEC-*`
 - Why it needs a decision now
 ```
-

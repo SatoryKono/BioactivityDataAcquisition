@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P1
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
----
+  Priority: P1
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # DQ Failure Investigation Runbook
 
@@ -70,8 +73,11 @@ grep "dq-check\|dq-threshold" logs/bioetl.log | tail -20
 - Key log fields:
 
 - `error_rate`: Percentage of quarantined records in the evaluated batch
+
 - `quarantined_count`: Absolute count
+
 - `total_count`: Total records in batch
+
 - `pipeline`: Pipeline name tied to the warning/failure
 
 ### Step 2: Examine Quarantine Records
@@ -122,19 +128,25 @@ bioetl quarantine stats --pipeline chembl_activity
 - **Source Data Issues**
 
 - Check if upstream API changed response format
+
 - Verify API version in use
+
 - Compare with known-good historical data
 
 - **Schema Evolution**
 
 - Check if new fields were added upstream
+
 - Verify transformer handles optional fields
+
 - Review schema validation rules
 
 - **Pipeline Bug**
 
 - Review recent code changes to transformer
+
 - Check for off-by-one errors in parsing
+
 - Verify type coercion logic
 
 ### Step 5: Impact Assessment
@@ -145,7 +157,7 @@ import polars as pl
 
 # Check current Silver table state
 dt = DeltaTable("data/output/silver/chembl/activity")
-df = pl.scan-delta(str(dt)).collect()
+df = pl.scan - delta(str(dt)).collect()
 
 # Count records by run_id
 run_stats = df.group_by("_run_id").agg(
@@ -167,12 +179,13 @@ print(run_stats)
 import json
 from pathlib import Path
 
+
 def reprocess_quarantine(quarantine_dir: str, output_file: str) -> None:
     """Extract and fix quarantined records."""
     fixed_records = []
 
     for f in Path(quarantine_dir).glob("*.jsonl"):
-        for line in f.read-text().splitlines():
+        for line in f.read - text().splitlines():
             record = json.loads(line)
             original = record.get("payload", {})
 
@@ -181,9 +194,7 @@ def reprocess_quarantine(quarantine_dir: str, output_file: str) -> None:
                 # Fix encoding
                 field_value = original.get("field")
                 if isinstance(field_value, str):
-                    original["field"] = field_value.encode(
-                        "utf-8", "ignore"
-                    ).decode()
+                    original["field"] = field_value.encode("utf-8", "ignore").decode()
                 fixed_records.append(original)
 
     with open(output_file, "w", encoding="utf-8") as f:
@@ -254,13 +265,17 @@ def test-activity-schema-handles-null-smiles():
 - Set up dashboards for:
 
 - DQ error rate over time
+
 - Error type distribution
+
 - Records quarantined per run
 
 - Alert on:
 
 - Soft threshold exceeded
+
 - New error type appearing
+
 - Sudden spike in quarantine rate
 
 ### Document Known Issues
@@ -281,9 +296,13 @@ def test-activity-schema-handles-null-smiles():
 - Key Prometheus metrics:
 
 - `bioetl-dq-records-processed-total{provider, entity}`
+
 - `bioetl-dq-records-passed-total{provider, entity}`
+
 - `bioetl-dq-records-failed-total{provider, entity}`
+
 - `bioetl-dq-soft-threshold-exceeded-total{provider, entity}`
+
 - `bioetl-dq-check-duration-ms{provider, entity}`
 
 ### Provenance Notes
@@ -297,8 +316,11 @@ def test-activity-schema-handles-null-smiles():
 - Escalate if:
 
 - Hard threshold exceeded for > 3 consecutive runs
+
 - Error rate increasing over time
+
 - New error type not in known issues
+
 - Upstream API changes suspected
 
 ## Compliance

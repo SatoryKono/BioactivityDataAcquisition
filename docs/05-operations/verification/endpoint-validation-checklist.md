@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Manual Endpoint Validation Checklists
 
@@ -20,19 +23,19 @@ Each section covers base configuration, health check, pagination, retry,
 and sample curl commands extracted from `configs/providers/{provider}.yaml`
 and `src/bioetl/infrastructure/adapters/{provider}/` source code.
 
----
+______________________________________________________________________
 
 ## Table of Contents
 
 1. [ChEMBL](#1-chembl)
-2. [CrossRef](#2-crossref)
-3. [OpenAlex](#3-openalex)
-4. [PubChem](#4-pubchem)
-5. [PubMed](#5-pubmed)
-6. [Semantic Scholar](#6-semantic-scholar)
-7. [UniProt](#7-uniprot)
+1. [CrossRef](#2-crossref)
+1. [OpenAlex](#3-openalex)
+1. [PubChem](#4-pubchem)
+1. [PubMed](#5-pubmed)
+1. [Semantic Scholar](#6-semantic-scholar)
+1. [UniProt](#7-uniprot)
 
----
+______________________________________________________________________
 
 ## 1. ChEMBL
 
@@ -42,18 +45,18 @@ and `src/bioetl/infrastructure/adapters/{provider}/` source code.
 
 ### Base Configuration
 
-| Parameter | Value |
-|-----------|-------|
-| Base URL | `https://www.ebi.ac.uk/chembl/api/data` |
-| Auth Type | `public` (no authentication required) |
-| Rate Limit | 3 req/sec, burst 10 |
-| Page Size | 1000 records/page (paginated queries) |
-| Filter Batch Size | 20 IDs per filtered API request |
-| Timeout | 60.0 sec |
-| Max Retries | 3 |
-| Max URL Length | 2000 chars |
-| API Version | None (unversioned) |
-| Data License | CC BY-SA 3.0 |
+| Parameter         | Value                                   |
+| ----------------- | --------------------------------------- |
+| Base URL          | `https://www.ebi.ac.uk/chembl/api/data` |
+| Auth Type         | `public` (no authentication required)   |
+| Rate Limit        | 3 req/sec, burst 10                     |
+| Page Size         | 1000 records/page (paginated queries)   |
+| Filter Batch Size | 20 IDs per filtered API request         |
+| Timeout           | 60.0 sec                                |
+| Max Retries       | 3                                       |
+| Max URL Length    | 2000 chars                              |
+| API Version       | None (unversioned)                      |
+| Data License      | CC BY-SA 3.0                            |
 
 ### Health Check
 
@@ -68,11 +71,12 @@ curl -s "https://www.ebi.ac.uk/chembl/api/data/status?format=json" | python3 -m 
 
 ### Pagination
 
-| Type | Next Indicator | Last Page Signal |
-|------|---------------|-----------------|
+| Type                                     | Next Indicator                 | Last Page Signal           |
+| ---------------------------------------- | ------------------------------ | -------------------------- |
 | Offset-based (`limit` + `offset` params) | `page-meta.next` is not `null` | `page-meta.next` is `null` |
 
 **Response envelope:**
+
 ```
 {
   "page-meta": {
@@ -90,11 +94,11 @@ curl -s "https://www.ebi.ac.uk/chembl/api/data/status?format=json" | python3 -m 
 
 ### Retry & Circuit Breaker
 
-| Parameter | Value |
-|-----------|-------|
-| `use-retry-after` | `false` (ChEMBL does not return Retry-After headers) |
-| Circuit Breaker Failure Threshold | 5 |
-| Circuit Breaker Recovery Timeout | 300 sec |
+| Parameter                         | Value                                                |
+| --------------------------------- | ---------------------------------------------------- |
+| `use-retry-after`                 | `false` (ChEMBL does not return Retry-After headers) |
+| Circuit Breaker Failure Threshold | 5                                                    |
+| Circuit Breaker Recovery Timeout  | 300 sec                                              |
 
 ### Validation Commands
 
@@ -132,7 +136,7 @@ print('Records:', len(d.get('molecules',[])))
 - [ ] Filter `--in` operator works for batch ID lookups
 - [ ] Non-paginated entities (target, protein-class) return all records without limit/offset
 
----
+______________________________________________________________________
 
 ## 2. CrossRef
 
@@ -142,17 +146,17 @@ print('Records:', len(d.get('molecules',[])))
 
 ### Base Configuration
 
-| Parameter | Value |
-|-----------|-------|
-| Base URL | `https://api.crossref.org` |
-| Auth Type | `email` (polite pool via `mailto` parameter) |
-| Rate Limit | 50 req/sec (polite pool), burst 100 |
-| Polite Pool | `true` (requires `BIOETL_CROSSREF_EMAIL` env var) |
-| Batch Size | 50 DOIs per batch |
-| Cursor Pagination | `true` |
-| Timeout | 30.0 sec |
-| Max Retries | 3 |
-| Data License | CC0 metadata |
+| Parameter         | Value                                             |
+| ----------------- | ------------------------------------------------- |
+| Base URL          | `https://api.crossref.org`                        |
+| Auth Type         | `email` (polite pool via `mailto` parameter)      |
+| Rate Limit        | 50 req/sec (polite pool), burst 100               |
+| Polite Pool       | `true` (requires `BIOETL_CROSSREF_EMAIL` env var) |
+| Batch Size        | 50 DOIs per batch                                 |
+| Cursor Pagination | `true`                                            |
+| Timeout           | 30.0 sec                                          |
+| Max Retries       | 3                                                 |
+| Data License      | CC0 metadata                                      |
 
 ### Health Check
 
@@ -171,11 +175,12 @@ print('Total results:', d.get('message',{}).get('total-results'))
 
 ### Pagination
 
-| Type | Next Indicator | Last Page Signal |
-|------|---------------|-----------------|
+| Type                          | Next Indicator                | Last Page Signal         |
+| ----------------------------- | ----------------------------- | ------------------------ |
 | Cursor-based (`cursor` param) | `message.next-cursor` present | `message.items` is empty |
 
 **Response envelope:**
+
 ```
 {
   "status": "ok",
@@ -191,11 +196,11 @@ print('Total results:', d.get('message',{}).get('total-results'))
 
 ### Retry & Circuit Breaker
 
-| Parameter | Value |
-|-----------|-------|
-| `use-retry-after` | `true` (CrossRef returns Retry-After on 429) |
-| Circuit Breaker Failure Threshold | 5 |
-| Circuit Breaker Recovery Timeout | 300 sec |
+| Parameter                         | Value                                        |
+| --------------------------------- | -------------------------------------------- |
+| `use-retry-after`                 | `true` (CrossRef returns Retry-After on 429) |
+| Circuit Breaker Failure Threshold | 5                                            |
+| Circuit Breaker Recovery Timeout  | 300 sec                                      |
 
 ### Validation Commands
 
@@ -232,7 +237,7 @@ print('Next cursor:', msg.get('next-cursor', 'N/A')[:20], '...')
 - [ ] Polite pool is activated (check `User-Agent` header with `mailto:`)
 - [ ] Retry-After header is respected on 429 responses
 
----
+______________________________________________________________________
 
 ## 3. OpenAlex
 
@@ -242,17 +247,17 @@ print('Next cursor:', msg.get('next-cursor', 'N/A')[:20], '...')
 
 ### Base Configuration
 
-| Parameter | Value |
-|-----------|-------|
-| Base URL | `https://api.openalex.org` |
-| Auth Type | `email` (polite pool via `mailto` parameter) |
-| Rate Limit | 10 req/sec (polite pool), burst 20 |
-| Polite Pool | `true` (requires `BIOETL_OPENALEX_EMAIL` env var) |
-| Batch Size | 50 DOIs per batch |
-| Cursor Pagination | `true` |
-| Timeout | 30.0 sec |
-| Max Retries | 3 |
-| Data License | CC0 (Public Domain) |
+| Parameter         | Value                                             |
+| ----------------- | ------------------------------------------------- |
+| Base URL          | `https://api.openalex.org`                        |
+| Auth Type         | `email` (polite pool via `mailto` parameter)      |
+| Rate Limit        | 10 req/sec (polite pool), burst 20                |
+| Polite Pool       | `true` (requires `BIOETL_OPENALEX_EMAIL` env var) |
+| Batch Size        | 50 DOIs per batch                                 |
+| Cursor Pagination | `true`                                            |
+| Timeout           | 30.0 sec                                          |
+| Max Retries       | 3                                                 |
+| Data License      | CC0 (Public Domain)                               |
 
 ### Health Check
 
@@ -270,11 +275,12 @@ print('Results:', len(d.get('results', [])))
 
 ### Pagination
 
-| Type | Next Indicator | Last Page Signal |
-|------|---------------|-----------------|
+| Type                                       | Next Indicator                   | Last Page Signal             |
+| ------------------------------------------ | -------------------------------- | ---------------------------- |
 | Cursor-based (`cursor` param, initial `*`) | `meta.next-cursor` is not `null` | `meta.next-cursor` is `null` |
 
 **Response envelope:**
+
 ```
 {
   "meta": {
@@ -292,11 +298,11 @@ print('Results:', len(d.get('results', [])))
 
 ### Retry & Circuit Breaker
 
-| Parameter | Value |
-|-----------|-------|
-| `use-retry-after` | `true` |
-| Circuit Breaker Failure Threshold | 5 |
-| Circuit Breaker Recovery Timeout | 300 sec |
+| Parameter                         | Value   |
+| --------------------------------- | ------- |
+| `use-retry-after`                 | `true`  |
+| Circuit Breaker Failure Threshold | 5       |
+| Circuit Breaker Recovery Timeout  | 300 sec |
 
 ### Validation Commands
 
@@ -339,7 +345,7 @@ for r in d.get('results', []):
 - [ ] Polite pool is activated via `mailto` query parameter
 - [ ] Retry-After header is respected on 429 responses
 
----
+______________________________________________________________________
 
 ## 4. PubChem
 
@@ -349,15 +355,15 @@ for r in d.get('results', []):
 
 ### Base Configuration
 
-| Parameter | Value |
-|-----------|-------|
-| Base URL | `https://pubchem.ncbi.nlm.nih.gov/rest/pug` |
-| Auth Type | `public` (no authentication required) |
-| Rate Limit | 5.0 req/sec, burst 10 |
-| Batch Size | 50 |
-| Timeout | 30.0 sec |
-| Max Retries | 3 |
-| Data License | Public Domain |
+| Parameter    | Value                                       |
+| ------------ | ------------------------------------------- |
+| Base URL     | `https://pubchem.ncbi.nlm.nih.gov/rest/pug` |
+| Auth Type    | `public` (no authentication required)       |
+| Rate Limit   | 5.0 req/sec, burst 10                       |
+| Batch Size   | 50                                          |
+| Timeout      | 30.0 sec                                    |
+| Max Retries  | 3                                           |
+| Data License | Public Domain                               |
 
 ### Health Check
 
@@ -376,9 +382,9 @@ print('Formula:', props[0].get('MolecularFormula') if props else 'N/A')
 
 ### Pagination
 
-| Type | Next Indicator | Last Page Signal |
-|------|---------------|-----------------|
-| No pagination (uses `pubchempy` library) | N/A | N/A |
+| Type                                     | Next Indicator | Last Page Signal |
+| ---------------------------------------- | -------------- | ---------------- |
+| No pagination (uses `pubchempy` library) | N/A            | N/A              |
 
 **Note:** PubChem adapter uses the `pubchempy` Python library (synchronous), which wraps
 PUG REST API calls. Responses are returned as compound objects, not paginated JSON.
@@ -386,11 +392,11 @@ Fetch strategies include SMILES-based search, CID-based lookup, and InChIKey loo
 
 ### Retry & Circuit Breaker
 
-| Parameter | Value |
-|-----------|-------|
-| `use-retry-after` | `true` (PubChem returns Retry-After on 429) |
-| Circuit Breaker Failure Threshold | 5 |
-| Circuit Breaker Recovery Timeout | 300 sec |
+| Parameter                         | Value                                       |
+| --------------------------------- | ------------------------------------------- |
+| `use-retry-after`                 | `true` (PubChem returns Retry-After on 429) |
+| Circuit Breaker Failure Threshold | 5                                           |
+| Circuit Breaker Recovery Timeout  | 300 sec                                     |
 
 ### Validation Commands
 
@@ -427,7 +433,7 @@ done
 - [ ] Rate limit (5 req/sec) is enforced, 429 returned on excess
 - [ ] Retry-After header is present in 429 responses
 
----
+______________________________________________________________________
 
 ## 5. PubMed
 
@@ -437,17 +443,17 @@ done
 
 ### Base Configuration
 
-| Parameter | Value |
-|-----------|-------|
-| Base URL | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils` |
-| Auth Type | `api-key` (optional, via `BIOETL_PUBMED_API_KEY` env var) |
-| Email | Required (`BIOETL_PUBMED_EMAIL` env var, default: `bioetl-bot@example.com`) |
-| Rate Limit (no key) | 3.0 req/sec, burst 5 |
-| Rate Limit (with key) | 10 req/sec, burst 20 |
-| Batch Size | 200 PMIDs per efetch request |
-| Timeout | 60.0 sec |
-| Max Retries | 3 |
-| Data License | Public Domain (US Government) |
+| Parameter             | Value                                                                       |
+| --------------------- | --------------------------------------------------------------------------- |
+| Base URL              | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils`                             |
+| Auth Type             | `api-key` (optional, via `BIOETL_PUBMED_API_KEY` env var)                   |
+| Email                 | Required (`BIOETL_PUBMED_EMAIL` env var, default: `bioetl-bot@example.com`) |
+| Rate Limit (no key)   | 3.0 req/sec, burst 5                                                        |
+| Rate Limit (with key) | 10 req/sec, burst 20                                                        |
+| Batch Size            | 200 PMIDs per efetch request                                                |
+| Timeout               | 60.0 sec                                                                    |
+| Max Retries           | 3                                                                           |
+| Data License          | Public Domain (US Government)                                               |
 
 ### Health Check
 
@@ -469,16 +475,18 @@ else:
 
 ### Pagination
 
-| Type | Next Indicator | Last Page Signal |
-|------|---------------|-----------------|
+| Type                                                  | Next Indicator                 | Last Page Signal    |
+| ----------------------------------------------------- | ------------------------------ | ------------------- |
 | Two-phase: esearch (get PMIDs) + efetch (get records) | esearch returns full PMID list | All PMIDs processed |
 
 **Search phase (`esearch.fcgi`):**
+
 ```
 Response: { "esearchresult": { "idlist": ["12345", "67890", ...], "count": "500" } }
 ```
 
 **Fetch phase (`efetch.fcgi`):**
+
 ```
 Params: db=pubmed, id=PMID1,PMID2,..., retmode=xml, rettype=abstract
 Response: XML (PubmedArticleSet) parsed by PubMedXmlProcessor
@@ -488,11 +496,11 @@ Records are fetched in batches of 200 PMIDs per efetch request.
 
 ### Retry & Circuit Breaker
 
-| Parameter | Value |
-|-----------|-------|
-| `use-retry-after` | `true` |
-| Circuit Breaker Failure Threshold | 5 |
-| Circuit Breaker Recovery Timeout | 300 sec |
+| Parameter                         | Value   |
+| --------------------------------- | ------- |
+| `use-retry-after`                 | `true`  |
+| Circuit Breaker Failure Threshold | 5       |
+| Circuit Breaker Recovery Timeout  | 300 sec |
 
 ### Validation Commands
 
@@ -525,7 +533,7 @@ curl -s -o /dev/null -w "%{http-code}" \
 - [ ] API key (when provided) increases rate limit to 10 req/sec
 - [ ] Retry-After header is respected on 429 responses
 
----
+______________________________________________________________________
 
 ## 6. Semantic Scholar
 
@@ -535,20 +543,20 @@ curl -s -o /dev/null -w "%{http-code}" \
 
 ### Base Configuration
 
-| Parameter | Value |
-|-----------|-------|
-| Base URL | `https://api.semanticscholar.org/graph/v1` |
-| Auth Type | `api-key` (via `BIOETL_SEMANTICSCHOLAR_API_KEY` env var) |
-| Rate Limit (no key) | 0.1 req/sec (1 per 10 sec), burst 1 |
-| Rate Limit (with key) | 1.0 req/sec, burst 5 |
-| Sliding Window | 300 sec (5-minute window) |
-| Batch Size | 100 (adapter default, 50 in config for safety) |
-| Page Size | 100 |
-| Timeout | 60.0 sec |
-| Max Retries | 5 |
-| Retry Base Delay | 30.0 sec |
-| Retry Max Delay | 300.0 sec (5 min) |
-| Data License | Semantic Scholar Dataset License |
+| Parameter             | Value                                                    |
+| --------------------- | -------------------------------------------------------- |
+| Base URL              | `https://api.semanticscholar.org/graph/v1`               |
+| Auth Type             | `api-key` (via `BIOETL_SEMANTICSCHOLAR_API_KEY` env var) |
+| Rate Limit (no key)   | 0.1 req/sec (1 per 10 sec), burst 1                      |
+| Rate Limit (with key) | 1.0 req/sec, burst 5                                     |
+| Sliding Window        | 300 sec (5-minute window)                                |
+| Batch Size            | 100 (adapter default, 50 in config for safety)           |
+| Page Size             | 100                                                      |
+| Timeout               | 60.0 sec                                                 |
+| Max Retries           | 5                                                        |
+| Retry Base Delay      | 30.0 sec                                                 |
+| Retry Max Delay       | 300.0 sec (5 min)                                        |
+| Data License          | Semantic Scholar Dataset License                         |
 
 ### Health Check
 
@@ -570,12 +578,13 @@ curl -s -w "\nHTTP Code: %{http-code}\n" \
 
 ### Pagination
 
-| Type | Next Indicator | Last Page Signal |
-|------|---------------|-----------------|
-| Offset-based (`offset` + `limit` for search) | `next` field in response (integer offset) | `next` is `null` |
-| Batch POST (`/paper/batch` for DOI resolution) | N/A (single response) | N/A |
+| Type                                           | Next Indicator                            | Last Page Signal |
+| ---------------------------------------------- | ----------------------------------------- | ---------------- |
+| Offset-based (`offset` + `limit` for search)   | `next` field in response (integer offset) | `next` is `null` |
+| Batch POST (`/paper/batch` for DOI resolution) | N/A (single response)                     | N/A              |
 
 **Search response envelope:**
+
 ```
 {
   "total": 10000,
@@ -586,6 +595,7 @@ curl -s -w "\nHTTP Code: %{http-code}\n" \
 ```
 
 **Batch DOI resolution (`POST /paper/batch`):**
+
 ```
 Request: { "ids": ["DOI:10.1038/...", "DOI:10.1126/..."] }
 Response: [ {paper1}, null, {paper3}, ... ]  // null for not-found DOIs
@@ -595,11 +605,11 @@ The batch response preserves order and returns `null` for unresolved DOIs.
 
 ### Retry & Circuit Breaker
 
-| Parameter | Value |
-|-----------|-------|
-| `use-retry-after` | `true` |
+| Parameter                         | Value              |
+| --------------------------------- | ------------------ |
+| `use-retry-after`                 | `true`             |
 | Circuit Breaker Failure Threshold | 10 (more tolerant) |
-| Circuit Breaker Recovery Timeout | 600 sec (10 min) |
+| Circuit Breaker Recovery Timeout  | 600 sec (10 min)   |
 
 ### Validation Commands
 
@@ -643,7 +653,7 @@ curl -s -o /dev/null -w "%{http-code}\n" "https://api.semanticscholar.org/graph/
 - [ ] 429 responses include Retry-After header
 - [ ] Rate limit without API key is extremely restrictive (1 req / 10 sec)
 
----
+______________________________________________________________________
 
 ## 7. UniProt
 
@@ -653,17 +663,17 @@ curl -s -o /dev/null -w "%{http-code}\n" "https://api.semanticscholar.org/graph/
 
 ### Base Configuration
 
-| Parameter | Value |
-|-----------|-------|
-| Base URL | `https://rest.uniprot.org` |
-| Auth Type | `api-key` (optional, via `BIOETL_UNIPROT_API_KEY` env var) |
-| Rate Limit (no key) | 10.0 req/sec, burst 20 |
-| Rate Limit (with key) | 100 req/sec, burst 200 |
-| Batch Size | 200 (source YAML), 100 IDs per OR-query (adapter constant `UNIPROT-BATCH-SIZE`) |
-| Protein Fetch Page Size | 500 (hardcoded in adapter) |
-| Timeout | 30.0 sec |
-| Max Retries | 3 |
-| Data License | CC BY 4.0 |
+| Parameter               | Value                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| Base URL                | `https://rest.uniprot.org`                                                      |
+| Auth Type               | `api-key` (optional, via `BIOETL_UNIPROT_API_KEY` env var)                      |
+| Rate Limit (no key)     | 10.0 req/sec, burst 20                                                          |
+| Rate Limit (with key)   | 100 req/sec, burst 200                                                          |
+| Batch Size              | 200 (source YAML), 100 IDs per OR-query (adapter constant `UNIPROT-BATCH-SIZE`) |
+| Protein Fetch Page Size | 500 (hardcoded in adapter)                                                      |
+| Timeout                 | 30.0 sec                                                                        |
+| Max Retries             | 3                                                                               |
+| Data License            | CC BY 4.0                                                                       |
 
 ### Health Check
 
@@ -684,11 +694,12 @@ if results:
 
 ### Pagination
 
-| Type | Next Indicator | Last Page Signal |
-|------|---------------|-----------------|
+| Type                                           | Next Indicator                 | Last Page Signal                 |
+| ---------------------------------------------- | ------------------------------ | -------------------------------- |
 | Cursor-based (`cursor` param in response JSON) | `nextCursor` field in response | `nextCursor` is absent or `null` |
 
 **Response envelope (protein search):**
+
 ```
 {
   "results": [ ... protein records ... ],
@@ -699,16 +710,17 @@ if results:
 **Filtered fetch:** Uses OR-query syntax `accession:P12345 OR accession:Q67890` in batches of 100.
 
 **Other entity types:**
+
 - `feature`: Fetched via `GET /uniprotkb/{accession}.json`, extracts `features` array
 - `sequence`: Fetched via `GET /uniprotkb/stream?query=...&format=fasta`, parsed by `FastaParser`
 
 ### Retry & Circuit Breaker
 
-| Parameter | Value |
-|-----------|-------|
-| `use-retry-after` | `true` |
-| Circuit Breaker Failure Threshold | 5 |
-| Circuit Breaker Recovery Timeout | 300 sec |
+| Parameter                         | Value   |
+| --------------------------------- | ------- |
+| `use-retry-after`                 | `true`  |
+| Circuit Breaker Failure Threshold | 5       |
+| Circuit Breaker Recovery Timeout  | 300 sec |
 
 ### Validation Commands
 
@@ -765,54 +777,54 @@ curl -s "https://rest.uniprot.org/uniprotkb/stream?query=accession:P62988&format
 - [ ] API key (when provided) enables higher rate limits (100 req/sec)
 - [ ] Retry-After header is respected on 429 responses
 
----
+______________________________________________________________________
 
 ## Cross-Provider Summary
 
 ### Authentication Matrix
 
-| Provider | Auth Type | Env Variable | Polite Pool |
-|----------|-----------|-------------|-------------|
-| ChEMBL | Public | N/A | N/A |
-| CrossRef | Email | `BIOETL_CROSSREF_EMAIL` | Yes (50 req/sec) |
-| OpenAlex | Email | `BIOETL_OPENALEX_EMAIL` | Yes (10 req/sec) |
-| PubChem | Public | N/A | N/A |
-| PubMed | API Key (optional) | `BIOETL_PUBMED_API_KEY`, `BIOETL_PUBMED_EMAIL` | N/A |
-| Semantic Scholar | API Key (recommended) | `BIOETL_SEMANTICSCHOLAR_API_KEY` | N/A |
-| UniProt | API Key (optional) | `BIOETL_UNIPROT_API_KEY` | N/A |
+| Provider         | Auth Type             | Env Variable                                   | Polite Pool      |
+| ---------------- | --------------------- | ---------------------------------------------- | ---------------- |
+| ChEMBL           | Public                | N/A                                            | N/A              |
+| CrossRef         | Email                 | `BIOETL_CROSSREF_EMAIL`                        | Yes (50 req/sec) |
+| OpenAlex         | Email                 | `BIOETL_OPENALEX_EMAIL`                        | Yes (10 req/sec) |
+| PubChem          | Public                | N/A                                            | N/A              |
+| PubMed           | API Key (optional)    | `BIOETL_PUBMED_API_KEY`, `BIOETL_PUBMED_EMAIL` | N/A              |
+| Semantic Scholar | API Key (recommended) | `BIOETL_SEMANTICSCHOLAR_API_KEY`               | N/A              |
+| UniProt          | API Key (optional)    | `BIOETL_UNIPROT_API_KEY`                       | N/A              |
 
 ### Rate Limit Comparison
 
-| Provider | Without Key/Email | With Key/Email |
-|----------|-------------------|----------------|
-| ChEMBL | 3 req/sec | N/A |
-| CrossRef | Shared pool (aggressive limiting) | 50 req/sec (polite pool) |
-| OpenAlex | Shared pool (lower priority) | 10 req/sec (polite pool) |
-| PubChem | 5 req/sec | N/A |
-| PubMed | 3 req/sec | 10 req/sec |
-| Semantic Scholar | 0.1 req/sec (1 per 10s) | 1 req/sec |
-| UniProt | 10 req/sec | 100 req/sec |
+| Provider         | Without Key/Email                 | With Key/Email           |
+| ---------------- | --------------------------------- | ------------------------ |
+| ChEMBL           | 3 req/sec                         | N/A                      |
+| CrossRef         | Shared pool (aggressive limiting) | 50 req/sec (polite pool) |
+| OpenAlex         | Shared pool (lower priority)      | 10 req/sec (polite pool) |
+| PubChem          | 5 req/sec                         | N/A                      |
+| PubMed           | 3 req/sec                         | 10 req/sec               |
+| Semantic Scholar | 0.1 req/sec (1 per 10s)           | 1 req/sec                |
+| UniProt          | 10 req/sec                        | 100 req/sec              |
 
 ### Pagination Type Comparison
 
-| Provider | Pagination Type | Key Response Fields |
-|----------|----------------|---------------------|
-| ChEMBL | Offset (`limit`/`offset`) | `page-meta.next`, `page-meta.total-count` |
-| CrossRef | Cursor (`cursor`) | `message.next-cursor` |
-| OpenAlex | Cursor (`cursor`, initial `*`) | `meta.next-cursor` |
-| PubChem | None (via pubchempy library) | N/A |
-| PubMed | Two-phase (esearch + efetch) | `esearchresult.idlist` |
-| Semantic Scholar | Offset (search) / Batch POST (DOIs) | `next` (offset integer) |
-| UniProt | Cursor (`nextCursor` in JSON) | `nextCursor` |
+| Provider         | Pagination Type                     | Key Response Fields                       |
+| ---------------- | ----------------------------------- | ----------------------------------------- |
+| ChEMBL           | Offset (`limit`/`offset`)           | `page-meta.next`, `page-meta.total-count` |
+| CrossRef         | Cursor (`cursor`)                   | `message.next-cursor`                     |
+| OpenAlex         | Cursor (`cursor`, initial `*`)      | `meta.next-cursor`                        |
+| PubChem          | None (via pubchempy library)        | N/A                                       |
+| PubMed           | Two-phase (esearch + efetch)        | `esearchresult.idlist`                    |
+| Semantic Scholar | Offset (search) / Batch POST (DOIs) | `next` (offset integer)                   |
+| UniProt          | Cursor (`nextCursor` in JSON)       | `nextCursor`                              |
 
 ### Circuit Breaker Settings
 
-| Provider | Failure Threshold | Recovery Timeout |
-|----------|-------------------|-----------------|
-| ChEMBL | 5 | 300 sec (5 min) |
-| CrossRef | 5 | 300 sec (5 min) |
-| OpenAlex | 5 | 300 sec (5 min) |
-| PubChem | 5 | 300 sec (5 min) |
-| PubMed | 5 | 300 sec (5 min) |
-| Semantic Scholar | 10 | 600 sec (10 min) |
-| UniProt | 5 | 300 sec (5 min) |
+| Provider         | Failure Threshold | Recovery Timeout |
+| ---------------- | ----------------- | ---------------- |
+| ChEMBL           | 5                 | 300 sec (5 min)  |
+| CrossRef         | 5                 | 300 sec (5 min)  |
+| OpenAlex         | 5                 | 300 sec (5 min)  |
+| PubChem          | 5                 | 300 sec (5 min)  |
+| PubMed           | 5                 | 300 sec (5 min)  |
+| Semantic Scholar | 10                | 600 sec (10 min) |
+| UniProt          | 5                 | 300 sec (5 min)  |

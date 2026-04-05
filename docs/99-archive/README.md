@@ -2,27 +2,28 @@
 
 *Status: archive (non-nav) | Last updated: 2026-03-26*
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Purpose
 
 `docs/99-archive/` stores historical and superseded materials:
+
 - retired plans and reports;
 - superseded ADR variants;
 - legacy dashboard and data-model notes.
 
 These documents are preserved for traceability and historical context.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Usage Rules
 
 1. Archive pages are not normative for current project behavior.
-2. If archive content contradicts active docs, active docs in `docs/00-05` win.
-3. Legacy paths/commands are allowed only as historical records.
-4. New archive materials should include a short reason for archival/supersession.
+1. If archive content contradicts active docs, active docs in `docs/00-05` win.
+1. Legacy paths/commands are allowed only as historical records.
+1. New archive materials should include a short reason for archival/supersession.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Main Subsections
 
@@ -34,7 +35,7 @@ These documents are preserved for traceability and historical context.
 - `plans/` — archived planning artifacts; retained only through references and summaries in the current snapshot.
 - `reports/` — archived reports from earlier cycles; not retained as published pages in this workspace snapshot.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Archive Catalog (Linked Artifacts)
 
@@ -94,7 +95,7 @@ These documents are preserved for traceability and historical context.
 
 - No markdown report artifacts are currently retained under `reports/` in this workspace snapshot.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Related Active Policies
 

@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P1
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
----
+  Priority: P1
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Incident Response Playbook
 
@@ -31,66 +34,71 @@ Last verified: '2026-03-30'
 
 ### Severity Levels
 
-| Level | Description | Response SLA | Recovery SLA |
-|-------|-------------|--------------|--------------|
-| **P0** | System unavailable or critical data loss (e.g., local storage corrupted, disk failure). | 15 min | 1 hour |
-| **P1** | Critical pipeline failure (Core Data: ChEMBL, PubChem). | 1 hour | 4 hours |
-| **P2** | Secondary pipeline failure (e.g., enrichment sources). | 8 hours | 24 hours |
-| **P3** | Warning / Data Quality anomalies / Non-blocking bugs. | 24 hours | Next Sprint |
+| Level  | Description                                                                             | Response SLA | Recovery SLA |
+| ------ | --------------------------------------------------------------------------------------- | ------------ | ------------ |
+| **P0** | System unavailable or critical data loss (e.g., local storage corrupted, disk failure). | 15 min       | 1 hour       |
+| **P1** | Critical pipeline failure (Core Data: ChEMBL, PubChem).                                 | 1 hour       | 4 hours      |
+| **P2** | Secondary pipeline failure (e.g., enrichment sources).                                  | 8 hours      | 24 hours     |
+| **P3** | Warning / Data Quality anomalies / Non-blocking bugs.                                   | 24 hours     | Next Sprint  |
 
 ### Common Alerts & Actions
 
 ### 1. Auth Failure (`401 Unauthorized`)
-*   **Symptom**: Logs show repeated `401` errors from a provider API.
-*   **Severity**: P1 (if blocking) or P2.
-*   **Diagnosis**: API key has expired or is invalid.
-*   **Action**:
-    1.  Verify the key in the secrets manager (or `.env` for local).
-    2.  Rotate the key: Generate a new one from the provider's portal.
-    3.  Update the environment variable `BIOETL_{PROVIDER}_{KEY}` (for example: `BIOETL_UNIPROT_API_KEY`).
-    4.  Restart the pipeline.
+
+- **Symptom**: Logs show repeated `401` errors from a provider API.
+- **Severity**: P1 (if blocking) or P2.
+- **Diagnosis**: API key has expired or is invalid.
+- **Action**:
+  1. Verify the key in the secrets manager (or `.env` for local).
+  1. Rotate the key: Generate a new one from the provider's portal.
+  1. Update the environment variable `BIOETL_{PROVIDER}_{KEY}` (for example: `BIOETL_UNIPROT_API_KEY`).
+  1. Restart the pipeline.
 
 ### 2. Rate Limit Exhausted (`429 Too Many Requests`)
-*   **Symptom**: Spike in `errors-total{type="recoverable"}` metric. Pipeline slows down effectively to a halt.
-*   **Severity**: P2.
-*   **Diagnosis**: The configured `requests-per-second` exceeds the provider's current allowance.
-*   **Action**:
-    1.  Check the provider's status page for global issues.
-    2.  Reduce the rate limit in the pipeline config (`configs/entities/{provider}/{entity}.yaml`):
-        ```yaml
-        rate-limit:
-          requests-per-second: 2  # Decrease from 5
-        ```
-    3.  Redeploy/Restart the pipeline.
+
+- **Symptom**: Spike in `errors-total{type="recoverable"}` metric. Pipeline slows down effectively to a halt.
+- **Severity**: P2.
+- **Diagnosis**: The configured `requests-per-second` exceeds the provider's current allowance.
+- **Action**:
+  1. Check the provider's status page for global issues.
+  1. Reduce the rate limit in the pipeline config (`configs/entities/{provider}/{entity}.yaml`):
+     ```yaml
+     rate-limit:
+       requests-per-second: 2  # Decrease from 5
+     ```
+  1. Redeploy/Restart the pipeline.
 
 ### 3. Schema Mismatch (Gold Layer)
-*   **Symptom**: Pipeline fails with `schema-violations > 0` and `SchemaValidationError`.
-*   **Severity**: P1.
-*   **Diagnosis**: The source API has changed its response format (Schema Drift), breaking the Gold contract.
-*   **Action**:
-    1.  Inspect the raw data in Bronze to identify the new field or type change.
-    2.  **Short-term**: If the field is non-critical, mark it as optional in the Pydantic model to unblock the pipeline.
-    3.  **Long-term**: Update the Gold schema and Pydantic models to reflect the change (requires a PR and release).
+
+- **Symptom**: Pipeline fails with `schema-violations > 0` and `SchemaValidationError`.
+- **Severity**: P1.
+- **Diagnosis**: The source API has changed its response format (Schema Drift), breaking the Gold contract.
+- **Action**:
+  1. Inspect the raw data in Bronze to identify the new field or type change.
+  1. **Short-term**: If the field is non-critical, mark it as optional in the Pydantic model to unblock the pipeline.
+  1. **Long-term**: Update the Gold schema and Pydantic models to reflect the change (requires a PR and release).
 
 ### 4. Lock Timeout ("Lock expired")
-*   **Symptom**: Alert "Lock expired" fires, or pipeline refuses to start.
-*   **Severity**: P2.
-*   **Diagnosis**: A previous local process crashed without releasing `MemoryLock`, or a job ran longer than the 4-hour hard limit.
-*   **Action**:
-    1.  Check for stuck local Python processes running this pipeline.
-    2.  Identify the lock owner `run-id` from logs (or from the failed run context).
-    3.  Manually release the lock:
-        ```bash
-        bioetl lock release --pipeline chembl_activity --run-id <RUN_ID>
-        ```
-    4.  Investigate why the job took so long (performance regression?).
+
+- **Symptom**: Alert "Lock expired" fires, or pipeline refuses to start.
+- **Severity**: P2.
+- **Diagnosis**: A previous local process crashed without releasing `MemoryLock`, or a job ran longer than the 4-hour hard limit.
+- **Action**:
+  1. Check for stuck local Python processes running this pipeline.
+  1. Identify the lock owner `run-id` from logs (or from the failed run context).
+  1. Manually release the lock:
+     ```bash
+     bioetl lock release --pipeline chembl_activity --run-id <RUN_ID>
+     ```
+  1. Investigate why the job took so long (performance regression?).
 
 ### Escalation Policy
 
 - If an incident cannot be resolved within the Response SLA:
-1.  **On-Call Engineer**: Post status update in `#bioetl-alerts`.
-2.  **Tech Lead**: Notify stakeholders if P0/P1.
-3.  **Post-Mortem**: Required for all P0/P1 incidents within 48 hours.
+
+1. **On-Call Engineer**: Post status update in `#bioetl-alerts`.
+1. **Tech Lead**: Notify stakeholders if P0/P1.
+1. **Post-Mortem**: Required for all P0/P1 incidents within 48 hours.
 
 ## Compliance
 

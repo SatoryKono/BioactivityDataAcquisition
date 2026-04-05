@@ -10,7 +10,7 @@ Last verified: '2026-03-29'
 
 # Dashboard Extension Guide (LLM)
 
-Дата сверки: **2026-03-29**  
+Дата сверки: **2026-03-29**
 Источник истины: `grafana/dashboards/*.json`
 
 Короткий playbook для LLM/AI-агента, который меняет или расширяет shipped

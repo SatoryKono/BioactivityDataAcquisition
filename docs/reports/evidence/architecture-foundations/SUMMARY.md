@@ -1,9 +1,8 @@
 # Сбор evidence завершён: architecture-foundations
 
-
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-**Создано объектов evidence:** 15  
+**Создано объектов evidence:** 15
 **Gate Статус:** PASSED
 
 Revalidated against the current repository state on 2026-03-23.
@@ -14,23 +13,23 @@ guardrails are green on the active tree.
 
 ## Сводка evidence
 
-| ID | Claim Summary | Confidence |
-|----|---------------|------------|
-| EV-layers-domain-pure-business-logic-no-io | Domain is the pure business-logic core and is guarded against I/O/application/infrastructure imports. | 0.97 |
-| EV-layers-application-owns-orchestration-and-services | Application owns orchestration, runners, transformers, and services rather than concrete wiring. | 0.94 |
-| EV-layers-infrastructure-hosts-adapters-storage-observability | Infrastructure holds adapters, storage, locking, and observability implementations behind domain ports. | 0.96 |
-| EV-layers-composition-is-separate-di-root | Composition is a separate top-level DI root and assembly layer, not part of interfaces. | 0.97 |
-| EV-layers-interfaces-are-driving-adapters | Interfaces are the driving-adapter edge and should route through application/composition seams. | 0.93 |
-| EV-patterns-hexagonal-ports-and-adapters-is-explicit | Hexagonal / Ports & Adapters is explicitly declared as the architecture style. | 0.97 |
-| EV-patterns-medallion-bronze-silver-gold-flow | Medallion data flow is explicit: Bronze -> Silver -> Gold, with Silver on Delta Lake. | 0.98 |
-| EV-patterns-domain-driven-design-primitives | The domain layer explicitly uses DDD primitives such as ports, aggregates, value objects, entities, and schemas. | 0.94 |
-| EV-patterns-dependency-injection-lives-in-composition | Constructor injection and composition-root assembly are explicit architecture rules backed by tests. | 0.97 |
-| EV-patterns-registry-and-factory-assembly-seams | Provider and pipeline assembly use explicit registry/factory seams in composition. | 0.91 |
-| EV-enforcement-dependency-map-shows-zero-layer-violations | The generated dependency map currently reports zero layer-policy violations. | 0.97 |
-| EV-enforcement-layer-dependency-suite-passes-baseline | The layer-dependency architecture suite passes on the active baseline. | 0.95 |
-| EV-enforcement-bootstrap-and-composition-boundaries-pass | Bootstrap/composition boundary suites pass on the active baseline. | 0.94 |
-| EV-enforcement-interface-and-adapter-di-guards-pass | Interface and adapter DI guardrails pass on the active baseline. | 0.95 |
-| EV-enforcement-import-matrix-is-docs-as-code | The import matrix is encoded in both active docs and executable architecture guardrails. | 0.93 |
+| ID                                                            | Claim Summary                                                                                                    | Confidence |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------- |
+| EV-layers-domain-pure-business-logic-no-io                    | Domain is the pure business-logic core and is guarded against I/O/application/infrastructure imports.            | 0.97       |
+| EV-layers-application-owns-orchestration-and-services         | Application owns orchestration, runners, transformers, and services rather than concrete wiring.                 | 0.94       |
+| EV-layers-infrastructure-hosts-adapters-storage-observability | Infrastructure holds adapters, storage, locking, and observability implementations behind domain ports.          | 0.96       |
+| EV-layers-composition-is-separate-di-root                     | Composition is a separate top-level DI root and assembly layer, not part of interfaces.                          | 0.97       |
+| EV-layers-interfaces-are-driving-adapters                     | Interfaces are the driving-adapter edge and should route through application/composition seams.                  | 0.93       |
+| EV-patterns-hexagonal-ports-and-adapters-is-explicit          | Hexagonal / Ports & Adapters is explicitly declared as the architecture style.                                   | 0.97       |
+| EV-patterns-medallion-bronze-silver-gold-flow                 | Medallion data flow is explicit: Bronze -> Silver -> Gold, with Silver on Delta Lake.                            | 0.98       |
+| EV-patterns-domain-driven-design-primitives                   | The domain layer explicitly uses DDD primitives such as ports, aggregates, value objects, entities, and schemas. | 0.94       |
+| EV-patterns-dependency-injection-lives-in-composition         | Constructor injection and composition-root assembly are explicit architecture rules backed by tests.             | 0.97       |
+| EV-patterns-registry-and-factory-assembly-seams               | Provider and pipeline assembly use explicit registry/factory seams in composition.                               | 0.91       |
+| EV-enforcement-dependency-map-shows-zero-layer-violations     | The generated dependency map currently reports zero layer-policy violations.                                     | 0.97       |
+| EV-enforcement-layer-dependency-suite-passes-baseline         | The layer-dependency architecture suite passes on the active baseline.                                           | 0.95       |
+| EV-enforcement-bootstrap-and-composition-boundaries-pass      | Bootstrap/composition boundary suites pass on the active baseline.                                               | 0.94       |
+| EV-enforcement-interface-and-adapter-di-guards-pass           | Interface and adapter DI guardrails pass on the active baseline.                                                 | 0.95       |
+| EV-enforcement-import-matrix-is-docs-as-code                  | The import matrix is encoded in both active docs and executable architecture guardrails.                         | 0.93       |
 
 ## Evidence Gate Check
 

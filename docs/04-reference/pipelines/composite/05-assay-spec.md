@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Composite Assay Pipeline Specification
 
@@ -17,19 +20,19 @@ Last verified: '2026-03-29'
 
 ## Current Canonical Contract Summary
 
-| Parameter | Value |
-|-----------|-------|
-| Pipeline ID | `composite_assay` |
-| Provider | `composite` |
-| Entity | `assay` |
-| Seed Pipeline | `chembl_assay` |
-| Enrichers | `chembl_cell_line`, `chembl_tissue` |
-| Join Keys | `cell_id`, `tissue_id` |
-| Merge Strategy | `left_outer` |
-| Conflict Resolution | `seed_priority` |
-| Preserve All Sources | `false` |
-| Silver Output | `data/output/silver/composite/assay` |
-| Gold Output | `data/output/gold/composite/assay` |
+| Parameter            | Value                                |
+| -------------------- | ------------------------------------ |
+| Pipeline ID          | `composite_assay`                    |
+| Provider             | `composite`                          |
+| Entity               | `assay`                              |
+| Seed Pipeline        | `chembl_assay`                       |
+| Enrichers            | `chembl_cell_line`, `chembl_tissue`  |
+| Join Keys            | `cell_id`, `tissue_id`               |
+| Merge Strategy       | `left_outer`                         |
+| Conflict Resolution  | `seed_priority`                      |
+| Preserve All Sources | `false`                              |
+| Silver Output        | `data/output/silver/composite/assay` |
+| Gold Output          | `data/output/gold/composite/assay`   |
 
 ## Notes
 
@@ -44,18 +47,18 @@ Last verified: '2026-03-29'
 
 ## Contract References
 
-| Artifact | Link |
-| --- | --- |
-| Canonical guide | [pipeline-configuration.md](../../../03-guides/pipeline-configuration.md) |
-| Gold contract export | [composite_assay_v1.0.json](../../contracts/gold/composite_assay_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Artifact             | Link                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Canonical guide      | [pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)                |
+| Gold contract export | [composite_assay_v1.0.json](../../contracts/gold/composite_assay_v1.0.json)              |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
 ## Compliance
 
-| Control | Status | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Canonical source traceability | Pass | Page delegates current contract to the linked canonical source and active config surface |
-| Contract linkage | Pass | [composite_assay_v1.0.json](../../contracts/gold/composite_assay_v1.0.json) |
-| Published-page role | Pass | Historical deep spec or summary is explicitly bounded by current canonical sources |
+| Control                       | Status | Evidence                                                                                 |
+| ----------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface |
+| Contract linkage              | Pass   | [composite_assay_v1.0.json](../../contracts/gold/composite_assay_v1.0.json)              |
+| Published-page role           | Pass   | Historical deep spec or summary is explicitly bounded by current canonical sources       |

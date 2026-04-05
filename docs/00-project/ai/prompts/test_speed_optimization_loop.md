@@ -96,13 +96,13 @@
 Использовать в таком порядке:
 
 1. `capability-discovery`
-2. `py-test-bot`
-3. `py-debug-bot` при неочевидных bottleneck'ах
-4. `py-test-swarm` если нужно распараллелить исследование по сегментам test suite
-5. `verify-unit-tests` после изменений в unit/smoke helpers
-6. `verify-integration-tests` после изменений в integration/e2e/VCR контуре
-7. `verify-architecture` если меняются test orchestration scripts или guardrails
-8. `verify-implementation` как финальная интегральная проверка
+1. `py-test-bot`
+1. `py-debug-bot` при неочевидных bottleneck'ах
+1. `py-test-swarm` если нужно распараллелить исследование по сегментам test suite
+1. `verify-unit-tests` после изменений в unit/smoke helpers
+1. `verify-integration-tests` после изменений в integration/e2e/VCR контуре
+1. `verify-architecture` если меняются test orchestration scripts или guardrails
+1. `verify-implementation` как финальная интегральная проверка
 
 ### Suggested Multi-Agent Flow
 

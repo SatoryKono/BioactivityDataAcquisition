@@ -17,6 +17,7 @@ path entrypoint from the project hub rather than a primary nav section. The
 strongest remaining argument for nav promotion is convenience, not correctness.
 
 Supporting evidence:
+
 - `EV-documentation-internal-surface-governance-ai-index-is-coherent-but-link-only`
 - `EV-documentation-internal-surface-governance-project-index-routes-readers-to-repo-only-surfaces`
 
@@ -28,6 +29,7 @@ excludes them from publication. Discoverability is preserved by curated
 repository-path references from the published hub pages.
 
 Supporting evidence:
+
 - `EV-documentation-internal-surface-governance-plans-and-reports-are-now-repo-only-by-policy`
 - `EV-documentation-internal-surface-governance-project-index-routes-readers-to-repo-only-surfaces`
 
@@ -38,6 +40,7 @@ drift checks pass, strict MkDocs build remains green, and the experimental
 deployment docs are aligned with the helper script's current override model.
 
 Supporting evidence:
+
 - `EV-documentation-internal-surface-governance-doc-guards-confirm-current-sync-health`
 - `EV-documentation-internal-surface-governance-strict-mkdocs-build-remains-green-under-current-boundary`
 - `EV-documentation-internal-surface-governance-deployment-docs-match-helper-overrides`
@@ -49,15 +52,16 @@ support treating it as a governance failure. A large normalization pass would
 create more churn than value right now.
 
 Supporting evidence:
+
 - `EV-documentation-internal-surface-governance-mixed-language-is-readability-debt`
 
 ## Decision candidates
 
 1. Keep `docs/00-project/ai/README.md` as a curated repository-path entrypoint
    for now, rather than promote it into nav immediately.
-2. Treat `plans/**` and `reports/**` as repo-only reference surfaces and point
+1. Treat `plans/**` and `reports/**` as repo-only reference surfaces and point
    to them from published docs via repository paths or curated summaries.
-3. Keep documentation governance in the guard layer unless a future green
+1. Keep documentation governance in the guard layer unless a future green
    baseline breaks again.
-4. Defer dedicated RU/EN normalization; allow opportunistic cleanup when
+1. Defer dedicated RU/EN normalization; allow opportunistic cleanup when
    touching internal docs for other reasons.

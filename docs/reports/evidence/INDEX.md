@@ -35,48 +35,49 @@ this page when you specifically need evidence-pack navigation.
 
 ## Package Inventory
 
-| Package | Summary | Orchestration | Synthesis | Decisions | Risks |
-|---|---|---|---|---|---|
-| `adapter-interface-alignment` | yes | no | yes | yes | yes |
-| `architecture-doc-drift` | yes | no | yes | no | no |
-| `architecture-foundations` | yes | no | yes | yes | yes |
-| `code-duplication-dead-code` | yes | yes | yes | yes | yes |
-| `compatibility-registry-curated-ssot-drift` | yes | no | yes | no | no |
-| `compatibility-registry-policy-history-mixing` | yes | no | yes | no | no |
-| `compatibility-registry-refactor` | yes | yes | yes | yes | yes |
-| `compatibility-registry-snapshot-automation-drift` | yes | no | yes | no | no |
-| `composition-package-topology` | yes | no | yes | yes | yes |
-| `data-observability-audit` | yes | no | no | no | no |
-| `dependency-hotspots` | yes | no | yes | yes | yes |
-| `documentation-internal-surface-governance` | yes | no | yes | yes | yes |
-| `documentation-publication-remediation` | yes | no | yes | yes | yes |
-| `documentation-remediation-options` | yes | no | yes | yes | yes |
-| `file-naming-drift` | yes | no | yes | no | no |
-| `function-naming-drift` | yes | no | yes | no | no |
-| `governance-signals` | yes | no | yes | yes | yes |
-| `infrastructure-package-topology` | yes | no | no | no | no |
-| `interfaces-package-topology` | yes | no | no | no | no |
-| `object-families-hierarchy` | yes | yes | yes | yes | yes |
-| `object-naming-drift` | yes | no | yes | no | no |
-| `operations-generated-doc-drift` | yes | no | yes | no | no |
-| `pipeline-config-loader-ownership` | yes | no | yes | yes | yes |
-| `project-and-ai-doc-drift` | yes | no | yes | no | no |
-| `project-diagram-artifact-surface` | yes | yes | yes | yes | yes |
-| `project-diagrams-refactor` | yes | yes | yes | yes | yes |
-| `project-documentation-drift` | yes | yes | yes | yes | yes |
-| `project-evidence-rebaseline` | yes | yes | yes | no | no |
-| `project-file-structure` | yes | no | yes | yes | yes |
-| `project-import-governance` | yes | yes | yes | yes | yes |
-| `project-naming-drift` | yes | yes | yes | yes | yes |
-| `project-package-topology` | yes | no | yes | yes | yes |
-| `project-package-topology-recursive` | yes | yes | yes | yes | yes |
-| `project-test-health` | yes | yes | yes | yes | yes |
-| `provider-registry-runtime-ownership` | yes | no | yes | yes | yes |
-| `refactor-backlog-calibration` | yes | no | yes | yes | yes |
-| `reference-guide-doc-drift` | yes | no | yes | no | no |
-| `src-bioetl-refactor-facts` | yes | yes | yes | no | no |
-| `technical-debt` | yes | yes | yes | yes | yes |
-| `variable-naming-drift` | yes | no | yes | no | no |
+| Package                                            | Summary | Orchestration | Synthesis | Decisions | Risks |
+| -------------------------------------------------- | ------- | ------------- | --------- | --------- | ----- |
+| `adapter-interface-alignment`                      | yes     | no            | yes       | yes       | yes   |
+| `architecture-doc-drift`                           | yes     | no            | yes       | no        | no    |
+| `architecture-foundations`                         | yes     | no            | yes       | yes       | yes   |
+| `code-duplication-dead-code`                       | yes     | yes           | yes       | yes       | yes   |
+| `compatibility-registry-curated-ssot-drift`        | yes     | no            | yes       | no        | no    |
+| `compatibility-registry-policy-history-mixing`     | yes     | no            | yes       | no        | no    |
+| `compatibility-registry-refactor`                  | yes     | yes           | yes       | yes       | yes   |
+| `compatibility-registry-snapshot-automation-drift` | yes     | no            | yes       | no        | no    |
+| `composition-package-topology`                     | yes     | no            | yes       | yes       | yes   |
+| `data-observability-audit`                         | yes     | no            | no        | no        | no    |
+| `dependency-hotspots`                              | yes     | no            | yes       | yes       | yes   |
+| `documentation-internal-surface-governance`        | yes     | no            | yes       | yes       | yes   |
+| `documentation-publication-remediation`            | yes     | no            | yes       | yes       | yes   |
+| `documentation-remediation-options`                | yes     | no            | yes       | yes       | yes   |
+| `file-naming-drift`                                | yes     | no            | yes       | no        | no    |
+| `function-naming-drift`                            | yes     | no            | yes       | no        | no    |
+| `governance-signals`                               | yes     | no            | yes       | yes       | yes   |
+| `infrastructure-package-topology`                  | yes     | no            | no        | no        | no    |
+| `interfaces-package-topology`                      | yes     | no            | no        | no        | no    |
+| `object-families-hierarchy`                        | yes     | yes           | yes       | yes       | yes   |
+| `object-naming-drift`                              | yes     | no            | yes       | no        | no    |
+| `operations-generated-doc-drift`                   | yes     | no            | yes       | no        | no    |
+| `pipeline-config-loader-ownership`                 | yes     | no            | yes       | yes       | yes   |
+| `project-and-ai-doc-drift`                         | yes     | no            | yes       | no        | no    |
+| `project-diagram-artifact-surface`                 | yes     | yes           | yes       | yes       | yes   |
+| `project-diagrams-refactor`                        | yes     | yes           | yes       | yes       | yes   |
+| `project-documentation-drift`                      | yes     | yes           | yes       | yes       | yes   |
+| `project-evidence-rebaseline`                      | yes     | yes           | yes       | no        | no    |
+| `project-file-structure`                           | yes     | no            | yes       | yes       | yes   |
+| `project-import-governance`                        | yes     | yes           | yes       | yes       | yes   |
+| `project-naming-drift`                             | yes     | yes           | yes       | yes       | yes   |
+| `project-package-topology`                         | yes     | no            | yes       | yes       | yes   |
+| `project-package-topology-recursive`               | yes     | yes           | yes       | yes       | yes   |
+| `project-test-health`                              | yes     | yes           | yes       | yes       | yes   |
+| `provider-registry-runtime-ownership`              | yes     | no            | yes       | yes       | yes   |
+| `refactor-backlog-calibration`                     | yes     | no            | yes       | yes       | yes   |
+| `reference-guide-doc-drift`                        | yes     | no            | yes       | no        | no    |
+| `scripts-layer-governance`                         | yes     | no            | no        | no        | no    |
+| `src-bioetl-refactor-facts`                        | yes     | yes           | yes       | no        | no    |
+| `technical-debt`                                   | yes     | yes           | yes       | yes       | yes   |
+| `variable-naming-drift`                            | yes     | no            | yes       | no        | no    |
 
 ## Current Notes
 
@@ -89,6 +90,9 @@ this page when you specifically need evidence-pack navigation.
 - `project-evidence-rebaseline` remains the parent closeout pack for repo-wide
   freshness waves across mutable evidence families.
 - `project-test-health` is fully refreshed to the current live-provider state.
+- `scripts-layer-governance` captures the current repo-wide script inventory
+  closeout where unknown/orphan script classes were reduced to `0` and the
+  remaining non-active surface was converted into explicit legacy policy.
 - `documentation-internal-surface-governance` is refreshed to the current
   `published` vs `repo-only` boundary model; do not read its older
   `internal-published` posture for `plans/**` and `reports/**` as current.

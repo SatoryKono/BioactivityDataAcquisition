@@ -35,20 +35,20 @@ create_namespace() {
 # Deploy application
 deploy() {
   echo "📦 Starting deployment..."
-  
+
   create_namespace
-  
+
   # Update image reference in manifests
   sed -i.bak "s|^[[:space:]]*image: .*|        image: $REGISTRY/bioetl:$IMAGE_TAG  # Updated by deploy-bioetl.sh|g" "$CONFIG_DIR/k8s-deployment.yaml"
-  
+
   echo "📋 Applying manifests..."
   kubectl apply -n "$NAMESPACE" -f "$CONFIG_DIR/k8s-deployment.yaml"
   kubectl apply -n "$NAMESPACE" -f "$CONFIG_DIR/k8s-monitoring.yaml"
   kubectl apply -n "$NAMESPACE" -f "$CONFIG_DIR/k8s-networking.yaml"
-  
+
   echo "⏳ Waiting for deployment to be ready..."
   kubectl rollout status deployment/bioetl -n "$NAMESPACE" --timeout=5m
-  
+
   echo "✅ Deployment complete!"
   echo ""
   echo "📊 Access points:"
@@ -60,22 +60,22 @@ deploy() {
 # Update image
 update() {
   echo "🔄 Updating image..."
-  
+
   kubectl set image deployment/bioetl \
     -n "$NAMESPACE" \
     bioetl="$REGISTRY/bioetl:$IMAGE_TAG" \
     --record
-  
+
   echo "⏳ Waiting for rollout..."
   kubectl rollout status deployment/bioetl -n "$NAMESPACE" --timeout=5m
-  
+
   echo "✅ Update complete!"
 }
 
 # Delete deployment
 delete() {
   echo "🗑️  Deleting deployment..."
-  
+
   read -p "Are you sure? (yes/no) " -n 3 -r
   echo
   if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
@@ -90,28 +90,28 @@ delete() {
 status() {
   echo "📊 Deployment Status"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  
+
   echo ""
   echo "🔹 Pods:"
   kubectl get pods -n "$NAMESPACE" -l app=bioetl
-  
+
   echo ""
   echo "🔹 Deployments:"
   kubectl get deployments -n "$NAMESPACE"
-  
+
   echo ""
   echo "🔹 Services:"
   kubectl get svc -n "$NAMESPACE"
-  
+
   echo ""
   echo "🔹 Persistent Volumes:"
   kubectl get pvc -n "$NAMESPACE"
-  
+
   echo ""
   echo "🔹 Resources:"
   kubectl top nodes
   kubectl top pods -n "$NAMESPACE" 2>/dev/null || echo "  (Metrics not available yet)"
-  
+
   echo ""
   echo "🔹 Recent Events:"
   kubectl get events -n "$NAMESPACE" --sort-by='.lastTimestamp' | tail -5
@@ -122,7 +122,7 @@ logs() {
   COMPONENT=${3:-bioetl}
   echo "📝 Logs for $COMPONENT in $NAMESPACE"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  
+
   if [ "$COMPONENT" = "all" ]; then
     kubectl logs -n "$NAMESPACE" -l app=bioetl -f --max-log-requests=10
   else
@@ -135,10 +135,10 @@ port_forward() {
   SERVICE=$3
   LOCAL_PORT=$4
   REMOTE_PORT=$5
-  
+
   echo "🔗 Port forwarding $SERVICE..."
   echo "   Local: $LOCAL_PORT → Remote: $REMOTE_PORT"
-  
+
   kubectl port-forward -n "$NAMESPACE" "svc/$SERVICE" "$LOCAL_PORT:$REMOTE_PORT"
 }
 

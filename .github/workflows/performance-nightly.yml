@@ -82,4 +82,3 @@ jobs:
             reports/performance/hotspot-degradation.md
           if-no-files-found: warn
           retention-days: 90
-

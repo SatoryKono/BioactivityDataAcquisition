@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-03'
----
+  Last verified: '2026-04-03'
+
+______________________________________________________________________
 
 # Data Providers Documentation
 
@@ -14,36 +17,36 @@ This directory contains documentation for each data source provider integrated w
 
 ## Supported Providers
 
-| Provider | Entities | Status |
-|----------|----------|--------|
-| [ChEMBL](chembl/activity.md) | Activity, Assay, Molecule, Target, Publication, plus auxiliary entities | Active |
-| [PubChem](pubchem/compound.md) | Compound | Active |
-| [UniProt](uniprot/protein.md) | Protein, ID Mapping | Active |
-| [PubMed](pubmed/publication.md) | Publication | Active |
-| [CrossRef](crossref/publication.md) | Publication | Active |
-| [OpenAlex](openalex/publication.md) | Publication | Active |
-| [SemanticScholar](semanticscholar/publication.md) | Publication | Active |
+| Provider                                          | Entities                                                                | Status |
+| ------------------------------------------------- | ----------------------------------------------------------------------- | ------ |
+| [ChEMBL](chembl/activity.md)                      | Activity, Assay, Molecule, Target, Publication, plus auxiliary entities | Active |
+| [PubChem](pubchem/compound.md)                    | Compound                                                                | Active |
+| [UniProt](uniprot/protein.md)                     | Protein, ID Mapping                                                     | Active |
+| [PubMed](pubmed/publication.md)                   | Publication                                                             | Active |
+| [CrossRef](crossref/publication.md)               | Publication                                                             | Active |
+| [OpenAlex](openalex/publication.md)               | Publication                                                             | Active |
+| [SemanticScholar](semanticscholar/publication.md) | Publication                                                             | Active |
 
 ## ChEMBL Entities
 
 ChEMBL provides comprehensive bioactivity data with multiple entity types:
 
-| Entity | Document | Pipeline Status |
-|--------|----------|-----------------|
-| [Activity](chembl/activity.md) | Entity schema and fields | Active |
-| [Assay](chembl/assay.md) | Bioassay definitions | Active |
-| [Molecule](chembl/molecule.md) | Chemical compounds | Active |
-| [Target](chembl/target.md) | Biological targets | Active |
-| [Assay Parameters](chembl/assay-parameters.md) | Assay parameter definitions | Active |
-| [Cell Line](chembl/cell-line.md) | Cell line data | Active |
-| [Compound Record](chembl/compound-record.md) | Compound records | Active |
-| [Publication](chembl/publication.md) | Literature references | Active |
-| [Publication Similarity](chembl/publication-similarity.md) | Publication similarity | Active |
-| [Publication Term](chembl/publication-term.md) | Publication terms | Active |
-| [Protein Class](chembl/protein-class.md) | Protein classification | Active |
-| [Subcellular Fraction](chembl/subcellular-fraction.md) | Subcellular fraction vocabulary | Active |
-| [Target Component](chembl/target-component.md) | Target components | Active |
-| [Tissue](chembl/tissue.md) | Tissue and anatomical context | Active |
+| Entity                                                     | Document                        | Pipeline Status |
+| ---------------------------------------------------------- | ------------------------------- | --------------- |
+| [Activity](chembl/activity.md)                             | Entity schema and fields        | Active          |
+| [Assay](chembl/assay.md)                                   | Bioassay definitions            | Active          |
+| [Molecule](chembl/molecule.md)                             | Chemical compounds              | Active          |
+| [Target](chembl/target.md)                                 | Biological targets              | Active          |
+| [Assay Parameters](chembl/assay-parameters.md)             | Assay parameter definitions     | Active          |
+| [Cell Line](chembl/cell-line.md)                           | Cell line data                  | Active          |
+| [Compound Record](chembl/compound-record.md)               | Compound records                | Active          |
+| [Publication](chembl/publication.md)                       | Literature references           | Active          |
+| [Publication Similarity](chembl/publication-similarity.md) | Publication similarity          | Active          |
+| [Publication Term](chembl/publication-term.md)             | Publication terms               | Active          |
+| [Protein Class](chembl/protein-class.md)                   | Protein classification          | Active          |
+| [Subcellular Fraction](chembl/subcellular-fraction.md)     | Subcellular fraction vocabulary | Active          |
+| [Target Component](chembl/target-component.md)             | Target components               | Active          |
+| [Tissue](chembl/tissue.md)                                 | Tissue and anatomical context   | Active          |
 
 ## Provider Configuration
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # semanticscholar_publication
 
@@ -21,16 +24,16 @@ Last verified: '2026-03-29'
 
 ## Current Canonical Contract Summary
 
-| Property | Value |
-|----------|-------|
-| Pipeline Name | `semanticscholar_publication` |
-| Provider | `semanticscholar` |
-| Entity Type | `publication` |
-| Business Primary Keys | `["paper_id"]` |
-| Loading Strategy | `full_scan_only` |
-| Bronze Format | `jsonl` + `zstd` |
-| Silver Format | `delta` |
-| Gold Format | `delta` |
+| Property              | Value                         |
+| --------------------- | ----------------------------- |
+| Pipeline Name         | `semanticscholar_publication` |
+| Provider              | `semanticscholar`             |
+| Entity Type           | `publication`                 |
+| Business Primary Keys | `["paper_id"]`                |
+| Loading Strategy      | `full_scan_only`              |
+| Bronze Format         | `jsonl` + `zstd`              |
+| Silver Format         | `delta`                       |
+| Gold Format           | `delta`                       |
 
 ## Notes
 

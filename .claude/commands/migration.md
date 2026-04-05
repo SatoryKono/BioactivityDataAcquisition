@@ -1,26 +1,29 @@
----
-description: Создание и запуск миграций Delta Lake таблиц BioETL. Действия: list, create, run, dry-run, status. Пример: /migration create rename_field_X_to_Y
----
+______________________________________________________________________
+
+## description: Создание и запуск миграций Delta Lake таблиц BioETL. Действия: list, create, run, dry-run, status. Пример: /migration create rename_field_X_to_Y
 
 # /migration
 
 Создание и запуск миграций данных для BioETL Delta Lake tables.
 
 ## Использование
+
 ```
 /migration [action] [target]
 ```
 
 **Действия:** `list` (default), `create`, `run`, `dry-run`, `status`
 
----
+______________________________________________________________________
 
 ## Инструкции
 
 ### `list` (default)
+
 ```bash
 find scripts/migrations -type f -name '*.py' | sort
 ```
+
 Per migration: filename, description (docstring), date (git log), status (applied/pending).
 
 ### `create`
@@ -30,11 +33,13 @@ Ask via AskUserQuestion: name (snake_case), description, target tables (Silver/G
 Study existing: `find scripts/migrations -type f -name '*.py' | sort | head`
 
 Template:
+
 ```python
 """<Description>.
 
 Migrates <what> in <which tables>.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -57,7 +62,9 @@ def migrate(data_dir: Path, *, dry_run: bool = False) -> int:
             continue
         dt = DeltaTable(str(table_path))
         df = pl.read_delta(str(table_path))
-        logger.info("Table %s: %d rows, columns: %s", table_path.name, len(df), df.columns)
+        logger.info(
+            "Table %s: %d rows, columns: %s", table_path.name, len(df), df.columns
+        )
         if dry_run:
             logger.info("[DRY RUN] Would migrate table %s", table_path.name)
             continue
@@ -86,17 +93,21 @@ if __name__ == "__main__":
 Verify: `uv run python scripts/migrations/{active|oneoff}/{name}.py --dry-run`
 
 ### `run`
+
 ```bash
 uv run python scripts/migrations/{target}.py --data-dir data/output
 ```
 
 ### `dry-run`
+
 ```bash
 uv run python scripts/migrations/{target}.py --data-dir data/output --dry-run
 ```
 
 ### `status`
+
 ```bash
 find data/output/ -name "_delta_log" -type d 2>/dev/null | sed 's|/_delta_log||' | sort
 ```
+
 Per table: path, version, file count, size.

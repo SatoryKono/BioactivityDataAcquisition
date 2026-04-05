@@ -1,9 +1,8 @@
 # Сбор evidence завершён: compatibility-registry-policy-history-mixing
 
-
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-**Создано объектов evidence:** 7  
+**Создано объектов evidence:** 7
 **Gate Статус:** PASSED
 
 Примечание о rebaseline: the repo still reflects the same measured-only governance and history-splitting conclusions captured here, so the pack remains a valid current-state reference.
@@ -18,15 +17,15 @@ This shard now reads best as historical trigger evidence plus policy context.
 
 ## Сводка evidence
 
-| ID | Claim Summary | Confidence |
-|----|---------------|------------|
-| EV-compatibility-registry-policy-history-mixing-measured-only-baseline | The inventory reports 5 measured-only modules outside the curated ledger and 0 transition-debt rows. | 0.96 |
-| EV-compatibility-registry-policy-history-mixing-telemetry-prefix-gating | Telemetry decides measured membership by inventory rows plus docstring-prefix tracking. | 0.90 |
-| EV-compatibility-registry-policy-history-mixing-test-enforces-measured-registry | Tests enforce measured-path equality and measured-only counts as a CI contract. | 0.97 |
-| EV-compatibility-registry-policy-history-mixing-inventory-contains-review-wave | The inventory contains a dated review-wave section inside the operational ledger. | 0.93 |
-| EV-compatibility-registry-policy-history-mixing-composition-doc-defers-governance | Composition guidance defers compatibility status back to the inventory. | 0.92 |
-| EV-compatibility-registry-policy-history-mixing-quality-config-ownership-model | The quality config reserves compatibility facades for contract/architecture ownership. | 0.88 |
-| EV-compatibility-registry-policy-history-mixing-registry-pattern-mixed-module-policy | The registry-pattern guide separates compatibility states and mixed-module policy for future compatibility surfaces. | 0.89 |
+| ID                                                                                   | Claim Summary                                                                                                        | Confidence |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- | ---------- |
+| EV-compatibility-registry-policy-history-mixing-measured-only-baseline               | The inventory reports 5 measured-only modules outside the curated ledger and 0 transition-debt rows.                 | 0.96       |
+| EV-compatibility-registry-policy-history-mixing-telemetry-prefix-gating              | Telemetry decides measured membership by inventory rows plus docstring-prefix tracking.                              | 0.90       |
+| EV-compatibility-registry-policy-history-mixing-test-enforces-measured-registry      | Tests enforce measured-path equality and measured-only counts as a CI contract.                                      | 0.97       |
+| EV-compatibility-registry-policy-history-mixing-inventory-contains-review-wave       | The inventory contains a dated review-wave section inside the operational ledger.                                    | 0.93       |
+| EV-compatibility-registry-policy-history-mixing-composition-doc-defers-governance    | Composition guidance defers compatibility status back to the inventory.                                              | 0.92       |
+| EV-compatibility-registry-policy-history-mixing-quality-config-ownership-model       | The quality config reserves compatibility facades for contract/architecture ownership.                               | 0.88       |
+| EV-compatibility-registry-policy-history-mixing-registry-pattern-mixed-module-policy | The registry-pattern guide separates compatibility states and mixed-module policy for future compatibility surfaces. | 0.89       |
 
 ## Key Observations
 

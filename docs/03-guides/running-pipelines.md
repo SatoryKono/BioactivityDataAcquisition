@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 6.4.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-04'
----
+  Last verified: '2026-04-04'
+
+______________________________________________________________________
 
 # Running Pipelines
 
@@ -20,7 +23,7 @@ Last verified: '2026-04-04'
 > [Getting Started](getting-started.md). For operator incident handling use
 > [Operations Runbooks](../05-operations/runbooks/index.md).
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Prerequisites
 
@@ -58,7 +61,7 @@ Last verified: '2026-04-04'
 > **Note:** BioETL использует **Local-Only** архитектуру (ADR-010).
 > Docker и внешние сервисы (Redis, MinIO) **не требуются**.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Быстрый старт
 
@@ -111,15 +114,15 @@ data/output/control/run_ledger/{manifest_id}.jsonl
 Sidecar metadata Bronze/Silver/Gold не встраивает полный manifest payload, но
 несёт ссылку `runtime.manifest_id` для связи dataset -> run control plane.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Типы запуска (Run Types)
 
-| Тип             | Флаг                  | Описание                                        | Очистка данных     |
-| --------------- | --------------------- | ----------------------------------------------- | ------------------ |
-| **Incremental** | (по умолчанию)        | Обработка новых записей с последнего checkpoint | Нет                |
-| **Backfill**    | `--run-type backfill` | Обработка записей для заполнения пробелов       | Silver/Gold        |
-| **Rebuild**     | `--run-type rebuild`  | Полная перезагрузка производных данных          | Silver/Gold        |
+| Тип             | Флаг                  | Описание                                        | Очистка данных |
+| --------------- | --------------------- | ----------------------------------------------- | -------------- |
+| **Incremental** | (по умолчанию)        | Обработка новых записей с последнего checkpoint | Нет            |
+| **Backfill**    | `--run-type backfill` | Обработка записей для заполнения пробелов       | Silver/Gold    |
+| **Rebuild**     | `--run-type rebuild`  | Полная перезагрузка производных данных          | Silver/Gold    |
 
 ### Incremental Run
 
@@ -159,7 +162,7 @@ bioetl run --pipeline chembl_activity --run-type rebuild --yes
 bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Тестирование и разработка
 
@@ -234,7 +237,7 @@ bioetl run --pipeline chembl_activity \
     --filter-field molecule_id
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Конфигурация пайплайнов
 
@@ -291,7 +294,7 @@ quality:
 
 > **Подробнее:** [Pipeline Configuration Guide](pipeline-configuration.md)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Блокировки (Locking)
 
@@ -316,14 +319,16 @@ bioetl lock check --pipeline chembl_activity --run-id <UUID>
 Если пайплайн завершился аварийно и следующий запуск не может получить lock:
 
 1. Убедитесь, что другой локальный процесс `bioetl` или `python` для этого пайплайна действительно не выполняется.
-2. Если процесс завис, завершите именно этот процесс на уровне ОС.
-3. Запустите пайплайн повторно:
+
+1. Если процесс завис, завершите именно этот процесс на уровне ОС.
+
+1. Запустите пайплайн повторно:
 
    ```bash
    bioetl run --pipeline chembl_activity
    ```
 
-4. Используйте `bioetl lock release ...` только если вы отлаживаете lock state в том же процессе, где lock был создан.
+1. Используйте `bioetl lock release ...` только если вы отлаживаете lock state в том же процессе, где lock был создан.
 
 ### TTL и Heartbeat
 
@@ -331,7 +336,7 @@ bioetl lock check --pipeline chembl_activity --run-id <UUID>
 - **Heartbeat interval:** 30 секунд (автоматически продлевает блокировку)
 - При аварийном завершении блокировка автоматически освобождается по истечении TTL
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Мониторинг и метрики
 
@@ -409,16 +414,16 @@ bioetl run --pipeline chembl_activity --no-health-server
 bioetl health server --port 8081
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Выходные данные (Pipeline Output)
 
 Пайплайны записывают данные в три слоя (Medallion Architecture):
 
-| Слой       | Путь                                             | Формат       | Retention |
-| ---------- | ------------------------------------------------ | ------------ | --------- |
-| **Bronze** | `data/output/bronze/{provider}/{entity}/{date}/` | JSONL + zstd | 90 дней   |
-| **Silver** | `data/output/silver/{provider}/{entity}/`        | Delta Lake   | Permanent |
+| Слой       | Путь                                             | Формат       | Retention              |
+| ---------- | ------------------------------------------------ | ------------ | ---------------------- |
+| **Bronze** | `data/output/bronze/{provider}/{entity}/{date}/` | JSONL + zstd | 90 дней                |
+| **Silver** | `data/output/silver/{provider}/{entity}/`        | Delta Lake   | Permanent              |
 | **Gold**   | `data/output/gold/{provider}/{entity}/`          | Delta Lake   | Permanent (if enabled) |
 
 ### Структура директорий
@@ -457,7 +462,7 @@ bioetl export chembl.activity --format xlsx
 bioetl export chembl.activity --layer gold
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Maintenance операции
 
@@ -486,7 +491,7 @@ bioetl maintenance bronze-cleanup
 bioetl maintenance bronze-cleanup --retention-days 60 --dry-run
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Карантин (Quarantine)
 
@@ -539,8 +544,8 @@ bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --limi
 Рекомендуемый workflow:
 
 1. Сначала проверить summary и trend в Grafana.
-2. Затем перейти к `bioetl quarantine stats --silver-filter-only`.
-3. Если нужна причина конкретной записи, использовать
+1. Затем перейти к `bioetl quarantine stats --silver-filter-only`.
+1. Если нужна причина конкретной записи, использовать
    `bioetl quarantine inspect --silver-filter-only`.
 
 ### Повторная обработка
@@ -556,20 +561,20 @@ bioetl quarantine replay --pipeline chembl_activity --max-age-days 7
 bioetl quarantine purge --pipeline chembl_activity --older-than-days 30 --dry-run
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Распространённые проблемы
 
-| Проблема                | Решение                                                    |
-| ----------------------- | ---------------------------------------------------------- |
+| Проблема                | Решение                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
 | Lock acquisition failed | Дождитесь завершения активного процесса или остановите зависший локальный процесс и перезапустите пайплайн |
-| Rate limit (429)        | Автоматический retry с backoff                             |
-| Schema drift detected   | Проверьте логи, review новых полей                         |
-| Checkpoint not found    | Запустите без `--resume`                                   |
-| DQ threshold exceeded   | Проверьте `quarantine stats`, исправьте источник           |
-| Circuit breaker open    | Подождите recovery (5 мин) или проверьте health провайдера |
+| Rate limit (429)        | Автоматический retry с backoff                                                                             |
+| Schema drift detected   | Проверьте логи, review новых полей                                                                         |
+| Checkpoint not found    | Запустите без `--resume`                                                                                   |
+| DQ threshold exceeded   | Проверьте `quarantine stats`, исправьте источник                                                           |
+| Circuit breaker open    | Подождите recovery (5 мин) или проверьте health провайдера                                                 |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Запуск нескольких пайплайнов
 
@@ -595,7 +600,7 @@ bioetl run-composite --composite publication
 bioetl run-composite --composite publication --seed-limit 100
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## См. также
 

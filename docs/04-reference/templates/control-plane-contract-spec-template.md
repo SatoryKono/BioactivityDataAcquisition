@@ -10,13 +10,13 @@ Last verified: '2026-04-01'
 
 # Control-Plane Contract Specification: <Surface Name>
 
-**Template type:** `control-plane-contract-spec`  
-**Surface ID:** `<surface_id>`  
-**Layer:** `control-plane`  
-**Source of truth:** `<code path>`  
-**Published contract doc:** `<published doc path>`  
-**Related ADR:** `<ADR path>`  
-**Related runbook:** `<runbook path>`  
+**Template type:** `control-plane-contract-spec`
+**Surface ID:** `<surface_id>`
+**Layer:** `control-plane`
+**Source of truth:** `<code path>`
+**Published contract doc:** `<published doc path>`
+**Related ADR:** `<ADR path>`
+**Related runbook:** `<runbook path>`
 **Related CLI reference:** `<CLI doc path>`
 
 ## Purpose

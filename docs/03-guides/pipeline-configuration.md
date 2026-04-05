@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 6.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Pipeline Configuration Guide
 
@@ -15,7 +18,7 @@ Last verified: '2026-03-29'
 **Версия:** 6.1.0
 **Дата обновления:** 2026-03-20
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Обзор
 
@@ -30,7 +33,7 @@ BioETL использует **YAML-файлы** для конфигурации 
 - **Immutable Domain Objects:** Конфиги преобразуются в frozen dataclasses
 - **Fixture governance (dual model):** tracked fixture manifest + gap registry
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Структура директорий
 
@@ -97,16 +100,16 @@ configs/
 quality/governance assets и composite helpers, поэтому active guide фиксирует
 категории, а не ручной глобальный count.
 
-| Категория | Описание |
-| --------- | -------- |
-| Entity configs (unified) | Standard ETL pipelines (`configs/entities`) |
-| Composite pipeline configs | Multi-provider pipelines (`configs/composites/*.yaml`) |
-| Composite field-group configs | Shared field groups (`configs/composites/field_groups`) |
-| Provider configs | Source + provider quality/filters (`configs/providers`) |
-| Base configs | Global defaults (`configs/base`) |
-| Quality/governance configs | Quality policy, debt, source-test, and composite quality files (`configs/quality`) |
-| Enum configs | Enum and publication-classification assets (`configs/enums`) |
-| Misc standalone configs | Naming exceptions and similar top-level config assets |
+| Категория                     | Описание                                                                           |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| Entity configs (unified)      | Standard ETL pipelines (`configs/entities`)                                        |
+| Composite pipeline configs    | Multi-provider pipelines (`configs/composites/*.yaml`)                             |
+| Composite field-group configs | Shared field groups (`configs/composites/field_groups`)                            |
+| Provider configs              | Source + provider quality/filters (`configs/providers`)                            |
+| Base configs                  | Global defaults (`configs/base`)                                                   |
+| Quality/governance configs    | Quality policy, debt, source-test, and composite quality files (`configs/quality`) |
+| Enum configs                  | Enum and publication-classification assets (`configs/enums`)                       |
+| Misc standalone configs       | Naming exceptions and similar top-level config assets                              |
 
 ### Fixture Governance: `manifest + gaps`
 
@@ -123,7 +126,7 @@ quality/governance assets и composite helpers, поэтому active guide фи
 - если tracked fixture отсутствует, должен быть explicit entry в `gaps`;
 - для ключей, покрытых `tracked_ci_sample`, gap-запись должна быть закрыта/удалена.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Unified Entity Config YAML
 
@@ -146,16 +149,16 @@ pipeline:
 
 ### Полная структура конфига
 
-| Секция       | Описание                                     | Обязательно |
-| ------------ | -------------------------------------------- | ----------- |
-| `version`    | Версия unified-конфига                       | Да          |
-| `provider`   | Провайдер                                    | Да          |
-| `entity`     | Сущность                                     | Да          |
-| `pipeline`   | Runtime-параметры пайплайна                  | Да          |
-| `schema`     | Column groups + layer include/exclude policy | Да          |
-| `quality`    | DQ-правила для сущности                      | Да          |
-| `filters`    | Extraction/silver/gold filters               | Да          |
-| `contracts`  | PK/merge/hash policy                         | Да          |
+| Секция      | Описание                                     | Обязательно |
+| ----------- | -------------------------------------------- | ----------- |
+| `version`   | Версия unified-конфига                       | Да          |
+| `provider`  | Провайдер                                    | Да          |
+| `entity`    | Сущность                                     | Да          |
+| `pipeline`  | Runtime-параметры пайплайна                  | Да          |
+| `schema`    | Column groups + layer include/exclude policy | Да          |
+| `quality`   | DQ-правила для сущности                      | Да          |
+| `filters`   | Extraction/silver/gold filters               | Да          |
+| `contracts` | PK/merge/hash policy                         | Да          |
 
 ### Пример с переопределениями
 
@@ -179,7 +182,7 @@ pipeline:
         nullable: true
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Composite Pipelines (ADR-026)
 
@@ -243,7 +246,7 @@ composite:
 > Seed и enricher pipelines запускаются как обычные single-source pipelines,
 > а composite layer выполняет агрегацию на уровне Silver-данных.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Convention-based Path Resolution (ADR-029)
 
@@ -256,15 +259,15 @@ composite:
 1. загружает provider source config из `configs/providers/{provider}.yaml`;
 1. merge-ит provider source config с entity-level `source` overrides.
 
-| Поле                 | Auto-computed значение                                 | Примечание                                |
-| -------------------- | ------------------------------------------------------ | ----------------------------------------- |
-| `dq_config_file`     | `../../entities/{provider}/{entity_type}.yaml`         | Convention default для entity-level DQ     |
-| `filter_config_file` | `../../entities/{provider}/{entity_type}.yaml`         | Convention default для entity-level filters |
-| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`          |                                           |
-| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`          |                                           |
-| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`            |                                           |
-| `silver_table`       | `{provider}_{entity_type}`                             | Если явно не задан                        |
-| `gold_table`         | `{provider}_{entity_type}`                             | Если явно не задан                        |
+| Поле                 | Auto-computed значение                         | Примечание                                  |
+| -------------------- | ---------------------------------------------- | ------------------------------------------- |
+| `dq_config_file`     | `../../entities/{provider}/{entity_type}.yaml` | Convention default для entity-level DQ      |
+| `filter_config_file` | `../../entities/{provider}/{entity_type}.yaml` | Convention default для entity-level filters |
+| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`  |                                             |
+| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`  |                                             |
+| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`    |                                             |
+| `silver_table`       | `{provider}_{entity_type}`                     | Если явно не задан                          |
+| `gold_table`         | `{provider}_{entity_type}`                     | Если явно не задан                          |
 
 > **Важно:** pipeline config не использует `source-file`. Provider source section
 > canonical-но грузится из `configs/providers/{provider}.yaml`, затем merge-ится
@@ -300,7 +303,7 @@ business_primary_keys: ["activity_id"]  # → sort_by = ["entity_id", "activity_
 
 > **Преимущество:** Снижает дублирование на ~30%. Разработчик указывает только переопределения. Все 21 entity configs соответствуют ADR-014 через авто-пропагацию.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Data Quality (DQ) конфигурация
 
@@ -394,7 +397,7 @@ entity_conditional_validations:
 | `length`   | Длина строки        | `min`, `max`             |
 | `unique`   | Уникальность        | —                        |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Filter конфигурация
 
@@ -459,7 +462,7 @@ gold_filters:
 | `is_empty`     | Пустая строка или список    |
 | `is_not_empty` | Не пустая строка или список |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Source конфигурация
 
@@ -506,31 +509,34 @@ entities:
 ```
 
 Canonical current source pagination contract:
+
 - `source.provider_config.pagination.*` is the single source of truth for provider pagination.
 - Pipelines may override pagination only through `page_size_override`.
 
 Retired source provider pagination aliases:
+
 - `source.provider_config.batch_size`
 - `source.provider_config.page_size`
 - `source.provider_config.max_url_length`
 - `source.provider_config.cursor_pagination`
 
 Retired source root alias:
+
 - `source.batch_size`
 
 ### Rate Limits по провайдерам (7 source configs)
 
-| Provider        | Source Config                  | Rate Limit   | Burst | Batch Size |
-| --------------- | ------------------------------ | ------------ | ----- | ---------- |
-| ChEMBL          | `configs/providers/chembl.yaml`          | 3 req/sec    | 10    | 20         |
-| PubChem         | `configs/providers/pubchem.yaml`         | 5 req/sec    | 10    | 50         |
-| UniProt         | `configs/providers/uniprot.yaml`         | 10 req/sec   | 20    | 200        |
-| CrossRef        | `configs/providers/crossref.yaml`        | 50 req/sec   | 100   | 50         |
-| OpenAlex        | `configs/providers/openalex.yaml`        | 10 req/sec   | 20    | 50         |
-| PubMed          | `configs/providers/pubmed.yaml`          | 3 req/sec    | 5     | 100        |
-| SemanticScholar | `configs/providers/semanticscholar.yaml` | 0.1 req/sec  | 1     | 50         |
+| Provider        | Source Config                            | Rate Limit  | Burst | Batch Size |
+| --------------- | ---------------------------------------- | ----------- | ----- | ---------- |
+| ChEMBL          | `configs/providers/chembl.yaml`          | 3 req/sec   | 10    | 20         |
+| PubChem         | `configs/providers/pubchem.yaml`         | 5 req/sec   | 10    | 50         |
+| UniProt         | `configs/providers/uniprot.yaml`         | 10 req/sec  | 20    | 200        |
+| CrossRef        | `configs/providers/crossref.yaml`        | 50 req/sec  | 100   | 50         |
+| OpenAlex        | `configs/providers/openalex.yaml`        | 10 req/sec  | 20    | 50         |
+| PubMed          | `configs/providers/pubmed.yaml`          | 3 req/sec   | 5     | 100        |
+| SemanticScholar | `configs/providers/semanticscholar.yaml` | 0.1 req/sec | 1     | 50         |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Sink конфигурация
 
@@ -588,7 +594,7 @@ sink:
 | `evolve` | Автоматическое добавление новых колонок |
 | `ignore` | Игнорировать несовпадения               |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Circuit Breaker конфигурация
 
@@ -605,7 +611,7 @@ circuit-breaker:
 - **Open:** Все запросы блокируются
 - **Half-Open:** Пробные запросы для recovery
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Maintenance конфигурация
 
@@ -621,7 +627,7 @@ maintenance:
     retention-days: 90          # Retention для Bronze файлов
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Валидация конфигурации
 
@@ -645,15 +651,15 @@ bioetl config list-pipelines
 
 При загрузке конфига выполняются проверки:
 
-| Проверка                         | Описание                                       |
-| -------------------------------- | ---------------------------------------------- |
-| `validate_batch_size`            | `batch_size <= 5000`                           |
-| `validate_provider`              | `provider` в lowercase                         |
-| `validate_entity_type_canonical` | publication\* вместо legacy document\*         |
+| Проверка                         | Описание                                            |
+| -------------------------------- | --------------------------------------------------- |
+| `validate_batch_size`            | `batch_size <= 5000`                                |
+| `validate_provider`              | `provider` в lowercase                              |
+| `validate_entity_type_canonical` | publication\* вместо legacy document\*              |
 | `validate_medallion_formats`     | Bronze принудительно `jsonl`, Silver только `delta` |
-| `validate_thresholds`            | `soft_fail < hard_fail`                        |
+| `validate_thresholds`            | `soft_fail < hard_fail`                             |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Примеры конфигураций
 
@@ -716,7 +722,7 @@ sink:
       enabled: true
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Миграция с JSON на YAML
 
@@ -745,7 +751,7 @@ batch_size: 100
 # Комментарии теперь поддерживаются!
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Troubleshooting
 
@@ -780,7 +786,7 @@ bioetl config validate chembl_activity
    bioetl config show chembl_activity --format json
    ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## См. также
 
