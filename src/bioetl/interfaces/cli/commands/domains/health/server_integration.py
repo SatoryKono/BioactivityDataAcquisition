@@ -15,6 +15,9 @@ from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
 import click
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
+    CLI_ENTRYPOINT_TYPED_ERRORS,
+)
 
 if TYPE_CHECKING:
     from bioetl.interfaces.http.health_server import HealthServer
@@ -46,22 +49,34 @@ async def health_server_context(
         return
 
     # Import here to avoid circular imports and keep interfaces layer clean
-    from bioetl.composition.services_api import get_health_server_dependencies
+    from bioetl.composition.services_api import (
+        get_health_server_dependencies,
+        get_quarantine_service,
+    )
     from bioetl.interfaces.http.health_server import HealthServer
 
     # Get dependencies from composition root (proper DI)
     deps = get_health_server_dependencies()
+    try:
+        quarantine_service = get_quarantine_service()
+    except CLI_ENTRYPOINT_TYPED_ERRORS:
+        # Why: keep health probes available during pipeline runs even if
+        # quarantine explorer dependencies are temporarily unavailable.
+        quarantine_service = None
 
     server = HealthServer(
         host=host,
         port=port,
         health_monitor=deps.health_monitor,
+        quarantine_service=quarantine_service,
         logger=deps.logger if hasattr(deps, "logger") else None,
     )
 
     try:
         await server.start()
     except OSError:
+        if quarantine_service is not None:
+            await quarantine_service.aclose()
         click.echo(
             f"Warning: Health server failed to bind to {host}:{port} "
             f"(port in use). Pipeline will continue without health server.",
@@ -74,6 +89,8 @@ async def health_server_context(
         yield server
     finally:
         await server.stop()
+        if quarantine_service is not None:
+            await quarantine_service.aclose()
 
 
 def add_health_server_options(cmd: click.Command) -> click.Command:

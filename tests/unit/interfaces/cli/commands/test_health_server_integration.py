@@ -37,18 +37,21 @@ class TestHealthServerContext:
             assert server is None
 
     @pytest.mark.asyncio
+    @patch("bioetl.composition.services_api.get_quarantine_service")
     @patch("bioetl.composition.services_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_enabled_starts_and_stops_server(
         self,
         mock_server_cls: MagicMock,
         mock_get_deps: MagicMock,
+        mock_get_quarantine_service: MagicMock,
     ) -> None:
         """Test that enabled context starts and stops the server."""
         # Setup mocks
         mock_deps = MagicMock()
         mock_deps.health_monitor = MagicMock()
         mock_get_deps.return_value = mock_deps
+        mock_get_quarantine_service.return_value = None
 
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
@@ -62,16 +65,19 @@ class TestHealthServerContext:
         mock_server.stop.assert_called_once()
 
     @pytest.mark.asyncio
+    @patch("bioetl.composition.services_api.get_quarantine_service")
     @patch("bioetl.composition.services_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_stops_server_on_exception(
         self,
         mock_server_cls: MagicMock,
         mock_get_deps: MagicMock,
+        mock_get_quarantine_service: MagicMock,
     ) -> None:
         """Test that server is stopped even when exception occurs."""
         mock_deps = MagicMock()
         mock_get_deps.return_value = mock_deps
+        mock_get_quarantine_service.return_value = None
 
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
@@ -85,17 +91,20 @@ class TestHealthServerContext:
         mock_server.stop.assert_called_once()
 
     @pytest.mark.asyncio
+    @patch("bioetl.composition.services_api.get_quarantine_service")
     @patch("bioetl.composition.services_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_custom_host_port(
         self,
         mock_server_cls: MagicMock,
         mock_get_deps: MagicMock,
+        mock_get_quarantine_service: MagicMock,
     ) -> None:
         """Test that custom host and port are passed to server."""
         mock_deps = MagicMock()
         mock_deps.health_monitor = MagicMock()
         mock_get_deps.return_value = mock_deps
+        mock_get_quarantine_service.return_value = None
 
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
@@ -109,8 +118,10 @@ class TestHealthServerContext:
             assert call_kwargs["host"] == "127.0.0.1"
             assert call_kwargs["port"] == 9090
             assert call_kwargs["health_monitor"] is mock_deps.health_monitor
+            assert call_kwargs["quarantine_service"] is None
 
     @pytest.mark.asyncio
+    @patch("bioetl.composition.services_api.get_quarantine_service")
     @patch("bioetl.composition.services_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch("click.echo")
@@ -119,11 +130,13 @@ class TestHealthServerContext:
         mock_echo: MagicMock,
         mock_server_cls: MagicMock,
         mock_get_deps: MagicMock,
+        mock_get_quarantine_service: MagicMock,
     ) -> None:
         """OSError during start should yield None and continue pipeline."""
         mock_deps = MagicMock()
         mock_deps.health_monitor = MagicMock()
         mock_get_deps.return_value = mock_deps
+        mock_get_quarantine_service.return_value = None
 
         mock_server = MagicMock()
         mock_server.start = AsyncMock(side_effect=OSError("in use"))

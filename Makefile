@@ -361,7 +361,7 @@ clean-local-artifacts: ## Clean local-only artifacts in repo root (use DRY_RUN=1
 		$(MAKE) clean; \
 	fi; \
 	$$remove_cmd site docs/site .mkdocs-site-tmp htmlcov .mypy_cache .pytest_cache .ruff_cache .hypothesis .benchmarks .import_linter_cache; \
-	$$remove_file_cmd bash.exe.stackdump full_log.txt log_test.txt coverage_output.txt coverage_summary.txt profile.svg; \
+	$$remove_file_cmd bash.exe.stackdump full_log.txt log_test.txt coverage_output.txt coverage_summary.txt profile.svg mkdocs_strict.log NUL .tmp_precommit_probe.txt CODEX_READY.md codex.bat; \
 	find . -maxdepth 1 -type f \( -name "test_backfill_*" -o -name "test_chembl_*" -o -name "test_failed_*" -o -name "test_full_pipeline_*" -o -name "test_multiple_*" -o -name "test_pipeline_*" -o -name "test_pubchem_*" -o -name "test_pubmed_*" -o -name "test_uniprot_*" -o -name "test_crossref_*" -o -name "Test*.test_*" -o -name "test_rebuild_*" -o -name "test_run_type_*" -o -name "test_vacuum_*" -o -name "*.stackdump" \) -print | while read -r f; do $$remove_file_cmd "$$f"; done; \
 	if [ "$(PURGE_WORKTREES)" = "1" ]; then \
 		echo "$(YELLOW)Purging .worktrees and .rollback directories$(NC)"; \

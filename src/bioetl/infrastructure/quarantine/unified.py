@@ -31,8 +31,12 @@ from bioetl.domain.types import (
     RunID,
 )
 from bioetl.infrastructure.quarantine.operations import (
+    get_filtered_filter_options,
+    get_filtered_record,
+    get_filtered_stats,
     get_statistics,
     inspect_records,
+    list_filtered_records,
     purge_records,
     replay_records,
 )
@@ -295,6 +299,102 @@ class UnifiedQuarantineAdapter:
             Dict with counts by error code, status distribution, and totals.
         """
         return get_statistics(self.base_path, None, pipeline, error_code, run_id)
+
+    async def list_filtered_records(
+        self,
+        *,
+        pipeline: str | None = None,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        payload_hash: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+        sort: str = "ingestion_ts_desc",
+    ) -> JsonDict:
+        """List paginated Silver-filter quarantine rows for record-level exploration."""
+        return list_filtered_records(
+            self.base_path,
+            None,
+            pipeline=pipeline,
+            run_type=run_type,
+            reason_code=reason_code,
+            field=field,
+            run_id=run_id,
+            payload_hash=payload_hash,
+            from_ts=from_ts,
+            to_ts=to_ts,
+            limit=limit,
+            offset=offset,
+            sort=sort,
+        )
+
+    async def get_filtered_record(
+        self,
+        *,
+        payload_hash: str,
+        pipeline: str | None = None,
+    ) -> JsonDict | None:
+        """Return one filtered Silver record with full payload details."""
+        return get_filtered_record(
+            self.base_path,
+            None,
+            payload_hash=payload_hash,
+            pipeline=pipeline,
+        )
+
+    async def get_filtered_stats(
+        self,
+        *,
+        pipeline: str | None = None,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        payload_hash: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+    ) -> JsonDict:
+        """Return aggregate Silver-filter explorer stats for current scope."""
+        return get_filtered_stats(
+            self.base_path,
+            None,
+            pipeline=pipeline,
+            run_type=run_type,
+            reason_code=reason_code,
+            field=field,
+            run_id=run_id,
+            payload_hash=payload_hash,
+            from_ts=from_ts,
+            to_ts=to_ts,
+        )
+
+    async def get_filtered_filter_options(
+        self,
+        *,
+        pipeline: str | None = None,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+    ) -> JsonDict:
+        """Return dynamic filter options for record-level quarantine exploration."""
+        return get_filtered_filter_options(
+            self.base_path,
+            None,
+            pipeline=pipeline,
+            run_type=run_type,
+            reason_code=reason_code,
+            field=field,
+            run_id=run_id,
+            from_ts=from_ts,
+            to_ts=to_ts,
+        )
 
     async def aclose(self) -> None:
         """Close resources."""

@@ -285,16 +285,11 @@ def create_pipeline_instance_with_services(
         dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
         effective_config_artifact_id=request.effective_config_artifact_id,
     )
+    # Any: compatibility seam forwards optional kwargs only when present.
     return cast(
         "BasePipeline",
-        cast(  # Any: compatibility seam forwards only present optional kwargs.
-            "Any",  # Any: helper keeps optional keyword omission semantics for tests.
-            create_pipeline_with_services,
-        )(
-            **cast(  # Any: runtime kwargs shape is narrowed by the surrounding builder.
-                "dict[str, Any]",  # Any: kwargs bag mixes several optional runtime objects.
-                create_pipeline_kwargs,
-            )
+        cast("Any", create_pipeline_with_services)(
+            **cast("dict[str, Any]", create_pipeline_kwargs)
         ),
     )
 
@@ -338,14 +333,9 @@ def create_factory_runner(
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,
     )
-    pipeline = cast(  # Any: factory callback is intentionally open for test seams.
-        "Any",  # Any: callback signature varies across mocked and concrete factories.
-        create_with_services_fn,
-    )(
-        **cast(  # Any: optional manifest-related kwargs are forwarded only when present.
-            "dict[str, Any]",  # Any: kwargs bag carries optional manifest-era fields.
-            create_with_services_kwargs,
-        )
+    # Any: factory callback signature is intentionally open for runtime/test seams.
+    pipeline = cast("Any", create_with_services_fn)(
+        **cast("dict[str, Any]", create_with_services_kwargs)
     )
     return assemble_runner_fn(
         pipeline=pipeline,

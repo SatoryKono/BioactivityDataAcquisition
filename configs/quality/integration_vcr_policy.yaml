@@ -127,6 +127,7 @@ tracked_suite_inventory:
         - tests/integration/test_dq_report_integration.py
       grafana:
         - tests/integration/test_grafana_config.py
+        - tests/integration/test_grafana_datasource_provisioning.py
       prometheus:
         - tests/integration/test_prometheus_rules_config.py
     composite_config_and_merge:

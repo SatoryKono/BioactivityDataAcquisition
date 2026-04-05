@@ -353,14 +353,13 @@ src/bioetl/
 ├── application/                 # Pipeline orchestration (§1.1)
 │   ├── core/                    # Core pipeline infrastructure
 │   │   ├── base.py              # Base pipeline primitives
-│   │   ├── base_transformer.py  # Base transformer contracts
+│   │   ├── base_transformer/    # Base transformer contracts and structural policy
 │   │   ├── batch_executor.py    # Batch executor
 │   │   ├── runner.py            # PipelineRunner (Driving Adapter logic)
-│   │   ├── shutdown.py          # Graceful shutdown handling
 │   │   ├── record_processor.py  # Record processing
-│   │   ├── preflight_service.py # Pre-run validation
-│   │   ├── postrun_service.py   # Post-run cleanup
-│   │   ├── checkpoint_manager.py    # Checkpoint management
+│   │   ├── lifecycle/           # Shutdown, checkpoint, locks, cleanup, heartbeat
+│   │   ├── preflight/           # Pre-run validation and health aggregation
+│   │   ├── postrun/             # Post-run cleanup, DQ, metadata and VACUUM
 │   │   ├── quarantine_manager.py    # Quarantine management
 │   │   ├── batch_memory_manager.py  # Memory management
 │   │   └── ...

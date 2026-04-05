@@ -1,9 +1,7 @@
 05/04/2026 00:00 DD — BioETL D-05: Pipelines & Config Specification
 
 Файлы:
-- [MD](sandbox:/mnt/data/BioETL_D-05_Pipelines_and_Config_Spec_ru.md)
-- [DOCX](sandbox:/mnt/data/BioETL_D-05_Pipelines_and_Config_Spec_ru.docx)
-- [PDF](sandbox:/mnt/data/BioETL_D-05_Pipelines_and_Config_Spec_ru.pdf)
+- MD/DOCX/PDF export artifacts were generated in a transient sandbox workspace and are not part of the repository snapshot.
 
 # Спецификация пайплайнов и конфигураций BioETL
 
@@ -11,7 +9,7 @@
 
 Идентификатор документа: **D-05**.
 
-Исследование начато с включённого коннектора **github** и репозитория `SatoryKono/BioactivityDataAcquisition` на entity["company","GitHub","code hosting platform"] [1]. Далее последовательно рассмотрены приоритетные официальные источники: entity["organization","EMBL-EBI","bioinformatics institute, uk"] (ebi.ac.uk) [6], entity["organization","National Institutes of Health","us biomedical agency"] (nih.gov) [4–5], entity["organization","UniProt","protein knowledgebase"] (uniprot.org) [7], entity["organization","Crossref","doi registration agency"] (crossref.org) [2], entity["organization","OpenAlex","open scholarly catalog"] (openalex.org) [3], entity["organization","Semantic Scholar","ai2 scholarly api"] (semanticscholar.org) [8–9]. citeturn0search0turn0search1turn0search2turn0search3turn0search5turn6search0turn7search1turn7search3
+Исследование начато с включённого коннектора **github** и репозитория `SatoryKono/BioactivityDataAcquisition2` на entity["company","GitHub","code hosting platform"] [1]. Далее последовательно рассмотрены приоритетные официальные источники: entity["organization","EMBL-EBI","bioinformatics institute, uk"] (ebi.ac.uk) [6], entity["organization","National Institutes of Health","us biomedical agency"] (nih.gov) [4–5], entity["organization","UniProt","protein knowledgebase"] (uniprot.org) [7], entity["organization","Crossref","doi registration agency"] (crossref.org) [2], entity["organization","OpenAlex","open scholarly catalog"] (openalex.org) [3], entity["organization","Semantic Scholar","ai2 scholarly api"] (semanticscholar.org) [8–9]. citeturn0search0turn0search1turn0search2turn0search3turn0search5turn6search0turn7search1turn7search3
 
 [...] Исходные чаты проекта не предоставлены; элементы orchestration‑слоя (где хранится schedule/resources/owner и как именно запускаются backfill/rebuild) помечены как «неуточнено».
 
@@ -376,7 +374,7 @@ D05-08,"Runbook rebuild/backfill semantics",QA,3,"M5","2 reviewers","Runbook pub
 
 ## Источники
 
-1. Репозиторий SatoryKono/BioactivityDataAcquisition (GitHub). Конфиги `configs/`, схемы `configs/_schema/`, валидаторы `scripts/schema/`, Pydantic‑схемы `src/bioetl/infrastructure/schemas/` (дата обращения: 05.04.2026).
+1. Репозиторий SatoryKono/BioactivityDataAcquisition2 (GitHub). Конфиги `configs/`, схемы `configs/_schema/`, валидаторы `scripts/schema/`, Pydantic‑схемы `src/bioetl/infrastructure/schemas/` (дата обращения: 05.04.2026).
 2. Crossref. Access and authentication (REST API): mailto, rate limits, concurrency, 429; best practices (дата обращения: 05.04.2026). citeturn0search0
 3. OpenAlex Developers. Authentication & rate limits (дата обращения: 05.04.2026). citeturn0search1
 4. NLM Customer Support Center. Enhanced API key / rate limits (дата обращения: 05.04.2026). citeturn0search2

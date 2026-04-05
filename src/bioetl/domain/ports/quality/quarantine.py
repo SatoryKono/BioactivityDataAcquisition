@@ -123,6 +123,62 @@ class QuarantinePort(Protocol):
         """
         ...
 
+    async def list_filtered_records(
+        self,
+        *,
+        pipeline: str | None = None,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        payload_hash: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+        sort: str = "ingestion_ts_desc",
+    ) -> MetaDict:
+        """List paginated Silver-filter records for explorer UIs."""
+        ...
+
+    async def get_filtered_record(
+        self,
+        *,
+        payload_hash: str,
+        pipeline: str | None = None,
+    ) -> MetaDict | None:
+        """Return one Silver-filter record including detail payload."""
+        ...
+
+    async def get_filtered_stats(
+        self,
+        *,
+        pipeline: str | None = None,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        payload_hash: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+    ) -> MetaDict:
+        """Return scoped Silver-filter aggregate stats for explorer UIs."""
+        ...
+
+    async def get_filtered_filter_options(
+        self,
+        *,
+        pipeline: str | None = None,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+    ) -> MetaDict:
+        """Return scoped filter options for explorer variable population."""
+        ...
+
     def replay(
         self,
         pipeline: str,

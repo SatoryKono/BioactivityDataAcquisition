@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from http import HTTPStatus
 from typing import TYPE_CHECKING, Protocol, cast
 
 if TYPE_CHECKING:
@@ -171,6 +172,29 @@ class HealthServerHTTPMixin:
         body = response.to_json()
         status_code = response.http_status
         status_text = "OK" if status_code == 200 else "Service Unavailable"
+        http_response = (
+            f"HTTP/1.1 {status_code} {status_text}\r\n"
+            "Content-Type: application/json\r\n"
+            f"Content-Length: {len(body)}\r\n"
+            "Connection: close\r\n"
+            "\r\n"
+            f"{body}"
+        )
+        writer.write(http_response.encode("utf-8"))
+        await writer.drain()
+
+    async def _send_payload_response(
+        self,
+        writer: asyncio.StreamWriter,
+        status_code: int,
+        payload: dict[str, object],
+    ) -> None:
+        """Send a generic JSON payload response."""
+        body = json.dumps(payload, default=str)
+        try:
+            status_text = HTTPStatus(status_code).phrase
+        except ValueError:
+            status_text = "OK"
         http_response = (
             f"HTTP/1.1 {status_code} {status_text}\r\n"
             "Content-Type: application/json\r\n"

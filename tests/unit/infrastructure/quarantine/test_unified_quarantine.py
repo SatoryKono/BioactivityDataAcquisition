@@ -745,6 +745,108 @@ class TestUnifiedQuarantineGetStats:
 
 
 @pytest.mark.unit
+class TestUnifiedQuarantineFilteredExplorer:
+    """Tests for record-level filtered explorer methods."""
+
+    @pytest.mark.asyncio
+    async def test_list_filtered_records(self, quarantine, mock_delta_table):
+        """List endpoint should return paginated normalized rows."""
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = [
+            {
+                "ingestion_ts": "2026-04-05T10:00:00Z",
+                "pipeline": "test",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": '{"id": 1, "canonical_smiles": "CCO"}',
+                "payload_hash": "sha256:1",
+                "error_details": (
+                    '{"message":"Required field missing",'
+                    '"reason_code":"missing_required_field",'
+                    '"rule_type":"required_fields",'
+                    '"field":"canonical_smiles",'
+                    '"operator":"required"}'
+                ),
+                "dq_status": "new",
+                "run_id": "run-1",
+            },
+            {
+                "ingestion_ts": "2026-04-04T10:00:00Z",
+                "pipeline": "test",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": '{"id": 2, "canonical_smiles": ""}',
+                "payload_hash": "sha256:2",
+                "error_details": (
+                    '{"message":"Required field missing",'
+                    '"reason_code":"missing_required_field",'
+                    '"rule_type":"required_fields",'
+                    '"field":"canonical_smiles",'
+                    '"operator":"required"}'
+                ),
+                "dq_status": "new",
+                "run_id": "run-1",
+            },
+        ]
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.list_filtered_records(
+            pipeline="test",
+            limit=1,
+            offset=0,
+        )
+
+        assert result["total"] == 2
+        assert len(result["items"]) == 1
+        assert result["items"][0]["reason_code"] == "missing_required_field"
+
+    @pytest.mark.asyncio
+    async def test_get_filtered_record_not_found(self, quarantine, mock_delta_table):
+        """Detail endpoint should return None when hash is unknown."""
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = []
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.get_filtered_record(payload_hash="missing")
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_get_filtered_filter_options(self, quarantine, mock_delta_table):
+        """Filter options endpoint should return distinct scoped values."""
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = [
+            {
+                "ingestion_ts": "2026-04-05T10:00:00Z",
+                "pipeline": "test",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": '{"id": 1}',
+                "payload_hash": "sha256:1",
+                "error_details": (
+                    '{"reason_code":"missing_required_field",'
+                    '"field":"canonical_smiles",'
+                    '"run_type":"incremental"}'
+                ),
+                "dq_status": "new",
+                "run_id": "run-1",
+            }
+        ]
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.get_filtered_filter_options(pipeline="test")
+
+        assert result["pipelines"] == ["test"]
+        assert result["run_types"] == ["incremental"]
+        assert result["reason_codes"] == ["missing_required_field"]
+        assert result["fields"] == ["canonical_smiles"]
+        assert result["run_ids"] == ["run-1"]
+
+
+@pytest.mark.unit
 class TestUnifiedQuarantineAclose:
     """Tests for UnifiedQuarantineAdapter.aclose method."""
 
