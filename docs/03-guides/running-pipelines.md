@@ -534,6 +534,10 @@ bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --limi
 - `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code-field`
 - `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-signature`
 
+`reason-signature` строится только из structured fields
+`reason_code | rule_type | field | operator`.
+Текст `Reason` / `message` удобен для чтения, но не считается stable analytics key.
+
 `bioetl quarantine inspect --silver-filter-only` показывает для каждой записи:
 
 - `payload_hash`, `dq_status`, `ingestion_ts`;

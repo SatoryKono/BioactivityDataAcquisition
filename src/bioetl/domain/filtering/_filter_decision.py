@@ -9,7 +9,12 @@ from bioetl.domain.types import JsonDict
 
 @dataclass(frozen=True, slots=True)
 class FilterDecision:
-    """Structured result of evaluating a record against filter rules."""
+    """Structured result of evaluating a record against filter rules.
+
+    The structured fields form the stable analytical identity for a rejection.
+    ``message`` remains human-readable display text and should not be used as an
+    aggregation key in CLI, quarantine summaries, or observability pipelines.
+    """
 
     include: bool
     reason_code: str | None = None
@@ -49,15 +54,36 @@ class FilterDecision:
             message=message,
         )
 
-    def to_dict(self) -> JsonDict:
-        """Convert the decision into JSON-serializable metadata."""
+    def analytics_details(self) -> JsonDict:
+        """Return stable structured fields used for grouping and drilldown."""
         return {
-            "include": self.include,
             "reason_code": self.reason_code,
             "rule_type": self.rule_type,
             "field": self.field,
             "operator": self.operator,
             "expected": self.expected,
             "actual": self.actual,
+        }
+
+    def analytics_key(self) -> str | None:
+        """Build a stable grouping key from structured reason fields only."""
+        parts: list[str] = []
+        for value in (
+            self.reason_code,
+            self.rule_type,
+            self.field,
+            self.operator,
+        ):
+            if isinstance(value, str) and value.strip():
+                parts.append(value.strip())
+        if not parts:
+            return None
+        return " | ".join(parts)
+
+    def to_dict(self) -> JsonDict:
+        """Convert the decision into JSON-serializable metadata."""
+        return {
+            "include": self.include,
+            **self.analytics_details(),
             "message": self.message,
         }
