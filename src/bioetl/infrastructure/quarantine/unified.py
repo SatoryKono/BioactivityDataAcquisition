@@ -185,6 +185,7 @@ class UnifiedQuarantineAdapter:
         pipeline: str,
         limit: int = 100,
         error_code: str | None = None,
+        run_id: str | None = None,
         dq_status: QuarantineRecordStatus | None = None,
     ) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
         """Inspect quarantine records matching the given filters.
@@ -193,13 +194,14 @@ class UnifiedQuarantineAdapter:
             pipeline: Pipeline name to filter by.
             limit: Maximum number of records to return.
             error_code: Optional error code to filter by.
+            run_id: Optional run ID to filter by.
             dq_status: Optional quarantine status to filter by.
 
         Returns:
             List of quarantine record dicts with payload, error, and status fields.
         """
         return inspect_records(
-            self.base_path, None, pipeline, limit, error_code, dq_status
+            self.base_path, None, pipeline, limit, error_code, run_id, dq_status
         )
 
     def replay(
@@ -280,17 +282,19 @@ class UnifiedQuarantineAdapter:
         self,
         pipeline: str,
         error_code: str | None = None,
+        run_id: str | None = None,
     ) -> JsonDict:  # Any: quarantine record has heterogeneous values
         """Get quarantine statistics for a pipeline.
 
         Args:
             pipeline: Pipeline name to compute statistics for.
             error_code: Optional error code to scope the statistics.
+            run_id: Optional run ID to scope the statistics.
 
         Returns:
             Dict with counts by error code, status distribution, and totals.
         """
-        return get_statistics(self.base_path, None, pipeline, error_code)
+        return get_statistics(self.base_path, None, pipeline, error_code, run_id)
 
     async def aclose(self) -> None:
         """Close resources."""

@@ -258,6 +258,7 @@ class QuarantineManagerService:
         self,
         limit: int = 100,
         error_code: str | None = None,
+        run_id: str | None = None,
     ) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
         """Inspect quarantined records for this pipeline.
 
@@ -266,6 +267,7 @@ class QuarantineManagerService:
         Args:
             limit: Maximum number of records to return.
             error_code: Optional filter by error code.
+            run_id: Optional filter by pipeline run ID.
 
         Returns:
             List of quarantined records.
@@ -275,12 +277,14 @@ class QuarantineManagerService:
             pipeline=self._pipeline_name,
             limit=limit,
             error_code=error_code,
+            run_id=run_id,
         )
         return records
 
     async def get_stats(
         self,
         error_code: str | None = None,
+        run_id: str | None = None,
     ) -> JsonDict:  # Any: quarantine record has heterogeneous values
         """Get statistics about quarantined records for this pipeline.
 
@@ -288,12 +292,17 @@ class QuarantineManagerService:
 
         Args:
             error_code: Optional error code to scope the statistics.
+            run_id: Optional pipeline run ID to scope the statistics.
 
         Returns:
             Dictionary with quarantine statistics.
 
         """
-        return await self._quarantine.get_stats(self._pipeline_name, error_code)
+        return await self._quarantine.get_stats(
+            self._pipeline_name,
+            error_code,
+            run_id,
+        )
 
 
 QuarantineManager = QuarantineManagerService

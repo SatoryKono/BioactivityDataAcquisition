@@ -76,6 +76,7 @@ def inspect_records(
     pipeline: str,
     limit: int = 100,
     error_code: str | None = None,
+    run_id: str | None = None,
     dq_status: QuarantineRecordStatus | None = None,
 ) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
     """Inspect quarantine records for a pipeline.
@@ -102,6 +103,8 @@ def inspect_records(
     mask = pc.equal(arrow_table["pipeline"], pipeline)
     if error_code:
         mask = pc.and_(mask, pc.equal(arrow_table["error_code"], error_code))
+    if run_id:
+        mask = pc.and_(mask, pc.equal(arrow_table["run_id"], run_id))
     mask = pc.and_(mask, pc.equal(arrow_table["dq_status"], status_filter.value))
 
     filtered_table = arrow_table.filter(mask)
@@ -175,6 +178,7 @@ def get_statistics(
     storage_options: dict[str, str] | None,
     pipeline: str,
     error_code: str | None = None,
+    run_id: str | None = None,
 ) -> JsonDict:  # Any: quarantine record has heterogeneous values
     """Get quarantine statistics for a pipeline.
 
@@ -218,6 +222,10 @@ def get_statistics(
     )
     if len(arrow_table) == 0:
         return empty_stats
+    if run_id:
+        arrow_table = arrow_table.filter(pc.equal(arrow_table["run_id"], run_id))
+        if len(arrow_table) == 0:
+            return empty_stats
 
     df = arrow_table.to_pylist()
     total_records = len(df)
