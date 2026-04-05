@@ -11,6 +11,7 @@ Commands:
     check-versions     Check version consistency across project files
     check-cleanliness  Audit repository root layout allowlist
     split-testing-roadmap  Create or preview #2511 child issues
+    sync-docs-issues   Preview or apply docs-sync issue metadata
     all                Run all checks sequentially
 """
 
@@ -26,6 +27,7 @@ COMMANDS: dict[str, str] = {
     "check-versions": "check_version_consistency.py",
     "check-cleanliness": "audit_root_cleanliness.py",
     "split-testing-roadmap": "split_testing_roadmap_issue.py",
+    "sync-docs-issues": "sync_docs_issues.py",
 }
 
 _DIR = Path(__file__).parent
