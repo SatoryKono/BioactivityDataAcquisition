@@ -77,6 +77,7 @@ Last verified: '2026-04-04'
     2.  Получите агрегаты по причинам:
         ```bash
         bioetl quarantine stats --pipeline your-pipeline-name --silver-filter-only
+        bioetl quarantine stats --pipeline your-pipeline-name --silver-filter-only --group-by reason-code-field
         ```
     3.  Посмотрите конкретные записи и точную причину исключения:
         ```bash

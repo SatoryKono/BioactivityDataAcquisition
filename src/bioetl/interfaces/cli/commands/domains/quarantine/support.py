@@ -18,7 +18,7 @@ from bioetl.interfaces.cli.commands.domains.quarantine.execution import (
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.rendering import (
     build_purge_preview_lines,
-    build_quarantine_stats_lines,
+    build_quarantine_grouped_lines,
     build_replay_preview_lines,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
@@ -143,9 +143,20 @@ class _QuarantineCommandContext:
         )
 
 
-def _render_stats_dashboard(stats: JsonDict, *, pipeline: str) -> None:
+def _render_stats_dashboard(
+    stats: JsonDict,
+    *,
+    pipeline: str,
+    top: int,
+    group_by: str | None,
+) -> None:
     """Render human-readable quarantine statistics."""
-    for line in build_quarantine_stats_lines(stats, pipeline=pipeline):
+    for line in build_quarantine_grouped_lines(
+        stats,
+        pipeline=pipeline,
+        top=top,
+        group_by=group_by,
+    ):
         click.echo(line)
 
 
@@ -184,6 +195,8 @@ def _show_quarantine_stats(
     pipeline: str,
     output_json: bool,
     error_code: str | None,
+    top: int,
+    group_by: str | None,
 ) -> None:
     """Display quarantine statistics for one pipeline."""
     context = _QuarantineCommandContext(pipeline=pipeline)
@@ -202,7 +215,7 @@ def _show_quarantine_stats(
     if output_json:
         click.echo(json.dumps(stats, indent=2))
         return
-    _render_stats_dashboard(stats, pipeline=pipeline)
+    _render_stats_dashboard(stats, pipeline=pipeline, top=top, group_by=group_by)
 
 
 def _replay_quarantine(

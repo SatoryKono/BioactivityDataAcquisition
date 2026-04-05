@@ -58,6 +58,18 @@ def _build_reason_signature(error_details: JsonDict) -> str | None:
     return " | ".join(parts)
 
 
+def _build_reason_field_signature(error_details: JsonDict) -> str | None:
+    """Build a stable reason+field grouping key for operator summaries."""
+    parts: list[str] = []
+    for key in ("reason_code", "field"):
+        value = error_details.get(key)
+        if isinstance(value, str) and value.strip():
+            parts.append(value.strip())
+    if not parts:
+        return None
+    return " | ".join(parts)
+
+
 def inspect_records(
     base_path: str,
     storage_options: dict[str, str] | None,
@@ -187,6 +199,7 @@ def get_statistics(
             "by_field": {},
             "by_rule_type": {},
             "by_operator": {},
+            "by_reason_code_field": {},
             "by_reason_signature": {},
         },
     }
@@ -215,6 +228,7 @@ def get_statistics(
     by_field: dict[str, int] = {}
     by_rule_type: dict[str, int] = {}
     by_operator: dict[str, int] = {}
+    by_reason_code_field: dict[str, int] = {}
     by_reason_signature: dict[str, int] = {}
     silver_filter_total = 0
 
@@ -231,6 +245,11 @@ def get_statistics(
         _increment_counter(by_field, error_details.get("field"))
         _increment_counter(by_rule_type, error_details.get("rule_type"))
         _increment_counter(by_operator, error_details.get("operator"))
+        reason_field_signature = _build_reason_field_signature(error_details)
+        if reason_field_signature:
+            by_reason_code_field[reason_field_signature] = (
+                by_reason_code_field.get(reason_field_signature, 0) + 1
+            )
         reason_signature = _build_reason_signature(error_details)
         if reason_signature:
             by_reason_signature[reason_signature] = (
@@ -254,6 +273,7 @@ def get_statistics(
             "by_field": by_field,
             "by_rule_type": by_rule_type,
             "by_operator": by_operator,
+            "by_reason_code_field": by_reason_code_field,
             "by_reason_signature": by_reason_signature,
         },
     }

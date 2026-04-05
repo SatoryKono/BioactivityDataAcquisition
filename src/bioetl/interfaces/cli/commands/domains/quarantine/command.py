@@ -72,11 +72,35 @@ def quarantine_inspect(
     is_flag=True,
     help="Shortcut for --error-code FILTERED_OUT_SILVER",
 )
+@click.option(  # type: ignore[untyped-decorator]
+    "--group-by",
+    type=click.Choice(
+        [
+            "reason-code",
+            "field",
+            "rule-type",
+            "operator",
+            "reason-code-field",
+            "reason-signature",
+        ],
+        case_sensitive=False,
+    ),
+    help="Focused Silver reject grouping for operator triage",
+)
+@click.option(  # type: ignore[untyped-decorator]
+    "--top",
+    type=int,
+    default=10,
+    show_default=True,
+    help="Maximum grouping entries to display",
+)
 def quarantine_stats(
     pipeline: str,
     output_json: bool,
     error_code: str | None,
     silver_filter_only: bool,
+    group_by: str | None,
+    top: int,
 ) -> None:
     """Show quarantine statistics dashboard for a pipeline."""
     resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
@@ -85,6 +109,8 @@ def quarantine_stats(
         pipeline=pipeline,
         output_json=output_json,
         error_code=resolved_error_code,
+        top=top,
+        group_by=group_by,
     )
 
 

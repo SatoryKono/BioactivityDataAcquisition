@@ -513,6 +513,7 @@ bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIE
 
 # Только Silver filter rejects
 bioetl quarantine stats --pipeline chembl_activity --silver-filter-only
+bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code-field
 bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --limit 20
 ```
 
@@ -523,6 +524,14 @@ bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --limi
 - breakdown по `field`;
 - breakdown по `rule_type`;
 - breakdown по `operator`.
+
+Для focused operator grouping можно использовать:
+
+- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code`
+- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by field`
+- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by rule-type`
+- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by operator`
+- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code-field`
 
 `bioetl quarantine inspect --silver-filter-only` показывает для каждой записи:
 

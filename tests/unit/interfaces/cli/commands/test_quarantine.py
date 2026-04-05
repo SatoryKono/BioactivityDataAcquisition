@@ -230,6 +230,8 @@ class TestQuarantineStats:
         assert "--json" in result.output
         assert "--error-code" in result.output
         assert "--silver-filter-only" in result.output
+        assert "--group-by" in result.output
+        assert "--top" in result.output
 
     def test_stats_requires_pipeline(self, cli_runner: CliRunner) -> None:
         """Test that quarantine stats requires --pipeline option."""
@@ -335,6 +337,57 @@ class TestQuarantineStats:
         assert result.exit_code == 0
         assert "Silver Filter Rejects: 3" in result.output
         assert "missing_required_field" in result.output
+
+    def test_stats_with_focused_group_by_reason_code_field(
+        self,
+        cli_runner: CliRunner,
+        mock_quarantine_manager: MagicMock,
+    ) -> None:
+        """Test quarantine stats focused grouping for Silver reject causes."""
+        mock_quarantine_manager.get_stats = AsyncMock(
+            return_value={
+                "total_count": 4,
+                "by_error_code": {"FILTERED_OUT_SILVER": 4},
+                "by_status": {"NEW": 4},
+                "silver_filter_rejects": {
+                    "total_count": 4,
+                    "by_reason_code": {"missing_required_field": 3},
+                    "by_field": {"publication_year": 3},
+                    "by_rule_type": {"required_fields": 3},
+                    "by_operator": {"required": 3},
+                    "by_reason_code_field": {
+                        "missing_required_field | publication_year": 3
+                    },
+                    "by_reason_signature": {
+                        "missing_required_field | required_fields | publication_year | required": 3
+                    },
+                },
+            }
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "quarantine",
+                    "stats",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--silver-filter-only",
+                    "--group-by",
+                    "reason-code-field",
+                    "--top",
+                    "5",
+                ],
+            )
+
+        assert result.exit_code == 0
+        assert "Focused Silver Reject Grouping:" in result.output
+        assert "Reason Code + Field" in result.output
+        assert "missing_required_field | publication_year" in result.output
 
     def test_stats_json_output(
         self,
