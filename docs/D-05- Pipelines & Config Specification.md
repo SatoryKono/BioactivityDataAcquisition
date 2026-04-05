@@ -1,9 +1,9 @@
 05/04/2026 00:00 DD — BioETL D-05: Pipelines & Config Specification
 
-Файлы:  
-- [MD](sandbox:/mnt/data/BioETL_D-05_Pipelines_and_Config_Spec_ru.md)  
-- [DOCX](sandbox:/mnt/data/BioETL_D-05_Pipelines_and_Config_Spec_ru.docx)  
-- [PDF](sandbox:/mnt/data/BioETL_D-05_Pipelines_and_Config_Spec_ru.pdf)  
+Файлы:
+- [MD](sandbox:/mnt/data/BioETL_D-05_Pipelines_and_Config_Spec_ru.md)
+- [DOCX](sandbox:/mnt/data/BioETL_D-05_Pipelines_and_Config_Spec_ru.docx)
+- [PDF](sandbox:/mnt/data/BioETL_D-05_Pipelines_and_Config_Spec_ru.pdf)
 
 # Спецификация пайплайнов и конфигураций BioETL
 
@@ -23,15 +23,15 @@
 Нормативная валидация конфигов для production‑качества должна быть многослойной: *JSON Schema 2020‑12* (структурный контракт) + *Pydantic v2* (типобезопасная валидация и запрет неизвестных полей) + CI‑инварианты и pre-commit гейты [10–11]. citeturn8search0turn8search2turn6search6turn6search2
 
 Ключевые compliance‑требования по провайдерам для включения в provider configs и runtime-клиент:
-- Crossref: `mailto`/User-Agent для polite pool, заголовки `x-rate-limit-*` и `x-concurrency-limit`, реакция на `429 Too Many Requests`, рекомендации по кэшированию [2]. citeturn0search0  
-- OpenAlex: лимиты/ограничения per_page/10k paging/cursor paging, 429 при превышении, наличие rate-limit endpoint [3]. citeturn0search1  
-- NCBI E-utilities: baseline 3 rps, 10 rps с ключом, отдельные условия для повышенных лимитов [4–5]. citeturn0search2turn0search5  
-- EMBL-EBI Proteins API: лимит 200 requests/second/user (как заявленная верхняя граница) [6]. citeturn0search3  
-- Semantic Scholar: рекомендация использовать API key, «introductory» лимит 1 RPS для ключа, запрет обхода rate limits и распространения ключа [8–9]. citeturn7search1turn7search3turn7search5  
-- UniProt: публичный REST API и инструменты ID mapping (первичный научный источник — статья NAR) [7]. citeturn6search0turn6search1  
+- Crossref: `mailto`/User-Agent для polite pool, заголовки `x-rate-limit-*` и `x-concurrency-limit`, реакция на `429 Too Many Requests`, рекомендации по кэшированию [2]. citeturn0search0
+- OpenAlex: лимиты/ограничения per_page/10k paging/cursor paging, 429 при превышении, наличие rate-limit endpoint [3]. citeturn0search1
+- NCBI E-utilities: baseline 3 rps, 10 rps с ключом, отдельные условия для повышенных лимитов [4–5]. citeturn0search2turn0search5
+- EMBL-EBI Proteins API: лимит 200 requests/second/user (как заявленная верхняя граница) [6]. citeturn0search3
+- Semantic Scholar: рекомендация использовать API key, «introductory» лимит 1 RPS для ключа, запрет обхода rate limits и распространения ключа [8–9]. citeturn7search1turn7search3turn7search5
+- UniProt: публичный REST API и инструменты ID mapping (первичный научный источник — статья NAR) [7]. citeturn6search0turn6search1
 
 {красный} Риски, требующие явного закрытия отдельными задачами:
-- возможный drift между официальными лимитами/правилами и фактическими значениями provider configs (обязателен периодический re-verify и pin-date в документации) [2–6][8–9]. citeturn0search0turn0search6turn0search3turn7search1  
+- возможный drift между официальными лимитами/правилами и фактическими значениями provider configs (обязателен периодический re-verify и pin-date в документации) [2–6][8–9]. citeturn0search0turn0search6turn0search3turn7search1
 - единый механизм secrets: секреты в YAML запрещены, но способ разрешения ссылок на env/secret store в текущей реализации — *неуточнено* [1].
 
 ## Область действия и стейкхолдеры
@@ -39,7 +39,7 @@
 В области действия:
 - спецификация структуры `configs/` и расположения файлов [1];
 - единый runtime‑шаблон entity config (pipeline/spec sections) и composite configs [1];
-- спецификация валидации: JSON Schema 2020‑12 и Pydantic v2 [10–11]. citeturn8search0turn6search6  
+- спецификация валидации: JSON Schema 2020‑12 и Pydantic v2 [10–11]. citeturn8search0turn6search6
 - CI/pre-commit гейты, чек‑листы ревью, метрики качества пайплайнов [1];
 - run types, backfill/rebuild интерфейс и требования идемпотентности.
 
@@ -196,7 +196,7 @@ quality: {}
 filters: {}
 contracts: {}
 ```
-Compliance‑заметка: paging constraints, 429 и рекомендации по cursor paging/backoff [3]. citeturn0search1  
+Compliance‑заметка: paging constraints, 429 и рекомендации по cursor paging/backoff [3]. citeturn0search1
 {красный} Уточнение лимитов по тарифу/правилам usage обязательно для production‑профиля [12]. citeturn0search6
 
 PubMed/NCBI — publication:
@@ -221,8 +221,8 @@ Compliance‑заметка: 3 rps baseline и 10 rps с ключом; повы�
 
 ## Валидация, CI-гейты и compliance
 
-*Механизм:* JSON Schema Draft 2020‑12 задаёт metaschema и базовые семантики (включая правила MUST/SHOULD/...) [10]. citeturn8search2turn8search4  
-*Механизм:* Pydantic v2 задаёт запрет неизвестных ключей через `extra='forbid'` и строгую типизацию через `strict=True` [11]. citeturn6search2turn6search6turn6search7  
+*Механизм:* JSON Schema Draft 2020‑12 задаёт metaschema и базовые семантики (включая правила MUST/SHOULD/...) [10]. citeturn8search2turn8search4
+*Механизм:* Pydantic v2 задаёт запрет неизвестных ключей через `extra='forbid'` и строгую типизацию через `strict=True` [11]. citeturn6search2turn6search6turn6search7
 
 Рекомендуемый профиль для BioETL:
 - runtime JSON Schema: `additionalProperties: false` на уровнях `pipeline`/`sink`/`contracts`;
@@ -292,8 +292,8 @@ Secrets handling (норма):
 image_group{"layout":"carousel","aspect_ratio":"16:9","query":["data pipeline orchestration airflow backfill max_active_runs diagram","prefect retries exponential backoff diagram","configuration validation json schema pydantic ci pipeline diagram"],"num_per_query":1}
 
 Orchestration:
-- backfill в Airflow создаёт DAG runs по диапазону дат, имеет reprocessing behavior и отдельный `max_active_runs` для backfill [13]. citeturn7search0  
-- в Prefect поддержаны retries с фиксированными/списочными задержками и `exponential_backoff` [14]. citeturn7search6turn7search2  
+- backfill в Airflow создаёт DAG runs по диапазону дат, имеет reprocessing behavior и отдельный `max_active_runs` для backfill [13]. citeturn7search0
+- в Prefect поддержаны retries с фиксированными/списочными задержками и `exponential_backoff` [14]. citeturn7search6turn7search2
 Выбор оркестратора в BioETL — *неуточнено*.
 
 Run types (нормативный интерфейс):
@@ -302,9 +302,9 @@ Run types (нормативный интерфейс):
 - `rebuild`: полная пересборка; destructive semantics — *неуточнено* без runbook.
 
 Retries/backoff и provider limits:
-- Crossref: 429 при превышении лимитов; заголовки лимитов/конкурентности; рекомендуется кэширование [2]. citeturn0search0  
-- OpenAlex: 429 и paging constraints, cursor paging для больших выборок [3]. citeturn0search1  
-- Semantic Scholar: запрет обхода лимитов и ключевых ограничений; возможна приостановка доступа [9]. citeturn7search3turn7search5  
+- Crossref: 429 при превышении лимитов; заголовки лимитов/конкурентности; рекомендуется кэширование [2]. citeturn0search0
+- OpenAlex: 429 и paging constraints, cursor paging для больших выборок [3]. citeturn0search1
+- Semantic Scholar: запрет обхода лимитов и ключевых ограничений; возможна приостановка доступа [9]. citeturn7search3turn7search5
 
 Observability (минимальный набор метрик):
 - config validation pass/fail по PR и main;
@@ -376,20 +376,20 @@ D05-08,"Runbook rebuild/backfill semantics",QA,3,"M5","2 reviewers","Runbook pub
 
 ## Источники
 
-1. Репозиторий SatoryKono/BioactivityDataAcquisition (GitHub). Конфиги `configs/`, схемы `configs/_schema/`, валидаторы `scripts/schema/`, Pydantic‑схемы `src/bioetl/infrastructure/schemas/` (дата обращения: 05.04.2026).  
-2. Crossref. Access and authentication (REST API): mailto, rate limits, concurrency, 429; best practices (дата обращения: 05.04.2026). citeturn0search0  
-3. OpenAlex Developers. Authentication & rate limits (дата обращения: 05.04.2026). citeturn0search1  
-4. NLM Customer Support Center. Enhanced API key / rate limits (дата обращения: 05.04.2026). citeturn0search2  
-5. NCBI E‑utilities. Usage guidelines and API key registration/tool/email policy (дата обращения: 05.04.2026). citeturn0search5  
-6. EMBL‑EBI. Proteins API documentation: base URL, 200 requests/second/user, terms/privacy (дата обращения: 05.04.2026). citeturn0search3  
-7. UniProt Consortium. The UniProt website API: facilitating programmatic access to protein knowledge. *Nucleic Acids Research*. 2025. DOI: 10.1093/nar/gkaf394. PMID: 40331428. PMCID: PMC12230682 (дата обращения: 05.04.2026). citeturn6search0turn6search1  
-8. Semantic Scholar. API overview (включая introductory 1 RPS для key) (дата обращения: 05.04.2026). citeturn7search1  
-9. Semantic Scholar Academic Graph API. License Agreement: запрет обхода rate limits, условия приостановки, ограничения на ключ (дата обращения: 05.04.2026). citeturn7search3turn7search5  
-10. JSON Schema. Draft 2020‑12 (core/meta); публикация 16.06.2022 (дата обращения: 05.04.2026). citeturn8search0turn8search2turn8search4  
-11. Pydantic v2. Configuration: `extra='forbid'`, `strict=True` (дата обращения: 05.04.2026). citeturn6search2turn6search6turn6search7  
-12. OpenAlex Help Center. Pricing/usage limits (дата обращения: 05.04.2026). citeturn0search6  
-13. Apache Airflow. Backfill (reprocessing behavior, max_active_runs) (дата обращения: 05.04.2026). citeturn7search0turn7search7  
-14. Prefect. Retries и exponential backoff (дата обращения: 05.04.2026). citeturn7search6turn7search2  
+1. Репозиторий SatoryKono/BioactivityDataAcquisition (GitHub). Конфиги `configs/`, схемы `configs/_schema/`, валидаторы `scripts/schema/`, Pydantic‑схемы `src/bioetl/infrastructure/schemas/` (дата обращения: 05.04.2026).
+2. Crossref. Access and authentication (REST API): mailto, rate limits, concurrency, 429; best practices (дата обращения: 05.04.2026). citeturn0search0
+3. OpenAlex Developers. Authentication & rate limits (дата обращения: 05.04.2026). citeturn0search1
+4. NLM Customer Support Center. Enhanced API key / rate limits (дата обращения: 05.04.2026). citeturn0search2
+5. NCBI E‑utilities. Usage guidelines and API key registration/tool/email policy (дата обращения: 05.04.2026). citeturn0search5
+6. EMBL‑EBI. Proteins API documentation: base URL, 200 requests/second/user, terms/privacy (дата обращения: 05.04.2026). citeturn0search3
+7. UniProt Consortium. The UniProt website API: facilitating programmatic access to protein knowledge. *Nucleic Acids Research*. 2025. DOI: 10.1093/nar/gkaf394. PMID: 40331428. PMCID: PMC12230682 (дата обращения: 05.04.2026). citeturn6search0turn6search1
+8. Semantic Scholar. API overview (включая introductory 1 RPS для key) (дата обращения: 05.04.2026). citeturn7search1
+9. Semantic Scholar Academic Graph API. License Agreement: запрет обхода rate limits, условия приостановки, ограничения на ключ (дата обращения: 05.04.2026). citeturn7search3turn7search5
+10. JSON Schema. Draft 2020‑12 (core/meta); публикация 16.06.2022 (дата обращения: 05.04.2026). citeturn8search0turn8search2turn8search4
+11. Pydantic v2. Configuration: `extra='forbid'`, `strict=True` (дата обращения: 05.04.2026). citeturn6search2turn6search6turn6search7
+12. OpenAlex Help Center. Pricing/usage limits (дата обращения: 05.04.2026). citeturn0search6
+13. Apache Airflow. Backfill (reprocessing behavior, max_active_runs) (дата обращения: 05.04.2026). citeturn7search0turn7search7
+14. Prefect. Retries и exponential backoff (дата обращения: 05.04.2026). citeturn7search6turn7search2
 
 URL (в код‑блоке):
 ```text

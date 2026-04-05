@@ -10,7 +10,7 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 волны; evidence по-прежнему полезен как карта object-family convergence work, а
 не как сигнал срочной текущей регрессии.
 
-**Создано объектов evidence:** 6  
+**Создано объектов evidence:** 6
 **Gate Статус:** PASSED
 
 ## Сводка evidence

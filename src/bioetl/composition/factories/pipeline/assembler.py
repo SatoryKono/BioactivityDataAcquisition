@@ -1,8 +1,7 @@
 """Assemble pipelines and runners from composition-layer factory inputs."""
-
 from __future__ import annotations
 
-from typing import Generic, TypeVar, cast
+from typing import Generic, TypeVar
 
 import pyarrow as pa
 
@@ -11,20 +10,20 @@ from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.base_transformer.types import TransformerDependencyContext
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
     get_data_source_creator,
 )
 from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
+from bioetl.composition.factories.pipeline.assembler_helpers import (
+    build_factory_context,
+    create_runner_from_factory,
+    create_with_services_from_factory,
+)
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
-    _PipelineFactoryContext,
-    build_create_pipeline_with_services_request,
     build_factory_services,
-    build_pipeline_factory_context,
     create_factory_data_source,
-    create_factory_runner,
     create_pipeline_instance_with_services,
     create_transformer_instance,
     extract_entity_type,
@@ -58,29 +57,9 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
 
-def _factory_context(
-    factory: GenericPipelineFactory[TPipeline],
-) -> _PipelineFactoryContext:
-    return build_pipeline_factory_context(
-        pipeline_name=factory.pipeline_name,
-        create_data_source_fn=factory._create_data_source,
-        pipeline_class=cast(type[BasePipeline] | None, factory.pipeline_class),
-        provider=factory.provider,
-        transformer_class=factory.transformer_class,
-        pandera_silver_schema=factory.pandera_silver_schema,
-    )
-
-
-def _extract_entity_type(pipeline_name: str) -> str | None:
-    """Compatibility wrapper for legacy unit tests expecting assembler-local helper."""
-    return extract_entity_type(pipeline_name)
-
-
-def _extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsContext:
-    """Compatibility wrapper for legacy unit tests expecting assembler-local helper."""
-    return extract_dq_configs(yaml_config)
-
-
+_factory_context = build_factory_context
+_extract_entity_type = extract_entity_type
+_extract_dq_configs = extract_dq_configs
 _assemble_runner_impl = assemble_runner_impl
 
 
@@ -204,27 +183,23 @@ class GenericPipelineFactory(Generic[TPipeline]):
         metrics: MetricsPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
-        return cast(
-            TPipeline,
-            create_pipeline_instance_with_services(
-                factory_context=_factory_context(self),
-                request=build_create_pipeline_with_services_request(
-                    run_id,
-                    runtime,
-                    settings,
-                    logger,
-                    manifest_id,
-                    config_hash,
-                    dq_contract_compatibility_hash,
-                    effective_config_artifact_id,
-                    config,
-                    filter_config,
-                    tracer,
-                    dq_monitor,
-                    metrics,
-                    cached_bronze,
-                ),
-            ),
+        return create_with_services_from_factory(
+            self,
+            run_id,
+            runtime,
+            settings,
+            logger,
+            manifest_id,
+            config_hash,
+            dq_contract_compatibility_hash,
+            effective_config_artifact_id,
+            config,
+            filter_config,
+            tracer,
+            dq_monitor,
+            metrics,
+            cached_bronze,
+            create_pipeline_instance_with_services_fn=create_pipeline_instance_with_services,
         )
 
     def create_runner(
@@ -241,23 +216,22 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
-        return create_factory_runner(
-            pipeline_name=self.pipeline_name,
-            silver_schema=self.silver_schema,
-            gold_schema=self.gold_schema,
+        return create_runner_from_factory(
+            self,
             run_id=run_id,
             runtime=runtime,
             settings=settings,
             observability=observability,
+            silver_schema=self.silver_schema,
+            gold_schema=self.gold_schema,
             manifest_id=manifest_id,
             config_hash=config_hash,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
-            create_with_services_fn=self.create_with_services,
-            assemble_runner_fn=assemble_runner,
             filter_config=filter_config,
             config=config,
             cached_bronze=cached_bronze,
+            assemble_runner_fn=assemble_runner,
         )
 
 

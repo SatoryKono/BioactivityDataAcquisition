@@ -21,10 +21,7 @@ INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 # logging.py is allowed since it creates the structlog-based logger implementation
 ALLOWED_FILES: set[str] = {
     "bioetl/infrastructure/observability/logging.py",  # Implements LoggerPort
-    (
-        "bioetl/infrastructure/observability/logging_config.py"  # Central
-        " stdlib/structlog bootstrap resets the root logger intentionally"
-    ),
+    "bioetl/infrastructure/observability/logging_config.py",  # Central stdlib/structlog bootstrap
 }
 
 

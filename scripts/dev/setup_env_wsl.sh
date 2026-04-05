@@ -23,7 +23,7 @@ fi
 mkdir -p "$(dirname "$VENV_DIR")"
 
 if command -v uv >/dev/null 2>&1; then
-    uv venv "$VENV_DIR" --python 3.13
+    uv venv "$VENV_DIR" --python 3.13 --allow-existing
     export VIRTUAL_ENV="$VENV_DIR"
     export PATH="$VENV_DIR/bin:$PATH"
     uv sync --active --extra dev --extra tracing || {
