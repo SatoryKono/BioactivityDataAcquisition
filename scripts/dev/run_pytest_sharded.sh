@@ -34,6 +34,7 @@ SHARD_ORDER=(
     "S7-crosscutting-architecture"
     "S7-crosscutting-architecture-guardrails"
     "S8-crosscutting-governance"
+    "S9-failures"
 )
 
 declare -A SHARD_WAVE=(
@@ -47,6 +48,7 @@ declare -A SHARD_WAVE=(
     ["S7-crosscutting-architecture"]="3"
     ["S7-crosscutting-architecture-guardrails"]="3"
     ["S8-crosscutting-governance"]="3"
+    ["S9-failures"]="4"
 )
 
 declare -A SHARD_PATHS=(
@@ -60,6 +62,7 @@ declare -A SHARD_PATHS=(
     ["S7-crosscutting-architecture"]="tests/architecture"
     ["S7-crosscutting-architecture-guardrails"]="tests/architecture/test_any_budget.py tests/architecture/test_scripts_catalog_governance.py tests/architecture/test_architecture_dependency_docs_drift.py tests/architecture/test_check_doc_links_guardrails.py tests/architecture/test_compatibility_facade_inventory.py tests/architecture/test_docs_version_sync.py tests/architecture/test_documentation_sync.py tests/architecture/test_code_metrics.py tests/architecture/test_legacy_schema_wrappers.py"
     ["S8-crosscutting-governance"]="tests/integration/pipelines tests/integration/chembl tests/contract tests/smoke"
+    ["S9-failures"]="tests/unit/interfaces/cli/test_registry_consistency.py::TestListPipelinesCommandSnapshot::test_list_pipelines_command_output"
 )
 
 declare -A SHARD_WORKERS_OVERRIDE=(
@@ -68,12 +71,15 @@ declare -A SHARD_WORKERS_OVERRIDE=(
     ["S7-crosscutting-architecture"]="2"
     ["S7-crosscutting-architecture-guardrails"]="2"
     ["S8-crosscutting-governance"]="0"
+    ["S9-failures"]="0"
 )
 
 declare -A SHARD_EXTRA_PYTEST_ARGS=(
+    ["S2-comp-iface"]="--ignore=tests/unit/interfaces/cli/test_registry_consistency.py"
     ["S7-crosscutting-architecture"]="--timeout=300 --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py"
     ["S7-crosscutting-architecture-guardrails"]="--timeout=300"
     ["S8-crosscutting-governance"]="--timeout=300"
+    ["S9-failures"]="--timeout=300"
 )
 
 usage() {
@@ -87,7 +93,7 @@ Purpose:
 
 Options:
   --list                    Show shard plan and exit
-  --wave N                  Run only one wave (1, 2, or 3)
+  --wave N                  Run only one wave (1, 2, 3, or 4)
   --shard NAME              Run only the named shard (may be repeated)
   --workers-per-shard N     xdist workers per shard (default: 2)
   --dist MODE               xdist distribution mode (default: loadfile)

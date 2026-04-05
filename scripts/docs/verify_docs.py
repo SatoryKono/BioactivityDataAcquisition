@@ -13,10 +13,10 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 _DIR = Path(__file__).parent
-_VERIFY_SITE_DIR = ".mkdocs-site-verify"
 
 
 def _run_step(label: str, argv: list[str]) -> int:
@@ -29,7 +29,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-links", action="store_true", help="Skip link/spec/config checks")
     parser.add_argument("--skip-drift", action="store_true", help="Skip drift checks")
-    parser.add_argument("--skip-docstrings", action="store_true", help="Skip docstring inventory checks")
+    parser.add_argument(
+        "--skip-docstrings",
+        action="store_true",
+        help="Skip docstring inventory checks",
+    )
     parser.add_argument("--skip-build", action="store_true", help="Skip strict MkDocs build")
     args = parser.parse_args()
 
@@ -70,25 +74,30 @@ def main() -> int:
                 ],
             )
         )
-    if not args.skip_build:
-        steps.append(
-            (
-                "strict-build",
-                [
-                    sys.executable,
-                    str(_DIR / "run_mkdocs_build.py"),
-                    "--strict",
-                    "--clean",
-                    "--site-dir",
-                    _VERIFY_SITE_DIR,
-                ],
-            )
-        )
 
     for label, argv in steps:
         exit_code = _run_step(label, argv)
         if exit_code != 0:
             return exit_code
+
+    if not args.skip_build:
+        with tempfile.TemporaryDirectory(prefix="bioetl-mkdocs-site-") as site_dir:
+            exit_code = _run_step(
+                "strict-build",
+                [
+                    sys.executable,
+                    "-m",
+                    "mkdocs",
+                    "build",
+                    "--strict",
+                    "--clean",
+                    "--site-dir",
+                    site_dir,
+                ],
+            )
+            if exit_code != 0:
+                return exit_code
+
     return 0
 
 

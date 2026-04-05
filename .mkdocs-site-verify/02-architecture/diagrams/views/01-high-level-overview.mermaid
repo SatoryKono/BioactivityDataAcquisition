@@ -1,0 +1,72 @@
+%% View: Overview | Parent: 01-high-level-full.mermaid
+%% @uniform width=140 height=56 max_title_len=8 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N13, N14, N15
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N1["Executor"]
+        N3["Runner"]
+        N4["Trans"]
+        N8["Boot"]
+        N11["Sources"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N10["Adapters"]
+        N5["Bronze"]
+        N6["Silver"]
+        N7["Gold"]
+        N13["A1"]
+        N14["A2"]
+        N15["A3"]
+        N2["Storage"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        N9["Factory"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        N12["CLI"]
+    end
+
+    N11 --> N10
+    N12 --> N8
+    N8 --> N9
+    N9 --> N3
+    N3 --> N1
+    N1 --> N4
+    N4 --> N10
+    N2 --> N5
+    N2 --> N6
+    N2 --> N7
+    N1 --> N2
+
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    %% linkStyle: data 0,6-10 | orchestration 1,3-5 | generic 2
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#1E293B,stroke-width:2px
+    linkStyle 1 stroke:#16a34a,stroke-width:2px
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#16a34a,stroke-width:2px
+    linkStyle 4 stroke:#16a34a,stroke-width:2px
+    linkStyle 5 stroke:#16a34a,stroke-width:2px
+    linkStyle 6 stroke:#1E293B,stroke-width:2px
+    linkStyle 7 stroke:#1E293B,stroke-width:2px
+    linkStyle 8 stroke:#1E293B,stroke-width:2px
+    linkStyle 9 stroke:#1E293B,stroke-width:2px
+    linkStyle 10 stroke:#1E293B,stroke-width:2px

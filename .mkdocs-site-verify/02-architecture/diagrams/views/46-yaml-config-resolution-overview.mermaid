@@ -1,0 +1,17 @@
+%% View: Overview | Parent: 46-yaml-config-resolution-full.mermaid
+%% @uniform width=180 height=56 max_title_len=18 max_desc_lines=1
+flowchart LR
+    YAML["Base / provider / entity YAML"] --> LOAD["Config loaders"]
+    LOAD --> NORM["Normalization"]
+    NORM --> VALID["Pydantic validation"]
+    VALID --> DOMAIN["Frozen domain config"]
+    LEGACY["Legacy-flat source config"] -.-> NORM
+
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
+    class YAML,LEGACY storage;
+    class LOAD infra;
+    class NORM,VALID process;
+    class DOMAIN port;

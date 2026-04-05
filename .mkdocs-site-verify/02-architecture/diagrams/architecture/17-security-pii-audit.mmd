@@ -1,0 +1,90 @@
+%% BioETL — Security, PII Hashing, and Audit Trail
+%% Shows how PII is handled and audit trail is maintained.
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   16
+%% @allow-polyline-routing
+%% @uniform width=312 height=216 max_title_len=31 max_desc_lines=10
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+    subgraph Ports["Domain Ports"]
+        PHP["PiiHasherPort<br/>(Protocol)<br/>--------<br/>+ hash(value: str) -> str"]:::size-md
+        AP["AuditPort<br/>(Protocol)<br/>--------<br/>+ log_write(entry)<br/>+ get_entries(filters)"]:::size-md
+    end
+
+    subgraph DomainTypes["Domain Types"]
+        AE["AuditEntry (frozen)<br/>run_id + timestamp + layer<br/>table + operation<br/>records_count + metadata"]:::size-md
+        AL["AuditLayer<br/>--------<br/>BRONZE / SILVER / GOLD"]:::size-sm
+        AO["AuditOperation<br/>--------<br/>WRITE / MERGE / APPEND<br/>DELETE / OVERWRITE"]:::size-sm
+    end
+
+    subgraph PIIFlow["PII Hashing Flow"]
+        RAW_PII["Raw PII Data<br/>(names, emails, affiliations)"]:::size-md
+        HASH_FN["SHA256(lowercase(value) + salt)"]:::size-sm
+        RAW_PII --> HASH_FN --> HASHED
+    end
+
+    subgraph InfraPII["Infrastructure: PII Hasher"]
+        SPH["Sha256PiiHasher<br/>--------<br/>+ hash(value) -> str"]:::size-md
+        SC["SaltConfig (frozen)<br/>current_salt + next_salt<br/>rotation_active"]:::size-md
+    end
+
+    subgraph InfraAudit["Infrastructure: Audit"]
+        FAA["FileAuditAdapter<br/>--------<br/>base_path, logger<br/>+ log_write(entry)<br/>+ get_entries(filters)"]:::size-md
+        JSONL["audit_YYYY-MM-DD.jsonl<br/>(daily append-only file)"]:::size-sm
+    end
+
+    subgraph Usage["Usage in Transformers"]
+        BT["BaseTransformer<br/>--------<br/>+ hash_pii_value()<br/>+ hash_pii_list()"]:::size-md
+    end
+
+    subgraph StorageAudit["Storage Audit Integration"]
+        GW["GoldWriter<br/>--------<br/>audit: AuditPort<br/>logs writes"]:::size-md
+    end
+
+    %% Port implementations
+    PHP -.-> SPH
+    AP -.-> FAA
+
+    %% PII composition
+    SPH --> SC
+
+    %% Audit storage
+    FAA --> JSONL
+
+    %% Usage
+    BT --> PHP
+    BW & SW & GW --> AP
+
+    %% Domain types
+    FAA --> AE
+    AE --> AL
+    AE --> AO
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef domain fill:#f5f3ff,stroke:#7c3aed
+    classDef pii fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef audit fill:#eff6ff,stroke:#2563eb
+    classDef storage fill:#fff7ed,stroke:#f59e0b
+    classDef usage fill:#f5f3ff,stroke:#7c3aed
+
+    class PHP,AP port
+    class AE,AL,AO domain
+    class RAW_PII,HASH_FN,HASHED,SPH,SC pii
+    class FAA,JSONL audit
+    class BW,SW,GW storage
+    class BT usage

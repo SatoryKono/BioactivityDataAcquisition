@@ -1,0 +1,37 @@
+%% Title: Package Family: interfaces/http
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/interfaces/http; modules: health_server_routing_mixin, health_server_http_mixin, health_server, health_server_state_mixin, types.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   8
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace health_server_routing_mixin {
+        class HealthServerRoutingMixin
+        class _HealthResponseSupport
+        class _HealthStateSupport
+    }
+
+    namespace health_server_http_mixin {
+        class HealthServerHTTPMixin
+        class _RouteRequestSupport
+    }
+
+    namespace health_server {
+        class HealthServer
+    }
+
+    namespace health_server_state_mixin {
+        class HealthServerStateMixin
+    }
+
+    namespace types {
+        class HealthResponse
+    }
+
+    HealthServerHTTPMixin <|-- HealthServer
+    HealthServerRoutingMixin <|-- HealthServer
+    HealthServerStateMixin <|-- HealthServer

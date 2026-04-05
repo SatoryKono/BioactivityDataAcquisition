@@ -1,0 +1,128 @@
+%% Title: Quarantine Record State Machine
+%% Covers: RULES.md §2.3 (Quarantine), §3.1 (Error Classification)
+%% Updated: 2026-02-17
+%% Components: QuarantineEntry aggregate, QuarantineManager, QuarantinePort
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    stateDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   6
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+stateDiagram-v2
+    [*] --> NEW: DQ validation failure
+
+    state NEW {
+        [*] --> AwaitingTriage
+        AwaitingTriage: 📋 Pending review
+        AwaitingTriage: Weekly triage process
+        AwaitingTriage: bioetl quarantine inspect
+
+        state "Record Details" as ND {
+            ND1: ingestion_ts
+            ND2: pipeline (str)
+            ND3: error_code (str)
+            ND4: error_message (str)
+            ND5: payload (str, truncated 64KB)
+            ND6: bronze_batch_id (UUID)
+            ND7: bronze_file_uri (str)
+        }
+    }
+
+    NEW --> IGNORED: Triage decision\n(data issue, not fixable)
+    NEW --> REPROCESSED: Fix applied,\nreplay successful
+
+    state IGNORED {
+        [*] --> Archived
+        Archived: 📁 No further action
+        Archived: Retained for audit trail
+        Archived: Can be reviewed later
+
+        state "Ignore Reasons" as IR {
+            IR1: Invalid source data
+            IR2: Deprecated entity
+            IR3: Known API issue
+            IR4: Duplicate record
+        }
+    }
+
+    state REPROCESSED {
+        [*] --> FixApplied
+        FixApplied: ✅ Successfully replayed
+        FixApplied: bioetl quarantine replay
+        FixApplied: Record now in Silver
+
+        state "Reprocess Steps" as RS {
+            RS1: 1. Identify root cause
+            RS2: 2. Fix transformer/schema
+            RS3: 3. Replay from Bronze
+            RS4: 4. Verify in Silver
+        }
+    }
+
+    IGNORED --> PURGED: After 30 days\n(local retention policy)
+    REPROCESSED --> PURGED: After 30 days\n(local retention policy)
+
+    state PURGED {
+        [*] --> Deleted
+        Deleted: 🗑️ Permanently removed
+        Deleted: No recovery possible
+    }
+
+    PURGED ==> [*]
+
+    note right of NEW
+        Quarantine Record Structure
+        ━━━━━━━━━━━━━━━━━━━━━━━━
+        • Retention: 30 days
+        • Format: Parquet
+        • Path: quarantine/{pipeline}/{date}/
+
+        Linkage to Bronze required
+        for replay capability
+    end note
+
+    note left of IGNORED
+        Triage Workflow
+        ━━━━━━━━━━━━━━━━━━━━━━━━
+        1. bioetl quarantine inspect
+        2. Review error patterns
+        3. Decide IGNORE or FIX
+        4. Document decision
+
+        Weekly review recommended
+    end note
+
+    note right of REPROCESSED
+        Replay Process
+        ━━━━━━━━━━━━━━━━━━━━━━━━
+        1. Load original Bronze record
+        2. Apply updated transformer
+        3. Validate with new schema
+        4. Write to Silver if pass
+        5. Mark as REPROCESSED
+    end note
+
+    %% Error codes section
+
+    state ErrorCodes {
+        state "Common Error Types" as CET {
+            E1: SCHEMA_MISMATCH
+            E2: MISSING_REQUIRED_FIELD
+            E3: INVALID_VALUE
+            E4: INVALID_SMILES
+            E5: TYPE_COERCION_FAILED
+            E6: CONSTRAINT_VIOLATION
+        }
+    }
+
+    %% Statistics and metrics section
+
+    state QuarantineStats {
+        state "Metrics Tracked" as MT {
+            M1: quarantine_records_total
+            M2: quarantine_by_error_code
+            M3: quarantine_age_days_histogram
+            M4: reprocess_success_rate
+        }
+    }
