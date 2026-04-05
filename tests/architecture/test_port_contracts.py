@@ -365,7 +365,16 @@ class TestCheckpointPortContract:
 class TestQuarantinePortContract:
     """Tests for QuarantinePort specific contracts."""
 
-    REQUIRED_QUARANTINE_METHODS = ["write", "write_many", "inspect", "get_stats"]
+    REQUIRED_QUARANTINE_METHODS = [
+        "write",
+        "write_many",
+        "inspect",
+        "get_stats",
+        "list_filtered_records",
+        "get_filtered_record",
+        "get_filtered_stats",
+        "get_filtered_filter_options",
+    ]
 
     @pytest.mark.parametrize("method_name", REQUIRED_QUARANTINE_METHODS)
     def test_quarantine_port_has_methods(self, method_name: str) -> None:

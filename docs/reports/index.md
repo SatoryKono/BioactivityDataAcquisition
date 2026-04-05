@@ -20,11 +20,15 @@ Canonical sources:
   rebaseline note when later waves change their live interpretation.
 - top-level `reports/` remains the working area for
   generated and iteration-heavy outputs before curation.
+- `docs/reports/` is intentionally narrower than `reports/`: it should act as a
+  curated map, not as a second copy of raw working output families.
 
 ## Main Entry Points
 
 - this index page — short orientation note for the repo-only reports surface
 - [`evidence/INDEX.md`](evidence/INDEX.md) — curated evidence, synthesis, decisions, risks, and roadmaps
+- [`../../reports/README.md`](../../reports/README.md) — working-output taxonomy,
+  retention, and cleanup rules for repo-root `reports/`
 - [`docs/plans/README.md`](../plans/README.md) — active planning artifacts
 - [`docs/99-archive/README.md`](../99-archive/README.md) — archive index for historical/superseded plans and baselines
 
@@ -39,6 +43,9 @@ Canonical sources:
 - Start here if you need the current reports-surface map.
 - Jump to `evidence/INDEX.md` if you need research traceability or decision
   support artifacts.
+- Jump to `reports/README.md` if you need to decide whether a working report
+  should stay in `reports/{LLM}/`, be consolidated into `reports/plans/` or a
+  shared artefact family, or be staged in `reports/trash/`.
 - Jump to `docs/plans/README.md` if you need active execution/backlog context.
 - Jump to `docs/99-archive/README.md` only for historical context.
 

@@ -14,6 +14,11 @@ remain useful for traceability, but they are not normative for current
 project behavior. Treat `docs/99-archive/README.md` as a repository path,
 not as a published MkDocs page.
 
+Working plans under `docs/plans/` are repo-only materials, and generated
+artifacts under `docs/site/` and `docs/exports/` are non-normative support
+surfaces. They may be useful during local workflows, but they do not replace
+the canonical docs published from `docs/00-05`.
+
 Then use section entry points as needed:
 
 - [Project Overview](00-project/index.md)

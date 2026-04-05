@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+if command -v readlink >/dev/null 2>&1; then
+    RESOLVED_SCRIPT_PATH="$(readlink -f "$SCRIPT_PATH" 2>/dev/null || true)"
+    if [[ -n "$RESOLVED_SCRIPT_PATH" ]]; then
+        SCRIPT_PATH="$RESOLVED_SCRIPT_PATH"
+    fi
+fi
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
@@ -10,12 +17,10 @@ DEFAULT_WORKERS_PER_SHARD=2
 DEFAULT_DIST_MODE="loadfile"
 DEFAULT_COVERAGE_DIR="$REPO_ROOT/.coverage-sharded"
 DEFAULT_PYTEST_CACHE_DIR="$REPO_ROOT/.pytest_cache"
-DEFAULT_PYTEST_CACHE_DIR="$REPO_ROOT/.pytest_cache"
 
 WORKERS_PER_SHARD="$DEFAULT_WORKERS_PER_SHARD"
 DIST_MODE="$DEFAULT_DIST_MODE"
 COVERAGE_DIR="$DEFAULT_COVERAGE_DIR"
-PYTEST_CACHE_DIR="$DEFAULT_PYTEST_CACHE_DIR"
 PYTEST_CACHE_DIR="$DEFAULT_PYTEST_CACHE_DIR"
 STREAM_LOGS=0
 TAIL_LOGS=0
@@ -549,7 +554,6 @@ main() {
 
     cleanup_coverage_dir
     mkdir -p "$COVERAGE_DIR"
-    mkdir -p "$PYTEST_CACHE_DIR"
     mkdir -p "$PYTEST_CACHE_DIR"
 
     local current_wave=""

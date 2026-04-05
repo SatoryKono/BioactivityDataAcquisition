@@ -29,6 +29,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
+    from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.composition.bootstrap.cli.health import HealthServerDependencies
 
 
@@ -44,6 +45,13 @@ def get_health_server_dependencies() -> HealthServerDependencies:
     from bioetl.composition.services_api import (
         get_health_server_dependencies as _impl,
     )
+
+    return _impl()
+
+
+def get_quarantine_service() -> QuarantineService:
+    """Load quarantine service through composition on demand."""
+    from bioetl.composition.services_api import get_quarantine_service as _impl
 
     return _impl()
 
@@ -112,19 +120,29 @@ async def _run_health_server(host: str, port: int) -> None:
     from bioetl.interfaces.http.health_server import HealthServer
 
     deps = get_health_server_dependencies()
+    quarantine_service: QuarantineService | None = None
+    try:
+        quarantine_service = get_quarantine_service()
+    except CLI_ENTRYPOINT_TYPED_ERRORS:
+        # Why: Health probes must stay available even when quarantine storage
+        # setup fails; explorer endpoints remain disabled in that case.
+        quarantine_service = None
     server = HealthServer(
         host=host,
         port=port,
         health_monitor=deps.health_monitor,
+        quarantine_service=quarantine_service,
     )
-    await server.start()
     try:
+        await server.start()
         while True:
             await asyncio.sleep(1)
     except asyncio.CancelledError:
         pass  # Why: shutdown loop exit; CancelledError is the normal stop signal
     finally:
         await server.stop()
+        if quarantine_service is not None:
+            await quarantine_service.aclose()
         click.echo("\nHealth server stopped.")
 
 
@@ -286,6 +304,10 @@ def health_server_command(host: str, port: int) -> None:
     - GET /health/live    - Kubernetes liveness probe
     - GET /health/ready   - Kubernetes readiness probe
     - GET /health/providers - Detailed provider status
+    - GET /ops/quarantine/filtered-records - Silver reject list (read-only)
+    - GET /ops/quarantine/filtered-record/{payload_hash} - Silver reject detail
+    - GET /ops/quarantine/filtered-stats - Silver reject aggregates
+    - GET /ops/quarantine/filter-options - Explorer variable options
 
     Example:
         bioetl health server --port 8081

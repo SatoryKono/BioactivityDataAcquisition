@@ -36,6 +36,18 @@ def mock_quarantine_port():
     port = MagicMock()
     port.inspect = AsyncMock(return_value=[])
     port.get_stats = AsyncMock(return_value={})
+    port.list_filtered_records = AsyncMock(return_value={"items": [], "total": 0})
+    port.get_filtered_record = AsyncMock(return_value=None)
+    port.get_filtered_stats = AsyncMock(return_value={"total": 0})
+    port.get_filtered_filter_options = AsyncMock(
+        return_value={
+            "pipelines": [],
+            "run_types": [],
+            "reason_codes": [],
+            "fields": [],
+            "run_ids": [],
+        }
+    )
     port.aclose = AsyncMock()
     # New synchronous methods
     port.replay = MagicMock(return_value=iter([]))
@@ -160,6 +172,135 @@ class TestQuarantineServiceGetStats:
         assert result["total_count"] == 100
         assert result["by_error_code"]["DQ_MISSING_FIELD"] == 60
         mock_quarantine_port.get_stats.assert_called_once_with("pipeline1", None)
+
+
+@pytest.mark.unit
+class TestQuarantineServiceFilteredExplorer:
+    """Test record-level explorer APIs in QuarantineService."""
+
+    @pytest.mark.asyncio
+    async def test_list_filtered_records(
+        self, quarantine_service, mock_quarantine_port
+    ):
+        """Service should delegate filtered list query to the port."""
+        mock_quarantine_port.list_filtered_records.return_value = {
+            "items": [{"payload_hash": "hash-1"}],
+            "total": 1,
+            "limit": 50,
+            "offset": 0,
+        }
+
+        result = await quarantine_service.list_filtered_records(
+            pipeline="pipeline1",
+            run_type="incremental",
+            reason_code="missing_required_field",
+            field="canonical_smiles",
+            run_id="run-1",
+            payload_hash="hash-1",
+            from_ts="2026-04-01T00:00:00Z",
+            to_ts="2026-04-02T00:00:00Z",
+            limit=25,
+            offset=10,
+            sort="ingestion_ts_desc",
+        )
+
+        assert result["total"] == 1
+        mock_quarantine_port.list_filtered_records.assert_called_once_with(
+            pipeline="pipeline1",
+            run_type="incremental",
+            reason_code="missing_required_field",
+            field="canonical_smiles",
+            run_id="run-1",
+            payload_hash="hash-1",
+            from_ts="2026-04-01T00:00:00Z",
+            to_ts="2026-04-02T00:00:00Z",
+            limit=25,
+            offset=10,
+            sort="ingestion_ts_desc",
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_filtered_record_not_found(
+        self, quarantine_service, mock_quarantine_port
+    ):
+        """Detail lookup should return None when no record exists."""
+        mock_quarantine_port.get_filtered_record.return_value = None
+
+        result = await quarantine_service.get_filtered_record(
+            payload_hash="missing",
+            pipeline="pipeline1",
+        )
+
+        assert result is None
+        mock_quarantine_port.get_filtered_record.assert_called_once_with(
+            payload_hash="missing",
+            pipeline="pipeline1",
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_filtered_stats(self, quarantine_service, mock_quarantine_port):
+        """Service should delegate filtered stats query to the port."""
+        mock_quarantine_port.get_filtered_stats.return_value = {
+            "total": 12,
+            "reject_ratio": 0.1,
+        }
+
+        result = await quarantine_service.get_filtered_stats(
+            pipeline="pipeline1",
+            run_type="incremental",
+            reason_code="missing_required_field",
+            field="canonical_smiles",
+            run_id="run-1",
+            payload_hash=None,
+            from_ts=None,
+            to_ts=None,
+        )
+
+        assert result["total"] == 12
+        mock_quarantine_port.get_filtered_stats.assert_called_once_with(
+            pipeline="pipeline1",
+            run_type="incremental",
+            reason_code="missing_required_field",
+            field="canonical_smiles",
+            run_id="run-1",
+            payload_hash=None,
+            from_ts=None,
+            to_ts=None,
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_filtered_filter_options(
+        self, quarantine_service, mock_quarantine_port
+    ):
+        """Service should return scoped filter options from the port."""
+        mock_quarantine_port.get_filtered_filter_options.return_value = {
+            "pipelines": ["pipeline1"],
+            "run_types": ["incremental"],
+            "reason_codes": ["missing_required_field"],
+            "fields": ["canonical_smiles"],
+            "run_ids": ["run-1"],
+        }
+
+        result = await quarantine_service.get_filtered_filter_options(
+            pipeline="pipeline1",
+            run_type=None,
+            reason_code=None,
+            field=None,
+            run_id=None,
+            from_ts="2026-04-01T00:00:00Z",
+            to_ts="2026-04-02T00:00:00Z",
+        )
+
+        assert result["run_types"] == ["incremental"]
+        mock_quarantine_port.get_filtered_filter_options.assert_called_once_with(
+            pipeline="pipeline1",
+            run_type=None,
+            reason_code=None,
+            field=None,
+            run_id=None,
+            from_ts="2026-04-01T00:00:00Z",
+            to_ts="2026-04-02T00:00:00Z",
+        )
 
 
 @pytest.mark.unit

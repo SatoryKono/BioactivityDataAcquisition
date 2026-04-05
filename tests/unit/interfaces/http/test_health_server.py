@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -515,6 +515,190 @@ class TestHealthServerHTTP:
             writer.close()
             await writer.wait_closed()
 
+
+class TestHealthServerQuarantineExplorer:
+    """Tests for /ops/quarantine/* explorer endpoints."""
+
+    @pytest.fixture
+    async def running_server_without_quarantine(self) -> HealthServer:
+        """Start server without quarantine service."""
+        server = HealthServer(host="127.0.0.1", port=0)
+        await server.start()
+        yield server
+        await server.stop()
+
+    @pytest.fixture
+    async def running_server_with_quarantine(
+        self,
+    ) -> tuple[HealthServer, MagicMock]:
+        """Start server with mocked quarantine service."""
+        service = MagicMock()
+        service.list_filtered_records = AsyncMock(
+            return_value={"items": [], "total": 0, "limit": 50, "offset": 0}
+        )
+        service.get_filtered_stats = AsyncMock(
+            return_value={
+                "total": 0,
+                "by_reason_code": [],
+                "by_field": [],
+                "by_reason_signature": [],
+                "bronze_records": 0,
+                "reject_ratio": 0.0,
+            }
+        )
+        service.get_filtered_filter_options = AsyncMock(
+            return_value={
+                "pipelines": ["chembl_activity"],
+                "run_types": ["incremental"],
+                "reason_codes": ["missing_required_field"],
+                "fields": ["canonical_smiles"],
+                "run_ids": ["run-1"],
+            }
+        )
+        service.get_filtered_record = AsyncMock(return_value=None)
+
+        server = HealthServer(
+            host="127.0.0.1",
+            port=0,
+            quarantine_service=service,
+        )
+        await server.start()
+        yield server, service
+        await server.stop()
+
+    @staticmethod
+    def _get_server_port(server: HealthServer) -> int:
+        """Get the actual port of the running server."""
+        assert server._server is not None
+        sockets = server._server.sockets
+        assert sockets is not None
+        return int(sockets[0].getsockname()[1])
+
+    async def _send_request(
+        self, port: int, method: str, path: str
+    ) -> tuple[int, str, str]:
+        """Send request and return status code, status text, and body."""
+        reader, writer = await asyncio.open_connection("127.0.0.1", port)
+        try:
+            request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\n\r\n"
+            writer.write(request.encode())
+            await writer.drain()
+
+            response_line = await reader.readline()
+            response_str = response_line.decode("utf-8").strip()
+            parts = response_str.split(" ", 2)
+            status_code = int(parts[1])
+            status_text = parts[2] if len(parts) > 2 else ""
+
+            headers = {}
+            while True:
+                line = await reader.readline()
+                if line in (b"\r\n", b"\n", b""):
+                    break
+                header_line = line.decode("utf-8").strip()
+                if ":" in header_line:
+                    key, value = header_line.split(":", 1)
+                    headers[key.strip().lower()] = value.strip()
+
+            content_length = int(headers.get("content-length", 0))
+            body = await reader.read(content_length)
+            return status_code, status_text, body.decode("utf-8")
+        finally:
+            writer.close()
+            await writer.wait_closed()
+
+    @pytest.mark.asyncio
+    async def test_records_endpoint_requires_quarantine_service(
+        self,
+        running_server_without_quarantine: HealthServer,
+    ) -> None:
+        """Explorer endpoints should return 503 when service is not configured."""
+        port = self._get_server_port(running_server_without_quarantine)
+        status_code, status_text, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/quarantine/filtered-records?pipeline=chembl_activity",
+        )
+
+        assert status_code == 503
+        assert status_text == "Quarantine explorer unavailable"
+        assert "Quarantine explorer unavailable" in body
+
+    @pytest.mark.asyncio
+    async def test_records_endpoint_requires_pipeline(
+        self,
+        running_server_with_quarantine: tuple[HealthServer, MagicMock],
+    ) -> None:
+        """List endpoint should enforce required pipeline query parameter."""
+        server, _ = running_server_with_quarantine
+        port = self._get_server_port(server)
+        status_code, status_text, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/quarantine/filtered-records",
+        )
+
+        assert status_code == 400
+        assert status_text == "Missing required query parameter: pipeline"
+        assert "pipeline" in body
+
+    @pytest.mark.asyncio
+    async def test_records_endpoint_delegates_to_quarantine_service(
+        self,
+        running_server_with_quarantine: tuple[HealthServer, MagicMock],
+    ) -> None:
+        """List endpoint should pass query filters to service call."""
+        server, service = running_server_with_quarantine
+        port = self._get_server_port(server)
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/quarantine/filtered-records?"
+            "pipeline=chembl_activity&run_type=incremental&reason_code=missing_required_field&"
+            "field=canonical_smiles&run_id=run-1&payload_hash=sha256%3Atest&"
+            "from=2026-04-01T00%3A00%3A00Z&to=2026-04-02T00%3A00%3A00Z&"
+            "limit=25&offset=5&sort=ingestion_ts_desc",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["total"] == 0
+        service.list_filtered_records.assert_awaited_once_with(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            reason_code="missing_required_field",
+            field="canonical_smiles",
+            run_id="run-1",
+            payload_hash="sha256:test",
+            from_ts="2026-04-01T00:00:00Z",
+            to_ts="2026-04-02T00:00:00Z",
+            limit=25,
+            offset=5,
+            sort="ingestion_ts_desc",
+        )
+
+    @pytest.mark.asyncio
+    async def test_record_detail_endpoint_returns_404(
+        self,
+        running_server_with_quarantine: tuple[HealthServer, MagicMock],
+    ) -> None:
+        """Detail endpoint should return 404 when hash is not found."""
+        server, service = running_server_with_quarantine
+        service.get_filtered_record = AsyncMock(return_value=None)
+        port = self._get_server_port(server)
+
+        status_code, status_text, _ = await self._send_request(
+            port,
+            "GET",
+            "/ops/quarantine/filtered-record/sha256%3Amissing?pipeline=chembl_activity",
+        )
+
+        assert status_code == 404
+        assert status_text == "Not Found"
+        service.get_filtered_record.assert_awaited_once_with(
+            payload_hash="sha256:missing",
+            pipeline="chembl_activity",
+        )
 
 class TestHealthServerWithMonitor:
     """Tests for health server with health monitor configured."""

@@ -549,10 +549,10 @@ Access the docs at `http://localhost:8000`.
 .
 ├── configs/                  # YAML pipeline configurations
 ├── docs/                     # Documentation (Architecture, Guides, Runbooks)
-│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (43 decisions)
+│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (45 decisions)
 │   ├── 00-project/
 │   │   ├── glossary.md       # Ubiquitous Language glossary
-│   │   └── RULES.md          # Project governance (v5.24)
+│   │   └── RULES.md          # Project governance (v6.1.0)
 │   └── ...
 ├── src/
 │   └── bioetl/
@@ -564,7 +564,7 @@ Access the docs at `http://localhost:8000`.
 │       │   ├── schemas/      # Pydantic/Pandera validation schemas
 │       │   └── exceptions/   # Classified exceptions (Critical/Recoverable/DQ)
 │       ├── application/      # Pipeline orchestration & services
-│       │   ├── core/         # PipelineRunner, Executor, BaseTransformer
+│       │   ├── core/         # Runner, batch execution, lifecycle, preflight/postrun, transformer runtime
 │       │   ├── pipelines/    # ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, Semantic Scholar (+ common utilities)
 │       │   └── services/     # Application services (lifecycle, vacuum, cleanup)
 │       ├── composition/      # Composition Root (public seams, bootstrap, factories)
@@ -586,7 +586,8 @@ Access the docs at `http://localhost:8000`.
 │       │   └── observability/ # Metrics, tracing, logging
 │       └── interfaces/       # External interfaces
 │           ├── cli/          # Click CLI commands
-│           └── orchestration/ # Reserved (empty; signal handlers removed 2025-12-31, shutdown logic in application/core/shutdown.py)
+│           ├── http/         # HTTP health server and request/response types
+│           └── orchestration/ # Reserved (empty; signal handlers removed 2025-12-31, shutdown logic in application/core/lifecycle/shutdown.py)
 ├── tests/                    # Unit, Integration, Architecture & E2E tests
 ├── scripts/                  # Utility scripts (lint_terminology.py, etc.)
 ├── Makefile                  # Automation commands

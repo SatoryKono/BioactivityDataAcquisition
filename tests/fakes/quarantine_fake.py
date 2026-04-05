@@ -123,6 +123,115 @@ class InMemoryQuarantine:
             },
         }
 
+    async def list_filtered_records(
+        self,
+        *,
+        pipeline: str,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        payload_hash: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+        sort: str = "ingestion_ts_desc",
+    ) -> dict[str, Any]:
+        """Return a minimal filtered-record list for tests."""
+        records = [
+            record
+            for record in self._records.get(pipeline, [])
+            if record.get("error_code") == "FILTERED_OUT_SILVER"
+        ]
+        if run_id:
+            records = [record for record in records if record.get("run_id") == run_id]
+        if payload_hash:
+            records = [
+                record
+                for record in records
+                if record.get("payload_hash") == payload_hash
+            ]
+        total = len(records)
+        return {
+            "items": records[offset : offset + limit],
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
+
+    async def get_filtered_record(
+        self,
+        *,
+        payload_hash: str,
+        pipeline: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Return one filtered record by payload hash."""
+        pipelines = [pipeline] if pipeline else list(self._records.keys())
+        for pipeline_name in pipelines:
+            for record in self._records.get(pipeline_name, []):
+                if (
+                    record.get("error_code") == "FILTERED_OUT_SILVER"
+                    and record.get("payload_hash") == payload_hash
+                ):
+                    return dict(record)
+        return None
+
+    async def get_filtered_stats(
+        self,
+        *,
+        pipeline: str,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        payload_hash: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+    ) -> dict[str, Any]:
+        """Return minimal aggregate stats for filtered records."""
+        records = await self.list_filtered_records(
+            pipeline=pipeline,
+            run_type=run_type,
+            reason_code=reason_code,
+            field=field,
+            run_id=run_id,
+            payload_hash=payload_hash,
+            from_ts=from_ts,
+            to_ts=to_ts,
+            limit=500,
+            offset=0,
+        )
+        total = int(records.get("total", 0))
+        return {
+            "total": total,
+            "by_reason_code": [],
+            "by_field": [],
+            "by_reason_signature": [],
+            "bronze_records": 0,
+            "reject_ratio": 0.0,
+        }
+
+    async def get_filtered_filter_options(
+        self,
+        *,
+        pipeline: str,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+    ) -> dict[str, Any]:
+        """Return empty filter options by default."""
+        return {
+            "pipelines": [pipeline],
+            "run_types": [],
+            "reason_codes": [],
+            "fields": [],
+            "run_ids": [],
+        }
+
     async def aclose(self) -> None:
         """Close quarantine storage (no-op for in-memory)."""
         pass

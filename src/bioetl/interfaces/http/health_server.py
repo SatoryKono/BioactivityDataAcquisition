@@ -17,6 +17,7 @@ from bioetl.interfaces.http.health_server_state_mixin import HealthServerStateMi
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
+    from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.domain.ports import HealthMonitorPort, LoggerPort
 
 
@@ -32,6 +33,7 @@ class HealthServer(
         host: str = "127.0.0.1",
         port: int = 8081,
         health_monitor: HealthMonitorPort | None = None,
+        quarantine_service: QuarantineService | None = None,
         logger: LoggerPort | None = None,
     ) -> None:
         """Initialize health server.
@@ -42,12 +44,15 @@ class HealthServer(
             health_monitor: Optional monitor providing provider health states for
                 /health/ready and /health/providers endpoints. Endpoints report
                 healthy with no provider data when None.
+            quarantine_service: Optional read-only service for
+                /ops/quarantine/* explorer endpoints.
             logger: Optional LoggerPort for structured server event logging.
                 Server events are silently dropped when None.
         """
         self.host = host
         self.port = port
         self._health_monitor = health_monitor
+        self._quarantine_service = quarantine_service
         self._logger = logger
         self._server: asyncio.Server | None = None
         self._start_time: float | None = None
@@ -116,6 +121,7 @@ async def run_health_server(
     host: str = "0.0.0.0",
     port: int = 8081,
     health_monitor: HealthMonitorPort | None = None,
+    quarantine_service: QuarantineService | None = None,
     logger: LoggerPort | None = None,
 ) -> None:
     """Run the health server until interrupted.
@@ -128,12 +134,14 @@ async def run_health_server(
         port: TCP port to listen on. Defaults to 8081.
         health_monitor: Optional monitor providing provider health states.
             Health endpoints report no provider data when None.
+        quarantine_service: Optional read-only quarantine explorer service.
         logger: Optional LoggerPort for structured server event logging.
     """
     server = HealthServer(
         host=host,
         port=port,
         health_monitor=health_monitor,
+        quarantine_service=quarantine_service,
         logger=logger,
     )
     await server.start()

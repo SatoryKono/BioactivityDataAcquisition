@@ -3,6 +3,11 @@ set -euo pipefail
 
 resolve_docker_bin() {
   local candidates=()
+  local docker_desktop_default="/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe"
+
+  if [[ -x "${docker_desktop_default}" ]]; then
+    candidates+=("${docker_desktop_default}")
+  fi
 
   if command -v docker.exe >/dev/null 2>&1; then
     candidates+=("$(command -v docker.exe)")
