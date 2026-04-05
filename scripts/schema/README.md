@@ -28,12 +28,12 @@ python -m scripts.schema <command> [args...]
 | `generate-artifacts`         | `scripts/schema/generate_schema_artifacts.py`                          | Generate schema artifacts                                                              |
 | `generate-pubtype`           | `scripts/schema/generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts                                     |
 | `generate-contracts`         | `scripts/schema/generate_contracts.py`                                 | Generate contracts                                                                     |
-| `generate-config-matrix`     | `scripts/schema/generate_config_matrix.py`                             | Compatibility wrapper for the legacy entity/composite config comparison matrix         |
+| `generate-config-matrix`     | `scripts/schema/generate_config_matrix.py`                             | Canonical entity/composite config comparison matrix generator                          |
 | `generate-unified-map`       | `scripts/schema/generate_unified_schema_map.py`                        | Generate unified Bronze→Silver→Gold schema map CSV                                     |
 | `generate-field-diagnostics` | `scripts/schema/generate_field_level_diagnostics.py`                   | Generate field-level schema drift diagnostics CSV                                      |
 | `generate-field-spec`        | `scripts/schema/generate_field_transformation_spec.py`                 | Generate deterministic per-field transformation specification CSV                      |
 | `validate-configs`           | `scripts/schema/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                             |
-| `validate-unified-configs`   | `scripts/schema/validate_unified_configs.py`                           | Compatibility wrapper for the legacy structural unified-config validator               |
+| `validate-unified-configs`   | `scripts/schema/validate_unified_configs.py`                           | Canonical structural unified-config validator retained for compatibility use cases      |
 | `analyze-gaps`               | `scripts/schema/config_gap_analysis.py`                                | Config gap analysis between configs and code                                           |
 
 ## When to Use
@@ -71,8 +71,8 @@ Runtime optionality currently resolves in this order:
 Validator distinction:
 
 - `python -m scripts.schema validate-configs` is the maintained JSON Schema / agent-canonical validator.
-- `python -m scripts.schema validate-unified-configs` is a compatibility façade over the older standalone structural validator kept behind the legacy direct path.
-- `python -m scripts.schema generate-config-matrix` is a compatibility façade over the older comparison-matrix generator kept behind the legacy direct path.
+- `python -m scripts.schema validate-unified-configs` is the canonical entrypoint for the older standalone structural validator kept for compatibility use cases.
+- `python -m scripts.schema generate-config-matrix` is the canonical entrypoint for the older comparison-matrix generator kept for compatibility use cases.
 - Keep them separate until their contracts are intentionally unified.
 
 This keeps structural policy compatible with today's configs while allowing

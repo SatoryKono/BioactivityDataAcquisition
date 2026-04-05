@@ -293,6 +293,51 @@ def _check_python_snippet_drift(lines: list[str]) -> list[tuple[int, str, str]]:
     return snippet_violations
 
 
+def _extract_delimited_header_frontmatter(text: str) -> dict[str, object]:
+    """Parse project-standard metadata blocks wrapped by underscore separators."""
+    lines = text.splitlines()
+    start_index = 0
+    while start_index < len(lines) and not lines[start_index].strip():
+        start_index += 1
+
+    if start_index >= len(lines) or not re.fullmatch(r"_{10,}", lines[start_index]):
+        return {}
+
+    end_index = start_index + 1
+    while end_index < len(lines) and not re.fullmatch(r"_{10,}", lines[end_index]):
+        end_index += 1
+    if end_index >= len(lines):
+        return {}
+
+    metadata_lines = lines[start_index + 1 : end_index]
+    frontmatter: dict[str, object] = {}
+    current_key: str | None = None
+
+    for raw_line in metadata_lines:
+        stripped = raw_line.strip()
+        if not stripped:
+            continue
+
+        nested_match = re.match(r"^[ \t]+([^:]+):\s*(.*)$", raw_line)
+        if nested_match:
+            frontmatter[nested_match.group(1).strip()] = nested_match.group(2).strip()
+            continue
+
+        key_value_match = re.match(r"^([^:]+):\s*(.*)$", raw_line)
+        if key_value_match:
+            current_key = key_value_match.group(1).strip()
+            value = key_value_match.group(2).strip()
+            frontmatter[current_key] = value
+            continue
+
+        if current_key == "Reviewers" and stripped.startswith("- "):
+            reviewers = frontmatter.setdefault("Reviewers", [])
+            if isinstance(reviewers, list):
+                reviewers.append(stripped[2:].strip())
+
+    return frontmatter
+
+
 def _extract_frontmatter(md_file: Path) -> dict[str, object]:
     """Parse YAML frontmatter from a markdown file."""
     try:
@@ -301,15 +346,17 @@ def _extract_frontmatter(md_file: Path) -> dict[str, object]:
         return {}
 
     if not text.startswith("---\n"):
-        return {}
+        return _extract_delimited_header_frontmatter(text)
 
     _, _, remainder = text.partition("---\n")
     frontmatter_text, sep, _ = remainder.partition("\n---")
     if not sep:
-        return {}
+        return _extract_delimited_header_frontmatter(text)
 
     loaded = yaml.safe_load(frontmatter_text)
-    return loaded if isinstance(loaded, dict) else {}
+    if isinstance(loaded, dict):
+        return loaded
+    return _extract_delimited_header_frontmatter(text)
 
 
 def _extract_headings(md_file: Path) -> set[str]:

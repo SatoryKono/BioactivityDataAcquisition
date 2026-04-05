@@ -450,8 +450,10 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
         "scripts/diagnostics/_tmp_inspect_vcr.py",
     }
     legacy_src_tools_wrappers = {
+        "src/tools/scripts/config_matrix_generator.py",
         "src/tools/scripts/generate_contracts.py",
         "src/tools/scripts/lint_terminology.py",
+        "src/tools/scripts/validate_unified_configs.py",
     }
     deprecated_legacy_paths = {
         "scripts/qa/generate_reports.py",
