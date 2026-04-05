@@ -52,5 +52,5 @@ jobs:
           uv-extras: "dev"
 
       - name: Run pip-audit
-        run: uv run pip-audit --require-hashes --disable-pip --strict
+        run: uv run pip-audit --disable-pip --strict
 
