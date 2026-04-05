@@ -36,13 +36,11 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         ContractPolicyPort,
+        DataNormalizationPort,
         DataSourcePort,
         DQMonitorPort,
         LoggerPort,
         MetricsPort,
-    )
-    from bioetl.domain.ports import (
-        DataNormalizationPort,
         PiiHasherPort,
         TracingPort,
     )

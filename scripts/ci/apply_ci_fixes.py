@@ -1014,19 +1014,23 @@ def apply_hf_e(api: GitHubAPI) -> None:
     # Target the specific smoke coverage upload step
     old_block = """\
             -   name: Upload smoke coverage data
+                if: always()
                 uses: actions/upload-artifact@v4
                 with:
                     name: coverage-data-smoke
                     path: reports/coverage/.coverage.smoke
-                    if-no-files-found: error"""
+                    if-no-files-found: error
+                    retention-days: 7"""
 
     new_block = """\
             -   name: Upload smoke coverage data
+                if: always()
                 uses: actions/upload-artifact@v4
                 with:
                     name: coverage-data-smoke
                     path: reports/coverage/.coverage.smoke
-                    if-no-files-found: warn"""
+                    if-no-files-found: warn
+                    retention-days: 7"""
 
     if old_block not in content:
         print(f"  WARNING: expected smoke upload block not found in {path}. Searching...")

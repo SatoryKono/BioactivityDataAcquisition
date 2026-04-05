@@ -71,6 +71,18 @@ pack: `ADR + contract + CLI + runbook`.
 - Internal и repo-only материалы MAY использоваться как supporting evidence, но
   MUST NOT заменять published ADR, contract, CLI или runbook.
 
+### Граница для `reports/**`
+
+- Семейство `reports/**` MUST рассматриваться как repo-only supporting surface,
+  а не как published guidance.
+- Допустимая taxonomy для `reports/**`: working output, shared artefact, plan
+  bundle, trash/deletion candidate и legacy snapshot.
+- Published страницы MAY ссылаться на `reports/**` только как на
+  repository-path evidence reference.
+- Если `reports/**` содержит вывод, который должен стать обязательным для
+  operator или contributor workflow, этот вывод MUST быть перенесён в
+  `docs/00-05/**` до того, как на него начнут опираться как на guidance.
+
 ## Обязательные шаблоны
 
 Published doc families MUST опираться на живые шаблоны из
