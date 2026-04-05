@@ -80,36 +80,51 @@ class PipelineContractPolicy(BaseModel):
             raise ValueError("merge_keys must overlap with primary_key")
         return self
 
-    @model_validator(mode="after")
-    def validate_rollout_policy(self) -> PipelineContractPolicy:
-        """Validate rollout metadata for versioned contract handling."""
+    def _validate_rollout_mode(self) -> None:
         allowed_modes = {"single", "dual_read", "dual_write", "dual_read_write"}
-        if self.rollout.mode not in allowed_modes:
-            allowed = ", ".join(sorted(allowed_modes))
-            raise ValueError(
-                f"rollout.mode must be one of {allowed}, got {self.rollout.mode!r}"
-            )
+        if self.rollout.mode in allowed_modes:
+            return
+        allowed = ", ".join(sorted(allowed_modes))
+        raise ValueError(
+            f"rollout.mode must be one of {allowed}, got {self.rollout.mode!r}"
+        )
+
+    def _validate_contract_identity(self) -> None:
         if not self.contract_ref.strip():
             raise ValueError("contract_ref must be a non-empty string")
         if not self.active_version.strip():
             raise ValueError("active_version must be a non-empty string")
+
+    def _validate_active_version_membership(self) -> None:
         if self.active_version not in self.rollout.read_order:
             raise ValueError("active_version must be present in rollout.read_order")
         if self.active_version not in self.rollout.write_versions:
             raise ValueError("active_version must be present in rollout.write_versions")
+
+    def _validate_unique_rollout_versions(self) -> None:
         if len(self.rollout.read_order) != len(set(self.rollout.read_order)):
             raise ValueError("rollout.read_order must not contain duplicate versions")
         if len(self.rollout.write_versions) != len(set(self.rollout.write_versions)):
+            raise ValueError("rollout.write_versions must not contain duplicate versions")
+
+    def _validate_single_rollout_mode(self) -> None:
+        if self.rollout.mode != "single":
+            return
+        if self.rollout.read_order != [self.active_version]:
             raise ValueError(
-                "rollout.write_versions must not contain duplicate versions"
+                "single rollout.mode requires read_order == [active_version]"
             )
-        if self.rollout.mode == "single":
-            if self.rollout.read_order != [self.active_version]:
-                raise ValueError(
-                    "single rollout.mode requires read_order == [active_version]"
-                )
-            if self.rollout.write_versions != [self.active_version]:
-                raise ValueError(
-                    "single rollout.mode requires write_versions == [active_version]"
-                )
+        if self.rollout.write_versions != [self.active_version]:
+            raise ValueError(
+                "single rollout.mode requires write_versions == [active_version]"
+            )
+
+    @model_validator(mode="after")
+    def validate_rollout_policy(self) -> PipelineContractPolicy:
+        """Validate rollout metadata for versioned contract handling."""
+        self._validate_rollout_mode()
+        self._validate_contract_identity()
+        self._validate_active_version_membership()
+        self._validate_unique_rollout_versions()
+        self._validate_single_rollout_mode()
         return self

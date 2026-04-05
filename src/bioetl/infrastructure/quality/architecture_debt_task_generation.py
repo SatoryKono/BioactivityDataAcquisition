@@ -33,7 +33,9 @@ COMMON_FORBIDDEN_PATHS: Final[tuple[str, ...]] = (
     ".github/**",
 )
 COMMON_CHECKS: Final[tuple[str, ...]] = (
-    "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+    "python -m pytest -q "
+    "tests/architecture/test_quality_debt_scorecard.py "
+    "tests/architecture/test_quality_exemptions_registry.py",
     "python -m scripts.qa check-exemptions --mode auto --growth-mode auto --trend-report off",
 )
 
@@ -72,11 +74,15 @@ def _build_checks(registry_name: str) -> list[str]:
     per_registry = {
         "file_size_limits": [
             "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits",
-            "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+            "python -m pytest -q "
+            "tests/architecture/test_quality_burndown_priorities.py::"
+            "test_file_size_limit_registry_has_no_stale_entries",
         ],
         "function_length": [
             "python -m pytest -q tests/architecture/test_code_metrics.py::TestFunctionLength",
-            "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_function_length_registry_has_no_stale_entries",
+            "python -m pytest -q "
+            "tests/architecture/test_quality_burndown_priorities.py::"
+            "test_function_length_registry_has_no_stale_entries",
         ],
         "function_complexity": [
             "python -m pytest -q tests/architecture/test_code_metrics.py::TestFunctionComplexity",
@@ -86,7 +92,9 @@ def _build_checks(registry_name: str) -> list[str]:
         ],
         "class_size": [
             "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
-            "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+            "python -m pytest -q "
+            "tests/architecture/test_quality_burndown_priorities.py::"
+            "test_class_size_registry_has_no_stale_entries",
         ],
         "class_method_count": [
             "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
