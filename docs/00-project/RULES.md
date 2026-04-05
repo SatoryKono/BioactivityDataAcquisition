@@ -1,30 +1,33 @@
----
+______________________________________________________________________
+
 Version: 6.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-03'
----
+  Last verified: '2026-04-03'
+
+______________________________________________________________________
 
 # BioETL: Правила Проекта
 
 ## Введение (Quick Reference)
 
-| Задача                              | Раздел       | Инструмент                  |
-| ----------------------------------- | ------------ | --------------------------- |
-| Создать новый пайплайн              | App D        | YAML config                 |
-| Добавить поле в схему               | 2.2, App E   | Pydantic model              |
-| Ошибка в проде (Alert)              | App C        | Runbook                     |
-| Удалить битые данные                | 2.6          | `bioetl quarantine purge --pipeline ...` |
-| Подготовить staging-like local profile | 5.6.1     | Environment isolation       |
-| Восстановление при аварии           | 5.5          | DR Runbook                  |
-| Откат релиза                        | 7.2          | Rollback Strategy           |
-| Безопасность                        | 5.4          | Security Policy             |
-| Forensic retention для таблицы      | 2.1.1, App D | Config `forensic-retention` |
-| Backfill с эксклюзивной блокировкой | 2.4          | Lock Mechanism              |
-| Deprecation поля                    | 7.1, App E   | Schema Evolution            |
+| Задача                                 | Раздел       | Инструмент                               |
+| -------------------------------------- | ------------ | ---------------------------------------- |
+| Создать новый пайплайн                 | App D        | YAML config                              |
+| Добавить поле в схему                  | 2.2, App E   | Pydantic model                           |
+| Ошибка в проде (Alert)                 | App C        | Runbook                                  |
+| Удалить битые данные                   | 2.6          | `bioetl quarantine purge --pipeline ...` |
+| Подготовить staging-like local profile | 5.6.1        | Environment isolation                    |
+| Восстановление при аварии              | 5.5          | DR Runbook                               |
+| Откат релиза                           | 7.2          | Rollback Strategy                        |
+| Безопасность                           | 5.4          | Security Policy                          |
+| Forensic retention для таблицы         | 2.1.1, App D | Config `forensic-retention`              |
+| Backfill с эксклюзивной блокировкой    | 2.4          | Lock Mechanism                           |
+| Deprecation поля                       | 7.1, App E   | Schema Evolution                         |
 
 ### Уровни Требований (Governance)
 
@@ -190,13 +193,13 @@ sink:
 
 **Migration matrix (обязательно для планирования изменений):**
 
-| Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                                                            |
-| ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ------------------------------------------------------------------------------------ |
-| publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем включить `mode: scd2` + `scd_config` и backfill интервалов валидности             |
-| reference dictionaries (chembl: assay, assay-parameters, cell-line, tissue, protein-class, subcellular-fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Единоразовый rebuild + переход на versioned upsert                                   |
-| slowly evolving records (chembl: target, target-component, molecule, compound-record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать current как version=1, дальнейшие изменения писать как новые версии |
-| high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно зафиксировать append в pipeline YAML                                            |
-| recomputed derived outputs (chembl: publication-similarity, publication-term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Оставить overwrite, но задать явно в pipeline YAML                                   |
+| Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ----------------------------------------------------------------------------------------------- |
+| publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем включить `mode: scd2` + `scd_config` и backfill интервалов валидности |
+| reference dictionaries (chembl: assay, assay-parameters, cell-line, tissue, protein-class, subcellular-fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Единоразовый rebuild + переход на versioned upsert                                              |
+| slowly evolving records (chembl: target, target-component, molecule, compound-record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать current как version=1, дальнейшие изменения писать как новые версии            |
+| high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно зафиксировать append в pipeline YAML                                                       |
+| recomputed derived outputs (chembl: publication-similarity, publication-term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Оставить overwrite, но задать явно в pipeline YAML                                              |
 
 ### 2.1.3. Инфраструктура Delta Lake
 
@@ -420,19 +423,20 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 #### 2.8.2. Обработка нарушений (Disposition)
 
-| Режим | Описание |
-|-------|----------|
-| **FAIL** | Остановка пайплайна при первом нарушении. Используется для критических схем. |
-| **WARN** | Логирование предупреждения, данные проходят дальше. |
-| **QUARANTINE** | Отправка битых записей в Quarantine, продолжение обработки валидных данных. |
+| Режим          | Описание                                                                     |
+| -------------- | ---------------------------------------------------------------------------- |
+| **FAIL**       | Остановка пайплайна при первом нарушении. Используется для критических схем. |
+| **WARN**       | Логирование предупреждения, данные проходят дальше.                          |
+| **QUARANTINE** | Отправка битых записей в Quarantine, продолжение обработки валидных данных.  |
 
 #### 2.8.3. Разрешение политик (Policy Resolution)
 
 При поиске активного контракта используется приоритетность:
+
 1. Точное совпадение (`contract_id` + `version`).
-2. Последняя (Latest) версия контракта.
-3. Контракт по умолчанию для типа сущности.
-4. Глобальная политика (Fallback).
+1. Последняя (Latest) версия контракта.
+1. Контракт по умолчанию для типа сущности.
+1. Глобальная политика (Fallback).
 
 ### 2.9. Генерация ID Сущности (Entity ID)
 
@@ -839,8 +843,8 @@ _run_id → _run_id → pipeline-run-id
 
 **Все HTTP-адаптеры используют единую инфраструктуру для HTTP-запросов.**
 
-| Адаптер          | Базовый класс     | HTTP-клиент              | Статус            |
-| ---------------- | ----------------- | ------------------------ | ----------------- |
+| Адаптер                  | Базовый класс     | HTTP-клиент              | Статус            |
+| ------------------------ | ----------------- | ------------------------ | ----------------- |
 | `ChemblAdapter`          | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
 | `UniProtAdapter`         | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
 | `PubMedAdapter`          | Mixin-based       | `UnifiedHTTPClient`      | ✅ Унифицирован   |
@@ -1138,11 +1142,11 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 #### 5.5.1. Detailed DR Procedures (Runbook)
 
-| Сценарий                      | Действие                                                                                                                                                                              |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить локальное хранилище из backup (point-in-time restore). 3. Перезапустить пайплайны с флагом `--run-type rebuild` (если затронут Silver).      |
-| **Потеря чекпоинта**          | Удалить файл чекпоинта: `data/output/checkpoints/{pipeline-name}.json`, затем запустить `--run-type rebuild` (приведет к дубликатам в Bronze, но дедупликация в Silver исправит это). |
-| **Потеря локального хоста/тома** | 1. Поднять новый локальный runtime/рабочую директорию. 2. Восстановить backup данных и конфигов. 3. Запустить `--run-type rebuild` или targeted restore по runbook. |
+| Сценарий                         | Действие                                                                                                                                                                              |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Повреждение Bronze/Silver**    | 1. Остановить пайплайны. 2. Восстановить локальное хранилище из backup (point-in-time restore). 3. Перезапустить пайплайны с флагом `--run-type rebuild` (если затронут Silver).      |
+| **Потеря чекпоинта**             | Удалить файл чекпоинта: `data/output/checkpoints/{pipeline-name}.json`, затем запустить `--run-type rebuild` (приведет к дубликатам в Bronze, но дедупликация в Silver исправит это). |
+| **Потеря локального хоста/тома** | 1. Поднять новый локальный runtime/рабочую директорию. 2. Восстановить backup данных и конфигов. 3. Запустить `--run-type rebuild` или targeted restore по runbook.                   |
 
 ### 5.6. Среды (Environments)
 
@@ -1185,14 +1189,14 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 #### Архитектурные Тесты Детерминизма
 
-| Тест                                       | REQ          | Проверка                  | Файл                                        |
-| ------------------------------------------ | ------------ | ------------------------- | ------------------------------------------- |
-| `test-no-random-import-in-storage-writers` | REQ-ARCH-030 | Запрет `import random`    | `test_no_random_in_writers.py`              |
-| `test-no-random-uniform-calls-in-storage`  | REQ-ARCH-030 | Запрет `random.uniform()` | `test_no_random_in_writers.py`              |
-| `test-no-random-choice-calls-in-storage`   | REQ-ARCH-030 | Запрет `random.choice()`  | `test_no_random_in_writers.py`              |
-| `test-no-datetime-now-in-infrastructure`   | REQ-ARCH-031 | Запрет `datetime.now()`   | `test_no_datetime_now_in_infrastructure.py` |
-| `test-no-datetime-now-in-domain`           | REQ-ARCH-031 | Запрет `datetime.now()` вне sanctioned seam | `test_no_datetime_now_in_domain.py` |
-| `test-allowed-files-still-exist`           | REQ-ARCH-031 | Валидация исключений      | `test_no_datetime_now_in_infrastructure.py` |
+| Тест                                       | REQ          | Проверка                                    | Файл                                        |
+| ------------------------------------------ | ------------ | ------------------------------------------- | ------------------------------------------- |
+| `test-no-random-import-in-storage-writers` | REQ-ARCH-030 | Запрет `import random`                      | `test_no_random_in_writers.py`              |
+| `test-no-random-uniform-calls-in-storage`  | REQ-ARCH-030 | Запрет `random.uniform()`                   | `test_no_random_in_writers.py`              |
+| `test-no-random-choice-calls-in-storage`   | REQ-ARCH-030 | Запрет `random.choice()`                    | `test_no_random_in_writers.py`              |
+| `test-no-datetime-now-in-infrastructure`   | REQ-ARCH-031 | Запрет `datetime.now()`                     | `test_no_datetime_now_in_infrastructure.py` |
+| `test-no-datetime-now-in-domain`           | REQ-ARCH-031 | Запрет `datetime.now()` вне sanctioned seam | `test_no_datetime_now_in_domain.py`         |
+| `test-allowed-files-still-exist`           | REQ-ARCH-031 | Валидация исключений                        | `test_no_datetime_now_in_infrastructure.py` |
 
 #### Детерминистичный Retry Jitter
 
@@ -1252,13 +1256,13 @@ grep -r "class ClassName\|def method-name" src/bioetl/
 
 Каждое утверждение о проблеме **MUST** содержать:
 
-| Поле                 | Требование                                        |
-| -------------------- | ------------------------------------------------- |
-| **Файл:строки**      | Точная ссылка на код (`runner.py:116-123`)        |
-| **Размер**           | LOC и количество методов                          |
-| **Структура**        | Описание публичных методов и делегирования        |
-| **Дата верификации** | Дата проверки кода                                |
-| **Проверено**        | "Проверено кодом и активной документацией ✅"     |
+| Поле                 | Требование                                    |
+| -------------------- | --------------------------------------------- |
+| **Файл:строки**      | Точная ссылка на код (`runner.py:116-123`)    |
+| **Размер**           | LOC и количество методов                      |
+| **Структура**        | Описание публичных методов и делегирования    |
+| **Дата верификации** | Дата проверки кода                            |
+| **Проверено**        | "Проверено кодом и активной документацией ✅" |
 
 **Пример верифицированного утверждения:**
 
@@ -1301,18 +1305,18 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 | "NoOp default = нарушение DI"       | Null Object Pattern валиден для опциональных зависимостей               | `NoOpMetrics`, `NoOpTracing`                                                                   |
 | "Optional parameter = нарушение DI" | \`policy: Policy                                                        | None = None\` — допустимый паттерн для value objects                                           |
 | "click.echo в CLI = нарушение"      | User-facing output — законная ответственность interfaces слоя           | `interfaces/cli/main.py` confirmation prompts                                                  |
-| "Shim file = дублирование"          | Re-export для backward compatibility валиден                            | `medallion_lifecycle.py`                                                                        |
+| "Shim file = дублирование"          | Re-export для backward compatibility валиден                            | `medallion_lifecycle.py`                                                                       |
 | "Нет автоматизации X"               | Часто уже реализовано, но не проверено                                  | `MedallionPolicy`, `DQConfig` существуют                                                       |
 
 #### 7.1.5. Причины Ложных Утверждений (REQ-ARCH-041)
 
 > **Статистика**: Анализ 2025-12-27 выявил ~50% ложных утверждений в планах рефакторинга.
 
-| Причина                                  | Описание                                        | Митигация                                   |
-| ---------------------------------------- | ----------------------------------------------- | ------------------------------------------- |
-| **Отсутствие верификации кодом**         | Утверждения без проверки фактического состояния | `grep`, `wc -l`, чтение файла               |
-| **Ложная корреляция размер → сложность** | 500+ LOC автоматически считается "монолитом"    | Анализ делегирования (см. 7.1.6)            |
-| **Неверная интерпретация паттернов**     | NoOp как нарушение DI, shim как дублирование    | Знание Null Object Pattern, backward-compat |
+| Причина                                  | Описание                                        | Митигация                                                  |
+| ---------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------- |
+| **Отсутствие верификации кодом**         | Утверждения без проверки фактического состояния | `grep`, `wc -l`, чтение файла                              |
+| **Ложная корреляция размер → сложность** | 500+ LOC автоматически считается "монолитом"    | Анализ делегирования (см. 7.1.6)                           |
+| **Неверная интерпретация паттернов**     | NoOp как нарушение DI, shim как дублирование    | Знание Null Object Pattern, backward-compat                |
 | **Устаревшие знания**                    | Задача уже реализована, но это не проверено     | Сверка с кодом, активными docs и текущими review artifacts |
 
 #### 7.1.6. Анализ Делегирования (MUST перед "god object")
@@ -1383,7 +1387,7 @@ find tests -name "*.py" -exec grep -l "ClassName" {} \;
 grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 8. Управление Изменениями
 
@@ -1470,21 +1474,21 @@ make run-local    # запуск сэмплового пайплайна (chembl
 
 - **.env.example**: Шаблон переменных окружения (без секретов).
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Приложение А: Источники и Библиотеки
 
 **Структура папок:** `src/bioetl/infrastructure/adapters/{provider}/`
 
-| Источник     | Библиотека                        | Rate Limit               | Retry Strategy          | Auth Type       | Health Check                                                                  |
-| ------------ | --------------------------------- | ------------------------ | ----------------------- | --------------- | ----------------------------------------------------------------------------- |
-| **ChEMBL**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec                | Exponential backoff     | Public          | `GET /chembl/api/data/status.json`                                            |
-| **PubChem**  | `pubchempy` via `BaseSyncAdapter` | 5 req/sec                | 429 -> wait Retry-After | Public          | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
-| **UniProt**  | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (100 with API key) | Exponential backoff | API Key (optional) | Search probe query                                                         |
-| **OpenAlex** | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (polite pool) | 429 -> backoff          | Email (polite pool) | Generic Probe\*                                                            |
-| **Semantic** | `httpx` via `UnifiedHTTPClient`   | 0.1 req/sec (1.0 with API key) | Sliding window     | API Key         | Generic Probe\*                                                               |
-| **PubMed**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec (10 with API key) | 429 -> backoff       | API Key         | Generic Probe\*                                                               |
-| **Crossref** | `httpx` via `UnifiedHTTPClient`   | 50 req/sec (polite pool) | Exponential backoff     | Email           | Generic Probe\*                                                               |
+| Источник     | Библиотека                        | Rate Limit                     | Retry Strategy          | Auth Type           | Health Check                                                                  |
+| ------------ | --------------------------------- | ------------------------------ | ----------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| **ChEMBL**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec                      | Exponential backoff     | Public              | `GET /chembl/api/data/status.json`                                            |
+| **PubChem**  | `pubchempy` via `BaseSyncAdapter` | 5 req/sec                      | 429 -> wait Retry-After | Public              | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
+| **UniProt**  | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (100 with API key)  | Exponential backoff     | API Key (optional)  | Search probe query                                                            |
+| **OpenAlex** | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (polite pool)       | 429 -> backoff          | Email (polite pool) | Generic Probe\*                                                               |
+| **Semantic** | `httpx` via `UnifiedHTTPClient`   | 0.1 req/sec (1.0 with API key) | Sliding window          | API Key             | Generic Probe\*                                                               |
+| **PubMed**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec (10 with API key)    | 429 -> backoff          | API Key             | Generic Probe\*                                                               |
+| **Crossref** | `httpx` via `UnifiedHTTPClient`   | 50 req/sec (polite pool)       | Exponential backoff     | Email               | Generic Probe\*                                                               |
 
 \* **Generic Probe**: Lightweight GET-запрос к базовому endpoint API (e.g., root или `/status`). Если API не предоставляет dedicated health endpoint, использовать минимальный запрос данных с timeout 5 секунд.
 
@@ -1550,13 +1554,13 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 | **P2** | Падение второстепенного пайплайна                | 8 часов     | 24 часа            |
 | **P3** | Warning / DQ аномалии                            | 24 часа     | Next Sprint        |
 
-| Ошибка                 | Симптом                                        | Действие                                                                                                |
-| ---------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Auth failure           | `401 Unauthorized` в логах                     | Проверить/обновить `BIOETL-{PROVIDER}-API-KEY`                                                          |
-| Rate limit exhausted   | `429` + пик `errors-total{type="recoverable"}` | Уменьшить `requests-per-second` в конфиге                                                               |
-| Schema mismatch (Gold) | Pipeline fail + `schema-violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR                                                  |
-| Stale checkpoint       | Warning при старте                             | `--resume` для продолжения или удалить файл `data/output/checkpoints/{pipeline-name}.json` для рестарта |
-| >20% DQ errors         | Batch fail                                     | Проверить источник; возможно API вернул ошибку в теле ответа                                            |
+| Ошибка                 | Симптом                                        | Действие                                                                                                                                               |
+| ---------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Auth failure           | `401 Unauthorized` в логах                     | Проверить/обновить `BIOETL-{PROVIDER}-API-KEY`                                                                                                         |
+| Rate limit exhausted   | `429` + пик `errors-total{type="recoverable"}` | Уменьшить `requests-per-second` в конфиге                                                                                                              |
+| Schema mismatch (Gold) | Pipeline fail + `schema-violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR                                                                                                 |
+| Stale checkpoint       | Warning при старте                             | `--resume` для продолжения или удалить файл `data/output/checkpoints/{pipeline-name}.json` для рестарта                                                |
+| >20% DQ errors         | Batch fail                                     | Проверить источник; возможно API вернул ошибку в теле ответа                                                                                           |
 | Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; определить owner `run-id`; для same-process диагностики использовать `bioetl lock check/release --pipeline ... --run-id ...` |
 
 ## Приложение D: Схема Конфигурации Пайплайна
@@ -1723,51 +1727,51 @@ fields:
 
 ## Приложение F: Реестр Architecture Decision Records (ADR)
 
-| ADR                                                                                  | Название                                   | Статус             | Дата       |
-| ------------------------------------------------------------------------------------ | ------------------------------------------ | ------------------ | ---------- |
-| [ADR-001](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)             | Delta Lake vs Parquet                      | Accepted           | 2025-05    |
-| [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md)            | Medallion Architecture                     | Accepted           | 2025-05    |
-| [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)        | In-Memory Locking (MemoryLock)             | Accepted (Revised) | 2025-12    |
-| [ADR-004](../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)           | Pydantic vs Dataclasses                    | Accepted           | 2025-05    |
-| [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md)      | Composition Layer Separation               | Accepted           | 2025-12    |
-| [ADR-006](../02-architecture/decisions/ADR-006-logger-metrics-ports.md)              | Logger and Metrics Ports                   | Accepted           | 2025-12-18 |
-| [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)    | Circuit Breaker Implementation             | Accepted           | 2025-12-22 |
-| [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy                 | Superseded         | 2025-12-22 |
-| [ADR-009](../02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)           | PaginatedFetcherMixin Design               | Accepted           | 2025-12-22 |
-| [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)             | Local-Only Deployment                      | Accepted           | 2025-12-23 |
-| [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md)        | Remove Watermark Mechanism                 | Accepted           | 2025-12-23 |
-| [ADR-012](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage Clear Contract and Run ID          | Accepted           | 2025-12-23 |
-| [ADR-013](../02-architecture/decisions/ADR-013-async-storage-cleanup.md)             | Async Storage Cleanup                      | Accepted           | 2025-12-24 |
-| [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md)              | Deterministic Writes and Retries           | Accepted           | 2025-12-24 |
-| [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)       | Pipeline Services Lifecycle                | Accepted           | 2025-12-24 |
-| [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)           | Error Handling Strategy                    | Accepted           | 2025-12-26 |
-| [ADR-017](../02-architecture/decisions/ADR-017-observability-architecture.md)        | Observability Architecture                 | Accepted           | 2025-12-26 |
-| [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md)            | Gold Strict Validation                     | Accepted           | 2025-12-26 |
-| [ADR-019](../02-architecture/decisions/ADR-019-observability-port-enforcement.md)    | Observability Port Enforcement             | Accepted           | 2025-12-26 |
-| [ADR-020](../02-architecture/decisions/ADR-020-basepipeline-decomposition.md)        | BasePipeline Decomposition                 | Accepted           | 2025-12-16 |
-| [ADR-021](../02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md)           | DDD Aggregates Adoption                    | Accepted           | 2025-12-29 |
-| [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md)                      | NoOp Tracing for Local-Only                | Accepted           | 2025-12-30 |
-| [ADR-023](../02-architecture/decisions/ADR-023-entity-type-patterns.md)              | Entity Type Patterns                       | Accepted           | 2026-01-06 |
-| [ADR-024](../02-architecture/decisions/ADR-024-entity-naming-unification.md)         | Entity Naming Unification                  | Accepted           | 2026-01-06 |
-| [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification                | Accepted (partial supersede by ADR-039) | 2026-01-19 |
-| [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline Pattern                 | Accepted           | 2026-01-15 |
-| [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)          | DQ Rules Externalization                   | Accepted           | 2026-01-19 |
-| [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md)      | Filter Rules Externalization               | Accepted           | 2026-01-20 |
-| [ADR-029](../02-architecture/decisions/ADR-029-output-metadata-unification.md)       | Output Metadata Unification                | Accepted           | 2026-01-23 |
-| [ADR-030](../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)   | Publication Pagination Strategy            | Accepted           | 2026-01-26 |
-| [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization             | Accepted           | 2026-01-26 |
-| [ADR-032](../02-architecture/decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern                | Accepted           | 2026-01-28 |
-| [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy   | Accepted           | 2026-02-06 |
-| [ADR-034](../02-architecture/decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs          | Accepted           | 2026-02-15 |
-| [ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)     | Accepted           | 2026-02-17 |
-| [ADR-036](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy            | Accepted           | 2026-02-18 |
-| [ADR-037](../02-architecture/decisions/ADR-037-canonical-schema-generation.md)       | Canonical Schema Source and Generation     | Accepted           | 2026-02-18 |
-| [ADR-038](../02-architecture/decisions/ADR-038-enum-externalization.md)              | ChEMBL Enum Values Externalization to YAML | Accepted           | 2026-02-16 |
-| [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md)      | Unified Entity Configuration Format        | Accepted           | 2026-02-24 |
-| [ADR-040](../02-architecture/decisions/ADR-040-diagram-governance.md)                | Diagram Governance and Layout Policy       | Accepted           | 2026-02-25 |
-| [ADR-041](../02-architecture/decisions/ADR-041-naming-policy-skills-agents.md)       | Naming Policy for Skills, Agents, Commands | Accepted           | 2026-03-04 |
-| [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)           | Testing Strategy Matrix & Fixture Gov.     | Accepted           | 2026-03-09 |
-| [ADR-043](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md)| Documentation & Knowledge Management       | Accepted           | 2026-03-09 |
+| ADR                                                                                   | Название                                   | Статус                                  | Дата       |
+| ------------------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------- | ---------- |
+| [ADR-001](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)              | Delta Lake vs Parquet                      | Accepted                                | 2025-05    |
+| [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md)             | Medallion Architecture                     | Accepted                                | 2025-05    |
+| [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)         | In-Memory Locking (MemoryLock)             | Accepted (Revised)                      | 2025-12    |
+| [ADR-004](../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)            | Pydantic vs Dataclasses                    | Accepted                                | 2025-05    |
+| [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md)       | Composition Layer Separation               | Accepted                                | 2025-12    |
+| [ADR-006](../02-architecture/decisions/ADR-006-logger-metrics-ports.md)               | Logger and Metrics Ports                   | Accepted                                | 2025-12-18 |
+| [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)     | Circuit Breaker Implementation             | Accepted                                | 2025-12-22 |
+| [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)         | Graceful Shutdown Strategy                 | Superseded                              | 2025-12-22 |
+| [ADR-009](../02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)            | PaginatedFetcherMixin Design               | Accepted                                | 2025-12-22 |
+| [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)              | Local-Only Deployment                      | Accepted                                | 2025-12-23 |
+| [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md)         | Remove Watermark Mechanism                 | Accepted                                | 2025-12-23 |
+| [ADR-012](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md)  | Storage Clear Contract and Run ID          | Accepted                                | 2025-12-23 |
+| [ADR-013](../02-architecture/decisions/ADR-013-async-storage-cleanup.md)              | Async Storage Cleanup                      | Accepted                                | 2025-12-24 |
+| [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md)               | Deterministic Writes and Retries           | Accepted                                | 2025-12-24 |
+| [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)        | Pipeline Services Lifecycle                | Accepted                                | 2025-12-24 |
+| [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)            | Error Handling Strategy                    | Accepted                                | 2025-12-26 |
+| [ADR-017](../02-architecture/decisions/ADR-017-observability-architecture.md)         | Observability Architecture                 | Accepted                                | 2025-12-26 |
+| [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md)             | Gold Strict Validation                     | Accepted                                | 2025-12-26 |
+| [ADR-019](../02-architecture/decisions/ADR-019-observability-port-enforcement.md)     | Observability Port Enforcement             | Accepted                                | 2025-12-26 |
+| [ADR-020](../02-architecture/decisions/ADR-020-basepipeline-decomposition.md)         | BasePipeline Decomposition                 | Accepted                                | 2025-12-16 |
+| [ADR-021](../02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md)            | DDD Aggregates Adoption                    | Accepted                                | 2025-12-29 |
+| [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md)                       | NoOp Tracing for Local-Only                | Accepted                                | 2025-12-30 |
+| [ADR-023](../02-architecture/decisions/ADR-023-entity-type-patterns.md)               | Entity Type Patterns                       | Accepted                                | 2026-01-06 |
+| [ADR-024](../02-architecture/decisions/ADR-024-entity-naming-unification.md)          | Entity Naming Unification                  | Accepted                                | 2026-01-06 |
+| [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)        | Pipeline Config Unification                | Accepted (partial supersede by ADR-039) | 2026-01-19 |
+| [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)         | Composite Pipeline Pattern                 | Accepted                                | 2026-01-15 |
+| [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)           | DQ Rules Externalization                   | Accepted                                | 2026-01-19 |
+| [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md)       | Filter Rules Externalization               | Accepted                                | 2026-01-20 |
+| [ADR-029](../02-architecture/decisions/ADR-029-output-metadata-unification.md)        | Output Metadata Unification                | Accepted                                | 2026-01-23 |
+| [ADR-030](../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)    | Publication Pagination Strategy            | Accepted                                | 2026-01-26 |
+| [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)     | Loading Strategy Formalization             | Accepted                                | 2026-01-26 |
+| [ADR-032](../02-architecture/decisions/ADR-032-unified-http-client.md)                | Unified HTTP Client Pattern                | Accepted                                | 2026-01-28 |
+| [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)    | Publication Metadata Validation Strategy   | Accepted                                | 2026-02-06 |
+| [ADR-034](../02-architecture/decisions/ADR-034-schema-domain-pairs.md)                | Schema↔Domain Configuration Pairs          | Accepted                                | 2026-02-15 |
+| [ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md)           | JSON Field Typing Policy (Silver↔Gold)     | Accepted                                | 2026-02-17 |
+| [ADR-036](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)    | Gold Contract Versioning Policy            | Accepted                                | 2026-02-18 |
+| [ADR-037](../02-architecture/decisions/ADR-037-canonical-schema-generation.md)        | Canonical Schema Source and Generation     | Accepted                                | 2026-02-18 |
+| [ADR-038](../02-architecture/decisions/ADR-038-enum-externalization.md)               | ChEMBL Enum Values Externalization to YAML | Accepted                                | 2026-02-16 |
+| [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md)       | Unified Entity Configuration Format        | Accepted                                | 2026-02-24 |
+| [ADR-040](../02-architecture/decisions/ADR-040-diagram-governance.md)                 | Diagram Governance and Layout Policy       | Accepted                                | 2026-02-25 |
+| [ADR-041](../02-architecture/decisions/ADR-041-naming-policy-skills-agents.md)        | Naming Policy for Skills, Agents, Commands | Accepted                                | 2026-03-04 |
+| [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)            | Testing Strategy Matrix & Fixture Gov.     | Accepted                                | 2026-03-09 |
+| [ADR-043](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md) | Documentation & Knowledge Management       | Accepted                                | 2026-03-09 |
 
 ## История Изменений (Changelog)
 

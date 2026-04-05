@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-03'
----
+  Last verified: '2026-04-03'
+
+______________________________________________________________________
 
 # Gold Layer Data Contracts
 
@@ -22,14 +25,14 @@ Last verified: '2026-04-03'
 > **Последнее обновление**: 2026-04-03
 > **Связанные ADR**: [ADR-018](../../02-architecture/decisions/ADR-018-gold-strict-validation.md), [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md), [ADR-045](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
 
----
+______________________________________________________________________
 
 ## Содержание
 
-1. [Обзор](#обзор)
-2. [Архитектура Gold-слоя](#архитектура-gold-слоя)
-3. [Фильтрация Silver → Gold](#фильтрация-silver--gold)
-4. [Контракты по провайдерам](#контракты-по-провайдерам)
+1. [Обзор](#%D0%BE%D0%B1%D0%B7%D0%BE%D1%80)
+1. [Архитектура Gold-слоя](#%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%B0-gold-%D1%81%D0%BB%D0%BE%D1%8F)
+1. [Фильтрация Silver → Gold](#%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%B0%D1%86%D0%B8%D1%8F-silver--gold)
+1. [Контракты по провайдерам](#%D0%BA%D0%BE%D0%BD%D1%82%D1%80%D0%B0%D0%BA%D1%82%D1%8B-%D0%BF%D0%BE-%D0%BF%D1%80%D0%BE%D0%B2%D0%B0%D0%B9%D0%B4%D0%B5%D1%80%D0%B0%D0%BC)
    - [ChEMBL](#chembl)
    - [PubChem](#pubchem)
    - [UniProt](#uniprot)
@@ -38,16 +41,17 @@ Last verified: '2026-04-03'
    - [OpenAlex](#openalex)
    - [Semantic Scholar](#semantic-scholar)
    - [Composite](#composite)
-5. [Системные поля](#системные-поля)
-6. [Режимы записи](#режимы-записи)
-7. [Примеры запросов](#примеры-запросов)
-8. [Валидация](#валидация)
+1. [Системные поля](#%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%BD%D1%8B%D0%B5-%D0%BF%D0%BE%D0%BB%D1%8F)
+1. [Режимы записи](#%D1%80%D0%B5%D0%B6%D0%B8%D0%BC%D1%8B-%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B8)
+1. [Примеры запросов](#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80%D1%8B-%D0%B7%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D0%BE%D0%B2)
+1. [Валидация](#%D0%B2%D0%B0%D0%BB%D0%B8%D0%B4%D0%B0%D1%86%D0%B8%D1%8F)
 
----
+______________________________________________________________________
 
 ## Обзор
 
 Gold-слой содержит **бизнес-готовые данные** с:
+
 - Строгой валидацией через Pandera (`strict=True`)
 - Фильтрацией по бизнес-правилам (качество, релевантность)
 - Детерминистичной записью (сортировка по primary key)
@@ -55,19 +59,20 @@ Gold-слой содержит **бизнес-готовые данные** с:
 
 ### Принципы Gold-слоя
 
-| Принцип | Описание |
-|---------|----------|
+| Принцип               | Описание                                           |
+| --------------------- | -------------------------------------------------- |
 | **Strict Validation** | Все поля валидируются перед записью (REQ-DATA-009) |
-| **Business Filters** | Только качественные данные проходят в Gold |
-| **Idempotency** | Повторный запуск даёт идентичный результат |
-| **Traceability** | Каждая запись содержит `_run_id`, `content_hash` |
+| **Business Filters**  | Только качественные данные проходят в Gold         |
+| **Idempotency**       | Повторный запуск даёт идентичный результат         |
+| **Traceability**      | Каждая запись содержит `_run_id`, `content_hash`   |
 
 Текущее уточнение по traceability:
+
 - strict Gold validation обеспечивается Pandera-based Gold validator-ами с `strict=True` по умолчанию;
 - Gold sidecars сохраняют `dq_report_path` и schema metadata (`contract_path`, `version`, `validation`);
 - единый contract-driven DQ provenance c глобальными `contract_version` и `rule_id` для всех DQ artefacts пока не является завершённым runtime contract и не должен предполагаться downstream tooling.
 
----
+______________________________________________________________________
 
 ## Архитектура Gold-слоя
 
@@ -88,11 +93,11 @@ Silver Layer                     Gold Layer
 ### Путь данных
 
 1. **Silver Record** → Все провалидированные записи из Bronze
-2. **Gold Filters** → Применение бизнес-фильтров из YAML-конфига
-3. **Schema Validation** → Проверка Pandera-схемой (`strict=True`)
-4. **Deterministic Write** → Сортировка по PK, запись в Delta Lake
+1. **Gold Filters** → Применение бизнес-фильтров из YAML-конфига
+1. **Schema Validation** → Проверка Pandera-схемой (`strict=True`)
+1. **Deterministic Write** → Сортировка по PK, запись в Delta Lake
 
----
+______________________________________________________________________
 
 ## Фильтрация Silver → Gold
 
@@ -100,14 +105,14 @@ Gold-фильтры определяются в YAML-конфигах пайпл
 
 ### Типы фильтров
 
-| Тип фильтра | Описание | Пример |
-|-------------|----------|--------|
-| **columns** | Inclusion list (IN) | `standard_type: [IC50, Ki]` |
-| **ranges** | Числовой диапазон | `standard_value: {min: 0}` |
-| **list_lengths** | Длина списка | `component_accessions: {min: 1, max: 1}` |
-| **list_contains** | Содержимое списка | `component_types: {values: [PROTEIN]}` |
-| **required_fields** | Обязательные поля | `[target_id, standard_value]` |
-| **exclude_if_present** | Исключение по наличию | `[deprecated_field]` |
+| Тип фильтра            | Описание              | Пример                                   |
+| ---------------------- | --------------------- | ---------------------------------------- |
+| **columns**            | Inclusion list (IN)   | `standard_type: [IC50, Ki]`              |
+| **ranges**             | Числовой диапазон     | `standard_value: {min: 0}`               |
+| **list_lengths**       | Длина списка          | `component_accessions: {min: 1, max: 1}` |
+| **list_contains**      | Содержимое списка     | `component_types: {values: [PROTEIN]}`   |
+| **required_fields**    | Обязательные поля     | `[target_id, standard_value]`            |
+| **exclude_if_present** | Исключение по наличию | `[deprecated_field]`                     |
 
 ### Пример конфигурации
 
@@ -128,7 +133,7 @@ gold_filters:
     - target_id
 ```
 
----
+______________________________________________________________________
 
 ## Контракты по провайдерам
 
@@ -141,44 +146,44 @@ gold_filters:
 
 ##### Gold-фильтры (Бизнес-логика)
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
-| `standard_type` | `[IC50, Ki]` | Только стандартизированные метрики связывания |
-| `standard_units` | `[nM]` | Единый масштаб для сравнения |
-| `standard_relation` | `["="]` | Точные значения, не диапазоны |
-| `assay_type` | `[B, F]` | Binding/Functional assays |
-| `potential_duplicate` | `["0"]` | Исключение дубликатов |
-| `standard_value` | `> 0` | Положительные значения активности |
+| Фильтр                | Значения     | Обоснование                                   |
+| --------------------- | ------------ | --------------------------------------------- |
+| `standard_type`       | `[IC50, Ki]` | Только стандартизированные метрики связывания |
+| `standard_units`      | `[nM]`       | Единый масштаб для сравнения                  |
+| `standard_relation`   | `["="]`      | Точные значения, не диапазоны                 |
+| `assay_type`          | `[B, F]`     | Binding/Functional assays                     |
+| `potential_duplicate` | `["0"]`      | Исключение дубликатов                         |
+| `standard_value`      | `> 0`        | Положительные значения активности             |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `entity_id` | str | No | Уникальный идентификатор |
-| `activity_id` | str | No | ChEMBL Activity ID |
-| `molecule_id` | str | No | ID молекулы |
-| `target_id` | str | Yes | ID мишени |
-| `assay_id` | str | Yes | ID эксперимента |
-| `publication_doi` | str | Yes | DOI публикации |
-| `publication_pmid` | str | Yes | PubMed ID публикации |
-| `publication_pmc_id` | str | Yes | PubMed Central ID публикации |
-| `standard_type` | str | Yes | Тип метрики (IC50, Ki) |
-| `standard_value` | float | Yes | Значение активности |
-| `standard_units` | str | Yes | Единицы измерения |
-| `pchembl_value` | float | Yes | -log10(IC50) |
-| `canonical_smiles` | str | Yes | SMILES молекулы |
-| `content_hash` | str | No | SHA256 хэш записи |
+| Поле                 | Тип   | Nullable | Описание                     |
+| -------------------- | ----- | -------- | ---------------------------- |
+| `entity_id`          | str   | No       | Уникальный идентификатор     |
+| `activity_id`        | str   | No       | ChEMBL Activity ID           |
+| `molecule_id`        | str   | No       | ID молекулы                  |
+| `target_id`          | str   | Yes      | ID мишени                    |
+| `assay_id`           | str   | Yes      | ID эксперимента              |
+| `publication_doi`    | str   | Yes      | DOI публикации               |
+| `publication_pmid`   | str   | Yes      | PubMed ID публикации         |
+| `publication_pmc_id` | str   | Yes      | PubMed Central ID публикации |
+| `standard_type`      | str   | Yes      | Тип метрики (IC50, Ki)       |
+| `standard_value`     | float | Yes      | Значение активности          |
+| `standard_units`     | str   | Yes      | Единицы измерения            |
+| `pchembl_value`      | float | Yes      | -log10(IC50)                 |
+| `canonical_smiles`   | str   | Yes      | SMILES молекулы              |
+| `content_hash`       | str   | No       | SHA256 хэш записи            |
 
 ##### Лиганд-эффективность
 
-| Поле | Описание |
-|------|----------|
-| `ligand_efficiency_bei` | Binding Efficiency Index |
-| `ligand_efficiency_le` | Ligand Efficiency |
+| Поле                    | Описание                     |
+| ----------------------- | ---------------------------- |
+| `ligand_efficiency_bei` | Binding Efficiency Index     |
+| `ligand_efficiency_le`  | Ligand Efficiency            |
 | `ligand_efficiency_lle` | Lipophilic Ligand Efficiency |
-| `ligand_efficiency_sei` | Surface Efficiency Index |
+| `ligand_efficiency_sei` | Surface Efficiency Index     |
 
----
+______________________________________________________________________
 
 #### chembl_molecule
 
@@ -187,37 +192,37 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
-| `molecule_type` | `[Small molecule]` | Drug-like молекулы |
-| `structure_type` | `[MOL]` | Структурированные соединения |
-| `inorganic_flag` | `["0"]` | Только органические |
+| Фильтр           | Значения           | Обоснование                  |
+| ---------------- | ------------------ | ---------------------------- |
+| `molecule_type`  | `[Small molecule]` | Drug-like молекулы           |
+| `structure_type` | `[MOL]`            | Структурированные соединения |
+| `inorganic_flag` | `["0"]`            | Только органические          |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `molecule_id` | str | No | ChEMBL Molecule ID |
-| `pref_name` | str | Yes | Предпочтительное название |
-| `molecule_type` | str | Yes | Тип молекулы |
-| `max_phase` | float | Yes | Фаза клинических испытаний (0-4) |
-| `structure_canonical_smiles` | str | Yes | Каноническая SMILES |
-| `structure_standard_inchi` | str | Yes | InChI |
-| `structure_standard_inchi_key` | str | Yes | InChIKey |
+| Поле                           | Тип   | Nullable | Описание                         |
+| ------------------------------ | ----- | -------- | -------------------------------- |
+| `molecule_id`                  | str   | No       | ChEMBL Molecule ID               |
+| `pref_name`                    | str   | Yes      | Предпочтительное название        |
+| `molecule_type`                | str   | Yes      | Тип молекулы                     |
+| `max_phase`                    | float | Yes      | Фаза клинических испытаний (0-4) |
+| `structure_canonical_smiles`   | str   | Yes      | Каноническая SMILES              |
+| `structure_standard_inchi`     | str   | Yes      | InChI                            |
+| `structure_standard_inchi_key` | str   | Yes      | InChIKey                         |
 
 ##### Физико-химические свойства
 
-| Поле | Описание |
-|------|----------|
-| `property_alogp` | Расчётный logP |
-| `property_mw_freebase` | Молекулярная масса |
-| `property_hba` | Hydrogen Bond Acceptors |
-| `property_hbd` | Hydrogen Bond Donors |
-| `property_psa` | Polar Surface Area |
-| `property_rtb` | Rotatable Bonds |
+| Поле                      | Описание                   |
+| ------------------------- | -------------------------- |
+| `property_alogp`          | Расчётный logP             |
+| `property_mw_freebase`    | Молекулярная масса         |
+| `property_hba`            | Hydrogen Bond Acceptors    |
+| `property_hbd`            | Hydrogen Bond Donors       |
+| `property_psa`            | Polar Surface Area         |
+| `property_rtb`            | Rotatable Bonds            |
 | `property_ro5_violations` | Нарушения правила Lipinski |
 
----
+______________________________________________________________________
 
 #### chembl_assay
 
@@ -226,25 +231,25 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
-| `assay_type` | `[B, F]` | Binding, Functional |
-| `confidence_score` | `["8", "9"]` | Высокая уверенность (шкала 0-9) |
-| `relationship_type` | `[D]` | Direct interaction only |
+| Фильтр              | Значения     | Обоснование                     |
+| ------------------- | ------------ | ------------------------------- |
+| `assay_type`        | `[B, F]`     | Binding, Functional             |
+| `confidence_score`  | `["8", "9"]` | Высокая уверенность (шкала 0-9) |
+| `relationship_type` | `[D]`        | Direct interaction only         |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `assay_id` | str | No | ChEMBL Assay ID |
-| `target_id` | str | Yes | ID мишени |
-| `assay_type` | str | Yes | Тип эксперимента |
-| `description` | str | Yes | Описание |
-| `confidence_score` | float | Yes | Уровень уверенности |
-| `bao_format` | str | Yes | BAO Format ID |
-| `assay_organism` | str | Yes | Организм |
+| Поле               | Тип   | Nullable | Описание            |
+| ------------------ | ----- | -------- | ------------------- |
+| `assay_id`         | str   | No       | ChEMBL Assay ID     |
+| `target_id`        | str   | Yes      | ID мишени           |
+| `assay_type`       | str   | Yes      | Тип эксперимента    |
+| `description`      | str   | Yes      | Описание            |
+| `confidence_score` | float | Yes      | Уровень уверенности |
+| `bao_format`       | str   | Yes      | BAO Format ID       |
+| `assay_organism`   | str   | Yes      | Организм            |
 
----
+______________________________________________________________________
 
 #### chembl_target
 
@@ -253,24 +258,24 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
-| `target_type` | `[SINGLE PROTEIN]` | Единичные белки |
-| `component_accessions` | length: 1 | Один UniProt accession |
-| `component_types` | contains: `[PROTEIN]` | Тип компонента — белок |
+| Фильтр                 | Значения              | Обоснование            |
+| ---------------------- | --------------------- | ---------------------- |
+| `target_type`          | `[SINGLE PROTEIN]`    | Единичные белки        |
+| `component_accessions` | length: 1             | Один UniProt accession |
+| `component_types`      | contains: `[PROTEIN]` | Тип компонента — белок |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `target_id` | str | No | ChEMBL Target ID |
-| `pref_name` | str | Yes | Название |
-| `target_type` | str | Yes | Тип мишени |
-| `organism` | str | Yes | Организм |
-| `taxonomy_id` | float | Yes | NCBI Taxonomy ID |
-| `component_accessions` | list[str] | Yes | UniProt accessions |
+| Поле                   | Тип       | Nullable | Описание           |
+| ---------------------- | --------- | -------- | ------------------ |
+| `target_id`            | str       | No       | ChEMBL Target ID   |
+| `pref_name`            | str       | Yes      | Название           |
+| `target_type`          | str       | Yes      | Тип мишени         |
+| `organism`             | str       | Yes      | Организм           |
+| `taxonomy_id`          | float     | Yes      | NCBI Taxonomy ID   |
+| `component_accessions` | list[str] | Yes      | UniProt accessions |
 
----
+______________________________________________________________________
 
 #### chembl_target_component
 
@@ -279,22 +284,22 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
-| `component_type` | `[PROTEIN]` | Только белки |
-| required | `accession` | Наличие UniProt accession |
+| Фильтр           | Значения    | Обоснование               |
+| ---------------- | ----------- | ------------------------- |
+| `component_type` | `[PROTEIN]` | Только белки              |
+| required         | `accession` | Наличие UniProt accession |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `component_id` | float | No | Component ID |
-| `accession` | str | Yes | UniProt accession |
-| `component_type` | str | Yes | Тип компонента |
-| `organism` | str | Yes | Организм |
-| `protein_classifications` | str | Yes | JSON классификации |
+| Поле                      | Тип   | Nullable | Описание           |
+| ------------------------- | ----- | -------- | ------------------ |
+| `component_id`            | float | No       | Component ID       |
+| `accession`               | str   | Yes      | UniProt accession  |
+| `component_type`          | str   | Yes      | Тип компонента     |
+| `organism`                | str   | Yes      | Организм           |
+| `protein_classifications` | str   | Yes      | JSON классификации |
 
----
+______________________________________________________________________
 
 #### chembl_publication
 
@@ -303,25 +308,25 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
-| `publication_type` | `[journal-article, book, dataset, patent]` | Канонические типы публикаций |
-| `publication_year` | `>= 1500` | Базовая временная валидация |
-| required | `publication_id, title` | Базовые метаданные для записи в Gold |
+| Фильтр             | Значения                                   | Обоснование                          |
+| ------------------ | ------------------------------------------ | ------------------------------------ |
+| `publication_type` | `[journal-article, book, dataset, patent]` | Канонические типы публикаций         |
+| `publication_year` | `>= 1500`                                  | Базовая временная валидация          |
+| required           | `publication_id, title`                    | Базовые метаданные для записи в Gold |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `publication_id` | str | No | ChEMBL Publication ID |
-| `publication_pmid` | str | Yes | PubMed ID |
-| `publication_doi` | str | Yes | DOI |
-| `title` | str | Yes | Заголовок |
-| `journal` | str | Yes | Журнал |
-| `publication_year` | float | Yes | Год публикации |
-| `authors` | str | Yes | Авторы |
+| Поле               | Тип   | Nullable | Описание              |
+| ------------------ | ----- | -------- | --------------------- |
+| `publication_id`   | str   | No       | ChEMBL Publication ID |
+| `publication_pmid` | str   | Yes      | PubMed ID             |
+| `publication_doi`  | str   | Yes      | DOI                   |
+| `title`            | str   | Yes      | Заголовок             |
+| `journal`          | str   | Yes      | Журнал                |
+| `publication_year` | float | Yes      | Год публикации        |
+| `authors`          | str   | Yes      | Авторы                |
 
----
+______________________________________________________________________
 
 #### chembl_compound_record
 
@@ -330,21 +335,21 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
+| Фильтр   | Значения                      | Обоснование    |
+| -------- | ----------------------------- | -------------- |
 | required | `molecule_id, publication_id` | Полнота связей |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `record_id` | float | No | Record ID |
-| `molecule_id` | str | No | ChEMBL Molecule ID |
-| `publication_id` | str | No | ChEMBL Publication ID |
-| `compound_key` | str | Yes | Название в публикации |
-| `compound_name` | str | Yes | Полное название |
+| Поле             | Тип   | Nullable | Описание              |
+| ---------------- | ----- | -------- | --------------------- |
+| `record_id`      | float | No       | Record ID             |
+| `molecule_id`    | str   | No       | ChEMBL Molecule ID    |
+| `publication_id` | str   | No       | ChEMBL Publication ID |
+| `compound_key`   | str   | Yes      | Название в публикации |
+| `compound_name`  | str   | Yes      | Полное название       |
 
----
+______________________________________________________________________
 
 #### chembl_cell_line
 
@@ -353,22 +358,22 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
+| Фильтр   | Значения    | Обоснование      |
+| -------- | ----------- | ---------------- |
 | required | `cell_name` | Наличие названия |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `cell_id` | str | No | ChEMBL Cell Line ID |
-| `cell_name` | str | No | Название |
-| `cell_description` | str | Yes | Описание |
-| `cell_source_tissue` | str | Yes | Ткань-источник |
-| `cell_source_organism` | str | Yes | Организм |
-| `cellosaurus_id` | str | Yes | Cellosaurus ID |
+| Поле                   | Тип | Nullable | Описание            |
+| ---------------------- | --- | -------- | ------------------- |
+| `cell_id`              | str | No       | ChEMBL Cell Line ID |
+| `cell_name`            | str | No       | Название            |
+| `cell_description`     | str | Yes      | Описание            |
+| `cell_source_tissue`   | str | Yes      | Ткань-источник      |
+| `cell_source_organism` | str | Yes      | Организм            |
+| `cellosaurus_id`       | str | Yes      | Cellosaurus ID      |
 
----
+______________________________________________________________________
 
 ### PubChem
 
@@ -379,25 +384,25 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
+| Фильтр   | Значения                 | Обоснование        |
+| -------- | ------------------------ | ------------------ |
 | required | `cid, molecular_formula` | Минимальные данные |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `entity_id` | str | No | Уникальный ID |
-| `cid` | str | No | PubChem Compound ID |
-| `molecular_formula` | str | Yes | Молекулярная формула |
-| `molecular_weight` | str | Yes | Молекулярная масса |
-| `canonical_smiles` | str | Yes | Каноническая SMILES |
-| `isomeric_smiles` | str | Yes | Изомерная SMILES |
-| `inchi` | str | Yes | InChI |
-| `inchikey` | str | Yes | InChIKey |
-| `iupac_name` | str | Yes | IUPAC название |
+| Поле                | Тип | Nullable | Описание             |
+| ------------------- | --- | -------- | -------------------- |
+| `entity_id`         | str | No       | Уникальный ID        |
+| `cid`               | str | No       | PubChem Compound ID  |
+| `molecular_formula` | str | Yes      | Молекулярная формула |
+| `molecular_weight`  | str | Yes      | Молекулярная масса   |
+| `canonical_smiles`  | str | Yes      | Каноническая SMILES  |
+| `isomeric_smiles`   | str | Yes      | Изомерная SMILES     |
+| `inchi`             | str | Yes      | InChI                |
+| `inchikey`          | str | Yes      | InChIKey             |
+| `iupac_name`        | str | Yes      | IUPAC название       |
 
----
+______________________________________________________________________
 
 ### UniProt
 
@@ -408,24 +413,24 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
-| `reviewed` | `["true"]` | Только Swiss-Prot (reviewed) |
-| required | `accession, entry_name, organism` | Полнота данных |
+| Фильтр     | Значения                          | Обоснование                  |
+| ---------- | --------------------------------- | ---------------------------- |
+| `reviewed` | `["true"]`                        | Только Swiss-Prot (reviewed) |
+| required   | `accession, entry_name, organism` | Полнота данных               |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `entity_id` | str | No | Уникальный ID |
-| `accession` | str | No | UniProt Accession |
-| `entry_name` | str | Yes | Entry name |
-| `protein_name` | str | Yes | Название белка |
-| `gene_names` | list[str] | Yes | Названия генов |
-| `organism_id` | float | Yes | NCBI Taxonomy ID |
-| `sequence_length` | float | Yes | Длина последовательности |
+| Поле              | Тип       | Nullable | Описание                 |
+| ----------------- | --------- | -------- | ------------------------ |
+| `entity_id`       | str       | No       | Уникальный ID            |
+| `accession`       | str       | No       | UniProt Accession        |
+| `entry_name`      | str       | Yes      | Entry name               |
+| `protein_name`    | str       | Yes      | Название белка           |
+| `gene_names`      | list[str] | Yes      | Названия генов           |
+| `organism_id`     | float     | Yes      | NCBI Taxonomy ID         |
+| `sequence_length` | float     | Yes      | Длина последовательности |
 
----
+______________________________________________________________________
 
 ### PubMed
 
@@ -436,27 +441,27 @@ gold_filters:
 
 ##### Gold-фильтры
 
-| Фильтр | Значения | Обоснование |
-|--------|----------|-------------|
+| Фильтр   | Значения      | Обоснование            |
+| -------- | ------------- | ---------------------- |
 | required | `pmid, title` | Минимальные метаданные |
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `entity_id` | str | No | Уникальный ID |
-| `pmid` | str | No | PubMed ID |
-| `doi` | str | Yes | DOI |
-| `pmc_id` | str | Yes | PubMed Central ID |
-| `title` | str | Yes | Заголовок |
-| `abstract` | str | Yes | Абстракт |
-| `journal` | str | Yes | Журнал |
-| `authors` | str | Yes | Авторы (flattened representation) |
-| `publication_year` | float | Yes | Год публикации |
-| `subject_mesh` | str | Yes | MeSH термины (flattened representation) |
-| `subject_keywords` | str | Yes | Ключевые слова (flattened representation) |
+| Поле               | Тип   | Nullable | Описание                                  |
+| ------------------ | ----- | -------- | ----------------------------------------- |
+| `entity_id`        | str   | No       | Уникальный ID                             |
+| `pmid`             | str   | No       | PubMed ID                                 |
+| `doi`              | str   | Yes      | DOI                                       |
+| `pmc_id`           | str   | Yes      | PubMed Central ID                         |
+| `title`            | str   | Yes      | Заголовок                                 |
+| `abstract`         | str   | Yes      | Абстракт                                  |
+| `journal`          | str   | Yes      | Журнал                                    |
+| `authors`          | str   | Yes      | Авторы (flattened representation)         |
+| `publication_year` | float | Yes      | Год публикации                            |
+| `subject_mesh`     | str   | Yes      | MeSH термины (flattened representation)   |
+| `subject_keywords` | str   | Yes      | Ключевые слова (flattened representation) |
 
----
+______________________________________________________________________
 
 ### CrossRef
 
@@ -468,50 +473,50 @@ gold_filters:
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `entity_id` | str | No | Уникальный ID записи |
-| `doi` | str | No | DOI публикации (обязателен, валидируется regex) |
-| `pmid` | str | Yes | PubMed ID |
-| `pmc_id` | str | Yes | PubMed Central ID |
-| `title` | str | Yes | Заголовок публикации |
-| `abstract` | str | Yes | Аннотация |
-| `authors` | str | Yes | Авторы (JSON-сериализованный список) |
-| `affiliation_list` | str | Yes | Аффилиации авторов (JSON) |
-| `journal` | str | Yes | Название журнала |
-| `issn` | str | Yes | Основной ISSN |
-| `issn_list` | str | Yes | Все ISSN журнала (JSON) |
-| `issn_print` | str | Yes | ISSN печатного издания |
-| `issn_electronic` | str | Yes | ISSN электронного издания |
-| `journal_name_short` | str | Yes | Сокращённое название журнала |
-| `publisher` | str | Yes | Издатель |
-| `volume` | str | Yes | Том |
-| `issue` | str | Yes | Номер выпуска |
-| `page_first` | str | Yes | Первая страница |
-| `page_last` | str | Yes | Последняя страница |
-| `publication_year` | float | Yes | Год публикации (диапазон 1500-2100) |
-| `publication_date` | str | Yes | Дата публикации |
-| `published_print` | str | Yes | Дата печатной публикации |
-| `published_online` | str | Yes | Дата онлайн-публикации |
-| `published` | str | Yes | Обобщённая дата публикации |
-| `publication_type` | str | Yes | Тип публикации (raw из API) |
-| `publication_type_unified` | str | Yes | Унифицированный тип публикации |
-| `publication_subclass` | str | Yes | Подкласс публикации |
-| `publication_class` | str | Yes | Класс публикации |
-| `citations_received` | float | Yes | Количество цитирований (>= 0) |
-| `citations_made` | float | Yes | Количество исходящих ссылок (>= 0) |
-| `language` | str | Yes | Язык публикации |
-| `license_url` | str | Yes | URL лицензии |
-| `subject_keywords` | str | Yes | Ключевые слова / предметные области (JSON) |
-| `content_domain_domains` | str | Yes | Домены контента CrossRef (JSON) |
-| `content_domain_crossmark_restriction` | bool | Yes | Ограничение CrossMark |
-| `alternative_id` | str | Yes | Альтернативные идентификаторы (JSON) |
-| `author_keys` | str | Yes | Ключи авторов (JSON) |
-| `author_orcids` | str | Yes | ORCID авторов (JSON) |
-| `author_details` | str | Yes | Детали авторов (JSON) |
-| `references` | str | Yes | Список ссылок (JSON) |
+| Поле                                   | Тип   | Nullable | Описание                                        |
+| -------------------------------------- | ----- | -------- | ----------------------------------------------- |
+| `entity_id`                            | str   | No       | Уникальный ID записи                            |
+| `doi`                                  | str   | No       | DOI публикации (обязателен, валидируется regex) |
+| `pmid`                                 | str   | Yes      | PubMed ID                                       |
+| `pmc_id`                               | str   | Yes      | PubMed Central ID                               |
+| `title`                                | str   | Yes      | Заголовок публикации                            |
+| `abstract`                             | str   | Yes      | Аннотация                                       |
+| `authors`                              | str   | Yes      | Авторы (JSON-сериализованный список)            |
+| `affiliation_list`                     | str   | Yes      | Аффилиации авторов (JSON)                       |
+| `journal`                              | str   | Yes      | Название журнала                                |
+| `issn`                                 | str   | Yes      | Основной ISSN                                   |
+| `issn_list`                            | str   | Yes      | Все ISSN журнала (JSON)                         |
+| `issn_print`                           | str   | Yes      | ISSN печатного издания                          |
+| `issn_electronic`                      | str   | Yes      | ISSN электронного издания                       |
+| `journal_name_short`                   | str   | Yes      | Сокращённое название журнала                    |
+| `publisher`                            | str   | Yes      | Издатель                                        |
+| `volume`                               | str   | Yes      | Том                                             |
+| `issue`                                | str   | Yes      | Номер выпуска                                   |
+| `page_first`                           | str   | Yes      | Первая страница                                 |
+| `page_last`                            | str   | Yes      | Последняя страница                              |
+| `publication_year`                     | float | Yes      | Год публикации (диапазон 1500-2100)             |
+| `publication_date`                     | str   | Yes      | Дата публикации                                 |
+| `published_print`                      | str   | Yes      | Дата печатной публикации                        |
+| `published_online`                     | str   | Yes      | Дата онлайн-публикации                          |
+| `published`                            | str   | Yes      | Обобщённая дата публикации                      |
+| `publication_type`                     | str   | Yes      | Тип публикации (raw из API)                     |
+| `publication_type_unified`             | str   | Yes      | Унифицированный тип публикации                  |
+| `publication_subclass`                 | str   | Yes      | Подкласс публикации                             |
+| `publication_class`                    | str   | Yes      | Класс публикации                                |
+| `citations_received`                   | float | Yes      | Количество цитирований (>= 0)                   |
+| `citations_made`                       | float | Yes      | Количество исходящих ссылок (>= 0)              |
+| `language`                             | str   | Yes      | Язык публикации                                 |
+| `license_url`                          | str   | Yes      | URL лицензии                                    |
+| `subject_keywords`                     | str   | Yes      | Ключевые слова / предметные области (JSON)      |
+| `content_domain_domains`               | str   | Yes      | Домены контента CrossRef (JSON)                 |
+| `content_domain_crossmark_restriction` | bool  | Yes      | Ограничение CrossMark                           |
+| `alternative_id`                       | str   | Yes      | Альтернативные идентификаторы (JSON)            |
+| `author_keys`                          | str   | Yes      | Ключи авторов (JSON)                            |
+| `author_orcids`                        | str   | Yes      | ORCID авторов (JSON)                            |
+| `author_details`                       | str   | Yes      | Детали авторов (JSON)                           |
+| `references`                           | str   | Yes      | Список ссылок (JSON)                            |
 
----
+______________________________________________________________________
 
 ### OpenAlex
 
@@ -523,51 +528,51 @@ gold_filters:
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `entity_id` | str | No | Уникальный ID записи |
-| `openalex_id` | str | No | OpenAlex Work ID (обязателен) |
-| `doi` | str | Yes | DOI публикации (валидируется regex) |
-| `pmid` | str | Yes | PubMed ID |
-| `pmc_id` | str | Yes | PubMed Central ID |
-| `mag_id` | str | Yes | Microsoft Academic Graph ID |
-| `title` | str | Yes | Заголовок публикации |
-| `abstract` | str | Yes | Аннотация |
-| `authors` | str | Yes | Авторы (JSON-сериализованный список) |
-| `affiliation_list` | str | Yes | Аффилиации авторов (JSON) |
-| `author_keys` | str | Yes | Ключи авторов (JSON) |
-| `author_openalex_ids` | str | Yes | OpenAlex ID авторов (JSON) |
-| `author_orcids` | str | Yes | ORCID авторов (JSON) |
-| `journal` | str | Yes | Название журнала / источника |
-| `issn` | str | Yes | ISSN журнала |
-| `publisher` | str | Yes | Издатель |
-| `volume` | str | Yes | Том |
-| `issue` | str | Yes | Номер выпуска |
-| `page_first` | str | Yes | Первая страница |
-| `page_last` | str | Yes | Последняя страница |
-| `publication_year` | float | Yes | Год публикации (диапазон 1500-2100) |
-| `publication_date` | str | Yes | Дата публикации |
-| `publication_type` | str | Yes | Тип публикации (raw из API) |
-| `publication_type_unified` | str | Yes | Унифицированный тип публикации |
-| `publication_subclass` | str | Yes | Подкласс публикации |
-| `publication_class` | str | Yes | Класс публикации |
-| `is_oa` | bool | Yes | Признак открытого доступа |
-| `oa_status` | str | Yes | Статус OA (gold/green/hybrid/bronze/closed) |
-| `is_retracted` | bool | No | Признак отозванной публикации |
-| `citations_received` | float | Yes | Количество цитирований (>= 0) |
-| `citations_made` | float | Yes | Количество исходящих ссылок (>= 0) |
-| `fwci` | float | Yes | Field-Weighted Citation Impact (>= 0) |
-| `language` | str | Yes | Язык публикации |
-| `subject_mesh` | str | Yes | MeSH-термины (JSON) |
-| `subject_keywords` | str | Yes | Ключевые слова (JSON) |
-| `subject_topics` | str | Yes | Тематические области OpenAlex (JSON) |
-| `primary_topic` | str | Yes | Основная тема (JSON) |
-| `grants` | str | Yes | Гранты и финансирование (JSON) |
-| `institution_ids` | str | Yes | OpenAlex ID институтов (JSON) |
-| `institution_country_codes` | str | Yes | Коды стран институтов (JSON) |
-| `ror_ids` | str | Yes | ROR идентификаторы институтов (JSON) |
+| Поле                        | Тип   | Nullable | Описание                                    |
+| --------------------------- | ----- | -------- | ------------------------------------------- |
+| `entity_id`                 | str   | No       | Уникальный ID записи                        |
+| `openalex_id`               | str   | No       | OpenAlex Work ID (обязателен)               |
+| `doi`                       | str   | Yes      | DOI публикации (валидируется regex)         |
+| `pmid`                      | str   | Yes      | PubMed ID                                   |
+| `pmc_id`                    | str   | Yes      | PubMed Central ID                           |
+| `mag_id`                    | str   | Yes      | Microsoft Academic Graph ID                 |
+| `title`                     | str   | Yes      | Заголовок публикации                        |
+| `abstract`                  | str   | Yes      | Аннотация                                   |
+| `authors`                   | str   | Yes      | Авторы (JSON-сериализованный список)        |
+| `affiliation_list`          | str   | Yes      | Аффилиации авторов (JSON)                   |
+| `author_keys`               | str   | Yes      | Ключи авторов (JSON)                        |
+| `author_openalex_ids`       | str   | Yes      | OpenAlex ID авторов (JSON)                  |
+| `author_orcids`             | str   | Yes      | ORCID авторов (JSON)                        |
+| `journal`                   | str   | Yes      | Название журнала / источника                |
+| `issn`                      | str   | Yes      | ISSN журнала                                |
+| `publisher`                 | str   | Yes      | Издатель                                    |
+| `volume`                    | str   | Yes      | Том                                         |
+| `issue`                     | str   | Yes      | Номер выпуска                               |
+| `page_first`                | str   | Yes      | Первая страница                             |
+| `page_last`                 | str   | Yes      | Последняя страница                          |
+| `publication_year`          | float | Yes      | Год публикации (диапазон 1500-2100)         |
+| `publication_date`          | str   | Yes      | Дата публикации                             |
+| `publication_type`          | str   | Yes      | Тип публикации (raw из API)                 |
+| `publication_type_unified`  | str   | Yes      | Унифицированный тип публикации              |
+| `publication_subclass`      | str   | Yes      | Подкласс публикации                         |
+| `publication_class`         | str   | Yes      | Класс публикации                            |
+| `is_oa`                     | bool  | Yes      | Признак открытого доступа                   |
+| `oa_status`                 | str   | Yes      | Статус OA (gold/green/hybrid/bronze/closed) |
+| `is_retracted`              | bool  | No       | Признак отозванной публикации               |
+| `citations_received`        | float | Yes      | Количество цитирований (>= 0)               |
+| `citations_made`            | float | Yes      | Количество исходящих ссылок (>= 0)          |
+| `fwci`                      | float | Yes      | Field-Weighted Citation Impact (>= 0)       |
+| `language`                  | str   | Yes      | Язык публикации                             |
+| `subject_mesh`              | str   | Yes      | MeSH-термины (JSON)                         |
+| `subject_keywords`          | str   | Yes      | Ключевые слова (JSON)                       |
+| `subject_topics`            | str   | Yes      | Тематические области OpenAlex (JSON)        |
+| `primary_topic`             | str   | Yes      | Основная тема (JSON)                        |
+| `grants`                    | str   | Yes      | Гранты и финансирование (JSON)              |
+| `institution_ids`           | str   | Yes      | OpenAlex ID институтов (JSON)               |
+| `institution_country_codes` | str   | Yes      | Коды стран институтов (JSON)                |
+| `ror_ids`                   | str   | Yes      | ROR идентификаторы институтов (JSON)        |
 
----
+______________________________________________________________________
 
 ### Semantic Scholar
 
@@ -579,47 +584,47 @@ gold_filters:
 
 ##### Ключевые поля
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `entity_id` | str | No | Уникальный ID записи |
-| `paper_id` | str | No | Semantic Scholar Paper ID (обязателен) |
-| `doi` | str | Yes | DOI публикации (валидируется regex) |
-| `pmid` | str | Yes | PubMed ID |
-| `pmc_id` | str | Yes | PubMed Central ID |
-| `corpus_id` | float | Yes | Semantic Scholar Corpus ID |
-| `dblp_id` | str | Yes | DBLP идентификатор |
-| `title` | str | Yes | Заголовок публикации |
-| `abstract` | str | Yes | Аннотация |
-| `tldr` | str | Yes | Автогенерированное краткое резюме (TL;DR) |
-| `authors` | str | Yes | Авторы (JSON-сериализованный список) |
-| `affiliation_list` | str | Yes | Аффилиации авторов (JSON) |
-| `author_keys` | str | Yes | Ключи авторов (JSON) |
-| `author_s2_ids` | str | Yes | Semantic Scholar ID авторов (JSON) |
-| `author_orcids` | str | Yes | ORCID авторов (JSON) |
-| `author_h_indices` | str | Yes | h-индексы авторов (JSON) |
-| `journal` | str | Yes | Название журнала |
-| `volume` | str | Yes | Том |
-| `issue` | str | Yes | Номер выпуска |
-| `page_range` | str | Yes | Диапазон страниц (raw из API) |
-| `page_first` | str | Yes | Первая страница |
-| `page_last` | str | Yes | Последняя страница |
-| `publication_year` | float | Yes | Год публикации (диапазон 1500-2100) |
-| `publication_date` | str | Yes | Дата публикации |
-| `publication_type` | str | Yes | Тип публикации (raw из API) |
-| `publication_type_unified` | str | Yes | Унифицированный тип публикации |
-| `publication_subclass` | str | Yes | Подкласс публикации |
-| `publication_class` | str | Yes | Класс публикации |
-| `publication_types` | str | Yes | Все типы публикации (JSON) |
-| `is_oa` | bool | Yes | Признак открытого доступа |
-| `oa_status` | str | Yes | Статус OA (gold/green/hybrid/bronze/closed) |
-| `open_access_url` | str | Yes | URL открытого доступа |
-| `citations_received` | float | Yes | Количество цитирований (>= 0) |
-| `citations_made` | float | Yes | Количество исходящих ссылок (>= 0) |
-| `influential_citation_count` | float | Yes | Количество влиятельных цитирований (>= 0) |
-| `citation_contexts` | str | Yes | Контексты цитирования (JSON) |
-| `subject_fields` | str | Yes | Предметные области (JSON) |
+| Поле                         | Тип   | Nullable | Описание                                    |
+| ---------------------------- | ----- | -------- | ------------------------------------------- |
+| `entity_id`                  | str   | No       | Уникальный ID записи                        |
+| `paper_id`                   | str   | No       | Semantic Scholar Paper ID (обязателен)      |
+| `doi`                        | str   | Yes      | DOI публикации (валидируется regex)         |
+| `pmid`                       | str   | Yes      | PubMed ID                                   |
+| `pmc_id`                     | str   | Yes      | PubMed Central ID                           |
+| `corpus_id`                  | float | Yes      | Semantic Scholar Corpus ID                  |
+| `dblp_id`                    | str   | Yes      | DBLP идентификатор                          |
+| `title`                      | str   | Yes      | Заголовок публикации                        |
+| `abstract`                   | str   | Yes      | Аннотация                                   |
+| `tldr`                       | str   | Yes      | Автогенерированное краткое резюме (TL;DR)   |
+| `authors`                    | str   | Yes      | Авторы (JSON-сериализованный список)        |
+| `affiliation_list`           | str   | Yes      | Аффилиации авторов (JSON)                   |
+| `author_keys`                | str   | Yes      | Ключи авторов (JSON)                        |
+| `author_s2_ids`              | str   | Yes      | Semantic Scholar ID авторов (JSON)          |
+| `author_orcids`              | str   | Yes      | ORCID авторов (JSON)                        |
+| `author_h_indices`           | str   | Yes      | h-индексы авторов (JSON)                    |
+| `journal`                    | str   | Yes      | Название журнала                            |
+| `volume`                     | str   | Yes      | Том                                         |
+| `issue`                      | str   | Yes      | Номер выпуска                               |
+| `page_range`                 | str   | Yes      | Диапазон страниц (raw из API)               |
+| `page_first`                 | str   | Yes      | Первая страница                             |
+| `page_last`                  | str   | Yes      | Последняя страница                          |
+| `publication_year`           | float | Yes      | Год публикации (диапазон 1500-2100)         |
+| `publication_date`           | str   | Yes      | Дата публикации                             |
+| `publication_type`           | str   | Yes      | Тип публикации (raw из API)                 |
+| `publication_type_unified`   | str   | Yes      | Унифицированный тип публикации              |
+| `publication_subclass`       | str   | Yes      | Подкласс публикации                         |
+| `publication_class`          | str   | Yes      | Класс публикации                            |
+| `publication_types`          | str   | Yes      | Все типы публикации (JSON)                  |
+| `is_oa`                      | bool  | Yes      | Признак открытого доступа                   |
+| `oa_status`                  | str   | Yes      | Статус OA (gold/green/hybrid/bronze/closed) |
+| `open_access_url`            | str   | Yes      | URL открытого доступа                       |
+| `citations_received`         | float | Yes      | Количество цитирований (>= 0)               |
+| `citations_made`             | float | Yes      | Количество исходящих ссылок (>= 0)          |
+| `influential_citation_count` | float | Yes      | Количество влиятельных цитирований (>= 0)   |
+| `citation_contexts`          | str   | Yes      | Контексты цитирования (JSON)                |
+| `subject_fields`             | str   | Yes      | Предметные области (JSON)                   |
 
----
+______________________________________________________________________
 
 ### Composite
 
@@ -627,99 +632,101 @@ Composite-схемы объединяют данные из нескольких
 
 **Файлы схем**:
 
-| Схема | Файл |
-|-------|------|
-| `CompositeActivityGoldSchema` | `domain/contracts/gold/composite_bioassay.py` |
-| `CompositeAssayGoldSchema` | `domain/contracts/gold/composite_bioassay.py` |
-| `CompositeTargetGoldSchema` | `domain/contracts/gold/composite_bioassay.py` |
-| `CompositeMoleculeGoldSchema` | `domain/contracts/gold/composite_molecule.py` |
+| Схема                            | Файл                                             |
+| -------------------------------- | ------------------------------------------------ |
+| `CompositeActivityGoldSchema`    | `domain/contracts/gold/composite_bioassay.py`    |
+| `CompositeAssayGoldSchema`       | `domain/contracts/gold/composite_bioassay.py`    |
+| `CompositeTargetGoldSchema`      | `domain/contracts/gold/composite_bioassay.py`    |
+| `CompositeMoleculeGoldSchema`    | `domain/contracts/gold/composite_molecule.py`    |
 | `CompositePublicationGoldSchema` | `domain/contracts/gold/composite_publication.py` |
 
 #### Общие поля для всех Composite-схем
 
 Все composite-схемы гарантируют наличие следующих полей:
 
-| Поле | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `entity_id` | str | No | Стабильный бизнес-идентификатор объединённой сущности |
+| Поле        | Тип | Nullable | Описание                                              |
+| ----------- | --- | -------- | ----------------------------------------------------- |
+| `entity_id` | str | No       | Стабильный бизнес-идентификатор объединённой сущности |
 
 #### Поля линейности (composite lineage)
 
 Поля, специфичные для composite-слоя (хранятся с алиасом `_*`):
 
-| Поле (alias) | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `_composite_run_id` | str | No | ID запуска composite-пайплайна |
-| `_source_providers` | str | No | Провайдеры-источники (JSON-список) |
-| `_enrichment_status` | str | No | Статус обогащения (enriched/partial/missing) |
-| `_lineage_created_at` | str | No | Timestamp создания lineage-записи (ISO 8601) |
+| Поле (alias)          | Тип | Nullable | Описание                                     |
+| --------------------- | --- | -------- | -------------------------------------------- |
+| `_composite_run_id`   | str | No       | ID запуска composite-пайплайна               |
+| `_source_providers`   | str | No       | Провайдеры-источники (JSON-список)           |
+| `_enrichment_status`  | str | No       | Статус обогащения (enriched/partial/missing) |
+| `_lineage_created_at` | str | No       | Timestamp создания lineage-записи (ISO 8601) |
 
 #### composite_publication (дополнительные поля)
 
 `CompositePublicationGoldSchema` дополнительно содержит поля поиска публикации:
 
-| Поле (alias) | Тип | Nullable | Описание |
-|------|-----|----------|----------|
-| `_source` | str | Yes | Провайдер-источник публикации |
-| `_lookup_method` | str | Yes | Метод поиска при cross-reference |
-| `_original_id` | str | Yes | Исходный ID из провайдера |
+| Поле (alias)     | Тип | Nullable | Описание                         |
+| ---------------- | --- | -------- | -------------------------------- |
+| `_source`        | str | Yes      | Провайдер-источник публикации    |
+| `_lookup_method` | str | Yes      | Метод поиска при cross-reference |
+| `_original_id`   | str | Yes      | Исходный ID из провайдера        |
 
 #### Примечание по composite-схемам
 
 Composite-схемы используют `strict=False` — бизнес-поля (например, `molecule_id`, `canonical_smiles`, `standard_value` для activity) берутся из соответствующих провайдерных схем и присутствуют в DataFrame, но не декларируются явно в composite-схеме. Валидируются только системные и lineage-поля.
 
----
+______________________________________________________________________
 
 ## Системные поля
 
 Провайдерные Gold-таблицы содержат следующие системные метаданные:
 
-| Поле | Alias | Тип | Nullable | Описание |
-|------|-------|-----|----------|----------|
-| `entity_id` | — | str | No | Глобальный уникальный ID |
-| `content_hash` | — | str | No* | SHA256 хэш содержимого (обязателен для провайдерных схем; composite-схемы могут не декларировать явно) |
-| `_run_id` | run_id | str | No | ID запуска пайплайна |
-| `_run_type` | run_type | str | No | Тип запуска (incremental/backfill) |
-| `_source_batch_id` | source_batch_id | str | Yes | ID исходного batch |
-| `_ingestion_ts` | ingestion_ts | str | No | Timestamp загрузки (ISO 8601) |
-| `_index` | index | int | No | Порядковый номер в batch |
+| Поле               | Alias           | Тип | Nullable | Описание                                                                                               |
+| ------------------ | --------------- | --- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `entity_id`        | —               | str | No       | Глобальный уникальный ID                                                                               |
+| `content_hash`     | —               | str | No\*     | SHA256 хэш содержимого (обязателен для провайдерных схем; composite-схемы могут не декларировать явно) |
+| `_run_id`          | run_id          | str | No       | ID запуска пайплайна                                                                                   |
+| `_run_type`        | run_type        | str | No       | Тип запуска (incremental/backfill)                                                                     |
+| `_source_batch_id` | source_batch_id | str | Yes      | ID исходного batch                                                                                     |
+| `_ingestion_ts`    | ingestion_ts    | str | No       | Timestamp загрузки (ISO 8601)                                                                          |
+| `_index`           | index           | int | No       | Порядковый номер в batch                                                                               |
 
 ### Content Hash
 
 Формула вычисления:
+
 ```python
 sha256(provider + canonical_json(record))
 ```
 
 **Нормализация перед хэшированием:**
+
 - NaN/Inf → `null`
 - Floats → `round(val, 10)`
 - Dates → ISO `YYYY-MM-DD`
 - Strings → `strip()`
 - **Исключаются**: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`
 
----
+______________________________________________________________________
 
 ## Режимы записи
 
-| Режим | Enum | Поведение | Идемпотентность |
-|-------|------|-----------|-----------------|
-| **OVERWRITE** | `GoldWriteMode.OVERWRITE` | Полная замена таблицы | Да |
-| **APPEND** | `GoldWriteMode.APPEND` | Добавление записей | Нет (возможны дубликаты) |
-| **SCD2** | `GoldWriteMode.SCD2` | Slowly Changing Dimensions Type 2 | Да (upsert) |
+| Режим         | Enum                      | Поведение                         | Идемпотентность          |
+| ------------- | ------------------------- | --------------------------------- | ------------------------ |
+| **OVERWRITE** | `GoldWriteMode.OVERWRITE` | Полная замена таблицы             | Да                       |
+| **APPEND**    | `GoldWriteMode.APPEND`    | Добавление записей                | Нет (возможны дубликаты) |
+| **SCD2**      | `GoldWriteMode.SCD2`      | Slowly Changing Dimensions Type 2 | Да (upsert)              |
 
 ### SCD2 конфигурация
 
 При использовании SCD2 добавляются поля:
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `valid_from` | datetime | Начало действия версии |
-| `valid_to` | datetime | Окончание (NULL = текущая) |
-| `is_current` | bool | Текущая версия |
-| `version` | int | Номер версии |
+| Поле         | Тип      | Описание                   |
+| ------------ | -------- | -------------------------- |
+| `valid_from` | datetime | Начало действия версии     |
+| `valid_to`   | datetime | Окончание (NULL = текущая) |
+| `is_current` | bool     | Текущая версия             |
+| `version`    | int      | Номер версии               |
 
----
+______________________________________________________________________
 
 ## Примеры запросов
 
@@ -735,15 +742,10 @@ df = pl.from_arrow(dt.to_pyarrow_table())
 
 # Фильтрация активных IC50 для конкретной мишени
 activities = df.filter(
-    (pl.col("target_id") == "CHEMBL1234") &
-    (pl.col("standard_type") == "IC50") &
-    (pl.col("standard_value") < 100)  # nM
-).select([
-    "molecule_id",
-    "standard_value",
-    "pchembl_value",
-    "canonical_smiles"
-])
+    (pl.col("target_id") == "CHEMBL1234")
+    & (pl.col("standard_type") == "IC50")
+    & (pl.col("standard_value") < 100)  # nM
+).select(["molecule_id", "standard_value", "pchembl_value", "canonical_smiles"])
 ```
 
 ### SQL (DuckDB)
@@ -821,7 +823,7 @@ previous_count = previous.to_pyarrow_table().num_rows
 print(f"Added {current_count - previous_count} records")
 ```
 
----
+______________________________________________________________________
 
 ## Валидация
 
@@ -853,18 +855,19 @@ validated = ChEMBLActivityGoldSchema.validate(df.to_pandas())
 
 ### Data Quality пороги
 
-| Порог | Значение | Действие |
-|-------|----------|----------|
-| **Soft** | >5% DQ errors | Warning в логах |
-| **Hard** | >20% DQ errors | Fail batch |
+| Порог    | Значение       | Действие        |
+| -------- | -------------- | --------------- |
+| **Soft** | >5% DQ errors  | Warning в логах |
+| **Hard** | >20% DQ errors | Fail batch      |
 
----
+______________________________________________________________________
 
 ## Gold Schema Implementation
 
 Gold-схемы реализованы как **Python Pandera DataFrameModel** классы в `src/bioetl/domain/contracts/gold/`.
 
 Каждая Gold-схема определяет:
+
 - Строгую валидацию типов (`strict=True`)
 - Nullable/non-nullable поля
 - Coercion rules (например, `int→float` для nullable integers)
@@ -908,20 +911,20 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 - [Data Layers](../../02-architecture/data-layers.md)
 - `docs/04-reference/contracts/gold/` (JSON contract exports directory)
 
----
+______________________________________________________________________
 
 ## Сводная таблица контрактов
 
-| Provider | Entity | Primary Key | Filters | Fields |
-|----------|--------|-------------|---------|--------|
-| ChEMBL | activity | `activity_id` | 5 column + 1 range | ~100 |
-| ChEMBL | molecule | `molecule_id` | 3 column | ~60 |
-| ChEMBL | assay | `assay_id` | 3 column | ~45 |
-| ChEMBL | target | `target_id` | 1 col + list filters | ~25 |
-| ChEMBL | target_component | `component_id` | 1 column | ~13 |
-| ChEMBL | publication | `publication_id` | required + enum/range validation | ~17 |
-| ChEMBL | compound_record | `record_id` | required only | ~8 |
-| ChEMBL | cell_line | `cell_id` | required only | ~12 |
-| PubChem | compound | `cid` | required only | ~10 |
-| UniProt | protein | `accession` | 1 column | ~8 |
-| PubMed | publication | `pmid` | required only | ~24 |
+| Provider | Entity           | Primary Key      | Filters                          | Fields |
+| -------- | ---------------- | ---------------- | -------------------------------- | ------ |
+| ChEMBL   | activity         | `activity_id`    | 5 column + 1 range               | ~100   |
+| ChEMBL   | molecule         | `molecule_id`    | 3 column                         | ~60    |
+| ChEMBL   | assay            | `assay_id`       | 3 column                         | ~45    |
+| ChEMBL   | target           | `target_id`      | 1 col + list filters             | ~25    |
+| ChEMBL   | target_component | `component_id`   | 1 column                         | ~13    |
+| ChEMBL   | publication      | `publication_id` | required + enum/range validation | ~17    |
+| ChEMBL   | compound_record  | `record_id`      | required only                    | ~8     |
+| ChEMBL   | cell_line        | `cell_id`        | required only                    | ~12    |
+| PubChem  | compound         | `cid`            | required only                    | ~10    |
+| UniProt  | protein          | `accession`      | 1 column                         | ~8     |
+| PubMed   | publication      | `pmid`           | required only                    | ~24    |

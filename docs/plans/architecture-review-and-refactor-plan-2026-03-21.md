@@ -1,7 +1,7 @@
 # Architecture Review And Refactor Plan
 
-Дата: 2026-03-23  
-Статус: supporting assessment and refactor roadmap  
+Дата: 2026-03-23
+Статус: supporting assessment and refactor roadmap
 Язык: русский
 
 > Этот документ — repo-only assessment surface. Он помогает

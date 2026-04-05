@@ -1,10 +1,9 @@
 # Сбор evidence завершён: project-test-health
 
-Дата: 2026-03-23  
+Дата: 2026-03-23
 Статус: актуализировано под текущий verify baseline
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
-
 
 > Этот summary — repo-only evidence layer для test-health решений.
 > Для canonical test policy и active runtime expectations приоритет остаётся у
@@ -18,12 +17,12 @@ compatibility-snapshot `--check` зелёные на актуальном дер
 
 ## Статус shard-ов
 
-| Shard | Evidence Objects | Gate |
-|---|---:|---|
-| `failure-stability` | 8 | PASSED |
-| `coverage-governance` | 9 | PASSED |
-| `semanticscholar-pilot-options` | 6 | PASSED |
-| `semanticscholar-enforced-options` | 6 | PASSED |
+| Shard                              | Evidence Objects | Gate   |
+| ---------------------------------- | ---------------: | ------ |
+| `failure-stability`                |                8 | PASSED |
+| `coverage-governance`              |                9 | PASSED |
+| `semanticscholar-pilot-options`    |                6 | PASSED |
+| `semanticscholar-enforced-options` |                6 | PASSED |
 
 ## Главные выводы
 

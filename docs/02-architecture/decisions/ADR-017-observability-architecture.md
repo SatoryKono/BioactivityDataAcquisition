@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-017: Observability Architecture
 
@@ -41,7 +44,9 @@ class LoggerPort(Protocol):
         """Emit an informational log event."""
         ...
 
-    def warning(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+    def warning(
+        self, _event: str, **kwargs: Any
+    ) -> Any:  # Any: structlog-compatible API
         """Emit a warning log event."""
         ...
 
@@ -53,7 +58,9 @@ class LoggerPort(Protocol):
         """Emit a debug log event."""
         ...
 
-    def exception(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+    def exception(
+        self, _event: str, **kwargs: Any
+    ) -> Any:  # Any: structlog-compatible API
         """Emit an error log event with current exception information attached."""
         ...
 ```
@@ -65,7 +72,9 @@ class LoggerPort(Protocol):
 class MetricsPort(Protocol):
     """Port for metrics collection."""
 
-    def observe_histogram(self, name: str, value: float, labels: dict[str, str]) -> None:
+    def observe_histogram(
+        self, name: str, value: float, labels: dict[str, str]
+    ) -> None:
         """Record a histogram observation."""
         ...
 
@@ -109,37 +118,37 @@ Metrics are exposed at `http://localhost:{BIOETL_METRICS_PORT}/metrics` (default
 
 **Pipeline Metrics (prefix: `bioetl-`):**
 
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
+| Metric                      | Type      | Labels                            | Description              |
+| --------------------------- | --------- | --------------------------------- | ------------------------ |
 | `pipeline-duration-seconds` | Histogram | pipeline, stage, status, run-type | Stage execution duration |
-| `records-processed-total` | Counter | pipeline, stage, run-type | Processed record count |
-| `errors-total` | Counter | pipeline, stage, error-code | Error count by type |
-| `batch-size-records` | Histogram | pipeline, stage | Batch size distribution |
+| `records-processed-total`   | Counter   | pipeline, stage, run-type         | Processed record count   |
+| `errors-total`              | Counter   | pipeline, stage, error-code       | Error count by type      |
+| `batch-size-records`        | Histogram | pipeline, stage                   | Batch size distribution  |
 
 **Circuit Breaker Metrics:**
 
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `circuit-breaker-state` | Gauge | adapter | 0=Closed, 1=Half-Open, 2=Open |
-| `circuit-breaker-trips-total` | Counter | adapter | Total OPEN transitions |
-| `circuit-breaker-success-total` | Counter | adapter | Successful calls |
-| `circuit-breaker-failure-total` | Counter | adapter | Failed calls |
+| Metric                          | Type    | Labels  | Description                   |
+| ------------------------------- | ------- | ------- | ----------------------------- |
+| `circuit-breaker-state`         | Gauge   | adapter | 0=Closed, 1=Half-Open, 2=Open |
+| `circuit-breaker-trips-total`   | Counter | adapter | Total OPEN transitions        |
+| `circuit-breaker-success-total` | Counter | adapter | Successful calls              |
+| `circuit-breaker-failure-total` | Counter | adapter | Failed calls                  |
 
 **Data Quality Metrics:**
 
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `dq-records-quarantined-total` | Counter | pipeline, error-code | Quarantined records |
-| `dq-anomaly-detected` | Counter | pipeline, metric, severity | Anomaly detections |
-| `dq-baseline-samples` | Gauge | pipeline, metric | Baseline sample count |
+| Metric                         | Type    | Labels                     | Description           |
+| ------------------------------ | ------- | -------------------------- | --------------------- |
+| `dq-records-quarantined-total` | Counter | pipeline, error-code       | Quarantined records   |
+| `dq-anomaly-detected`          | Counter | pipeline, metric, severity | Anomaly detections    |
+| `dq-baseline-samples`          | Gauge   | pipeline, metric           | Baseline sample count |
 
 **Maintenance Metrics:**
 
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `vacuum-duration-seconds` | Histogram | table | VACUUM operation time |
-| `vacuum-files-removed-total` | Counter | table, layer | Removed file count |
-| `archive-duration-seconds` | Histogram | table | Archive operation time |
+| Metric                       | Type      | Labels       | Description            |
+| ---------------------------- | --------- | ------------ | ---------------------- |
+| `vacuum-duration-seconds`    | Histogram | table        | VACUUM operation time  |
+| `vacuum-files-removed-total` | Counter   | table, layer | Removed file count     |
+| `archive-duration-seconds`   | Histogram | table        | Archive operation time |
 
 ### 3. NoOp Implementations for Testing
 
@@ -147,13 +156,14 @@ Each port has a corresponding NoOp implementation. `NoOpMetrics` and `NoOpTracin
 live in `domain/ports/noop.py` (no I/O dependencies), while `NoOpLogger` lives in
 `infrastructure/observability/noop_logger.py` (adapter-level fallback):
 
-| Port | NoOp Implementation | Location |
-|------|---------------------|----------|
-| `LoggerPort` | `NoOpLogger` | `infrastructure/observability/noop_logger.py` |
-| `MetricsPort` | `NoOpMetrics` | `domain/ports/noop.py` |
-| `TracingPort` | `NoOpTracing` | `domain/ports/noop.py` (mirrors OTel API surface) |
+| Port          | NoOp Implementation | Location                                          |
+| ------------- | ------------------- | ------------------------------------------------- |
+| `LoggerPort`  | `NoOpLogger`        | `infrastructure/observability/noop_logger.py`     |
+| `MetricsPort` | `NoOpMetrics`       | `domain/ports/noop.py`                            |
+| `TracingPort` | `NoOpTracing`       | `domain/ports/noop.py` (mirrors OTel API surface) |
 
 **Key Features of NoOp Implementations:**
+
 - Null Object Pattern: silently ignore all operations
 - Idempotent: safe for repeated calls
 - Warning on use (configurable): alerts developers in non-test environments
@@ -161,7 +171,7 @@ live in `domain/ports/noop.py` (no I/O dependencies), while `NoOpLogger` lives i
 
 ```python
 # Testing: explicit opt-out, no warning
-metrics = NoOpMetrics(warn-on-use=False)
+metrics = NoOpMetrics(warn - on - use=False)
 
 # Production: warning if accidentally used
 metrics = NoOpMetrics()  # Emits UserWarning
@@ -171,22 +181,23 @@ metrics = NoOpMetrics()  # Emits UserWarning
 
 Structured JSON logs with mandatory fields:
 
-| Field | Required | Example |
-|-------|----------|---------|
-| `ts` | MUST | `2025-12-26T10:00:00Z` |
-| `level` | MUST | `INFO`, `ERROR` |
-| `run-id` | MUST | UUID |
-| `pipeline` | MUST | `chembl_activity` |
-| `stage` | MUST | `extract`, `transform`, `load` |
-| `dataset` | SHOULD | `chembl.activity` |
-| `record-count` | SHOULD | 1000 |
-| `error-type` | On errors | `SCHEMA-VIOLATION` |
+| Field          | Required  | Example                        |
+| -------------- | --------- | ------------------------------ |
+| `ts`           | MUST      | `2025-12-26T10:00:00Z`         |
+| `level`        | MUST      | `INFO`, `ERROR`                |
+| `run-id`       | MUST      | UUID                           |
+| `pipeline`     | MUST      | `chembl_activity`              |
+| `stage`        | MUST      | `extract`, `transform`, `load` |
+| `dataset`      | SHOULD    | `chembl.activity`              |
+| `record-count` | SHOULD    | 1000                           |
+| `error-type`   | On errors | `SCHEMA-VIOLATION`             |
 
 ## Justification
 
 ### 1. Ports Enable Clean Architecture
 
 Application layer must not depend on infrastructure:
+
 - `structlog` is never imported in `application/` or `interfaces/`
 - All logging goes through `LoggerPort`
 - Verified by architectural test `test-no-structlog-in-application-interfaces`
@@ -194,6 +205,7 @@ Application layer must not depend on infrastructure:
 ### 2. NoOp Pattern Simplifies Testing
 
 Tests don't need to mock observability:
+
 - Inject `NoOpLogger`, `NoOpMetrics`, `NoOpTracing`
 - Zero overhead in test execution
 - No side effects (file writes, network calls)
@@ -201,6 +213,7 @@ Tests don't need to mock observability:
 ### 3. Standardized Labels Enable Aggregation
 
 Consistent labeling across all metrics:
+
 - `pipeline`: identifies the data pipeline
 - `stage`: extract/transform/load phase
 - `run-type`: incremental/backfill/rebuild
@@ -209,6 +222,7 @@ Consistent labeling across all metrics:
 ### 4. Runtime Checkable Protocols
 
 All ports use `@runtime-checkable`:
+
 - Enables `isinstance()` checks at runtime
 - Validates adapter implementations
 - Tested by `tests/architecture/test_port_contracts.py`
@@ -298,6 +312,7 @@ class PipelineRunner:
 ### 1. Direct structlog/Prometheus Usage
 
 Rejected because:
+
 - Violates layered architecture
 - Tight coupling to infrastructure
 - Difficult to test without mocks
@@ -305,6 +320,7 @@ Rejected because:
 ### 2. Single Observability Port
 
 Rejected because:
+
 - Conflates separate concerns (logging, metrics, tracing)
 - Some pipelines need only logging, not metrics
 - Different lifecycle (metrics server vs log writes)
@@ -312,6 +328,7 @@ Rejected because:
 ### 3. Mocking Instead of NoOp
 
 Rejected because:
+
 - `MagicMock` is heavier than NoOp objects
 - No type safety on mock calls
 - NoOp is cleaner Null Object Pattern
@@ -319,6 +336,7 @@ Rejected because:
 ### 4. Global Logger/Metrics
 
 Rejected because:
+
 - Hides dependencies
 - Difficult to test in isolation
 - Violates dependency injection principle
@@ -350,13 +368,13 @@ Rejected because:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-017-observability-architecture.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                |
+| ------------ | -------------------------------------------------------------------------- | ------ | --------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-017-observability-architecture.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                              |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                        |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`    |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                            |
 
 ## Rollout
 

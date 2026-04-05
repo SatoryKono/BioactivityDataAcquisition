@@ -66,11 +66,11 @@ NEO4J-GLOBAL-TX-MAX=50g
 - **Heap Size**: 25-40% of available host RAM
   - Initial: ~1/4 of max heap
   - Max: Keep room for OS and page cache
-  
+
 - **Page Cache**: 40-50% of available host RAM
   - Stores graph data pages
   - Critical for query performance
-  
+
 - **Transaction Memory**: Leave 10-20% for OS buffer
 
 ## Configuration Explanation

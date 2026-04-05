@@ -27,4 +27,3 @@ Use this vocabulary as a prompting aid when scanning text for manipulation signa
 - always, never, everyone knows, unquestionably, undeniably
 
 Use vocabulary as a cue, not as proof on its own.
-

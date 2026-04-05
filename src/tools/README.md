@@ -33,12 +33,14 @@ python src/tools/generate_docs_export.py --rewrite-manifest
 ```
 
 **What it does:**
+
 - Resolves legacy `docs/**` paths after folder migrations
 - Rewrites the export manifest with normalized current paths
 - Regenerates `docs/exports/full-documentation-no-plans-reports-skills.merged.md`
 - Reports removed historical entries that are intentionally skipped
 
 **Repository policy:**
+
 - The merged export is a generated convenience artifact, not a normative source.
 - It may be generated on demand and is not required to stay committed in git.
 
@@ -74,6 +76,7 @@ python src/tools/file_merger.py --merge_project_code
 ```
 
 **Output files:**
+
 - `interfaces_merged.md` - CLI and observability interfaces
 - `infrastructure_merged.md` - Adapters and external integrations
 - `domain_merged.md` - Core business logic and protocols
@@ -122,6 +125,7 @@ directories such as `.venv`, `.git`, `.worktrees`, `.cache`, `.pytest_cache`,
 are listed but not traversed recursively.
 
 **Example output:**
+
 ```
 ./
 ├── .claude/
@@ -138,18 +142,19 @@ are listed but not traversed recursively.
 
 #### Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `-i, --input-dir` | Input directory to scan | Required for standard mode |
-| `-o, --output` | Output file path | `merged_output.txt` |
-| `-e, --extensions` | Comma-separated extensions | `md,py` |
-| `--encoding` | File encoding | `utf-8` |
-| `--exclude-dirs` | Directories to exclude | `__pycache__,.git,.venv,node_modules,.ai,data,.worktrees,.cache,.pytest_cache,reports,logs,output` |
-| `--sort` | Sorting method | `alphabetical` (also: `by_extension`, `none`) |
+| Option             | Description                | Default                                                                                            |
+| ------------------ | -------------------------- | -------------------------------------------------------------------------------------------------- |
+| `-i, --input-dir`  | Input directory to scan    | Required for standard mode                                                                         |
+| `-o, --output`     | Output file path           | `merged_output.txt`                                                                                |
+| `-e, --extensions` | Comma-separated extensions | `md,py`                                                                                            |
+| `--encoding`       | File encoding              | `utf-8`                                                                                            |
+| `--exclude-dirs`   | Directories to exclude     | `__pycache__,.git,.venv,node_modules,.ai,data,.worktrees,.cache,.pytest_cache,reports,logs,output` |
+| `--sort`           | Sorting method             | `alphabetical` (also: `by_extension`, `none`)                                                      |
 
 #### Output Format
 
 Each merged file includes:
+
 ```
 ================================================================================
 File: example.py
@@ -159,6 +164,7 @@ Path: relative/path/to/example.py
 ```
 
 Statistics are printed at the end:
+
 - Total files processed
 - Total size (human-readable)
 - Breakdown by extension
@@ -172,22 +178,22 @@ Statistics are printed at the end:
 #### Use Cases
 
 1. **Code Review**: Merge layer code for AI/LLM analysis
-2. **Documentation**: Create unified doc for external sharing
-3. **Debugging**: Quick overview of configuration state
-4. **Project Analysis**: Understand project structure at a glance
-5. **Context Building**: Generate context files for AI assistants
+1. **Documentation**: Create unified doc for external sharing
+1. **Debugging**: Quick overview of configuration state
+1. **Project Analysis**: Understand project structure at a glance
+1. **Context Building**: Generate context files for AI assistants
 
----
+______________________________________________________________________
 
 ## Adding New Tools
 
 When adding new tools to this directory:
 
 1. **Use Python 3.11+** type hints and Google-style docstrings
-2. **Make it executable**: `chmod +x your_tool.py`
-3. **Add shebang**: `#!/usr/bin/env python3`
-4. **Document in this README** with usage examples
-5. **Follow project patterns**: See `file_merger.py` as reference
+1. **Make it executable**: `chmod +x your_tool.py`
+1. **Add shebang**: `#!/usr/bin/env python3`
+1. **Document in this README** with usage examples
+1. **Follow project patterns**: See `file_merger.py` as reference
 
 ## Tool Guidelines
 
@@ -197,7 +203,7 @@ When adding new tools to this directory:
 - Output statistics when processing multiple files
 - Use `get_project_root()` pattern for path resolution
 
----
+______________________________________________________________________
 
 ## Scripts
 

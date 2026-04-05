@@ -331,4 +331,3 @@ _Generated: 2026-04-02T10:19:59+03:00_
 ![50-exception-hierarchy](./50-exception-hierarchy.png)
 
 ---
-

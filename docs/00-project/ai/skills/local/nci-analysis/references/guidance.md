@@ -3,9 +3,9 @@
 ## Core Rules
 
 1. Evaluate patterns in the text before researching factual accuracy.
-2. Quote the evidence that justifies each elevated score.
-3. Always generate both manipulative and legitimate interpretations.
-4. Escalate to deep research when the trigger thresholds are met.
+1. Quote the evidence that justifies each elevated score.
+1. Always generate both manipulative and legitimate interpretations.
+1. Escalate to deep research when the trigger thresholds are met.
 
 ## Guidance By Composite Factor
 
@@ -33,4 +33,3 @@
 
 - Ask what a reasonable reader would need to know to judge fairly.
 - Trigger verification when authority, sourcing, or context is weak.
-

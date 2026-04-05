@@ -1,6 +1,7 @@
 # Report Templates
 
 ## Short Report
+
 - Question
 - Key findings
 - Evidence table
@@ -8,6 +9,7 @@
 - Recommendation
 
 ## Full Report
+
 - Scope and assumptions
 - Search strategy
 - Source scoring

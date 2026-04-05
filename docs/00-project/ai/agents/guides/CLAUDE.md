@@ -388,7 +388,7 @@ cat docs/99-archive/refactoring-plan.md | head -60
 
 **Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](../../../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 
-**Актуальный набор ADR** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`  
+**Актуальный набор ADR** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 Перед ссылкой на номер ADR проверь текущий список файлов, а не исторический диапазон.
 (полный реестр в `docs/00-project/RULES.md` Приложение F)
 
@@ -450,7 +450,7 @@ async def aclose() -> None                             # Graceful shutdown
 | **Integration**  | `tests/integration/`  | live suite | VCR.py для HTTP                  |
 | **Architecture** | `tests/architecture/` | active suite | Проверка слоёв, контракты портов |
 
-**Всего:** не используй статический total; считай live для текущего tree и branch.  
+**Всего:** не используй статический total; считай live для текущего tree и branch.
 **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
 ### Основные команды

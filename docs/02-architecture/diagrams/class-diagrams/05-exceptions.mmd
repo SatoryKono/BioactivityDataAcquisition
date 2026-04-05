@@ -18,98 +18,98 @@ classDiagram
 
     class CriticalError {
         Unrecoverable system errors
-        
-        
+
+
     }
 
     class RecoverableError {
         Transient errors that can be retried
-        
-        
+
+
     }
 
     class DataQualityError {
         Data validation failures
-        
-        
+
+
     }
 
     class ValidationError {
         Schema or field validation failures
-        
-        
+
+
     }
 
     class SchemaViolationError {
         +table: str
         +errors: list
-        
+
     }
 
     class DataQualityThresholdError {
         +error_rate: float
         +threshold: float
-        
+
     }
 
     class LockNotHeldError {
         Lock was lost during operation
-        
-        
+
+
     }
 
     class PipelineConfigError {
         Invalid pipeline configuration
-        
-        
+
+
     }
 
     class AdapterError {
         External API adapter errors
-        
-        
+
+
     }
 
     class StorageError {
         Storage I/O errors
-        
-        
+
+
     }
 
     class AtomicWriteError {
         Atomic write failure
-        
-        
+
+
     }
 
     class CheckpointError {
         Checkpoint save/load failure
-        
-        
+
+
     }
 
     class CircuitBreakerOpenError {
         Circuit breaker is OPEN
-        
-        
+
+
     }
 
     class RateLimitExceededError {
         Rate limit exhausted
-        
-        
+
+
     }
 
     class NetworkError {
         Network connectivity errors
-        
-        
+
+
     }
 
     class TimeoutError {
         Operation timed out
-        
-        
+
+
     }
 
     BioETLError <|-- CriticalError

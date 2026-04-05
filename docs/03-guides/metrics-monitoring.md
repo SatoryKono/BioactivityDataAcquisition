@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 6.2.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-04'
----
+  Last verified: '2026-04-04'
+
+______________________________________________________________________
 
 # Metrics & Monitoring Guide
 
@@ -20,7 +23,7 @@ Last verified: '2026-04-04'
 > dashboards and alert triage use [Monitoring Guide](../05-operations/01-monitoring-guide.md)
 > and [Observability Checklist](../05-operations/runbooks/observability-checklist.md).
 
----
+______________________________________________________________________
 
 ## Обзор
 
@@ -44,18 +47,18 @@ BioETL предоставляет комплексную систему observab
 └──────────────────┘    └──────────────────┘    └──────────────────┘
 ```
 
----
+______________________________________________________________________
 
 ## Конфигурация
 
 ### Переменные окружения
 
-| Переменная | Описание | По умолчанию |
-|------------|----------|--------------|
-| `BIOETL_OBSERVABILITY__METRICS_ENABLED` | Включить Prometheus метрики | `true` |
-| `BIOETL_METRICS_PORT` | Порт для Prometheus endpoint | `8000` |
-| `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Включить OpenTelemetry tracing | `false` |
-| `BIOETL_LOG_LEVEL` | Уровень логирования | `INFO` |
+| Переменная                              | Описание                       | По умолчанию |
+| --------------------------------------- | ------------------------------ | ------------ |
+| `BIOETL_OBSERVABILITY__METRICS_ENABLED` | Включить Prometheus метрики    | `true`       |
+| `BIOETL_METRICS_PORT`                   | Порт для Prometheus endpoint   | `8000`       |
+| `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Включить OpenTelemetry tracing | `false`      |
+| `BIOETL_LOG_LEVEL`                      | Уровень логирования            | `INFO`       |
 
 ### Включение/отключение
 
@@ -80,7 +83,7 @@ export BIOETL_OBSERVABILITY__METRICS_ENABLED=false
 > умолчанию). Это снижает риск потери post-run метрик между scrape-циклами
 > Prometheus.
 
----
+______________________________________________________________________
 
 ## Prometheus Metrics
 
@@ -97,7 +100,7 @@ export BIOETL_OBSERVABILITY__METRICS_ENABLED=false
 - Для каждой новой метрики обязательно:
   1. определить объект метрики в
      `src/bioetl/infrastructure/observability/_metrics_defs_*.py`,
-  2. зарегистрировать её в `HISTOGRAMS` / `COUNTERS` / `GAUGES` в
+  1. зарегистрировать её в `HISTOGRAMS` / `COUNTERS` / `GAUGES` в
      `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
 
 > Если в будущем потребуется typed API, helper-методы добавляются в
@@ -123,53 +126,53 @@ curl http://localhost:8000/metrics | grep bioetl_
 
 #### Pipeline Metrics (MUST)
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
+| Метрика                            | Тип       | Labels                            | Описание                |
+| ---------------------------------- | --------- | --------------------------------- | ----------------------- |
 | `bioetl_pipeline_duration_seconds` | Histogram | pipeline, stage, status, run_type | Длительность выполнения |
-| `bioetl_records_processed_total` | Counter | pipeline, stage, run_type | Обработанные записи |
-| `bioetl_errors_total` | Counter | pipeline, stage, error_code | Количество ошибок |
-| `bioetl_batch_size_records` | Histogram | pipeline, stage | Размер батчей |
-| `bioetl_pipeline_runs_total` | Counter | pipeline, run_type, status | Количество запусков |
+| `bioetl_records_processed_total`   | Counter   | pipeline, stage, run_type         | Обработанные записи     |
+| `bioetl_errors_total`              | Counter   | pipeline, stage, error_code       | Количество ошибок       |
+| `bioetl_batch_size_records`        | Histogram | pipeline, stage                   | Размер батчей           |
+| `bioetl_pipeline_runs_total`       | Counter   | pipeline, run_type, status        | Количество запусков     |
 
 #### Data Quality Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_dq_records_quarantined_total` | Counter | pipeline, error_type, run_type | Карантинные записи |
-| `bioetl_dq_check_duration_ms` | Histogram | pipeline | Длительность DQ проверок |
-| `bioetl_dq_validation_failures_total` | Counter | pipeline, stage, severity | Превышения DQ порогов |
-| `bioetl_dq_validation_score` | Gauge | pipeline, entity | Оценка валидности (0.0-1.0) |
-| `bioetl_dq_anomaly_detected` | Counter | pipeline, metric, severity, anomaly_type | Обнаруженные аномалии |
-| `bioetl_data_freshness_seconds` | Gauge | pipeline, entity | Unix timestamp последнего successful ingestion; lag вычисляется как `time() - metric` |
-| `bioetl_dq_baseline_updated` | Counter | pipeline, metric | Обновления baseline |
-| `bioetl_dq_baseline_samples` | Gauge | pipeline, metric | Семплы в baseline |
+| Метрика                               | Тип       | Labels                                   | Описание                                                                              |
+| ------------------------------------- | --------- | ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| `bioetl_dq_records_quarantined_total` | Counter   | pipeline, error_type, run_type           | Карантинные записи                                                                    |
+| `bioetl_dq_check_duration_ms`         | Histogram | pipeline                                 | Длительность DQ проверок                                                              |
+| `bioetl_dq_validation_failures_total` | Counter   | pipeline, stage, severity                | Превышения DQ порогов                                                                 |
+| `bioetl_dq_validation_score`          | Gauge     | pipeline, entity                         | Оценка валидности (0.0-1.0)                                                           |
+| `bioetl_dq_anomaly_detected`          | Counter   | pipeline, metric, severity, anomaly_type | Обнаруженные аномалии                                                                 |
+| `bioetl_data_freshness_seconds`       | Gauge     | pipeline, entity                         | Unix timestamp последнего successful ingestion; lag вычисляется как `time() - metric` |
+| `bioetl_dq_baseline_updated`          | Counter   | pipeline, metric                         | Обновления baseline                                                                   |
+| `bioetl_dq_baseline_samples`          | Gauge     | pipeline, metric                         | Семплы в baseline                                                                     |
 
 #### Circuit Breaker Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_circuit_breaker_state` | Gauge | adapter | Состояние (0=closed, 1=half-open, 2=open) |
-| `bioetl_circuit_breaker_trips_total` | Counter | adapter | Количество срабатываний |
-| `bioetl_circuit_breaker_success_total` | Counter | adapter | Успешные вызовы |
-| `bioetl_circuit_breaker_failure_total` | Counter | adapter | Неуспешные вызовы |
+| Метрика                                | Тип     | Labels  | Описание                                  |
+| -------------------------------------- | ------- | ------- | ----------------------------------------- |
+| `bioetl_circuit_breaker_state`         | Gauge   | adapter | Состояние (0=closed, 1=half-open, 2=open) |
+| `bioetl_circuit_breaker_trips_total`   | Counter | adapter | Количество срабатываний                   |
+| `bioetl_circuit_breaker_success_total` | Counter | adapter | Успешные вызовы                           |
+| `bioetl_circuit_breaker_failure_total` | Counter | adapter | Неуспешные вызовы                         |
 
 #### Pipeline Lifecycle Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_pipeline_runs_total` | Counter | pipeline, run_type, status | Количество запусков |
-| `bioetl_phase_duration_seconds` | Histogram | pipeline, phase, status | Длительность фаз lifecycle |
+| Метрика                         | Тип       | Labels                     | Описание                   |
+| ------------------------------- | --------- | -------------------------- | -------------------------- |
+| `bioetl_pipeline_runs_total`    | Counter   | pipeline, run_type, status | Количество запусков        |
+| `bioetl_phase_duration_seconds` | Histogram | pipeline, phase, status    | Длительность фаз lifecycle |
 
 #### Control Plane & Traceability Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_control_plane_manifest_writes_total` | Counter | pipeline, run_type, status | Попытки записи immutable run manifest |
-| `bioetl_control_plane_ledger_appends_total` | Counter | pipeline, event_type, status | Попытки append в run ledger |
-| `bioetl_checkpoint_compatibility_events_total` | Counter | pipeline, disposition | Исходы compatibility policy при resume |
-| `bioetl_lineage_fragments_emitted_total` | Counter | pipeline, layer, status | Попытки публикации lineage fragments |
-| `bioetl_lineage_refs_missing_total` | Counter | pipeline, layer, ref_type | Missing upstream lineage references during persistence |
-| `bioetl_composite_source_selection_total` | Counter | pipeline, decision_type, selected_source | Low-cardinality composite source-selection decisions during composite persistence |
+| Метрика                                        | Тип     | Labels                                   | Описание                                                                          |
+| ---------------------------------------------- | ------- | ---------------------------------------- | --------------------------------------------------------------------------------- |
+| `bioetl_control_plane_manifest_writes_total`   | Counter | pipeline, run_type, status               | Попытки записи immutable run manifest                                             |
+| `bioetl_control_plane_ledger_appends_total`    | Counter | pipeline, event_type, status             | Попытки append в run ledger                                                       |
+| `bioetl_checkpoint_compatibility_events_total` | Counter | pipeline, disposition                    | Исходы compatibility policy при resume                                            |
+| `bioetl_lineage_fragments_emitted_total`       | Counter | pipeline, layer, status                  | Попытки публикации lineage fragments                                              |
+| `bioetl_lineage_refs_missing_total`            | Counter | pipeline, layer, ref_type                | Missing upstream lineage references during persistence                            |
+| `bioetl_composite_source_selection_total`      | Counter | pipeline, decision_type, selected_source | Low-cardinality composite source-selection decisions during composite persistence |
 
 > Guardrail: для control-plane/traceability метрик нельзя использовать
 > `run_id`, `manifest_id`, paths и другие high-cardinality идентификаторы как
@@ -182,78 +185,78 @@ curl http://localhost:8000/metrics | grep bioetl_
 
 #### Transformer Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_transform_duration_seconds` | Histogram | provider, entity_type | Длительность трансформации |
-| `bioetl_transform_errors_total` | Counter | provider, entity_type, error_type | Ошибки трансформации |
+| Метрика                             | Тип       | Labels                            | Описание                   |
+| ----------------------------------- | --------- | --------------------------------- | -------------------------- |
+| `bioetl_transform_duration_seconds` | Histogram | provider, entity_type             | Длительность трансформации |
+| `bioetl_transform_errors_total`     | Counter   | provider, entity_type, error_type | Ошибки трансформации       |
 
 #### Storage Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_vacuum_duration_seconds` | Histogram | table | Длительность VACUUM |
-| `bioetl_vacuum_files_removed_total` | Counter | table, layer | Удалённые файлы |
-| `bioetl_bronze_write_duration_seconds` | Histogram | provider, entity | Длительность записи Bronze |
-| `bioetl_bronze_records_written_total` | Counter | provider, entity | Записи в Bronze |
-| `bioetl_bronze_bytes_written_total` | Counter | provider, entity | Байты в Bronze |
-| `bioetl_policy_violations_total` | Counter | layer, mode | Нарушения политик |
-| `bioetl_silver_validation_failures_total` | Counter | table, pipeline | Ошибки валидации Silver |
+| Метрика                                   | Тип       | Labels           | Описание                   |
+| ----------------------------------------- | --------- | ---------------- | -------------------------- |
+| `bioetl_vacuum_duration_seconds`          | Histogram | table            | Длительность VACUUM        |
+| `bioetl_vacuum_files_removed_total`       | Counter   | table, layer     | Удалённые файлы            |
+| `bioetl_bronze_write_duration_seconds`    | Histogram | provider, entity | Длительность записи Bronze |
+| `bioetl_bronze_records_written_total`     | Counter   | provider, entity | Записи в Bronze            |
+| `bioetl_bronze_bytes_written_total`       | Counter   | provider, entity | Байты в Bronze             |
+| `bioetl_policy_violations_total`          | Counter   | layer, mode      | Нарушения политик          |
+| `bioetl_silver_validation_failures_total` | Counter   | table, pipeline  | Ошибки валидации Silver    |
 
 #### Input Filter Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_filter_ids_loaded_total` | Counter | pipeline, source_file | Загруженные ID |
-| `bioetl_filter_ids_duplicates_total` | Counter | pipeline, source_file | Дубликаты ID |
+| Метрика                                   | Тип     | Labels                | Описание            |
+| ----------------------------------------- | ------- | --------------------- | ------------------- |
+| `bioetl_filter_ids_loaded_total`          | Counter | pipeline, source_file | Загруженные ID      |
+| `bioetl_filter_ids_duplicates_total`      | Counter | pipeline, source_file | Дубликаты ID        |
 | `bioetl_filter_combinations_loaded_total` | Counter | pipeline, source_file | Комбинации фильтров |
 
 #### Health Check Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_health_check_status` | Gauge | component | Статус (0=unknown, 1=healthy, 2=degraded) |
-| `bioetl_pipeline_health_check_passed` | Gauge | pipeline, component | Статус компонента |
-| `bioetl_provider_health_status` | Gauge | provider | Статус провайдера |
-| `bioetl_health_check_duration_seconds` | Histogram | pipeline | Длительность health check |
-| `bioetl_health_check_latency_seconds` | Histogram | provider | Латентность health check |
-| `bioetl_health_check_success_total` | Counter | provider | Health checks со статусом `HEALTHY` |
-| `bioetl_health_check_degraded_total` | Counter | provider | Health checks со статусом `DEGRADED` |
-| `bioetl_health_check_failures_total` | Counter | provider | Health checks со статусом `UNHEALTHY` или probe-exception |
+| Метрика                                | Тип       | Labels              | Описание                                                  |
+| -------------------------------------- | --------- | ------------------- | --------------------------------------------------------- |
+| `bioetl_health_check_status`           | Gauge     | component           | Статус (0=unknown, 1=healthy, 2=degraded)                 |
+| `bioetl_pipeline_health_check_passed`  | Gauge     | pipeline, component | Статус компонента                                         |
+| `bioetl_provider_health_status`        | Gauge     | provider            | Статус провайдера                                         |
+| `bioetl_health_check_duration_seconds` | Histogram | pipeline            | Длительность health check                                 |
+| `bioetl_health_check_latency_seconds`  | Histogram | provider            | Латентность health check                                  |
+| `bioetl_health_check_success_total`    | Counter   | provider            | Health checks со статусом `HEALTHY`                       |
+| `bioetl_health_check_degraded_total`   | Counter   | provider            | Health checks со статусом `DEGRADED`                      |
+| `bioetl_health_check_failures_total`   | Counter   | provider            | Health checks со статусом `UNHEALTHY` или probe-exception |
 
 #### Preflight Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_preflight_medallion_policy_valid` | Gauge | pipeline | Валидность medallion policy |
-| `bioetl_preflight_config_errors_total` | Gauge | pipeline | Ошибки конфигурации |
-| `bioetl_infrastructure_validated` | Gauge | pipeline | Статус валидации инфраструктуры |
+| Метрика                                   | Тип   | Labels   | Описание                        |
+| ----------------------------------------- | ----- | -------- | ------------------------------- |
+| `bioetl_preflight_medallion_policy_valid` | Gauge | pipeline | Валидность medallion policy     |
+| `bioetl_preflight_config_errors_total`    | Gauge | pipeline | Ошибки конфигурации             |
+| `bioetl_infrastructure_validated`         | Gauge | pipeline | Статус валидации инфраструктуры |
 
 #### Adapter / HTTP Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_adapter_request_duration_seconds` | Histogram | provider, endpoint | Длительность API-запросов |
-| `bioetl_adapter_requests_total` | Counter | provider, endpoint, status | Количество API-запросов |
-| `bioetl_adapter_batch_size` | Histogram | provider, endpoint | Размер ответов |
-| `bioetl_adapter_dropped_duplicates_total` | Counter | provider, entity_type | Дупликаты отброшенные |
-| `bioetl_http_request_duration_seconds` | Histogram | provider, method, status | Длительность HTTP-запросов |
-| `bioetl_http_retries_total` | Counter | provider, method | HTTP retry-попытки |
-| `bioetl_http_request_errors_total` | Counter | provider, method, error_type | Ошибки HTTP |
-| `bioetl_data_source_retries_total` | Counter | provider, operation | Retry data source |
-| `bioetl_data_source_retry_exhausted_total` | Counter | provider, operation | Retry исчерпан |
+| Метрика                                    | Тип       | Labels                       | Описание                   |
+| ------------------------------------------ | --------- | ---------------------------- | -------------------------- |
+| `bioetl_adapter_request_duration_seconds`  | Histogram | provider, endpoint           | Длительность API-запросов  |
+| `bioetl_adapter_requests_total`            | Counter   | provider, endpoint, status   | Количество API-запросов    |
+| `bioetl_adapter_batch_size`                | Histogram | provider, endpoint           | Размер ответов             |
+| `bioetl_adapter_dropped_duplicates_total`  | Counter   | provider, entity_type        | Дупликаты отброшенные      |
+| `bioetl_http_request_duration_seconds`     | Histogram | provider, method, status     | Длительность HTTP-запросов |
+| `bioetl_http_retries_total`                | Counter   | provider, method             | HTTP retry-попытки         |
+| `bioetl_http_request_errors_total`         | Counter   | provider, method, error_type | Ошибки HTTP                |
+| `bioetl_data_source_retries_total`         | Counter   | provider, operation          | Retry data source          |
+| `bioetl_data_source_retry_exhausted_total` | Counter   | provider, operation          | Retry исчерпан             |
 
 #### Rate Limiter Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_rate_limiter_tokens_available` | Gauge | provider | Доступные токены |
-| `bioetl_rate_limiter_wait_seconds` | Histogram | provider | Время ожидания |
+| Метрика                                | Тип       | Labels   | Описание         |
+| -------------------------------------- | --------- | -------- | ---------------- |
+| `bioetl_rate_limiter_tokens_available` | Gauge     | provider | Доступные токены |
+| `bioetl_rate_limiter_wait_seconds`     | Histogram | provider | Время ожидания   |
 
 #### Shutdown Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---------|-----|--------|----------|
-| `bioetl_shutdown_initiated` | Counter | reason | Инициация shutdown |
+| Метрика                     | Тип     | Labels | Описание            |
+| --------------------------- | ------- | ------ | ------------------- |
+| `bioetl_shutdown_initiated` | Counter | reason | Инициация shutdown  |
 | `bioetl_shutdown_completed` | Counter | reason | Завершение shutdown |
 
 ### Примеры PromQL запросов
@@ -276,7 +279,7 @@ sum(rate(bioetl_dq_records_quarantined_total[5m])) /
 sum(rate(bioetl_records_processed_total[5m])) * 100
 ```
 
----
+______________________________________________________________________
 
 ## Structured Logging
 
@@ -284,14 +287,14 @@ sum(rate(bioetl_records_processed_total[5m])) * 100
 
 Все логи следуют единой схеме с обязательными полями:
 
-| Поле | Обязательно | Описание |
-|------|-------------|----------|
-| `ts` | MUST | ISO timestamp |
-| `level` | MUST | Log level (DEBUG, INFO, WARNING, ERROR) |
-| `run-id` | MUST | UUID correlation ID |
-| `pipeline` | MUST | Имя пайплайна |
-| `stage` | SHOULD | Этап (extract, transform, load, validate) |
-| `event` | MUST | Описание события |
+| Поле       | Обязательно | Описание                                  |
+| ---------- | ----------- | ----------------------------------------- |
+| `ts`       | MUST        | ISO timestamp                             |
+| `level`    | MUST        | Log level (DEBUG, INFO, WARNING, ERROR)   |
+| `run-id`   | MUST        | UUID correlation ID                       |
+| `pipeline` | MUST        | Имя пайплайна                             |
+| `stage`    | SHOULD      | Этап (extract, transform, load, validate) |
+| `event`    | MUST        | Описание события                          |
 
 ### Пример лога
 
@@ -311,12 +314,12 @@ sum(rate(bioetl_records_processed_total[5m])) * 100
 
 ### Уровни логирования
 
-| Уровень | Использование |
-|---------|---------------|
-| `DEBUG` | Детальная информация для troubleshooting |
-| `INFO` | Нормальные операции (default) |
+| Уровень   | Использование                                   |
+| --------- | ----------------------------------------------- |
+| `DEBUG`   | Детальная информация для troubleshooting        |
+| `INFO`    | Нормальные операции (default)                   |
 | `WARNING` | Предупреждения (DQ soft threshold, rate limits) |
-| `ERROR` | Ошибки, требующие внимания |
+| `ERROR`   | Ошибки, требующие внимания                      |
 
 ### Настройка уровня
 
@@ -328,7 +331,7 @@ export BIOETL_LOG_LEVEL=DEBUG
 bioetl run --pipeline chembl_activity --debug
 ```
 
----
+______________________________________________________________________
 
 ## OpenTelemetry Tracing
 
@@ -357,12 +360,12 @@ pipeline-execution
 
 ### Span Attributes
 
-| Span | Attributes |
-|------|------------|
+| Span                 | Attributes                              |
+| -------------------- | --------------------------------------- |
 | `pipeline-execution` | pipeline, run_id, entity_type, run_type |
-| `batch-{n}` | batch_id, record_count, start_index |
-| `write-{layer}` | batch_id, record_count |
-| `transform` | silver_count, gold_count |
+| `batch-{n}`          | batch_id, record_count, start_index     |
+| `write-{layer}`      | batch_id, record_count                  |
+| `transform`          | silver_count, gold_count                |
 
 ### Экспорт трассировки
 
@@ -381,7 +384,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317
 # Настраивается автоматически при отсутствии OTLP endpoint
 ```
 
----
+______________________________________________________________________
 
 ## Health Checks
 
@@ -402,11 +405,11 @@ bioetl run --pipeline chembl_activity --no-health-server
 
 ### Endpoints
 
-| Endpoint | Описание | Response |
-|----------|----------|----------|
-| `GET /health` | Общий статус | `{"status": "healthy"}` |
-| `GET /health/live` | Liveness probe | `{"status": "alive"}` |
-| `GET /health/ready` | Readiness probe | `{"status": "ready"}` |
+| Endpoint                | Описание           | Response                     |
+| ----------------------- | ------------------ | ---------------------------- |
+| `GET /health`           | Общий статус       | `{"status": "healthy"}`      |
+| `GET /health/live`      | Liveness probe     | `{"status": "alive"}`        |
+| `GET /health/ready`     | Readiness probe    | `{"status": "ready"}`        |
 | `GET /health/providers` | Статус провайдеров | `{"chembl": "healthy", ...}` |
 
 ### Standalone Health Server
@@ -430,24 +433,24 @@ bioetl health check --provider chembl --provider pubchem
 bioetl health check --json
 ```
 
----
+______________________________________________________________________
 
 ## Alerting
 
 ### Рекомендуемые пороги
 
-| Метрика | Условие | Severity |
-|---------|---------|----------|
-| `bioetl_circuit_breaker_state == 2` | > 5 min | Critical |
-| `bioetl_errors_total` rate | > 10/min | Warning |
-| `bioetl_dq_records_quarantined_total` rate | > 5% and <=20% of processed, with >=20 bronze records | Warning |
-| `bioetl_dq_records_quarantined_total` rate | > 20% of processed, with >=20 bronze records | Critical |
-| `bioetl_pipeline_duration_seconds` | > 95th percentile + 50% | Warning |
-| `bioetl_health_check_status == 0` | > 1 min | Critical |
-| `time() - bioetl_data_freshness_seconds` | > 24h and <=72h | Warning |
-| `time() - bioetl_data_freshness_seconds` | > 72h | Critical |
-| `bioetl_data_source_retry_exhausted_total` | 1-2 exhaustions in 1h | Warning |
-| `bioetl_data_source_retry_exhausted_total` | >=3 exhaustions in 1h | Critical |
+| Метрика                                    | Условие                                                | Severity |
+| ------------------------------------------ | ------------------------------------------------------ | -------- |
+| `bioetl_circuit_breaker_state == 2`        | > 5 min                                                | Critical |
+| `bioetl_errors_total` rate                 | > 10/min                                               | Warning  |
+| `bioetl_dq_records_quarantined_total` rate | > 5% and \<=20% of processed, with >=20 bronze records | Warning  |
+| `bioetl_dq_records_quarantined_total` rate | > 20% of processed, with >=20 bronze records           | Critical |
+| `bioetl_pipeline_duration_seconds`         | > 95th percentile + 50%                                | Warning  |
+| `bioetl_health_check_status == 0`          | > 1 min                                                | Critical |
+| `time() - bioetl_data_freshness_seconds`   | > 24h and \<=72h                                       | Warning  |
+| `time() - bioetl_data_freshness_seconds`   | > 72h                                                  | Critical |
+| `bioetl_data_source_retry_exhausted_total` | 1-2 exhaustions in 1h                                  | Warning  |
+| `bioetl_data_source_retry_exhausted_total` | >=3 exhaustions in 1h                                  | Critical |
 
 Smoke baseline для этих границ закреплён в
 `tests/integration/test_prometheus_rules_config.py`, чтобы warning/critical окна
@@ -486,7 +489,7 @@ groups:
           summary: "High quarantine rate for {{ $labels.pipeline }}"
 ```
 
----
+______________________________________________________________________
 
 ## Grafana Dashboard
 
@@ -497,21 +500,25 @@ groups:
 ### Основные панели
 
 1. **Pipeline Overview**
+
    - Количество запусков по статусу
    - Длительность выполнения (histogram)
    - Обработанные записи (counter)
 
-2. **Data Quality**
+1. **Data Quality**
+
    - Карантинные записи
    - DQ validation score
    - Anomaly detection
 
-3. **Circuit Breaker**
+1. **Circuit Breaker**
+
    - Состояние по провайдерам
    - Количество срабатываний
    - Success/Failure rate
 
-4. **Performance**
+1. **Performance**
+
    - Batch size distribution
    - Write duration by layer
    - VACUUM duration
@@ -550,37 +557,40 @@ Use these metrics to answer a different question than write counters:
 did control-plane state fail to persist, or was it persisted successfully but
 could not be read back during investigation and follow-up processing?
 
----
+______________________________________________________________________
 
 ## NoOp режим
 
 При отключении observability используются NoOp реализации:
 
-| Компонент | NoOp реализация |
-|-----------|-----------------|
+| Компонент   | NoOp реализация                  |
+| ----------- | -------------------------------- |
 | MetricsPort | `NoOpMetrics` — все методы no-op |
 | TracingPort | `NoOpTracing` — фиктивный tracer |
-| LoggerPort | `UnifiedLogger` — всегда активен |
+| LoggerPort  | `UnifiedLogger` — всегда активен |
 
 > **Note:** Логирование всегда включено. Отключить можно только метрики и трассировку.
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
 ### Метрики не отображаются
 
 1. Проверить что метрики включены:
+
    ```bash
    echo $BIOETL_OBSERVABILITY__METRICS_ENABLED  # should be "true"
    ```
 
-2. Проверить endpoint:
+1. Проверить endpoint:
+
    ```bash
    curl http://localhost:8000/metrics | head -20
    ```
 
-3. Проверить порт не занят:
+1. Проверить порт не занят:
+
    ```bash
    lsof -i :8000
    ```
@@ -588,11 +598,13 @@ could not be read back during investigation and follow-up processing?
 ### Health check падает
 
 1. Проверить connectivity к провайдеру:
+
    ```bash
    bioetl health check --provider chembl
    ```
 
-2. Проверить логи на ошибки:
+1. Проверить логи на ошибки:
+
    ```bash
    grep -i error logs/bioetl.log
    ```
@@ -600,16 +612,18 @@ could not be read back during investigation and follow-up processing?
 ### Tracing не работает
 
 1. Проверить что tracing включён:
+
    ```bash
    echo $BIOETL_OBSERVABILITY__TRACING_ENABLED  # should be "true"
    ```
 
-2. Проверить OTLP endpoint:
+1. Проверить OTLP endpoint:
+
    ```bash
    echo $OTEL_EXPORTER_OTLP_ENDPOINT
    ```
 
----
+______________________________________________________________________
 
 ## См. также
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # OpenAI Codex CLI: Setup and Usage via WSL2
 
@@ -15,18 +18,18 @@ with VPN proxy workaround.
 
 ## Prerequisites
 
-| Component | Version | Notes |
-|-----------|---------|-------|
-| WSL2 | 2.6+ | `wsl --version` |
-| Debian (WSL) | any | `wsl --install -d Debian` |
-| Node.js (in WSL) | 22.x | Installed to `/usr/local/` |
-| Codex CLI (in WSL) | 0.112+ | `npm install -g @openai/codex` |
-| Python (Windows) | 3.11+ | For proxy server |
+| Component          | Version | Notes                          |
+| ------------------ | ------- | ------------------------------ |
+| WSL2               | 2.6+    | `wsl --version`                |
+| Debian (WSL)       | any     | `wsl --install -d Debian`      |
+| Node.js (in WSL)   | 22.x    | Installed to `/usr/local/`     |
+| Codex CLI (in WSL) | 0.112+  | `npm install -g @openai/codex` |
+| Python (Windows)   | 3.11+   | For proxy server               |
 
 > **Why WSL2?** Codex CLI is a Rust binary that doesn't run natively on
 > Windows. WSL2 provides a Linux environment where it works correctly.
 
----
+______________________________________________________________________
 
 ## Architecture
 
@@ -52,23 +55,23 @@ WSL2 on Windows 10 cannot route HTTPS traffic through the host VPN
 directly (mirrored networking requires Windows 11 23H2+). The proxy
 bridges this gap.
 
----
+______________________________________________________________________
 
 ## File Inventory
 
-| File | Location | Purpose |
-|------|----------|---------|
-| `wsl_proxy.py` | `scripts/ops/` | HTTP CONNECT proxy (Python stdlib) |
-| `start-wsl-proxy.bat` | `scripts/ops/` | Start proxy in background |
-| `codex.bat` | `scripts/ops/` | Launch interactive Codex from Windows |
-| `codex-exec.bat` | `scripts/ops/` | Launch full-auto Codex from Windows |
-| `.setup_wsl_codex.sh` | `scripts/dev/` | DNS resolver (dig + PowerShell fallback) |
-| `.wsl_proxy_env.sh` | repo root | Auto-configure proxy env vars |
-| `.codex/config.toml` | repo root | Project-level Codex config |
-| `~/.codex/config.toml` | WSL home | Global Codex config (MCP servers) |
-| `~/.bashrc` | WSL home | Sources DNS + proxy scripts |
+| File                   | Location       | Purpose                                  |
+| ---------------------- | -------------- | ---------------------------------------- |
+| `wsl_proxy.py`         | `scripts/ops/` | HTTP CONNECT proxy (Python stdlib)       |
+| `start-wsl-proxy.bat`  | `scripts/ops/` | Start proxy in background                |
+| `codex.bat`            | `scripts/ops/` | Launch interactive Codex from Windows    |
+| `codex-exec.bat`       | `scripts/ops/` | Launch full-auto Codex from Windows      |
+| `.setup_wsl_codex.sh`  | `scripts/dev/` | DNS resolver (dig + PowerShell fallback) |
+| `.wsl_proxy_env.sh`    | repo root      | Auto-configure proxy env vars            |
+| `.codex/config.toml`   | repo root      | Project-level Codex config               |
+| `~/.codex/config.toml` | WSL home       | Global Codex config (MCP servers)        |
+| `~/.bashrc`            | WSL home       | Sources DNS + proxy scripts              |
 
----
+______________________________________________________________________
 
 ## Quick Start
 
@@ -114,7 +117,7 @@ scripts\ops\codex.bat "add retry logic"         # interactive with prompt
 scripts\ops\codex-exec.bat "fix the bug"        # full-auto
 ```
 
----
+______________________________________________________________________
 
 ## Initial Setup (one-time)
 
@@ -151,7 +154,7 @@ codex login status
 # Expected: "Logged in using ChatGPT"
 ```
 
----
+______________________________________________________________________
 
 ## Configuration
 
@@ -197,17 +200,17 @@ multi_agent = true
 
 All MCP servers use `startup_timeout_sec = 30` to accommodate VPN latency:
 
-| Server | Package | Purpose |
-|--------|---------|---------|
-| memory | `@modelcontextprotocol/server-memory` | Persistent memory |
-| sequential-thinking | `@modelcontextprotocol/server-sequential-thinking` | Reasoning |
-| github | `@modelcontextprotocol/server-github` | GitHub API |
-| filesystem | `@modelcontextprotocol/server-filesystem` | File access |
-| pdf | `@modelcontextprotocol/server-pdf` | PDF reading |
-| prometheus | `prometheus-mcp` | Prometheus queries and target discovery |
-| grafana | `mcp-grafana-npx` | Grafana dashboards, datasources, and observability context |
+| Server              | Package                                            | Purpose                                                    |
+| ------------------- | -------------------------------------------------- | ---------------------------------------------------------- |
+| memory              | `@modelcontextprotocol/server-memory`              | Persistent memory                                          |
+| sequential-thinking | `@modelcontextprotocol/server-sequential-thinking` | Reasoning                                                  |
+| github              | `@modelcontextprotocol/server-github`              | GitHub API                                                 |
+| filesystem          | `@modelcontextprotocol/server-filesystem`          | File access                                                |
+| pdf                 | `@modelcontextprotocol/server-pdf`                 | PDF reading                                                |
+| prometheus          | `prometheus-mcp`                                   | Prometheus queries and target discovery                    |
+| grafana             | `mcp-grafana-npx`                                  | Grafana dashboards, datasources, and observability context |
 
----
+______________________________________________________________________
 
 ## VPN Workaround Details
 
@@ -217,14 +220,15 @@ WSL2 on Windows 10 uses a NAT-based virtual network. When a VPN is active,
 WSL2 traffic cannot reach external hosts because:
 
 1. VPN routes bypass the WSL2 virtual adapter
-2. DNS resolution in WSL2 fails (queries go to the gateway, not VPN DNS)
-3. Mirrored networking (`networkingMode=mirrored`) requires Windows 11 23H2+
+1. DNS resolution in WSL2 fails (queries go to the gateway, not VPN DNS)
+1. Mirrored networking (`networkingMode=mirrored`) requires Windows 11 23H2+
 
 ### Solution: Two-layer workaround
 
 **Layer 1: DNS** (`scripts/dev/.setup_wsl_codex.sh`)
 
 Resolves OpenAI and npm hosts using:
+
 - `dig` (fast, works when WSL DNS is functional)
 - `powershell.exe Resolve-DnsName` fallback (uses Windows DNS via VPN)
 
@@ -245,7 +249,7 @@ environment variables (set by `.wsl_proxy_env.sh`).
 
 The proxy runs on the Windows host where VPN routing works correctly.
 
----
+______________________________________________________________________
 
 ## WSL2 Shell Configuration
 
@@ -282,26 +286,31 @@ generateHosts = false       # preserve our DNS entries
 generateResolvConf = false   # keep custom resolv.conf
 ```
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
 ### Codex can't connect to OpenAI
 
 1. **Check proxy is running** (Windows):
+
    ```cmd
    netstat -an | findstr 3128
    ```
+
    If not listening, run `scripts\ops\start-wsl-proxy.bat`.
 
-2. **Check proxy env** (WSL):
+1. **Check proxy env** (WSL):
+
    ```bash
    echo $http_proxy
    # Expected: http://172.x.x.x:3128
    ```
+
    If empty, run `proxy-on` or `source ~/.bashrc`.
 
-3. **Test connectivity** (WSL):
+1. **Test connectivity** (WSL):
+
    ```bash
    curl -x $http_proxy -sI https://api.openai.com | head -3
    # Expected: HTTP/1.1 200 Connection Established
@@ -351,20 +360,20 @@ When VPN is back on:
 proxy-on     # re-enable proxy vars
 ```
 
----
+______________________________________________________________________
 
 ## Useful Commands
 
-| Command | Description |
-|---------|-------------|
-| `cx` | Interactive Codex in project dir |
-| `cxe "prompt"` | Full-auto Codex |
-| `codex review` | Code review |
-| `codex resume` | Resume previous session |
-| `codex login status` | Check auth status |
-| `proxy-on` / `proxy-off` | Toggle proxy |
-| `cdp` | cd to project directory |
+| Command                  | Description                      |
+| ------------------------ | -------------------------------- |
+| `cx`                     | Interactive Codex in project dir |
+| `cxe "prompt"`           | Full-auto Codex                  |
+| `codex review`           | Code review                      |
+| `codex resume`           | Resume previous session          |
+| `codex login status`     | Check auth status                |
+| `proxy-on` / `proxy-off` | Toggle proxy                     |
+| `cdp`                    | cd to project directory          |
 
----
+______________________________________________________________________
 
 *Last updated: 2026-03-10*

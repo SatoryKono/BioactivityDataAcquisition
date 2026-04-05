@@ -6,7 +6,7 @@ This document is preserved as historical implementation context. Active DQ
 governance and current behavior must be derived from the current source code,
 active docs in `docs/00-05`, and current CI/test gates.
 
----
+______________________________________________________________________
 
 # Data Quality Contract System - Implementation Summary
 
@@ -19,10 +19,10 @@ This document provides a comprehensive summary of the contract-based Data Qualit
 The DQ system adheres to the following architectural principles:
 
 1. **Hexagonal Architecture**: Clear separation between domain, application, and infrastructure layers
-2. **Immutability**: All DQ contract types are frozen dataclasses for thread safety
-3. **Contract-Based Design**: Explicit contracts for DQ policies and rule outcomes
-4. **Deterministic Behavior**: Policy resolution and outcome creation are deterministic
-5. **Backward Compatibility**: New features are optional to maintain existing functionality
+1. **Immutability**: All DQ contract types are frozen dataclasses for thread safety
+1. **Contract-Based Design**: Explicit contracts for DQ policies and rule outcomes
+1. **Deterministic Behavior**: Policy resolution and outcome creation are deterministic
+1. **Backward Compatibility**: New features are optional to maintain existing functionality
 
 ## Epic 1: Canonical DQ Contract Kernel
 
@@ -31,18 +31,23 @@ The DQ system adheres to the following architectural principles:
 #### Domain Types (`src/bioetl/domain/types/dq_contracts.py`)
 
 - **DQDisposition**: Enum for final decisions about data quality violations
+
   - `PASS`, `WARN`, `QUARANTINE`, `SKIP`, `FAIL`
 
 - **DQViolationKind**: Enum for categories of DQ violations
+
   - `SCHEMA_VIOLATION`, `THRESHOLD_BREACH`, `BUSINESS_RULE_VIOLATION`, `CROSS_VALIDATION_MISMATCH`, `ANOMALY_SIGNAL`
 
 - **DQPolicyRef**: Immutable reference to DQ policy contracts
+
   - `contract_ref`, `contract_version`, `rule_bundle_version`, `policy_hash`
 
 - **DQRuleOutcome**: Immutable outcome of single DQ rule evaluation
+
   - `rule_id`, `violation_kind`, `severity`, `disposition`, `disposition_reason`, `affected_fields`, `config_path`
 
 - **DQRuleProvenance**: Compact provenance information for metadata sidecars
+
   - `rule_id`, `contract_version`, `severity`, `disposition`, `config_path`, `report_artifact_path`, `policy_hash`
 
 #### Extended DQ Result (`src/bioetl/domain/value_objects/dq_result.py`)
@@ -87,11 +92,13 @@ The DQ system adheres to the following architectural principles:
 #### Contract-Aware Validators (`src/bioetl/infrastructure/validation/contract_validator.py`)
 
 - **ContractAwareGoldValidator**: Gold layer validator with contract support
+
   - Converts schema errors to DQ outcomes
   - Determines severity based on error type
   - Tracks provenance information
 
 - **ContractAwareSilverValidator**: Silver layer validator with contract support
+
   - Similar functionality to Gold validator
   - Optimized for Silver layer requirements
 
@@ -131,7 +138,7 @@ The DQ system adheres to the following architectural principles:
 - Added DQ consistency validation to `.github/workflows/tests.yml`
 - Two validation points:
   1. **Fast validation** in `governance-preflight` job
-  2. **Comprehensive validation** in dedicated `dq-consistency-gate` job
+  1. **Comprehensive validation** in dedicated `dq-consistency-gate` job
 
 ### Architecture Tests
 
@@ -151,6 +158,7 @@ The DQ system adheres to the following architectural principles:
 ### 1. Immutable Contract Types
 
 All DQ contract types are frozen dataclasses ensuring:
+
 - Thread safety in concurrent environments
 - Predictable behavior without side effects
 - Safe sharing across components
@@ -158,6 +166,7 @@ All DQ contract types are frozen dataclasses ensuring:
 ### 2. Deterministic Policy Resolution
 
 The `DQPolicyResolver` ensures deterministic behavior through:
+
 - SHA256 hashing of policy configurations
 - Consistent disposition resolution
 - Immutable disposition overrides using `frozendict`
@@ -165,6 +174,7 @@ The `DQPolicyResolver` ensures deterministic behavior through:
 ### 3. Comprehensive Provenance Tracking
 
 DQ provenance is tracked at multiple levels:
+
 - **Rule Level**: Individual rule outcomes with contract references
 - **Policy Level**: Policy hashes for configuration consistency
 - **Metadata Level**: Provenance embedded in Silver/Gold metadata
@@ -172,6 +182,7 @@ DQ provenance is tracked at multiple levels:
 ### 4. Backward Compatibility
 
 All new features are optional:
+
 - Existing DQ functionality remains unchanged
 - New contract fields are optional with sensible defaults
 - Gradual adoption path for existing pipelines
@@ -179,6 +190,7 @@ All new features are optional:
 ### 5. Architecture Enforcement
 
 Architecture tests ensure:
+
 - Proper layer boundaries are maintained
 - Contract types are used correctly
 - Immutability constraints are enforced
@@ -199,7 +211,7 @@ config = DQConfig(
     contract_version="1.0.0",
     rule_bundle_version="1.0.0",
     default_disposition_policy=DQDisposition.WARN,
-    disposition_overrides={"schema.molecule_id": DQDisposition.FAIL}
+    disposition_overrides={"schema.molecule_id": DQDisposition.FAIL},
 )
 
 # Create resolver
@@ -207,9 +219,7 @@ resolver = DQPolicyResolver(config)
 
 # Resolve disposition
 disposition = resolver.resolve_disposition(
-    "schema.molecule_id",
-    DQViolationKind.SCHEMA_VIOLATION,
-    "high"
+    "schema.molecule_id", DQViolationKind.SCHEMA_VIOLATION, "high"
 )
 # Returns: DQDisposition.FAIL (from override)
 
@@ -218,7 +228,7 @@ outcome = resolver.create_rule_outcome(
     rule_id="schema.molecule_id",
     violation_kind=DQViolationKind.SCHEMA_VIOLATION,
     severity="high",
-    config_path="contracts/chembl_molecule/dq_rules.yaml"
+    config_path="contracts/chembl_molecule/dq_rules.yaml",
 )
 ```
 
@@ -241,7 +251,7 @@ metadata = {
             "rule_id": "schema.molecule_id",
             "contract_version": "1.0.0",
             "severity": "high",
-            "disposition": "fail"
+            "disposition": "fail",
         }
     ]
 }
@@ -262,14 +272,14 @@ outcome1 = DQRuleOutcome(
     rule_id="schema.molecule_id",
     violation_kind=DQViolationKind.SCHEMA_VIOLATION,
     severity="high",
-    disposition=DQDisposition.FAIL
+    disposition=DQDisposition.FAIL,
 )
 
 outcome2 = DQRuleOutcome(
     rule_id="threshold.completeness",
     violation_kind=DQViolationKind.THRESHOLD_BREACH,
     severity="medium",
-    disposition=DQDisposition.WARN
+    disposition=DQDisposition.WARN,
 )
 
 # Create policy reference
@@ -277,7 +287,7 @@ policy_ref = DQPolicyRef(
     contract_ref="chembl_molecule",
     contract_version="1.0.0",
     rule_bundle_version="1.0.0",
-    policy_hash="abc123..."
+    policy_hash="abc123...",
 )
 
 # Create DQ result
@@ -285,12 +295,14 @@ result = DQResult(
     error_rate=0.15,
     status=DQEvaluationStatus.FAILED,
     rule_outcomes=[outcome1, outcome2],
-    policy_ref=policy_ref
+    policy_ref=policy_ref,
 )
 
 # Filter outcomes
 fail_outcomes = [o for o in result.rule_outcomes if o.disposition == DQDisposition.FAIL]
-schema_outcomes = result.get_outcomes_by_violation_kind(DQViolationKind.SCHEMA_VIOLATION)
+schema_outcomes = result.get_outcomes_by_violation_kind(
+    DQViolationKind.SCHEMA_VIOLATION
+)
 ```
 
 ## Testing Strategy
@@ -340,32 +352,32 @@ schema_outcomes = result.get_outcomes_by_violation_kind(DQViolationKind.SCHEMA_V
 ### For Existing Code
 
 1. **No Changes Required**: Existing DQ functionality continues to work unchanged
-2. **Optional Adoption**: New contract features can be adopted incrementally
-3. **Backward Compatibility**: All new fields have sensible defaults
+1. **Optional Adoption**: New contract features can be adopted incrementally
+1. **Backward Compatibility**: All new fields have sensible defaults
 
 ### For New Development
 
 1. **Use Contract Types**: Prefer `DQRuleOutcome` over raw validation results
-2. **Policy Configuration**: Use `DQConfig` with contract references
-3. **Provenance Tracking**: Include provenance in metadata for traceability
-4. **Deterministic Resolution**: Use `DQPolicyResolver` for consistent policy decisions
+1. **Policy Configuration**: Use `DQConfig` with contract references
+1. **Provenance Tracking**: Include provenance in metadata for traceability
+1. **Deterministic Resolution**: Use `DQPolicyResolver` for consistent policy decisions
 
 ## Future Enhancements
 
 ### Potential Extensions
 
 1. **Contract Versioning**: Automated contract version management
-2. **Policy Registry**: Central registry for DQ policies
-3. **Contract Evolution**: Tools for safe contract evolution
-4. **Policy Analytics**: Analysis of policy effectiveness over time
-5. **Contract Testing**: Automated contract compliance testing
+1. **Policy Registry**: Central registry for DQ policies
+1. **Contract Evolution**: Tools for safe contract evolution
+1. **Policy Analytics**: Analysis of policy effectiveness over time
+1. **Contract Testing**: Automated contract compliance testing
 
 ### Architecture Improvements
 
 1. **Contract Discovery**: Automatic discovery of contract references
-2. **Policy Inheritance**: Hierarchical policy inheritance
-3. **Contract Validation**: Schema validation for contract files
-4. **Policy Visualization**: Tools for visualizing policy relationships
+1. **Policy Inheritance**: Hierarchical policy inheritance
+1. **Contract Validation**: Schema validation for contract files
+1. **Policy Visualization**: Tools for visualizing policy relationships
 
 ## Summary
 

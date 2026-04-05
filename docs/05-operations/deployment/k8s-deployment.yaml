@@ -25,30 +25,30 @@ spec:
       securityContext:
         runAsNonRoot: false  # BioETL may need elevated privileges for data processing
         fsGroup: 1000
-      
+
       containers:
       - name: bioetl
         image: bioetl:REPLACE_IMAGE_TAG  # Update registry and tag before apply
         imagePullPolicy: IfNotPresent
-        
+
         ports:
         - name: metrics
           containerPort: 8000
           protocol: TCP
-        
+
         envFrom:
         - configMapRef:
             name: bioetl-config
         - secretRef:
             name: bioetl-secrets
             optional: true
-        
+
         env:
         - name: BIOETL_DATA_DIR
           value: /data
         - name: BIOETL_LOG_FILE
           value: /logs/bioetl.log
-        
+
         resources:
           requests:
             cpu: 500m
@@ -56,7 +56,7 @@ spec:
           limits:
             cpu: 2000m
             memory: 4Gi
-        
+
         livenessProbe:
           httpGet:
             path: /metrics
@@ -65,7 +65,7 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
-        
+
         readinessProbe:
           httpGet:
             path: /metrics
@@ -74,7 +74,7 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 2
-        
+
         volumeMounts:
         - name: data
           mountPath: /data
@@ -83,7 +83,7 @@ spec:
         - name: config
           mountPath: /etc/bioetl
           readOnly: true
-      
+
       volumes:
       - name: data
         persistentVolumeClaim:
@@ -93,7 +93,7 @@ spec:
       - name: config
         configMap:
           name: bioetl-config
-      
+
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
 ---

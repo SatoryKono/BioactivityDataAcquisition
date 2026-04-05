@@ -11,30 +11,30 @@
 
 ### Insight 1: Complexity governance is stable enough to serve as a clean baseline
 
-**Observation:** The current `check-c901` run reports `0` current violations, `0` new violations, and `7` resolved baseline violations.  
-**Implication:** We can interpret any newly introduced `C901` failures during upcoming architecture work as fresh regressions rather than inherited baseline noise. This lowers diagnostic cost for the next refactor wave.  
-**Confidence:** 0.97  
+**Observation:** The current `check-c901` run reports `0` current violations, `0` new violations, and `7` resolved baseline violations.
+**Implication:** We can interpret any newly introduced `C901` failures during upcoming architecture work as fresh regressions rather than inherited baseline noise. This lowers diagnostic cost for the next refactor wave.
+**Confidence:** 0.97
 **Evidence:** `EV-governance-signals-c901-enforceable-baseline-is-green`
 
 ### Insight 2: Green file-size governance does not mean the large-file problem is gone
 
 **Observation:** The enforceable file-size ratchet is tied to the `file_size_limits` exemption registry, which is currently empty, while the raw hotspot inventory still shows `82` files above `10 KB` and `10` above `350 LOC`.
-**Implication:** Current green-state reporting can be misread if people assume it describes the whole source-tree size profile. Operationally, this means the repo has successfully ratcheted exemptions down, but has not yet converted the broad hotspot tail into a directly enforced budget.  
-**Confidence:** 0.95  
+**Implication:** Current green-state reporting can be misread if people assume it describes the whole source-tree size profile. Operationally, this means the repo has successfully ratcheted exemptions down, but has not yet converted the broad hotspot tail into a directly enforced budget.
+**Confidence:** 0.95
 **Evidence:** `EV-governance-signals-file-size-ratchet-tracks-exemptions-not-raw-hotspots`, `EV-governance-signals-file-size-ratchet-tightened-from-six-to-zero`
 
 ### Insight 3: Size governance has become stricter, but only through narrow controls
 
-**Observation:** The scorecard moved from a historical `file_size_limits` baseline of `6` to an enforceable baseline of `0`, and registry sync is explicitly anchored to the enforceable `baseline`. At the same time, the only named hotspot budget discovered is `core_orchestration` under `src/bioetl/application/core/`.  
-**Implication:** Governance has tightened in principle, but that tightening currently acts through selective registry control and one named hotspot program rather than a repo-wide ratchet on all large files. This is a disciplined but partial form of size governance.  
-**Confidence:** 0.92  
+**Observation:** The scorecard moved from a historical `file_size_limits` baseline of `6` to an enforceable baseline of `0`, and registry sync is explicitly anchored to the enforceable `baseline`. At the same time, the only named hotspot budget discovered is `core_orchestration` under `src/bioetl/application/core/`.
+**Implication:** Governance has tightened in principle, but that tightening currently acts through selective registry control and one named hotspot program rather than a repo-wide ratchet on all large files. This is a disciplined but partial form of size governance.
+**Confidence:** 0.92
 **Evidence:** `EV-governance-signals-file-size-ratchet-tightened-from-six-to-zero`, `EV-governance-signals-hotspot-budgets-prioritize-application-core`
 
 ### Insight 4: Duplication in `application` and `composition` is visible enough to prioritize, but not yet governable as a trend
 
 **Observation:** Ad hoc scans found `31` `R0801` occurrences in `composition` and `88` in `application`, but the default duplication workflow only checks `src/bioetl/infrastructure/adapters`.
-**Implication:** We can say there is current duplication pressure, especially in `application`, but we cannot yet claim a controlled improvement or regression trend for those layers. Until there is a ratcheted baseline, duplication in these areas remains visible debt rather than enforceable debt.  
-**Confidence:** 0.93  
+**Implication:** We can say there is current duplication pressure, especially in `application`, but we cannot yet claim a controlled improvement or regression trend for those layers. Until there is a ratcheted baseline, duplication in these areas remains visible debt rather than enforceable debt.
+**Confidence:** 0.93
 **Evidence:** `EV-governance-signals-composition-duplication-snapshot-has-28-r0801-occurrences`, `EV-governance-signals-application-duplication-snapshot-has-88-r0801-occurrences`, `EV-governance-signals-duplication-governance-excludes-composition-and-application`
 
 ## Contradictions and Resolutions

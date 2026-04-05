@@ -1,25 +1,28 @@
----
+______________________________________________________________________
+
 Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-04'
----
+  Last verified: '2026-04-04'
+
+______________________________________________________________________
 
 # Monitoring Docs Index
 
 ## Канонические источники
 
 1. `grafana/dashboards/*.json` — фактическая конфигурация Grafana и финальный source of truth по panels/links/variables.
-2. `docs/03-guides/dashboards/dashboard-v2-usage.md` — короткий операторский сценарий: какой dashboard открыть первым, куда смотреть, как делать drilldown.
-3. `docs/03-guides/dashboards/variables-guide.md` — фактические template variables и их PromQL sources.
-4. `docs/03-guides/dashboards/dashboard-extension-human.md` — краткое руководство для человека, который расширяет shipped dashboards.
-5. `docs/03-guides/dashboards/dashboard-extension-llm.md` — краткий playbook для LLM/AI-агента: JSON invariants, nav model, docs cascade, verification.
-6. `docs/03-guides/dashboards/dashboard-v2-updates.md` — bounded audit/change log по shipped JSON.
-7. `docs/05-operations/01-monitoring-guide.md` — operational runbook: alert-backed troubleshooting path и ссылки на runbooks.
-8. `grafana/README.md` — setup/reference документ по стеку Prometheus/Grafana/Loki/Tempo, а не основной operator quick-start.
+1. `docs/03-guides/dashboards/dashboard-v2-usage.md` — короткий операторский сценарий: какой dashboard открыть первым, куда смотреть, как делать drilldown.
+1. `docs/03-guides/dashboards/variables-guide.md` — фактические template variables и их PromQL sources.
+1. `docs/03-guides/dashboards/dashboard-extension-human.md` — краткое руководство для человека, который расширяет shipped dashboards.
+1. `docs/03-guides/dashboards/dashboard-extension-llm.md` — краткий playbook для LLM/AI-агента: JSON invariants, nav model, docs cascade, verification.
+1. `docs/03-guides/dashboards/dashboard-v2-updates.md` — bounded audit/change log по shipped JSON.
+1. `docs/05-operations/01-monitoring-guide.md` — operational runbook: alert-backed troubleshooting path и ссылки на runbooks.
+1. `grafana/README.md` — setup/reference документ по стеку Prometheus/Grafana/Loki/Tempo, а не основной operator quick-start.
 
 ## Как читать этот набор
 

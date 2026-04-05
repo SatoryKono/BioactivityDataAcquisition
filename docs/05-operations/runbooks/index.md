@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: Informational
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-01'
----
+  Priority: Informational
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-04-01'
+
+______________________________________________________________________
 
 # Operations Runbooks (Playbooks)
 
@@ -36,39 +39,43 @@ Last verified: '2026-04-01'
 ### Available Runbooks
 
 ### Incident Response
-| Runbook | Description | Priority |
-|---------|-------------|----------|
-| [Incident Response](incident-response.md) | Coordination + routing layer for alert triage and escalation | P1 |
-| [Pipeline Failure - Critical](pipeline-failure-critical.md) | Critical pipeline failure handling | P0 |
-| [Pipeline Failure - DQ](pipeline-failure-dq.md) | Data Quality failure handling | P1 |
-| [Pipeline Failure Recovery](pipeline-failure-recovery.md) | General pipeline recovery procedures | P1 |
+
+| Runbook                                                     | Description                                                  | Priority |
+| ----------------------------------------------------------- | ------------------------------------------------------------ | -------- |
+| [Incident Response](incident-response.md)                   | Coordination + routing layer for alert triage and escalation | P1       |
+| [Pipeline Failure - Critical](pipeline-failure-critical.md) | Critical pipeline failure handling                           | P0       |
+| [Pipeline Failure - DQ](pipeline-failure-dq.md)             | Data Quality failure handling                                | P1       |
+| [Pipeline Failure Recovery](pipeline-failure-recovery.md)   | General pipeline recovery procedures                         | P1       |
 
 ### Data Management
-| Runbook | Description | Priority |
-|---------|-------------|----------|
-| [Data Recovery](data-recovery.md) | Steps to recover from data corruption or loss (DR) | P0/P1 |
-| [Quarantine Management](quarantine-management.md) | Managing quarantined records | P2 |
-| [DQ Failure Investigation](dq-failure-investigation.md) | Investigating data quality failures | P1 |
-| [Backfill/Rebuild](backfill-rebuild.md) | Data backfill and rebuild procedures | P2 |
-| [Schema Evolution](schema-evolution.md) | Handling schema changes | P2 |
+
+| Runbook                                                 | Description                                        | Priority |
+| ------------------------------------------------------- | -------------------------------------------------- | -------- |
+| [Data Recovery](data-recovery.md)                       | Steps to recover from data corruption or loss (DR) | P0/P1    |
+| [Quarantine Management](quarantine-management.md)       | Managing quarantined records                       | P2       |
+| [DQ Failure Investigation](dq-failure-investigation.md) | Investigating data quality failures                | P1       |
+| [Backfill/Rebuild](backfill-rebuild.md)                 | Data backfill and rebuild procedures               | P2       |
+| [Schema Evolution](schema-evolution.md)                 | Handling schema changes                            | P2       |
 
 ### Infrastructure
-| Runbook | Description | Priority |
-|---------|-------------|----------|
-| [Checkpoint Debugging](checkpoint-debugging.md) | Debugging checkpoint issues | P2 |
-| [Stale Lock](stale-lock.md) | Handling stale lock situations | P1 |
-| [Vacuum Procedures](vacuum-procedures.md) | Delta Lake vacuum maintenance | P2 |
-| [Scaling and Performance Tuning](scaling.md) | Local-only performance tuning (vertical scaling + Delta maintenance) | P3 |
+
+| Runbook                                         | Description                                                          | Priority |
+| ----------------------------------------------- | -------------------------------------------------------------------- | -------- |
+| [Checkpoint Debugging](checkpoint-debugging.md) | Debugging checkpoint issues                                          | P2       |
+| [Stale Lock](stale-lock.md)                     | Handling stale lock situations                                       | P1       |
+| [Vacuum Procedures](vacuum-procedures.md)       | Delta Lake vacuum maintenance                                        | P2       |
+| [Scaling and Performance Tuning](scaling.md)    | Local-only performance tuning (vertical scaling + Delta maintenance) | P3       |
 
 ### Monitoring
-| Runbook | Description | Priority |
-|---------|-------------|----------|
-| [Observability Checklist](observability-checklist.md) | Operator validation checklist for metrics, log correlation, dashboards, and diagnostics routing | P2 |
-| [Run Manifest Inspection](run-manifest-inspection.md) | Mandatory runbook for the supported RunManifest / RunLedger inspection surface | P1 |
-| [Traceability Signal Ownership](traceability-signal-ownership.md) | Ownership and escalation matrix for traceability signals | P1 |
-| [Traceability Tabletop Drills](traceability-tabletop-drills.md) | Recurring drill catalog, cadence, and scoring model | P2 |
-| [Traceability Adoption Checklist](traceability-adoption-checklist.md) | Evidence log and exit-gate checklist for operator adoption | P2 |
-| [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md) | Canonical one-time execution pack for the final Wave 5 closeout gate | P2 |
+
+| Runbook                                                                  | Description                                                                                     | Priority |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | -------- |
+| [Observability Checklist](observability-checklist.md)                    | Operator validation checklist for metrics, log correlation, dashboards, and diagnostics routing | P2       |
+| [Run Manifest Inspection](run-manifest-inspection.md)                    | Mandatory runbook for the supported RunManifest / RunLedger inspection surface                  | P1       |
+| [Traceability Signal Ownership](traceability-signal-ownership.md)        | Ownership and escalation matrix for traceability signals                                        | P1       |
+| [Traceability Tabletop Drills](traceability-tabletop-drills.md)          | Recurring drill catalog, cadence, and scoring model                                             | P2       |
+| [Traceability Adoption Checklist](traceability-adoption-checklist.md)    | Evidence log and exit-gate checklist for operator adoption                                      | P2       |
+| [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md) | Canonical one-time execution pack for the final Wave 5 closeout gate                            | P2       |
 
 ### Control-Plane / Traceability Routing
 

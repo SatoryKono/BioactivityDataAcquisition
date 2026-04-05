@@ -34,7 +34,7 @@ effective_config:
   timestamp: "2024-03-25T14:30:00.123456Z"
   pipeline_name: "chembl_molecule_etl"
   execution_id: "abc-123-def-456"
-  
+
   # Provenance
   provenance:
     git_commit: "a1b2c3d4e5f67890"
@@ -45,13 +45,13 @@ effective_config:
       - "configs/providers/chembl.yaml"
       - "configs/entities/molecule.yaml"
       - "configs/composites/molecule_pipeline.yaml"
-    
+
   # Environment
   environment:
     name: "production"
     region: "us-east-1"
     deployment_id: "prod-chembl-20240325"
-    
+
   # DQ Contracts
   dq_contracts:
     - contract_id: "molecule_schema_validation"
@@ -60,21 +60,21 @@ effective_config:
       disposition: "fail"
       rule_count: 12
       last_updated: "2024-03-20T10:15:00Z"
-      
+
     - contract_id: "molecule_content_validation"
       version: "1.3.2"
       hash: "1234567890abcdefa1b2c3d4e5f67890"
       disposition: "warn"
       rule_count: 8
       last_updated: "2024-03-18T09:30:00Z"
-      
+
     - contract_id: "cross_source_consistency"
       version: "1.0.5"
       hash: "fedcba0987654321fedcba0987654321"
       disposition: "quarantine"
       rule_count: 5
       last_updated: "2024-03-15T16:20:00Z"
-    
+
   # Pipeline Configuration
   pipeline_config:
     sources: ["chembl", "pubchem", "bindingdb"]
@@ -82,13 +82,13 @@ effective_config:
     merge_strategy: "prioritize"
     batch_size: 1000
     parallel_workers: 8
-    
+
     aggregation:
       group_by: ["molecule_id", "assay_type"]
       aggregations:
         mean_pchembl: {field: "pchembl_value", method: "mean"}
         count_assays: {field: "assay_id", method: "count"}
-      
+
     cross_validation:
       pairs:
         - chembl: ["pubchem", "bindingdb"]
@@ -96,25 +96,25 @@ effective_config:
       rules:
         strict: ["molecule_id", "smiles"]
         lenient: ["assay_description"]
-      
+
     field_priorities:
       molecule_id: {priority: 1, source: "chembl"}
       smiles: {priority: 1, source: "pubchem"}
       assay_type: {priority: 2, source: "chembl"}
-      
+
   # Performance Settings
   performance:
     cache_ttl: 3600
     max_memory_mb: 4096
     timeout_seconds: 300
     retry_attempts: 3
-    
+
   # Monitoring
   monitoring:
     metrics_enabled: true
     logging_level: "INFO"
     trace_sample_rate: 0.1
-    
+
 # Hash for change detection
 hash: "a1b2c3...finalhash...7890"
 ```
@@ -303,16 +303,16 @@ print(f"Pipeline: {metadata['pipeline_name']}")
 def should_reprocess_data(saved_hash: str, current_config: dict) -> bool:
     """Check if data needs reprocessing due to config changes"""
     service = EffectiveConfigService()
-    
+
     # Create artifact for current configuration
     current_artifact = service.create_artifact(current_config)
     current_hash = current_artifact.compute_hash()
-    
+
     # Compare with saved hash
     if saved_hash != current_hash:
         print(f"Configuration changed: {saved_hash} -> {current_hash}")
         return True
-    
+
     return False
 
 # Usage in pipeline
@@ -331,10 +331,10 @@ else:
 def log_configuration_version(config: dict, context: dict):
     """Log configuration version for audit trail"""
     service = EffectiveConfigService()
-    
+
     # Create artifact
     artifact = service.create_artifact(config)
-    
+
     # Store in version history
     version_log = {
         "timestamp": artifact.metadata['timestamp'],
@@ -344,10 +344,10 @@ def log_configuration_version(config: dict, context: dict):
         "user": context.get('user', 'system'),
         "config_size": len(service.serialize_config(artifact))
     }
-    
+
     # Write to version history database
     save_to_version_history(version_log)
-    
+
     return version_log
 
 # Usage during pipeline initialization
@@ -365,11 +365,11 @@ print(f"Configuration version logged: {version_info['hash']}")
 def debug_with_artifact(issue_context: dict):
     """Create debug bundle with configuration artifact"""
     service = EffectiveConfigService()
-    
+
     # Get current configuration
     current_config = get_current_pipeline_config()
     artifact = service.create_artifact(current_config)
-    
+
     # Create debug bundle
     debug_bundle = {
         "issue_id": issue_context['issue_id'],
@@ -383,10 +383,10 @@ def debug_with_artifact(issue_context: dict):
         "logs": get_relevant_logs(issue_context['time_range']),
         "metrics": get_relevant_metrics(issue_context['time_range'])
     }
-    
+
     # Save debug bundle
     save_debug_bundle(debug_bundle)
-    
+
     return debug_bundle
 
 # Usage when debugging pipeline issues
@@ -409,21 +409,21 @@ except Exception as e:
 def rollback_configuration(target_hash: str):
     """Rollback pipeline configuration to previous version"""
     service = EffectiveConfigService()
-    
+
     # Retrieve target configuration from history
     target_config_json = get_config_from_history(target_hash)
     if not target_config_json:
         raise ValueError(f"Configuration with hash {target_hash} not found")
-    
+
     # Deserialize and validate
     target_artifact = service.deserialize_config(target_config_json)
     if not target_artifact.validate():
         raise ValueError("Target configuration is invalid")
-    
+
     # Apply rollback
     current_config = get_current_pipeline_config()
     current_artifact = service.create_artifact(current_config)
-    
+
     # Log rollback event
     log_rollback_event({
         "from_hash": current_artifact.compute_hash(),
@@ -431,10 +431,10 @@ def rollback_configuration(target_hash: str):
         "timestamp": datetime.now().isoformat(),
         "user": get_current_user()
     })
-    
+
     # Apply new configuration
     apply_pipeline_config(target_artifact)
-    
+
     return {
         "success": True,
         "from_hash": current_artifact.compute_hash(),
@@ -490,7 +490,7 @@ results = load_checkpoint(config_hash)
 # ✅ GOOD: Log every configuration change
 def on_config_change(new_config: dict):
     artifact = service.create_artifact(new_config)
-    
+
     # Store in history database
     save_to_config_history({
         "hash": artifact.compute_hash(),
@@ -513,7 +513,7 @@ on_config_change(new_pipeline_config)
 def safe_load_checkpoint(checkpoint_hash: str):
     current_config = get_current_pipeline_config()
     service = EffectiveConfigService()
-    
+
     if service.is_checkpoint_compatible(checkpoint_hash, current_config):
         return load_checkpoint(checkpoint_hash)
     else:
@@ -553,7 +553,7 @@ def process_config_batch(configs: list) -> list:
     """Process batch of configurations with shared resources"""
     service = EffectiveConfigService()
     results = []
-    
+
     for config in configs:
         try:
             artifact = service.create_artifact(config)
@@ -571,7 +571,7 @@ def process_config_batch(configs: list) -> list:
                 "hash": None,
                 "valid": False
             })
-    
+
     return results
 
 # Usage
@@ -658,7 +658,7 @@ CHUNK_SIZE = 1024 * 1024  # 1MB chunks
 def serialize_large_config(artifact: EffectiveConfigArtifact, file_path: str):
     """Serialize large config to file in chunks"""
     json_str = service.serialize_config(artifact)
-    
+
     with open(file_path, 'w') as f:
         for i in range(0, len(json_str), CHUNK_SIZE):
             f.write(json_str[i:i+CHUNK_SIZE])
@@ -691,10 +691,10 @@ def get_cached_config(config_id: str) -> EffectiveConfigArtifact:
 def get_config_lazy(config_id: str):
     if not hasattr(get_config_lazy, 'cache'):
         get_config_lazy.cache = {}
-    
+
     if config_id not in get_config_lazy.cache:
         get_config_lazy.cache[config_id] = load_config_from_database(config_id)
-    
+
     return get_config_lazy.cache[config_id]
 ```
 

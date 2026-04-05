@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 Примечание о rebaseline: generated dependency map и compatibility-adjacent
 artifacts на текущем дереве свежие и проходят `--check`; этот pack по-прежнему
 описывает derivative-document risk и reader-confusion risk, а не текущий red
@@ -19,11 +18,11 @@ generation, generated maps и historical verification artifacts.
 ## Созданные объекты evidence
 
 1. `EV-operations-generated-doc-drift-export-still-preserves-stale-pipelineservices-sections`
-2. `EV-operations-generated-doc-drift-export-still-carries-old-manager-labels`
-3. `EV-operations-generated-doc-drift-generated-module-dependency-map-is-derivative-not-active-policy`
-4. `EV-operations-generated-doc-drift-vcr-verification-artifact-still-lists-duplicate-and-orphan-cassettes`
-5. `EV-operations-generated-doc-drift-vcr-verification-artifact-preserves-stale-field-anomaly-names`
-6. `EV-operations-generated-doc-drift-tracked-merged-export-retired-from-repo-surface`
+1. `EV-operations-generated-doc-drift-export-still-carries-old-manager-labels`
+1. `EV-operations-generated-doc-drift-generated-module-dependency-map-is-derivative-not-active-policy`
+1. `EV-operations-generated-doc-drift-vcr-verification-artifact-still-lists-duplicate-and-orphan-cassettes`
+1. `EV-operations-generated-doc-drift-vcr-verification-artifact-preserves-stale-field-anomaly-names`
+1. `EV-operations-generated-doc-drift-tracked-merged-export-retired-from-repo-surface`
 
 ## Проверка gate
 

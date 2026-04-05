@@ -1,28 +1,31 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Architecture Diagrams - BioETL
 
 Комплексная система архитектурных диаграмм для понимания структуры, потоков данных и компонентов проекта BioETL.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Содержание
 
-1. [Обзорные Архитектурные Диаграммы](#1-обзорные-архитектурные-диаграммы)
-1. [Потоки Данных](#2-потоки-данных)
-1. [Компонентные Диаграммы](#3-компонентные-диаграммы)
-1. [Паттерны и Механизмы](#4-паттерны-и-механизмы)
-1. [Конфигурация и Схемы](#5-конфигурация-и-схемы)
+1. [Обзорные Архитектурные Диаграммы](#1-%D0%BE%D0%B1%D0%B7%D0%BE%D1%80%D0%BD%D1%8B%D0%B5-%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%BD%D1%8B%D0%B5-%D0%B4%D0%B8%D0%B0%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D1%8B)
+1. [Потоки Данных](#2-%D0%BF%D0%BE%D1%82%D0%BE%D0%BA%D0%B8-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85)
+1. [Компонентные Диаграммы](#3-%D0%BA%D0%BE%D0%BC%D0%BF%D0%BE%D0%BD%D0%B5%D0%BD%D1%82%D0%BD%D1%8B%D0%B5-%D0%B4%D0%B8%D0%B0%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D1%8B)
+1. [Паттерны и Механизмы](#4-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%BC%D0%B5%D1%85%D0%B0%D0%BD%D0%B8%D0%B7%D0%BC%D1%8B)
+1. [Конфигурация и Схемы](#5-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%B8-%D1%81%D1%85%D0%B5%D0%BC%D1%8B)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 1. Обзорные Архитектурные Диаграммы
 
@@ -74,7 +77,7 @@ Last verified: '2026-03-29'
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/01-high-level.mmd`](../foundation/01-high-level.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 1.2 Hexagonal Architecture Overview
 
@@ -113,7 +116,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/26-hexagonal-ports-adapters.mmd`](../foundation/26-hexagonal-ports-adapters.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 1.3 Layer Dependency Matrix
 
@@ -147,7 +150,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/27-import-matrix-enforcement.mmd`](../foundation/27-import-matrix-enforcement.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 1.4 Medallion Architecture Overview
 
@@ -194,7 +197,7 @@ Bronze → Silver → Gold уровни хранения данных.
 
 **Файл:** [`docs/02-architecture/diagrams/architecture/03-medallion-data-flow.mmd`](../architecture/03-medallion-data-flow.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 2. Потоки Данных
 
@@ -245,7 +248,7 @@ End-to-end поток данных от API провайдера до Gold layer
 1. **Write Bronze**
 
    - JSONL + zstd compression
-   - Write \-metadata.yaml
+   - Write -metadata.yaml
 
 1. **Write Silver**
 
@@ -287,7 +290,7 @@ End-to-end поток данных от API провайдера до Gold layer
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/08-complete-etl-workflow.mmd`](../foundation/08-complete-etl-workflow.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 2.2 Silver Merge Operation
 
@@ -344,7 +347,7 @@ Delta merge by content-hash — критическая операция для i
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/19-delta-lake-write-sequence.mermaid`](../foundation/19-delta-lake-write-sequence.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 3. Компонентные Диаграммы
 
@@ -381,7 +384,7 @@ Representative карта доменной модели с DDD aggregates, entit
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/13-domain-models-relationship.mmd`](../foundation/13-domain-models-relationship.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 3.2 Ports Architecture
 
@@ -417,7 +420,7 @@ Port protocol families — контракты между Domain и Infrastructur
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/26-hexagonal-ports-adapters.mmd`](../foundation/26-hexagonal-ports-adapters.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 3.3 Pipeline Core Components
 
@@ -472,7 +475,7 @@ Port protocol families — контракты между Domain и Infrastructur
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/40-application-core-collaboration.mermaid`](../foundation/40-application-core-collaboration.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 4. Паттерны и Механизмы
 
@@ -524,7 +527,7 @@ Port protocol families — контракты между Domain и Infrastructur
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/41-error-classification-tree.mermaid`](../foundation/41-error-classification-tree.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 4.2 Retry Mechanism
 
@@ -571,7 +574,7 @@ delay = (backoff-factor ^ retry-count) * base-delay + random(jitter-min, jitter-
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/04-error-flow.mermaid`](../foundation/04-error-flow.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 4.3 Circuit Breaker States
 
@@ -620,7 +623,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/07-circuit-breaker-states.mermaid`](../foundation/07-circuit-breaker-states.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 4.4 Graceful Shutdown
 
@@ -664,7 +667,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/05-pipeline-lifecycle-states.mermaid`](../foundation/05-pipeline-lifecycle-states.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 5. Конфигурация и Схемы
 
@@ -727,7 +730,7 @@ bioetl run --pipeline chembl_activity \
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/46-yaml-config-resolution.mermaid`](../foundation/46-yaml-config-resolution.mmd)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Приложения
 
@@ -747,6 +750,6 @@ bioetl run --pipeline chembl_activity \
 
 Скрипт рендеринга: [`render.sh`](../tooling/render.sh) или `make render-diagrams`.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 *Создано автоматически | Claude Code | 2026-01-20*

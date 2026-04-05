@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Debt Ownership Playbook
 
@@ -38,10 +41,10 @@ Mandatory enforcement points:
 ## PR Checklist
 
 1. New exemption declares explicit `owner` and concrete `removal_step`.
-2. `owner` is mapped to the correct subsystem in scorecard governance.
-3. `removal_step` references concrete follow-up action (refactor/task/RF).
-4. `scripts/qa/check_quality_exemptions.py --mode warn` passes.
-5. Active owner count in registry remains >= 3.
+1. `owner` is mapped to the correct subsystem in scorecard governance.
+1. `removal_step` references concrete follow-up action (refactor/task/RF).
+1. `scripts/qa/check_quality_exemptions.py --mode warn` passes.
+1. Active owner count in registry remains >= 3.
 
 ## Dashboard
 
@@ -75,6 +78,6 @@ When a review discusses file-size debt:
 1. Check exemption debt first in:
    - `configs/quality/debt_scorecard.yaml`
    - `configs/quality/architecture_metric_exemptions.yaml`
-2. If structural context is needed, generate or refresh a raw hotspot inventory snapshot using the canonical command in `scripts/README.md`.
-3. Treat that raw snapshot as evidence for prioritization, not as a blocking gate by itself.
-4. Only convert hotspot inventory into enforceable debt through an explicit scorecard or named-hotspot decision.
+1. If structural context is needed, generate or refresh a raw hotspot inventory snapshot using the canonical command in `scripts/README.md`.
+1. Treat that raw snapshot as evidence for prioritization, not as a blocking gate by itself.
+1. Only convert hotspot inventory into enforceable debt through an explicit scorecard or named-hotspot decision.

@@ -21,22 +21,22 @@ classDiagram
         +health_check(): HealthCheckResult
         +\_\_aenter\_\_(): Self
         +\_\_aexit\_\_(...): None
-        
-        
-        
-        
+
+
+
+
     }
 
     class FilterableDataSourcePort {
         <<Protocol>>
         +fetch_filtered(entity_type, filter_ids, filter_field, limit): AsyncIterator~dict~
         +fetch_filtered_with_fallback(entity_type, ids, field, limit): AsyncIterator~dict~
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
     }
 
     class StoragePort {
@@ -55,21 +55,21 @@ classDiagram
         +heartbeat(key, owner_id): bool
         +validate_owner(key, owner_id): bool
         +validate_fencing_token(key, token): bool
-        
-        
-        
-        
+
+
+
+
     }
 
     class CheckpointPort {
         <<Protocol>>
         +save(key, data): None
         +load(key): dict | None
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class QuarantinePort {
@@ -77,22 +77,22 @@ classDiagram
         +write(records, pipeline, error_code): None
         +inspect(pipeline, limit): list
         +replay(pipeline, filter_fn): int
-        
-        
-        
+
+
+
     }
 
     class AuditPort {
         <<Protocol>>
         +log_write(entry: AuditEntry): None
         +get_entries(filters): list~AuditEntry~
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
     }
 
     class LoggerPort {
@@ -100,9 +100,9 @@ classDiagram
         +bind(**kwargs): LoggerPort
         +info(msg, **fields): None
         +error(msg, **fields): None
-        
-        
-        
+
+
+
     }
 
     class MetricsPort {
@@ -110,24 +110,24 @@ classDiagram
         +observe_histogram(name, value, labels): None
         +increment_counter(name, labels): None
         +set_gauge(name, value, labels): None
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class TracingPort {
         <<Protocol>>
         +get_tracer(name): Tracer
         +close(): None
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
     }
 
     class CircuitBreakerPort {
@@ -135,110 +135,110 @@ classDiagram
         +get_state(): CircuitBreakerState
         +call(fn): T
         +reset(): None
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class RateLimiterPort {
         <<Protocol>>
         +acquire(tokens): None
         +try_acquire(): bool
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
     }
 
     class PiiHasherPort {
         <<Protocol>>
         +hash(value: str): str
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
     }
 
     class MetadataWriterPort {
         <<Protocol>>
         +write(path, metadata): None
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
     }
 
     class DeltaReaderPort {
         <<Protocol>>
         +read_table(path, columns, limit): DataFrame
         +get_schema(path): Schema
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
     }
 
     class InputFilterPort {
         <<Protocol>>
         +load_filter_ids(path, column): FilterLoadResult
         +load_filter_with_fallback(path, column, fallback): FilterLoadResult
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
     }
 
     class DQMonitorPort {
         <<Protocol>>
         +add_metric(name, value): None
         +check_quality(): DQResult
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class JsonEncoderPort {
         <<Protocol>>
         +encode(obj): str
         +decode(s): Any
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
     }
 
     class MemoryMonitorPort {
         <<Protocol>>
         +get_stats(): MemoryStats
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
     }
 
     DataSourcePort <|-- FilterableDataSourcePort

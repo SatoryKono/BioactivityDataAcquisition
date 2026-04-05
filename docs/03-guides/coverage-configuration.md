@@ -1,26 +1,29 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Coverage Configuration Guide
 
 **Reference**: `pyproject.toml [tool.coverage.*]` sections (lines 203-229)
 **Last Updated**: 2026-03-26
 
----
+______________________________________________________________________
 
 ## Overview
 
 BioETL uses `pytest-cov` (Coverage.py) to measure code test coverage with a **85% threshold** enforced in CI.
 The configuration balances executable code metrics with realistic coverage targets, excluding stub-like code that cannot be tested.
 
----
+______________________________________________________________________
 
 ## Configuration File
 
@@ -52,17 +55,17 @@ precision = 2
 # Note: fail_under NOT set here (CI coverage-verify uses --cov-fail-under=85)
 ```
 
----
+______________________________________________________________________
 
 ## Key Settings
 
 ### `[tool.coverage.run]`
 
-| Setting | Value | Purpose |
-|---------|-------|---------|
-| `source` | `["src/bioetl"]` | Only measure production code |
-| `branch` | `true` | Include branch coverage (condition coverage) |
-| `omit` | Test files, `__pycache__`, `__main__.py` | Exclude non-measurable code |
+| Setting  | Value                                    | Purpose                                      |
+| -------- | ---------------------------------------- | -------------------------------------------- |
+| `source` | `["src/bioetl"]`                         | Only measure production code                 |
+| `branch` | `true`                                   | Include branch coverage (condition coverage) |
+| `omit`   | Test files, `__pycache__`, `__main__.py` | Exclude non-measurable code                  |
 
 **Note**: `fail_under` is NOT set here because CI test-matrix runs parallel groups that cover partial codebase. The `coverage-verify` step in `.github/workflows/tests.yml` explicitly uses `--cov-fail-under=85`.
 
@@ -72,26 +75,26 @@ precision = 2
 
 Lines matching these patterns are excluded from coverage metrics:
 
-| Pattern | Use Case | Example |
-|---------|----------|---------|
-| `pragma: no cover` | Manual exclusion marker | `if unreachable:  # pragma: no cover` |
-| `if TYPE_CHECKING:` | Type-only imports | `if TYPE_CHECKING: from typing import ...` |
+| Pattern                     | Use Case                     | Example                                            |
+| --------------------------- | ---------------------------- | -------------------------------------------------- |
+| `pragma: no cover`          | Manual exclusion marker      | `if unreachable:  # pragma: no cover`              |
+| `if TYPE_CHECKING:`         | Type-only imports            | `if TYPE_CHECKING: from typing import ...`         |
 | `raise NotImplementedError` | Abstract method placeholders | `def abstract_method(): raise NotImplementedError` |
-| `@abstractmethod` | ABC decorators | Inherent placeholder in abstract classes |
-| `@overload` | Protocol stubs (P3) | Type-checking-only method signatures in Protocols |
-| `^\\s*pass\\s*$` | Bare pass statements (P3) | No-op placeholders in abstract classes |
-| `^\\s*\\.\\.\\.\\s*$` | Ellipsis stubs (P3) | Protocol method implementations |
+| `@abstractmethod`           | ABC decorators               | Inherent placeholder in abstract classes           |
+| `@overload`                 | Protocol stubs (P3)          | Type-checking-only method signatures in Protocols  |
+| `^\\s*pass\\s*$`            | Bare pass statements (P3)    | No-op placeholders in abstract classes             |
+| `^\\s*\\.\\.\\.\\s*$`       | Ellipsis stubs (P3)          | Protocol method implementations                    |
 
 **P3 Update (2026-03-08)**: Added 3 patterns (`@overload`, bare `pass`, ellipsis) to exclude non-executable stub-like code from coverage metrics. This allows focusing metrics on actual executable code paths.
 
 #### Other Settings
 
-| Setting | Value | Purpose |
-|---------|-------|---------|
-| `show_missing` | `true` | List uncovered lines in report |
-| `precision` | `2` | Two decimal places (e.g., `85.42%`) |
+| Setting        | Value  | Purpose                             |
+| -------------- | ------ | ----------------------------------- |
+| `show_missing` | `true` | List uncovered lines in report      |
+| `precision`    | `2`    | Two decimal places (e.g., `85.42%`) |
 
----
+______________________________________________________________________
 
 ## Running Coverage Checks
 
@@ -132,7 +135,7 @@ uv run python -m coverage report --show-missing --fail-under=85
 
 Coverage CI check runs in `.github/workflows/tests.yml` → `coverage-verify` job.
 
----
+______________________________________________________________________
 
 ## Understanding Exclude Patterns
 
@@ -140,6 +143,7 @@ Coverage CI check runs in `.github/workflows/tests.yml` → `coverage-verify` jo
 
 ```python
 from typing import Protocol, overload, AsyncIterator
+
 
 @runtime_checkable
 class DataSourcePort(Protocol):
@@ -165,16 +169,18 @@ class DataSourcePort(Protocol):
 ```
 
 **Coverage Behavior**:
+
 - Lines with `@overload` decorator → **EXCLUDED** (type-only)
 - Line with actual `async def fetch(...)` → **INCLUDED** (executable)
 - Ellipsis in actual implementation → **EXCLUDED** (optional; stub-like)
 
----
+______________________________________________________________________
 
 ### Example 2: Abstract Base Class with `pass`
 
 ```python
 from abc import ABC, abstractmethod
+
 
 class AbstractService(ABC):
     """Abstract service (not tested directly)."""
@@ -184,18 +190,18 @@ class AbstractService(ABC):
         pass  # EXCLUDED (bare pass)
 
     @abstractmethod
-    def stop(self) -> None:
-        ...  # EXCLUDED (ellipsis)
+    def stop(self) -> None: ...  # EXCLUDED (ellipsis)
 ```
 
 **Coverage Behavior**:
+
 - `@abstractmethod` decorator → **EXCLUDED**
 - `pass` statement → **EXCLUDED** (bare pass pattern)
 - Ellipsis → **EXCLUDED** (ellipsis pattern)
 
 Subclass implementations are tested directly and count toward coverage.
 
----
+______________________________________________________________________
 
 ### Example 3: Type-Only Imports
 
@@ -206,23 +212,24 @@ if TYPE_CHECKING:
     # These imports are EXCLUDED from coverage
     from some_expensive_module import SomeType  # EXCLUDED
 
+
 def function(x: "SomeType") -> None:
     # This implementation IS INCLUDED
     print(x)
 ```
 
----
+______________________________________________________________________
 
 ## Coverage Targets
 
-| Layer | Target | Notes |
-|-------|--------|-------|
-| **Domain** | >90% | Core business logic; highest priority |
-| **Application** | >85% | Pipelines, transformers |
-| **Infrastructure** | >80% | Adapters, storage (lower due to I/O complexity) |
-| **Overall** | ≥85% | CI enforcement threshold |
+| Layer              | Target | Notes                                           |
+| ------------------ | ------ | ----------------------------------------------- |
+| **Domain**         | >90%   | Core business logic; highest priority           |
+| **Application**    | >85%   | Pipelines, transformers                         |
+| **Infrastructure** | >80%   | Adapters, storage (lower due to I/O complexity) |
+| **Overall**        | ≥85%   | CI enforcement threshold                        |
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
@@ -237,6 +244,7 @@ def function(x: "SomeType") -> None:
 **Problem**: Legitimate code showing as "missing" in HTML report.
 
 **Solution**: Use `# pragma: no cover` to manually exclude unreachable code:
+
 ```python
 if sys.platform == "win32":  # Only reachable on Windows
     handle_windows()
@@ -249,15 +257,16 @@ else:  # pragma: no cover
 **Problem**: Coverage varies between local runs and CI.
 
 **Possible Causes**:
+
 1. Different Python versions (3.11 vs 3.12) — conditional code paths differ
-2. Partial test runs in parallel CI — coverage is cumulative across all jobs
-3. Missing test dependencies — some tests skipped
+1. Partial test runs in parallel CI — coverage is cumulative across all jobs
+1. Missing test dependencies — some tests skipped
 
 **Solution**: Run the full suite locally only when needed; in CI coverage is now
 assembled from shard coverage plus a dedicated `serial` pass, rather than from
 one extra full rerun of almost the entire suite.
 
----
+______________________________________________________________________
 
 ## CI Integration
 
@@ -290,7 +299,7 @@ coverage-verify:
 
 **Status Check**: Required for PR merge. If coverage drops below 85%, merge is blocked.
 
----
+______________________________________________________________________
 
 ## References
 
@@ -299,16 +308,16 @@ coverage-verify:
 - **GitHub Policy**: `docs/00-project/governance/05-github-policy.md` — CI checks
 - **pyproject.toml**: Lines 203-229 for full configuration
 
----
+______________________________________________________________________
 
 ## Changelog
 
-| Date | Change | Impact |
-|------|--------|--------|
+| Date       | Change                                                       | Impact                                                                       |
+| ---------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
 | 2026-03-26 | Synced local and CI command examples with Makefile/tests.yml | Clarified serial default, split coverage flow, and resilient coverage-verify |
-| 2026-03-08 | Added `@overload`, bare `pass`, ellipsis patterns | P3 optimization: focus metrics on executable code |
-| 2026-02-18 | Initial coverage config | Baseline 85% threshold |
+| 2026-03-08 | Added `@overload`, bare `pass`, ellipsis patterns            | P3 optimization: focus metrics on executable code                            |
+| 2026-02-18 | Initial coverage config                                      | Baseline 85% threshold                                                       |
 
----
+______________________________________________________________________
 
 *Last synced: 2026-03-26 | Codex documentation audit*

@@ -17,27 +17,52 @@ Note: Run from repository root. This script avoids changing branch protection or
 #>
 
 [CmdletBinding()]
-param(n    [switch]$Apply,n    [switch]$Push,n    [string]$BranchPrefix = "ci/optimize-workflows",n    [string]$RepoRoot = ".",n    [string]$CommitMessage = "chore(ci): add concurrency and path-filters to workflows; add reusable setup`n`nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",n    [string]$BackupDir = "reports\workflow_backups",n    [string]$ReportFile = "reports\ci_optimization_report.txt"n)
+param(
+n    [switch]$Apply,
+n    [switch]$Push,
+n    [string]$BranchPrefix = "ci/optimize-workflows",
+n    [string]$RepoRoot = ".",
+n    [string]$CommitMessage = "chore(ci): add concurrency and path-filters to workflows; add reusable setup`n`nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
+n    [string]$BackupDir = "reports\workflow_backups",
+n    [string]$ReportFile = "reports\ci_optimization_report.txt"
+n)
 
 Set-StrictMode -Version Latest
-nWrite-Host "Repo root: $RepoRoot"
-$workflowsDir = Join-Path $RepoRoot ".github\workflows"nif (-not (Test-Path $workflowsDir)) { Write-Error ".github\workflows not found under $RepoRoot"; exit 1 }
-n$pathIgnoreList = @(n  "docs/**",n  "*.md",n  ".ai/**",n  ".claude/**",n  ".github/workflows/**",n  "LICENSE"n)
-nfunction Make-Indent($n) { if ($n -le 0) { return "" } else { return -join (1..$n | ForEach-Object { ' ' }) } }
-nfunction Get-IndentLen($line) { if ($line -match '^( *)') { return $matches[1].Length } else { return 0 } }
-n$changed = @()
+
+nWrite-Host "Repo root: $RepoRoot"
+$workflowsDir = Join-Path $RepoRoot ".github\workflows"
+nif (-not (Test-Path $workflowsDir)) { Write-Error ".github\workflows not found under $RepoRoot"; exit 1 }
+
+n$pathIgnoreList = @(
+n  "docs/**",
+n  "*.md",
+n  ".ai/**",
+n  ".claude/**",
+n  ".github/workflows/**",
+n  "LICENSE"
+n)
+
+nfunction Make-Indent($n) { if ($n -le 0) { return "" } else { return -join (1..$n | ForEach-Object { ' ' }) } }
+
+nfunction Get-IndentLen($line) { if ($line -match '^( *)') { return $matches[1].Length } else { return 0 } }
+
+n$changed = @()
 $report = @()
 # ensure backup dir exists
-$backupPath = Join-Path $RepoRoot $BackupDirnNew-Item -ItemType Directory -Force -Path $backupPath | Out-Null
+$backupPath = Join-Path $RepoRoot $BackupDir
+nNew-Item -ItemType Directory -Force -Path $backupPath | Out-Null
 
 # process each yaml file
-Get-ChildItem -Path $workflowsDir -Filter *.yml -File | ForEach-Object {n  $file = $_.FullNamen  $report += "Processing: $file"
+Get-ChildItem -Path $workflowsDir -Filter *.yml -File | ForEach-Object {
+n  $file = $_.FullName
+n  $report += "Processing: $file"
   $origContent = Get-Content -Raw -Encoding UTF8 -Path $file
   $lines = [regex]::Split($origContent, "\r?\n")
   $originalLines = $lines.Clone()
   $modified = $false
 
-  # add concurrency if missingn  if (-not ($origContent -match '(?m)^\s*concurrency\s*:')) {
+  # add concurrency if missing
+n  if (-not ($origContent -match '(?m)^\s*concurrency\s*:')) {
      # find index after 'name:' or before 'on:'
      $insertIndex = $null
      for ($i=0; $i -lt $lines.Length; $i++) {
@@ -53,7 +78,8 @@ Get-ChildItem -Path $workflowsDir -Filter *.yml -File | ForEach-Object {n  $fil
        '  group: ${{ github.workflow }}-${{ github.ref }}',
        '  cancel-in-progress: true'
      )
-n     if ($insertIndex -eq 0) {
+
+n     if ($insertIndex -eq 0) {
         $lines = $concLines + $lines
      } else {
         $prefix = $lines[0..($insertIndex-1)]
@@ -116,7 +142,8 @@ Get-ChildItem -Path $workflowsDir -Filter *.yml -File | ForEach-Object {n  $fil
   } else {
      $report += " - No changes required"
   }
-n  $report += ""
+
+n  $report += ""
 }
 
 # create reusable workflow file
@@ -140,11 +167,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-n      - name: Set up Python
+
+n      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python-version }}
-n      - name: Cache uv and virtualenv
+
+n      - name: Cache uv and virtualenv
         uses: actions/cache@v4
         with:
           path: |
@@ -153,7 +182,8 @@ jobs:
           key: uv-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('uv.lock') }}
           restore-keys: |
             uv-${{ runner.os }}-py${{ inputs.python-version }}-
-n      - name: Install uv
+
+n      - name: Install uv
         uses: astral-sh/setup-uv@v7
 '@
    Set-Content -Path $reusablePath -Value $reusableContent -Encoding UTF8
@@ -162,7 +192,8 @@ jobs:
 } else {
    $report += "Reusable workflow already exists: $reusablePath"
 }
-n# write report
+
+n# write report
 $reportHeader = @()
 $reportHeader += "CI Optimization report - $(Get-Date -Format u)"
 $reportHeader += "Repo root: $RepoRoot"
@@ -171,13 +202,15 @@ $reportHeader += $report
 New-Item -ItemType Directory -Force -Path (Split-Path -Path (Join-Path $RepoRoot $ReportFile) -Parent) | Out-Null
 Set-Content -Path (Join-Path $RepoRoot $ReportFile) -Value ($reportHeader -join "`n") -Encoding UTF8
 Write-Host "Report written to $ReportFile"
-nif ($Apply) {
+
+nif ($Apply) {
   # commit changes to new branch
   if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
      Write-Error "git not found: cannot create branch/commit. Changes are written to files but not committed."
      exit 1
   }
-n  $ts = Get-Date -Format yyyyMMddHHmmss
+
+n  $ts = Get-Date -Format yyyyMMddHHmmss
   $branch = "$BranchPrefix-$ts"
   git checkout -b $branch
   foreach ($f in $changed) { git add -- $f }

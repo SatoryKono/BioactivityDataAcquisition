@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P1
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
----
+  Priority: P1
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Operational Runbook: Publication Validation
 
@@ -31,25 +34,26 @@ Last verified: '2026-03-30'
 
 ### Содержание
 
-1. [Обзор](#обзор)
-2. [Мониторинг и алерты](#мониторинг-и-алерты)
-3. [Диагностика по уровням валидации](#диагностика-по-уровням-валидации)
-4. [Общие проблемы и решения](#общие-проблемы-и-решения)
-5. [Escalation Path](#escalation-path)
-6. [Контакты и ресурсы](#контакты-и-ресурсы)
+1. [Обзор](#%D0%BE%D0%B1%D0%B7%D0%BE%D1%80)
+1. [Мониторинг и алерты](#%D0%BC%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3-%D0%B8-%D0%B0%D0%BB%D0%B5%D1%80%D1%82%D1%8B)
+1. [Диагностика по уровням валидации](#%D0%B4%D0%B8%D0%B0%D0%B3%D0%BD%D0%BE%D1%81%D1%82%D0%B8%D0%BA%D0%B0-%D0%BF%D0%BE-%D1%83%D1%80%D0%BE%D0%B2%D0%BD%D1%8F%D0%BC-%D0%B2%D0%B0%D0%BB%D0%B8%D0%B4%D0%B0%D1%86%D0%B8%D0%B8)
+1. [Общие проблемы и решения](#%D0%BE%D0%B1%D1%89%D0%B8%D0%B5-%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D0%B8-%D1%80%D0%B5%D1%88%D0%B5%D0%BD%D0%B8%D1%8F)
+1. [Escalation Path](#escalation-path)
+1. [Контакты и ресурсы](#%D0%BA%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D1%8B-%D0%B8-%D1%80%D0%B5%D1%81%D1%83%D1%80%D1%81%D1%8B)
 
-- ---
+______________________________________________________________________
 
 ### Обзор
 
 - Данный runbook описывает процедуры диагностики и устранения сбоев в **5-уровневой валидационной системе** для публикационных данных BioETL.
 
 - **Validation Levels:**
+
 1. Base Validation (Pandera)
-2. Structural Validation
-3. External Verification
-4. Logical Validation
-5. Semantic Validation
+1. Structural Validation
+1. External Verification
+1. Logical Validation
+1. Semantic Validation
 
 - **Key Metrics:**
 - **DQ Pass Rate** — процент записей без ошибок/предупреждений
@@ -57,7 +61,7 @@ Last verified: '2026-03-30'
 - **FAIL Rate** — процент отклонённых записей
 - **Validation Latency** — время выполнения валидации (per level)
 
-- ---
+______________________________________________________________________
 
 ### Мониторинг и алерты
 
@@ -66,6 +70,7 @@ Last verified: '2026-03-30'
 #### Alert: HighFailRate
 
 - **Триггер:**
+
 ```promql
 (
   bioetl_validation_failed_total /
@@ -76,7 +81,9 @@ Last verified: '2026-03-30'
 - **Описание:** Более 10% записей отклонены валидацией
 
 - **Действия:**
+
 1. Проверить логи последних запусков:
+
    ```bash
    # Посмотреть ошибки за последний час
    tail -200 logs/bioetl.log | jq 'select(.event == "validation-failed")'
@@ -86,7 +93,8 @@ Last verified: '2026-03-30'
      jq 'select(.event == "validation-failed") | select(.timestamp > now - 3600)'
    ```
 
-2. Определить провайдера и уровень с наибольшим fail rate:
+1. Определить провайдера и уровень с наибольшим fail rate:
+
    ```bash
    # Топ провайдеров по fail rate
    cat logs/bioetl.log | \
@@ -94,14 +102,16 @@ Last verified: '2026-03-30'
      sort | uniq -c | sort -rn | head -10
    ```
 
-3. Если проблема в **Base Validation** → проверить схему (см. [Base Validation Failures](#level-1-base-validation-failures))
-4. Если проблема в **External Verification** → проверить доступность API (см. [External Verification Failures](#level-3-external-verification-failures))
+1. Если проблема в **Base Validation** → проверить схему (см. [Base Validation Failures](#level-1-base-validation-failures))
 
-- ---
+1. Если проблема в **External Verification** → проверить доступность API (см. [External Verification Failures](#level-3-external-verification-failures))
+
+______________________________________________________________________
 
 #### Alert: ValidationLatencyHigh
 
 - **Триггер:**
+
 ```promql
 histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 ```
@@ -109,7 +119,9 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 - **Описание:** P95 validation latency > 5 минут
 
 - **Действия:**
+
 1. Проверить, какой уровень валидации медленный:
+
    ```bash
    # Latency по уровням
    cat logs/bioetl.log | \
@@ -119,7 +131,8 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
             map({level: .[0].level, avg-duration: (map(.duration) | add / length)})'
    ```
 
-2. Если медленный **External Verification**:
+1. Если медленный **External Verification**:
+
    - Проверить rate limiting:
      ```bash
      # Количество 429 ответов от API
@@ -127,7 +140,8 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
      ```
    - Снизить `batch-size` или увеличить `retry-delay`
 
-3. Если медленный **Semantic Validation**:
+1. Если медленный **Semantic Validation**:
+
    - Отключить временно:
      ```bash
      bioetl run \
@@ -135,13 +149,14 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
        --skip-semantic
      ```
 
-- ---
+______________________________________________________________________
 
 ### Предупреждающие алерты (P2 — реакция в течение 4 часов)
 
 #### Alert: HighWarnRate
 
 - **Триггер:**
+
 ```promql
 (
   bioetl_validation_warned_total /
@@ -152,27 +167,31 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 - **Описание:** Более 20% записей в карантине (`-dq-warn=True`)
 
 - **Действия:**
+
 1. Проверить топ правил, вызывающих WARN:
+
    ```bash
    cat logs/bioetl.log | \
      jq -r 'select(.event == "validation-warning") | .rule' | \
      sort | uniq -c | sort -rn | head -10
    ```
 
-2. Если топ правило — `doi-not-found`:
+1. Если топ правило — `doi-not-found`:
+
    - CrossRef API может быть временно недоступен
    - Проверить вручную:
      ```bash
      curl -I https://api.crossref.org/works/10.1038/nature12373
      ```
 
-3. Если топ правило — `low-title-abstract-similarity`:
+1. Если топ правило — `low-title-abstract-similarity`:
+
    - Semantic validation слишком строгая
    - Увеличить threshold в конфиге
 
-4. **Не требует немедленного action** — записи в карантине доступны для анализа
+1. **Не требует немедленного action** — записи в карантине доступны для анализа
 
-- ---
+______________________________________________________________________
 
 ### Диагностика по уровням валидации
 
@@ -249,7 +268,7 @@ PY
       return doi
   ```
 
-- ---
+______________________________________________________________________
 
 - **Проблема 2: NULL в non-nullable полях**
 
@@ -289,7 +308,7 @@ PY
           yield record
   ```
 
-- ---
+______________________________________________________________________
 
 - **Проблема 3: Неправильный тип данных**
 
@@ -318,7 +337,7 @@ print(df[~df['publication-year'].apply(lambda x: isinstance(x, (int, float, type
           return None
   ```
 
-- ---
+______________________________________________________________________
 
 ### Level 2: Structural Validation Warnings
 
@@ -387,7 +406,7 @@ print(mismatches[['doi', 'publication_year', 'publication_date']].head(10))
       )
   ```
 
-- ---
+______________________________________________________________________
 
 ### Level 3: External Verification Failures
 
@@ -427,7 +446,9 @@ cat config/crossref-validation.yaml | grep -A5 "external-verification"
 ```
 
 - **Решение:**
+
 - Снизить rate limit:
+
   ```yaml
   # config/crossref-validation.yaml
   external-verification:
@@ -438,6 +459,7 @@ cat config/crossref-validation.yaml | grep -A5 "external-verification"
   ```
 
 - Или добавить exponential backoff:
+
   ```python
   async def verify-with-retry(self, doi: str) -> VerificationResult:
       for attempt in range(self.-max-retries):
@@ -453,7 +475,7 @@ cat config/crossref-validation.yaml | grep -A5 "external-verification"
       return VerificationResult(status="WARN", found=False)
   ```
 
-- ---
+______________________________________________________________________
 
 - **Проблема 2: PubMed NCBI API timeout**
 
@@ -475,7 +497,7 @@ cat config/pubmed-validation.yaml | grep -A2 "timeout"
         rate-limit: 2  # Lower than default 3 to reduce load
   ```
 
-- ---
+______________________________________________________________________
 
 - **Проблема 3: API недоступен (network issue)**
 
@@ -492,7 +514,9 @@ curl -v --connect-timeout 5 https://api.crossref.org/
 ```
 
 - **Решение:**
+
 - Временно отключить External Verification:
+
   ```bash
   bioetl run \
     --pipeline crossref_publication \
@@ -500,6 +524,7 @@ curl -v --connect-timeout 5 https://api.crossref.org/
   ```
 
 - Или отключить только проблемный провайдер:
+
   ```yaml
   # config/crossref-validation.yaml
   external-verification:
@@ -509,7 +534,7 @@ curl -v --connect-timeout 5 https://api.crossref.org/
         enabled: false  # Disable temporarily
   ```
 
-- ---
+______________________________________________________________________
 
 ### Level 4: Logical Validation Warnings
 
@@ -566,7 +591,7 @@ print(future-years[['openalex-id', 'publication-year', 'title']].head())
   WHERE publication-year = 2099;
   ```
 
-- ---
+______________________________________________________________________
 
 - **Проблема: Negative citations**
 
@@ -597,7 +622,7 @@ print(negative-cit[['paper-id', 'citations-received', 'title']].head())
       return raw-citations
   ```
 
-- ---
+______________________________________________________________________
 
 ### Level 5: Semantic Validation Warnings
 
@@ -637,8 +662,11 @@ cat config/pubmed-validation.yaml | grep -A3 "semantic-validation"
 ```
 
 - **Решение:**
+
 - Semantic validation **НЕ блокирует** записи (только WARN)
+
 - Если слишком много false positives — увеличить threshold:
+
   ```yaml
   semantic-validation:
     enabled: true
@@ -646,13 +674,14 @@ cat config/pubmed-validation.yaml | grep -A3 "semantic-validation"
   ```
 
 - Или отключить для конкретного провайдера:
+
   ```yaml
   # config/chembl-validation.yaml
   semantic-validation:
     enabled: false  # Disable for ChEMBL (low quality abstracts)
   ```
 
-- ---
+______________________________________________________________________
 
 - **Проблема: Language mismatch (detected != declared)**
 
@@ -675,17 +704,20 @@ print(lang-mismatch[['pmid', 'language', 'title', 'abstract']].head())
 - Language detection может быть некорректной для коротких текстов
 - Оставить как WARN, не блокировать запись
 
-- ---
+______________________________________________________________________
 
 ### Общие проблемы и решения
 
 ### 1. Pipeline застревает на валидации
 
 - **Симптомы:**
+
 - Pipeline выполняется > 2 часов
+
 - CPU usage low, network idle
 
 - **Диагностика:**
+
 ```bash
 # Проверить, какой процесс активен
 ps aux | grep bioetl
@@ -698,6 +730,7 @@ lsof -i -P -n | grep bioetl
 ```
 
 - **Решение:**
+
 ```bash
 # Kill pipeline
 pkill -f "bioetl run"
@@ -709,15 +742,18 @@ bioetl run \
   --skip-semantic
 ```
 
-- ---
+______________________________________________________________________
 
 ### 2. Карантинная таблица переполнена
 
 - **Симптомы:**
+
 - > 50% записей в карантине (`-dq-warn=True`)
+
 - Silver storage растёт быстрее обычного
 
 - **Диагностика:**
+
 ```bash
 # Количество записей в карантине
 python -c "
@@ -741,34 +777,41 @@ print(reasons.value-counts().head(10))
 ```
 
 - **Решение:**
+
 1. **Если причина — External 404:**
+
    - Отключить External Verification для следующих запусков
    - Провести manual review топ-N записей
 
-2. **Если причина — Semantic low similarity:**
+1. **Если причина — Semantic low similarity:**
+
    - Увеличить threshold или отключить Semantic Validation
 
-3. **Промоция валидных записей из карантина:**
+1. **Промоция валидных записей из карантина:**
+
    ```python
    # Автоматически промотировать записи с только одной WARN причиной
-   df = pd.read-parquet("data/silver/pubmed/publication.parquet")
-   single-warn = df[
-       (df["-dq-warn"] == True) &
-       (df["-dq-warn-reasons"].str.count(",") == 0)  # Single reason
+   df = pd.read - parquet("data/silver/pubmed/publication.parquet")
+   single - warn = df[
+       (df["-dq-warn"] == True)
+       & (df["-dq-warn-reasons"].str.count(",") == 0)  # Single reason
    ]
-   single-warn["-dq-warn"] = False
-   single-warn.to-parquet("data/silver/pubmed/publication.parquet", mode="append")
+   single - warn["-dq-warn"] = False
+   single - warn.to - parquet("data/silver/pubmed/publication.parquet", mode="append")
    ```
 
-- ---
+______________________________________________________________________
 
 ### 3. DQ Metrics отсутствуют в Prometheus
 
 - **Симптомы:**
+
 - Grafana dashboard пустой
+
 - Prometheus `/metrics` endpoint не показывает `bioetl_validation_*` метрики
 
 - **Диагностика:**
+
 ```bash
 # Проверить Prometheus endpoint
 curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.job == "bioetl")'
@@ -778,6 +821,7 @@ curl http://localhost:8000/metrics | grep bioetl_validation
 ```
 
 - **Решение:**
+
 ```bash
 # Перезапустить pipeline с Prometheus exporter
 bioetl run \
@@ -792,7 +836,7 @@ scrape-configs:
       - targets: ['localhost:8000']
 ```
 
-- ---
+______________________________________________________________________
 
 ### Escalation Path
 
@@ -826,7 +870,7 @@ scrape-configs:
   - Архитектурные изменения необходимы
   - SLA нарушено
 
-- ---
+______________________________________________________________________
 
 ### Контакты и ресурсы
 
@@ -839,13 +883,13 @@ scrape-configs:
 
 ### Upstream провайдеры
 
-| Провайдер | Support Email | API Status Page | Rate Limits |
-|-----------|---------------|-----------------|-------------|
-| CrossRef | support@crossref.org | https://status.crossref.org/ | 50 req/s (polite pool: mailto in User-Agent) |
-| PubMed/NCBI | info@ncbi.nlm.nih.gov | https://www.ncbi.nlm.nih.gov/home/about/policies/ | 3 req/s without API key, 10 with key |
-| OpenAlex | team@openalex.org | https://status.openalex.org/ | 100,000 req/day (polite pool: mailto in User-Agent) |
-| Semantic Scholar | semanticscholar-api@allenai.org | https://www.semanticscholar.org/product/api | 100 req/5min for public API |
-| ChEMBL | chembl-help@ebi.ac.uk | https://www.ebi.ac.uk/chembl/ | No official limit (be polite) |
+| Провайдер        | Support Email                   | API Status Page                                   | Rate Limits                                         |
+| ---------------- | ------------------------------- | ------------------------------------------------- | --------------------------------------------------- |
+| CrossRef         | support@crossref.org            | https://status.crossref.org/                      | 50 req/s (polite pool: mailto in User-Agent)        |
+| PubMed/NCBI      | info@ncbi.nlm.nih.gov           | https://www.ncbi.nlm.nih.gov/home/about/policies/ | 3 req/s without API key, 10 with key                |
+| OpenAlex         | team@openalex.org               | https://status.openalex.org/                      | 100,000 req/day (polite pool: mailto in User-Agent) |
+| Semantic Scholar | semanticscholar-api@allenai.org | https://www.semanticscholar.org/product/api       | 100 req/5min for public API                         |
+| ChEMBL           | chembl-help@ebi.ac.uk           | https://www.ebi.ac.uk/chembl/                     | No official limit (be polite)                       |
 
 ### ADR и документация
 
@@ -854,7 +898,7 @@ scrape-configs:
 - **Canonical provider refs:** `docs/04-reference/providers/{provider}/publication.md`
 - **Test Suite:** `tests/contract/` + `tests/unit/` (471 тест)
 
-- ---
+______________________________________________________________________
 
 - **Версия runbook:** 1.0.0 **Последнее обновление:** 2026-02-06 **Владелец:** Data Engineering Team **Статус:** Production Ready ✅
 

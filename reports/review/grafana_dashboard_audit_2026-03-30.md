@@ -28,10 +28,10 @@ Audit evidence sources:
 
 ### 1. Overview
 
-Dashboard file: [bioetl-overview-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-overview-v2.json)  
+Dashboard file: [bioetl-overview-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-overview-v2.json)
 Screenshot: [bioetl-overview-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-overview-v2.png)
 
-Overall status: Healthy dashboard with live pipeline degradation signal  
+Overall status: Healthy dashboard with live pipeline degradation signal
 Confidence: High
 
 Verified panels:
@@ -67,10 +67,10 @@ Recommendations:
 
 ### 2. Data Quality
 
-Dashboard file: [bioetl-dq-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-dq-v2.json)  
+Dashboard file: [bioetl-dq-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-dq-v2.json)
 Screenshot: [bioetl-dq-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-dq-v2.png)
 
-Overall status: Healthy dashboard with downstream completion gap  
+Overall status: Healthy dashboard with downstream completion gap
 Confidence: High
 
 Verified panels:
@@ -109,10 +109,10 @@ Recommendations:
 
 ### 3. Provider Health
 
-Dashboard file: [bioetl-provider-health-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-provider-health-v2.json)  
+Dashboard file: [bioetl-provider-health-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-provider-health-v2.json)
 Screenshot: [bioetl-provider-health-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-provider-health-v2.png)
 
-Overall status: Healthy  
+Overall status: Healthy
 Confidence: High
 
 Verified panels:
@@ -135,10 +135,10 @@ Recommendations:
 
 ### 4. Runtime
 
-Dashboard file: [bioetl-runtime.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-runtime.json)  
+Dashboard file: [bioetl-runtime.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-runtime.json)
 Screenshot: [bioetl-runtime.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-runtime.png)
 
-Overall status: Healthy with one live alert signal to investigate  
+Overall status: Healthy with one live alert signal to investigate
 Confidence: High
 
 Verified panels:

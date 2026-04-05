@@ -10,7 +10,7 @@ Last verified: '2026-03-29'
 
 # Dashboard Extension Guide (Human)
 
-Дата сверки: **2026-03-29**  
+Дата сверки: **2026-03-29**
 Источник истины: `grafana/dashboards/*.json`
 
 Короткий guide для инженера, который вручную расширяет shipped Grafana dashboards

@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P2
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
----
+  Priority: P2
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Backfill and Rebuild Operations
 
@@ -42,6 +45,7 @@ Last verified: '2026-03-30'
 ### Procedure: Full Rebuild
 
 1. **Stop Incremental Pipelines**:
+
 - Ensure no incremental runs are scheduled.
 
 1. **Run Rebuild**:
@@ -58,11 +62,13 @@ Last verified: '2026-03-30'
    - Validate DQ metrics.
 
 1. **Resume Incremental**:
+
 - Enable scheduled incremental runs.
 
 ### Procedure: Backfill (Time Range)
 
 1. **Determine Range**:
+
 - Identify start and end dates for backfill.
 
 1. **Run Backfill**:
@@ -73,6 +79,7 @@ Last verified: '2026-03-30'
    ```
 
 1. **Monitor Progress**:
+
 - Watch logs for progress. Backfills can be long-running.
 
 ### Troubleshooting

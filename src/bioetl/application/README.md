@@ -5,13 +5,13 @@ The application layer coordinates use cases and runtime flows. It may depend on
 
 ## Package Structure
 
-| Package | Responsibility |
-| --- | --- |
-| `core/` | Core pipeline orchestration, runner behavior, shared execution services |
-| `composite/` | Composite-pipeline coordination and merge-oriented workflows |
-| `services/` | Service objects for lifecycle, export, metadata, DQ, health, and runtime management |
-| `observability/` | Application-facing observer abstractions and tracing helpers |
-| `pipelines/` | Pipeline-specific application flows and package-level execution seams |
+| Package          | Responsibility                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| `core/`          | Core pipeline orchestration, runner behavior, shared execution services             |
+| `composite/`     | Composite-pipeline coordination and merge-oriented workflows                        |
+| `services/`      | Service objects for lifecycle, export, metadata, DQ, health, and runtime management |
+| `observability/` | Application-facing observer abstractions and tracing helpers                        |
+| `pipelines/`     | Pipeline-specific application flows and package-level execution seams               |
 
 ## What Belongs Here
 

@@ -25,20 +25,20 @@ from typing import Literal, Optional
 @dataclass(frozen=True)
 class MigrationPhaseConfig:
     """Configuration for a migration phase."""
-    
+
     # Unique identifier for this phase
     phase_name: str
-    
+
     # Version range for this phase
     start_version: str
     end_version: Optional[str] = None  # None means current phase
-    
+
     # Compatibility characteristics
     backward_compatible: bool = True
-    
+
     # How to transition to this phase
     migration_strategy: Literal["immediate", "gradual", "optional"] = "gradual"
-    
+
     # What to do when issues arise
     fallback_behavior: Literal["warn", "error", "silent"] = "warn"
 ```
@@ -49,17 +49,17 @@ class MigrationPhaseConfig:
 def version_compare(v1: str, v2: str) -> int:
     """
     Compare semantic versions (-1 if v1<v2, 0 if equal, 1 if v1>v2).
-    
+
     Handles different version lengths (e.g., "1.2" vs "1.2.3").
     Missing components are treated as zero.
-    
+
     Args:
         v1: First version string
         v2: Second version string
-        
+
     Returns:
         -1 if v1 < v2, 0 if equal, 1 if v1 > v2
-        
+
     Examples:
         version_compare("1.2", "1.2.3")  # Returns -1 (1.2.0 < 1.2.3)
         version_compare("2.0", "1.9.9") # Returns 1 (2.0.0 > 1.9.9)
@@ -194,7 +194,7 @@ for phase in phases:
 @dataclass(frozen=True)
 class MigrationStatus:
     """Current migration status information."""
-    
+
     current_phase: str           # Current migration phase
     supported_phases: list[str]  # All supported phase names
     current_version: str         # Current version string
@@ -211,27 +211,27 @@ class MigrationStatus:
 def safe_migrate_config(config: dict, target_version: str) -> dict:
     """Safely migrate configuration to target version"""
     service = PhasedMigrationSupportService()
-    
+
     # Check current status
     status = service.get_current_migration_status()
     print(f"Migrating from {status.current_version} to {target_version}")
-    
+
     # Check compatibility
     issues = service.check_backward_compatibility(config, target_version)
-    
+
     if issues:
         print(f"⚠️  Compatibility issues found: {issues}")
-        
+
         # Apply automatic fallbacks
         modified_config, warnings = service.apply_migration_fallback(
             config, target_version, fallback_behavior="warn"
         )
-        
+
         if warnings:
             print(f"⚠️  Applied fallbacks: {warnings}")
-        
+
         return modified_config
-    
+
     # Configuration is already compatible
     print("✅ Configuration is compatible")
     return config
@@ -249,14 +249,14 @@ def run_pipeline_with_version_awareness(pipeline_config: dict):
     """Run pipeline with migration awareness"""
     service = PhasedMigrationSupportService()
     status = service.get_current_migration_status()
-    
+
     print(f"Running pipeline in phase: {status.current_phase}")
     print(f"Version: {status.current_version}")
-    
+
     # Check for migration warnings
     if status.migration_warnings:
         print(f"⚠️  Migration warnings: {status.migration_warnings}")
-    
+
     # Apply phase-specific configurations
     if status.current_phase == "v1.0":
         # v1.0 specific logic
@@ -264,15 +264,15 @@ def run_pipeline_with_version_awareness(pipeline_config: dict):
     elif status.current_phase == "v1.1":
         # v1.1 specific logic
         pipeline_config = apply_v1_1_config(pipeline_config)
-    
+
     # Check compatibility with latest version
     latest_issues = service.check_backward_compatibility(
         pipeline_config, "latest"
     )
-    
+
     if latest_issues:
         print(f"⚠️  Configuration not ready for latest version: {latest_issues}")
-    
+
     # Run pipeline
     return execute_pipeline(pipeline_config)
 
@@ -287,26 +287,26 @@ results = run_pipeline_with_version_awareness(base_config)
 def test_migration(from_version: str, to_version: str, test_config: dict):
     """Test migration path between versions"""
     service = PhasedMigrationSupportService()
-    
+
     print(f"Testing migration: {from_version} -> {to_version}")
-    
+
     # Get migration guide
     guide = service.get_migration_guide(from_version, to_version)
-    
+
     if guide['breaking_changes']:
         print(f"⚠️  Breaking changes: {guide['breaking_changes']}")
-    
+
     if guide['deprecations']:
         print(f"ℹ️  Deprecations: {guide['deprecations']}")
-    
+
     # Apply migration
     migrated_config, warnings = service.apply_migration_fallback(
         test_config, to_version, fallback_behavior="error"
     )
-    
+
     # Validate migrated configuration
     validation_result = validate_config(migrated_config, to_version)
-    
+
     if validation_result.is_valid():
         print("✅ Migration successful")
         return True, migrated_config
@@ -334,18 +334,18 @@ for from_ver, to_ver, config in migration_tests:
 def create_rollback_plan(current_version: str) -> dict:
     """Create rollback plan for current version"""
     service = PhasedMigrationSupportService()
-    
+
     # Get current status
     status = service.get_current_migration_status()
-    
+
     # Determine fallback versions
     fallback_versions = []
-    
+
     if status.current_phase == "v1.2":
         fallback_versions = ["v1.1", "v1.0"]
     elif status.current_phase == "v1.1":
         fallback_versions = ["v1.0"]
-    
+
     # Create rollback plan
     plan = {
         "current_version": current_version,
@@ -353,23 +353,23 @@ def create_rollback_plan(current_version: str) -> dict:
         "rollback_steps": [],
         "risk_assessment": "low"
     }
-    
+
     # Add rollback steps for each fallback version
     for fallback_version in fallback_versions:
         guide = service.get_migration_guide(current_version, fallback_version)
-        
+
         step = {
             "target_version": fallback_version,
             "breaking_changes": guide['breaking_changes'],
             "estimated_impact": "medium" if guide['breaking_changes'] else "low",
             "steps": guide['steps']
         }
-        
+
         plan['rollback_steps'].append(step)
-        
+
         if guide['breaking_changes']:
             plan['risk_assessment'] = "high"
-    
+
     return plan
 
 # Usage during deployment planning
@@ -409,10 +409,10 @@ if status.current_phase != "v2.0":
     migrated_config = service.apply_migration_fallback(
         current_config, "v2.0", fallback_behavior="error"
     )
-    
+
     # Deploy immediately
     deploy_pipeline(migrated_config)
-    
+
     # No fallback period
     disable_old_versions()
 ```
@@ -661,7 +661,7 @@ def migrate_config_batch(configs: list, target_phase: str) -> list:
     """Migrate batch of configurations"""
     service = PhasedMigrationSupportService()
     results = []
-    
+
     for config in configs:
         try:
             migrated, warnings = service.apply_migration_fallback(
@@ -680,7 +680,7 @@ def migrate_config_batch(configs: list, target_phase: str) -> list:
                 "error": str(e),
                 "success": False
             })
-    
+
     return results
 
 # Usage
@@ -696,7 +696,7 @@ import concurrent.futures
 def parallel_migrate(configs: list, target_phase: str, workers: int = 4) -> list:
     """Migrate configurations in parallel"""
     service = PhasedMigrationSupportService()
-    
+
     def migrate_one(config):
         try:
             migrated, warnings = service.apply_migration_fallback(
@@ -705,10 +705,10 @@ def parallel_migrate(configs: list, target_phase: str, workers: int = 4) -> list
             return {"config": config, "migrated": migrated, "warnings": warnings, "success": True}
         except Exception as e:
             return {"config": config, "error": str(e), "success": False}
-    
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         results = list(executor.map(migrate_one, configs))
-    
+
     return results
 
 # Usage for large-scale migrations
@@ -768,10 +768,10 @@ while attempt < max_attempts:
     migrated, warnings = service.apply_migration_fallback(
         config, target_phase, fallback_behavior="warn"
     )
-    
+
     if not warnings:
         break
-    
+
     attempt += 1
     config = migrated
 

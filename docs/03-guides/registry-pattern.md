@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Registry Pattern
 
@@ -23,11 +26,11 @@ runtime shape.
 
 ## Canonical Surfaces
 
-| Surface | Kind | Canonical Import | Notes |
-|---------|------|------------------|-------|
-| `PipelineRegistry` | Instance-based | `bioetl.composition.registry` | Prefer `create_registry()` for tests and isolated flows. |
-| `ProviderRegistry` | Instance-scoped + compatibility facade | `bioetl.composition.providers` | Prefer explicit instances for isolated/local seams; class-level methods target the shared default registry. |
-| `get_data_source_creator()` / `DataSourceFactory` | Canonical creator path | `bioetl.composition.factories.datasource.data_source_factory` | Preferred for data-source assembly; backed by `ProviderRegistry`. |
+| Surface                                           | Kind                                   | Canonical Import                                              | Notes                                                                                                       |
+| ------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `PipelineRegistry`                                | Instance-based                         | `bioetl.composition.registry`                                 | Prefer `create_registry()` for tests and isolated flows.                                                    |
+| `ProviderRegistry`                                | Instance-scoped + compatibility facade | `bioetl.composition.providers`                                | Prefer explicit instances for isolated/local seams; class-level methods target the shared default registry. |
+| `get_data_source_creator()` / `DataSourceFactory` | Canonical creator path                 | `bioetl.composition.factories.datasource.data_source_factory` | Preferred for data-source assembly; backed by `ProviderRegistry`.                                           |
 
 Governance status for the two transition-heavy surfaces:
 
@@ -43,13 +46,13 @@ for status semantics, allowed call sites, and exit criteria.
 
 ## Common Operations
 
-| Goal | `PipelineRegistry` | `ProviderRegistry` | Data-source assembly |
-|------|--------------------|--------------------|----------------------|
-| Register | `registry.register(key, factory)` or `registry.register_factory(factory)` | `ProviderRegistry.register(name, config)` | Register provider config in `ProviderRegistry` |
-| Get | `registry.get(name)` | `ProviderRegistry.get(name)` | `get_data_source_creator(name)` |
-| List | `registry.list_keys()` or `registry.list_pipelines()` | `ProviderRegistry.list_providers()` | `DataSourceFactory.list_providers()` |
-| Contains | `registry.contains(name)` | `ProviderRegistry.is_registered(name)` | `ProviderRegistry.has_data_source_creator(name)` |
-| Create | — | `ProviderRegistry.create_adapter(...)` | `DataSourceFactory.create(...)` |
+| Goal     | `PipelineRegistry`                                                        | `ProviderRegistry`                        | Data-source assembly                             |
+| -------- | ------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------------ |
+| Register | `registry.register(key, factory)` or `registry.register_factory(factory)` | `ProviderRegistry.register(name, config)` | Register provider config in `ProviderRegistry`   |
+| Get      | `registry.get(name)`                                                      | `ProviderRegistry.get(name)`              | `get_data_source_creator(name)`                  |
+| List     | `registry.list_keys()` or `registry.list_pipelines()`                     | `ProviderRegistry.list_providers()`       | `DataSourceFactory.list_providers()`             |
+| Contains | `registry.contains(name)`                                                 | `ProviderRegistry.is_registered(name)`    | `ProviderRegistry.has_data_source_creator(name)` |
+| Create   | —                                                                         | `ProviderRegistry.create_adapter(...)`    | `DataSourceFactory.create(...)`                  |
 
 ## PipelineRegistry
 
@@ -88,10 +91,10 @@ runtime `PipelineRegistry` instance and pass it through the execution path.
 
 `PipelineRegistry` still exposes compatibility aliases:
 
-| Legacy Method | Canonical Method |
-|---------------|------------------|
+| Legacy Method               | Canonical Method                           |
+| --------------------------- | ------------------------------------------ |
 | `register_factory(factory)` | `register(factory.pipeline_name, factory)` |
-| `list_pipelines()` | `list_keys()` |
+| `list_pipelines()`          | `list_keys()`                              |
 
 ## ProviderRegistry
 

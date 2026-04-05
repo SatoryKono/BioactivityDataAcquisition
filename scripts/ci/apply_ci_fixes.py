@@ -41,6 +41,9 @@ BRANCHES = {
     "ci-06": "fix/ci-docker-paths-conflict",
     "ci-07": "fix/ci-perf-gate-exitcode",
     "ci-12": "fix/ci-security-workflow-scan",
+    "hf-a": "fix/hf-upload-artifact-v3",
+    "hf-b": "fix/hf-pip-audit-flags",
+    "hf-e": "fix/hf-smoke-coverage-artifact",
 }
 
 PR_BODIES = {
@@ -132,6 +135,41 @@ in the same trigger block. The `docker.yml` had both filters, making
 ### Fix
 Remove `paths-ignore` from `push` and `pull_request` triggers.
 The `paths` filter already restricts the workflow to Docker-related files.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "hf-a": """## HF-A: Upgrade upload-artifact@v3 → @v4 in contract-governance-fast-check.yml
+
+`actions/upload-artifact@v3` was deprecated and is now automatically
+rejected by GitHub Actions runners — the job fails immediately without
+running any steps.
+
+### Fix
+- `actions/upload-artifact@v3` → `@v4`
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "hf-b": """## HF-B: Fix pip-audit invocation in security.yml
+
+`pip-audit --require-hashes` requires `--requirement (-r)` to read hashes
+from a requirements file. Without `-r`, the tool exits with code 2
+(argument error) before auditing anything.
+
+### Fix
+Remove `--require-hashes` flag. The `--disable-pip` and `--strict` flags
+remain; pip-audit will audit the uv-managed virtual environment directly.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "hf-e": """## HF-E: Fix smoke-check coverage upload — tolerate missing artifact
+
+The `upload-artifact` step for smoke coverage used `if-no-files-found: error`.
+When the smoke tests produce no `.coverage.smoke` file (e.g. on early-exit
+or first-run without test data), the upload step fails even though the tests
+themselves may have passed.
+
+### Fix
+Change `if-no-files-found: error` → `warn` for the smoke coverage upload.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 """,
@@ -851,6 +889,161 @@ def apply_ci12(api: GitHubAPI) -> None:
         print(f"  PR created: {pr_url}")
 
 
+# ── HF-A ─────────────────────────────────────────────────────────────────────
+
+def apply_hf_a(api: GitHubAPI) -> None:
+    print("\n=== HF-A: Upgrade upload-artifact@v3 → @v4 in contract-governance-fast-check.yml ===")
+    branch = BRANCHES["hf-a"]
+    sha = api.get_sha()
+
+    if api.branch_exists(branch):
+        print(f"  Branch {branch} already exists — skipping branch creation")
+    else:
+        api.create_branch(branch, sha)
+
+    path = ".github/workflows/contract-governance-fast-check.yml"
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
+
+    if "actions/upload-artifact@v3" not in content:
+        print(f"  INFO: upload-artifact@v3 not found in {path} — already fixed?")
+        return
+
+    new_content = content.replace("actions/upload-artifact@v3", "actions/upload-artifact@v4")
+    count = content.count("actions/upload-artifact@v3")
+    print(f"  Patching {path}: upgrading upload-artifact@v3 → @v4 ({count} occurrence{'s' if count > 1 else ''})")
+    api.update_file(
+        path=path,
+        content=new_content,
+        sha=file_sha,
+        message=(
+            "fix(ci): upgrade upload-artifact@v3 → @v4 in contract-governance-fast-check\n\n"
+            "upload-artifact@v3 is deprecated and now auto-fails on GitHub Actions.\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
+        branch=branch,
+    )
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): upgrade upload-artifact@v3 → @v4 (blocks contract governance)",
+            branch=branch,
+            body=PR_BODIES["hf-a"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
+# ── HF-B ─────────────────────────────────────────────────────────────────────
+
+def apply_hf_b(api: GitHubAPI) -> None:
+    print("\n=== HF-B: Fix pip-audit --require-hashes flag in security.yml ===")
+    branch = BRANCHES["hf-b"]
+    sha = api.get_sha()
+
+    if api.branch_exists(branch):
+        print(f"  Branch {branch} already exists — skipping branch creation")
+    else:
+        api.create_branch(branch, sha)
+
+    path = ".github/workflows/security.yml"
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
+
+    old_cmd = "uv run pip-audit --require-hashes --disable-pip --strict"
+    new_cmd = "uv run pip-audit --disable-pip --strict"
+
+    if old_cmd not in content:
+        print(f"  INFO: buggy pip-audit command not found in {path} — already fixed?")
+        return
+
+    new_content = content.replace(old_cmd, new_cmd, 1)
+    print(f"  Patching {path}: removing --require-hashes (requires -r, causes exit 2)")
+    api.update_file(
+        path=path,
+        content=new_content,
+        sha=file_sha,
+        message=(
+            "fix(ci): remove --require-hashes from pip-audit (requires -r flag)\n\n"
+            "--require-hashes without --requirement (-r) exits with code 2\n"
+            "immediately, auditing nothing. Remove the flag.\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
+        branch=branch,
+    )
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): remove invalid --require-hashes from pip-audit",
+            branch=branch,
+            body=PR_BODIES["hf-b"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
+# ── HF-E ─────────────────────────────────────────────────────────────────────
+
+def apply_hf_e(api: GitHubAPI) -> None:
+    print("\n=== HF-E: Fix smoke-check coverage upload (if-no-files-found: error → warn) ===")
+    branch = BRANCHES["hf-e"]
+    sha = api.get_sha()
+
+    if api.branch_exists(branch):
+        print(f"  Branch {branch} already exists — skipping branch creation")
+    else:
+        api.create_branch(branch, sha)
+
+    path = ".github/workflows/tests.yml"
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
+
+    # Target the specific smoke coverage upload step
+    old_block = """\
+            -   name: Upload smoke coverage data
+                uses: actions/upload-artifact@v4
+                with:
+                    name: coverage-data-smoke
+                    path: reports/coverage/.coverage.smoke
+                    if-no-files-found: error"""
+
+    new_block = """\
+            -   name: Upload smoke coverage data
+                uses: actions/upload-artifact@v4
+                with:
+                    name: coverage-data-smoke
+                    path: reports/coverage/.coverage.smoke
+                    if-no-files-found: warn"""
+
+    if old_block not in content:
+        print(f"  WARNING: expected smoke upload block not found in {path}. Searching...")
+        if "coverage-data-smoke" in content:
+            print("  Found 'coverage-data-smoke' — pattern differs, manual review needed")
+        return
+
+    new_content = content.replace(old_block, new_block, 1)
+    print(f"  Patching {path}: smoke coverage upload if-no-files-found: error → warn")
+    api.update_file(
+        path=path,
+        content=new_content,
+        sha=file_sha,
+        message=(
+            "fix(ci): tolerate missing smoke coverage artifact\n\n"
+            "Change if-no-files-found from error to warn for smoke coverage upload.\n"
+            "The upload step should not block CI when smoke tests don't produce\n"
+            "a coverage file (e.g. on first run without test data).\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
+        branch=branch,
+    )
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): tolerate missing smoke coverage artifact",
+            branch=branch,
+            body=PR_BODIES["hf-e"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
@@ -870,7 +1063,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--only",
-        choices=["ci-01", "ci-02", "ci-03", "ci-04", "ci-06", "ci-07", "ci-12"],
+        choices=["ci-01", "ci-02", "ci-03", "ci-04", "ci-06", "ci-07", "ci-12",
+                 "hf-a", "hf-b", "hf-e"],
         help="Apply only one fix",
     )
     args = parser.parse_args()
@@ -895,6 +1089,12 @@ def main() -> None:
             apply_ci07(api)
         if not args.only or args.only == "ci-12":
             apply_ci12(api)
+        if not args.only or args.only == "hf-a":
+            apply_hf_a(api)
+        if not args.only or args.only == "hf-b":
+            apply_hf_b(api)
+        if not args.only or args.only == "hf-e":
+            apply_hf_e(api)
         print("\n✅ Done!")
     except requests.HTTPError as e:
         print(f"\n❌ GitHub API error: {e}")

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-01'
----
+  Last verified: '2026-04-01'
+
+______________________________________________________________________
 
 # Template Index
 
@@ -18,13 +21,13 @@ remain implementation templates and MAY keep `Class: internal`.
 
 ## Core Templates
 
-| Template type | File | Primary use |
-|---|---|---|
-| `adr` | [adr-template.md](adr-template.md) | Architecture decisions |
-| `runbook` | [runbook-template.md](runbook-template.md) | Operator procedures |
-| `provider-spec` | [provider-spec-template.md](provider-spec-template.md) | Provider reference docs |
-| `pipeline-spec` | [pipeline-spec-template.md](pipeline-spec-template.md) | Pipeline reference docs |
-| `data-contract-spec` | [data-contract-spec-template.md](data-contract-spec-template.md) | Data contract and published schema docs |
+| Template type                 | File                                                                               | Primary use                                            |
+| ----------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `adr`                         | [adr-template.md](adr-template.md)                                                 | Architecture decisions                                 |
+| `runbook`                     | [runbook-template.md](runbook-template.md)                                         | Operator procedures                                    |
+| `provider-spec`               | [provider-spec-template.md](provider-spec-template.md)                             | Provider reference docs                                |
+| `pipeline-spec`               | [pipeline-spec-template.md](pipeline-spec-template.md)                             | Pipeline reference docs                                |
+| `data-contract-spec`          | [data-contract-spec-template.md](data-contract-spec-template.md)                   | Data contract and published schema docs                |
 | `control-plane-contract-spec` | [control-plane-contract-spec-template.md](control-plane-contract-spec-template.md) | Feature-flagged control-plane and inspection contracts |
 
 `contract-spec` MAY be used as a short alias for `data-contract-spec`, but the

@@ -1,6 +1,6 @@
 *Статус: internal-published (Internal / Extended)*
 
-# _references/
+# \_references/
 
 Mirror of skill reference bundles used by CI validation scripts.
 
@@ -17,10 +17,10 @@ still wins and the mirror must be re-synced.
 
 ## Consumers
 
-| Script | What it checks |
-|--------|---------------|
-| `scripts/ops/check_skills_mirror.sh` | Overlays reference bundles from `_references/local` onto skill mirrors |
-| `scripts/ops/check_ai_skills_layout.sh` | Validates `_references` exists as a required subdirectory |
+| Script                                  | What it checks                                                         |
+| --------------------------------------- | ---------------------------------------------------------------------- |
+| `scripts/ops/check_skills_mirror.sh`    | Overlays reference bundles from `_references/local` onto skill mirrors |
+| `scripts/ops/check_ai_skills_layout.sh` | Validates `_references` exists as a required subdirectory              |
 
 ## Rules
 

@@ -1,29 +1,32 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: template
 Class: internal
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Provider Specification: <Provider> <Entity>
 
-**Pipeline ID:** `<provider_entity>`  
-**Provider:** `<provider>`  
-**Entity:** `<entity>`  
+**Pipeline ID:** `<provider_entity>`
+**Provider:** `<provider>`
+**Entity:** `<entity>`
 **Source config:** `configs/entities/<provider>/<entity>.yaml`
 
 ## Identification
 
-| Parameter | Value |
-|---|---|
-| Provider | `<provider>` |
-| Entity | `<entity>` |
-| Endpoint / source | `<url-or-source>` |
-| Auth mode | `<public|api-key|oauth|other>` |
-| Rate limit | `<configured limit>` |
+| Parameter          | Value                                                                        |
+| ------------------ | ---------------------------------------------------------------------------- |
+| Provider           | `<provider>`                                                                 |
+| Entity             | `<entity>`                                                                   |
+| Endpoint / source  | `<url-or-source>`                                                            |
+| Auth mode          | \`\<public                                                                   |
+| Rate limit         | `<configured limit>`                                                         |
 | Canonical contract | `docs/04-reference/contracts/gold/<provider>_<entity>_v<major>.<minor>.json` |
 
 ## Source Contract
@@ -46,11 +49,11 @@ Last verified: '2026-03-30'
 
 ## Load Behavior
 
-| Layer | Format | Mode | Key / path |
-|---|---|---|---|
-| Bronze | `<jsonl+zstd>` | `<append>` | `<path>` |
-| Silver | `<delta>` | `<append|merge>` | `<path-or-table>` |
-| Gold | `<delta|disabled>` | `<mode>` | `<path-or-table>` |
+| Layer  | Format         | Mode        | Key / path |
+| ------ | -------------- | ----------- | ---------- |
+| Bronze | `<jsonl+zstd>` | `<append>`  | `<path>`   |
+| Silver | `<delta>`      | \`\<append  | merge>\`   |
+| Gold   | \`\<delta      | disabled>\` | `<mode>`   |
 
 ## Data Quality
 
@@ -65,13 +68,13 @@ Last verified: '2026-03-30'
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Metadata | YAML header MUST be complete | `<pass|fail>` | `<header>` |
-| Config | Spec MUST link active entity/provider config | `<pass|fail>` | `<config paths>` |
-| Contract | Spec MUST link canonical contract export | `<pass|fail>` | `<contract path>` |
-| Runtime | Spec MUST align with ADR-010 local-only posture | `<pass|fail|n/a>` | `<runtime note>` |
-| Naming | Canonical fields MUST follow project naming policy | `<pass|fail>` | `<field examples>` |
+| Control  | Requirement                                        | Status   | Evidence |
+| -------- | -------------------------------------------------- | -------- | -------- |
+| Metadata | YAML header MUST be complete                       | \`\<pass | fail>\`  |
+| Config   | Spec MUST link active entity/provider config       | \`\<pass | fail>\`  |
+| Contract | Spec MUST link canonical contract export           | \`\<pass | fail>\`  |
+| Runtime  | Spec MUST align with ADR-010 local-only posture    | \`\<pass | fail     |
+| Naming   | Canonical fields MUST follow project naming policy | \`\<pass | fail>\`  |
 
 ## References
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-006: Ports for Logger and Metrics
 
@@ -26,9 +29,9 @@ Note: `domain/ports.py` was reorganized into a package `domain/ports/` with a fa
 We have chosen to:
 
 1. **Create `LoggerPort`** in `domain/ports/` package as a formal Protocol for logging
-2. **Keep `MetricsPort`** as-is (already properly defined)
-3. **Use ports consistently** in `PipelineServices` for both logger and metrics
-4. **Maintain backward compatibility** via `BoundLogger` alias in `domain/context.py`
+1. **Keep `MetricsPort`** as-is (already properly defined)
+1. **Use ports consistently** in `PipelineServices` for both logger and metrics
+1. **Maintain backward compatibility** via `BoundLogger` alias in `domain/context.py`
 
 ## Justification
 
@@ -36,15 +39,15 @@ We have chosen to:
 
 All external dependencies should be abstracted through ports:
 
-| Dependency | Port | Location |
-|------------|------|----------|
+| Dependency  | Port             | Location        |
+| ----------- | ---------------- | --------------- |
 | Data Source | `DataSourcePort` | `domain/ports/` |
-| Storage | `StoragePort` | `domain/ports/` |
-| Lock | `LockPort` | `domain/ports/` |
-| Checkpoint | `CheckpointPort` | `domain/ports/` |
-| Quarantine | `QuarantinePort` | `domain/ports/` |
-| Metrics | `MetricsPort` | `domain/ports/` |
-| **Logger** | **`LoggerPort`** | `domain/ports/` |
+| Storage     | `StoragePort`    | `domain/ports/` |
+| Lock        | `LockPort`       | `domain/ports/` |
+| Checkpoint  | `CheckpointPort` | `domain/ports/` |
+| Quarantine  | `QuarantinePort` | `domain/ports/` |
+| Metrics     | `MetricsPort`    | `domain/ports/` |
+| **Logger**  | **`LoggerPort`** | `domain/ports/` |
 
 ### 2. Testability
 
@@ -58,12 +61,13 @@ logger: "structlog.BoundLogger"
 logger: LoggerPort
 
 # Tests can use any implementation
-mock-logger = MagicMock(spec=LoggerPort)
+mock - logger = MagicMock(spec=LoggerPort)
 ```
 
 ### 3. Future Flexibility
 
 The abstraction allows switching logging implementations without changing application code:
+
 - structlog (current)
 - loguru
 - Standard library logging
@@ -90,7 +94,9 @@ class LoggerPort(Protocol):
         """Emit an informational log event."""
         ...
 
-    def warning(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+    def warning(
+        self, _event: str, **kwargs: Any
+    ) -> Any:  # Any: structlog-compatible API
         """Emit a warning log event."""
         ...
 
@@ -102,7 +108,9 @@ class LoggerPort(Protocol):
         """Emit a debug log event."""
         ...
 
-    def exception(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+    def exception(
+        self, _event: str, **kwargs: Any
+    ) -> Any:  # Any: structlog-compatible API
         """Emit an error log event with exception information."""
         ...
 ```
@@ -119,13 +127,13 @@ All code now uses `LoggerPort` directly from `bioetl.domain.ports`.
 ```python
 @dataclass(frozen=True)
 class PipelineServices:
-    data-source: DataSourcePort
+    data - source: DataSourcePort
     storage: StoragePort
     lock: LockPort
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
-    metrics: MetricsPort    # Already a port
-    logger: LoggerPort      # Now also a port (was structlog.BoundLogger)
+    metrics: MetricsPort  # Already a port
+    logger: LoggerPort  # Now also a port (was structlog.BoundLogger)
 ```
 
 ## Alternatives Considered
@@ -133,6 +141,7 @@ class PipelineServices:
 ### 1. Keep structlog typing
 
 Rejected because:
+
 - Violates Ports & Adapters architecture
 - Creates tight coupling to infrastructure
 - Makes testing harder
@@ -141,6 +150,7 @@ Rejected because:
 ### 2. Create separate LoggingPort with different interface
 
 Rejected because:
+
 - The structlog interface (`bind`, `info`, `error`, etc.) is already a good abstraction
 - No benefit in creating a different interface
 - Would require adapters for existing code
@@ -148,6 +158,7 @@ Rejected because:
 ### 3. Move LoggerPort to a separate file
 
 Rejected because:
+
 - All other ports are in `domain/ports/` package
 - Keeping them together improves discoverability
 - No circular dependency issues
@@ -155,19 +166,21 @@ Rejected because:
 ## Consequences
 
 ### Positive
+
 - Consistent architecture across all dependencies
 - Improved testability
 - Future flexibility for logging implementations
 - Clean domain layer without infrastructure dependencies
 
 ### Negative
+
 - Minor: Existing code using `BoundLogger` still works but should migrate to `LoggerPort`
 
 ## Rollout
 
 1. New code should use `LoggerPort` directly
-2. Existing code using `BoundLogger` continues to work
-3. Gradual migration as files are modified
+1. Existing code using `BoundLogger` continues to work
+1. Gradual migration as files are modified
 
 ## References
 
@@ -179,13 +192,13 @@ Rejected because:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-006-logger-metrics-ports.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-006-logger-metrics-ports.md`    |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                           |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                         |
 
 ## Rollback
 

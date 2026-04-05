@@ -1,20 +1,19 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-043: Documentation and Knowledge Management Strategy
 
-**Date:** 2026-03-09
-**Status:** Accepted
-**Decision makers:** @BioETL-Team
-**Related:** ADR-040 (diagram governance), ADR-041 (naming), ADR-042 (testing)
----
+## **Date:** 2026-03-09 **Status:** Accepted **Decision makers:** @BioETL-Team **Related:** ADR-040 (diagram governance), ADR-041 (naming), ADR-042 (testing)
 
 ## Context
 
@@ -22,17 +21,17 @@ BioETL has 100+ documentation files across `docs/`, 43 ADRs, and extensive
 inline documentation. However, several knowledge management gaps exist:
 
 1. **ADR Coverage Gap**: No systematic way to identify undocumented architectural decisions
-2. **Cross-reference Integrity**: Links between docs break as files move
-3. **Provider Docs vs Runbooks Drift**: Provider reference docs and operational playbooks are separate concerns, but the docs policy does not state that clearly
-4. **Glossary Synchronization**: Domain terms defined in multiple places without single source
-5. **Documentation Drift**: Code changes without corresponding doc updates
+1. **Cross-reference Integrity**: Links between docs break as files move
+1. **Provider Docs vs Runbooks Drift**: Provider reference docs and operational playbooks are separate concerns, but the docs policy does not state that clearly
+1. **Glossary Synchronization**: Domain terms defined in multiple places without single source
+1. **Documentation Drift**: Code changes without corresponding doc updates
 
 ### Conflict: Documentation Freshness vs Maintenance Burden
 
 Comprehensive docs require ongoing maintenance. Over-documentation creates
 stale content that misleads. The strategy must balance coverage with freshness.
 
----
+______________________________________________________________________
 
 ## Decision
 
@@ -51,6 +50,7 @@ Component Category → Required ADR Coverage:
 ### 2. Cross-Reference Validation
 
 CI MUST validate internal documentation links:
+
 - Markdown link targets exist (`[text](path)` → path is valid file)
 - ADR references in code comments point to existing ADRs
 - RULES.md section references are valid
@@ -91,11 +91,12 @@ SHOULD mirror the runtime profiles and MUST NOT intentionally diverge on:
 Each doc file SHOULD include a `Last verified:` date in frontmatter or header.
 CI weekly job flags docs not verified in 90+ days.
 
----
+______________________________________________________________________
 
 ## Consequences
 
 ### Positive
+
 - Systematic ADR coverage prevents undocumented decisions
 - Cross-reference validation catches broken links before merge
 - Provider docs and operational runbooks have explicit boundaries
@@ -103,15 +104,17 @@ CI weekly job flags docs not verified in 90+ days.
 - Runtime AI profiles and published mirrors use one shared fact model
 
 ### Negative
+
 - ADR gap detection may initially flag many missing ADRs
 - Provider reference docs still add maintenance work for new providers
 - Freshness tracking needs human verification dates
 
 ### Risks
+
 - **Doc overhead**: Mitigated by templates and automation
 - **False positive broken links**: Mitigated by excluding external URLs
 
----
+______________________________________________________________________
 
 ## Compliance
 

@@ -5,14 +5,13 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 ## Созданные объекты evidence
 
 1. `EV-interfaces-package-topology-root-exposes-user-facing-entrypoints-and-observability`
-2. `EV-interfaces-package-topology-cli-is-organized-as-a-thin-controller-package`
-3. `EV-interfaces-package-topology-http-is-dedicated-to-health-serving`
-4. `EV-interfaces-package-topology-orchestration-is-intentionally-reserved`
-5. `EV-interfaces-package-topology-layer-has-a-public-observability-facade`
+1. `EV-interfaces-package-topology-cli-is-organized-as-a-thin-controller-package`
+1. `EV-interfaces-package-topology-http-is-dedicated-to-health-serving`
+1. `EV-interfaces-package-topology-orchestration-is-intentionally-reserved`
+1. `EV-interfaces-package-topology-layer-has-a-public-observability-facade`
 
 ## Проверка gate
 

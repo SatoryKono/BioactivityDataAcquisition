@@ -5,10 +5,10 @@ The constrained spec workflow is intentionally strict.
 ## Non-Negotiable Rules
 
 1. No PRD or architecture section may exist without at least one `DEC-*` citation.
-2. Requirements must cite the decision that authorizes them.
-3. Architecture choices must cite the decision that justifies them.
-4. Relevant risks must be cross-referenced with `RISK-*` IDs.
-5. Evidence should be cited with `EV-*` IDs when a claim depends on research, measurement, or user findings.
+1. Requirements must cite the decision that authorizes them.
+1. Architecture choices must cite the decision that justifies them.
+1. Relevant risks must be cross-referenced with `RISK-*` IDs.
+1. Evidence should be cited with `EV-*` IDs when a claim depends on research, measurement, or user findings.
 
 ## Allowed Citation Patterns
 
@@ -30,4 +30,3 @@ The constrained spec workflow is intentionally strict.
 - Every technical choice cites a decision.
 - Risk notes are included where the choice introduces known downside.
 - No section expands scope beyond the decision ledger.
-

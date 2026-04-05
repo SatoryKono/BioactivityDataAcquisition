@@ -1,7 +1,7 @@
 # DEC-ADAPT Proposed Decision Draft
 
-Date: 2026-03-20  
-Status: Proposed  
+Date: 2026-03-20
+Status: Proposed
 Scope: `adapter-interface-alignment`
 
 This draft converts the current evidence set into a coherent proposed decision package. Nothing here is marked accepted yet. The goal is to make the trade-offs explicit so the next implementation step can be deliberate rather than incremental.
@@ -19,10 +19,10 @@ These four decisions are intended to be adopted together. Taken separately, they
 
 ## DEC-ADAPT-001
 
-**Decision**  
+**Decision**
 Choose provider-bound typed creators as the canonical helper-synthesis boundary for adapter construction, and reduce `DataSourceFactory.create()` to a compatibility facade over that policy.
 
-**Recommended option**  
+**Recommended option**
 Normalize on provider-specific composition creators and keep `DataSourceFactory` thin.
 
 **Alternatives considered**
@@ -61,10 +61,10 @@ Normalize on provider-specific composition creators and keep `DataSourceFactory`
 
 ## DEC-ADAPT-002
 
-**Decision**  
+**Decision**
 Formalize the `custom_creator` contract as an explicit composition protocol instead of `Callable[..., DataSourcePort]`.
 
-**Recommended option**  
+**Recommended option**
 Replace the open-ended callable alias with a typed protocol for internal adapter factories, while keeping provider-specific runtime callers on `data_source_creator`.
 
 **Alternatives considered**
@@ -102,10 +102,10 @@ Replace the open-ended callable alias with a typed protocol for internal adapter
 
 ## DEC-ADAPT-003
 
-**Decision**  
+**Decision**
 Define adapter helper bundles as explicit composition concepts, with family-specific typing instead of one implicit kwargs bag.
 
-**Recommended option**  
+**Recommended option**
 Introduce a core adapter-support bundle and one or more family extensions, rather than one flat universal helper bag.
 
 **Suggested shape**
@@ -152,10 +152,10 @@ Introduce a core adapter-support bundle and one or more family extensions, rathe
 
 ## DEC-ADAPT-004
 
-**Decision**  
+**Decision**
 Treat local creator fixes as temporary stabilization unless they clearly move a seam toward the canonical model.
 
-**Recommended option**  
+**Recommended option**
 Allow local fixes only when they preserve the small outward interface and reduce divergence from the target contract.
 
 **Alternatives considered**

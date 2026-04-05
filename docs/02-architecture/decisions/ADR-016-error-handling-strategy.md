@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-016: Error Handling Strategy
 
@@ -25,11 +28,11 @@ We have implemented a **differentiated error handling strategy** with three tier
 
 ### 1. Three-Tier Error Classification
 
-| Error Type | Behavior | Examples |
-|------------|----------|----------|
-| **Critical** | Pipeline fail | Auth failure (401), schema mismatch in Gold, database unavailable |
-| **Recoverable** | Retry with backoff (max 3 attempts) | 429 Rate Limit, 502/504 Timeout, network errors |
-| **Data Quality** | Log + skip record | Invalid SMILES, missing optional field |
+| Error Type       | Behavior                            | Examples                                                          |
+| ---------------- | ----------------------------------- | ----------------------------------------------------------------- |
+| **Critical**     | Pipeline fail                       | Auth failure (401), schema mismatch in Gold, database unavailable |
+| **Recoverable**  | Retry with backoff (max 3 attempts) | 429 Rate Limit, 502/504 Timeout, network errors                   |
+| **Data Quality** | Log + skip record                   | Invalid SMILES, missing optional field                            |
 
 This decision implements RULES.md Section 3.1.
 
@@ -47,10 +50,11 @@ jitter-seed: 42        # Optional seed for reproducibility
 ```
 
 **Deterministic Jitter Calculation:**
+
 ```python
-hash-input = f"{attempt}:{url}:{seed}"
-jitter-factor = (hash(hash-input) % 1000) / 1000.0
-jitter = jitter-min + jitter-factor * (jitter-max - jitter-min)
+hash - input = f"{attempt}:{url}:{seed}"
+jitter - factor = (hash(hash - input) % 1000) / 1000.0
+jitter = jitter - min + jitter - factor * (jitter - max - jitter - min)
 ```
 
 ### 3. Circuit Breaker
@@ -81,6 +85,7 @@ State machine pattern for cascading failure protection:
 ```
 
 **Configuration:**
+
 - `failure-threshold`: 5 consecutive errors
 - `recovery-timeout`: 300s (5 minutes)
 - Triggering errors: 5xx, 429, connection timeouts
@@ -91,29 +96,31 @@ See [ADR-007](ADR-007-circuit-breaker-implementation.md) for implementation deta
 
 All failed records are stored in a single quarantine table `common.quarantine`:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `ingestion_ts` | Timestamp | Time of incident |
-| `pipeline` | String | Pipeline name (e.g., `chembl_activity`) |
-| `error-code` | String | Error type (e.g., `SCHEMA-VIOLATION`) |
-| `payload` | JSON/Text | Raw record (**truncated to 64KB**) |
-| `payload-hash` | String | SHA256 for deduplication |
-| `bronze-batch-id` | UUID | Reference to source batch |
-| `dq-status` | String | `NEW` \| `IGNORED` \| `REPROCESSED` |
+| Field             | Type      | Description                             |
+| ----------------- | --------- | --------------------------------------- |
+| `ingestion_ts`    | Timestamp | Time of incident                        |
+| `pipeline`        | String    | Pipeline name (e.g., `chembl_activity`) |
+| `error-code`      | String    | Error type (e.g., `SCHEMA-VIOLATION`)   |
+| `payload`         | JSON/Text | Raw record (**truncated to 64KB**)      |
+| `payload-hash`    | String    | SHA256 for deduplication                |
+| `bronze-batch-id` | UUID      | Reference to source batch               |
+| `dq-status`       | String    | `NEW` \| `IGNORED` \| `REPROCESSED`     |
 
 **64KB Truncation Rationale:**
+
 - Prevents storage bloat from large malformed records
 - Maintains linkage to Bronze via `bronze-batch-id` for full payload access
 - Sufficient context for debugging most issues
 
 ### 5. Batch Error Thresholds
 
-| Threshold | Condition | Action |
-|-----------|-----------|--------|
-| **Soft** | >5% DQ errors | Warning |
-| **Hard** | >20% DQ errors | Fail Batch |
+| Threshold | Condition      | Action     |
+| --------- | -------------- | ---------- |
+| **Soft**  | >5% DQ errors  | Warning    |
+| **Hard**  | >20% DQ errors | Fail Batch |
 
 Metrics tracked:
+
 - `record-error-rate`: Ratio of bad rows
 - `entity-error-rate`: Ratio of bad unique entities
 
@@ -122,6 +129,7 @@ Metrics tracked:
 ### 1. Differentiated Handling Prevents Over-Engineering
 
 Not all errors deserve the same treatment:
+
 - Critical errors need immediate attention
 - Recoverable errors should be retried automatically
 - Data quality issues shouldn't stop the pipeline
@@ -129,6 +137,7 @@ Not all errors deserve the same treatment:
 ### 2. Deterministic Jitter Enables Reproducibility
 
 Per [ADR-014](ADR-014-deterministic-writes.md), infrastructure must be deterministic:
+
 - Hash-based jitter allows reproducible retries in tests
 - Random jitter still used in production for thundering herd prevention
 - Configurable via `RetryConfig(deterministic=True)`
@@ -136,6 +145,7 @@ Per [ADR-014](ADR-014-deterministic-writes.md), infrastructure must be determini
 ### 3. Unified Quarantine Simplifies Operations
 
 Instead of per-pipeline quarantine tables:
+
 - Single location for all failed records
 - Consistent schema for tooling
 - Cross-pipeline analysis capability
@@ -144,6 +154,7 @@ Instead of per-pipeline quarantine tables:
 ### 4. Circuit Breaker Prevents Cascading Failures
 
 When external APIs fail:
+
 - Stops hammering failing services
 - Preserves rate limit quotas
 - Enables graceful degradation
@@ -221,6 +232,7 @@ class QuarantinePort(Protocol):
 ### 1. Fail-Fast Only
 
 Rejected because:
+
 - Wastes resources on transient failures
 - Doesn't distinguish data quality from infrastructure issues
 - Poor user experience for minor issues
@@ -228,6 +240,7 @@ Rejected because:
 ### 2. Per-Pipeline Quarantine Tables
 
 Rejected because:
+
 - Schema duplication
 - Tooling complexity
 - Cross-pipeline analysis difficult
@@ -236,6 +249,7 @@ Rejected because:
 ### 3. Unlimited Payload in Quarantine
 
 Rejected because:
+
 - Storage cost explosion with malformed large records
 - 64KB covers 99% of debugging needs
 - Full payload accessible via Bronze linkage
@@ -243,6 +257,7 @@ Rejected because:
 ### 4. No Deterministic Mode
 
 Rejected because:
+
 - Tests become non-reproducible
 - Debugging retry issues is difficult
 - Violates [ADR-014](ADR-014-deterministic-writes.md) principles
@@ -271,13 +286,13 @@ Rejected because:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-016-error-handling-strategy.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-016-error-handling-strategy.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                           |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                         |
 
 ## Rollout
 

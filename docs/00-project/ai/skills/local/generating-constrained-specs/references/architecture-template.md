@@ -45,4 +45,3 @@ Replace placeholder decision IDs with real `DEC-*` references before finalizing 
 |---|---|---|
 |  |  |  |
 ```
-

@@ -17,11 +17,11 @@ Examples:
 ## Rules
 
 1. Always start with the `EV-` prefix.
-2. Use the pillar name as the first segment after the prefix.
-3. Use lowercase kebab-case only.
-4. Prefer topic words that describe the underlying claim, not the source.
-5. Add a short qualifier only when it disambiguates similar evidence.
-6. Keep the ID stable once the evidence object is referenced elsewhere.
+1. Use the pillar name as the first segment after the prefix.
+1. Use lowercase kebab-case only.
+1. Prefer topic words that describe the underlying claim, not the source.
+1. Add a short qualifier only when it disambiguates similar evidence.
+1. Keep the ID stable once the evidence object is referenced elsewhere.
 
 ## Good IDs
 
@@ -47,4 +47,3 @@ Use one of the standard ledger pillars:
 - `legal`
 - `ops`
 - `economics`
-

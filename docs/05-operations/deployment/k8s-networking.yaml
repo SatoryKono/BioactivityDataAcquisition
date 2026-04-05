@@ -13,7 +13,7 @@ spec:
     - bioetl.example.com
     - grafana.example.com
     secretName: bioetl-tls
-  
+
   rules:
   - host: bioetl.example.com
     http:
@@ -25,7 +25,7 @@ spec:
             name: bioetl
             port:
               number: 8000
-  
+
   - host: grafana.example.com
     http:
       paths:

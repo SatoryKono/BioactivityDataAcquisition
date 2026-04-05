@@ -6,18 +6,18 @@ business logic.
 
 ## Package Structure
 
-| Package | Responsibility |
-| --- | --- |
-| `cli/` | Click-based commands, command groups, output formatting, exit codes |
-| `http/` | HTTP health/metrics server seams and lightweight server state helpers |
-| `orchestration/` | External orchestration-facing interface adapters |
+| Package          | Responsibility                                                        |
+| ---------------- | --------------------------------------------------------------------- |
+| `cli/`           | Click-based commands, command groups, output formatting, exit codes   |
+| `http/`          | HTTP health/metrics server seams and lightweight server state helpers |
+| `orchestration/` | External orchestration-facing interface adapters                      |
 
 ## Reading Order
 
 1. Start with `cli/main.py` for the command entrypoint.
-2. Follow `cli/commands/` for command-specific behavior.
-3. Inspect `http/` when debugging health or metrics serving.
-4. Inspect `orchestration/` when integrating with external runtime control.
+1. Follow `cli/commands/` for command-specific behavior.
+1. Inspect `http/` when debugging health or metrics serving.
+1. Inspect `orchestration/` when integrating with external runtime control.
 
 ## Placement Rules
 

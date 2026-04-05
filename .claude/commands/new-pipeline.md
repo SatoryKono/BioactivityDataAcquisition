@@ -1,10 +1,11 @@
----
-description: "Создание нового ETL-пайплайна для провайдера и сущности в BioETL. Генерирует файлы по шаблонам."
----
+______________________________________________________________________
+
+## description: "Создание нового ETL-пайплайна для провайдера и сущности в BioETL. Генерирует файлы по шаблонам."
 
 # /new-pipeline
 
 ## Использование
+
 ```
 /new-pipeline [provider] [entity]
 ```
@@ -12,15 +13,18 @@ description: "Создание нового ETL-пайплайна для про
 ## Инструкции
 
 ### Шаг 1: Сбор данных
+
 Collect: `provider` (snake_case), `entity` (snake_case, singular), `primary_key`, business fields, new/existing provider.
 
 ### Шаг 2: Валидация
+
 - `configs/entities/{provider}/{entity}.yaml` must NOT exist
 - Naming must be snake_case
 
 ### Шаг 3: Создать артефакты
 
 **3.1 Config:** `configs/entities/{provider}/{entity}.yaml` — use template:
+
 ```yaml
 version: "1.0.0"
 provider: {provider}
@@ -57,9 +61,11 @@ contracts:
 **3.5 If new provider:** create provider config, adapter client, update `composition/providers/registration.py`
 
 ### Шаг 4: Tests
+
 `tests/unit/application/pipelines/{provider}/test_{entity}_transformer.py`
 
 ### Шаг 5: Verify
+
 ```bash
 python -m scripts.schema validate-configs --verbose
 python -m pytest tests/architecture/test_registry_contracts.py -q
@@ -67,6 +73,7 @@ python -m pytest tests/unit/application/pipelines/{provider}/ -q
 ```
 
 ## Naming Convention
+
 - Pipeline: `{provider}_{entity}`
 - Transformer: `{Provider}{Entity}Transformer`
 - Gold schema: `{Provider}{Entity}GoldSchema`

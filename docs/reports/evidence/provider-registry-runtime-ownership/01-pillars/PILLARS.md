@@ -28,6 +28,6 @@ already sufficient for the current architecture?
 ## Evaluation Focus
 
 1. Is runtime bootstrap already explicit and testable enough through the named seam?
-2. Do runtime callers naturally own a `ProviderRegistry` instance today?
-3. Where does explicit registry instance threading already produce clear value?
-4. What evidence would justify a later RF-07D4 wave instead of stopping here?
+1. Do runtime callers naturally own a `ProviderRegistry` instance today?
+1. Where does explicit registry instance threading already produce clear value?
+1. What evidence would justify a later RF-07D4 wave instead of stopping here?

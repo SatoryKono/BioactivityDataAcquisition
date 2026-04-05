@@ -40,8 +40,8 @@ runtime source и canonical governance docs:
 ## Practical Reading Order
 
 1. [agent-memory.md](agent-memory.md)
-2. relevant `memory-py-*.md` file for the current role
-3. `docs/00-project/ai/agents/` for guides and runtime-facing mirrors
+1. relevant `memory-py-*.md` file for the current role
+1. `docs/00-project/ai/agents/` for guides and runtime-facing mirrors
 
 ### Dashboard work
 

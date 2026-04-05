@@ -1,9 +1,6 @@
----
-name: deep-research
-description: Use when asked for "deep research", "thorough analysis", "comprehensive report", "investigate", "due diligence", or when multiple sources are needed to answer complex questions. Produces well-sourced research reports through iterative refinement.
-context: fork
-agent: general-purpose
----
+______________________________________________________________________
+
+## name: deep-research description: Use when asked for "deep research", "thorough analysis", "comprehensive report", "investigate", "due diligence", or when multiple sources are needed to answer complex questions. Produces well-sourced research reports through iterative refinement. context: fork agent: general-purpose
 
 # Conducting Deep Research
 
@@ -26,6 +23,7 @@ Use TodoWrite to track these mandatory steps:
 ### Step 1: Clarify Scope
 
 Ask me clarifying questions only if:
+
 - Topic has multiple interpretations
 - Key constraints missing (timeframe, geography, industry)
 - Success criteria unclear
@@ -49,6 +47,7 @@ Language: [Match user's language]
 ### Step 3: Initial Draft (Noisy Starting Point)
 
 Write from existing knowledge only, marking gaps:
+
 - `[NEEDS VERIFICATION]` - uncertain claims
 - `[RESEARCH NEEDED]` - missing information
 - `[CONFIDENCE: LOW/MED/HIGH]` - flag uncertainty levels
@@ -58,6 +57,7 @@ This draft intentionally contains "noise" - the refinement loop will denoise it.
 ### Step 4: Red Team Critique
 
 Attack the draft for:
+
 - **Logic**: Circular reasoning, false dichotomies, unsupported claims
 - **Gaps**: Missing perspectives, incomplete coverage
 - **Sources**: Unsourced claims, single-source reliance
@@ -67,11 +67,13 @@ Rate each issue 1-10 severity. See [references/critique-framework.md](references
 ### Step 5: Targeted Research with Reflection
 
 **Search budget by complexity:**
+
 - Simple verification: 1-2 searches
-- Moderate topics: 3-5 searches  
+- Moderate topics: 3-5 searches
 - Complex research: 5-10 searches
 
 **CRITICAL: Think after EVERY search.** After each `web_search`, pause and reflect:
+
 ```
 REFLECTION:
 - What key facts did I find?
@@ -81,6 +83,7 @@ REFLECTION:
 ```
 
 **Parallel research triggers** - pursue multiple threads when:
+
 - Comparing alternatives (search each separately)
 - Multiple independent sub-questions exist
 - Different source types needed (academic vs news vs official)
@@ -91,17 +94,18 @@ See [references/search-patterns.md](references/search-patterns.md) for query tec
 
 **Score each source (1-100 confidence):**
 
-| Source Type | Base Score |
-|-------------|------------|
-| Official documentation, peer-reviewed | 85-100 |
-| Government/institutional reports | 75-90 |
-| Established news outlets | 60-80 |
-| Industry publications | 50-75 |
-| Blogs, forums | 20-50 |
+| Source Type                           | Base Score |
+| ------------------------------------- | ---------- |
+| Official documentation, peer-reviewed | 85-100     |
+| Government/institutional reports      | 75-90      |
+| Established news outlets              | 60-80      |
+| Industry publications                 | 50-75      |
+| Blogs, forums                         | 20-50      |
 
 Adjust based on: recency, author credentials, citation quality.
 
 **Track facts with attribution:**
+
 ```
 FACT: [Statement]
 SOURCE: [URL]
@@ -110,32 +114,36 @@ DISPUTED: [Yes/No - conflicts with other sources?]
 ```
 
 **When sources contradict:**
+
 1. Note the contradiction explicitly
-2. Check publication dates (prefer recent)
-3. Evaluate source authority
-4. Search for additional sources to break tie
-5. If unresolved, present both views with confidence levels
+1. Check publication dates (prefer recent)
+1. Evaluate source authority
+1. Search for additional sources to break tie
+1. If unresolved, present both views with confidence levels
 
 See [references/source-evaluation.md](references/source-evaluation.md) for detailed guidance.
 
 ### Step 7: Refine Draft (Denoise)
 
 Refine by:
+
 1. Replacing `[NEEDS VERIFICATION]` with sourced facts
-2. Adding inline citations with confidence: "According to [Source] (high confidence), ..."
-3. Qualifying or removing unsupported claims
-4. Addressing contradictions explicitly
-5. Adding counterarguments
+1. Adding inline citations with confidence: "According to [Source] (high confidence), ..."
+1. Qualifying or removing unsupported claims
+1. Addressing contradictions explicitly
+1. Adding counterarguments
 
 **Context management:** If accumulating too much research, compress raw notes into key findings before continuing. Discard redundant/low-value information.
 
 ### Step 8: Evaluate Quality
 
 Score 1-10 on:
+
 - **Comprehensiveness**: All key questions addressed?
 - **Accuracy**: Claims well-sourced with appropriate confidence?
 
 **Track across iterations:**
+
 ```
 QUALITY LOG:
 Iteration 1: Comprehensiveness 5, Accuracy 4, Avg 4.5
@@ -174,6 +182,7 @@ See [references/report-templates.md](references/report-templates.md) for format 
 **Input**: "Research the current state of nuclear fusion energy"
 
 **Research Brief**:
+
 ```
 Topic: Current state of nuclear fusion energy
 Key Questions:
@@ -184,13 +193,15 @@ Constraints: Focus on scientific/engineering progress, not policy
 ```
 
 **Draft Excerpt** (before research):
+
 ```
-Nuclear fusion has made significant progress [CONFIDENCE: LOW]. 
+Nuclear fusion has made significant progress [CONFIDENCE: LOW].
 The National Ignition Facility achieved ignition [NEEDS VERIFICATION].
 Private companies like [RESEARCH NEEDED] are also pursuing fusion.
 ```
 
 **Post-search reflection**:
+
 ```
 REFLECTION after search 1 (NIF ignition):
 - Found: NIF achieved ignition Dec 2022, 3.15 MJ from 2.05 MJ input
@@ -200,6 +211,7 @@ REFLECTION after search 1 (NIF ignition):
 ```
 
 **Source tracking**:
+
 ```
 FACT: NIF achieved fusion ignition December 2022
 SOURCE: llnl.gov/news/...
@@ -208,6 +220,7 @@ DISPUTED: No
 ```
 
 **Quality log**:
+
 ```
 Iteration 1: Comp 5, Acc 4 → Need private sector + timelines
 Iteration 2: Comp 8, Acc 7 → Good coverage, strengthen citations
@@ -240,6 +253,7 @@ Use the **AskUserQuestion tool** at key decision points throughout the deep rese
 ### Example Invocations
 
 **Scope clarification (Step 1):**
+
 ```
 Topic: "Research renewable energy"
 → Use AskUserQuestion tool:
@@ -252,6 +266,7 @@ Topic: "Research renewable energy"
 ```
 
 **Research brief validation (Step 2):**
+
 ```
 After drafting research brief
 → Use AskUserQuestion tool:
@@ -264,6 +279,7 @@ After drafting research brief
 ```
 
 **Quality iteration decision (Step 8):**
+
 ```
 Iteration 2: Comprehensiveness 6, Accuracy 7, Avg 6.5
 → Use AskUserQuestion tool:
@@ -275,6 +291,7 @@ Iteration 2: Comprehensiveness 6, Accuracy 7, Avg 6.5
 ```
 
 **Source contradiction (Step 6):**
+
 ```
 Major sources disagree: Source A (confidence 85) says X, Source B (confidence 80) says Y
 → Use AskUserQuestion tool:
@@ -287,6 +304,7 @@ Major sources disagree: Source A (confidence 85) says X, Source B (confidence 80
 ```
 
 **Report depth selection (Step 9):**
+
 ```
 Research complete, ready for final report
 → Use AskUserQuestion tool:

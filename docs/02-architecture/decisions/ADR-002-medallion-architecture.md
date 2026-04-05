@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-002: Why Medallion Architecture?
 
@@ -29,28 +32,32 @@ This decision is codified in Section 2.1 of `RULES.md`.
 
 The Medallion Architecture provides a clear and logical separation of concerns, which directly addresses several key project requirements:
 
-1.  **Traceability and Replayability**:
-    *   The **Bronze** layer serves as an immutable, append-only archive of raw source data. This allows us to re-run any pipeline from scratch (`--full-rebuild`) in case of bugs or changes in business logic, without having to re-fetch data from source APIs. This is critical for disaster recovery and auditing.
+1. **Traceability and Replayability**:
 
-2.  **Improved Data Quality**:
-    *   Each layer represents a progressive improvement in data quality.
-    *   **Bronze**: Raw, as-is data.
-    *   **Silver**: Normalized, cleaned, and enriched data (e.g., standardized units, validated schemas).
-    *   **Gold**: Business-level aggregates and views, optimized for specific use cases (e.g., analytics, machine learning).
-    *   This structure isolates data quality issues. A problem in a Gold table can be fixed by reprocessing from the Silver layer, which is much faster than going back to the source.
+   - The **Bronze** layer serves as an immutable, append-only archive of raw source data. This allows us to re-run any pipeline from scratch (`--full-rebuild`) in case of bugs or changes in business logic, without having to re-fetch data from source APIs. This is critical for disaster recovery and auditing.
 
-3.  **Decoupling of Concerns**:
-    *   **Ingestion vs. Transformation**: Ingestion pipelines are only responsible for landing data in Bronze. Transformation pipelines work from Bronze to Silver. This decoupling means a change in a Gold table's business logic does not impact the ingestion process.
-    *   **Multiple Use Cases**: The Silver layer can serve as a source for many different Gold tables, preventing the duplication of cleaning and normalization logic.
+1. **Improved Data Quality**:
 
-4.  **Security and Governance**:
-    *   The layered approach allows for different access controls. For example, a wider audience can be granted access to the public-safe Gold layer, while access to the potentially sensitive Bronze and Silver layers can be more restricted.
+   - Each layer represents a progressive improvement in data quality.
+   - **Bronze**: Raw, as-is data.
+   - **Silver**: Normalized, cleaned, and enriched data (e.g., standardized units, validated schemas).
+   - **Gold**: Business-level aggregates and views, optimized for specific use cases (e.g., analytics, machine learning).
+   - This structure isolates data quality issues. A problem in a Gold table can be fixed by reprocessing from the Silver layer, which is much faster than going back to the source.
+
+1. **Decoupling of Concerns**:
+
+   - **Ingestion vs. Transformation**: Ingestion pipelines are only responsible for landing data in Bronze. Transformation pipelines work from Bronze to Silver. This decoupling means a change in a Gold table's business logic does not impact the ingestion process.
+   - **Multiple Use Cases**: The Silver layer can serve as a source for many different Gold tables, preventing the duplication of cleaning and normalization logic.
+
+1. **Security and Governance**:
+
+   - The layered approach allows for different access controls. For example, a wider audience can be granted access to the public-safe Gold layer, while access to the potentially sensitive Bronze and Silver layers can be more restricted.
 
 ## Consequences
 
-*   **Increased Storage Costs**: Storing data in three different forms consumes more storage space. This is mitigated by using efficient storage formats (zstd-compressed JSONL, Delta Lake) and a local archive policy for old Bronze data.
-*   **Higher Latency**: The multi-hop process (Bronze -> Silver -> Gold) introduces latency compared to a single, monolithic ETL job. This is an acceptable trade-off for the gains in reliability and maintainability.
-*   **Development Overhead**: Requires developers to think in terms of layers and manage pipelines between them. However, this structure also simplifies individual pipeline logic.
+- **Increased Storage Costs**: Storing data in three different forms consumes more storage space. This is mitigated by using efficient storage formats (zstd-compressed JSONL, Delta Lake) and a local archive policy for old Bronze data.
+- **Higher Latency**: The multi-hop process (Bronze -> Silver -> Gold) introduces latency compared to a single, monolithic ETL job. This is an acceptable trade-off for the gains in reliability and maintainability.
+- **Development Overhead**: Requires developers to think in terms of layers and manage pipelines between them. However, this structure also simplifies individual pipeline logic.
 
 ## References
 
@@ -62,13 +69,13 @@ The Medallion Architecture provides a clear and logical separation of concerns, 
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-002-medallion-architecture.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-002-medallion-architecture.md`  |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                           |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                         |
 
 ## Rollout
 

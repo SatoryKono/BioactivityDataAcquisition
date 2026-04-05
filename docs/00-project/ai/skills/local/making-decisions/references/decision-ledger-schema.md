@@ -29,23 +29,23 @@ Use this schema for `04-decisions/DECISIONS.yaml`.
 
 ## Required Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `id` | string | Semantic decision ID prefixed with `DEC-` |
-| `decision` | string | Clear statement of what was chosen |
-| `status` | string | Recommended values: `accepted`, `provisional`, `needs-research` |
-| `owner` | string | Decision owner, usually `user` unless another owner is explicit |
-| `created_at` | date | Decision date in `YYYY-MM-DD` format |
-| `alternatives` | list[string] | Options that were considered |
-| `evidence` | list[string] | Supporting `EV-*` IDs |
-| `tradeoffs.wins` | list[string] | Benefits of the chosen option |
-| `tradeoffs.loses` | list[string] | Downsides or sacrifices |
+| Field             | Type         | Description                                                     |
+| ----------------- | ------------ | --------------------------------------------------------------- |
+| `id`              | string       | Semantic decision ID prefixed with `DEC-`                       |
+| `decision`        | string       | Clear statement of what was chosen                              |
+| `status`          | string       | Recommended values: `accepted`, `provisional`, `needs-research` |
+| `owner`           | string       | Decision owner, usually `user` unless another owner is explicit |
+| `created_at`      | date         | Decision date in `YYYY-MM-DD` format                            |
+| `alternatives`    | list[string] | Options that were considered                                    |
+| `evidence`        | list[string] | Supporting `EV-*` IDs                                           |
+| `tradeoffs.wins`  | list[string] | Benefits of the chosen option                                   |
+| `tradeoffs.loses` | list[string] | Downsides or sacrifices                                         |
 
 ## Recommended Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `risks` | list[string] | Linked `RISK-*` entries created or affected by the decision |
+| Field          | Type         | Description                                                  |
+| -------------- | ------------ | ------------------------------------------------------------ |
+| `risks`        | list[string] | Linked `RISK-*` entries created or affected by the decision  |
 | `implications` | list[string] | Follow-on consequences for scope, architecture, or execution |
 
 ## Quality Gate
@@ -53,4 +53,3 @@ Use this schema for `04-decisions/DECISIONS.yaml`.
 - At least two evidence IDs per accepted decision whenever possible.
 - At least one alternative must be documented.
 - Both wins and loses must be present.
-

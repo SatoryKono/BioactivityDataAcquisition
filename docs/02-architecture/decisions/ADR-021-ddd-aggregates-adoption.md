@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted (Implemented 2025-12-29)
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-021: Внедрение DDD Aggregates в Domain Layer
 
@@ -25,9 +28,9 @@ Last verified: '2026-03-30'
 ### Проблемы до рефакторинга
 
 1. **Отсутствие инвариантной защиты**: Batch-записи могли модифицироваться на любом этапе
-2. **Размытые границы консистентности**: Непонятно, какие объекты должны изменяться транзакционно
-3. **Отсутствие Event Sourcing**: Нет механизма отслеживания изменений состояния
-4. **Слабая типизация идентификаторов**: `run-id` и `batch-id` были обычными строками
+1. **Размытые границы консистентности**: Непонятно, какие объекты должны изменяться транзакционно
+1. **Отсутствие Event Sourcing**: Нет механизма отслеживания изменений состояния
+1. **Слабая типизация идентификаторов**: `run-id` и `batch-id` были обычными строками
 
 ### Затронутые области
 
@@ -66,6 +69,7 @@ class Batch:
 ```
 
 **State Machine:**
+
 ```
 OPEN → SEALED → WRITING → COMMITTED
                       ↘→ FAILED
@@ -95,6 +99,7 @@ class PipelineRun:
 ```
 
 **State Machine:**
+
 ```
 PENDING → RUNNING → COMPLETED
                ↘→ FAILED
@@ -125,9 +130,16 @@ class QuarantineEntry:
 ```python
 # Типизированные идентификаторы
 class RunID(UUID): ...
+
+
 class BatchID(UUID): ...
+
+
 class EntityID(str): ...
+
+
 class ContentHash(str): ...
+
 
 # Измерения
 class Measurement:
@@ -140,18 +152,18 @@ class Measurement:
 
 События, эмитируемые агрегатами (`domain/aggregates/events.py`):
 
-| Event | Aggregate | Когда |
-|-------|-----------|-------|
-| `BatchCreated` | Batch | После `Batch.create()` |
-| `BatchSealed` | Batch | После `batch.seal()` |
-| `BatchWritten` | Batch | После `batch.mark-committed()` |
-| `BatchFailed` | Batch | После `batch.mark-failed()` |
-| `RecordQuarantined` | Batch | После `batch.quarantine-record()` |
-| `RunStarted` | PipelineRun | После `run.start()` |
-| `StageCompleted` | PipelineRun | После `run.record-stage-success()` |
-| `StageFailed` | PipelineRun | После `run.record-stage-failure()` |
-| `RunCompleted` | PipelineRun | После `run.complete()` |
-| `RunFailed` | PipelineRun | После `run.fail()` |
+| Event               | Aggregate   | Когда                              |
+| ------------------- | ----------- | ---------------------------------- |
+| `BatchCreated`      | Batch       | После `Batch.create()`             |
+| `BatchSealed`       | Batch       | После `batch.seal()`               |
+| `BatchWritten`      | Batch       | После `batch.mark-committed()`     |
+| `BatchFailed`       | Batch       | После `batch.mark-failed()`        |
+| `RecordQuarantined` | Batch       | После `batch.quarantine-record()`  |
+| `RunStarted`        | PipelineRun | После `run.start()`                |
+| `StageCompleted`    | PipelineRun | После `run.record-stage-success()` |
+| `StageFailed`       | PipelineRun | После `run.record-stage-failure()` |
+| `RunCompleted`      | PipelineRun | После `run.complete()`             |
+| `RunFailed`         | PipelineRun | После `run.fail()`                 |
 
 ### 4. Структура domain слоя после рефакторинга
 
@@ -181,24 +193,24 @@ src/bioetl/domain/
 ### Положительные
 
 1. **Защита инвариантов**: State machine в агрегатах предотвращает некорректные переходы
-2. **Чёткие границы консистентности**: Каждый агрегат — единица транзакционной консистентности
-3. **Event Sourcing Ready**: `collect-events()` позволяет публиковать события
-4. **Типобезопасность**: Value Objects исключают смешение идентификаторов
-5. **Тестируемость**: Агрегаты можно тестировать изолированно без I/O
-6. **Документирование бизнес-правил**: Инварианты явно описаны в docstrings
+1. **Чёткие границы консистентности**: Каждый агрегат — единица транзакционной консистентности
+1. **Event Sourcing Ready**: `collect-events()` позволяет публиковать события
+1. **Типобезопасность**: Value Objects исключают смешение идентификаторов
+1. **Тестируемость**: Агрегаты можно тестировать изолированно без I/O
+1. **Документирование бизнес-правил**: Инварианты явно описаны в docstrings
 
 ### Отрицательные
 
 1. **Увеличение сложности**: Добавлено ~1824 LOC нового кода в domain
-2. **Кривая обучения**: Требуется понимание DDD patterns
-3. **Миграция**: Существующий код нужно адаптировать
+1. **Кривая обучения**: Требуется понимание DDD patterns
+1. **Миграция**: Существующий код нужно адаптировать
 
 ### Риски и митигация
 
-| Риск | Митигация | Статус |
-|------|-----------|--------|
-| Over-engineering | Только критичные агрегаты (Batch, Run) | Закрыт |
-| Регрессии | Полное тестовое покрытие агрегатов | Закрыт |
+| Риск                 | Митигация                                 | Статус |
+| -------------------- | ----------------------------------------- | ------ |
+| Over-engineering     | Только критичные агрегаты (Batch, Run)    | Закрыт |
+| Регрессии            | Полное тестовое покрытие агрегатов        | Закрыт |
 | Сложность интеграции | Агрегаты используются в application layer | Закрыт |
 
 ## Примеры использования
@@ -299,13 +311,13 @@ async def run(self) -> None:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-021-ddd-aggregates-adoption.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted (Implemented 2025-12-29)` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-021-ddd-aggregates-adoption.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted (Implemented 2025-12-29)`  |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                         |
 
 ## Rollout
 

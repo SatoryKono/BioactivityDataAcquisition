@@ -1,6 +1,6 @@
 # Adapter Seam Matrix: Current to Target
 
-Date: 2026-03-20  
+Date: 2026-03-20
 Pillar: `adapter-interface-alignment`
 
 This matrix translates the current evidence set into a target contract map for refactoring. It does not mark architectural choices as accepted; it records the proposed direction implied by the evidence.

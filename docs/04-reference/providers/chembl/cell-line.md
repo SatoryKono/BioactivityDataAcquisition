@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Cell Line
 
@@ -15,7 +18,7 @@ Last verified: '2026-03-30'
 **Сущность:** `cell_line`
 **Версия схемы:** 1.2.0
 
----
+______________________________________________________________________
 
 ## 1. Описание
 
@@ -23,42 +26,42 @@ Last verified: '2026-03-30'
 
 **Источник данных:** ChEMBL REST API, таблица `cell_dictionary`
 
----
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
 ### Идентификаторы
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `cell_id` | `str` | Уникальный ChEMBL ID клеточной линии (PK) |
+| Поле        | Тип   | Описание                                     |
+| ----------- | ----- | -------------------------------------------- |
+| `cell_id`   | `str` | Уникальный ChEMBL ID клеточной линии (PK)    |
 | `cell_name` | `str` | Название клеточной линии (напр., HeLa, MCF7) |
 
 ### Метаданные
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `cell_description` | `str` | Описание клеточной линии |
-| `cell_type` | `str` | Тип клеточной линии (напр., Cancer cell line) |
+| Поле               | Тип   | Описание                                      |
+| ------------------ | ----- | --------------------------------------------- |
+| `cell_description` | `str` | Описание клеточной линии                      |
+| `cell_type`        | `str` | Тип клеточной линии (напр., Cancer cell line) |
 
 ### Источник
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `cell_source_tissue` | `str` | Ткань-источник (напр., Cervix, Breast) |
-| `cell_source_organism` | `str` | Организм-источник (напр., Homo sapiens) |
-| `cell_source_taxonomy_id` | `int` | NCBI Taxonomy ID организма-источника |
+| Поле                      | Тип   | Описание                                |
+| ------------------------- | ----- | --------------------------------------- |
+| `cell_source_tissue`      | `str` | Ткань-источник (напр., Cervix, Breast)  |
+| `cell_source_organism`    | `str` | Организм-источник (напр., Homo sapiens) |
+| `cell_source_taxonomy_id` | `int` | NCBI Taxonomy ID организма-источника    |
 
 ### Внешние идентификаторы
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `cellosaurus_id` | `str` | Cellosaurus ID (формат: `CVCL_XXXX`) |
-| `clo_id` | `str` | Cell Line Ontology ID (формат: `CLO_XXXXX`) |
-| `cl_lincs_id` | `str` | LINCS ID (Library of Integrated Network-Based Cellular Signatures) |
-| `efo_id` | `str` | EFO ontology ID (формат: `EFO_XXXXX`) |
+| Поле             | Тип   | Описание                                                           |
+| ---------------- | ----- | ------------------------------------------------------------------ |
+| `cellosaurus_id` | `str` | Cellosaurus ID (формат: `CVCL_XXXX`)                               |
+| `clo_id`         | `str` | Cell Line Ontology ID (формат: `CLO_XXXXX`)                        |
+| `cl_lincs_id`    | `str` | LINCS ID (Library of Integrated Network-Based Cellular Signatures) |
+| `efo_id`         | `str` | EFO ontology ID (формат: `EFO_XXXXX`)                              |
 
----
+______________________________________________________________________
 
 ## 3. Трансформация
 
@@ -76,28 +79,28 @@ Last verified: '2026-03-30'
 entity_id = f"chembl:{cell_id}"
 ```
 
----
+______________________________________________________________________
 
 ## 4. Валидация
 
 ### DQ-правила
 
 1. **`cell_id`** — обязательное, формат `^CHEMBL\d+$`
-2. **`cell_name`** — обязательное
-3. **`cell_source_taxonomy_id`** — если указан, должен быть >= 1
-4. **Внешние ID** — если указаны, валидируются по regex:
+1. **`cell_name`** — обязательное
+1. **`cell_source_taxonomy_id`** — если указан, должен быть >= 1
+1. **Внешние ID** — если указаны, валидируются по regex:
    - `cellosaurus_id`: `^CVCL_[A-Z0-9]+$`
    - `clo_id`: `^CLO_\d+$`
    - `efo_id`: `^EFO_\d+$`
 
 ### Пороги ошибок
 
-| Порог | Условие | Действие |
-|-------|---------|----------|
-| Soft | > 5% ошибок | WARNING |
-| Hard | > 20% ошибок | FAIL BATCH |
+| Порог | Условие      | Действие   |
+| ----- | ------------ | ---------- |
+| Soft  | > 5% ошибок  | WARNING    |
+| Hard  | > 20% ошибок | FAIL BATCH |
 
----
+______________________________________________________________________
 
 ## 5. Использование CLI
 
@@ -115,20 +118,20 @@ bioetl run --pipeline chembl_cell_line --run-type rebuild
 bioetl run --pipeline chembl_cell_line --input-csv data/input/cell.csv
 ```
 
----
+______________________________________________________________________
 
 ## 6. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/cell_line.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/cell_line_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
-| Схема | `src/bioetl/domain/schemas/chembl/cell_line.py` |
-| Сущность | `src/bioetl/domain/entities/chembl_structures_foundation.py` |
-| Фабрика | `src/bioetl/composition/factories/pipeline/registry.py` |
+| Компонент     | Путь                                                               |
+| ------------- | ------------------------------------------------------------------ |
+| Конфигурация  | `configs/entities/chembl/cell_line.yaml`                           |
+| Трансформер   | `src/bioetl/application/pipelines/chembl/cell_line_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`            |
+| Схема         | `src/bioetl/domain/schemas/chembl/cell_line.py`                    |
+| Сущность      | `src/bioetl/domain/entities/chembl_structures_foundation.py`       |
+| Фабрика       | `src/bioetl/composition/factories/pipeline/registry.py`            |
 
----
+______________________________________________________________________
 
 ## 7. Связи с другими сущностями
 
@@ -138,7 +141,7 @@ Cell Line (cell_id)
         └── Activity [1:N]
 ```
 
----
+______________________________________________________________________
 
 ## 8. Примеры данных
 
@@ -162,28 +165,28 @@ Cell Line (cell_id)
 
 ### Silver (нормализованный)
 
-| cell_id | cell_name | cell_source_organism | cell_source_taxonomy_id | cellosaurus_id |
-|---------|-----------|----------------------|-------------------------|----------------|
-| CHEMBL3308376 | HeLa | Homo sapiens | 9606 | CVCL_0030 |
+| cell_id       | cell_name | cell_source_organism | cell_source_taxonomy_id | cellosaurus_id |
+| ------------- | --------- | -------------------- | ----------------------- | -------------- |
+| CHEMBL3308376 | HeLa      | Homo sapiens         | 9606                    | CVCL_0030      |
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [chembl_cell_line_v1.0.json](../../contracts/gold/chembl_cell_line_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [chembl_cell_line_v1.0.json](../../contracts/gold/chembl_cell_line_v1.0.json)            |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Процесс (ETL)` и `Связанные файлы` |
-| Contract linkage | Pass | [chembl_cell_line_v1.0.json](../../contracts/gold/chembl_cell_line_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                        |
+| ----------------- | ------ | --------------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                        |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Процесс (ETL)` и `Связанные файлы` |
+| Contract linkage  | Pass   | [chembl_cell_line_v1.0.json](../../contracts/gold/chembl_cell_line_v1.0.json)                                   |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                           |
 
 ## API Compliance
 

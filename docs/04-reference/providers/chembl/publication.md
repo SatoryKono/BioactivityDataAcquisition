@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Publication
 
@@ -14,7 +17,7 @@ Last verified: '2026-03-30'
 **Провайдер:** `chembl`
 **Сущность:** `publication`
 
----
+______________________________________________________________________
 
 ## 1. Что делает пайплайн
 
@@ -28,7 +31,7 @@ Source of truth для текущего поведения:
 - `src/bioetl/domain/schemas/chembl/publication.py`
 - `src/bioetl/infrastructure/schemas/silver_chembl_core.py`
 
----
+______________________________________________________________________
 
 ## 2. Конфигурация
 
@@ -51,7 +54,7 @@ Source of truth для текущего поведения:
   - `publication_type`
   - `title`
 
----
+______________________________________________________________________
 
 ## 3. Silver surface
 
@@ -59,11 +62,11 @@ Source of truth для текущего поведения:
 
 Current Silver contract жёстко опирается на:
 
-| Поле | Где закреплено |
-|------|----------------|
-| `publication_id` | YAML required + Arrow + Pandera |
+| Поле               | Где закреплено                  |
+| ------------------ | ------------------------------- |
+| `publication_id`   | YAML required + Arrow + Pandera |
 | `publication_type` | YAML required + Arrow + Pandera |
-| `title` | YAML required + Arrow + Pandera |
+| `title`            | YAML required + Arrow + Pandera |
 
 ### 3.2. Маппинг входных полей
 
@@ -101,7 +104,7 @@ Current Silver contract жёстко опирается на:
 - `authors` нормализуются в сериализованное представление
 - `author_keys` вычисляются отдельно для downstream matching/join сценариев
 
----
+______________________________________________________________________
 
 ## 4. Валидация
 
@@ -120,7 +123,7 @@ Silver Pandera schema определяется в
 Страница не фиксирует literal-формулу `entity_id`: текущая реализация использует
 общий identity service/base transformer.
 
----
+______________________________________________________________________
 
 ## 5. CLI
 
@@ -129,34 +132,34 @@ bioetl run --pipeline chembl_publication
 bioetl run --pipeline chembl_publication --limit 1000
 ```
 
----
+______________________________________________________________________
 
 ## 6. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/publication.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/publication_transformer.py` |
-| Arrow schema | `src/bioetl/infrastructure/schemas/silver_chembl_core.py` |
-| Pandera schema | `src/bioetl/domain/schemas/chembl/publication.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
+| Компонент      | Путь                                                                 |
+| -------------- | -------------------------------------------------------------------- |
+| Конфигурация   | `configs/entities/chembl/publication.yaml`                           |
+| Трансформер    | `src/bioetl/application/pipelines/chembl/publication_transformer.py` |
+| Arrow schema   | `src/bioetl/infrastructure/schemas/silver_chembl_core.py`            |
+| Pandera schema | `src/bioetl/domain/schemas/chembl/publication.py`                    |
+| Pipeline defs  | `src/bioetl/application/pipelines/chembl/_pipelines.py`              |
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [chembl_publication_v1.0.json](../../contracts/gold/chembl_publication_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [chembl_publication_v1.0.json](../../contracts/gold/chembl_publication_v1.0.json)        |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
-| Contract linkage | Pass | [chembl_publication_v1.0.json](../../contracts/gold/chembl_publication_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                       |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
+| Contract linkage  | Pass   | [chembl_publication_v1.0.json](../../contracts/gold/chembl_publication_v1.0.json)                              |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                          |
 
 ## API Compliance
 

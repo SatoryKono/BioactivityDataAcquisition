@@ -1,42 +1,49 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Guide: Add a New Provider
 
 This guide describes the current (v6.x) process for adding a **new external provider** to BioETL.
 
 Scope:
+
 - add a provider source config (`configs/providers/{provider}.yaml`)
 - add an infrastructure adapter (`src/bioetl/infrastructure/adapters/{provider}/`)
 - register provider in Composition (`src/bioetl/composition/providers/registration.py`)
 - bootstrap at least one pipeline for this provider
 
 Use this guide together with:
+
 - [add-pipeline-existing-source.md](add-pipeline-existing-source.md)
 - [pipeline-configuration.md](pipeline-configuration.md)
 - [RULES.md](../00-project/RULES.md)
 
----
+______________________________________________________________________
 
 ## 1. Naming and Scope
 
 Provider naming rules:
+
 - provider id: `snake_case` (example: `myprovider`)
 - entity ids: `snake_case` singular (`publication`, `compound`)
 - pipeline name: `{provider}_{entity}`
 
 Before implementation:
+
 - verify provider is not already present in `configs/providers/`
 - define first supported entity (recommended: a small, stable endpoint)
 
----
+______________________________________________________________________
 
 ## 2. Create Provider Source Config
 
@@ -101,33 +108,38 @@ filters:
 ```
 
 Notes:
+
 - `source.provider_config.pagination` is the canonical place for paging defaults.
 - Keep credentials in env vars (`*_ENV`), never in YAML.
 
----
+______________________________________________________________________
 
 ## 3. Implement Infrastructure Adapter
 
 Create adapter module under:
+
 - `src/bioetl/infrastructure/adapters/{provider}/client.py`
 
 Adapter must satisfy `DataSourcePort`/`FilterableDataSourcePort` contract and use `UnifiedHTTPClient`.
 
 Start from template:
+
 - `docs/04-reference/templates/source_adapter.py.tpl`
 
 Minimum expectations:
+
 - implement `fetch(...)` async generator
 - implement or inherit `health_check()`
 - keep API/network logic in infrastructure only
 
----
+______________________________________________________________________
 
 ## 4. Register Provider in Composition Layer
 
 Update `src/bioetl/composition/providers/registration.py`:
 
 1. Add provider-specific creator function:
+
 - `_create_{provider}_data_source(...) -> DataSourcePort`
 
 2. Register provider inside the composition registration flow (`src/bioetl/composition/providers/registration.py`), after resolving `target_registry`:
@@ -151,7 +163,7 @@ If provider needs custom lifecycle/constructor wiring, use `custom_creator=` as 
 Runtime/bootstrap code should continue to use `ensure_providers_loaded()` as the
 shared lifecycle seam rather than calling registration directly.
 
----
+______________________________________________________________________
 
 ## 5. Add First Pipeline for the Provider
 
@@ -164,7 +176,7 @@ For the first provider entity, complete all items from
 - `register_all_transformers()` entry
 - `PIPELINE_CONFIGS` entry in `src/bioetl/composition/factories/pipeline/registry.py`
 
----
+______________________________________________________________________
 
 ## 6. Validation Checklist
 
@@ -194,11 +206,12 @@ uv run python -m pytest tests/unit/application/pipelines/myprovider/ -q
 uv run python -m pytest tests/integration/ -k myprovider -q
 ```
 
----
+______________________________________________________________________
 
 ## 7. Done Criteria
 
 Provider onboarding is complete when:
+
 - provider config exists and loads
 - adapter and provider registration are in place
 - at least one pipeline runs end-to-end (`run --pipeline {provider}_{entity}`)

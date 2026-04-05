@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Утверждено ✅
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Руководство по валидации публикаций (Publication Validation Guide)
 
@@ -14,21 +17,21 @@ Last verified: '2026-03-29'
 **Статус:** Утверждено ✅
 **Связанный ADR:** ADR-033
 
----
+______________________________________________________________________
 
 ## Содержание
 
-1. [Введение](#введение)
-2. [Архитектура валидации](#архитектура-валидации)
-3. [Пятиуровневая стратегия](#пятиуровневая-стратегия)
-4. [Жизненный цикл DQ-флагов](#жизненный-цикл-dq-флагов)
-5. [Иерархия конфигурации](#иерархия-конфигурации)
-6. [Workflow валидации](#workflow-валидации)
-7. [Примеры использования](#примеры-использования)
-8. [Troubleshooting](#troubleshooting)
-9. [Best Practices](#best-practices)
+1. [Введение](#%D0%B2%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5)
+1. [Архитектура валидации](#%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%B0-%D0%B2%D0%B0%D0%BB%D0%B8%D0%B4%D0%B0%D1%86%D0%B8%D0%B8)
+1. [Пятиуровневая стратегия](#%D0%BF%D1%8F%D1%82%D0%B8%D1%83%D1%80%D0%BE%D0%B2%D0%BD%D0%B5%D0%B2%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D1%82%D0%B5%D0%B3%D0%B8%D1%8F)
+1. [Жизненный цикл DQ-флагов](#%D0%B6%D0%B8%D0%B7%D0%BD%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9-%D1%86%D0%B8%D0%BA%D0%BB-dq-%D1%84%D0%BB%D0%B0%D0%B3%D0%BE%D0%B2)
+1. [Иерархия конфигурации](#%D0%B8%D0%B5%D1%80%D0%B0%D1%80%D1%85%D0%B8%D1%8F-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D0%B8)
+1. [Workflow валидации](#workflow-%D0%B2%D0%B0%D0%BB%D0%B8%D0%B4%D0%B0%D1%86%D0%B8%D0%B8)
+1. [Примеры использования](#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80%D1%8B-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F)
+1. [Troubleshooting](#troubleshooting)
+1. [Best Practices](#best-practices)
 
----
+______________________________________________________________________
 
 ## Введение
 
@@ -42,11 +45,11 @@ Last verified: '2026-03-29'
 **Ключевые принципы:**
 
 1. **Fail-Fast для критичных ошибок** — блокировка записей с некорректными PK или типами данных
-2. **Graceful Degradation для предупреждений** — пропуск записей с WARN через карантин
-3. **Layered Validation** — последовательная проверка от простых правил к сложным
-4. **Observability** — полное логирование всех DQ событий с контекстом
+1. **Graceful Degradation для предупреждений** — пропуск записей с WARN через карантин
+1. **Layered Validation** — последовательная проверка от простых правил к сложным
+1. **Observability** — полное логирование всех DQ событий с контекстом
 
----
+______________________________________________________________________
 
 ## Архитектура валидации
 
@@ -99,13 +102,14 @@ graph TB
 ```
 
 **Легенда:**
+
 - **Синий** — Base Validation (Pandera)
 - **Зелёный** — Silver Layer (валидные записи)
 - **Жёлтый** — Gold Layer (финальный слой)
 - **Оранжевый** — Quarantine (WARN записи)
 - **Розовый** — Логирование и мониторинг
 
----
+______________________________________________________________________
 
 ## Пятиуровневая стратегия
 
@@ -116,30 +120,32 @@ graph TB
 **Когда:** Сразу после трансформации Bronze → Silver
 
 **Проверки:**
+
 - ✅ Тип данных (string, integer, boolean, date)
 - ✅ Nullable constraints (non-nullable fields)
 - ✅ Regex patterns (DOI: `^10\.\d{4,9}/.+$`, PMID: `^[1-9]\d*$`)
 - ✅ String trimming и normalization
 
 **Результат:**
+
 - `PASS` → следующий уровень
 - `FAIL` → запись отклонена (`-dq-error=True`), логируется
 
 **Пример:**
+
 ```python
 from pandera import DataFrameModel, Field
 import pandera as pa
 
+
 class PublicationSilverSchema(DataFrameModel):
     pmid: Series[str] = Field(
-        nullable=True,
-        regex=r"^[1-9]\d*$",
-        description="PubMed ID (positive integer)"
+        nullable=True, regex=r"^[1-9]\d*$", description="PubMed ID (positive integer)"
     )
     doi: Series[str] = Field(
         nullable=True,
         regex=r"^10\.\d{4,9}/.+$",
-        description="Digital Object Identifier"
+        description="Digital Object Identifier",
     )
     title: Series[str] = Field(nullable=True)
 
@@ -148,7 +154,7 @@ class PublicationSilverSchema(DataFrameModel):
         strict = False  # Silver allows extra columns
 ```
 
----
+______________________________________________________________________
 
 ### 2. Structural Validation
 
@@ -157,41 +163,46 @@ class PublicationSilverSchema(DataFrameModel):
 **Когда:** После успешной Base Validation
 
 **Проверки:**
+
 - ✅ Page ordering: `page_first <= page_last`
 - ✅ Year consistency: `YEAR(publication_date) == publication_year`
 - ✅ Field dependencies: `IF doi THEN title IS NOT NULL`
 - ✅ Content hash integrity: `SHA256(title + abstract + ...) == content_hash`
 
 **Результат:**
+
 - `PASS` → следующий уровень
 - `WARN` → `_dq_warn=True`, продолжить валидацию
 
 **Пример:**
+
 ```python
 class StructuralValidator:
     def validate_page_ordering(self, df: pd.DataFrame) -> pd.DataFrame:
         """Check page_first <= page_last when both numeric."""
         mask = (
-            df["page_first"].notna() &
-            df["page_last"].notna() &
-            df["page_first"].str.isnumeric() &
-            df["page_last"].str.isnumeric()
+            df["page_first"].notna()
+            & df["page_last"].notna()
+            & df["page_first"].str.isnumeric()
+            & df["page_last"].str.isnumeric()
         )
 
-        invalid = df[mask & (df["page_first"].astype(int) > df["page_last"].astype(int))]
+        invalid = df[
+            mask & (df["page_first"].astype(int) > df["page_last"].astype(int))
+        ]
 
         if not invalid.empty:
             df.loc[invalid.index, "_dq_warn"] = True
             self._logger.warning(
                 "page_ordering_violation",
                 count=len(invalid),
-                record_ids=invalid.index.tolist()
+                record_ids=invalid.index.tolist(),
             )
 
         return df
 ```
 
----
+______________________________________________________________________
 
 ### 3. External Verification
 
@@ -201,21 +212,23 @@ class StructuralValidator:
 
 **API Endpoints:**
 
-| Идентификатор | Провайдер | Endpoint | HTTP Method |
-|---------------|-----------|----------|-------------|
-| `doi` | CrossRef | `https://api.crossref.org/works/{doi}` | GET |
-| `pmid` | PubMed | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}` | GET |
-| `pmc_id` | PMC | `https://www.ncbi.nlm.nih.gov/pmc/articles/{pmc_id}` | GET |
-| `openalex_id` | OpenAlex | `https://api.openalex.org/works/{id}` | GET |
-| `paper_id` | Semantic Scholar | `https://api.semanticscholar.org/graph/v1/paper/{id}` | GET |
-| `publication_id` | ChEMBL | `https://www.ebi.ac.uk/chembl/api/data/document/{id}` | GET |
+| Идентификатор    | Провайдер        | Endpoint                                                                        | HTTP Method |
+| ---------------- | ---------------- | ------------------------------------------------------------------------------- | ----------- |
+| `doi`            | CrossRef         | `https://api.crossref.org/works/{doi}`                                          | GET         |
+| `pmid`           | PubMed           | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}` | GET         |
+| `pmc_id`         | PMC              | `https://www.ncbi.nlm.nih.gov/pmc/articles/{pmc_id}`                            | GET         |
+| `openalex_id`    | OpenAlex         | `https://api.openalex.org/works/{id}`                                           | GET         |
+| `paper_id`       | Semantic Scholar | `https://api.semanticscholar.org/graph/v1/paper/{id}`                           | GET         |
+| `publication_id` | ChEMBL           | `https://www.ebi.ac.uk/chembl/api/data/document/{id}`                           | GET         |
 
 **Результат:**
+
 - `HTTP 200` → PASS
 - `HTTP 404` → WARN (`-dq-warn=True`)
 - `HTTP 429/500/timeout` → SKIP (не блокировать)
 
 **Конфигурация:**
+
 ```yaml
 external-verification:
   enabled: true
@@ -232,7 +245,7 @@ external-verification:
       rate_limit: 3
 ```
 
----
+______________________________________________________________________
 
 ### 4. Logical Validation
 
@@ -241,16 +254,19 @@ external-verification:
 **Когда:** После External Verification
 
 **Проверки:**
+
 - ✅ Range constraints: `publication_year ∈ [1800, CURRENT_YEAR + 1]`
 - ✅ Non-negative rules: `citations-received >= 0`, `citations-made >= 0`
 - ✅ Date ordering: `date-completed <= date-revised`
 - ✅ Citation logic: `citations-received >= influential-citation_count`
 
 **Результат:**
+
 - `PASS` → следующий уровень
 - `WARN` → `-dq-warn=True`
 
 **Пример:**
+
 ```python
 class LogicalValidator:
     def validate-publication_year-range(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -274,7 +290,7 @@ class LogicalValidator:
         return df
 ```
 
----
+______________________________________________________________________
 
 ### 5. Semantic Validation
 
@@ -283,18 +299,21 @@ class LogicalValidator:
 **Когда:** Последний уровень (опционально)
 
 **Проверки:**
+
 - ✅ Text similarity: `SemanticSimilarity(title, abstract) > 0.3`
 - ✅ Language detection: `Language(abstract) == language`
 - ✅ Keyword relevance: `Keywords(abstract) ∩ subject-keywords ≠ ∅`
 - ✅ TLDR consistency: `SemanticSimilarity(abstract, tldr) > 0.5`
 
 **Результат:**
+
 - **ВСЕГДА WARN** (никогда не FAIL)
 - `-dq-warn=True` при низкой согласованности
 
 **Важно:** Semantic validation **НЕ блокирует** записи, только помечает флагом.
 
 **Конфигурация:**
+
 ```yaml
 semantic-validation:
   enabled: false  # Expensive, disabled by default
@@ -307,7 +326,7 @@ semantic-validation:
     min-overlap: 1
 ```
 
----
+______________________________________________________________________
 
 ## Жизненный цикл DQ-флагов
 
@@ -354,13 +373,13 @@ stateDiagram-v2
 
 **Флаги:**
 
-| Флаг | Значение | Действие |
-|------|----------|----------|
-| `-dq-error=True` | Критическая ошибка (PK violation, type error) | Запись **отклонена**, не попадает в Silver |
-| `-dq-warn=True` | Некритичное предупреждение (external 404, low similarity) | Запись **помещается в карантин**, доступна для Gold с фильтрацией |
-| `-dq-warn=False`<br/>`-dq-error=False` | Все проверки пройдены | Запись **чистая**, автоматически идёт в Gold |
+| Флаг                                   | Значение                                                  | Действие                                                          |
+| -------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------- |
+| `-dq-error=True`                       | Критическая ошибка (PK violation, type error)             | Запись **отклонена**, не попадает в Silver                        |
+| `-dq-warn=True`                        | Некритичное предупреждение (external 404, low similarity) | Запись **помещается в карантин**, доступна для Gold с фильтрацией |
+| `-dq-warn=False`<br/>`-dq-error=False` | Все проверки пройдены                                     | Запись **чистая**, автоматически идёт в Gold                      |
 
----
+______________________________________________________________________
 
 ## Иерархия конфигурации
 
@@ -391,22 +410,27 @@ graph TB
 **Приоритет (от низкого к высокому):**
 
 1. **Default Config** (значения по умолчанию в коде и dataclass/Settings)
+
    - Базовые правила для всех провайдеров
    - Дефолтные пороги и таймауты
 
-2. **Provider Config** (`configs/providers/{provider}.yaml`)
+1. **Provider Config** (`configs/providers/{provider}.yaml`)
+
    - Специфичные для провайдера настройки
    - Переопределяет Default
 
-3. **Pipeline Config** (`configs/entities/{provider}/{entity}.yaml`)
+1. **Pipeline Config** (`configs/entities/{provider}/{entity}.yaml`)
+
    - Настройки для конкретного pipeline (provider + entity)
    - Переопределяет Provider
 
-4. **CLI Arguments** (`--validation-mode strict`)
+1. **CLI Arguments** (`--validation-mode strict`)
+
    - Runtime-параметры
    - Наивысший приоритет
 
 **Пример Default Config:**
+
 ```yaml
 # Example validation defaults (conceptual)
 validation:
@@ -438,6 +462,7 @@ validation:
 ```
 
 **Пример Pipeline Override:**
+
 ```yaml
 # pipelines/pubmed_publication.yaml
 validation:
@@ -453,7 +478,7 @@ validation:
     similarity-threshold: 0.4  # Higher threshold
 ```
 
----
+______________________________________________________________________
 
 ## Workflow валидации
 
@@ -518,16 +543,16 @@ sequenceDiagram
 **Этапы:**
 
 1. **Ingestion** — адаптер извлекает raw data из источника
-2. **Transformation** — трансформер преобразует Bronze → Silver format
-3. **Base Validation** — Pandera проверяет схему (типы, regex, nullable)
-4. **Structural Validation** — проверка межполевых правил
-5. **External Verification** — HTTP-запросы к upstream API (опционально)
-6. **Logical Validation** — проверка бизнес-инвариантов
-7. **Semantic Validation** — NLP-проверки (опционально)
-8. **Storage** — запись в Delta Lake (clean или quarantine)
-9. **Observability** — логирование метрик DQ
+1. **Transformation** — трансформер преобразует Bronze → Silver format
+1. **Base Validation** — Pandera проверяет схему (типы, regex, nullable)
+1. **Structural Validation** — проверка межполевых правил
+1. **External Verification** — HTTP-запросы к upstream API (опционально)
+1. **Logical Validation** — проверка бизнес-инвариантов
+1. **Semantic Validation** — NLP-проверки (опционально)
+1. **Storage** — запись в Delta Lake (clean или quarantine)
+1. **Observability** — логирование метрик DQ
 
----
+______________________________________________________________________
 
 ## Примеры использования
 
@@ -539,12 +564,13 @@ bioetl run --pipeline pubmed_publication \
 ```
 
 **Результат:**
+
 - Активны все уровни, соответствующие конфигу pipeline
 - `-dq-warn=True` → запись попадает в карантин (поведение задаётся конфигом)
 - Используется стандартный логгер CLI (`logs/bioetl.log`)
 - В CLI нет отдельного `--run-type validation`; validation depth задаётся schema/pipeline config
 
----
+______________________________________________________________________
 
 ### 2. Balanced (по умолчанию)
 
@@ -554,11 +580,12 @@ bioetl run --pipeline chembl_publication \
 ```
 
 **Результат:**
+
 - Уровни валидации берутся из pipeline config (external/semantic опциональны)
 - `-dq-warn=True` → запись в карантине
 - Баланс производительности и покрытия
 
----
+______________________________________________________________________
 
 ### 3. Fast Check (dry-run без записи)
 
@@ -569,11 +596,12 @@ bioetl run --pipeline crossref_publication \
 ```
 
 **Результат:**
+
 - Проверяет схему и валидаторы без записи в Delta
 - Максимальная производительность
 - Удобно для быстрых проверок после изменений схемы
 
----
+______________________________________________________________________
 
 ### 4. Programmatic API
 
@@ -616,22 +644,25 @@ for validator in validators:
 df.to-parquet("silver/pubmed/publication-validated.parquet")
 ```
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
 ### Проблема: Высокий процент WARN записей
 
 **Симптомы:**
+
 - > 20% записей имеют `-dq-warn=True`
 - Карантин переполнен
 
 **Причины:**
+
 1. External verification включена, но API провайдера недоступен
-2. Слишком строгие пороги в Semantic Validation
-3. Некорректные данные у источника
+1. Слишком строгие пороги в Semantic Validation
+1. Некорректные данные у источника
 
 **Решение:**
+
 ```bash
 # 1. Проверить доступность API
 curl -I https://api.crossref.org/works/10.1038/nature12373
@@ -645,24 +676,28 @@ semantic:
   similarity-threshold: 0.2  # Было 0.3
 ```
 
----
+______________________________________________________________________
 
 ### Проблема: Base Validation постоянно FAIL
 
 **Симптомы:**
+
 - Все записи отклонены на Pandera
 - `pandera.errors.SchemaError: Column 'doi' failed validation`
 
 **Причины:**
+
 1. Regex паттерн не соответствует реальным данным
-2. Некорректная трансформация Bronze → Silver
-3. NULL в non-nullable полях
+1. Некорректная трансформация Bronze → Silver
+1. NULL в non-nullable полях
 
 **Решение:**
+
 ```python
 # 1. Проверить реальные значения
-df = pd.read-parquet("bronze/crossref/publication.parquet")
+df = pd.read - parquet("bronze/crossref/publication.parquet")
 print(df["doi"].value_counts())
+
 
 # 2. Ослабить regex (temporary)
 class PublicationSilverSchema(DataFrameModel):
@@ -671,26 +706,30 @@ class PublicationSilverSchema(DataFrameModel):
         regex=None,  # Отключить regex временно
     )
 
+
 # 3. Проверить трансформер
 # src/bioetl/application/pipelines/crossref/transformer.py
 def transform_doi(raw_doi: str) -> str:
     return raw_doi.strip().lower()  # Ensure normalization
 ```
 
----
+______________________________________________________________________
 
 ### Проблема: External Verification timeout
 
 **Симптомы:**
+
 - Валидация зависает на External уровне
 - Логи: `external-verification-timeout`
 
 **Причины:**
+
 1. Слишком низкий timeout
-2. Rate limit превышен
-3. API провайдера медленный
+1. Rate limit превышен
+1. API провайдера медленный
 
 **Решение:**
+
 ```yaml
 # configs/providers/pubmed.yaml
 external-verification:
@@ -703,21 +742,21 @@ external-verification:
       rate_limit: 2  # Снизить с 3 до 2 RPS
 ```
 
----
+______________________________________________________________________
 
 ## Best Practices
 
 ### 1. Используйте режимы валидации по контексту
 
-| Сценарий | Режим | Уровни | Rationale |
-|----------|-------|--------|-----------|
-| **REBUILD** | Fast | Base only | Известные чистые данные, не нужны дорогие проверки |
-| **BACKFILL** | Balanced | Base + Structural + Logical | Новые данные, но без External (дорого) |
-| **INCREMENTAL** | Strict | Все 5 уровней | Малые объёмы, критически важное качество |
-| **Development** | Strict | Все 5 уровней | Поиск проблем в схеме |
-| **Production CI** | Balanced | Base + Structural + Logical | Компромисс качество/скорость |
+| Сценарий          | Режим    | Уровни                      | Rationale                                          |
+| ----------------- | -------- | --------------------------- | -------------------------------------------------- |
+| **REBUILD**       | Fast     | Base only                   | Известные чистые данные, не нужны дорогие проверки |
+| **BACKFILL**      | Balanced | Base + Structural + Logical | Новые данные, но без External (дорого)             |
+| **INCREMENTAL**   | Strict   | Все 5 уровней               | Малые объёмы, критически важное качество           |
+| **Development**   | Strict   | Все 5 уровней               | Поиск проблем в схеме                              |
+| **Production CI** | Balanced | Base + Structural + Logical | Компромисс качество/скорость                       |
 
----
+______________________________________________________________________
 
 ### 2. Мониторинг DQ-метрик
 
@@ -751,11 +790,12 @@ validation-duration = Histogram(
 ```
 
 **Dashboard (Grafana):**
+
 - DQ Pass Rate: `validation-passed / (validation-passed + validation-warned + validation-failed)`
 - Top Failing Rules: `topk(10, validation-failed)`
 - Validation Latency: `validation-duration{quantile="0.95"}`
 
----
+______________________________________________________________________
 
 ### 3. Batch External Verification
 
@@ -780,7 +820,7 @@ async def verify_dois_batch(dois: list[str]) -> dict[str, bool]:
         return results
 ```
 
----
+______________________________________________________________________
 
 ### 4. Карантинные записи требуют review
 
@@ -799,7 +839,7 @@ WHERE pmid IN ('12345678', '87654321')
   AND manual-review-status = 'approved';
 ```
 
----
+______________________________________________________________________
 
 ### 5. Используйте VCR.py для тестов External
 
@@ -807,8 +847,9 @@ WHERE pmid IN ('12345678', '87654321')
 import pytest
 import vcr
 
+
 @pytest.mark.integration
-@vcr.use-cassette("tests/fixtures/vcr/crossref-doi-valid.yaml")
+@ vcr.use - cassette("tests/fixtures/vcr/crossref-doi-valid.yaml")
 async def test_external_verification_doi():
     """Test DOI verification with recorded HTTP response."""
     verifier = ExternalVerifier(config=config)
@@ -819,11 +860,12 @@ async def test_external_verification_doi():
 ```
 
 **Cassette recording:**
+
 ```bash
 pytest tests/integration/validation/ --record-mode=once
 ```
 
----
+______________________________________________________________________
 
 ## Связанная документация
 
@@ -833,7 +875,7 @@ pytest tests/integration/validation/ --record-mode=once
 - **Operational Runbook:** `docs/05-operations/runbooks/publication-validation-runbook.md`
 - **Tests:** `tests/contract/` + `tests/unit/` (471 тест)
 
----
+______________________________________________________________________
 
 **Версия документа:** 1.0.0
 **Последнее обновление:** 2026-02-06

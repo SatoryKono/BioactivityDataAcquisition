@@ -11,13 +11,13 @@ Use this contract for the parent topic pack.
 ## Required Sections For `ORCHESTRATION.md`
 
 1. Topic
-2. Mode
-3. Shard strategy
-4. Shard map
-5. Agent ownership
-6. Output roots
-7. Gate rules
-8. Aggregation plan
+1. Mode
+1. Shard strategy
+1. Shard map
+1. Agent ownership
+1. Output roots
+1. Gate rules
+1. Aggregation plan
 
 ## Minimal `ORCHESTRATION.md` Shape
 

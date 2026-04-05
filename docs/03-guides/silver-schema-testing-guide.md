@@ -1,23 +1,27 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Silver Schema Testing Guide
 
 **Created:** 2026-02-10
 **Purpose:** Guidelines for testing and maintaining Silver layer schemas
 
----
+______________________________________________________________________
 
 ## Overview
 
 Silver layer schemas define the structure and validation rules for normalized data. Schema stability is critical because changes affect:
+
 - ✅ Gold layer contracts
 - ✅ Downstream analytics
 - ✅ External data consumers
@@ -25,7 +29,7 @@ Silver layer schemas define the structure and validation rules for normalized da
 
 This guide covers the **Silver Schema Contract Tests** that protect against accidental schema modifications.
 
----
+______________________________________________________________________
 
 ## Test Suite Location
 
@@ -45,7 +49,7 @@ tests/contract/silver_schemas/
 
 **Total:** ~185 contract tests covering 18 Silver schemas (100% coverage)
 
----
+______________________________________________________________________
 
 ## Running Tests
 
@@ -110,13 +114,14 @@ while still covering distinct pipeline families:
 - `pubmed_publication`
 - `uniprot_protein`
 
----
+______________________________________________________________________
 
 ## Understanding Snapshot Tests
 
 ### What Are Snapshot Tests?
 
 Snapshot tests capture the **current state** of a schema and detect ANY deviation:
+
 - ✅ Field additions
 - ✅ Field deletions (BREAKING)
 - ✅ Type changes (BREAKING)
@@ -126,8 +131,8 @@ Snapshot tests capture the **current state** of a schema and detect ANY deviatio
 ### How They Work
 
 1. **First run:** Creates `snapshots/{schema-name}-schema.json`
-2. **Subsequent runs:** Compares current schema against snapshot
-3. **On mismatch:** Test fails with detailed diff
+1. **Subsequent runs:** Compares current schema against snapshot
+1. **On mismatch:** Test fails with detailed diff
 
 ### Example Snapshot
 
@@ -159,7 +164,7 @@ Snapshot tests capture the **current state** of a schema and detect ANY deviatio
 }
 ```
 
----
+______________________________________________________________________
 
 ## Workflow: Adding New Schema
 
@@ -172,6 +177,7 @@ from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
 
+
 class EntitySchema(ETLRecordSchema):
     """Pandera schema for Provider Entity.
 
@@ -179,10 +185,7 @@ class EntitySchema(ETLRecordSchema):
     """
 
     # Primary key
-    entity_id: Series[str] = pa.Field(
-        nullable=False,
-        description="Primary key."
-    )
+    entity_id: Series[str] = pa.Field(nullable=False, description="Primary key.")
 
     # Other fields...
 ```
@@ -218,17 +221,18 @@ git add tests/contract/silver_schemas/snapshots/{provider}-{entity}-schema.json
 git commit -m "feat(schemas): add EntitySchema for Provider"
 ```
 
----
+______________________________________________________________________
 
 ## Workflow: Modifying Existing Schema
 
 ### Step 1: Understand Impact
 
 **Questions to ask:**
+
 1. Is this a **breaking change**? (field deletion, type change, nullability change)
-2. Will Gold layer contracts need updates?
-3. Are there downstream consumers using this field?
-4. Is historical data compatible?
+1. Will Gold layer contracts need updates?
+1. Are there downstream consumers using this field?
+1. Is historical data compatible?
 
 ### Step 2: Modify Schema
 
@@ -239,8 +243,7 @@ class ActivitySchema(ETLRecordSchema):
 
     # NEW: Additional metadata
     data_source_version: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Provider API version."
+        nullable=True, description="Provider API version."
     )
 ```
 
@@ -257,6 +260,7 @@ uv run pytest tests/contract/silver_schemas/test_schema_stability.py -k chembl_a
 ### Step 4: Review Diff Carefully
 
 The test output shows:
+
 - **Added fields** — Usually safe
 - **Removed fields** — **BREAKING CHANGE**
 - **Type changes** — **BREAKING CHANGE**
@@ -265,10 +269,11 @@ The test output shows:
 ### Step 5: Update Downstream
 
 If breaking change:
+
 1. Update Gold contracts (`docs/04-reference/contracts/gold/`)
-2. Update composite pipeline configs (if applicable)
-3. Create migration guide
-4. Notify data consumers
+1. Update composite pipeline configs (if applicable)
+1. Create migration guide
+1. Notify data consumers
 
 ### Step 6: Update Snapshot
 
@@ -294,7 +299,7 @@ git commit -m "feat(schemas): add data-source-version to ActivitySchema
 Related: #1234"
 ```
 
----
+______________________________________________________________________
 
 ## Workflow: Deprecating Field
 
@@ -306,14 +311,13 @@ Related: #1234"
 class PublicationSchema(ETLRecordSchema):
     # NEW field with correct name
     citations_received: Series[int] | None = pa.Field(
-        nullable=True,
-        description="Number of citations received (incoming)."
+        nullable=True, description="Number of citations received (incoming)."
     )
 
     # OLD field marked deprecated
     citation_count: Series[int] | None = pa.Field(
         nullable=True,
-        description="DEPRECATED: Use citations_received instead. Will be removed in v6.0."
+        description="DEPRECATED: Use citations_received instead. Will be removed in v6.0.",
     )
 ```
 
@@ -326,7 +330,7 @@ def transform_publication(raw: dict) -> dict:
 
     return {
         "citations_received": citation_count,  # NEW
-        "citation_count": citation_count,      # OLD (deprecated)
+        "citation_count": citation_count,  # OLD (deprecated)
         # ... other fields
     }
 ```
@@ -349,19 +353,19 @@ def transform_publication(raw: dict) -> dict:
 class PublicationSchema(ETLRecordSchema):
     # NEW field (kept)
     citations_received: Series[int] | None = pa.Field(
-        nullable=True,
-        description="Number of citations received (incoming)."
+        nullable=True, description="Number of citations received (incoming)."
     )
 
     # OLD field REMOVED
 ```
 
 Update snapshot:
+
 ```bash
 UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stability.py -k publication
 ```
 
----
+______________________________________________________________________
 
 ## Test Categories Explained
 
@@ -370,6 +374,7 @@ UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stabi
 **Purpose:** Prevent accidental schema modifications
 
 **Tests:**
+
 - ✅ `test_schema_fields_unchanged` — Snapshot comparison
 - ✅ `test_primary_key_field_exists` — PK presence
 - ✅ `test_etl_metadata_fields_present` — ETL metadata
@@ -378,13 +383,14 @@ UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stabi
 
 **Coverage:** All 18 schemas
 
----
+______________________________________________________________________
 
 ### 2. Field Type Tests (`test_field_types.py`)
 
 **Purpose:** Ensure type safety and consistency
 
 **Tests:**
+
 - ✅ `test_no_object_dtype_without_reason` — Avoid generic `object`
 - ✅ `test_id_fields_are_strings` — IDs are `str`, not `int`
 - ✅ `test_numeric_fields_not_nullable_without_union` — `Series[float] | None`
@@ -395,13 +401,14 @@ UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stabi
 
 **Coverage:** All 18 schemas
 
----
+______________________________________________________________________
 
 ### 3. Validation Tests (`test_validations.py`)
 
 **Purpose:** Ensure validation consistency
 
 **Tests:**
+
 - ✅ `test_chembl_id_pattern_consistent` — ChEMBL ID regex
 - ✅ `test_pmid_pattern_if_present` — PMID format
 - ✅ `test_year_fields_have_range_check` — Year bounds
@@ -414,13 +421,14 @@ UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stabi
 
 **Coverage:** All 18 schemas
 
----
+______________________________________________________________________
 
 ### 4. Naming Convention Tests (`test_naming_conventions.py`)
 
 **Purpose:** Enforce naming consistency
 
 **Tests:**
+
 - ✅ `test_field_names_are_snake_case` — snake-case only
 - ✅ `test_no_camelcase_fields` — No camelCase
 - ✅ `test_no_abbreviations_without_glossary` — Documented abbreviations
@@ -434,7 +442,7 @@ UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stabi
 
 **Coverage:** All 18 schemas
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
@@ -443,54 +451,59 @@ UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stabi
 **Cause:** You added a field to the schema
 
 **Solution:**
+
 ```bash
 # If addition is intentional
 UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stability.py -k schema-name
 ```
 
----
+______________________________________________________________________
 
 ### Test Fails: "Fields removed"
 
 **Cause:** You deleted a field — **BREAKING CHANGE**
 
 **Solution:**
-1. **STOP** — Do not delete fields without deprecation
-2. Follow deprecation workflow (Phase 1-5)
-3. Only delete after 1-2 releases
 
----
+1. **STOP** — Do not delete fields without deprecation
+1. Follow deprecation workflow (Phase 1-5)
+1. Only delete after 1-2 releases
+
+______________________________________________________________________
 
 ### Test Fails: "Type changed"
 
 **Cause:** You changed field dtype — **BREAKING CHANGE**
 
 **Solution:**
-1. Verify change is necessary
-2. Check impact on historical data
-3. Update Gold contracts
-4. Create migration guide
-5. Update snapshot
 
----
+1. Verify change is necessary
+1. Check impact on historical data
+1. Update Gold contracts
+1. Create migration guide
+1. Update snapshot
+
+______________________________________________________________________
 
 ### Test Fails: "Validation checks changed"
 
 **Cause:** You added/removed validation (regex, range, enum)
 
 **Solution:**
-1. Verify validation is correct
-2. Check if change affects existing data
-3. Update DQ configs if needed
-4. Update snapshot
 
----
+1. Verify validation is correct
+1. Check if change affects existing data
+1. Update DQ configs if needed
+1. Update snapshot
+
+______________________________________________________________________
 
 ### Test Fails: "Field not snake-case"
 
 **Cause:** Field name violates naming conventions
 
 **Solution:**
+
 ```python
 # BAD
 publicationYear: Series[int]
@@ -500,7 +513,7 @@ PublicationYear: Series[int]
 publication_year: Series[int]
 ```
 
----
+______________________________________________________________________
 
 ## Best Practices
 
@@ -522,7 +535,7 @@ publication_year: Series[int]
 - ❌ Update snapshots without reviewing diff
 - ❌ Commit schema without updating snapshot
 
----
+______________________________________________________________________
 
 ## Integration with CI/CD
 
@@ -546,36 +559,37 @@ uv run pytest tests/contract/silver_schemas/ -m contracts -v
 
 **Manual override:** Requires `UPDATE_SNAPSHOTS=1` flag (not available in CI by design).
 
----
+______________________________________________________________________
 
 ## Performance
 
-| Test Category | Execution Time | Parallelizable |
-|---------------|----------------|----------------|
-| Schema Stability | ~5-10 seconds | ✅ Yes |
-| Field Types | ~3-5 seconds | ✅ Yes |
-| Validations | ~5-10 seconds | ✅ Yes |
-| Naming Conventions | ~3-5 seconds | ✅ Yes |
-| **Total** | **~20-30 seconds** | ✅ Yes |
+| Test Category      | Execution Time     | Parallelizable |
+| ------------------ | ------------------ | -------------- |
+| Schema Stability   | ~5-10 seconds      | ✅ Yes         |
+| Field Types        | ~3-5 seconds       | ✅ Yes         |
+| Validations        | ~5-10 seconds      | ✅ Yes         |
+| Naming Conventions | ~3-5 seconds       | ✅ Yes         |
+| **Total**          | **~20-30 seconds** | ✅ Yes         |
 
 **Optimization:** optional explicit parallel run:
+
 ```bash
 uv run pytest tests/contract/silver_schemas/ -m contracts -n auto --dist loadscope
 ```
 
----
+______________________________________________________________________
 
 ## Maintenance Schedule
 
-| Task | Frequency | Owner |
-|------|-----------|-------|
-| Run contract tests | Every commit | Developer |
-| Review snapshots | Every schema change | Code reviewer |
-| Update documentation | Every breaking change | Developer |
-| Audit schema consistency | Quarterly | Data team |
-| Cleanup deprecated fields | Every major release | Maintainer |
+| Task                      | Frequency             | Owner         |
+| ------------------------- | --------------------- | ------------- |
+| Run contract tests        | Every commit          | Developer     |
+| Review snapshots          | Every schema change   | Code reviewer |
+| Update documentation      | Every breaking change | Developer     |
+| Audit schema consistency  | Quarterly             | Data team     |
+| Cleanup deprecated fields | Every major release   | Maintainer    |
 
----
+______________________________________________________________________
 
 ## References
 
@@ -586,14 +600,14 @@ uv run pytest tests/contract/silver_schemas/ -m contracts -n auto --dist loadsco
 - **docs/glossary.md**: Ubiquitous Language
 - **tests/contract/silver_schemas/README.md**: Detailed test documentation
 
----
+______________________________________________________________________
 
 ## Statistics
 
 **Test Count:** ~185 tests
 **Schemas Covered:** 18 (100%)
 **Snapshot Coverage:** 18/18 (100%)
-**Maintenance Time:** <5 min per schema change
+**Maintenance Time:** \<5 min per schema change
 **Value:** Prevents accidental breaking changes
 
 **Last Updated:** 2026-03-26

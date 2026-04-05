@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P2
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-03-30'
----
+  Priority: P2
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Checkpoint Debugging Runbook
 
@@ -75,7 +78,7 @@ cat data/output/checkpoints/chembl_activity.json | jq '.metadata.records_process
 - **Resolution**:
 
 1. If value is stale/corrupt, backup and reset checkpoint.
-2. If state is valid but data is inconsistent, run full rebuild:
+1. If state is valid but data is inconsistent, run full rebuild:
 
 ```bash
 bioetl run --pipeline chembl_activity --run-type rebuild
@@ -94,7 +97,7 @@ ls -la data/output/checkpoints/
 - **Resolution**:
 
 1. This is expected after successful runs (checkpoint is cleaned up).
-2. If pipeline crashed and file is still missing, rerun without `--resume` or recover from backup.
+1. If pipeline crashed and file is still missing, rerun without `--resume` or recover from backup.
 
 ### Issue 3: Checkpoint corruption
 
@@ -133,8 +136,8 @@ touch data/output/checkpoints/.write-test && rm data/output/checkpoints/.write-t
 - **Resolution**:
 
 1. Verify filesystem permissions.
-2. Verify available disk space.
-3. Verify run is actually in incremental mode and checkpoint saving is reached.
+1. Verify available disk space.
+1. Verify run is actually in incremental mode and checkpoint saving is reached.
 
 ### Manual Operations
 
@@ -174,6 +177,7 @@ rm -f data/output/checkpoints/*.json
 import json
 from pathlib import Path
 
+
 def validate_checkpoint(pipeline: str) -> bool:
     checkpoint_path = Path(f"data/output/checkpoints/{pipeline}.json")
     if not checkpoint_path.exists():
@@ -195,6 +199,7 @@ def validate_checkpoint(pipeline: str) -> bool:
     print(f"version={data.get('version')}")
     return True
 
+
 validate_checkpoint("chembl_activity")
 ```
 
@@ -203,8 +208,11 @@ validate_checkpoint("chembl_activity")
 - Track and alert on:
 
 - checkpoint file load failures
+
 - repeated resume from same `records_processed` value
+
 - missing checkpoint after abnormal termination
+
 - write/permission errors in `data/output/checkpoints/`
 
 ## Compliance

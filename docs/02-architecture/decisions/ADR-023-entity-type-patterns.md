@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-023: Паттерны передачи entity_type в трансформерах
 
@@ -33,17 +36,18 @@ def __init__(
 ```
 
 Параметр `entity_type` используется для:
+
 - **Metrics labels**: `transform-duration-seconds{entity_type="..."}`, `transform-errors-total{entity_type="..."}`
 - **Tracing attributes**: `bioetl.entity_type` в span
 - **Entity ID generation**: `compute-entity-id()` формирует `{provider}:{entity_type}:{source-id}`
 
 ### Выявленные Паттерны
 
-| Паттерн | Описание | Количество | Итоговый entity_type |
-|---------|----------|------------|----------------------|
-| **A** | ChEMBL через `BaseChemblTransformer` (не передаёт entity_type) | 12 | `"unknown"` |
-| **B** | Явная передача entity_type в `super().__init__()` | 6 | Корректный |
-| **C** | Нет entity_type, нет entity_class (PubMed) | 1 | `"unknown"` |
+| Паттерн | Описание                                                       | Количество | Итоговый entity_type |
+| ------- | -------------------------------------------------------------- | ---------- | -------------------- |
+| **A**   | ChEMBL через `BaseChemblTransformer` (не передаёт entity_type) | 12         | `"unknown"`          |
+| **B**   | Явная передача entity_type в `super().__init__()`              | 6          | Корректный           |
+| **C**   | Нет entity_type, нет entity_class (PubMed)                     | 1          | `"unknown"`          |
 
 **Проблема**: 13 из 19 трансформеров имели `entity_type = "unknown"`, что приводило к потере ценной информации в метриках и трейсинге.
 
@@ -135,6 +139,7 @@ class ActivityTransformer(BaseChemblTransformer):
     entity_class = Bioactivity
     ...
 
+
 # После: entity_type = "bioactivity" (автоматически)
 # Код трансформера не изменился
 ```
@@ -182,28 +187,28 @@ Span атрибуты становятся информативными:
 
 ### Изменённые Файлы
 
-| Файл | Изменение |
-|------|-----------|
+| Файл                                                      | Изменение                                   |
+| --------------------------------------------------------- | ------------------------------------------- |
 | `application/pipelines/chembl/base_chembl_transformer.py` | Auto-derive `entity_type` из `entity_class` |
-| `application/pipelines/pubmed/transformer.py` | Явная передача `entity_type="publication"` |
+| `application/pipelines/pubmed/transformer.py`             | Явная передача `entity_type="publication"`  |
 
 ### Результирующие entity_type
 
-| Трансформер | entity_class | entity_type |
-|-------------|--------------|-------------|
-| ActivityTransformer | Bioactivity | `"bioactivity"` |
-| AssayTransformer | Assay | `"assay"` |
-| MoleculeTransformer | Molecule | `"molecule"` |
-| TargetTransformer | Target | `"target"` |
-| PublicationTransformer | ChemblPublication | `"chemblpublication"` |
-| TargetComponentTransformer | TargetComponent | `"targetcomponent"` |
-| CellLineTransformer | CellLine | `"cellline"` |
-| CompoundRecordTransformer | CompoundRecord | `"compoundrecord"` |
-| ProteinClassTransformer | ProteinClassification | `"proteinclassification"` |
-| AssayParametersTransformer | AssayParameters | `"assayparameters"` |
+| Трансформер                      | entity_class                | entity_type                     |
+| -------------------------------- | --------------------------- | ------------------------------- |
+| ActivityTransformer              | Bioactivity                 | `"bioactivity"`                 |
+| AssayTransformer                 | Assay                       | `"assay"`                       |
+| MoleculeTransformer              | Molecule                    | `"molecule"`                    |
+| TargetTransformer                | Target                      | `"target"`                      |
+| PublicationTransformer           | ChemblPublication           | `"chemblpublication"`           |
+| TargetComponentTransformer       | TargetComponent             | `"targetcomponent"`             |
+| CellLineTransformer              | CellLine                    | `"cellline"`                    |
+| CompoundRecordTransformer        | CompoundRecord              | `"compoundrecord"`              |
+| ProteinClassTransformer          | ProteinClassification       | `"proteinclassification"`       |
+| AssayParametersTransformer       | AssayParameters             | `"assayparameters"`             |
 | PublicationSimilarityTransformer | ChemblPublicationSimilarity | `"chemblpublicationsimilarity"` |
-| PublicationTermTransformer | ChemblPublicationTerm | `"chemblpublicationterm"` |
-| PubMedPublicationTransformer | — | `"publication"` |
+| PublicationTermTransformer       | ChemblPublicationTerm       | `"chemblpublicationterm"`       |
+| PubMedPublicationTransformer     | —                           | `"publication"`                 |
 
 ## Alternatives Considered
 
@@ -216,6 +221,7 @@ class ActivityTransformer(BaseChemblTransformer):
 ```
 
 **Rejected** because:
+
 - Requires changes to all 12 ChEMBL transformers
 - Duplicates information (entity_class already provides this)
 - Prone to inconsistencies (typos, naming variations)
@@ -231,6 +237,7 @@ class ActivityTransformer(BaseChemblTransformer):
 ```
 
 **Rejected** because:
+
 - Additional maintenance burden
 - Must be updated when new entities added
 - Simple `.lower()` is sufficient for now
@@ -245,6 +252,7 @@ class BaseChemblTransformer(BaseTransformer):
 ```
 
 **Rejected** because:
+
 - Over-engineering for no clear benefit
 - Nobody needs to override entity_type for ChEMBL transformers
 
@@ -280,13 +288,13 @@ If more readable names needed, a mapping dictionary can be added later without b
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-023-entity-type-patterns.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-023-entity-type-patterns.md`    |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                           |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                         |
 
 ## Rollout
 

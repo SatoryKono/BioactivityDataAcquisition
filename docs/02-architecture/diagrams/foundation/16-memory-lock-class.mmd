@@ -20,15 +20,15 @@ classDiagram
         +heartbeat(key: str, owner_id: str, exclusive: bool) bool
         +validate_owner(key: str, owner_id: str) bool
         +aclose() None
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
     }
 
     class MemoryLock {
@@ -56,15 +56,15 @@ classDiagram
         +expires_at: float
         +original_ttl: int
         +exclusive: bool = False
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
     }
 
     class LockResult {
@@ -74,15 +74,15 @@ classDiagram
         +key: str
         +ttl: int
         +message: str | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
     }
 
     class LockNotHeldError {
@@ -91,16 +91,16 @@ classDiagram
         +expected_owner: str
         +actual_owner: str | None
         +message: str
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 
     class LockCoordinator {
@@ -118,7 +118,7 @@ classDiagram
         +stop_heartbeat() None
         -_heartbeat_loop(resource: str, owner_id: str) None
         -_build_lock_key(resource: str) str
-        
+
     }
 
     class BackfillLock {
@@ -128,15 +128,15 @@ classDiagram
         +acquire_exclusive(resource: str, owner_id: str, wait_timeout: int) bool
         +release_exclusive(resource: str, owner_id: str) bool
         +get_lock_key(provider: str, entity: str, run_type: RunType)$ str
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
     }
 
     %% Relationships

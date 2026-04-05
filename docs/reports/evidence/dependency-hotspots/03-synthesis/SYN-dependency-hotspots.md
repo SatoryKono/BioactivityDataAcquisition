@@ -93,21 +93,25 @@
 ## Recommended Decisions
 
 - **DEC-HOTSPOT-001:** Choose the first refactoring wave boundary.
+
   - Options:
     - Start with the overlap set (`>10 KB` and `>350 LOC`) as the highest-density shortlist.
     - Start with dependency-pressure seams (`composite`, `composition`, `cli`) even when the files are not all in the overlap set.
 
 - **DEC-HOTSPOT-002:** Decide whether size-only hotspots are first-class backlog items.
+
   - Options:
     - Treat `>10 KB` files below `350 LOC` as phase-two hotspots.
     - Ignore size-only hotspots and focus only on LOC-heavy modules.
 
 - **DEC-HOTSPOT-003:** Decide whether infrastructure adapters should be the first package decomposition target.
+
   - Options:
     - Prioritize `src/bioetl/infrastructure/adapters` first.
     - Prioritize CLI/application pressure seams first because of user-facing orchestration impact.
 
 - **DEC-HOTSPOT-004:** Define how dependency pressure and file-size pressure should be merged into one prioritization model.
+
   - Options:
     - One combined score using dependency pressure plus hotspot thresholds.
     - Two parallel tracks: graph pressure first, file-size debt second.
@@ -124,5 +128,5 @@
 ## Top Insights
 
 1. The project’s main structural issue is concentrated pressure inside allowed seams, not broken layer rules. (EV-dependency-hotspots-module-map-zero-layer-violations, EV-dependency-hotspots-cross-layer-pressure-centers-on-composite-factories-cli)
-2. The hotspot inventory is materially broader by size than by LOC, so LOC-only triage would miss a large share of dense modules. (EV-dependency-hotspots-95-files-exceed-10kb, EV-dependency-hotspots-17-files-exceed-350-loc)
-3. Hotspot prioritization should follow fresh summary-layer interpretation and current metrics rather than one historical package ranking snapshot. (EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail)
+1. The hotspot inventory is materially broader by size than by LOC, so LOC-only triage would miss a large share of dense modules. (EV-dependency-hotspots-95-files-exceed-10kb, EV-dependency-hotspots-17-files-exceed-350-loc)
+1. Hotspot prioritization should follow fresh summary-layer interpretation and current metrics rather than one historical package ranking snapshot. (EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail)

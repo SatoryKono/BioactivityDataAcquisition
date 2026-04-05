@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: PubChem Compound
 
@@ -22,12 +25,12 @@ Last verified: '2026-03-30'
 
 **Источник конфигурации:** `configs/entities/pubchem/compound.yaml`
 
-| Параметр | Значение | Описание |
-|---|---|---|
-| `pipeline_name` | `pubchem_compound` | Уникальное имя пайплайна. |
-| `provider` | `pubchem` | Имя провайдера данных. |
-| `entity_type` | `compound` | Тип извлекаемой сущности. |
-| `business_primary_keys` | `["molecule_id"]` | Канонический бизнес-ключ для Silver/Gold. |
+| Параметр                | Значение           | Описание                                  |
+| ----------------------- | ------------------ | ----------------------------------------- |
+| `pipeline_name`         | `pubchem_compound` | Уникальное имя пайплайна.                 |
+| `provider`              | `pubchem`          | Имя провайдера данных.                    |
+| `entity_type`           | `compound`         | Тип извлекаемой сущности.                 |
+| `business_primary_keys` | `["molecule_id"]`  | Канонический бизнес-ключ для Silver/Gold. |
 
 ## 3. Процесс (ETL)
 
@@ -44,11 +47,11 @@ Last verified: '2026-03-30'
 
 ### 3.3. Load
 
-| Слой | Формат | Стратегия | Таблица/Путь |
-|---|---|---|---|
-| **Bronze** | `jsonl` (сжатый `zstd`) | Append-only | `bronze/pubchem/compound/...` |
-| **Silver** | `delta` | Merge (по `molecule_id`) | `pubchem_compound` |
-| **Gold** | `delta` | - | `dim_compound` |
+| Слой       | Формат                  | Стратегия                | Таблица/Путь                  |
+| ---------- | ----------------------- | ------------------------ | ----------------------------- |
+| **Bronze** | `jsonl` (сжатый `zstd`) | Append-only              | `bronze/pubchem/compound/...` |
+| **Silver** | `delta`                 | Merge (по `molecule_id`) | `pubchem_compound`            |
+| **Gold**   | `delta`                 | -                        | `dim_compound`                |
 
 ## 4. Качество Данных (DQ)
 
@@ -60,28 +63,28 @@ Last verified: '2026-03-30'
 - [ChEMBL Activity](../chembl/activity.md) - Детальная документация (пример)
 - [Project Rules](../../../00-project/RULES.md) - Правила обработки данных
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [pubchem_compound_v1.0.json](../../contracts/gold/pubchem_compound_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [pubchem_compound_v1.0.json](../../contracts/gold/pubchem_compound_v1.0.json)            |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
----
+______________________________________________________________________
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface описан в разделах `Конфигурация` и `Процесс (ETL)` |
-| Contract linkage | Pass | [pubchem_compound_v1.0.json](../../contracts/gold/pubchem_compound_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                 |
+| ----------------- | ------ | ---------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Runtime alignment | Pass   | Активный config/runtime surface описан в разделах `Конфигурация` и `Процесс (ETL)`       |
+| Contract linkage  | Pass   | [pubchem_compound_v1.0.json](../../contracts/gold/pubchem_compound_v1.0.json)            |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                    |
 
----
+______________________________________________________________________
 
 ## API Compliance
 

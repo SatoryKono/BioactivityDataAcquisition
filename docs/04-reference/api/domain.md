@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Domain Layer API Reference
 
@@ -18,35 +21,35 @@ runtime context primitives, configuration objects, validation functions, and
 domain services. All other layers depend on this layer; it depends on nothing
 external.
 
----
+______________________________________________________________________
 
 ## Package Structure
 
-| Subpackage | Description | Key Public Symbols |
-|---|---|---|
-| `domain.ports` | Protocol interfaces for dependency inversion (DI), including sanctioned runtime/resilience contracts | `DataSourcePort`, `StoragePort`, `LoggerPort`, `RunnerFactoryPort`, `ExecutionObservabilityPort` |
-| `domain.context` | Deterministic execution context primitives carried through pipeline flows | `PipelineContext`, `PipelineRunContext` |
-| `domain.entities` | Rich domain objects and Pydantic DTOs | `Bioactivity`, `Molecule`, `Target`, `BaseEntity` |
-| `domain.value_objects` | Immutable domain primitives with self-validation | `ChemblId`, `DOI`, `InChI`, `SMILES`, `PubMedId` |
-| `domain.types` | Enums, NewType IDs, TypedDicts, health reports | `RunType`, `HealthStatus`, `ErrorType`, `BatchID` |
-| `domain.config` | Pipeline and runtime configuration value objects | `PipelineConfig`, `RuntimeConfig`, `DQConfig` |
-| `domain.exceptions` | Centralized exception hierarchy | `BioETLError`, `ValidationError`, `StorageError` |
-| `domain.aggregates` | DDD aggregates with protected invariants | `PipelineRun`, `Batch`, `QuarantineEntry` |
-| `domain.composite` | Composite pipeline models (ADR-026) | `CompositeConfig`, `EnricherConfig`, `MergeStrategy` |
-| `domain.contracts` | Pandera Gold schema definitions | `ChEMBLActivityGoldSchema`, `PubChemCompoundGoldSchema` |
-| `domain.schemas` | Column ordering, constants, validators | `canonical_column_order`, `CHEMBL_ID_PATTERN` |
-| `domain.services` | Pure domain services (no I/O) | `IdentityService`, `NormalizationService`, `UnitConverter` |
-| `domain.validation` | Pure validation functions | `validate_doi`, `validate_smiles`, `validate_inchi_key` |
-| `domain.transformations` | Hashing, drift detection, coercion | `generate_entity_id`, `generate_content_hash`, `safe_float` |
-| `domain.filtering` | Filter configuration models | `InputFilterConfig`, `GoldFilterConfig`, `GoldRangeFilter` |
-| `domain.models` | Pydantic metadata sidecar models | `BronzeMetadata`, `SilverMetadata`, `GoldMetadata` |
-| `domain.registry` | Entity type mappings and field aliases | `FieldAlias`, `PublicationMapping` |
-| `domain.normalization` | Pure text normalization functions | normalization helpers |
-| `domain.serialization` | Centralized JSON helpers | JSON encoding utilities |
-| `domain.constants` | Shared constants (`META_FIELDS`, etc.) | `META_FIELDS` |
-| `domain.medallion` | Medallion layer enum | `Layer` |
+| Subpackage               | Description                                                                                          | Key Public Symbols                                                                               |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `domain.ports`           | Protocol interfaces for dependency inversion (DI), including sanctioned runtime/resilience contracts | `DataSourcePort`, `StoragePort`, `LoggerPort`, `RunnerFactoryPort`, `ExecutionObservabilityPort` |
+| `domain.context`         | Deterministic execution context primitives carried through pipeline flows                            | `PipelineContext`, `PipelineRunContext`                                                          |
+| `domain.entities`        | Rich domain objects and Pydantic DTOs                                                                | `Bioactivity`, `Molecule`, `Target`, `BaseEntity`                                                |
+| `domain.value_objects`   | Immutable domain primitives with self-validation                                                     | `ChemblId`, `DOI`, `InChI`, `SMILES`, `PubMedId`                                                 |
+| `domain.types`           | Enums, NewType IDs, TypedDicts, health reports                                                       | `RunType`, `HealthStatus`, `ErrorType`, `BatchID`                                                |
+| `domain.config`          | Pipeline and runtime configuration value objects                                                     | `PipelineConfig`, `RuntimeConfig`, `DQConfig`                                                    |
+| `domain.exceptions`      | Centralized exception hierarchy                                                                      | `BioETLError`, `ValidationError`, `StorageError`                                                 |
+| `domain.aggregates`      | DDD aggregates with protected invariants                                                             | `PipelineRun`, `Batch`, `QuarantineEntry`                                                        |
+| `domain.composite`       | Composite pipeline models (ADR-026)                                                                  | `CompositeConfig`, `EnricherConfig`, `MergeStrategy`                                             |
+| `domain.contracts`       | Pandera Gold schema definitions                                                                      | `ChEMBLActivityGoldSchema`, `PubChemCompoundGoldSchema`                                          |
+| `domain.schemas`         | Column ordering, constants, validators                                                               | `canonical_column_order`, `CHEMBL_ID_PATTERN`                                                    |
+| `domain.services`        | Pure domain services (no I/O)                                                                        | `IdentityService`, `NormalizationService`, `UnitConverter`                                       |
+| `domain.validation`      | Pure validation functions                                                                            | `validate_doi`, `validate_smiles`, `validate_inchi_key`                                          |
+| `domain.transformations` | Hashing, drift detection, coercion                                                                   | `generate_entity_id`, `generate_content_hash`, `safe_float`                                      |
+| `domain.filtering`       | Filter configuration models                                                                          | `InputFilterConfig`, `GoldFilterConfig`, `GoldRangeFilter`                                       |
+| `domain.models`          | Pydantic metadata sidecar models                                                                     | `BronzeMetadata`, `SilverMetadata`, `GoldMetadata`                                               |
+| `domain.registry`        | Entity type mappings and field aliases                                                               | `FieldAlias`, `PublicationMapping`                                                               |
+| `domain.normalization`   | Pure text normalization functions                                                                    | normalization helpers                                                                            |
+| `domain.serialization`   | Centralized JSON helpers                                                                             | JSON encoding utilities                                                                          |
+| `domain.constants`       | Shared constants (`META_FIELDS`, etc.)                                                               | `META_FIELDS`                                                                                    |
+| `domain.medallion`       | Medallion layer enum                                                                                 | `Layer`                                                                                          |
 
----
+______________________________________________________________________
 
 ## Ports (Protocol Interfaces)
 
@@ -68,11 +71,11 @@ introducing a concrete logging framework into the domain layer.
 
 ### Data Source Ports
 
-| Port | Methods | Description |
-|---|---|---|
-| `DataSourcePort` | `fetch()`, `health_check()`, `aclose()` | Base port for fetching records from external APIs |
-| `FilterableDataSourcePort` | `fetch_filtered()`, `fetch_multi_filtered()`, `fetch_filtered_with_fallback()` | Extended port with server-side filtering |
-| `DataSourceFactoryPort` | `list_providers()`, `create()` | Factory for creating data source adapters |
+| Port                       | Methods                                                                        | Description                                       |
+| -------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `DataSourcePort`           | `fetch()`, `health_check()`, `aclose()`                                        | Base port for fetching records from external APIs |
+| `FilterableDataSourcePort` | `fetch_filtered()`, `fetch_multi_filtered()`, `fetch_filtered_with_fallback()` | Extended port with server-side filtering          |
+| `DataSourceFactoryPort`    | `list_providers()`, `create()`                                                 | Factory for creating data source adapters         |
 
 **DataSourcePort signatures:**
 
@@ -95,72 +98,72 @@ class DataSourcePort(Protocol):
 
 ### Storage Ports
 
-| Port | Description |
-|---|---|
-| `StoragePort` | Aggregate facade inheriting all narrow storage ports |
-| `BronzeStoragePort` | Bronze layer write and cleanup |
-| `SilverStoragePort` | Silver layer write, read, and clear |
-| `GoldStoragePort` | Gold layer write and clear |
-| `MergedStoragePort` | Composite pipeline merged writes |
-| `StorageMaintenancePort` | Cross-layer maintenance (vacuum, optimize, archive) |
-| `StorageLifecyclePort` | Resource lifecycle (aclose, health_check) |
+| Port                     | Description                                          |
+| ------------------------ | ---------------------------------------------------- |
+| `StoragePort`            | Aggregate facade inheriting all narrow storage ports |
+| `BronzeStoragePort`      | Bronze layer write and cleanup                       |
+| `SilverStoragePort`      | Silver layer write, read, and clear                  |
+| `GoldStoragePort`        | Gold layer write and clear                           |
+| `MergedStoragePort`      | Composite pipeline merged writes                     |
+| `StorageMaintenancePort` | Cross-layer maintenance (vacuum, optimize, archive)  |
+| `StorageLifecyclePort`   | Resource lifecycle (aclose, health_check)            |
 
 ### Observability Ports
 
-| Port | Description |
-|---|---|
-| `LoggerPort` | Structured logging abstraction |
-| `TracingPort` | Distributed tracing (OpenTelemetry) |
-| `MetricsPort` | Metrics collection (Prometheus) |
-| `MetricsServerPort` | Metrics HTTP server management |
-| `DQMonitorPort` | Data quality monitoring |
-| `ExecutorMetricsPort` | Batch executor metrics |
+| Port                         | Description                                                                               |
+| ---------------------------- | ----------------------------------------------------------------------------------------- |
+| `LoggerPort`                 | Structured logging abstraction                                                            |
+| `TracingPort`                | Distributed tracing (OpenTelemetry)                                                       |
+| `MetricsPort`                | Metrics collection (Prometheus)                                                           |
+| `MetricsServerPort`          | Metrics HTTP server management                                                            |
+| `DQMonitorPort`              | Data quality monitoring                                                                   |
+| `ExecutorMetricsPort`        | Batch executor metrics                                                                    |
 | `ExecutionObservabilityPort` | Domain-facing execution bundle for logger, metrics, tracing, and DQ monitor collaborators |
 
 ### Config Ports
 
-| Port | Description |
-|---|---|
-| `SettingsPort` | Application settings access |
-| `PipelineSettingsPort` | Pipeline-specific settings |
-| `PipelineConfigLoaderPort` | Pipeline config loading |
-| `PipelineYamlConfigPort` | YAML config access |
-| `SettingsLoaderPort` | Settings loading |
-| `DomainConfigMapperPort` | Domain config mapping |
+| Port                       | Description                 |
+| -------------------------- | --------------------------- |
+| `SettingsPort`             | Application settings access |
+| `PipelineSettingsPort`     | Pipeline-specific settings  |
+| `PipelineConfigLoaderPort` | Pipeline config loading     |
+| `PipelineYamlConfigPort`   | YAML config access          |
+| `SettingsLoaderPort`       | Settings loading            |
+| `DomainConfigMapperPort`   | Domain config mapping       |
 
 ### Quality Ports
 
-| Port | Description |
-|---|---|
-| `BronzeDQAnalyzerPort` | Bronze layer DQ analysis |
-| `SilverDQAnalyzerPort` | Silver layer DQ analysis |
-| `GoldDQAnalyzerPort` | Gold layer DQ analysis |
-| `SilverValidatorPort` | Silver schema validation |
-| `GoldValidatorPort` | Gold schema validation |
-| `QuarantinePort` | Failed record quarantine |
-| `ContractPolicyPort` | Contract enforcement policy |
-| `ErrorClassifierPort` | Error classification |
-| `ErrorHandlerPort` | Error handling strategy |
-| `DQReportWriterPort` | DQ report persistence |
-| `FallbackPolicyPort` | Fallback strategy for failed lookups |
+| Port                   | Description                          |
+| ---------------------- | ------------------------------------ |
+| `BronzeDQAnalyzerPort` | Bronze layer DQ analysis             |
+| `SilverDQAnalyzerPort` | Silver layer DQ analysis             |
+| `GoldDQAnalyzerPort`   | Gold layer DQ analysis               |
+| `SilverValidatorPort`  | Silver schema validation             |
+| `GoldValidatorPort`    | Gold schema validation               |
+| `QuarantinePort`       | Failed record quarantine             |
+| `ContractPolicyPort`   | Contract enforcement policy          |
+| `ErrorClassifierPort`  | Error classification                 |
+| `ErrorHandlerPort`     | Error handling strategy              |
+| `DQReportWriterPort`   | DQ report persistence                |
+| `FallbackPolicyPort`   | Fallback strategy for failed lookups |
 
 ### Runtime Ports
 
-| Port | Description |
-|---|---|
-| `RunnablePort` | Pipeline runnable interface |
-| `ExecutionMetricsRunnerPort` | Runnable that also exposes execution counters |
-| `PipelineFactoryPort` | Pipeline and runner creation through domain-facing settings/config/observability contracts |
-| `RunnerFactoryPort` | Runner creation |
-| `PipelineRegistryPort` | Pipeline registry lookup |
-| `RegistryAccessorPort` | Registry access |
-| `CheckpointPort` | Checkpoint persistence |
-| `LockPort` | Distributed locking |
-| `ShutdownPort` | Graceful shutdown signal |
-| `BatchIdGeneratorPort` | Batch ID generation |
-| `ClockPort` | Time abstraction |
-| `MemoryMonitorPort` | Memory usage monitoring |
-| `MetricsExtractorPort` | Metrics extraction |
+| Port                         | Description                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------ |
+| `RunnablePort`               | Pipeline runnable interface                                                                |
+| `ExecutionMetricsRunnerPort` | Runnable that also exposes execution counters                                              |
+| `PipelineFactoryPort`        | Pipeline and runner creation through domain-facing settings/config/observability contracts |
+| `RunnerFactoryPort`          | Runner creation                                                                            |
+| `PipelineRegistryPort`       | Pipeline registry lookup                                                                   |
+| `RegistryAccessorPort`       | Registry access                                                                            |
+| `CheckpointPort`             | Checkpoint persistence                                                                     |
+| `LockPort`                   | Distributed locking                                                                        |
+| `ShutdownPort`               | Graceful shutdown signal                                                                   |
+| `BatchIdGeneratorPort`       | Batch ID generation                                                                        |
+| `ClockPort`                  | Time abstraction                                                                           |
+| `MemoryMonitorPort`          | Memory usage monitoring                                                                    |
+| `MetricsExtractorPort`       | Metrics extraction                                                                         |
 
 `PipelineFactoryPort.create_runner()` now depends on `SettingsPort`,
 `PipelineYamlConfigPort`, and `ExecutionObservabilityPort` rather than a
@@ -169,66 +172,66 @@ while removing outer-layer runtime vocabulary from the port surface.
 
 ### Other Ports
 
-| Port | Description |
-|---|---|
-| `AuditPort` | Write operation traceability |
-| `AdrServicePort` | ADR document management |
-| `MetadataWriterPort` | Metadata sidecar writing |
-| `MetadataCoordinatorPort` | Metadata coordination |
-| `RateLimiterPort` | API rate limiting |
-| `CircuitBreakerPort` | Circuit breaker pattern |
-| `HealthCheckPort` | Health check interface |
-| `HealthMonitorPort` | Health state monitoring |
-| `PiiHasherPort` | PII field hashing |
-| `JsonEncoderPort` | JSON encoding |
-| `DataNormalizationPort` | Data normalization |
-| `DeltaReaderPort` | Delta Lake reading |
-| `InputFilterPort` | Input filtering |
-| `IDMappingPort` | UniProt ID mapping |
+| Port                      | Description                  |
+| ------------------------- | ---------------------------- |
+| `AuditPort`               | Write operation traceability |
+| `AdrServicePort`          | ADR document management      |
+| `MetadataWriterPort`      | Metadata sidecar writing     |
+| `MetadataCoordinatorPort` | Metadata coordination        |
+| `RateLimiterPort`         | API rate limiting            |
+| `CircuitBreakerPort`      | Circuit breaker pattern      |
+| `HealthCheckPort`         | Health check interface       |
+| `HealthMonitorPort`       | Health state monitoring      |
+| `PiiHasherPort`           | PII field hashing            |
+| `JsonEncoderPort`         | JSON encoding                |
+| `DataNormalizationPort`   | Data normalization           |
+| `DeltaReaderPort`         | Delta Lake reading           |
+| `InputFilterPort`         | Input filtering              |
+| `IDMappingPort`           | UniProt ID mapping           |
 
 ### NoOp Implementations (Null Object Pattern)
 
-| Class | Implements |
-|---|---|
-| `NoOpTracing` | `TracingPort` |
-| `NoOpMetrics` | `MetricsPort` |
-| `NoOpAudit` | `AuditPort` |
+| Class                | Implements           |
+| -------------------- | -------------------- |
+| `NoOpTracing`        | `TracingPort`        |
+| `NoOpMetrics`        | `MetricsPort`        |
+| `NoOpAudit`          | `AuditPort`          |
 | `NoOpMetadataWriter` | `MetadataWriterPort` |
-| `NoOpMemoryMonitor` | `MemoryMonitorPort` |
-| `NoOpPiiHasher` | `PiiHasherPort` |
+| `NoOpMemoryMonitor`  | `MemoryMonitorPort`  |
+| `NoOpPiiHasher`      | `PiiHasherPort`      |
 
----
+______________________________________________________________________
 
 ## Aggregates
 
-| Aggregate | Root Entity | Key Classes | Description |
-|---|---|---|---|
-| `PipelineRun` | `PipelineRun` | `PipelineRunState`, `StageResult`, `StageStatus` | Orchestration context with stage tracking |
-| `Batch` | `Batch` | `BatchRecord`, `BatchStatus` | Collection of records with consistent batch_id |
-| `QuarantineEntry` | `QuarantineEntry` | `QuarantineStatus` | Failed record with error context |
+| Aggregate         | Root Entity       | Key Classes                                      | Description                                    |
+| ----------------- | ----------------- | ------------------------------------------------ | ---------------------------------------------- |
+| `PipelineRun`     | `PipelineRun`     | `PipelineRunState`, `StageResult`, `StageStatus` | Orchestration context with stage tracking      |
+| `Batch`           | `Batch`           | `BatchRecord`, `BatchStatus`                     | Collection of records with consistent batch_id |
+| `QuarantineEntry` | `QuarantineEntry` | `QuarantineStatus`                               | Failed record with error context               |
 
----
+______________________________________________________________________
 
 ## Entities
 
 ### ChEMBL Domain Entities (dataclass)
 
-| Entity | Description |
-|---|---|
-| `Bioactivity` | Core bioactivity measurement with state tracking |
-| `Assay` | Biological assay entity |
-| `AssayParameters` | Assay parameter measurements |
-| `Molecule` | Chemical compound |
-| `Target` | Biological target |
-| `TargetComponent` | Target protein component |
-| `CellLine` | Cell line entity |
-| `Tissue` | Tissue entity |
-| `SubcellularFraction` | Subcellular fraction entity |
-| `CompoundRecord` | Molecule-document link |
-| `ChemblPublication` | ChEMBL publication entity |
-| `ChemblPublicationSimilarity` | Publication similarity score |
-| `ChemblPublicationTerm` | Publication term frequency |
-| `ProteinClassification` | Protein class hierarchy |
+| Entity                        | Description                                      |
+| ----------------------------- | ------------------------------------------------ |
+| `Bioactivity`                 | Core bioactivity measurement with state tracking |
+| `Assay`                       | Biological assay entity                          |
+| `AssayParameters`             | Assay parameter measurements                     |
+| `Molecule`                    | Chemical compound                                |
+| `Target`                      | Biological target                                |
+| `TargetComponent`             | Target protein component                         |
+| `CellLine`                    | Cell line entity                                 |
+| `Tissue`                      | Tissue entity                                    |
+| `SubcellularFraction`         | Subcellular fraction entity                      |
+| `CompoundRecord`              | Molecule-document link                           |
+| `ChemblPublication`           | ChEMBL publication entity                        |
+| `ChemblPublicationSimilarity` | Publication similarity score                     |
+| `ChemblPublicationTerm`       | Publication term frequency                       |
+| `ProteinClassification`       | Protein class hierarchy                          |
 
 ### ChEMBL DTOs (Pydantic, frozen, extra='forbid')
 
@@ -238,20 +241,20 @@ while removing outer-layer runtime vocabulary from the port surface.
 
 ### Publication Entities
 
-| Entity | Provider |
-|---|---|
-| `PublicationEntityBase` | Base class for all publication entities |
-| `CrossRefPublicationEntity` | CrossRef |
-| `OpenAlexPublicationEntity` | OpenAlex |
-| `PubMedPublicationEntity` | PubMed |
-| `SemanticScholarPublicationEntity` | Semantic Scholar |
+| Entity                             | Provider                                |
+| ---------------------------------- | --------------------------------------- |
+| `PublicationEntityBase`            | Base class for all publication entities |
+| `CrossRefPublicationEntity`        | CrossRef                                |
+| `OpenAlexPublicationEntity`        | OpenAlex                                |
+| `PubMedPublicationEntity`          | PubMed                                  |
+| `SemanticScholarPublicationEntity` | Semantic Scholar                        |
 
 ### Other Entities
 
 `PubchemMolecule`, `UniprotTarget`, `PublicationRecord` (CrossRef DTO),
 `ArticleRecord` (PubMed DTO), `PubchemMoleculeRecord` (PubChem DTO)
 
----
+______________________________________________________________________
 
 ## Value Objects
 
@@ -280,24 +283,24 @@ while removing outer-layer runtime vocabulary from the port surface.
 
 `TaxonomyId`, `ValueObject` (base class), `DQEvaluationStatus`
 
----
+______________________________________________________________________
 
 ## Types
 
 ### Enums
 
-| Enum | Values |
-|---|---|
-| `RunType` | `INCREMENTAL`, `BACKFILL`, `REBUILD` |
-| `HealthStatus` | `HEALTHY`, `DEGRADED`, `UNHEALTHY` |
-| `ErrorType` | Error classification categories |
-| `CircuitBreakerState` | `CLOSED`, `OPEN`, `HALF_OPEN` |
-| `PublicationType` | Publication type categories |
-| `CellularityType` | Organism cellularity types |
-| `DataClassification` | Data sensitivity levels |
-| `DriftLevel` | Schema drift severity |
-| `ExecutionContext` | Pipeline execution context |
-| `QuarantineRecordStatus` | Quarantine record states |
+| Enum                     | Values                               |
+| ------------------------ | ------------------------------------ |
+| `RunType`                | `INCREMENTAL`, `BACKFILL`, `REBUILD` |
+| `HealthStatus`           | `HEALTHY`, `DEGRADED`, `UNHEALTHY`   |
+| `ErrorType`              | Error classification categories      |
+| `CircuitBreakerState`    | `CLOSED`, `OPEN`, `HALF_OPEN`        |
+| `PublicationType`        | Publication type categories          |
+| `CellularityType`        | Organism cellularity types           |
+| `DataClassification`     | Data sensitivity levels              |
+| `DriftLevel`             | Schema drift severity                |
+| `ExecutionContext`       | Pipeline execution context           |
+| `QuarantineRecordStatus` | Quarantine record states             |
 
 ### NewType IDs
 
@@ -311,44 +314,44 @@ while removing outer-layer runtime vocabulary from the port surface.
 
 `HealthReport`, `PreflightReport`, `ComponentHealthResult`, `ValidationResult`
 
----
+______________________________________________________________________
 
 ## Configuration
 
-| Config | Description |
-|---|---|
-| `PipelineConfig` | Pipeline-level settings (provider, entity, batch size) |
-| `RuntimeConfig` | Runtime behavior (timeouts, retries) |
-| `DQConfig` | Data quality thresholds and rules |
-| `DQReportConfig` | DQ report output settings |
-| `TableConfig` | Table-level settings |
-| `MemoryConfig` | Memory management settings |
-| `ValidationConfig` | Field validation configuration |
-| `BaseClientConfig` | Base HTTP client configuration |
-| `BaseProviderConfig` | Provider-level configuration |
-| `RateLimitConfig` | Rate limiting settings |
+| Config               | Description                                            |
+| -------------------- | ------------------------------------------------------ |
+| `PipelineConfig`     | Pipeline-level settings (provider, entity, batch size) |
+| `RuntimeConfig`      | Runtime behavior (timeouts, retries)                   |
+| `DQConfig`           | Data quality thresholds and rules                      |
+| `DQReportConfig`     | DQ report output settings                              |
+| `TableConfig`        | Table-level settings                                   |
+| `MemoryConfig`       | Memory management settings                             |
+| `ValidationConfig`   | Field validation configuration                         |
+| `BaseClientConfig`   | Base HTTP client configuration                         |
+| `BaseProviderConfig` | Provider-level configuration                           |
+| `RateLimitConfig`    | Rate limiting settings                                 |
 
----
+______________________________________________________________________
 
 ## Domain Services
 
-| Service | Description |
-|---|---|
-| `IdentityService` | Entity ID and content hash generation |
-| `NormalizationService` | Bioactivity normalization facade |
-| `DataNormalizationService` | Text normalization (DOI, PMID, authors, HTML) |
-| `UnitConverter` | Concentration unit conversion (nM, uM, mM) |
-| `ValueValidator` | Bioactivity value range validation |
-| `ActivityAggregator` | Multiple measurement aggregation |
-| `OrganismClassificationService` | Organism cellularity classification |
-| `DQMetricsCalculator` | DQ metrics computation |
-| `DQReportSerializer` | DQ report serialization |
-| `DateNormalizationService` | Date normalization |
-| `DoiNormalizationService` | DOI normalization |
-| `PmidNormalizationService` | PMID normalization |
-| `TextNormalizationService` | General text normalization |
+| Service                         | Description                                   |
+| ------------------------------- | --------------------------------------------- |
+| `IdentityService`               | Entity ID and content hash generation         |
+| `NormalizationService`          | Bioactivity normalization facade              |
+| `DataNormalizationService`      | Text normalization (DOI, PMID, authors, HTML) |
+| `UnitConverter`                 | Concentration unit conversion (nM, uM, mM)    |
+| `ValueValidator`                | Bioactivity value range validation            |
+| `ActivityAggregator`            | Multiple measurement aggregation              |
+| `OrganismClassificationService` | Organism cellularity classification           |
+| `DQMetricsCalculator`           | DQ metrics computation                        |
+| `DQReportSerializer`            | DQ report serialization                       |
+| `DateNormalizationService`      | Date normalization                            |
+| `DoiNormalizationService`       | DOI normalization                             |
+| `PmidNormalizationService`      | PMID normalization                            |
+| `TextNormalizationService`      | General text normalization                    |
 
----
+______________________________________________________________________
 
 ## Composite Pipeline Models (ADR-026)
 
@@ -383,7 +386,7 @@ while removing outer-layer runtime vocabulary from the port surface.
 
 `CompositeLineageMetadata`, `EnrichmentStatusRecord`, `FieldSource`
 
----
+______________________________________________________________________
 
 ## Gold Schemas (Pandera DataFrameModel)
 
@@ -407,25 +410,25 @@ while removing outer-layer runtime vocabulary from the port surface.
 `CompositeActivityGoldSchema`, `CompositeAssayGoldSchema`, `CompositeMoleculeGoldSchema`,
 `CompositePublicationGoldSchema`, `CompositeTargetGoldSchema`
 
----
+______________________________________________________________________
 
 ## Filtering
 
-| Class | Description |
-|---|---|
-| `InputFilterConfig` | API request filtering by external ID lists |
-| `GoldFilterConfig` | Gold layer column-based filters |
-| `SilverFilterConfig` | Silver layer filter config |
-| `GoldColumnFilter` | Single column filter specification |
-| `GoldRangeFilter` | Numeric range filter |
-| `GoldListContainsFilter` | List containment filter |
-| `GoldListLengthFilter` | List length filter |
-| `FilterColumn` | Column specification for input filtering |
-| `FilterOperator` | Filter comparison operator enum |
-| `FilterLoadResult` | Filter loading result |
-| `BaseFilterConfig` | Base filter configuration |
+| Class                    | Description                                |
+| ------------------------ | ------------------------------------------ |
+| `InputFilterConfig`      | API request filtering by external ID lists |
+| `GoldFilterConfig`       | Gold layer column-based filters            |
+| `SilverFilterConfig`     | Silver layer filter config                 |
+| `GoldColumnFilter`       | Single column filter specification         |
+| `GoldRangeFilter`        | Numeric range filter                       |
+| `GoldListContainsFilter` | List containment filter                    |
+| `GoldListLengthFilter`   | List length filter                         |
+| `FilterColumn`           | Column specification for input filtering   |
+| `FilterOperator`         | Filter comparison operator enum            |
+| `FilterLoadResult`       | Filter loading result                      |
+| `BaseFilterConfig`       | Base filter configuration                  |
 
----
+______________________________________________________________________
 
 ## Metadata Models (Pydantic)
 
@@ -434,7 +437,7 @@ while removing outer-layer runtime vocabulary from the port surface.
 `EnvironmentMetadata`, `DQSummary`, `ColumnMetrics`, `DeltaMetrics`,
 `SCDMetadata`, `SchemaDrift`, `FileOutputMetadata`, `ExtractionParams`
 
----
+______________________________________________________________________
 
 ## Exception Hierarchy
 

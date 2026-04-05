@@ -6,7 +6,7 @@
 
 > **Focus**: Documentation, ADR management, CHANGELOG, docstrings, glossary sync, doc-code consistency.
 
----
+______________________________________________________________________
 
 ## 1. Identity & Scope
 
@@ -28,11 +28,12 @@ When updating architecture, governance, or agent docs, sync against:
 - `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md`
 
 Prefer evidence-backed wording:
+
 - package count is descriptive, not a standalone defect signal;
 - family-level topology is the preferred hotspot narrative;
 - governance signals should be cited when docs imply prioritization.
 
----
+______________________________________________________________________
 
 ## 2. Documentation Structure
 
@@ -67,16 +68,17 @@ docs/
 
 ### Root-level Docs
 
-| File | Purpose |
-|------|---------|
-| `CHANGELOG.md` | Version history |
-| `README.md` | Project overview |
+| File           | Purpose          |
+| -------------- | ---------------- |
+| `CHANGELOG.md` | Version history  |
+| `README.md`    | Project overview |
 
----
+______________________________________________________________________
 
 ## 3. ADR Management
 
 ### Current State
+
 - ADR set: verify live from `docs/02-architecture/decisions/` before citing counts or ranges
 - Status pattern: generally Accepted; ADR-008 is historically Superseded
 - Location: `docs/02-architecture/decisions/`
@@ -108,23 +110,23 @@ Accepted | Proposed | Deprecated | Superseded by ADR-0YY
 
 ### Key ADR Reference
 
-| ADR | Topic |
-|-----|-------|
-| ADR-007 | Circuit Breaker Implementation |
-| ADR-010 | Local-Only Deployment |
-| ADR-014 | Deterministic Writes |
-| ADR-025 | Pipeline Config Unification |
-| ADR-026 | Composite Pipeline Pattern |
-| ADR-027 | DQ Rules Externalization |
-| ADR-028 | Filter Rules Externalization |
-| ADR-029 | Convention-based Config |
-| ADR-033 | Publication Validation Strategy |
+| ADR     | Topic                                           |
+| ------- | ----------------------------------------------- |
+| ADR-007 | Circuit Breaker Implementation                  |
+| ADR-010 | Local-Only Deployment                           |
+| ADR-014 | Deterministic Writes                            |
+| ADR-025 | Pipeline Config Unification                     |
+| ADR-026 | Composite Pipeline Pattern                      |
+| ADR-027 | DQ Rules Externalization                        |
+| ADR-028 | Filter Rules Externalization                    |
+| ADR-029 | Convention-based Config                         |
+| ADR-033 | Publication Validation Strategy                 |
 | ADR-037 | Canonical Schema Source and Generated Artifacts |
-| ADR-038 | Enum Externalization to YAML |
-| ADR-039 | Unified Entity Config Format |
-| ADR-040 | Diagram Governance |
+| ADR-038 | Enum Externalization to YAML                    |
+| ADR-039 | Unified Entity Config Format                    |
+| ADR-040 | Diagram Governance                              |
 
----
+______________________________________________________________________
 
 ## 4. CHANGELOG Conventions
 
@@ -146,7 +148,7 @@ Accepted | Proposed | Deprecated | Superseded by ADR-0YY
 - Removed feature description
 ```
 
----
+______________________________________________________________________
 
 ## 5. Docstring Conventions
 
@@ -192,30 +194,31 @@ def transform(self, records: list[dict[str, Any]]) -> list[Entity]:
     """
 ```
 
----
+______________________________________________________________________
 
 ## 6. Glossary Sync
 
 **Glossary file**: `docs/00-project/glossary.md`
 
 Key terms to keep synchronized:
+
 - Medallion layers (Bronze, Silver, Gold)
 - Architecture patterns (Hexagonal, DDD, Ports & Adapters)
 - Provider names and entity types
 - ADR concepts (Content Hash, DQ Thresholds, etc.)
 
----
+______________________________________________________________________
 
 ## 7. Doc-Code Sync Checks
 
 ### Statistics to Validate in RULES.md
 
-| Statistic | How to Check |
-|-----------|-------------|
-| Number of ADRs | `ls docs/02-architecture/decisions/ADR-*.md \| wc -l` |
-| Number of providers | Check `src/bioetl/infrastructure/adapters/` |
+| Statistic                    | How to Check                                                         |
+| ---------------------------- | -------------------------------------------------------------------- |
+| Number of ADRs               | `ls docs/02-architecture/decisions/ADR-*.md \| wc -l`                |
+| Number of providers          | Check `src/bioetl/infrastructure/adapters/`                          |
 | Number of architecture tests | `pytest tests/architecture/ --collect-only \| grep "test_" \| wc -l` |
-| Coverage threshold | Check `pyproject.toml` pytest config |
+| Coverage threshold           | Check `pyproject.toml` pytest config                                 |
 
 ### Cross-reference Validation
 
@@ -259,20 +262,20 @@ CI gates: `check-links` (`docs.yml`), `check-drift` (`architecture.yml`), `check
 Pre-commit: `lint` (diagrams), `fix-orphans`.
 Scheduled: `check-kpi` (Monday 4:00 UTC), `suite nightly` (2:20 UTC).
 
----
+______________________________________________________________________
 
 ## 8. Modes of Operation
 
-| Mode | Purpose |
-|------|---------|
-| `DOC` | Update docs, docstrings, CHANGELOG |
-| `ADR` | Create, validate, update ADRs |
+| Mode       | Purpose                                       |
+| ---------- | --------------------------------------------- |
+| `DOC`      | Update docs, docstrings, CHANGELOG            |
+| `ADR`      | Create, validate, update ADRs                 |
 | `ANALYSIS` | Sync statistics, cross-references, validation |
-| `REFUSE` | Insufficient data |
+| `REFUSE`   | Insufficient data                             |
 
 Always declare mode at the start of response.
 
----
+______________________________________________________________________
 
 ## 9. DOC Update Log Template
 
@@ -296,42 +299,44 @@ Always declare mode at the start of response.
 - [ ] CHANGELOG updated
 ```
 
----
+______________________________________________________________________
 
 ## 10. Integration with Other Agents
 
-| Event | Action |
-|-------|--------|
-| py-test-bot (final pass) | -> doc-bot updates docs/docstrings |
-| py-audit-bot (doc drift finding) | -> doc-bot corrects drift |
-| orchestrator (new entity) | -> doc-bot adds provider docs |
-| New ADR needed | -> doc-bot creates ADR |
-| Refactoring complete | -> doc-bot updates CHANGELOG |
+| Event                            | Action                             |
+| -------------------------------- | ---------------------------------- |
+| py-test-bot (final pass)         | -> doc-bot updates docs/docstrings |
+| py-audit-bot (doc drift finding) | -> doc-bot corrects drift          |
+| orchestrator (new entity)        | -> doc-bot adds provider docs      |
+| New ADR needed                   | -> doc-bot creates ADR             |
+| Refactoring complete             | -> doc-bot updates CHANGELOG       |
 
----
+______________________________________________________________________
 
 ## 11. Key Files for Documentation
 
-| What | Path |
-|------|------|
-| RULES.md (Constitution) | `docs/00-project/RULES.md` |
-| Glossary | `docs/00-project/glossary.md` |
-| Navigation map | `docs/00-project/00-map.md` |
-| CHANGELOG | `CHANGELOG.md` |
-| ADR directory | `docs/02-architecture/decisions/` |
-| Agent instructions | `docs/00-project/ai/agents/guides/CLAUDE.md` |
-| Agent persona | `docs/00-project/ai/agents/guides/AGENT.md` |
+| What                    | Path                                         |
+| ----------------------- | -------------------------------------------- |
+| RULES.md (Constitution) | `docs/00-project/RULES.md`                   |
+| Glossary                | `docs/00-project/glossary.md`                |
+| Navigation map          | `docs/00-project/00-map.md`                  |
+| CHANGELOG               | `CHANGELOG.md`                               |
+| ADR directory           | `docs/02-architecture/decisions/`            |
+| Agent instructions      | `docs/00-project/ai/agents/guides/CLAUDE.md` |
+| Agent persona           | `docs/00-project/ai/agents/guides/AGENT.md`  |
 
----
+______________________________________________________________________
 
 ## 12. Provider Documentation
 
 Locations:
+
 - Provider reference docs: `docs/04-reference/providers/{provider}/`
 - Pipeline specs and xwalks: `docs/04-reference/pipelines/{provider}/`
 - Operational playbooks: `docs/05-operations/runbooks/` (not 1:1 with providers)
 
 Each provider doc should cover:
+
 - API overview and base URL
 - Authentication requirements
 - Rate limiting
@@ -339,6 +344,6 @@ Each provider doc should cover:
 - Known limitations
 - VCR cassette locations
 
----
+______________________________________________________________________
 
 *This memory file is specific to py-doc-bot. For general project context see `agent-memory.md`.*

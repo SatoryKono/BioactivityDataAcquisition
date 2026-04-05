@@ -1,18 +1,21 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Политика именования сущностей
 
 *Синхронизировано с RULES.md v6.1 и ADR-024 | Последнее обновление: 2026-03-13*
 
----
+______________________________________________________________________
 
 ## 1. Общие принципы
 
@@ -22,27 +25,27 @@ Last verified: '2026-03-29'
 
 Согласно ADR-024, для обеспечения согласованности между провайдерами используются следующие канонические термины:
 
-| Концепт | Канонический термин | Примеры (ChEMBL, PubChem, PubMed) |
-| :--- | :--- | :--- |
-| Научная публикация | **Publication** | `ChemblPublication`, `PubMedPublication` |
-| Химическая структура | **Molecule** | `ChemblMolecule`, `PubchemMolecule` |
-| Биологическая мишень | **Target** | `ChemblTarget`, `UniprotTarget` |
-| Результат анализа | **Activity** | `ChemblActivity` |
+| Концепт              | Канонический термин | Примеры (ChEMBL, PubChem, PubMed)        |
+| :------------------- | :------------------ | :--------------------------------------- |
+| Научная публикация   | **Publication**     | `ChemblPublication`, `PubMedPublication` |
+| Химическая структура | **Molecule**        | `ChemblMolecule`, `PubchemMolecule`      |
+| Биологическая мишень | **Target**          | `ChemblTarget`, `UniprotTarget`          |
+| Результат анализа    | **Activity**        | `ChemblActivity`                         |
 
 ### 1.2. Две поверхности именования
 
 BioETL использует два согласованных, но не всегда одинаковых naming surface:
 
-| Поверхность | Назначение | Примеры |
-| :--- | :--- | :--- |
-| **Canonical domain names** | Domain entities, domain DTOs, часть domain schemas и терминология Ubiquitous Language | `PubchemMolecule`, `UniprotTarget`, `ChemblPublication` |
+| Поверхность                     | Назначение                                                                                   | Примеры                                                                                      |
+| :------------------------------ | :------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| **Canonical domain names**      | Domain entities, domain DTOs, часть domain schemas и терминология Ubiquitous Language        | `PubchemMolecule`, `UniprotTarget`, `ChemblPublication`                                      |
 | **Stable external identifiers** | CLI `--pipeline`, `pipeline.pipeline_name`, часть pipeline/transformer/schema public surface | `pubchem_compound`, `uniprot_protein`, `PubChemCompoundPipeline`, `UniProtProteinGoldSchema` |
 
 Правило по умолчанию: использовать canonical term. Исключения допустимы только
 для stable external/public surface и должны быть зафиксированы в
 `configs/naming_exceptions.yaml`.
 
----
+______________________________________________________________________
 
 ## 2. Правила именования по категориям
 
@@ -58,6 +61,7 @@ BioETL использует два согласованных, но не все�
 ### 2.2. Пайплайны (Pipelines)
 
 #### 2.2.1. Идентификаторы пайплайнов (Pipeline IDs)
+
 **Формат:** `{provider}_{entity}` (snake_case)
 **Используется в:** YAML конфигах (`pipeline_name`), CLI (`--pipeline`).
 
@@ -67,6 +71,7 @@ policy-backed external IDs, хотя domain использует `PubchemMolecul
 `UniprotTarget`.
 
 #### 2.2.2. Классы пайплайнов
+
 **Формат:** `{Provider}{EntitySurfaceTerm}Pipeline` (PascalCase)
 **Место:** `src/bioetl/application/pipelines/{provider}/`
 
@@ -88,6 +93,7 @@ policy-backed external IDs, хотя domain использует `PubchemMolecul
 ### 2.4. Схемы валидации (Pandera/PyArrow)
 
 #### 2.4.1. Pandera Schemas (Gold)
+
 **Формат:** `{Provider}{EntitySurfaceTerm}GoldSchema` (PascalCase)
 **Место:** `src/bioetl/domain/contracts/gold/`
 
@@ -96,26 +102,29 @@ policy-backed external IDs, хотя domain использует `PubchemMolecul
   если это зафиксировано в exception registry.
 
 #### 2.4.2. PyArrow Schemas (Silver)
+
 **Формат:** `CHEMBL-{CANONICAL-TERM}-SCHEMA` (UPPER-SNAKE-CASE)
 **Место:** `src/bioetl/infrastructure/schemas/silver.py`
 
----
+______________________________________________________________________
 
 ## 3. Таблицы и Файлы
 
 ### 3.1. Имена таблиц (Silver/Gold)
 
 **Формат:** `{provider}_{entity}` (snake_case)
+
 - Должны совпадать с идентификатором пайплайна.
 - **Пример**: `chembl_publication`.
 
 ### 3.2. Файлы конфигурации
 
 **Путь**: `configs/entities/{provider}/{entity}.yaml`
+
 - Имя файла должно совпадать с именем сущности (entity).
 - **Пример**: `configs/entities/chembl/publication.yaml`.
 
----
+______________________________________________________________________
 
 ## 4. Исключения (Naming Exceptions)
 
@@ -128,7 +137,7 @@ CLI/pipeline/schema surface, это должно быть оформлено и�
 
 Добавление нового исключения требует обоснования в PR и обновления этого файла.
 
----
+______________________________________________________________________
 
 ## 5. Связанные документы
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Pipeline: ChEMBL Activity
 
@@ -14,14 +17,14 @@ Last verified: '2026-03-29'
 
 ## Overview
 
-| Property           | Value                                    |
-| ------------------ | ---------------------------------------- |
-| **Pipeline Name**  | `chembl_activity`                        |
-| **Provider**       | ChEMBL                                   |
-| **Entity**         | Activity                                 |
+| Property           | Value                                   |
+| ------------------ | --------------------------------------- |
+| **Pipeline Name**  | `chembl_activity`                       |
+| **Provider**       | ChEMBL                                  |
+| **Entity**         | Activity                                |
 | **Configuration**  | `configs/entities/chembl/activity.yaml` |
-| **Primary Key**    | `activity_id`                            |
-| **Config Version** | 1.2.0                                    |
+| **Primary Key**    | `activity_id`                           |
+| **Config Version** | 1.2.0                                   |
 
 ## Description
 
@@ -49,10 +52,10 @@ The Activity entity contains **55 fields**. Key fields:
 
 ## Data Quality Rules
 
-| Rule              | Condition                           | Action                 |
-| ----------------- | ----------------------------------- | ---------------------- |
-| Positive value    | `standard_value > 0`                | Quarantine if violated |
-| Known type        | `standard_type` in known enum       | Warning if unknown     |
+| Rule              | Condition                            | Action                 |
+| ----------------- | ------------------------------------ | ---------------------- |
+| Positive value    | `standard_value > 0`                 | Quarantine if violated |
+| Known type        | `standard_type` in known enum        | Warning if unknown     |
 | Valid molecule ID | `molecule_id` matches `^CHEMBL\\d+$` | Quarantine if invalid  |
 
 ### Error Thresholds
@@ -64,11 +67,11 @@ The Activity entity contains **55 fields**. Key fields:
 
 ## Storage Layers
 
-| Layer  | Format       | Mode                   | Path Pattern                          |
-| ------ | ------------ | ---------------------- | ------------------------------------- |
-| Bronze | JSONL + Zstd | Append-only            | `data/output/bronze/chembl/activity/` |
-| Silver | Delta Lake   | Append                 | `data/output/silver/chembl/activity/` |
-| Gold   | Disabled in current config | `sink.gold.enabled: false` | — |
+| Layer  | Format                     | Mode                       | Path Pattern                          |
+| ------ | -------------------------- | -------------------------- | ------------------------------------- |
+| Bronze | JSONL + Zstd               | Append-only                | `data/output/bronze/chembl/activity/` |
+| Silver | Delta Lake                 | Append                     | `data/output/silver/chembl/activity/` |
+| Gold   | Disabled in current config | `sink.gold.enabled: false` | —                                     |
 
 ### Gold Layer Status
 
@@ -103,6 +106,6 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 | Data Quality      | `configs/entities/chembl/activity.yaml#quality`                   |
 | Silver Schema     | `src/bioetl/infrastructure/schemas/silver.py`                     |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 *See [full documentation in Russian](../providers/chembl/activity.md) for complete schema details, normalization rules, and data flow diagrams.*

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Cleanup Policy
 
@@ -113,10 +116,10 @@ This document defines deterministic cleanup rules and automation for removing ca
 
 ### 3.4. Quarantine (`common.quarantine`)
 
-| Parameter | Value                                |
-| --------- | ------------------------------------ |
-| Retention | 30 дней (local retention policy)     |
-| Triage    | Еженедельно                          |
+| Parameter | Value                                    |
+| --------- | ---------------------------------------- |
+| Retention | 30 дней (local retention policy)         |
+| Triage    | Еженедельно                              |
 | Purge     | `bioetl quarantine purge --pipeline ...` |
 
 ### 3.5. Logs and Metrics
@@ -136,14 +139,14 @@ All whitelist patterns **MUST** be in `.gitignore`.
 
 Основной путь очистки — цели в `Makefile`:
 
-| Command | Behavior |
-| --- | --- |
-| `make clean` | Удаляет Python-кэш, coverage-артефакты, build/dist |
-| `make clean-local-artifacts DRY_RUN=1` | Preview очистки локальных артефактов |
-| `make clean-local-artifacts` | Применяет локальную очистку (без удаления `.worktrees/.rollback`) |
-| `make clean-local-artifacts PURGE_WORKTREES=1` | Дополнительно очищает локальные `.worktrees/.rollback` |
-| `make clean-preflight DRY_RUN=1` | Preview preflight-очистки через `scripts/repo/preflight_cleanup.sh` |
-| `make clean-all` | `clean` + удаление логов/временных файлов |
+| Command                                        | Behavior                                                            |
+| ---------------------------------------------- | ------------------------------------------------------------------- |
+| `make clean`                                   | Удаляет Python-кэш, coverage-артефакты, build/dist                  |
+| `make clean-local-artifacts DRY_RUN=1`         | Preview очистки локальных артефактов                                |
+| `make clean-local-artifacts`                   | Применяет локальную очистку (без удаления `.worktrees/.rollback`)   |
+| `make clean-local-artifacts PURGE_WORKTREES=1` | Дополнительно очищает локальные `.worktrees/.rollback`              |
+| `make clean-preflight DRY_RUN=1`               | Preview preflight-очистки через `scripts/repo/preflight_cleanup.sh` |
+| `make clean-all`                               | `clean` + удаление логов/временных файлов                           |
 
 ### 4.3. Delta Lake VACUUM (MUST)
 
@@ -169,12 +172,12 @@ bioetl quarantine purge --pipeline chembl_activity
 
 ### 5.1. Post-Cleanup Validation
 
-| Check                     | Command                                                     |
-| ------------------------- | ----------------------------------------------------------- |
-| Tests pass                | `pytest -q` (without network)                               |
-| Smoke tests green         | `pytest tests/smoke/ -q`                                    |
-| Structure policy green    | `python3 scripts/repo/audit_root_cleanliness.py --strict-untracked` |
-| Smoke run                 | One pipeline, identical artifacts                           |
+| Check                  | Command                                                             |
+| ---------------------- | ------------------------------------------------------------------- |
+| Tests pass             | `pytest -q` (without network)                                       |
+| Smoke tests green      | `pytest tests/smoke/ -q`                                            |
+| Structure policy green | `python3 scripts/repo/audit_root_cleanliness.py --strict-untracked` |
+| Smoke run              | One pipeline, identical artifacts                                   |
 
 ### 5.2. Structural Verification
 
@@ -254,11 +257,11 @@ Enforcement:
 
 ### 7.4. Scheduled Jobs (SHOULD)
 
-| Job | Schedule | Action |
-| --- | --- | --- |
-| `root-hygiene` | On PR/Push | Проверка root allowlist |
-| `no-pyc-check` | On PR/Push | Блокировка `*.pyc` / `__pycache__` |
-| `preflight cleanup` | On demand | Локальная/операционная очистка перед релизом |
+| Job                 | Schedule   | Action                                       |
+| ------------------- | ---------- | -------------------------------------------- |
+| `root-hygiene`      | On PR/Push | Проверка root allowlist                      |
+| `no-pyc-check`      | On PR/Push | Блокировка `*.pyc` / `__pycache__`           |
+| `preflight cleanup` | On demand  | Локальная/операционная очистка перед релизом |
 
 ## 8. Disaster Recovery Cleanup
 
@@ -318,9 +321,9 @@ Production-like local cleanup SHOULD run inside a change window with a backup or
 restore point available. Repository cleanup is manual/operator-driven in the
 current Local-Only runtime; no CI/CD-only cleanup path is required.
 
-| Action           | Approval Required           |
-| ---------------- | --------------------------- |
-| VACUUM           | No (automated)              |
-| Quarantine purge | No (automated, >30 days)    |
-| Bronze archive   | No (local retention policy) |
+| Action           | Approval Required              |
+| ---------------- | ------------------------------ |
+| VACUUM           | No (automated)                 |
+| Quarantine purge | No (automated, >30 days)       |
+| Bronze archive   | No (local retention policy)    |
 | Manual delete    | Yes (change window / incident) |

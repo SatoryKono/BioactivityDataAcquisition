@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-31'
----
+  Last verified: '2026-03-31'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Assay
 
@@ -14,7 +17,7 @@ Last verified: '2026-03-31'
 **Провайдер:** `chembl`
 **Сущность:** `assay`
 
----
+______________________________________________________________________
 
 ## 1. Что делает пайплайн
 
@@ -27,7 +30,7 @@ Silver-запись `Assay`. Источник поведения для теку
 - `src/bioetl/infrastructure/schemas/silver_chembl_core.py`
 - `src/bioetl/domain/schemas/chembl/assay.py`
 
----
+______________________________________________________________________
 
 ## 2. Конфигурация
 
@@ -57,7 +60,7 @@ Silver-запись `Assay`. Источник поведения для теку
   - `confidence_score in {8, 9}`
   - `relationship_type = D`
 
----
+______________________________________________________________________
 
 ## 3. Silver surface
 
@@ -65,17 +68,17 @@ Silver-запись `Assay`. Источник поведения для теку
 
 В текущем коде и схемах для Silver жёстко отражены как не-null:
 
-| Поле | Где закреплено |
-|------|----------------|
-| `assay_id` | YAML required + Arrow + Pandera |
-| `assay_type` | YAML required + Arrow + Pandera |
-| `description` | YAML required + Arrow + Pandera |
-| `target_id` | YAML required + Arrow + Pandera |
-| `publication_id` | YAML required + Arrow + Pandera |
-| `bao_format` | YAML required + Arrow + Pandera |
-| `assay_type_description` | YAML required + Pandera |
-| `relationship_type` | YAML required + Pandera |
-| `confidence_score` | YAML required + Pandera |
+| Поле                     | Где закреплено                  |
+| ------------------------ | ------------------------------- |
+| `assay_id`               | YAML required + Arrow + Pandera |
+| `assay_type`             | YAML required + Arrow + Pandera |
+| `description`            | YAML required + Arrow + Pandera |
+| `target_id`              | YAML required + Arrow + Pandera |
+| `publication_id`         | YAML required + Arrow + Pandera |
+| `bao_format`             | YAML required + Arrow + Pandera |
+| `assay_type_description` | YAML required + Pandera         |
+| `relationship_type`      | YAML required + Pandera         |
+| `confidence_score`       | YAML required + Pandera         |
 
 ### 3.2. Дополнительные бизнес-поля
 
@@ -113,23 +116,23 @@ Silver-запись `Assay`. Источник поведения для теку
 Документация не фиксирует буквальную формулу `entity_id`; текущая реализация
 делегирует вычисление identity/hash в общий базовый transformer/service слой.
 
----
+______________________________________________________________________
 
 ## 4. Как трансформер строит запись
 
 `src/bioetl/application/pipelines/chembl/assay_transformer.py` делает следующее:
 
 1. Поддерживает legacy alias: если пришёл `assay_chembl_id`, он подставляется в `assay_id`.
-2. Маппит плоские поля через declarative field groups.
-3. Разворачивает вложенный `variant_sequence` через `flatten_nested_dict()`.
-4. Нормализует `assay_tax_id -> assay_taxonomy_id` и `variant_tax_id -> variant_taxonomy_id`.
-5. Канонизирует `bao_format` в форму `BAO_########`.
-6. Нормализует `bao_label` по evidence-backed BAO mapping, а при неизвестном формате делает trim/lowercase passthrough.
-7. Нормализует `assay_organism` как display field: trim, whitespace collapse, удаление trailing strain annotations.
-8. Сериализует `variant_sequence`, `assay_classifications`, `assay_parameters` в JSON-строки.
-9. Передаёт итоговые business fields в базовый ChEMBL transformer для вычисления identity, content hash и system fields.
+1. Маппит плоские поля через declarative field groups.
+1. Разворачивает вложенный `variant_sequence` через `flatten_nested_dict()`.
+1. Нормализует `assay_tax_id -> assay_taxonomy_id` и `variant_tax_id -> variant_taxonomy_id`.
+1. Канонизирует `bao_format` в форму `BAO_########`.
+1. Нормализует `bao_label` по evidence-backed BAO mapping, а при неизвестном формате делает trim/lowercase passthrough.
+1. Нормализует `assay_organism` как display field: trim, whitespace collapse, удаление trailing strain annotations.
+1. Сериализует `variant_sequence`, `assay_classifications`, `assay_parameters` в JSON-строки.
+1. Передаёт итоговые business fields в базовый ChEMBL transformer для вычисления identity, content hash и system fields.
 
----
+______________________________________________________________________
 
 ## 5. Валидация
 
@@ -157,7 +160,7 @@ Silver Pandera schema находится в
 - `relationship_type`
 - `confidence_score`
 
----
+______________________________________________________________________
 
 ## 6. Gold-поведение
 
@@ -170,21 +173,21 @@ Gold-отбор для текущего pipeline задаётся исключи
 Если эти значения меняются, source of truth находится в
 `configs/entities/chembl/assay.yaml`, а не в этой странице.
 
----
+______________________________________________________________________
 
 ## 7. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/assay.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
-| Сущность | `src/bioetl/domain/entities/chembl_activity.py` |
-| Arrow schema | `src/bioetl/infrastructure/schemas/silver_chembl_core.py` |
-| Pandera schema | `src/bioetl/domain/schemas/chembl/assay.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
-| Gold contract export | `docs/04-reference/contracts/gold/chembl_assay_v1.0.json` |
+| Компонент            | Путь                                                           |
+| -------------------- | -------------------------------------------------------------- |
+| Конфигурация         | `configs/entities/chembl/assay.yaml`                           |
+| Трансформер          | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
+| Сущность             | `src/bioetl/domain/entities/chembl_activity.py`                |
+| Arrow schema         | `src/bioetl/infrastructure/schemas/silver_chembl_core.py`      |
+| Pandera schema       | `src/bioetl/domain/schemas/chembl/assay.py`                    |
+| Pipeline defs        | `src/bioetl/application/pipelines/chembl/_pipelines.py`        |
+| Gold contract export | `docs/04-reference/contracts/gold/chembl_assay_v1.0.json`      |
 
----
+______________________________________________________________________
 
 ## 8. CLI
 
@@ -197,20 +200,20 @@ bioetl run --pipeline chembl_assay --input-csv data/input/assay.csv
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [chembl_assay_v1.0.json](../../contracts/gold/chembl_assay_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [chembl_assay_v1.0.json](../../contracts/gold/chembl_assay_v1.0.json)                    |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Runtime surface закреплён в `Конфигурация`, `Silver surface`, `Gold-поведение` |
-| Contract linkage | Pass | [chembl_assay_v1.0.json](../../contracts/gold/chembl_assay_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                 |
+| ----------------- | ------ | ---------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Runtime alignment | Pass   | Runtime surface закреплён в `Конфигурация`, `Silver surface`, `Gold-поведение`           |
+| Contract linkage  | Pass   | [chembl_assay_v1.0.json](../../contracts/gold/chembl_assay_v1.0.json)                    |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                    |
 
 ## API Compliance
 

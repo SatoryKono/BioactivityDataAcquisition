@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.1.0
 Status: superseded
 Class: internal
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-01'
----
+  Last verified: '2026-04-01'
+
+______________________________________________________________________
 
 # D-01 Governance & Style Guide документации BioETL
 

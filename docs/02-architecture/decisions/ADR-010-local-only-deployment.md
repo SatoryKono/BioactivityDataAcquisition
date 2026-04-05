@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-01'
----
+  Last verified: '2026-04-01'
+
+______________________________________________________________________
 
 # ADR-010: Local-Only Deployment Strategy
 
@@ -19,26 +22,31 @@ Last verified: '2026-04-01'
 ## Context
 
 BioETL изначально проектировался с поддержкой облачной инфраструктуры:
+
 - S3 для хранения Bronze/Silver/Gold слоёв
 - Redis для распределённых блокировок
 - Prefect для оркестрации пайплайнов
 
 Однако анализ реальных сценариев использования показал, что:
+
 1. Проект используется преимущественно для локальной разработки и исследований
-2. Облачное развёртывание не планируется в обозримом будущем
-3. Поддержка облачной инфраструктуры добавляет значительную сложность
-4. Зависимости от внешних сервисов усложняют локальную разработку
+1. Облачное развёртывание не планируется в обозримом будущем
+1. Поддержка облачной инфраструктуры добавляет значительную сложность
+1. Зависимости от внешних сервисов усложняют локальную разработку
 
 ## Decision
 
 Переход на **исключительно локальное развертывание** с использованием:
+
 - **Локальная файловая система** для всех слоёв данных (Bronze, Silver, Gold)
 - **In-memory блокировки** (MemoryLock) вместо Redis
 - **Локальные checkpoints** вместо S3
 - **CLI-based execution** вместо Prefect orchestration
 
 ### Strict Single Instance Constraint
+
 Система спроектирована как **Single Instance Application**.
+
 - **ЗАПРЕЩЕНО** запускать несколько экземпляров одного пайплайна одновременно.
 - **ЗАПРЕЩЕНО** горизонтальное масштабирование (Horizontal Scaling).
 - **ОТКАЗ ОТ REDIS**: Использование Redis Lock и распределенных блокировок **ЗАПРЕЩЕНО**.
@@ -49,16 +57,17 @@ BioETL изначально проектировался с поддержкой
 
 ### 1. Упрощение архитектуры
 
-| До | После |
-|---|---|
-| S3 + boto3 | Локальная ФС (pathlib) |
-| Redis + aioredis | MemoryLock |
-| Prefect + tasks | CLI + PipelineRunner |
-| Docker Compose (minio, redis) | Python venv только |
+| До                            | После                  |
+| ----------------------------- | ---------------------- |
+| S3 + boto3                    | Локальная ФС (pathlib) |
+| Redis + aioredis              | MemoryLock             |
+| Prefect + tasks               | CLI + PipelineRunner   |
+| Docker Compose (minio, redis) | Python venv только     |
 
 ### 2. Уменьшение зависимостей
 
 Удалены зависимости:
+
 - `boto3`, `boto3-stubs` (AWS SDK)
 - `redis`, `aioredis` (Redis client)
 - `prefect` (Workflow orchestration)
@@ -74,6 +83,7 @@ BioETL изначально проектировался с поддержкой
 ### 4. Достаточность для use cases
 
 Локальный запуск полностью покрывает:
+
 - Исследования и прототипирование
 - Разовые загрузки данных
 - Локальную аналитику
@@ -88,8 +98,8 @@ BioETL изначально проектировался с поддержкой
 writer = BronzeWriter(
     bucket="bronze-bucket",
     endpoint_url="http://minio:9000",
-    access-key="...",
-    secret-key="..."
+    access - key="...",
+    secret - key="...",
 )
 
 # Стало
@@ -100,7 +110,7 @@ writer = BronzeWriter(base_path=Path("data/output/bronze"))
 
 ```python
 # Было
-lock = RedisDistributedLock(redis-client)
+lock = RedisDistributedLock(redis - client)
 
 # Стало
 lock = MemoryLock()
@@ -110,14 +120,15 @@ lock = MemoryLock()
 
 Хотя MemoryLock работает только в пределах одного процесса, он реализует **полный функционал LockPort**:
 
-| Функционал | Реализация | Файл:строки |
-|------------|------------|-------------|
-| **TTL-based expiration** | `_ttl_checker_loop()` — фоновая задача проверяет и освобождает просроченные блокировки | `memory_lock.py:43-64` |
-| **Heartbeat** | `heartbeat()` — продлевает TTL блокировки на original_ttl | `memory_lock.py:176-204` |
-| **Safety Guard** | `validate_owner()` — проверяет владельца перед записью в storage | `memory_lock.py:206-238` |
-| **Graceful Shutdown** | `aclose()` — отменяет TTL checker и освобождает все блокировки | `memory_lock.py:240-256` |
+| Функционал               | Реализация                                                                             | Файл:строки              |
+| ------------------------ | -------------------------------------------------------------------------------------- | ------------------------ |
+| **TTL-based expiration** | `_ttl_checker_loop()` — фоновая задача проверяет и освобождает просроченные блокировки | `memory_lock.py:43-64`   |
+| **Heartbeat**            | `heartbeat()` — продлевает TTL блокировки на original_ttl                              | `memory_lock.py:176-204` |
+| **Safety Guard**         | `validate_owner()` — проверяет владельца перед записью в storage                       | `memory_lock.py:206-238` |
+| **Graceful Shutdown**    | `aclose()` — отменяет TTL checker и освобождает все блокировки                         | `memory_lock.py:240-256` |
 
 **Конфигурация по умолчанию** (из `PipelineSettings`):
+
 - `heartbeat_interval = 30s` (см. `config.py:238`)
 - `effective_lock_ttl = heartbeat_interval * 3 = 90s`
 - TTL check interval = 1s
@@ -139,6 +150,7 @@ await lock.release(key="pipeline:chembl", owner_id=run_id)
 ```
 
 **Ограничения:**
+
 - Не защищает от гонок между процессами (by design)
 - Требует single-instance deployment (см. Strict Single Instance Constraint)
 
@@ -146,10 +158,7 @@ await lock.release(key="pipeline:chembl", owner_id=run_id)
 
 ```python
 # Было
-checkpoint = S3Checkpoint(
-    bucket="checkpoints",
-    endpoint_url="..."
-)
+checkpoint = S3Checkpoint(bucket="checkpoints", endpoint_url="...")
 
 # Стало
 checkpoint = LocalCheckpoint(base_path=Path("data/output/checkpoints"))
@@ -163,6 +172,7 @@ class Settings:
     aws: AWSSettings
     s3: S3Settings
     redis: RedisSettings
+
 
 # Стало
 class Settings:
@@ -178,22 +188,23 @@ class Settings:
 ### Positive
 
 1. **Простота**: Меньше кода, меньше конфигурации, меньше точек отказа
-2. **Портативность**: Работает на любой машине с Python 3.11+
-3. **Тестируемость**: Unit тесты работают без внешних сервисов
-4. **Быстрый старт**: Новые разработчики могут начать работу мгновенно
+1. **Портативность**: Работает на любой машине с Python 3.11+
+1. **Тестируемость**: Unit тесты работают без внешних сервисов
+1. **Быстрый старт**: Новые разработчики могут начать работу мгновенно
 
 ### Negative
 
 1. **Нет распределённого запуска**: Только один процесс может работать с данными
-2. **Нет облачного масштабирования**: Ограничено локальным диском
-3. **Нет отказоустойчивости**: Нет репликации данных
+1. **Нет облачного масштабирования**: Ограничено локальным диском
+1. **Нет отказоустойчивости**: Нет репликации данных
 
 ### Mitigation
 
 При необходимости облачного развёртывания в будущем:
+
 1. Порты (Protocols) в domain слое остались неизменными
-2. **Однако**, внедрение распределенных блокировок (Redis) потребует пересмотра этого ADR и явного одобрения, так как текущая стратегия — жесткий Local-Only.
-3. Hexagonal архитектура позволяет добавлять адаптеры, но это **ЗАПРЕЩЕНО** текущей политикой.
+1. **Однако**, внедрение распределенных блокировок (Redis) потребует пересмотра этого ADR и явного одобрения, так как текущая стратегия — жесткий Local-Only.
+1. Hexagonal архитектура позволяет добавлять адаптеры, но это **ЗАПРЕЩЕНО** текущей политикой.
 
 ## References
 
@@ -207,10 +218,11 @@ class Settings:
 ## Rollout
 
 При обновлении с предыдущих версий:
+
 1. Удалить Docker Compose конфигурацию (minio, redis)
-2. Обновить переменные окружения (удалить AWS-*, REDIS-*)
-3. Переустановить зависимости: `pip install -e .[dev]`
-4. Перенести данные из S3 в локальную директорию `data/`
+1. Обновить переменные окружения (удалить AWS-*, REDIS-*)
+1. Переустановить зависимости: `pip install -e .[dev]`
+1. Перенести данные из S3 в локальную директорию `data/`
 
 ## Migration Notes
 
@@ -228,13 +240,13 @@ layout.
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-010-local-only-deployment.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `declared` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status     | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ---------- | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass`     | `ADR-010-local-only-deployment.md`   |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass`     | `Accepted`                           |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `declared` | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass`     | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass`     | `References`                         |
 
 ## Rollback
 

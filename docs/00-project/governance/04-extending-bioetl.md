@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Extending BioETL: Providers and Pipelines
 
@@ -15,32 +18,35 @@ Last verified: '2026-03-29'
 This document is the governance playbook for extending BioETL.
 
 Canonical guides:
+
 - [Add a new provider](../../03-guides/add-new-source.md)
 - [Add pipeline for existing provider](../../03-guides/add-pipeline-existing-source.md)
 - [Pipeline configuration](../../03-guides/pipeline-configuration.md)
 
 Canonical templates:
+
 - [Unified entity config template](../../04-reference/templates/config.yaml.tpl)
 - [Provider source config template](../../04-reference/templates/provider.yaml.tpl)
 - [Adapter template](../../04-reference/templates/source_adapter.py.tpl)
 - [Transformer template](../../04-reference/templates/pipeline.py.tpl)
 - [Pipeline factory registration template](../../04-reference/templates/factory.py.tpl)
 
----
+______________________________________________________________________
 
 ## 1. Extension Paths
 
 Choose one path:
 
 1. New provider + first entity pipeline.
-2. New entity pipeline for existing provider.
+1. New entity pipeline for existing provider.
 
 Both paths require:
+
 - config updates under `configs/`
 - composition registration updates
 - tests + docs sync
 
----
+______________________________________________________________________
 
 ## 2. Mandatory Artifacts
 
@@ -59,11 +65,12 @@ Both paths require:
 - `PIPELINE_CONFIGS` entry in `pipeline/registry.py`
 - Silver schema + Gold contract exports
 
----
+______________________________________________________________________
 
 ## 3. Governance Rules
 
 MUST:
+
 - follow snake_case naming for provider/entity/pipeline IDs
 - keep unified entity config sections complete (`pipeline/schema/quality/filters/contracts`)
 - keep provider/entity values consistent between top-level and `pipeline.*`
@@ -71,11 +78,12 @@ MUST:
 - register pipelines declaratively through `PIPELINE_CONFIGS`
 
 MUST NOT:
+
 - add legacy config-tree folders for pipelines/sources/schemas in the config root
 - add `BasePipeline` subclasses for standard provider pipelines (use `GenericPipeline` + transformer)
 - keep secrets in YAML/config files
 
----
+______________________________________________________________________
 
 ## 4. Required Validation
 
@@ -89,7 +97,7 @@ uv run python -m pytest tests/architecture/test_source_config_usage.py -q
 
 Then run targeted unit tests for changed provider/pipeline.
 
----
+______________________________________________________________________
 
 ## 5. Review Checklist
 

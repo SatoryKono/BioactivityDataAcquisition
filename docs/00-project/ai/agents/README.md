@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-04'
----
+  Last verified: '2026-04-04'
+
+______________________________________________________________________
 
 # Agent Catalog — BioETL (Mirror)
 
@@ -27,16 +30,16 @@ Last verified: '2026-04-04'
 
 ## BioETL Core (8 активных агентов)
 
-| Agent | Role | Primary Responsibility |
-|-------|------|------------------------|
-| `py-audit-bot` | Compliance Gate | Code/architecture audit, RULES.md compliance |
-| `py-plan-bot` | Architect | Task planning, RF-* decomposition |
-| `py-test-bot` | Tester | Tests (baseline/final/retest), coverage, VCR |
-| `py-config-bot` | Config Engineer | YAML configs (pipeline/DQ/filter) |
-| `py-debug-bot` | Troubleshooter | RCA, bug fixes, regression debugging |
-| `py-doc-bot` | Technical Writer | Docs, ADR, CHANGELOG, Mermaid diagrams |
-| `py-test-swarm` | QA Orchestrator | Hierarchical testing (L1->L2->L3) |
-| `py-review-orchestrator` | Review Lead | Code review (S1-S8 stages) |
+| Agent                    | Role             | Primary Responsibility                       |
+| ------------------------ | ---------------- | -------------------------------------------- |
+| `py-audit-bot`           | Compliance Gate  | Code/architecture audit, RULES.md compliance |
+| `py-plan-bot`            | Architect        | Task planning, RF-\* decomposition           |
+| `py-test-bot`            | Tester           | Tests (baseline/final/retest), coverage, VCR |
+| `py-config-bot`          | Config Engineer  | YAML configs (pipeline/DQ/filter)            |
+| `py-debug-bot`           | Troubleshooter   | RCA, bug fixes, regression debugging         |
+| `py-doc-bot`             | Technical Writer | Docs, ADR, CHANGELOG, Mermaid diagrams       |
+| `py-test-swarm`          | QA Orchestrator  | Hierarchical testing (L1->L2->L3)            |
+| `py-review-orchestrator` | Review Lead      | Code review (S1-S8 stages)                   |
 
 ## Related Files
 

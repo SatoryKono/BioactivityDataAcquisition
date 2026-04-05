@@ -41,4 +41,3 @@ jobs:
 
       - name: Validate root-level allowlist
         run: python scripts/repo/audit_root_cleanliness.py
-

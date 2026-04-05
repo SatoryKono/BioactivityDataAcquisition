@@ -22,23 +22,23 @@ classDiagram
             +fetch(query: Query) AsyncIterator~BronzeRecord~
             +health_check() HealthStatus
             +aclose() None
-            
-            
-            
-            
-            
+
+
+
+
+
         }
 
         class FilterableDataSourcePort {
             <<Protocol>>
             +fetch_filtered(filters: FilterConfig) AsyncIterator~BronzeRecord~
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
         }
 
         class StoragePort {
@@ -60,9 +60,9 @@ classDiagram
             +heartbeat(key, owner_id, exclusive) bool
             +validate_owner(key, owner_id) bool
             +aclose() None
-            
-            
-            
+
+
+
         }
 
         class CheckpointPort {
@@ -71,10 +71,10 @@ classDiagram
             +load(key) CheckpointState?
             +list_all() list~str~
             +delete(key) None
-            
-            
-            
-            
+
+
+
+
         }
 
         class QuarantinePort {
@@ -83,10 +83,10 @@ classDiagram
             +inspect(pipeline, limit) list~QuarantineRecord~
             +get_stats(pipeline) QuarantineStats
             +aclose() None
-            
-            
-            
-            
+
+
+
+
         }
 
         class MetricsPort {
@@ -95,22 +95,22 @@ classDiagram
             +increment_counter(name, labels, value) None
             +set_gauge(name, value, labels) None
             +close() None
-            
-            
-            
-            
+
+
+
+
         }
 
         class TracingPort {
             <<Protocol>>
             +get_tracer(name) Tracer
             +close() None
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
         }
 
         class LoggerPort {
@@ -121,8 +121,8 @@ classDiagram
             +error(msg, **kwargs) None
             +debug(msg, **kwargs) None
             +exception(msg, **kwargs) None
-            
-            
+
+
         }
 
         class CircuitBreakerPort {
@@ -131,10 +131,10 @@ classDiagram
             +get_failure_count() int
             +call(func, *args) T
             +reset() None
-            
-            
-            
-            
+
+
+
+
         }
 
         class RateLimiterPort {
@@ -142,11 +142,11 @@ classDiagram
             +acquire() None
             +try_acquire() bool
             +available_tokens() int
-            
-            
-            
-            
-            
+
+
+
+
+
         }
     }
 
@@ -158,9 +158,9 @@ classDiagram
             +run_id: RunID
             +run_type: RunType
             +ingestion_ts: datetime
-            
-            
-            
+
+
+
         }
 
         class Activity {
@@ -172,7 +172,7 @@ classDiagram
             +standard_value: float?
             +standard_units: str?
             +pchembl_value: float?
-            
+
         }
 
         class Molecule {
@@ -183,8 +183,8 @@ classDiagram
             +inchi_key: str?
             +molecular_weight: float?
             +parent_molecule_id: str?
-            
-            
+
+
         }
 
         class Assay {
@@ -193,10 +193,10 @@ classDiagram
             +description: str?
             +target_id: str?
             +document_id: str?
-            
-            
-            
-            
+
+
+
+
         }
 
         class Target {
@@ -206,9 +206,9 @@ classDiagram
             +organism: str?
             +tax_id: int?
             +uniprot_accessions: list~str~?
-            
-            
-            
+
+
+
         }
 
         class PublicationEntityBase {
@@ -228,11 +228,11 @@ classDiagram
             +publication_type: str
             +volume: str?
             +src_id: int?
-            
-            
-            
-            
-            
+
+
+
+
+
         }
     }
 
@@ -243,10 +243,10 @@ classDiagram
             +entity: str
             +table_config: TableConfig
             +dq_config: DQConfig
-            
-            
-            
-            
+
+
+
+
         }
 
         class RuntimeConfig {
@@ -256,9 +256,9 @@ classDiagram
             +resume: bool
             +dry_run: bool
             +filters: FilterConfig?
-            
-            
-            
+
+
+
         }
 
         class DQConfig {
@@ -266,11 +266,11 @@ classDiagram
             +soft_fail_threshold: float = 0.05
             +hard_fail_threshold: float = 0.20
             +strict_validation: bool = False
-            
-            
-            
-            
-            
+
+
+
+
+
         }
 
         class TableConfig {
@@ -281,8 +281,8 @@ classDiagram
             +silver_write_mode: SilverWriteMode
             +gold_write_mode: GoldWriteMode
             +partition_cols: tuple~str~
-            
-            
+
+
         }
     }
 
@@ -292,11 +292,11 @@ classDiagram
             INCREMENTAL
             BACKFILL
             REBUILD
-            
-            
-            
-            
-            
+
+
+
+
+
         }
 
         class SilverWriteMode {
@@ -304,11 +304,11 @@ classDiagram
             MERGE
             APPEND
             DELETE
-            
-            
-            
-            
-            
+
+
+
+
+
         }
 
         class GoldWriteMode {
@@ -316,11 +316,11 @@ classDiagram
             APPEND
             OVERWRITE
             SCD2
-            
-            
-            
-            
-            
+
+
+
+
+
         }
 
         class CircuitState {
@@ -328,11 +328,11 @@ classDiagram
             CLOSED = 0
             HALF_OPEN = 1
             OPEN = 2
-            
-            
-            
-            
-            
+
+
+
+
+
         }
     }
 

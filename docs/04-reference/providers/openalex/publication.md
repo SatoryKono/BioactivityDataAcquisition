@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: OpenAlex Publication
 
@@ -15,7 +18,7 @@ Last verified: '2026-03-30'
 **Сущность:** `publication` (API-термин: `work`)
 **Версия схемы:** 1.2.0
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 1. Описание
 
@@ -33,7 +36,7 @@ Last verified: '2026-03-30'
 - **Work** — термин OpenAlex API
 - Оба термина обозначают одну сущность — научную публикацию
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
@@ -57,10 +60,10 @@ Last verified: '2026-03-30'
 
 ### Даты и тип
 
-| Поле               | Тип           | Описание                                                     |
-| ------------------ | ------------- | ------------------------------------------------------------ |
-| `publication_year` | `int \| None` | Год публикации (валидируется: 1500-2100)                     |
-| `publication_date` | `str \| None` | Дата публикации (YYYY-MM-DD)                                 |
+| Поле               | Тип           | Описание                                                             |
+| ------------------ | ------------- | -------------------------------------------------------------------- |
+| `publication_year` | `int \| None` | Год публикации (валидируется: 1500-2100)                             |
+| `publication_date` | `str \| None` | Дата публикации (YYYY-MM-DD)                                         |
 | `publication_type` | `str \| None` | Нормализованный тип OpenAlex (`journal-article`, `preprint`, и т.д.) |
 
 ### Open Access
@@ -72,33 +75,33 @@ Last verified: '2026-03-30'
 
 ### Авторы и идентификаторы
 
-| Поле                | Тип           | Описание                                                     |
-| ------------------- | ------------- | ------------------------------------------------------------ |
-| `author_keys`       | `str \| None` | Нормализованные ключи авторов (`Surname-F`), разделённые `\|`|
-| `author_openalex_ids` | `str \| None` | JSON-массив OpenAlex author IDs                            |
-| `author_orcids`     | `str \| None` | JSON-массив ORCID идентификаторов                            |
-| `affiliation_list`  | `str \| None` | JSON-массив аффилиаций                                       |
+| Поле                  | Тип           | Описание                                                      |
+| --------------------- | ------------- | ------------------------------------------------------------- |
+| `author_keys`         | `str \| None` | Нормализованные ключи авторов (`Surname-F`), разделённые `\|` |
+| `author_openalex_ids` | `str \| None` | JSON-массив OpenAlex author IDs                               |
+| `author_orcids`       | `str \| None` | JSON-массив ORCID идентификаторов                             |
+| `affiliation_list`    | `str \| None` | JSON-массив аффилиаций                                        |
 
 ### Метрики и классификация
 
-| Поле                | Тип           | Описание                                  |
-| ------------------- | ------------- | ----------------------------------------- |
-| `citations_received`| `int \| None` | Количество цитирований                    |
-| `publication_class` | `str`         | Класс публикации: EXP, REV, PEER         |
-| `publication_type`  | `str \| None` | Сырой тип OpenAlex (article, book, и т.д.) |
-| `publication_type_unified` | `str` | Унифицированный тип: `PUBLICATION`, `PREPRINT`, `DATASET`, `OTHER` |
-| `subject_topics`    | `str \| None` | JSON-массив тем (4-уровневая иерархия)    |
-| `primary_topic`     | `str \| None` | Основная тема                             |
-| `language`          | `str \| None` | Код языка публикации                      |
+| Поле                       | Тип           | Описание                                                           |
+| -------------------------- | ------------- | ------------------------------------------------------------------ |
+| `citations_received`       | `int \| None` | Количество цитирований                                             |
+| `publication_class`        | `str`         | Класс публикации: EXP, REV, PEER                                   |
+| `publication_type`         | `str \| None` | Сырой тип OpenAlex (article, book, и т.д.)                         |
+| `publication_type_unified` | `str`         | Унифицированный тип: `PUBLICATION`, `PREPRINT`, `DATASET`, `OTHER` |
+| `subject_topics`           | `str \| None` | JSON-массив тем (4-уровневая иерархия)                             |
+| `primary_topic`            | `str \| None` | Основная тема                                                      |
+| `language`                 | `str \| None` | Код языка публикации                                               |
 
 ### Метаданные резолюции
 
 | Поле             | Тип           | Описание                                                |
 | ---------------- | ------------- | ------------------------------------------------------- |
 | `_lookup_method` | `str`         | Метод резолюции: `doi`, `title_fallback`, `title_only`  |
-| `_original_id`  | `str \| None` | Оригинальный DOI из входного CSV (для fallback записей) |
+| `_original_id`   | `str \| None` | Оригинальный DOI из входного CSV (для fallback записей) |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 3. Трансформация
 
@@ -145,7 +148,7 @@ entity_id = f"openalex:{openalex_id}"
 - Исключаются lineage-поля (`_run_id`, `_ingestion_ts`, etc.)
 - None-значения исключаются из хэша
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 4. Особенности
 
@@ -214,7 +217,7 @@ input_filter:
   fallback_column: "title"  # Поиск по заголовку при неудаче DOI
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 5. Использование CLI
 
@@ -251,7 +254,7 @@ doi,title
 | ----------------------- | --------------------- | ----------- |
 | `BIOETL_OPENALEX_EMAIL` | Email для polite pool | Да          |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 6. Health Check
 
@@ -263,7 +266,7 @@ OpenAlex adapter реализует health check через `/works?per-page=1`:
 | `DEGRADED`  | Ответ 200 за > 5 сек     |
 | `UNHEALTHY` | Ошибка или не-200 статус |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 7. Error Handling
 
@@ -283,13 +286,13 @@ OpenAlex adapter реализует health check через `/works?per-page=1`:
 
 ### Data Quality
 
-| Условие                 | Поведение                 |
-| ----------------------- | ------------------------- |
-| Missing openalex_id     | Skip record (log warning) |
-| Invalid year range      | Set publication_year = None      |
-| Empty title in fallback | Skip title search         |
+| Условие                 | Поведение                   |
+| ----------------------- | --------------------------- |
+| Missing openalex_id     | Skip record (log warning)   |
+| Invalid year range      | Set publication_year = None |
+| Empty title in fallback | Skip title search           |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 8. Gold Filters
 
@@ -304,14 +307,14 @@ gold_filters:
       max: 2050
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 9. Связанные файлы
 
 | Компонент              | Путь                                                       |
 | ---------------------- | ---------------------------------------------------------- |
-| Конфигурация пайплайна | `configs/entities/openalex/publication.yaml`              |
-| Конфигурация источника | `configs/providers/openalex.yaml`                            |
+| Конфигурация пайплайна | `configs/entities/openalex/publication.yaml`               |
+| Конфигурация источника | `configs/providers/openalex.yaml`                          |
 | Трансформер            | `src/bioetl/application/pipelines/openalex/transformer.py` |
 | Экстракторы            | `src/bioetl/application/pipelines/openalex/extractors.py`  |
 | Адаптер                | `src/bioetl/infrastructure/adapters/openalex/client.py`    |
@@ -319,7 +322,7 @@ gold_filters:
 | Domain Entity          | `src/bioetl/domain/entities/openalex.py`                   |
 | Gold Schema            | `src/bioetl/domain/schemas/openalex/publication.py`        |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 10. Примеры данных
 
@@ -416,7 +419,7 @@ gold_filters:
 }
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 11. Тестирование
 
@@ -447,7 +450,7 @@ gold_filters:
 }
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 12. Архитектура
 
@@ -497,28 +500,28 @@ Silver → GoldWriter (validated)
     └─ Apply gold_filters, export CSV
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [openalex_publication_v1.0.json](../../contracts/gold/openalex_publication_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [openalex_publication_v1.0.json](../../contracts/gold/openalex_publication_v1.0.json)    |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Описание`, `Трансформация`, `Data Flow` |
-| Contract linkage | Pass | [openalex_publication_v1.0.json](../../contracts/gold/openalex_publication_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                             |
+| ----------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`             |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Описание`, `Трансформация`, `Data Flow` |
+| Contract linkage  | Pass   | [openalex_publication_v1.0.json](../../contracts/gold/openalex_publication_v1.0.json)                |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## API Compliance
 

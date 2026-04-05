@@ -22,9 +22,9 @@ classDiagram
         +_dq_warn: bool
         +_dq_error: bool
         +\_\_post_init\_\_()
-        
-        
-        
+
+
+
     }
 
     class Bioactivity {
@@ -49,16 +49,16 @@ classDiagram
         RAW
         NORMALIZED
         VALIDATED
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 
     class PublicationBase {
@@ -71,11 +71,11 @@ classDiagram
         +year: int | None
         +publication_type: PublicationType
         +abstract_text: str | None
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class Batch {
@@ -88,11 +88,11 @@ classDiagram
         +add_record(record): None
         +seal(): None
         +collect_events(): list~DomainEvent~
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class BatchRecord {
@@ -105,11 +105,11 @@ classDiagram
         +error: str | None
         +error_code: str | None
         +with_validation_error(msg, code): BatchRecord
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class BatchStatus {
@@ -119,14 +119,14 @@ classDiagram
         WRITING
         COMMITTED
         FAILED
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
     }
 
     class PipelineRun {
@@ -137,13 +137,13 @@ classDiagram
         +start_stage(name): None
         +complete_stage(name, result): None
         +fail_stage(name, error): None
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
     }
 
     class StageResult {
@@ -156,11 +156,11 @@ classDiagram
         +error: str | None
         +records_processed: int
         +duration_seconds: float
-        
-        
-        
-        
-        
+
+
+
+
+
     }
 
     class PipelineRunState {
@@ -170,14 +170,14 @@ classDiagram
         COMPLETED
         FAILED
         SHUTDOWN
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
     }
 
     class StageStatus {
@@ -187,14 +187,14 @@ classDiagram
         SUCCESS
         FAILED
         SKIPPED
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
     }
 
     class QuarantineEntry {
@@ -204,31 +204,31 @@ classDiagram
         +error_code: str
         +created_at: datetime
         +status: QuarantineRecordStatus
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
     }
 
     class DomainEvent {
         <<base class>>
         +event_id: UUID
         +occurred_at: datetime
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
     }
 
     BaseEntity <|-- Bioactivity
