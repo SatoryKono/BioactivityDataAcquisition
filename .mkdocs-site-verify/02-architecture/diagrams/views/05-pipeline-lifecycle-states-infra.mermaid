@@ -1,0 +1,75 @@
+%% View: Infrastructure-Mapping | Parent: 05-pipeline-lifecycle-states-full.mermaid
+%% @uniform width=184 height=56 max_title_len=18 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N10, N12, N5
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N16["ERROR"]
+        N6["ValidateLock"]
+        N18["VALIDATING"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N20["PREFLIGHT"]
+        N17["TRANSFORMING"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["LOCK_ACQUIRING"]
+        N2["RequestLock"]
+        N3["WaitingForLock"]
+        N4["LockAcquired"]
+        N5["RouteQuarantine"]
+        N7["DQMetrics"]
+        N8["CleanupCheckpoint"]
+        N9["CHECKPOINT_SAVED"]
+        N10["CheckpointLoad"]
+        N11["ReleaseLock"]
+        N12["SaveCheckpoint"]
+        N13["*"]
+        N14["SHUTDOWN_REQUESTED"]
+        N15["EXTRACTING"]
+        N19["LOADING"]
+    end
+
+    N13 --> N2
+    N2 --> N3
+    N2 --> N4
+    N3 --> N4
+    N1 --> N20
+    N20 --> N15
+    N20 --> N16
+    N15 --> N17
+    N15 --> N16
+    N17 --> N18
+    N17 --> N16
+    N18 --> N19
+    N18 --> N16
+    N13 --> N6
+    N19 --> N16
+    N13 --> N7
+    N7 --> N8
+    N8 --> N11
+    N15 --> N14
+    N17 --> N14
+    N18 --> N14
+    N19 --> N14
+    N14 --> N9
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    %% linkStyle: primary=21 edge(s) | secondary=2 edge(s)
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 stroke:#1E293B,stroke-width:4px
+    linkStyle 21,22 stroke:#7c3aed,stroke-width:3px,stroke-dasharray:5

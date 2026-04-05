@@ -1,0 +1,90 @@
+%% Title: Complete ETL Workflow (6 Phases)
+%% Covers: application/core/{runner,batch_executor,batch_processing_service,postrun/service}.py, application/services/medallion_lifecycle.py
+%% Updated: 2026-03-24
+%% Components: PipelineRunner, BatchExecutor, BatchProcessingService, BatchTransformer, BatchWriter, PostrunService, MedallionLifecycleService, PipelineService
+
+%% @version 1.1.0
+%% @date    2026-03-24
+%% @type    flowchart
+%% @level   Component / Class
+%% @nodes   25
+%% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% @uniform width=348 height=68 max_title_len=35 max_desc_lines=2
+flowchart TD
+    subgraph Startup["Phase 1: Startup"]
+        A1["Enter services + lock contexts"]
+        A2["validate_infrastructure"]
+        A3["prepare_for_run"]
+        A4["load checkpoint / resolve offset"]
+        A1 --> A2 --> A3 --> A4
+    end
+
+    subgraph Extract["Phase 2: Extract"]
+        B1["BatchExecutor.execute"]
+        B2["extract_records via DataSourcePort.fetch"]
+        B3["assemble batch"]
+        B1 --> B2 --> B3
+    end
+
+    subgraph Process["Phase 3: Bronze + Transform"]
+        C1["write_bronze_layer"]
+        C2["transform_batch"]
+        C3["track metrics + quarantine"]
+        C1 --> C2 --> C3
+    end
+
+    subgraph Load["Phase 4: Silver / Gold Load"]
+        D1["write_silver_gold_concurrent"]
+        D2["write_silver"]
+        D3["write_gold"]
+        D4["commit batch state + save checkpoint"]
+        D1 --> D2
+        D1 --> D3
+        D2 --> D4
+        D3 --> D4
+    end
+
+    subgraph Postrun["Phase 5: Postrun"]
+        E1["PostrunService.run"]
+        E2["compact silver if needed"]
+        E3["run DQ checks + reports"]
+        E4["finalize_run vacuum"]
+        E1 --> E2 --> E3 --> E4
+    end
+
+    subgraph Cleanup["Phase 6: Cleanup"]
+        F1["delete_checkpoint"]
+        F2["release lock"]
+        F3["PipelineService.aclose"]
+        F4["cleanup tracer / exit"]
+        F1 --> F2 --> F3 --> F4
+    end
+
+    subgraph Crosscut["Cross-cutting"]
+        H1["Heartbeat / lock TTL"]
+        H2["Metrics + tracing spans"]
+    end
+
+    G1{"More records?"}
+
+    A4 --> B1
+    B3 --> C1
+    C3 --> D1
+    D4 --> G1
+    G1 -->|Yes| B2
+    G1 -->|No| E1
+    E4 --> F1
+
+    A1 -.-> H1
+    B1 -.-> H2
+    C2 -.-> H2
+    E1 -.-> H2
+
+    style Startup fill:#f0fdf4
+    style Extract fill:#eff6ff
+    style Process fill:#fff7ed
+    style Load fill:#f5f3ff
+    style Postrun fill:#ffe4e6
+    style Cleanup fill:#f8fafc
+    style Crosscut fill:#fefce8

@@ -1,0 +1,28 @@
+%% Title: Package Family: application/core/base_transformer
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/base_transformer; modules: errors, types, base, contract_policy.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   6
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace errors {
+        class FilteredOutError
+        class TransformationError
+    }
+
+    namespace types {
+        class TransformerDependencyContext
+        class ValueObjectWithFromRaw
+    }
+
+    namespace base {
+        class BaseTransformer
+    }
+
+    namespace contract_policy {
+        class _DefaultContractPolicy
+    }

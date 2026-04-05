@@ -1,0 +1,8 @@
+# Diagram regression quality-gate source set (relative to repository root)
+# This pool mirrors DIAG-T013 smoke baselines and is used for hard quality gates.
+
+docs/02-architecture/diagrams/foundation/01-full-system-component.mmd
+docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd
+docs/02-architecture/diagrams/views/01-full-system-component-full.mermaid
+docs/02-architecture/diagrams/views/30-port-adapter-mapping-full.mermaid
+docs/02-architecture/diagrams/views/31-pipeline-run-lifecycle-infra.mermaid

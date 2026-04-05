@@ -1,0 +1,24 @@
+%% Title: Package Family: domain/lineage
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/lineage; modules: refs, graph.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   8
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace refs {
+        class DatasetRef
+        class LineageNodeRef
+        class LineageNodeType
+        class SchemaRef
+        class TransformRef
+    }
+
+    namespace graph {
+        class LineageEdge
+        class LineageEdgeType
+        class LineageGraphFragment
+    }

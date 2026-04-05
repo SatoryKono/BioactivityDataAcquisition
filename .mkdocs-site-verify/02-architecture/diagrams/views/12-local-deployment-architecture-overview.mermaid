@@ -1,0 +1,16 @@
+%% View: Overview | Parent: 12-local-deployment-architecture-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=1
+flowchart TB
+    CLI["CLI / scheduler"] --> WORKERS["Local workers"]
+    WORKERS --> DATA["bronze / silver / gold"]
+    WORKERS --> AUX["quarantine / checkpoints / lineage"]
+    WORKERS -.-> LOCK["MemoryLock<br/>single-process only"]
+    WORKERS --> OBS["logs / metrics"]
+    APIS["External APIs"] --> WORKERS
+
+    classDef layer_app fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    classDef layer_infra fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef layer_iface fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+    class CLI,APIS layer_iface;
+    class WORKERS layer_app;
+    class DATA,AUX,LOCK,OBS layer_infra;

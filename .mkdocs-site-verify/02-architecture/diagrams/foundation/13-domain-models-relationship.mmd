@@ -1,0 +1,428 @@
+%% Title: Domain Models Relationship Hierarchy
+%% Covers: RULES.md §1.3 (Domain Entities), §1.1 (Domain Layer)
+%% Updated: 2026-02-17
+%% Components: BaseEntity, Activity, Assay, Target, Molecule, Publication, Lineage fields
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    classDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   15
+%% @uniform class width=248 height=240 max_title_len=26 max_desc_lines=22
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+classDiagram
+    direction TB
+
+    class BaseEntity {
+        <<abstract>>
+        +entity_id: EntityID
+        +content_hash: ContentHash
+        +run_id: RunID
+        +run_type: RunType
+        +ingestion_ts: datetime
+        +source_batch_id: BatchID
+        +dq_warn: bool = False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class Activity {
+        +activity_id: str
+        +assay_id: str
+        +molecule_id: str
+        +target_id: str | None
+        +standard_type: str
+        +standard_value: float | None
+        +standard_units: str | None
+        +standard_relation: str | None
+        +pchembl_value: float | None
+        +data_validity_comment: str | None
+        +activity_comment: str | None
+        +potential_duplicate: bool | None
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class Assay {
+        +assay_id: str
+        +assay_type: str
+        +description: str | None
+        +assay_organism: str | None
+        +assay_strain: str | None
+        +assay_cell_type: str | None
+        +assay_subcellular_fraction: str | None
+        +target_id: str | None
+        +document_id: str | None
+        +src_id: int | None
+        +confidence_score: int | None
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class Target {
+        +target_id: str
+        +target_type: str
+        +pref_name: str | None
+        +organism: str | None
+        +tax_id: int | None
+        +uniprot_accessions: list~str~ | None
+        +gene_names: list~str~ | None
+        +target_components: list~str~ | None
+        +species_group_flag: bool | None
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class Molecule {
+        +molecule_id: str
+        +pref_name: str | None
+        +molecule_type: str
+        +max_phase: int | None
+        +therapeutic_flag: bool | None
+        +dosed_ingredient: bool | None
+        +canonical_smiles: str | None
+        +standard_inchi: str | None
+        +inchi_key: str | None
+        +molecular_formula: str | None
+        +molecular_weight: float | None
+        +alogp: float | None
+        +psa: float | None
+        +hba: int | None
+        +hbd: int | None
+        +num_ro5_violations: int | None
+        +parent_molecule_id: str | None
+
+
+
+
+
+    }
+
+    class PublicationEntityBase {
+        <<abstract>>
+        +doi: str | None
+        +pmid: str | None
+        +pmc_id: str | None
+        +title: str | None
+        +abstract: str | None
+        +authors: str | None
+        +affiliation_list: str | None
+        +author_orcids: str | None
+        +journal: str | None
+        +publication_year: int | None
+        +publication_date: str | None
+        +publication_type: str
+        +language: str | None
+        +page_first: str | None
+        +page_last: str | None
+        +citations_received: int | None
+        +citations_made: int | None
+        +is_oa: bool | None
+        +_lookup_method: str
+        +_original_id: str | None
+        +_source: str
+    }
+
+    class ChemblPublication {
+        +document_chembl_id: str
+        +volume: str | None
+        +issue: str | None
+        +src_id: int | None
+        +chembl_release: str | None
+        +creation_date: str | None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class PubMedPublication {
+        +pmid: str
+        +pmc_id: str | None
+        +journal_name_short: str | None
+        +issn: str | None
+        +subject_mesh: list~str~
+        +subject_keywords: list~str~
+        +publication_types: list~str~
+        +author_count: int | None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class CrossRefPublication {
+        +doi: str
+        +publisher: str | None
+        +issn: str | None
+        +license_url: str | None
+        +subject_keywords: list~str~
+        +author_details: str | None
+        +references: str | None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class OpenAlexPublication {
+        +openalex_id: str
+        +mag_id: str | None
+        +fwci: float | None
+        +is_retracted: bool
+        +subject_topics: list | None
+        +primary_topic: dict | None
+        +author_openalex_ids: str | None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class SemanticScholarPublication {
+        +paper_id: str
+        +corpus_id: int | None
+        +dblp_id: str | None
+        +tldr: str | None
+        +influential_citation_count: int | None
+        +author_s2_ids: str | None
+        +author_h_indices: str | None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class UniprotTarget {
+        +target_accession: str
+        +entry_name: str
+        +protein_name: str
+        +organism: str
+        +tax_id: int
+        +sequence: str
+        +sequence_length: int
+        +gene_names: list~str~ | None
+        +go_terms: list~str~ | None
+        +features: dict | None
+        +subcellular_locations: list~str~ | None
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class PubchemMolecule {
+        +molecule_cid: str
+        +iupac_name: str | None
+        +canonical_smiles: str
+        +isomeric_smiles: str | None
+        +inchi: str | None
+        +inchikey: str | None
+        +molecular_weight: float
+        +molecular_formula: str
+        +xlogp: float | None
+        +exact_mass: float | None
+        +monoisotopic_mass: float | None
+        +tpsa: float | None
+        +complexity: float | None
+        +h_bond_donor_count: int
+        +h_bond_acceptor_count: int
+        +rotatable_bond_count: int | None
+        +heavy_atom_count: int | None
+
+
+
+
+
+    }
+
+    class QuarantineRecord {
+        +ingestion_ts: datetime
+        +pipeline: str
+        +error_code: str
+        +error_message: str
+        +payload: str
+        +payload_hash: str
+        +bronze_batch_id: BatchID
+        +bronze_file_uri: str
+        +dq_status: str = "NEW"
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class LineageLogEntry {
+        +batch_id: BatchID
+        +pipeline: str
+        +bronze_paths: list~str~
+        +transform_version: str
+        +run_params: dict
+        +created_at: datetime
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    %% Inheritance from BaseEntity
+    BaseEntity <|-- Activity : extends
+    BaseEntity <|-- Assay : extends
+    BaseEntity <|-- Target : extends
+    BaseEntity <|-- Molecule : extends
+    BaseEntity <|-- PublicationEntityBase : extends
+    BaseEntity <|-- UniprotTarget : extends
+    BaseEntity <|-- PubchemMolecule : extends
+
+    %% Publication hierarchy
+    PublicationEntityBase <|-- ChemblPublication : extends
+    PublicationEntityBase <|-- PubMedPublication : extends
+    PublicationEntityBase <|-- CrossRefPublication : extends
+    PublicationEntityBase <|-- OpenAlexPublication : extends
+    PublicationEntityBase <|-- SemanticScholarPublication : extends
+
+    %% ChEMBL Entity Relationships
+    Activity --> Assay : assay_id
+    Activity --> Molecule : molecule_id
+    Activity --> Target : target_id (nullable)
+    Assay --> Target : target_id (nullable)
+    Assay --> ChemblPublication : document_chembl_id (nullable)
+    Molecule --> Molecule : parent_molecule_id (self-ref)
+
+    %% Cross-provider relationships (conceptual)
+    Target ..> UniprotTarget : uniprot_accessions
+    Molecule ..> PubchemMolecule : inchikey match
+    ChemblPublication ..> PubMedPublication : pmid match
+    ChemblPublication ..> CrossRefPublication : doi match
+    OpenAlexPublication ..> PubMedPublication : pmid match
+    SemanticScholarPublication ..> PubMedPublication : pmid match
+
+    %% Notes
+    note for BaseEntity "Lineage fields:<br/>entity_id + content_hash<br/>run_id + run_type<br/>ingestion_ts"
+
+    note for PublicationEntityBase "Publication fields (ADR-024):<br/>ids: pmid/doi/pmc<br/>citations in/out<br/>year range<br/>author orcids"
+
+    note for QuarantineRecord "DQ failed records<br/>Retention: 30 days<br/>States: NEW -> IGNORED | REPROCESSED"

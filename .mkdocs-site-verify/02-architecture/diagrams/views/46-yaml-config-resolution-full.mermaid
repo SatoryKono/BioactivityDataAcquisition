@@ -1,0 +1,26 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/46-yaml-config-resolution.mmd
+%% Full reference diagram synced with the canonical config-resolution source.
+%% Title: YAML Configuration Resolution Chain
+%% Covers: unified config path plus still-active normalization compatibility
+%% Updated: 2026-03-16
+
+%% @version 1.1.0
+%% @date    2026-03-16
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @uniform width=420 height=96 max_title_len=32 max_desc_lines=3
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+flowchart TB
+    BASE["base + provider + entity YAML"] --> YAML["YAML loader"]
+    SOURCE["provider source config"] --> YAML
+    YAML --> NORM["normalize_pipeline_config_payload<br/>compat new + legacy shapes"]
+    NORM --> PIPEVAL["PipelineYamlConfig"]
+    PIPEVAL --> PIPECFG["PipelineConfig"]
+    PIPECFG --> TABLE["TableConfig"]
+
+    DQ["DQ hierarchy<br/>base + provider + entity + inline"] --> DQLOAD["DQConfigLoader"] --> DQFILE["DQConfigFile"]
+    FILTERS["Filter hierarchy<br/>base + provider + entity + inline"] --> FLOAD["FilterConfigLoader"] --> FFILE["FilterConfigFile"]
+    DQFILE --> DQCFG["DQConfig"]
+    FFILE --> IFCFG["Input / Silver / Gold filters"]
+    SOURCE -.->|"legacy-flat source payload still accepted"| SRCVAL["SourceYamlConfig"]
