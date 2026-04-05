@@ -297,9 +297,9 @@ class TestPrometheusCustomCounters:
                 rule_type="structural_policy",
                 field="other",
             )
-            COUNTERS["silver_filter_rejections_total"].labels().inc.assert_called_once_with(
-                3
-            )
+            COUNTERS[
+                "silver_filter_rejections_total"
+            ].labels().inc.assert_called_once_with(3)
 
 
 @pytest.mark.unit

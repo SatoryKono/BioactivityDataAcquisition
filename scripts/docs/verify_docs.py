@@ -27,14 +27,18 @@ def _run_step(label: str, argv: list[str]) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--skip-links", action="store_true", help="Skip link/spec/config checks")
+    parser.add_argument(
+        "--skip-links", action="store_true", help="Skip link/spec/config checks"
+    )
     parser.add_argument("--skip-drift", action="store_true", help="Skip drift checks")
     parser.add_argument(
         "--skip-docstrings",
         action="store_true",
         help="Skip docstring inventory checks",
     )
-    parser.add_argument("--skip-build", action="store_true", help="Skip strict MkDocs build")
+    parser.add_argument(
+        "--skip-build", action="store_true", help="Skip strict MkDocs build"
+    )
     args = parser.parse_args()
 
     steps: list[tuple[str, list[str]]] = []

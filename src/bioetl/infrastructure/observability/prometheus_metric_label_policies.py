@@ -175,17 +175,23 @@ def normalize_quarantine_reason(reason: str) -> str:
 
 def normalize_silver_filter_reason_code(reason_code: str | None) -> str:
     """Normalize Silver filter reason_code to a bounded label set."""
-    return _normalize_bounded_label(reason_code or "other", _ALLOWED_SILVER_FILTER_REASON_CODE_LABELS)
+    return _normalize_bounded_label(
+        reason_code or "other", _ALLOWED_SILVER_FILTER_REASON_CODE_LABELS
+    )
 
 
 def normalize_silver_filter_rule_type(rule_type: str | None) -> str:
     """Normalize Silver filter rule_type to a bounded label set."""
-    return _normalize_bounded_label(rule_type or "other", _ALLOWED_SILVER_FILTER_RULE_TYPE_LABELS)
+    return _normalize_bounded_label(
+        rule_type or "other", _ALLOWED_SILVER_FILTER_RULE_TYPE_LABELS
+    )
 
 
 def normalize_silver_filter_field(field: str | None) -> str:
     """Normalize Silver filter field name to a bounded label set."""
-    return _normalize_bounded_label(field or "other", _ALLOWED_SILVER_FILTER_FIELD_LABELS)
+    return _normalize_bounded_label(
+        field or "other", _ALLOWED_SILVER_FILTER_FIELD_LABELS
+    )
 
 
 def normalize_dq_stage(stage: str) -> str:

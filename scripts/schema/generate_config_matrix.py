@@ -61,7 +61,9 @@ def _sort_key(path: str) -> tuple[int, list[str]]:
 def main() -> None:
     """Generate CSV and Markdown comparison outputs."""
     configs = _collect_configs()
-    all_keys = sorted({key for values in configs.values() for key in values}, key=_sort_key)
+    all_keys = sorted(
+        {key for values in configs.values() for key in values}, key=_sort_key
+    )
     config_names = sorted(configs.keys())
 
     output_path = Path("docs/config_comparison_matrix.csv")
