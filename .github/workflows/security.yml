@@ -52,5 +52,6 @@ jobs:
           uv-extras: "dev"
 
       - name: Run pip-audit
-        run: uv run pip-audit --strict --skip-editable
-
+        run: |
+          UV_CACHE_DIR=/tmp/.uv-cache uv export --no-hashes --no-emit-project --extra dev > /tmp/pip-audit-requirements.txt
+          UV_CACHE_DIR=/tmp/.uv-cache uv run pip-audit --strict -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
