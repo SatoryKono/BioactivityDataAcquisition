@@ -76,6 +76,64 @@ def _append_section(
         lines.extend(f"    {line}" for line in rendered)
 
 
+def _append_transitions(lines: list[str], transitions: object) -> None:
+    if not isinstance(transitions, list):
+        return
+    if lines:
+        lines.append("")
+    lines.append("Transitions")
+    if not transitions:
+        lines.append("  none")
+        return
+    for entry in transitions:
+        if not isinstance(entry, dict):
+            lines.append(f"  - {_format_scalar(entry)}")
+            continue
+        line = (
+            "  - "
+            f"{_format_scalar(entry.get('from_version'))} -> "
+            f"{_format_scalar(entry.get('to_version'))}"
+        )
+        if entry.get("migration_guide") is not None:
+            line += f" (guide: {_format_scalar(entry.get('migration_guide'))})"
+        if entry.get("affects_hash") is True:
+            line += " [affects_hash]"
+        lines.append(line)
+
+
+def _append_required_actions(lines: list[str], required_actions: object) -> None:
+    if not isinstance(required_actions, list):
+        return
+    if lines:
+        lines.append("")
+    lines.append("Required Actions")
+    if not required_actions:
+        lines.append("  none")
+        return
+    for action in required_actions:
+        if not isinstance(action, dict):
+            lines.append(f"  - {_format_scalar(action)}")
+            continue
+        title = _format_scalar(action.get("title"))
+        code = _format_scalar(action.get("code"))
+        description = _format_scalar(action.get("description"))
+        lines.append(f"  - {title} [{code}]")
+        lines.append(f"    {description}")
+
+
+def _append_notes(lines: list[str], notes: object) -> None:
+    if not isinstance(notes, list):
+        return
+    if lines:
+        lines.append("")
+    lines.append("Notes")
+    if not notes:
+        lines.append("  none")
+        return
+    for note in notes:
+        lines.append(f"  - {_format_scalar(note)}")
+
+
 def _render_plan_payload(payload: dict[str, object]) -> str:
     lines: list[str] = []
     _append_section(
@@ -95,54 +153,9 @@ def _render_plan_payload(payload: dict[str, object]) -> str:
             ("supported_versions", payload.get("supported_versions")),
         ),
     )
-    transitions = payload.get("transitions")
-    if isinstance(transitions, list):
-        if lines:
-            lines.append("")
-        lines.append("Transitions")
-        if not transitions:
-            lines.append("  none")
-        for entry in transitions:
-            if not isinstance(entry, dict):
-                lines.append(f"  - {_format_scalar(entry)}")
-                continue
-            line = (
-                "  - "
-                f"{_format_scalar(entry.get('from_version'))} -> "
-                f"{_format_scalar(entry.get('to_version'))}"
-            )
-            if entry.get("migration_guide") is not None:
-                line += f" (guide: {_format_scalar(entry.get('migration_guide'))})"
-            if entry.get("affects_hash") is True:
-                line += " [affects_hash]"
-            lines.append(line)
-
-    required_actions = payload.get("required_actions")
-    if isinstance(required_actions, list):
-        if lines:
-            lines.append("")
-        lines.append("Required Actions")
-        if not required_actions:
-            lines.append("  none")
-        for action in required_actions:
-            if not isinstance(action, dict):
-                lines.append(f"  - {_format_scalar(action)}")
-                continue
-            title = _format_scalar(action.get("title"))
-            code = _format_scalar(action.get("code"))
-            description = _format_scalar(action.get("description"))
-            lines.append(f"  - {title} [{code}]")
-            lines.append(f"    {description}")
-
-    notes = payload.get("notes")
-    if isinstance(notes, list):
-        if lines:
-            lines.append("")
-        lines.append("Notes")
-        if not notes:
-            lines.append("  none")
-        for note in notes:
-            lines.append(f"  - {_format_scalar(note)}")
+    _append_transitions(lines, payload.get("transitions"))
+    _append_required_actions(lines, payload.get("required_actions"))
+    _append_notes(lines, payload.get("notes"))
     return "\n".join(lines)
 
 
