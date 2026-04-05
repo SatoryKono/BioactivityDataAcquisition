@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 _DIR = Path(__file__).parent
+_VERIFY_SITE_DIR = ".mkdocs-site-verify"
 
 
 def _run_step(label: str, argv: list[str]) -> int:
@@ -79,7 +80,7 @@ def main() -> int:
                     "--strict",
                     "--clean",
                     "--site-dir",
-                    "docs/site",
+                    _VERIFY_SITE_DIR,
                 ],
             )
         )

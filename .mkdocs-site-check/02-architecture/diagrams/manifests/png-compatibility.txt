@@ -1,0 +1,10 @@
+# Curated PNG compatibility smoke set (relative to repository root).
+# Keep this list intentionally smaller than visual-smoke.txt.
+
+# foundation/
+docs/02-architecture/diagrams/foundation/svg/01-full-system-component.svg
+docs/02-architecture/diagrams/foundation/svg/30-port-adapter-mapping.svg
+
+# views/
+docs/02-architecture/diagrams/views/svg/01-full-system-component-full.svg
+docs/02-architecture/diagrams/views/svg/31-pipeline-run-lifecycle-infra.svg

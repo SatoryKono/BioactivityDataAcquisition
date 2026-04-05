@@ -65,8 +65,8 @@ declare -A SHARD_PATHS=(
 declare -A SHARD_WORKERS_OVERRIDE=(
     ["S1-domain-core"]="0"
     ["S1-domain-services"]="0"
-    ["S7-crosscutting-architecture"]="0"
-    ["S7-crosscutting-architecture-guardrails"]="0"
+    ["S7-crosscutting-architecture"]="2"
+    ["S7-crosscutting-architecture-guardrails"]="2"
     ["S8-crosscutting-governance"]="0"
 )
 

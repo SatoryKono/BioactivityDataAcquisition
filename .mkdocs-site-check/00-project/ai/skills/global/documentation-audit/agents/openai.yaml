@@ -1,0 +1,5 @@
+interface:
+  display_name: "Documentation Audit"
+  short_description: "Audit and update BioETL docs against current RULES/REQUIREMENTS."
+  default_prompt: "Use $documentation-audit to reconcile BioETL documentation with current RULES.md and REQUIREMENTS.md."
+  brand_color: "#2563EB"

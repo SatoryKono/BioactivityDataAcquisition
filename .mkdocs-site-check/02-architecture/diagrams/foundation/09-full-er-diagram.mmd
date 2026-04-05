@@ -1,0 +1,267 @@
+%% Title: Entity-Relationship Diagram (All Providers)
+%% Covers: RULES.md §1.3 (Domain Entities), §4 (Provider Specs)
+%% Updated: 2026-02-17
+%% Components: Activity, Assay, Molecule, Target, Publication, Protein, Compound, LineageLog, Quarantine
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    erDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   14
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+erDiagram
+    Activity ||--o{ Assay : "assay_id FK"
+    Activity ||--o{ Molecule : "molecule_id FK"
+    Activity ||--o| Target : "target_id FK (nullable)"
+    Assay ||--o| Target : "target_id FK"
+    Assay ||--o| ChemblPublication : "document_chembl_id FK"
+    Molecule ||--o| Molecule : "parent_molecule_id FK"
+    Target ||--o{ TargetComponent : "has components"
+    LineageLog ||--o{ Activity : "batch contains"
+    Quarantine ||--o| LineageLog : "bronze_batch_id FK"
+    ChemblPublication |o..o| PubMedPublication : "pmid match"
+    ChemblPublication |o..o| CrossRefPublication : "doi match"
+
+    Activity {
+        string activity_id PK "ChEMBL activity ID"
+        string assay_id FK "Reference to Assay"
+        string molecule_id FK "Reference to Molecule"
+        string target_id FK "Reference to Target (nullable)"
+        string standard_type "Activity type (IC50, Ki, etc.)"
+        float standard_value "Measured value (nullable)"
+        string standard_units "Units (nM, uM, etc.)"
+        string standard_relation "Relation (=, <, >)"
+        float pchembl_value "Normalized potency (nullable)"
+        string data_validity_comment "Validity status"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        string _run_type "INCREMENTAL|BACKFILL|REBUILD"
+        uuid _source_batch_id "Bronze batch reference"
+        timestamp _ingestion_ts "Ingestion timestamp"
+        bool _dq_warn "DQ warning flag"
+    }
+
+    Assay {
+        string assay_id PK "ChEMBL assay ID"
+        string assay_type "Binding, Functional, ADMET"
+        string description "Assay description (nullable)"
+        string assay_organism "Test organism"
+        string assay_strain "Organism strain"
+        string assay_cell_type "Cell type used"
+        string target_id FK "Reference to Target (nullable)"
+        string document_id FK "Reference to Document (nullable)"
+        int src_id "Source database ID"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        string _run_type "Run type enum"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    Target {
+        string target_id PK "ChEMBL target ID"
+        string target_type "PROTEIN, CELL-LINE, etc."
+        string pref_name "Preferred name (nullable)"
+        string organism "Source organism"
+        int tax_id "NCBI taxonomy ID (nullable)"
+        json uniprot_accessions "UniProt IDs (nullable)"
+        json gene_names "Gene symbols (nullable)"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        string _run_type "Run type enum"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    TargetComponent {
+        string component_id PK "Component ID"
+        string target_id FK "Parent target"
+        string accession "UniProt accession"
+        string component_type "PROTEIN, DNA, etc."
+        string description "Component description"
+    }
+
+    Molecule {
+        string molecule_id PK "ChEMBL molecule ID"
+        string pref_name "Preferred name (nullable)"
+        string molecule_type "Small molecule, Antibody, etc."
+        int max_phase "Max clinical phase"
+        string canonical_smiles "SMILES string (nullable)"
+        string standard_inchi "InChI string (nullable)"
+        string inchi_key "InChIKey (nullable)"
+        string molecular_formula "Chemical formula"
+        float molecular_weight "Molecular weight (nullable)"
+        string parent_molecule_id FK "Parent molecule (nullable)"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        string _run_type "Run type enum"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    ChemblPublication {
+        string document_chembl_id PK "ChEMBL document ID"
+        string publication_type "PUBLICATION, PATENT, etc."
+        string doi "DOI (nullable)"
+        string pmid "PubMed ID (nullable, string)"
+        string title "Publication title (nullable)"
+        json authors "Author list (nullable)"
+        string journal "Journal name"
+        int publication_year "Publication year (1500-2100)"
+        string publication_date "Date YYYY-MM-DD"
+        string volume "Journal volume"
+        string page_first "First page"
+        string page_last "Last page"
+        string abstract "Abstract text (nullable)"
+        int citations_received "Incoming citation count"
+        int citations_made "Outgoing reference count"
+        json author_orcids "Author ORCIDs (JSON array)"
+        string _source "Source: chembl"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    PubMedPublication {
+        string pmid PK "PubMed ID (positive integer string)"
+        string doi "DOI (nullable)"
+        string pmc_id "PMC ID (nullable)"
+        string title "Article title"
+        string abstract "Abstract text (nullable)"
+        json authors "Author list"
+        string journal "Journal name"
+        int publication_year "Publication year (1500-2100)"
+        string publication_date "Date YYYY-MM-DD"
+        int citations_received "Incoming citation count"
+        int citations_made "Outgoing reference count"
+        json author_orcids "Author ORCIDs (JSON array)"
+        json affiliation_list "Affiliations (JSON array)"
+        json subject_mesh "MeSH terms (JSON array)"
+        json subject_keywords "Keywords (JSON array)"
+        string _source "Source: pubmed"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    CrossRefPublication {
+        string doi PK "DOI (required)"
+        string pmid "PubMed ID (nullable)"
+        string title "Article title (nullable)"
+        string abstract "Abstract text (nullable)"
+        json authors "Author list (nullable)"
+        string journal "Journal name"
+        string publisher "Publisher name"
+        int publication_year "Publication year (1500-2100)"
+        string publication_date "Date YYYY-MM-DD"
+        int citations_received "Incoming citation count"
+        int citations_made "Outgoing reference count"
+        json author_orcids "Author ORCIDs (JSON array)"
+        string issn "ISSN (nullable)"
+        string license_url "License URL (nullable)"
+        string _source "Source: crossref"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    OpenAlexPublication {
+        string openalex_id PK "OpenAlex Work ID (W prefix)"
+        string doi "DOI (nullable)"
+        string pmid "PubMed ID (nullable)"
+        string title "Article title (nullable)"
+        string abstract "Abstract text (nullable)"
+        json authors "Author list (nullable)"
+        string journal "Journal name"
+        int publication_year "Publication year (1500-2100)"
+        int citations_received "Incoming citation count"
+        int citations_made "Outgoing reference count"
+        json author_orcids "Author ORCIDs (JSON array)"
+        float fwci "Field-weighted citation impact"
+        bool is_retracted "Retraction flag"
+        string _source "Source: openalex"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    SemanticScholarPublication {
+        string paper_id PK "S2 Paper ID (40-char hex)"
+        string doi "DOI (nullable)"
+        string pmid "PubMed ID (nullable)"
+        string title "Article title (nullable)"
+        string abstract "Abstract text (nullable)"
+        json authors "Author list (nullable)"
+        string journal "Journal name"
+        int publication_year "Publication year (1500-2100)"
+        int citations_received "Incoming citation count"
+        int citations_made "Outgoing reference count"
+        int influential_citation_count "Influential citations"
+        json author_orcids "Author ORCIDs (JSON array)"
+        json author_s2_ids "S2 Author IDs (JSON array)"
+        string tldr "AI-generated summary"
+        string _source "Source: semanticscholar"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    LineageLog {
+        uuid batch_id PK "Unique batch identifier"
+        string pipeline "Pipeline name"
+        json bronze_paths "List of Bronze file paths"
+        string transform_version "Transformer version"
+        json run_params "Runtime parameters"
+        timestamp created_at "Creation timestamp"
+    }
+
+    Quarantine {
+        timestamp ingestion_ts PK "Ingestion timestamp"
+        string pipeline "Source pipeline"
+        string error_code "Error classification"
+        string error_message "Human-readable message"
+        string payload "Truncated record (64KB max)"
+        string payload_hash "Hash of full payload"
+        uuid bronze_batch_id FK "Reference to LineageLog"
+        string bronze_file_uri "Bronze file location"
+        string dq_status "NEW|IGNORED|REPROCESSED"
+        timestamp updated_at "Last status update"
+    }
+
+    Protein {
+        string protein_id PK "UniProt accession"
+        string entry_name "UniProt entry name"
+        string protein_name "Full protein name"
+        string organism "Source organism"
+        int tax_id "NCBI taxonomy ID"
+        string sequence "Amino acid sequence"
+        int sequence_length "Sequence length"
+        json features "Protein features"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    Compound {
+        string compound_id PK "PubChem CID"
+        string iupac_name "IUPAC name"
+        string canonical_smiles "Canonical SMILES"
+        string isomeric_smiles "Isomeric SMILES"
+        string inchi "InChI string"
+        string inchikey "InChIKey"
+        float molecular_weight "Molecular weight"
+        string molecular_formula "Chemical formula"
+        float xlogp "Calculated LogP"
+        int h_bond_donor_count "H-bond donors"
+        int h_bond_acceptor_count "H-bond acceptors"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
