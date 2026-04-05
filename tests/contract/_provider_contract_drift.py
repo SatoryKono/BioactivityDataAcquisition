@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_SNAPSHOTS_DIR = ROOT / "tests" / "fixtures" / "contracts"
 _PATH_TOKEN_RE = re.compile(r"([^\.\[]*)(?:\[(\d+)\])?")
 _ALLOWED_TYPE_NAMES = frozenset({"bool", "dict", "float", "int", "list", "null", "str"})
+_BREAKING_SEVERITY = "breaking"
 
 
 class ContractPathResolutionError(ValueError):
@@ -82,7 +83,12 @@ def assert_provider_probe_matches_snapshot(
         if actual_paths.get(path) != expected_type
     ]
     if mismatches:
-        lines = [f"{provider}.{probe}: provider contract snapshot drift detected"]
+        lines = [
+            f"{provider}.{probe}: provider contract snapshot drift detected",
+            f"severity={_BREAKING_SEVERITY}",
+            f"paths_checked={len(expected_paths)}",
+            f"mismatched_paths={len(mismatches)}",
+        ]
         for path in mismatches:
             lines.append(
                 f"  {path}: expected {expected_paths[path]!r}, "
@@ -118,7 +124,10 @@ def _extract_actual_path_types(
             value = _resolve_path(payload, path)
         except ContractPathResolutionError as exc:
             pytest.fail(
-                f"provider contract snapshot path {path!r} could not be resolved: {exc}\n"
+                "provider contract snapshot path could not be resolved\n"
+                f"severity={_BREAKING_SEVERITY}\n"
+                f"path={path!r}\n"
+                f"error={exc}\n"
                 "If this is an intentional API change, run: UPDATE_SNAPSHOTS=1 pytest ..."
             )
         actual_paths[path] = _infer_type_name(value)

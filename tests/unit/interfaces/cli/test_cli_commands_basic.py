@@ -251,19 +251,17 @@ class TestMainFunction:
 
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     @patch("bioetl.interfaces.cli.main.cli")
-    def test_main_calls_cli_with_explicit_registry(
+    def test_main_calls_cli_without_eager_registry(
         self,
         mock_cli,
         mock_build_registry,
     ):
-        """Test main function calls cli() with an explicit prebuilt registry."""
-        registry = MagicMock()
-        mock_build_registry.return_value = registry
+        """Test main function delegates to click without prebuilding a registry."""
 
         main()
 
-        mock_build_registry.assert_called_once_with()
-        mock_cli.assert_called_once_with(obj=registry)
+        mock_build_registry.assert_not_called()
+        mock_cli.assert_called_once_with()
 
 
 class TestCliVersion:

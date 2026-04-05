@@ -1,11 +1,11 @@
 ---
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-04'
 ---
 
 # 05.01 Руководство по мониторингу (Monitoring Guide)
@@ -57,8 +57,13 @@ Pushgateway publication на завершении run. Это позволяет
 - **Stage Distribution in Range / Pipeline Distribution in Range**: selected-range срезы распределения.
 - **Overall Yield (Selected Range)**: `gold[$__range] / clamp-min(bronze[$__range], 1)`.
 - **Control Plane & Lineage**: отдельная строка для `Manifest Writes (24h)`,
-  `Ledger Appends (24h)`, `Checkpoint Incompatibilities (24h)` и
-  `Lineage Fragment Failures (24h)`.
+  `Ledger Appends (24h)`, `Checkpoint Incompatibilities (24h)`,
+  `Lineage Refs Missing (24h)` и `Global Control-plane Lookup` сигналов.
+- **Composite Source Selections (24h)**: informational counter по
+  `bioetl_composite_source_selection_total`, который показывает bounded
+  composite arbitration activity в выбранном `$pipeline`. Это не alert-state
+  signal, а operator context для случаев, когда composite path неожиданно
+  меняет источник данных или перестаёт выбирать expected source.
 - **Global Control-plane Lookup Failures (24h) / Global Control-plane Lookup p95 (1h)**:
   показывают, можно ли читать manifest/ledger/lineage обратно и насколько
   дорогими становятся lookup paths во время расследований. Эти сигналы сейчас

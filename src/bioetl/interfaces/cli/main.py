@@ -13,7 +13,6 @@ import click
 from bioetl import __version__ as BIOETL_VERSION
 from bioetl.interfaces.cli.registry_helpers import (
     _build_registered_registry,
-    build_cli_registry,
     create_registry,
     register_all_pipelines,
 )
@@ -167,13 +166,12 @@ def _build_main_registry() -> object:
 @click.pass_context  # type: ignore[untyped-decorator]
 def cli(ctx: click.Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
-    if ctx.obj is None:
-        ctx.obj = build_cli_registry()
+    del ctx
 
 
 def main() -> None:
     """Main entry point."""
-    cli(obj=_build_main_registry())
+    cli()
 
 
 if __name__ == "__main__":
