@@ -1,11 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-05T07:39:43.852140+00:00",
+  "generated_at": "2026-04-05T07:53:20.453208+00:00",
   "summary": {
     "total_scripts": 227,
     "status_counts": {
-      "active": 226,
-      "orphan": 1
+      "active": 221,
+      "legacy": 4,
+      "orphan": 2
     },
     "reference_group_coverage": {
       "agents": 10,
@@ -2024,7 +2025,7 @@
         },
         {
           "path": "scripts/README.md",
-          "line": 74,
+          "line": 78,
           "source_group": "scripts",
           "text": "| `diagnostics` | `python -m scripts.diagnostics cleanup`               | Debug & diagnostics    |"
         },
@@ -4382,9 +4383,9 @@
     {
       "path": "scripts/generate_architecture_dependency_map.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/README.md",
@@ -4400,7 +4401,7 @@
         },
         {
           "path": "scripts/README.md",
-          "line": 109,
+          "line": 113,
           "source_group": "scripts",
           "text": "1. `dependency-map drift` -> regenerate only through `scripts/qa/generate_architecture_dependency_map.py --update`."
         },
@@ -4409,6 +4410,12 @@
           "line": 81,
           "source_group": "scripts",
           "text": "`scripts/generate_architecture_dependency_map.py` remains a compatibility wrapper only."
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 422,
+          "source_group": "scripts",
+          "text": "\"scripts/generate_architecture_dependency_map.py\","
         },
         {
           "path": "tests/architecture/test_architecture_dependency_docs_drift.py",
@@ -4514,7 +4521,7 @@
         },
         {
           "path": "scripts/README.md",
-          "line": 72,
+          "line": 76,
           "source_group": "scripts",
           "text": "| `ops`         | `python -m scripts.ops salt-rotate`                   | Operational automation |"
         },
@@ -6088,7 +6095,7 @@
         },
         {
           "path": "scripts/README.md",
-          "line": 79,
+          "line": 83,
           "source_group": "scripts",
           "text": "python scripts/qa/check_c901_baseline.py --target src/bioetl  # still works"
         },
@@ -6609,7 +6616,7 @@
         },
         {
           "path": "scripts/README.md",
-          "line": 172,
+          "line": 176,
           "source_group": "scripts",
           "text": "- `scripts/qa/report_duplication_baseline.py` is the canonical direct script path behind `python -m scripts.qa report-duplication-baseline`."
         },
@@ -7098,9 +7105,9 @@
     {
       "path": "scripts/rerender_grafana_screenshots.py",
       "type": "py",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/README.md",
@@ -7113,6 +7120,12 @@
           "line": 43,
           "source_group": "scripts",
           "text": "- `scripts/rerender_grafana_screenshots.py`"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 423,
+          "source_group": "scripts",
+          "text": "\"scripts/rerender_grafana_screenshots.py\","
         }
       ]
     },
@@ -7176,9 +7189,9 @@
     {
       "path": "scripts/run_pytest.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/README.md",
@@ -7191,15 +7204,21 @@
           "line": 41,
           "source_group": "scripts",
           "text": "- `scripts/run_pytest.ps1`"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 421,
+          "source_group": "scripts",
+          "text": "\"scripts/run_pytest.ps1\","
         }
       ]
     },
     {
       "path": "scripts/run_pytest.sh",
       "type": "sh",
-      "status": "active",
+      "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/README.md",
@@ -7212,6 +7231,12 @@
           "line": 40,
           "source_group": "scripts",
           "text": "- `scripts/run_pytest.sh`"
+        },
+        {
+          "path": "scripts/repo/check_scripts_inventory.py",
+          "line": 420,
+          "source_group": "scripts",
+          "text": "\"scripts/run_pytest.sh\","
         }
       ]
     },
@@ -7220,7 +7245,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 47,
+      "reference_count": 48,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -8229,17 +8254,10 @@
     {
       "path": "src/tools/scripts/generate_contracts.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_gold_schema_contracts.py",
-          "line": 19,
-          "source_group": "tests",
-          "text": "# Generated from Pandera schemas by src/tools/scripts/generate_contracts.py"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "src/tools/scripts/lint_terminology.py",

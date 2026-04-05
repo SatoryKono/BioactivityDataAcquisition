@@ -42,6 +42,10 @@ Canonical root-level direct paths retained for compatibility:
 - `scripts/generate_architecture_dependency_map.py`
 - `scripts/rerender_grafana_screenshots.py`
 
+Inventory/governance should treat these root-level paths as legacy
+compatibility entrypoints unless a live CI/build/agent caller still depends on
+them directly.
+
 Rules:
 
 - New scripts must be placed in the appropriate canonical subdirectory.

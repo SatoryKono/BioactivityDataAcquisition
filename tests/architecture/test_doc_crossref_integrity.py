@@ -9,6 +9,7 @@ Validates ADR-043 requirements:
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -56,7 +57,9 @@ def _iter_internal_doc_links(
             target = match.group(1).strip()
             if not target or re.match(r"^[a-z]+:", target, re.IGNORECASE):
                 continue
-            resolved = (path.parent / target).resolve()
+            # `Path.resolve()` is disproportionately expensive on /mnt/* checkouts
+            # and we only need lexical normalization to keep comparisons inside docs/.
+            resolved = Path(os.path.normpath(path.parent / target))
             if DOCS_DIR != resolved and DOCS_DIR not in resolved.parents:
                 continue
             records.append((lineno, target, resolved))
