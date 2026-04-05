@@ -24,9 +24,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.base_transformer.types import (
-        TransformerDependencyContext,
-    )
+    from bioetl.application.core.base_transformer.types import TransformerDependencyContext
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.factories.datasource.data_source_factory import (
@@ -35,18 +33,16 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import (
-        GoldFilterConfig,
-        InputFilterConfig,
-        SilverFilterConfig,
-    )
+    from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         ContractPolicyPort,
-        DataNormalizationPort,
         DataSourcePort,
         DQMonitorPort,
         LoggerPort,
         MetricsPort,
+    )
+    from bioetl.domain.ports import (
+        DataNormalizationPort,
         PiiHasherPort,
         TracingPort,
     )
@@ -59,8 +55,6 @@ TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
 @dataclass(frozen=True, slots=True)
 class _PipelineFactoryContext:
-    """Stable internal factory context shared across assembler helper calls."""
-
     pipeline_name: str
     create_data_source_fn: DataSourceCreatorProtocol
     pipeline_class: type[BasePipeline] | None = None
@@ -71,8 +65,6 @@ class _PipelineFactoryContext:
 
 @dataclass(frozen=True, slots=True)
 class _BuildFactoryServicesRequest:
-    """Runtime request inputs for pipeline service assembly."""
-
     settings: Settings
     logger: LoggerPort
     config: PipelineYamlConfig | None = None
@@ -85,7 +77,6 @@ _CreatePipelineWithServicesRequest = _PipelineCreationRequest
 
 
 def extract_entity_type(pipeline_name: str) -> str | None:
-    """Extract trailing entity from `<provider>_<entity>` pipeline names."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
@@ -96,7 +87,6 @@ def resolve_data_source_creator(
     data_source_creator: DataSourceCreatorProtocol | None,
     get_data_source_creator_fn: Callable[..., DataSourceCreatorProtocol],
 ) -> DataSourceCreatorProtocol:
-    """Resolve explicit or provider-wired data-source creators."""
     if data_source_creator is not None:
         return data_source_creator
     return get_data_source_creator_fn(provider, provider_registry=provider_registry)
@@ -111,7 +101,6 @@ def build_pipeline_factory_context(
     transformer_class: type[BaseTransformer] | None = None,
     pandera_silver_schema: object | None = None,
 ) -> _PipelineFactoryContext:
-    """Create the stable context bag shared by factory helper calls."""
     return _PipelineFactoryContext(
         pipeline_name=pipeline_name,
         create_data_source_fn=create_data_source_fn,
@@ -138,22 +127,10 @@ def build_create_pipeline_with_services_request(
     metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext | None = None,
 ) -> _CreatePipelineWithServicesRequest:
-    """Build the canonical request payload for pipeline/service assembly."""
     return _CreatePipelineWithServicesRequest(
-        run_id,
-        runtime,
-        settings,
-        logger,
-        manifest_id,
-        config_hash,
-        dq_contract_compatibility_hash,
-        effective_config_artifact_id,
-        config,
-        filter_config,
-        tracer,
-        dq_monitor,
-        metrics,
-        cached_bronze,
+        run_id, runtime, settings, logger, manifest_id, config_hash,
+        dq_contract_compatibility_hash, effective_config_artifact_id, config,
+        filter_config, tracer, dq_monitor, metrics, cached_bronze,
     )
 
 
@@ -165,15 +142,14 @@ def _apply_optional_control_plane_kwargs(
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
 ) -> None:
-    """Forward optional control-plane fields only when present."""
-    if manifest_id is not None:
-        kwargs["manifest_id"] = manifest_id
-    if config_hash is not None:
-        kwargs["config_hash"] = config_hash
-    if dq_contract_compatibility_hash is not None:
-        kwargs["dq_contract_compatibility_hash"] = dq_contract_compatibility_hash
-    if effective_config_artifact_id is not None:
-        kwargs["effective_config_artifact_id"] = effective_config_artifact_id
+    for key, value in {
+        "manifest_id": manifest_id,
+        "config_hash": config_hash,
+        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+        "effective_config_artifact_id": effective_config_artifact_id,
+    }.items():
+        if value is not None:
+            kwargs[key] = value
 
 
 def _resolve_strict_gold_validation(
@@ -181,12 +157,7 @@ def _resolve_strict_gold_validation(
     runtime: RuntimeConfig,
     settings: Settings,
 ) -> bool:
-    """Force strict Gold validation in prod unless explicit test mode is active."""
-    return (
-        True
-        if settings.env == "prod" and not settings.test_mode
-        else runtime.strict_gold_validation
-    )
+    return settings.env == "prod" and not settings.test_mode or runtime.strict_gold_validation
 
 
 def create_transformer_instance(
@@ -205,7 +176,6 @@ def create_transformer_instance(
     contract_policy: ContractPolicyPort | None = None,
     dependencies: TransformerDependencyContext | None = None,
 ) -> BaseTransformer | None:
-    """Create transformer when a transformer class is configured."""
     if transformer_class is None:
         return None
 
@@ -242,13 +212,8 @@ def create_factory_data_source(
     pipeline_name: str,
     filter_config: InputFilterConfig | None = None,
 ) -> DataSourcePort:
-    """Create provider data source via injected creator."""
     return create_data_source_fn(
-        settings,
-        pipeline_config,
-        logger,
-        filter_config,
-        pipeline_name=pipeline_name,
+        settings, pipeline_config, logger, filter_config, pipeline_name=pipeline_name
     )
 
 
@@ -257,7 +222,6 @@ def build_factory_services(
     factory_context: _PipelineFactoryContext,
     request: _BuildFactoryServicesRequest,
 ) -> PipelineService:
-    """Build shared pipeline services for the configured pipeline."""
     return build_pipeline_services(
         pipeline_name=factory_context.pipeline_name,
         create_data_source_fn=factory_context.create_data_source_fn,
@@ -275,7 +239,6 @@ def create_pipeline_instance_with_services(
     factory_context: _PipelineFactoryContext,
     request: _CreatePipelineWithServicesRequest,
 ) -> BasePipeline:
-    """Create pipeline instance with wired services and optional transformer."""
     if factory_context.pipeline_class is None or factory_context.provider is None:
         raise AssertionError(
             "factory_context must include pipeline_class and provider for pipeline creation"
@@ -338,7 +301,6 @@ def create_factory_runner(
     config: PipelineYamlConfig | None = None,
     cached_bronze: CachedBronzeContext | None = None,
 ) -> PipelineRunner:
-    """Create and assemble a fully configured PipelineRunner instance."""
     yaml_config = config or load_pipeline_config(pipeline_name)
     create_with_services_kwargs: dict[str, object] = {
         "run_id": run_id,

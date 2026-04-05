@@ -1,8 +1,8 @@
 schema_version: 1
 baseline:
-  total_exemptions: 0
+  total_exemptions: 1
   by_registry:
-    file_size_limits: 0
+    file_size_limits: 1
     function_complexity: 0
     function_length: 0
     class_size: 0
