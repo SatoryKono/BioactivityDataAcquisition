@@ -1,0 +1,4 @@
+interface:
+  display_name: "Py Test Swarm"
+  short_description: "Оркестрация иерархического тестирования BioETL"
+  default_prompt: "Запусти $py-test-swarm как L1-оркестратор: собери baseline, декомпозируй задачи на L2/L3, агрегируй телеметрию и сформируй reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_FINAL.md."

@@ -1,0 +1,131 @@
+%% Title: Composite Pipeline Phase Lifecycle and Resume Semantics
+%% Covers: domain/composite/state.py, checkpoint replay gate, run-ledger stage semantics
+%% Rank: 23 (Score 7.31) — FSM governs all composite pipeline execution
+%% Updated: 2026-04-02
+
+%% @version 1.1.0
+%% @date    2026-04-02
+%% @type    stateDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   10
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+stateDiagram-v2
+    [*] --> NOT_STARTED
+
+    NOT_STARTED --> SEED_RUNNING : start()
+
+    SEED_RUNNING --> SEED_COMPLETED : seed success
+    SEED_RUNNING --> FAILED : seed error
+
+    SEED_COMPLETED --> DEPENDENCIES_RUNNING : has dependencies
+    SEED_COMPLETED --> ENRICHING : no dependencies<br/>(skip deps phase)
+
+    DEPENDENCIES_RUNNING --> DEPENDENCIES_COMPLETED : all deps done
+    DEPENDENCIES_RUNNING --> FAILED : dep critical error
+
+    DEPENDENCIES_COMPLETED --> ENRICHING : start enrichers
+
+    ENRICHING --> ENRICHMENT_COMPLETED : all enrichers done<br/>(COMPLETED or PARTIAL)
+    ENRICHING --> FAILED : all enrichers failed
+
+    ENRICHMENT_COMPLETED --> MERGING : start merge
+
+    MERGING --> COMPLETED : merge success
+    MERGING --> FAILED : merge error
+
+    COMPLETED --> [*]
+    FAILED --> [*]
+
+    state NOT_STARTED {
+        [*] --> idle
+        idle : CompositePipelineState.NOT_STARTED
+        idle : is_terminal = False
+        idle : is_resumable = False
+    }
+
+    state SEED_RUNNING {
+        [*] --> extracting_seed
+        extracting_seed : PipelineRunner executes seed pipeline
+        extracting_seed : Bronze → Silver for seed entity
+        extracting_seed : is_active = True
+    }
+
+    state SEED_COMPLETED {
+        [*] --> keys_extracted
+        keys_extracted : KeyExtractorService.extract_keys()
+        keys_extracted : Join keys (DOI, PMID, etc.) available
+        keys_extracted : is_resumable = True
+    }
+
+    state DEPENDENCIES_RUNNING {
+        [*] --> running_deps
+        running_deps : DependencyCoordinator.run()
+        running_deps : Sequential execution of dependency pipelines
+        running_deps : is_active = True
+        running_deps : is_resumable = True
+    }
+
+    state DEPENDENCIES_COMPLETED {
+        [*] --> deps_done
+        deps_done : All dependency Silver tables populated
+        deps_done : is_resumable = True
+    }
+
+    state ENRICHING {
+        [*] --> fan_out
+        fan_out : EnrichmentCoordinator.run_enrichers()
+        fan_out : asyncio.gather() parallel execution
+        fan_out : is_active = True
+        fan_out : is_resumable = True
+    }
+
+    state ENRICHMENT_COMPLETED {
+        [*] --> enrichers_done
+        enrichers_done : EnrichmentStatus per enricher
+        enrichers_done : COMPLETED / PARTIAL / FAILED / SKIPPED
+        enrichers_done : is_resumable = True
+    }
+
+    state MERGING {
+        [*] --> merge_active
+        merge_active : MergeService.merge()
+        merge_active : Read Silver → Join → Resolve conflicts → Gold
+        merge_active : is_active = True
+    }
+
+    state COMPLETED {
+        [*] --> success
+        success : CompositeResult with all phase results
+        success : is_terminal = True
+        success : to_metric_value() = 8
+    }
+
+    state FAILED {
+        [*] ==> error
+        error : is_terminal = True
+        error : is_resumable = True (retry allowed)
+        error : to_metric_value() = 9
+    }
+
+    note right of SEED_COMPLETED
+        Checkpoint snapshot stores state,
+        anchors, phase results, and last_event_id.
+        On resume, anchors are validated first,
+        then ledger suffix replay projects
+        coarse-grained state forward.
+    end note
+
+    note left of ENRICHING
+        Entering each execution phase emits
+        stage_started to the run ledger.
+        Successful phase exit emits
+        stage_completed with metrics snapshot.
+    end note
+
+    note right of FAILED
+        FAILED is resumable: snapshot payloads
+        stay in checkpoint and run_failed is
+        recorded in the control-plane ledger.
+        There is no separate stage_failed
+        baseline event in the published model.
+    end note

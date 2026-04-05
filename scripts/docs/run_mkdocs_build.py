@@ -43,8 +43,8 @@ def main() -> int:
     parser.add_argument("--clean", action="store_true", help="Clean stale files before build")
     parser.add_argument(
         "--site-dir",
-        default="docs/site",
-        help="Output site directory (default: docs/site)",
+        default=".mkdocs-site",
+        help="Output site directory (default: .mkdocs-site)",
     )
     parser.add_argument(
         "--config-file",

@@ -49,6 +49,7 @@ BRANCHES = {
     "hf-pip-disable": "fix/hf-pip-audit-disable-flag",
     "hf-paths-conflict": "fix/hf-remove-paths-ignore-conflict",
     "hf-typecheck-warn": "fix/hf-typecheck-continue-on-error",
+    "hf-pip-skip-editable": "fix/hf-pip-audit-skip-editable",
 }
 
 PR_BODIES = {
@@ -240,6 +241,20 @@ reports the errors without failing the overall CI status. The job still
 runs and uploads the mypy report artifact for tracking.
 
 Also re-applies `actions/checkout@v4` (overwritten by a direct commit).
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "hf-pip-skip-editable": """## HF-pip-skip-editable: Fix pip-audit — skip local editable package
+
+`pip-audit --strict` fails with:
+> `bioetl: Dependency not found on PyPI and could not be audited: bioetl (6.1.0)`
+
+The local `bioetl` package is installed in editable mode (as a dev dependency).
+pip-audit cannot find it on PyPI and exits with code 1 under `--strict`.
+
+### Fix
+Add `--skip-editable` flag so pip-audit skips locally installed editable
+packages and only audits third-party dependencies fetched from PyPI.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 """,
@@ -1404,6 +1419,60 @@ def apply_hf_typecheck_warn(api: GitHubAPI) -> None:
         print(f"  PR created: {pr_url}")
 
 
+def apply_hf_pip_skip_editable(api: GitHubAPI) -> None:
+    """HF-pip-skip-editable: add --skip-editable to pip-audit in security.yml."""
+    print("=== HF-pip-skip-editable: Fix pip-audit — add --skip-editable ===")
+    branch = BRANCHES["hf-pip-skip-editable"]
+    path = ".github/workflows/security.yml"
+
+    if not api.dry_run:
+        if api.branch_exists(branch):
+            print(f"  Branch {branch} already exists — skipping branch creation")
+        else:
+            sha = api.get_sha()
+            api.create_branch(branch, sha)
+
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
+
+    old_line = "        run: uv run pip-audit --strict"
+    new_line = "        run: uv run pip-audit --strict --skip-editable"
+
+    if new_line in content:
+        print(f"  INFO: {path} already has --skip-editable — nothing to do")
+        return
+
+    if old_line not in content:
+        print(f"  WARNING: expected pip-audit command not found in {path}")
+        print(f"  Content snippet: {content[content.find('pip-audit'):content.find('pip-audit')+80]!r}")
+        return
+
+    content = content.replace(old_line, new_line)
+    print(f"  Patching {path}: adding --skip-editable to pip-audit")
+
+    api.update_file(
+        path=path,
+        content=content,
+        sha=file_sha,
+        message=(
+            "fix(ci): add --skip-editable to pip-audit in security.yml\n\n"
+            "pip-audit --strict fails with 'Dependency not found on PyPI'\n"
+            "because the local editable `bioetl` package cannot be found on PyPI.\n"
+            "--skip-editable tells pip-audit to only audit third-party packages.\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
+        branch=branch,
+    )
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): add --skip-editable to pip-audit (local package not on PyPI)",
+            branch=branch,
+            body=PR_BODIES["hf-pip-skip-editable"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
@@ -1425,7 +1494,8 @@ def main() -> None:
         "--only",
         choices=["ci-01", "ci-02", "ci-03", "ci-04", "ci-06", "ci-07", "ci-12",
                  "hf-a", "hf-b", "hf-e", "hf-lxml",
-                 "hf-pip-disable", "hf-paths-conflict", "hf-typecheck-warn"],
+                 "hf-pip-disable", "hf-paths-conflict", "hf-typecheck-warn",
+                 "hf-pip-skip-editable"],
         help="Apply only one fix",
     )
     args = parser.parse_args()
@@ -1464,6 +1534,8 @@ def main() -> None:
             apply_hf_paths_conflict(api)
         if not args.only or args.only == "hf-typecheck-warn":
             apply_hf_typecheck_warn(api)
+        if not args.only or args.only == "hf-pip-skip-editable":
+            apply_hf_pip_skip_editable(api)
         print("\n✅ Done!")
     except requests.HTTPError as e:
         print(f"\n❌ GitHub API error: {e}")

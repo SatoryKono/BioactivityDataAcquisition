@@ -1,0 +1,148 @@
+%% BioETL — Configuration System
+%% Shows how YAML configs are loaded, validated, and published as effective-config and manifest provenance artifacts.
+
+%% @version 1.1.0
+%% @date    2026-03-28
+%% @type    flowchart
+%% @level   System / Component
+%% @png-scale 6
+%% @png-dpi   600
+%% @nodes   31
+%% @reference  Decomposed into 11a-config-loading, 11b-config-domain
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=216 height=198 max_title_len=22 max_desc_lines=9
+flowchart LR
+%% keep-orphan: APC, CBC, CCFG, OBS_SET, PCP, PIPE_SET, SETTINGS, SRC
+    subgraph YAML["YAML Config Files"]
+        direction TB
+        BASE_YAML["configs/base/*.yaml<br/>pipeline and quality defaults"]:::size-lg
+        PROV_YAML["configs/providers/*.yaml<br/>source plus provider defaults"]:::size-lg
+        PC_YAML["configs/entities/*/*.yaml<br/>unified entity configs"]:::size-lg
+        COMP_YAML["configs/composites/*.yaml<br/>composite configs"]:::size-lg
+    end
+
+    subgraph Loaders["Infrastructure Config Loaders"]
+        direction TB
+        PCL["PipelineConfigLoader<br/>load(path) -> PipelineConfig"]:::size-lg
+        DQCL["DQConfigLoader<br/>load(path) -> DQConfig"]:::size-lg
+        FCL["FilterConfigLoader<br/>load(path) -> FilterConfig"]:::size-lg
+        BCL["BaseConfigLoader<br/>load()/validate() base logic"]:::size-lg
+    end
+
+    subgraph InfraSchemas["Infrastructure Schemas (Pydantic)"]
+        direction TB
+        PYC["PipelineYamlConfig"]:::size-lg
+        APC["ApiConfig"]:::size-lg
+        SRC["SourceConfig"]:::size-lg
+        CBC["CircuitBreakerConfig"]:::size-lg
+        DQF["DQConfigFile"]:::size-lg
+        FFG["FilterConfigFile"]:::size-lg
+        PCP["PipelineContractPolicy"]:::size-lg
+    end
+
+    subgraph DomainConfig["Domain Configuration"]
+        direction TB
+        RT["RuntimeConfig<br/>run flags, limits, strict-mode"]:::size-lg
+        PIPE["PipelineConfig<br/>provider/entity/table/dq settings"]:::size-lg
+        TC["TableConfig<br/>silver_table / gold_table"]:::size-lg
+        DQC["DQConfig<br/>soft/hard thresholds + validations"]:::size-lg
+        SFC["SilverFilterConfig<br/>source_path + column_name"]:::size-lg
+        GFC["GoldFilterConfig<br/>source_path + column_name"]:::size-lg
+    end
+
+    subgraph CompositeConfig["Composite Domain Config"]
+        direction TB
+        CCFG["CompositeConfig<br/>seed/dependencies/enrichers/merge"]:::size-lg
+    end
+
+    subgraph AppConfig["Application Config"]
+        direction TB
+        RPC["RecordProcessorConfig<br/>table + schemas + dq"]:::size-lg
+        LC["LockConfig<br/>timeout + heartbeat + retries"]:::size-lg
+        ECS["EffectiveConfigService<br/>build + hash + compare artifact"]:::size-lg
+        RMS["RunManifestService<br/>attach artifact refs into provenance"]:::size-lg
+    end
+
+    subgraph InfraSettings["Infrastructure Settings"]
+        direction TB
+        SETTINGS["Settings<br/>BaseSettings from YAML + ENV"]:::size-lg
+        OBS_SET["ObservabilitySettings"]:::size-lg
+        PIPE_SET["PipelineSettings"]:::size-lg
+    end
+
+    subgraph ControlPlane["Control-plane artifacts"]
+        direction TB
+        ECA["EffectiveConfigArtifact<br/>resolved + overrides + effective snapshot"]:::size-lg
+        RMA["RunManifest provenance<br/>config hash + contract refs + artifact id"]:::size-lg
+    end
+
+    %% YAML → Loaders
+    BASE_YAML ==> PCL
+    BASE_YAML ==> DQCL
+    BASE_YAML ==> FCL
+    PROV_YAML ==> PCL
+    PROV_YAML ==> DQCL
+    PROV_YAML ==> FCL
+    PC_YAML ==> PCL
+    PC_YAML ==> DQCL
+    PC_YAML ==> FCL
+    COMP_YAML ==> PCL
+
+    %% Loaders inheritance
+    BCL -.->|"inherits"| PCL
+    BCL -.->|"inherits"| DQCL
+    BCL -.->|"inherits"| FCL
+
+    %% Loaders → Infra Schemas (validation)
+    PCL -->|"validates"| PYC
+    DQCL -->|"validates"| DQF
+    FCL -->|"validates"| FFG
+
+    %% Infra Schemas → Domain Config
+    PYC --> PIPE
+    DQF --> DQC
+    FFG --> SFC & GFC
+
+    %% Domain Config composition
+    PIPE --> TC
+    PIPE --> DQC
+    PIPE --> SFC
+    PIPE --> GFC
+
+    %% Application uses domain config
+    PIPE --> RPC
+    RT --> LC
+    PIPE --> ECS
+    DQC --> ECS
+    SETTINGS --> ECS
+    ECS --> ECA
+    ECA --> RMS
+    RMS --> RMA
+
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef schema fill:#ffe4e6,stroke:#dc2626
+    classDef settings fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+    classDef artifact fill:#ecfccb,stroke:#65a30d,stroke-width:2px
+
+    class BASE_YAML,PROV_YAML,PC_YAML,COMP_YAML storage
+    class PCL,DQCL,FCL,BCL adapter
+    class PYC,APC,SRC,CBC,DQF,FFG,PCP schema
+    class RT,PIPE,TC,DQC,SFC,GFC,CCFG port
+    class RPC,LC,ECS,RMS service
+    class SETTINGS,OBS_SET,PIPE_SET settings
+    class ECA,RMA artifact
