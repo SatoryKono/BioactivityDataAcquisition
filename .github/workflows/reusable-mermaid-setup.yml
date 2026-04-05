@@ -1,0 +1,46 @@
+name: "[DEPRECATED] Reusable Mermaid setup"
+# DEPRECATED: Use .github/actions/setup-mermaid composite action instead.
+# This workflow_call approach runs in a separate runner, making it unsuitable
+# for setup steps. Kept for backward compatibility; will be removed in a future PR.
+
+on:
+  workflow_call:
+    inputs:
+      mermaid-version:
+        description: "Mermaid CLI version to install"
+        required: false
+        default: "10.6.1"
+        type: string
+      install-librsvg:
+        description: "Install librsvg2-bin and svgo for SVG optimization"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Mermaid CLI
+        run: |
+          npm install -g @mermaid-js/mermaid-cli@${{ inputs.mermaid-version }}
+          if [ "${{ inputs.install-librsvg }}" = "true" ]; then
+            npm install -g svgo
+            sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
+          fi
+
+      - name: Install Chrome headless shell for Puppeteer
+        run: npx -y puppeteer browsers install chrome-headless-shell
+
+      - name: Create Puppeteer config
+        run: |
+          cat > /tmp/puppeteer-config.json << 'EOF'
+          {
+            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+          }
+          EOF
