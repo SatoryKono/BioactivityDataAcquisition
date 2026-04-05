@@ -6,13 +6,64 @@ from bioetl.domain.types import JsonDict
 
 __all__ = [
     "build_purge_preview_lines",
+    "build_quarantine_grouped_lines",
     "build_quarantine_stats_lines",
     "build_replay_preview_lines",
 ]
 
 
+_GROUP_BY_TITLES = {
+    "reason-code": "Reason Code",
+    "field": "Field",
+    "rule-type": "Rule Type",
+    "operator": "Operator",
+    "reason-code-field": "Reason Code + Field",
+    "reason-signature": "Stable Signature",
+}
+
+_GROUP_BY_KEYS = {
+    "reason-code": "by_reason_code",
+    "field": "by_field",
+    "rule-type": "by_rule_type",
+    "operator": "by_operator",
+    "reason-code-field": "by_reason_code_field",
+    "reason-signature": "by_reason_signature",
+}
+
+
+def _append_group_lines(
+    lines: list[str],
+    *,
+    values: dict[str, int],
+    total: int,
+    title: str,
+    top: int,
+) -> None:
+    """Append one ranked grouping block to the output lines."""
+    if not values:
+        return
+    lines.append(f"\n  {title}:")
+    for label, count in sorted(
+        values.items(),
+        key=lambda item: (-item[1], item[0]),
+    )[:top]:
+        pct = (count / total * 100) if total > 0 else 0
+        lines.append(f"    - {label}: {count} ({pct:.1f}%)")
+
+
 def build_quarantine_stats_lines(stats: JsonDict, *, pipeline: str) -> list[str]:
     """Build human-readable quarantine statistics lines."""
+    return build_quarantine_grouped_lines(stats, pipeline=pipeline, top=10)
+
+
+def build_quarantine_grouped_lines(
+    stats: JsonDict,
+    *,
+    pipeline: str,
+    top: int,
+    group_by: str | None = None,
+) -> list[str]:
+    """Build quarantine statistics with optional focused Silver reject grouping."""
     lines = [
         "",
         f"{'=' * 50}",
@@ -45,22 +96,41 @@ def build_quarantine_stats_lines(stats: JsonDict, *, pipeline: str) -> list[str]
             lines.append(
                 f"\n  Silver Filter Rejects: {silver_total} ({pct:.1f}% of quarantine)"
             )
-            for title, key in (
-                ("By Reason Code", "by_reason_code"),
-                ("By Field", "by_field"),
-                ("By Rule Type", "by_rule_type"),
-                ("By Operator", "by_operator"),
-            ):
-                values = silver_filter_stats.get(key, {})
-                if not isinstance(values, dict) or not values:
-                    continue
-                lines.append(f"\n  {title}:")
-                for label, count in sorted(
-                    values.items(),
-                    key=lambda item: (-item[1], item[0]),
-                )[:10]:
-                    pct = (count / silver_total * 100) if silver_total > 0 else 0
-                    lines.append(f"    - {label}: {count} ({pct:.1f}%)")
+            if group_by is None:
+                for title, key in (
+                    ("By Reason Code", "by_reason_code"),
+                    ("By Field", "by_field"),
+                    ("By Rule Type", "by_rule_type"),
+                    ("By Operator", "by_operator"),
+                    ("By Reason Code + Field", "by_reason_code_field"),
+                ):
+                    values = silver_filter_stats.get(key, {})
+                    if not isinstance(values, dict):
+                        continue
+                    _append_group_lines(
+                        lines,
+                        values=values,
+                        total=silver_total,
+                        title=title,
+                        top=top,
+                    )
+            else:
+                values = silver_filter_stats.get(_GROUP_BY_KEYS[group_by], {})
+                if isinstance(values, dict) and values:
+                    lines.append(
+                        "\n  Focused Silver Reject Grouping:"
+                    )
+                    _append_group_lines(
+                        lines,
+                        values=values,
+                        total=silver_total,
+                        title=_GROUP_BY_TITLES[group_by],
+                        top=top,
+                    )
+                else:
+                    lines.append(
+                        "\n  Focused Silver Reject Grouping: no structured values available."
+                    )
 
     lines.append(f"\n{'=' * 50}\n")
     return lines

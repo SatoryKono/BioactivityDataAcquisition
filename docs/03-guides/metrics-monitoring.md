@@ -147,6 +147,21 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_dq_baseline_updated`          | Counter   | pipeline, metric                         | Обновления baseline                                                                   |
 | `bioetl_dq_baseline_samples`          | Gauge     | pipeline, metric                         | Семплы в baseline                                                                     |
 
+### Silver filter rejects: operator semantics
+
+- Для high-level operator summary используйте Prometheus/Grafana signal
+  `bioetl_records_processed_total{stage="filtered_out"}`.
+- Для coarse quarantine family signal используется bounded label metric
+  `quarantine_records_total{reason="filtered_out_silver"}`.
+- Этот label intentionally coarse и не должен расширяться raw free-text причинами,
+  `message`, или неограниченными значениями полей.
+- Exact reason analytics по `reason_code`, `rule_type`, `field`, `operator`
+  должны идти через quarantine-derived aggregation или CLI, а не через
+  Prometheus labels.
+- Record-level drilldown для Silver rejects остаётся задачей quarantine CLI:
+  `bioetl quarantine stats --pipeline <name> --silver-filter-only`
+  и `bioetl quarantine inspect --pipeline <name> --silver-filter-only`.
+
 #### Circuit Breaker Metrics
 
 | Метрика                                | Тип     | Labels  | Описание                                  |

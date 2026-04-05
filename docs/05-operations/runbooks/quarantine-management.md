@@ -46,6 +46,7 @@ bioetl quarantine inspect --pipeline {pipeline-name} --limit 50
 - For Silver-only triage, start with:
 ```bash
 bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only
+bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only --group-by reason-code-field
 bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --limit 20
 ```
 
@@ -54,6 +55,13 @@ bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --limi
   - top `reason_code`;
   - top rejected `field`;
   - `rule_type` / `operator` distribution.
+
+- Если нужен один операторский pivot без визуального шума, используйте:
+  - `--group-by reason-code`
+  - `--group-by field`
+  - `--group-by rule-type`
+  - `--group-by operator`
+  - `--group-by reason-code-field`
 
 - `inspect --silver-filter-only` is the right drilldown when you need the exact
   reason for one record. The CLI renders `Reason`, `reason_code`, `rule_type`,
