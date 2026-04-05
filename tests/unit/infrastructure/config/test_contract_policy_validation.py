@@ -31,6 +31,17 @@ def test_schema_columns_extracts_column_names() -> None:
 
 
 @pytest.mark.unit
+def test_schema_columns_prefers_pandera_fields_fast_path() -> None:
+    schema_cls = SimpleNamespace(
+        __fields__={"field_a": object(), "_aliased_b": object()},
+    )
+
+    result = schema_columns(schema_cls)
+
+    assert result == {"field_a", "_aliased_b"}
+
+
+@pytest.mark.unit
 def test_schema_columns_raises_when_schema_has_no_to_schema() -> None:
     with pytest.raises(ValueError, match="does not expose to_schema"):
         schema_columns(SimpleNamespace())

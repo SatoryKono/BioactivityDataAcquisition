@@ -703,6 +703,14 @@ shipped pack.
 pipeline dashboards использует TraceQL filter по `span."bioetl.pipeline"` и
 `span."bioetl.run_type"`.
 
+**Silver Rejects triage sequence:**
+1. Начните с `1. Overview` или `2. Runtime`, чтобы увидеть summary spike по
+   `Silver Filter Rejects`.
+2. Перейдите в `4. Data Quality`, чтобы проверить bounded breakdown через
+   `Top Silver Reject Reasons` и `Top Silver Reject Fields`.
+3. Используйте quarantine CLI для exact record-level drilldown и reason-signature
+   inspection.
+
 ---
 
 ## 11. Дашборд: 4. Data Quality
@@ -812,6 +820,14 @@ dashboard-variable interpolation. Дополнительное сужение п
 Explore с тем же time range. Как и в остальных shipped dashboards, Loki handoff
 стартует с безопасного `{job="bioetl"}` entrypoint. Tempo handoff использует
 тот же dashboard scope через `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
+
+**Silver Rejects triage sequence:**
+1. Используйте panel `Silver Filter Rejects` как быстрый runtime signal, чтобы
+   отделить intentional exclusions от общего DQ/runtime шума.
+2. Если spike подтверждён, переходите по dashboard link `4. Data Quality` за
+   bounded cause summary.
+3. Для exact records, field-level failures и stable signatures переходите в
+   quarantine CLI.
 
 ---
 

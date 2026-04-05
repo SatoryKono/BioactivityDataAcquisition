@@ -42,6 +42,20 @@ class _ArrowSchemaLike(Protocol):
     names: list[str]
 
 
+def _schema_columns_from_pandera_fields(schema_class: object) -> set[str] | None:
+    """Return DataFrameModel columns from ``__fields__`` when available.
+
+    Pandera ``DataFrameModel`` classes expose ``__fields__`` with resolved output
+    column names (including aliases). Reading this mapping avoids materializing a
+    full schema via ``to_schema()``, which can trigger expensive optional dtype
+    imports (e.g., geopandas) during architecture/test bootstrap.
+    """
+    fields = getattr(schema_class, "__fields__", None)
+    if isinstance(fields, dict) and fields:
+        return {str(name) for name in fields.keys()}
+    return None
+
+
 def load_contract_registry_entries(
     registry_path: Path | None = None,
 ) -> dict[str, dict[str, object]]:
@@ -139,6 +153,10 @@ def validate_contract_policy_registry_alignment(
 
 def schema_columns(schema_class: object) -> set[str]:
     """Extract column names from a Pandera DataFrameModel class."""
+    fields_columns = _schema_columns_from_pandera_fields(schema_class)
+    if fields_columns is not None:
+        return fields_columns
+
     if not hasattr(schema_class, "to_schema"):
         raise ValueError(f"Schema {schema_class!r} does not expose to_schema()")
     try:
