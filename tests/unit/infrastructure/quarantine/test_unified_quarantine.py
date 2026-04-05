@@ -372,6 +372,36 @@ class TestUnifiedQuarantineInspect:
 
         assert result == []
 
+    @pytest.mark.asyncio
+    async def test_inspect_with_run_id_filter(self, quarantine, mock_delta_table):
+        """Test inspect applies a run_id filter when provided."""
+        import pyarrow.compute as pc
+
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.__len__ = MagicMock(return_value=0)
+        mock_arrow_table.filter.return_value = mock_arrow_table
+        mock_arrow_table.sort_by.return_value = mock_arrow_table
+        mock_arrow_table.slice.return_value = mock_arrow_table
+        mock_arrow_table.to_pylist.return_value = []
+        mock_arrow_table.__getitem__.side_effect = lambda key: f"column:{key}"
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        with (
+            patch.object(pc, "equal", side_effect=["pipeline-mask", "run-mask", "status-mask"]) as equal_mock,
+            patch.object(pc, "and_", side_effect=["pipeline-run-mask", "final-mask"]) as and_mock,
+        ):
+            result = await quarantine.inspect(
+                pipeline="test",
+                run_id="run-123",
+                dq_status=QuarantineRecordStatus.NEW,
+            )
+
+        assert result == []
+        assert equal_mock.call_args_list[1].args == ("column:run_id", "run-123")
+        assert and_mock.call_count == 2
+
 
 @pytest.mark.unit
 class TestUnifiedQuarantineReplay:
@@ -596,6 +626,10 @@ class TestUnifiedQuarantineGetStats:
         self, quarantine, mock_delta_table
     ):
         """Test get_stats derives structured Silver reject aggregations."""
+        silver_reject_details = (
+            '{"reason_code":"missing_required_field","rule_type":"required_fields",'
+            '"field":"publication_year","operator":"required"}'
+        )
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
         mock_arrow_table.__len__ = MagicMock(return_value=2)
@@ -603,12 +637,12 @@ class TestUnifiedQuarantineGetStats:
             {
                 "error_code": "FILTERED_OUT_SILVER",
                 "dq_status": "new",
-                "error_details": '{"reason_code":"missing_required_field","rule_type":"required_fields","field":"publication_year","operator":"required"}',
+                "error_details": silver_reject_details,
             },
             {
                 "error_code": "FILTERED_OUT_SILVER",
                 "dq_status": "new",
-                "error_details": '{"reason_code":"missing_required_field","rule_type":"required_fields","field":"publication_year","operator":"required"}',
+                "error_details": silver_reject_details,
             },
         ]
         mock_pandas_df = MagicMock()
@@ -658,6 +692,54 @@ class TestUnifiedQuarantineGetStats:
         assert result["total_count"] == 1
         assert result["by_error_code"]["FILTERED_OUT_SILVER"] == 1
         mock_table.to_pyarrow_table.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_get_stats_honors_run_id_filter(
+        self, quarantine, mock_delta_table
+    ):
+        """Test get_stats scopes statistics to one run_id when requested."""
+        mock_table = MagicMock()
+        scoped_table = MagicMock()
+        scoped_table.__len__ = MagicMock(return_value=1)
+        scoped_table.to_pylist.return_value = [
+            {
+                "error_code": "FILTERED_OUT_SILVER",
+                "dq_status": "new",
+                "run_id": "run-123",
+                "error_details": (
+                    '{"reason_code":"missing_required_field",'
+                    '"rule_type":"required_fields",'
+                    '"field":"publication_year",'
+                    '"operator":"required"}'
+                ),
+            }
+        ]
+        mock_pandas_df = MagicMock()
+        mock_pandas_df.__getitem__ = MagicMock(return_value=MagicMock())
+        mock_pandas_df["ingestion_ts"].min.return_value = "2025-01-01T00:00:00"
+        mock_pandas_df["ingestion_ts"].max.return_value = "2025-01-15T00:00:00"
+        scoped_table.to_pandas.return_value = mock_pandas_df
+
+        base_table = MagicMock()
+        base_table.__len__ = MagicMock(return_value=2)
+        base_table.filter.return_value = scoped_table
+        base_table.__getitem__.side_effect = lambda key: f"column:{key}"
+
+        mock_table.to_pyarrow_table.return_value = base_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.get_stats(pipeline="test", run_id="run-123")
+
+        assert result["total_count"] == 1
+        assert result["by_error_code"] == {"FILTERED_OUT_SILVER": 1}
+        assert result["silver_filter_rejects"]["total_count"] == 1
+        assert (
+            result["silver_filter_rejects"]["by_reason_signature"][
+                "missing_required_field | required_fields | publication_year | required"
+            ]
+            == 1
+        )
+        base_table.filter.assert_called_once()
 
 
 @pytest.mark.unit

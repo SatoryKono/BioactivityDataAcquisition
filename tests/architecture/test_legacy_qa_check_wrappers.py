@@ -23,13 +23,11 @@ def test_check_architecture_wrapper_delegates_to_canonical() -> None:
 
 def test_check_application_deps_wrapper_delegates_to_canonical() -> None:
     repo_root = _repo_root()
-    wrapper_path = (
-        repo_root / "src" / "tools" / "scripts" / "check_application_deps.py"
-    )
+    wrapper_path = repo_root / "src" / "tools" / "scripts" / "check_application_deps.py"
 
-    assert (
-        wrapper_path.exists()
-    ), "src/tools/scripts/check_application_deps.py must exist"
+    assert wrapper_path.exists(), (
+        "src/tools/scripts/check_application_deps.py must exist"
+    )
     content = wrapper_path.read_text(encoding="utf-8")
     assert "runpy.run_path" in content
     assert "scripts" in content
@@ -41,9 +39,9 @@ def test_check_constructor_args_wrapper_delegates_to_canonical() -> None:
     repo_root = _repo_root()
     wrapper_path = repo_root / "src" / "tools" / "scripts" / "check_constructor_args.py"
 
-    assert (
-        wrapper_path.exists()
-    ), "src/tools/scripts/check_constructor_args.py must exist"
+    assert wrapper_path.exists(), (
+        "src/tools/scripts/check_constructor_args.py must exist"
+    )
     content = wrapper_path.read_text(encoding="utf-8")
     assert "runpy.run_path" in content
     assert "scripts" in content

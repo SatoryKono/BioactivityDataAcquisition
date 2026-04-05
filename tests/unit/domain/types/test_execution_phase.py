@@ -1,5 +1,7 @@
 """Unit tests for execution phase and FSM."""
 
+import pytest
+
 from bioetl.domain.types.execution_phase import (
     CompositeFSM,
     ExecutionFSMConfig,
@@ -78,11 +80,8 @@ def test_invalid_transition():
     # Try to transition directly to DEPENDENCY_EXECUTION (should fail)
     assert not fsm.can_transition(PhaseTransition.PREFLIGHT_TO_DEPENDENCIES)
 
-    try:
+    with pytest.raises(ValueError, match="Invalid transition"):
         fsm.transition(PhaseTransition.PREFLIGHT_TO_DEPENDENCIES)
-        assert False, "Should have raised ValueError"
-    except ValueError as e:
-        assert "Invalid transition" in str(e)
 
 
 def test_preflight_to_dependencies_transition():
@@ -114,13 +113,10 @@ def test_validation_required_transition():
         PhaseTransition.PREFLIGHT_TO_DEPENDENCIES, validation_passed=False
     )
 
-    try:
+    with pytest.raises(ValueError):
         fsm.transition(
             PhaseTransition.PREFLIGHT_TO_DEPENDENCIES, validation_passed=False
         )
-        assert False, "Should have raised ValueError"
-    except ValueError:
-        pass  # Expected
 
 
 def test_preflight_failure_transition():

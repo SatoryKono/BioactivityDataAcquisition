@@ -253,7 +253,13 @@ def _inspect_quarantine(
     context = _QuarantineCommandContext(pipeline=pipeline)
 
     async def _inspect() -> list[JsonDict]:
-        return await manager.inspect(limit=limit, error_code=error_code, run_id=run_id)
+        inspect_kwargs: dict[str, object] = {
+            "limit": limit,
+            "error_code": error_code,
+        }
+        if run_id is not None:
+            inspect_kwargs["run_id"] = run_id
+        return await manager.inspect(**inspect_kwargs)
 
     records = context.run_async(
         _inspect(),

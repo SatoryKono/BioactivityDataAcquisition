@@ -57,6 +57,7 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
+
 def _factory_context(
     factory: GenericPipelineFactory[TPipeline],
 ) -> _PipelineFactoryContext:
@@ -69,15 +70,19 @@ def _factory_context(
         pandera_silver_schema=factory.pandera_silver_schema,
     )
 
+
 def _extract_entity_type(pipeline_name: str) -> str | None:
     """Compatibility wrapper for legacy unit tests expecting assembler-local helper."""
     return extract_entity_type(pipeline_name)
+
 
 def _extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsContext:
     """Compatibility wrapper for legacy unit tests expecting assembler-local helper."""
     return extract_dq_configs(yaml_config)
 
+
 _assemble_runner_impl = assemble_runner_impl
+
 
 class GenericPipelineFactory(Generic[TPipeline]):
     def __init__(
@@ -96,15 +101,27 @@ class GenericPipelineFactory(Generic[TPipeline]):
             raise ValueError(
                 f"gold_schema is required for pipeline '{pipeline_name}' to enforce Gold validation."
             )
-        self.pipeline_name, self.pipeline_class, self.provider = pipeline_name, pipeline_class, provider
-        self.silver_schema, self.gold_schema, self.pandera_silver_schema = silver_schema, gold_schema, pandera_silver_schema
-        self.transformer_class, self.provider_registry = transformer_class, provider_registry
+        self.pipeline_name, self.pipeline_class, self.provider = (
+            pipeline_name,
+            pipeline_class,
+            provider,
+        )
+        self.silver_schema, self.gold_schema, self.pandera_silver_schema = (
+            silver_schema,
+            gold_schema,
+            pandera_silver_schema,
+        )
+        self.transformer_class, self.provider_registry = (
+            transformer_class,
+            provider_registry,
+        )
         self._create_data_source = resolve_data_source_creator(
             provider=provider,
             provider_registry=provider_registry,
             data_source_creator=data_source_creator,
             get_data_source_creator_fn=get_data_source_creator,
         )
+
     def create_transformer(
         self,
         tracer: TracingPort | None = None,
@@ -132,6 +149,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             contract_policy=contract_policy,
             dependencies=dependencies,
         )
+
     def create_data_source(
         self,
         settings: Settings,
@@ -147,6 +165,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             pipeline_name=self.pipeline_name,
             filter_config=filter_config,
         )
+
     def build_services(
         self,
         settings: Settings,
@@ -167,6 +186,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 dq_monitor,
             ),
         )
+
     def create_with_services(
         self,
         run_id: RunID,
@@ -206,6 +226,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 ),
             ),
         )
+
     def create_runner(
         self,
         run_id: RunID,
@@ -239,6 +260,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             cached_bronze=cached_bronze,
         )
 
+
 def create_pipeline_factory(
     pipeline_name: str,
     pipeline_class: type[TPipeline],
@@ -249,7 +271,18 @@ def create_pipeline_factory(
     transformer_class: type[BaseTransformer] | None = None,
     provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
-    return GenericPipelineFactory(pipeline_name, pipeline_class, provider, silver_schema, gold_schema, pandera_silver_schema, None, transformer_class, provider_registry)
+    return GenericPipelineFactory(
+        pipeline_name,
+        pipeline_class,
+        provider,
+        silver_schema,
+        gold_schema,
+        pandera_silver_schema,
+        None,
+        transformer_class,
+        provider_registry,
+    )
+
 
 def assemble_runner(
     pipeline: BasePipeline,
@@ -268,5 +301,6 @@ def assemble_runner(
         yaml_config=yaml_config,
         dq_configs_extractor=_extract_dq_configs,
     )
+
 
 __all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]

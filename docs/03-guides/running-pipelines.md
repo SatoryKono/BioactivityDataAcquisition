@@ -515,6 +515,10 @@ bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIE
 bioetl quarantine stats --pipeline chembl_activity --silver-filter-only
 bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code-field
 bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --limit 20
+
+# Один конкретный run со справедливым Bronze denominator
+bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --run-id <run-id>
+bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --run-id <run-id> --limit 20
 ```
 
 `bioetl quarantine stats --silver-filter-only` показывает:
@@ -524,6 +528,11 @@ bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --limi
 - breakdown по `field`;
 - breakdown по `rule_type`;
 - breakdown по `operator`.
+
+Если указан `--run-id`, CLI также пытается показать `Silver Rejects vs Bronze`
+на основе control-plane ledger `records_bronze` для этого запуска.
+Без `--run-id` этот ratio намеренно не показывается, потому что quarantine
+обычно агрегирует записи across runs.
 
 Для focused operator grouping можно использовать:
 

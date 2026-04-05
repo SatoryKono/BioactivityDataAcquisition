@@ -8,11 +8,20 @@ from __future__ import annotations
 
 from functools import cache
 import xml.etree.ElementTree as ET
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
+
+if TYPE_CHECKING:
+    from bioetl.application.pipelines.pubmed.transformer import (
+        PubMedPublicationTransformer,
+    )
+    from bioetl.domain.context import PipelineContext
+else:
+    PipelineContext = Any
+    PubMedPublicationTransformer = Any
 
 # Sample PubMed XML for testing
 MINIMAL_PUBMED_XML = """<?xml version="1.0"?>

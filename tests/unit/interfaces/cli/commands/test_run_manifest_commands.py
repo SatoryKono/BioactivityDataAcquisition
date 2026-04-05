@@ -110,7 +110,10 @@ class _FakeRunManifestService:
                 },
                 "next_steps": [
                     "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
-                    "Review cross-validation mismatch outcomes and composite policy anchors before retry or quarantine changes.",
+                    (
+                        "Review cross-validation mismatch outcomes and composite"
+                        " policy anchors before retry or quarantine changes."
+                    ),
                 ],
             },
         )

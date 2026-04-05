@@ -1,7 +1,6 @@
 """Retained convenience loader for pipeline YAML plus DQ integration.
 
 Wave 3 ownership classification: retain.
-
 Loads and validates pipeline configurations from YAML files.
 Integrates with DQConfigLoader for hierarchical DQ config resolution.
 
@@ -141,5 +140,6 @@ class PipelineConfigLoader:
         """
         self._dq_loader.clear_cache()
         self._filter_loader.clear_cache()
+
 
 __all__ = ["PipelineConfigLoader"]

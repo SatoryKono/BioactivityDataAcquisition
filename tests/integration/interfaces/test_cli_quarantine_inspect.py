@@ -133,7 +133,11 @@ class TestCliQuarantineInspect:
             )
 
         # Verify inspect was called with correct limit (error_code=None is also passed)
-        mock_manager.inspect.assert_called_once_with(limit=50, error_code=None)
+        mock_manager.inspect.assert_called_once_with(
+            limit=50,
+            error_code=None,
+            run_id=None,
+        )
         assert result.exit_code == 0
 
     def test_quarantine_inspect_default_limit(
@@ -155,7 +159,11 @@ class TestCliQuarantineInspect:
             )
 
         # Verify inspect was called with default limit (error_code=None is also passed)
-        mock_manager.inspect.assert_called_once_with(limit=100, error_code=None)
+        mock_manager.inspect.assert_called_once_with(
+            limit=100,
+            error_code=None,
+            run_id=None,
+        )
         assert result.exit_code == 0
 
     def test_quarantine_inspect_displays_payload(

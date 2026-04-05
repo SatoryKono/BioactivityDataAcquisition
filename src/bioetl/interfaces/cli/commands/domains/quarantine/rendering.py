@@ -114,9 +114,7 @@ def _append_focused_silver_filter_grouping(
             top=top,
         )
         return
-    lines.append(
-        "\n  Focused Silver Reject Grouping: no structured values available."
-    )
+    lines.append("\n  Focused Silver Reject Grouping: no structured values available.")
 
 
 def _append_silver_filter_lines(
@@ -138,8 +136,10 @@ def _append_silver_filter_lines(
     )
     bronze_records = silver_filter_stats.get("bronze_records")
     bronze_ratio_pct = silver_filter_stats.get("bronze_ratio_pct")
-    if isinstance(bronze_records, int) and bronze_records > 0 and isinstance(
-        bronze_ratio_pct, (int, float)
+    if (
+        isinstance(bronze_records, int)
+        and bronze_records > 0
+        and isinstance(bronze_ratio_pct, (int, float))
     ):
         lines.append(
             f"  Silver Rejects vs Bronze: {silver_total}/{bronze_records} ({bronze_ratio_pct:.1f}%)"
@@ -188,7 +188,9 @@ def build_quarantine_grouped_lines(
 
     total = stats.get("total_count", stats.get("total_records", 0))
     lines.append(f"\n  Total Records: {total}")
-    _append_error_code_lines(lines, by_error=stats.get("by_error_code", {}), total=total)
+    _append_error_code_lines(
+        lines, by_error=stats.get("by_error_code", {}), total=total
+    )
     _append_status_lines(lines, by_status=stats.get("by_status", {}), total=total)
     _append_silver_filter_lines(
         lines,

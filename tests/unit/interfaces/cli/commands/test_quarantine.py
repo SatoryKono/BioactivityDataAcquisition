@@ -70,6 +70,7 @@ class TestQuarantineInspect:
         assert "--pipeline" in result.output
         assert "--limit" in result.output
         assert "--error-code" in result.output
+        assert "--run-id" in result.output
         assert "--silver-filter-only" in result.output
 
     def test_inspect_requires_pipeline(self, cli_runner: CliRunner) -> None:
@@ -156,7 +157,7 @@ class TestQuarantineInspect:
 
         # Verify inspect was called with correct error_code
         mock_quarantine_manager.inspect.assert_called_once_with(
-            limit=100, error_code="DQ_MISSING_FIELD"
+            limit=100, error_code="DQ_MISSING_FIELD", run_id=None
         )
         assert result.exit_code == 0
 
@@ -185,7 +186,7 @@ class TestQuarantineInspect:
             )
 
         mock_quarantine_manager.inspect.assert_called_once_with(
-            limit=50, error_code=None
+            limit=50, error_code=None, run_id=None
         )
         assert result.exit_code == 0
 
@@ -213,7 +214,38 @@ class TestQuarantineInspect:
             )
 
         mock_quarantine_manager.inspect.assert_called_once_with(
-            limit=100, error_code="FILTERED_OUT_SILVER"
+            limit=100, error_code="FILTERED_OUT_SILVER", run_id=None
+        )
+        assert result.exit_code == 0
+
+    def test_inspect_with_run_id_filter(
+        self,
+        cli_runner: CliRunner,
+        mock_quarantine_manager: MagicMock,
+    ) -> None:
+        """Test quarantine inspect with explicit run-id scoping."""
+        mock_quarantine_manager.inspect = AsyncMock(return_value=[])
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "quarantine",
+                    "inspect",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--run-id",
+                    "00000000-0000-0000-0000-000000000123",
+                ],
+            )
+
+        mock_quarantine_manager.inspect.assert_called_once_with(
+            limit=100,
+            error_code=None,
+            run_id="00000000-0000-0000-0000-000000000123",
         )
         assert result.exit_code == 0
 
@@ -229,6 +261,7 @@ class TestQuarantineStats:
         assert "--pipeline" in result.output
         assert "--json" in result.output
         assert "--error-code" in result.output
+        assert "--run-id" in result.output
         assert "--silver-filter-only" in result.output
         assert "--group-by" in result.output
         assert "--top" in result.output
@@ -332,11 +365,78 @@ class TestQuarantineStats:
             )
 
         mock_quarantine_manager.get_stats.assert_called_once_with(
-            error_code="FILTERED_OUT_SILVER"
+            error_code="FILTERED_OUT_SILVER",
+            run_id=None,
         )
         assert result.exit_code == 0
         assert "Silver Filter Rejects: 3" in result.output
         assert "missing_required_field" in result.output
+
+    def test_stats_with_run_id_and_bronze_ratio(
+        self,
+        cli_runner: CliRunner,
+        mock_quarantine_manager: MagicMock,
+    ) -> None:
+        """Test run-scoped Silver reject summary includes Bronze denominator."""
+        mock_quarantine_manager.get_stats = AsyncMock(
+            return_value={
+                "total_count": 4,
+                "by_error_code": {"FILTERED_OUT_SILVER": 4},
+                "by_status": {"NEW": 4},
+                "silver_filter_rejects": {
+                    "total_count": 4,
+                    "by_reason_code": {"missing_required_field": 4},
+                    "by_field": {"publication_year": 4},
+                    "by_rule_type": {"required_fields": 4},
+                    "by_operator": {"required": 4},
+                    "by_reason_code_field": {
+                        "missing_required_field | publication_year": 4
+                    },
+                    "by_reason_signature": {
+                        "missing_required_field | required_fields | publication_year | required": 4
+                    },
+                },
+            }
+        )
+        mock_run_manifest_service = MagicMock()
+        mock_run_manifest_service.show.return_value = MagicMock(
+            ledger_entries=(
+                MagicMock(metrics_snapshot={"records_bronze": 10}),
+                MagicMock(metrics_snapshot={"records_silver": 4}),
+            )
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            with patch(
+                "bioetl.interfaces.cli.commands.quarantine.get_run_manifest_service",
+                return_value=mock_run_manifest_service,
+            ):
+                result = cli_runner.invoke(
+                    cli,
+                    [
+                        "quarantine",
+                        "stats",
+                        "--pipeline",
+                        "chembl_activity",
+                        "--silver-filter-only",
+                        "--run-id",
+                        "00000000-0000-0000-0000-000000000123",
+                    ],
+                )
+
+        mock_quarantine_manager.get_stats.assert_called_once_with(
+            error_code="FILTERED_OUT_SILVER",
+            run_id="00000000-0000-0000-0000-000000000123",
+        )
+        mock_run_manifest_service.show.assert_called_once_with(
+            "00000000-0000-0000-0000-000000000123"
+        )
+        assert result.exit_code == 0
+        assert "Run ID Scope: 00000000-0000-0000-0000-000000000123" in result.output
+        assert "Silver Rejects vs Bronze: 4/10 (40.0%)" in result.output
 
     def test_stats_with_focused_group_by_reason_code_field(
         self,

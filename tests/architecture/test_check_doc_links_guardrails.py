@@ -324,9 +324,9 @@ nav:
     monkeypatch.setattr(
         Path,
         "read_text",
-        lambda self, encoding="utf-8", errors="replace": mkdocs_payload
-        if self == mkdocs_file
-        else "",
+        lambda self, encoding="utf-8", errors="replace": (
+            mkdocs_payload if self == mkdocs_file else ""
+        ),
     )
     monkeypatch.setattr(Path, "exists", lambda self: self == mkdocs_file)
 

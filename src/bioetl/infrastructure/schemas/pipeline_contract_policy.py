@@ -105,7 +105,9 @@ class PipelineContractPolicy(BaseModel):
         if len(self.rollout.read_order) != len(set(self.rollout.read_order)):
             raise ValueError("rollout.read_order must not contain duplicate versions")
         if len(self.rollout.write_versions) != len(set(self.rollout.write_versions)):
-            raise ValueError("rollout.write_versions must not contain duplicate versions")
+            raise ValueError(
+                "rollout.write_versions must not contain duplicate versions"
+            )
 
     def _validate_single_rollout_mode(self) -> None:
         if self.rollout.mode != "single":

@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import NamedTuple
 
 from bioetl.domain.ports import MetricsPort, QuarantinePort, QuarantineWriteRequest
-from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict
+from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict, RunID
 
 
 class DQQuarantineEntry(NamedTuple):
@@ -43,11 +43,7 @@ def _filtered_quarantine_metadata(
     error_details: JsonDict = {"message": reason}
     if details:
         error_details.update(
-            {
-                key: value
-                for key, value in details.items()
-                if key != "message"
-            }
+            {key: value for key, value in details.items() if key != "message"}
         )
     return {
         "error_details": error_details,
@@ -127,6 +123,7 @@ class QuarantineManagerService:
         error_type: ErrorType,
         batch_id: BatchID,
         error_details: str,
+        run_id: RunID | None = None,
         *,
         ingestion_ts: datetime,
     ) -> None:
@@ -137,6 +134,7 @@ class QuarantineManagerService:
             error_type: Classification of the error.
             batch_id: ID of the batch containing this record.
             error_details: Human-readable error description.
+            run_id: Optional pipeline run identifier for traceability.
             ingestion_ts: Ingestion timestamp from context
                          (single source of time per ADR-014). Required.
 
@@ -146,6 +144,7 @@ class QuarantineManagerService:
             error_code=error_type.value,
             payload=record,
             bronze_batch_id=batch_id,
+            run_id=run_id,
             metadata={"error_details": {"message": error_details}},
             ingestion_ts=ingestion_ts,
         )
@@ -156,6 +155,7 @@ class QuarantineManagerService:
         self,
         records: list[DQQuarantineEntry],
         batch_id: BatchID,
+        run_id: RunID | None = None,
         *,
         ingestion_ts: datetime,
     ) -> None:
@@ -169,6 +169,7 @@ class QuarantineManagerService:
                 "error_code": error_type.value,
                 "payload": record,
                 "bronze_batch_id": batch_id,
+                "run_id": run_id,
                 "metadata": {"error_details": {"message": error_details}},
                 "ingestion_ts": ingestion_ts,
             }
@@ -187,6 +188,7 @@ class QuarantineManagerService:
         record: JsonDict,  # Any: quarantine record has heterogeneous values
         batch_id: BatchID,
         error_details: str,
+        run_id: RunID | None = None,
         *,
         details: JsonDict | None = None,
         ingestion_ts: datetime,
@@ -200,6 +202,7 @@ class QuarantineManagerService:
             record: The raw record excluded by Silver filters.
             batch_id: ID of the batch containing this record.
             error_details: Human-readable exclusion reason.
+            run_id: Optional pipeline run identifier for traceability.
             ingestion_ts: Ingestion timestamp from context.
         """
         error_code = "FILTERED_OUT_SILVER"
@@ -208,6 +211,7 @@ class QuarantineManagerService:
             error_code=error_code,
             payload=record,
             bronze_batch_id=batch_id,
+            run_id=run_id,
             metadata=_filtered_quarantine_metadata(
                 reason=error_details,
                 details=details,
@@ -224,6 +228,7 @@ class QuarantineManagerService:
         self,
         records: list[FilteredQuarantineEntry],
         batch_id: BatchID,
+        run_id: RunID | None = None,
         *,
         ingestion_ts: datetime,
     ) -> None:
@@ -238,6 +243,7 @@ class QuarantineManagerService:
                 "error_code": error_code,
                 "payload": entry.record,
                 "bronze_batch_id": batch_id,
+                "run_id": run_id,
                 "metadata": _filtered_quarantine_metadata(
                     reason=entry.reason,
                     details=entry.details,

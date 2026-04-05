@@ -193,6 +193,10 @@ class TestTransformSingle:
         assert result.gold_record is None
         assert result.is_quarantined is True
         mock_quarantine_manager.quarantine_records.assert_called_once()
+        assert (
+            mock_quarantine_manager.quarantine_records.call_args.kwargs["run_id"]
+            == mock_context.run_id
+        )
 
     async def test_transform_single_filtered_out_quarantine_sink(
         self,
@@ -235,6 +239,12 @@ class TestTransformSingle:
         assert result.is_quarantined is False
         assert result.is_filtered_out is True
         mock_quarantine_manager.quarantine_filtered_records.assert_called_once()
+        assert (
+            mock_quarantine_manager.quarantine_filtered_records.call_args.kwargs[
+                "run_id"
+            ]
+            == mock_context.run_id
+        )
 
 
 @pytest.mark.unit
@@ -360,6 +370,10 @@ class TestTransformStream:
 
         assert len(result.silver_records) == 2
         assert result.quarantined_count == 1
+        assert (
+            mock_quarantine_manager.quarantine_records.call_args.kwargs["run_id"]
+            == mock_context.run_id
+        )
 
     async def test_transform_stream_tracks_filtered_out(
         self,
@@ -410,6 +424,12 @@ class TestTransformStream:
         assert result.quarantined_count == 0
         assert result.filtered_out_count == 1
         mock_quarantine_manager.quarantine_filtered_records.assert_called_once()
+        assert (
+            mock_quarantine_manager.quarantine_filtered_records.call_args.kwargs[
+                "run_id"
+            ]
+            == mock_context.run_id
+        )
 
 
 @pytest.mark.unit

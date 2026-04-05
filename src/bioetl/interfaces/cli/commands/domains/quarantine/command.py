@@ -9,7 +9,10 @@ from __future__ import annotations
 import click
 
 from bioetl.composition.resources_api import get_quarantine_manager
-from bioetl.composition.services_api import get_quarantine_service
+from bioetl.composition.services_api import (
+    get_quarantine_service,
+    get_run_manifest_service,
+)
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _inspect_quarantine,
     _purge_quarantine,
@@ -37,6 +40,10 @@ def quarantine() -> None:
     "--error-code", help="Filter by error code"
 )
 @click.option(  # type: ignore[untyped-decorator]
+    "--run-id",
+    help="Scope inspection to one pipeline run ID",
+)
+@click.option(  # type: ignore[untyped-decorator]
     "--silver-filter-only",
     is_flag=True,
     help="Shortcut for --error-code FILTERED_OUT_SILVER",
@@ -45,6 +52,7 @@ def quarantine_inspect(
     pipeline: str,
     limit: int,
     error_code: str | None,
+    run_id: str | None,
     silver_filter_only: bool,
 ) -> None:
     """Inspect quarantined records for a pipeline."""
@@ -54,6 +62,7 @@ def quarantine_inspect(
         pipeline=pipeline,
         limit=limit,
         error_code=resolved_error_code,
+        run_id=run_id,
     )
 
 
@@ -66,6 +75,10 @@ def quarantine_inspect(
 )
 @click.option(  # type: ignore[untyped-decorator]
     "--error-code", help="Scope stats to one error code"
+)
+@click.option(  # type: ignore[untyped-decorator]
+    "--run-id",
+    help="Scope stats to one pipeline run ID",
 )
 @click.option(  # type: ignore[untyped-decorator]
     "--silver-filter-only",
@@ -98,6 +111,7 @@ def quarantine_stats(
     pipeline: str,
     output_json: bool,
     error_code: str | None,
+    run_id: str | None,
     silver_filter_only: bool,
     group_by: str | None,
     top: int,
@@ -111,6 +125,8 @@ def quarantine_stats(
         error_code=resolved_error_code,
         top=top,
         group_by=group_by,
+        run_id=run_id,
+        run_manifest_service=get_run_manifest_service() if run_id else None,
     )
 
 

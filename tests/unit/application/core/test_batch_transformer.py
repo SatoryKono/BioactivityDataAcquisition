@@ -494,6 +494,12 @@ class TestBatchTransformerTransform:
         assert result.quarantined_count == 0
         assert result.filtered_out_count == 1
         mock_quarantine_manager.quarantine_filtered_records.assert_called_once()
+        assert (
+            mock_quarantine_manager.quarantine_filtered_records.call_args.kwargs[
+                "run_id"
+            ]
+            == mock_context.run_id
+        )
 
     async def test_transform_batch_continues_when_bulk_filtered_quarantine_fails(
         self,

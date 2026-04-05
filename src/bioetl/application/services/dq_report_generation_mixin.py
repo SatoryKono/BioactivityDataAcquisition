@@ -126,17 +126,18 @@ class DQReportGenerationMixin:
             analyzer=self._bronze_analyzer,
             report_writer=self._report_writer,
             logger=self._logger,
-            emit_skipped_metric=lambda pipeline,
-            stage,
-            reason: self._emit_dq_report_skipped_metric(
-                pipeline=pipeline,
-                stage=stage,
-                reason=reason,
+            emit_skipped_metric=lambda pipeline, stage, reason: (
+                self._emit_dq_report_skipped_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                    reason=reason,
+                )
             ),
-            emit_generated_metric=lambda pipeline,
-            stage: self._emit_dq_report_generated_metric(
-                pipeline=pipeline,
-                stage=stage,
+            emit_generated_metric=lambda pipeline, stage: (
+                self._emit_dq_report_generated_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                )
             ),
         )
 
@@ -152,17 +153,18 @@ class DQReportGenerationMixin:
             analyzer=self._silver_analyzer,
             report_writer=self._report_writer,
             logger=self._logger,
-            emit_skipped_metric=lambda pipeline,
-            stage,
-            reason: self._emit_dq_report_skipped_metric(
-                pipeline=pipeline,
-                stage=stage,
-                reason=reason,
+            emit_skipped_metric=lambda pipeline, stage, reason: (
+                self._emit_dq_report_skipped_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                    reason=reason,
+                )
             ),
-            emit_generated_metric=lambda pipeline,
-            stage: self._emit_dq_report_generated_metric(
-                pipeline=pipeline,
-                stage=stage,
+            emit_generated_metric=lambda pipeline, stage: (
+                self._emit_dq_report_generated_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                )
             ),
         )
 
@@ -178,17 +180,18 @@ class DQReportGenerationMixin:
             analyzer=self._gold_analyzer,
             report_writer=self._report_writer,
             logger=self._logger,
-            emit_skipped_metric=lambda pipeline,
-            stage,
-            reason: self._emit_dq_report_skipped_metric(
-                pipeline=pipeline,
-                stage=stage,
-                reason=reason,
+            emit_skipped_metric=lambda pipeline, stage, reason: (
+                self._emit_dq_report_skipped_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                    reason=reason,
+                )
             ),
-            emit_generated_metric=lambda pipeline,
-            stage: self._emit_dq_report_generated_metric(
-                pipeline=pipeline,
-                stage=stage,
+            emit_generated_metric=lambda pipeline, stage: (
+                self._emit_dq_report_generated_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                )
             ),
         )
 

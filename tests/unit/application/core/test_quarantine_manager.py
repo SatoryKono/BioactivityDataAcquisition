@@ -13,7 +13,7 @@ from bioetl.application.core.quarantine_manager import (
     FilteredQuarantineEntry,
     QuarantineManagerService,
 )
-from bioetl.domain.types import BatchID, ErrorType
+from bioetl.domain.types import BatchID, ErrorType, RunID
 
 
 @pytest.fixture
@@ -47,6 +47,7 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
         )
         batch_id = BatchID(uuid4())
+        run_id = RunID(uuid4())
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_filtered_records(
@@ -55,11 +56,13 @@ class TestQuarantineManagerBulkWrites:
                 FilteredQuarantineEntry({"activity_id": "2"}, "filtered"),
             ],
             batch_id,
+            run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
 
         quarantine_port.write_many.assert_awaited_once()
         requests = quarantine_port.write_many.await_args.args[0]
+        assert requests[0]["run_id"] == run_id
         assert requests[0]["metadata"]["classification"] == "filter_rejection"
         assert requests[0]["metadata"]["quarantine_category"] == "silver_filter"
         assert "quasi_quarantine" not in requests[0]["metadata"]
@@ -82,12 +85,14 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
         )
         batch_id = BatchID(uuid4())
+        run_id = RunID(uuid4())
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_filtered_record(
             record={"activity_id": "1"},
             batch_id=batch_id,
             error_details="display text",
+            run_id=run_id,
             details={
                 "message": "unstable text that must not override display message",
                 "reason_code": "required_field_missing",
@@ -100,6 +105,7 @@ class TestQuarantineManagerBulkWrites:
 
         quarantine_port.write.assert_awaited_once()
         request = quarantine_port.write.await_args.kwargs
+        assert request["run_id"] == run_id
         assert request["metadata"]["error_details"] == {
             "message": "display text",
             "reason_code": "required_field_missing",
@@ -122,6 +128,7 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
         )
         batch_id = BatchID(uuid4())
+        run_id = RunID(uuid4())
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_records(
@@ -131,10 +138,13 @@ class TestQuarantineManagerBulkWrites:
                 ({"activity_id": "3"}, ErrorType.MISSING_REQUIRED_FIELD, "missing"),
             ],
             batch_id,
+            run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
 
         quarantine_port.write_many.assert_awaited_once()
+        requests = quarantine_port.write_many.await_args.args[0]
+        assert requests[0]["run_id"] == run_id
         metrics.inc_quarantine_records.assert_any_call(
             pipeline="chembl_activity",
             reason=ErrorType.INVALID_DATA.value,
@@ -159,6 +169,7 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
         )
         batch_id = BatchID(uuid4())
+        run_id = RunID(uuid4())
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_record(
@@ -166,10 +177,12 @@ class TestQuarantineManagerBulkWrites:
             error_type=ErrorType.INVALID_DATA,
             batch_id=batch_id,
             error_details="bad value",
+            run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
 
         quarantine_port.write.assert_awaited_once()
+        assert quarantine_port.write.await_args.kwargs["run_id"] == run_id
         metrics.track_quarantined_records.assert_called_once_with(
             ErrorType.INVALID_DATA,
             1,
