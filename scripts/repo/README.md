@@ -18,6 +18,7 @@ python -m scripts.repo <command> [args...]
 | `check-versions`        | `check_version_consistency.py`   | Check version consistency across project files                   |
 | `check-cleanliness`     | `audit_root_cleanliness.py`      | Audit repository root layout allowlist                           |
 | `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511` |
+| `sync-docs-issues`      | `sync_docs_issues.py`            | Preview or apply labels, milestone, and comments for docs-sync issues |
 | `all`                   | *(all above)*                    | Run all checks sequentially                                      |
 
 ## Shell Wrapper
@@ -25,11 +26,13 @@ python -m scripts.repo <command> [args...]
 ```bash
 bash scripts/repo/split_testing_roadmap_issue.sh --help
 GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/repo/split_testing_roadmap_issue.sh --apply --comment-parent
+bash scripts/repo/sync_docs_issues.sh --help
+GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/repo/sync_docs_issues.sh --apply --skip-milestone
 ```
 
 Use the shell wrapper when you want a copy-pasteable bash entrypoint for the
-testing-roadmap issue split workflow. It forwards all arguments to the Python
-implementation.
+testing-roadmap issue split workflow or the docs-sync issue metadata workflow.
+Both wrappers forward all arguments to their Python implementations.
 
 ## When to Use
 
@@ -40,6 +43,7 @@ implementation.
 | `check-versions`        | Before release or after bumping version in any file                     | CI gate (`docs.yml`)         |
 | `check-cleanliness`     | After adding files to repository root                                   | Pre-commit hook              |
 | `split-testing-roadmap` | When converting a roadmap issue into executable GitHub child issues     | Manual maintenance workflow  |
+| `sync-docs-issues`      | When applying the documentation-sync issue package metadata and execution-order comments | Manual maintenance workflow  |
 | `all`                   | Quick local sanity check before PR                                      | Manual                       |
 
 ## Other Files
