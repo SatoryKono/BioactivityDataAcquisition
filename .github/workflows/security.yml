@@ -10,7 +10,6 @@ on:
       - '*.md'
       - '.ai/**'
       - '.claude/**'
-      - '.github/workflows/**'
       - 'LICENSE'
   pull_request:
     paths-ignore:
@@ -18,7 +17,6 @@ on:
       - '*.md'
       - '.ai/**'
       - '.claude/**'
-      - '.github/workflows/**'
       - 'LICENSE'
 
 concurrency:
