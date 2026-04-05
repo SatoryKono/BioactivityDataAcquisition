@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prometheus Alert Rule Editor"
+  short_description: "Create and safely update Prometheus alert rules"
+  default_prompt: "Use $prometheus-alert-rule-editor to create, review, or tune Prometheus-backed alert rules, labels, annotations, and thresholds."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Py Review Orchestrator"
+  short_description: "Hierarchical BioETL review orchestration"
+  default_prompt: "Use $py-review-orchestrator to run hierarchical S1-S8 BioETL review and generate reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_FINAL.md."

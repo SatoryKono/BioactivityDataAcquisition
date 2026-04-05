@@ -1,0 +1,4 @@
+interface:
+  display_name: "Py Architecture Debt Bot"
+  short_description: "End-to-end architecture debt reduction orchestration"
+  default_prompt: "Use $py-architecture-debt-bot to generate architecture debt tasks, build an execution plan, run a targeted reduction wave, and verify the result."

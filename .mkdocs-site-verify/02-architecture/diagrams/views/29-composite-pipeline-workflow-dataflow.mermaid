@@ -1,0 +1,14 @@
+%% View: Data-Flow | Parent: 29-composite-pipeline-workflow-full.mermaid
+%% @uniform width=160 height=56 max_title_len=16 max_desc_lines=1
+flowchart LR
+    SEED["Seed Silver"] --> KEYS["Filter keys"]
+    SEED --> DEPS["Dependency outputs"]
+    KEYS --> ENR["Enricher outputs"]
+    ENR --> MERGE["Merge input set"]
+    DEPS --> MERGE
+    MERGE --> GOLD["Gold table"]
+
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    class KEYS,MERGE app;
+    class SEED,DEPS,ENR,GOLD infra;

@@ -1,0 +1,82 @@
+%% Title: Cross-Provider Data Enrichment Flow — Publication
+%% Covers: ADR-026 (Composite), publication composite pipeline config
+%% Rank: 19 (Score 8.00) — 5 providers merging into unified Gold
+%% Updated: 2026-02-17
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   19
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=376 height=184 max_title_len=37 max_desc_lines=8
+flowchart LR
+    subgraph ChEMBL["ChEMBL (Seed)"]
+        CA["ChemblAdapter<br/>/document endpoint"]
+        CT["PublicationTransformer"]
+        CS[("Silver<br/>chembl/publication"<br/>)]
+    end
+
+    subgraph CrossRef["CrossRef (Enricher)"]
+        CRA["CrossRefAdapter<br/>/works?filter=doi:..."]
+        CRT["CrossRefPublicationTransformer"]
+        CRS[("Silver<br/>crossref/publication"<br/>)]
+    end
+
+    subgraph PubMed["PubMed (Enricher)"]
+        PMA["PubMedAdapter<br/>efetch(PMIDs)"]
+        PMT["PubMedPublicationTransformer"]
+        PMS[("Silver<br/>pubmed/publication"<br/>)]
+    end
+
+    subgraph OpenAlex["OpenAlex (Enricher)"]
+        OAA["OpenAlexAdapter<br/>/works?filter=doi:..."]
+        OAT["OpenAlexPublicationTransformer"]
+        OAS[("Silver<br/>openalex/publication"<br/>)]
+    end
+
+    subgraph S2["Semantic Scholar (Enricher)"]
+        SSA["SemanticScholarAdapter<br/>/paper/batch"]
+        SST["SemanticScholarPublicationTransformer"]
+        S2S[("Silver<br/>semanticscholar/publication"<br/>)]
+    end
+
+    subgraph Merge["Merge Phase"]
+        MS["MergeService<br/>LEFT OUTER JOIN<br/>conflict: coalesce"]
+        FIELDS["Field groups<br/>id/status + bibliography<br/>author + terms<br/>citations + dates + types"]
+    end
+
+    subgraph Gold["Gold Output"]
+        GS["CompositePublicationGoldSchema<br/>(Pandera strict validation)"]
+    end
+
+    %% Flows
+    CA --> CT --> CS
+    CRA --> CRT --> CRS
+    PMA --> PMT --> PMS
+    OAA --> OAT --> OAS
+    SSA --> SST --> S2S
+
+    CS ==>|"seed"| MS
+    CRS -->|"citations"| MS
+    PMS -->|"abstract"| MS
+    OAS -->|"concepts"| MS
+    S2S -->|"tldr"| MS
+
+    MS --> FIELDS
+    FIELDS --> GS --> GT
+
+    %% Styling
+    style ChEMBL fill:#fff7ed,stroke:#f59e0b,color:#212121
+    style Merge fill:#f1f5f9,stroke:#475569,color:#212121
+    style Gold fill:#fefce8,stroke:#ca8a04,color:#212121

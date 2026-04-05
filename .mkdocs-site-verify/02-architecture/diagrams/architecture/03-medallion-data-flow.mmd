@@ -1,0 +1,122 @@
+%% BioETL — Medallion Architecture Data Flow (Bronze → Silver → Gold)
+%% Shows how data flows through the three medallion layers.
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   36
+%% @reference  Canonical medallion flow — at threshold boundary
+%% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
+graph LR
+    subgraph Sources["External Data Sources"]
+        API7["Semantic Scholar API<br/>"]:::size-sm
+    end
+
+    subgraph Ingestion["Data Ingestion"]
+        DS["DataSourcePort<br/>fetch() / fetch_filtered()"]:::size-sm
+        RL["RateLimiter<br/>(TokenBucket)"]:::size-sm
+        CB["CircuitBreaker<br/>"]:::size-sm
+        RETRY["Retry Logic<br/>"]:::size-sm
+    end
+
+    subgraph Bronze["Bronze Layer (Raw)"]
+        BW["BronzeWriter<br/>"]:::size-sm
+        BJSONL["JSONL + zstd<br/>compressed files"]:::size-sm
+        BMETA["_metadata.yaml<br/>sidecar"]:::size-sm
+        BAUDIT["Audit Log<br/>"]:::size-sm
+    end
+
+    subgraph Transform["Transformation"]
+        BT["BaseTransformer<br/>(Template Method)"]:::size-sm
+        NORM["Normalization<br/>(text, units, dates)"]:::size-sm
+        HASH["Identity Service<br/>(entity_id + content_hash)"]:::size-sm
+        PII["PII Hasher<br/>(SHA256 + salt)"]:::size-sm
+        DQ_CHECK["DQ Thresholds<br/>Check"]:::size-sm
+    end
+
+    subgraph Silver["Silver Layer (Normalized)"]
+        SW["SilverWriter<br/>(Delta Lake)"]:::size-sm
+        DELTA_S["Delta Table<br/>(merge/upsert)"]:::size-sm
+        SV["Silver Validator<br/>(Pandera)"]:::size-sm
+        SMETA["_metadata.yaml<br/>"]:::size-sm
+    end
+
+    subgraph GoldTransform["Gold Transformation"]
+        GFILT["Gold Filters<br/>"]:::size-sm
+        GMAP["Field Mapping<br/>(exclude fields)"]:::size-sm
+        GV["Gold Validator<br/>(Pandera strict)"]:::size-sm
+    end
+
+    subgraph Gold["Gold Layer (Business-Ready)"]
+        GW["GoldWriter<br/>(Delta Lake)"]:::size-sm
+        DELTA_G["Delta Table<br/>(validated, typed)"]:::size-sm
+        GMETA["_metadata.yaml<br/>"]:::size-sm
+    end
+
+    subgraph Quarantine["Quarantine"]
+        QM["QuarantineManager<br/>"]:::size-sm
+        QS["Quarantine Store<br/>"]:::size-sm
+    end
+
+    subgraph DQ["Data Quality Reports"]
+        DQ_B["Bronze DQ<br/>Analyzer"]:::size-sm
+        DQ_S["Silver DQ<br/>Analyzer"]:::size-sm
+        DQ_G["Gold DQ<br/>Analyzer"]:::size-sm
+    end
+
+    %% Flow
+    API1 & API2 & API3 & API4 & API5 & API6 & API7 -.-> DS
+    DS --> RL --> CB --> RETRY
+
+    RETRY --> BW
+    BW --> BJSONL
+    BW --> BMETA
+    BW --> BAUDIT
+
+    BJSONL --> BT
+    BT --> NORM --> HASH --> PII
+    PII --> DQ_CHECK
+
+    DQ_CHECK -->|"pass"| SW
+    DQ_CHECK -->|"fail"| QM --> QS
+
+    SW --> SV --> DELTA_S
+    SW --> SMETA
+
+    DELTA_S --> GFILT --> GMAP --> GV
+    GV --> GW --> DELTA_G
+    GW --> GMETA
+
+    BJSONL --> DQ_B --> DQ_RPT
+    DELTA_S --> DQ_S --> DQ_RPT
+    DELTA_G --> DQ_G --> DQ_RPT
+
+    classDef bronze fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef silver fill:#f8fafc,stroke:#475569,stroke-width:2px
+    classDef gold fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    classDef source fill:#f1f5f9,stroke:#64748b
+    classDef process fill:#f0fdf4,stroke:#16a34a
+    classDef quarantine fill:#fff1f2,stroke:#dc2626
+    classDef dq fill:#f5f3ff,stroke:#7c3aed
+
+    class BW,BJSONL,BMETA,BAUDIT bronze
+    class SW,DELTA_S,SV,SMETA silver
+    class GW,DELTA_G,GV,GMETA gold
+    class API1,API2,API3,API4,API5,API6,API7 source
+    class DS,RL,CB,RETRY,BT,NORM,HASH,PII,DQ_CHECK,GFILT,GMAP process
+    class QM,QS quarantine
+    class DQ_B,DQ_S,DQ_G,DQ_RPT dq

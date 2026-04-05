@@ -1,0 +1,82 @@
+%% Title: HTTP Client API Request Sequence
+%% Covers: RULES.md §3.6 (Resilience), §3.7 (Rate Limiting), UnifiedHTTPClient retry flow
+%% Updated: 2026-03-24
+%% Components: ProviderAdapter, UnifiedHTTPClient, TokenBucketRateLimiter, CircuitBreakerGuard, httpx AsyncClient, retry/backoff
+
+%% @version 1.1.0
+%% @date    2026-03-24
+%% @type    sequenceDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   7
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform sequence width=244 max_title_len=26
+sequenceDiagram
+    autonumber
+    participant Adapter as ProviderAdapter
+    participant Client as UnifiedHTTPClient
+    participant RL as TokenBucketRateLimiter
+    participant CB as CircuitBreakerGuard
+    participant HTTPX as httpx.AsyncClient
+    participant API as External Provider API
+    participant Obs as Tracing + Metrics
+
+    Note over Adapter,Client: Phase 1: Request entry
+
+    Adapter->>Client: get(url, params) / post(...)
+    activate Client
+    Client->>Obs: start request span
+
+    Note over Client,API: Phase 2: Retry-orchestrated attempts
+
+    loop attempt in retry_config.max_attempts
+        Client->>RL: acquire()
+        RL-->>Client: token granted
+
+        Client->>CB: call(client.request, method, url, **kwargs)
+        activate CB
+
+        alt circuit open
+            CB-->>Client: raise CircuitBreakerOpenError
+            Client->>Obs: mark span error + trip telemetry
+            Client-->>Adapter: raise CircuitBreakerOpenError
+        else call allowed
+            CB->>HTTPX: request(method, url, **kwargs)
+            activate HTTPX
+            HTTPX->>API: HTTP request
+
+            alt 2xx success
+                API-->>HTTPX: response
+                HTTPX-->>CB: httpx.Response
+                CB-->>Client: response
+                Client->>Obs: record duration/status metrics
+                Client-->>Adapter: httpx.Response
+
+            else retryable status / transient error
+                API-->>HTTPX: 429 / 5xx or timeout
+                HTTPX-->>CB: response or exception
+                CB-->>Client: outcome
+                Client->>Client: calculate backoff<br/>honor Retry-After when present
+                Client->>Obs: log retry attempt
+            else terminal error
+                API-->>HTTPX: 4xx / non-retryable failure
+                HTTPX-->>CB: response or exception
+                CB-->>Client: outcome
+                Client->>Obs: mark span error
+                Client-->>Adapter: raise HTTPError / BioETLError
+            end
+            deactivate HTTPX
+        end
+
+        deactivate CB
+    end
+
+    Note over Client,Obs: Phase 3: Retry exhaustion finalization
+
+    Client->>Obs: finalize_request_observability(...)
+    Client-->>Adapter: raise RetryExhaustedError
+    deactivate Client
+
+    rect rgb(240, 255, 240)
+        Note over Client,API: Additional path
+        Note right of Client: get_once() still uses rate limiter + circuit breaker,<br/>but skips the retry loop and raises on first non-2xx response.
+    end

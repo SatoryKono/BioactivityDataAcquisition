@@ -1,0 +1,69 @@
+%% BioETL — Publication, UniProt, Other Transformers and Blocks
+%% Provider-specific transformers, declarative PubMed blocks, and helper extractor seams.
+
+%% @version 1.1.0
+%% @date    2026-03-19
+%% @type    flowchart
+%% @level   System / Component
+%% @view    transformer-publications
+%% @parent  16-transformer-hierarchy.mmd
+%% @nodes   16
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+%% keep-orphan: IDMT, PCCT
+    subgraph Publications["Publication Transformers"]
+        BPT["BasePublicationTransformer"]:::size-sm
+        PMT["PubMedPublicationTransformer"]:::size-sm
+        CRfT["CrossRefPublicationTransformer"]:::size-sm
+        OAT["OpenAlexPublicationTransformer"]:::size-sm
+        SST["SemanticScholarPublicationTransformer"]:::size-sm
+    end
+
+    subgraph UniProtTrans["UniProt Transformers"]
+        UPT["UniProtProteinTransformer"]:::size-sm
+        IDMT["IDMappingTransformer"]:::size-sm
+    end
+
+    subgraph Other["Other Transformers"]
+        PCCT["PubChemCompoundTransformer"]:::size-sm
+    end
+
+    subgraph Helpers["Blocks + Helper Extractors"]
+        EBP["ExtractionBlock<br/>protocol"]:::size-sm
+        PBS["PubMed block set<br/>identifier / core / author / journal<br/>date / classification / metrics"]:::size-md
+        AE["AbstractExtractor"]:::size-sm
+        AuE["AuthorExtractor"]:::size-sm
+        DE["DateExtractor"]:::size-sm
+        IE["IdentifierExtractor"]:::size-sm
+        CLE["ClassificationExtractor"]:::size-sm
+        UPH["UniProt helper extractors<br/>taxonomy / gene / feature<br/>comments / xrefs"]:::size-md
+    end
+
+    %% Inheritance
+    BPT --> PMT & CRfT & OAT & SST
+
+    %% Usage relationships
+    BPT -.->|iterates| EBP
+    PMT -.->|builds| PBS
+    PBS -.->|uses| AE & AuE & DE & IE & CLE
+    UPT -.->|uses| UPH
+
+    classDef pub fill:#f0fdf4,stroke:#16a34a
+    classDef uniprot fill:#f5f3ff,stroke:#7c3aed
+    classDef other fill:#f1f5f9,stroke:#64748b
+    classDef helper fill:#fefce8,stroke:#ca8a04
+
+    class BPT,PMT,CRfT,OAT,SST pub
+    class UPT,IDMT uniprot
+    class PCCT other
+    class EBP,PBS,AE,AuE,DE,IE,CLE,UPH helper

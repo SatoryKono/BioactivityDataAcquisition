@@ -1,0 +1,27 @@
+%% View: Domain | Parent: 05-layers-interaction-full.mermaid
+%% @uniform width=172 height=56 max_title_len=17 max_desc_lines=0
+flowchart LR
+    subgraph Application["Application contracts"]
+        BasePipeline["BasePipeline"]
+        Runner["PipelineRunner"]
+        Services["PipelineService"]
+        Processing["BatchProcessingService"]
+        Composite["CompositeRunner"]
+    end
+
+    subgraph Domain["Domain responsibilities"]
+        Ports["Port facades"]
+        Models["Entities / VOs"]
+        RuntimeTypes["Config / runtime"]
+        Errors["Errors / events"]
+    end
+
+    BasePipeline --> Ports
+    Services --> Ports
+    Processing --> Models
+    Runner --> RuntimeTypes
+    Runner --> Errors
+    Composite --> Models
+
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

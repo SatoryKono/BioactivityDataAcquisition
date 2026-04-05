@@ -1,0 +1,4 @@
+interface:
+  display_name: "Documentation Cascade Audit"
+  short_description: "Hierarchical BioETL documentation cascade audit"
+  default_prompt: "Use $documentation-cascade-audit to run a hierarchical BioETL documentation audit and write the consolidated report to reports/{LLM}/review_documentation-cascade-audit_{YYYYMMDD}_{HHMM}.md."

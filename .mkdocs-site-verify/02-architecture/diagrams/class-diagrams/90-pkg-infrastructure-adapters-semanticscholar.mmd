@@ -1,0 +1,52 @@
+%% Title: Package Family: infrastructure/adapters/semanticscholar
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/semanticscholar; modules: health_metadata_mixin, _client_fallback_policy, _search_fetch_flow, adapter, batch_request_mixin, fallback.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   14
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace health_metadata_mixin {
+        class SemanticScholarAdapterMetricsProtocol
+        class SemanticScholarHTTPClientProtocol
+        class SemanticScholarHTTPResponseProtocol
+        class SemanticScholarHealthMetadataDependencies
+        class SemanticScholarHealthMetadataMixin
+        class SemanticScholarHealthMetadataMixinABC
+        class SemanticScholarRequestCollectorProtocol
+    }
+
+    namespace client_fallback_policy {
+        class _SemanticScholarFallbackPolicyMixin
+        class _SupportsNormalizeDoi
+    }
+
+    namespace search_fetch_flow {
+        class _SemanticScholarSearchFetchMixin
+    }
+
+    namespace adapter {
+        class SemanticScholarAdapter
+    }
+
+    namespace batch_request_mixin {
+        class SemanticScholarBatchRequestMixin
+    }
+
+    namespace fallback {
+        class SemanticScholarTitleFallbackHandler
+    }
+
+    namespace fetch_adapter_mixin {
+        class SemanticScholarFetchAdapterMixin
+    }
+
+    SemanticScholarBatchRequestMixin <|-- SemanticScholarAdapter
+    SemanticScholarFetchAdapterMixin <|-- SemanticScholarAdapter
+    SemanticScholarHealthMetadataMixin <|-- SemanticScholarAdapter
+    SemanticScholarHealthMetadataMixinABC <|-- SemanticScholarHealthMetadataMixin
+    _SemanticScholarFallbackPolicyMixin <|-- SemanticScholarAdapter
+    _SemanticScholarSearchFetchMixin <|-- SemanticScholarFetchAdapterMixin
