@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from functools import cache
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pyarrow as pa
@@ -20,6 +21,9 @@ from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     normalize_scd_config,
     set_gold_write_span_attributes,
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 
 @cache

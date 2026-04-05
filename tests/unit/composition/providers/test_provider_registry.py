@@ -726,8 +726,9 @@ class TestProviderLoader:
         monkeypatch.setattr(
             module,
             "resolve_provider_registry",
-            lambda candidate=None: captured.setdefault("candidate", candidate)
-            or registry,
+            lambda candidate=None: (
+                captured.setdefault("candidate", candidate) or registry
+            ),
         )
 
         assert module._get_loader_registry() is registry

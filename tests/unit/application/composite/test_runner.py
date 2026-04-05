@@ -755,7 +755,6 @@ class TestFSMSeedResume:
             run_id=str(uuid4()),
             created_at=datetime.now(tz=UTC),
         )
-        keys_df = MagicMock(name="keys_df")
         seed_result = SeedResult(
             pipeline_name="chembl_activity",
             records_extracted=100,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import cache
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -17,6 +18,12 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.exceptions import BioETLError
 from tests.unit.application.composite.merge_test_support import build_merge_service
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.merger import (
+        MergeCollaboratorGroup,
+        MergeService,
+    )
 
 
 @cache

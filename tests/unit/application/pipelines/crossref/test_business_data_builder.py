@@ -169,9 +169,9 @@ def test_extract_author_bundle_normalizes_and_hashes_author_fields(
         data_normalizer=_StubNormalizer(),
         hash_pii_value=lambda value: f"hash:{value}" if value else None,
         serialize_json=lambda value: json.dumps(value, sort_keys=True),
-        serialize_json_list=lambda value: json.dumps(value)
-        if value is not None
-        else None,
+        serialize_json_list=lambda value: (
+            json.dumps(value) if value is not None else None
+        ),
     )
 
     assert result["authors"] == '["Ada"]'
@@ -197,9 +197,9 @@ def test_extract_author_bundle_uses_string_affiliations_when_dicts_absent(
         data_normalizer=_StubNormalizer(),
         hash_pii_value=lambda value: value,
         serialize_json=lambda value: json.dumps(value),
-        serialize_json_list=lambda value: json.dumps(value)
-        if value is not None
-        else None,
+        serialize_json_list=lambda value: (
+            json.dumps(value) if value is not None else None
+        ),
     )
 
     assert result["affiliation_list"] == json.dumps(["Org A"])
@@ -225,9 +225,9 @@ def test_extract_author_bundle_returns_none_for_non_list_affiliations(
         data_normalizer=normalizer,
         hash_pii_value=lambda value: value,
         serialize_json=lambda value: {"not": "a-string"},
-        serialize_json_list=lambda value: json.dumps(value)
-        if value is not None
-        else None,
+        serialize_json_list=lambda value: (
+            json.dumps(value) if value is not None else None
+        ),
     )
 
     normalizer.normalize_affiliations.assert_called_once_with(None)
@@ -319,16 +319,16 @@ def test_build_crossref_business_data_assembles_expected_payload(
         record,
         data_normalizer=_StubNormalizer(),
         validate_doi=lambda value: str(value),
-        validate_publication_year=lambda value: int(value)
-        if value is not None
-        else None,
+        validate_publication_year=lambda value: (
+            int(value) if value is not None else None
+        ),
         classify_publication_type=lambda value: {
             "publication_category": f"classified:{value}"
         },
         serialize_json=lambda value: json.dumps(value, sort_keys=True),
-        serialize_json_list=lambda value: json.dumps(value)
-        if value is not None
-        else None,
+        serialize_json_list=lambda value: (
+            json.dumps(value) if value is not None else None
+        ),
         hash_pii_value=lambda value: f"hash:{value}" if value else None,
     )
 
@@ -381,9 +381,9 @@ def test_build_crossref_business_data_falls_back_to_online_publication_date(
         validate_publication_year=lambda value: value,
         classify_publication_type=lambda value: {},
         serialize_json=lambda value: json.dumps(value),
-        serialize_json_list=lambda value: json.dumps(value)
-        if value is not None
-        else None,
+        serialize_json_list=lambda value: (
+            json.dumps(value) if value is not None else None
+        ),
         hash_pii_value=lambda value: value,
     )
 

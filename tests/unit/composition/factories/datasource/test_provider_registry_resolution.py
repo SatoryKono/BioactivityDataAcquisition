@@ -48,11 +48,13 @@ def test_resolve_datasource_provider_registry_uses_provider_registry_default_pat
 
     monkeypatch.setattr(
         "bioetl.composition.factories.datasource.provider_registry_resolution.resolve_provider_registry",
-        lambda candidate, *, ensure_ready=False: captured.update(
-            registry=candidate,
-            ensure_ready=ensure_ready,
-        )
-        or sentinel_registry,
+        lambda candidate, *, ensure_ready=False: (
+            captured.update(
+                registry=candidate,
+                ensure_ready=ensure_ready,
+            )
+            or sentinel_registry
+        ),
     )
 
     result = resolve_datasource_provider_registry()

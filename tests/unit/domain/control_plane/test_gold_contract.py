@@ -232,7 +232,8 @@ def test_registry_register_get_and_validate_all_handle_conflicts_and_invalid_con
     }
 
     with pytest.raises(
-        ValueError, match="Version conflict for gold.compound: 1.2.3 vs 2.0.0"
+        ValueError,
+        match=r"Version conflict for gold\.compound: 1\.2\.3 vs 2\.0\.0",
     ):
         registry.register(_make_contract("2.0.0"))
 

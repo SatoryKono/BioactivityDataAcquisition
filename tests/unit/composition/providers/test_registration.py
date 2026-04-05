@@ -427,8 +427,9 @@ def test_resolve_provider_family_registration_context_builds_default_support_onc
     )
     monkeypatch.setattr(
         "bioetl.composition.providers._registration_contracts.resolve_provider_assembly_support",
-        lambda assembly_support: captured.update(assembly_support=assembly_support)
-        or sentinel_support,
+        lambda assembly_support: (
+            captured.update(assembly_support=assembly_support) or sentinel_support
+        ),
     )
 
     resolved_support, resolved_rate_limits = (
@@ -457,20 +458,21 @@ def test_build_provider_family_http_config_map_uses_shared_manifest_builder(
 
     monkeypatch.setattr(
         "bioetl.composition.providers._registration_contracts.build_http_provider_config_map",
-        lambda *, specs, assembly_support: captured.update(
-            specs=specs,
-            assembly_support=assembly_support,
-        )
-        or sentinel_config_map,
+        lambda *, specs, assembly_support: (
+            captured.update(
+                specs=specs,
+                assembly_support=assembly_support,
+            )
+            or sentinel_config_map
+        ),
     )
 
     result = _build_provider_family_http_config_map(
         rate_limits=rate_limits,
         assembly_support=support,
-        spec_builder=lambda incoming_rate_limits: captured.update(
-            rate_limits=incoming_rate_limits
-        )
-        or (sentinel_spec,),
+        spec_builder=lambda incoming_rate_limits: (
+            captured.update(rate_limits=incoming_rate_limits) or (sentinel_spec,)
+        ),
     )
 
     assert result is sentinel_config_map
@@ -492,20 +494,24 @@ def test_build_provider_family_config_map_composes_context_http_and_extra_builde
 
     monkeypatch.setattr(
         "bioetl.composition.providers._config_helpers._resolve_provider_family_registration_context",
-        lambda *providers, assembly_support=None: captured.update(
-            providers=providers,
-            assembly_support=assembly_support,
-        )
-        or (support, rate_limits),
+        lambda *providers, assembly_support=None: (
+            captured.update(
+                providers=providers,
+                assembly_support=assembly_support,
+            )
+            or (support, rate_limits)
+        ),
     )
     monkeypatch.setattr(
         "bioetl.composition.providers._config_helpers._build_provider_family_http_config_map",
-        lambda *, rate_limits, assembly_support, spec_builder: captured.update(
-            http_rate_limits=rate_limits,
-            http_assembly_support=assembly_support,
-            http_spec_builder=spec_builder,
-        )
-        or http_configs,
+        lambda *, rate_limits, assembly_support, spec_builder: (
+            captured.update(
+                http_rate_limits=rate_limits,
+                http_assembly_support=assembly_support,
+                http_spec_builder=spec_builder,
+            )
+            or http_configs
+        ),
     )
 
     sentinel_spec_builder = MagicMock(name="spec_builder")

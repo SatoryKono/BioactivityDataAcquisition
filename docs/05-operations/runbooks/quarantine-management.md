@@ -50,11 +50,27 @@ bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only --group-
 bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --limit 20
 ```
 
+- If you are investigating one concrete run and need a trustworthy Bronze denominator,
+  use run-scoped mode:
+```bash
+bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only --run-id {run-id}
+bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --run-id {run-id} --limit 20
+```
+
 - `stats --silver-filter-only` is the fastest way to see:
   - total Silver rejects;
   - top `reason_code`;
   - top rejected `field`;
   - `rule_type` / `operator` distribution.
+
+- `stats --silver-filter-only --run-id ...` additionally shows
+  `Silver Rejects vs Bronze` when the control-plane ledger contains
+  `records_bronze` for that run. The ratio is intentionally omitted outside
+  run-scoped mode to avoid misleading cross-run denominators.
+
+- Historical quarantine rows written before `run_id` propagation may not be
+  discoverable via `--run-id`. Run-scoped triage is most reliable for new runs
+  written after the provenance update.
 
 - Если нужен один операторский pivot без визуального шума, используйте:
   - `--group-by reason-code`

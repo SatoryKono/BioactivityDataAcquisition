@@ -36,6 +36,7 @@ async def flush_filtered_records(
         await quarantine_manager.quarantine_filtered_records(
             records,
             batch_id,
+            run_id=context.run_id,
             ingestion_ts=context.started_at,
         )
         return 0
@@ -63,6 +64,7 @@ async def flush_dq_records(
         await quarantine_manager.quarantine_records(
             records,
             batch_id,
+            run_id=context.run_id,
             ingestion_ts=context.started_at,
         )
         return 0

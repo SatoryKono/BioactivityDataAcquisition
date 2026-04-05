@@ -24,7 +24,9 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.base_transformer.types import TransformerDependencyContext
+    from bioetl.application.core.base_transformer.types import (
+        TransformerDependencyContext,
+    )
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.factories.datasource.data_source_factory import (
@@ -33,7 +35,11 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig, SilverFilterConfig
+    from bioetl.domain.filtering import (
+        GoldFilterConfig,
+        InputFilterConfig,
+        SilverFilterConfig,
+    )
     from bioetl.domain.ports import (
         ContractPolicyPort,
         DataNormalizationPort,
@@ -126,9 +132,20 @@ def build_create_pipeline_with_services_request(
     cached_bronze: CachedBronzeContext | None = None,
 ) -> _CreatePipelineWithServicesRequest:
     return _CreatePipelineWithServicesRequest(
-        run_id, runtime, settings, logger, manifest_id, config_hash,
-        dq_contract_compatibility_hash, effective_config_artifact_id, config,
-        filter_config, tracer, dq_monitor, metrics, cached_bronze,
+        run_id,
+        runtime,
+        settings,
+        logger,
+        manifest_id,
+        config_hash,
+        dq_contract_compatibility_hash,
+        effective_config_artifact_id,
+        config,
+        filter_config,
+        tracer,
+        dq_monitor,
+        metrics,
+        cached_bronze,
     )
 
 
@@ -155,7 +172,9 @@ def _resolve_strict_gold_validation(
     runtime: RuntimeConfig,
     settings: Settings,
 ) -> bool:
-    return settings.env == "prod" and not settings.test_mode or runtime.strict_gold_validation
+    return (
+        settings.env == "prod" and not settings.test_mode
+    ) or runtime.strict_gold_validation
 
 
 def create_transformer_instance(

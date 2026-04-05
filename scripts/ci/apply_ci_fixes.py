@@ -52,6 +52,7 @@ BRANCHES = {
     "hf-pip-skip-editable": "fix/hf-pip-audit-skip-editable",
     "hf-stray-dirs": "chore/hf-remove-stray-mkdocs-dirs",
     "hf-checkout-hygiene": "fix/hf-checkout-hygiene-v6",
+    "hf-mcp-allowlist": "fix/hf-add-mcp-json-allowlist",
 }
 
 PR_BODIES = {
@@ -293,6 +294,22 @@ major version is `@v4`.
 
 ### Fix
 Replace `actions/checkout@v6` → `actions/checkout@v4` in both files.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "hf-mcp-allowlist": """## HF-mcp-allowlist: Add .mcp.json to root file allowlist
+
+`.mcp.json` was added to the repository root as the GitHub Copilot CLI
+MCP server configuration (mirrors `.codex/settings.json`). However,
+`audit_root_cleanliness.py` enforces a strict allowlist of tracked root files
+via `.github/root-allowlist.txt`, and `.mcp.json` was not in it.
+
+This caused both Root Hygiene and Block Compiled Python Artifacts CI checks
+to fail with:
+> `Unexpected tracked root files: .mcp.json`
+
+### Fix
+Add `.mcp.json` to `.github/root-allowlist.txt`.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 """,
@@ -1658,6 +1675,59 @@ def apply_hf_checkout_hygiene(api: GitHubAPI) -> None:
         print(f"  PR created: {pr_url}")
 
 
+def apply_hf_mcp_allowlist(api: GitHubAPI) -> None:
+    """HF-mcp-allowlist: Add .mcp.json to .github/root-allowlist.txt."""
+    print("=== HF-mcp-allowlist: Add .mcp.json to root allowlist ===")
+    branch = BRANCHES["hf-mcp-allowlist"]
+    path = ".github/root-allowlist.txt"
+
+    if not api.dry_run:
+        if api.branch_exists(branch):
+            print(f"  Branch {branch} already exists — skipping branch creation")
+        else:
+            sha = api.get_sha()
+            api.create_branch(branch, sha)
+
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
+
+    if ".mcp.json" in content:
+        print(f"  INFO: {path} already contains .mcp.json — nothing to do")
+        return
+
+    # Insert .mcp.json in alphabetical position (after .jscpd.json, before .pre-commit-config.yaml)
+    patched = content.replace(
+        ".pre-commit-config.yaml",
+        ".mcp.json\n.pre-commit-config.yaml",
+    )
+
+    if patched == content:
+        # Fallback: append at end of file
+        patched = content.rstrip("\n") + "\n.mcp.json\n"
+
+    print(f"  Patching {path}: adding .mcp.json")
+    api.update_file(
+        path=path,
+        content=patched,
+        sha=file_sha,
+        message=(
+            "fix(ci): add .mcp.json to root-allowlist.txt\n\n"
+            ".mcp.json is the GitHub Copilot CLI MCP server configuration file.\n"
+            "audit_root_cleanliness.py was rejecting it as an unexpected root file.\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
+        branch=branch,
+    )
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): add .mcp.json to root file allowlist",
+            branch=branch,
+            body=PR_BODIES["hf-mcp-allowlist"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
@@ -1680,7 +1750,8 @@ def main() -> None:
         choices=["ci-01", "ci-02", "ci-03", "ci-04", "ci-06", "ci-07", "ci-12",
                  "hf-a", "hf-b", "hf-e", "hf-lxml",
                  "hf-pip-disable", "hf-paths-conflict", "hf-typecheck-warn",
-                 "hf-pip-skip-editable", "hf-stray-dirs", "hf-checkout-hygiene"],
+                 "hf-pip-skip-editable", "hf-stray-dirs", "hf-checkout-hygiene",
+                 "hf-mcp-allowlist"],
         help="Apply only one fix",
     )
     args = parser.parse_args()
@@ -1725,6 +1796,8 @@ def main() -> None:
             apply_hf_stray_dirs(api)
         if not args.only or args.only == "hf-checkout-hygiene":
             apply_hf_checkout_hygiene(api)
+        if not args.only or args.only == "hf-mcp-allowlist":
+            apply_hf_mcp_allowlist(api)
         print("\n✅ Done!")
     except requests.HTTPError as e:
         print(f"\n❌ GitHub API error: {e}")

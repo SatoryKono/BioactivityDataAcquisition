@@ -87,6 +87,11 @@ class TestInspectQuarantine:
             )
 
         mock_echo.assert_called_once_with(record)
+        manager.inspect.assert_awaited_once_with(
+            limit=10,
+            error_code=None,
+            run_id=None,
+        )
 
     def test_domain_error_exits_with_fail(self) -> None:
         """Test that BioETLError during inspect exits with FAIL code."""
@@ -149,6 +154,49 @@ class TestShowQuarantineStats:
 
         output = " ".join(str(c) for c in mock_echo.call_args_list)
         assert "chembl_activity" in output or "SCHEMA_ERROR" in output
+        manager.get_stats.assert_awaited_once_with(error_code=None, run_id=None)
+
+    def test_run_scoped_stats_enrich_bronze_ratio(self) -> None:
+        """Run-scoped stats should surface Bronze denominator when available."""
+        stats = {
+            "total_count": 4,
+            "by_error_code": {"FILTERED_OUT_SILVER": 4},
+            "by_status": {"NEW": 4},
+            "silver_filter_rejects": {
+                "total_count": 4,
+                "by_reason_code": {"missing_required_field": 4},
+                "by_field": {},
+                "by_rule_type": {},
+                "by_operator": {},
+                "by_reason_code_field": {},
+                "by_reason_signature": {},
+            },
+        }
+        manager = _make_manager(stats=stats)
+        run_manifest_service = MagicMock()
+        run_manifest_service.show.return_value = MagicMock(
+            ledger_entries=(MagicMock(metrics_snapshot={"records_bronze": 20}),)
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine_support.click.echo"
+        ) as mock_echo:
+            _show_quarantine_stats(
+                manager,
+                pipeline="chembl_activity",
+                output_json=False,
+                error_code="FILTERED_OUT_SILVER",
+                run_id="00000000-0000-0000-0000-000000000123",
+                run_manifest_service=run_manifest_service,
+            )
+
+        output = " ".join(str(c) for c in mock_echo.call_args_list)
+        assert "Run ID Scope: 00000000-0000-0000-0000-000000000123" in output
+        assert "Silver Rejects vs Bronze: 4/20 (20.0%)" in output
+        manager.get_stats.assert_awaited_once_with(
+            error_code="FILTERED_OUT_SILVER",
+            run_id="00000000-0000-0000-0000-000000000123",
+        )
 
     def test_domain_error_exits_with_fail(self) -> None:
         """Test that BioETLError during stats fetch exits with FAIL code."""

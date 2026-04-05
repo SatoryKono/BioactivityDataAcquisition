@@ -281,7 +281,9 @@ class TestDocsVersionSync:
             pytest.skip("docs/ directory not found")
 
         active_docs = [
-            md_file for md_file in docs_markdown_files if not is_noncanonical_doc(md_file)
+            md_file
+            for md_file in docs_markdown_files
+            if not is_noncanonical_doc(md_file)
         ]
         outdated = collect_outdated_version_refs(
             paths=active_docs,
@@ -304,7 +306,9 @@ class TestDocsVersionSync:
         docs_text_cache: dict[Path, str],
     ) -> None:
         """Canonical docs in 02/03/04 MUST not reference stale RULES.md versions."""
-        canonical_root_paths = tuple(project_root / root for root in CANONICAL_VERSION_ROOTS)
+        canonical_root_paths = tuple(
+            project_root / root for root in CANONICAL_VERSION_ROOTS
+        )
         canonical_docs = [
             md_file
             for md_file in docs_markdown_files

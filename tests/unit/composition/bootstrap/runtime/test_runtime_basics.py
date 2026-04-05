@@ -29,7 +29,6 @@ class TestBootstrapRuntimeBasics:
         config = SimpleNamespace(name="test_pipeline")
         settings = SimpleNamespace(metrics_enabled=False)
         logger = MagicMock()
-        metrics = MagicMock()
         storage = MagicMock()
         lock = MagicMock()
 
