@@ -97,6 +97,7 @@
     },
     {
       "datasource": "Prometheus",
+      "description": "Selected-range summary only. Use 4. Data Quality for bounded top reasons/fields and quarantine CLI for exact record-level causes.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -184,6 +185,7 @@
     },
     {
       "datasource": "Prometheus",
+      "description": "Selected-range ratio only. Pivot to 4. Data Quality when reject volume spikes and use quarantine CLI for exact reject signatures.",
       "fieldConfig": {
         "defaults": {
           "color": {

@@ -139,6 +139,7 @@ async def transform_record_attempt(
         )
     except FilteredOutError as error:
         batch_metrics.track_processed_records("filtered_out", 1)
+        batch_metrics.track_silver_filter_rejection(error.details or None)
         return RecordTransformOutcome(
             silver_record=None,
             gold_record=None,

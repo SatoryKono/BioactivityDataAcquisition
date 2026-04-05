@@ -31,6 +31,7 @@ __all__ = [
     "PIPELINE_DURATION_SECONDS",
     "QUARANTINE_RECORDS_TOTAL",
     "RECORDS_PROCESSED_TOTAL",
+    "SILVER_FILTER_REJECTIONS_TOTAL",
     "VACUUM_DURATION_SECONDS",
     "VACUUM_FILES_REMOVED_TOTAL",
 ]
@@ -82,6 +83,12 @@ QUARANTINE_RECORDS_TOTAL = Counter(
     "bioetl_quarantine_records_total",
     "Total number of records written to quarantine",
     ["pipeline", "reason"],
+)
+
+SILVER_FILTER_REJECTIONS_TOTAL = Counter(
+    "bioetl_silver_filter_rejections_total",
+    "Total number of Silver filter rejections with bounded analytical labels",
+    ["pipeline", "run_type", "reason_code", "rule_type", "field"],
 )
 
 DQ_VALIDATION_FAILURES_TOTAL = Counter(

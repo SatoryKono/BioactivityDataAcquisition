@@ -66,6 +66,7 @@ def test_is_metrics_port_like_true() -> None:
             "increment_counter",
             "set_gauge",
             "inc_quarantine_records",
+            "inc_silver_filter_rejections",
             "inc_dq_validation_failures",
             "close",
         ]

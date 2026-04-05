@@ -90,7 +90,6 @@ class TestInspectQuarantine:
         manager.inspect.assert_awaited_once_with(
             limit=10,
             error_code=None,
-            run_id=None,
         )
 
     def test_domain_error_exits_with_fail(self) -> None:

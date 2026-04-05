@@ -211,7 +211,14 @@ class TestTransformSingle:
         from bioetl.application.core.base_transformer import FilteredOutError
 
         async def filtered_transform(ctx, record, index):
-            raise FilteredOutError("Record excluded by silver filters")
+            raise FilteredOutError(
+                "Record excluded by silver filters",
+                details={
+                    "reason_code": "required_field_missing",
+                    "rule_type": "required_fields",
+                    "field": "publication_year",
+                },
+            )
 
         config = RecordProcessorConfig(
             pipeline_name="test",
@@ -244,6 +251,13 @@ class TestTransformSingle:
                 "run_id"
             ]
             == mock_context.run_id
+        )
+        mock_batch_metrics.track_silver_filter_rejection.assert_called_once_with(
+            {
+                "reason_code": "required_field_missing",
+                "rule_type": "required_fields",
+                "field": "publication_year",
+            }
         )
 
 
@@ -389,7 +403,14 @@ class TestTransformStream:
 
         async def selective_transform(ctx, record, index):
             if record.get("id") == "filtered":
-                raise FilteredOutError("Record excluded by silver filters")
+                raise FilteredOutError(
+                    "Record excluded by silver filters",
+                    details={
+                        "reason_code": "required_field_missing",
+                        "rule_type": "required_fields",
+                        "field": "publication_year",
+                    },
+                )
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         config = RecordProcessorConfig(
@@ -429,6 +450,13 @@ class TestTransformStream:
                 "run_id"
             ]
             == mock_context.run_id
+        )
+        mock_batch_metrics.track_silver_filter_rejection.assert_called_once_with(
+            {
+                "reason_code": "required_field_missing",
+                "rule_type": "required_fields",
+                "field": "publication_year",
+            }
         )
 
 

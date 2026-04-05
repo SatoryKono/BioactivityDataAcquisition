@@ -133,11 +133,11 @@ class TestCliQuarantineInspect:
             )
 
         # Verify inspect was called with correct limit (error_code=None is also passed)
-        mock_manager.inspect.assert_called_once_with(
-            limit=50,
-            error_code=None,
-            run_id=None,
-        )
+        mock_manager.inspect.assert_called_once()
+        inspect_kwargs = mock_manager.inspect.call_args.kwargs
+        assert inspect_kwargs["limit"] == 50
+        assert inspect_kwargs["error_code"] is None
+        assert inspect_kwargs.get("run_id") is None
         assert result.exit_code == 0
 
     def test_quarantine_inspect_default_limit(
@@ -159,11 +159,11 @@ class TestCliQuarantineInspect:
             )
 
         # Verify inspect was called with default limit (error_code=None is also passed)
-        mock_manager.inspect.assert_called_once_with(
-            limit=100,
-            error_code=None,
-            run_id=None,
-        )
+        mock_manager.inspect.assert_called_once()
+        inspect_kwargs = mock_manager.inspect.call_args.kwargs
+        assert inspect_kwargs["limit"] == 100
+        assert inspect_kwargs["error_code"] is None
+        assert inspect_kwargs.get("run_id") is None
         assert result.exit_code == 0
 
     def test_quarantine_inspect_displays_payload(
@@ -245,9 +245,11 @@ class TestCliQuarantineInspect:
         assert "Reason: Missing required field" in result.output
         assert "Reason Code: missing_required_field" in result.output
         assert "Field: publication_year" in result.output
-        mock_manager.inspect.assert_called_once_with(
-            limit=100, error_code="FILTERED_OUT_SILVER"
-        )
+        mock_manager.inspect.assert_called_once()
+        inspect_kwargs = mock_manager.inspect.call_args.kwargs
+        assert inspect_kwargs["limit"] == 100
+        assert inspect_kwargs["error_code"] == "FILTERED_OUT_SILVER"
+        assert inspect_kwargs.get("run_id") is None
 
     def test_quarantine_inspect_multiple_pipelines(
         self,

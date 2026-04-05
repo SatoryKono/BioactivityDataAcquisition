@@ -29,6 +29,16 @@
     },
     {
       "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "4. Data Quality",
+      "type": "link",
+      "url": "/d/bioetl-dq-v2"
+    },
+    {
+      "asDropdown": false,
       "icon": "logs",
       "includeVars": true,
       "keepTime": true,
@@ -186,6 +196,7 @@
     },
     {
       "datasource": "Prometheus",
+      "description": "Summary signal only. For bounded cause breakdown use 4. Data Quality; for exact record-level causes use quarantine CLI.",
       "fieldConfig": {
         "defaults": {
           "color": {

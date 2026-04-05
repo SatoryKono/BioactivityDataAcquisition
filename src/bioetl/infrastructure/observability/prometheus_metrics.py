@@ -12,6 +12,9 @@ from bioetl.infrastructure.observability.prometheus_metric_label_policies import
     normalize_dq_stage,
     normalize_metric_dispatch_labels,
     normalize_quarantine_reason,
+    normalize_silver_filter_field,
+    normalize_silver_filter_reason_code,
+    normalize_silver_filter_rule_type,
 )
 from bioetl.infrastructure.observability.prometheus_metric_registries import (
     COUNTERS,
@@ -157,6 +160,28 @@ class PrometheusMetrics(MetricsPort):
                 "pipeline": pipeline,
                 "stage": bounded_stage,
                 "severity": bounded_severity,
+            },
+        )
+
+    def inc_silver_filter_rejections(
+        self,
+        pipeline: str,
+        run_type: str,
+        reason_code: str | None = None,
+        rule_type: str | None = None,
+        field: str | None = None,
+        count: int = 1,
+    ) -> None:
+        """Increment bounded Silver filter rejection breakdown counters."""
+        self.increment_counter(
+            "silver_filter_rejections_total",
+            count,
+            {
+                "pipeline": pipeline,
+                "run_type": run_type,
+                "reason_code": normalize_silver_filter_reason_code(reason_code),
+                "rule_type": normalize_silver_filter_rule_type(rule_type),
+                "field": normalize_silver_filter_field(field),
             },
         )
 

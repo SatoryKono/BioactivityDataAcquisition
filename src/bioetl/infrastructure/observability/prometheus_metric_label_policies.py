@@ -18,6 +18,100 @@ _ALLOWED_REASON_LABELS = frozenset(
         "other",
     }
 )
+_ALLOWED_SILVER_FILTER_REASON_CODE_LABELS = frozenset(
+    {
+        "required_field_missing",
+        "exclude_if_present",
+        "column_filter_mismatch",
+        "range_filter_mismatch",
+        "list_length_filter_mismatch",
+        "list_contains_filter_mismatch",
+        "required_field_type_mismatch",
+        "optional_nonnullable_field_type_mismatch",
+        "nullable_field_type_coerced_to_null",
+        "other",
+    }
+)
+_ALLOWED_SILVER_FILTER_RULE_TYPE_LABELS = frozenset(
+    {
+        "required_fields",
+        "exclude_if_present",
+        "column_filters",
+        "range_filters",
+        "list_length_filters",
+        "list_contains_filters",
+        "structural_policy",
+        "other",
+    }
+)
+_ALLOWED_SILVER_FILTER_FIELD_LABELS = frozenset(
+    {
+        "_state",
+        "accession",
+        "activity_id",
+        "assay_description",
+        "assay_id",
+        "assay_param_id",
+        "assay_type",
+        "assay_type_description",
+        "bao_endpoint",
+        "bao_format",
+        "bao_label",
+        "canonical_smiles",
+        "cell_id",
+        "cell_name",
+        "class_level",
+        "component_id",
+        "confidence_score",
+        "data_validity_comment",
+        "description",
+        "doc_1",
+        "doc_2",
+        "doi",
+        "inorganic_flag",
+        "journal",
+        "mapping_status",
+        "molecule_id",
+        "molecule_type",
+        "openalex_id",
+        "organism",
+        "organism_scientific",
+        "other",
+        "paper_id",
+        "pchembl_value",
+        "pmid",
+        "potential_duplicate",
+        "pref_name",
+        "protein_class_id",
+        "publication_id",
+        "publication_type",
+        "publication_year",
+        "record_id",
+        "relation",
+        "relationship_type",
+        "sim_id",
+        "src_id",
+        "standard_flag",
+        "standard_relation",
+        "standard_type",
+        "standard_units",
+        "standard_value",
+        "structure_type",
+        "subcellular_fraction",
+        "target_id",
+        "target_organism",
+        "target_taxonomy_id",
+        "target_type",
+        "term",
+        "term_type",
+        "tissue_id",
+        "title",
+        "type",
+        "units",
+        "uo_units",
+        "value",
+    }
+)
 _ALLOWED_STAGE_LABELS = frozenset(
     {
         "validation",
@@ -77,6 +171,21 @@ def normalize_metric_dispatch_labels(
 def normalize_quarantine_reason(reason: str) -> str:
     """Normalize quarantine reason to a bounded label set."""
     return _normalize_bounded_label(reason, _ALLOWED_REASON_LABELS)
+
+
+def normalize_silver_filter_reason_code(reason_code: str | None) -> str:
+    """Normalize Silver filter reason_code to a bounded label set."""
+    return _normalize_bounded_label(reason_code or "other", _ALLOWED_SILVER_FILTER_REASON_CODE_LABELS)
+
+
+def normalize_silver_filter_rule_type(rule_type: str | None) -> str:
+    """Normalize Silver filter rule_type to a bounded label set."""
+    return _normalize_bounded_label(rule_type or "other", _ALLOWED_SILVER_FILTER_RULE_TYPE_LABELS)
+
+
+def normalize_silver_filter_field(field: str | None) -> str:
+    """Normalize Silver filter field name to a bounded label set."""
+    return _normalize_bounded_label(field or "other", _ALLOWED_SILVER_FILTER_FIELD_LABELS)
 
 
 def normalize_dq_stage(stage: str) -> str:

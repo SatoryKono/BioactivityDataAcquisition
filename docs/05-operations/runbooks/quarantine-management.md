@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P2
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-04'
+Last verified: '2026-04-05'
 ---
 
 # Quarantine Management
@@ -118,9 +118,10 @@ bioetl quarantine purge --pipeline {pipeline-name}
 - Use Grafana first for summary/trend investigation:
   - `bioetl-overview-v2`: high-level `filtered_out` volume.
   - `bioetl-runtime`: runtime triage and warning correlation.
-  - `bioetl-dq-v2`: DQ/quarantine summary for selected `$pipeline` and `$run_type`.
-- Use CLI/quarantine for record-level causes. Grafana is the summary surface;
-  quarantine CLI is the drilldown surface.
+  - `bioetl-dq-v2`: DQ/quarantine summary for selected `$pipeline` and `$run_type`,
+    включая bounded panels `Top Silver Reject Reasons` и `Top Silver Reject Fields`.
+- Use CLI/quarantine for record-level causes and exact reason signatures. Grafana is
+  the summary surface; quarantine CLI is the drilldown surface.
 
 ### Retention
 

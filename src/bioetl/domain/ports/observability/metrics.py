@@ -130,6 +130,30 @@ class MetricsPort(Protocol):
         """
         ...
 
+    def inc_silver_filter_rejections(
+        self,
+        pipeline: str,
+        run_type: str,
+        reason_code: str | None = None,
+        rule_type: str | None = None,
+        field: str | None = None,
+        count: int = 1,
+    ) -> None:
+        """Increment bounded Silver-filter rejection counters.
+
+        Args:
+            pipeline: Pipeline identifier label.
+            run_type: Run-type label associated with the rejected record.
+            reason_code: Structured reject reason code. Implementations must
+                normalize this to a bounded label vocabulary.
+            rule_type: Structured reject rule type. Implementations must
+                normalize this to a bounded label vocabulary.
+            field: Structured reject field name. Implementations must normalize
+                this to a bounded label vocabulary.
+            count: Number of rejections to add. Defaults to 1.
+        """
+        ...
+
     def close(self) -> None:
         """Flush pending metrics and release backend resources."""
         ...
