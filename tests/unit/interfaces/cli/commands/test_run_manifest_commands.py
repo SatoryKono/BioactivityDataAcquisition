@@ -158,6 +158,28 @@ class TestRunManifestCommands:
         assert "show" in result.output
         assert "diff" in result.output
 
+    def test_run_manifest_help_avoids_eager_registry_build(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        import importlib
+
+        registry_helpers = importlib.import_module(
+            "bioetl.interfaces.cli.registry_helpers"
+        )
+
+        monkeypatch.setattr(
+            registry_helpers,
+            "build_cli_registry",
+            lambda: (_ for _ in ()).throw(AssertionError("registry should stay lazy")),
+        )
+
+        result = cli_runner.invoke(cli, ["run-manifest", "--help"])
+
+        assert result.exit_code == 0
+        assert "Inspect control-plane run manifests and ledger history." in result.output
+
     def test_show_json_outputs_manifest_and_ledger(
         self,
         cli_runner: CliRunner,
