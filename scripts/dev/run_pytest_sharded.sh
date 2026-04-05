@@ -68,6 +68,7 @@ declare -A SHARD_WORKERS_OVERRIDE=(
 
 declare -A SHARD_EXTRA_PYTEST_ARGS=(
     ["S7-crosscutting-architecture"]="--timeout=300"
+    ["S8-crosscutting-governance"]="--timeout=300"
 )
 
 usage() {

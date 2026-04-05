@@ -2,6 +2,30 @@
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
   "entries": {
+    "scripts/run_pytest.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a thin root-level bridge to scripts/dev/run_pytest.sh until historical references and user habits converge on the canonical dev wrapper."
+    },
+    "scripts/run_pytest.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a thin root-level bridge to scripts/dev/run_pytest.ps1 until historical references and user habits converge on the canonical dev wrapper."
+    },
+    "scripts/generate_architecture_dependency_map.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a root-level compatibility wrapper while tests and docs still assert the historical path; prefer scripts.qa.generate_architecture_dependency_map as the canonical implementation."
+    },
+    "scripts/rerender_grafana_screenshots.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a root-level compatibility wrapper to scripts/ops/rerender_grafana_screenshots.py until no historical references remain."
+    },
     "scripts/qa/generate_reports.py": {
       "owner": "platform-architecture",
       "decision": "deprecate",

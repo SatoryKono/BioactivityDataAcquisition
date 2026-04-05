@@ -34,7 +34,37 @@ BRANCHES = {
     "ci-03": "refactor/ci-docker-single-build",
 }
 
+BRANCHES.update({
+    "ci-07": "fix/ci-perf-gate-exitcode",
+    "ci-12": "fix/ci-security-workflow-scan",
+})
+
 PR_BODIES = {
+    "ci-07": """## CI-07: Fix performance gate — exit code not propagated
+
+The gate step used `failed=$(python3 -c "... sys.exit(1)")`.
+`$()` captures stdout only; the Python exit code was silently discarded.
+The subsequent `echo` succeeded with code 0, so the step always passed
+even when benchmarks exceeded budget.
+
+### Fix
+Replace variable-capture pattern with a heredoc — Python exits directly,
+propagating the non-zero code to the step.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "ci-12": """## CI-12: Fix security.yml — scan workflow file changes
+
+`security.yml` excluded `.github/workflows/**` from push/PR triggers.
+A PR introducing a malicious workflow would bypass `detect-secrets`
+and `pip-audit` scans entirely.
+
+### Fix
+Remove `.github/workflows/**` from `paths-ignore` so workflow changes
+always trigger security scans.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
     "ci-01": """## CI-01: Replace `actions/checkout@v6` → `@v4`
 
 `actions/checkout@v6` does not exist as a stable release.

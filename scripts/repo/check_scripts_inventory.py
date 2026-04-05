@@ -414,12 +414,23 @@ def _dedupe_refs(refs: list[RefEvidence]) -> list[RefEvidence]:
 
 
 def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
+    groups = {item.source_group for item in refs}
+    strong_active_groups = {"ci", "build", "skills", "agents"}
+    legacy_root_wrappers = {
+        "scripts/run_pytest.sh",
+        "scripts/run_pytest.ps1",
+        "scripts/generate_architecture_dependency_map.py",
+        "scripts/rerender_grafana_screenshots.py",
+    }
+
+    if script_rel in legacy_root_wrappers:
+        return "active" if groups & strong_active_groups else "legacy"
+
     if not refs:
         return (
             "legacy" if ("_tmp" in script_rel or "debug_" in script_rel) else "orphan"
         )
 
-    groups = {item.source_group for item in refs}
     if groups & {"ci", "build", "skills", "tests", "scripts", "agents"}:
         return "active"
     if groups == {"docs"}:
