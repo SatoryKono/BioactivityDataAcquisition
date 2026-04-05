@@ -14,22 +14,7 @@ policy:
     - expires_on
     - removal_step
 registries:
-  file_size_limits:
-    src/bioetl/composition/factories/pipeline/factory_method_helpers.py:
-      value: 400
-      owner: "@bioetl-platform"
-      reason: >
-        Transitional composition helper still aggregates factory wiring and
-        staged runtime/control-plane assembly helpers while the pipeline
-        factory surface is being reduced incrementally.
-      classification: technical_debt
-      linked_rf: RF-023
-      expires_on: "2026-06-30"
-      removal_step: >
-        Split the remaining control-plane kwargs and request-assembly helpers
-        away from generic pipeline creation helpers, then remove this
-        exemption once the file drops back under the default composition LOC
-        budget.
+  file_size_limits: {}
   function_complexity:
     {}
   function_length: {}
