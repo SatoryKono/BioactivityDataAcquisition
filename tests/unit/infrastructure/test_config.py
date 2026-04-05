@@ -134,7 +134,9 @@ def test_yaml_config_to_domain_maps_field_policy() -> None:
 
     domain_config = yaml_config_to_domain(yaml_config)
 
-    assert tuple((policy.field, policy.optional) for policy in domain_config.field_policy) == (
+    assert tuple(
+        (policy.field, policy.optional) for policy in domain_config.field_policy
+    ) == (
         ("curation_flag", False),
         ("notes", True),
     )

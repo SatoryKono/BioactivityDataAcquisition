@@ -3,7 +3,6 @@
 from bioetl.application.services.checkpoint_compatibility_service_v2 import (
     CheckpointCompatibilityConfig,
     CheckpointCompatibilityMode,
-    CheckpointCompatibilityResult,
     CheckpointCompatibilityServiceV2,
     CheckpointIdentity,
     CompatibilityVerdict,

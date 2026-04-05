@@ -37,9 +37,20 @@ def _parse_subgraphs(lines: list[str]) -> dict[str, str]:
             nid = nm.group(1)
             # Skip Mermaid keywords
             if nid.lower() in (
-                "subgraph", "end", "style", "classDef", "linkStyle",
-                "click", "class", "direction", "graph", "flowchart",
-                "fill", "stroke", "width", "height",
+                "subgraph",
+                "end",
+                "style",
+                "classDef",
+                "linkStyle",
+                "click",
+                "class",
+                "direction",
+                "graph",
+                "flowchart",
+                "fill",
+                "stroke",
+                "width",
+                "height",
             ):
                 continue
             if stack:
@@ -55,8 +66,16 @@ def _get_node_labels(lines: list[str]) -> dict[str, str]:
             nid = m.group(1)
             lbl = m.group(2).split("<br")[0].replace("&nbsp;", "").strip()
             if nid.lower() not in (
-                "subgraph", "end", "style", "classDef", "linkStyle",
-                "click", "class", "direction", "graph", "flowchart",
+                "subgraph",
+                "end",
+                "style",
+                "classDef",
+                "linkStyle",
+                "click",
+                "class",
+                "direction",
+                "graph",
+                "flowchart",
             ):
                 labels[nid] = lbl
     return labels
@@ -185,8 +204,12 @@ def fix_link001(lines: list[str]) -> list[str]:
             tgt_label = node_labels.get(tgt, tgt)
 
             # Port/Protocol → dashed arrow
-            if ("Port" in tgt_label or "Protocol" in tgt_label
-                    or "Port" in src_label or "Protocol" in src_label):
+            if (
+                "Port" in tgt_label
+                or "Protocol" in tgt_label
+                or "Port" in src_label
+                or "Protocol" in src_label
+            ):
                 lines[line_idx] = lines[line_idx].replace("-->", "-.->", 1)
                 changed_types.add("-.->")
                 break

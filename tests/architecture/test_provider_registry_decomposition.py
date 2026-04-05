@@ -317,7 +317,9 @@ def test_registration_module_stays_decoupled_from_provider_registry() -> None:
 def test_registration_module_documents_wave3_simplify_now_closeout() -> None:
     """Registration module should stay classified as a simplified thin seam."""
     source = REGISTRATION_PATH.read_text(encoding="utf-8")
-    assert "Wave 3 ownership classification: simplify-now closeout complete." in source, (
+    assert (
+        "Wave 3 ownership classification: simplify-now closeout complete." in source
+    ), (
         "registration.py must keep its Wave 3 ownership classification explicit "
         "after the provider-assembly scaffold closeout."
     )
@@ -331,9 +333,9 @@ def test_registration_module_documents_wave3_simplify_now_closeout() -> None:
 def test_loader_routes_default_registry_through_canonical_resolution_helper() -> None:
     """Loader entrypoints should share the canonical registry-resolution seam."""
     imported_modules = _import_from_modules(LOADER_PATH)
-    assert (
-        "bioetl.composition.providers._registry_resolution" in imported_modules
-    ), "loader.py must import the shared _registry_resolution helper."
+    assert "bioetl.composition.providers._registry_resolution" in imported_modules, (
+        "loader.py must import the shared _registry_resolution helper."
+    )
 
     source = LOADER_PATH.read_text(encoding="utf-8")
     assert "_resolve_default_provider_registry" not in source, (
@@ -369,9 +371,7 @@ def test_registration_family_uses_canonical_provider_config_builders(
     )
 
     imported_modules = _import_from_modules(path)
-    assert (
-        "bioetl.composition.providers._config_helpers" in imported_modules
-    ), (
+    assert "bioetl.composition.providers._config_helpers" in imported_modules, (
         f"{path.name} must route family assembly through shared scaffold helpers "
         "from _config_helpers."
     )

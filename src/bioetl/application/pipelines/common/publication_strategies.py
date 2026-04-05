@@ -29,7 +29,9 @@ class DefaultIdentifierResolver(IdentifierResolverStrategy):
         context: PipelineContext,
         business_data: JsonDict,
         index: int,
-    ) -> tuple[str, Any] | None:  # Any: primary ID values remain provider-specific scalars at the strategy seam.
+    ) -> (
+        tuple[str, Any] | None
+    ):  # Any: primary ID values remain provider-specific scalars at the strategy seam.
         primary_id = business_data.get(self._primary_id_field)
         if not primary_id:
             context.logger.warning(

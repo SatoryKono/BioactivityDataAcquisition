@@ -207,14 +207,18 @@ def _load_forbidden_aliases(raw: object) -> tuple[ForbiddenAlias, ...]:
     return tuple(entries)
 
 
-def load_naming_registry(registry_path: Path = NAMING_EXCEPTIONS_PATH) -> NamingRegistry:
+def load_naming_registry(
+    registry_path: Path = NAMING_EXCEPTIONS_PATH,
+) -> NamingRegistry:
     """Load the naming exception registry from configs/."""
     if not registry_path.exists():
         raise FileNotFoundError(f"Naming exception registry missing: {registry_path}")
 
     payload = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
     if not isinstance(payload, dict):
-        raise ValueError("Naming exception registry must be a YAML mapping at top level")
+        raise ValueError(
+            "Naming exception registry must be a YAML mapping at top level"
+        )
 
     stable_public_surface = payload.get("stable_public_surface", {})
     if not isinstance(stable_public_surface, dict):
@@ -267,7 +271,9 @@ def validate_naming_registry(registry: NamingRegistry) -> list[str]:
 
     stable_id_names = {entry.name for entry in registry.stable_pipeline_ids}
     if not stable_id_names:
-        errors.append("stable_public_surface.pipeline_ids must declare at least one entry")
+        errors.append(
+            "stable_public_surface.pipeline_ids must declare at least one entry"
+        )
 
     for required in ("pubchem_compound", "uniprot_protein"):
         if required not in stable_id_names:
@@ -397,9 +403,7 @@ def check_documentation(
         if rel_parts and rel_parts[0] in _DOC_EXCLUDED_DIRS:
             continue
         if rel is not None and any(
-            str(rel).replace("\\", "/").startswith(
-                _normalize_doc_excluded_subpath(sp)
-            )
+            str(rel).replace("\\", "/").startswith(_normalize_doc_excluded_subpath(sp))
             for sp in _DOC_EXCLUDED_SUBPATHS
         ):
             continue
@@ -525,7 +529,9 @@ def format_report(results: dict[str, list[Violation]]) -> str:
             lines.append("")
 
     if total_violations == 0:
-        lines.append("OK: **No violations found. All naming conventions are followed.**")
+        lines.append(
+            "OK: **No violations found. All naming conventions are followed.**"
+        )
 
     return "\n".join(lines)
 

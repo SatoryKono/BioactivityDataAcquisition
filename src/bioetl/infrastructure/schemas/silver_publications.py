@@ -32,9 +32,7 @@ def _build_publication_schema(provider_fields: list[pa.Field]) -> pa.Schema:
     )
 
 
-PUBMED_PUBLICATION_SCHEMA = _build_publication_schema(
-    build_pubmed_publication_fields()
-)
+PUBMED_PUBLICATION_SCHEMA = _build_publication_schema(build_pubmed_publication_fields())
 
 SEMANTICSCHOLAR_PUBLICATION_SCHEMA = _build_publication_schema(
     build_semanticscholar_publication_fields()

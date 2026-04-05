@@ -97,8 +97,12 @@ def test_acceptance_baseline_code_anchors_match_current_runtime_contract() -> No
     context_source = _read("src/bioetl/domain/context.py")
     manifest_source = _read("src/bioetl/domain/control_plane/run_manifest.py")
     ledger_source = _read("src/bioetl/domain/control_plane/run_ledger.py")
-    load_service_source = _read("src/bioetl/application/composite/checkpoint/load_service.py")
-    runner_service_source = _read("src/bioetl/application/services/pipeline_runner_service.py")
+    load_service_source = _read(
+        "src/bioetl/application/composite/checkpoint/load_service.py"
+    )
+    runner_service_source = _read(
+        "src/bioetl/application/services/pipeline_runner_service.py"
+    )
 
     for anchor in criteria["canonical_runtime_contexts"]["code_anchors"]:
         assert anchor in context_source
@@ -110,7 +114,9 @@ def test_acceptance_baseline_code_anchors_match_current_runtime_contract() -> No
         assert anchor in ledger_source
 
     for anchor in criteria["checkpoint_snapshot_only_contract"]["code_anchors"]:
-        assert anchor in _read("src/bioetl/application/composite/checkpoint/state.py") or anchor in _read(
+        assert anchor in _read(
+            "src/bioetl/application/composite/checkpoint/state.py"
+        ) or anchor in _read(
             "src/bioetl/application/composite/checkpoint/_state_codec.py"
         )
 
@@ -135,7 +141,9 @@ def test_acceptance_baseline_keeps_removed_value_object_manifest_absent() -> Non
     criteria = {row["id"]: row for row in payload["criteria"]}
     deprecated_row = criteria["deprecated_value_object_run_manifest_absent"]
 
-    deprecated_module = ROOT / "src" / "bioetl" / "domain" / "value_objects" / "run_manifest.py"
+    deprecated_module = (
+        ROOT / "src" / "bioetl" / "domain" / "value_objects" / "run_manifest.py"
+    )
     assert deprecated_module.parent == ROOT / deprecated_row["source_paths"][0]
     assert not deprecated_module.exists(), (
         "Deprecated value-object RunManifest must remain absent from src/bioetl/domain/value_objects/."

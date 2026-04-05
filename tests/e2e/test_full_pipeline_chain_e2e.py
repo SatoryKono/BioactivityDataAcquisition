@@ -38,6 +38,7 @@ def vcr_config() -> dict[str, Any]:
         "decode_compressed_response": True,
     }
 
+
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio

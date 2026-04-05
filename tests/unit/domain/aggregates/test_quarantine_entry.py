@@ -303,7 +303,9 @@ class TestQuarantineEntryExpiration:
         assert quarantine_entry.age_seconds is None
         assert quarantine_entry.age_seconds_at(_ts(10)) == pytest.approx(10.0)
 
-    def test_resolved_entry_has_stable_age(self, quarantine_entry: QuarantineEntry) -> None:
+    def test_resolved_entry_has_stable_age(
+        self, quarantine_entry: QuarantineEntry
+    ) -> None:
         """Resolved entry should expose deterministic age from stored state."""
         quarantine_entry.mark_ignored(resolved_at=_ts(10))
 

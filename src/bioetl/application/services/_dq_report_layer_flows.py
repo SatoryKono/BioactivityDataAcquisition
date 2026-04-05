@@ -36,7 +36,9 @@ async def generate_bronze_report(
 ) -> Path | None:
     """Generate Bronze DQ report when analyzer and data are available."""
     if analyzer is None or report_writer is None:
-        emit_skipped_metric(context.pipeline_name, "bronze", "analyzer_or_writer_unavailable")
+        emit_skipped_metric(
+            context.pipeline_name, "bronze", "analyzer_or_writer_unavailable"
+        )
         logger.warning(
             "bronze_dq_report_skipped",
             reason="analyzer or writer not available",
@@ -65,7 +67,9 @@ async def generate_bronze_report(
         )
         path = await report_writer.write_bronze_report(
             report=report,
-            output_path=_resolve_output_path(context.bronze_output_path, config.output_path),
+            output_path=_resolve_output_path(
+                context.bronze_output_path, config.output_path
+            ),
             format=config.get_format_enum(),
             provider=context.provider,
             entity=context.entity,
@@ -100,7 +104,9 @@ async def generate_silver_report(
 ) -> Path | None:
     """Generate Silver DQ report when analyzer and data are available."""
     if analyzer is None or report_writer is None:
-        emit_skipped_metric(context.pipeline_name, "silver", "analyzer_or_writer_unavailable")
+        emit_skipped_metric(
+            context.pipeline_name, "silver", "analyzer_or_writer_unavailable"
+        )
         logger.warning(
             "silver_dq_report_skipped",
             reason="analyzer or writer not available",
@@ -136,7 +142,9 @@ async def generate_silver_report(
         )
         path = await report_writer.write_silver_report(
             report=report,
-            output_path=_resolve_output_path(context.silver_output_path, config.output_path),
+            output_path=_resolve_output_path(
+                context.silver_output_path, config.output_path
+            ),
             format=config.get_format_enum(),
             provider=context.provider,
             entity=context.entity,
@@ -170,7 +178,9 @@ async def generate_gold_report(
 ) -> Path | None:
     """Generate Gold DQ report when analyzer and data are available."""
     if analyzer is None or report_writer is None:
-        emit_skipped_metric(context.pipeline_name, "gold", "analyzer_or_writer_unavailable")
+        emit_skipped_metric(
+            context.pipeline_name, "gold", "analyzer_or_writer_unavailable"
+        )
         logger.warning(
             "gold_dq_report_skipped",
             reason="analyzer or writer not available",
@@ -202,7 +212,9 @@ async def generate_gold_report(
         )
         path = await report_writer.write_gold_report(
             report=report,
-            output_path=_resolve_output_path(context.gold_output_path, config.output_path),
+            output_path=_resolve_output_path(
+                context.gold_output_path, config.output_path
+            ),
             format=config.get_format_enum(),
             provider=context.provider,
             entity=context.entity,

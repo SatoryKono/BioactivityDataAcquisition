@@ -64,13 +64,7 @@ PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE_PATH = (
 )
 PIPELINE_CONFIGS_COMPAT_MODULE = "bioetl.composition.factories.pipeline.configs"
 PIPELINE_CONFIGS_COMPAT_MODULE_PATH = (
-    ROOT
-    / "src"
-    / "bioetl"
-    / "composition"
-    / "factories"
-    / "pipeline"
-    / "configs.py"
+    ROOT / "src" / "bioetl" / "composition" / "factories" / "pipeline" / "configs.py"
 )
 RUN_COMMAND_INTERNAL_MODULE = "bioetl.interfaces.cli.commands.domains.run.command"
 RUN_ALL_COMMAND_INTERNAL_MODULE = (

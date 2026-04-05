@@ -128,10 +128,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
             "scripts/ops/mcp_brave_search_wrapper.sh"
         )
     assert servers["openaiDeveloperDocs"]["type"] == "http"
-    assert (
-        servers["openaiDeveloperDocs"]["url"]
-        == "https://developers.openai.com/mcp"
-    )
+    assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
 
 
 def test_setup_sh_wrapper_delegates_to_backend() -> None:

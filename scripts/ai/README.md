@@ -9,6 +9,9 @@ Policy:
   workflow commands.
 - They may be invoked directly or through local shell aliases/wrappers outside
   the repository.
+- Repository-local documentation alone is not strong enough evidence to treat
+  them as active contributor-facing workflow commands in inventory/governance
+  reports.
 - Changes should preserve the current direct-execution contract unless a
   documented replacement path exists.
 - They are intentionally kept out of the grouped `python -m scripts.<group>`

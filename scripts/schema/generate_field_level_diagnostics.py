@@ -154,7 +154,10 @@ def _parse_molecule_aliases() -> dict[str, dict[str, str]]:
         for element in value.elts:
             if not isinstance(element, ast.Call):
                 continue
-            if not isinstance(element.func, ast.Name) or element.func.id != "FieldAlias":
+            if (
+                not isinstance(element.func, ast.Name)
+                or element.func.id != "FieldAlias"
+            ):
                 continue
 
             canonical_name = ""
@@ -201,7 +204,9 @@ def _canonical_field(provider: str, entity: str, field_name: str) -> str:
     return _alias_map(provider, entity).get(field_name, field_name)
 
 
-def _field_groups_for_name(bronze_groups: list[dict[str, Any]], field_name: str) -> list[str]:
+def _field_groups_for_name(
+    bronze_groups: list[dict[str, Any]], field_name: str
+) -> list[str]:
     matched: list[str] = []
     for group in bronze_groups:
         group_name = group.get("name")
@@ -269,7 +274,9 @@ def _collect_layer_items(
         record = ensure(canonical)
         record["silver_pyarrow_field_names"].add(field_name)
         record["actual_names"].add(field_name)
-        record["silver_pyarrow_types"].add(_normalize_pyarrow_type(str(field.get("type", ""))))
+        record["silver_pyarrow_types"].add(
+            _normalize_pyarrow_type(str(field.get("type", "")))
+        )
         record["silver_pyarrow_nullable"].add(bool(field.get("nullable", True)))
         for group_name in _field_groups_for_name(bronze_groups, field_name):
             record["bronze_groups"].add(group_name)
@@ -282,7 +289,9 @@ def _collect_layer_items(
         record = ensure(canonical)
         record["silver_pandera_field_names"].add(field_name)
         record["actual_names"].add(field_name)
-        record["silver_pandera_types"].add(_normalize_pandera_type(str(field.get("dtype", ""))))
+        record["silver_pandera_types"].add(
+            _normalize_pandera_type(str(field.get("dtype", "")))
+        )
         record["silver_pandera_nullable"].add(bool(field.get("nullable", False)))
         description = str(field.get("description", "")).strip()
         if description:
@@ -375,15 +384,31 @@ def build_field_level_rows() -> list[dict[str, str]]:
                     "entity": entity,
                     "field": field_name,
                     "bronze_groups_json": _json_dump(sorted(record["bronze_groups"])),
-                    "bronze_field_names_json": _json_dump(sorted(record["bronze_field_names"])),
-                    "silver_pyarrow_field_names_json": _json_dump(sorted(record["silver_pyarrow_field_names"])),
-                    "silver_pandera_field_names_json": _json_dump(sorted(record["silver_pandera_field_names"])),
-                    "gold_field_names_json": _json_dump(sorted(record["gold_field_names"])),
-                    "silver_pyarrow_types_json": _json_dump(sorted(record["silver_pyarrow_types"])),
-                    "silver_pandera_types_json": _json_dump(sorted(record["silver_pandera_types"])),
+                    "bronze_field_names_json": _json_dump(
+                        sorted(record["bronze_field_names"])
+                    ),
+                    "silver_pyarrow_field_names_json": _json_dump(
+                        sorted(record["silver_pyarrow_field_names"])
+                    ),
+                    "silver_pandera_field_names_json": _json_dump(
+                        sorted(record["silver_pandera_field_names"])
+                    ),
+                    "gold_field_names_json": _json_dump(
+                        sorted(record["gold_field_names"])
+                    ),
+                    "silver_pyarrow_types_json": _json_dump(
+                        sorted(record["silver_pyarrow_types"])
+                    ),
+                    "silver_pandera_types_json": _json_dump(
+                        sorted(record["silver_pandera_types"])
+                    ),
                     "gold_types_json": _json_dump(sorted(record["gold_types"])),
-                    "silver_pyarrow_nullable_json": _json_dump(sorted(record["silver_pyarrow_nullable"])),
-                    "silver_pandera_nullable_json": _json_dump(sorted(record["silver_pandera_nullable"])),
+                    "silver_pyarrow_nullable_json": _json_dump(
+                        sorted(record["silver_pyarrow_nullable"])
+                    ),
+                    "silver_pandera_nullable_json": _json_dump(
+                        sorted(record["silver_pandera_nullable"])
+                    ),
                     "gold_nullable_json": _json_dump(sorted(record["gold_nullable"])),
                     "type_inconsistency": str(_type_inconsistency(record)).lower(),
                     "json_usage": _json_usage(record),

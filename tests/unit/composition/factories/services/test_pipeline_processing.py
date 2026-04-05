@@ -5,7 +5,6 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from bioetl.composition.factories.services.pipeline_processing import (
     build_components_and_processing_service,
@@ -13,9 +12,15 @@ from bioetl.composition.factories.services.pipeline_processing import (
 
 
 class TestBuildComponentsAndProcessingService:
-    @patch("bioetl.composition.factories.services.pipeline_processing.BatchProcessingService")
-    @patch("bioetl.composition.factories.services.pipeline_processing.BatchProcessingSupportService")
-    @patch("bioetl.composition.factories.services.pipeline_processing.QuarantineManagerService")
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing.BatchProcessingService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing.BatchProcessingSupportService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing.QuarantineManagerService"
+    )
     def test_delegates_component_build_and_wraps_processing_service(
         self,
         mock_quarantine_manager_cls: MagicMock,

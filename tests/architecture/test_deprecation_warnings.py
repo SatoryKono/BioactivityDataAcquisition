@@ -10,5 +10,8 @@ def test_runner_assembly_has_no_deprecated_fsm_bootstrap_warning() -> None:
     source = Path(
         "src/bioetl/composition/bootstrap/runtime/runner_assembly.py"
     ).read_text(encoding="utf-8")
-    assert "Creating CompositePipelineRunner without fsm_state_helper is deprecated" not in source
+    assert (
+        "Creating CompositePipelineRunner without fsm_state_helper is deprecated"
+        not in source
+    )
     assert "DeprecationWarning" not in source

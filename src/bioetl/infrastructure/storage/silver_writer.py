@@ -302,10 +302,14 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         """Return True when rollout policy requires Silver shadow writes."""
         if self._contract_rollout_policy is None:
             return False
-        return self._contract_rollout_policy.mode in {
-            "dual_write",
-            "dual_read_write",
-        } and len(self._contract_rollout_policy.write_versions) > 1
+        return (
+            self._contract_rollout_policy.mode
+            in {
+                "dual_write",
+                "dual_read_write",
+            }
+            and len(self._contract_rollout_policy.write_versions) > 1
+        )
 
     def _enforce_write_policy(
         self,

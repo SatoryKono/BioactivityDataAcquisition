@@ -42,8 +42,12 @@ from scripts.docs.chembl_matrix_structural_contract import (
 )
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
-DEFAULT_INPUT: Final[Path] = PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
-DEFAULT_OUTPUT: Final[Path] = PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+DEFAULT_INPUT: Final[Path] = (
+    PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+)
+DEFAULT_OUTPUT: Final[Path] = (
+    PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+)
 NS: Final[dict[str, str]] = {
     "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
     "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
@@ -113,8 +117,12 @@ def _arg_parser() -> argparse.ArgumentParser:
             "Silver policy semantics."
         )
     )
-    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="Input workbook.")
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook.")
+    parser.add_argument(
+        "--input", type=Path, default=DEFAULT_INPUT, help="Input workbook."
+    )
+    parser.add_argument(
+        "--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook."
+    )
     parser.add_argument(
         "--contract-export",
         type=Path,
@@ -153,7 +161,10 @@ def _load_shared_strings(archive: zipfile.ZipFile) -> list[str]:
 def _sheet_targets(archive: zipfile.ZipFile) -> set[str]:
     workbook = ET.fromstring(archive.read("xl/workbook.xml"))
     rels = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
-    rel_map = {rel.attrib["Id"]: rel.attrib["Target"] for rel in rels.findall("pr:Relationship", NS)}
+    rel_map = {
+        rel.attrib["Id"]: rel.attrib["Target"]
+        for rel in rels.findall("pr:Relationship", NS)
+    }
     targets: set[str] = set()
     for sheet in workbook.find("a:sheets", NS).findall("a:sheet", NS):
         rel_id = sheet.attrib[f"{{{REL_NS}}}id"]
@@ -201,7 +212,9 @@ def _parse_tokens(
     ]
 
 
-def _join_tokens(prefix: list[str], existing: list[str], *, drop: frozenset[str] | None = None) -> str:
+def _join_tokens(
+    prefix: list[str], existing: list[str], *, drop: frozenset[str] | None = None
+) -> str:
     seen: set[str] = set()
     ordered: list[str] = []
     blocked = drop or frozenset()
@@ -215,7 +228,9 @@ def _join_tokens(prefix: list[str], existing: list[str], *, drop: frozenset[str]
 
 def _prepend_action(existing_value: str, action: str) -> str:
     existing_tokens = _parse_tokens(existing_value)
-    return _join_tokens([action], existing_tokens, drop=frozenset({"not_applicable", "none"}))
+    return _join_tokens(
+        [action], existing_tokens, drop=frozenset({"not_applicable", "none"})
+    )
 
 
 def _resolve_runtime_contract(
@@ -228,7 +243,9 @@ def _resolve_runtime_contract(
     silver_column = row.get("Silver column", "")
     if not source_db or not source_table or not silver_column:
         return None
-    return contract_index.get(contract_lookup_key(source_db, source_table, silver_column))
+    return contract_index.get(
+        contract_lookup_key(source_db, source_table, silver_column)
+    )
 
 
 def _update_row(
@@ -261,7 +278,10 @@ def _update_row(
         type_kind = row.get("Type", "").strip().lower()
         nullable_display_value = row.get("Nullable", "").strip().lower()
         required_display_value = row.get("Required", "")
-        is_required = bool(required_display_value.strip()) and required_display_value.strip().lower() != "optional"
+        is_required = (
+            bool(required_display_value.strip())
+            and required_display_value.strip().lower() != "optional"
+        )
         is_nullable = nullable_display_value == "true"
         is_nonnullable = nullable_display_value == "false"
         filters_prefix = []
@@ -275,7 +295,9 @@ def _update_row(
 
     filters = _parse_tokens(
         row.get("Silver Filters", ""),
-        drop=frozenset({"none", "not_applicable"}) | REQUIRED_FILTER_TOKENS | STRUCTURAL_FILTER_TOKENS,
+        drop=frozenset({"none", "not_applicable"})
+        | REQUIRED_FILTER_TOKENS
+        | STRUCTURAL_FILTER_TOKENS,
     )
     validation = _parse_tokens(
         row.get("Silver Validation", ""),
@@ -340,7 +362,9 @@ def main() -> int:
         sheet_targets = _sheet_targets(zin)
         change_counter: Counter[str] = Counter()
 
-        with zipfile.ZipFile(temp_output_path, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+        with zipfile.ZipFile(
+            temp_output_path, "w", compression=zipfile.ZIP_DEFLATED
+        ) as zout:
             for info in zin.infolist():
                 data = zin.read(info.filename)
                 if info.filename not in sheet_targets:
@@ -355,12 +379,18 @@ def main() -> int:
 
                 header_by_index: dict[int, str] = {}
                 for cell in rows[0].findall("a:c", NS):
-                    header_by_index[_column_index(cell.attrib["r"])] = _cell_text(cell, shared_strings)
-                index_by_header = {header: index for index, header in header_by_index.items()}
+                    header_by_index[_column_index(cell.attrib["r"])] = _cell_text(
+                        cell, shared_strings
+                    )
+                index_by_header = {
+                    header: index for index, header in header_by_index.items()
+                }
 
                 for row in rows[1:]:
                     row_map = {
-                        header_by_index[_column_index(cell.attrib["r"])] : _cell_text(cell, shared_strings)
+                        header_by_index[_column_index(cell.attrib["r"])]: _cell_text(
+                            cell, shared_strings
+                        )
                         for cell in row.findall("a:c", NS)
                         if _column_index(cell.attrib["r"]) in header_by_index
                     }

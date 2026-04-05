@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 def test_storage_factory_reexports_storage_factory() -> None:
     """Canonical storage_factory path should expose the legacy storage factory symbols."""
     from bioetl.composition.factories.storage.factory import StorageFactory
@@ -48,4 +49,3 @@ def test_pipeline_configs_import_warns_and_reexports_registry_manifest() -> None
 
     assert PIPELINE_CONFIGS is not None
     assert PipelineFactoryConfig is not None
-

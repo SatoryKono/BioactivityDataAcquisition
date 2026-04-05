@@ -89,7 +89,11 @@ def build_dependency_load_specs(
     specs: list[MergeInputLoadSpec] = []
     for dependency in dependencies:
         dep_result = dependency_results.get(dependency.pipeline)
-        if dep_result is None or not dep_result.is_success or not dependency.silver_table:
+        if (
+            dep_result is None
+            or not dep_result.is_success
+            or not dependency.silver_table
+        ):
             continue
         specs.append(
             MergeInputLoadSpec(

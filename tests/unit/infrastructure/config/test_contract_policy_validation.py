@@ -80,7 +80,9 @@ def test_validate_pipeline_contract_policy_raises_when_keys_missing() -> None:
 
 
 @pytest.mark.unit
-def test_validate_contract_policy_registry_alignment_requires_guide_for_major_transition() -> None:
+def test_validate_contract_policy_registry_alignment_requires_guide_for_major_transition() -> (
+    None
+):
     policy = PipelineContractPolicy.model_validate(
         {
             "primary_key": ["id"],

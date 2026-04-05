@@ -6,7 +6,9 @@ from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.domain.types import BronzeRecord
 
 
-def extract_terms_from_publication(record: BronzeRecord, publication_id: str) -> list[BronzeRecord]:
+def extract_terms_from_publication(
+    record: BronzeRecord, publication_id: str
+) -> list[BronzeRecord]:
     """Extract and flatten all terms from a publication record."""
     terms: list[BronzeRecord] = []
     raw_mesh_terms = record.get("mesh_terms")

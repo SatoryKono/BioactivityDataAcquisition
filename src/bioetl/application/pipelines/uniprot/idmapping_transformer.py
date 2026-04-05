@@ -215,9 +215,7 @@ class IDMappingTransformer(BaseTransformer):
             **business_data,
         )
         silver_record = self.entity_to_silver_record(entity)
-        silver_record["_dq_warn"] = (
-            business_data.get("mapping_status") == "not_found"
-        )
+        silver_record["_dq_warn"] = business_data.get("mapping_status") == "not_found"
         return cast("SilverRecord", silver_record)
 
     def _build_pre_silver_json_record(

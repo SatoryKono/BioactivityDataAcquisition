@@ -151,9 +151,7 @@ def _sheet_targets(archive: zipfile.ZipFile) -> list[tuple[str, str]]:
         rel_id = sheet.attrib[
             "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
         ]
-        targets.append(
-            (sheet.attrib["name"], "xl/" + rel_map[rel_id].lstrip("/"))
-        )
+        targets.append((sheet.attrib["name"], "xl/" + rel_map[rel_id].lstrip("/")))
     return targets
 
 
@@ -184,9 +182,7 @@ def _read_workbook(path: Path) -> dict[str, list[dict[str, str]]]:
                 data_rows.append(
                     {
                         header: row_map.get(index, "")
-                        for index, header in zip(
-                            ordered_indexes, headers, strict=True
-                        )
+                        for index, header in zip(ordered_indexes, headers, strict=True)
                     }
                 )
             workbook_rows[sheet_name] = data_rows
@@ -261,8 +257,8 @@ def _sheet_dictionary(rows: list[dict[str, str]]) -> dict[str, object]:
         for raw_value, occurrence_count in sorted(
             counter.items(), key=lambda item: (-item[1], item[0])
         ):
-            proposed_canonical_value, normalization_rule, review_status = _propose_value(
-                column, raw_value
+            proposed_canonical_value, normalization_rule, review_status = (
+                _propose_value(column, raw_value)
             )
             entries.append(
                 {
@@ -273,13 +269,13 @@ def _sheet_dictionary(rows: list[dict[str, str]]) -> dict[str, object]:
                     "review_status": review_status,
                 }
             )
-        dictionary[column] = {
-            "dictionary_entries": entries
-        }
+        dictionary[column] = {"dictionary_entries": entries}
     return dictionary
 
 
-def _global_inventory(workbook_rows: dict[str, list[dict[str, str]]]) -> dict[str, object]:
+def _global_inventory(
+    workbook_rows: dict[str, list[dict[str, str]]],
+) -> dict[str, object]:
     columns: dict[str, object] = {}
     for column in TARGET_COLUMNS:
         counter: Counter[str] = Counter()
@@ -321,8 +317,8 @@ def _column_dictionary(
         for raw_value, occurrence_count in sorted(
             global_counter.items(), key=lambda item: (-item[1], item[0])
         ):
-            proposed_canonical_value, normalization_rule, review_status = _propose_value(
-                column, raw_value
+            proposed_canonical_value, normalization_rule, review_status = (
+                _propose_value(column, raw_value)
             )
             entry = {
                 "raw_value": raw_value,

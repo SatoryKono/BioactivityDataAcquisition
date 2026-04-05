@@ -452,7 +452,9 @@ class TestContractSnapshotGovernance:
         registry = fixture_governance.get("contract_snapshot_registry", {})
         providers = registry.get("providers", {})
 
-        assert fixture_governance.get("rollout", {}).get("contract_snapshots") == "partial"
+        assert (
+            fixture_governance.get("rollout", {}).get("contract_snapshots") == "partial"
+        )
         assert registry.get("scope") == "bounded_live_provider_baseline"
         assert registry.get("update_env_var") == "UPDATE_SNAPSHOTS"
 
@@ -474,7 +476,9 @@ class TestContractSnapshotGovernance:
 
         for provider, provider_config in providers.items():
             version = provider_config["version"]
-            snapshot_path = TESTS_DIR / "fixtures" / "contracts" / provider / f"v{version}.json"
+            snapshot_path = (
+                TESTS_DIR / "fixtures" / "contracts" / provider / f"v{version}.json"
+            )
             assert snapshot_path.exists(), (
                 f"bounded snapshot registry is missing canonical snapshot for '{provider}'"
             )

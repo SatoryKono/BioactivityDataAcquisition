@@ -16,8 +16,12 @@ from xml.etree import ElementTree as ET
 import yaml
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
-DEFAULT_INPUT: Final[Path] = PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
-DEFAULT_OUTPUT: Final[Path] = PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+DEFAULT_INPUT: Final[Path] = (
+    PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+)
+DEFAULT_OUTPUT: Final[Path] = (
+    PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
+)
 DEFAULT_MAPPING_OUTPUT: Final[Path] = (
     PROJECT_ROOT
     / "docs/reports/dictionaries/chembl_pipeline_silver_matrices_v12_canonical_mappings.yaml"
@@ -252,9 +256,7 @@ SILVER_VALIDATION_MAP: Final[dict[str, str]] = {
     "custom; cross-field: structure_completeness": (
         "custom; cross_field:structure_completeness"
     ),
-    "enum; allowed=B,F,A,T,P,U; non-null": (
-        "pandera:enum:{B,F,A,T,P,U}; not_null"
-    ),
+    "enum; allowed=B,F,A,T,P,U; non-null": ("pandera:enum:{B,F,A,T,P,U}; not_null"),
     "enum; allowed=D,H,M,N,S,U": "pandera:enum:{D,H,M,N,S,U}",
     "enum; allowed=MESH_HEADING,KEYWORD,AUTHOR,INSTITUTION; cross-field: term_completeness; key_nullability: partition not nullable": (
         "pandera:enum:{MESH_HEADING,KEYWORD,AUTHOR,INSTITUTION}; cross_field:term_completeness; key_not_null:partition"
@@ -339,9 +341,7 @@ SOURCE_FIELD_VALIDATION_MAP: Final[dict[str, str]] = {
     "Assay type should align with ChEMBL assay-type controlled vocabulary": (
         "provider_controlled_vocabulary"
     ),
-    "Derived discriminator for keyword vs MeSH term origin": (
-        "derived_from_nested"
-    ),
+    "Derived discriminator for keyword vs MeSH term origin": ("derived_from_nested"),
     "Derived from nested MeSH qualifier payload": "derived_from_nested",
     "Derived from nested document MeSH term payload": "derived_from_nested",
     "Derived from nested keyword or MeSH term text": "derived_from_nested",
@@ -372,24 +372,16 @@ SOURCE_FIELD_VALIDATION_MAP: Final[dict[str, str]] = {
         "optional_provider_field"
     ),
     "Optional free-text parameter comment": "optional_provider_field",
-    "Optional molecule-based Tanimoto similarity score": (
-        "optional_provider_field"
-    ),
+    "Optional molecule-based Tanimoto similarity score": ("optional_provider_field"),
     "Optional second PubMed identifier": "optional_provider_field",
     "Optional second document identifier in similarity record": (
         "optional_provider_field"
     ),
-    "Optional standardized RELATION operator": (
-        "optional_provider_field"
-    ),
-    "Optional standardized assay-parameter type": (
-        "optional_provider_field"
-    ),
+    "Optional standardized RELATION operator": ("optional_provider_field"),
+    "Optional standardized assay-parameter type": ("optional_provider_field"),
     "Optional standardized numeric value": "optional_provider_field",
     "Optional standardized units": "optional_provider_field",
-    "Optional target-based Tanimoto similarity score": (
-        "optional_provider_field"
-    ),
+    "Optional target-based Tanimoto similarity score": ("optional_provider_field"),
     "Optional upstream target identifier carried from assay payload": (
         "optional_provider_field"
     ),
@@ -426,8 +418,12 @@ def _arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Normalize controlled vocabulary values in ChEMBL matrix workbooks."
     )
-    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="Input workbook.")
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook.")
+    parser.add_argument(
+        "--input", type=Path, default=DEFAULT_INPUT, help="Input workbook."
+    )
+    parser.add_argument(
+        "--output", type=Path, default=DEFAULT_OUTPUT, help="Output workbook."
+    )
     parser.add_argument(
         "--mapping-output",
         type=Path,
@@ -456,7 +452,10 @@ def _load_shared_strings(archive: zipfile.ZipFile) -> list[str]:
 def _sheet_targets(archive: zipfile.ZipFile) -> dict[str, str]:
     workbook = ET.fromstring(archive.read("xl/workbook.xml"))
     rels = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
-    rel_map = {rel.attrib["Id"]: rel.attrib["Target"] for rel in rels.findall("pr:Relationship", NS)}
+    rel_map = {
+        rel.attrib["Id"]: rel.attrib["Target"]
+        for rel in rels.findall("pr:Relationship", NS)
+    }
     targets: dict[str, str] = {}
     for sheet in workbook.find("a:sheets", NS).findall("a:sheet", NS):
         rel_id = sheet.attrib[f"{{{REL_NS}}}id"]
@@ -571,14 +570,19 @@ def _coarsen_silver_validation(value: str) -> str:
 
 
 def _canonicalize(header: str, raw_value: str) -> str:
-    value = " ".join(raw_value.strip().split()) if header not in {
-        "Silver Filters",
-        "Silver Validation",
-        "Source_Field_Validation",
-        "Silver Normalisation",
-        "Source_Field_Normalisation",
-        "Validation fail action",
-    } else "; ".join(part.strip() for part in raw_value.split(";") if part.strip())
+    value = (
+        " ".join(raw_value.strip().split())
+        if header
+        not in {
+            "Silver Filters",
+            "Silver Validation",
+            "Source_Field_Validation",
+            "Silver Normalisation",
+            "Source_Field_Normalisation",
+            "Validation fail action",
+        }
+        else "; ".join(part.strip() for part in raw_value.split(";") if part.strip())
+    )
 
     if header in {"Source_Field_Type", "Type"}:
         return TYPE_MAP.get(value.lower(), value)
@@ -587,20 +591,32 @@ def _canonicalize(header: str, raw_value: str) -> str:
     if header == "Required":
         return _normalize_required(value)
     if header == "Filter fail sink":
-        return FILTER_FAIL_SINK_MAP.get(raw_value, FILTER_FAIL_SINK_MAP.get(value, value))
+        return FILTER_FAIL_SINK_MAP.get(
+            raw_value, FILTER_FAIL_SINK_MAP.get(value, value)
+        )
     if header == "Silver Normalisation":
-        return SILVER_NORMALISATION_MAP.get(raw_value, SILVER_NORMALISATION_MAP.get(value, value))
+        return SILVER_NORMALISATION_MAP.get(
+            raw_value, SILVER_NORMALISATION_MAP.get(value, value)
+        )
     if header == "Source_Field_Normalisation":
-        return SOURCE_FIELD_NORMALISATION_MAP.get(raw_value, SOURCE_FIELD_NORMALISATION_MAP.get(value, value))
+        return SOURCE_FIELD_NORMALISATION_MAP.get(
+            raw_value, SOURCE_FIELD_NORMALISATION_MAP.get(value, value)
+        )
     if header == "Silver Filters":
         return SILVER_FILTERS_MAP.get(raw_value, SILVER_FILTERS_MAP.get(value, value))
     if header == "Silver Validation":
-        mapped = SILVER_VALIDATION_MAP.get(raw_value, SILVER_VALIDATION_MAP.get(value, value))
+        mapped = SILVER_VALIDATION_MAP.get(
+            raw_value, SILVER_VALIDATION_MAP.get(value, value)
+        )
         return _coarsen_silver_validation(mapped)
     if header == "Source_Field_Validation":
-        return SOURCE_FIELD_VALIDATION_MAP.get(raw_value, SOURCE_FIELD_VALIDATION_MAP.get(value, value))
+        return SOURCE_FIELD_VALIDATION_MAP.get(
+            raw_value, SOURCE_FIELD_VALIDATION_MAP.get(value, value)
+        )
     if header == "Validation fail action":
-        return VALIDATION_FAIL_ACTION_MAP.get(raw_value, VALIDATION_FAIL_ACTION_MAP.get(value, value))
+        return VALIDATION_FAIL_ACTION_MAP.get(
+            raw_value, VALIDATION_FAIL_ACTION_MAP.get(value, value)
+        )
     return value
 
 
@@ -643,9 +659,13 @@ def main() -> int:
     with zipfile.ZipFile(input_path) as zin:
         shared_strings = _load_shared_strings(zin)
         sheet_targets = set(_sheet_targets(zin).values())
-        applied_counter: dict[str, Counter[str]] = {column: Counter() for column in TARGET_COLUMNS}
+        applied_counter: dict[str, Counter[str]] = {
+            column: Counter() for column in TARGET_COLUMNS
+        }
 
-        with zipfile.ZipFile(temp_output_path, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+        with zipfile.ZipFile(
+            temp_output_path, "w", compression=zipfile.ZIP_DEFLATED
+        ) as zout:
             for info in zin.infolist():
                 data = zin.read(info.filename)
                 if info.filename not in sheet_targets:
@@ -683,7 +703,8 @@ def main() -> int:
 
     payload = _mapping_payload()
     payload["applied_value_counts"] = {
-        column: dict(counter.most_common()) for column, counter in applied_counter.items()
+        column: dict(counter.most_common())
+        for column, counter in applied_counter.items()
     }
     mapping_output.write_text(
         yaml.safe_dump(payload, allow_unicode=True, sort_keys=False),

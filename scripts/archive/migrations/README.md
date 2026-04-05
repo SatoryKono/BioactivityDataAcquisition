@@ -9,6 +9,9 @@ Rules:
   `scripts/migrations/oneoff/`.
 - Files in this directory are retained only for historical reference when no
   canonical replacement exists.
+- Repository-local references to files in this directory should not by
+  themselves promote these scripts to active operational status in lifecycle
+  reporting.
 - If a document points here, it should say explicitly that the script is a
   historical migration reference rather than a standard operational path.
 

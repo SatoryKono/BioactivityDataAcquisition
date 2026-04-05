@@ -56,7 +56,7 @@ def parse_args() -> argparse.Namespace:
     --pattern src/bioetl/infrastructure/**/utils.py
 
 Совместимый legacy path:
-  python src/tools/scripts/duplicate_function_analyzer.py
+  Direct wrapper path remains available during the migration window.
         """,
     )
     parser.add_argument(

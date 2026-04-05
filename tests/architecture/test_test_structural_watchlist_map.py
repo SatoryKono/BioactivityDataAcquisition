@@ -61,7 +61,9 @@ class TestResidualTestCiStructuralWatchlistMap:
         allowed_priority_bands = {"P0", "P1", "P2"}
         allowed_blast_radius = {"high", "medium", "low"}
         allowed_maturity = {"partial", "policy_stabilized", "active", "candidate"}
-        family_names = {entry["family"] for entry in mapping.get("watchlist_families", [])}
+        family_names = {
+            entry["family"] for entry in mapping.get("watchlist_families", [])
+        }
 
         assert ranks == [1, 2, 3]
         assert len(set(surfaces)) == len(surfaces)

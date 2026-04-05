@@ -22,6 +22,7 @@ Commands:
     validate-unified-configs Validate legacy unified entity config structure
     analyze-gaps           Config gap analysis
 """
+
 from __future__ import annotations
 
 import subprocess

@@ -41,8 +41,7 @@ def resolve_read_candidates(
 ) -> list[str]:
     """Resolve ordered fallback read candidates for a logical table."""
     return [
-        resolve_versioned_table_name(logical_table, version)
-        for version in read_order
+        resolve_versioned_table_name(logical_table, version) for version in read_order
     ]
 
 

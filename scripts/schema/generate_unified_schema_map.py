@@ -27,7 +27,12 @@ SRC_DIR = PROJECT_ROOT / "src"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "unified_schema_map.csv"
 
 CHEMBL_MANIFEST = (
-    SRC_DIR / "bioetl" / "composition" / "factories" / "pipeline" / "_registry_manifest_chembl.py"
+    SRC_DIR
+    / "bioetl"
+    / "composition"
+    / "factories"
+    / "pipeline"
+    / "_registry_manifest_chembl.py"
 )
 NON_CHEMBL_MANIFEST = (
     SRC_DIR
@@ -247,7 +252,9 @@ def _scan_pyarrow_schemas() -> dict[str, SymbolLocation]:
     return registry
 
 
-def _scan_pandera_models(root: Path, *, suffix: str = "Schema") -> dict[str, SymbolLocation]:
+def _scan_pandera_models(
+    root: Path, *, suffix: str = "Schema"
+) -> dict[str, SymbolLocation]:
     registry: dict[str, SymbolLocation] = {}
     for path in root.rglob("*.py"):
         tree = _read_ast(path)
@@ -516,7 +523,9 @@ def _pipeline_name(config: dict[str, Any], *, path: Path) -> str:
 
     pipeline_name = pipeline.get("pipeline_name")
     if not isinstance(pipeline_name, str) or not pipeline_name.strip():
-        raise ValueError(f"{path.relative_to(PROJECT_ROOT)}: missing pipeline.pipeline_name")
+        raise ValueError(
+            f"{path.relative_to(PROJECT_ROOT)}: missing pipeline.pipeline_name"
+        )
     return pipeline_name
 
 
@@ -536,7 +545,9 @@ def _build_row(
 
     pyarrow_location = pyarrow_locations.get(binding.silver_schema_symbol)
     if pyarrow_location is None:
-        raise ValueError(f"No PyArrow schema source found for {binding.silver_schema_symbol}")
+        raise ValueError(
+            f"No PyArrow schema source found for {binding.silver_schema_symbol}"
+        )
 
     pandera_location = pandera_locations.get(binding.pandera_silver_symbol)
     if pandera_location is None:
@@ -544,7 +555,9 @@ def _build_row(
 
     gold_location = gold_locations.get(binding.gold_schema_symbol)
     if gold_location is None:
-        raise ValueError(f"No Gold contract source found for {binding.gold_schema_symbol}")
+        raise ValueError(
+            f"No Gold contract source found for {binding.gold_schema_symbol}"
+        )
 
     pyarrow_fields = _extract_pyarrow_fields(
         pyarrow_location.path,
@@ -567,10 +580,16 @@ def _build_row(
 
     silver_pyarrow_columns = [field["name"] for field in pyarrow_fields]
     silver_pandera_columns = [field["name"] for field in pandera_fields]
-    gold_columns = list(cast("dict[str, object]", gold_json_contract["properties"]).keys())
+    gold_columns = list(
+        cast("dict[str, object]", gold_json_contract["properties"]).keys()
+    )
 
-    silver_pyarrow_ref = f"{pyarrow_location.qualified_prefix}.{binding.silver_schema_symbol}"
-    silver_pandera_ref = f"{pandera_location.qualified_prefix}.{binding.pandera_silver_symbol}"
+    silver_pyarrow_ref = (
+        f"{pyarrow_location.qualified_prefix}.{binding.silver_schema_symbol}"
+    )
+    silver_pandera_ref = (
+        f"{pandera_location.qualified_prefix}.{binding.pandera_silver_symbol}"
+    )
     gold_contract_ref = f"{gold_location.qualified_prefix}.{binding.gold_schema_symbol}"
 
     layer_flow = {

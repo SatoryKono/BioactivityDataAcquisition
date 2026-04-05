@@ -162,4 +162,3 @@ def evaluate_list_contains_filters(
             message=f"Field '{contains_filter.column}' failed list-contains filter",
         )
     return FilterDecision.allowed()
-

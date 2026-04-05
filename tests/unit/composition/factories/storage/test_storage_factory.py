@@ -185,9 +185,15 @@ def test_create_normalizes_delta_writer_base_paths_for_entity_scoped_yaml_paths(
         checkpoint_path=tmp_path / "checkpoints",
     )
     config = _make_config(
-        bronze_layer=_make_sink_layer(tmp_path / "custom" / "bronze" / "chembl" / "activity"),
-        silver_layer=_make_sink_layer(tmp_path / "custom" / "silver" / "chembl" / "activity"),
-        gold_layer=_make_sink_layer(tmp_path / "custom" / "gold" / "chembl" / "activity"),
+        bronze_layer=_make_sink_layer(
+            tmp_path / "custom" / "bronze" / "chembl" / "activity"
+        ),
+        silver_layer=_make_sink_layer(
+            tmp_path / "custom" / "silver" / "chembl" / "activity"
+        ),
+        gold_layer=_make_sink_layer(
+            tmp_path / "custom" / "gold" / "chembl" / "activity"
+        ),
     )
 
     result = StorageFactory.create(

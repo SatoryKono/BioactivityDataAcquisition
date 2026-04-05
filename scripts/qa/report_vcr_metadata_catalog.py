@@ -70,8 +70,10 @@ def _metadata_path_for(cassette_path: Path) -> Path:
 
 
 def _is_cassette_file(path: Path) -> bool:
-    return path.is_file() and path.suffix.lower() in {".yaml", ".yml"} and not (
-        path.name.endswith("_meta.yaml") or path.name.endswith("_meta.yml")
+    return (
+        path.is_file()
+        and path.suffix.lower() in {".yaml", ".yml"}
+        and not (path.name.endswith("_meta.yaml") or path.name.endswith("_meta.yml"))
     )
 
 
@@ -129,9 +131,7 @@ def build_catalog(vcr_root: Path) -> dict[str, object]:
     provider_summary: dict[str, ProviderCatalogSummary] = {}
 
     for row in rows:
-        summary = provider_summary.setdefault(
-            row.provider, ProviderCatalogSummary()
-        )
+        summary = provider_summary.setdefault(row.provider, ProviderCatalogSummary())
         summary.cassette_count += 1
         if row.has_metadata_sidecar:
             summary.metadata_sidecar_count += 1

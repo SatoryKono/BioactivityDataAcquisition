@@ -20,14 +20,24 @@ from typing import Any
 # ---------------------------------------------------------------------------
 
 SRC_ROOT = Path("/home/user/BioactivityDataAcquisition/src/bioetl")
-OUTPUT_JSON = Path("/home/user/BioactivityDataAcquisition/reports/inventory/inventory.json")
+OUTPUT_JSON = Path(
+    "/home/user/BioactivityDataAcquisition/reports/inventory/inventory.json"
+)
 
 LAYERS = ("domain", "application", "infrastructure", "composition", "interfaces")
 
 # NAME-001 allowed suffixes for classes
 NAME001_SUFFIXES = (
-    "Factory", "Client", "Port", "Service", "Transformer",
-    "Error", "Schema", "Config", "Adapter", "Model",
+    "Factory",
+    "Client",
+    "Port",
+    "Service",
+    "Transformer",
+    "Error",
+    "Schema",
+    "Config",
+    "Adapter",
+    "Model",
 )
 
 UPPER_SNAKE_RE = re.compile(r"^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
@@ -36,6 +46,7 @@ UPPER_SNAKE_RE = re.compile(r"^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _layer_for(path: Path) -> str:
     """Determine the architectural layer from a file path."""
@@ -77,6 +88,7 @@ def _has_name001_suffix(name: str) -> bool:
 # ---------------------------------------------------------------------------
 # Core collection
 # ---------------------------------------------------------------------------
+
 
 def collect_from_file(filepath: Path) -> dict[str, Any]:
     """Parse a single .py file and return its inventory."""
@@ -158,11 +170,13 @@ def collect_from_file(filepath: Path) -> dict[str, Any]:
                     pass
 
             if is_type_alias and isinstance(target, ast.Name):
-                type_aliases.append({
-                    "name": target.id,
-                    "lineno": node.lineno,
-                    "value": ast.unparse(node.value) if node.value else None,
-                })
+                type_aliases.append(
+                    {
+                        "name": target.id,
+                        "lineno": node.lineno,
+                        "value": ast.unparse(node.value) if node.value else None,
+                    }
+                )
 
         # --- Constants (UPPER_SNAKE_CASE assignments) ----------------------
         elif isinstance(node, ast.Assign):
@@ -174,11 +188,13 @@ def collect_from_file(filepath: Path) -> dict[str, Any]:
                         value_repr = "<complex>"
                     if len(value_repr) > 120:
                         value_repr = value_repr[:117] + "..."
-                    constants.append({
-                        "name": target.id,
-                        "lineno": node.lineno,
-                        "value_preview": value_repr,
-                    })
+                    constants.append(
+                        {
+                            "name": target.id,
+                            "lineno": node.lineno,
+                            "value_preview": value_repr,
+                        }
+                    )
 
     return {
         "file": str(filepath),
@@ -192,6 +208,7 @@ def collect_from_file(filepath: Path) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Aggregation & reporting
 # ---------------------------------------------------------------------------
+
 
 def build_inventory():
     """Walk the source tree and build the full inventory."""
@@ -216,11 +233,17 @@ def summarise(inventory):
 
     # Per-layer totals
     layer_stats = {}
-    all_classes = []   # (layer, file, cls_info)
+    all_classes = []  # (layer, file, cls_info)
     all_functions = []
 
     for layer, modules in inventory.items():
-        stats = {"files": 0, "classes": 0, "functions": 0, "constants": 0, "type_aliases": 0}
+        stats = {
+            "files": 0,
+            "classes": 0,
+            "functions": 0,
+            "constants": 0,
+            "type_aliases": 0,
+        }
         for mod in modules:
             stats["files"] += 1
             stats["classes"] += len(mod["classes"])
@@ -238,7 +261,13 @@ def summarise(inventory):
     summary["per_layer"] = layer_stats
 
     # Grand totals
-    grand = {"files": 0, "classes": 0, "functions": 0, "constants": 0, "type_aliases": 0}
+    grand = {
+        "files": 0,
+        "classes": 0,
+        "functions": 0,
+        "constants": 0,
+        "type_aliases": 0,
+    }
     for stats in layer_stats.values():
         for k in grand:
             grand[k] += stats[k]
@@ -275,13 +304,15 @@ def summarise(inventory):
     missing_suffix = []
     for layer, fpath, cls in all_classes:
         if not cls["has_name001_suffix"]:
-            missing_suffix.append({
-                "layer": layer,
-                "file": fpath,
-                "class": cls["name"],
-                "bases": ", ".join(cls["bases"]) if cls["bases"] else "(none)",
-                "loc": cls["loc"],
-            })
+            missing_suffix.append(
+                {
+                    "layer": layer,
+                    "file": fpath,
+                    "class": cls["name"],
+                    "bases": ", ".join(cls["bases"]) if cls["bases"] else "(none)",
+                    "loc": cls["loc"],
+                }
+            )
     summary["classes_without_name001_suffix"] = missing_suffix
 
     return summary
@@ -311,16 +342,27 @@ def print_summary(summary):
     header = f"  {'Layer':<20} {'Files':>6} {'Classes':>8} {'Functions':>10} {'Constants':>10} {'TypeAlias':>10}"
     print(header)
     print(f"  {'---':<20} {'---':>6} {'---':>8} {'---':>10} {'---':>10} {'---':>10}")
-    for layer in ("root", "domain", "application", "infrastructure", "composition", "interfaces"):
+    for layer in (
+        "root",
+        "domain",
+        "application",
+        "infrastructure",
+        "composition",
+        "interfaces",
+    ):
         s = summary["per_layer"].get(layer)
         if s:
-            print(f"  {layer:<20} {s['files']:>6} {s['classes']:>8} {s['functions']:>10} {s['constants']:>10} {s['type_aliases']:>10}")
+            print(
+                f"  {layer:<20} {s['files']:>6} {s['classes']:>8} {s['functions']:>10} {s['constants']:>10} {s['type_aliases']:>10}"
+            )
 
     # --- Top 20 classes ---
     print(f"\n{'-' * 88}")
     print("  TOP 20 LARGEST CLASSES (by LOC)")
     print(f"{'-' * 88}")
-    print(f"  {'#':>3}  {'LOC':>5}  {'Pub':>4} {'Priv':>5}  {'Layer':<16} {'Class':<32} {'File'}")
+    print(
+        f"  {'#':>3}  {'LOC':>5}  {'Pub':>4} {'Priv':>5}  {'Layer':<16} {'Class':<32} {'File'}"
+    )
     for i, entry in enumerate(summary["top20_classes_by_loc"], 1):
         print(
             f"  {i:>3}  {entry['loc']:>5}  {entry['public_methods']:>4} {entry['private_methods']:>5}"
@@ -331,7 +373,9 @@ def print_summary(summary):
     print(f"\n{'-' * 88}")
     print("  TOP 20 LARGEST FUNCTIONS (by LOC)")
     print(f"{'-' * 88}")
-    print(f"  {'#':>3}  {'LOC':>5}  {'Async':>5}  {'Layer':<16} {'Function':<35} {'File'}")
+    print(
+        f"  {'#':>3}  {'LOC':>5}  {'Async':>5}  {'Layer':<16} {'Function':<35} {'File'}"
+    )
     for i, entry in enumerate(summary["top20_functions_by_loc"], 1):
         async_flag = "yes" if entry["is_async"] else "no"
         print(
@@ -366,6 +410,7 @@ def print_summary(summary):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
     if not SRC_ROOT.is_dir():
         print(f"ERROR: Source root not found: {SRC_ROOT}", file=sys.stderr)
@@ -382,7 +427,9 @@ def main():
         "summary": summary,
         "inventory": inventory,
     }
-    OUTPUT_JSON.write_text(json.dumps(output_payload, indent=2, default=str), encoding="utf-8")
+    OUTPUT_JSON.write_text(
+        json.dumps(output_payload, indent=2, default=str), encoding="utf-8"
+    )
 
     print_summary(summary)
 

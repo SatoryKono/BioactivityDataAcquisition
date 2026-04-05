@@ -142,9 +142,7 @@ def collect_stats(src_dir: Path) -> CoverageStats:
         if ast.get_docstring(tree):
             stats.modules_with_doc += 1
         else:
-            stats.missing.append(
-                {"file": str(rel), "kind": "module", "name": str(rel)}
-            )
+            stats.missing.append({"file": str(rel), "kind": "module", "name": str(rel)})
         process_body(tree.body, rel=rel)
 
     return stats
@@ -169,9 +167,7 @@ def print_report(stats: CoverageStats, *, verbose: bool = True) -> None:
     print()
 
     if verbose and stats.missing:
-        public_missing = [
-            m for m in stats.missing if not m["name"].startswith("_")
-        ]
+        public_missing = [m for m in stats.missing if not m["name"].startswith("_")]
         if public_missing:
             print(f"Public items missing docstrings ({len(public_missing)}):")
             for m in public_missing:
@@ -189,14 +185,12 @@ def check_thresholds(
 
     thresholds = dict(THRESHOLDS)
     if fail_under is not None:
-        thresholds = {k: fail_under for k in thresholds}
+        thresholds = dict.fromkeys(thresholds, fail_under)
 
     for kind, threshold in thresholds.items():
         actual = getattr(stats, f"{kind}_pct")
         if actual < threshold:
-            violations.append(
-                f"{kind}: {actual}% < {threshold}% threshold"
-            )
+            violations.append(f"{kind}: {actual}% < {threshold}% threshold")
 
     return violations
 

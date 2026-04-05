@@ -83,7 +83,9 @@ def main() -> int:
     try:
         # Load registry
         registry = ContractRegistry(registry_path)
-        print(f"::notice::Loaded contract registry with {len(registry.entries)} entries")
+        print(
+            f"::notice::Loaded contract registry with {len(registry.entries)} entries"
+        )
 
         # Validate all entries
         validation_result = registry.validate_all()

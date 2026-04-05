@@ -236,7 +236,12 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
 
 
 @pytest.mark.parametrize(
-    ("dataset_ref", "lineage_fragment_id", "expected_missing_links", "expected_lineage_gap"),
+    (
+        "dataset_ref",
+        "lineage_fragment_id",
+        "expected_missing_links",
+        "expected_lineage_gap",
+    ),
     [
         (None, "silver:fragment-1", 0, False),
         ("silver:chembl.activity@1", None, 0, True),

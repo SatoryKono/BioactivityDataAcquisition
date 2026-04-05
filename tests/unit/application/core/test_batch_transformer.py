@@ -628,7 +628,9 @@ class TestBatchTransformerAggregationHelpers:
     ) -> None:
         """Batch finalizer should flush quarantine state and build result."""
         state = create_transform_aggregation_state()
-        state.filtered_records.append(FilteredQuarantineEntry({"id": "filtered"}, "why"))
+        state.filtered_records.append(
+            FilteredQuarantineEntry({"id": "filtered"}, "why")
+        )
         state.dq_records.append(({"id": "bad"}, MagicMock(), "error"))
         state.filtered_out_count = 1
         state.quarantined_count = 1

@@ -63,7 +63,5 @@ def test_rollout_and_hash_routing_application_domain_modules_stay_infra_free(
         "Rollout/hash routing must not pull infrastructure runtime dependencies "
         "into application/domain modules.\n"
         "Keep config loading, validators, and storage wiring in composition.\n"
-        "Violations:\n"
-        + "\n".join(f"  - {violation}" for violation in violations)
+        "Violations:\n" + "\n".join(f"  - {violation}" for violation in violations)
     )
-

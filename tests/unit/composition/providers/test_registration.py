@@ -637,6 +637,7 @@ def test_build_http_provider_config_map_builds_multiple_entries_from_manifest() 
     assert configs["beta"].http_config.rate_overrides == {"api_key": 30.0}
     assert configs["beta"].custom_creator is custom_creator
     assert configs["alpha"].data_source_creator is not None
-    assert configs["alpha"].data_source_creator(
-        MagicMock(), MagicMock(), MagicMock()
-    ) is support
+    assert (
+        configs["alpha"].data_source_creator(MagicMock(), MagicMock(), MagicMock())
+        is support
+    )

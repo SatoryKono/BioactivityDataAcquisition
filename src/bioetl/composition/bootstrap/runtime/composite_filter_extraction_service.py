@@ -29,7 +29,9 @@ class CompositeFilterExtractionService:
     def __init__(
         self,
         logger: LoggerPort | None = None,
-        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+        normalization_policies: Mapping[
+            str, JoinKeyNormalizationPolicy
+        ] = JOIN_KEY_NORMALIZATION_POLICIES,
     ) -> None:
         self._logger = logger
         self._normalization_policies = normalization_policies

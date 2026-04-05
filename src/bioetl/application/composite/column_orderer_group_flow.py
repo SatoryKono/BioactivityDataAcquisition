@@ -107,7 +107,9 @@ def filter_columns_by_groups(
         matched = {
             column
             for column in matched
-            if not any(fnmatch(column, pattern) for pattern in layer_config.exclude_fields)
+            if not any(
+                fnmatch(column, pattern) for pattern in layer_config.exclude_fields
+            )
         }
 
     ordered = order_by_yaml_groups(

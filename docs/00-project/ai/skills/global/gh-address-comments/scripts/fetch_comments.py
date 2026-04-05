@@ -192,7 +192,7 @@ def fetch_all(owner: str, repo: str, number: int) -> dict[str, Any]:
             threads_cursor=threads_cursor,
         )
 
-        if "errors" in payload and payload["errors"]:
+        if payload.get("errors"):
             raise RuntimeError(
                 f"GitHub GraphQL errors:\n{json.dumps(payload['errors'], indent=2)}"
             )

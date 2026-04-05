@@ -56,7 +56,11 @@ def _fetch_server() -> dict[str, object]:
 def _pdf_server() -> dict[str, object]:
     return {
         "command": "npx",
-        "args": ["-y", f"@modelcontextprotocol/server-pdf@{PDF_MCP_VERSION}", "--stdio"],
+        "args": [
+            "-y",
+            f"@modelcontextprotocol/server-pdf@{PDF_MCP_VERSION}",
+            "--stdio",
+        ],
         "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
     }
 
@@ -93,12 +97,19 @@ def _core_servers(root: Path) -> dict[str, dict[str, object]]:
         },
         "filesystem": {
             "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-filesystem@2026.1.14", root_path],
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-filesystem@2026.1.14",
+                root_path,
+            ],
             "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
         },
         "sequential-thinking": {
             "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"],
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-sequential-thinking@2025.12.18",
+            ],
             "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
         },
         "fetch": _fetch_server(),
@@ -153,7 +164,9 @@ def _codex_registration(root: Path) -> int:
     if codex_bin is None:
         print("[2/3] Codex CLI not found. Skipping Codex MCP registration.")
         print("[3/3] Done.")
-        print("Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools.")
+        print(
+            "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
+        )
         return 0
 
     print("[2/3] Refreshing Codex MCP registrations")
@@ -190,7 +203,9 @@ def _codex_registration(root: Path) -> int:
         print(f"      {server_name} MCP registered in Codex.")
 
     print("[3/3] Done.")
-    print("Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools.")
+    print(
+        "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
+    )
     return 0
 
 
@@ -202,7 +217,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.skip_codex:
         print("[2/3] Skipping Codex MCP registration (requested).")
         print("[3/3] Done.")
-        print("Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools.")
+        print(
+            "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
+        )
         return 0
 
     return _codex_registration(root)

@@ -38,10 +38,7 @@ _OBJECT_SUFFIX_SPACING_RE = re.compile(
 )
 _CLASS_METHOD_LINE_RE = re.compile(r"^\s*[+\-#~]\s*[A-Za-z_][A-Za-z0-9_]*\s*\(")
 
-SVG_DIRS = [
-    render_dir(family, "svg")
-    for family in SOURCE_FAMILIES
-]
+SVG_DIRS = [render_dir(family, "svg") for family in SOURCE_FAMILIES]
 
 
 def _local_name(tag: str) -> str:
@@ -133,7 +130,9 @@ def _class_tokens(node: ET.Element | None) -> set[str]:
     return {token for token in raw.split() if token}
 
 
-def _detect_label_kind(parent: ET.Element, parent_map: dict[ET.Element, ET.Element]) -> str:
+def _detect_label_kind(
+    parent: ET.Element, parent_map: dict[ET.Element, ET.Element]
+) -> str:
     """Infer semantic label kind from parent/ancestor class groups."""
     chain: list[ET.Element] = [parent]
     current = parent
@@ -149,7 +148,11 @@ def _detect_label_kind(parent: ET.Element, parent_map: dict[ET.Element, ET.Eleme
         return "methods"
     if "members-group" in tokens:
         return "members"
-    if "label-group" in tokens or "annotation-group" in tokens or "cluster-label" in tokens:
+    if (
+        "label-group" in tokens
+        or "annotation-group" in tokens
+        or "cluster-label" in tokens
+    ):
         return "title"
     if "edgeLabel" in tokens:
         return "edge"
@@ -244,7 +247,7 @@ def _wrap_label_lines(lines: list[str], max_chars: int, label_kind: str) -> list
                 continue
             start = 0
             while start < len(chunk):
-                wrapped.append(chunk[start:start + max_chars])
+                wrapped.append(chunk[start : start + max_chars])
                 start += max_chars
 
     while wrapped and not wrapped[0]:
@@ -287,7 +290,9 @@ def _is_fallback_text(node: ET.Element) -> bool:
     return "fo-fallback" in classes.split()
 
 
-def _build_fallback_text(fo: ET.Element, label_kind: str = "generic") -> ET.Element | None:
+def _build_fallback_text(
+    fo: ET.Element, label_kind: str = "generic"
+) -> ET.Element | None:
     text_lines = _extract_text_lines(fo)
     if not text_lines:
         return None
@@ -417,11 +422,17 @@ def main() -> int:
         description="Add fallback SVG text for Mermaid foreignObject labels.",
     )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--check", action="store_true", help="Exit 1 if fallback insertion needed")
+    group.add_argument(
+        "--check", action="store_true", help="Exit 1 if fallback insertion needed"
+    )
     group.add_argument("--fix", action="store_true", help="Write changes in place")
     group.add_argument("--dry-run", action="store_true", help="Show what would change")
-    parser.add_argument("-f", "--file", type=Path, action="append", help="Specific SVG file(s)")
-    parser.add_argument("--dir", type=Path, action="append", help="Specific directory(ies)")
+    parser.add_argument(
+        "-f", "--file", type=Path, action="append", help="Specific SVG file(s)"
+    )
+    parser.add_argument(
+        "--dir", type=Path, action="append", help="Specific directory(ies)"
+    )
     args = parser.parse_args()
 
     mode = "check" if args.check else ("dry-run" if args.dry_run else "fix")

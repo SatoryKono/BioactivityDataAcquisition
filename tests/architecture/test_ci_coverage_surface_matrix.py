@@ -30,7 +30,10 @@ class TestCiCoverageSurfaceMatrix:
         assert matrix.get("policy_scope") == "ci_coverage_surface_mapping"
         assert matrix.get("workflow_path") == ".github/workflows/tests.yml"
         assert matrix.get("threshold_policy", {}).get("hard_coverage_threshold") == 85
-        assert matrix.get("threshold_policy", {}).get("enforced_in_job") == "coverage-verify"
+        assert (
+            matrix.get("threshold_policy", {}).get("enforced_in_job")
+            == "coverage-verify"
+        )
 
     def test_ci_coverage_surface_matrix_tracks_expected_major_lanes(self) -> None:
         matrix = _load_yaml(MATRIX_PATH)

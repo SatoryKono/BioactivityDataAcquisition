@@ -12,7 +12,9 @@ ROOT = Path(__file__).resolve().parents[2]
 PIPELINE_CONFIG_LOADER_PATH = (
     ROOT / "src" / "bioetl" / "infrastructure" / "config" / "pipeline_config_loader.py"
 )
-REGISTRATION_PATH = ROOT / "src" / "bioetl" / "composition" / "providers" / "registration.py"
+REGISTRATION_PATH = (
+    ROOT / "src" / "bioetl" / "composition" / "providers" / "registration.py"
+)
 LOADER_PATH = ROOT / "src" / "bioetl" / "composition" / "providers" / "loader.py"
 DEFAULT_REGISTRY_PATH = (
     ROOT / "src" / "bioetl" / "composition" / "providers" / "_default_registry.py"

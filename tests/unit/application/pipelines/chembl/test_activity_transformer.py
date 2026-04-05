@@ -684,7 +684,9 @@ class TestActivityTransformerSilverContract:
                     )
                 details = exc_info.value.details
 
-            expected_policy_stage = "semantic" if field_name == "_state" else "structural"
+            expected_policy_stage = (
+                "semantic" if field_name == "_state" else "structural"
+            )
             if details.get("policy_stage") != expected_policy_stage:
                 assertion_failures.append(
                     f"{field_name}: unexpected policy_stage={details.get('policy_stage')!r}"

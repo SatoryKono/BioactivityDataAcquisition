@@ -4,18 +4,17 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
-from datetime import UTC, datetime
 import json
 import os
-from pathlib import Path
 import queue
 import shlex
 import subprocess
 import sys
 import threading
 import time
-
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_TIMEOUT_SECONDS = 15.0

@@ -67,10 +67,7 @@ def _get_rate_limit_from_config(provider: str) -> RateLimitContext:
 
 def _get_rate_limits_from_config(*providers: str) -> dict[str, RateLimitContext]:
     """Resolve multiple provider rate limits through one canonical helper path."""
-    return {
-        provider: _get_rate_limit_from_config(provider)
-        for provider in providers
-    }
+    return {provider: _get_rate_limit_from_config(provider) for provider in providers}
 
 
 def _resolve_provider_family_registration_context(
@@ -92,7 +89,9 @@ def _build_provider_family_http_config_map(
     *,
     rate_limits: dict[str, RateLimitContext],
     assembly_support: ProviderAssemblySupport,
-    spec_builder: Callable[[dict[str, RateLimitContext]], tuple[HttpProviderConfigSpec, ...]],
+    spec_builder: Callable[
+        [dict[str, RateLimitContext]], tuple[HttpProviderConfigSpec, ...]
+    ],
 ) -> dict[str, ProviderConfig]:
     """Build one family's HTTP provider configs from a manifest builder."""
     from bioetl.composition.providers._registration_contracts import (

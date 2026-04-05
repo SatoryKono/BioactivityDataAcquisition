@@ -143,7 +143,9 @@ def test_build_record_processor_config_and_validator_forwards_paths_and_strict()
     assert gold_validator_factory.call_args.kwargs["strict"] is False
 
 
-def test_build_record_processor_config_tracks_non_hash_affecting_rollout_versions() -> None:
+def test_build_record_processor_config_tracks_non_hash_affecting_rollout_versions() -> (
+    None
+):
     pipeline = _make_pipeline()
     pipeline.transformer._contract_policy.rollout = SimpleNamespace(
         write_versions=("1.0.0", "2.0.0"),

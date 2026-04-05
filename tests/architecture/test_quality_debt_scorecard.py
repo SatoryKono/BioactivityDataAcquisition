@@ -67,7 +67,9 @@ def _rewrite_registry_owners(
     registry = load_exemptions_registry()
     registries = registry.get("registries", {})
     assert isinstance(registries, dict)
-    if all(isinstance(entries, dict) and not entries for entries in registries.values()):
+    if all(
+        isinstance(entries, dict) and not entries for entries in registries.values()
+    ):
         for index, registry_name in enumerate(
             sorted(registries)[: max(1, len(owner_cycle))]
         ):

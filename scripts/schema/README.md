@@ -48,7 +48,7 @@ python -m scripts.schema <command> [args...]
 | `generate-artifacts` | After changing domain models (enums, lookup tables) | Manual, after model changes |
 | `generate-pubtype` | After changing publication type classification logic | Manual, after classification changes |
 | `generate-contracts` | Before release; auto-generates JSON contracts from Pandera DataFrameModel schemas | Manual, pre-release |
-| `generate-config-matrix` | When you need the older comparison matrix/report for entity and composite YAMLs without calling `src/tools/scripts/config_matrix_generator.py` directly | Manual, audit/reporting |
+| `generate-config-matrix` | When you need the older comparison matrix/report for entity and composite YAMLs through the canonical schema entrypoint | Manual, audit/reporting |
 | `generate-unified-map` | When you need one reproducible cross-layer inventory of entity configs, Silver schemas, and Gold contracts | Manual, audit/reporting |
 | `generate-field-diagnostics` | When you need per-field type drift, JSON storage pattern, nullable conflicts, or alias redundancy diagnostics across Bronze/Silver/Gold | Manual, audit/reporting |
 | `generate-field-spec` | When you need deterministic per-field normalization specs with canonical JSON/DOI/PMID/date rules and conservative hash impact flags | Manual, audit/reporting |
@@ -71,8 +71,8 @@ Runtime optionality currently resolves in this order:
 Validator distinction:
 
 - `python -m scripts.schema validate-configs` is the maintained JSON Schema / agent-canonical validator.
-- `python -m scripts.schema validate-unified-configs` is a compatibility façade over the older standalone structural validator from `src/tools/scripts/validate_unified_configs.py`.
-- `python -m scripts.schema generate-config-matrix` is a compatibility façade over the older comparison-matrix generator from `src/tools/scripts/config_matrix_generator.py`.
+- `python -m scripts.schema validate-unified-configs` is a compatibility façade over the older standalone structural validator kept behind the legacy direct path.
+- `python -m scripts.schema generate-config-matrix` is a compatibility façade over the older comparison-matrix generator kept behind the legacy direct path.
 - Keep them separate until their contracts are intentionally unified.
 
 This keeps structural policy compatible with today's configs while allowing

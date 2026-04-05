@@ -55,6 +55,8 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
+
+
 @dataclass(frozen=True, slots=True)
 class _PipelineFactoryContext:
     """Stable internal factory context shared across assembler helper calls."""
@@ -65,6 +67,8 @@ class _PipelineFactoryContext:
     provider: str | None = None
     transformer_class: type[BaseTransformer] | None = None
     pandera_silver_schema: object | None = None
+
+
 @dataclass(frozen=True, slots=True)
 class _BuildFactoryServicesRequest:
     """Runtime request inputs for pipeline service assembly."""
@@ -75,10 +79,15 @@ class _BuildFactoryServicesRequest:
     filter_config: InputFilterConfig | None = None
     tracer: TracingPort | None = None
     dq_monitor: DQMonitorPort | None = None
+
+
 _CreatePipelineWithServicesRequest = _PipelineCreationRequest
+
+
 def extract_entity_type(pipeline_name: str) -> str | None:
     """Extract trailing entity from `<provider>_<entity>` pipeline names."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
+
 
 def resolve_data_source_creator(
     *,
@@ -91,6 +100,8 @@ def resolve_data_source_creator(
     if data_source_creator is not None:
         return data_source_creator
     return get_data_source_creator_fn(provider, provider_registry=provider_registry)
+
+
 def build_pipeline_factory_context(
     *,
     pipeline_name: str,
@@ -109,6 +120,8 @@ def build_pipeline_factory_context(
         transformer_class=transformer_class,
         pandera_silver_schema=pandera_silver_schema,
     )
+
+
 def build_create_pipeline_with_services_request(
     run_id: RunID,
     runtime: RuntimeConfig,
@@ -142,6 +155,8 @@ def build_create_pipeline_with_services_request(
         metrics,
         cached_bronze,
     )
+
+
 def _apply_optional_control_plane_kwargs(
     kwargs: dict[str, object],
     *,
@@ -159,13 +174,21 @@ def _apply_optional_control_plane_kwargs(
         kwargs["dq_contract_compatibility_hash"] = dq_contract_compatibility_hash
     if effective_config_artifact_id is not None:
         kwargs["effective_config_artifact_id"] = effective_config_artifact_id
+
+
 def _resolve_strict_gold_validation(
     *,
     runtime: RuntimeConfig,
     settings: Settings,
 ) -> bool:
     """Force strict Gold validation in prod unless explicit test mode is active."""
-    return True if settings.env == "prod" and not settings.test_mode else runtime.strict_gold_validation
+    return (
+        True
+        if settings.env == "prod" and not settings.test_mode
+        else runtime.strict_gold_validation
+    )
+
+
 def create_transformer_instance(
     *,
     transformer_class: type[BaseTransformer] | None,
@@ -208,6 +231,8 @@ def create_transformer_instance(
         gold_filters=gold_filters,
         dependencies=resolved_dependencies,
     )
+
+
 def create_factory_data_source(
     *,
     create_data_source_fn: DataSourceCreatorProtocol,
@@ -225,6 +250,8 @@ def create_factory_data_source(
         filter_config,
         pipeline_name=pipeline_name,
     )
+
+
 def build_factory_services(
     *,
     factory_context: _PipelineFactoryContext,
@@ -241,6 +268,8 @@ def build_factory_services(
         tracer=request.tracer,
         dq_monitor=request.dq_monitor,
     )
+
+
 def create_pipeline_instance_with_services(
     *,
     factory_context: _PipelineFactoryContext,
@@ -288,6 +317,8 @@ def create_pipeline_instance_with_services(
             )
         ),
     )
+
+
 def create_factory_runner(
     *,
     pipeline_name: str,

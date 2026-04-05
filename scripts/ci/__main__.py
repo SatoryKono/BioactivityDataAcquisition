@@ -13,6 +13,7 @@ Commands:
     debt-report     Generate weekly quality debt report
     apply-ci-fixes  Apply one-off hosted GitHub workflow fixes
 """
+
 from __future__ import annotations
 
 import subprocess

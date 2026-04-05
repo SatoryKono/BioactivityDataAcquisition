@@ -102,8 +102,7 @@ Examples:
         type=str,
         default=DEFAULT_EXCLUDE_DIRS,
         help=(
-            "Comma-separated directories to exclude "
-            f"(default: {DEFAULT_EXCLUDE_DIRS})"
+            f"Comma-separated directories to exclude (default: {DEFAULT_EXCLUDE_DIRS})"
         ),
     )
 

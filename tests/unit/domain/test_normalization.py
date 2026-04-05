@@ -178,9 +178,7 @@ class TestNormalizePmid:
             (False, None),
         ],
     )
-    def test_normalize_pmid(
-        self, pmid: str | int | None, expected: str | None
-    ) -> None:
+    def test_normalize_pmid(self, pmid: str | int | None, expected: str | None) -> None:
         """Test PMID normalization."""
         assert normalize_pmid(pmid) == expected
 

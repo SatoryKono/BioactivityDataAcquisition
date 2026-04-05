@@ -60,7 +60,9 @@ def semanticscholar_publication_data_dir(
     tmp_path_factory: pytest.TempPathFactory,
 ) -> Generator[Path, None, None]:
     """Create one shared data dir for deterministic Semantic Scholar playback."""
-    data_dir = tmp_path_factory.mktemp("semanticscholar_publication_e2e") / "bioetl_data"
+    data_dir = (
+        tmp_path_factory.mktemp("semanticscholar_publication_e2e") / "bioetl_data"
+    )
     with managed_e2e_data_dir(data_dir) as prepared_dir:
         yield prepared_dir
 

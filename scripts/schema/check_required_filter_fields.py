@@ -71,9 +71,10 @@ def extract_expected_required_fields(config: dict[str, Any]) -> set[str]:
         field = item.get("field")
         if not isinstance(field, str) or field in EXCLUDED_FIELDS:
             continue
-        if item.get("type") in {"required", "not_null"} or item.get(
-            "nullable"
-        ) is False:
+        if (
+            item.get("type") in {"required", "not_null"}
+            or item.get("nullable") is False
+        ):
             expected.add(field)
 
     for item in quality.get("key_nullability") or []:
@@ -144,7 +145,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if args.verbose:
-        print("INV-CFG-007: PASS (silver required_fields cover explicit YAML requiredness)")
+        print(
+            "INV-CFG-007: PASS (silver required_fields cover explicit YAML requiredness)"
+        )
     return 0
 
 

@@ -317,7 +317,9 @@ class TestBatchEncapsulation:
 
     def test_metadata_returns_copy(self, run_id: RunID) -> None:
         """Invariant: metadata returns a copy."""
-        batch = Batch.create(run_id=run_id, created_at=_ts(0), metadata={"key": "value"})
+        batch = Batch.create(
+            run_id=run_id, created_at=_ts(0), metadata={"key": "value"}
+        )
 
         metadata = batch.metadata
         metadata["new_key"] = "new_value"

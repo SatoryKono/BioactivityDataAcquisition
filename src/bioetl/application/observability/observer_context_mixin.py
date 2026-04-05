@@ -82,7 +82,10 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
 
     def _has_real_tracing(self) -> bool:
         """Return whether the observer uses a non-noop tracing implementation."""
-        return self._tracer is not None and getattr(self._tracer, "is_noop", False) is not True
+        return (
+            self._tracer is not None
+            and getattr(self._tracer, "is_noop", False) is not True
+        )
 
     def _build_trace_attributes(self) -> dict[str, object]:
         """Build span attributes with optional correlation anchors."""

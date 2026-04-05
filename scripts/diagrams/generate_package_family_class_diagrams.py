@@ -12,10 +12,10 @@ from __future__ import annotations
 import argparse
 import ast
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Iterable
 
 try:
     from .diagram_paths import DIAGRAM_ROOT, REPO_ROOT

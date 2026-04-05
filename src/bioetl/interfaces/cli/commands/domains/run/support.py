@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 
 
 @cache
-def _load_pipeline_registry_type() -> type["PipelineRegistry"]:
+def _load_pipeline_registry_type() -> type[PipelineRegistry]:
     """Resolve PipelineRegistry lazily so command imports stay lightweight."""
     from bioetl.composition import PipelineRegistry
 

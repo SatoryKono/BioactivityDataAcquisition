@@ -76,7 +76,8 @@ def normalize_join_key_columns(
                 key=key,
                 normalization_policies=normalization_policies,
             )
-        ) is not None
+        )
+        is not None
     ]
     if not expressions:
         return df

@@ -12,7 +12,10 @@ def test_build_child_issue_templates_tracks_parent_issue() -> None:
 
     assert len(templates) == 3
     assert all("#2511" in template.body for template in templates)
-    assert templates[0].title == "Unit Test Standards Baseline for Pure Transformation Logic"
+    assert (
+        templates[0].title
+        == "Unit Test Standards Baseline for Pure Transformation Logic"
+    )
 
 
 def test_build_parent_comment_references_child_issues() -> None:
@@ -37,7 +40,9 @@ def test_build_parent_comment_references_child_issues() -> None:
     )
 
     assert "#2601 Unit Test Standards Baseline for Pure Transformation Logic" in comment
-    assert "#2602 Integration and VCR Policy Tightening for Supported Pipelines" in comment
+    assert (
+        "#2602 Integration and VCR Policy Tightening for Supported Pipelines" in comment
+    )
     assert "#2594 Pandera Schema Drift Checks for Selected Pipelines" in comment
     assert "Parent roadmap remains #2511." in comment
 
@@ -66,7 +71,9 @@ def test_resolve_retry_delay_falls_back_to_linear_backoff() -> None:
     assert delay == 4.5
 
 
-def test_run_apply_reuses_existing_issues_and_skips_comment(monkeypatch: object) -> None:
+def test_run_apply_reuses_existing_issues_and_skips_comment(
+    monkeypatch: object,
+) -> None:
     existing_issue = module.IssueRecord(
         number=2601,
         title="Unit Test Standards Baseline for Pure Transformation Logic",

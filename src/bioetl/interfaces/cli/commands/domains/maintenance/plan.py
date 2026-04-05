@@ -146,7 +146,9 @@ def _render_plan_payload(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
-def _handle_plan_failure(exc: BaseException, *, pipeline: str, reason_code: str) -> None:
+def _handle_plan_failure(
+    exc: BaseException, *, pipeline: str, reason_code: str
+) -> None:
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,

@@ -21,10 +21,7 @@ except ImportError:  # pragma: no cover - direct script execution
     from diagram_paths import DIAGRAM_ROOT
 
 # Page break block that works for both DOCX (pandoc) and PDF (wkhtmltopdf)
-PAGE_BREAK = (
-    '\n\\newpage\n'
-    '\n<div style="page-break-before: always;"></div>\n'
-)
+PAGE_BREAK = '\n\\newpage\n\n<div style="page-break-before: always;"></div>\n'
 
 
 def fix_bundle(md_path: Path) -> int:
@@ -46,13 +43,13 @@ def fix_bundle(md_path: Path) -> int:
         line = lines[i]
 
         # Remove old page-break-after divs
-        if 'page-break-after' in line:
+        if "page-break-after" in line:
             i += 1
             changes += 1
             continue
 
         # Detect diagram headings (## name, but not ## Table of Contents, ## Описание, ## Метаданные)
-        heading_match = re.match(r'^## (.+)$', line)
+        heading_match = re.match(r"^## (.+)$", line)
         if heading_match:
             heading_text = heading_match.group(1).strip()
 
@@ -76,7 +73,7 @@ def fix_bundle(md_path: Path) -> int:
             if first_diagram_heading_seen and not is_toc_or_header:
                 # Insert page break before this heading (except very first)
                 if any(
-                    re.match(r'^## (?!Table of Contents)', l)
+                    re.match(r"^## (?!Table of Contents)", l)
                     for l in out
                     if l.startswith("## ")
                 ):

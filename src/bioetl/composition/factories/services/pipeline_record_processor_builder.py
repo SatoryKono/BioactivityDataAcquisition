@@ -38,7 +38,9 @@ def _coerce_string_frozenset(value: object | None) -> frozenset[str]:
     return frozenset(item for item in value if isinstance(item, str))
 
 
-def _extract_hash_policy(pipeline: BasePipeline) -> tuple[frozenset[str], frozenset[str]]:
+def _extract_hash_policy(
+    pipeline: BasePipeline,
+) -> tuple[frozenset[str], frozenset[str]]:
     """Extract effective content-hash field policy from transformer wiring."""
     transformer = getattr(pipeline, "transformer", None)
     identity = getattr(transformer, "_identity", None)

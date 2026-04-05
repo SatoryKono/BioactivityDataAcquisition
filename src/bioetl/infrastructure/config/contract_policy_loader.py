@@ -99,7 +99,9 @@ def _apply_rollout_defaults(
     normalized["active_version"] = active_version
     normalized["rollout"] = {
         "mode": mode,
-        "read_order": list(read_order) if isinstance(read_order, list) else [active_version],
+        "read_order": list(read_order)
+        if isinstance(read_order, list)
+        else [active_version],
         "write_versions": list(write_versions)
         if isinstance(write_versions, list)
         else [active_version],

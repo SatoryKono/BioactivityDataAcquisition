@@ -93,7 +93,10 @@ def collect_field_columns(
         try:
             provider, entity = parse_pipeline_name(enricher.pipeline)
             enricher_qualified = f"{provider}.{entity}.{field}"
-            if enricher_qualified in available_columns and enricher_qualified not in columns:
+            if (
+                enricher_qualified in available_columns
+                and enricher_qualified not in columns
+            ):
                 columns.append(enricher_qualified)
         except ValueError:
             legacy_col = f"{get_enricher_prefix(enricher.pipeline)}{field}".rstrip(".")

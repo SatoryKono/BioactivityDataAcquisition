@@ -2,16 +2,21 @@
 """
 CI Fixes script for SatoryKono/BioactivityDataAcquisition.
 
-Implements CI-01, CI-02, CI-03:
+Wave 1 (bugs):
   CI-01 — Replace actions/checkout@v6 → @v4 across all workflows
   CI-02 — Add Python 3.13 to test-matrix in tests.yml
   CI-03 — Fix docker-push to reuse image from docker-build (no double build)
+  CI-07 — Fix performance gate exit code (heredoc instead of $())
+  CI-12 — Include .github/workflows/** in security scans
+
+Wave 2 (cleanup):
+  CI-04 — Delete deprecated reusable workflow files
+  CI-06 — Fix paths/paths-ignore conflict in docker.yml
 
 Usage:
     python apply_ci_fixes.py --token ghp_YOUR_TOKEN_HERE [--dry-run]
-    python apply_ci_fixes.py --token ghp_YOUR_TOKEN_HERE --only ci-01
-    python apply_ci_fixes.py --token ghp_YOUR_TOKEN_HERE --only ci-02
-    python apply_ci_fixes.py --token ghp_YOUR_TOKEN_HERE --only ci-03
+    python apply_ci_fixes.py --token ghp_YOUR_TOKEN_HERE --only ci-04
+    python apply_ci_fixes.py --token ghp_YOUR_TOKEN_HERE --only ci-06
 
 Requirements: pip install requests
 """
@@ -32,12 +37,11 @@ BRANCHES = {
     "ci-01": "fix/ci-checkout-v4",
     "ci-02": "feat/ci-python-313-matrix",
     "ci-03": "refactor/ci-docker-single-build",
-}
-
-BRANCHES.update({
+    "ci-04": "chore/ci-delete-deprecated-workflows",
+    "ci-06": "fix/ci-docker-paths-conflict",
     "ci-07": "fix/ci-perf-gate-exitcode",
     "ci-12": "fix/ci-security-workflow-scan",
-})
+}
 
 PR_BODIES = {
     "ci-07": """## CI-07: Fix performance gate — exit code not propagated
@@ -110,17 +114,40 @@ Medium — test by triggering a push to main after merging.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 """,
+    "ci-04": """## CI-04: Delete deprecated reusable workflow files
+
+`reusable-setup.yml` and `reusable-mermaid-setup.yml` are both explicitly
+marked `# DEPRECATED` in their headers. The composite actions
+`.github/actions/setup-python-uv` and `.github/actions/setup-mermaid`
+replace them. No callers remain.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "ci-06": """## CI-06: Fix paths/paths-ignore conflict in docker.yml
+
+GitHub Actions silently ignores `paths-ignore` when `paths` is present
+in the same trigger block. The `docker.yml` had both filters, making
+`paths-ignore` a no-op while creating confusion.
+
+### Fix
+Remove `paths-ignore` from `push` and `pull_request` triggers.
+The `paths` filter already restricts the workflow to Docker-related files.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
 }
 
 
 class GitHubAPI:
     def __init__(self, token: str, dry_run: bool = False) -> None:
         self.session = requests.Session()
-        self.session.headers.update({
-            "Authorization": f"token {token}",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-        })
+        self.session.headers.update(
+            {
+                "Authorization": f"token {token}",
+                "Accept": "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+            }
+        )
         self.dry_run = dry_run
         self.base = f"https://api.github.com/repos/{OWNER}/{REPO}"
 
@@ -166,22 +193,44 @@ class GitHubAPI:
         content = base64.b64decode(data["content"]).decode("utf-8")
         return content, data["sha"]
 
-    def update_file(self, path: str, content: str, sha: str, message: str, branch: str) -> None:
+    def update_file(
+        self, path: str, content: str, sha: str, message: str, branch: str
+    ) -> None:
         encoded = base64.b64encode(content.encode("utf-8")).decode("utf-8")
-        self.put(f"/contents/{path}", {
-            "message": message,
-            "content": encoded,
-            "sha": sha,
-            "branch": branch,
-        })
+        self.put(
+            f"/contents/{path}",
+            {
+                "message": message,
+                "content": encoded,
+                "sha": sha,
+                "branch": branch,
+            },
+        )
+
+    def delete_file(self, path: str, sha: str, message: str, branch: str) -> None:
+        if self.dry_run:
+            print(f"  [DRY-RUN] DELETE {path}")
+            return
+        resp = self.session.delete(
+            f"{self.base}/contents/{path}",
+            json={
+                "message": message,
+                "sha": sha,
+                "branch": branch,
+            },
+        )
+        resp.raise_for_status()
 
     def create_pr(self, title: str, branch: str, body: str) -> str:
-        data = self.post("/pulls", {
-            "title": title,
-            "head": branch,
-            "base": BASE_BRANCH,
-            "body": body,
-        })
+        data = self.post(
+            "/pulls",
+            {
+                "title": title,
+                "head": branch,
+                "base": BASE_BRANCH,
+                "body": body,
+            },
+        )
         return data.get("html_url", "(dry-run)")
 
     def list_workflow_files(self) -> list[dict]:
@@ -189,6 +238,7 @@ class GitHubAPI:
 
 
 # ── CI-01 ────────────────────────────────────────────────────────────────────
+
 
 def apply_ci01(api: GitHubAPI) -> None:
     print("\n=== CI-01: Replace checkout@v6 → @v4 ===")
@@ -237,6 +287,7 @@ def apply_ci01(api: GitHubAPI) -> None:
 
 
 # ── CI-02 ────────────────────────────────────────────────────────────────────
+
 
 def apply_ci02(api: GitHubAPI) -> None:
     print("\n=== CI-02: Add Python 3.13 to test-matrix ===")
@@ -496,6 +547,166 @@ def apply_ci03(api: GitHubAPI) -> None:
         print(f"  PR created: {pr_url}")
 
 
+# ── CI-04 ────────────────────────────────────────────────────────────────────
+
+DEPRECATED_WORKFLOWS = [
+    ".github/workflows/reusable-setup.yml",
+    ".github/workflows/reusable-mermaid-setup.yml",
+]
+
+
+def apply_ci04(api: GitHubAPI) -> None:
+    print("\n=== CI-04: Delete deprecated reusable workflow files ===")
+    branch = BRANCHES["ci-04"]
+    sha = api.get_sha()
+
+    if api.branch_exists(branch):
+        print(f"  Branch {branch} already exists — skipping branch creation")
+    else:
+        api.create_branch(branch, sha)
+
+    deleted = []
+    for path in DEPRECATED_WORKFLOWS:
+        try:
+            _, file_sha = api.get_file(path, BASE_BRANCH)
+        except requests.HTTPError as e:
+            if e.response is not None and e.response.status_code == 404:
+                print(f"  SKIP {path} — not found (already deleted?)")
+                continue
+            raise
+        print(f"  Deleting {path}")
+        api.delete_file(
+            path=path,
+            sha=file_sha,
+            message=(
+                f"chore(ci): delete deprecated {path.split('/')[-1]}\n\n"
+                "Replaced by composite actions:\n"
+                "  .github/actions/setup-python-uv\n"
+                "  .github/actions/setup-mermaid\n\n"
+                "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+            ),
+            branch=branch,
+        )
+        deleted.append(path.split("/")[-1])
+        time.sleep(0.3)
+
+    if not deleted:
+        print("  Nothing to delete — all files already removed.")
+        return
+
+    print(f"\n  Deleted: {', '.join(deleted)}")
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="chore(ci): delete deprecated reusable workflow files",
+            branch=branch,
+            body=PR_BODIES["ci-04"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
+# ── CI-06 ────────────────────────────────────────────────────────────────────
+
+# GitHub ignores paths-ignore when paths is also present in the same trigger.
+# Fix: remove paths-ignore blocks from push and pull_request triggers.
+CI06_OLD_PUSH = """\
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
+    branches: [ main, master, develop ]
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose*.yml'
+      - '.dockerignore'
+      - 'entrypoint.sh'"""
+
+CI06_NEW_PUSH = """\
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose*.yml'
+      - '.dockerignore'
+      - 'entrypoint.sh'"""
+
+CI06_OLD_PR = """\
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
+    branches: [ main, master, develop ]
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose*.yml'
+      - '.dockerignore'
+      - 'entrypoint.sh'"""
+
+CI06_NEW_PR = """\
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose*.yml'
+      - '.dockerignore'
+      - 'entrypoint.sh'"""
+
+
+def apply_ci06(api: GitHubAPI) -> None:
+    print("\n=== CI-06: Fix paths/paths-ignore conflict in docker.yml ===")
+    branch = BRANCHES["ci-06"]
+    sha = api.get_sha()
+
+    if api.branch_exists(branch):
+        print(f"  Branch {branch} already exists — skipping branch creation")
+    else:
+        api.create_branch(branch, sha)
+
+    path = ".github/workflows/docker.yml"
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
+
+    if CI06_OLD_PUSH not in content and CI06_OLD_PR not in content:
+        print(f"  WARNING: expected patterns not found in {path}. Already fixed?")
+        return
+
+    new_content = content
+    if CI06_OLD_PUSH in new_content:
+        new_content = new_content.replace(CI06_OLD_PUSH, CI06_NEW_PUSH, 1)
+        print("  Removed paths-ignore from push trigger")
+    if CI06_OLD_PR in new_content:
+        new_content = new_content.replace(CI06_OLD_PR, CI06_NEW_PR, 1)
+        print("  Removed paths-ignore from pull_request trigger")
+
+    api.update_file(
+        path=path,
+        content=new_content,
+        sha=file_sha,
+        message=(
+            "fix(ci): remove paths-ignore from docker.yml triggers\n\n"
+            "GitHub ignores paths-ignore when paths is also present in the\n"
+            "same trigger block. Remove the dead paths-ignore filters.\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
+        branch=branch,
+    )
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): remove dead paths-ignore from docker.yml triggers",
+            branch=branch,
+            body=PR_BODIES["ci-06"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
 # ── CI-07 ────────────────────────────────────────────────────────────────────
 
 # Old buggy gate step: $() captures stdout, sys.exit(1) code is lost.
@@ -615,7 +826,9 @@ def apply_ci12(api: GitHubAPI) -> None:
     # Remove from both push and pull_request triggers (may appear twice)
     count = content.count(CI12_OLD_PATHS_IGNORE)
     new_content = content.replace(CI12_OLD_PATHS_IGNORE, CI12_NEW_PATHS_IGNORE)
-    print(f"  Patching {path}: removing .github/workflows/** exclusion ({count} occurrence{'s' if count > 1 else ''})")
+    print(
+        f"  Patching {path}: removing .github/workflows/** exclusion ({count} occurrence{'s' if count > 1 else ''})"
+    )
     api.update_file(
         path=path,
         content=new_content,
@@ -640,11 +853,26 @@ def apply_ci12(api: GitHubAPI) -> None:
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Apply CI fixes to BioactivityDataAcquisition")
-    parser.add_argument("--token", required=True, help="GitHub Personal Access Token (needs repo + workflow scopes)")
-    parser.add_argument("--dry-run", action="store_true", help="Print what would happen without making changes")
-    parser.add_argument("--only", choices=["ci-01", "ci-02", "ci-03", "ci-07", "ci-12"], help="Apply only one fix")
+    parser = argparse.ArgumentParser(
+        description="Apply CI fixes to BioactivityDataAcquisition"
+    )
+    parser.add_argument(
+        "--token",
+        required=True,
+        help="GitHub Personal Access Token (needs repo + workflow scopes)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print what would happen without making changes",
+    )
+    parser.add_argument(
+        "--only",
+        choices=["ci-01", "ci-02", "ci-03", "ci-04", "ci-06", "ci-07", "ci-12"],
+        help="Apply only one fix",
+    )
     args = parser.parse_args()
 
     api = GitHubAPI(args.token, dry_run=args.dry_run)
@@ -659,6 +887,10 @@ def main() -> None:
             apply_ci02(api)
         if not args.only or args.only == "ci-03":
             apply_ci03(api)
+        if not args.only or args.only == "ci-04":
+            apply_ci04(api)
+        if not args.only or args.only == "ci-06":
+            apply_ci06(api)
         if not args.only or args.only == "ci-07":
             apply_ci07(api)
         if not args.only or args.only == "ci-12":

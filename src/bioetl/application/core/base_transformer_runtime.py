@@ -55,7 +55,11 @@ def serialize_list(values: list[object]) -> ScalarValue:
         if isinstance(item, dict):
             return serialize_dict(cast("dict[str, object]", item))
         if isinstance(item, list):
-            return None if not item else orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+            return (
+                None
+                if not item
+                else orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+            )
         return cast("ScalarValue", item)
     return orjson.dumps(values, option=orjson.OPT_SORT_KEYS).decode("utf-8")
 

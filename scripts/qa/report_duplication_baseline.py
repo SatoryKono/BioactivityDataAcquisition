@@ -300,7 +300,9 @@ def _build_payload(
     """Build machine-readable payload for JSON output."""
     total_duplicate_clusters = sum(r.duplicate_count for r in reports)
     total_raw_duplicate_clusters = sum(
-        r.raw_duplicate_count if r.raw_duplicate_count is not None else r.duplicate_count
+        r.raw_duplicate_count
+        if r.raw_duplicate_count is not None
+        else r.duplicate_count
         for r in reports
     )
     summary = {
@@ -359,7 +361,9 @@ def _render_markdown(
     """Render a compact markdown summary for review and local artifacts."""
     total = sum(r.duplicate_count for r in reports)
     raw_total = sum(
-        r.raw_duplicate_count if r.raw_duplicate_count is not None else r.duplicate_count
+        r.raw_duplicate_count
+        if r.raw_duplicate_count is not None
+        else r.duplicate_count
         for r in reports
     )
     normalized = bool(exclude_module_patterns)
@@ -443,10 +447,7 @@ def _render_markdown(
                     and isinstance(modules[1], str)
                     and isinstance(count, int)
                 ):
-                    lines.append(
-                        "| "
-                        f"`{modules[0]}` <-> `{modules[1]}` | {count} |"
-                    )
+                    lines.append(f"| `{modules[0]}` <-> `{modules[1]}` | {count} |")
         if not report.clusters:
             lines.append("- no `R0801` findings")
             continue
@@ -492,7 +493,9 @@ def _render_markdown(
             delta = item.get("delta_duplicate_count")
             if not isinstance(target, str) or not isinstance(current_count, int):
                 continue
-            previous_text = str(previous_count) if isinstance(previous_count, int) else "n/a"
+            previous_text = (
+                str(previous_count) if isinstance(previous_count, int) else "n/a"
+            )
             delta_text = f"{delta:+d}" if isinstance(delta, int) else "n/a"
             lines.append(
                 f"| `{target}` | {current_count} | {previous_text} | {delta_text} |"

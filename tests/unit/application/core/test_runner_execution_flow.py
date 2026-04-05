@@ -120,7 +120,9 @@ async def test_run_execution_cycle_passes_resolved_offset_to_executor() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_run_execution_cycle_hands_resolved_context_to_named_stage_runner() -> None:
+async def test_run_execution_cycle_hands_resolved_context_to_named_stage_runner() -> (
+    None
+):
     host = _ExecutionHost()
     observed_context: object | None = None
 
@@ -133,7 +135,9 @@ async def test_run_execution_cycle_hands_resolved_context_to_named_stage_runner(
         observed_context = context
 
     original_helper = runner_execution_flow._run_execution_cycle_stages
-    runner_execution_flow._run_execution_cycle_stages = _recording_run_execution_cycle_stages
+    runner_execution_flow._run_execution_cycle_stages = (
+        _recording_run_execution_cycle_stages
+    )
     try:
         await runner_execution_flow.run_execution_cycle(cast(Any, host))
     finally:

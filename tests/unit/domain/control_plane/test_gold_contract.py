@@ -117,7 +117,9 @@ def test_validate_compatibility_detects_major_version_change() -> None:
 
 
 def test_validate_compatibility_allows_minor_version_when_rule_enables_it() -> None:
-    source = _make_contract("1.2.3", compatibility_rules={"minor_version_compatibility": True})
+    source = _make_contract(
+        "1.2.3", compatibility_rules={"minor_version_compatibility": True}
+    )
     target = _make_contract("1.3.0")
 
     result = source.validate_compatibility(target)
@@ -199,7 +201,9 @@ def test_validate_reports_identity_schema_and_provenance_errors() -> None:
     assert "Missing source file in provenance" in errors
 
 
-def test_registry_register_get_and_validate_all_handle_conflicts_and_invalid_contracts() -> None:
+def test_registry_register_get_and_validate_all_handle_conflicts_and_invalid_contracts() -> (
+    None
+):
     registry = GoldContractRegistry()
     valid_contract = _make_contract("1.2.3")
     invalid_contract = GoldContract(
@@ -227,7 +231,9 @@ def test_registry_register_get_and_validate_all_handle_conflicts_and_invalid_con
         ]
     }
 
-    with pytest.raises(ValueError, match="Version conflict for gold.compound: 1.2.3 vs 2.0.0"):
+    with pytest.raises(
+        ValueError, match="Version conflict for gold.compound: 1.2.3 vs 2.0.0"
+    ):
         registry.register(_make_contract("2.0.0"))
 
 

@@ -89,7 +89,9 @@ def _build_rollout_runtime_services(
     )
 
 
-def _versioned_table_path(base_path: Path, logical_table: str, contract_version: str) -> Path:
+def _versioned_table_path(
+    base_path: Path, logical_table: str, contract_version: str
+) -> Path:
     provider, _ = logical_table.split(".", 1)
     table_name = resolve_versioned_table_name(logical_table, contract_version)
     return base_path / provider / table_name.split(".", 1)[1]
@@ -117,10 +119,17 @@ async def test_contract_rollout_affects_hash_false_dual_write_keeps_same_hash(
         schema=silver_rollout_schema,
     )
 
-    v1_table = DeltaTable(str(_versioned_table_path(e2e_data_dir / "silver", logical_table, "1.0.0")))
-    v2_table = DeltaTable(str(_versioned_table_path(e2e_data_dir / "silver", logical_table, "2.0.0")))
+    v1_table = DeltaTable(
+        str(_versioned_table_path(e2e_data_dir / "silver", logical_table, "1.0.0"))
+    )
+    v2_table = DeltaTable(
+        str(_versioned_table_path(e2e_data_dir / "silver", logical_table, "2.0.0"))
+    )
 
-    assert v1_table.to_pyarrow_table().to_pylist() == v2_table.to_pyarrow_table().to_pylist()
+    assert (
+        v1_table.to_pyarrow_table().to_pylist()
+        == v2_table.to_pyarrow_table().to_pylist()
+    )
     assert v1_table.to_pyarrow_table().to_pylist()[0]["content_hash"] == "stable-hash"
 
 
@@ -151,12 +160,20 @@ async def test_contract_rollout_affects_hash_true_dual_write_projects_version_ha
         schema=silver_rollout_schema,
     )
 
-    v1_rows = DeltaTable(
-        str(_versioned_table_path(e2e_data_dir / "silver", logical_table, "1.0.0"))
-    ).to_pyarrow_table().to_pylist()
-    v2_rows = DeltaTable(
-        str(_versioned_table_path(e2e_data_dir / "silver", logical_table, "2.0.0"))
-    ).to_pyarrow_table().to_pylist()
+    v1_rows = (
+        DeltaTable(
+            str(_versioned_table_path(e2e_data_dir / "silver", logical_table, "1.0.0"))
+        )
+        .to_pyarrow_table()
+        .to_pylist()
+    )
+    v2_rows = (
+        DeltaTable(
+            str(_versioned_table_path(e2e_data_dir / "silver", logical_table, "2.0.0"))
+        )
+        .to_pyarrow_table()
+        .to_pylist()
+    )
 
     assert v1_rows[0]["content_hash"] == "hash-v1"
     assert v2_rows[0]["content_hash"] == "hash-v2"
@@ -176,8 +193,12 @@ async def test_contract_rollout_cutover_and_rollback_change_read_priority(
     v2_path = _versioned_table_path(silver_base_path, logical_table, "2.0.0")
     v1_path.parent.mkdir(parents=True, exist_ok=True)
     v2_path.parent.mkdir(parents=True, exist_ok=True)
-    write_deltalake(str(v1_path), pa.Table.from_pylist([{"id": "1", "value": "legacy"}]))
-    write_deltalake(str(v2_path), pa.Table.from_pylist([{"id": "1", "value": "shadow"}]))
+    write_deltalake(
+        str(v1_path), pa.Table.from_pylist([{"id": "1", "value": "legacy"}])
+    )
+    write_deltalake(
+        str(v2_path), pa.Table.from_pylist([{"id": "1", "value": "shadow"}])
+    )
 
     before_cutover = await reader.read_with_fallback(logical_table, ["1.0.0", "2.0.0"])
     after_cutover = await reader.read_with_fallback(logical_table, ["2.0.0", "1.0.0"])

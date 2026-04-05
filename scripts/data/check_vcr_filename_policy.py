@@ -62,8 +62,7 @@ def main() -> int:
 
     if stale_allowlist:
         sys.stdout.write(
-            "INFO: stale entries in .github/vcr-noext-allowlist.txt "
-            "(can be removed):\n"
+            "INFO: stale entries in .github/vcr-noext-allowlist.txt (can be removed):\n"
         )
         for path in stale_allowlist:
             sys.stdout.write(f"  - {path}\n")

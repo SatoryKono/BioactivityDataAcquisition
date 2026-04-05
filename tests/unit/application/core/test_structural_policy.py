@@ -140,7 +140,9 @@ def test_structural_policy_quarantines_optional_nonnullable_type_mismatch() -> N
 
 
 @pytest.mark.unit
-def test_structural_policy_respects_empty_as_missing_override_for_blank_strings() -> None:
+def test_structural_policy_respects_empty_as_missing_override_for_blank_strings() -> (
+    None
+):
     policy = build_structural_policy(
         domain_config=SimpleNamespace(
             field_policy=(

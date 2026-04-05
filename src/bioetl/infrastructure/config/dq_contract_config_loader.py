@@ -45,6 +45,8 @@ def _resolve_threshold(
     if isinstance(nested, dict) and threshold_name in nested:
         return float(nested[threshold_name])
     return default
+
+
 def _parse_disposition_overrides(
     overrides: dict[str, str] | None,
 ) -> dict[str, DQDisposition]:

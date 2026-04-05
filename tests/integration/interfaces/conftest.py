@@ -22,19 +22,19 @@ if TYPE_CHECKING:
     from tests.fakes.quarantine_fake import InMemoryQuarantine
 
 
-def _create_cli_runner() -> "CliRunner":
+def _create_cli_runner() -> CliRunner:
     from click.testing import CliRunner
 
     return CliRunner()
 
 
-def _create_in_memory_checkpoint() -> "InMemoryCheckpoint":
+def _create_in_memory_checkpoint() -> InMemoryCheckpoint:
     from tests.fakes.checkpoint_fake import InMemoryCheckpoint
 
     return InMemoryCheckpoint()
 
 
-def _create_in_memory_quarantine() -> "InMemoryQuarantine":
+def _create_in_memory_quarantine() -> InMemoryQuarantine:
     from tests.fakes.quarantine_fake import InMemoryQuarantine
 
     return InMemoryQuarantine()

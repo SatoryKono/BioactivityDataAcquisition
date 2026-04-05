@@ -16,8 +16,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import time
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -30,7 +30,9 @@ DEFAULT_REPO: Final[str] = "BioactivityDataAcquisition"
 DEFAULT_PARENT_ISSUE: Final[int] = 2511
 DEFAULT_TOKEN_ENV: Final[str] = "GITHUB_PERSONAL_ACCESS_TOKEN"
 MAX_HTTP_RETRIES: Final[int] = 4
-RETRYABLE_HTTP_STATUS_CODES: Final[frozenset[int]] = frozenset({429, 500, 502, 503, 504})
+RETRYABLE_HTTP_STATUS_CODES: Final[frozenset[int]] = frozenset(
+    {429, 500, 502, 503, 504}
+)
 DEFAULT_RETRY_DELAY_SECONDS: Final[float] = 1.5
 
 
@@ -224,9 +226,7 @@ def _build_parent_comment(*, parent_issue: int, child_issues: list[IssueRecord])
 def _require_token(token_env: str) -> str:
     token = os.getenv(token_env, "").strip()
     if not token:
-        raise ValueError(
-            f"Missing GitHub token in environment variable: {token_env}"
-        )
+        raise ValueError(f"Missing GitHub token in environment variable: {token_env}")
     return token
 
 
@@ -350,7 +350,9 @@ def _list_repo_issues(owner: str, repo: str, token: str) -> list[IssueRecord]:
     return issues
 
 
-def _find_existing_issue(issues: list[IssueRecord], *, title: str) -> IssueRecord | None:
+def _find_existing_issue(
+    issues: list[IssueRecord], *, title: str
+) -> IssueRecord | None:
     for issue in issues:
         if issue.title == title:
             return issue

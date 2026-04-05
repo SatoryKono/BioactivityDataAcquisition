@@ -24,7 +24,9 @@ def build_validation_summary(report: CompositeValidationReport) -> JsonDict:
                 "blockers": len(report.deep_preflight_result.get_blockers()),
             },
             "runtime_guard": {
-                "issues": len(runtime_guard_result.issues) if runtime_guard_result else 0,
+                "issues": len(runtime_guard_result.issues)
+                if runtime_guard_result
+                else 0,
                 "blockers": (
                     len(runtime_guard_result.get_blockers())
                     if runtime_guard_result

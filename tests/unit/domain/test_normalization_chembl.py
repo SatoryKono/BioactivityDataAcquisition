@@ -65,10 +65,7 @@ class TestNormalizeUnits:
 
     def test_normalize_qudt_unit_trims_but_preserves_uri(self) -> None:
         value = " http://www.openphacts.org/units/Nanomolar "
-        assert (
-            normalize_qudt_unit(value)
-            == "http://www.openphacts.org/units/Nanomolar"
-        )
+        assert normalize_qudt_unit(value) == "http://www.openphacts.org/units/Nanomolar"
 
     def test_normalize_standard_unit_preserves_unknown_trimmed_value(self) -> None:
         assert normalize_standard_unit(" ratio ") == "ratio"
@@ -85,8 +82,7 @@ class TestNormalizeOrganismName:
 
     def test_normalize_known_scientific_name_to_canonical_display(self) -> None:
         assert (
-            normalize_chembl_organism_name("  homo sapiens (Human) ")
-            == "Homo sapiens"
+            normalize_chembl_organism_name("  homo sapiens (Human) ") == "Homo sapiens"
         )
 
     def test_normalize_alias_to_canonical_display(self) -> None:

@@ -103,12 +103,20 @@ async def test_gold_writer_dual_write_projects_version_specific_schema(
         mode="append",
     )
 
-    v1_rows = DeltaTable(
-        str(_versioned_table_path(tmp_path / "gold", "chembl.activity__v1_0_0"))
-    ).to_pyarrow_table().to_pylist()
-    v2_rows = DeltaTable(
-        str(_versioned_table_path(tmp_path / "gold", "chembl.activity__v2_0_0"))
-    ).to_pyarrow_table().to_pylist()
+    v1_rows = (
+        DeltaTable(
+            str(_versioned_table_path(tmp_path / "gold", "chembl.activity__v1_0_0"))
+        )
+        .to_pyarrow_table()
+        .to_pylist()
+    )
+    v2_rows = (
+        DeltaTable(
+            str(_versioned_table_path(tmp_path / "gold", "chembl.activity__v2_0_0"))
+        )
+        .to_pyarrow_table()
+        .to_pylist()
+    )
 
     assert v1_rows == [{"entity_id": "CHEMBL123", "legacy_value": "old-shape"}]
     assert v2_rows == [{"entity_id": "CHEMBL123", "value": 5.5}]

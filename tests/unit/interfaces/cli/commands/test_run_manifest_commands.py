@@ -178,7 +178,9 @@ class TestRunManifestCommands:
         result = cli_runner.invoke(cli, ["run-manifest", "--help"])
 
         assert result.exit_code == 0
-        assert "Inspect control-plane run manifests and ledger history." in result.output
+        assert (
+            "Inspect control-plane run manifests and ledger history." in result.output
+        )
 
     def test_show_json_outputs_manifest_and_ledger(
         self,

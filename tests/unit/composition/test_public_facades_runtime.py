@@ -23,7 +23,6 @@ def test_composite_api_reexports_bootstrap_entrypoints() -> None:
     assert compat_module.load_pipeline_config is target_module.load_pipeline_config
 
 
-
 @pytest.mark.unit
 def test_pipeline_construction_module_reexports_canonical_builders() -> None:
     """Public construction seam should expose its delegated helper owners."""

@@ -93,6 +93,7 @@ def _build_field_policy(
     yaml_config: PipelineYamlConfig,
 ) -> tuple[FieldPolicyConfig, ...]:
     """Build explicit field-level policy overrides from YAML config."""
+
     def _normalize_boolean_vocabulary(values: list[str]) -> tuple[str, ...]:
         normalized: list[str] = []
         seen: set[str] = set()

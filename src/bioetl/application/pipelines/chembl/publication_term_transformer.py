@@ -54,7 +54,9 @@ class PublicationTermTransformer(BaseChemblTransformer):
             self._get_required_field(prepared_record, self.primary_id_field),
         )
         business_data = self._extract_business_data(prepared_record, primary_id)
-        entity_id = _resolve_publication_term_entity_id(self, prepared_record, business_data)
+        entity_id = _resolve_publication_term_entity_id(
+            self, prepared_record, business_data
+        )
         return PreSilverRecord(
             entity_id=entity_id,
             business_data=business_data,
@@ -217,10 +219,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
 def _prepare_publication_term_record(record: BronzeRecord) -> BronzeRecord:
     """Normalize legacy ChEMBL publication-term input field names."""
-    if (
-        "publication_id" not in record
-        and record.get("document_chembl_id") is not None
-    ):
+    if "publication_id" not in record and record.get("document_chembl_id") is not None:
         normalized_record = dict(record)
         normalized_record["publication_id"] = record.get("document_chembl_id")
         return normalized_record

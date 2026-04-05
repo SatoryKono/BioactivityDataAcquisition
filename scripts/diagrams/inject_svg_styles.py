@@ -26,6 +26,7 @@ Usage:
     # Process specific directory
     python scripts/diagrams/inject_svg_styles.py --fix --dir docs/.../architecture/svg
 """
+
 from __future__ import annotations
 
 import argparse
@@ -67,6 +68,7 @@ _STYLE_CLOSE_RE = re.compile(r"(\]\]></style>|</style>)")
 
 # ── CSS rules to inject ────────────────────────────────────────────────────
 
+
 def _build_css_rules(svg_id: str) -> str:
     """Build ID-scoped CSS override rules for edge label readability."""
     return (
@@ -82,6 +84,7 @@ def _build_css_rules(svg_id: str) -> str:
 
 
 # ── Core logic ──────────────────────────────────────────────────────────────
+
 
 def needs_injection(content: str) -> bool:
     """Check if SVG content already has injected styles."""
@@ -113,6 +116,7 @@ def inject_styles(content: str) -> str | None:
 
 
 # ── File processing ─────────────────────────────────────────────────────────
+
 
 def collect_svg_files(
     files: list[Path] | None,
@@ -160,17 +164,24 @@ def process_file(
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Inject CSS overrides into Mermaid SVG files for edge label readability.",
     )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--check", action="store_true", help="Check mode (exit 1 if injection needed)")
+    group.add_argument(
+        "--check", action="store_true", help="Check mode (exit 1 if injection needed)"
+    )
     group.add_argument("--fix", action="store_true", help="Fix SVGs in-place")
     group.add_argument("--dry-run", action="store_true", help="Show what would change")
 
-    parser.add_argument("-f", "--file", type=Path, action="append", help="Specific SVG file(s)")
-    parser.add_argument("--dir", type=Path, action="append", help="Specific directory(ies)")
+    parser.add_argument(
+        "-f", "--file", type=Path, action="append", help="Specific SVG file(s)"
+    )
+    parser.add_argument(
+        "--dir", type=Path, action="append", help="Specific directory(ies)"
+    )
 
     args = parser.parse_args()
 

@@ -43,7 +43,9 @@ def _build_runtime() -> SimpleNamespace:
 
 
 @pytest.mark.unit
-def test_build_composite_launch_context_snapshot_returns_runtime_sensitive_fields() -> None:
+def test_build_composite_launch_context_snapshot_returns_runtime_sensitive_fields() -> (
+    None
+):
     config = _build_config()
     runtime = _build_runtime()
 
@@ -58,7 +60,9 @@ def test_build_composite_launch_context_snapshot_returns_runtime_sensitive_field
 
 
 @pytest.mark.unit
-def test_build_composite_source_refs_preserves_seed_dependency_and_enricher_order() -> None:
+def test_build_composite_source_refs_preserves_seed_dependency_and_enricher_order() -> (
+    None
+):
     config = _build_config()
 
     result = build_composite_source_refs(config)

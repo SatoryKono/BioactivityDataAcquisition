@@ -156,7 +156,8 @@ class TestPathToTableName:
     def test_strips_gold_prefix(self):
         """Test gold prefix is stripped."""
         assert (
-            _path_to_table_name_helper("gold/publication_enriched") == "publication_enriched"
+            _path_to_table_name_helper("gold/publication_enriched")
+            == "publication_enriched"
         )
 
     def test_strips_bronze_prefix(self):

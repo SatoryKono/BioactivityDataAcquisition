@@ -80,6 +80,54 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded maintainer helper for closing issue #2594 after the Pandera drift gate summary; do not treat it as a reusable automation entrypoint."
     },
+    "scripts/ai/code-reviewer.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain for operator compatibility and possible external shell aliases, but do not treat it as a canonical contributor workflow command without stronger in-repo runtime evidence."
+    },
+    "scripts/ai/data-engineer.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain for operator compatibility and possible external shell aliases, but do not treat it as a canonical contributor workflow command without stronger in-repo runtime evidence."
+    },
+    "scripts/ai/literature-researcher.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain for operator compatibility and possible external shell aliases, but do not treat it as a canonical contributor workflow command without stronger in-repo runtime evidence."
+    },
+    "scripts/archive/migrations/migrate_openalex_citation_count.py": {
+      "owner": "@bioetl-platform",
+      "decision": "historical_reference",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical migration reference; new migration entrypoints must live under scripts/migrations/active or scripts/migrations/oneoff."
+    },
+    "scripts/archive/migrations/migrate_pmid_to_string.py": {
+      "owner": "@bioetl-platform",
+      "decision": "historical_reference",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical migration reference; new migration entrypoints must live under scripts/migrations/active or scripts/migrations/oneoff."
+    },
+    "scripts/archive/migrations/rename_structure_fields.py": {
+      "owner": "@bioetl-platform",
+      "decision": "historical_reference",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical migration reference; new migration entrypoints must live under scripts/migrations/active or scripts/migrations/oneoff."
+    },
+    "scripts/dev/dev_setup.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_placeholder",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a compatibility facade for python -m scripts.dev setup while canonical onboarding stays on make install, make test-deps, make setup-plugins, and python -m scripts.dev setup-mcp."
+    },
+    "scripts/diagnostics/_tmp_inspect_vcr.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded troubleshooting helper; rename or remove it before promoting it as a stable diagnostics command."
+    },
     "scripts/qa/generate_reports.py": {
       "owner": "platform-architecture",
       "decision": "deprecate",
@@ -94,6 +142,38 @@
       "next_step": "Remove the orphaned contract generator after confirming no external tooling still shells into the historical src/tools path.",
       "review_by": "2026-05-31",
       "replacement": "scripts/schema/generate_contracts.py",
+      "sunset_date": "2026-06-30"
+    },
+    "src/tools/scripts/check_architecture.py": {
+      "owner": "platform-architecture",
+      "decision": "deprecate",
+      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.qa check-architecture.",
+      "review_by": "2026-05-31",
+      "replacement": "scripts/qa/check_architecture.py",
+      "sunset_date": "2026-06-30"
+    },
+    "src/tools/scripts/check_application_deps.py": {
+      "owner": "platform-architecture",
+      "decision": "deprecate",
+      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.qa check-app-deps.",
+      "review_by": "2026-05-31",
+      "replacement": "scripts/qa/check_application_deps.py",
+      "sunset_date": "2026-06-30"
+    },
+    "src/tools/scripts/check_constructor_args.py": {
+      "owner": "platform-architecture",
+      "decision": "deprecate",
+      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.qa check-constructor-args.",
+      "review_by": "2026-05-31",
+      "replacement": "scripts/qa/check_constructor_args.py",
+      "sunset_date": "2026-06-30"
+    },
+    "src/tools/scripts/lint_terminology.py": {
+      "owner": "platform-architecture",
+      "decision": "deprecate",
+      "next_step": "Retain only as a compatibility wrapper while historical direct-path callers converge on scripts/qa/lint_terminology.py and python -m scripts.qa check-terminology.",
+      "review_by": "2026-05-31",
+      "replacement": "scripts/qa/lint_terminology.py",
       "sunset_date": "2026-06-30"
     }
   }

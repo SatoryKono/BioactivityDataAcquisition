@@ -16,7 +16,9 @@ def _uniprot_test_symbols() -> dict[str, object]:
     from bioetl.application.core.record_normalization_processor import (
         RecordNormalizationProcessor,
     )
-    from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
+    from bioetl.application.pipelines.uniprot.transformer import (
+        UniProtProteinTransformer,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import RunType
     from tests.helpers.transformer_dependencies import instantiate_test_transformer
@@ -312,7 +314,9 @@ class TestUniProtProteinTransformer:
             "genes": [{"geneName": {"value": "PTGS2"}}],
         }
 
-        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        pre_silver = await transformer.transform_pre_silver(
+            mock_context, record, index=0
+        )
         symbols = _uniprot_test_symbols()
         assert isinstance(pre_silver, symbols["PreSilverRecord"])
         staged_result = symbols["RecordNormalizationProcessor"](
