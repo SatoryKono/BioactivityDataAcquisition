@@ -81,4 +81,6 @@ python -m scripts.qa analyze-duplicate-functions
 `scripts/generate_architecture_dependency_map.py` remains a compatibility wrapper only.
 The legacy direct paths for the historical architecture, application-deps, and
 constructor-args checks remain supported during the migration window, but new
-integrations should use the grouped QA commands above.
+integrations should use the grouped QA commands above. The grouped QA commands
+now own the implementation, while the older `src/tools/scripts/check_*` paths
+act only as compatibility wrappers.
