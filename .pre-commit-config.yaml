@@ -73,12 +73,11 @@ repos:
     hooks:
       - id: pip-audit
         name: Check for known vulnerabilities in dependencies
-        entry: pip-audit
-        language: system
+        entry: python scripts/dev/run_project_python.py -m pip_audit --disable-pip --strict
+        language: python
         pass_filenames: false
         # Only run on commit, not on every file change
         stages: [pre-commit]
-        # Skip if pip-audit not installed (CI will handle this)
         verbose: true
 
       - id: validate-pipeline-configs
@@ -130,14 +129,14 @@ repos:
 
       - id: check-root-vcr-cassettes
         name: Block VCR cassette anti-patterns
-        entry: python scripts/data/check_root_vcr_cassettes.py
-        language: system
+        entry: python scripts/dev/run_project_python.py scripts/data/check_root_vcr_cassettes.py
+        language: python
         pass_filenames: false
 
       - id: check-vcr-filename-policy
         name: Enforce VCR filename policy
-        entry: python scripts/data/check_vcr_filename_policy.py
-        language: system
+        entry: python scripts/dev/run_project_python.py scripts/data/check_vcr_filename_policy.py
+        language: python
         pass_filenames: false
 
       - id: check-architecture-dependency-map-drift
