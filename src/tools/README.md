@@ -13,7 +13,7 @@ Utility scripts for BioETL project maintenance and development.
   migrated to canonical grouped entrypoints.
 - Legacy `src/tools/scripts/check_*.py` validators should migrate toward
   grouped commands under `scripts.qa` / `scripts.schema`, with the old direct
-  paths kept only as compatibility facades during the migration window.
+  paths kept only as thin compatibility facades during the migration window.
 - **Temporary files** (e.g., `_gen*.py`, `.cursor_tmp_*`) should be reviewed and cleaned up
   explicitly as part of a dedicated cleanup pass.
 
@@ -272,8 +272,9 @@ Generates a cross-config comparison matrix and discrepancy report for entity and
 python -m scripts.schema generate-config-matrix
 ```
 
-The direct legacy path remains available for compatibility during the migration
-window, but the canonical command above should be used for new integrations.
+The direct legacy path remains available only as a thin compatibility wrapper
+during the migration window, but the canonical command above should be used for
+new integrations.
 
 ### scripts/validate_unified_configs.py
 
@@ -287,8 +288,9 @@ Legacy standalone validator for unified entity YAML configs.
 python -m scripts.schema validate-unified-configs
 ```
 
-The direct legacy path remains available for compatibility during the migration
-window, but the canonical command above should be used for new integrations.
+The direct legacy path remains available only as a thin compatibility wrapper
+during the migration window, but the canonical command above should be used for
+new integrations.
 
 Use `python -m scripts.schema validate-configs` only for the maintained JSON
 Schema / agent-canonical validation flow.
