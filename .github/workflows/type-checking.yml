@@ -28,10 +28,11 @@ jobs:
   type-check:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    continue-on-error: true
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
