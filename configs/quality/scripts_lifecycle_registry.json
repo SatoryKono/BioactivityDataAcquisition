@@ -122,6 +122,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a compatibility facade for python -m scripts.dev setup while canonical onboarding stays on make install, make test-deps, make setup-plugins, and python -m scripts.dev setup-mcp."
     },
+    "scripts/dev/run_project_python.py": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a thin preferred-interpreter launcher for historical direct script/module invocations, but do not expand it into a primary contributor-facing workflow while wrapper commands remain the canonical entrypoints."
+    },
     "scripts/diagnostics/_tmp_inspect_vcr.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",

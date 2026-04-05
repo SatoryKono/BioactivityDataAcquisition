@@ -7,18 +7,26 @@ on:
   push:
     branches: [ "main" ]
     paths:
+      - 'README.md'
       - 'docs/**'
       - 'scripts/docs/**'
+      - '.github/actions/setup-python-uv/**'
       - 'tests/architecture/test_check_doc_links_guardrails.py'
       - 'mkdocs.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
       - '.github/workflows/docs.yml'
   pull_request:
     branches: [ "main" ]
     paths:
+      - 'README.md'
       - 'docs/**'
       - 'scripts/docs/**'
+      - '.github/actions/setup-python-uv/**'
       - 'tests/architecture/test_check_doc_links_guardrails.py'
       - 'mkdocs.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
       - '.github/workflows/docs.yml'
 
 jobs:
@@ -57,7 +65,7 @@ jobs:
             tests/architecture/test_runtime_agent_docs_drift.py \
             -q --tb=short
 
-  validate-mkdocs:
+  docs-verify:
     needs: docs-governance
     runs-on: ubuntu-latest
     steps:
@@ -72,8 +80,8 @@ jobs:
       - name: Validate version consistency
         run: python scripts/repo/check_version_consistency.py
 
-      - name: Run documentation integrity guardrails
-        run: uv run python scripts/docs/check_doc_links.py
+      - name: Run canonical docs verification chain
+        run: uv run python -m scripts.docs verify
 
       - name: Check architecture dependency docs drift
         run: uv run python scripts/qa/generate_architecture_dependency_map.py --check
@@ -89,9 +97,6 @@ jobs:
             docs/02-architecture/generated/module-dependency-map.md \
             docs/02-architecture/generated/module-dependency-map.json || \
             (echo "::error::Dependency map docs were regenerated. Commit updated generated files before merge." && exit 1)
-
-      - name: Build docs in strict mode
-        run: uv run bash scripts/docs/build_docs_site.sh --strict
 
   # Detect whether mermaid/diagram sources changed so the expensive
   # Puppeteer-based validate-mermaid and render-diagrams jobs can be skipped

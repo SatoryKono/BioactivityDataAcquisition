@@ -43,11 +43,14 @@ ______________________________________________________________________
 - Standard docs checks:
 
 ```bash
+uv run python -m scripts.docs verify
 uv run python -m scripts.docs check-links --links --specs --configs
 uv run python -m scripts.docs check-drift --ports --classes
 uv run python -m scripts.docs check-docstrings --summary
 bash scripts/docs/build_docs_site.sh --strict
 ```
+
+- Preferred end-to-end entrypoint: `uv run python -m scripts.docs verify`
 
 - Published workflow guide: [Docs Verification](../03-guides/docs-verification.md)
 - `make docs-build` remains a convenient wrapper for a non-strict site build when

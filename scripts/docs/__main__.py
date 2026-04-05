@@ -6,6 +6,7 @@ Usage:
     python -m scripts.docs --help
 
 Commands:
+    verify             Run the canonical docs verification chain
     check-links        Check documentation links, specs, and configs
     check-drift        Check documentation drift (ports, classes, runtime mirrors, freshness)
     check-docstrings   Check docstring coverage
@@ -29,6 +30,7 @@ import sys
 from pathlib import Path
 
 COMMANDS: dict[str, str] = {
+    "verify": "verify_docs.py",
     "check-links": "check_doc_links.py",
     "check-drift": "check_doc_drift.py",
     "check-docstrings": "check_docstring_coverage.py",
