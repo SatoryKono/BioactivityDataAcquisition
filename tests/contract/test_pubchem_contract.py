@@ -10,10 +10,16 @@ See:
 
 from __future__ import annotations
 
+import os
+
 import httpx
 import pytest
+from tests.contract._provider_contract_drift import (
+    assert_provider_probe_matches_snapshot,
+)
 
 PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
+UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 pytestmark = pytest.mark.network
 
 
@@ -64,6 +70,26 @@ class TestPubChemContract:
         assert compound["id"]["id"]["cid"] == cid
 
     @pytest.mark.asyncio
+    async def test_compound_by_molecule_id_snapshot_contract(self) -> None:
+        """Verify compound lookup payload matches the managed snapshot."""
+        cid = 2244
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{PUBCHEM_API_BASE}/compound/cid/{cid}/JSON",
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "pubchem",
+            "compound_by_molecule_id",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
+
+    @pytest.mark.asyncio
     async def test_compound_by_name(self) -> None:
         """Verify compound search by name."""
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -104,6 +130,27 @@ class TestPubChemContract:
         assert "MolecularWeight" in props
         # API may return CanonicalSMILES or ConnectivitySMILES depending on request
         assert "CanonicalSMILES" in props or "ConnectivitySMILES" in props
+
+    @pytest.mark.asyncio
+    async def test_compound_property_snapshot_contract(self) -> None:
+        """Verify property endpoint payload matches the managed snapshot."""
+        cid = 2244
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{PUBCHEM_API_BASE}/compound/cid/{cid}/property/"
+                "MolecularFormula,MolecularWeight,CanonicalSMILES/JSON",
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "pubchem",
+            "compound_property_endpoint",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
 
     @pytest.mark.asyncio
     async def test_substance_endpoint(self) -> None:
@@ -180,6 +227,26 @@ class TestPubChemContract:
         assert "CID" in data["IdentifierList"]
         # Aspirin should be found
         assert 2244 in data["IdentifierList"]["CID"]
+
+    @pytest.mark.asyncio
+    async def test_smiles_search_snapshot_contract(self) -> None:
+        """Verify SMILES search payload matches the managed snapshot."""
+        smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{PUBCHEM_API_BASE}/compound/smiles/{smiles}/cids/JSON",
+            )
+
+        assert response.status_code == 200
+        assert_provider_probe_matches_snapshot(
+            "pubchem",
+            "smiles_search",
+            response.json(),
+            update_snapshots=UPDATE_SNAPSHOTS,
+        )
 
     @pytest.mark.asyncio
     @pytest.mark.slow

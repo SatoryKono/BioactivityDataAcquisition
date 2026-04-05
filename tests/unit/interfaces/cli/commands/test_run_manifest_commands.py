@@ -75,6 +75,18 @@ class _FakeRunManifestService:
                 "effective_config_artifact_id": "eca-123",
                 "dq_contract_compatibility_hash": "compat-hash-1",
                 "event_family_counts": {"pipeline.lifecycle": 1},
+                "event_type_counts": {"run_finished": 1},
+                "artifact_refs": [
+                    {
+                        "event_type": "artifact_published",
+                        "stage": "gold",
+                        "dataset_ref": "gold:chembl.activity@1",
+                        "lineage_fragment_id": "gold:fragment-1",
+                        "artifact_path": "/tmp/output/gold/chembl/activity",
+                    }
+                ],
+                "lineage_fragment_ids": ["gold:fragment-1"],
+                "missing_artifact_links": 0,
                 "dq_rule_ids": ["gold.not_null.id"],
                 "dq_dispositions": ["fail"],
                 "dq_report_paths": ["/tmp/reports/gold_dq.json"],
@@ -146,6 +158,28 @@ class TestRunManifestCommands:
         assert "show" in result.output
         assert "diff" in result.output
 
+    def test_run_manifest_help_avoids_eager_registry_build(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        import importlib
+
+        registry_helpers = importlib.import_module(
+            "bioetl.interfaces.cli.registry_helpers"
+        )
+
+        monkeypatch.setattr(
+            registry_helpers,
+            "build_cli_registry",
+            lambda: (_ for _ in ()).throw(AssertionError("registry should stay lazy")),
+        )
+
+        result = cli_runner.invoke(cli, ["run-manifest", "--help"])
+
+        assert result.exit_code == 0
+        assert "Inspect control-plane run manifests and ledger history." in result.output
+
     def test_show_json_outputs_manifest_and_ledger(
         self,
         cli_runner: CliRunner,
@@ -188,12 +222,18 @@ class TestRunManifestCommands:
         assert "latest_status: success" in result.output
         assert "contract_version: 1.2.0" in result.output
         assert "dq_policy_ref: chembl_activity.gold" in result.output
+        assert "event_family_counts" in result.output
+        assert "event_type_counts" in result.output
+        assert "artifact_refs" in result.output
+        assert "lineage_fragment_ids" in result.output
+        assert "missing_artifact_links: 0" in result.output
         assert "gold.not_null.id" in result.output
         assert "cross_validation_mismatch" in result.output
         assert "composite.cross_validation.quarantine" in result.output
         assert "cross_validation_config_paths" in result.output
         assert "correlation_anchor_gaps" in result.output
         assert "/tmp/reports/gold_dq.json" in result.output
+        assert "/tmp/output/gold/chembl/activity" in result.output
         assert (
             "Review DQ report artifacts, rule IDs, and contract policy anchors "
             "before retry or escalation." in result.output

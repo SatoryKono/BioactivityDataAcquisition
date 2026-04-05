@@ -493,6 +493,47 @@ class TestCheckpointResumeCompatibilityPolicy:
         assert any("resume continues" in message for message in warning_messages)
 
     @pytest.mark.asyncio
+    async def test_soft_fail_policy_blocks_resume_on_execution_identity_mismatch(
+        self,
+    ) -> None:
+        checkpoint_port = _InMemoryCheckpointPort()
+        logger = MagicMock()
+        run_id = uuid4()
+
+        await checkpoint_port.save(
+            pipeline="chembl_activity",
+            run_id=run_id,
+            metadata={
+                "records_processed": 90,
+                "effective_config_hash": "cfg-old",
+            },
+        )
+
+        manager = CheckpointManagerService(
+            checkpoint_port=checkpoint_port,
+            logger=logger,
+            pipeline_name="chembl_activity",
+            run_id=run_id,
+            resume=True,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=logger
+            ),
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                effective_config_hash="cfg-new",
+            ),
+            compatibility_policy="soft_fail",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is None
+        warning_messages = [
+            call.args[0] for call in logger.warning.call_args_list if call.args
+        ]
+        assert any("soft_fail policy" in message for message in warning_messages)
+
+    @pytest.mark.asyncio
     async def test_hard_fail_policy_raises_on_execution_identity_mismatch(self) -> None:
         checkpoint_port = _InMemoryCheckpointPort()
         logger = MagicMock()

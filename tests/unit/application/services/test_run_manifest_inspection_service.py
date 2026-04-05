@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
+import pytest
+
 from bioetl.application.services.effective_config_service import EffectiveConfigService
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestInspectionService,
@@ -233,6 +235,50 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
     ]
 
 
+@pytest.mark.parametrize(
+    ("dataset_ref", "lineage_fragment_id", "expected_missing_links", "expected_lineage_gap"),
+    [
+        (None, "silver:fragment-1", 0, False),
+        ("silver:chembl.activity@1", None, 0, True),
+    ],
+)
+def test_show_distinguishes_partial_artifact_anchor_gaps(
+    dataset_ref: str | None,
+    lineage_fragment_id: str | None,
+    expected_missing_links: int,
+    expected_lineage_gap: bool,
+) -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(uuid4())
+    manifest = _make_manifest(manifest_id="manifest-partial-gap", run_id=run_id)
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-1",
+            manifest_id="manifest-partial-gap",
+            run_id=run_id,
+            event_type="artifact_published",
+            occurred_at=datetime.now(UTC),
+            status="published",
+            stage="silver",
+            dataset_ref=dataset_ref,
+            lineage_fragment_id=lineage_fragment_id,
+            details={"artifact_path": "/tmp/output/silver/chembl/activity"},
+        )
+    )
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    result = service.show("manifest-partial-gap")
+
+    assert result.diagnostics["missing_artifact_links"] == expected_missing_links
+    assert result.diagnostics["alert_signals"]["artifact_linkage_gap"] is False
+    assert result.diagnostics["alert_signals"]["lineage_gap"] is expected_lineage_gap
+
+
 def test_show_collects_dq_trace_anchors() -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
@@ -434,6 +480,104 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
     assert result.diagnostics["dq_report_paths"] == [
         "data/output/silver/chembl/activity/_dq.json"
     ]
+
+
+def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000103"))
+
+    manifest_service = RunManifestService(
+        manifest_port=manifest_store,
+        _manifest_id_factory=lambda: "manifest-chain-smoke",
+    )
+    manifest = manifest_service.create_manifest(
+        RunManifestCreateRequest(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context={"limit": 25},
+            runtime_config={"run_type": "incremental", "limit": 25},
+            resolved_config={"provider": "chembl", "entity_type": "activity"},
+            pipeline_version="1.0.0",
+            git_commit="abc1234",
+            config_hash="hash-smoke",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            dq_policy_ref="chembl.activity.dq",
+            rule_bundle_version="dq-rules.v1",
+            dq_contract_compatibility_hash="compat-hash-smoke",
+            effective_config_artifact_id="eca-smoke-1",
+        )
+    )
+    ledger_service = RunLedgerService(
+        ledger_port=ledger_store,
+        manifest_id=manifest.manifest_id,
+        run_id=run_id,
+        _entry_id_factory=lambda: f"entry-smoke-{len(ledger_store._items) + 1}",
+    )
+    ledger_service.record_manifest_created(manifest)
+    ledger_service.record_run_started()
+    ledger_service.record_stage_started(
+        stage="execute_pipeline",
+        details={"records": 5},
+    )
+    ledger_service.record_stage_completed(
+        stage="execute_pipeline",
+        metrics_snapshot={"records_bronze": 5},
+        details={"result": "ok"},
+    )
+    ledger_service.record_artifact_published(
+        layer="silver",
+        artifact_path="data/output/silver/chembl/activity",
+        dataset_ref="silver:chembl.activity@1",
+        lineage_fragment_id="silver:fragment-smoke-1",
+    )
+    ledger_service.record_run_finished(metrics_snapshot={"records_silver": 5})
+
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+    result = service.show(manifest.manifest_id)
+
+    assert result.diagnostics["total_events"] == 6
+    assert result.diagnostics["latest_event_type"] == "run_finished"
+    assert result.diagnostics["latest_status"] == "success"
+    assert result.diagnostics["event_family_counts"] == {
+        "artifact": 1,
+        "diagnostic": 1,
+        "pipeline.lifecycle": 2,
+        "pipeline.phase": 2,
+    }
+    assert result.diagnostics["event_type_counts"] == {
+        "artifact_published": 1,
+        "manifest_created": 1,
+        "run_finished": 1,
+        "run_started": 1,
+        "stage_completed": 1,
+        "stage_started": 1,
+    }
+    assert result.diagnostics["missing_artifact_links"] == 0
+    assert result.diagnostics["alert_signals"] == {
+        "run_failed": False,
+        "run_shutdown": False,
+        "artifact_linkage_gap": False,
+        "lineage_gap": False,
+        "dq_signal_present": False,
+        "cross_validation_signal_present": False,
+    }
+    assert result.diagnostics["next_steps"] == [
+        "No alert signals detected; continue routine monitoring."
+    ]
+    assert result.diagnostics["correlation_anchor_gaps"] == {
+        "effective_config_hash": 0,
+        "contract_ref": 0,
+        "data_contract_version": 0,
+        "composite_run_id": 0,
+    }
 
 
 def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:

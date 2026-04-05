@@ -444,7 +444,7 @@ class TestMutationTestingRollout:
 
 @pytest.mark.architecture
 class TestContractSnapshotGovernance:
-    """Validate the bounded provider contract snapshot rollout slice."""
+    """Validate the bounded live-provider contract snapshot rollout slice."""
 
     def test_bounded_contract_snapshot_registry_matches_managed_slice(self) -> None:
         matrix = _load_matrix()
@@ -453,7 +453,7 @@ class TestContractSnapshotGovernance:
         providers = registry.get("providers", {})
 
         assert fixture_governance.get("rollout", {}).get("contract_snapshots") == "partial"
-        assert registry.get("scope") == "bounded_publication_slice"
+        assert registry.get("scope") == "bounded_live_provider_baseline"
         assert registry.get("update_env_var") == "UPDATE_SNAPSHOTS"
 
         documentation_path = ROOT / registry["documentation"]
@@ -462,7 +462,15 @@ class TestContractSnapshotGovernance:
         assert documentation_path.exists()
         assert helper_module_path.exists()
         assert registry_test_path.exists()
-        assert set(providers) == {"crossref", "openalex", "pubmed", "semanticscholar"}
+        assert set(providers) == {
+            "chembl",
+            "crossref",
+            "openalex",
+            "pubchem",
+            "pubmed",
+            "semanticscholar",
+            "uniprot",
+        }
 
         for provider, provider_config in providers.items():
             version = provider_config["version"]
