@@ -118,6 +118,7 @@ class InMemoryQuarantine:
                 "by_field": {},
                 "by_rule_type": {},
                 "by_operator": {},
+                "by_reason_code_field": {},
                 "by_reason_signature": {},
             },
         }

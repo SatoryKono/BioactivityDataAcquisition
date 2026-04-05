@@ -389,6 +389,154 @@ class TestQuarantineStats:
         assert "Reason Code + Field" in result.output
         assert "missing_required_field | publication_year" in result.output
 
+    def test_stats_with_focused_group_by_reason_signature(
+        self,
+        cli_runner: CliRunner,
+        mock_quarantine_manager: MagicMock,
+    ) -> None:
+        """Test quarantine stats focused grouping for stable signatures."""
+        mock_quarantine_manager.get_stats = AsyncMock(
+            return_value={
+                "total_count": 2,
+                "by_error_code": {"FILTERED_OUT_SILVER": 2},
+                "by_status": {"NEW": 2},
+                "silver_filter_rejects": {
+                    "total_count": 2,
+                    "by_reason_code": {"missing_required_field": 2},
+                    "by_field": {"publication_year": 2},
+                    "by_rule_type": {"required_fields": 2},
+                    "by_operator": {"required": 2},
+                    "by_reason_code_field": {
+                        "missing_required_field | publication_year": 2
+                    },
+                    "by_reason_signature": {
+                        "missing_required_field | required_fields | publication_year | required": 2
+                    },
+                },
+            }
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "quarantine",
+                    "stats",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--silver-filter-only",
+                    "--group-by",
+                    "reason-signature",
+                ],
+            )
+
+        assert result.exit_code == 0
+        assert "Focused Silver Reject Grouping:" in result.output
+        assert "Stable Signature" in result.output
+        assert (
+            "missing_required_field | required_fields | publication_year | required"
+            in result.output
+        )
+
+    def test_stats_with_top_limits_group_output(
+        self,
+        cli_runner: CliRunner,
+        mock_quarantine_manager: MagicMock,
+    ) -> None:
+        """Test quarantine stats honors --top for focused Silver grouping."""
+        mock_quarantine_manager.get_stats = AsyncMock(
+            return_value={
+                "total_count": 6,
+                "by_error_code": {"FILTERED_OUT_SILVER": 6},
+                "by_status": {"NEW": 6},
+                "silver_filter_rejects": {
+                    "total_count": 6,
+                    "by_reason_code": {
+                        "missing_required_field": 3,
+                        "column_filter_mismatch": 2,
+                        "range_filter_mismatch": 1,
+                    },
+                    "by_field": {},
+                    "by_rule_type": {},
+                    "by_operator": {},
+                    "by_reason_code_field": {},
+                    "by_reason_signature": {},
+                },
+            }
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "quarantine",
+                    "stats",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--silver-filter-only",
+                    "--group-by",
+                    "reason-code",
+                    "--top",
+                    "2",
+                ],
+            )
+
+        assert result.exit_code == 0
+        assert "missing_required_field" in result.output
+        assert "column_filter_mismatch" in result.output
+        assert "range_filter_mismatch" not in result.output
+
+    def test_stats_with_focused_group_by_zero_state(
+        self,
+        cli_runner: CliRunner,
+        mock_quarantine_manager: MagicMock,
+    ) -> None:
+        """Test focused grouping zero-state message when values are unavailable."""
+        mock_quarantine_manager.get_stats = AsyncMock(
+            return_value={
+                "total_count": 1,
+                "by_error_code": {"FILTERED_OUT_SILVER": 1},
+                "by_status": {"NEW": 1},
+                "silver_filter_rejects": {
+                    "total_count": 1,
+                    "by_reason_code": {},
+                    "by_field": {},
+                    "by_rule_type": {},
+                    "by_operator": {},
+                    "by_reason_code_field": {},
+                    "by_reason_signature": {},
+                },
+            }
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "quarantine",
+                    "stats",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--silver-filter-only",
+                    "--group-by",
+                    "reason-signature",
+                ],
+            )
+
+        assert result.exit_code == 0
+        assert "Focused Silver Reject Grouping: no structured values available." in (
+            result.output
+        )
+
     def test_stats_json_output(
         self,
         cli_runner: CliRunner,

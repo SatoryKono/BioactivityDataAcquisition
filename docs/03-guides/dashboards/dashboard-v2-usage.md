@@ -58,6 +58,7 @@ composite source selections и fragment outcomes по `layer/status`.
   ```bash
   bioetl quarantine stats --pipeline <pipeline> --silver-filter-only
   bioetl quarantine stats --pipeline <pipeline> --silver-filter-only --group-by reason-code-field
+  bioetl quarantine stats --pipeline <pipeline> --silver-filter-only --group-by reason-signature
   bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --limit 20
   ```
 - Grafana в текущей shipped конфигурации — summary/trend surface.
