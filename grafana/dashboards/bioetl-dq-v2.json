@@ -32,6 +32,18 @@
     },
     {
       "asDropdown": false,
+      "icon": "list-ul",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "5. Silver Reject Explorer",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-silver-reject-explorer"
+    },
+    {
+      "asDropdown": false,
       "icon": "logs",
       "includeVars": true,
       "keepTime": true,

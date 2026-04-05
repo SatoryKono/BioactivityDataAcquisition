@@ -185,6 +185,14 @@ def test_dashboard_has_required_variables(dashboard_path):
         "bioetl-dq-v2.json": {"pipeline", "run_type"},
         "bioetl-runtime.json": {"pipeline", "run_type"},
         "bioetl-provider-health-v2.json": {"provider"},
+        "bioetl-silver-reject-explorer.json": {
+            "pipeline",
+            "run_type",
+            "reason_code",
+            "field",
+            "run_id",
+            "payload_hash",
+        },
     }
     dashboard = load_dashboard(dashboard_path)
     variables = {
@@ -227,6 +235,38 @@ def test_variable_query_sources(dashboard_path):
         for var in dashboard.get("templating", {}).get("list", [])
         if var.get("name")
     }
+
+    if dashboard_path.name == "bioetl-silver-reject-explorer.json":
+        for variable_name in (
+            "pipeline",
+            "run_type",
+            "reason_code",
+            "field",
+            "run_id",
+        ):
+            variable = variable_map.get(variable_name)
+            assert variable is not None, (
+                f"Dashboard {dashboard_path.name} must define '{variable_name}' variable"
+            )
+            assert variable.get("datasource") == "Quarantine Explorer", (
+                f"Dashboard {dashboard_path.name} '{variable_name}' must use "
+                "Quarantine Explorer datasource"
+            )
+            query = variable.get("query", {})
+            query_text = query.get("query", "") if isinstance(query, dict) else ""
+            assert "/ops/quarantine/filter-options" in query_text, (
+                f"Dashboard {dashboard_path.name} '{variable_name}' query must use "
+                "/ops/quarantine/filter-options endpoint"
+            )
+
+        payload_hash_var = variable_map.get("payload_hash")
+        assert payload_hash_var is not None, (
+            f"Dashboard {dashboard_path.name} must define 'payload_hash' variable"
+        )
+        assert payload_hash_var.get("type") == "textbox", (
+            f"Dashboard {dashboard_path.name} 'payload_hash' must be a textbox"
+        )
+        return
 
     assert "run_id" not in variable_map, (
         f"Dashboard {dashboard_path.name} must not define deprecated 'run_id' variable"
@@ -1068,6 +1108,7 @@ def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> No
         "bioetl-dq-v2.json",
         "bioetl-runtime.json",
         "bioetl-provider-health-v2.json",
+        "bioetl-silver-reject-explorer.json",
     )
 
     for dashboard_name in expectations:
@@ -1114,6 +1155,42 @@ def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
         )
         assert any(url == "/d/bioetl-dq-v2" for url in urls), (
             f"{dashboard_name} Data Quality handoff must target /d/bioetl-dq-v2"
+        )
+
+
+def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None:
+    """Data Quality dashboard should expose an explicit handoff to Silver explorer."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    links = dashboard.get("links", [])
+    titles = {link.get("title") for link in links if link.get("title")}
+    urls = [link.get("url", "") for link in links]
+
+    assert "5. Silver Reject Explorer" in titles, (
+        "Data Quality dashboard must expose a Silver Reject Explorer handoff"
+    )
+    assert any(url == "/d/bioetl-silver-reject-explorer" for url in urls), (
+        "Data Quality handoff must target /d/bioetl-silver-reject-explorer"
+    )
+
+
+def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> None:
+    """Record-level explorer panels must use the Quarantine Explorer datasource."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    expected_titles = {"Filtered Records Table", "Selected Record Details"}
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_titles
+    }
+    assert panels.keys() == expected_titles, (
+        "Silver Reject Explorer must define both table and detail panels"
+    )
+    for title, panel in panels.items():
+        datasource = panel.get("datasource")
+        assert datasource == "Quarantine Explorer", (
+            f"Panel {title!r} must use Quarantine Explorer datasource"
         )
 
 

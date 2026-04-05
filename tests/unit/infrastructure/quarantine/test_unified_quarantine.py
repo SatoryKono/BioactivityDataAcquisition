@@ -111,6 +111,7 @@ def mock_delta_table():
     with (
         patch("bioetl.infrastructure.quarantine.unified.DeltaTable", mock),
         patch("bioetl.infrastructure.quarantine.operations.DeltaTable", mock),
+        patch("bioetl.infrastructure.quarantine.filtered_reads.DeltaTable", mock),
     ):
         yield mock
 
@@ -844,6 +845,93 @@ class TestUnifiedQuarantineFilteredExplorer:
         assert result["reason_codes"] == ["missing_required_field"]
         assert result["fields"] == ["canonical_smiles"]
         assert result["run_ids"] == ["run-1"]
+
+    @pytest.mark.asyncio
+    async def test_list_filtered_records_supports_multi_pipeline_scope(
+        self, quarantine, mock_delta_table
+    ):
+        """List endpoint should support multi-pipeline CSV scope."""
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = [
+            {
+                "ingestion_ts": "2026-04-05T10:00:00Z",
+                "pipeline": "chembl_activity",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": '{"id": 1}',
+                "payload_hash": "sha256:1",
+                "error_details": '{"reason_code":"missing_required_field"}',
+                "dq_status": "new",
+                "run_id": "run-1",
+            },
+            {
+                "ingestion_ts": "2026-04-05T09:00:00Z",
+                "pipeline": "pubchem_activity",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": '{"id": 2}',
+                "payload_hash": "sha256:2",
+                "error_details": '{"reason_code":"range_filter_mismatch"}',
+                "dq_status": "new",
+                "run_id": "run-2",
+            },
+        ]
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.list_filtered_records(
+            pipeline="chembl_activity,pubchem_activity",
+            limit=50,
+            offset=0,
+        )
+
+        assert result["total"] == 2
+        pipelines = {item["pipeline"] for item in result["items"]}
+        assert pipelines == {"chembl_activity", "pubchem_activity"}
+
+    @pytest.mark.asyncio
+    async def test_get_filtered_filter_options_without_pipeline_scope(
+        self, quarantine, mock_delta_table
+    ):
+        """Filter options should include pipelines when pipeline scope is omitted."""
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = [
+            {
+                "ingestion_ts": "2026-04-05T10:00:00Z",
+                "pipeline": "chembl_activity",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": '{"id": 1}',
+                "payload_hash": "sha256:1",
+                "error_details": (
+                    '{"reason_code":"missing_required_field",'
+                    '"field":"canonical_smiles",'
+                    '"run_type":"incremental"}'
+                ),
+                "dq_status": "new",
+                "run_id": "run-1",
+            },
+            {
+                "ingestion_ts": "2026-04-05T11:00:00Z",
+                "pipeline": "pubchem_activity",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": '{"id": 2}',
+                "payload_hash": "sha256:2",
+                "error_details": (
+                    '{"reason_code":"range_filter_mismatch",'
+                    '"field":"activity_type",'
+                    '"run_type":"full"}'
+                ),
+                "dq_status": "new",
+                "run_id": "run-2",
+            },
+        ]
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.get_filtered_filter_options(pipeline=None)
+
+        assert result["pipelines"] == ["chembl_activity", "pubchem_activity"]
+        assert result["run_types"] == ["full", "incremental"]
 
 
 @pytest.mark.unit
