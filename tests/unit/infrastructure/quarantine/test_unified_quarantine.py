@@ -389,8 +389,12 @@ class TestUnifiedQuarantineInspect:
         mock_delta_table.return_value = mock_table
 
         with (
-            patch.object(pc, "equal", side_effect=["pipeline-mask", "run-mask", "status-mask"]) as equal_mock,
-            patch.object(pc, "and_", side_effect=["pipeline-run-mask", "final-mask"]) as and_mock,
+            patch.object(
+                pc, "equal", side_effect=["pipeline-mask", "run-mask", "status-mask"]
+            ) as equal_mock,
+            patch.object(
+                pc, "and_", side_effect=["pipeline-run-mask", "final-mask"]
+            ) as and_mock,
         ):
             result = await quarantine.inspect(
                 pipeline="test",
@@ -694,9 +698,7 @@ class TestUnifiedQuarantineGetStats:
         mock_table.to_pyarrow_table.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_stats_honors_run_id_filter(
-        self, quarantine, mock_delta_table
-    ):
+    async def test_get_stats_honors_run_id_filter(self, quarantine, mock_delta_table):
         """Test get_stats scopes statistics to one run_id when requested."""
         mock_table = MagicMock()
         scoped_table = MagicMock()
