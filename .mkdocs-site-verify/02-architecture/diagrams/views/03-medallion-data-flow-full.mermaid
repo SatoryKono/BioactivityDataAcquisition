@@ -1,0 +1,38 @@
+%% View: Full | Parent: 03-medallion-data-flow.mmd
+%% Parent source: docs/02-architecture/diagrams/architecture/03-medallion-data-flow.mmd
+%% Full reference diagram retained after decomposition.
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=184 height=64 max_title_len=18 max_desc_lines=1
+flowchart LR
+
+    SRC["External APIs"]:::adapter
+    ING["Ingestion<br/>rate-limit + retry"]:::process
+    BRZ["Bronze<br/>JSONL + metadata"]:::storage
+    TRN["Transform<br/>normalize + identity"]:::process
+    SLR["Silver<br/>Delta + validator"]:::storage
+    GLD["Gold<br/>Delta + business schema"]:::storage
+    DQ["DQ Analyzers"]:::service
+    QRT["Quarantine"]:::adapter
+
+    SRC --> ING --> BRZ --> TRN --> SLR --> GLD
+    TRN --> DQ
+    BRZ --> DQ
+    SLR --> DQ
+    GLD --> DQ
+    TRN -.-> QRT
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;

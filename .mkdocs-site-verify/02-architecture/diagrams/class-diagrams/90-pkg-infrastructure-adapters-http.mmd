@@ -1,0 +1,67 @@
+%% Title: Package Family: infrastructure/adapters/http
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/http; modules: client_retry_observability, health_monitor, _client_retry_models, _health_monitor_support, circuit_breaker, client.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   17
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace client_retry_observability {
+        class RetryStateLike
+        class SpanLike
+        class _OtelTracerLike
+    }
+
+    namespace health_monitor {
+        class HealthAdjustedConfig
+        class ProviderHealthMonitor
+        class ProviderHealthState
+    }
+
+    namespace client_retry_models {
+        class _RequestAttemptOutcome
+        class _RetryRequestState
+    }
+
+    namespace health_monitor_support {
+        class _ProviderHealthStateLike
+    }
+
+    namespace circuit_breaker {
+        class CircuitBreakerGuard
+    }
+
+    namespace client {
+        class UnifiedHTTPClient
+    }
+
+    namespace client_context_mixin {
+        class HTTPClientContextMixin
+    }
+
+    namespace client_request_methods_mixin {
+        class HTTPClientRequestMethodsMixin
+    }
+
+    namespace client_retry_mixin {
+        class HTTPClientRetryMixin
+    }
+
+    namespace health_tracker {
+        class ProviderHealthTracker
+    }
+
+    namespace pagination {
+        class PaginatedFetcherMixin
+    }
+
+    namespace rate_limiter {
+        class TokenBucketRateLimiter
+    }
+
+    HTTPClientContextMixin <|-- UnifiedHTTPClient
+    HTTPClientRequestMethodsMixin <|-- UnifiedHTTPClient
+    HTTPClientRetryMixin <|-- UnifiedHTTPClient

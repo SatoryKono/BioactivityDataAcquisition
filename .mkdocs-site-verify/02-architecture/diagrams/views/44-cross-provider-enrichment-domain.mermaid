@@ -1,0 +1,59 @@
+%% View: Domain-Focus | Parent: 44-cross-provider-enrichment-full.mermaid
+%% @uniform width=144 height=56 max_title_len=13 max_desc_lines=0
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N1["CS"]
+        N2["CT"]
+        N4["pmid"]
+        N5["ntitle"]
+        N6["authors"]
+        N7["CRS"]
+        N8["CRT"]
+        N10["nfunders"]
+        N11["references"]
+        N12["PMS"]
+        N13["PMT"]
+        N15["nmesh_terms"]
+        N16["pub_type"]
+        N17["OAS"]
+        N18["OAT"]
+        N20["ninstitutions"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N3["CA"]
+        N9["CRA"]
+        N14["PMA"]
+        N19["OAA"]
+    end
+
+    N3 ==> N2
+    N2 --> N1
+    N9 --> N8
+    N8 --> N7
+    N14 --> N13
+    N13 --> N12
+    N19 --> N18
+    N18 --> N17
+    N1 --> N4
+    N1 --> N5
+    N1 --> N6
+    N7 --> N10
+    N7 --> N11
+    N12 --> N15
+    N12 --> N16
+    N17 --> N20
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#475569,stroke-width:2px,stroke-dasharray:5

@@ -1,0 +1,11 @@
+field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_silver_schema,code_gold_schema,json_type,nullable,primary_key,notes
+protein_class_id,S2.1,YES,EMPTY,protein_class_transformer.py:82,chembl.py:662,protein_classification.py:24,chembl.py:529,integer,false,true,OK
+parent_id,S2.2,YES,EMPTY,protein_class_transformer.py:30,chembl.py:665,protein_classification.py:31,chembl.py:532,integer,true,false,OK
+class_level,S2.2,YES,EMPTY,protein_class_transformer.py:30,chembl.py:666,protein_classification.py:37,chembl.py:533,integer,true,false,OK
+pref_name,S2.3,YES,EMPTY,protein_class_transformer.py:36,chembl.py:669,protein_classification.py:44,chembl.py:536,string,true,false,OK
+short_name,S2.3,YES,EMPTY,protein_class_transformer.py:37,chembl.py:670,protein_classification.py:48,chembl.py:537,string,true,false,OK
+protein_class_desc,S2.3,YES,EMPTY,protein_class_transformer.py:38,chembl.py:671,protein_classification.py:52,chembl.py:538,string,true,false,OK
+definition,S2.3,YES,EMPTY,protein_class_transformer.py:39,chembl.py:672,protein_classification.py:56,chembl.py:539,string,true,false,OK
+sort_order,S2.4,YES,EMPTY,protein_class_transformer.py:45,chembl.py:677,protein_classification.py:62,chembl.py:542,integer,true,false,OK
+replaced_by,S2.4,YES,EMPTY,protein_class_transformer.py:45,chembl.py:678,protein_classification.py:67,chembl.py:543,integer,true,false,OK
+downgraded,S2.4,YES,EMPTY,protein_class_transformer.py:45,chembl.py:681,protein_classification.py:72,chembl.py:544,integer,true,false,OK

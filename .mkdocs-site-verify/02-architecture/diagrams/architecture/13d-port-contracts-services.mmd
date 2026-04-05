@@ -1,0 +1,94 @@
+%% BioETL — Port Contracts: Services and Controls
+%% Control-plane, checkpoint, and DQ service ports with their current consumers and adapters.
+
+%% @version 1.0.0
+%% @date    2026-03-28
+%% @type    flowchart
+%% @level   System / Component
+%% @view    services
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   22
+%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph LR
+%% keep-orphan: DQMP
+    subgraph Domain["Domain Layer"]
+        LKP["LockPort"]:::size-sm
+        CKP["CheckpointPort"]:::size-sm
+        CCP["CompositeCheckpointPort"]:::size-sm
+        QRP["QuarantinePort"]:::size-sm
+        ADP["AuditPort"]:::size-sm
+        PIIP["PiiHasherPort"]:::size-sm
+        IFP["InputFilterPort"]:::size-sm
+        DQMP["DQMonitorPort"]:::size-sm
+        BDQP["BronzeDQAnalyzerPort"]:::size-sm
+        SDQP["SilverDQAnalyzerPort"]:::size-sm
+        GDQP["GoldDQAnalyzerPort"]:::size-sm
+        DQRWP["DQReportWriterPort"]:::size-sm
+        RMP["RunManifestPort"]:::size-sm
+        RLP["RunLedgerPort"]:::size-sm
+        LSP["LineageStorePort"]:::size-sm
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        ML["MemoryLock"]:::size-sm
+        LC["LocalCheckpoint"]:::size-sm
+        UQ["UnifiedQuarantine"]:::size-sm
+        FA["FileAuditAdapter"]:::size-sm
+        SPH["Sha256PiiHasher"]:::size-sm
+        CSVR["CsvFilterReader"]:::size-sm
+        DQRW_I["DQReportWriter"]:::size-sm
+        FRM["FileRunManifestStore"]:::size-sm
+        FRL["FileRunLedgerStore"]:::size-sm
+        FLS["FileLineageStore"]:::size-sm
+    end
+
+    subgraph Application["Application Layer"]
+        BDA["BronzeDQAnalyzer"]:::size-sm
+        SDA["SilverDQAnalyzer"]:::size-sm
+        GDA["GoldDQAnalyzer"]:::size-sm
+        CCS["CompositeCheckpointService"]:::size-sm
+        RMS["RunManifestService"]:::size-sm
+        RLS["RunLedgerService"]:::size-sm
+        LIS["LineageInspectionService"]:::size-sm
+    end
+
+    LKP --- ML
+    CKP --- LC
+    CCP --- LC
+    QRP --- UQ
+    ADP --- FA
+    PIIP --- SPH
+    IFP --- CSVR
+    BDQP --- BDA
+    SDQP --- SDA
+    GDQP --- GDA
+    DQRWP --- DQRW_I
+    RMP --- FRM
+    RLP --- FRL
+    LSP --- FLS
+
+    CCS --> CCP
+    RMS --> RMP
+    RLS --> RLP
+    LIS --> RMP
+    LIS --> LSP
+
+    classDef domain fill:#f5f3ff,stroke:#7c3aed
+    classDef app fill:#F0FDF4,stroke:#16A34A
+    classDef infra fill:#FFF1F2,stroke:#DC2626
+
+    class LKP,CKP,CCP,QRP,ADP,PIIP,IFP,DQMP,BDQP,SDQP,GDQP,DQRWP,RMP,RLP,LSP domain
+    class BDA,SDA,GDA,CCS,RMS,RLS,LIS app
+    class ML,LC,UQ,FA,SPH,CSVR,DQRW_I,FRM,FRL,FLS infra

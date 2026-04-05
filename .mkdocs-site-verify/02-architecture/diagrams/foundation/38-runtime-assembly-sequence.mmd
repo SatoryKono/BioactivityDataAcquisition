@@ -1,0 +1,84 @@
+%% Title: Runtime Assembly Sequence — build_pipeline_runner to PipelineRunner
+%% Covers: composition/runtime_builders/runner_builder.py, runtime_builders/control_plane.py, runtime_builders/ledger_collaborator.py, composition/factories/pipeline/{assembler,factory_method_helpers,_creation_wiring,runner_assembly}.py, ADR-005
+%% Rank: 13 (Score 8.25) — Step-by-step runtime pipeline assembly with control-plane publication
+%% Updated: 2026-03-28
+
+%% @version 1.2.0
+%% @date    2026-03-28
+%% @type    sequenceDiagram
+%% @level   Component / Class
+%% @nodes   12
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform sequence width=192 max_title_len=19
+sequenceDiagram
+    autonumber
+    participant Caller as Caller<br/>(bootstrap_pipeline_runner)
+    participant RB as runner_builder.py
+    participant REG as PipelineRegistry
+    participant IN as prepare_runner_inputs()
+    participant CP as control_plane.py
+    participant GF as GenericPipelineFactory
+    participant FMH as factory_method_helpers
+    participant SB as services/bundle.py
+    participant CW as _creation_wiring.py
+    participant RA as runner_assembly.py
+    participant LC as ledger_collaborator.py
+    participant PR as PipelineRunner
+
+    Caller->>RB: build_pipeline_runner(ctx, registry)
+
+    Note over RB,REG: Phase 1: registry + factory lookup
+    RB->>REG: _initialize_registry(...)
+    REG-->>RB: registry with pipeline factory
+    RB->>REG: get(ctx.pipeline_name).factory
+    REG-->>RB: GenericPipelineFactory
+
+    Note over RB,IN: Phase 2: runtime inputs
+    RB->>IN: prepare_runner_inputs(ctx, ...)
+    IN->>IN: get settings + load yaml config
+    IN->>IN: build observability bundle
+    IN->>IN: assemble runtime/filter/cached bronze
+    IN-->>RB: RunnerInputs
+
+    Note over RB,CP: Phase 3: control-plane publication
+    RB->>RB: _resolve_control_plane_flags(settings)
+    alt manifest enabled
+        RB->>CP: create_run_manifest_with_effective_config(ctx, inputs, ledger_enabled)
+        CP->>CP: persist effective-config artifact
+        CP->>CP: persist run manifest
+        CP-->>RB: ControlPlaneRefs + RunLedgerService?
+        RB->>CP: attach_manifest_id(ctx, manifest_id, ...)
+        RB->>RB: _bind_manifest_logger_context(inputs, manifest_id)
+    else manifest disabled
+        RB->>RB: keep original ctx + inputs
+    end
+
+    Note over RB,GF: Phase 4: factory facade
+    RB->>GF: create_runner(run_id, runtime, settings, observability, manifest_id?, config hashes?, filter_config, config, cached_bronze)
+    GF->>FMH: create_factory_runner(...)
+
+    Note over FMH,SB: Phase 5: pipeline with services
+    FMH->>FMH: load_pipeline_config() fallback only if config missing
+    FMH->>GF: create_with_services(...)
+    GF->>FMH: create_pipeline_instance_with_services(...)
+    FMH->>SB: create_pipeline_with_services(...)
+    SB->>CW: _create_pipeline_with_services_impl(...)
+    CW->>SB: build_pipeline_services(...)
+    SB->>SB: create live or cached bronze data source
+    CW->>CW: build metadata + transformer + domain config
+    CW-->>SB: BasePipeline.create(...)
+    SB-->>FMH: configured pipeline
+
+    Note over FMH,RA: Phase 6: runner assembly
+    FMH->>RA: assemble_runner_impl(...)
+    RA->>RA: checkpoint/lock/preflight/postrun/batch executor
+    RA-->>FMH: PipelineRunner
+    FMH-->>GF: PipelineRunner
+    GF-->>RB: PipelineRunner
+
+    opt ledger service present
+        RB->>LC: attach_control_plane_collaborators(runner, run_ledger_service)
+        LC-->>RB: runner instrumented for ledger events
+    end
+
+    RB-->>Caller: PipelineRunner

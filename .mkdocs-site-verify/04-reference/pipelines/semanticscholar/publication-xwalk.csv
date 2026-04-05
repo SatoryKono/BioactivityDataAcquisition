@@ -1,0 +1,33 @@
+field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_gold_schema,api_endpoint,json_type,nullable,primary_key,notes
+paper_id,§3.2,YES (PK),MISSING,transformer.py:137,semanticscholar.py:64,publications.py:381,/graph/v1/paper/,string,false,true,OK
+abstract,§3.2,MISSING,MISSING,transformer.py:216,MISSING (inherited base),publications.py:391,/graph/v1/paper/,string,true,false,OK
+affiliation_list,MISSING,MISSING,MISSING,transformer.py:179,MISSING (inherited base),publications.py:429,/graph/v1/paper/,string,true,false,MISSING_DOC
+author_h_indices,MISSING,MISSING,MISSING,transformer.py:176,semanticscholar.py:95,publications.py:435,/graph/v1/paper/,string,true,false,MISSING_DOC
+author_keys,MISSING,MISSING,MISSING,transformer.py:169,MISSING (inherited base),publications.py:432,/graph/v1/paper/,string,true,false,MISSING_DOC
+author_orcids,MISSING,MISSING,MISSING,transformer.py:173,MISSING (inherited base),publications.py:434,/graph/v1/paper/,string,true,false,MISSING_DOC
+author_s2_ids,MISSING,MISSING,MISSING,transformer.py:170,semanticscholar.py:94,publications.py:433,/graph/v1/paper/,string,true,false,MISSING_DOC
+authors,§3.2,MISSING,MISSING,transformer.py:168,MISSING (inherited base),publications.py:392,/graph/v1/paper/,string,true,false,OK
+citation_contexts,MISSING,MISSING,MISSING,transformer.py:219,semanticscholar.py:98,publications.py:426,/graph/v1/paper/,string,true,false,MISSING_DOC
+citations_made,§3.2,MISSING,MISSING,transformer.py:235,MISSING (inherited base),publications.py:412,/graph/v1/paper/,number,true,false,OK
+citations_received,§3.2,MISSING,MISSING,transformer.py:234,MISSING (inherited base),publications.py:409,/graph/v1/paper/,number,true,false,OK
+corpus_id,§3.2,MISSING,MISSING,transformer.py:141,semanticscholar.py:69,publications.py:387,/graph/v1/paper/,number,true,false,OK
+dblp_id,MISSING,MISSING,MISSING,transformer.py:140,semanticscholar.py:68,publications.py:440,/graph/v1/paper/,string,true,false,MISSING_DOC
+doi,§3.2,MISSING,MISSING,transformer.py:138,MISSING (inherited base),publications.py:384,/graph/v1/paper/,string,true,false,OK
+influential_citation_count,§3.2,MISSING,MISSING,transformer.py:236,semanticscholar.py:84,publications.py:413,/graph/v1/paper/,number,true,false,OK
+is_oa,§3.2,MISSING,MISSING,transformer.py:237,MISSING (inherited base),publications.py:418,/graph/v1/paper/,boolean,true,false,OK
+issue,MISSING,MISSING,MISSING,transformer.py:224,semanticscholar.py:76,publications.py:402,/graph/v1/paper/,string,true,false,MISSING_DOC
+journal,§3.2,MISSING,MISSING,transformer.py:222,MISSING (inherited base),publications.py:400,/graph/v1/paper/,string,true,false,OK
+oa_status,MISSING,MISSING,MISSING,transformer.py:239,MISSING (inherited base),publications.py:420,/graph/v1/paper/,string,true,false,MISSING_DOC
+open_access_url,MISSING,MISSING,MISSING,transformer.py:238,semanticscholar.py:87,publications.py:419,/graph/v1/paper/,string,true,false,MISSING_DOC
+page_first,MISSING,MISSING,MISSING,transformer.py:226,MISSING (inherited base),publications.py:404,/graph/v1/paper/,string,true,false,MISSING_DOC
+page_last,MISSING,MISSING,MISSING,transformer.py:227,MISSING (inherited base),publications.py:405,/graph/v1/paper/,string,true,false,MISSING_DOC
+page_range,MISSING,MISSING,MISSING,transformer.py:225,semanticscholar.py:79,publications.py:403,/graph/v1/paper/,string,true,false,MISSING_DOC
+pmid,§3.2,MISSING,MISSING,transformer.py:139,MISSING (inherited base),publications.py:385,/graph/v1/paper/,string,true,false,OK
+publication_date,§3.2,MISSING,MISSING,transformer.py:231,MISSING (inherited base),publications.py:397,/graph/v1/paper/,string,true,false,OK
+publication_type,§3.2,MISSING,MISSING,transformer.py:243,MISSING (inherited base),publications.py:424,/graph/v1/paper/,string,true,false,OK
+publication_types,MISSING,MISSING,MISSING,transformer.py:254,semanticscholar.py:91,publications.py:425,/graph/v1/paper/,string,true,false,MISSING_DOC
+publication_year,§3.2,MISSING,MISSING,transformer.py:228,MISSING (inherited base),publications.py:394,/graph/v1/paper/,number,true,false,OK
+subject_fields,MISSING,MISSING,MISSING,transformer.py:240,semanticscholar.py:90,publications.py:423,/graph/v1/paper/,string,true,false,MISSING_DOC
+title,§3.2,MISSING,MISSING,transformer.py:215,MISSING (inherited base),publications.py:390,/graph/v1/paper/,string,true,false,OK
+tldr,§3.2,MISSING,MISSING,transformer.py:217,semanticscholar.py:72,publications.py:393,/graph/v1/paper/,string,true,false,OK
+volume,MISSING,MISSING,MISSING,transformer.py:223,semanticscholar.py:75,publications.py:401,/graph/v1/paper/,string,true,false,MISSING_DOC
