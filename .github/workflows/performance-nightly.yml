@@ -61,14 +61,13 @@ jobs:
         if: always()
         run: |
           if [ -f reports/performance/hotspot-degradation.json ]; then
-            failed=$(python3 -c "
+            python3 - <<'PY'
           import json, sys
           data = json.load(open('reports/performance/hotspot-degradation.json'))
           failed = data.get('summary', {}).get('failed', 0)
-          print(failed)
+          print(f'Benchmarks over budget: {failed}')
           sys.exit(1 if failed > 0 else 0)
-          ")
-            echo "Benchmarks over budget: $failed"
+          PY
           fi
 
       - name: Upload performance artifacts
