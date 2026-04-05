@@ -12,6 +12,7 @@
 .gitleaks.toml
 .importlinter
 .jscpd.json
+.mcp.json
 .pre-commit-config.yaml
 .secrets.baseline
 AGENTS.md
