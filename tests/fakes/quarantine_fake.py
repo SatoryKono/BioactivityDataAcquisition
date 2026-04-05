@@ -126,7 +126,7 @@ class InMemoryQuarantine:
     async def list_filtered_records(
         self,
         *,
-        pipeline: str,
+        pipeline: str | None = None,
         run_type: str | None = None,
         reason_code: str | None = None,
         field: str | None = None,
@@ -139,11 +139,19 @@ class InMemoryQuarantine:
         sort: str = "ingestion_ts_desc",
     ) -> dict[str, Any]:
         """Return a minimal filtered-record list for tests."""
-        records = [
-            record
-            for record in self._records.get(pipeline, [])
-            if record.get("error_code") == "FILTERED_OUT_SILVER"
-        ]
+        if pipeline and pipeline.strip().lower() not in {"*", "all", "__all", ".*"}:
+            pipelines = [item.strip() for item in pipeline.split(",") if item.strip()]
+        else:
+            pipelines = list(self._records.keys())
+        records = []
+        for pipeline_name in pipelines:
+            records.extend(
+                [
+                    record
+                    for record in self._records.get(pipeline_name, [])
+                    if record.get("error_code") == "FILTERED_OUT_SILVER"
+                ]
+            )
         if run_id:
             records = [record for record in records if record.get("run_id") == run_id]
         if payload_hash:
@@ -180,7 +188,7 @@ class InMemoryQuarantine:
     async def get_filtered_stats(
         self,
         *,
-        pipeline: str,
+        pipeline: str | None = None,
         run_type: str | None = None,
         reason_code: str | None = None,
         field: str | None = None,
@@ -215,7 +223,7 @@ class InMemoryQuarantine:
     async def get_filtered_filter_options(
         self,
         *,
-        pipeline: str,
+        pipeline: str | None = None,
         run_type: str | None = None,
         reason_code: str | None = None,
         field: str | None = None,
@@ -224,8 +232,12 @@ class InMemoryQuarantine:
         to_ts: str | None = None,
     ) -> dict[str, Any]:
         """Return empty filter options by default."""
+        if pipeline and pipeline.strip().lower() not in {"*", "all", "__all", ".*"}:
+            pipelines = [item.strip() for item in pipeline.split(",") if item.strip()]
+        else:
+            pipelines = sorted(self._records.keys())
         return {
-            "pipelines": [pipeline],
+            "pipelines": pipelines,
             "run_types": [],
             "reason_codes": [],
             "fields": [],

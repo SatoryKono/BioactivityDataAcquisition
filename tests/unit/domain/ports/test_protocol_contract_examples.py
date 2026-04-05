@@ -262,7 +262,7 @@ class TestQuarantinePortProtocol:
             async def list_filtered_records(
                 self,
                 *,
-                pipeline: str,
+                pipeline: str | None = None,
                 run_type: str | None = None,
                 reason_code: str | None = None,
                 field: str | None = None,
@@ -287,7 +287,7 @@ class TestQuarantinePortProtocol:
             async def get_filtered_stats(
                 self,
                 *,
-                pipeline: str,
+                pipeline: str | None = None,
                 run_type: str | None = None,
                 reason_code: str | None = None,
                 field: str | None = None,
@@ -301,7 +301,7 @@ class TestQuarantinePortProtocol:
             async def get_filtered_filter_options(
                 self,
                 *,
-                pipeline: str,
+                pipeline: str | None = None,
                 run_type: str | None = None,
                 reason_code: str | None = None,
                 field: str | None = None,

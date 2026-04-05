@@ -302,6 +302,47 @@ class TestQuarantineServiceFilteredExplorer:
             to_ts="2026-04-02T00:00:00Z",
         )
 
+    @pytest.mark.asyncio
+    async def test_list_filtered_records_all_pipeline_scope(
+        self, quarantine_service, mock_quarantine_port
+    ):
+        """Service should support all-pipeline record listing when pipeline omitted."""
+        mock_quarantine_port.list_filtered_records.return_value = {
+            "items": [],
+            "total": 0,
+            "limit": 50,
+            "offset": 0,
+        }
+
+        result = await quarantine_service.list_filtered_records(
+            pipeline=None,
+            run_type=None,
+            reason_code=None,
+            field=None,
+            run_id=None,
+            payload_hash=None,
+            from_ts=None,
+            to_ts=None,
+            limit=50,
+            offset=0,
+            sort="ingestion_ts_desc",
+        )
+
+        assert result["total"] == 0
+        mock_quarantine_port.list_filtered_records.assert_called_once_with(
+            pipeline=None,
+            run_type=None,
+            reason_code=None,
+            field=None,
+            run_id=None,
+            payload_hash=None,
+            from_ts=None,
+            to_ts=None,
+            limit=50,
+            offset=0,
+            sort="ingestion_ts_desc",
+        )
+
 
 @pytest.mark.unit
 class TestQuarantineServiceReplay:
