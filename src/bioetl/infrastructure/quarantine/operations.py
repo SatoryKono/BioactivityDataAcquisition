@@ -169,7 +169,9 @@ def _normalize_filter_values(raw: str | None) -> set[str] | None:
     if raw is None:
         return None
     candidate = raw.strip()
-    if not candidate or candidate in {"*", "All", "__all"}:
+    if not candidate:
+        return None
+    if candidate.lower() in {"*", "all", "__all", ".*"}:
         return None
     values = {item.strip() for item in candidate.split(",") if item.strip()}
     return values or None
@@ -181,7 +183,15 @@ def _matches_values_filter(value: object, allowed: set[str] | None) -> bool:
         return True
     if not isinstance(value, str):
         return False
-    return value in allowed
+    return value.strip() in allowed
+
+
+def _single_filter_value(raw: str | None) -> str | None:
+    """Return one normalized value when filter resolves to exactly one item."""
+    values = _normalize_filter_values(raw)
+    if values is None or len(values) != 1:
+        return None
+    return next(iter(values))
 
 
 def _parse_time_bound(value: str | None) -> datetime | None:
@@ -210,6 +220,7 @@ def _clamp_limit(limit: int, *, default: int = 50, hard_cap: int = 500) -> int:
 def _iter_filtered_rows(
     table_records: list[JsonDict],
     *,
+    pipeline: str | None,
     run_type: str | None,
     reason_code: str | None,
     field: str | None,
@@ -220,6 +231,7 @@ def _iter_filtered_rows(
     include_payload: bool,
 ) -> list[JsonDict]:
     """Apply server-side filtering for explorer rows."""
+    pipeline_filter = _normalize_filter_values(pipeline)
     run_type_filter = _normalize_filter_values(run_type)
     reason_code_filter = _normalize_filter_values(reason_code)
     field_filter = _normalize_filter_values(field)
@@ -231,6 +243,8 @@ def _iter_filtered_rows(
     rows: list[JsonDict] = []
     for record in table_records:
         row = _normalize_filtered_row(record, include_payload=include_payload)
+        if not _matches_values_filter(row.get("pipeline"), pipeline_filter):
+            continue
         if not _matches_values_filter(row.get("run_type"), run_type_filter):
             continue
         if not _matches_values_filter(row.get("reason_code"), reason_code_filter):
@@ -253,6 +267,60 @@ def _iter_filtered_rows(
             continue
         rows.append(row)
     return rows
+
+
+def _load_filtered_rows(
+    base_path: str,
+    storage_options: dict[str, str] | None,
+    *,
+    pipeline: str | None,
+    run_type: str | None,
+    reason_code: str | None,
+    field: str | None,
+    run_id: str | None,
+    payload_hash: str | None,
+    from_ts: str | None,
+    to_ts: str | None,
+    include_payload: bool,
+) -> list[JsonDict]:
+    """Read Silver-filter rows and apply scoped filtering in-memory."""
+    try:
+        dt = DeltaTable(base_path, storage_options=storage_options)
+    except TableNotFoundError:
+        return []
+
+    filters: list[tuple[str, str, object]] = [
+        ("error_code", "=", "FILTERED_OUT_SILVER"),
+    ]
+    run_id_single = _single_filter_value(run_id)
+    if run_id_single:
+        filters.append(("run_id", "=", run_id_single))
+    payload_hash_single = _single_filter_value(payload_hash)
+    if payload_hash_single:
+        filters.append(("payload_hash", "=", payload_hash_single))
+
+    partitions: list[tuple[str, str, object]] | None = None
+    pipeline_single = _single_filter_value(pipeline)
+    if pipeline_single:
+        partitions = [("pipeline", "=", pipeline_single)]
+
+    arrow_table = dt.to_pyarrow_table(
+        partitions=partitions,
+        filters=filters,
+    )
+    table_records: list[JsonDict] = arrow_table.to_pylist()
+    return _iter_filtered_rows(
+        table_records,
+        pipeline=pipeline,
+        run_type=run_type,
+        reason_code=reason_code,
+        field=field,
+        run_id=run_id,
+        payload_hash=payload_hash,
+        from_ts=from_ts,
+        to_ts=to_ts,
+        include_payload=include_payload,
+    )
 
 
 def inspect_records(
@@ -312,7 +380,7 @@ def list_filtered_records(
     base_path: str,
     storage_options: dict[str, str] | None,
     *,
-    pipeline: str,
+    pipeline: str | None = None,
     run_type: str | None = None,
     reason_code: str | None = None,
     field: str | None = None,
@@ -325,28 +393,10 @@ def list_filtered_records(
     sort: str = "ingestion_ts_desc",
 ) -> JsonDict:
     """Return paginated Silver-filter quarantine rows for explorer dashboards."""
-    try:
-        dt = DeltaTable(base_path, storage_options=storage_options)
-    except TableNotFoundError:
-        return {
-            "items": [],
-            "total": 0,
-            "limit": _clamp_limit(limit),
-            "offset": max(0, offset),
-        }
-
-    filters: list[tuple[str, str, object]] = [
-        ("error_code", "=", "FILTERED_OUT_SILVER"),
-    ]
-    if run_id:
-        filters.append(("run_id", "=", run_id))
-    arrow_table = dt.to_pyarrow_table(
-        partitions=[("pipeline", "=", pipeline)],
-        filters=filters,
-    )
-    table_records: list[JsonDict] = arrow_table.to_pylist()
-    rows = _iter_filtered_rows(
-        table_records,
+    rows = _load_filtered_rows(
+        base_path,
+        storage_options,
+        pipeline=pipeline,
         run_type=run_type,
         reason_code=reason_code,
         field=field,
@@ -405,6 +455,7 @@ def get_filtered_record(
 
     rows = _iter_filtered_rows(
         table_records,
+        pipeline=pipeline,
         run_type=None,
         reason_code=None,
         field=None,
@@ -429,7 +480,7 @@ def get_filtered_stats(
     base_path: str,
     storage_options: dict[str, str] | None,
     *,
-    pipeline: str,
+    pipeline: str | None = None,
     run_type: str | None = None,
     reason_code: str | None = None,
     field: str | None = None,
@@ -439,7 +490,7 @@ def get_filtered_stats(
     to_ts: str | None = None,
 ) -> JsonDict:
     """Return aggregate stats for filtered records under current scope."""
-    records_response = list_filtered_records(
+    rows = _load_filtered_rows(
         base_path,
         storage_options,
         pipeline=pipeline,
@@ -450,19 +501,12 @@ def get_filtered_stats(
         payload_hash=payload_hash,
         from_ts=from_ts,
         to_ts=to_ts,
-        limit=500,
-        offset=0,
+        include_payload=False,
     )
-    items = records_response.get("items", [])
-    if not isinstance(items, list):
-        items = []
-
     by_reason_code: dict[str, int] = {}
     by_field: dict[str, int] = {}
     by_reason_signature: dict[str, int] = {}
-    for row in items:
-        if not isinstance(row, dict):
-            continue
+    for row in rows:
         _increment_counter(by_reason_code, row.get("reason_code"))
         _increment_counter(by_field, row.get("field"))
         signature = " | ".join(
@@ -473,17 +517,30 @@ def get_filtered_stats(
         if signature:
             by_reason_signature[signature] = by_reason_signature.get(signature, 0) + 1
 
-    stats = get_statistics(
-        base_path,
-        storage_options,
-        pipeline,
-        error_code="FILTERED_OUT_SILVER",
-        run_id=run_id,
-    )
-    bronze_records = stats.get("bronze_records")
-    if not isinstance(bronze_records, int):
-        bronze_records = 0
-    total = len(items)
+    bronze_records = 0
+    pipeline_filter = _normalize_filter_values(pipeline)
+    if pipeline_filter is None:
+        scoped_pipelines = {
+            row.get("pipeline", "")
+            for row in rows
+            if isinstance(row.get("pipeline"), str) and row.get("pipeline", "").strip()
+        }
+    else:
+        scoped_pipelines = set(pipeline_filter)
+    run_id_single = _single_filter_value(run_id)
+    for pipeline_name in sorted(scoped_pipelines):
+        stats = get_statistics(
+            base_path,
+            storage_options,
+            pipeline_name,
+            error_code=None,
+            run_id=run_id_single,
+        )
+        pipeline_total = stats.get("total_count")
+        if isinstance(pipeline_total, int):
+            bronze_records += pipeline_total
+
+    total = len(rows)
     reject_ratio = float(total / bronze_records) if bronze_records > 0 else 0.0
     return {
         "total": total,
@@ -520,7 +577,7 @@ def get_filtered_filter_options(
     base_path: str,
     storage_options: dict[str, str] | None,
     *,
-    pipeline: str,
+    pipeline: str | None = None,
     run_type: str | None = None,
     reason_code: str | None = None,
     field: str | None = None,
@@ -529,29 +586,10 @@ def get_filtered_filter_options(
     to_ts: str | None = None,
 ) -> JsonDict:
     """Return dynamic filter options for the quarantine explorer UI."""
-    try:
-        dt = DeltaTable(base_path, storage_options=storage_options)
-    except TableNotFoundError:
-        return {
-            "pipelines": [],
-            "run_types": [],
-            "reason_codes": [],
-            "fields": [],
-            "run_ids": [],
-        }
-
-    filters: list[tuple[str, str, object]] = [
-        ("error_code", "=", "FILTERED_OUT_SILVER"),
-    ]
-    if run_id:
-        filters.append(("run_id", "=", run_id))
-    arrow_table = dt.to_pyarrow_table(
-        partitions=[("pipeline", "=", pipeline)],
-        filters=filters,
-    )
-    table_records: list[JsonDict] = arrow_table.to_pylist()
-    rows = _iter_filtered_rows(
-        table_records,
+    rows = _load_filtered_rows(
+        base_path,
+        storage_options,
+        pipeline=pipeline,
         run_type=run_type,
         reason_code=reason_code,
         field=field,
@@ -562,6 +600,13 @@ def get_filtered_filter_options(
         include_payload=False,
     )
 
+    pipelines = sorted(
+        {
+            row.get("pipeline", "")
+            for row in rows
+            if isinstance(row.get("pipeline"), str) and row.get("pipeline")
+        }
+    )
     run_types = sorted(
         {
             row.get("run_type", "")
@@ -592,7 +637,7 @@ def get_filtered_filter_options(
     )
 
     return {
-        "pipelines": [pipeline],
+        "pipelines": pipelines,
         "run_types": run_types,
         "reason_codes": reason_codes,
         "fields": fields,
