@@ -50,7 +50,7 @@ python -m scripts.ops <command> [args...]
 | `update-rescope-bodies` | When the prepared full re-scope issue bodies should replace the current descriptions for the current architecture/testing governance issues | Manual, maintainer utility |
 | `close-ge-spike` | When issue `#2595` should be closed after the spike memo is committed or ready for reference | Manual, maintainer utility |
 | `close-schema-drift` | When issue `#2594` should be closed after the representative Pandera schema drift gate is merged or ready for reference | Manual, maintainer utility |
-| `setup-agents` | After cloning repo or updating `.codex/agents/` profiles | Manual, initial setup |
+| `setup-agents` | After cloning repo or updating `.claude/agents/` profiles | Manual, initial setup |
 | `setup-plugins` | After cloning repo or updating local pytest/pre-commit tooling | Manual, initial setup |
 | `setup-skills` | After cloning repo or updating skills configuration; keeps `agents/` in sync unless `--skills-only` is passed | Manual, initial setup |
 | `check-skills` | Before PR touching `.claude/skills/`; validates layout consistency | CI gate (`skills-consistency.yml`) |

@@ -9,8 +9,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-SOURCE_ROOT="$REPO_ROOT/.codex/agents"
-CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+SOURCE_ROOT="$REPO_ROOT/.claude/agents"
+CODEX_HOME="${CODEX_HOME:-$HOME/.claude}"
 DEST_ROOT="$CODEX_HOME/agents"
 DRY_RUN=false
 

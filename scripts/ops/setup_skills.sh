@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # setup_skills.sh - Sync repository Codex skills into CODEX_HOME.
-# By default this also syncs the paired `.codex/agents` tree because many
+# By default this also syncs the paired `.claude/agents` tree because many
 # skills resolve relative agent references through CODEX_HOME.
 # Usage:
 #   bash scripts/setup_skills.sh
@@ -12,8 +12,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-SOURCE_ROOT="$REPO_ROOT/.codex/skills"
-CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+SOURCE_ROOT="$REPO_ROOT/.claude/skills"
+CODEX_HOME="${CODEX_HOME:-$HOME/.claude}"
 DEST_ROOT="$CODEX_HOME/skills"
 DRY_RUN=false
 SYNC_AGENTS=true
