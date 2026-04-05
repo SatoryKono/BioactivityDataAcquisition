@@ -136,6 +136,14 @@ def _append_silver_filter_lines(
     lines.append(
         f"\n  Silver Filter Rejects: {silver_total} ({pct:.1f}% of quarantine)"
     )
+    bronze_records = silver_filter_stats.get("bronze_records")
+    bronze_ratio_pct = silver_filter_stats.get("bronze_ratio_pct")
+    if isinstance(bronze_records, int) and bronze_records > 0 and isinstance(
+        bronze_ratio_pct, (int, float)
+    ):
+        lines.append(
+            f"  Silver Rejects vs Bronze: {silver_total}/{bronze_records} ({bronze_ratio_pct:.1f}%)"
+        )
     if group_by is None:
         _append_all_silver_filter_groupings(
             lines,
@@ -172,6 +180,11 @@ def build_quarantine_grouped_lines(
         f"  Quarantine Dashboard: {pipeline}",
         f"{'=' * 50}",
     ]
+    run_scope = stats.get("run_scope")
+    if isinstance(run_scope, dict):
+        run_id = run_scope.get("run_id")
+        if isinstance(run_id, str) and run_id.strip():
+            lines.append(f"\n  Run ID Scope: {run_id}")
 
     total = stats.get("total_count", stats.get("total_records", 0))
     lines.append(f"\n  Total Records: {total}")

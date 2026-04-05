@@ -90,6 +90,7 @@ class QuarantinePort(Protocol):
         pipeline: str,
         limit: int = 10,
         error_code: str | None = None,
+        run_id: str | None = None,
     ) -> list[BronzeRecord]:
         """Inspect records in quarantine.
 
@@ -97,6 +98,7 @@ class QuarantinePort(Protocol):
             pipeline: The name of the pipeline to inspect.
             limit: The maximum number of records to return.
             error_code: Filter records by a specific error code.
+            run_id: Optional pipeline run ID to scope the inspection.
 
         Returns:
             A list of quarantined records.
@@ -107,12 +109,14 @@ class QuarantinePort(Protocol):
         self,
         pipeline: str,
         error_code: str | None = None,
+        run_id: str | None = None,
     ) -> MetaDict:
         """Get statistics about the quarantined records for a pipeline.
 
         Args:
             pipeline: The name of the pipeline.
             error_code: Optional error code to scope the statistics.
+            run_id: Optional pipeline run ID to scope the statistics.
 
         Returns:
             A dictionary of statistics (e.g., count by error code).
