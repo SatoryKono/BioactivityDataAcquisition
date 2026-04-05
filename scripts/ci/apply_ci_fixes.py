@@ -496,6 +496,148 @@ def apply_ci03(api: GitHubAPI) -> None:
         print(f"  PR created: {pr_url}")
 
 
+# ── CI-07 ────────────────────────────────────────────────────────────────────
+
+# Old buggy gate step: $() captures stdout, sys.exit(1) code is lost.
+CI07_OLD = """\
+      - name: Gate on degradation report
+        if: always()
+        run: |
+          if [ -f reports/performance/hotspot-degradation.json ]; then
+            failed=$(python3 -c "
+          import json, sys
+          data = json.load(open('reports/performance/hotspot-degradation.json'))
+          failed = data.get('summary', {}).get('failed', 0)
+          print(failed)
+          sys.exit(1 if failed > 0 else 0)
+          ")
+            echo "Benchmarks over budget: $failed"
+          fi"""
+
+CI07_NEW = """\
+      - name: Gate on degradation report
+        if: always()
+        run: |
+          if [ -f reports/performance/hotspot-degradation.json ]; then
+            python3 - <<'PY'
+          import json, sys
+          data = json.load(open('reports/performance/hotspot-degradation.json'))
+          failed = data.get('summary', {}).get('failed', 0)
+          print(f'Benchmarks over budget: {failed}')
+          sys.exit(1 if failed > 0 else 0)
+          PY
+          fi"""
+
+
+def apply_ci07(api: GitHubAPI) -> None:
+    print("\n=== CI-07: Fix performance gate exit code ===")
+    branch = BRANCHES["ci-07"]
+    sha = api.get_sha()
+
+    if api.branch_exists(branch):
+        print(f"  Branch {branch} already exists — skipping branch creation")
+    else:
+        api.create_branch(branch, sha)
+
+    path = ".github/workflows/performance-nightly.yml"
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
+
+    if CI07_OLD not in content:
+        print(f"  WARNING: expected pattern not found in {path}. Already fixed?")
+        print("  Searching for 'Gate on degradation report' step...")
+        if "Gate on degradation report" in content:
+            print("  Step found but pattern differs — manual review needed")
+        return
+
+    new_content = content.replace(CI07_OLD, CI07_NEW, 1)
+    print(f"  Patching {path}: replacing buggy $() gate with heredoc")
+    api.update_file(
+        path=path,
+        content=new_content,
+        sha=file_sha,
+        message=(
+            "fix(ci): propagate exit code in performance degradation gate\n\n"
+            "Replace `failed=$(python3 -c '...')` with heredoc so sys.exit(1)\n"
+            "correctly fails the step when benchmarks exceed budget.\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
+        branch=branch,
+    )
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): propagate exit code in performance degradation gate",
+            branch=branch,
+            body=PR_BODIES["ci-07"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
+# ── CI-12 ────────────────────────────────────────────────────────────────────
+
+CI12_OLD_PATHS_IGNORE = """\
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'"""
+
+CI12_NEW_PATHS_IGNORE = """\
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - 'LICENSE'"""
+
+
+def apply_ci12(api: GitHubAPI) -> None:
+    print("\n=== CI-12: Fix security.yml — include workflow changes in scans ===")
+    branch = BRANCHES["ci-12"]
+    sha = api.get_sha()
+
+    if api.branch_exists(branch):
+        print(f"  Branch {branch} already exists — skipping branch creation")
+    else:
+        api.create_branch(branch, sha)
+
+    path = ".github/workflows/security.yml"
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
+
+    if ".github/workflows/**" not in content:
+        print(f"  INFO: .github/workflows/** not in {path} — already fixed?")
+        return
+
+    # Remove from both push and pull_request triggers (may appear twice)
+    count = content.count(CI12_OLD_PATHS_IGNORE)
+    new_content = content.replace(CI12_OLD_PATHS_IGNORE, CI12_NEW_PATHS_IGNORE)
+    print(f"  Patching {path}: removing .github/workflows/** exclusion ({count} occurrence{'s' if count > 1 else ''})")
+    api.update_file(
+        path=path,
+        content=new_content,
+        sha=file_sha,
+        message=(
+            "fix(ci): include workflow file changes in security scans\n\n"
+            "Remove .github/workflows/** from paths-ignore so PRs that\n"
+            "modify workflow files still trigger detect-secrets and pip-audit.\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
+        branch=branch,
+    )
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): include workflow file changes in security scans",
+            branch=branch,
+            body=PR_BODIES["ci-12"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main() -> None:
