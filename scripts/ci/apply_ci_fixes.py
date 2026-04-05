@@ -87,7 +87,7 @@ class GitHubAPI:
     def __init__(self, token: str, dry_run: bool = False) -> None:
         self.session = requests.Session()
         self.session.headers.update({
-            "Authorization": f"Bearer {token}",
+            "Authorization": f"token {token}",
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         })
@@ -172,12 +172,14 @@ def apply_ci01(api: GitHubAPI) -> None:
 
     files = api.list_workflow_files()
     updated = []
+    # In dry-run the branch isn't created, so read from BASE_BRANCH for scanning.
+    read_branch = BASE_BRANCH if api.dry_run else branch
 
     for f in files:
         if not f["name"].endswith(".yml") and not f["name"].endswith(".yaml"):
             continue
         path = f["path"]
-        content, file_sha = api.get_file(path, branch)
+        content, file_sha = api.get_file(path, read_branch)
         if "actions/checkout@v6" not in content:
             continue
         new_content = content.replace("actions/checkout@v6", "actions/checkout@v4")
@@ -217,7 +219,8 @@ def apply_ci02(api: GitHubAPI) -> None:
         api.create_branch(branch, sha)
 
     path = ".github/workflows/tests.yml"
-    content, file_sha = api.get_file(path, branch)
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
 
     old_matrix = 'python-version: [ "3.11", "3.12" ]'
     new_matrix = 'python-version: [ "3.11", "3.12", "3.13" ]'
@@ -435,7 +438,8 @@ def apply_ci03(api: GitHubAPI) -> None:
         api.create_branch(branch, sha)
 
     path = ".github/workflows/docker.yml"
-    _, file_sha = api.get_file(path, branch)
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    _, file_sha = api.get_file(path, read_branch)
 
     print(f"  Replacing {path} with fixed version")
     api.update_file(
@@ -486,7 +490,8 @@ def main() -> None:
         print("\n✅ Done!")
     except requests.HTTPError as e:
         print(f"\n❌ GitHub API error: {e}")
-        print(f"   Response: {e.response.text if e.response else 'no response'}")
+        body = e.response.text if e.response is not None else "no response"
+        print(f"   Response body: {body or '(empty)'}")
         sys.exit(1)
 
 

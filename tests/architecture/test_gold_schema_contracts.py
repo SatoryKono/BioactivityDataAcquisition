@@ -16,7 +16,7 @@ CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
 
 # Required Gold schema contracts with version 1.0
 # Note: Using sorted tuple for deterministic pytest-xdist test collection order
-# Generated from Pandera schemas by src/tools/scripts/generate_contracts.py
+# Generated from Pandera schemas by python -m scripts.schema generate-contracts
 REQUIRED_SCHEMAS = (
     "chembl_activity_v1.0.json",
     "chembl_assay_v1.0.json",

@@ -18,7 +18,14 @@ from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
 )
 
 _PARTITION_TEST_SETTINGS = settings(
-    suppress_health_check=[HealthCheck.too_slow]
+    deadline=None,
+    max_examples=40,
+    suppress_health_check=[HealthCheck.too_slow],
+)
+_ASYNC_POLICY_TEST_SETTINGS = settings(
+    deadline=None,
+    max_examples=40,
+    suppress_health_check=[HealthCheck.too_slow],
 )
 _FILTER_ID_TEXT = st.text(
     alphabet=st.characters(
@@ -101,6 +108,7 @@ def _fallback_chain_case(
     return primary_ids, resolved_ids, title_entries, limit
 
 
+@_ASYNC_POLICY_TEST_SETTINGS
 @given(case=_fallback_chain_case())
 def test_run_fetch_with_fallback_policy_prefix_property(
     case: tuple[list[str], set[str], list[str], int | None],

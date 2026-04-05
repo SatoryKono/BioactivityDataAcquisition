@@ -52,7 +52,7 @@ class TestCliExitCodeMatrix:
                 return_value=registry,
             ),
         ):
-            yield
+            yield registry
 
     def test_run_exit_code_matrix(self, cli_runner) -> None:
         with patch("bioetl.interfaces.cli.commands.run.execute_run") as mock_execute:
@@ -110,10 +110,18 @@ class TestCliExitCodeMatrix:
             )
             assert result.exit_code == ExitCode.FAIL
 
-    def test_run_all_exit_code_matrix(self, cli_runner) -> None:
+    def test_run_all_exit_code_matrix(self, cli_runner, _mock_registry) -> None:
         batch_run_result = _get_batch_run_result_type()
-        with patch("bioetl.interfaces.cli.commands.run_all.asyncio.run") as mock_run:
-            mock_run.return_value = batch_run_result(
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.domains.run_all.command.resolve_context_registry",
+                return_value=_mock_registry,
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.domains.run_all.command._run_batch_with_policy"
+            ) as mock_execute_batch,
+        ):
+            mock_execute_batch.return_value = batch_run_result(
                 total=2,
                 succeeded=2,
                 failed=0,
@@ -139,7 +147,7 @@ class TestCliExitCodeMatrix:
             )
             assert result.exit_code == ExitCode.OK
 
-            mock_run.return_value = batch_run_result(
+            mock_execute_batch.return_value = batch_run_result(
                 total=2,
                 succeeded=1,
                 failed=1,
@@ -166,7 +174,7 @@ class TestCliExitCodeMatrix:
             )
             assert result.exit_code == ExitCode.PIPELINE_ERROR
 
-            mock_run.return_value = batch_run_result(
+            mock_execute_batch.return_value = batch_run_result(
                 total=1,
                 succeeded=0,
                 failed=0,
