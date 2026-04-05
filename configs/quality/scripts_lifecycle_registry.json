@@ -1,5 +1,14 @@
 {
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
-  "entries": {}
+  "entries": {
+    "scripts/qa/generate_reports.py": {
+      "owner": "platform-architecture",
+      "decision": "deprecate",
+      "next_step": "Remove the legacy report generator after confirming no external automation still depends on it.",
+      "review_by": "2026-05-31",
+      "replacement": "scripts/repo/check_scripts_inventory.py",
+      "sunset_date": "2026-06-30"
+    }
+  }
 }

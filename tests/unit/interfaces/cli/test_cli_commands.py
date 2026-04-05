@@ -1760,9 +1760,6 @@ class TestRunCommandExceptionHandlers:
                 "bioetl.interfaces.cli.registry_helpers.build_cli_registry"
             ) as mock_registry,
             patch(
-                "bioetl.interfaces.cli.main.build_cli_registry"
-            ) as mock_registry_main,
-            patch(
                 "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
                 return_value=mock_service,
             ),
@@ -1772,7 +1769,6 @@ class TestRunCommandExceptionHandlers:
             ),
         ):
             mock_registry.return_value.list_pipelines.return_value = ["foo"]
-            mock_registry_main.return_value.list_pipelines.return_value = ["foo"]
             result = cli_runner.invoke(cli, ["run", "--pipeline", "foo"])
 
         assert result.exit_code == 80  # CONFIG_ERROR
@@ -1788,9 +1784,6 @@ class TestRunCommandExceptionHandlers:
                 "bioetl.interfaces.cli.registry_helpers.build_cli_registry"
             ) as mock_registry,
             patch(
-                "bioetl.interfaces.cli.main.build_cli_registry"
-            ) as mock_registry_main,
-            patch(
                 "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
                 return_value=mock_service,
             ),
@@ -1800,7 +1793,6 @@ class TestRunCommandExceptionHandlers:
             ),
         ):
             mock_registry.return_value.list_pipelines.return_value = ["foo"]
-            mock_registry_main.return_value.list_pipelines.return_value = ["foo"]
             result = cli_runner.invoke(cli, ["run", "--pipeline", "foo"])
 
         assert result.exit_code == 1  # FAIL

@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-04T17:54:16.998761+00:00",
+  "generated_at": "2026-04-05T07:39:43.852140+00:00",
   "summary": {
-    "total_scripts": 226,
+    "total_scripts": 227,
     "status_counts": {
-      "active": 226
+      "active": 226,
+      "orphan": 1
     },
     "reference_group_coverage": {
       "agents": 10,
@@ -6431,6 +6432,14 @@
           "text": "\"report-hotspots\": \"generate_hotspot_degradation_report.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/qa/generate_reports.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/qa/lint_terminology.py",

@@ -43,7 +43,9 @@ def sort_columns_by_provider(
 
 def extract_field_from_qualified_name(column: str) -> str:
     """Extract field name from qualified column name."""
-    parts = column.split(".")
+    # ⚡ Bolt: safely limit list allocation overhead by using .split('.', maxsplit=3)
+    # while fully preserving exactly 2 or 3 parts behavior
+    parts = column.split(".", maxsplit=3)
     if len(parts) == 3:
         return parts[2]
     if len(parts) == 2:

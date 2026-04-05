@@ -47,15 +47,12 @@ def mock_registry():
         "pubchem_compound",
         "uniprot_protein",
     ]
-    with (
-        patch(
-            "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
-            return_value=mock,
-        ),
-        patch(
-            "bioetl.interfaces.cli.main.build_cli_registry",
-            return_value=mock,
-        ),
+    with patch(
+        "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
+        return_value=mock,
+    ), patch(
+        "bioetl.interfaces.cli.commands.domains.run_all.command.resolve_context_registry",
+        return_value=mock,
     ):
         yield mock
 
@@ -72,15 +69,12 @@ def mock_registry_main():
         "pubchem_compound",
         "uniprot_protein",
     ]
-    with (
-        patch(
-            "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
-            return_value=mock,
-        ),
-        patch(
-            "bioetl.interfaces.cli.main.build_cli_registry",
-            return_value=mock,
-        ),
+    with patch(
+        "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
+        return_value=mock,
+    ), patch(
+        "bioetl.interfaces.cli.commands.domains.run_all.command.resolve_context_registry",
+        return_value=mock,
     ):
         yield mock
 

@@ -65,7 +65,7 @@ def mock_registry():
         "uniprot_protein",
     ]
     with patch(
-        "bioetl.interfaces.cli.main.build_cli_registry",
+        "bioetl.interfaces.cli.commands.domains.run_all.command.resolve_context_registry",
         return_value=mock,
     ):
         yield mock
