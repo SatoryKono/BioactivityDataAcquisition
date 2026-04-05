@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-04'
+Last verified: '2026-04-05'
 ---
 
 # Docs Verification
@@ -31,6 +31,12 @@ Use this guide when you:
 Published docs define current supported behavior. Repo-only material may support
 analysis and traceability, but it must not override the active guidance in
 `docs/00-05`.
+
+Published docs MAY cite repo-only supporting material such as `reports/**` when
+it improves traceability, but those references MUST stay as repository-path
+citations. If a report contains guidance that operators or contributors need to
+follow, migrate that guidance into `docs/00-05` first and treat the report as
+supporting evidence only.
 
 ## Prerequisites
 
@@ -112,6 +118,90 @@ location explicitly:
 ```bash
 UV_CACHE_DIR=/tmp/.uv-cache uv run python -m scripts.docs check-links --links --specs --configs
 ```
+
+## Live Docs Watchlist
+
+Use this short watchlist whenever a change touches runtime-facing docs or when a
+doc-sync PR needs a focused code-versus-doc review.
+
+### 1. Monitoring variables and dashboards
+
+- **Source of truth**: `grafana/dashboards/*.json`,
+  `docs/03-guides/dashboards/variables-guide.md`
+- **Docs to review**: `docs/05-operations/01-monitoring-guide.md`, dashboard
+  variable guides, operator runbooks that reference dashboard filters
+- **Command/check**:
+
+```bash
+rg -n '\$pipeline|\$run_type|\$provider' \
+  grafana/dashboards docs/03-guides/dashboards docs/05-operations/01-monitoring-guide.md
+uv run python -m scripts.docs check-links --links --configs
+```
+
+### 2. Control-plane contracts
+
+- **Source of truth**: `src/bioetl/domain/control_plane/**`,
+  `src/bioetl/domain/contracts/**`, supported CLI surfaces under
+  `src/bioetl/interfaces/**`
+- **Docs to review**: `docs/04-reference/contracts/**`,
+  `docs/04-reference/cli.md`, `docs/05-operations/runbooks/run-manifest-inspection.md`
+- **Command/check**:
+
+```bash
+uv run python -m scripts.docs check-drift --ports --classes
+bash scripts/docs/build_docs_site.sh --strict
+```
+
+### 3. Provider and entity inventory
+
+- **Source of truth**: `configs/providers/*.yaml`, `configs/entities/**`,
+  `configs/composites/*.yaml`
+- **Docs to review**: `README.md`, `docs/04-reference/providers/**`,
+  `docs/04-reference/pipelines/README.md`
+- **Command/check**:
+
+```bash
+uv run python -m scripts.docs check-links --links --specs --configs
+rg -n 'configs/providers|configs/entities|configs/composites' README.md docs/04-reference
+```
+
+### 4. Storage layout
+
+- **Source of truth**: `src/bioetl/infrastructure/config/_base.py`,
+  runtime storage helpers under `src/bioetl/infrastructure/storage/**`
+- **Docs to review**: `docs/03-guides/local-storage-layout.md`,
+  `docs/03-guides/running-pipelines.md`, storage references in runbooks
+- **Command/check**:
+
+```bash
+uv run python -m scripts.docs check-drift --classes
+rg -n 'data/output|checkpoints|quarantine|control' \
+  src/bioetl/infrastructure/config/_base.py docs/03-guides docs/05-operations/runbooks
+```
+
+### 5. Runbooks and operator procedures
+
+- **Source of truth**: supported CLI/runtime behavior in `src/bioetl/interfaces/**`,
+  contracts in `docs/04-reference/contracts/**`, and the active runbook index
+- **Docs to review**: `docs/05-operations/runbooks/**`,
+  `docs/05-operations/01-monitoring-guide.md`, `docs/04-reference/cli.md`
+- **Command/check**:
+
+```bash
+uv run python -m scripts.docs check-links --links --specs --configs
+bash scripts/docs/build_docs_site.sh --strict
+```
+
+## Doc-Sync PR Checklist
+
+Use this checklist for PRs that change published docs, runtime guidance, or
+repo-only supporting material that feeds active documentation.
+
+- [ ] Published doc changes were checked with `uv run python -m scripts.docs check-links --links --specs --configs`.
+- [ ] Drift-sensitive surfaces were reviewed against the **Live Docs Watchlist** items that match the change.
+- [ ] Any normative conclusion discovered in `reports/**` was migrated into `docs/00-05` before linking the report as supporting evidence.
+- [ ] `uv run python -m scripts.docs check-drift --ports --classes` ran when ports, classes, contracts, or storage/runtime structure changed.
+- [ ] `bash scripts/docs/build_docs_site.sh --strict` passed before merge.
 
 ## Recurring Audit Checklist
 
