@@ -13,6 +13,8 @@ ______________________________________________________________________
 
 # ADR-043: Documentation and Knowledge Management Strategy
 
+**Status:** Accepted
+
 ## **Date:** 2026-03-09 **Status:** Accepted **Decision makers:** @BioETL-Team **Related:** ADR-040 (diagram governance), ADR-041 (naming), ADR-042 (testing)
 
 ## Context

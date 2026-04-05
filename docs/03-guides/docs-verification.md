@@ -49,6 +49,13 @@ Recommended setup:
 uv sync --extra dev --extra tracing --extra docs
 ```
 
+If you hit cache- or wheel-related `uv` installation failures in WSL, rerun the
+same sync with an explicit writable cache path:
+
+```bash
+UV_CACHE_DIR=/tmp/.uv-cache uv sync --extra dev --extra tracing --extra docs
+```
+
 Fallback without `uv`:
 
 ```bash
@@ -58,6 +65,16 @@ pip install -e ".[dev,tracing,docs]"
 ```
 
 ## Verification Flow
+
+### Canonical single-command path
+
+```bash
+uv run python -m scripts.docs verify
+```
+
+Use this as the default end-to-end verification path for doc-sync changes. It
+runs link/spec/config checks, docs drift, docstring inventory, and a strict
+MkDocs build through the in-repo helper chain.
 
 ### 1. Link and reference checks
 
@@ -89,7 +106,7 @@ changed.
 ### 4. Strict site build
 
 ```bash
-bash scripts/docs/build_docs_site.sh --strict
+uv run python -m scripts.docs verify --skip-links --skip-drift --skip-docstrings
 ```
 
 Use the strict build after the checks above when you need confidence that the
@@ -117,6 +134,7 @@ location explicitly:
 
 ```bash
 UV_CACHE_DIR=/tmp/.uv-cache uv run python -m scripts.docs check-links --links --specs --configs
+UV_CACHE_DIR=/tmp/.uv-cache uv sync --extra dev --extra tracing --extra docs
 ```
 
 ## Live Docs Watchlist

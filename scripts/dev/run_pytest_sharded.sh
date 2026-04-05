@@ -32,6 +32,7 @@ SHARD_ORDER=(
     "S5-infra-adapters"
     "S6-crosscutting-unit"
     "S7-crosscutting-architecture"
+    "S7-crosscutting-architecture-guardrails"
     "S8-crosscutting-governance"
 )
 
@@ -44,6 +45,7 @@ declare -A SHARD_WAVE=(
     ["S5-infra-adapters"]="3"
     ["S6-crosscutting-unit"]="3"
     ["S7-crosscutting-architecture"]="3"
+    ["S7-crosscutting-architecture-guardrails"]="3"
     ["S8-crosscutting-governance"]="3"
 )
 
@@ -56,6 +58,7 @@ declare -A SHARD_PATHS=(
     ["S5-infra-adapters"]="tests/unit/infrastructure/adapters tests/unit/infrastructure/storage tests/integration/adapters tests/integration/interfaces"
     ["S6-crosscutting-unit"]="tests/unit/infrastructure/config tests/unit/infrastructure/quality tests/unit/infrastructure/observability tests/unit/infrastructure/schemas"
     ["S7-crosscutting-architecture"]="tests/architecture"
+    ["S7-crosscutting-architecture-guardrails"]="tests/architecture/test_any_budget.py tests/architecture/test_scripts_catalog_governance.py tests/architecture/test_architecture_dependency_docs_drift.py tests/architecture/test_check_doc_links_guardrails.py tests/architecture/test_compatibility_facade_inventory.py tests/architecture/test_docs_version_sync.py tests/architecture/test_documentation_sync.py tests/architecture/test_code_metrics.py tests/architecture/test_legacy_schema_wrappers.py"
     ["S8-crosscutting-governance"]="tests/integration/pipelines tests/integration/chembl tests/contract tests/smoke"
 )
 
@@ -63,11 +66,13 @@ declare -A SHARD_WORKERS_OVERRIDE=(
     ["S1-domain-core"]="0"
     ["S1-domain-services"]="0"
     ["S7-crosscutting-architecture"]="0"
+    ["S7-crosscutting-architecture-guardrails"]="0"
     ["S8-crosscutting-governance"]="0"
 )
 
 declare -A SHARD_EXTRA_PYTEST_ARGS=(
-    ["S7-crosscutting-architecture"]="--timeout=300"
+    ["S7-crosscutting-architecture"]="--timeout=300 --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py"
+    ["S7-crosscutting-architecture-guardrails"]="--timeout=300"
     ["S8-crosscutting-governance"]="--timeout=300"
 )
 

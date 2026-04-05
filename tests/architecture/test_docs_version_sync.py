@@ -113,16 +113,20 @@ def collect_outdated_version_refs(
     paths: list[Path],
     project_root: Path,
     rules_version: str,
+    docs_text_cache: dict[Path, str] | None = None,
 ) -> list[str]:
     """Collect stale RULES.md version references outside changelog/history sections."""
     outdated: list[str] = []
     current_major_minor = tuple(map(int, rules_version.split(".")))
 
     for md_file in paths:
-        try:
-            content = md_file.read_text(encoding="utf-8")
-        except UnicodeDecodeError:
-            continue
+        if docs_text_cache is not None and md_file in docs_text_cache:
+            content = docs_text_cache[md_file]
+        else:
+            try:
+                content = md_file.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                continue
 
         changelog_markers = [
             "## changelog",
@@ -163,12 +167,12 @@ def collect_outdated_version_refs(
 class TestDocsVersionSync:
     """Тесты синхронизации версий документации."""
 
-    @pytest.fixture
+    @pytest.fixture(scope="session")
     def project_root(self) -> Path:
         """Получить корневую директорию проекта."""
         return get_project_root()
 
-    @pytest.fixture
+    @pytest.fixture(scope="session")
     def rules_version(self, project_root: Path) -> str:
         """Получить актуальную версию RULES.md."""
         return extract_rules_version(project_root)
@@ -259,7 +263,11 @@ class TestDocsVersionSync:
         assert not errors, "\n\n".join(errors)
 
     def test_no_outdated_versions_in_active_docs(
-        self, project_root: Path, rules_version: str
+        self,
+        project_root: Path,
+        rules_version: str,
+        docs_markdown_files: list[Path],
+        docs_text_cache: dict[Path, str],
     ) -> None:
         """Активные документы НЕ ДОЛЖНЫ ссылаться на устаревшие версии.
 
@@ -273,14 +281,13 @@ class TestDocsVersionSync:
             pytest.skip("docs/ directory not found")
 
         active_docs = [
-            md_file
-            for md_file in docs_dir.rglob("*.md")
-            if not is_noncanonical_doc(md_file)
+            md_file for md_file in docs_markdown_files if not is_noncanonical_doc(md_file)
         ]
         outdated = collect_outdated_version_refs(
             paths=active_docs,
             project_root=project_root,
             rules_version=rules_version,
+            docs_text_cache=docs_text_cache,
         )
 
         assert not outdated, (
@@ -290,24 +297,29 @@ class TestDocsVersionSync:
         )
 
     def test_no_outdated_versions_in_canonical_docs(
-        self, project_root: Path, rules_version: str
+        self,
+        project_root: Path,
+        rules_version: str,
+        docs_markdown_files: list[Path],
+        docs_text_cache: dict[Path, str],
     ) -> None:
         """Canonical docs in 02/03/04 MUST not reference stale RULES.md versions."""
-        canonical_docs: list[Path] = []
-        for root in CANONICAL_VERSION_ROOTS:
-            root_path = project_root / root
-            if not root_path.exists():
-                continue
-            canonical_docs.extend(
-                md_file
-                for md_file in root_path.rglob("*.md")
-                if not is_noncanonical_doc(md_file)
+        canonical_root_paths = tuple(project_root / root for root in CANONICAL_VERSION_ROOTS)
+        canonical_docs = [
+            md_file
+            for md_file in docs_markdown_files
+            if any(
+                root_path == md_file.parent or root_path in md_file.parents
+                for root_path in canonical_root_paths
             )
+            and not is_noncanonical_doc(md_file)
+        ]
 
         outdated = collect_outdated_version_refs(
             paths=canonical_docs,
             project_root=project_root,
             rules_version=rules_version,
+            docs_text_cache=docs_text_cache,
         )
         assert not outdated, (
             "Canonical docs contain stale RULES.md version references:\n"

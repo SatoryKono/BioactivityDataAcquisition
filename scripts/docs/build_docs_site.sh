@@ -4,6 +4,7 @@ set -euo pipefail
 TMP_SITE_DIR=".mkdocs-site-tmp"
 OUT_SITE_DIR="docs/site"
 LEGACY_SITE_DIR="site"
+BUILD_HELPER="scripts/docs/run_mkdocs_build.py"
 
 STRICT_FLAG=""
 if [[ "${1:-}" == "--strict" ]]; then
@@ -18,20 +19,20 @@ cleanup_tmp() {
 
 trap cleanup_tmp EXIT
 
-if command -v mkdocs >/dev/null 2>&1; then
-  mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+if python -c "import mkdocs" >/dev/null 2>&1; then
+  python "$BUILD_HELPER" $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
 elif [[ -x "./.venv/bin/python" ]]; then
-  ./.venv/bin/python -m mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+  ./.venv/bin/python "$BUILD_HELPER" $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
 elif [[ -x "./.venv/Scripts/python.exe" ]]; then
   # WSL can fail executing Windows binaries directly depending on interop policy.
   if command -v cmd.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
     WIN_REPO_ROOT="$(wslpath -w "$PWD")"
-    cmd.exe /c "cd /d \"$WIN_REPO_ROOT\" && .venv\\Scripts\\python.exe -m mkdocs build $STRICT_FLAG --clean --site-dir \"$TMP_SITE_DIR\""
+    cmd.exe /c "cd /d \"$WIN_REPO_ROOT\" && .venv\\Scripts\\python.exe $BUILD_HELPER $STRICT_FLAG --clean --site-dir \"$TMP_SITE_DIR\""
   else
-    ./.venv/Scripts/python.exe -m mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+    ./.venv/Scripts/python.exe "$BUILD_HELPER" $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
   fi
 else
-  python -m mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+  mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
 fi
 
 rm -rf "$OUT_SITE_DIR"

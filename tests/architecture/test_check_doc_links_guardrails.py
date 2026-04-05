@@ -23,8 +23,16 @@ def _load_module() -> ModuleType:
     return module
 
 
-def test_iter_python_fence_lines_extracts_python_blocks_only() -> None:
-    module = _load_module()
+@pytest.fixture(scope="module")
+def check_doc_links_module() -> ModuleType:
+    """Load the docs guardrail module once per test module."""
+    return _load_module()
+
+
+def test_iter_python_fence_lines_extracts_python_blocks_only(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     lines = [
         "```bash",
         "python scripts/check_doc_links.py",
@@ -39,8 +47,10 @@ def test_iter_python_fence_lines_extracts_python_blocks_only() -> None:
     assert extracted == [(5, "value = foo_bar()")]
 
 
-def test_python_snippet_guardrails_detect_known_invalid_tokens() -> None:
-    module = _load_module()
+def test_python_snippet_guardrails_detect_known_invalid_tokens(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     lines = [
         "```python",
         "compound = pcp.Compound.from-cid(cid)",
@@ -57,8 +67,10 @@ def test_python_snippet_guardrails_detect_known_invalid_tokens() -> None:
     assert "python_invalid_run_in_executor_token" in rule_names
 
 
-def test_python_snippet_guardrails_detect_renamed_files() -> None:
-    module = _load_module()
+def test_python_snippet_guardrails_detect_renamed_files(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     lines = [
         "```python",
         "with open('src/bioetl/infrastructure/config-loader.py', encoding='utf-8') as f:",
@@ -72,8 +84,10 @@ def test_python_snippet_guardrails_detect_renamed_files() -> None:
     assert "python_renamed_file_token" in rule_names
 
 
-def test_python_snippet_guardrails_allow_explicit_legacy_marker() -> None:
-    module = _load_module()
+def test_python_snippet_guardrails_allow_explicit_legacy_marker(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     lines = [
         "```python",
         "compound = pcp.Compound.from-cid(cid)  # doc-lint: allow-legacy",
@@ -85,8 +99,10 @@ def test_python_snippet_guardrails_allow_explicit_legacy_marker() -> None:
     assert violations == []
 
 
-def test_path_contracts_allow_canonical_requirements_link() -> None:
-    module = _load_module()
+def test_path_contracts_allow_canonical_requirements_link(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     source = module.DOCS_DIR / "00-project" / "RULES.md"
     lines = ["See [Requirements](../01-requirements/REQUIREMENTS.md)."]
 
@@ -95,8 +111,10 @@ def test_path_contracts_allow_canonical_requirements_link() -> None:
     assert violations == []
 
 
-def test_path_contracts_detect_noncanonical_requirements_link() -> None:
-    module = _load_module()
+def test_path_contracts_detect_noncanonical_requirements_link(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     source = module.DOCS_DIR / "00-project" / "RULES.md"
     lines = ["See [Requirements](REQUIREMENTS.md)."]
 
@@ -106,8 +124,10 @@ def test_path_contracts_detect_noncanonical_requirements_link() -> None:
     assert "requirements_path_contract" in rule_names
 
 
-def test_path_contracts_detect_noncanonical_governance_link() -> None:
-    module = _load_module()
+def test_path_contracts_detect_noncanonical_governance_link(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     source = module.DOCS_DIR / "00-project" / "RULES.md"
     lines = ["Legacy link: [Policy](../99-archive/governance/policy.md)."]
 
@@ -117,8 +137,10 @@ def test_path_contracts_detect_noncanonical_governance_link() -> None:
     assert "governance_path_contract" in rule_names
 
 
-def test_drift_rules_include_legacy_run_flag_and_path_tokens() -> None:
-    module = _load_module()
+def test_drift_rules_include_legacy_run_flag_and_path_tokens(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     rule_names = {rule.name for rule in module.DRIFT_RULES}
 
     assert "legacy_run_type_flag" in rule_names
@@ -127,8 +149,10 @@ def test_drift_rules_include_legacy_run_flag_and_path_tokens() -> None:
     assert "legacy_docs_pipelines_path" in rule_names
 
 
-def test_legacy_system_meta_field_rule_ignores_cli_double_dash_flags() -> None:
-    module = _load_module()
+def test_legacy_system_meta_field_rule_ignores_cli_double_dash_flags(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     rule = next(
         candidate
         for candidate in module.DRIFT_RULES
@@ -142,8 +166,10 @@ def test_legacy_system_meta_field_rule_ignores_cli_double_dash_flags() -> None:
 
 
 @pytest.mark.slow
-def test_guardrails_pass_for_current_nav_docs() -> None:
-    module = _load_module()
+def test_guardrails_pass_for_current_nav_docs(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
 
     violations = module.check_legacy_paths_in_nav_docs()
 
@@ -156,8 +182,10 @@ def test_guardrails_pass_for_current_nav_docs() -> None:
     )
 
 
-def test_not_in_nav_baseline_file_exists() -> None:
-    module = _load_module()
+def test_not_in_nav_baseline_file_exists(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
 
     baseline_file = module.NOT_IN_NAV_BASELINE_FILE
     assert baseline_file.exists(), (
@@ -166,8 +194,10 @@ def test_not_in_nav_baseline_file_exists() -> None:
     )
 
 
-def test_not_in_nav_growth_guard_passes_for_current_repo() -> None:
-    module = _load_module()
+def test_not_in_nav_growth_guard_passes_for_current_repo(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
 
     current_count, baseline_count, added, _removed, baseline_exists = (
         module.check_not_in_nav_growth()
@@ -184,8 +214,9 @@ def test_not_in_nav_growth_guard_passes_for_current_repo() -> None:
 def test_not_in_nav_growth_excludes_reports_prefixes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    check_doc_links_module: ModuleType,
 ) -> None:
-    module = _load_module()
+    module = check_doc_links_module
     baseline_file = tmp_path / "not_in_nav_baseline.txt"
     baseline_file.write_text(
         "\n".join(
@@ -220,8 +251,9 @@ def test_not_in_nav_growth_excludes_reports_prefixes(
 def test_collect_link_scan_files_keeps_nav_docs_without_prechecking_existence(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    check_doc_links_module: ModuleType,
 ) -> None:
-    module = _load_module()
+    module = check_doc_links_module
     tree_doc = tmp_path / "tree.md"
     nav_doc = tmp_path / "nav.md"
     missing_nav_doc = tmp_path / "missing-nav.md"
@@ -236,23 +268,29 @@ def test_collect_link_scan_files_keeps_nav_docs_without_prechecking_existence(
     assert collected == [missing_nav_doc, nav_doc, tree_doc]
 
 
-def test_has_any_heading_accepts_cli_inspection_alias() -> None:
-    module = _load_module()
+def test_has_any_heading_accepts_cli_inspection_alias(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
     headings = {"purpose", "cli inspection", "invariants"}
 
     assert module._has_any_heading(headings, "Inspection Surface", "CLI Inspection")
 
 
-def test_control_plane_contract_files_include_run_manifest_ledger() -> None:
-    module = _load_module()
+def test_control_plane_contract_files_include_run_manifest_ledger(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
 
     files = module._control_plane_contract_spec_files()
 
     assert any(path.name == "run-manifest-ledger.md" for path in files)
 
 
-def test_control_plane_contract_governance_passes_current_repo() -> None:
-    module = _load_module()
+def test_control_plane_contract_governance_passes_current_repo(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
 
     violations = module.check_control_plane_contract_governance()
 
