@@ -144,6 +144,14 @@
       "replacement": "scripts/schema/generate_contracts.py",
       "sunset_date": "2026-06-30"
     },
+    "src/tools/scripts/config_matrix_generator.py": {
+      "owner": "platform-architecture",
+      "decision": "deprecate",
+      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.schema generate-config-matrix.",
+      "review_by": "2026-05-31",
+      "replacement": "scripts/schema/generate_config_matrix.py",
+      "sunset_date": "2026-06-30"
+    },
     "src/tools/scripts/check_architecture.py": {
       "owner": "platform-architecture",
       "decision": "deprecate",
@@ -174,6 +182,14 @@
       "next_step": "Retain only as a compatibility wrapper while historical direct-path callers converge on scripts/qa/lint_terminology.py and python -m scripts.qa check-terminology.",
       "review_by": "2026-05-31",
       "replacement": "scripts/qa/lint_terminology.py",
+      "sunset_date": "2026-06-30"
+    },
+    "src/tools/scripts/validate_unified_configs.py": {
+      "owner": "platform-architecture",
+      "decision": "deprecate",
+      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.schema validate-unified-configs.",
+      "review_by": "2026-05-31",
+      "replacement": "scripts/schema/validate_unified_configs.py",
       "sunset_date": "2026-06-30"
     }
   }

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import difflib
-import importlib.util
 from pathlib import Path
 import sys
 from types import ModuleType
@@ -11,11 +10,12 @@ from types import ModuleType
 
 def _load_dep_map_module() -> ModuleType:
     script = Path("scripts/qa/generate_architecture_dependency_map.py").resolve()
-    spec = importlib.util.spec_from_file_location("dep_map_drift_gen", str(script))
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
+    module = ModuleType("dep_map_drift_gen")
+    module.__file__ = str(script)
+    module.__package__ = ""
     sys.modules["dep_map_drift_gen"] = module
-    spec.loader.exec_module(module)
+    source = script.read_text(encoding="utf-8")
+    exec(compile(source, str(script), "exec"), module.__dict__)
     return module
 
 

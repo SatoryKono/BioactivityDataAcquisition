@@ -44,6 +44,7 @@ BRANCHES = {
     "hf-a": "fix/hf-upload-artifact-v3",
     "hf-b": "fix/hf-pip-audit-flags",
     "hf-e": "fix/hf-smoke-coverage-artifact",
+    "hf-lxml": "fix/hf-type-checking-lxml",
 }
 
 PR_BODIES = {
@@ -170,6 +171,20 @@ themselves may have passed.
 
 ### Fix
 Change `if-no-files-found: error` → `warn` for the smoke coverage upload.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "hf-lxml": """## HF-lxml: Fix type-checking — remove --txt-report (requires missing lxml)
+
+`mypy --txt-report` requires the `lxml` package at runtime. `lxml` is not
+listed in any `[project.optional-dependencies]` group, so it is absent from
+the uv virtual environment. mypy crashes immediately with an ImportError
+before type-checking a single file.
+
+### Fix
+Remove `--txt-report reports/mypy_report` from the mypy invocation.
+The mypy output is already captured to `reports/mypy_strict.log` via
+`tee`, so no diagnostic information is lost.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 """,
@@ -1044,6 +1059,77 @@ def apply_hf_e(api: GitHubAPI) -> None:
         print(f"  PR created: {pr_url}")
 
 
+
+# ── HF-lxml ──────────────────────────────────────────────────────────────────
+
+def apply_hf_lxml(api: GitHubAPI) -> None:
+    print("\n=== HF-lxml: Fix type-checking — remove --txt-report (lxml missing) ===")
+    branch = BRANCHES["hf-lxml"]
+    sha = api.get_sha()
+
+    if api.branch_exists(branch):
+        print(f"  Branch {branch} already exists — skipping branch creation")
+    else:
+        api.create_branch(branch, sha)
+
+    path = ".github/workflows/type-checking.yml"
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    content, file_sha = api.get_file(path, read_branch)
+
+    old_cmd = (
+        "uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \\\n"
+        "            --txt-report reports/mypy_report \\\n"
+        "            2>&1 | tee -a reports/mypy_strict.log"
+    )
+    new_cmd = (
+        "uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \\\n"
+        "            2>&1 | tee -a reports/mypy_strict.log"
+    )
+
+    if "--txt-report" not in content:
+        print(f"  INFO: --txt-report not found in {path} — already fixed?")
+        return
+
+    new_content = content.replace(old_cmd, new_cmd, 1)
+    if new_content == content:
+        # Try a more flexible replacement in case of whitespace differences
+        import re
+        new_content = re.sub(
+            r"(uv run mypy[^\n]*)\s*\n(\s*)--txt-report reports/mypy_report\s*\\\n(\s*)(2>&1)",
+            r"\1 \\\n\3\4",
+            content,
+        )
+
+    if new_content == content:
+        print(f"  WARNING: Could not patch {path} — pattern mismatch, manual review needed")
+        return
+
+    print(f"  Patching {path}: removing --txt-report (requires lxml, not in deps)")
+    api.update_file(
+        path=path,
+        content=new_content,
+        sha=file_sha,
+        message=(
+            "fix(ci): remove --txt-report from mypy (requires missing lxml)\n\n"
+            "mypy --txt-report requires the lxml package. lxml is not in any\n"
+            "[project.optional-dependencies] group, so uv sync does not install it.\n"
+            "mypy crashes immediately with ImportError before checking any files.\n\n"
+            "Remove --txt-report. The mypy output is already captured to\n"
+            "reports/mypy_strict.log via tee, so no diagnostics are lost.\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
+        branch=branch,
+    )
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): remove --txt-report from mypy (lxml not installed)",
+            branch=branch,
+            body=PR_BODIES["hf-lxml"],
+        )
+        print(f"  PR created: {pr_url}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
@@ -1064,7 +1150,7 @@ def main() -> None:
     parser.add_argument(
         "--only",
         choices=["ci-01", "ci-02", "ci-03", "ci-04", "ci-06", "ci-07", "ci-12",
-                 "hf-a", "hf-b", "hf-e"],
+                 "hf-a", "hf-b", "hf-e", "hf-lxml"],
         help="Apply only one fix",
     )
     args = parser.parse_args()
@@ -1095,6 +1181,8 @@ def main() -> None:
             apply_hf_b(api)
         if not args.only or args.only == "hf-e":
             apply_hf_e(api)
+        if not args.only or args.only == "hf-lxml":
+            apply_hf_lxml(api)
         print("\n✅ Done!")
     except requests.HTTPError as e:
         print(f"\n❌ GitHub API error: {e}")
