@@ -70,6 +70,47 @@ class TestQuarantineManagerBulkWrites:
         )
 
     @pytest.mark.asyncio
+    async def test_quarantine_filtered_record_preserves_structured_details_and_ignores_message_override(
+        self,
+        quarantine_port: MagicMock,
+        metrics: MagicMock,
+    ) -> None:
+        """Structured reason fields should survive without replacing display text."""
+        manager = QuarantineManagerService(
+            quarantine_port=quarantine_port,
+            pipeline_name="chembl_activity",
+            metrics=metrics,
+        )
+        batch_id = BatchID(uuid4())
+        ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
+
+        await manager.quarantine_filtered_record(
+            record={"activity_id": "1"},
+            batch_id=batch_id,
+            error_details="display text",
+            details={
+                "message": "unstable text that must not override display message",
+                "reason_code": "required_field_missing",
+                "rule_type": "required_fields",
+                "field": "activity_id",
+                "operator": "is_not_null",
+            },
+            ingestion_ts=ingestion_ts,
+        )
+
+        quarantine_port.write.assert_awaited_once()
+        request = quarantine_port.write.await_args.kwargs
+        assert request["metadata"]["error_details"] == {
+            "message": "display text",
+            "reason_code": "required_field_missing",
+            "rule_type": "required_fields",
+            "field": "activity_id",
+            "operator": "is_not_null",
+        }
+        assert request["metadata"]["classification"] == "filter_rejection"
+        assert request["metadata"]["quarantine_category"] == "silver_filter"
+
+    @pytest.mark.asyncio
     async def test_quarantine_records_aggregates_metrics_by_error_type(
         self,
         quarantine_port: MagicMock,

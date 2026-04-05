@@ -64,6 +64,11 @@ bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --limi
   - `--group-by reason-code-field`
   - `--group-by reason-signature`
 
+- `reason-signature` — это stable analytical key вида
+  `reason_code | rule_type | field | operator`.
+  Human-readable `Reason` / `message` остаётся display-only текстом и не должен
+  использоваться как aggregation key.
+
 - `inspect --silver-filter-only` is the right drilldown when you need the exact
   reason for one record. The CLI renders `Reason`, `reason_code`, `rule_type`,
   `field`, `operator`, `expected`, `actual`, and the original payload.

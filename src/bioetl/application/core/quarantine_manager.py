@@ -33,10 +33,22 @@ def _filtered_quarantine_metadata(
     reason: str,
     details: JsonDict | None,
 ) -> JsonDict:
-    """Build canonical quarantine metadata for Silver filter rejections."""
+    """Build canonical quarantine metadata for Silver filter rejections.
+
+    The human-readable ``reason`` is stored as display text under ``message``.
+    Structured fields in ``details`` remain the stable analytical contract for
+    grouping and drilldown. Callers cannot override ``message`` through
+    ``details``.
+    """
     error_details: JsonDict = {"message": reason}
     if details:
-        error_details.update(details)
+        error_details.update(
+            {
+                key: value
+                for key, value in details.items()
+                if key != "message"
+            }
+        )
     return {
         "error_details": error_details,
         "classification": "filter_rejection",
