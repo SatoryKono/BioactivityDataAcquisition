@@ -195,8 +195,8 @@ def _show_quarantine_stats(
     pipeline: str,
     output_json: bool,
     error_code: str | None,
-    top: int,
-    group_by: str | None,
+    top: int = 10,
+    group_by: str | None = None,
 ) -> None:
     """Display quarantine statistics for one pipeline."""
     context = _QuarantineCommandContext(pipeline=pipeline)
