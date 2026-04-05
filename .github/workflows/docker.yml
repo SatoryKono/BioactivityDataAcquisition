@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Run Hadolint (Dockerfile linting)
         uses: hadolint/hadolint-action@v3
@@ -54,7 +54,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -73,40 +73,66 @@ jobs:
       contents: read
       security-events: write
       packages: write
+    outputs:
+      image-ref: ${{ steps.set-ref.outputs.image-ref }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      # Login to GHCR so we can push a temporary SHA tag on main pushes.
+      # This allows docker-push to retag without rebuilding the image.
+      - name: Login to GHCR (temp tag on main push)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        id: build
+        uses: docker/build-push-action@v6
         with:
           context: .
-          push: false
-          load: true
-          tags: bioetl:${{ github.sha }}
+          # On main push: push temp SHA tag to GHCR so docker-push can retag.
+          # On PR/other: load locally for Trivy scan only.
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+          load: ${{ !(github.ref == 'refs/heads/main' && github.event_name == 'push') }}
+          tags: |
+            bioetl:${{ github.sha }}
+            ${{ (github.ref == 'refs/heads/main' && github.event_name == 'push') && format('ghcr.io/{0}:sha-{1}', github.repository, github.sha) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Set image-ref output
+        id: set-ref
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" = "push" ]; then
+            echo "image-ref=ghcr.io/${{ github.repository }}:sha-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image-ref=bioetl:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
-          image-ref: bioetl:${{ github.sha }}
+          image-ref: ${{ steps.set-ref.outputs.image-ref }}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
 
       - name: Run Trivy on debian:bookworm-slim base image
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: 'debian:bookworm-slim'
           format: 'table'
@@ -114,7 +140,7 @@ jobs:
 
   docker-push:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     needs: docker-build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
@@ -122,12 +148,6 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -135,15 +155,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push image to GHCR
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
+      # Retag the already-built and pushed SHA image — no rebuild needed.
+      - name: Tag and push final image tags
+        run: |
+          SOURCE="ghcr.io/${{ github.repository }}:sha-${{ github.sha }}"
+          docker buildx imagetools create \
+            --tag "ghcr.io/${{ github.repository }}:latest" \
+            --tag "ghcr.io/${{ github.repository }}:${{ github.sha }}" \
+            --tag "ghcr.io/${{ github.repository }}:${{ github.ref_name }}" \
+            "${SOURCE}"
+          echo "✅ Final tags pushed (no rebuild)"
