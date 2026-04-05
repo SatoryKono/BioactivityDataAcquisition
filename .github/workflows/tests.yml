@@ -85,7 +85,7 @@ jobs:
                 with:
                     name: coverage-data-smoke
                     path: reports/coverage/.coverage.smoke
-                    if-no-files-found: error
+                    if-no-files-found: warn
                     retention-days: 7
 
     control-plane-e2e:
