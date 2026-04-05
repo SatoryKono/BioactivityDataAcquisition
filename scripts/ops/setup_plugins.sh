@@ -209,33 +209,78 @@ install_precommit() {
     fi
 
     log_info "Ensuring pre-commit is installed..."
-    local precommit_home="$REPO_ROOT/.cache/pre-commit"
+    local cache_root="$REPO_ROOT/.cache"
+    local precommit_home="$cache_root/pre-commit"
     local precommit_home_runtime="$precommit_home"
-    mkdir -p "$precommit_home"
+    local cache_root_runtime="$cache_root"
+    local go_cache_runtime="$cache_root/go-build"
+    local go_path_runtime="$cache_root/go"
+    local uv_cache_runtime="$cache_root/uv"
+    mkdir -p "$precommit_home" "$cache_root" "$cache_root/go-build" "$cache_root/go" "$cache_root/uv"
 
     if [[ "$PYTHON_KIND" == "windows-venv" ]] && [[ "$IS_WSL" == false ]]; then
         local precommit_home_win_runtime=""
+        local cache_root_win_runtime=""
+        local go_cache_win_runtime=""
+        local go_path_win_runtime=""
+        local uv_cache_win_runtime=""
         precommit_home_win_runtime="$(to_windows_path "$precommit_home")" || precommit_home_win_runtime=""
+        cache_root_win_runtime="$(to_windows_path "$cache_root")" || cache_root_win_runtime=""
+        go_cache_win_runtime="$(to_windows_path "$cache_root/go-build")" || go_cache_win_runtime=""
+        go_path_win_runtime="$(to_windows_path "$cache_root/go")" || go_path_win_runtime=""
+        uv_cache_win_runtime="$(to_windows_path "$cache_root/uv")" || uv_cache_win_runtime=""
         if [[ -n "$precommit_home_win_runtime" ]]; then
             precommit_home_runtime="$precommit_home_win_runtime"
         fi
+        if [[ -n "$cache_root_win_runtime" ]]; then
+            cache_root_runtime="$cache_root_win_runtime"
+        fi
+        if [[ -n "$go_cache_win_runtime" ]]; then
+            go_cache_runtime="$go_cache_win_runtime"
+        fi
+        if [[ -n "$go_path_win_runtime" ]]; then
+            go_path_runtime="$go_path_win_runtime"
+        fi
+        if [[ -n "$uv_cache_win_runtime" ]]; then
+            uv_cache_runtime="$uv_cache_win_runtime"
+        fi
     fi
     export PRE_COMMIT_HOME="$precommit_home_runtime"
+    export XDG_CACHE_HOME="$cache_root_runtime"
+    export GOCACHE="$go_cache_runtime"
+    export GOPATH="$go_path_runtime"
+    export UV_CACHE_DIR="$uv_cache_runtime"
 
     if [[ "$PYTHON_KIND" == "windows-venv" ]] && [[ "$IS_WSL" == false ]] && command -v powershell.exe >/dev/null 2>&1; then
         local repo_root_win=""
         local python_bin_win=""
         local precommit_home_win=""
+        local cache_root_win=""
+        local go_cache_win=""
+        local go_path_win=""
+        local uv_cache_win=""
 
         repo_root_win="$(to_windows_path "$REPO_ROOT")" || repo_root_win=""
         python_bin_win="$(to_windows_path "$REPO_ROOT/$PYTHON_BIN")" || python_bin_win=""
         precommit_home_win="$(to_windows_path "$precommit_home")" || precommit_home_win=""
+        cache_root_win="$(to_windows_path "$cache_root")" || cache_root_win=""
+        go_cache_win="$(to_windows_path "$cache_root/go-build")" || go_cache_win=""
+        go_path_win="$(to_windows_path "$cache_root/go")" || go_path_win=""
+        uv_cache_win="$(to_windows_path "$cache_root/uv")" || uv_cache_win=""
 
-        if [[ -n "$repo_root_win" ]] && [[ -n "$python_bin_win" ]] && [[ -n "$precommit_home_win" ]]; then
+        if [[ -n "$repo_root_win" ]] && [[ -n "$python_bin_win" ]] && [[ -n "$precommit_home_win" ]] && [[ -n "$cache_root_win" ]] && [[ -n "$go_cache_win" ]] && [[ -n "$go_path_win" ]] && [[ -n "$uv_cache_win" ]]; then
             powershell.exe -NoProfile -Command "
 \$env:Path='C:\\Program Files\\Git\\cmd;'+\$env:Path
 \$env:PRE_COMMIT_HOME='$precommit_home_win'
+\$env:XDG_CACHE_HOME='$cache_root_win'
+\$env:GOCACHE='$go_cache_win'
+\$env:GOPATH='$go_path_win'
+\$env:UV_CACHE_DIR='$uv_cache_win'
 New-Item -ItemType Directory -Force -Path \$env:PRE_COMMIT_HOME | Out-Null
+New-Item -ItemType Directory -Force -Path \$env:XDG_CACHE_HOME | Out-Null
+New-Item -ItemType Directory -Force -Path \$env:GOCACHE | Out-Null
+New-Item -ItemType Directory -Force -Path \$env:GOPATH | Out-Null
+New-Item -ItemType Directory -Force -Path \$env:UV_CACHE_DIR | Out-Null
 Set-Location '$repo_root_win'
 & '$python_bin_win' -m pre_commit install --install-hooks
 " >/dev/null

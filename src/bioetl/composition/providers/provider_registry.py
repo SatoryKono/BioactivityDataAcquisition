@@ -1,11 +1,9 @@
 """Provider registry facade over split metadata and creation helpers.
 
 Retained compatibility obligations are intentionally narrow:
-- the class-level ``DefaultRegistryMethod`` mirror for legacy call sites;
-- ``register_default_provider_config()`` for import-time decorator registration;
-- ``ensure_provider_registry_ready()`` for canonical bootstrap resolution.
+- class-level ``DefaultRegistryMethod`` mirror for legacy call sites;
+- ``register_default_provider_config()`` and ``ensure_provider_registry_ready()``.
 """
-
 from __future__ import annotations
 
 import threading

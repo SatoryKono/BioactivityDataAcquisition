@@ -84,4 +84,3 @@ search for, not as proof that the metric exists.
 - Required labels are verified.
 - The recommended selector is explicit and reasonably stable.
 - High-cardinality or ambiguity risks are called out.
-

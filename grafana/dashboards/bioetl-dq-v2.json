@@ -145,7 +145,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+          "expr": "sum by (pipeline, stage) (last_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
           "legendFormat": "{{pipeline}} / {{stage}}",
           "refId": "A"
         }
@@ -259,7 +259,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
+          "expr": "round(sum(last_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
           "instant": true,
           "legendFormat": "Bronze",
           "refId": "A"
@@ -313,7 +313,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
+          "expr": "round(sum(last_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
           "instant": true,
           "legendFormat": "Gold",
           "refId": "A"
@@ -616,7 +616,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "expr": "round(sum(last_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
           "instant": true,
           "legendFormat": "Filtered Out",
           "refId": "A"
@@ -686,7 +686,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (pipeline) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))",
+          "expr": "sum by (pipeline) (last_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))",
           "instant": true,
           "legendFormat": "{{pipeline}}",
           "refId": "A"
@@ -756,7 +756,7 @@
       },
       "targets": [
         {
-          "expr": "topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"reason_code\", \"none\", \"\", \"\")",
+          "expr": "topk(10, sum by (reason_code) (last_over_time(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"reason_code\", \"none\", \"\", \"\")",
           "instant": true,
           "legendFormat": "{{reason_code}}",
           "refId": "A"
@@ -826,7 +826,7 @@
       },
       "targets": [
         {
-          "expr": "topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"field\", \"none\", \"\", \"\")",
+          "expr": "topk(10, sum by (field) (last_over_time(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"field\", \"none\", \"\", \"\")",
           "instant": true,
           "legendFormat": "{{field}}",
           "refId": "A"

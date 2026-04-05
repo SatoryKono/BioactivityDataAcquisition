@@ -73,7 +73,7 @@ repos:
     hooks:
       - id: pip-audit
         name: Check for known vulnerabilities in dependencies
-        entry: python scripts/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --strict
+        entry: python scripts/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict
         language: python
         pass_filenames: false
         # Only run on commit, not on every file change

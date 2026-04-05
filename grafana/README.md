@@ -686,13 +686,13 @@ shipped pack.
 |---|---|---|---|---|
 | 99 | Pipeline | Stat | `max(label_values(bioetl_records_processed_total{...}, pipeline)) or vector(0)` | Информационная панель с именем текущего пайплайна. |
 | 100 | Run Type | Stat | `max(label_values(bioetl_records_processed_total{..., run_type=~"$run_type"}, run_type)) or vector(0)` | Информационная панель с текущим типом запуска. |
-| 1 | Processing Volume by Stage | Timeseries | `sum by (stage) (increase(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Stage volume в пределах активного окна Grafana. |
-| 2 | Stage Distribution in Range | Piechart | `sum by (stage) (increase(...[$__range]))` | Распределение selected-range объёма по Bronze/Silver/Gold/Quarantined. |
-| 3 | Pipeline Distribution in Range | Piechart | `sum by (pipeline) (increase(...[$__range]))` | Распределение selected-range объёма по пайплайнам. |
-| 4 | Overall Yield (Selected Range) | Gauge | `gold[$__range] / clamp_min(bronze[$__range], 1)` | Gauge selected-range yield для выбранных pipeline/run_type. |
+| 1 | Processing Volume by Stage | Timeseries | `sum by (stage) (last_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Latest observed stage totals внутри активного окна Grafana; для batch-style exporter это устойчивее, чем `increase(...)` на sparse scrapes. |
+| 2 | Stage Distribution in Range | Piechart | `sum by (stage) (last_over_time(...[$__range]))` | Распределение последних observed stage totals внутри выбранного временного окна. |
+| 3 | Pipeline Distribution in Range | Piechart | `sum by (pipeline) (last_over_time(...[$__range]))` | Распределение последних observed totals по пайплайнам внутри выбранного временного окна. |
+| 4 | Overall Yield (Selected Range) | Gauge | `gold_last[$__range] / clamp_min(bronze_last[$__range], 1)` | Yield по последним observed Bronze/Gold totals внутри выбранного временного окна. |
 | 101 | Latest Data Timestamp | Stat | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})` | Последний observed ingestion timestamp из доменной freshness-метрики. |
-| 118 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный shipped signal для Silver filter rejection за текущее временное окно Grafana; не смешивается с DQ quarantine. |
-| 119 | Silver Filter Reject Rate | Gauge | `filtered_out[$__range] / clamp_min(bronze[$__range], 1)` | Доля intentionally excluded Silver filters относительно Bronze input за текущее временное окно Grafana. |
+| 118 | Silver Filter Rejects | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный shipped signal для Silver filter rejection внутри текущего временного окна Grafana; использует latest observed counter value, чтобы не терять single-run batch totals. |
+| 119 | Silver Filter Reject Rate | Gauge | `filtered_out_last[$__range] / clamp_min(bronze_last[$__range], 1)` | Доля intentionally excluded Silver filters относительно Bronze input по последним observed totals внутри выбранного временного окна. |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
@@ -727,15 +727,15 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
 |---|---|---|---|---|
 | 99 | Pipeline | Stat | `max(label_values(..., pipeline)) or vector(0)` | Информационная панель пайплайна. |
 | 100 | Run Type | Stat | `max(label_values(..., run_type)) or vector(0)` | Информационная панель типа запуска. |
-| 1 | Data Flow in Range: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Selected-range поток данных Bronze → Silver → Gold. |
+| 1 | Data Flow in Range: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (last_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Latest observed data-flow totals Bronze → Silver → Gold внутри активного Grafana окна; оптимизировано под sparse batch exporter. |
 | 2 | Data Quality Score (Volume-weighted) | Gauge | `sum(score * record_count) / clamp_min(sum(record_count), 1)` | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`, чтобы крупные сущности не смешивались с малыми через простой `avg(...)`. |
-| 3 | Source Records in Range (Bronze) | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))` | Объём Bronze input за активное Grafana окно. |
-| 4 | Clean Records in Range (Gold) | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))` | Объём Gold output за активное Grafana окно. |
+| 3 | Source Records in Range (Bronze) | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))` | Последний observed Bronze input внутри активного Grafana окна. |
+| 4 | Clean Records in Range (Gold) | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))` | Последний observed Gold output внутри активного Grafana окна. |
 | 5 | Worst-Entity DQ Score | Gauge | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)` | Худший observed DQ score по сущностям внутри выбранного pipeline scope. |
-| 117 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный счётчик Silver filter rejects за текущее временное окно; не заменяет `Records Quarantined`. |
-| 118 | Silver Filter Rejects by Pipeline | Bar gauge | `sum by (pipeline) (increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))` | Breakdown intentional Silver exclusions по выбранным pipeline values за текущее временное окно. |
-| 121 | Top Silver Reject Reasons | Bar gauge | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `reason_code` для текущего dashboard scope. |
-| 122 | Top Silver Reject Fields | Bar gauge | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `field`; exact field/root-cause drilldown остаётся в quarantine CLI. |
+| 117 | Silver Filter Rejects | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный счётчик Silver filter rejects внутри текущего временного окна; не заменяет `Records Quarantined`. |
+| 118 | Silver Filter Rejects by Pipeline | Bar gauge | `sum by (pipeline) (last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))` | Breakdown intentional Silver exclusions по выбранным pipeline values через latest observed totals внутри текущего окна. |
+| 121 | Top Silver Reject Reasons | Bar gauge | `topk(10, sum by (reason_code) (last_over_time(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `reason_code` без fractional `increase(...)` artefacts на sparse batch scrapes. |
+| 122 | Top Silver Reject Fields | Bar gauge | `topk(10, sum by (field) (last_over_time(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `field`; exact field/root-cause drilldown остаётся в quarantine CLI. |
 | 101 | Latest Data Timestamp | Stat | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})` | Последний observed ingestion timestamp внутри выбранного pipeline scope. |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
@@ -769,12 +769,12 @@ incidents и freshness investigation. Tempo drilldown предфильтрова
 
 | ID | Название | Тип | PromQL | Описание |
 |---|---|---|---|---|
-| 1 | Health Check Latency by Provider (p95) | Timeseries | `histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))` | Сравнение p95 latency по всем выбранным провайдерам. |
-| 2 | Healthy Checks | Stat | `sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range]))` | Текущий объём health probes, завершившихся статусом `HEALTHY`, за выбранное временное окно Grafana. |
-| 105 | Degraded Checks | Stat | `sum(increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range]))` | Текущий объём health probes, завершившихся статусом `DEGRADED`, за выбранное временное окно Grafana. |
-| 104 | Provider Failure Rate | Gauge | `failures[$__range] / clamp_min(healthy[$__range] + degraded[$__range] + failures[$__range], 1)` | Failure-rate по выбранным провайдерам за текущее временное окно Grafana; `DEGRADED` остаётся в denominator как completed probe, но не считается success. |
-| 7 | Health Checks Total | Stat | `sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range]) + increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range]) + increase(bioetl_health_check_failures_total{provider=~"$provider"}[$__range]))` | Общий объём completed health probes за выбранное временное окно Grafana. |
-| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))` | Повторяемые p95 gauges по выбранным провайдерам. |
+| 1 | Health Check Latency by Provider (p95) | Timeseries | `histogram_quantile(0.95, sum by (le, provider) (bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}))` | Сравнение p95 latency по всем выбранным провайдерам на cumulative histogram buckets; avoids `NaN` on sparse provider probes. |
+| 2 | Healthy Checks | Stat | `sum(last_over_time(bioetl_health_check_success_total{provider=~"$provider"}[$__range]))` | Latest observed объём health probes со статусом `HEALTHY` внутри выбранного временного окна Grafana. |
+| 105 | Degraded Checks | Stat | `sum(last_over_time(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range]))` | Latest observed объём health probes со статусом `DEGRADED` внутри выбранного временного окна. |
+| 104 | Provider Failure Rate | Gauge | `failures_last[$__range] / clamp_min(healthy_last[$__range] + degraded_last[$__range] + failures_last[$__range], 1)` | Failure-rate по latest observed provider counters внутри текущего временного окна; подходит для sparse batch probes. |
+| 7 | Health Checks Total | Stat | `sum(last_over_time(success[$__range])) + sum(last_over_time(degraded[$__range])) + sum(last_over_time(failures[$__range]))` | Общий объём completed health probes по latest observed counters внутри выбранного временного окна. |
+| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}))` | Повторяемые p95 gauges по выбранным провайдерам без `rate(...)`-induced `NaN` на редких health checks. |
 
 **Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`.
 
@@ -811,7 +811,7 @@ dashboard-variable interpolation. Дополнительное сужение п
 | 7 | Freshness Alert Conditions | Stat | Prometheus | Количество freshness conditions старше 24h. |
 | 8 | Top Warning Events | Bar gauge | Loki | Наиболее частые warning events за текущее временное окно Grafana. |
 | 9 | Log Hygiene Trend | Timeseries | Loki | Тренд warnings против unstructured rows с adaptive bucket size через `$__interval`. |
-| 17 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Быстрый triage-signal за текущее временное окно, который помогает отличить intentional Silver exclusions от DQ/schema проблем. Panel description направляет в `4. Data Quality` для bounded cause breakdown и в quarantine CLI для exact drilldown. |
+| 17 | Silver Filter Rejects | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Быстрый triage-signal внутри текущего временного окна, который помогает отличить intentional Silver exclusions от DQ/schema проблем без fractional sparse-counter artefacts. Panel description направляет в `4. Data Quality` для bounded cause breakdown и в quarantine CLI для exact drilldown. |
 
 **Фильтрация:** `$pipeline`, `$run_type`.
 

@@ -18,4 +18,3 @@
 
 - Minimum evidence objects: `5`
 - Target evidence objects: `6`
-
