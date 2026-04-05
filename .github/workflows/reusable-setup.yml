@@ -1,0 +1,39 @@
+name: "[DEPRECATED] Reusable CI setup"
+# DEPRECATED: Use .github/actions/setup-python-uv composite action instead.
+# This workflow_call approach runs in a separate runner, making it unsuitable
+# for setup steps. Kept for backward compatibility; will be removed in a future PR.
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        default: "3.11"
+        type: string
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      python-version: ${{ inputs.python-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py${{ inputs.python-version }}-
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
