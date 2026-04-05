@@ -644,7 +644,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Apply CI fixes to BioactivityDataAcquisition")
     parser.add_argument("--token", required=True, help="GitHub Personal Access Token (needs repo + workflow scopes)")
     parser.add_argument("--dry-run", action="store_true", help="Print what would happen without making changes")
-    parser.add_argument("--only", choices=["ci-01", "ci-02", "ci-03"], help="Apply only one fix")
+    parser.add_argument("--only", choices=["ci-01", "ci-02", "ci-03", "ci-07", "ci-12"], help="Apply only one fix")
     args = parser.parse_args()
 
     api = GitHubAPI(args.token, dry_run=args.dry_run)
@@ -659,6 +659,10 @@ def main() -> None:
             apply_ci02(api)
         if not args.only or args.only == "ci-03":
             apply_ci03(api)
+        if not args.only or args.only == "ci-07":
+            apply_ci07(api)
+        if not args.only or args.only == "ci-12":
+            apply_ci12(api)
         print("\n✅ Done!")
     except requests.HTTPError as e:
         print(f"\n❌ GitHub API error: {e}")

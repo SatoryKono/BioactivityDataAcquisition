@@ -59,6 +59,14 @@ python -m scripts.ops <command> [args...]
 | `deploy` | When deploying BioETL to target environment | Manual, deployment |
 | `delete-branches` | Periodic repo hygiene; removes stale remote branches | Manual, maintenance |
 
+## Manual GitHub Maintenance Policy
+
+- `update-issue` is the preferred reusable shell entry point for future manual GitHub issue edits from WSL/bash.
+- `create-runmanifest-ledger-issue` and `triage-issues` remain supported as bounded maintainer utilities because they encode a curated issue-management procedure, not a general reusable platform API.
+- Issue-specific commands such as `post-2597-progress`, `close-2597`, `post-rescope-comments`, `update-rescope-bodies`, `close-ge-spike`, and `close-schema-drift` are retained only for bounded operational slices and should be treated as compatibility-maintained maintainer utilities rather than as a general automation surface.
+- When a new GitHub maintenance workflow is needed, prefer extending `update-issue` or introducing a generalized driver instead of adding another issue-number-specific shell script.
+- Historical wave scripts in **Other Files** are legacy repeatability artifacts. Keep them runnable for audit/history, but prefer a generalized issue/PR maintenance driver for any new cleanup wave.
+
 ## Other Files
 
 | File | Description |

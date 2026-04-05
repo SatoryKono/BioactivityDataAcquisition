@@ -422,8 +422,25 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
         "scripts/generate_architecture_dependency_map.py",
         "scripts/rerender_grafana_screenshots.py",
     }
+    legacy_manual_ops_scripts = {
+        "scripts/ops/close_superseded_prs.sh",
+        "scripts/ops/close_duplicate_prs_wave2.sh",
+        "scripts/ops/close_duplicate_prs_wave3.sh",
+    }
+    legacy_issue_specific_ops_scripts = {
+        "scripts/ops/post_issue_2597_progress.sh",
+        "scripts/ops/close_issue_2597.sh",
+        "scripts/ops/post_issue_rescope_comments.sh",
+        "scripts/ops/update_issue_rescope_bodies.sh",
+        "scripts/ops/close_great_expectations_spike_issue.sh",
+        "scripts/ops/close_pandera_schema_drift_issue.sh",
+    }
 
     if script_rel in legacy_root_wrappers:
+        return "active" if groups & strong_active_groups else "legacy"
+    if script_rel in legacy_manual_ops_scripts:
+        return "active" if groups & strong_active_groups else "legacy"
+    if script_rel in legacy_issue_specific_ops_scripts:
         return "active" if groups & strong_active_groups else "legacy"
 
     if not refs:

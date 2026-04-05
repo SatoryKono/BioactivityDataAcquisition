@@ -26,12 +26,74 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a root-level compatibility wrapper to scripts/ops/rerender_grafana_screenshots.py until no historical references remain."
     },
+    "scripts/ops/close_superseded_prs.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical maintainer helper for already-curated PR cleanup waves; do not extend or use as the basis for new automation."
+    },
+    "scripts/ops/close_duplicate_prs_wave2.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only for historical repeatability of the wave-2 duplicate-PR cleanup; prefer a generalized issue/PR maintenance driver for future work."
+    },
+    "scripts/ops/close_duplicate_prs_wave3.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only for historical repeatability of the wave-3 duplicate-PR cleanup; prefer a generalized issue/PR maintenance driver for future work."
+    },
+    "scripts/ops/post_issue_2597_progress.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded maintainer helper for the already-curated issue #2597 progress update; do not reuse it as a template for future issue automation."
+    },
+    "scripts/ops/close_issue_2597.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded maintainer helper for the prepared issue #2597 closeout flow; prefer generalized issue maintenance tooling for future closures."
+    },
+    "scripts/ops/post_issue_rescope_comments.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a prepared maintainer helper for the current re-scope comment batch; do not extend this issue-number-specific path for new workflows."
+    },
+    "scripts/ops/update_issue_rescope_bodies.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a prepared maintainer helper for the current re-scope body replacement batch; prefer generalized issue editing tooling for future work."
+    },
+    "scripts/ops/close_great_expectations_spike_issue.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded maintainer helper for closing issue #2595 after the spike memo; do not treat it as a reusable automation entrypoint."
+    },
+    "scripts/ops/close_pandera_schema_drift_issue.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded maintainer helper for closing issue #2594 after the Pandera drift gate summary; do not treat it as a reusable automation entrypoint."
+    },
     "scripts/qa/generate_reports.py": {
       "owner": "platform-architecture",
       "decision": "deprecate",
       "next_step": "Remove the legacy report generator after confirming no external automation still depends on it.",
       "review_by": "2026-05-31",
       "replacement": "scripts/repo/check_scripts_inventory.py",
+      "sunset_date": "2026-06-30"
+    },
+    "src/tools/scripts/generate_contracts.py": {
+      "owner": "platform-architecture",
+      "decision": "deprecate",
+      "next_step": "Remove the orphaned contract generator after confirming no external tooling still shells into the historical src/tools path.",
+      "review_by": "2026-05-31",
+      "replacement": "scripts/schema/generate_contracts.py",
       "sunset_date": "2026-06-30"
     }
   }
