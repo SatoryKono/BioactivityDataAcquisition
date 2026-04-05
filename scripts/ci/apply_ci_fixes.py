@@ -1511,6 +1511,153 @@ def apply_hf_pip_skip_editable(api: GitHubAPI) -> None:
         print(f"  PR created: {pr_url}")
 
 
+def apply_hf_stray_dirs(api: GitHubAPI) -> None:
+    """HF-stray-dirs: Remove accidentally committed .mkdocs-site-* directories."""
+    print("=== HF-stray-dirs: Remove stray .mkdocs-site-* directories ===")
+    branch = BRANCHES["hf-stray-dirs"]
+    stray_prefixes = (
+        ".mkdocs-site-check/",
+        ".mkdocs-site-check-2/",
+        ".mkdocs-site-verify/",
+    )
+
+    if not api.dry_run:
+        if api.branch_exists(branch):
+            print(f"  Branch {branch} already exists — skipping branch creation")
+        else:
+            sha = api.get_sha()
+            api.create_branch(branch, sha)
+
+    ref_branch = BASE_BRANCH if api.dry_run else branch
+    commit_sha = api.get_sha(ref_branch)
+
+    # Get the commit to find its tree SHA
+    commit_data = api.get(f"/git/commits/{commit_sha}")
+    tree_sha = commit_data["tree"]["sha"]
+
+    # Get full recursive tree to enumerate stray files
+    tree_data = api.get(f"/git/trees/{tree_sha}?recursive=1")
+    all_entries = tree_data.get("tree", [])
+
+    stray_files = [
+        e
+        for e in all_entries
+        if e["type"] == "blob"
+        and any(e["path"].startswith(p) for p in stray_prefixes)
+    ]
+
+    if not stray_files:
+        print("  INFO: No stray files found — already clean")
+        return
+
+    print(f"  Found {len(stray_files)} files to delete in stray directories:")
+    for f in stray_files[:8]:
+        print(f"    {f['path']}")
+    if len(stray_files) > 8:
+        print(f"    ... and {len(stray_files) - 8} more")
+
+    if api.dry_run:
+        print("  [DRY-RUN] Would create new tree and commit to remove these files")
+        return
+
+    # Create new tree with stray files nulled out (deleted)
+    new_tree_entries = [
+        {"path": f["path"], "mode": f["mode"], "type": "blob", "sha": None}
+        for f in stray_files
+    ]
+    new_tree_resp = api.session.post(
+        f"{api.base}/git/trees",
+        json={"base_tree": tree_sha, "tree": new_tree_entries},
+    )
+    new_tree_resp.raise_for_status()
+    new_tree_sha = new_tree_resp.json()["sha"]
+
+    # Create commit
+    new_commit_resp = api.session.post(
+        f"{api.base}/git/commits",
+        json={
+            "message": (
+                "chore: remove accidentally committed .mkdocs-site-* directories\n\n"
+                "These MkDocs build artifacts were committed in 2d15d11 by mistake.\n"
+                "audit_root_cleanliness.py enforces an allowlist and was blocking CI.\n\n"
+                "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+            ),
+            "tree": new_tree_sha,
+            "parents": [commit_sha],
+        },
+    )
+    new_commit_resp.raise_for_status()
+    new_commit_sha = new_commit_resp.json()["sha"]
+
+    # Update branch reference
+    patch_resp = api.session.patch(
+        f"{api.base}/git/refs/heads/{branch}",
+        json={"sha": new_commit_sha, "force": False},
+    )
+    patch_resp.raise_for_status()
+    print(f"  Deleted {len(stray_files)} stray files via Git Trees API")
+
+    pr_url = api.create_pr(
+        title="chore: remove accidentally committed .mkdocs-site-* directories",
+        branch=branch,
+        body=PR_BODIES["hf-stray-dirs"],
+    )
+    print(f"  PR created: {pr_url}")
+
+
+def apply_hf_checkout_hygiene(api: GitHubAPI) -> None:
+    """HF-checkout-hygiene: Fix checkout@v6 in root-hygiene.yml and compiled-artifacts-block.yml."""
+    print("=== HF-checkout-hygiene: Fix checkout@v6 in hygiene workflows ===")
+    branch = BRANCHES["hf-checkout-hygiene"]
+    files_to_fix = [
+        ".github/workflows/root-hygiene.yml",
+        ".github/workflows/compiled-artifacts-block.yml",
+    ]
+
+    if not api.dry_run:
+        if api.branch_exists(branch):
+            print(f"  Branch {branch} already exists — skipping branch creation")
+        else:
+            sha = api.get_sha()
+            api.create_branch(branch, sha)
+
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    changed: list[str] = []
+
+    for path in files_to_fix:
+        content, file_sha = api.get_file(path, read_branch)
+        if "actions/checkout@v6" not in content:
+            print(f"  INFO: {path} does not contain checkout@v6 — skipping")
+            continue
+        patched = content.replace("actions/checkout@v6", "actions/checkout@v4")
+        print(f"  Patching {path}: checkout@v6 → @v4")
+        api.update_file(
+            path=path,
+            content=patched,
+            sha=file_sha,
+            message=(
+                f"fix(ci): replace actions/checkout@v6 with @v4 in {path.split('/')[-1]}\n\n"
+                "actions/checkout@v6 does not exist; @v4 is the current stable major.\n\n"
+                "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+            ),
+            branch=branch,
+        )
+        changed.append(path.split("/")[-1])
+
+    if not changed:
+        print("  INFO: No files needed patching")
+        return
+
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="fix(ci): replace actions/checkout@v6 → @v4 in hygiene workflows",
+            branch=branch,
+            body=PR_BODIES["hf-checkout-hygiene"],
+        )
+        print(f"  Fixed: {', '.join(changed)}")
+        print(f"  PR created: {pr_url}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
@@ -1533,7 +1680,7 @@ def main() -> None:
         choices=["ci-01", "ci-02", "ci-03", "ci-04", "ci-06", "ci-07", "ci-12",
                  "hf-a", "hf-b", "hf-e", "hf-lxml",
                  "hf-pip-disable", "hf-paths-conflict", "hf-typecheck-warn",
-                 "hf-pip-skip-editable"],
+                 "hf-pip-skip-editable", "hf-stray-dirs", "hf-checkout-hygiene"],
         help="Apply only one fix",
     )
     args = parser.parse_args()
@@ -1574,6 +1721,10 @@ def main() -> None:
             apply_hf_typecheck_warn(api)
         if not args.only or args.only == "hf-pip-skip-editable":
             apply_hf_pip_skip_editable(api)
+        if not args.only or args.only == "hf-stray-dirs":
+            apply_hf_stray_dirs(api)
+        if not args.only or args.only == "hf-checkout-hygiene":
+            apply_hf_checkout_hygiene(api)
         print("\n✅ Done!")
     except requests.HTTPError as e:
         print(f"\n❌ GitHub API error: {e}")
