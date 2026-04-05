@@ -157,7 +157,8 @@ class TestQuarantineInspect:
 
         # Verify inspect was called with correct error_code
         mock_quarantine_manager.inspect.assert_called_once_with(
-            limit=100, error_code="DQ_MISSING_FIELD", run_id=None
+            limit=100,
+            error_code="DQ_MISSING_FIELD",
         )
         assert result.exit_code == 0
 
@@ -186,7 +187,8 @@ class TestQuarantineInspect:
             )
 
         mock_quarantine_manager.inspect.assert_called_once_with(
-            limit=50, error_code=None, run_id=None
+            limit=50,
+            error_code=None,
         )
         assert result.exit_code == 0
 
@@ -214,7 +216,8 @@ class TestQuarantineInspect:
             )
 
         mock_quarantine_manager.inspect.assert_called_once_with(
-            limit=100, error_code="FILTERED_OUT_SILVER", run_id=None
+            limit=100,
+            error_code="FILTERED_OUT_SILVER",
         )
         assert result.exit_code == 0
 

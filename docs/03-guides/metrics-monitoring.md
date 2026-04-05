@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 6.2.1
+Version: 6.3.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-04-05'
 
 ______________________________________________________________________
 
@@ -15,8 +15,8 @@ ______________________________________________________________________
 
 Руководство по настройке и использованию системы метрик и мониторинга в BioETL.
 
-**Версия:** 6.2.1
-**Дата обновления:** 2026-04-04
+**Версия:** 6.3.0
+**Дата обновления:** 2026-04-05
 
 > **Boundary:** this guide focuses on local observability setup, metric
 > semantics, and implementation-facing monitoring usage. For shipped operator
@@ -158,6 +158,10 @@ curl http://localhost:8000/metrics | grep bioetl_
 - Exact reason analytics по `reason_code`, `rule_type`, `field`, `operator`
   должны идти через quarantine-derived aggregation или CLI, а не через
   Prometheus labels.
+- Для operator-grade bounded dashboard summary используется отдельная metric family
+  `bioetl_silver_filter_rejections_total{pipeline,run_type,reason_code,rule_type,field}`.
+  Эта метрика не использует `message` и нормализует labels к reviewable bounded
+  vocabulary; неизвестные значения схлопываются в `other`.
 - Record-level drilldown для Silver rejects остаётся задачей quarantine CLI:
   `bioetl quarantine stats --pipeline <name> --silver-filter-only`
   и `bioetl quarantine inspect --pipeline <name> --silver-filter-only`.

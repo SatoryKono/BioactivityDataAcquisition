@@ -710,6 +710,49 @@ def test_silver_filter_reject_rate_uses_selected_time_range() -> None:
 
 
 @pytest.mark.parametrize(
+    ("panel_title", "label_name"),
+    [
+        ("Top Silver Reject Reasons", "reason_code"),
+        ("Top Silver Reject Fields", "field"),
+    ],
+)
+def test_silver_filter_breakdown_panels_use_bounded_breakdown_metric(
+    panel_title: str, label_name: str
+) -> None:
+    """Reason/field breakdown panels must use the bounded Silver breakdown metric."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None, f"Panel '{panel_title}' not found in bioetl-dq-v2.json"
+
+    targets = [target for target in panel.get("targets", []) if isinstance(target, dict)]
+    assert targets, f"Panel '{panel_title}' must define at least one query target"
+    expressions = [
+        target.get("expr", "")
+        for target in targets
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any("bioetl_silver_filter_rejections_total" in expr for expr in expressions), (
+        f"Panel '{panel_title}' must use bioetl_silver_filter_rejections_total"
+    )
+    assert any(f"by ({label_name})" in expr for expr in expressions), (
+        f"Panel '{panel_title}' must group by {label_name}"
+    )
+    assert any("[$__range]" in expr for expr in expressions), (
+        f"Panel '{panel_title}' must use the selected Grafana time range"
+    )
+    assert all(target.get("instant") is True for target in targets), (
+        f"Panel '{panel_title}' must use instant Prometheus queries"
+    )
+
+
+@pytest.mark.parametrize(
     ("panel_title", "expected_snippet"),
     [
         ("Healthy Checks", "[$__range]"),
@@ -1039,6 +1082,30 @@ def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> No
         )
         assert any("/explore?left=" in url and "loki" in url for url in urls), (
             f"{dashboard_name} Loki drilldown must use a Loki Explore payload"
+        )
+
+
+def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
+    """Overview and Runtime should offer an explicit handoff into DQ triage."""
+    expectations = (
+        "bioetl-overview-v2.json",
+        "bioetl-runtime.json",
+    )
+
+    for dashboard_name in expectations:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        titles = {
+            link.get("title")
+            for link in dashboard.get("links", [])
+            if link.get("title")
+        }
+        urls = [link.get("url", "") for link in dashboard.get("links", [])]
+
+        assert "4. Data Quality" in titles, (
+            f"{dashboard_name} must expose a Data Quality dashboard handoff"
+        )
+        assert any(url == "/d/bioetl-dq-v2" for url in urls), (
+            f"{dashboard_name} Data Quality handoff must target /d/bioetl-dq-v2"
         )
 
 

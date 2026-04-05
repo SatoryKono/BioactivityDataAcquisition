@@ -6,3 +6,50 @@ while canonical implementations are partitioned by operational domain under
 """
 
 from __future__ import annotations
+
+from importlib import import_module
+from types import ModuleType
+
+_PUBLIC_COMMAND_MODULES = frozenset(
+    {
+        "adr",
+        "archive",
+        "checkpoint",
+        "cleanup",
+        "config",
+        "config_dq",
+        "debug",
+        "export",
+        "export_support",
+        "health",
+        "health_rendering",
+        "health_server_integration",
+        "inspection_output",
+        "lineage",
+        "lock",
+        "maintenance",
+        "metrics_server_integration",
+        "plan",
+        "quarantine",
+        "quarantine_execution",
+        "quarantine_rendering",
+        "quarantine_support",
+        "run",
+        "run_all",
+        "run_composite",
+        "run_manifest",
+        "vacuum",
+    }
+)
+
+__all__ = sorted(_PUBLIC_COMMAND_MODULES)
+
+
+def __getattr__(name: str) -> ModuleType:
+    """Lazily expose retained top-level command seams for compat patch targets."""
+    if name not in _PUBLIC_COMMAND_MODULES:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    module = import_module(f"{__name__}.{name}")
+    globals()[name] = module
+    return module

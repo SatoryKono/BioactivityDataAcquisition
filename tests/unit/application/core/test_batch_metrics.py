@@ -32,6 +32,7 @@ def mock_metrics() -> MagicMock:
     metrics.set_gauge = MagicMock()
     metrics.inc_dq_validation_failures = MagicMock()
     metrics.inc_quarantine_records = MagicMock()
+    metrics.inc_silver_filter_rejections = MagicMock()
     return metrics
 
 
@@ -237,6 +238,62 @@ class TestTrackError:
                 "stage": "transform",
                 "error_code": ErrorType.SCHEMA_VIOLATION.value,
             },
+        )
+
+
+@pytest.mark.unit
+class TestTrackSilverFilterRejection:
+    """Tests for bounded Silver reject breakdown tracking."""
+
+    def test_tracks_structured_silver_filter_labels(
+        self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
+    ) -> None:
+        """Structured semantic filter details should be forwarded as labels."""
+        recorder.track_silver_filter_rejection(
+            {
+                "reason_code": "required_field_missing",
+                "rule_type": "required_fields",
+                "field": "publication_year",
+                "message": "display only",
+            }
+        )
+
+        mock_metrics.inc_silver_filter_rejections.assert_called_once_with(
+            pipeline="test_pipeline",
+            run_type="incremental",
+            reason_code="required_field_missing",
+            rule_type="required_fields",
+            field="publication_year",
+            count=1,
+        )
+
+    def test_structural_rejects_use_structural_policy_rule_type(
+        self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
+    ) -> None:
+        """Structural rejects should map missing rule_type to structural_policy."""
+        recorder.track_silver_filter_rejection(
+            {
+                "reason_code": "optional_nonnullable_field_type_mismatch",
+                "field": "title",
+                "policy_stage": "structural",
+            }
+        )
+
+        mock_metrics.inc_silver_filter_rejections.assert_called_once_with(
+            pipeline="test_pipeline",
+            run_type="incremental",
+            reason_code="optional_nonnullable_field_type_mismatch",
+            rule_type="structural_policy",
+            field="title",
+            count=1,
+        )
+
+    def test_no_op_when_metrics_none(
+        self, recorder_no_metrics: BatchMetricsRecorderService
+    ) -> None:
+        """Tracking should remain a no-op when metrics are disabled."""
+        recorder_no_metrics.track_silver_filter_rejection(
+            {"reason_code": "required_field_missing"}
         )
 
     def test_increments_by_one(

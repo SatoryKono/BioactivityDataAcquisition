@@ -460,7 +460,14 @@ class TestBatchTransformerTransform:
 
         async def filtered_transform(ctx, record, index):
             if record.get("id") == "filtered":
-                raise FilteredOutError("Record excluded by silver filters")
+                raise FilteredOutError(
+                    "Record excluded by silver filters",
+                    details={
+                        "reason_code": "required_field_missing",
+                        "rule_type": "required_fields",
+                        "field": "publication_year",
+                    },
+                )
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         config = RecordProcessorConfig(
@@ -499,6 +506,13 @@ class TestBatchTransformerTransform:
                 "run_id"
             ]
             == mock_context.run_id
+        )
+        mock_batch_metrics.track_silver_filter_rejection.assert_called_once_with(
+            {
+                "reason_code": "required_field_missing",
+                "rule_type": "required_fields",
+                "field": "publication_year",
+            }
         )
 
     async def test_transform_batch_continues_when_bulk_filtered_quarantine_fails(

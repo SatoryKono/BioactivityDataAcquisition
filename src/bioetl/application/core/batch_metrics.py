@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
-    from bioetl.domain.types import ErrorType
+    from bioetl.domain.types import ErrorType, JsonDict
 
 
 class BatchMetricsRecorderService:
@@ -151,6 +151,46 @@ class BatchMetricsRecorderService:
                 reason=error_type.value,
                 count=count,
             )
+
+    def track_silver_filter_rejection(
+        self,
+        details: JsonDict | None = None,
+        count: int = 1,
+    ) -> None:
+        """Record bounded Silver-filter reject breakdown labels.
+
+        `message` remains display-only and is intentionally ignored here.
+        """
+        if not self._metrics:
+            return
+
+        reason_code: str | None = None
+        rule_type: str | None = None
+        field: str | None = None
+
+        if details is not None:
+            maybe_reason_code = details.get("reason_code")
+            if isinstance(maybe_reason_code, str):
+                reason_code = maybe_reason_code
+
+            maybe_rule_type = details.get("rule_type")
+            if isinstance(maybe_rule_type, str):
+                rule_type = maybe_rule_type
+            elif details.get("policy_stage") == "structural":
+                rule_type = "structural_policy"
+
+            maybe_field = details.get("field")
+            if isinstance(maybe_field, str):
+                field = maybe_field
+
+        self._metrics.inc_silver_filter_rejections(
+            pipeline=self._pipeline_label,
+            run_type=self._run_type_label,
+            reason_code=reason_code,
+            rule_type=rule_type,
+            field=field,
+            count=count,
+        )
 
 
 # Compatibility alias retained for legacy imports; new code should use

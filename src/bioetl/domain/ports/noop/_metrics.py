@@ -147,6 +147,18 @@ class NoOpMetrics:
         """
         return None
 
+    def inc_silver_filter_rejections(
+        self,
+        _pipeline: str,
+        _run_type: str,
+        _reason_code: str | None = None,
+        _rule_type: str | None = None,
+        _field: str | None = None,
+        _count: int = 1,
+    ) -> None:
+        """No-op implementation for bounded Silver filter breakdown metrics."""
+        return None
+
     def close(self) -> None:
         """No-op implementation — no metrics backend to flush or close."""
         return None

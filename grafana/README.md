@@ -537,6 +537,7 @@ Host Machine (Windows/macOS/Linux)
 | `bioetl_dq_baseline_updated` | Counter | `pipeline`, `metric` | Количество обновлений baseline для DQ монитора. |
 | `bioetl_dq_baseline_samples` | Gauge | `pipeline`, `metric` | Текущее количество samples в baseline DQ. |
 | `bioetl_dq_soft_threshold_exceeded` | Counter | `pipeline` | Количество превышений мягкого порога DQ. |
+| `bioetl_silver_filter_rejections_total` | Counter | `pipeline`, `run_type`, `reason_code`, `rule_type`, `field` | Bounded operator summary для Silver rejects по structured labels; raw `message` и unconstrained field text сюда не попадают. |
 
 ### 5.4 Circuit Breaker Metrics
 
@@ -725,6 +726,8 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
 | 5 | Worst-Entity DQ Score | Gauge | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)` | Худший observed DQ score по сущностям внутри выбранного pipeline scope. |
 | 117 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный счётчик Silver filter rejects за текущее временное окно; не заменяет `Records Quarantined`. |
 | 118 | Silver Filter Rejects by Pipeline | Bar gauge | `sum by (pipeline) (increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))` | Breakdown intentional Silver exclusions по выбранным pipeline values за текущее временное окно. |
+| 121 | Top Silver Reject Reasons | Bar gauge | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `reason_code` для текущего dashboard scope. |
+| 122 | Top Silver Reject Fields | Bar gauge | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `field`; exact field/root-cause drilldown остаётся в quarantine CLI. |
 | 101 | Latest Data Timestamp | Stat | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})` | Последний observed ingestion timestamp внутри выбранного pipeline scope. |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
@@ -732,6 +735,11 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
 Важно: shipped DQ surface теперь явно различает два потока.
 - DQ quarantine = `bioetl_dq_records_quarantined_total`
 - Silver filter rejects = `bioetl_records_processed_total{stage="filtered_out"}`
+
+Для bounded reason-level summary dashboard дополнительно использует:
+- `bioetl_silver_filter_rejections_total{reason_code,rule_type,field}`
+- неизвестные значения схлопываются в `other`
+- raw `message` не используется как Prometheus label
 
 **Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и
 `Explore Traces (Tempo, tracing profile)` используют текущее временное окно. Panel `Data Flow in
@@ -795,11 +803,11 @@ dashboard-variable interpolation. Дополнительное сужение п
 | 7 | Freshness Alert Conditions | Stat | Prometheus | Количество freshness conditions старше 24h. |
 | 8 | Top Warning Events | Bar gauge | Loki | Наиболее частые warning events за текущее временное окно Grafana. |
 | 9 | Log Hygiene Trend | Timeseries | Loki | Тренд warnings против unstructured rows с adaptive bucket size через `$__interval`. |
-| 17 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Быстрый triage-signal за текущее временное окно, который помогает отличить intentional Silver exclusions от DQ/schema проблем. |
+| 17 | Silver Filter Rejects | Stat | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Быстрый triage-signal за текущее временное окно, который помогает отличить intentional Silver exclusions от DQ/schema проблем. Panel description направляет в `4. Data Quality` для bounded cause breakdown и в quarantine CLI для exact drilldown. |
 
 **Фильтрация:** `$pipeline`, `$run_type`.
 
-**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и
+**Drilldown:** dashboard links `Back to Overview`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)` и
 `Explore Traces (Tempo, tracing profile)` плюс data links у `Log Hygiene Trend` ведут в
 Explore с тем же time range. Как и в остальных shipped dashboards, Loki handoff
 стартует с безопасного `{job="bioetl"}` entrypoint. Tempo handoff использует

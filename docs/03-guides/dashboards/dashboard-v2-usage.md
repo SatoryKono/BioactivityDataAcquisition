@@ -1,16 +1,16 @@
 ---
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-04'
+Last verified: '2026-04-05'
 ---
 
 # BioETL Dashboards v2: Usage
 
-Дата сверки: **2026-04-04**
+Дата сверки: **2026-04-05**
 Источник истины: `grafana/dashboards/*.json`
 
 ## Какие дашборды использовать
@@ -50,10 +50,16 @@ composite source selections и fragment outcomes по `layer/status`.
 - Для быстрых summary используйте shipped panels `Silver Filter Rejects` и
   `Silver Filter Rejects by Pipeline` в `bioetl-overview-v2`, `bioetl-dq-v2`,
   `bioetl-runtime`.
+- `bioetl-overview-v2` и `bioetl-runtime` теперь содержат явный handoff в
+  `4. Data Quality`, чтобы оператор мог быстро перейти от summary spike к
+  bounded cause breakdown.
+- Для bounded cause summary используйте `Top Silver Reject Reasons` и
+  `Top Silver Reject Fields` в `bioetl-dq-v2`.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
   - в каком `$pipeline` проблема сильнее;
-  - это локальный всплеск или устойчивый тренд в выбранном time range.
+  - это локальный всплеск или устойчивый тренд в выбранном time range;
+  - какие `reason_code` и `field` сейчас доминируют в bounded dashboard summary.
 - Для ответа на вопрос "почему именно записи были исключены" переходите в CLI:
   ```bash
   bioetl quarantine stats --pipeline <pipeline> --silver-filter-only
@@ -62,7 +68,9 @@ composite source selections и fragment outcomes по `layer/status`.
   bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --limit 20
   ```
 - Grafana в текущей shipped конфигурации — summary/trend surface.
-  Record-level причины и exact by-reason drilldown остаются задачей quarantine CLI.
+  `Top Silver Reject Reasons` / `Top Silver Reject Fields` используют bounded
+  metric vocabulary, а не raw quarantine text.
+- Record-level причины и exact by-reason drilldown остаются задачей quarantine CLI.
 
 ## Drilldown
 

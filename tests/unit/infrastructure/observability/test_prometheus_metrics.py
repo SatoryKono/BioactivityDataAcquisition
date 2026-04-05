@@ -279,6 +279,28 @@ class TestPrometheusCustomCounters:
                 "dq_validation_failures_total"
             ].labels().inc.assert_called_once_with(1)
 
+    def test_inc_silver_filter_rejections_bounded_labels(self, prometheus_metrics):
+        with patch.dict(COUNTERS, {"silver_filter_rejections_total": MagicMock()}):
+            prometheus_metrics.inc_silver_filter_rejections(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                reason_code="Unbounded Random Reason",
+                rule_type="structural-policy",
+                field="totally_unknown_field",
+                count=3,
+            )
+
+            COUNTERS["silver_filter_rejections_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                reason_code="other",
+                rule_type="structural_policy",
+                field="other",
+            )
+            COUNTERS["silver_filter_rejections_total"].labels().inc.assert_called_once_with(
+                3
+            )
+
 
 @pytest.mark.unit
 class TestObservabilityMetricContract:
