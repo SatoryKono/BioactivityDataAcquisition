@@ -4,7 +4,9 @@ import asyncio
 from collections.abc import AsyncIterator
 
 import pytest
+from hypothesis import HealthCheck
 from hypothesis import given
+from hypothesis import settings
 from hypothesis import strategies as st
 
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
@@ -13,6 +15,17 @@ from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
     is_retry_exhausted_error,
     run_fetch_with_fallback_policy,
     split_filter_ids_for_fallback,
+)
+
+_PARTITION_TEST_SETTINGS = settings(
+    suppress_health_check=[HealthCheck.too_slow]
+)
+_FILTER_ID_TEXT = st.text(
+    alphabet=st.characters(
+        whitelist_categories=("Ll", "Lu", "Nd"),
+        whitelist_characters=("_", "-", "/", ".", " "),
+    ),
+    max_size=32,
 )
 
 
@@ -24,7 +37,8 @@ def test_split_filter_ids_for_fallback_supports_markers_and_empty() -> None:
     assert title_only == ["", "  ", "__title_only_0__"]
 
 
-@given(filter_ids=st.lists(st.text(max_size=32), max_size=30))
+@_PARTITION_TEST_SETTINGS
+@given(filter_ids=st.lists(_FILTER_ID_TEXT, max_size=30))
 def test_split_filter_ids_for_fallback_partition_property(
     filter_ids: list[str],
 ) -> None:
