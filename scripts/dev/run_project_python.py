@@ -40,7 +40,7 @@ def main() -> int:
 
     target_python = _preferred_python()
     command = [target_python, *sys.argv[1:]]
-    completed = subprocess.run(command, cwd=REPO_ROOT, check=False)  # noqa: S603
+    completed = subprocess.run(command, cwd=REPO_ROOT, check=False)
     return int(completed.returncode)
 
 

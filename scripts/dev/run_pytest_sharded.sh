@@ -9,10 +9,14 @@ RUNNER="$SCRIPT_DIR/run_pytest.sh"
 DEFAULT_WORKERS_PER_SHARD=2
 DEFAULT_DIST_MODE="loadfile"
 DEFAULT_COVERAGE_DIR="$REPO_ROOT/.coverage-sharded"
+DEFAULT_PYTEST_CACHE_DIR="$REPO_ROOT/.pytest_cache"
+DEFAULT_PYTEST_CACHE_DIR="$REPO_ROOT/.pytest_cache"
 
 WORKERS_PER_SHARD="$DEFAULT_WORKERS_PER_SHARD"
 DIST_MODE="$DEFAULT_DIST_MODE"
 COVERAGE_DIR="$DEFAULT_COVERAGE_DIR"
+PYTEST_CACHE_DIR="$DEFAULT_PYTEST_CACHE_DIR"
+PYTEST_CACHE_DIR="$DEFAULT_PYTEST_CACHE_DIR"
 STREAM_LOGS=0
 TAIL_LOGS=0
 DRY_RUN=0
@@ -77,6 +81,7 @@ declare -A SHARD_PATHS=(
 declare -A SHARD_WORKERS_OVERRIDE=(
     ["S1-domain-core"]="0"
     ["S1-domain-services"]="0"
+    ["S4-app-services"]="0"
     ["S7-crosscutting-architecture-a"]="0"
     ["S7-crosscutting-architecture-b"]="0"
     ["S7-crosscutting-architecture-c"]="0"
@@ -427,6 +432,7 @@ run_wave() {
             cmd+=(--no-cov)
         fi
         cmd+=("${shard_extra_args[@]}")
+        cmd+=(-o "cache_dir=$PYTEST_CACHE_DIR")
         cmd+=("${EXTRA_PYTEST_ARGS[@]}")
 
         if [[ "$DRY_RUN" == "1" ]]; then
@@ -543,6 +549,8 @@ main() {
 
     cleanup_coverage_dir
     mkdir -p "$COVERAGE_DIR"
+    mkdir -p "$PYTEST_CACHE_DIR"
+    mkdir -p "$PYTEST_CACHE_DIR"
 
     local current_wave=""
     local -a wave_shards=()

@@ -1031,8 +1031,11 @@ def apply_ci12(api: GitHubAPI) -> None:
 
 # ── HF-A ─────────────────────────────────────────────────────────────────────
 
+
 def apply_hf_a(api: GitHubAPI) -> None:
-    print("\n=== HF-A: Upgrade upload-artifact@v3 → @v4 in contract-governance-fast-check.yml ===")
+    print(
+        "\n=== HF-A: Upgrade upload-artifact@v3 → @v4 in contract-governance-fast-check.yml ==="
+    )
     branch = BRANCHES["hf-a"]
     sha = api.get_sha()
 
@@ -1049,9 +1052,13 @@ def apply_hf_a(api: GitHubAPI) -> None:
         print(f"  INFO: upload-artifact@v3 not found in {path} — already fixed?")
         return
 
-    new_content = content.replace("actions/upload-artifact@v3", "actions/upload-artifact@v4")
+    new_content = content.replace(
+        "actions/upload-artifact@v3", "actions/upload-artifact@v4"
+    )
     count = content.count("actions/upload-artifact@v3")
-    print(f"  Patching {path}: upgrading upload-artifact@v3 → @v4 ({count} occurrence{'s' if count > 1 else ''})")
+    print(
+        f"  Patching {path}: upgrading upload-artifact@v3 → @v4 ({count} occurrence{'s' if count > 1 else ''})"
+    )
     api.update_file(
         path=path,
         content=new_content,
@@ -1074,6 +1081,7 @@ def apply_hf_a(api: GitHubAPI) -> None:
 
 
 # ── HF-B ─────────────────────────────────────────────────────────────────────
+
 
 def apply_hf_b(api: GitHubAPI) -> None:
     print("\n=== HF-B: Fix pip-audit --require-hashes flag in security.yml ===")
@@ -1122,8 +1130,11 @@ def apply_hf_b(api: GitHubAPI) -> None:
 
 # ── HF-E ─────────────────────────────────────────────────────────────────────
 
+
 def apply_hf_e(api: GitHubAPI) -> None:
-    print("\n=== HF-E: Fix smoke-check coverage upload (if-no-files-found: error → warn) ===")
+    print(
+        "\n=== HF-E: Fix smoke-check coverage upload (if-no-files-found: error → warn) ==="
+    )
     branch = BRANCHES["hf-e"]
     sha = api.get_sha()
 
@@ -1158,9 +1169,13 @@ def apply_hf_e(api: GitHubAPI) -> None:
                     retention-days: 7"""
 
     if old_block not in content:
-        print(f"  WARNING: expected smoke upload block not found in {path}. Searching...")
+        print(
+            f"  WARNING: expected smoke upload block not found in {path}. Searching..."
+        )
         if "coverage-data-smoke" in content:
-            print("  Found 'coverage-data-smoke' — pattern differs, manual review needed")
+            print(
+                "  Found 'coverage-data-smoke' — pattern differs, manual review needed"
+            )
         return
 
     new_content = content.replace(old_block, new_block, 1)
@@ -1188,8 +1203,8 @@ def apply_hf_e(api: GitHubAPI) -> None:
         print(f"  PR created: {pr_url}")
 
 
-
 # ── HF-lxml ──────────────────────────────────────────────────────────────────
+
 
 def apply_hf_lxml(api: GitHubAPI) -> None:
     print("\n=== HF-lxml: Fix type-checking — remove --txt-report (lxml missing) ===")
@@ -1229,7 +1244,9 @@ def apply_hf_lxml(api: GitHubAPI) -> None:
         )
 
     if new_content == content:
-        print(f"  WARNING: Could not patch {path} — pattern mismatch, manual review needed")
+        print(
+            f"  WARNING: Could not patch {path} — pattern mismatch, manual review needed"
+        )
         return
 
     print(f"  Patching {path}: removing --txt-report (requires lxml, not in deps)")
@@ -1288,13 +1305,17 @@ def apply_hf_pip_disable(api: GitHubAPI) -> None:
     elif "pip-audit --strict" in content and "--disable-pip" not in content:
         print(f"  INFO: --disable-pip already removed from {path}")
     else:
-        print(f"  WARNING: unexpected pip-audit command in {path} — manual review needed")
+        print(
+            f"  WARNING: unexpected pip-audit command in {path} — manual review needed"
+        )
 
     # Re-apply checkout@v4 (may have been overwritten by direct commits)
     if "actions/checkout@v6" in content:
         count = content.count("actions/checkout@v6")
         content = content.replace("actions/checkout@v6", "actions/checkout@v4")
-        print(f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})")
+        print(
+            f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})"
+        )
         patched = True
 
     if not patched:
@@ -1332,9 +1353,9 @@ def _remove_paths_ignore_block(content: str, trigger: str) -> str:
     # Handles varying indentation (4 or 6 spaces)
     pattern = (
         r"(  (?:push|pull_request):\n)"
-        r"((?:    [^\n]*\n)*?)"   # lines before paths-ignore
+        r"((?:    [^\n]*\n)*?)"  # lines before paths-ignore
         r"(    paths-ignore:\n(?:      [^\n]*\n)+)"  # paths-ignore block
-        r"((?:    [^\n]*\n)*)"    # lines after paths-ignore (branches, paths, etc.)
+        r"((?:    [^\n]*\n)*)"  # lines after paths-ignore (branches, paths, etc.)
     )
     # More targeted: remove just the paths-ignore block under any trigger
     result = _re.sub(
@@ -1381,7 +1402,9 @@ def apply_hf_paths_conflict(api: GitHubAPI) -> None:
         if "actions/checkout@v6" in content:
             count = content.count("actions/checkout@v6")
             content = content.replace("actions/checkout@v6", "actions/checkout@v4")
-            print(f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})")
+            print(
+                f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})"
+            )
             patched = True
 
         if not patched:
@@ -1413,7 +1436,9 @@ def apply_hf_paths_conflict(api: GitHubAPI) -> None:
 
 
 def apply_hf_typecheck_warn(api: GitHubAPI) -> None:
-    print("\n=== HF-typecheck-warn: Make type-check job non-blocking (continue-on-error) ===")
+    print(
+        "\n=== HF-typecheck-warn: Make type-check job non-blocking (continue-on-error) ==="
+    )
     branch = BRANCHES["hf-typecheck-warn"]
     sha = api.get_sha()
 
@@ -1430,7 +1455,9 @@ def apply_hf_typecheck_warn(api: GitHubAPI) -> None:
 
     # Add continue-on-error: true to the type-check job
     if "continue-on-error: true" not in content:
-        old_job_header = "  type-check:\n    runs-on: ubuntu-latest\n    timeout-minutes: 40"
+        old_job_header = (
+            "  type-check:\n    runs-on: ubuntu-latest\n    timeout-minutes: 40"
+        )
         new_job_header = "  type-check:\n    runs-on: ubuntu-latest\n    timeout-minutes: 40\n    continue-on-error: true"
         if old_job_header in content:
             content = content.replace(old_job_header, new_job_header, 1)
@@ -1443,7 +1470,9 @@ def apply_hf_typecheck_warn(api: GitHubAPI) -> None:
     if "actions/checkout@v6" in content:
         count = content.count("actions/checkout@v6")
         content = content.replace("actions/checkout@v6", "actions/checkout@v4")
-        print(f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})")
+        print(
+            f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})"
+        )
         patched = True
 
     if not patched:
@@ -1499,7 +1528,9 @@ def apply_hf_pip_skip_editable(api: GitHubAPI) -> None:
 
     if old_line not in content:
         print(f"  WARNING: expected pip-audit command not found in {path}")
-        print(f"  Content snippet: {content[content.find('pip-audit'):content.find('pip-audit')+80]!r}")
+        print(
+            f"  Content snippet: {content[content.find('pip-audit') : content.find('pip-audit') + 80]!r}"
+        )
         return
 
     content = content.replace(old_line, new_line)
@@ -1559,8 +1590,7 @@ def apply_hf_stray_dirs(api: GitHubAPI) -> None:
     stray_files = [
         e
         for e in all_entries
-        if e["type"] == "blob"
-        and any(e["path"].startswith(p) for p in stray_prefixes)
+        if e["type"] == "blob" and any(e["path"].startswith(p) for p in stray_prefixes)
     ]
 
     if not stray_files:
@@ -1747,11 +1777,26 @@ def main() -> None:
     )
     parser.add_argument(
         "--only",
-        choices=["ci-01", "ci-02", "ci-03", "ci-04", "ci-06", "ci-07", "ci-12",
-                 "hf-a", "hf-b", "hf-e", "hf-lxml",
-                 "hf-pip-disable", "hf-paths-conflict", "hf-typecheck-warn",
-                 "hf-pip-skip-editable", "hf-stray-dirs", "hf-checkout-hygiene",
-                 "hf-mcp-allowlist"],
+        choices=[
+            "ci-01",
+            "ci-02",
+            "ci-03",
+            "ci-04",
+            "ci-06",
+            "ci-07",
+            "ci-12",
+            "hf-a",
+            "hf-b",
+            "hf-e",
+            "hf-lxml",
+            "hf-pip-disable",
+            "hf-paths-conflict",
+            "hf-typecheck-warn",
+            "hf-pip-skip-editable",
+            "hf-stray-dirs",
+            "hf-checkout-hygiene",
+            "hf-mcp-allowlist",
+        ],
         help="Apply only one fix",
     )
     args = parser.parse_args()

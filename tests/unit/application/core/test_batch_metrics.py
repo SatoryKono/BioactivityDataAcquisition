@@ -305,7 +305,7 @@ class TestTrackSilverFilterRejection:
         increment_amount = mock_metrics.increment_counter.call_args[0][1]
         assert increment_amount == 1
 
-    def test_no_op_when_metrics_none(
+    def test_track_error_no_op_when_metrics_none(
         self, recorder_no_metrics: BatchMetricsRecorderService
     ) -> None:
         """Test that track_error is no-op when metrics is None."""

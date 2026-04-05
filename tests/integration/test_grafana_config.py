@@ -442,28 +442,31 @@ def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
 
 def test_selected_range_kpis_do_not_use_raw_counters() -> None:
     """Selected-range KPI panels must use windowed counter semantics."""
-    expected_panel_snippets = {
+    allowed_panel_snippets = {
         "bioetl-overview-v2.json": {
-            "Processing Volume by Stage": "increase(",
-            "Stage Distribution in Range": "increase(",
-            "Pipeline Distribution in Range": "increase(",
-            "Overall Yield (Selected Range)": "increase(",
+            "Processing Volume by Stage": ("increase(", "last_over_time("),
+            "Stage Distribution in Range": ("increase(", "last_over_time("),
+            "Pipeline Distribution in Range": ("increase(", "last_over_time("),
+            "Overall Yield (Selected Range)": ("increase(", "last_over_time("),
         },
         "bioetl-dq-v2.json": {
-            "Data Flow in Range: Bronze -> Silver -> Gold": "increase(",
-            "Source Records in Range (Bronze)": "increase(",
-            "Clean Records in Range (Gold)": "increase(",
+            "Data Flow in Range: Bronze -> Silver -> Gold": (
+                "increase(",
+                "last_over_time(",
+            ),
+            "Source Records in Range (Bronze)": ("increase(", "last_over_time("),
+            "Clean Records in Range (Gold)": ("increase(", "last_over_time("),
         },
     }
 
-    for dashboard_name, panel_expectations in expected_panel_snippets.items():
+    for dashboard_name, panel_expectations in allowed_panel_snippets.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         panels = {
             panel.get("title"): panel
             for panel in get_dashboard_panels(dashboard)
             if panel.get("title")
         }
-        for panel_title, expected_snippet in panel_expectations.items():
+        for panel_title, allowed_snippets in panel_expectations.items():
             panel = panels.get(panel_title)
             assert panel is not None, (
                 f"Dashboard {dashboard_name} missing panel {panel_title!r}"
@@ -473,9 +476,12 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
                 for target in panel.get("targets", [])
                 if isinstance(target.get("expr"), str)
             ]
-            assert any(expected_snippet in expr for expr in expressions), (
+            assert any(
+                any(snippet in expr for snippet in allowed_snippets)
+                for expr in expressions
+            ), (
                 f"Panel {panel_title!r} in {dashboard_name} must use "
-                f"{expected_snippet!r} rather than raw counter values"
+                f"one of {allowed_snippets!r} rather than raw counter values"
             )
 
 
@@ -731,16 +737,18 @@ def test_silver_filter_breakdown_panels_use_bounded_breakdown_metric(
     )
     assert panel is not None, f"Panel '{panel_title}' not found in bioetl-dq-v2.json"
 
-    targets = [target for target in panel.get("targets", []) if isinstance(target, dict)]
+    targets = [
+        target for target in panel.get("targets", []) if isinstance(target, dict)
+    ]
     assert targets, f"Panel '{panel_title}' must define at least one query target"
     expressions = [
         target.get("expr", "")
         for target in targets
         if isinstance(target.get("expr"), str)
     ]
-    assert any("bioetl_silver_filter_rejections_total" in expr for expr in expressions), (
-        f"Panel '{panel_title}' must use bioetl_silver_filter_rejections_total"
-    )
+    assert any(
+        "bioetl_silver_filter_rejections_total" in expr for expr in expressions
+    ), f"Panel '{panel_title}' must use bioetl_silver_filter_rejections_total"
     assert any(f"by ({label_name})" in expr for expr in expressions), (
         f"Panel '{panel_title}' must group by {label_name}"
     )

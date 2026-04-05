@@ -39,8 +39,12 @@ def _patch_material_theme_namespace() -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--strict", action="store_true", help="Enable MkDocs strict mode")
-    parser.add_argument("--clean", action="store_true", help="Clean stale files before build")
+    parser.add_argument(
+        "--strict", action="store_true", help="Enable MkDocs strict mode"
+    )
+    parser.add_argument(
+        "--clean", action="store_true", help="Clean stale files before build"
+    )
     parser.add_argument(
         "--site-dir",
         default=".mkdocs-site",

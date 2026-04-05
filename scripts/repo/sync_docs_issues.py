@@ -541,8 +541,7 @@ def run(argv: list[str] | None = None) -> int:
             print("- Milestone: <not set>")
         else:
             print(
-                f"- Milestone: {milestone.title} "
-                f"(#{milestone.number}, {milestone.url})"
+                f"- Milestone: {milestone.title} (#{milestone.number}, {milestone.url})"
             )
         for issue in updates:
             print(f"- #{issue.number} {issue.title}")

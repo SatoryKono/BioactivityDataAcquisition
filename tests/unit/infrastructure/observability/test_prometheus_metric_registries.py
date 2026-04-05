@@ -71,7 +71,8 @@ def test_metric_definition_exports_remain_stable() -> None:
 
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 84
+    # This ratchet intentionally changes only when we add/remove public metrics.
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 85
 
 
 @pytest.mark.unit

@@ -52,7 +52,7 @@ def _schema_columns_from_pandera_fields(schema_class: object) -> set[str] | None
     """
     fields = getattr(schema_class, "__fields__", None)
     if isinstance(fields, dict) and fields:
-        return {str(name) for name in fields.keys()}
+        return {str(name) for name in fields}
     return None
 
 
