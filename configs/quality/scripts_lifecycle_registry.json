@@ -128,11 +128,23 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a thin preferred-interpreter launcher for historical direct script/module invocations, but do not expand it into a primary contributor-facing workflow while wrapper commands remain the canonical entrypoints."
     },
+    "scripts/dev/run_s7_stability_waves.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded S7 stability troubleshooting helper; either attach it to a canonical developer workflow with explicit call-sites or remove it after the stabilization wave completes."
+    },
     "scripts/diagnostics/_tmp_inspect_vcr.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded troubleshooting helper; rename or remove it before promoting it as a stable diagnostics command."
+    },
+    "scripts/repo/finalize_docs_issues_2638_2643.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded maintainer helper for the prepared docs issue-finalization batch; do not treat this issue-number-specific path as a reusable automation workflow."
     },
     "scripts/qa/generate_reports.py": {
       "owner": "platform-architecture",

@@ -532,6 +532,7 @@ bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --limi
 - `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by rule-type`
 - `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by operator`
 - `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code-field`
+- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-signature`
 
 `bioetl quarantine inspect --silver-filter-only` показывает для каждой записи:
 

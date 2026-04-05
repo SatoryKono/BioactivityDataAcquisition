@@ -62,6 +62,7 @@ bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --limi
   - `--group-by rule-type`
   - `--group-by operator`
   - `--group-by reason-code-field`
+  - `--group-by reason-signature`
 
 - `inspect --silver-filter-only` is the right drilldown when you need the exact
   reason for one record. The CLI renders `Reason`, `reason_code`, `rule_type`,

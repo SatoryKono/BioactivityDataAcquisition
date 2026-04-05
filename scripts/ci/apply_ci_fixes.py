@@ -50,6 +50,8 @@ BRANCHES = {
     "hf-paths-conflict": "fix/hf-remove-paths-ignore-conflict",
     "hf-typecheck-warn": "fix/hf-typecheck-continue-on-error",
     "hf-pip-skip-editable": "fix/hf-pip-audit-skip-editable",
+    "hf-stray-dirs": "chore/hf-remove-stray-mkdocs-dirs",
+    "hf-checkout-hygiene": "fix/hf-checkout-hygiene-v6",
 }
 
 PR_BODIES = {
@@ -255,6 +257,42 @@ pip-audit cannot find it on PyPI and exits with code 1 under `--strict`.
 ### Fix
 Add `--skip-editable` flag so pip-audit skips locally installed editable
 packages and only audits third-party dependencies fetched from PyPI.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "hf-stray-dirs": """## HF-stray-dirs: Remove accidentally committed .mkdocs-site-* directories
+
+Commit `2d15d11` accidentally committed three MkDocs build artifact directories
+to the repository root:
+- `.mkdocs-site-check/`
+- `.mkdocs-site-check-2/`
+- `.mkdocs-site-verify/`
+
+These directories are MkDocs HTML build outputs and should never be tracked.
+`scripts/repo/audit_root_cleanliness.py` enforces a root-directory allowlist and
+exits with code 1 when unexpected directories are found, causing two CI workflows
+to fail:
+- **Root Hygiene** (`root-hygiene.yml`)
+- **Block Compiled Python Artifacts** (`compiled-artifacts-block.yml`)
+
+### Fix
+Remove all files from these three directories via the Git Trees API.
+The directories will disappear once all their contents are deleted.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+""",
+    "hf-checkout-hygiene": """## HF-checkout-hygiene: Fix actions/checkout@v6 in hygiene workflows
+
+Two workflow files still use the non-existent `actions/checkout@v6`:
+- `.github/workflows/root-hygiene.yml`
+- `.github/workflows/compiled-artifacts-block.yml`
+
+These were not covered by the original CI-01 wave (or were re-introduced by
+a direct commit). `actions/checkout@v6` does not exist; the valid latest
+major version is `@v4`.
+
+### Fix
+Replace `actions/checkout@v6` → `actions/checkout@v4` in both files.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 """,
