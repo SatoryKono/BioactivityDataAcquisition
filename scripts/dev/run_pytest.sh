@@ -107,10 +107,122 @@ _needs_xdist_plugin() {
     return 1
 }
 
+_SELECTED_TEST_PATHS=()
+
+_collect_selected_test_paths() {
+    _SELECTED_TEST_PATHS=()
+    local expects_value=0
+    local arg
+    for arg in "$@"; do
+        if [[ "$expects_value" == "1" ]]; then
+            expects_value=0
+            continue
+        fi
+
+        case "$arg" in
+            -k|-m|-n|-o|-p|--maxfail|--timeout|--durations|--durations-min|--dist|--cov|--cov-report|--cov-config|--rootdir|--basetemp|--ignore|--ignore-glob)
+                expects_value=1
+                continue
+                ;;
+            --dist=*|--cov=*|--cov-report=*|--cov-config=*|--rootdir=*|--basetemp=*|--timeout=*|--maxfail=*|--durations=*|--durations-min=*|--ignore=*|--ignore-glob=*)
+                continue
+                ;;
+            -n*)
+                [[ "$arg" != "-q" ]] && continue
+                ;;
+            -*)
+                continue
+                ;;
+        esac
+
+        local candidate="${arg%%::*}"
+        case "$candidate" in
+            tests|tests/*)
+                _SELECTED_TEST_PATHS+=("$candidate")
+                ;;
+        esac
+    done
+}
+
+_has_selected_test_paths() {
+    [[ "${#_SELECTED_TEST_PATHS[@]}" -gt 0 ]]
+}
+
+_paths_match_any() {
+    local target
+    local prefix
+    for target in "${_SELECTED_TEST_PATHS[@]}"; do
+        for prefix in "$@"; do
+            case "$target" in
+                "$prefix"|"$prefix"/*)
+                    return 0
+                    ;;
+            esac
+        done
+    done
+    return 1
+}
+
+_selected_dirs_match_any() {
+    local target
+    local prefix
+    for target in "${_SELECTED_TEST_PATHS[@]}"; do
+        [[ -d "$target" ]] || continue
+        for prefix in "$@"; do
+            case "$target" in
+                "$prefix"|"$prefix"/*)
+                    return 0
+                    ;;
+            esac
+        done
+    done
+    return 1
+}
+
+_needs_vcr_plugin() {
+    if ! _has_selected_test_paths; then
+        return 0
+    fi
+    _paths_match_any tests/integration tests/e2e tests/contract
+}
+
+_needs_syrupy_plugin() {
+    if ! _has_selected_test_paths; then
+        return 0
+    fi
+
+    if _selected_dirs_match_any tests/unit; then
+        return 0
+    fi
+
+    _paths_match_any \
+        tests/unit/application/pipelines/test_transformer_snapshots.py \
+        tests/unit/interfaces/cli/test_registry_consistency.py
+}
+
+_needs_hypothesis_plugin_for_selection() {
+    if ! _has_selected_test_paths; then
+        return 0
+    fi
+
+    if _selected_dirs_match_any tests/unit tests/architecture; then
+        return 0
+    fi
+
+    _paths_match_any \
+        tests/unit/domain/test_exceptions.py \
+        tests/unit/domain/test_transformations.py \
+        tests/unit/domain/services/test_identity_service.py \
+        tests/unit/infrastructure/validation/test_pandera_validator.py \
+        tests/architecture/test_port_contracts_hypothesis.py
+}
+
 if _needs_cov_plugin "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}" && [[ -z "${COVERAGE_FILE:-}" ]]; then
     mkdir -p /tmp/bioetl-coverage
     export COVERAGE_FILE="/tmp/bioetl-coverage/.coverage.$$.sqlite"
 fi
+
+_collect_selected_test_paths "${PYTEST_ARGS[@]}"
 
 if [[ "$PYTEST_NARROW" == "1" ]]; then
     export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
@@ -137,10 +249,16 @@ elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
     _core_pytest_plugins=(
         pytest_asyncio.plugin
         pytest_timeout
-        syrupy
-        pytest_vcr
-        _hypothesis_pytestplugin
     )
+    if _needs_syrupy_plugin; then
+        _core_pytest_plugins+=(syrupy)
+    fi
+    if _needs_vcr_plugin; then
+        _core_pytest_plugins+=(pytest_vcr)
+    fi
+    if _needs_hypothesis_plugin_for_selection; then
+        _core_pytest_plugins+=(_hypothesis_pytestplugin)
+    fi
     if _needs_cov_plugin "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"; then
         _core_pytest_plugins+=(pytest_cov.plugin)
     fi

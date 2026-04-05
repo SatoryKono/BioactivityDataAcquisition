@@ -1,15 +1,12 @@
-______________________________________________________________________
-
+---
 Version: 6.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
-
-- BioETL Team
-  Last verified: '2026-04-03'
-
-______________________________________________________________________
+  - BioETL Team
+Last verified: '2026-04-03'
+---
 
 # BioETL: Правила Проекта
 
