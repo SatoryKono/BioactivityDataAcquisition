@@ -117,14 +117,9 @@ def _normalize_filtered_row(
     record: JsonDict,
     *,
     include_payload: bool,
+    include_payload_preview: bool,
 ) -> JsonDict:
     """Normalize one Silver-filter quarantine row for explorer responses."""
-    payload_raw = record.get("payload")
-    payload = (
-        deserialize_from_json(payload_raw) if isinstance(payload_raw, str) else payload_raw
-    )
-    if not isinstance(payload, dict):
-        payload = {"value": payload}
     error_details = _normalize_error_details(record)
     ingestion_ts_raw, _ = _normalize_timestamp(record.get("ingestion_ts"))
 
@@ -149,8 +144,17 @@ def _normalize_filtered_row(
         "actual": error_details.get("actual"),
         "dq_status": record.get("dq_status", ""),
         "reason": reason,
-        "payload_preview": _build_payload_preview(payload),
     }
+    if include_payload_preview or include_payload:
+        payload_raw = record.get("payload")
+        payload = (
+            deserialize_from_json(payload_raw)
+            if isinstance(payload_raw, str)
+            else payload_raw
+        )
+        if not isinstance(payload, dict):
+            payload = {"value": payload}
+        normalized["payload_preview"] = _build_payload_preview(payload)
     if include_payload:
         normalized["payload"] = payload
     return normalized
@@ -221,6 +225,7 @@ def _iter_filtered_rows(
     from_ts: str | None,
     to_ts: str | None,
     include_payload: bool,
+    include_payload_preview: bool,
 ) -> list[JsonDict]:
     """Apply server-side filtering for explorer rows."""
     pipeline_filter = _normalize_filter_values(pipeline)
@@ -234,7 +239,11 @@ def _iter_filtered_rows(
 
     rows: list[JsonDict] = []
     for record in table_records:
-        row = _normalize_filtered_row(record, include_payload=include_payload)
+        row = _normalize_filtered_row(
+            record,
+            include_payload=include_payload,
+            include_payload_preview=include_payload_preview,
+        )
         if not _matches_values_filter(row.get("pipeline"), pipeline_filter):
             continue
         if not _matches_values_filter(row.get("run_type"), run_type_filter):
@@ -270,6 +279,7 @@ def _load_filtered_rows(
     from_ts: str | None,
     to_ts: str | None,
     include_payload: bool,
+    include_payload_preview: bool,
 ) -> list[JsonDict]:
     """Read Silver-filter rows and apply scoped filtering in-memory."""
     try:
@@ -308,6 +318,7 @@ def _load_filtered_rows(
         from_ts=from_ts,
         to_ts=to_ts,
         include_payload=include_payload,
+        include_payload_preview=include_payload_preview,
     )
 
 
@@ -340,6 +351,7 @@ def list_filtered_records(
         from_ts=from_ts,
         to_ts=to_ts,
         include_payload=False,
+        include_payload_preview=False,
     )
 
     reverse = sort != "ingestion_ts_asc"
@@ -400,6 +412,7 @@ def get_filtered_record(
         from_ts=None,
         to_ts=None,
         include_payload=True,
+        include_payload_preview=True,
     )
     if not rows:
         return None
@@ -437,6 +450,7 @@ def get_filtered_filter_options(
         from_ts=from_ts,
         to_ts=to_ts,
         include_payload=False,
+        include_payload_preview=False,
     )
 
     pipelines = sorted(

@@ -123,6 +123,7 @@ def get_filtered_stats(
         from_ts=from_ts,
         to_ts=to_ts,
         include_payload=False,
+        include_payload_preview=False,
     )
     by_reason_code: dict[str, int] = {}
     by_field: dict[str, int] = {}
