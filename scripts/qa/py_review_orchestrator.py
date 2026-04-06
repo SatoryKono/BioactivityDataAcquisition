@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 import json
 import os
@@ -35,7 +37,7 @@ class SectorResult:
     total_loc: int = 0
     issues: list[Issue] = field(default_factory=list)
     positive_observations: list[str] = field(default_factory=list)
-    sub_results: list["SectorResult"] = field(default_factory=list)
+    sub_results: list[SectorResult] = field(default_factory=list)
 
     @property
     def is_orchestrator(self) -> bool:
@@ -81,6 +83,8 @@ class ReviewOrchestrator:
         total_files = 0
         total_loc = 0
         file_paths = []
+        ignore_dirs = {".venv", ".git", ".pytest_cache", ".ruff_cache", ".mypy_cache", "__pycache__", ".claude", ".codex", "playwright", "reports", "grafana"}
+
         for p in paths:
             base_path = Path(p)
             if not base_path.exists():
@@ -96,15 +100,18 @@ class ReviewOrchestrator:
                         pass
                 continue
 
-            for ext in file_exts:
-                for file_path in base_path.rglob(f"*{ext}"):
-                    file_paths.append(file_path)
-                    try:
-                        loc = sum(1 for _ in open(file_path, "r", encoding="utf-8"))
-                        total_loc += loc
-                        total_files += 1
-                    except Exception:
-                        pass
+            for root, dirs, files in os.walk(base_path):
+                dirs[:] = [d for d in dirs if d not in ignore_dirs]
+                for file in files:
+                    file_path = Path(root) / file
+                    if file_path.suffix in file_exts:
+                        file_paths.append(file_path)
+                        try:
+                            loc = sum(1 for _ in open(file_path, encoding="utf-8"))
+                            total_loc += loc
+                            total_files += 1
+                        except Exception:
+                            pass
         return total_files, total_loc, file_paths
 
     def determine_subsectors(
@@ -255,6 +262,19 @@ class ReviewOrchestrator:
                     "name": "Interfaces",
                     "paths": ["src/bioetl/interfaces"],
                 },
+            ]
+        elif sector_id == "S5":
+            return [
+                {"id": "S5.1", "name": "Cross Domain", "paths": ["src/bioetl/domain"]},
+                {"id": "S5.2", "name": "Cross Application", "paths": ["src/bioetl/application"]},
+                {"id": "S5.3", "name": "Cross Infrastructure", "paths": ["src/bioetl/infrastructure"]},
+                {"id": "S5.4", "name": "Cross Other", "paths": ["src/bioetl/composition", "src/bioetl/interfaces"]}
+            ]
+        elif sector_id == "S7":
+            return [
+                {"id": "S7.1", "name": "Entities", "paths": ["configs/entities"]},
+                {"id": "S7.2", "name": "Pipelines", "paths": ["configs/pipelines"]},
+                {"id": "S7.3", "name": "Other Configs", "paths": ["configs/infrastructure", "configs/quality"]}
             ]
         elif sector_id == "S6":
             return [
