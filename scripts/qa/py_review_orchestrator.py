@@ -428,6 +428,25 @@ class ReviewOrchestrator:
 
         has_type_checking = "TYPE_CHECKING" in content
 
+        allowed_constructors = {
+            "Path", "dict", "list", "set", "tuple", "frozenset", "str", "int", "float", "bool",
+            "bytes", "bytearray", "complex", "range", "memoryview", "type", "object",
+            "Exception", "ValueError", "TypeError", "KeyError", "IndexError", "AttributeError",
+            "RuntimeError", "NotImplementedError", "NameError", "SyntaxError", "SystemError",
+            "EnvironmentError", "IOError", "OSError", "ConnectionError", "TimeoutError",
+            "PermissionError", "IsADirectoryError", "NotADirectoryError", "FileExistsError",
+            "FileNotFoundError", "ProcessLookupError", "InterruptedError", "ChildProcessError",
+            "MagicMock", "Mock", "PropertyMock", "AsyncMock", "NonCallableMock", "ANY",
+            "SimpleNamespace", "Counter", "deque", "defaultdict", "namedtuple", "OrderedDict",
+            "ChainMap", "UserDict", "UserList", "UserString", "timedelta", "date", "datetime",
+            "time", "tzinfo", "timezone", "Decimal", "Fraction", "Pattern", "Match", "UUID",
+            "Enum", "IntEnum", "Flag", "IntFlag", "auto", "Lock", "RLock", "Semaphore",
+            "BoundedSemaphore", "Event", "Condition", "Barrier", "Thread", "Timer", "Process",
+            "Pool", "Queue", "Pipe", "Manager", "Value", "Array", "ctypes", "Struct", "Union",
+            "BytesIO", "StringIO", "TextIOWrapper", "FileIO", "BufferedReader", "BufferedWriter",
+            "BufferedRandom", "BufferedRWPair", "ConfigParser", "RawConfigParser", "SafeConfigParser"
+        }
+
         for node in ast.walk(tree):
             # AP-001 / DI-001: Hard-coded Constructor
             if isinstance(node, ast.FunctionDef) and node.name == "__init__":
