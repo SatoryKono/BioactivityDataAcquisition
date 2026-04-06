@@ -411,8 +411,13 @@ bioetl run --pipeline chembl_activity --no-health-server
 ### Standalone Health Server
 
 ```bash
-bioetl health server --port 8081
+bioetl health server --host 0.0.0.0 --port 8081
 ```
+
+> Примечание: для `5. Silver Reject Explorer` этот сервер должен быть доступен
+> из Grafana container (`host.docker.internal:8081`). Если поднять его только на
+> `127.0.0.1`, datasource `Quarantine Explorer` не сможет получить данные и
+> панели будут показывать `No data`.
 
 ______________________________________________________________________
 

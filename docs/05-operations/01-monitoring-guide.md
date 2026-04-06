@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.2
+Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
@@ -52,6 +52,7 @@ Pushgateway publication на завершении run. Это позволяет
 
 - **1. Overview / 2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`
 - **3. Provider Health**: `$provider`
+- **5. Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
 
 > **Важно**: Если вы не видите данных, убедитесь, что в фильтре выбран правильный пайплайн или стоит значение `All`.
 
@@ -149,6 +150,16 @@ Pushgateway publication на завершении run. Это позволяет
   DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
   Tempo handoff уже ограничен текущими `$pipeline/$run_type`.
 
+#### 5. 5. Silver Reject Explorer
+
+Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-backed, read-only datasource).
+
+- **Filtered Records Table**: полный список отфильтрованных записей с server-side filtering/pagination.
+- **Selected Record Details**: exact reject context по выбранному `payload_hash`.
+- **Top Reject Reasons / Fields / Signatures**: агрегаты в том же scoped контексте.
+- **Datasource**: `Quarantine Explorer` (JSON/Infinity), не Prometheus.
+- **Drilldown**: links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces` и row-level link в CLI-команду.
+
 #### Silver Filter Rejects Handoff
 
 - Используйте `1. Overview` или `2. Runtime` как summary surface, чтобы
@@ -156,10 +167,10 @@ Pushgateway publication на завершении run. Это позволяет
 - После подтверждения переходите в `4. Data Quality`, где
   `Top Silver Reject Reasons` и `Top Silver Reject Fields` дают bounded cause
   summary без raw quarantine text.
-- Если нужен exact record-level drilldown, stable reason signature или
-  inspection конкретных записей, переходите в quarantine CLI:
-  `bioetl quarantine stats --pipeline <pipeline> --silver-filter-only` и
-  `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --limit 20`.
+- Для row-level browsing переходите в `5. Silver Reject Explorer`.
+- CLI остаётся execution surface для replay/resolve:
+  `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --run-id <run-id> --limit 200` и
+  `bioetl quarantine resolve --pipeline <pipeline> --payload-hash <payload-hash> --status IGNORED`.
 
 ## 3. Alert-backed сигналы
 
@@ -229,8 +240,22 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
   1. Подтвердите spike в `1. Overview` или `2. Runtime`.
   1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
      `Top Silver Reject Fields`.
-  1. Если нужна exact причина по записям, используйте quarantine CLI с
-     `--silver-filter-only`.
+  1. Перейдите в `5. Silver Reject Explorer` для списка записей и detail по `payload_hash`.
+  1. Если нужны action-операции, используйте quarantine CLI (`inspect/resolve/replay`).
+- **`5. Silver Reject Explorer` показывает `No data` во всех панелях**:
+  1. Проверьте, что backend доступен: `curl http://127.0.0.1:8081/ops/quarantine/filter-options`.
+  1. Проверьте, что сервер поднят с внешним bind для Grafana container:
+     `bioetl health server --host 0.0.0.0 --port 8081`.
+  1. Проверьте наличие Infinity plugin и datasource:
+     `curl -u admin:<password> http://localhost:3000/api/datasources` должен содержать `Quarantine Explorer`,
+     а `curl -u admin:<password> http://localhost:3000/api/plugins/yesoreyeram-infinity-datasource/settings`
+     должен возвращать `200`.
+  1. Для Grafana 12+ используйте `GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource`
+     (legacy `GF_INSTALL_PLUGINS` оставляем только для обратной совместимости).
+  1. Убедитесь, что Grafana datasource `Quarantine Explorer` указывает на
+     `http://host.docker.internal:8081` (или ваш override `BIOETL_QUARANTINE_EXPLORER_URL`).
+  1. Если используется Linux Docker engine, проверьте что у Grafana есть
+     `host.docker.internal` (`extra_hosts: host-gateway`).
 - **Дашборд пустой**:
   1. Проверьте, что пайплайн-процесс запущен и не завершился с ошибкой.
   1. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).

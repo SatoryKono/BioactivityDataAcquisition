@@ -14,6 +14,7 @@ Commands:
     probe-quality      Measure narrow pytest/mypy startup and timeout behavior
     run-tests          Run tests (Python)
     mock-metrics       Start mock metrics server
+    mock-quarantine    Start mock quarantine explorer API server
     test-changed       Run tests for changed files only (Python backend)
     setup-mcp          Setup Copilot/Codex MCP integration
 """
@@ -29,6 +30,7 @@ COMMANDS: dict[str, str] = {
     "probe-quality": "quality_gate_probe.py",
     "run-tests": "run_tests.py",
     "mock-metrics": "metrics_mock_server.py",
+    "mock-quarantine": "quarantine_explorer_mock_server.py",
     "setup-mcp": "setup_copilot_codex_mcp.py",
 }
 

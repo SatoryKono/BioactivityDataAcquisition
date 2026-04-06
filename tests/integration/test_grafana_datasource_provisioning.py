@@ -26,4 +26,5 @@ def test_grafana_compose_installs_infinity_plugin() -> None:
     """Grafana container must install the Infinity datasource plugin."""
     compose_path = Path("docker-compose.monitoring.yml")
     content = compose_path.read_text(encoding="utf-8")
+    assert "GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource" in content
     assert "GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource" in content

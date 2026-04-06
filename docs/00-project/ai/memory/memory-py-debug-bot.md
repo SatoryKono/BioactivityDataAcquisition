@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
+*Version: 1.0.1 | Date: 2026-04-06 | Parent: agent-memory.md*
 
 > **Focus**: Root cause analysis, test failure debugging, systematic hypothesis verification, error classification.
 
@@ -26,6 +26,18 @@ When a failure appears structural rather than local, consult:
 - `docs/reports/evidence/governance-signals/SUMMARY.md`
 
 Default assumption: debug the concrete seam first; do not escalate to repo-wide restructuring unless the failure is supported by topology and governance evidence.
+
+## Debt Tracking During Fixes
+
+Every bug fix that edits files should also check whether it changes debt
+signals for the touched path:
+
+- review the relevant scorecard registries (`file_size_limits`,
+  `function_complexity`, `function_length`, `class_size`,
+  `class_method_count`, `god_object`, `domain_complexity`);
+- if the path belongs to a hotspot family, watch `duplication_clusters`,
+  `files_ge_250_loc`, `max_internal_fan_in`, and related family caps;
+- report debt outcome as `improved`, `unchanged`, or `worsened`.
 
 ---
 

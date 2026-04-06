@@ -20,6 +20,7 @@
 13.1. [Дашборд: 2. Runtime](#131-дашборд-2-runtime)
 13. [Дашборд: 3. Provider Health](#13-дашборд-3-provider-health)
 11. [Дашборд: 4. Data Quality](#11-дашборд-4-data-quality)
+12. [Дашборд: 5. Silver Reject Explorer](#12-дашборд-5-silver-reject-explorer)
 14. [Справочник PromQL-паттернов](#14-справочник-promql-паттернов)
 15. [Устранение неполадок](#15-устранение-неполадок)
 16. [Архитектурные решения и обоснования](#16-архитектурные-решения-и-обоснования)
@@ -107,8 +108,8 @@
 │                                                                   │
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Provisioning (автоматическая загрузка)                    │    │
-│  │  - Datasource: Prometheus (prometheus.yml)                │    │
-│  │  - Dashboards: 4 JSON файлов (bioetl.yaml)               │    │
+│  │  - Datasources: Prometheus + Quarantine Explorer          │    │
+│  │  - Dashboards: 5 JSON файлов (bioetl.yaml)               │    │
 │  │  - Обновление каждые 30 секунд                            │    │
 │  │  - allowUiUpdates: true                                   │    │
 │  └──────────────────────────────────────────────────────────┘    │
@@ -118,6 +119,7 @@
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
+│  - 5. Silver Reject Explorer (bioetl-silver-reject-explorer)     │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -145,15 +147,20 @@ grafana/
 ├── README.md                          # Этот документ
 ├── prometheus.yml                     # Конфигурация Prometheus scraper
 ├── provisioning/
-│   ├── datasources/
-│   │   └── prometheus.yml             # Datasource: Prometheus → Grafana
+│   ├── datasources-core/
+│   │   ├── prometheus.yml             # Datasource: Prometheus → Grafana
+│   │   └── quarantine-explorer.yml    # Datasource: Quarantine Explorer (Infinity)
+│   ├── datasources-tracing/
+│   │   ├── loki.yml                   # Datasource: Loki (optional profile)
+│   │   └── tempo.yml                  # Datasource: Tempo (optional profile)
 │   └── dashboards/
 │       └── bioetl.yaml                # Dashboard provisioning config
 └── dashboards/
     ├── bioetl-overview-v2.json        # Обзор для последнего запуска (v2)
     ├── bioetl-dq-v2.json              # Data Quality для последнего запуска (v2)
     ├── bioetl-runtime.json            # Runtime triage: log hygiene + alert conditions
-    └── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)
+    ├── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)
+    └── bioetl-silver-reject-explorer.json # Record-level Silver reject explorer
 
 docker-compose.monitoring.yml          # Docker Compose для стека мониторинга
 
@@ -697,7 +704,7 @@ shipped pack.
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
 **Drilldown:** dashboard links `2. Runtime`, `3. Provider Health`,
-`4. Data Quality`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
+`4. Data Quality`, `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
 текущее временное окно. Panel `Processing Volume by Stage` дублирует Explore handoff
 через data links для быстрого перехода в Grafana Explore. Tempo handoff для
 pipeline dashboards использует TraceQL filter по `span."bioetl.pipeline"` и
@@ -708,8 +715,8 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
    `Silver Filter Rejects`.
 2. Перейдите в `4. Data Quality`, чтобы проверить bounded breakdown через
    `Top Silver Reject Reasons` и `Top Silver Reject Fields`.
-3. Используйте quarantine CLI для exact record-level drilldown и reason-signature
-   inspection.
+3. Перейдите в `5. Silver Reject Explorer` для record-level browsing.
+4. Используйте quarantine CLI для execution (`resolve/replay`) и final action.
 
 ---
 
@@ -735,7 +742,7 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
 | 117 | Silver Filter Rejects | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный счётчик Silver filter rejects внутри текущего временного окна; не заменяет `Records Quarantined`. |
 | 118 | Silver Filter Rejects by Pipeline | Bar gauge | `sum by (pipeline) (last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))` | Breakdown intentional Silver exclusions по выбранным pipeline values через latest observed totals внутри текущего окна. |
 | 121 | Top Silver Reject Reasons | Bar gauge | `topk(10, sum by (reason_code) (last_over_time(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `reason_code` без fractional `increase(...)` artefacts на sparse batch scrapes. |
-| 122 | Top Silver Reject Fields | Bar gauge | `topk(10, sum by (field) (last_over_time(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `field`; exact field/root-cause drilldown остаётся в quarantine CLI. |
+| 122 | Top Silver Reject Fields | Bar gauge | `topk(10, sum by (field) (last_over_time(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `field`; exact field/root-cause drilldown делается в `5. Silver Reject Explorer`. |
 | 101 | Latest Data Timestamp | Stat | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})` | Последний observed ingestion timestamp внутри выбранного pipeline scope. |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
@@ -749,11 +756,43 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
 - неизвестные значения схлопываются в `other`
 - raw `message` не используется как Prometheus label
 
-**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и
+**Drilldown:** dashboard link `Back to Overview` плюс `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и
 `Explore Traces (Tempo, tracing profile)` используют текущее временное окно. Panel `Data Flow in
 Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
 incidents и freshness investigation. Tempo drilldown предфильтрован по
 `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
+
+---
+
+## 12. Дашборд: 5. Silver Reject Explorer
+
+**Файл:** `grafana/dashboards/bioetl-silver-reject-explorer.json`  
+**UID:** `bioetl-silver-reject-explorer`  
+**Refresh:** 30 секунд  
+**Time range:** Последние 12 часов  
+**Назначение:** Record-level browsing для Silver `filtered_out` записей на read-only quarantine API.
+
+### Панели
+
+| Название | Тип | Источник |
+|---|---|---|
+| Filtered Records Total | Stat | `/ops/quarantine/filtered-stats` |
+| Reject Rate vs Bronze | Gauge | `/ops/quarantine/filtered-stats` |
+| Top Reject Reasons / Fields / Signatures | Bar gauge / Table | `/ops/quarantine/filtered-stats` |
+| Filtered Records Table | Table | `/ops/quarantine/filtered-records` |
+| Selected Record Details | Table | `/ops/quarantine/filtered-record/{payload_hash}` |
+| Run Scope Summary | Stat | `/ops/quarantine/filtered-stats` |
+
+**Datasource:** `Quarantine Explorer` (`yesoreyeram-infinity-datasource`, provisioning: `grafana/provisioning/datasources-core/quarantine-explorer.yml`).
+
+**Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash` + стандартный Grafana time picker.
+
+**Важно:** это не Prometheus dashboard для row-level таблиц.  
+`1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;  
+`5. Silver Reject Explorer` закрывает exact record-level drilldown gap.
+
+**Drilldown:** links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`;  
+table row links дают self-drilldown по `payload_hash` и CLI handoff.
 
 ---
 
@@ -826,8 +865,8 @@ Explore с тем же time range. Как и в остальных shipped dashb
    отделить intentional exclusions от общего DQ/runtime шума.
 2. Если spike подтверждён, переходите по dashboard link `4. Data Quality` за
    bounded cause summary.
-3. Для exact records, field-level failures и stable signatures переходите в
-   quarantine CLI.
+3. Для record-level списка и details переходите в `5. Silver Reject Explorer`.
+4. Для execution (`resolve/replay/purge`) используйте quarantine CLI.
 
 ---
 
@@ -1704,6 +1743,7 @@ open http://localhost:9090/alerts
 | 3. Provider Health | `bioetl-provider-health-v2` | 2 | 5 | 30s | 12h | `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам |
 | BioETL Data Quality | `bioetl-dq` | 1 | 4 | 30s | 6h | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records` | DQ мониторинг с перцентилями |
 | 4. Data Quality | `bioetl-dq-v2` | 2 | 7 | 30s | 12h | `records_processed_total`, `data_freshness_seconds` | Selected-range DQ surface |
+| 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1 | 8 | 30s | 12h | Quarantine Explorer API (`/ops/quarantine/filtered-*`) | Record-level browsing для Silver rejects |
 
 ---
 

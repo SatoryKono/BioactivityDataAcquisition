@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
+*Version: 1.0.1 | Date: 2026-04-06 | Parent: agent-memory.md*
 
 > **Focus**: Documentation, ADR management, CHANGELOG, docstrings, glossary sync, doc-code consistency.
 
@@ -32,6 +32,18 @@ Prefer evidence-backed wording:
 - package count is descriptive, not a standalone defect signal;
 - family-level topology is the preferred hotspot narrative;
 - governance signals should be cited when docs imply prioritization.
+
+## Debt Tracking During Doc Updates
+
+If documentation is updated because files changed, make sure the narrative
+tracks technical debt correctly:
+
+- do not present `hotspot inventory` as if it were enforceable `exemption debt`;
+- if docs mention debt budgets or exemptions, sync wording with
+  `configs/quality/debt_scorecard.yaml` and
+  `configs/quality/architecture_metric_exemptions.yaml`;
+- when a task closes, preserve the debt outcome wording:
+  `improved`, `unchanged`, or `worsened`.
 
 ______________________________________________________________________
 

@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0 (консолидировано из веток `codex/develop-user-instructions-for-codex*`) | Основано на `docs/00-project/RULES.md`, `AGENT.md`, `CLAUDE.md`, `GEMINI.md` | Дата: 2026-03-13*
+*Версия: 1.1 (консолидировано из веток `codex/develop-user-instructions-for-codex*`) | Основано на `docs/00-project/RULES.md`, `AGENT.md`, `CLAUDE.md`, `GEMINI.md` | Дата: 2026-04-06*
 
 ## 1) Роль и цель
 
@@ -47,6 +47,25 @@
 - package count alone is not a refactor trigger;
 - hotspot calibration should be family-level by default;
 - topology identifies candidate zones, governance signals justify action.
+
+### Debt Tracking For File Edits
+
+Перед завершением любой правки файлов сверяйся с
+`docs/00-project/RULES.md` §1.1.3 и выполняй минимальный debt-check:
+
+1. Не смешивай `exemption debt` со `hotspot inventory`.
+1. Для затронутых путей проверь релевантные registries из
+   `configs/quality/debt_scorecard.yaml`:
+   `file_size_limits`, `function_complexity`, `function_length`, `class_size`,
+   `class_method_count`, `god_object`, `domain_complexity`.
+1. Если путь входит в named hotspot family, проверь bounded-growth / family
+   parameters (`duplication_clusters`, `files_ge_250_loc`,
+   `max_internal_fan_in`, related budgets) и не ухудшай их молча.
+1. Не вводи новый exemption без явного обновления
+   `configs/quality/architecture_metric_exemptions.yaml` и без required
+   metadata.
+1. В финальном сообщении фиксируй debt outcome для touched files:
+   `improved`, `unchanged` или `worsened`.
 
 ----------------------------------------------------------------------
 
@@ -106,6 +125,13 @@
 - Graceful degradation.
 - CLI user confirmations.
 - `MemoryLock` для local-only сценария.
+- Test doubles/scaffolding в `tests/**`
+  (`MagicMock`, `AsyncMock`, `SimpleNamespace`, direct state/value-object setup).
+- `Path(...)` и аналогичные stdlib/value-object conversions, если они только
+  нормализуют уже injected input и не создают runtime service dependency.
+- Создание infrastructure-local helpers внутри `infrastructure/**`
+  (`TracerProvider`, `AnomalyDetector`, `ArrowDataConverter`,
+  `RetentionPolicy`), если это адаптерная реализация, а не business logic.
 
 ----------------------------------------------------------------------
 

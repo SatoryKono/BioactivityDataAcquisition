@@ -36,10 +36,18 @@ BioETL is a Python ETL pipeline for bioactivity data acquisition from multiple p
 
 ### Dependency Injection
 
-- MUST inject dependencies via constructor, NOT hard-code them.
+- MUST inject cross-layer and business-logic dependencies via constructor, NOT hard-code them.
 - MUST NOT use Service Locator pattern.
-- Factory calls MUST only be in `composition/` layer.
+- Factory calls for business logic MUST only be in `composition/` layer.
 - NO module-level side effects in application/domain.
+- Do NOT flag test scaffolding in `tests/**` (`MagicMock`, `AsyncMock`,
+  `SimpleNamespace`, direct state/value-object setup) as DI violations.
+- Do NOT treat stdlib/value-object normalization such as `Path(...)` as a DI
+  violation when it adapts an already injected value rather than constructing a
+  service dependency.
+- Infrastructure adapters MAY construct infrastructure-local helper objects as
+  part of adapter implementation; this is not itself a business-logic DI
+  violation.
 
 ### Naming Conventions
 

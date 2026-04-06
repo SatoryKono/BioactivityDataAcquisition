@@ -253,6 +253,16 @@ src/bioetl/
 1. **Graceful degradation в MemoryMonitor**:
 
    - При недоступности psutil возвращает **консервативные оценки** (50% памяти), не нули
+
+1. **Test scaffolding и stdlib/value-object construction**:
+
+   - `MagicMock`, `AsyncMock`, `SimpleNamespace`, direct state/value-object setup
+     в `tests/**` не являются `AP-001`
+   - `Path(...)` / `str(...)` / simple normalization helpers не являются
+     hard-coded DI, если не создают service dependency
+   - создание `TracerProvider`, `AnomalyDetector`, `ArrowDataConverter`,
+     `RetentionPolicy` внутри `infrastructure/**` само по себе не является
+     DI-нарушением
    - Это **безопасный fallback** — лучше переоценить нагрузку, чем недооценить
    - Реализация: `memory_monitor.py:170-180` (`-get-stats-estimate`)
    - **НЕ баг**, а продуманное поведение для кросс-платформенности

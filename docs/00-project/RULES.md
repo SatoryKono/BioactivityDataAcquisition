@@ -1,11 +1,11 @@
 ---
-Version: 6.1.0
+Version: 6.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
   - BioETL Team
-Last verified: '2026-04-03'
+Last verified: '2026-04-06'
 ---
 
 # BioETL: Правила Проекта
@@ -129,6 +129,50 @@ class MyAdapter:
 - **MUST NOT** выбрасывать исключения — ловить и возвращать `UNHEALTHY`
 
 **Проверка:** Архитектурный тест `tests/architecture/` валидирует сигнатуры.
+
+### 1.1.3. Tracking Technical Debt During File Changes
+
+Любое изменение файлов **MUST** сопровождаться быстрой оценкой влияния на
+параметры технического долга для затронутых путей.
+
+- При изменениях в `src/`, `tests/`, `configs/` или `docs/` исполнитель
+  **MUST** определить, делает ли изменение debt-сигналы лучше, хуже или
+  оставляет их без изменений.
+- Debt-сигналы **MUST** интерпретироваться в двух разных плоскостях:
+  - **Exemption debt**: enforceable debt из
+    `configs/quality/architecture_metric_exemptions.yaml`, управляемый через
+    `configs/quality/debt_scorecard.yaml`.
+  - **Hotspot inventory**: raw evidence по size/LOC/duplication/fan-in из
+    `scripts/README.md` и related reports. Этот сигнал **MUST NOT**
+    трактоваться как enforceable debt, пока он явно не закреплён в scorecard
+    или named hotspot budget.
+- Для затронутого кода **MUST** быть проверены релевантные scorecard
+  registries: `file_size_limits`, `function_complexity`, `function_length`,
+  `class_size`, `class_method_count`, `god_object`, `domain_complexity`.
+- Если изменённый путь попадает в `hotspot_budgets` или
+  `report_only_hotspot_families` из `configs/quality/debt_scorecard.yaml`,
+  исполнитель **SHOULD** дополнительно отслеживать family-level параметры,
+  включая `duplication_clusters`, `files_ge_250_loc`,
+  `max_internal_fan_in` и другие bounded-growth поля для этой family.
+- Изменения **MUST NOT** неявно создавать новый debt exemption. Если exemption
+  действительно необходим, его **MUST** оформить в
+  `configs/quality/architecture_metric_exemptions.yaml` со всеми required
+  metadata: `value`, `owner`, `reason`, `classification`, `linked_rf`,
+  `expires_on`, `removal_step`, а scorecard sync **MUST** остаться валидным.
+- Если правка затрагивает quality gates, исполнитель **SHOULD** проверить, что
+  coarse budgets `ruff_error_count`, `mypy_error_count` и
+  `architecture_skip_count` не ухудшились относительно текущего scorecard.
+- Завершение задачи **SHOULD** явно фиксировать debt outcome для затронутых
+  файлов: `improved`, `unchanged` или `worsened`, с краткой пометкой, какие
+  параметры были проверены.
+
+Рекомендуемые проверки:
+
+```bash
+uv run python -m scripts.qa check-exemptions
+uv run python -m pytest tests/architecture/test_quality_debt_scorecard.py -q
+uv run python -m pytest tests/architecture/test_regression_metrics.py -q
+```
 
 ## 2. Поток Данных и Стратегия Medallion
 

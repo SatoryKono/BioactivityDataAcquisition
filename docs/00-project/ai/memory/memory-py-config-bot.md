@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
+*Version: 1.0.1 | Date: 2026-04-06 | Parent: agent-memory.md*
 
 > **Focus**: YAML config creation/update, DQ rules, filter rules, composite pipelines, ADR compliance.
 
@@ -25,6 +25,17 @@ For claims about config-tree layout or repo organization, consult:
 - `docs/reports/evidence/project-package-topology/SUMMARY.md`
 
 Do not propose repo/package restructuring from config sprawl alone without evidence beyond file count or directory breadth.
+
+## Debt Tracking During Config Edits
+
+When config changes affect governance or tracked code areas:
+
+- distinguish `exemption debt` from `hotspot inventory`;
+- verify whether the change impacts `configs/quality/debt_scorecard.yaml` or
+  `configs/quality/architecture_metric_exemptions.yaml`;
+- never add a new exemption without required metadata;
+- mention debt outcome for touched files or config surfaces:
+  `improved`, `unchanged`, or `worsened`.
 
 ---
 
