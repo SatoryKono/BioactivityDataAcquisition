@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.10
+Version: 1.0.11
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-04-06'
 
 ______________________________________________________________________
 
@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.10 | Дата: 2026-04-04 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.0*
+*Версия: 1.0.11 | Дата: 2026-04-06 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.1*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; другие runtimes могут сохранять отдельные runtime-specific copies и не обязаны совпадать побайтно с Codex surface.
 
@@ -40,7 +40,7 @@ ______________________________________________________________________
 | Провайдеры      | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.)     |
 | ADR             | Текущий набор в `docs/02-architecture/decisions/`; ADR-008 исторически superseded |
 | Coverage target | ≥85% overall, ≥90% domain                                                         |
-| RULES.md        | v6.1 (2026-03-13)                                                                 |
+| RULES.md        | v6.1.1 (2026-04-06)                                                               |
 
 ### Ключевые файлы
 
@@ -88,6 +88,24 @@ ______________________________________________________________________
 - topology подсказывает, где смотреть; governance signals подсказывают, где действовать.
 - compatibility registry использует YAML SSOT + shared loader + generated snapshot как baseline;
 - freeze guards по умолчанию считаются отдельным import-discipline/removal-policy слоем и не должны автоматически мигрировать в shared loader.
+
+### Technical debt tracking defaults
+
+При любых file edits агент по умолчанию должен:
+
+- отличать `exemption debt` от `hotspot inventory`;
+- проверять применимые debt registries в
+  `configs/quality/debt_scorecard.yaml`:
+  `file_size_limits`, `function_complexity`, `function_length`, `class_size`,
+  `class_method_count`, `god_object`, `domain_complexity`;
+- для путей внутри named hotspot families смотреть family-level параметры
+  (`duplication_clusters`, `files_ge_250_loc`, `max_internal_fan_in`,
+  related growth caps) и не допускать тихой деградации;
+- не вводить новый exemption без обновления
+  `configs/quality/architecture_metric_exemptions.yaml` с required metadata и
+  без сохранения scorecard sync;
+- в closeout фиксировать debt outcome по затронутым файлам:
+  `improved`, `unchanged` или `worsened`.
 
 ### Быстрые команды
 

@@ -16,6 +16,10 @@ from bioetl.interfaces.cli.commands.domains.quarantine.execution import (
     run_quarantine_async,
     run_quarantine_sync,
 )
+from bioetl.interfaces.cli.commands.domains.quarantine._run_scope_stats import (
+    RunManifestInspectionServiceProtocol,
+    enrich_run_scoped_stats,
+)
 from bioetl.interfaces.cli.commands.domains.quarantine.rendering import (
     build_purge_preview_lines,
     build_quarantine_grouped_lines,
@@ -57,23 +61,6 @@ class _QuarantineManager(Protocol):
         run_id: str | None = None,
     ) -> JsonDict:
         """Return aggregate quarantine statistics."""
-        ...
-
-
-class _RunManifestInspectionResult(Protocol):
-    """Protocol for manifest inspection payloads used in CLI enrichment."""
-
-    @property
-    def ledger_entries(self) -> tuple[object, ...]:
-        """Return the associated ledger entries."""
-        ...
-
-
-class _RunManifestInspectionService(Protocol):
-    """Protocol for control-plane manifest lookup used by quarantine CLI."""
-
-    def show(self, identifier: str) -> _RunManifestInspectionResult:
-        """Resolve one manifest or run identifier."""
         ...
 
 
@@ -182,64 +169,6 @@ def _render_stats_dashboard(
         click.echo(line)
 
 
-def _resolve_run_scoped_bronze_records(
-    run_manifest_service: _RunManifestInspectionService | None,
-    *,
-    run_id: str | None,
-) -> int | None:
-    """Resolve a Bronze denominator for one run from control-plane ledger data."""
-    if run_manifest_service is None or run_id is None:
-        return None
-    try:
-        inspection = run_manifest_service.show(run_id)
-    except ValueError:
-        return None
-
-    bronze_records: int | None = None
-    for entry in inspection.ledger_entries:
-        metrics_snapshot = getattr(entry, "metrics_snapshot", None)
-        if not isinstance(metrics_snapshot, dict):
-            continue
-        value = metrics_snapshot.get("records_bronze")
-        if not isinstance(value, int) or value <= 0:
-            continue
-        bronze_records = value if bronze_records is None else max(bronze_records, value)
-    return bronze_records
-
-
-def _enrich_run_scoped_stats(
-    stats: JsonDict,
-    *,
-    run_id: str | None,
-    run_manifest_service: _RunManifestInspectionService | None,
-) -> JsonDict:
-    """Add run-scoped metadata and optional Bronze denominator to stats."""
-    if run_id is None:
-        return stats
-
-    stats["run_scope"] = {"run_id": run_id}
-    silver = stats.get("silver_filter_rejects")
-    if not isinstance(silver, dict):
-        return stats
-
-    bronze_records = _resolve_run_scoped_bronze_records(
-        run_manifest_service,
-        run_id=run_id,
-    )
-    if bronze_records is None:
-        return stats
-
-    silver_total = silver.get("total_count")
-    if not isinstance(silver_total, int):
-        return stats
-
-    silver["bronze_records"] = bronze_records
-    if bronze_records > 0:
-        silver["bronze_ratio"] = silver_total / bronze_records
-        silver["bronze_ratio_pct"] = (silver_total / bronze_records) * 100
-    return stats
-
-
 def _inspect_quarantine(
     manager: _QuarantineManager,
     *,
@@ -285,7 +214,7 @@ def _show_quarantine_stats(
     top: int = 10,
     group_by: str | None = None,
     run_id: str | None = None,
-    run_manifest_service: _RunManifestInspectionService | None = None,
+    run_manifest_service: RunManifestInspectionServiceProtocol | None = None,
 ) -> None:
     """Display quarantine statistics for one pipeline."""
     context = _QuarantineCommandContext(pipeline=pipeline)
@@ -301,7 +230,7 @@ def _show_quarantine_stats(
     )
     if stats is None:
         return
-    stats = _enrich_run_scoped_stats(
+    stats = enrich_run_scoped_stats(
         stats,
         run_id=run_id,
         run_manifest_service=run_manifest_service,

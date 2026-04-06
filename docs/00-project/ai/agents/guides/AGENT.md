@@ -1,8 +1,8 @@
-# AGENT.md: Инструкции для Агента BioETL (v2.5)
+# AGENT.md: Инструкции для Агента BioETL (v2.6)
 
 *Статус: internal-published (Internal / Extended)*
 
-*Синхронизировано с RULES.md v6.1 (2026-03-13) | Дедублировано: ссылки на RULES.md*
+*Синхронизировано с RULES.md v6.1.1 (2026-04-06) | Дедублировано: ссылки на RULES.md*
 
 > **Runtime-specific note:** если задача исполняется в Claude Code, считай
 > runtime-specific orchestration source outside the Codex SSOT.
@@ -52,6 +52,36 @@ Operational rule:
 - breadth сама по себе не равна debt;
 - package family важнее whole layer как единица calibration;
 - governance signals важнее интуитивных structural claims.
+
+### Technical Debt Tracking On Edits
+
+При любой правке файлов следи не только за корректностью поведения, но и за
+параметрами технического долга:
+
+- различай `exemption debt` из `configs/quality/architecture_metric_exemptions.yaml`
+  и `hotspot inventory` из `scripts/README.md`;
+- проверяй релевантные registries из `configs/quality/debt_scorecard.yaml`:
+  `file_size_limits`, `function_complexity`, `function_length`, `class_size`,
+  `class_method_count`, `god_object`, `domain_complexity`;
+- если меняешь файлы внутри named hotspot family, отслеживай family-level
+  параметры вроде `duplication_clusters`, `files_ge_250_loc`,
+  `max_internal_fan_in`;
+- не создавай новый exemption молча: если он нужен, оформи required metadata и
+  сохрани scorecard sync;
+- в завершении задачи явно укажи debt outcome: `improved`, `unchanged` или
+  `worsened`.
+
+### DI False-Positive Guardrail
+
+Не помечай как `AP-001` следующие случаи:
+
+- test-only scaffolding в `tests/**` (`MagicMock`, `AsyncMock`,
+  `SimpleNamespace`, direct state construction);
+- `Path(...)` и другие stdlib/value-object conversions, если они лишь
+  нормализуют входные данные;
+- infrastructure-local helper construction в `infrastructure/**`, если это
+  часть adapter implementation, а не внедрение concrete dependency в
+  `application/domain`.
 
 ----------------------------------------------------------------------
 

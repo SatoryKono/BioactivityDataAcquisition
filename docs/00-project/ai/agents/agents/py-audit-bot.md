@@ -194,7 +194,7 @@ grep -rn ": Any\| Any " src/bioetl/<scope>/ --include="*.py"
 | DI-V002 | Method-level instantiation | `def run(): client = Client()`                    |
 | DI-V003 | Service Locator            | `ServiceLocator.get()`, `Container.resolve()`     |
 | DI-V004 | Import-time side effects   | `logger = structlog.get_logger()` at module level |
-| DI-V005 | Factory in business logic  | Factory calls outside `composition/`              |
+| DI-V005 | Factory in business logic  | Factory calls outside `composition/` in business logic |
 
 ### E. Naming Conventions
 
@@ -268,6 +268,13 @@ ______________________________________________________________________
 - `TYPE_CHECKING` imports
 - All `domain.*` imports in infrastructure (domain is pure value objects + contracts)
 - `domain.types` / `domain.exceptions` everywhere
+- Test doubles and scaffolding in `tests/**`
+  (`MagicMock`, `AsyncMock`, `SimpleNamespace`, direct state/value-object setup)
+- `Path(...)` and simple stdlib/value-object normalization when adapting
+  injected inputs rather than creating a service dependency
+- Infrastructure-local helper construction inside `infrastructure/**`
+  (`TracerProvider`, `AnomalyDetector`, `ArrowDataConverter`,
+  `RetentionPolicy`) unless it is actually business logic leakage
 
 ______________________________________________________________________
 

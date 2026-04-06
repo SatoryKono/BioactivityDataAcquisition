@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
+*Version: 1.0.1 | Date: 2026-04-06 | Parent: agent-memory.md*
 
 > **Focus**: Test execution, coverage analysis, VCR management, failure classification, baseline/final/retest.
 
@@ -25,6 +25,18 @@ For test recommendations that imply structural conclusions, consult:
 - `docs/reports/evidence/governance-signals/SUMMARY.md`
 
 Do not infer that a broad layer needs reorganization from test spread alone. Prefer family-level calibration plus failing evidence.
+
+## Debt Tracking During Test Edits
+
+When tests are added or changed alongside code:
+
+- treat test evidence as support for debt evaluation, not as a standalone debt
+  classifier;
+- if the task changes tracked files, include debt outcome in the closeout:
+  `improved`, `unchanged`, or `worsened`;
+- when tests cover exemption or scorecard behavior, keep
+  `configs/quality/debt_scorecard.yaml` and
+  `configs/quality/architecture_metric_exemptions.yaml` semantics aligned.
 
 ---
 

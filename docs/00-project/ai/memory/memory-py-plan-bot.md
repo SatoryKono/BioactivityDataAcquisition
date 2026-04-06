@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
+*Version: 1.0.1 | Date: 2026-04-06 | Parent: agent-memory.md*
 
 > **Focus**: Task decomposition, RF-* planning, DAG dependencies, composite pipeline design, routing.
 
@@ -33,6 +33,17 @@ Planning defaults:
 - do not use package count alone as a refactor trigger;
 - use package families as the unit of hotspot calibration;
 - treat `application/core` as the currently confirmed family hotspot and compare next candidates against evidence before expanding scope.
+
+## Debt Tracking Requirement For Planned Edits
+
+Every RF that changes files should explicitly preserve a debt-tracking step:
+
+- identify which scorecard registries are likely to move;
+- note whether the path is inside a named hotspot family;
+- require the implementing agent to report debt outcome:
+  `improved`, `unchanged`, or `worsened`;
+- if a plan would require a new exemption, surface that explicitly rather than
+  hiding it inside implementation work.
 
 ---
 

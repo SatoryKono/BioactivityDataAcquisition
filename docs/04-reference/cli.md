@@ -575,6 +575,12 @@ ______________________________________________________________________
 bioetl health server [--host 127.0.0.1] [--port 8081]
 ```
 
+Для Grafana `5. Silver Reject Explorer` используйте:
+
+```bash
+bioetl health server --host 0.0.0.0 --port 8081
+```
+
 **Endpoints:**
 
 - `GET /health` — общий статус

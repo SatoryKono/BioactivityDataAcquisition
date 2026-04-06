@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
+*Version: 1.0.1 | Date: 2026-04-06 | Parent: agent-memory.md*
 
 > **Focus**: Architecture compliance, code review, import boundaries, DI violations, naming, scoring.
 
@@ -28,6 +28,16 @@ For repo-wide structural findings, calibrate against:
 - `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md`
 
 Do not flag wide layers as refactor debt from package count alone. Prefer family-level hotspot findings backed by topology plus governance evidence.
+
+## Debt Tracking Review Rule
+
+When reviewing tasks that edit files, require the implementation closeout to say
+whether debt moved `improved`, `unchanged`, or `worsened`, and check that the
+author distinguished:
+
+- `exemption debt` in `configs/quality/architecture_metric_exemptions.yaml`;
+- `hotspot inventory` / family signals in `configs/quality/debt_scorecard.yaml`
+  and `scripts/README.md`.
 
 ---
 
@@ -91,7 +101,7 @@ pytest tests/architecture/ -v --tb=short
 | DI-002 | `def run(): client = Client()` | application, domain |
 | DI-003 | `ServiceLocator.get()` | everywhere |
 | DI-004 | Module-level `logger = structlog.get_logger()` | application, domain |
-| DI-005 | Factory calls outside `composition/` | application, domain, infrastructure |
+| DI-005 | Factory calls in business logic | application, domain |
 
 ---
 
@@ -110,6 +120,15 @@ pytest tests/architecture/ -v --tb=short
 - Click confirmations in CLI (interfaces layer)
 - Config classes with default values (`RuntimeConfig(timeout=30.0)`)
 - Test-specific module-level assignments
+- Test doubles and scaffolding in `tests/**` (`MagicMock`, `AsyncMock`,
+  `SimpleNamespace`, direct state/value-object construction)
+- Stdlib/path normalization helpers in constructors
+  (`Path(...)`, `str(...)`, `Path.resolve()`) when they adapt injected values
+  rather than creating a service dependency
+- Infrastructure adapters instantiating infrastructure-local helper objects
+  (`ArrowDataConverter`, `RetentionPolicy`, `AnomalyDetector`,
+  `TracerProvider`) inside `infrastructure/**`, unless the code is actually
+  business logic or a hidden service locator
 
 ---
 

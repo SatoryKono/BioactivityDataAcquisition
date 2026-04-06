@@ -1,5 +1,5 @@
 ---
-Version: 1.2.0
+Version: 1.3.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -21,12 +21,14 @@ Last verified: '2026-04-05'
 | 2. Runtime | `bioetl-runtime` | Runtime triage: warnings, unstructured logs, alert conditions |
 | 3. Provider Health | `bioetl-provider-health-v2` | Latency/успехи health_check провайдеров |
 | 4. Data Quality | `bioetl-dq-v2` | Качество данных, карантин, аномалии, freshness |
+| 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed) |
 
 ## Фильтрация
 
 - `bioetl-overview-v2`, `bioetl-dq-v2`, `bioetl-runtime`: `$pipeline`, `$run_type`
 - `bioetl-provider-health-v2`: `$provider`
-- Переменные `$run_id` и `execution` не используются.
+- `bioetl-silver-reject-explorer`: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
+- Переменная `execution` не используется; `$run_id` используется только в `bioetl-silver-reject-explorer`.
 
 ## Что смотреть в первую очередь
 
@@ -60,31 +62,33 @@ composite source selections и fragment outcomes по `layer/status`.
      `Silver Filter Rejects` в текущем time range.
   2. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
      `Top Silver Reject Fields`, чтобы сузить проблему до bounded cause summary.
-  3. Перейдите в quarantine CLI, если нужен exact record-level drilldown,
-     stable reason signature или inspection конкретных записей.
+  3. Откройте `5. Silver Reject Explorer` для record-level списка, выбора
+     `reason_code/field/run_id` и detail по конкретному `payload_hash`.
+  4. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и
+     финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
   - в каком `$pipeline` проблема сильнее;
   - это локальный всплеск или устойчивый тренд в выбранном time range;
   - какие `reason_code` и `field` сейчас доминируют в bounded dashboard summary.
-- Для ответа на вопрос "почему именно записи были исключены" переходите в CLI:
+- Для action-перехода из explorer в CLI используйте:
   ```bash
-  bioetl quarantine stats --pipeline <pipeline> --silver-filter-only
-  bioetl quarantine stats --pipeline <pipeline> --silver-filter-only --group-by reason-code-field
-  bioetl quarantine stats --pipeline <pipeline> --silver-filter-only --group-by reason-signature
-  bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --limit 20
+  bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --run-id <run-id> --limit 200
+  bioetl quarantine resolve --pipeline <pipeline> --payload-hash <payload-hash> --status IGNORED
   ```
-- Grafana в текущей shipped конфигурации — summary/trend surface.
-  `Top Silver Reject Reasons` / `Top Silver Reject Fields` используют bounded
-  metric vocabulary, а не raw quarantine text.
-- Record-level причины и exact by-reason drilldown остаются задачей quarantine CLI.
+- Grafana в shipped конфигурации разделена по ролям:
+  `1-4` dashboards дают summary/trend и bounded breakdown на Prometheus.
+  `5. Silver Reject Explorer` даёт row-level browsing через datasource `Quarantine Explorer`.
+- Record-level drilldown больше не ограничен только CLI.
+  CLI остаётся execution surface для replay/resolve/purge.
 
 ## Drilldown
 
 - `bioetl-overview-v2`: dashboard links `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` открывают соседние dashboards и Grafana Explore в текущем time range. Panel `id=1` (`Processing Volume by Stage`) дублирует Explore handoff через data links.
 - `bioetl-runtime`: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают короткий путь из warning/unstructured-log spikes обратно в overview и в Explore. Panel `id=9` (`Log Hygiene Trend`) дублирует Explore handoff через data links.
 - `bioetl-provider-health-v2`: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в overview и correlation flow. Panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
-- `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают тот же переход для DQ incidents и freshness investigation. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
+- `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают тот же переход для DQ incidents и freshness investigation. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
+- `bioetl-silver-reject-explorer`: dashboard links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`; main table поддерживает data links для self-drilldown по `payload_hash` и CLI handoff.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: dashboards с `$pipeline/$run_type` предварительно фильтруют TraceQL по `span."bioetl.pipeline"` и `span."bioetl.run_type"`, а provider dashboard — по `span."bioetl.provider"`. Это не заменяет correlation по `trace_id` / `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом клике.
 

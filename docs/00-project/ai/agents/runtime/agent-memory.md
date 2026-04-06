@@ -1,11 +1,11 @@
 ---
-Version: 1.1.0
+Version: 1.1.1
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-02'
+Last verified: '2026-04-06'
 ---
 
 # Memory: BioETL (краткая выжимка)
@@ -66,3 +66,16 @@ Last verified: '2026-04-02'
 Для structural claims:
 - не считать package count самостоятельным сигналом к reorg;
 - проверять family-level topology и governance evidence вместе.
+
+## Debt tracking on file changes
+- При изменении файлов обязательно различай `exemption debt` и `hotspot inventory`.
+- Проверяй применимые registries в `configs/quality/debt_scorecard.yaml`:
+  `file_size_limits`, `function_complexity`, `function_length`, `class_size`,
+  `class_method_count`, `god_object`, `domain_complexity`.
+- Если путь входит в hotspot family из scorecard, отслеживай family-level
+  параметры вроде `duplication_clusters`, `files_ge_250_loc`,
+  `max_internal_fan_in` и не ухудшай их молча.
+- Не добавляй новый exemption без required metadata в
+  `configs/quality/architecture_metric_exemptions.yaml` и без scorecard sync.
+- В финале задачи помечай debt outcome для touched files:
+  `improved`, `unchanged` или `worsened`.
