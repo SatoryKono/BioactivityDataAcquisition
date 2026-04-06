@@ -3,22 +3,22 @@
 **Date**: 2026-04-06
 **RULES.md Version**: 5.22
 **Project Version**: 1.0.0
-**Total files reviewed**: 5047
-**Total LOC reviewed**: 858873
+**Total files reviewed**: 4967
+**Total LOC reviewed**: 853932
 
 ---
 
 ## Executive Summary
 **Overall Status**: PASS
-**Overall Score**: 9.4/10.0
+**Overall Score**: 9.2/10.0
 
 ### Key Metrics
 | Metric | Value |
 |--------|-------|
-| Total issues found | 4376 |
-| Critical issues | 139 |
-| High issues | 4053 |
-| Medium issues | 184 |
+| Total issues found | 4528 |
+| Critical issues | 151 |
+| High issues | 4064 |
+| Medium issues | 313 |
 | Low issues | 0 |
 | Sectors reviewed | 8 |
 
@@ -33,8 +33,8 @@
 | S4 Composition + Interfaces | src/bioetl/composition, src/bioetl/interfaces | 252 | 31785 | 8.9 | PASS |
 | S6 Tests | tests | 1278 | 333453 | 6.4 | WARN |
 | S7 Configs | configs | 67 | 10487 | 10.0 | PASS |
-| S8 Documentation | docs | 838 | 109791 | 10.0 | PASS |
-| S5 Cross-cutting | src/bioetl | 1433 | 202646 | 10.0 | PASS |
+| S8 Documentation | docs | 758 | 104850 | 10.0 | PASS |
+| S5 Cross-cutting | src/bioetl | 1433 | 202646 | 8.1 | PASS |
 
 ---
 
@@ -52,40 +52,40 @@
 - **AP-001**: tests/unit/application/composite/test_runner_robustness.py:63 - Hard-coded dependency instantiation: CompositeCheckpointState()
 - **AP-001**: tests/unit/application/composite/test_runner_observability_mixin.py:22 - Hard-coded dependency instantiation: SimpleNamespace()
 - **AP-001**: tests/unit/application/composite/test_runner_observability_mixin.py:33 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/core/test_publication_term_data_source.py:27 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_publication_term_data_source.py:28 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_publication_term_data_source.py:29 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_publication_term_data_source.py:30 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_publication_term_data_source.py:554 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_publication_term_data_source.py:555 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_publication_term_data_source.py:556 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_publication_term_data_source.py:557 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_runner_execution_flow.py:20 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_runner_execution_flow.py:21 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_runner_execution_flow.py:22 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_runner_execution_flow.py:23 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_runner_execution_flow.py:27 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_runner_execution_flow.py:30 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_runner_execution_flow.py:33 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_runner_execution_flow.py:34 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_subcellular_fraction_data_source.py:24 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_subcellular_fraction_data_source.py:25 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_subcellular_fraction_data_source.py:26 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_subcellular_fraction_data_source.py:27 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_subcellular_fraction_data_source.py:42 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_subcellular_fraction_data_source.py:43 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_subcellular_fraction_data_source.py:44 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_subcellular_fraction_data_source.py:45 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_batch_executor_dq_mixin.py:63 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_batch_executor_dq_mixin.py:67 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_batch_executor_dq_mixin.py:68 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/core/test_batch_executor_recovery.py:25 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_batch_executor_recovery.py:26 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_filtered_data_source.py:24 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_filtered_data_source.py:25 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_filtered_data_source.py:26 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_filtered_data_source.py:27 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_filtered_data_source.py:45 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_filtered_data_source.py:46 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_filtered_data_source.py:47 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/core/test_filtered_data_source.py:48 - Hard-coded dependency instantiation: AsyncMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:72 - Hard-coded dependency instantiation: SimpleNamespace()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:77 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:80 - Hard-coded dependency instantiation: AsyncMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:82 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:85 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:58 - Hard-coded dependency instantiation: SimpleNamespace()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:71 - Hard-coded dependency instantiation: SimpleNamespace()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:72 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:74 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:75 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:82 - Hard-coded dependency instantiation: AsyncMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:83 - Hard-coded dependency instantiation: SimpleNamespace()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:89 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:91 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:92 - Hard-coded dependency instantiation: AsyncMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:107 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:109 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:75 - Hard-coded dependency instantiation: SimpleNamespace()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:76 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:78 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:80 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:81 - Hard-coded dependency instantiation: AsyncMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:82 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:65 - Hard-coded dependency instantiation: SimpleNamespace()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:70 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:72 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:73 - Hard-coded dependency instantiation: AsyncMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:76 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:77 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:80 - Hard-coded dependency instantiation: AsyncMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:62 - Hard-coded dependency instantiation: SimpleNamespace()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:63 - Hard-coded dependency instantiation: SimpleNamespace()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:66 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:69 - Hard-coded dependency instantiation: AsyncMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:70 - Hard-coded dependency instantiation: AsyncMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py:33 - Hard-coded dependency instantiation: SimpleNamespace()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py:44 - Hard-coded dependency instantiation: MagicMock()
