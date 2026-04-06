@@ -175,6 +175,8 @@ class BaseDeltaWriter:
         base_path: str | Path,
         logger: LoggerPort,
         flat_structure: bool = False,
+        arrow_converter: ArrowDataConverter | None = None,
+        retention_policy: RetentionPolicy | None = None,
     ) -> None:
         """Initialize base Delta writer.
 
@@ -184,12 +186,14 @@ class BaseDeltaWriter:
             logger: Structured logger for observability (MUST be injected per RULES.md).
             flat_structure: If True, Delta data is written directly to base_path
                           without creating table_name subdirectory.
+            arrow_converter: Custom ArrowDataConverter used for record serialization.
+            retention_policy: Custom retention policy manager for table maintenance.
         """
         self.base_path = str(base_path).rstrip("/")
         self.logger = logger
         self._flat_structure = flat_structure
-        self._arrow_converter = ArrowDataConverter(logger=logger)
-        self._retention_manager = RetentionPolicy(base_path)
+        self._arrow_converter = arrow_converter or ArrowDataConverter(logger=logger)
+        self._retention_manager = retention_policy or RetentionPolicy(base_path)
 
     def _resolve_table_path(self, table_name: str) -> str:
         """Resolve the filesystem path for a Delta table.

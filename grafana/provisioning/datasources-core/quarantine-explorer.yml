@@ -5,9 +5,9 @@ datasources:
     type: yesoreyeram-infinity-datasource
     uid: quarantine-explorer
     access: proxy
-    url: ${BIOETL_QUARANTINE_EXPLORER_URL:-http://host.docker.internal:8081}
+    url: ${BIOETL_QUARANTINE_EXPLORER_URL}
     editable: true
     jsonData:
       allowedHosts:
-        - ${BIOETL_QUARANTINE_EXPLORER_URL:-http://host.docker.internal:8081}
+        - ${BIOETL_QUARANTINE_EXPLORER_URL}
       auth_method: none
