@@ -34,12 +34,12 @@ def sort_columns_by_provider(
         """Return (provider_index, name) placing seed columns first."""
         lower_col = col.lower()
 
-        # ⚡ Bolt: use .find() to avoid expensive list allocations in inner loop
-        dot_idx = lower_col.find(".")
-        if dot_idx == -1 or lower_col.find(".", dot_idx + 1) == -1:
+        # ⚡ Bolt: safely limit list allocations with maxsplit while avoiding sentinel checks
+        parts = lower_col.split(".", maxsplit=2)
+        if len(parts) < 3:
             return (0, lower_col)
 
-        idx = provider_idx_map.get(lower_col[:dot_idx], default_idx)
+        idx = provider_idx_map.get(parts[0], default_idx)
         return (idx, lower_col)
 
     return sorted(columns, key=sort_key)
