@@ -24,19 +24,23 @@ def sort_columns_by_provider(
     provider_order: tuple[str, ...],
 ) -> list[str]:
     """Sort columns by provider prefix order."""
+    # ⚡ Bolt: pre-compute O(1) lookup dictionary to avoid O(N) .index() calls
+    provider_idx_map = {
+        provider: idx + 1 for idx, provider in enumerate(provider_order)
+    }
+    default_idx = len(provider_order) + 1
 
     def sort_key(col: str) -> tuple[int, str]:
         """Return (provider_index, name) placing seed columns first."""
-        parts = col.split(".")
-        if len(parts) < 3:
-            return (0, col.lower())
+        lower_col = col.lower()
 
-        provider = parts[0].lower()
-        try:
-            idx = provider_order.index(provider)
-            return (idx + 1, col.lower())
-        except ValueError:
-            return (len(provider_order) + 1, col.lower())
+        # ⚡ Bolt: use .find() to avoid expensive list allocations in inner loop
+        dot_idx = lower_col.find(".")
+        if dot_idx == -1 or lower_col.find(".", dot_idx + 1) == -1:
+            return (0, lower_col)
+
+        idx = provider_idx_map.get(lower_col[:dot_idx], default_idx)
+        return (idx, lower_col)
 
     return sorted(columns, key=sort_key)
 
