@@ -20,6 +20,7 @@ def test_quarantine_explorer_datasource_is_repo_provisioned() -> None:
     assert "uid: quarantine-explorer" in content
     assert "type: yesoreyeram-infinity-datasource" in content
     assert "BIOETL_QUARANTINE_EXPLORER_URL" in content
+    assert ":-" not in content
 
 
 def test_grafana_compose_installs_infinity_plugin() -> None:
