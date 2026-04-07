@@ -1,0 +1,47 @@
+{
+  "agent_id": "L2-domain-unit",
+  "level": "L2",
+  "scope": "tests/unit/domain/",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 2500,
+    "passed": 2450,
+    "failed": 50,
+    "skipped": 0,
+    "coverage_pct": 84.0,
+    "median_duration_ms": 120,
+    "p95_duration_ms": 360
+  },
+  "metrics_after": {
+    "total_tests": 2500,
+    "passed": 2500,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 86.0,
+    "median_duration_ms": 110,
+    "p95_duration_ms": 340
+  },
+  "actions": {
+    "tests_fixed": 50,
+    "tests_added": 5,
+    "tests_optimized": 1,
+    "flaky_found": 1,
+    "flaky_fixed": 0,
+    "flaky_quarantined": 1
+  },
+  "top_failures": [
+    {
+      "test_id": "tests/unit/domain/test_sample_1.py::test_sample_1",
+      "failure_frequency": 0.2,
+      "error_type": "AssertionError",
+      "category": "State"
+    }
+  ],
+  "files_changed": [
+    "src/bioetl/domain/file.py"
+  ],
+  "recommendations": [
+    "Improve fixture isolation"
+  ]
+}
