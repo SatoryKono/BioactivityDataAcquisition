@@ -209,6 +209,18 @@
       "review_by": "2026-05-31",
       "replacement": "scripts/schema/validate_unified_configs.py",
       "sunset_date": "2026-06-30"
+    },
+    "scripts/ops/start-codex.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a legacy utility"
+    },
+    "scripts/qa/py_review_orchestrator.py": {
+      "owner": "@bioetl-platform",
+      "decision": "active",
+      "review_by": "2026-07-15",
+      "next_step": "Active script for py-review-orchestrator static analysis"
     }
   }
 }
