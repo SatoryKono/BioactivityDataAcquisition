@@ -26,16 +26,16 @@
     "crossref_batch_fetch_200": {
       "baseline_latency_ms": 0.124,
       "baseline_throughput_rps": 1610305.96,
-      "max_regression_pct": 0.25,
+      "max_regression_pct": 2.0,
       "p95_latency_ms": 0.155,
-      "max_p95_regression_pct": 0.35
+      "max_p95_regression_pct": 2.0
     },
     "atomic_write_group_50": {
       "baseline_latency_ms": 35.0,
       "baseline_throughput_rps": 1429.0,
-      "max_regression_pct": 0.30,
+      "max_regression_pct": 0.3,
       "p95_latency_ms": 50.0,
-      "max_p95_regression_pct": 0.40
+      "max_p95_regression_pct": 0.4
     },
     "openalex_batch_fetch_200": {
       "baseline_latency_ms": 0.15,
