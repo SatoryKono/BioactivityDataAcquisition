@@ -9,7 +9,7 @@
 
 Идентификатор документа: **D-05**.
 
-Исследование начато с включённого коннектора **github** и репозитория `SatoryKono/BioactivityDataAcquisition2` на entity["company","GitHub","code hosting platform"] [1]. Далее последовательно рассмотрены приоритетные официальные источники: entity["organization","EMBL-EBI","bioinformatics institute, uk"] (ebi.ac.uk) [6], entity["organization","National Institutes of Health","us biomedical agency"] (nih.gov) [4–5], entity["organization","UniProt","protein knowledgebase"] (uniprot.org) [7], entity["organization","Crossref","doi registration agency"] (crossref.org) [2], entity["organization","OpenAlex","open scholarly catalog"] (openalex.org) [3], entity["organization","Semantic Scholar","ai2 scholarly api"] (semanticscholar.org) [8–9]. citeturn0search0turn0search1turn0search2turn0search3turn0search5turn6search0turn7search1turn7search3
+Исследование начато с включённого коннектора **github** и репозитория `SatoryKono/BioactivityDataAcquisition2` на entity["company","GitHub","code hosting platform"] [1]. Далее последовательно рассмотрены приоритетные официальные источники: entity["organization","EMBL-EBI","bioinformatics institute, uk"] (ebi.ac.uk) [6], entity["organization","National Institutes of Health","us biomedical agency"] (nih.gov) [4–5], entity["organization","UniProt","protein knowledgebase"] (uniprot.org) [7], entity["organization","Crossref","doi registration agency"] (crossref.org) [2], entity["organization","OpenAlex","open scholarly catalog"] (openalex.org) [3], entity["organization","Semantic Scholar","ai2 scholarly api"] (semanticscholar.org) . citeturn0search0turn0search1turn0search2turn0search3turn0search5turn6search0turn7search1turn7search3
 
 [...] Исходные чаты проекта не предоставлены; элементы orchestration‑слоя (где хранится schedule/resources/owner и как именно запускаются backfill/rebuild) помечены как «неуточнено».
 
@@ -25,11 +25,11 @@
 - OpenAlex: лимиты/ограничения per_page/10k paging/cursor paging, 429 при превышении, наличие rate-limit endpoint [3]. citeturn0search1
 - NCBI E-utilities: baseline 3 rps, 10 rps с ключом, отдельные условия для повышенных лимитов [4–5]. citeturn0search2turn0search5
 - EMBL-EBI Proteins API: лимит 200 requests/second/user (как заявленная верхняя граница) [6]. citeturn0search3
-- Semantic Scholar: рекомендация использовать API key, «introductory» лимит 1 RPS для ключа, запрет обхода rate limits и распространения ключа [8–9]. citeturn7search1turn7search3turn7search5
+- Semantic Scholar: рекомендация использовать API key, «introductory» лимит 1 RPS для ключа, запрет обхода rate limits и распространения ключа . citeturn7search1turn7search3turn7search5
 - UniProt: публичный REST API и инструменты ID mapping (первичный научный источник — статья NAR) [7]. citeturn6search0turn6search1
 
 {красный} Риски, требующие явного закрытия отдельными задачами:
-- возможный drift между официальными лимитами/правилами и фактическими значениями provider configs (обязателен периодический re-verify и pin-date в документации) [2–6][8–9]. citeturn0search0turn0search6turn0search3turn7search1
+- возможный drift между официальными лимитами/правилами и фактическими значениями provider configs (обязателен периодический re-verify и pin-date в документации) [2–6]. citeturn0search0turn0search6turn0search3turn7search1
 - единый механизм secrets: секреты в YAML запрещены, но способ разрешения ссылок на env/secret store в текущей реализации — *неуточнено* [1].
 
 ## Область действия и стейкхолдеры
