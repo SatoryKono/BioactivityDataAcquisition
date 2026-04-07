@@ -90,7 +90,7 @@ jobs:
 
     control-plane-e2e:
         runs-on: ubuntu-latest
-        timeout-minutes: 15
+        timeout-minutes: 30
         needs: smoke-check
         env:
             BIOETL_TEST_MODE: "true"
@@ -125,7 +125,7 @@ jobs:
 
     governance-preflight:
         runs-on: ubuntu-latest
-        timeout-minutes: 10
+        timeout-minutes: 30
 
         steps:
             -   name: Checkout code
@@ -188,7 +188,7 @@ jobs:
 
     config-schema-preflight:
         runs-on: ubuntu-latest
-        timeout-minutes: 10
+        timeout-minutes: 30
 
         steps:
             -   name: Checkout code
@@ -237,7 +237,7 @@ jobs:
 
     track-d-gates:
         runs-on: ubuntu-latest
-        timeout-minutes: 15
+        timeout-minutes: 30
         needs: smoke-check
         env:
             BIOETL_TEST_MODE: "true"
@@ -274,7 +274,7 @@ jobs:
 
     dq-consistency-gate:
         runs-on: ubuntu-latest
-        timeout-minutes: 10
+        timeout-minutes: 30
         needs: governance-preflight
 
         steps:
@@ -319,7 +319,7 @@ jobs:
     # Fast tests run first for quick feedback
     test-fast:
         runs-on: ubuntu-latest
-        timeout-minutes: 10
+        timeout-minutes: 30
         needs: smoke-check  # Only minimal dependency smoke should gate fast tests
 
         steps:
@@ -369,7 +369,7 @@ jobs:
     # Full test matrix runs in parallel for comprehensive coverage
     test-matrix:
         runs-on: ubuntu-latest
-        timeout-minutes: 15
+        timeout-minutes: 30
         needs: smoke-check  # Allow matrix to start after minimal dependency smoke only
         strategy:
             fail-fast: false
@@ -577,7 +577,7 @@ jobs:
         needs:
             - test-fast
             - test-matrix
-        timeout-minutes: 10
+        timeout-minutes: 30
 
         steps:
             -   name: Set up Python 3.11

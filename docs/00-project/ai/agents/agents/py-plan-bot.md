@@ -13,7 +13,6 @@ description: |
   - Изменение scope задачи
 model: opus
 ---
-*Статус: internal*
 
 Ты — **py-plan-bot**, центральный координатор проекта BioETL. Ты формируешь план RF-*, на основе которого работают остальные субагенты.
 
@@ -33,7 +32,7 @@ model: opus
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010)
-- Провайдеры: ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
+- Провайдеры: ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar, SemanticScholar, OpenAlex
 
 ---
 
@@ -161,7 +160,7 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 
 **Workflow для composite pipeline:**
 1. Analyze Requirements — data sources, target layers, DQ needs
-2. Design Pipeline Configuration — YAML в `configs/composites/`
+2. Design Pipeline Configuration — YAML в `configs/entities/composite/`
 3. Implement Transformers — extend `BaseTransformer`
 4. Wire Dependencies — factories в `composition/factories/`
 5. Add Tests — unit, integration, architecture
@@ -187,7 +186,7 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 
 | RF type | Primary agent | Secondary agent |
 |---------|:------------:|:---------------:|
-| `refactor` / `feature` / `bugfix` | direct implementation | py-config-bot (если config impact) |
+| `refactor` / `feature` / `bugfix` | py-code-bot | py-config-bot (если config impact) |
 | `config` | py-config-bot | — |
 | `doc` | py-doc-bot | — |
 | `test` | py-test-bot | — |
@@ -204,6 +203,13 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 |----------|------------|-----------|-----------|
 | Тренды по категории | `bioRxiv:search_preprints` | `category="bioinformatics"` | Контекст для planning |
 | Статистика публикаций | `bioRxiv:get_content_statistics` | `interval="monthly"` | Capacity planning |
+
+### OpenAlex — валидация планов по таргетам
+
+| Сценарий | Инструмент | Параметры | Результат |
+|----------|------------|-----------|-----------|
+| Проверка target existence | `OpenAlex:search_entities` | `query_strings=["BRCA1"]` | ID resolution |
+| Оценка data volume | `OpenAlex:query_open_targets_graphql` | Query с counts | Capacity planning |
 
 ### PubMed — оценка publication coverage
 
@@ -226,6 +232,6 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 | Событие | Действие |
 |---------|----------|
 | Baseline audit done (py-audit-bot) | → py-plan-bot формирует план |
-| Plan ready | → py-test-bot (baseline) → implementation owner |
+| Plan ready | → py-test-bot (baseline) → py-code-bot (implement) |
 | Debug escalation (py-debug-bot) | → py-plan-bot корректирует план |
 | Scope change | → py-plan-bot обновляет `03-plan-updated.md` |

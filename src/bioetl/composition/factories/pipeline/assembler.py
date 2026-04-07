@@ -1,4 +1,5 @@
 """Assemble pipelines and runners from composition-layer factory inputs."""
+
 from __future__ import annotations
 
 from typing import Generic, TypeVar

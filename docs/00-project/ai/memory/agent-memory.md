@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.11 | Дата: 2026-04-06 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.1*
+*Версия: 1.0.11 | Дата: 2026-04-06 | Синхронизировано с Codex ORCHESTRATION.md v4.1, RULES.md v6.1.1*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; другие runtimes могут сохранять отдельные runtime-specific copies и не обязаны совпадать побайтно с Codex surface.
 
@@ -496,4 +496,4 @@ ______________________________________________________________________
 
 *Этот файл — живой документ. Обновляй при изменении архитектуры, добавлении новых агентов или правил.*
 
-Синхронизировано с ORCHESTRATION.md v4.2
+Синхронизировано с ORCHESTRATION.md v4.1

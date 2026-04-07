@@ -2,11 +2,9 @@ ______________________________________________________________________
 
 ## name: py-review-orchestrator description: "Hierarchical Code Review Agent for BioETL" model: sonnet
 
-*Статус: internal*
-
 # py-review-orchestrator — Hierarchical Code Review Agent
 
-*Версия: 1.0.0 | Совместимо с RULES.md v6.1 (2026-03-13)*
+*Версия: 1.0.0 | Совместимо с RULES.md v5.24 (2026-02-24)*
 
 ______________________________________________________________________
 
@@ -15,11 +13,6 @@ ______________________________________________________________________
 Провести **исчерпывающее ревью** кода, документации, конфигураций и тестов
 проекта BioETL через иерархическую систему агентов с автоматическим
 масштабированием глубины анализа.
-
-Consolidation note (2026-03-08): это каноническая точка входа для полного
-ревью BioETL. Generic specialist reviewers (`sp-code-reviewer`,
-`sp-architect-reviewer`) используются как вспомогательные, но не как primary
-entrypoint для BioETL compliance review.
 
 **Принцип работы:** Orchestrator Level-1 (L1) делит проект на крупные секторы
 и запускает агентов-ревьюеров. Каждый ревьюер оценивает объём своей зоны.
@@ -77,10 +70,13 @@ ______________________________________________________________________
 
 ## КОНТЕКСТ ПРОЕКТА
 - Архитектура: Hexagonal (Ports & Adapters), 5 слоёв
-- Размер слоёв, tests/configs/docs считай live в текущем checkout перед разбиением на сектора
-- Не копируй исторические snapshot-counts в отчёт; используй команды подсчёта и фиксируй дату/ветку при необходимости
-- Правила: `docs/00-project/RULES.md` (v6.1), runtime self-review rules
-- ADR: используй текущий список файлов в `docs/02-architecture/decisions/`, не исторический диапазон
+- Слои: `domain` (190 .py), `application` (133), `infrastructure` (140),
+  `composition` (54), `interfaces` (29) — итого ~548 файлов src/
+- Тесты: ~620 файлов в `tests/`
+- Конфигурации: ~38 YAML в `configs/`
+- Документация: ~600 файлов в `docs/`
+- Правила: `docs/00-project/RULES.md` (v5.24), `.claude/rules/ai-selfreview-rules.md`
+- ADR: 40 решений в `docs/02-architecture/decisions/`
 
 ## ПЛАН СЕКТОРОВ
 Раздели проект на следующие **8 секторов** и запусти по одному агенту
@@ -134,8 +130,8 @@ ______________________________________________________________________
 
 ### 2A.1. Загрузи правила
 Прочитай эти файлы для понимания критериев:
-- runtime self-review rules — правила ревью и scoring
-- runtime project context file — контекст проекта
+- `.claude/rules/ai-selfreview-rules.md` — правила ревью и scoring
+- `.claude/PROJECT_CONTEXT.md` — контекст проекта
 
 ### 2A.2. Проведи ревью по категориям
 Для каждого файла в scope проверь применимые правила:
@@ -349,55 +345,55 @@ ______________________________________________________________________
 Используй логическое деление по модулям/подпакетам.
 Примеры разбиения:
 
-**Для S1 (Domain; пересчитай live перед запуском):**
+**Для S1 (Domain, 190 файлов):**
 
-| Подзона | Scope                                                                                                                         | Примечание                                               |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| S1.1    | domain/ports/ + domain/contracts/                                                                                             | Выделяй отдельно из-за import-boundary и protocol review |
-| S1.2    | domain/entities/ + domain/value_objects/                                                                                      | Удобно держать в одной предметной подзоне                |
-| S1.3    | domain/schemas/                                                                                                               | Отдельная подзона для schema/rules drift                 |
-| S1.4    | domain/services/ + domain/filtering/ + domain/mapping/                                                                        | Часто cohesive review block                              |
-| S1.5    | domain/config/ + domain/composite/ + domain/aggregates/ + domain/registry/ + domain/models/ + domain/exceptions/ + root files | При превышении порога разбей дополнительно               |
+| Подзона | Scope                                                                                                                         | Файлов |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------- | ------ |
+| S1.1    | domain/ports/ + domain/contracts/                                                                                             | ~34    |
+| S1.2    | domain/entities/ + domain/value_objects/                                                                                      | ~38    |
+| S1.3    | domain/schemas/                                                                                                               | ~37    |
+| S1.4    | domain/services/ + domain/filtering/ + domain/mapping/                                                                        | ~30    |
+| S1.5    | domain/config/ + domain/composite/ + domain/aggregates/ + domain/registry/ + domain/models/ + domain/exceptions/ + root files | ~51    |
 
-**Для S2 (Application; пересчитай live перед запуском):**
+**Для S2 (Application, 133 файла):**
 
-| Подзона | Scope                                                                                                    | Примечание                                    |
-| ------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| S2.1    | application/pipelines/chembl/ + application/pipelines/common/                                            | Provider-heavy orchestration cluster          |
-| S2.2    | application/pipelines/pubmed/ + application/pipelines/crossref/ + application/pipelines/openalex/        | Группируй по совместимому pipeline surface    |
-| S2.3    | application/pipelines/pubchem/ + application/pipelines/semanticscholar/ + application/pipelines/uniprot/ | Группируй по совместимому pipeline surface    |
-| S2.4    | application/core/                                                                                        | Отдельный review block для orchestration core |
-| S2.5    | application/composite/ + application/services/ + application/observability/                              | При превышении порога дели ещё раз            |
+| Подзона | Scope                                                                                                    | Файлов |
+| ------- | -------------------------------------------------------------------------------------------------------- | ------ |
+| S2.1    | application/pipelines/chembl/ + application/pipelines/common/                                            | ~20    |
+| S2.2    | application/pipelines/pubmed/ + application/pipelines/crossref/ + application/pipelines/openalex/        | ~19    |
+| S2.3    | application/pipelines/pubchem/ + application/pipelines/semanticscholar/ + application/pipelines/uniprot/ | ~17    |
+| S2.4    | application/core/                                                                                        | ~31    |
+| S2.5    | application/composite/ + application/services/ + application/observability/                              | ~43    |
 
-**Для S3 (Infrastructure; пересчитай live перед запуском):**
+**Для S3 (Infrastructure, 140 файлов):**
 
-| Подзона | Scope                                                                                  | Примечание                          |
-| ------- | -------------------------------------------------------------------------------------- | ----------------------------------- |
-| S3.1    | infrastructure/adapters/chembl/ + .../pubmed/ + .../crossref/                          | Provider adapters cluster           |
-| S3.2    | infrastructure/adapters/pubchem/ + .../openalex/ + .../semanticscholar/ + .../uniprot/ | Provider adapters cluster           |
-| S3.3    | infrastructure/adapters/ (base, http, common, decorators, input)                       | Shared adapter substrate            |
-| S3.4    | infrastructure/storage/ + infrastructure/config/ + infrastructure/schemas/             | Storage/config/schema cluster       |
-| S3.5    | infrastructure/observability/ + остальные модули                                       | Split further if threshold exceeded |
+| Подзона | Scope                                                                                  | Файлов |
+| ------- | -------------------------------------------------------------------------------------- | ------ |
+| S3.1    | infrastructure/adapters/chembl/ + .../pubmed/ + .../crossref/                          | ~23    |
+| S3.2    | infrastructure/adapters/pubchem/ + .../openalex/ + .../semanticscholar/ + .../uniprot/ | ~18    |
+| S3.3    | infrastructure/adapters/ (base, http, common, decorators, input)                       | ~25    |
+| S3.4    | infrastructure/storage/ + infrastructure/config/ + infrastructure/schemas/             | ~31    |
+| S3.5    | infrastructure/observability/ + остальные модули                                       | ~43    |
 
-**Для S6 (Tests; пересчитай live перед запуском):**
+**Для S6 (Tests, ~620 файлов):**
 
-| Подзона | Scope                                                                                                                       | Примечание                                 |
-| ------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| S6.1    | tests/architecture/                                                                                                         | Boundary and invariant suite               |
-| S6.2    | tests/unit/domain/                                                                                                          | Domain unit cluster                        |
-| S6.3    | tests/unit/application/                                                                                                     | Application unit cluster                   |
-| S6.4    | tests/unit/infrastructure/                                                                                                  | Infrastructure unit cluster                |
-| S6.5    | tests/unit/composition/ + tests/unit/interfaces/ + tests/unit/contracts/ + tests/unit/pipelines/                            | Split further if current tree is too large |
-| S6.6    | tests/integration/ + tests/e2e/ + tests/contract/ + tests/security/ + tests/smoke/ + tests/performance/ + tests/benchmarks/ | Cross-cutting non-unit suites              |
+| Подзона | Scope                                                                                                                       | Файлов |
+| ------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
+| S6.1    | tests/architecture/                                                                                                         | ~57    |
+| S6.2    | tests/unit/domain/                                                                                                          | ~104   |
+| S6.3    | tests/unit/application/                                                                                                     | ~120   |
+| S6.4    | tests/unit/infrastructure/                                                                                                  | ~115   |
+| S6.5    | tests/unit/composition/ + tests/unit/interfaces/ + tests/unit/cli/ + tests/unit/contracts/ + tests/unit/pipelines/          | ~75    |
+| S6.6    | tests/integration/ + tests/e2e/ + tests/contract/ + tests/security/ + tests/smoke/ + tests/performance/ + tests/benchmarks/ | ~117   |
 
-**Для S8 (Documentation; пересчитай live перед запуском):**
+**Для S8 (Documentation, ~600 файлов):**
 
-| Подзона | Scope                                                                    | Примечание                   |
-| ------- | ------------------------------------------------------------------------ | ---------------------------- |
-| S8.1    | docs/00-project/ + docs/01-requirements/                                 | Governance and requirements  |
-| S8.2    | docs/02-architecture/ (decisions, policies)                              | Architecture governance      |
-| S8.3    | docs/04-reference/                                                       | Reference-heavy subtree      |
-| S8.4    | docs/03-guides/ + docs/05-operations/ + remaining docs not covered above | Guide and operations subtree |
+| Подзона | Scope                                                       | Файлов |
+| ------- | ----------------------------------------------------------- | ------ |
+| S8.1    | docs/00-project/ + docs/01-requirements/                    | ~20    |
+| S8.2    | docs/02-architecture/ (decisions, policies)                 | ~50    |
+| S8.3    | docs/04-reference/                                          | ~148   |
+| S8.4    | docs/03-guides/ + docs/05-operations/ + docs/03-data-model/ | ~87    |
 
 ### 2B.2. Запусти L3-агентов
 
@@ -680,7 +676,7 @@ ______________________________________________________________________
 Вставьте в чат:
 
 ```text
-Прочитай runtime profile `py-review-orchestrator` и выполни полное
+Прочитай .claude/agents/py-review-orchestrator.md и выполни полное
 иерархическое ревью проекта согласно инструкции L1 Orchestrator (раздел 3).
 Отчёты создавай в reports/review/.
 ```
@@ -692,7 +688,7 @@ Task(
     subagent_type="general-purpose",
     description="L1 Review Orchestrator",
     prompt="""Ты — L1 Review Orchestrator. Прочитай файл
-    runtime profile `py-review-orchestrator` и выполни полное
+    .claude/agents/py-review-orchestrator.md и выполни полное
     иерархическое ревью проекта BioETL.
     Шаги:
     1. Создай директорию reports/review/
@@ -708,20 +704,20 @@ ______________________________________________________________________
 
 ```text
 L1 запускает:
-  ├── Task(S1-domain) → сначала считает live scope; если > 40 файлов или > 3000 LOC → L2 mode
-  │   ├── Task(S1.1-ports)      → сверяет live с порогом → Worker или L2 → S1.1-ports.md
-  │   ├── Task(S1.2-entities)   → сверяет live с порогом → Worker или L2 → S1.2-entities.md
-  │   ├── Task(S1.3-schemas)    → сверяет live с порогом → Worker или L2 → S1.3-schemas.md
-  │   ├── Task(S1.4-services)   → сверяет live с порогом → Worker или L2 → S1.4-services.md
-  │   └── Task(S1.5-other)      → при превышении порога делит ещё раз
+  ├── Task(S1-domain) → оценка: 190 файлов > 40 → L2 mode
+  │   ├── Task(S1.1-ports)      → 34 файла ≤ 40 → Worker mode → S1.1-ports.md
+  │   ├── Task(S1.2-entities)   → 38 файлов ≤ 40 → Worker mode → S1.2-entities.md
+  │   ├── Task(S1.3-schemas)    → 37 файлов ≤ 40 → Worker mode → S1.3-schemas.md
+  │   ├── Task(S1.4-services)   → 30 файлов ≤ 40 → Worker mode → S1.4-services.md
+  │   └── Task(S1.5-other)      → 51 файлов > 40 → Worker mode (пограничный, OK)
   │   → Собирает → S1-domain.md
   │
   ├── Task(S2-application) → L2 mode → 5 подзон → S2-application.md
   ├── Task(S3-infrastructure) → L2 mode → 5 подзон → S3-infrastructure.md
-  ├── Task(S4-composition) → определяет live size → при превышении порога делает 2-3 подзоны → S4-composition.md
+  ├── Task(S4-composition) → 83 файла → L2 mode → 2-3 подзоны → S4-composition.md
   ├── Task(S5-crosscutting) → Worker mode (специальный) → S5-crosscutting.md
   ├── Task(S6-tests) → L2 mode → 6 подзон → S6-tests.md
-  ├── Task(S7-configs) → решает Worker/L2 после live-подсчёта → S7-configs.md
+  ├── Task(S7-configs) → Worker mode (38 файлов) → S7-configs.md
   └── Task(S8-docs) → L2 mode → 4 подзоны → S8-docs.md
 
 L1 собирает все → FINAL-REVIEW.md
@@ -731,10 +727,10 @@ ______________________________________________________________________
 
 ## 8. References
 
-- **RULES.md** — `docs/00-project/RULES.md` (v6.1)
-- **Self-review rules** — runtime self-review rules
-- **Orchestration** — `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
+- **RULES.md** — `docs/00-project/RULES.md` (v5.24)
+- **Self-review rules** — `.claude/rules/ai-selfreview-rules.md`
+- **Orchestration** — `.claude/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
 - **Architecture tests** — `tests/architecture/`
-- **Audit bot** — runtime profile `py-audit-bot`
-- **Project context** — runtime project context file
+- **Audit bot** — `.claude/agents/py-audit-bot.md`
+- **Project context** — `.claude/PROJECT_CONTEXT.md`

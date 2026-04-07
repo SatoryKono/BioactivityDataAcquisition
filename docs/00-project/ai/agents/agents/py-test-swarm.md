@@ -3,7 +3,6 @@ name: py-test-swarm
 description: "Hierarchical testing system for BioETL (L1→L2→L3). Modes: full_audit, fix_failures, coverage_boost, optimize, flakiness_scan."
 model: opus
 ---
-*Статус: internal*
 
 # py-test-swarm — Иерархическая Система Тестирования BioETL
 
@@ -14,13 +13,7 @@ model: opus
 При старте прочитай:
 - `docs/00-project/ai/memory/agent-memory.md` — общий контекст проекта
 - `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification
-- `docs/00-project/ai/agents/agents/ORCHESTRATION.md` — публикуемый mirror протокола оркестрации (§2-§7)
-
-## Runtime Note
-
-- CI или single-OS checkout: `uv run python -m ...`
-- Mixed checkout в Windows PowerShell: `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`, `.\.venv-win\Scripts\python.exe -m ...`
-- Mixed checkout в WSL/Linux: `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`, `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...`
+- `.claude/agents/ORCHESTRATION.md` — протокол оркестрации (§2-§7)
 
 ## Контекст проекта
 
@@ -29,7 +22,7 @@ model: opus
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Стек: Python 3.13, uv, pytest, VCR.py, mypy --strict, Pandera, Delta Lake
 - 5 слоёв: domain, application, infrastructure, composition, interfaces
-- Размер codebase и тестового дерева быстро меняется; перед декомпозицией считай live по текущему checkout (`find src/bioetl tests -type f -name '*.py' | wc -l`, `pytest --collect-only`, subtree counts)
+- 550 production-файлов, 611 тестовых файлов, ~9,700 тестовых функций, ~190,000 строк тестового кода
 - Coverage threshold: ≥85% overall, ≥90% domain
 - 7 провайдеров: ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
 
@@ -45,19 +38,17 @@ model: opus
 **Структура тестов:**
 ```text
 tests/
-├── unit/              — Быстрые, in-memory fakes
-├── architecture/      — Layer boundaries, naming, contracts
-├── integration/       — VCR.py для HTTP, pipeline lifecycle
-├── e2e/               — End-to-end (full pipeline chain)
-├── contract/          — API contract/schema stability tests
-├── benchmarks/        — Performance benchmarks
-├── security/          — Security scanning
-├── performance/       — Load tests
-├── smoke/             — Quick sanity checks
-└── fixtures/          — VCR cassettes, configs, input data
+├── unit/              425 файлов  — Быстрые, in-memory fakes
+├── architecture/       58 файлов  — Layer boundaries, naming, contracts
+├── integration/        55 файлов  — VCR.py для HTTP, pipeline lifecycle
+├── e2e/                24 файла   — End-to-end (full pipeline chain)
+├── contract/           17 файлов  — API contract/schema stability tests
+├── benchmarks/          7 файлов  — Performance benchmarks
+├── security/            4 файла   — Security scanning
+├── performance/         2 файла   — Load tests
+├── smoke/               2 файла   — Quick sanity checks
+└── fixtures/                      — VCR cassettes, configs, input data
 ```
-
-Перед шардированием scope обязательно посчитай live число Python-файлов в нужных поддеревьях `tests/`.
 
 Провайдеры (по папкам тестов): chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot
 
@@ -341,7 +332,7 @@ Task(
 > - Стек: Python 3.13, uv, pytest, pytest-asyncio, hypothesis, VCR.py, respx, syrupy
 > - Coverage threshold: ≥85% overall, ≥90% domain
 > - Архитектура: domain → application → infrastructure → composition → interfaces
-> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\scripts\dev\run_pytest.ps1` / `.\scripts\dev\run_mypy.ps1`; WSL mixed checkout: `bash scripts/dev/run_pytest.sh` / `bash scripts/dev/run_mypy.sh`
+> - Команды: через `uv run python -m pytest ...` и `uv run python -m mypy --strict ...`
 >
 > ## Task Brief
 > - **Тестовые файлы**: {test_paths}
@@ -525,7 +516,7 @@ Task(
   subagent_type="py-test-swarm",
   description="L1 test swarm orchestrator",
   prompt="""
-  Прочитай runtime profile `py-test-swarm` и выполни роль L1-оркестратора.
+  Прочитай файл `.claude/agents/py-test-swarm.md` и выполни роль L1-оркестратора.
 
   Параметры:
   - task_id: SWARM-001

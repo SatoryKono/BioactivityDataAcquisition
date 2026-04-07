@@ -146,6 +146,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded maintainer helper for the prepared docs issue-finalization batch; do not treat this issue-number-specific path as a reusable automation workflow."
     },
+    "scripts/ops/start-codex.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded maintainer helper for the prepared docs issue-finalization batch; do not treat this issue-number-specific path as a reusable automation workflow."
+    },
+    "scripts/qa/py_review_orchestrator.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded maintainer helper for the prepared docs issue-finalization batch; do not treat this issue-number-specific path as a reusable automation workflow."
+    },
     "scripts/qa/generate_reports.py": {
       "owner": "platform-architecture",
       "decision": "deprecate",

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-07T10:24:05.625699+00:00",
+  "generated_at": "2026-04-07T11:03:28.362051+00:00",
   "summary": {
     "total_scripts": 237,
     "status_counts": {
@@ -5783,7 +5783,7 @@
         },
         {
           "path": ".github/workflows/duplication-complexity.yml",
-          "line": 207,
+          "line": 205,
           "source_group": "ci",
           "text": "run: python -m scripts.qa check-constructor-args --warn-only"
         },

@@ -1,40 +1,21 @@
----
-Version: 1.0.0
-Status: active
-Class: internal-published
-Owner: BioETL Team
-Reviewers:
-- BioETL Team
-Last verified: '2026-03-31'
----
+# Claude Code Agents — BioETL
 
-# Agent Catalog — BioETL
+Agent registry after consolidation (2026-03-12).
+See `ORCHESTRATION.md` for workflow and write-zone rules.
 
-*Статус: internal-published | Runtime-facing mirror index (2026-03-23)*
+## BioETL Core (9 active agents)
 
-Consolidated agent registry for published docs navigation.
-
-## Surface Note
-
-- This page is a **published mirror index**, not a canonical runtime registry.
-- Claude runtime source of truth remains in its runtime-specific agent registry.
-- Codex keeps its own runtime-specific orchestration and related agent context
-  under `.codex/agents/`.
-- Use this catalog for discoverability; verify live runtime behavior in the
-  relevant runtime tree before treating any profile note as authoritative.
-
-## BioETL Core (8 active agents)
-
-| Agent | Model | Role |
-|-------|-------|------|
-| `py-audit-bot` | opus | Code/architecture audit, RULES.md compliance |
-| `py-plan-bot` | opus | Task planning, RF-* decomposition |
-| `py-test-bot` | sonnet | Tests (baseline/final/retest), coverage |
-| `py-config-bot` | sonnet | YAML configs (pipeline/DQ/filter) |
-| `py-debug-bot` | opus | RCA, bug fixes, regression debugging |
-| `py-doc-bot` | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams |
-| `py-test-swarm` | opus | Hierarchical testing (L1->L2->L3) |
-| `py-review-orchestrator` | opus | Code review (S1-S8 stages) |
+| Agent                                                   | Model  | Role                                            |
+| ------------------------------------------------------- | ------ | ----------------------------------------------- |
+| [py-audit-bot](py-audit-bot.md)                         | opus   | Code/architecture audit, RULES.md compliance    |
+| [py-architecture-debt-bot](py-architecture-debt-bot.md) | opus   | End-to-end architecture debt reduction workflow |
+| [py-plan-bot](py-plan-bot.md)                           | opus   | Task planning, RF-\* decomposition              |
+| [py-test-bot](py-test-bot.md)                           | sonnet | Tests (baseline/final/retest), coverage         |
+| [py-config-bot](py-config-bot.md)                       | sonnet | YAML configs (pipeline/DQ/filter)               |
+| [py-debug-bot](py-debug-bot.md)                         | opus   | RCA, bug fixes, regression debugging            |
+| [py-doc-bot](py-doc-bot.md)                             | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams          |
+| [py-test-swarm](py-test-swarm.md)                       | opus   | Hierarchical testing (L1->L2->L3)               |
+| [py-review-orchestrator](py-review-orchestrator.md)     | opus   | Code review (S1-S8 stages)                      |
 
 Repo-wide documentation audits are no longer routed through a dedicated
 documentation-only agent entry in active orchestration docs; use the
@@ -43,27 +24,30 @@ workflow.
 
 ## Generic Utilities (12 agents)
 
-| Agent | Model | Role |
-|-------|-------|------|
-| `sp-code-reviewer` | sonnet | General-purpose code review |
-| `sp-debugger` | sonnet | Bug diagnosis, root cause analysis |
-| `sp-refactoring-specialist` | sonnet | Code refactoring |
-| `sp-architect-reviewer` | sonnet | Architecture evaluation |
-| `sp-test-automator` | sonnet | Test framework automation |
-| `sp-api-designer` | sonnet | API design, OpenAPI specs |
-| `sp-data-engineer` | sonnet | Data pipelines, ETL patterns |
-| `sp-database-optimizer` | sonnet | Query optimization, indexing |
-| `sp-dependency-manager` | sonnet | CVE audit, version conflicts |
-| `sp-git-workflow-manager` | sonnet | Git branching strategies |
-| `sp-prompt-engineer` | sonnet | LLM prompt design and testing |
-| `sp-scientific-literature-researcher` | sonnet | Scientific paper search (BGPT MCP) |
+| Agent                                                                   | Model  | Role                               |
+| ----------------------------------------------------------------------- | ------ | ---------------------------------- |
+| [code-reviewer](code-reviewer.md)                                       | sonnet | General-purpose code review        |
+| [debugger](debugger.md)                                                 | sonnet | Bug diagnosis, root cause analysis |
+| [refactoring-specialist](refactoring-specialist.md)                     | sonnet | Code refactoring                   |
+| [architect-reviewer](architect-reviewer.md)                             | sonnet | Architecture evaluation            |
+| [test-automator](test-automator.md)                                     | sonnet | Test framework automation          |
+| [api-designer](api-designer.md)                                         | sonnet | API design, OpenAPI specs          |
+| [data-engineer](data-engineer.md)                                       | sonnet | Data pipelines, ETL patterns       |
+| [database-optimizer](database-optimizer.md)                             | sonnet | Query optimization, indexing       |
+| [dependency-manager](dependency-manager.md)                             | sonnet | CVE audit, version conflicts       |
+| [git-workflow-manager](git-workflow-manager.md)                         | sonnet | Git branching strategies           |
+| [prompt-engineer](prompt-engineer.md)                                   | sonnet | LLM prompt design and testing      |
+| [scientific-literature-researcher](scientific-literature-researcher.md) | sonnet | Scientific paper search (BGPT MCP) |
 
-## Orchestration Workflow
+## Standard Workflow
 
-See [ORCHESTRATION.md](ORCHESTRATION.md) for the published mirror of the
-standard workflow, then confirm runtime-specific behavior in the active runtime
-registry when exact execution semantics matter.
-
-Detailed profile mirrors remain repo-only under `docs/00-project/ai/agents/agents/`.
-When exact runtime behavior matters, prefer `.codex/agents/*.md` or the active
-runtime registry over the published catalog.
+```
+1. py-audit-bot (baseline)
+2. py-plan-bot
+3. py-test-bot (baseline)
+4. [debug cycle if FAIL]
+5. code + py-config-bot (parallel)
+6. py-test-bot (final)
+7. py-doc-bot
+8. py-audit-bot (final)
+```
