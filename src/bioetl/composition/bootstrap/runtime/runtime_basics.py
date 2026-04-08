@@ -11,6 +11,9 @@ from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
     validate_join_key_normalization_policies,
 )
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 from bioetl.composition.factories.services.port_factories import create_metrics
 
 if TYPE_CHECKING:
@@ -22,9 +25,6 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractionService,
     )
-    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
-        CompositeInfrastructureContext,
-    )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
         CompositeSupportServicesFactory,
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
         BronzeRunOptions,
         RunnerFactoryBuilderService,
     )
-    from bioetl.composition.entrypoints import RunOptions
+    from bioetl.composition.execution_api import RunOptions
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.context import PipelineRunContext
@@ -118,8 +118,8 @@ def build_runner_factories(
     Returns:
         Tuple of (seed_factory, dependency_factory, enricher_factory) callables.
     """
-    # CIRCULAR-DEPENDENCY: kept local to avoid entrypoints bootstrap cycle.
-    from bioetl.composition.entrypoints import RunOptions, build_pipeline_context
+    # CIRCULAR-DEPENDENCY: kept local to avoid execution bootstrap cycle.
+    from bioetl.composition.execution_api import RunOptions, build_pipeline_context
 
     validate_join_key_normalization_policies(config)
     filter_extraction_service = filter_extraction_service_cls(

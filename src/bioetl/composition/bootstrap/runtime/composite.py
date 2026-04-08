@@ -10,6 +10,9 @@ from pydantic import ValidationError
 
 from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 from bioetl.composition.bootstrap.runtime._composite_config_runtime_compat import (
     load_runtime_composite_config as _load_runtime_composite_config_impl,
 )
@@ -59,9 +62,6 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
-        CompositeInfrastructureContext,
-    )
     from bioetl.domain.ports import LockPort, LoggerPort
 
 __all__ = [

@@ -1,23 +1,9 @@
-"""Context object for composite infrastructure primitives."""
+"""Compatibility shim for the composite infrastructure context type."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 
-from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort
-from bioetl.infrastructure.config import Settings
-
-
-@dataclass(frozen=True, slots=True)
-class CompositeInfrastructureContext:
-    """Bundle of infrastructure primitives required by composite runtime."""
-
-    run_id: str
-    settings: Settings
-    logger: LoggerPort
-    metrics: MetricsPort
-    storage: (
-        Any  # Any: storage adapter is concrete infra object implementing StoragePort
-    )
-    lock: LockPort
+__all__ = ["CompositeInfrastructureContext"]

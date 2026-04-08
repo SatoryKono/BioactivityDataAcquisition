@@ -296,8 +296,12 @@ def create_pipeline_instance_with_services(
     # Any: compatibility seam forwards optional kwargs only when present.
     return cast(
         "BasePipeline",
-        cast("Any", create_pipeline_with_services)(  # Any: factory callable keeps an open kwargs contract across compatibility seams.
-            **cast("dict[str, Any]", create_pipeline_kwargs)  # Any: kwargs bag mixes heterogeneous optional service values.
+        cast(
+            "Any", create_pipeline_with_services
+        )(  # Any: factory callable keeps an open kwargs contract across compatibility seams.
+            **cast(
+                "dict[str, Any]", create_pipeline_kwargs
+            )  # Any: kwargs bag mixes heterogeneous optional service values.
         ),
     )
 
@@ -343,8 +347,12 @@ def create_factory_runner(
         effective_config_artifact_id=effective_config_artifact_id,
     )
     # Any: factory callback signature is intentionally open for runtime/test seams.
-    pipeline = cast("Any", create_with_services_fn)(  # Any: factory callback stays open to provider-specific wiring extensions.
-        **cast("dict[str, Any]", create_with_services_kwargs)  # Any: kwargs bag carries heterogeneous optional service objects.
+    pipeline = cast(
+        "Any", create_with_services_fn
+    )(  # Any: factory callback stays open to provider-specific wiring extensions.
+        **cast(
+            "dict[str, Any]", create_with_services_kwargs
+        )  # Any: kwargs bag carries heterogeneous optional service objects.
     )
     return assemble_runner_fn(
         pipeline=pipeline,

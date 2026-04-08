@@ -8,6 +8,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
     create_composite_runner as _create_composite_runner_impl,
 )
@@ -82,9 +85,6 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
-        CompositeInfrastructureContext,
-    )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )

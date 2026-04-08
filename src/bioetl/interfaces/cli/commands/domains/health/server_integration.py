@@ -15,6 +15,7 @@ from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
 import click
+
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
 )

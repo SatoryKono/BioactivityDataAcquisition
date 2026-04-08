@@ -37,6 +37,17 @@ def _module_name_for_path(src_dir: Path, file_path: Path) -> str:
     return ".".join(rel_parts)
 
 
+def _collect_existing_modules(source_root: Path) -> frozenset[str]:
+    modules: set[str] = set()
+    for py_file in source_root.rglob("*.py"):
+        rel_path = py_file.relative_to(source_root.parent)
+        if py_file.name == "__init__.py":
+            modules.add(".".join(rel_path.parent.parts))
+            continue
+        modules.add(".".join(rel_path.with_suffix("").parts))
+    return frozenset(modules)
+
+
 def _resolve_relative_module(
     *,
     importer_module: str,
@@ -56,14 +67,13 @@ def _resolve_relative_module(
     return ".".join(base_parts)
 
 
-def _module_exists(src_dir: Path, module: str) -> bool:
-    path = src_dir / Path(*module.split("."))
-    return path.with_suffix(".py").exists() or (path / "__init__.py").exists()
+def _module_exists(existing_modules: frozenset[str], module: str) -> bool:
+    return module in existing_modules
 
 
 def _iter_candidate_import_targets(
     *,
-    src_dir: Path,
+    existing_modules: frozenset[str],
     importer_module: str,
     node: ast.AST,
 ) -> list[str]:
@@ -86,7 +96,7 @@ def _iter_candidate_import_targets(
         if alias.name == "*":
             continue
         nested_module = f"{base_module}.{alias.name}"
-        if _module_exists(src_dir, nested_module):
+        if _module_exists(existing_modules, nested_module):
             candidates.append(nested_module)
     return candidates
 
@@ -100,6 +110,7 @@ def _collect_external_private_imports(
 ) -> dict[tuple[str, str], list[int]]:
     violations: dict[tuple[str, str], list[int]] = {}
     source_root = src_dir / "bioetl"
+    existing_modules = _collect_existing_modules(source_root)
 
     for py_file in sorted(source_root.rglob("*.py")):
         importer_module = _module_name_for_path(src_dir, py_file)
@@ -109,7 +120,7 @@ def _collect_external_private_imports(
 
         for node in ast.walk(tree):
             for target_module in _iter_candidate_import_targets(
-                src_dir=src_dir,
+                existing_modules=existing_modules,
                 importer_module=importer_module,
                 node=node,
             ):

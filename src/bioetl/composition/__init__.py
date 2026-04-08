@@ -37,6 +37,7 @@ _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "entrypoints": "bioetl.composition.entrypoints",
     "execution_api": "bioetl.composition.execution_api",
     "observability_api": "bioetl.composition.observability_api",
+    "resources_api": "bioetl.composition.resources_api",
     "resource_management_api": "bioetl.composition.resource_management_api",
     "services_api": "bioetl.composition.services_api",
     "types": "bioetl.composition.types",
@@ -53,6 +54,7 @@ __all__ = [
     "get_default_registry",
     "observability_api",
     "resource_management_api",
+    "resources_api",
     "services_api",
     "types",
 ]

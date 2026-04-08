@@ -1,21 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-08T08:00:43.204680+00:00",
+  "generated_at": "2026-04-08T18:16:19.674181+00:00",
   "summary": {
-    "total_scripts": 259,
+    "total_scripts": 274,
     "status_counts": {
-      "active": 221,
+      "active": 230,
       "legacy": 29,
-      "orphan": 9
+      "orphan": 14,
+      "unknown": 1
     },
     "reference_group_coverage": {
       "agents": 10,
       "build": 31,
       "ci": 47,
-      "docs": 106,
-      "scripts": 232,
+      "docs": 115,
+      "scripts": 239,
       "skills": 9,
-      "tests": 85
+      "tests": 89
     }
   },
   "scripts": [
@@ -574,7 +575,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 557,
+          "line": 560,
           "source_group": "ci",
           "text": "scripts/ci/run_pytest_resilient.py \\"
         },
@@ -1132,7 +1133,7 @@
         },
         {
           "path": "scripts/dev/README.md",
-          "line": 190,
+          "line": 192,
           "source_group": "scripts",
           "text": "| `scripts/dev/.setup_wsl_codex.sh`         | WSL/Codex DNS and connectivity bootstrap helper for the documented WSL setup flow         |"
         },
@@ -1159,7 +1160,7 @@
       "references": [
         {
           "path": "scripts/dev/README.md",
-          "line": 189,
+          "line": 191,
           "source_group": "scripts",
           "text": "| `scripts/dev/.wsl-vpn-fix.ps1`            | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -1170,7 +1171,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 27,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -1209,16 +1210,16 @@
           "text": "If you activated `.venv` instead of using `uv`, `python -m scripts.dev setup-mcp`"
         },
         {
-          "path": "scripts/README.md",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "`python -m scripts.dev ...`; `dev_setup.sh` remains a legacy placeholder only)."
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 137,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.dev setup-mcp"
         },
         {
-          "path": "scripts/README.md",
-          "line": 90,
-          "source_group": "scripts",
-          "text": "| `dev`         | `python -m scripts.dev run-tests unit`                | Developer workflows    |"
+          "path": "docs/05-operations/deployment/neo4j-memory-setup.md",
+          "line": 35,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.dev setup-mcp"
         }
       ]
     },
@@ -1296,7 +1297,7 @@
       "references": [
         {
           "path": "scripts/dev/README.md",
-          "line": 145,
+          "line": 147,
           "source_group": "scripts",
           "text": "| `install-deps`   | `scripts/dev/install_deps.py`            | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -1317,7 +1318,7 @@
       "references": [
         {
           "path": "scripts/dev/README.md",
-          "line": 150,
+          "line": 152,
           "source_group": "scripts",
           "text": "| `mock-metrics`   | `scripts/dev/metrics_mock_server.py`     | Start mock metrics server                                        |"
         },
@@ -1365,13 +1366,13 @@
         },
         {
           "path": "scripts/dev/README.md",
-          "line": 147,
+          "line": 149,
           "source_group": "scripts",
           "text": "| `pretest-guardrails` | `scripts/dev/pretest_guardrails.sh`  | Run cleanup + repo/docs/architecture preflight                   |"
         },
         {
           "path": "scripts/dev/README.md",
-          "line": 179,
+          "line": 181,
           "source_group": "scripts",
           "text": "| `scripts/dev/pretest_guardrails.sh`       | Run cleanup + repo/docs/architecture preflight before broad bash pytest runs              |"
         },
@@ -1410,13 +1411,13 @@
       "references": [
         {
           "path": "scripts/dev/README.md",
-          "line": 146,
+          "line": 148,
           "source_group": "scripts",
           "text": "| `probe-quality`  | `scripts/dev/quality_gate_probe.py`      | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/dev/README.md",
-          "line": 183,
+          "line": 185,
           "source_group": "scripts",
           "text": "| `scripts/dev/quality_gate_probe.py`       | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -1437,13 +1438,13 @@
       "references": [
         {
           "path": "scripts/dev/README.md",
-          "line": 151,
+          "line": 153,
           "source_group": "scripts",
           "text": "| `mock-quarantine`| `scripts/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/dev/README.md",
-          "line": 184,
+          "line": 186,
           "source_group": "scripts",
           "text": "| `scripts/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks |"
         },
@@ -1734,13 +1735,13 @@
         },
         {
           "path": "scripts/dev/README.md",
-          "line": 149,
+          "line": 151,
           "source_group": "scripts",
           "text": "| `pytest-sharded` | `scripts/dev/run_pytest_sharded.sh`      | Run the recommended path-based pytest shards                     |"
         },
         {
           "path": "scripts/dev/README.md",
-          "line": 182,
+          "line": 184,
           "source_group": "scripts",
           "text": "| `scripts/dev/run_pytest_sharded.sh`       | Run the recommended path-based pytest shard plan (shell variant)                          |"
         },
@@ -1789,7 +1790,7 @@
       "references": [
         {
           "path": "scripts/dev/README.md",
-          "line": 176,
+          "line": 178,
           "source_group": "scripts",
           "text": "| `scripts/dev/run_tests.ps1`               | Run tests (PowerShell variant)                                                            |"
         },
@@ -1828,13 +1829,13 @@
         },
         {
           "path": "scripts/dev/README.md",
-          "line": 148,
+          "line": 150,
           "source_group": "scripts",
           "text": "| `run-tests`      | `scripts/dev/run_tests.py`               | Run tests                                                        |"
         },
         {
           "path": "scripts/dev/README.md",
-          "line": 152,
+          "line": 154,
           "source_group": "scripts",
           "text": "| `test-changed`   | `scripts/dev/run_tests.py changed`       | Run tests for changed files only                                 |"
         },
@@ -1873,7 +1874,7 @@
       "references": [
         {
           "path": "scripts/dev/README.md",
-          "line": 175,
+          "line": 177,
           "source_group": "scripts",
           "text": "| `scripts/dev/run_tests.sh`                | Run tests (shell variant)                                                                 |"
         },
@@ -1900,13 +1901,13 @@
       "references": [
         {
           "path": "scripts/dev/README.md",
-          "line": 186,
+          "line": 188,
           "source_group": "scripts",
           "text": "| `scripts/dev/setup_copilot_codex_mcp.ps1` | Setup MCP (PowerShell variant)                                                            |"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 146,
+          "line": 160,
           "source_group": "tests",
           "text": "content = (root / \"scripts/dev/setup_copilot_codex_mcp.ps1\").read_text("
         }
@@ -1917,11 +1918,47 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 16,
       "references": [
         {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 11,
+          "source_group": "docs",
+          "text": "- `scripts/dev/setup_copilot_codex_mcp.py` (setup automation)"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 210,
+          "source_group": "docs",
+          "text": "- Project MCP Config: See `setup_copilot_codex_mcp.py` for full automation"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 47,
+          "source_group": "docs",
+          "text": "| `scripts/dev/setup_copilot_codex_mcp.py` | MCP setup automation | ✅ Updated |"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 199,
+          "source_group": "docs",
+          "text": "- **Project MCP Config**: `scripts/dev/setup_copilot_codex_mcp.py`"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 15,
+          "source_group": "docs",
+          "text": "- **Automation**: `scripts/dev/setup_copilot_codex_mcp.py` updated to include Neo4j Memory"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 138,
+          "source_group": "docs",
+          "text": "- `scripts/dev/setup_copilot_codex_mcp.py` — Already configured for Neo4j"
+        },
+        {
           "path": "scripts/dev/README.md",
-          "line": 153,
+          "line": 155,
           "source_group": "scripts",
           "text": "| `setup-mcp`      | `scripts/dev/setup_copilot_codex_mcp.py` | Setup Copilot/Codex MCP integration                              |"
         },
@@ -1930,42 +1967,6 @@
           "line": 35,
           "source_group": "scripts",
           "text": "\"setup-mcp\": \"setup_copilot_codex_mcp.py\","
-        },
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.ps1",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "# Canonical implementation: scripts/dev/setup_copilot_codex_mcp.py"
-        },
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.ps1",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "& $pythonCmd.Source scripts/dev/setup_copilot_codex_mcp.py @args"
-        },
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.sh",
-          "line": 3,
-          "source_group": "scripts",
-          "text": "# Canonical implementation: scripts/dev/setup_copilot_codex_mcp.py"
-        },
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.sh",
-          "line": 25,
-          "source_group": "scripts",
-          "text": "exec \"$PYTHON_BIN\" scripts/dev/setup_copilot_codex_mcp.py \"$@\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 22,
-          "source_group": "tests",
-          "text": "\"scripts/dev/setup_copilot_codex_mcp.py\","
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 140,
-          "source_group": "tests",
-          "text": "assert \"scripts/dev/setup_copilot_codex_mcp.py\" in content"
         }
       ]
     },
@@ -1978,13 +1979,13 @@
       "references": [
         {
           "path": "scripts/dev/README.md",
-          "line": 185,
+          "line": 187,
           "source_group": "scripts",
           "text": "| `scripts/dev/setup_copilot_codex_mcp.sh`  | Setup MCP (shell variant)                                                                 |"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 137,
+          "line": 151,
           "source_group": "tests",
           "text": "content = (root / \"scripts/dev/setup_copilot_codex_mcp.sh\").read_text("
         }
@@ -3889,13 +3890,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 215,
+          "line": 218,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 224,
+          "line": 227,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -4507,7 +4508,7 @@
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 84,
+          "line": 88,
           "source_group": "scripts",
           "text": "`scripts/generate_architecture_dependency_map.py` remains a compatibility wrapper only."
         },
@@ -4653,13 +4654,94 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 95,
+          "source_group": "docs",
+          "text": "| **check_mcp.sh** | `scripts/ops/` | General MCP validation (all servers) |"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 106,
+          "source_group": "docs",
+          "text": "bash scripts/ops/check_mcp.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
+          "line": 99,
+          "source_group": "docs",
+          "text": "bash scripts/ops/check_mcp.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
+          "line": 211,
+          "source_group": "docs",
+          "text": "3. ✅ Запустить тест: `bash scripts/ops/check_mcp.sh`"
+        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 48,
           "source_group": "scripts",
           "text": "\"check-mcp\": \"check_mcp.sh\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/check_neo4j_mcp.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 17,
+      "references": [
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 70,
+          "source_group": "docs",
+          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 173,
+          "source_group": "docs",
+          "text": "3. Run verification: `bash scripts/ops/check_neo4j_mcp.sh`"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 193,
+          "source_group": "docs",
+          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 68,
+          "source_group": "docs",
+          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 93,
+          "source_group": "docs",
+          "text": "| **check_neo4j_mcp.sh** | `scripts/ops/` | Full MCP + backend health check |"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 100,
+          "source_group": "docs",
+          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 189,
+          "source_group": "docs",
+          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": "- **[check_neo4j_mcp.sh](../../../scripts/ops/check_neo4j_mcp.sh)** - Comprehensive MCP + backend health check"
         }
       ]
     },
@@ -5258,7 +5340,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 10,
       "references": [
         {
           "path": "scripts/ops/00_START_HERE.md",
@@ -5297,16 +5379,16 @@
           "text": ". (Join-Path $PSScriptRoot \"load_repo_env.ps1\")"
         },
         {
-          "path": "scripts/ops/mcp_prometheus_wrapper.ps1",
+          "path": "scripts/ops/mcp_neo4j_cypher_wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"load_repo_env.ps1\")"
         },
         {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 159,
-          "source_group": "tests",
-          "text": "assert \"load_repo_env.ps1\" in ps_content"
+          "path": "scripts/ops/mcp_neo4j_memory_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"load_repo_env.ps1\")"
         }
       ]
     },
@@ -5315,8 +5397,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 20,
       "references": [
+        {
+          "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
+          "line": 76,
+          "source_group": "docs",
+          "text": "\"scripts/ops/load_repo_env.sh\","
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 104,
+          "source_group": "docs",
+          "text": "| `scripts/ops/load_repo_env.sh` | Env variable loader |"
+        },
         {
           "path": "scripts/ops/check_mcp.sh",
           "line": 7,
@@ -5330,6 +5424,18 @@
           "text": "source \"${SCRIPT_DIR}/load_repo_env.sh\""
         },
         {
+          "path": "scripts/ops/check_neo4j_mcp.sh",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./load_repo_env.sh"
+        },
+        {
+          "path": "scripts/ops/check_neo4j_mcp.sh",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/load_repo_env.sh\""
+        },
+        {
           "path": "scripts/ops/mcp_brave_search_wrapper.sh",
           "line": 7,
           "source_group": "scripts",
@@ -5337,30 +5443,6 @@
         },
         {
           "path": "scripts/ops/mcp_brave_search_wrapper.sh",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "source \"${script_dir}/load_repo_env.sh\""
-        },
-        {
-          "path": "scripts/ops/mcp_dockerhub_wrapper.sh",
-          "line": 7,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./load_repo_env.sh"
-        },
-        {
-          "path": "scripts/ops/mcp_dockerhub_wrapper.sh",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "source \"${script_dir}/load_repo_env.sh\""
-        },
-        {
-          "path": "scripts/ops/mcp_grafana_wrapper.sh",
-          "line": 7,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./load_repo_env.sh"
-        },
-        {
-          "path": "scripts/ops/mcp_grafana_wrapper.sh",
           "line": 8,
           "source_group": "scripts",
           "text": "source \"${script_dir}/load_repo_env.sh\""
@@ -5376,7 +5458,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 94,
+          "line": 98,
           "source_group": "tests",
           "text": "assert \"mcp_brave_search_wrapper.ps1\" in servers[\"brave-search\"][\"args\"][-1]"
         }
@@ -5391,13 +5473,13 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 125,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"brave-search\": _wrapper_server(root, \"mcp_brave_search_wrapper.sh\"),"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 128,
+          "line": 136,
           "source_group": "tests",
           "text": "\"scripts/ops/mcp_brave_search_wrapper.sh\""
         }
@@ -5412,7 +5494,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 89,
+          "line": 93,
           "source_group": "tests",
           "text": "assert \"mcp_context7_wrapper.ps1\" in servers[\"context7\"][\"args\"][-1]"
         }
@@ -5427,13 +5509,13 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 120,
+          "line": 125,
           "source_group": "scripts",
           "text": "\"context7\": _wrapper_server(root, \"mcp_context7_wrapper.sh\"),"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 113,
+          "line": 121,
           "source_group": "tests",
           "text": "\"scripts/ops/mcp_context7_wrapper.sh\""
         }
@@ -5448,7 +5530,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 88,
+          "line": 92,
           "source_group": "tests",
           "text": "assert \"mcp_docker_docs_wrapper.ps1\" in servers[\"docker-docs\"][\"args\"][-1]"
         }
@@ -5463,13 +5545,13 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 119,
+          "line": 124,
           "source_group": "scripts",
           "text": "\"docker-docs\": _wrapper_server(root, \"mcp_docker_docs_wrapper.sh\"),"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 110,
+          "line": 118,
           "source_group": "tests",
           "text": "\"scripts/ops/mcp_docker_docs_wrapper.sh\""
         }
@@ -5484,7 +5566,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 87,
+          "line": 91,
           "source_group": "tests",
           "text": "assert \"mcp_docker_wrapper.ps1\" in servers[\"docker\"][\"args\"][-1]"
         }
@@ -5499,13 +5581,13 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 118,
+          "line": 123,
           "source_group": "scripts",
           "text": "\"docker\": _wrapper_server(root, \"mcp_docker_wrapper.sh\"),"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 107,
+          "line": 115,
           "source_group": "tests",
           "text": "\"scripts/ops/mcp_docker_wrapper.sh\""
         }
@@ -5520,7 +5602,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 91,
+          "line": 95,
           "source_group": "tests",
           "text": "assert \"mcp_dockerhub_wrapper.ps1\" in servers[\"dockerhub\"][\"args\"][-1]"
         }
@@ -5535,13 +5617,13 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 122,
+          "line": 127,
           "source_group": "scripts",
           "text": "\"dockerhub\": _wrapper_server(root, \"mcp_dockerhub_wrapper.sh\"),"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 119,
+          "line": 127,
           "source_group": "tests",
           "text": "\"scripts/ops/mcp_dockerhub_wrapper.sh\""
         }
@@ -5556,7 +5638,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 93,
+          "line": 97,
           "source_group": "tests",
           "text": "assert \"mcp_grafana_wrapper.ps1\" in servers[\"grafana\"][\"args\"][-1]"
         }
@@ -5571,15 +5653,129 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 124,
+          "line": 129,
           "source_group": "scripts",
           "text": "\"grafana\": _wrapper_server(root, \"mcp_grafana_wrapper.sh\"),"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 125,
+          "line": 133,
           "source_group": "tests",
           "text": "\"scripts/ops/mcp_grafana_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/mcp_neo4j_cypher_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 99,
+          "source_group": "tests",
+          "text": "assert \"mcp_neo4j_cypher_wrapper.ps1\" in servers[\"neo4j-cypher\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/mcp_neo4j_cypher_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/NEO4J-MCP-SETUP.md",
+          "line": 18,
+          "source_group": "docs",
+          "text": "- Wrapper: `scripts/ops/mcp_neo4j_cypher_wrapper.sh`"
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 131,
+          "source_group": "scripts",
+          "text": "\"neo4j-cypher\": _wrapper_server(root, \"mcp_neo4j_cypher_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 139,
+          "source_group": "tests",
+          "text": "\"scripts/ops/mcp_neo4j_cypher_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/mcp_neo4j_memory_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 100,
+          "source_group": "tests",
+          "text": "assert \"mcp_neo4j_memory_wrapper.ps1\" in servers[\"neo4j-memory\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/mcp_neo4j_memory_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 30,
+      "references": [
+        {
+          "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
+          "line": 74,
+          "source_group": "docs",
+          "text": "\"scripts/ops/mcp_neo4j_memory_wrapper.sh\","
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 10,
+          "source_group": "docs",
+          "text": "- `scripts/ops/mcp_neo4j_memory_wrapper.sh` (wrapper script)"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 63,
+          "source_group": "docs",
+          "text": "Command: scripts/ops/mcp_neo4j_memory_wrapper.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 126,
+          "source_group": "docs",
+          "text": "The wrapper script (`mcp_neo4j_memory_wrapper.sh`) will:"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 172,
+          "source_group": "docs",
+          "text": "2. Check wrapper script exists: `ls -la scripts/ops/mcp_neo4j_memory_wrapper.sh`"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 46,
+          "source_group": "docs",
+          "text": "| `scripts/ops/mcp_neo4j_memory_wrapper.sh` | MCP wrapper script | ✅ Ready |"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 113,
+          "source_group": "docs",
+          "text": "Used by `mcp_neo4j_memory_wrapper.sh`:"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 14,
+          "source_group": "docs",
+          "text": "- **Wrapper Script**: `scripts/ops/mcp_neo4j_memory_wrapper.sh` created"
         }
       ]
     },
@@ -5592,7 +5788,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 90,
+          "line": 94,
           "source_group": "tests",
           "text": "assert \"mcp_paper_search_wrapper.ps1\" in servers[\"paper-search\"][\"args\"][-1]"
         }
@@ -5607,13 +5803,13 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 121,
+          "line": 126,
           "source_group": "scripts",
           "text": "\"paper-search\": _wrapper_server(root, \"mcp_paper_search_wrapper.sh\"),"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 116,
+          "line": 124,
           "source_group": "tests",
           "text": "\"scripts/ops/mcp_paper_search_wrapper.sh\""
         }
@@ -5628,7 +5824,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 92,
+          "line": 96,
           "source_group": "tests",
           "text": "assert \"mcp_prometheus_wrapper.ps1\" in servers[\"prometheus\"][\"args\"][-1]"
         }
@@ -5643,13 +5839,13 @@
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 123,
+          "line": 128,
           "source_group": "scripts",
           "text": "\"prometheus\": _wrapper_server(root, \"mcp_prometheus_wrapper.sh\"),"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 122,
+          "line": 130,
           "source_group": "tests",
           "text": "\"scripts/ops/mcp_prometheus_wrapper.sh\""
         }
@@ -5776,6 +5972,51 @@
       ]
     },
     {
+      "path": "scripts/ops/neo4j_quick_start.sh",
+      "type": "sh",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 71,
+          "source_group": "docs",
+          "text": "bash scripts/ops/neo4j_quick_start.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 94,
+          "source_group": "docs",
+          "text": "| **neo4j_quick_start.sh** | `scripts/ops/` | One-command startup & verification |"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 103,
+          "source_group": "docs",
+          "text": "bash scripts/ops/neo4j_quick_start.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 37,
+          "source_group": "docs",
+          "text": "- **[neo4j_quick_start.sh](../../../scripts/ops/neo4j_quick_start.sh)** - One-command startup"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 130,
+          "source_group": "docs",
+          "text": "- `scripts/ops/neo4j_quick_start.sh` — Quick startup helper"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 154,
+          "source_group": "docs",
+          "text": "| **Quick Start** | `bash scripts/ops/neo4j_quick_start.sh` |"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/post_issue_2597_progress.sh",
       "type": "sh",
       "status": "legacy",
@@ -5804,6 +6045,14 @@
           "text": "\"scripts/ops/post_issue_rescope_comments.sh\","
         }
       ]
+    },
+    {
+      "path": "scripts/ops/print_neo4j_memory_seed.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/rerender_grafana_screenshots.py",
@@ -6061,6 +6310,88 @@
       ]
     },
     {
+      "path": "scripts/ops/smoke_test_final.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/smoke_test_neo4j_mcp.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/SMOKE_TEST_README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "bash scripts/ops/smoke_test_neo4j_mcp.sh"
+        },
+        {
+          "path": "scripts/ops/SMOKE_TEST_README.md",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "bash scripts/ops/smoke_test_neo4j_mcp.sh"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/smoke_test_neo4j_mcp_knowall.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/smoke_test_neo4j_mcp_knowall.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": "1. Run smoke test: bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 36,
+          "source_group": "docs",
+          "text": "bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 101,
+          "source_group": "docs",
+          "text": "| `scripts/ops/smoke_test_neo4j_mcp_knowall.sh` | ⭐ Verify setup (run second) |"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 128,
+          "source_group": "docs",
+          "text": "bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 161,
+          "source_group": "docs",
+          "text": "bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh"
+        },
+        {
+          "path": "scripts/ops/wsl_neo4j_startup.sh",
+          "line": 328,
+          "source_group": "scripts",
+          "text": "printf \"   ${BLUE}bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh${NC}\\n\\n\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/start-codex.bat",
       "type": "bat",
       "status": "active",
@@ -6312,6 +6643,71 @@
       ]
     },
     {
+      "path": "scripts/ops/verify_neo4j.bat",
+      "type": "bat",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/wsl_neo4j_startup.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 12,
+      "references": [
+        {
+          "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
+          "line": 75,
+          "source_group": "docs",
+          "text": "\"scripts/ops/wsl_neo4j_startup.sh\","
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 13,
+          "source_group": "docs",
+          "text": "bash scripts/ops/wsl_neo4j_startup.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 100,
+          "source_group": "docs",
+          "text": "| `scripts/ops/wsl_neo4j_startup.sh` | ⭐ Start Neo4j (run first) |"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 120,
+          "source_group": "docs",
+          "text": "bash scripts/ops/wsl_neo4j_startup.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 158,
+          "source_group": "docs",
+          "text": "bash scripts/ops/wsl_neo4j_startup.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 248,
+          "source_group": "docs",
+          "text": "# Edit wsl_neo4j_startup.sh and modify:"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 303,
+          "source_group": "docs",
+          "text": "**Ready to start?** Run: `bash scripts/ops/wsl_neo4j_startup.sh`"
+        },
+        {
+          "path": "scripts/ops/smoke_test_neo4j_mcp_knowall.ps1",
+          "line": 42,
+          "source_group": "scripts",
+          "text": "Info \"Start it: bash scripts/ops/wsl_neo4j_startup.sh (from WSL)\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/wsl_proxy.py",
       "type": "py",
       "status": "active",
@@ -6375,7 +6771,7 @@
       "agent_usage": [
         "py-architecture-debt-bot"
       ],
-      "reference_count": 75,
+      "reference_count": 81,
       "references": [
         {
           "path": ".codex/agents/py-architecture-debt-bot.md",
@@ -6436,13 +6832,13 @@
       "references": [
         {
           "path": "scripts/qa/README.md",
-          "line": 31,
+          "line": 32,
           "source_group": "scripts",
           "text": "| `analyze-duplicate-functions` | `analyze_duplicate_functions.py`          | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |"
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"analyze_duplicate_functions.py\","
         }
@@ -6457,13 +6853,13 @@
       "references": [
         {
           "path": "scripts/qa/README.md",
-          "line": 32,
+          "line": 33,
           "source_group": "scripts",
           "text": "| `calibrate-hotspots`          | `scripts/qa/calibrate_hotspot_budgets.py` | Calibrate hotspot budgets                                                                         |"
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 53,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"calibrate_hotspot_budgets.py\","
         }
@@ -6484,7 +6880,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"check_application_deps.py\","
         },
@@ -6511,7 +6907,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"check_architecture.py\","
         },
@@ -6550,7 +6946,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"check-c901\": \"check_c901_baseline.py\","
         },
@@ -6577,7 +6973,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"check_constructor_args.py\","
         },
@@ -6598,7 +6994,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 233,
+          "line": 236,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/check_docs_drift.py"
         }
@@ -6613,7 +7009,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 163,
+          "line": 166,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/check_naming_package_consistency.py --check"
         },
@@ -6625,7 +7021,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"check_naming_package_consistency.py\","
         },
@@ -6682,7 +7078,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"check_quality_exemptions.py\","
         }
@@ -6703,13 +7099,13 @@
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 66,
+          "line": 68,
           "source_group": "scripts",
           "text": "- `scripts/qa/generate_architecture_debt_tasks.py` (`python -m scripts.qa generate-debt-tasks`) generates the canonical architecture debt task backlog."
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"generate_architecture_debt_tasks.py\","
         },
@@ -6748,7 +7144,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 230,
+          "line": 233,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/generate_architecture_dependency_map.py --check"
         },
@@ -6850,7 +7246,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 479,
+          "line": 482,
           "source_group": "ci",
           "text": "uv run python scripts/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -6862,13 +7258,13 @@
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "| `report-hotspots`             | `generate_hotspot_degradation_report.py`  | Generate performance hotspot degradation report                                                   |"
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"report-hotspots\": \"generate_hotspot_degradation_report.py\","
         }
@@ -6888,6 +7284,14 @@
           "text": "\"scripts/qa/generate_reports.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/qa/hotspot_family_metrics.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/qa/lint_terminology.py",
@@ -6916,7 +7320,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"check-terminology\": \"lint_terminology.py\","
         },
@@ -6967,7 +7371,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"check-naming\": \"naming_audit.py\","
         },
@@ -7014,13 +7418,13 @@
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 67,
+          "line": 69,
           "source_group": "scripts",
           "text": "- `scripts/qa/reduce_architecture_debt.py` (`python -m scripts.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent."
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"reduce_architecture_debt.py\","
         },
@@ -7059,27 +7463,48 @@
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "| `report-duplication-baseline` | `report_duplication_baseline.py`          | Generate report-only duplication baseline for `composition`/`application`                         |"
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 65,
+          "line": 67,
           "source_group": "scripts",
           "text": "- `scripts/qa/report_duplication_baseline.py` (`python -m scripts.qa report-duplication-baseline`) generates report-only duplication baseline artifacts for governance review."
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 77,
+          "line": 81,
           "source_group": "scripts",
           "text": "python scripts/qa/report_duplication_baseline.py"
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"report_duplication_baseline.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/qa/report_hotspot_family_baseline.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/qa/README.md",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "| `report-family-baseline`      | `report_hotspot_family_baseline.py` | Generate/check RF-06 hotspot-family baseline artifacts                                             |"
+        },
+        {
+          "path": "scripts/qa/__main__.py",
+          "line": 51,
+          "source_group": "scripts",
+          "text": "\"report-family-baseline\": \"report_hotspot_family_baseline.py\","
         }
       ]
     },
@@ -7110,13 +7535,13 @@
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 76,
+          "line": 78,
           "source_group": "scripts",
           "text": "python scripts/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking"
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"report_provider_contract_drift.py\","
         }
@@ -7149,19 +7574,19 @@
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 74,
+          "line": 76,
           "source_group": "scripts",
           "text": "python scripts/qa/report_vcr_metadata_catalog.py --check"
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 75,
+          "line": 77,
           "source_group": "scripts",
           "text": "python scripts/qa/report_vcr_metadata_catalog.py --update"
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"report_vcr_metadata_catalog.py\","
         },
@@ -7188,7 +7613,7 @@
       "references": [
         {
           "path": "scripts/qa/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"sync_integration_vcr_policy.py\","
         }
@@ -7203,13 +7628,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 166,
+          "line": 169,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/validate_dq_consistency.py"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 293,
+          "line": 296,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/validate_dq_consistency.py"
         },
@@ -7835,13 +8260,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 209,
+          "line": 212,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 212,
+          "line": 215,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         },
@@ -7913,7 +8338,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 206,
+          "line": 209,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/check_config_invariants.py"
         },
@@ -8162,7 +8587,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 227,
+          "line": 230,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/generate_pipeline_schema.py --check"
         },
@@ -8321,7 +8746,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 203,
+          "line": 206,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/validate_pipeline_configs.py"
         },

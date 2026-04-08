@@ -368,6 +368,11 @@ run_repo_checks() {
     run_step catalog-check \
         "$PYTHON_BIN" -m scripts.repo check-catalog \
         --catalog scripts/catalog.yaml
+
+    run_step hotspot-family-baseline-check \
+        "$PYTHON_BIN" -m scripts.qa report-family-baseline \
+        --active-only \
+        --check
 }
 
 run_docs_identity_checks() {

@@ -19,11 +19,9 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
-    from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
-        DoiBatchProcessor,
-    )
-    from bioetl.infrastructure.adapters.crossref._search_paginator import (
-        SearchPaginator,
+    from bioetl.infrastructure.adapters.crossref.types import (
+        CrossRefBatchFetcher,
+        CrossRefSearchPaginator,
     )
 
 __all__ = ["CrossRefFetchFlow"]
@@ -34,8 +32,8 @@ class CrossRefFetchFlow:
     """Orchestrates CrossRef FilterableDataSourcePort fetch and fallback paths."""
 
     logger: LoggerPort
-    batch_fetcher: DoiBatchProcessor
-    search_paginator: SearchPaginator
+    batch_fetcher: CrossRefBatchFetcher
+    search_paginator: CrossRefSearchPaginator
     fallback_decorator: ComposableFallbackDecorator
     batch_size: int
     response_mapper: CrossRefResponseMapper

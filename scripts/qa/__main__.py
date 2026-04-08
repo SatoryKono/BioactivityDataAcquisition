@@ -20,6 +20,7 @@ Commands:
     report-vcr-metadata  Generate/check canonical VCR metadata catalog
     report-provider-contract-drift  Generate provider contract drift diagnostics from replay cassettes
     sync-integration-vcr-policy Sync tracked integration/e2e inventory in integration VCR policy
+    report-family-baseline Generate/check RF-06 hotspot-family baseline artifacts
     report-hotspots      Generate hotspot degradation report
     report-duplication-baseline  Generate report-only duplication baseline
     analyze-duplicate-functions Analyze duplicate function names across selected code areas
@@ -47,6 +48,7 @@ COMMANDS: dict[str, str] = {
     "report-vcr-metadata": "report_vcr_metadata_catalog.py",
     "report-provider-contract-drift": "report_provider_contract_drift.py",
     "sync-integration-vcr-policy": "sync_integration_vcr_policy.py",
+    "report-family-baseline": "report_hotspot_family_baseline.py",
     "report-hotspots": "generate_hotspot_degradation_report.py",
     "report-duplication-baseline": "report_duplication_baseline.py",
     "analyze-duplicate-functions": "analyze_duplicate_functions.py",

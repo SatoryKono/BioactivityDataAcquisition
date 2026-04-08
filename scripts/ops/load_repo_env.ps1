@@ -16,44 +16,56 @@ function Import-BioetlRepoEnv {
     } else {
         Join-Path $RepoRoot ".env"
     }
+    $envLocalFile = Join-Path $RepoRoot ".env.local"
 
-    if (-not (Test-Path $envFile)) {
+    if (-not (Test-Path $envFile) -and -not (Test-Path $envLocalFile)) {
         $env:BIOETL_REPO_ENV_LOADED = "1"
         return
     }
 
-    foreach ($rawLine in Get-Content -Path $envFile) {
-        $line = $rawLine.Trim()
-        if (-not $line -or $line.StartsWith("#") -or -not $rawLine.Contains("=")) {
+    $shellEnv = @{}
+    Get-ChildItem Env: | ForEach-Object {
+        $shellEnv[$_.Name] = $_.Value
+    }
+
+    $filesToLoad = @($envFile, $envLocalFile)
+    foreach ($file in $filesToLoad) {
+        if (-not (Test-Path $file)) {
             continue
         }
 
-        $parts = $rawLine -split '=', 2
-        if ($parts.Count -ne 2) {
-            continue
-        }
+        foreach ($rawLine in Get-Content -Path $file) {
+            $line = $rawLine.Trim()
+            if (-not $line -or $line.StartsWith("#") -or -not $rawLine.Contains("=")) {
+                continue
+            }
 
-        $name = $parts[0].Trim()
-        if ($name -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') {
-            continue
-        }
+            $parts = $rawLine -split '=', 2
+            if ($parts.Count -ne 2) {
+                continue
+            }
 
-        $currentValue = [Environment]::GetEnvironmentVariable($name)
-        if (-not [string]::IsNullOrEmpty($currentValue)) {
-            continue
-        }
+            $name = $parts[0].Trim()
+            if ($name -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') {
+                continue
+            }
 
-        $value = $parts[1].Trim()
-        if ($value.Length -ge 2 -and (
-                ($value.StartsWith('"') -and $value.EndsWith('"')) -or
-                ($value.StartsWith("'") -and $value.EndsWith("'"))
-            )) {
-            $value = $value.Substring(1, $value.Length - 2)
-        } else {
-            $value = [regex]::Replace($value, '\s+#.*$', '').TrimEnd()
-        }
+            if ($shellEnv.ContainsKey($name) -and -not [string]::IsNullOrEmpty($shellEnv[$name])) {
+                continue
+            }
 
-        Set-Item -Path "Env:$name" -Value $value
+            $value = $parts[1].Trim()
+            if ($value.Length -ge 2 -and (
+                    ($value.StartsWith('"') -and $value.EndsWith('"')) -or
+                    ($value.StartsWith("'") -and $value.EndsWith("'"))
+                )) {
+                $value = $value.Substring(1, $value.Length - 2)
+            } else {
+                $value = [regex]::Replace($value, '\s+#.*$', '').TrimEnd()
+            }
+
+            Set-Item -Path "Env:$name" -Value $value
+        }
     }
 
     $env:BIOETL_REPO_ENV_LOADED = "1"

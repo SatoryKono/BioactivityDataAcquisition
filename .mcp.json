@@ -11,6 +11,12 @@
         "NPM_CONFIG_CACHE": "/tmp/npm-cache"
       }
     },
+    "neo4j-cypher": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_neo4j_cypher_wrapper.sh"
+      ]
+    },
     "filesystem": {
       "command": "npx",
       "args": [

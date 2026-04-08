@@ -15,10 +15,10 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 from bioetl.application.services._quarantine_service_filtered_mixin import (
     QuarantineServiceFilteredMixin,
 )
+from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, QuarantinePort

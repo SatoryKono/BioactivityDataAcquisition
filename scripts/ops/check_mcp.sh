@@ -49,7 +49,7 @@ fi
 
 printf "=== MCP server list ===\n%s\n\n" "$list_out"
 
-for server in memory filesystem sequential-thinking fetch pdf github docker docker-docs context7 paper-search dockerhub prometheus grafana brave-search openaiDeveloperDocs; do
+for server in memory filesystem sequential-thinking fetch pdf github docker docker-docs context7 paper-search dockerhub prometheus grafana brave-search neo4j-cypher neo4j-memory openaiDeveloperDocs; do
   if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
     ok "Server '${server}' is registered"
   else
@@ -72,6 +72,8 @@ dockerhub_out="$(codex mcp get dockerhub 2>&1 || true)"
 prometheus_out="$(codex mcp get prometheus 2>&1 || true)"
 grafana_out="$(codex mcp get grafana 2>&1 || true)"
 brave_out="$(codex mcp get brave-search 2>&1 || true)"
+neo4j_cypher_out="$(codex mcp get neo4j-cypher 2>&1 || true)"
+neo4j_memory_out="$(codex mcp get neo4j-memory 2>&1 || true)"
 openai_docs_out="$(codex mcp get openaiDeveloperDocs 2>&1 || true)"
 
 require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
@@ -88,6 +90,8 @@ require_contains "$dockerhub_out" "mcp_dockerhub_wrapper" "dockerhub is routed t
 require_contains "$prometheus_out" "mcp_prometheus_wrapper" "prometheus is routed through the project wrapper" || status=1
 require_contains "$grafana_out" "mcp_grafana_wrapper" "grafana is routed through the project wrapper" || status=1
 require_contains "$brave_out" "mcp_brave_search_wrapper" "brave-search is routed through the project wrapper" || status=1
+require_contains "$neo4j_cypher_out" "mcp_neo4j_cypher_wrapper" "neo4j-cypher is routed through the project wrapper" || status=1
+require_contains "$neo4j_memory_out" "mcp_neo4j_memory_wrapper" "neo4j-memory is routed through the project wrapper" || status=1
 require_contains "$openai_docs_out" "https://developers.openai.com/mcp" "openaiDeveloperDocs points to official OpenAI MCP endpoint" || status=1
 
 if grep -Fq -- "${REPO_ROOT}" <<<"$filesystem_out"; then
@@ -105,9 +109,9 @@ else
 fi
 
 if [[ -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
-  ok "GITHUB_PERSONAL_ACCESS_TOKEN is set"
+  ok "GITHUB_PERSONAL_ACCESS_TOKEN is set (shell or .env)"
 else
-  warn "GITHUB_PERSONAL_ACCESS_TOKEN is not set (GitHub MCP auth may fail)"
+  warn "GITHUB_PERSONAL_ACCESS_TOKEN is not set in shell or .env (GitHub MCP auth may fail)"
 fi
 
 exit "$status"

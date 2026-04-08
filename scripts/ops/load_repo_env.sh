@@ -5,62 +5,134 @@ load_repo_env_if_present() {
     return 0
   fi
 
-  local script_dir repo_root env_file python_bin
+  local script_dir repo_root env_file env_local_file
   script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
   repo_root="$(cd -- "${script_dir}/../.." && pwd)"
   env_file="${BIOETL_ENV_FILE:-${repo_root}/.env}"
+  env_local_file="${repo_root}/.env.local"
 
-  if [[ ! -f "${env_file}" ]]; then
+  if [[ ! -f "${env_file}" && ! -f "${env_local_file}" ]]; then
     export BIOETL_REPO_ENV_LOADED=1
     return 0
   fi
 
+  # Try Python-based loading first (most reliable)
+  local python_bin
   python_bin="$(command -v python3 || command -v python || true)"
-  if [[ -z "${python_bin}" ]]; then
-    printf "[WARN] Python executable not found; skipping .env auto-load.\n" >&2
-    export BIOETL_REPO_ENV_LOADED=1
-    return 0
-  fi
-
-  while IFS= read -r -d '' key && IFS= read -r -d '' value; do
-    if [[ -z "${!key+x}" || -z "${!key}" ]]; then
+  
+  if [[ -n "${python_bin}" ]]; then
+    # Python version (original)
+    while IFS= read -r -d '' key && IFS= read -r -d '' value; do
       printf -v "${key}" '%s' "${value}"
       export "${key}"
-    fi
-  done < <(
-    "${python_bin}" - "${env_file}" <<'PY'
+    done < <(
+      "${python_bin}" - "${env_file}" "${env_local_file}" <<'PY'
 from __future__ import annotations
 
 import re
+import os
 import sys
 from pathlib import Path
 
-env_path = Path(sys.argv[1])
+env_paths = [Path(p) for p in sys.argv[1:]]
+shell_keys = set()
+for key in os.environ:
+    shell_keys.add(key)
 
-for raw in env_path.read_text(encoding="utf-8").splitlines():
-    stripped = raw.strip()
-    if not stripped or stripped.startswith("#") or "=" not in raw:
+values: dict[str, str] = {}
+for env_path in env_paths:
+    if not env_path.is_file():
         continue
 
-    key, value = raw.split("=", 1)
-    key = key.strip()
-    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key):
-        continue
+    for raw in env_path.read_text(encoding="utf-8").splitlines():
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#") or "=" not in raw:
+            continue
 
-    value = value.strip()
-    if not value:
-        parsed = ""
-    elif len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
-        parsed = value[1:-1]
-    else:
-        parsed = re.sub(r"\s+#.*$", "", value).rstrip()
+        key, value = raw.split("=", 1)
+        key = key.strip()
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key):
+            continue
 
+        if key in shell_keys:
+            continue
+
+        value = value.strip()
+        if not value:
+            parsed = ""
+        elif len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+            parsed = value[1:-1]
+        else:
+            parsed = re.sub(r"\s+#.*$", "", value).rstrip()
+
+        values[key] = parsed
+
+for key, parsed in values.items():
     sys.stdout.write(key)
     sys.stdout.write("\0")
     sys.stdout.write(parsed)
     sys.stdout.write("\0")
 PY
-  )
+    )
+  else
+    # Fallback: Pure bash parsing (no Python required)
+    local -A env_vars
+    
+    # Load .env first
+    if [[ -f "${env_file}" ]]; then
+      while IFS='=' read -r key value; do
+        key="${key##*( )}"      # Trim leading whitespace
+        key="${key%%*( )}"      # Trim trailing whitespace
+        
+        # Skip empty lines and comments
+        [[ -z "${key}" || "${key}" == "#"* ]] && continue
+        
+        # Trim value
+        value="${value##*( )}"
+        value="${value%%*( )}"
+        
+        # Remove quotes if present
+        if [[ "${value}" =~ ^['\"](.*)['\"']$ ]]; then
+          value="${BASH_REMATCH[1]}"
+        else
+          # Remove inline comments
+          value="${value%% #*}"
+          value="${value%%*( )}"
+        fi
+        
+        env_vars["${key}"]="${value}"
+      done < "${env_file}"
+    fi
+    
+    # Load .env.local (overrides .env)
+    if [[ -f "${env_local_file}" ]]; then
+      while IFS='=' read -r key value; do
+        key="${key##*( )}"
+        key="${key%%*( )}"
+        
+        [[ -z "${key}" || "${key}" == "#"* ]] && continue
+        
+        value="${value##*( )}"
+        value="${value%%*( )}"
+        
+        if [[ "${value}" =~ ^['\"](.*)['\"']$ ]]; then
+          value="${BASH_REMATCH[1]}"
+        else
+          value="${value%% #*}"
+          value="${value%%*( )}"
+        fi
+        
+        env_vars["${key}"]="${value}"
+      done < "${env_local_file}"
+    fi
+    
+    # Export all loaded variables
+    for key in "${!env_vars[@]}"; do
+      if [[ -z "${!key:-}" ]]; then
+        export "${key}=${env_vars[${key}]}"
+      fi
+    done
+  fi
 
   export BIOETL_REPO_ENV_LOADED=1
 }

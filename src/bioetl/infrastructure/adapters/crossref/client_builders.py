@@ -19,6 +19,10 @@ from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryB
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
     CrossRefResponseMapper,
 )
+from bioetl.infrastructure.adapters.crossref.types import (
+    CrossRefBatchFetcher,
+    CrossRefSearchPaginator,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
@@ -65,7 +69,7 @@ def _create_default_crossref_batch_fetcher(
     api_base: str,
     headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
-) -> DoiBatchProcessor:
+) -> CrossRefBatchFetcher:
     """Create default DOI batch processor for non-DI call sites.
 
     Args:
@@ -100,7 +104,7 @@ def _create_default_crossref_search_paginator(
     api_base: str,
     headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
-) -> SearchPaginator:
+) -> CrossRefSearchPaginator:
     """Create default search paginator for non-DI call sites.
 
     Args:
@@ -144,8 +148,8 @@ def _create_default_crossref_title_fallback_handler(
 def _create_default_crossref_fetch_flow(
     *,
     logger: LoggerPort,
-    batch_fetcher: DoiBatchProcessor,
-    search_paginator: SearchPaginator,
+    batch_fetcher: CrossRefBatchFetcher,
+    search_paginator: CrossRefSearchPaginator,
     fallback_decorator: ComposableFallbackDecorator,
     batch_size: int,
     response_mapper: CrossRefResponseMapper,

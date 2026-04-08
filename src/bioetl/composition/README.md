@@ -7,7 +7,11 @@ together. No business logic lives here — only assembly, factory, and registrat
 
 ```
 composition/
-├── entrypoints.py              # Public seam: run_pipeline(), services, resource ops
+├── entrypoints.py              # Retained execution-first seam (+ deprecated legacy lookups)
+├── execution_api.py            # Canonical execution API
+├── services_api.py             # Canonical service-bootstrap API
+├── resources_api.py            # Canonical resource-management API
+├── resource_management_api.py  # Deprecated alias for resources_api (compat only)
 ├── registry.py                 # PipelineRegistry — maps (provider, entity) → pipeline class
 ├── builders.py                 # High-level builder helpers for CLI/orchestration
 ├── types.py                    # Shared type aliases for composition
@@ -118,7 +122,9 @@ StorageFactory
 
 ## Retained Entrypoint Policy
 
-- `composition.entrypoints` is the canonical public seam for CLI/interface access.
+- `composition.entrypoints` is a retained public seam with execution-focused `__all__`.
+- Service/resource helpers should come from `composition.services_api` and
+  `composition.resources_api`.
 - Internal modules such as `_pipeline_execution`, `_resource_management`, and `_services`
   stay private to `composition/` plus dedicated entrypoint tests.
 - Composite runtime flows should use `load_composite_config()` as the stable

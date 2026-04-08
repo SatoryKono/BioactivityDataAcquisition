@@ -6,12 +6,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
-from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
-    DoiBatchProcessor,
-)
-from bioetl.infrastructure.adapters.crossref._search_paginator import (
-    SearchPaginator,
-)
 from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_fetch_flow,
 )
@@ -22,6 +16,10 @@ from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
 from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
     CrossRefResponseMapper,
+)
+from bioetl.infrastructure.adapters.crossref.types import (
+    CrossRefBatchFetcher,
+    CrossRefSearchPaginator,
 )
 
 if TYPE_CHECKING:
@@ -42,8 +40,8 @@ class CrossRefRuntimeServices:
 
     query_builder: CrossRefQueryBuilder
     response_mapper: CrossRefResponseMapper
-    batch_fetcher: DoiBatchProcessor
-    search_paginator: SearchPaginator
+    batch_fetcher: CrossRefBatchFetcher
+    search_paginator: CrossRefSearchPaginator
     fallback_handler: CrossRefTitleFallbackHandler
 
 
@@ -62,8 +60,8 @@ def build_crossref_runtime_services(
     *,
     query_builder: CrossRefQueryBuilder | None,
     response_mapper: CrossRefResponseMapper | None,
-    batch_fetcher: DoiBatchProcessor | None,
-    search_paginator: SearchPaginator | None,
+    batch_fetcher: CrossRefBatchFetcher | None,
+    search_paginator: CrossRefSearchPaginator | None,
     title_fallback_handler: CrossRefTitleFallbackHandler | None,
 ) -> CrossRefRuntimeServices:
     """Validate that composition injected the full CrossRef runtime graph."""
@@ -95,8 +93,8 @@ def build_crossref_fetch_flow(
     *,
     fetch_flow: CrossRefFetchFlow | None,
     logger: LoggerPort,
-    batch_fetcher: DoiBatchProcessor,
-    search_paginator: SearchPaginator,
+    batch_fetcher: CrossRefBatchFetcher,
+    search_paginator: CrossRefSearchPaginator,
     fallback_decorator: ComposableFallbackDecorator,
     batch_size: int,
     response_mapper: CrossRefResponseMapper,
