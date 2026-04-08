@@ -2,12 +2,25 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from collections.abc import AsyncIterator, Callable
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.datasource.adapter_helpers import (
+    AdapterHelperServices,
     AdapterHelpersFactory,
 )
+from bioetl.domain.ports import ErrorHandlerPort
+from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.crossref import CROSSREF_API_BASE, CrossRefAdapter
+from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
+    DoiBatchProcessor,
+)
+from bioetl.infrastructure.adapters.crossref._search_paginator import SearchPaginator
 from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_batch_fetcher,
     _create_default_crossref_query_builder,
@@ -15,21 +28,33 @@ from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_search_paginator,
     _create_default_crossref_title_fallback_handler,
 )
+from bioetl.infrastructure.adapters.crossref.fallback import (
+    CrossRefTitleFallbackHandler,
+)
+from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
+from bioetl.infrastructure.adapters.crossref.response_mapper import (
+    CrossRefResponseMapper,
+)
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.common.dependency_context import (
+        HttpAdapterDependencyContext,
+    )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+    from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
     from bioetl.infrastructure.config import Settings
 
 __all__ = ["create_crossref_adapter"]
 
 
 def _resolve_mailto(
-    kwargs: dict[str, Any],
+    kwargs: dict[str, object],
     settings: Settings | None,
 ) -> str:
     """Resolve mailto from kwargs or settings."""
-    mailto = kwargs.get("mailto")
+    mailto_raw = kwargs.get("mailto")
+    mailto = mailto_raw if isinstance(mailto_raw, str) and mailto_raw else None
     if not mailto and settings:
         mailto = getattr(settings, "default_email", None)
     if not mailto:
@@ -40,21 +65,22 @@ def _resolve_mailto(
     return mailto
 
 
-def _validate_dependencies(
+def _require_dependencies(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
-) -> None:
-    """Validate required dependencies."""
+) -> tuple[UnifiedHTTPClient, LoggerPort]:
+    """Validate and return required dependencies."""
     if http_client is None:
         raise ValueError("CrossRef adapter requires http_client")
     if logger is None:
         raise ValueError("CrossRef adapter requires logger")
+    return http_client, logger
 
 
 def _create_helper_services(
     logger: LoggerPort,
-    metrics: Any | None,
-) -> Any:
+    metrics: MetricsPort | None,
+) -> AdapterHelperServices:
     """Create helper services for the adapter."""
     return AdapterHelpersFactory.create_http_helpers(
         provider="crossref",
@@ -64,24 +90,45 @@ def _create_helper_services(
 
 
 def _resolve_optional_components(
-    kwargs: dict[str, Any],
-    helper_services: Any,
-) -> tuple[Any, ...]:
+    kwargs: dict[str, object],
+    helper_services: AdapterHelperServices,
+) -> tuple[
+    ErrorHandlerPort,
+    AdapterMetricsRecorder,
+    APIRequestCollector,
+    FallbackFetchOrchestratorService,
+]:
     """Resolve optional components with defaults."""
+    error_handler = cast("ErrorHandlerPort | None", kwargs.get("error_handler"))
+    adapter_metrics = cast(
+        "AdapterMetricsRecorder | None",
+        kwargs.get("adapter_metrics"),
+    )
+    request_collector = cast(
+        "APIRequestCollector | None",
+        kwargs.get("request_collector"),
+    )
+    fallback_fetch_service = cast(
+        "FallbackFetchOrchestratorService | None",
+        kwargs.get("fallback_fetch_service"),
+    )
     return (
-        kwargs.get("error_handler", helper_services.error_handler),
-        kwargs.get("adapter_metrics", helper_services.adapter_metrics),
-        kwargs.get("request_collector", helper_services.request_collector),
-        kwargs.get("fallback_fetch_service", helper_services.fallback_fetch_service),
+        error_handler or helper_services.error_handler,
+        adapter_metrics or helper_services.adapter_metrics,
+        request_collector or helper_services.request_collector,
+        fallback_fetch_service or helper_services.fallback_fetch_service,
     )
 
 
 def _create_query_builder(
-    kwargs: dict[str, Any],
+    kwargs: dict[str, object],
     mailto: str,
-) -> Any:
+) -> CrossRefQueryBuilder:
     """Create query builder with defaults."""
-    query_builder = kwargs.get("query_builder")
+    query_builder = cast(
+        "CrossRefQueryBuilder | None",
+        kwargs.get("query_builder"),
+    )
     if query_builder is None:
         query_builder = _create_default_crossref_query_builder(
             api_base=CROSSREF_API_BASE,
@@ -91,25 +138,29 @@ def _create_query_builder(
 
 
 def _create_response_mapper(
-    kwargs: dict[str, Any],
-) -> Any:
+    kwargs: dict[str, object],
+) -> CrossRefResponseMapper:
     """Create response mapper with defaults."""
-    response_mapper = kwargs.get("response_mapper")
+    response_mapper = cast(
+        "CrossRefResponseMapper | None",
+        kwargs.get("response_mapper"),
+    )
     if response_mapper is None:
         response_mapper = _create_default_crossref_response_mapper()
     return response_mapper
 
 
 def _create_batch_fetcher(
+    kwargs: dict[str, object],
     http_client: UnifiedHTTPClient,
     logger: LoggerPort,
-    adapter_metrics: Any,
+    adapter_metrics: AdapterMetricsRecorder,
     mailto: str,
-    headers_fn: Callable[..., dict[str, str]],
-    request_collector: Any,
-) -> Any:
+    headers_fn: Callable[[], dict[str, str]],
+    request_collector: APIRequestCollector,
+) -> DoiBatchProcessor:
     """Create batch fetcher with defaults."""
-    batch_fetcher = kwargs.get("batch_fetcher")
+    batch_fetcher = cast("DoiBatchProcessor | None", kwargs.get("batch_fetcher"))
     if batch_fetcher is None:
         batch_fetcher = _create_default_crossref_batch_fetcher(
             http=http_client,
@@ -124,15 +175,16 @@ def _create_batch_fetcher(
 
 
 def _create_search_paginator(
+    kwargs: dict[str, object],
     http_client: UnifiedHTTPClient,
     logger: LoggerPort,
-    adapter_metrics: Any,
+    adapter_metrics: AdapterMetricsRecorder,
     mailto: str,
-    headers_fn: Callable[..., dict[str, str]],
-    request_collector: Any,
-) -> Any:
+    headers_fn: Callable[[], dict[str, str]],
+    request_collector: APIRequestCollector,
+) -> SearchPaginator:
     """Create search paginator with defaults."""
-    search_paginator = kwargs.get("search_paginator")
+    search_paginator = cast("SearchPaginator | None", kwargs.get("search_paginator"))
     if search_paginator is None:
         search_paginator = _create_default_crossref_search_paginator(
             http=http_client,
@@ -147,11 +199,15 @@ def _create_search_paginator(
 
 
 def _create_title_fallback_handler(
+    kwargs: dict[str, object],
     logger: LoggerPort,
-    search_fn: Callable[..., Any],
-) -> Any:
+    search_fn: Callable[[str, int], AsyncIterator[JsonDict]],
+) -> CrossRefTitleFallbackHandler:
     """Create title fallback handler with defaults."""
-    title_fallback_handler = kwargs.get("title_fallback_handler")
+    title_fallback_handler = cast(
+        "CrossRefTitleFallbackHandler | None",
+        kwargs.get("title_fallback_handler"),
+    )
     if title_fallback_handler is None:
         title_fallback_handler = _create_default_crossref_title_fallback_handler(
             logger=logger,
@@ -164,7 +220,7 @@ def create_crossref_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,  # Any: forward arbitrary adapter config kwargs
+    **kwargs: object,
 ) -> CrossRefAdapter:
     """Create CrossRefAdapter resolving mandatory ``mailto`` from kwargs/settings.
 
@@ -186,43 +242,66 @@ def create_crossref_adapter(
     """
     # Resolve and validate dependencies
     mailto = _resolve_mailto(kwargs, settings)
-    _validate_dependencies(http_client, logger)
-    
+    http_client_resolved, logger_resolved = _require_dependencies(http_client, logger)
+
     # Create helper services
-    metrics = kwargs.get("metrics")
-    helper_services = _create_helper_services(logger, metrics)
-    
+    metrics = cast("MetricsPort | None", kwargs.get("metrics"))
+    helper_services = _create_helper_services(logger_resolved, metrics)
+
     # Resolve optional components
-    error_handler, adapter_metrics, request_collector, fallback_fetch_service = \
-        _resolve_optional_components(kwargs, helper_services)
-    
+    (
+        error_handler,
+        adapter_metrics,
+        request_collector,
+        fallback_fetch_service,
+    ) = _resolve_optional_components(kwargs, helper_services)
+
     # Create query builder and get headers function
     query_builder = _create_query_builder(kwargs, mailto)
     headers_fn = query_builder.build_headers
-    
+
     # Create response mapper
     response_mapper = _create_response_mapper(kwargs)
-    
+
     # Create batch fetcher
     batch_fetcher = _create_batch_fetcher(
-        http_client, logger, adapter_metrics, mailto, headers_fn, request_collector
+        kwargs,
+        http_client_resolved,
+        logger_resolved,
+        adapter_metrics,
+        mailto,
+        headers_fn,
+        request_collector,
     )
-    
+
     # Create search paginator
     search_paginator = _create_search_paginator(
-        http_client, logger, adapter_metrics, mailto, headers_fn, request_collector
+        kwargs,
+        http_client_resolved,
+        logger_resolved,
+        adapter_metrics,
+        mailto,
+        headers_fn,
+        request_collector,
     )
-    
+
     # Create title fallback handler
-    title_fallback_handler = _create_title_fallback_handler(logger, search_paginator.search)
+    title_fallback_handler = _create_title_fallback_handler(
+        kwargs,
+        logger_resolved,
+        search_paginator.search,
+    )
+    batch_size = cast(int, kwargs.get("batch_size", 50))
+    dependency_context = cast("HttpAdapterDependencyContext | None", kwargs.get("dependency_context"))
+    fetch_flow = cast("CrossRefFetchFlow | None", kwargs.get("fetch_flow"))
 
     return CrossRefAdapter(
-        http_client=http_client,
-        logger=logger,
+        http_client=http_client_resolved,
+        logger=logger_resolved,
         mailto=mailto,
-        batch_size=kwargs.get("batch_size", 50),
+        batch_size=batch_size,
         metrics=metrics,
-        dependency_context=kwargs.get("dependency_context"),
+        dependency_context=dependency_context,
         error_handler=error_handler,
         adapter_metrics=adapter_metrics,
         request_collector=request_collector,
@@ -232,5 +311,5 @@ def create_crossref_adapter(
         batch_fetcher=batch_fetcher,
         search_paginator=search_paginator,
         title_fallback_handler=title_fallback_handler,
-        fetch_flow=kwargs.get("fetch_flow"),
+        fetch_flow=fetch_flow,
     )

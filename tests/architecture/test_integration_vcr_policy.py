@@ -348,7 +348,7 @@ class TestIntegrationVcrPolicy:
             )
 
         assert not re.search(
-            r"SatoryKono/BioactivityDataAcquisition(?!2)",
+            r"SatoryKono/BioactivityDataAcquisition2",
             testing_guide,
         )
 

@@ -31,13 +31,15 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.run_context import RunContext
 
 
-def build_silver_lineage_fragment(
-    *,
+
+
+
+def _build_silver_nodes(
     run_context: RunContext,
     input_data: SilverMetadataInput,
-) -> LineageGraphFragment:
-    """Build canonical Silver lineage fragment from metadata input."""
-    created_at = fragment_timestamp(input_data.completed_at, input_data.started_at)
+    created_at: str,
+) -> tuple[list, list]:
+    """Build all nodes for the silver lineage fragment."""
     run = run_node(run_context)
     manifest = manifest_node(run_context)
     silver_dataset, composite_source_nodes, composite_source_edges = (
@@ -73,14 +75,33 @@ def build_silver_lineage_fragment(
         *lineage_transform_nodes,
         *composite_source_nodes,
     ]
+    
+    if manifest is not None:
+        nodes.append(manifest)
+    
+    return nodes, composite_source_edges
+
+
+def _build_silver_edges(
+    run_context: RunContext,
+    input_data: SilverMetadataInput,
+    nodes: list,
+    created_at: str,
+    composite_source_edges: list[LineageEdge],
+) -> list[LineageEdge]:
+    """Build all edges for the silver lineage fragment."""
+    run = next(node for node in nodes if hasattr(node, 'run_id') and node.run_id == run_context.run_id)
+    silver_dataset = next(node for node in nodes if hasattr(node, 'table_name') and node.table_name == input_data.table_name)
+    bronze_nodes = [node for node in nodes if hasattr(node, 'layer') and node.layer == 'bronze']
+    lineage_transform_nodes = [node for node in nodes if hasattr(node, 'transform_type')]
+    
     edges = manifest_edges(
-        manifest=manifest,
+        manifest=manifest_node(run_context),
         run=run,
         created_at=created_at,
         run_context=run_context,
     )
-    if manifest is not None:
-        nodes.append(manifest)
+    
     edges.extend(
         LineageEdge(
             edge_type=LineageEdgeType.DERIVED_FROM,
@@ -92,7 +113,9 @@ def build_silver_lineage_fragment(
         )
         for bronze_node in bronze_nodes
     )
+    
     edges.extend(composite_source_edges)
+    
     if lineage_transform_nodes:
         edges.extend(
             transform_edges(
@@ -123,6 +146,24 @@ def build_silver_lineage_fragment(
                 created_at=created_at,
             )
         )
+    
+    return edges
+
+
+def build_silver_lineage_fragment(
+    *,
+    run_context: RunContext,
+    input_data: SilverMetadataInput,
+) -> LineageGraphFragment:
+    """Build canonical Silver lineage fragment from metadata input."""
+    created_at = fragment_timestamp(input_data.completed_at, input_data.started_at)
+    
+    # Build nodes
+    nodes, composite_source_edges = _build_silver_nodes(run_context, input_data, created_at)
+    
+    # Build edges
+    edges = _build_silver_edges(run_context, input_data, nodes, created_at, composite_source_edges)
+    
     return LineageGraphFragment(
         fragment_id=build_fragment_id(
             "silver",

@@ -129,7 +129,7 @@ class LockConfig:
     Bundles locking configuration to reduce __init__ parameters.
 
     Attributes:
-        lock_key: The key used for the distributed lock.
+        lock_key: The key used for runtime lock coordination.
         exclusive: Whether the lock is exclusive.
         lock_ttl: Time-to-live for the lock in seconds.
         wait_for_lock: Whether to wait for lock acquisition.

@@ -21,7 +21,7 @@ DEFAULT_CHECKPOINT_INTERVAL: int = 1000
 """Default interval (in records) between checkpoint saves."""
 
 DEFAULT_LOCK_TTL_SECONDS: int = 3600
-"""Default time-to-live for distributed locks (1 hour)."""
+"""Default time-to-live for runtime locks (1 hour)."""
 
 # =============================================================================
 # Data Quality defaults

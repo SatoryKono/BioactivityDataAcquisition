@@ -31,7 +31,7 @@ Last verified: '2026-03-30'
 
 ### Horizontal Scaling (Not Supported in Current Architecture)
 
-- BioETL currently runs in Local-Only single-instance mode (ADR-010). Horizontal scaling and distributed lock orchestration are not supported.
+- BioETL currently runs in Local-Only single-instance mode (ADR-010). Horizontal scaling and inter-process lock orchestration are not supported.
 
 *   **Current strategy**: Run one pipeline process at a time on a single host.
 *   **Concurrency guard**: `MemoryLock` is process-local and does not provide inter-process safety.

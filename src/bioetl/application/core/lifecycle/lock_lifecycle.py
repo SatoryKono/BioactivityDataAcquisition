@@ -1,4 +1,4 @@
-"""Lifecycle helpers for distributed lock orchestration."""
+"""Lifecycle helpers for runtime lock orchestration."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ __all__ = [
 
 
 async def acquire_lock(host: LockCoordinator) -> FencingToken | None:
-    """Acquire the distributed lock and update shared runtime state."""
+    """Acquire the runtime lock and update shared runtime state."""
     token = await host._lock.acquire(
         key=host._config.lock_key,
         owner_id=host._run_id,
@@ -52,7 +52,7 @@ async def acquire_lock(host: LockCoordinator) -> FencingToken | None:
 
 
 async def release_lock(host: LockCoordinator) -> None:
-    """Release the distributed lock, stop heartbeat, and clear context state."""
+    """Release the runtime lock, stop heartbeat, and clear context state."""
     if host._heartbeat:
         await host._heartbeat.stop()
         host._heartbeat = None

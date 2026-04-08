@@ -215,7 +215,7 @@ class ErrorType(StrEnum):
     """Schema drift detected in Silver layer (new/removed fields)."""
 
     LOCK_LOST = "LOCK_LOST"
-    """Distributed lock lost during execution."""
+    """Runtime lock ownership lost during execution."""
 
     # Recoverable errors (retry)
     RATE_LIMIT = "RATE_LIMIT"

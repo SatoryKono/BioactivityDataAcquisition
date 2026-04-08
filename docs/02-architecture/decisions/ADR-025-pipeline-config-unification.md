@@ -285,8 +285,8 @@ pipeline-name: chembl_activity
 - [ADR-027: DQ Rules Externalization](ADR-027-dq-rules-externalization.md) - Hierarchical DQ config
 - [03-file-policy.md](../../00-project/governance/03-file-policy.md) - File structure documentation
 - [04-extending-bioetl.md](../../00-project/governance/04-extending-bioetl.md) - Entity config template
-- [configs/base/pipeline.yaml](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/configs/base/pipeline.yaml) - Unified Base Schema v2.0.0
-- [Pipeline Pydantic Schema](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/schemas/pipeline_config.py) - Pydantic validation schema
+- [configs/base/pipeline.yaml](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/configs/base/pipeline.yaml) - Unified Base Schema v2.0.0
+- [Pipeline Pydantic Schema](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/src/bioetl/infrastructure/schemas/pipeline_config.py) - Pydantic validation schema
 
 ## Changelog
 

@@ -128,7 +128,7 @@ See [Composite Pipeline Diagram](../02-architecture/diagrams/foundation/29-compo
 
 ## Current Version
 
-**v6.1.0** (2026-03-11) — See [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md) and [Release Notes](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md#610---2026-03-11) for details.
+**v6.1.0** (2026-03-11) — See [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md) and [Release Notes](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md#610---2026-03-11) for details.
 
 ## Getting Started
 

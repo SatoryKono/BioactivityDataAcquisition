@@ -1,6 +1,6 @@
 """A simple in-memory lock for local development and testing.
 
-This lock is not distributed and only works within a single process.
+This lock is process-local and only coordinates tasks within one process.
 """
 
 from __future__ import annotations

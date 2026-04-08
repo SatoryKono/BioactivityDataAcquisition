@@ -24,7 +24,9 @@ def resolve_provider_registry(
     provider_registry: None = None,
     *,
     ensure_ready: Literal[False] = False,
-) -> ProviderRegistry: ...
+) -> ProviderRegistry:
+    """Resolve default provider registry without forcing readiness."""
+    ...
 
 
 @overload
@@ -32,7 +34,9 @@ def resolve_provider_registry(
     provider_registry: ProviderRegistry | None = None,
     *,
     ensure_ready: Literal[True],
-) -> ProviderRegistry: ...
+) -> ProviderRegistry:
+    """Resolve provider registry and guarantee ready/loaded state."""
+    ...
 
 
 @overload
@@ -40,7 +44,9 @@ def resolve_provider_registry(
     provider_registry: RegistryT,
     *,
     ensure_ready: Literal[False] = False,
-) -> RegistryT: ...
+) -> RegistryT:
+    """Pass through explicit registry implementation without readiness forcing."""
+    ...
 
 
 def resolve_provider_registry(

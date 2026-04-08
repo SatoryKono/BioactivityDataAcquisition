@@ -17,7 +17,7 @@ ______________________________________________________________________
 **Status:** Accepted
 **Last updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
-**Supersedes:** [ADR-003](ADR-003-in-memory-locking-strategy.md) (original distributed-locking posture)
+**Supersedes:** [ADR-003](ADR-003-in-memory-locking-strategy.md) (original multi-instance lock posture)
 
 ## Context
 

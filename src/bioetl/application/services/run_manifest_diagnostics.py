@@ -21,13 +21,12 @@ class DQDetailsSummary(TypedDict):
     has_cross_validation_signal: bool
 
 
-def build_diagnostics_summary(
+def _build_base_summary(
     manifest: RunManifest,
-    ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> dict[str, object]:
-    """Build compact operator-oriented diagnostics summary."""
+    """Build base summary from manifest code provenance."""
     code_provenance = manifest.code_provenance
-    summary: dict[str, object] = {
+    return {
         "execution_fingerprint": manifest.execution_fingerprint,
         "config_hash": code_provenance.config_hash,
         "effective_config_hash": code_provenance.config_hash,
@@ -40,9 +39,27 @@ def build_diagnostics_summary(
         ),
         "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
     }
-    if not ledger_entries:
-        return summary
 
+
+def _process_ledger_entries(
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> tuple[
+    Counter[str],
+    Counter[str],
+    list[dict[str, object]],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    bool,
+    bool,
+    int,
+    dict[str, int],
+]:
+    """Process ledger entries and extract statistics."""
     family_counter: Counter[str] = Counter()
     type_counter: Counter[str] = Counter()
     artifact_refs: list[dict[str, object]] = []
@@ -62,6 +79,7 @@ def build_diagnostics_summary(
         "data_contract_version": 0,
         "composite_run_id": 0,
     }
+    
     for entry in ledger_entries:
         family_counter.update([entry.event_family or "diagnostic"])
         type_counter.update([entry.event_type])
@@ -92,7 +110,44 @@ def build_diagnostics_summary(
             correlation_anchor_gaps,
             entry,
         )
+    
+    return (
+        family_counter,
+        type_counter,
+        artifact_refs,
+        lineage_fragment_ids,
+        dq_rule_ids,
+        dq_dispositions,
+        dq_report_paths,
+        dq_violation_kinds,
+        cross_validation_rule_ids,
+        cross_validation_config_paths,
+        dq_signal_present,
+        cross_validation_signal_present,
+        missing_link_count,
+        correlation_anchor_gaps,
+    )
 
+
+def _build_final_summary(
+    base_summary: dict[str, object],
+    ledger_entries: tuple[RunLedgerEntry, ...],
+    family_counter: Counter[str],
+    type_counter: Counter[str],
+    artifact_refs: list[dict[str, object]],
+    lineage_fragment_ids: set[str],
+    dq_rule_ids: set[str],
+    dq_dispositions: set[str],
+    dq_report_paths: set[str],
+    dq_violation_kinds: set[str],
+    cross_validation_rule_ids: set[str],
+    cross_validation_config_paths: set[str],
+    dq_signal_present: bool,
+    cross_validation_signal_present: bool,
+    missing_link_count: int,
+    correlation_anchor_gaps: dict[str, int],
+) -> dict[str, object]:
+    """Build final summary with all processed data."""
     latest_entry = ledger_entries[-1]
     alert_signals = _build_alert_signals(
         latest_status=latest_entry.status,
@@ -103,6 +158,8 @@ def build_diagnostics_summary(
         cross_validation_signal_present=cross_validation_signal_present,
     )
     next_steps = _build_next_steps(alert_signals)
+    
+    summary = base_summary.copy()
     summary.update(
         {
             "total_events": len(ledger_entries),
@@ -126,6 +183,53 @@ def build_diagnostics_summary(
         }
     )
     return summary
+
+
+def build_diagnostics_summary(
+    manifest: RunManifest,
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> dict[str, object]:
+    """Build compact operator-oriented diagnostics summary."""
+    base_summary = _build_base_summary(manifest)
+    
+    if not ledger_entries:
+        return base_summary
+    
+    (
+        family_counter,
+        type_counter,
+        artifact_refs,
+        lineage_fragment_ids,
+        dq_rule_ids,
+        dq_dispositions,
+        dq_report_paths,
+        dq_violation_kinds,
+        cross_validation_rule_ids,
+        cross_validation_config_paths,
+        dq_signal_present,
+        cross_validation_signal_present,
+        missing_link_count,
+        correlation_anchor_gaps,
+    ) = _process_ledger_entries(ledger_entries)
+    
+    return _build_final_summary(
+        base_summary,
+        ledger_entries,
+        family_counter,
+        type_counter,
+        artifact_refs,
+        lineage_fragment_ids,
+        dq_rule_ids,
+        dq_dispositions,
+        dq_report_paths,
+        dq_violation_kinds,
+        cross_validation_rule_ids,
+        cross_validation_config_paths,
+        dq_signal_present,
+        cross_validation_signal_present,
+        missing_link_count,
+        correlation_anchor_gaps,
+    )
 
 
 def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:

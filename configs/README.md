@@ -77,7 +77,7 @@ Retained supporting assets:
 | `source` | API-specific params merged from provider-level defaults (no legacy source_file) |
 
 Legacy file-reference keys follow explicit status rules:
-- Normative CI/source-of-truth constants for active, retired, and transitional config keys live in `src/bioetl/infrastructure/config/config_ci_contract.py`. Pre-commit `scripts/schema/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) both import that shared contract.
+- Normative CI/source-of-truth constants for active, retired, and transitional config keys live in `src/bioetl/infrastructure/config/config_ci_contract.py`. Pre-commit `scripts/schema/check_config_invariants.py` and `tests/architecture/test_config_ci_invariants.py` both import that shared contract.
 - Retired now: pipeline `schema_file`, `data_schema_file`, `column_groups_file`, `source_file`, source `batch_size`, source `provider_config.batch_size/page_size/max_url_length/cursor_pagination`, and composite `merge.column_groups_file` are not part of the active runtime contract.
 - Required canonical composite contract: composite `composite.version` must be present; YAML files that omit it are no longer accepted by runtime validation.
 - Transitional migration-only: pipeline `filter_batch_size` remains a compatibility alias and is deprecated in schema/models.

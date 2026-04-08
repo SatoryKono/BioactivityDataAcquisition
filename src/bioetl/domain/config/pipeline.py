@@ -141,7 +141,7 @@ class PipelineConfig:
 
     @property
     def lock_key(self) -> str:
-        """Generate lock key for distributed locking."""
+        """Generate lock key for runtime locking."""
         return f"pipeline:{self.pipeline_name}"
 
     @property

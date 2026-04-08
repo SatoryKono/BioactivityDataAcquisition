@@ -503,11 +503,13 @@ Dashboard для работы с проблемными записями.
 bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 ```
 
-| Опция          | Тип | По умолчанию | Описание              |
-| -------------- | --- | ------------ | --------------------- |
-| `--pipeline`   | str | Required     | Имя пайплайна         |
-| `--limit`      | int | 100          | Максимум записей      |
-| `--error-code` | str | None         | Фильтр по коду ошибки |
+| Опция                 | Тип  | По умолчанию | Описание                                         |
+| --------------------- | ---- | ------------ | ------------------------------------------------ |
+| `--pipeline`          | str  | Required     | Имя пайплайна                                    |
+| `--limit`             | int  | 100          | Максимум записей                                 |
+| `--error-code`        | str  | None         | Фильтр по коду ошибки                            |
+| `--run-id`            | str  | None         | Ограничить просмотр одним run                    |
+| `--silver-filter-only` | flag | False        | Shortcut для `--error-code FILTERED_OUT_SILVER` |
 
 **Примеры:**
 
@@ -522,7 +524,17 @@ bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIE
 bioetl quarantine stats --pipeline <NAME> [--json]
 ```
 
-Показывает: общее количество, распределение по кодам ошибок, статусы (NEW, REVIEWED, RESOLVED).
+| Опция                 | Тип  | По умолчанию | Описание                                         |
+| --------------------- | ---- | ------------ | ------------------------------------------------ |
+| `--pipeline`          | str  | Required     | Имя пайплайна                                    |
+| `--json`              | flag | False        | Вывод в JSON                                     |
+| `--error-code`        | str  | None         | Ограничить статистику одним кодом ошибки         |
+| `--run-id`            | str  | None         | Ограничить статистику одним run                  |
+| `--silver-filter-only` | flag | False        | Shortcut для `--error-code FILTERED_OUT_SILVER` |
+| `--group-by`          | str  | None         | Фокусная Silver-группировка (`reason-code`, `field`, `rule-type`, `operator`, `reason-code-field`, `reason-signature`) |
+| `--top`               | int  | 10           | Лимит элементов в группировках                   |
+
+Показывает: общее количество, распределение по кодам ошибок, статусы (`NEW`, `IGNORED`, `REPROCESSED`).
 
 #### `quarantine replay` — Повторная обработка
 
@@ -536,6 +548,10 @@ bioetl quarantine replay --pipeline <NAME> [OPTIONS]
 | `--error-code`   | str  | None         | Фильтр по коду ошибки        |
 | `--max-age-days` | int  | 7            | Максимальный возраст записей |
 | `--dry-run`      | flag | False        | Предпросмотр                 |
+
+`quarantine replay` подготавливает записи к повторной обработке:
+в non-dry-run режиме подходящие записи помечаются как `REPROCESSED`.
+Команда не запускает полный rerun пайплайна сама по себе.
 
 #### `quarantine purge` — Удаление старых записей
 
@@ -554,6 +570,8 @@ bioetl quarantine purge --pipeline <NAME> [OPTIONS]
 ```bash
 bioetl quarantine resolve --pipeline <NAME> --payload-hash <HASH> [--status IGNORED|REPROCESSED]
 ```
+
+Допустимые значения `--status`: `IGNORED`, `REPROCESSED`.
 
 ______________________________________________________________________
 
@@ -609,7 +627,7 @@ ______________________________________________________________________
 ### `lock` — Inspect and manage local runtime locks
 
 Inspection and manual release surface for the Local-Only runtime lock files.
-This CLI group does **not** represent a distributed lock manager or external
+This CLI group does **not** represent an inter-process lock manager or external
 coordinator.
 
 #### `lock release` — Освобождение блокировки

@@ -4,7 +4,7 @@ Application Service that orchestrates pipeline execution lifecycle.
 Coordinates locking, checkpointing, and execution.
 
 Delegates to specialized services (injected directly via DI):
-- LockCoordinator: Distributed locking
+- LockCoordinator: Runtime locking
 - PreflightService: Infrastructure health validation
 - PostrunService: DQ checks, VACUUM, cleanup
 - MedallionLifecycleService: Medallion layer clearing and vacuum
@@ -120,7 +120,7 @@ class PipelineRunner:
             checkpoint_manager: Checkpoint manager.
             shutdown_signal: Shutdown signal for graceful termination.
             logger: Structured logger.
-            lock_manager: Distributed locking manager.
+            lock_manager: Runtime locking manager.
             preflight: Pre-flight infrastructure validation service.
             postrun: Post-run DQ checks service.
             lifecycle_service: Medallion lifecycle service for clearing and vacuum.

@@ -221,7 +221,7 @@ End-to-end поток данных от API провайдера до Gold layer
 
 1. **Lock Acquisition**
 
-   - Acquire distributed lock
+   - Acquire runtime lock (process-local in Local-Only profile)
    - Start heartbeat (30s interval)
 
 1. **Medallion Clear** (зависит от run-type)

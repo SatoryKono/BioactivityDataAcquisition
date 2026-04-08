@@ -113,7 +113,7 @@ def create_composite_runner(
         runtime: Runtime options for the composite run.
         run_id: UUID string identifying this run.
         logger: Structured logger forwarded to the runner.
-        lock: LockPort used for distributed execution safety.
+        lock: LockPort used for runtime execution safety.
         seed_runner_factory: Callable that creates a seed-phase PipelineRunner.
         dependencies_runner_factory: Callable that creates a dependency-phase
             PipelineRunner given a pipeline name and keys DataFrame.

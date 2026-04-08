@@ -91,7 +91,7 @@ class CompositePipelineRunner(
         Args:
             config: Composite pipeline domain configuration, including seed
                 and enricher pipeline names, merge settings, and the
-                distributed lock key.
+                runtime lock key.
             runtime: Run-time flags such as ``resume``, ``run_type``, and
                 ``dry_run`` that control execution behaviour without changing
                 domain configuration.
@@ -182,7 +182,7 @@ class CompositePipelineRunner(
         self._record_run_started()
 
     async def _run_with_managed_lock(self) -> CompositeResult:
-        """Acquire/release the distributed lock around the canonical run body.
+        """Acquire/release the runtime lock around the canonical run body.
 
         A background :class:`HeartbeatTask` keeps the lock alive for the
         entire duration of the composite pipeline execution, preventing TTL
@@ -201,7 +201,7 @@ class CompositePipelineRunner(
         return lock_run_result
 
     async def run(self) -> CompositeResult:
-        """Execute full composite pipeline under distributed lock.
+        """Execute full composite pipeline under runtime lock.
 
         Returns:
             CompositeResult summarising seed, enrichment, dependency, and merge outcomes.
