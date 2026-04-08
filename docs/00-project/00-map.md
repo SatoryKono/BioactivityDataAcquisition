@@ -523,12 +523,12 @@ ______________________________________________________________________
 | Topic         | Document                                                                                                       | RULES.md |
 | ------------- | -------------------------------------------------------------------------------------------------------------- | -------- |
 | GitHub Policy | [05-github-policy.md](governance/05-github-policy.md)                                                          | §4, §5   |
-| Contributing  | [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/.github/CONTRIBUTING.md) | —        |
-| Security      | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/.github/SECURITY.md)         | §5.4     |
+| Contributing  | [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | —        |
+| Security      | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md)         | §5.4     |
 
 ## Related Resources
 
-- **Repository**: [SatoryKono/BioactivityDataAcquisition2](https://github.com/SatoryKono/BioactivityDataAcquisition2)
+- **Repository**: [SatoryKono/BioactivityDataAcquisition](https://github.com/SatoryKono/BioactivityDataAcquisition)
 - **Issues**: Report bugs and feature requests
 - **CI/CD**: GitHub Actions workflows ([GitHub Policy](governance/05-github-policy.md))
 

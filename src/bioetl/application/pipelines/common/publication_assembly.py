@@ -67,7 +67,9 @@ class PublicationAssemblyTransformer(Protocol):
         **kwargs: object,
     ) -> BaseEntity: ...
 
-    def entity_to_silver_record(self, entity: BaseEntity) -> SilverRecord: ...
+    def entity_to_silver_record(self, entity: BaseEntity) -> SilverRecord:
+        """Project a domain entity into a serializable Silver-layer record."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)

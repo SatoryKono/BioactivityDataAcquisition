@@ -1,7 +1,12 @@
-"""Locking port for distributed lock coordination.
+"""Locking port for runtime coordination.
 
-This port provides a mechanism for coordinating operations across
-multiple instances or processes, preventing race conditions.
+This port defines lock ownership and liveness checks used by pipeline runtime
+coordination. In the current Local-Only profile, implementations are
+process-local; the port remains an extension point for broader coordination
+backends if the deployment profile changes.
+
+Terminology note: older project docs used broader lock wording for this
+surface. The runtime semantics are unchanged; only wording was clarified.
 """
 
 from __future__ import annotations
@@ -18,10 +23,10 @@ __all__ = [
 
 @runtime_checkable
 class LockPort(Protocol):
-    """Port for distributed locking.
+    """Port for runtime locking.
 
-    This interface provides a mechanism for coordinating operations across
-    multiple instances or processes, preventing race conditions.
+    The protocol models lock acquisition, liveness, and ownership validation
+    for pipeline execution coordination.
     """
 
     async def acquire(

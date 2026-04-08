@@ -21,6 +21,7 @@ $PytestArgs = @($args)
 $NeedsDefaultFlags = $true
 $PytestNarrow = $false
 $CollectOnly = $false
+$SkipPreflight = $false
 $FilteredArgs = @()
 
 function Test-BenchmarkPluginNeeded {
@@ -90,9 +91,53 @@ function Test-XdistPluginNeeded {
     return $false
 }
 
+function Test-PreflightScope {
+    param(
+        [string[]]$Args
+    )
+
+    $SelectedPaths = @()
+    foreach ($Arg in $Args) {
+        if ($Arg.StartsWith("-")) {
+            continue
+        }
+        $SelectedPaths += $Arg
+    }
+
+    if ($SelectedPaths.Count -eq 0) {
+        return "full"
+    }
+
+    foreach ($PathArg in $SelectedPaths) {
+        if (
+            $PathArg -eq "tests" -or
+            $PathArg -eq "tests/" -or
+            $PathArg -eq "tests\" -or
+            $PathArg -like "tests/architecture*" -or
+            $PathArg -like "tests\architecture*" -or
+            $PathArg -like "tests/integration*" -or
+            $PathArg -like "tests\integration*" -or
+            $PathArg -like "tests/e2e*" -or
+            $PathArg -like "tests\e2e*" -or
+            $PathArg -like "tests/contract*" -or
+            $PathArg -like "tests\contract*" -or
+            $PathArg -like "tests/smoke*" -or
+            $PathArg -like "tests\smoke*"
+        ) {
+            return "full"
+        }
+    }
+
+    return ""
+}
+
 foreach ($Arg in $PytestArgs) {
     if ($Arg -eq "--narrow") {
         $PytestNarrow = $true
+        continue
+    }
+    if ($Arg -eq "--skip-preflight") {
+        $SkipPreflight = $true
         continue
     }
     if ($Arg -in @("--collect-only", "--co")) {
@@ -105,6 +150,43 @@ foreach ($Arg in $PytestArgs) {
 }
 
 $PytestArgs = $FilteredArgs
+$PreflightScope = ""
+if ($env:BIOETL_PREFLIGHT_SCOPE) {
+    $PreflightScope = $env:BIOETL_PREFLIGHT_SCOPE
+} else {
+    $PreflightScope = Test-PreflightScope -Args $PytestArgs
+}
+
+if (
+    -not $SkipPreflight -and
+    $env:BIOETL_SKIP_PREFLIGHT -ne "1" -and
+    $env:BIOETL_PREFLIGHT_DONE -ne "1" -and
+    $env:BIOETL_PREFLIGHT_ACTIVE -ne "1" -and
+    -not $PytestNarrow -and
+    -not $CollectOnly -and
+    $NeedsDefaultFlags -and
+    $PreflightScope
+) {
+    $PreflightScript = Join-Path $ScriptDir "pretest_guardrails.ps1"
+    if (Test-Path $PreflightScript) {
+        Write-Host "[run_pytest] running pretest guardrails (scope=$PreflightScope)"
+        $env:BIOETL_PREFLIGHT_ACTIVE = "1"
+        try {
+            $PreflightArgs = @("--mode", "auto", "--scope", $PreflightScope)
+            if ($env:BIOETL_PREFLIGHT_STRICT_DOCS -eq "1") {
+                $PreflightArgs += "--strict-docs"
+            }
+            & $PreflightScript @PreflightArgs
+            if ($LASTEXITCODE -ne 0) {
+                exit $LASTEXITCODE
+            }
+            $env:BIOETL_PREFLIGHT_DONE = "1"
+        } finally {
+            $env:BIOETL_PREFLIGHT_ACTIVE = "0"
+        }
+    }
+}
+
 $QuietRequested = $false
 foreach ($Arg in $PytestArgs) {
     if ($Arg -in @("-q", "--quiet", "-qq", "-qqq")) {

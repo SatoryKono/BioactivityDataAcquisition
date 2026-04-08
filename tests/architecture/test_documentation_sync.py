@@ -296,7 +296,7 @@ def test_no_legacy_repo_slug_in_active_docs_and_workflows(
     workflow_text_cache: dict[Path, str],
 ) -> None:
     """Active docs/workflows should reference the current repository slug."""
-    legacy_slug = re.compile(r"SatoryKono/BioactivityDataAcquisition(?!2)")
+    legacy_slug = re.compile(r"SatoryKono/BioactivityDataAcquisition2")
     candidates = [Path("README.md")]
     candidates.extend(_iter_active_docs_markdown(docs_markdown_files))
     candidates.extend(workflow_text_cache)
@@ -313,7 +313,7 @@ def test_no_legacy_repo_slug_in_active_docs_and_workflows(
             violations.append(path.as_posix())
 
     assert not violations, (
-        "Legacy repository slug found (expected BioactivityDataAcquisition2):\n"
+        "Legacy repository slug found (expected BioactivityDataAcquisition):\n"
         + "\n".join(f"  - {item}" for item in sorted(violations))
     )
 

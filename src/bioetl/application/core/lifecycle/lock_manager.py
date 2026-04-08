@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 
 class LockCoordinator:
-    """Manages acquiring, releasing, and maintaining distributed locks.
+    """Manages acquiring, releasing, and maintaining runtime locks.
 
     This is an Application Service that coordinates lock lifecycle:
     - Lock acquisition and release
@@ -160,7 +160,7 @@ class LockCoordinator:
         )
 
     async def acquire(self) -> FencingToken | None:
-        """Acquire the distributed lock.
+        """Acquire the runtime lock.
 
         Returns:
             FencingToken if lock was acquired, None otherwise.
@@ -169,7 +169,7 @@ class LockCoordinator:
         return await acquire_lock(self)
 
     async def release(self) -> None:
-        """Release the distributed lock and stop heartbeat."""
+        """Release the runtime lock and stop heartbeat."""
         await release_lock(self)
 
     def get_context(self) -> LockContext | None:

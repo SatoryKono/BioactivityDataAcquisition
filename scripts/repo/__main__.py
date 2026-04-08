@@ -7,6 +7,7 @@ Usage:
 
 Commands:
     check-inventory    Check scripts inventory drift
+    sync-inventory     Refresh scripts inventory manifest
     check-catalog      Validate catalog governance policy
     check-versions     Check version consistency across project files
     check-cleanliness  Audit repository root layout allowlist
@@ -23,6 +24,7 @@ from pathlib import Path
 
 COMMANDS: dict[str, str] = {
     "check-inventory": "check_scripts_inventory.py",
+    "sync-inventory": "sync_scripts_inventory.py",
     "check-catalog": "check_scripts_catalog.py",
     "check-versions": "check_version_consistency.py",
     "check-cleanliness": "audit_root_cleanliness.py",

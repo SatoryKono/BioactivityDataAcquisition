@@ -21,6 +21,7 @@ Commands:
     fix-links-explicit Fix documentation links with explicit rules
     fix-link-warnings  Fix link warnings in specified files
     audit-sentence     Sentence-level documentation audit
+    sync-repo-identity Sync active docs/workflows to canonical repo identity
 """
 
 from __future__ import annotations
@@ -45,6 +46,7 @@ COMMANDS: dict[str, str] = {
     "fix-links-explicit": "fix_doc_links_explicit.py",
     "fix-link-warnings": "fix_link_warnings.py",
     "audit-sentence": "sentence_doc_audit.py",
+    "sync-repo-identity": "sync_repo_identity.py",
 }
 
 _DIR = Path(__file__).parent

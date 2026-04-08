@@ -22,6 +22,7 @@ class DefaultIdentifierResolver(IdentifierResolverStrategy):
         self._primary_id_field = primary_id_field
 
     def get_primary_id_field(self) -> str:
+        """Return the configured primary-id field for publication records."""
         return self._primary_id_field
 
     def validate_primary_id(
@@ -30,6 +31,7 @@ class DefaultIdentifierResolver(IdentifierResolverStrategy):
         business_data: JsonDict,
         index: int,
     ) -> tuple[str, Any] | None:  # Any: primary ID values remain provider-specific scalars at the strategy seam.
+        """Validate primary-id presence and return the `(field, value)` pair."""
         primary_id = business_data.get(self._primary_id_field)
         if not primary_id:
             context.logger.warning(
@@ -53,9 +55,11 @@ class DefaultPublicationMetadataPolicy(PublicationMetadataStrategy):
         self._log_fallback = log_fallback
 
     def get_entity_class(self) -> type[BaseEntity]:
+        """Return the entity class used to inflate publication domain records."""
         return self._entity_class
 
     def should_log_fallback_lookup(self) -> bool:
+        """Return whether fallback lookup events should be logged."""
         return self._log_fallback
 
     def post_process_silver_record(self, silver_record: JsonDict) -> JsonDict:

@@ -74,7 +74,7 @@ Supported policy slice for issue `#2598`:
 - canonical tooling paths активированы для partial rollout: `scripts/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/migrations/active/backfill_vcr_metadata_sidecars.py` служит canonical backfill entry point; при этом workflow-level automated backfill всё ещё не включён
 - descriptive test-health taxonomy теперь canonical-фиксируется в `configs/quality/test_health_reporting.yaml`; статусы `fully_exercised_green`, `staged_green`, `environment_limited_green` остаются informational и не заменяют merge-blocking CI status
 - monthly `contract-tests.yml` остаётся активным live-network workflow и должен запускать `tests/contract/` с `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и `--network`
-- monthly `contract-tests.yml` выполняется только в canonical repository `SatoryKono/BioactivityDataAcquisition2`, а failure issue внутри workflow ссылается на этот guide как на поддерживаемый policy/runbook entry point
+- monthly `contract-tests.yml` выполняется только в canonical repository `SatoryKono/BioactivityDataAcquisition`, а failure issue внутри workflow ссылается на этот guide как на поддерживаемый policy/runbook entry point
 - минимальный live-contract baseline теперь полностью enforceable: `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar` обязаны иметь live contract suites
 - для `semanticscholar` live governance теперь разделена:
   - `tests/contract/test_semanticscholar_contract.py` содержит promotion-grade путь;
@@ -558,7 +558,7 @@ provider-contract-drift.yml
 - replay drift gate работает отдельно от live path и использует существующие
   `tests/fixtures/contracts/{provider}/v{version}.json` + curated VCR cassettes
   как default PR/CI baseline;
-- live contract workflow guarded to repository `SatoryKono/BioactivityDataAcquisition2`; в нём `tests/contract/` запускаются только при `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и флаге `--network`;
+- live contract workflow guarded to repository `SatoryKono/BioactivityDataAcquisition`; в нём `tests/contract/` запускаются только при `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и флаге `--network`;
 - `provider-contract-drift.yml` генерирует machine-readable artifact
   `provider-contract-drift-report.json` и hard-fail'ит только на `breaking`
   drift; `warning` остаётся видимым в artifact для PR review;

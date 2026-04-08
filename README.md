@@ -4,11 +4,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition2/actions/workflows/tests.yml)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
 [![Version](https://img.shields.io/badge/version-6.1.0-blue)](CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](.github/SECURITY.md)
 
-> **Canonical repository:** [SatoryKono/BioactivityDataAcquisition2](https://github.com/SatoryKono/BioactivityDataAcquisition2)
+> **Canonical repository:** [SatoryKono/BioactivityDataAcquisition](https://github.com/SatoryKono/BioactivityDataAcquisition)
 
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data
 from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, analysis-ready **Delta Lake** warehouse.
@@ -133,8 +133,8 @@ fallback when `uv` is unavailable.
 Use the maintained Make targets for local bootstrap:
 
 ```bash
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
-cd BioactivityDataAcquisition2
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
+cd BioactivityDataAcquisition
 make install
 make test-deps
 make setup-plugins
@@ -192,8 +192,8 @@ bash scripts/dev/run_mypy.sh
    Initialize the virtual environment and install project dependencies.
 
 ```bash
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
-cd BioactivityDataAcquisition2
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
+cd BioactivityDataAcquisition
 
 # Preferred manual path
 uv sync --extra dev --extra tracing

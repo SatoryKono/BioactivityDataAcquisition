@@ -76,15 +76,11 @@ def _append_section(
         lines.extend(f"    {line}" for line in rendered)
 
 
-def _render_show_payload(payload: dict[str, object]) -> str:
-    """Render one manifest inspection payload in human-readable form."""
-    manifest = payload.get("manifest", {})
-    ledger_entries = payload.get("ledger_entries", [])
-    diagnostics = payload.get("diagnostics", {})
-    if not isinstance(manifest, dict):
-        return json.dumps(payload, indent=2, default=str)
-    provenance = manifest.get("code_provenance", {})
+def _render_manifest_section(manifest: dict[str, object]) -> list[str]:
+    """Render manifest section."""
     lines: list[str] = []
+    provenance = manifest.get("code_provenance", {})
+    
     _append_section(
         lines,
         "Manifest",
@@ -100,6 +96,7 @@ def _render_show_payload(payload: dict[str, object]) -> str:
             ("schema_version", manifest.get("schema_version")),
         ),
     )
+    
     if isinstance(provenance, dict):
         _append_section(
             lines,
@@ -110,6 +107,7 @@ def _render_show_payload(payload: dict[str, object]) -> str:
                 ("config_hash", provenance.get("config_hash")),
             ),
         )
+    
     _append_section(
         lines,
         "Execution Inputs",
@@ -121,9 +119,15 @@ def _render_show_payload(payload: dict[str, object]) -> str:
             ("planned_artifacts", manifest.get("planned_artifacts")),
         ),
     )
+    
+    return lines
+
+
+def _render_ledger_section(ledger_entries: list[object]) -> list[str]:
+    """Render ledger section."""
+    lines: list[str] = []
+    
     if isinstance(ledger_entries, list) and ledger_entries:
-        if lines:
-            lines.append("")
         lines.append("Ledger")
         lines.append(f"  entries: {len(ledger_entries)}")
         for entry in ledger_entries:
@@ -140,6 +144,14 @@ def _render_show_payload(payload: dict[str, object]) -> str:
             lines.append(f"  - {summary}")
     else:
         _append_section(lines, "Ledger", (("entries", 0),))
+    
+    return lines
+
+
+def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
+    """Render diagnostics section."""
+    lines: list[str] = []
+    
     if isinstance(diagnostics, dict):
         _append_section(
             lines,
@@ -191,6 +203,31 @@ def _render_show_payload(payload: dict[str, object]) -> str:
                 ("next_steps", diagnostics.get("next_steps")),
             ),
         )
+    
+    return lines
+
+
+def _render_show_payload(payload: dict[str, object]) -> str:
+    """Render one manifest inspection payload in human-readable form."""
+    manifest = payload.get("manifest", {})
+    ledger_entries = payload.get("ledger_entries", [])
+    diagnostics = payload.get("diagnostics", {})
+    
+    if not isinstance(manifest, dict):
+        return json.dumps(payload, indent=2, default=str)
+    
+    # Render all sections
+    lines: list[str] = []
+    lines.extend(_render_manifest_section(manifest))
+    
+    if lines:
+        lines.append("")
+    lines.extend(_render_ledger_section(ledger_entries))
+    
+    if lines and (isinstance(ledger_entries, list) and ledger_entries):
+        lines.append("")
+    lines.extend(_render_diagnostics_section(diagnostics))
+    
     return "\n".join(lines)
 
 

@@ -229,6 +229,9 @@ jobs:
             -   name: Check architecture dependency docs drift
                 run: uv run python scripts/qa/generate_architecture_dependency_map.py --check
 
+            -   name: Check docs drift (forbidden patterns)
+                run: uv run python scripts/qa/check_docs_drift.py
+
             -   name: Validate docker-compose.yml syntax
                 run: docker compose config > /dev/null
 

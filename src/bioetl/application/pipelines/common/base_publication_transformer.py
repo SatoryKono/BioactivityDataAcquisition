@@ -209,12 +209,15 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
     def pre_extract_validation(
         self, context: PipelineContext, record: BronzeRecord, index: int
     ) -> None:
+        """Run provider-specific pre-extraction checks for one bronze record."""
         self._pre_extract_validation(context, record, index)
 
     def extract_business_data(self, record: BronzeRecord) -> JsonDict:
+        """Extract normalized publication business fields from a bronze record."""
         return self._extract_business_data(record)
 
     def get_primary_id_field(self) -> str:
+        """Return the provider-specific primary identifier field name."""
         return self._get_primary_id_field()
 
     def validate_primary_id(
@@ -223,12 +226,15 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         business_data: JsonDict,
         index: int,
     ) -> tuple[str, PrimaryId] | None:
+        """Validate and return primary-id metadata for one publication payload."""
         return self._validate_primary_id(context, business_data, index)
 
     def get_entity_class(self) -> type[BaseEntity]:
+        """Return the domain entity class used for publication inflation."""
         return self._get_entity_class()
 
     def should_log_fallback_lookup(self) -> bool:
+        """Return whether fallback-lookup observability should be emitted."""
         return self._should_log_fallback_lookup()
 
     def post_process_silver_record(self, silver_record: SilverRecord) -> SilverRecord:

@@ -1,35 +1,38 @@
-______________________________________________________________________
-
-Version: 0.2.0
-Status: active (legacy stub)
-Class: internal reference
+---
+Version: 0.3.0
+Status: draft
+Class: repo-only
 Owner: BioETL Team
 Reviewers:
-
 - BioETL Team
-  Last verified: '2026-04-07'
+Last synchronized: '2026-04-08'
+---
 
-______________________________________________________________________
+# D-01 Governance & Style Guide (Draft Sync Note)
 
-# D-01 Governance & Style Guide
+## Назначение
 
-Этот файл сохранён как исторический stub, который документирует базовую ориентацию по governance/стилю. Он не содержит нормативных правил, а служит точкой входа к актуальной публикуемой версии.
+Этот файл является черновым синхронизационным note для будущего D-01 handbook.
+Он не является нормативным source of truth.
 
-## Что теперь является source of truth
+## Канонические источники
 
-- `docs/00-project/governance/01-documentation-governance-style-guide.md` — главный живой документ, описывающий шаблоны, workflow, поддержание метаданных и контрольные точки для документации BioETL.
-- `docs/00-project/RULES.md` — содержит конкретные требования по DI, импортам, схемам, журналированию, provider health, naming convention и другим governance-аспектам, которые должны соблюдаться при разработке нового кода.
+- `docs/00-project/governance/01-documentation-governance-style-guide.md`
+- `docs/00-project/governance/06-doc-publication-policy.md`
+- `docs/00-project/governance/07-doc-nav-policy.md`
+- `docs/00-project/RULES.md`
 
-## Как использовать этот stub
+При конфликте между этим draft и каноническими документами приоритет всегда за каноническими документами.
 
-1. Перейдите в каноническую версию по ссылке выше; она должна использоваться в первую очередь.
-2. Если вам нужно сослаться на governance/стиль в сторонних документах или почтовых тракерах, указывайте `D-01` как reference id, но включайте URL на `docs/00-project/governance/01-documentation-governance-style-guide.md`.
-3. При изменении канонического документа обновите `Last verified` здесь и добавьте краткое summary изменений (например, на случай ссылок из внешних repo). 
+## Текущий статус синхронизации
 
-## Краткие указания
+- Роль D-01 закреплена как pointer-document к governance policy в `docs/00-project/governance/`.
+- Нормативные требования по документации, publication class и nav-правилам уже покрыты каноном.
+- В D-серии сохраняется только обзорная рамка и карта источников, без дублирования нормативных правил.
 
-- Не копируйте содержимое canonical doc сюда; вместо этого укажите ссылку.
-- Не поддерживайте отдельную версию в других местах — используйте `docs/00-project/governance/...`.
-- Версия `0.2.0` отражает текущий статус stub (обновите дедлайн/версию только при изменении описания stub’а).
+## Критерии промоушена в future published handbook
 
-План: оставаться light-weight, но гарантировать, что D-01 всегда направляет на текущую governance-версию.
+1. Утверждён единый формат для всей серии D-01..D-06.
+2. Убрано дублирование норматива из D-серии; остаются только cross-source summary и decision-ready дельты.
+3. Для каждого раздела D-01 есть прямые ссылки на актуальные governance/policy страницы.
+

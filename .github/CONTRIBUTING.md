@@ -6,7 +6,7 @@
 # 1. Clone and install
 # Clone the canonical repository or your fork, then verify origin:
 git clone <repo-url>
-cd BioactivityDataAcquisition2
+cd BioactivityDataAcquisition
 git remote -v
 uv sync --extra dev --extra tests --extra tracing
 # Windows/.venv fallback:

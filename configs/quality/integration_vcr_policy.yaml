@@ -9,103 +9,101 @@ source_of_truth:
 supported_scopes:
   integration:
     canonical_test_roots:
-      - tests/integration/adapters/
-      - tests/integration/chembl/
-      - tests/integration/composite/
-      - tests/integration/config/
-      - tests/integration/infrastructure/
-      - tests/integration/interfaces/
-      - tests/integration/pipelines/
-      - tests/integration/validation/
-      - tests/integration/ci/
-    purpose: >-
-      Adapter-, pipeline-, config-, and storage-facing integration checks that use
-      either VCR-backed HTTP replay or local temporary artifacts rather than live
+    - tests/integration/adapters/
+    - tests/integration/chembl/
+    - tests/integration/composite/
+    - tests/integration/config/
+    - tests/integration/infrastructure/
+    - tests/integration/interfaces/
+    - tests/integration/pipelines/
+    - tests/integration/validation/
+    - tests/integration/ci/
+    purpose: Adapter-, pipeline-, config-, and storage-facing integration checks that
+      use either VCR-backed HTTP replay or local temporary artifacts rather than live
       network execution by default.
     supported_pipeline_families:
       provider_adapter_replay:
-        - chembl
-        - pubchem
-        - pubmed
-        - semanticscholar
-        - uniprot
+      - chembl
+      - pubchem
+      - pubmed
+      - semanticscholar
+      - uniprot
       provider_adapter_mixed_mode:
-        - crossref
-        - openalex
+      - crossref
+      - openalex
       pipeline_replay_smoke:
-        - chembl_activity
-        - chembl_cell_line
-        - chembl_compound_record
-        - chembl_target_component
-        - pubchem_compound
-        - uniprot_protein
+      - chembl_activity
+      - chembl_cell_line
+      - chembl_compound_record
+      - chembl_target_component
+      - pubchem_compound
+      - uniprot_protein
       governance_and_runtime_surfaces:
-        - control_plane
-        - data_quality
-        - grafana
-        - prometheus
+      - control_plane
+      - data_quality
+      - grafana
+      - prometheus
   e2e:
     canonical_test_root: tests/e2e/
     required_marker: e2e
-    purpose: >-
-      End-to-end local-only pipeline execution with memory/file-system control plane
-      components and provider I/O constrained by VCR replay unless an explicit
+    purpose: End-to-end local-only pipeline execution with memory/file-system control
+      plane components and provider I/O constrained by VCR replay unless an explicit
       recording refresh path is being used.
     ci_smoke_workflow_job: control-plane-e2e
     ci_smoke_target: tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle
     representative_pipeline_families:
       provider_runs:
-        - chembl_activity
-        - chembl_assay
-        - chembl_molecule
-        - chembl_publication
-        - chembl_publication_term
-        - chembl_target
-        - crossref_publication
-        - openalex_publication
-        - pubchem_compound
-        - pubmed_publication
-        - semanticscholar_publication
-        - uniprot_protein
+      - chembl_activity
+      - chembl_assay
+      - chembl_molecule
+      - chembl_publication
+      - chembl_publication_term
+      - chembl_target
+      - crossref_publication
+      - openalex_publication
+      - pubchem_compound
+      - pubmed_publication
+      - semanticscholar_publication
+      - uniprot_protein
       scenario_runs:
-        - advanced_scenarios
-        - checkpoint
-        - full_pipeline
-        - full_pipeline_chain
-        - run_types
+      - advanced_scenarios
+      - checkpoint
+      - full_pipeline
+      - full_pipeline_chain
+      - run_types
 tracked_suite_inventory:
   integration:
     adapter_provider_surfaces:
       chembl:
-        - tests/integration/adapters/test_chembl.py
+      - tests/integration/adapters/test_chembl.py
       crossref:
-        - tests/integration/adapters/test_crossref.py
-        - tests/integration/adapters/test_crossref_vcr_rebalance.py
+      - tests/integration/adapters/test_crossref.py
+      - tests/integration/adapters/test_crossref_vcr_rebalance.py
       openalex:
-        - tests/integration/adapters/openalex/test_adapter.py
-        - tests/integration/adapters/openalex/test_pipeline.py
-        - tests/integration/adapters/test_openalex_vcr_rebalance.py
+      - tests/integration/adapters/openalex/test_adapter.py
+      - tests/integration/adapters/openalex/test_pipeline.py
+      - tests/integration/adapters/test_openalex_vcr_rebalance.py
       pubchem:
-        - tests/integration/adapters/test_pubchem.py
+      - tests/integration/adapters/test_pubchem.py
       pubmed:
-        - tests/integration/adapters/test_pubmed.py
-        - tests/integration/adapters/test_pubmed_coverage.py
-        - tests/integration/adapters/test_pubmed_edge_cases.py
-        - tests/integration/adapters/test_pubmed_vcr_rebalance.py
+      - tests/integration/adapters/test_pubmed.py
+      - tests/integration/adapters/test_pubmed_coverage.py
+      - tests/integration/adapters/test_pubmed_edge_cases.py
+      - tests/integration/adapters/test_pubmed_vcr_rebalance.py
       semanticscholar:
-        - tests/integration/adapters/test_semanticscholar.py
-        - tests/integration/adapters/test_semanticscholar_vcr_rebalance.py
+      - tests/integration/adapters/test_semanticscholar.py
+      - tests/integration/adapters/test_semanticscholar_vcr_rebalance.py
       uniprot:
-        - tests/integration/adapters/test_uniprot.py
-        - tests/integration/adapters/test_uniprot_idmapping.py
+      - tests/integration/adapters/test_uniprot.py
+      - tests/integration/adapters/test_uniprot_idmapping.py
       shared_http_behavior:
-        - tests/integration/adapters/test_http_retry_semantics.py
+      - tests/integration/adapters/test_http_retry_semantics.py
     chembl_parameter_extraction_surfaces:
-      - tests/integration/chembl/test_activity_extraction_params.py
-      - tests/integration/chembl/test_assay_extraction_params.py
-      - tests/integration/chembl/test_molecule_extraction_params.py
-      - tests/integration/chembl/test_publication_extraction_params.py
-      - tests/integration/chembl/test_target_extraction_params.py
+    - tests/integration/chembl/test_activity_extraction_params.py
+    - tests/integration/chembl/test_assay_extraction_params.py
+    - tests/integration/chembl/test_molecule_extraction_params.py
+    - tests/integration/chembl/test_publication_extraction_params.py
+    - tests/integration/chembl/test_target_extraction_params.py
     pipeline_replay_smoke:
       chembl_activity: tests/integration/pipelines/test_chembl_activity.py
       chembl_cell_line: tests/integration/pipelines/test_chembl_cell_line.py
@@ -114,45 +112,45 @@ tracked_suite_inventory:
       pubchem_compound: tests/integration/test_pubchem_pipeline.py
       uniprot_protein: tests/integration/test_uniprot_pipeline.py
     normalization_and_pipeline_support:
-      - tests/integration/pipelines/test_crossref_date_normalization.py
-      - tests/integration/pipelines/test_pubmed_date_normalization.py
-      - tests/integration/test_cross_provider_doi_normalization.py
+    - tests/integration/pipelines/test_crossref_date_normalization.py
+    - tests/integration/pipelines/test_pubmed_date_normalization.py
+    - tests/integration/test_cross_provider_doi_normalization.py
     governance_and_runtime_surfaces:
       control_plane:
-        - tests/integration/test_runner_lifecycle.py
-        - tests/integration/test_preflight_health_modes.py
-        - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
+      - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
+      - tests/integration/test_preflight_health_modes.py
+      - tests/integration/test_runner_lifecycle.py
       data_quality:
-        - tests/integration/test_dq_monitor_integration.py
-        - tests/integration/test_dq_report_integration.py
+      - tests/integration/test_dq_monitor_integration.py
+      - tests/integration/test_dq_report_integration.py
       grafana:
-        - tests/integration/test_grafana_config.py
-        - tests/integration/test_grafana_datasource_provisioning.py
+      - tests/integration/test_grafana_config.py
+      - tests/integration/test_grafana_datasource_provisioning.py
       prometheus:
-        - tests/integration/test_prometheus_rules_config.py
+      - tests/integration/test_prometheus_rules_config.py
     composite_config_and_merge:
-      - tests/integration/composite/test_column_naming_integration.py
-      - tests/integration/composite/test_composite_config_backward_compatibility.py
-      - tests/integration/composite/test_molecule_pipeline.py
+    - tests/integration/composite/test_column_naming_integration.py
+    - tests/integration/composite/test_composite_config_backward_compatibility.py
+    - tests/integration/composite/test_molecule_pipeline.py
     config_and_storage_surfaces:
-      - tests/integration/config/test_dq_config_loading.py
-      - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
-      - tests/integration/infrastructure/storage/test_gold_writer_versioning.py
-      - tests/integration/infrastructure/storage/test_silver_writer.py
-      - tests/integration/ci/test_config_stability.py
+    - tests/integration/ci/test_config_stability.py
+    - tests/integration/config/test_dq_config_loading.py
+    - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
+    - tests/integration/infrastructure/storage/test_gold_writer_versioning.py
+    - tests/integration/infrastructure/storage/test_silver_writer.py
     interface_cli_surfaces:
-      - tests/integration/interfaces/test_cli_checkpoint_list.py
-      - tests/integration/interfaces/test_cli_config_dq.py
-      - tests/integration/interfaces/test_cli_exit_code_matrix.py
-      - tests/integration/interfaces/test_cli_maintenance_archive.py
-      - tests/integration/interfaces/test_cli_maintenance_vacuum.py
-      - tests/integration/interfaces/test_cli_quarantine_inspect.py
-      - tests/integration/interfaces/test_cli_run_dry_run.py
-      - tests/integration/interfaces/test_cli_run_incremental.py
-      - tests/integration/interfaces/test_cli_run_manifest.py
-      - tests/integration/interfaces/test_cli_shutdown_integration.py
+    - tests/integration/interfaces/test_cli_checkpoint_list.py
+    - tests/integration/interfaces/test_cli_config_dq.py
+    - tests/integration/interfaces/test_cli_exit_code_matrix.py
+    - tests/integration/interfaces/test_cli_maintenance_archive.py
+    - tests/integration/interfaces/test_cli_maintenance_vacuum.py
+    - tests/integration/interfaces/test_cli_quarantine_inspect.py
+    - tests/integration/interfaces/test_cli_run_dry_run.py
+    - tests/integration/interfaces/test_cli_run_incremental.py
+    - tests/integration/interfaces/test_cli_run_manifest.py
+    - tests/integration/interfaces/test_cli_shutdown_integration.py
     external_validation_surfaces:
-      - tests/integration/validation/test_external_verification.py
+    - tests/integration/validation/test_external_verification.py
   e2e:
     provider_runs:
       chembl_activity: tests/e2e/test_chembl_activity_e2e.py
@@ -174,19 +172,19 @@ tracked_suite_inventory:
       full_pipeline_chain: tests/e2e/test_full_pipeline_chain_e2e.py
       run_types: tests/e2e/test_run_types_e2e.py
     operational_and_governance_surfaces:
-      - tests/e2e/test_cli_safety.py
-      - tests/e2e/test_contract_rollout_e2e.py
-      - tests/e2e/test_contract_rollout_runtime_e2e.py
-      - tests/e2e/test_e2e_stability_policy.py
-      - tests/e2e/test_gold_layer_e2e.py
-      - tests/e2e/test_pipeline_matrix_e2e.py
+    - tests/e2e/test_cli_safety.py
+    - tests/e2e/test_contract_rollout_e2e.py
+    - tests/e2e/test_contract_rollout_runtime_e2e.py
+    - tests/e2e/test_e2e_stability_policy.py
+    - tests/e2e/test_gold_layer_e2e.py
+    - tests/e2e/test_pipeline_matrix_e2e.py
     resilience_and_failure_surfaces:
-      - tests/e2e/test_network_failure_e2e.py
-      - tests/e2e/test_pipeline_circuit_breaker_e2e.py
-      - tests/e2e/test_pipeline_graceful_shutdown_e2e.py
-      - tests/e2e/test_pipeline_with_dq_errors_e2e.py
-      - tests/e2e/test_pipeline_with_schema_drift_e2e.py
-      - tests/e2e/test_resilience_scenarios_e2e.py
+    - tests/e2e/test_network_failure_e2e.py
+    - tests/e2e/test_pipeline_circuit_breaker_e2e.py
+    - tests/e2e/test_pipeline_graceful_shutdown_e2e.py
+    - tests/e2e/test_pipeline_with_dq_errors_e2e.py
+    - tests/e2e/test_pipeline_with_schema_drift_e2e.py
+    - tests/e2e/test_resilience_scenarios_e2e.py
 execution_paths:
   local:
     windows:
@@ -196,11 +194,14 @@ execution_paths:
         integration: tests\integration\
         e2e: tests\e2e\
       replay_examples:
-        integration: '.\scripts\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"'
-        e2e: '.\scripts\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none'
+        integration: .\scripts\dev\run_pytest.ps1 tests\integration\ --vcr-record=none
+          -m "integration and not e2e"
+        e2e: .\scripts\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none
       refresh_examples:
-        targeted_integration: '.\scripts\dev\run_pytest.ps1 tests\integration\adapters\test_pubmed.py --vcr-record=new_episodes -v'
-        targeted_e2e: '.\scripts\dev\run_pytest.ps1 tests\e2e\test_pubchem_compound_e2e.py -m e2e --vcr-record=new_episodes -v'
+        targeted_integration: .\scripts\dev\run_pytest.ps1 tests\integration\adapters\test_pubmed.py
+          --vcr-record=new_episodes -v
+        targeted_e2e: .\scripts\dev\run_pytest.ps1 tests\e2e\test_pubchem_compound_e2e.py
+          -m e2e --vcr-record=new_episodes -v
     wsl:
       bootstrap: scripts/dev/setup_env_wsl.sh
       pytest_runner: scripts/dev/run_pytest.sh
@@ -208,44 +209,48 @@ execution_paths:
         integration: tests/integration/
         e2e: tests/e2e/
       replay_examples:
-        integration: 'bash scripts/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"'
-        e2e: 'bash scripts/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none'
+        integration: bash scripts/dev/run_pytest.sh tests/integration/ --vcr-record=none
+          -m "integration and not e2e"
+        e2e: bash scripts/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none
       refresh_examples:
-        targeted_integration: 'bash scripts/dev/run_pytest.sh tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v'
-        targeted_e2e: 'bash scripts/dev/run_pytest.sh tests/e2e/test_pubchem_compound_e2e.py -m e2e --vcr-record=new_episodes -v'
+        targeted_integration: bash scripts/dev/run_pytest.sh tests/integration/adapters/test_pubmed.py
+          --vcr-record=new_episodes -v
+        targeted_e2e: bash scripts/dev/run_pytest.sh tests/e2e/test_pubchem_compound_e2e.py
+          -m e2e --vcr-record=new_episodes -v
     ci_uv:
       workflow_path: .github/workflows/tests.yml
       preferred_command_family:
-        - uv run pytest
-        - uv run python -m pytest
+      - uv run pytest
+      - uv run python -m pytest
       standard_replay_examples:
-        smoke_check: 'uv run pytest tests/smoke/ -v --tb=short'
-        control_plane_e2e: 'VCR_RECORD_MODE=none uv run pytest tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle --vcr-record=none -q --tb=short'
+        smoke_check: uv run pytest tests/smoke/ -v --tb=short
+        control_plane_e2e: VCR_RECORD_MODE=none uv run pytest tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle
+          --vcr-record=none -q --tb=short
   live_contract:
     workflow_path: .github/workflows/contract-tests.yml
     gate_mode: scheduled
-    repository_guard: SatoryKono/BioactivityDataAcquisition2
+    repository_guard: SatoryKono/BioactivityDataAcquisition
     required_env:
-      BIOETL_LIVE_API_TESTS: "true"
-      BIOETL_NETWORK_TESTS: "true"
+      BIOETL_LIVE_API_TESTS: 'true'
+      BIOETL_NETWORK_TESTS: 'true'
     required_pytest_flag: --network
     failure_issue_runbook_path: docs/03-guides/testing.md
-    manual_command_example: 'uv run pytest tests/contract/ -v --tb=short --network'
+    manual_command_example: uv run pytest tests/contract/ -v --tb=short --network
 vcr_policy:
   canonical_root: tests/fixtures/vcr/{provider}/
   forbidden_locations:
-    - tests/fixtures/vcr_cassettes/
+  - tests/fixtures/vcr_cassettes/
   placement_checks:
-    - scripts/data/check_root_vcr_cassettes.py
-    - scripts/data/check_vcr_filename_policy.py
-    - scripts/data/check_vcr_secrets.py
+  - scripts/data/check_root_vcr_cassettes.py
+  - scripts/data/check_vcr_filename_policy.py
+  - scripts/data/check_vcr_secrets.py
   default_record_modes:
     ci: none
     local: once
   supported_refresh_record_modes:
-    - new_episodes
+  - new_episodes
   legacy_compatibility_record_modes:
-    - all
+  - all
   extensionless_allowlist: .github/vcr-noext-allowlist.txt
   stale_age_days: 90
   stale_age_requires_metadata: true
@@ -255,35 +260,37 @@ vcr_policy:
   metadata_backfill_script: scripts/migrations/active/backfill_vcr_metadata_sidecars.py
   refresh_protocol:
     pre_refresh_checks:
-      - python -m scripts.data check-vcr-placement
-      - python -m scripts.data check-vcr-naming
+    - python -m scripts.data check-vcr-placement
+    - python -m scripts.data check-vcr-naming
     targeted_recording_only: true
     preferred_refresh_mode: new_episodes
     post_refresh_checks:
-      - python -m scripts.data check-vcr-placement
-      - python -m scripts.data check-vcr-naming
-      - python -m scripts.data check-vcr-secrets
-      - python -m scripts.qa report-vcr-metadata --check
+    - python -m scripts.data check-vcr-placement
+    - python -m scripts.data check-vcr-naming
+    - python -m scripts.data check-vcr-secrets
+    - python -m scripts.qa report-vcr-metadata --check
 governance_rules:
   refresh_triggers:
-    - missing cassette for an already-supported integration or e2e path
-    - intentional adapter request-shape or endpoint change
-    - contract failure or schema-drift investigation that proves replay divergence
+  - missing cassette for an already-supported integration or e2e path
+  - intentional adapter request-shape or endpoint change
+  - contract failure or schema-drift investigation that proves replay divergence
   review_required_after_refresh:
-    - cassette diff changes request parameters, headers, or pagination shape
-    - cassette diff changes sanitized fields or redaction coverage
-    - cassette refresh introduces or removes extensionless filenames
+  - cassette diff changes request parameters, headers, or pagination shape
+  - cassette diff changes sanitized fields or redaction coverage
+  - cassette refresh introduces or removes extensionless filenames
   ci_behavior:
-    - standard CI paths must run with VCR replay locked to none
-    - scheduled live contract coverage is separate from standard integration and e2e replay
+  - standard CI paths must run with VCR replay locked to none
+  - scheduled live contract coverage is separate from standard integration and e2e
+    replay
   stale_signals:
-    - cassette sidecar age exceeds 90 days where metadata exists
-    - canonical provider or pipeline path moved without policy artifact update
-    - cassette refresh changes sanitized request or pagination shape without review note
+  - cassette sidecar age exceeds 90 days where metadata exists
+  - canonical provider or pipeline path moved without policy artifact update
+  - cassette refresh changes sanitized request or pagination shape without review
+    note
 incremental_extension_model:
   add_new_provider_or_pipeline_family:
-    - add tests under canonical integration or e2e roots
-    - store cassettes only under tests/fixtures/vcr/{provider}/
-    - update configs/quality/test_matrix.yaml for policy ownership
-    - update configs/quality/fixture_governance_ledger.yaml if rollout status changes
-    - prefer tightening tracked policy artifacts over adding ad hoc doc-only exceptions
+  - add tests under canonical integration or e2e roots
+  - store cassettes only under tests/fixtures/vcr/{provider}/
+  - update configs/quality/test_matrix.yaml for policy ownership
+  - update configs/quality/fixture_governance_ledger.yaml if rollout status changes
+  - prefer tightening tracked policy artifacts over adding ad hoc doc-only exceptions

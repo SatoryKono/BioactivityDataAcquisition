@@ -26,11 +26,10 @@ TL;DR for setting up and running BioETL locally.
 
 ### Option A: Supported Local Bootstrap (Recommended)
 
-#```bash
 ```bash
 # Clone and enter directory
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
-cd BioactivityDataAcquisition2
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
+cd BioactivityDataAcquisition
 
 # Install dependencies and create/refresh the local environment
 make install
@@ -72,8 +71,8 @@ This bootstrap creates `.venv-win` for PowerShell and
 
 ```bash
 # Clone and enter directory
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
-cd BioactivityDataAcquisition2
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
+cd BioactivityDataAcquisition
 
 # Preferred manual path without make
 uv sync --extra dev --extra tracing

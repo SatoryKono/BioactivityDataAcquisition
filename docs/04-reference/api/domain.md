@@ -158,7 +158,7 @@ class DataSourcePort(Protocol):
 | `PipelineRegistryPort`       | Pipeline registry lookup                                                                   |
 | `RegistryAccessorPort`       | Registry access                                                                            |
 | `CheckpointPort`             | Checkpoint persistence                                                                     |
-| `LockPort`                   | Distributed locking                                                                        |
+| `LockPort`                   | Runtime locking coordination (Local-Only profile: process-local implementation)            |
 | `ShutdownPort`               | Graceful shutdown signal                                                                   |
 | `BatchIdGeneratorPort`       | Batch ID generation                                                                        |
 | `ClockPort`                  | Time abstraction                                                                           |

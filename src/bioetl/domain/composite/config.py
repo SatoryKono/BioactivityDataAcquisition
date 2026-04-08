@@ -154,7 +154,7 @@ class CompositeConfig:
 
     @property
     def lock_key(self) -> str:
-        """Return the distributed lock key for this composite pipeline."""
+        """Return the runtime lock key for this composite pipeline."""
         return f"composite:{self.name}"
 
     def to_dict(self) -> dict[str, object]:

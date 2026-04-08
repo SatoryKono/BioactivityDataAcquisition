@@ -9,7 +9,7 @@ __all__ = ["LockAcquisitionError", "LockLostError"]
 
 
 class LockLostError(CriticalError):
-    """Raised when distributed lock is lost during execution."""
+    """Raised when runtime lock ownership is lost during execution."""
 
     error_type = ErrorType.LOCK_LOST
 

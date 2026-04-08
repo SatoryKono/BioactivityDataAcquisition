@@ -61,6 +61,7 @@ class PubMedDataExtractor(DataExtractorStrategy):
         record: BronzeRecord,
         index: int,
     ) -> None:
+        """Validate and parse the raw PubMed XML payload before extraction."""
         raw_xml = record.get("_raw_xml")
         if not raw_xml or not isinstance(raw_xml, str):
             raise ValueError("Missing or invalid _raw_xml field")
@@ -76,6 +77,7 @@ class PubMedDataExtractor(DataExtractorStrategy):
             raise ValueError(f"XML parse error: {e}") from e
 
     def extract_business_data(self, record: BronzeRecord) -> JsonDict:
+        """Extract normalized PubMed business fields from one bronze record."""
         # This implementation will be used when we move PubMed to pure composition.
         # It needs to provide all the logic that was previously in PubMedPublicationTransformer.
         # For the sake of this migration step, we'll keep it compatible.

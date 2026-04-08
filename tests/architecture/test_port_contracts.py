@@ -335,7 +335,7 @@ class TestLockPortContract:
     def test_lock_port_has_lock_methods(self, method_name: str) -> None:
         """LockPort MUST have acquire, release, and heartbeat methods."""
         assert hasattr(ports.LockPort, method_name), (
-            f"LockPort MUST define {method_name}() for distributed locking"
+            f"LockPort MUST define {method_name}() for runtime locking"
         )
 
 

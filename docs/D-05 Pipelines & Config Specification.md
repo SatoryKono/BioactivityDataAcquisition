@@ -1,63 +1,44 @@
-______________________________________________________________________
-
-Version: 0.2.0
-Status: active
-Class: published
+---
+Version: 0.3.0
+Status: draft
+Class: repo-only
 Owner: BioETL Team
 Reviewers:
-
 - BioETL Team
-  Last verified: '2026-04-07'
+Last synchronized: '2026-04-08'
+---
 
-______________________________________________________________________
+# D-05 Pipelines and Config Specification (Draft Sync Note)
 
-# D-05 Pipelines & Config Specification
+## Назначение
 
-Краткий guide по каноническому runtime-конфигу BioETL, валидациям и обязательным примерам.
+D-05 остаётся draft-конденсатором для будущей unified pipeline/config спецификации.
+Текущие нормативные требования живут в опубликованных guides/reference страницах.
 
-## Основные ссылки
+## Канонические источники
 
-- `docs/03-guides/pipeline-configuration.md` — шаблон `configs/entities/{provider}/{entity}.yaml`, объяснение секций `pipeline/schema/quality/filters/contracts`, шаблон `config.yaml.tpl`.
-- `docs/04-reference/templates/*` — шаблоны `config.yaml.tpl`, `factory.py.tpl`, `pipeline.py.tpl`, `provider-spec-template.md`, а также образцы `source_adapter`.
-- `docs/03-guides/add-new-source.md` / `docs/03-guides/add-pipeline-existing-source.md` — пошаговые чеклисты: от provider config до transformer/registry/test.
-- `rules` и CI: `docs/00-project/RULES.md`, `scripts/schema validate-configs`, архитектурные `tests/architecture`.
+- `docs/03-guides/pipeline-configuration.md`
+- `docs/03-guides/add-new-source.md`
+- `docs/03-guides/add-pipeline-existing-source.md`
+- `docs/04-reference/templates/index.md`
+- `docs/00-project/RULES.md`
+- `scripts/schema/README.md`
 
-## Что должно быть в спецификации
+## Текущие зоны дрейфа
 
-1. **Три уровня конфигов** (base/provider/entity) существуют в `configs/` и задействуются одновременно: базовые дефолты, политики провайдера и канонические entity YAML.
-2. **Entity config** всегда содержит секции `pipeline/schema/quality/filters/contracts` (включайте пустые `{}` вместо отсутствия).
-3. **Pipeline block** оформляется по шаблону: `pipeline_name`, `provider/entity`, `description`, `loading_strategy`, `batch_size`, `sink` для Bronze/Silver/Gold, optional overrides (`extraction_params`, `dq_overrides`, `filter_rules`).
-4. **Schema/quality/contracts** валидируются JSON Schema + Pydantic (`extra='forbid'`, `strict=True`), composite configs имеют отдельное JSON Schema.
-5. **Provider config** (`configs/providers/{provider}.yaml`) описывает `source.provider_config`, `pagination`, `rate_limit`, `entities`, `quality`, `filters`, `circuit_breaker`, `health_check`.
+- Детальные таблицы и команды в D-05 быстро устаревают относительно `pipeline-configuration.md` и `scripts/schema` entry points.
+- Runtime config schema validation и strictness policy уже централизованы в guides + tooling, поэтому дублирование в D-05 не добавляет signal.
+- Шаблоны и registration workflow должны поддерживаться в `04-reference/templates` и composition guides, а не в отдельном дубле.
 
-## Артефакты, которые должны путешествовать в пайплайн-релизе
+## План синхронизации D-05
 
-| Тип | Где хранится | Что описывает |
-|---|---|---|
-| Unified entity config | `configs/entities/{provider}/{entity}.yaml` | runtime YAML + schema/quality/filters/contracts |
-| Provider config | `configs/providers/{provider}.yaml` | сетевые параметры, rate limits, health и список entities |
-| Transformer | `src/bioetl/application/pipelines/{provider}/{entity}_transformer.py` | бизнес-трансформация |
-| Silver schema | `src/bioetl/domain/schemas/{provider}/{entity}.py` | Pandera-валидация |
-| Gold contract | `src/bioetl/domain/contracts/gold/{provider}.py` | DataFrameModel, экспортирован в `contracts/__init__` |
-| Registries | `transformer_factory.py`, `pipeline/registry.py`, `composition/providers/registration.py` | DI и runtime registration |
-| Tests | unit + architecture, опционально integration/VCR |
+1. Держать в D-05 только high-level map: config hierarchy, required config surfaces, validation gates.
+2. Все исполняемые примеры команд оставлять в `03-guides` и `scripts/schema/README.md`.
+3. Для каждой pipeline/config области фиксировать один canonical link вместо повторения текста.
 
-## Проверки и CI-гейты
+## Критерии промоушена в future published handbook
 
-- `uv run python -m scripts.schema validate-configs --verbose`
-- `python -c "from bioetl.infrastructure.config import load_pipeline_config; load_pipeline_config('{provider}_{entity}'); print('ok')"`
-- `uv run python -m pytest tests/architecture/test_registry_contracts.py -q`
-- `uv run python -m pytest tests/architecture/test_source_config_usage.py -q`
-- `uv run python -m pytest tests/unit/application/pipelines/{provider}/ -q`
-- при наличии API-доступа добавлять интеграционные тесты `tests/integration/ -k {provider}` или VCR репорты.
+1. D-05 не содержит копий таблиц и command blocks из канонических guides.
+2. Все обязательные секции unified config описаны через ссылочную карту на актуальные документы.
+3. Любая правка config workflow сначала отражается в canonical guides/tooling docs, потом в D-05 summary.
 
-## Критерии завершения
-
-- runtime YAML проходит JSON Schema + Pydantic + CI (forbid unknown keys, требуемые секции, запрет секретов).
-- transformer и pipeline зарегистрированы (transformer factory + `PIPELINE_CONFIGS`).
-- Silver и Gold схемы доступны и экспортированы.
-- unit tests + architecture smoke проходят.
-- `uv run python -m bioetl run --pipeline {provider}_{entity} --limit 10` выполняется без ошибок.
-- документация (`provider-spec-template`, README провайдера, D-02 handbook) обновлена и ссылается на CI/health.
-
-Обновляйте D-05 одновременно с изменениями в шаблонах/валидаторах (поддерживайте бифорт или мерж-обновление `docs/03-guides/pipeline-configuration.md`). 

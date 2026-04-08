@@ -51,7 +51,7 @@ class PipelineService:
     Attributes:
         data_source: Port for fetching data from external sources.
         storage: Port for writing to Bronze/Silver/Gold layers.
-        lock: Port for distributed locking coordination.
+        lock: Port for runtime lock coordination.
         checkpoint: Port for pipeline state persistence.
         quarantine: Port for failed record isolation.
         metrics: Port for observability metrics collection.

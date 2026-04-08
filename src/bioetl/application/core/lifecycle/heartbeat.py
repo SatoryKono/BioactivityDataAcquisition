@@ -1,4 +1,4 @@
-"""Heartbeat management for distributed locks.
+"""Heartbeat management for runtime locks.
 
 Extracted from LockCoordinator to follow Single Responsibility Principle.
 Handles background heartbeat tasks that keep locks alive.

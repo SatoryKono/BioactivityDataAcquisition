@@ -65,6 +65,7 @@ __all__ = [
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
+    """Load pipeline YAML configuration using the canonical config API seam."""
     return _load_pipeline_config_direct(pipeline_name)
 
 
@@ -72,6 +73,7 @@ def yaml_config_to_domain(
     yaml_config: PipelineYamlConfig,
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
+    """Convert YAML pipeline config to domain config with optional DQ overrides."""
     return _yaml_config_to_domain_direct(
         yaml_config=yaml_config,
         resolved_dq_config=resolved_dq_config,
@@ -79,6 +81,7 @@ def yaml_config_to_domain(
 
 
 def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
+    """Compute deterministic config hash for run-manifest and cache identity."""
     config_hash: str = _compute_config_hash_direct(config)
     return config_hash
 

@@ -81,6 +81,7 @@ _CreatePipelineWithServicesRequest = _PipelineCreationRequest
 
 
 def extract_entity_type(pipeline_name: str) -> str | None:
+    """Extract trailing entity token from `<provider>_<entity>` pipeline names."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
@@ -91,6 +92,7 @@ def resolve_data_source_creator(
     data_source_creator: DataSourceCreatorProtocol | None,
     get_data_source_creator_fn: Callable[..., DataSourceCreatorProtocol],
 ) -> DataSourceCreatorProtocol:
+    """Resolve explicit or registry-derived data-source creator callback."""
     if data_source_creator is not None:
         return data_source_creator
     return get_data_source_creator_fn(provider, provider_registry=provider_registry)
@@ -105,6 +107,7 @@ def build_pipeline_factory_context(
     transformer_class: type[BaseTransformer] | None = None,
     pandera_silver_schema: object | None = None,
 ) -> _PipelineFactoryContext:
+    """Build immutable factory context consumed by helper orchestration flows."""
     return _PipelineFactoryContext(
         pipeline_name=pipeline_name,
         create_data_source_fn=create_data_source_fn,
@@ -131,6 +134,7 @@ def build_create_pipeline_with_services_request(
     metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext | None = None,
 ) -> _CreatePipelineWithServicesRequest:
+    """Pack runtime pipeline-creation arguments into a typed request object."""
     return _CreatePipelineWithServicesRequest(
         run_id,
         runtime,
@@ -193,6 +197,7 @@ def create_transformer_instance(
     contract_policy: ContractPolicyPort | None = None,
     dependencies: TransformerDependencyContext | None = None,
 ) -> BaseTransformer | None:
+    """Create transformer instance with resolved dependency context."""
     if transformer_class is None:
         return None
 
@@ -229,6 +234,7 @@ def create_factory_data_source(
     pipeline_name: str,
     filter_config: InputFilterConfig | None = None,
 ) -> DataSourcePort:
+    """Create data-source adapter for one pipeline execution context."""
     return create_data_source_fn(
         settings, pipeline_config, logger, filter_config, pipeline_name=pipeline_name
     )
@@ -239,6 +245,7 @@ def build_factory_services(
     factory_context: _PipelineFactoryContext,
     request: _BuildFactoryServicesRequest,
 ) -> PipelineService:
+    """Build shared pipeline services from context and runtime request values."""
     return build_pipeline_services(
         pipeline_name=factory_context.pipeline_name,
         create_data_source_fn=factory_context.create_data_source_fn,
@@ -256,6 +263,7 @@ def create_pipeline_instance_with_services(
     factory_context: _PipelineFactoryContext,
     request: _CreatePipelineWithServicesRequest,
 ) -> BasePipeline:
+    """Create a fully wired pipeline instance with optional control-plane metadata."""
     if factory_context.pipeline_class is None or factory_context.provider is None:
         raise AssertionError(
             "factory_context must include pipeline_class and provider for pipeline creation"
@@ -313,6 +321,7 @@ def create_factory_runner(
     config: PipelineYamlConfig | None = None,
     cached_bronze: CachedBronzeContext | None = None,
 ) -> PipelineRunner:
+    """Create pipeline and assemble a runner with strict-gold validation policy."""
     yaml_config = config or load_pipeline_config(pipeline_name)
     create_with_services_kwargs: dict[str, object] = {
         "run_id": run_id,

@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 30
 
     # Only run on main repository, not forks
-    if: github.repository == 'SatoryKono/BioactivityDataAcquisition2'
+    if: github.repository == 'SatoryKono/BioactivityDataAcquisition'
 
     steps:
       - name: Checkout code

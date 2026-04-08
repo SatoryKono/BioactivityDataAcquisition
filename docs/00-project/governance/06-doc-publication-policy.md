@@ -175,8 +175,8 @@ Published site metadata canonical source находится в `mkdocs.yml`:
 
 - `site_name = BioETL Project`
 - `site_url = https://SatoryKono.github.io/BioactivityDataAcquisition/`
-- `repo_name = SatoryKono/BioactivityDataAcquisition2`
-- `repo_url = https://github.com/SatoryKono/BioactivityDataAcquisition2`
+- `repo_name = SatoryKono/BioactivityDataAcquisition`
+- `repo_url = https://github.com/SatoryKono/BioactivityDataAcquisition`
 
 Verified 2026-04-01: drift между publication policy и текущим MkDocs metadata не
 обнаружен. Разница между site title и repository slug считается intentional,

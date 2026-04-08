@@ -41,8 +41,8 @@ Ensure you have the following tools installed on your machine:
 ## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
-cd BioactivityDataAcquisition2
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
+cd BioactivityDataAcquisition
 ```
 
 ## 2. Environment Setup
