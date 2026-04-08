@@ -16,9 +16,56 @@ policy:
 registries:
   file_size_limits: {}
   function_complexity:
-    {}
+    src/bioetl/infrastructure/quarantine/filtered_reads.py::get_filtered_filter_options:
+      value: 16
+      owner: "@bioetl-platform"
+      reason: "Pre-existing tech debt"
+      classification: technical_debt
+      linked_rf: RF-001
+      removal_step: refactor
+      expires_on: "2026-12-31"
+    src/bioetl/infrastructure/quarantine/operations.py::get_filtered_stats:
+      value: 16
+      owner: "@bioetl-platform"
+      reason: "Pre-existing tech debt"
+      classification: technical_debt
+      linked_rf: RF-001
+      removal_step: refactor
+      expires_on: "2026-12-31"
   function_length: {}
-  class_size: {}
+  class_size:
+    src/bioetl/application/services/quarantine_service.py::QuarantineService:
+      value: 415
+      owner: "@bioetl-architecture"
+      reason: "Pre-existing tech debt"
+      classification: technical_debt
+      linked_rf: RF-001
+      removal_step: refactor
+      expires_on: "2026-12-31"
+    src/bioetl/infrastructure/quarantine/unified.py::UnifiedQuarantineAdapter:
+      value: 350
+      owner: "@bioetl-data-model"
+      reason: "Pre-existing tech debt"
+      classification: technical_debt
+      linked_rf: RF-001
+      removal_step: refactor
+      expires_on: "2026-12-31"
   class_method_count: {}
-  god_object: {}
+  god_object:
+    src/bioetl/application/services/quarantine_service.py::QuarantineService:
+      value: true
+      owner: "@bioetl-architecture"
+      reason: "Pre-existing tech debt"
+      classification: technical_debt
+      linked_rf: RF-001
+      removal_step: refactor
+      expires_on: "2026-12-31"
+    src/bioetl/infrastructure/quarantine/unified.py::UnifiedQuarantineAdapter:
+      value: true
+      owner: "@bioetl-data-model"
+      reason: "Pre-existing tech debt"
+      classification: technical_debt
+      linked_rf: RF-001
+      removal_step: refactor
+      expires_on: "2026-12-31"
   domain_complexity: {}

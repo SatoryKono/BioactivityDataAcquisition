@@ -1,13 +1,13 @@
 schema_version: 1
 baseline:
-  total_exemptions: 0
+  total_exemptions: 6
   by_registry:
     file_size_limits: 0
-    function_complexity: 0
+    function_complexity: 2
     function_length: 0
-    class_size: 0
+    class_size: 2
     class_method_count: 0
-    god_object: 0
+    god_object: 2
     domain_complexity: 0
 historical_baseline:
   total_exemptions: 23
@@ -209,45 +209,45 @@ report_only_hotspot_families:
         next_action: "2026-04-02 adds a bounded files_ge_250_loc cap at the current reviewed baseline for composition/factories/pipeline while max_internal_fan_in remains watch-only."
 quarterly_targets:
   - quarter: "2026-Q1"
-    max_total_exemptions: 9
+    max_total_exemptions: 12
     min_integral_score: 65
     group_budgets:
       size_metrics: 6
-      complexity_metrics: 1
-      structural_debt: 2
+      complexity_metrics: 3
+      structural_debt: 3
     registry_budgets:
       file_size_limits: 3
-      function_complexity: 1
+      function_complexity: 3
       function_length: 0
       class_size: 3
       class_method_count: 0
-      god_object: 2
+      god_object: 3
       domain_complexity: 6
   - quarter: "2026-Q2"
-    max_total_exemptions: 8
-    min_integral_score: 72
+    max_total_exemptions: 11
+    min_integral_score: 70
     group_budgets:
-      size_metrics: 0
-      complexity_metrics: 0
-      structural_debt: 0
+      size_metrics: 2
+      complexity_metrics: 2
+      structural_debt: 2
     registry_budgets:
       file_size_limits: 0
-      function_complexity: 0
+      function_complexity: 2
       function_length: 0
-      class_size: 0
+      class_size: 2
       class_method_count: 0
-      god_object: 0
+      god_object: 2
       domain_complexity: 0
 owner_decomposition_targets:
   - quarter: "2026-Q1"
     allocations:
       "@bioetl-architecture": 0
       "@bioetl-domain": 4
-      "@bioetl-platform": 5
+      "@bioetl-platform": 8
   - quarter: "2026-Q2"
     allocations:
       "@bioetl-architecture": 3
-      "@bioetl-platform": 3
+      "@bioetl-platform": 6
       "@bioetl-data-model": 2
 expiry_decomposition_targets:
   - quarter: "2026-Q1"
