@@ -24,19 +24,22 @@ def sort_columns_by_provider(
     provider_order: tuple[str, ...],
 ) -> list[str]:
     """Sort columns by provider prefix order."""
+    # Pre-compute provider indices for O(1) lookup
+    provider_idx = {p.lower(): i for i, p in enumerate(provider_order)}
+    fallback_idx = len(provider_order) + 1
 
     def sort_key(col: str) -> tuple[int, str]:
         """Return (provider_index, name) placing seed columns first."""
-        parts = col.split(".")
+        # ⚡ Bolt: safely limit list allocation overhead
+        parts = col.split(".", maxsplit=2)
         if len(parts) < 3:
             return (0, col.lower())
 
         provider = parts[0].lower()
-        try:
-            idx = provider_order.index(provider)
+        idx = provider_idx.get(provider)
+        if idx is not None:
             return (idx + 1, col.lower())
-        except ValueError:
-            return (len(provider_order) + 1, col.lower())
+        return (fallback_idx, col.lower())
 
     return sorted(columns, key=sort_key)
 
@@ -100,13 +103,16 @@ def collect_explicit_group_columns(
     ordered: list[str] = []
     used: set[str] = set()
 
+    # Fast path: Pre-extract fields to avoid O(N*M) redundant string parsing
+    extracted_fields = {col: extract_field_fn(col) for col in available}
+
     for field_name in group.fields:
         field_matches: list[str] = []
         aliases = resolve_aliases_fn(field_name)
         for col in available:
             if col in used:
                 continue
-            extracted = extract_field_fn(col)
+            extracted = extracted_fields[col]
             if extracted in aliases or col in aliases:
                 field_matches.append(col)
                 used.add(col)
