@@ -104,6 +104,11 @@ ______________________________________________________________________
 | Artifact publish linkage error   | `artifact_published` exists but missing dataset/lineage links | Storage/Metadata Owner | Metadata/Lineage Owner | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 30m unresolved |
 | Composite dependency degradation | composite enrichment/cross-validation degradation signal      | Composite Owner        | Data Quality Owner     | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 45m unresolved |
 
+### Control-plane aggregate telemetry
+
+- Используйте `bioetl-control-plane-v1` для мониторинга aggregated manifest write failures, ledger append failures, checkpoint compatibility и control-plane read failure ratio.
+- Alert `BioETLControlPlaneReadFailureRate` (runbook: `docs/05-operations/runbooks/observability-checklist.md`) сигнализирует о доле failed reads выше 5% за 30 минут, и его можно использовать как дополнительный сигнал контроля manifest/ledger integrity.
+
 ### Minimal Response Contract
 
 - For each incident, owner must document in the ticket:

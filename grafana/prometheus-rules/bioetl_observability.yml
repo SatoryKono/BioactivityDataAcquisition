@@ -104,6 +104,16 @@ groups:
           description: "Run-ledger append failure ratio exceeded 10% for pipeline={{ $labels.pipeline }} event_type={{ $labels.event_type }} in the last 30m."
           runbook: "docs/05-operations/runbooks/run-manifest-inspection.md"
 
+      - alert: BioETLControlPlaneReadFailureRate
+        expr: (sum by (store, operation) (increase(bioetl_control_plane_reads_total{status="failed"}[30m])) / clamp_min(sum by (store, operation) (increase(bioetl_control_plane_reads_total[30m])), 1)) > 0.05
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Control-plane read failure rate is elevated"
+          description: "Control-plane read failure rate exceeded 5% for store={{ $labels.store }} operation={{ $labels.operation }} in the last 30m."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
   - name: bioetl_dq_observability
     rules:
       - alert: BioETLDQSoftThresholdExceeded

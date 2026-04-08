@@ -174,7 +174,7 @@ consistency, а этот документ задаёт правила публи
 Published site metadata canonical source находится в `mkdocs.yml`:
 
 - `site_name = BioETL Project`
-- `site_url = https://SatoryKono.github.io/BioactivityDataAcquisition2/`
+- `site_url = https://SatoryKono.github.io/BioactivityDataAcquisition/`
 - `repo_name = SatoryKono/BioactivityDataAcquisition2`
 - `repo_url = https://github.com/SatoryKono/BioactivityDataAcquisition2`
 

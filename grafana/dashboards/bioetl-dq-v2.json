@@ -33,7 +33,7 @@
     {
       "asDropdown": false,
       "icon": "list-ul",
-      "includeVars": true,
+      "includeVars": false,
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
@@ -1220,6 +1220,29 @@
       ],
       "title": "Latest Data Timestamp",
       "type": "stat"
+    }
+    ,
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 60
+      },
+      "id": 150,
+      "options": {
+        "content": "### Control-plane aggregates available\n- Open `BioETL Control Plane v1` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
+        "mode": "markdown"
+      },
+      "type": "text"
     }
   ],
   "refresh": "30s",

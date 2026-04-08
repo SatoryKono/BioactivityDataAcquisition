@@ -1,0 +1,100 @@
+# Codex WSL Quick Reference
+
+## One-Time Setup
+
+```bash
+# From WSL in project root
+bash ./scripts/ops/setup_wsl_codex.sh
+
+# If issues, configure proxy manually:
+source .wsl_proxy_env.sh
+curl -I https://api.openai.com  # Test
+```
+
+## Usage from PowerShell (Windows)
+
+```powershell
+# Navigate to project
+cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
+
+# Interactive mode (new WSL wrapper)
+.\scripts\ops\codex-wsl.bat
+
+# With prompt
+.\scripts\ops\codex-wsl.bat "analyze the pipeline"
+
+# Or use original launchers
+.\scripts\ops\codex.bat                    # Interactive
+.\scripts\ops\codex.bat "fix the parser"   # With prompt
+.\scripts\ops\codex-exec.bat "refactor"    # Auto-exec
+```
+
+## Usage from WSL Terminal
+
+```bash
+# Navigate to project
+cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+
+# Interactive
+./scripts/ops/codex.sh
+
+# With prompt
+./scripts/ops/codex.sh "analyze pipeline"
+
+# Auto-execution
+./scripts/ops/codex-exec.sh "fix all TODOs"
+```
+
+## Common Prompts
+
+| Task | Command |
+|------|---------|
+| **Analyze Code** | `./scripts/ops/codex.sh "explain the ChemBL data extraction"` |
+| **Find Issues** | `./scripts/ops/codex.sh "identify performance bottlenecks in ETL"` |
+| **Generate Tests** | `./scripts/ops/codex.sh "create unit tests for transformers"` |
+| **Refactor** | `./scripts/ops/codex.sh "optimize database queries"` |
+| **Add Docs** | `./scripts/ops/codex.sh "generate docstrings for all methods"` |
+| **Debug** | `./scripts/ops/codex.sh "debug the gold_sink_disabled warning"` |
+| **Auto-Apply** | `./scripts/ops/codex-exec.sh "add type hints everywhere"` |
+
+## Troubleshooting Checklist
+
+| Problem | Solution |
+|---------|----------|
+| `Codex not found` | Run: `bash ./scripts/ops/setup_wsl_codex.sh` |
+| `OpenAI timeout` | Source proxy: `source .wsl_proxy_env.sh` then `curl -I https://api.openai.com` |
+| `WSL not found` | From PowerShell: `wsl -l -v` then `wsl --install -d Ubuntu` |
+| `Permission denied` | `chmod +x ./scripts/ops/codex.sh` |
+| `No internet in WSL` | Start Windows proxy: `.\scripts\ops\start-wsl-proxy.bat` |
+| `Connection refused` | Restart Docker Desktop (if VPN-related) |
+
+## Files Created
+
+- `scripts/ops/codex.sh` - WSL bash launcher
+- `scripts/ops/codex-exec.sh` - WSL auto-exec launcher
+- `scripts/ops/codex-wsl.bat` - Modern Windows wrapper
+- `scripts/ops/setup_wsl_codex.sh` - Installation script
+- `scripts/ops/CODEX_WSL_SETUP.md` - Full guide (this document)
+
+## Keyboard Shortcuts (Interactive Mode)
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+C` | Exit |
+| `Ctrl+L` | Clear screen |
+| `↑/↓` | History navigation |
+| `Tab` | Auto-complete |
+| `Enter` | Submit |
+
+## Tips
+
+1. **Test connectivity first**: `curl -I https://api.openai.com`
+2. **Verify installation**: `codex --version`
+3. **Start with read-only**: `./scripts/ops/codex.sh -s read-only "analyze this"`
+4. **Always review output**: Before accepting changes from auto-exec
+5. **Keep project in sync**: Git commit before major refactoring via Codex
+6. **Use working directory**: Always run from project root for context
+
+---
+
+For full documentation: `CODEX_WSL_SETUP.md` | `CODEX_SETUP.md` | `CODEX_QUICK_REF.md`

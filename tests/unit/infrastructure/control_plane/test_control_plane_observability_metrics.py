@@ -1,0 +1,168 @@
+"""Unit tests for control-plane metric emitters."""
+
+from __future__ import annotations
+
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import MagicMock
+from uuid import uuid4
+
+from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
+from bioetl.domain.control_plane.run_manifest import RunCodeProvenance, RunManifest
+from bioetl.domain.ports.observability.metrics import MetricsPort
+from bioetl.domain.types import RunID, RunType
+from bioetl.infrastructure.control_plane.file_run_ledger_store import FileRunLedgerStore
+from bioetl.infrastructure.control_plane.file_run_manifest_store import (
+    FileRunManifestStore,
+)
+
+
+def _make_manifest(pipeline: str = "chembl_activity") -> RunManifest:
+    now = datetime.utcnow()
+    return RunManifest(
+        manifest_id="manifest-obs",
+        execution_fingerprint="fingerprint",
+        schema_version="1",
+        created_at=now,
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name=pipeline,
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+
+
+def _make_ledger_entry(manifest: RunManifest) -> RunLedgerEntry:
+    return RunLedgerEntry(
+        entry_id="entry-obs",
+        manifest_id=manifest.manifest_id,
+        run_id=manifest.run_id,
+        event_type="manifest_created",
+        occurred_at=datetime.utcnow(),
+        status="success",
+        details={"_diagnostic": {"pipeline": manifest.pipeline_name}},
+    )
+
+
+def test_manifest_and_ledger_emit_control_plane_counters(tmp_path: Path) -> None:
+    metrics = MagicMock(spec=MetricsPort)
+    manifest_store = FileRunManifestStore(
+        base_path=tmp_path / "manifests", metrics=metrics
+    )
+    ledger_store = FileRunLedgerStore(base_path=tmp_path / "ledger", metrics=metrics)
+
+    manifest = _make_manifest()
+    manifest_store.save(manifest)
+
+    ledger_entry = _make_ledger_entry(manifest)
+    ledger_store.append(ledger_entry)
+
+    assert metrics.increment_counter.call_count == 2
+    manifest_call, ledger_call = metrics.increment_counter.call_args_list
+
+    manifest_labels = manifest_call.args[2]
+    assert manifest_call.args[0] == "control_plane_manifest_writes_total"
+    assert manifest_labels == {
+        "pipeline": manifest.pipeline_name,
+        "run_type": manifest.run_type.value,
+        "status": "success",
+    }
+
+    ledger_labels = ledger_call.args[2]
+    assert ledger_call.args[0] == "control_plane_ledger_appends_total"
+    assert ledger_labels == {
+        "pipeline": manifest.pipeline_name,
+        "event_type": "manifest_created",
+        "status": "success",
+    }
+
+    allowed_keys = {"pipeline", "run_type", "event_type", "status"}
+    for call in metrics.increment_counter.call_args_list:
+        label_keys = set(call.args[2].keys())
+        assert label_keys.issubset(allowed_keys)
+
+
+def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
+    tmp_path: Path,
+) -> None:
+    metrics = MagicMock(spec=MetricsPort)
+    manifest_store = FileRunManifestStore(
+        base_path=tmp_path / "manifests",
+        metrics=metrics,
+    )
+    ledger_store = FileRunLedgerStore(
+        base_path=tmp_path / "ledger",
+        metrics=metrics,
+    )
+
+    manifest = _make_manifest()
+    manifest_store.save(manifest)
+    entry = RunLedgerEntry(
+        entry_id="entry-guard",
+        manifest_id=manifest.manifest_id,
+        run_id=manifest.run_id,
+        event_type="artifact_published",
+        occurred_at=datetime.utcnow(),
+        status="published",
+        dataset_ref="silver:chembl.activity@hash-123",
+        lineage_fragment_id="silver:fragment-1",
+        details={
+            "_diagnostic": {"pipeline": manifest.pipeline_name},
+            "artifact_path": "/tmp/output/silver/chembl/activity",
+            "source_batch_id": "batch-123",
+            "dataset_hash": "hash-123",
+        },
+    )
+    ledger_store.append(entry)
+
+    assert manifest_store.get(manifest.manifest_id) == manifest
+    assert manifest_store.get_by_run_id(manifest.run_id) == manifest
+    assert ledger_store.list_entries(manifest.manifest_id) == [entry]
+    assert ledger_store.list_entries_by_run_id(manifest.run_id) == [entry]
+
+    forbidden_keys = {
+        "run_id",
+        "manifest_id",
+        "artifact_path",
+        "path",
+        "dataset_hash",
+        "source_batch_id",
+    }
+    forbidden_values = {
+        str(manifest.run_id),
+        manifest.manifest_id,
+        "/tmp/output/silver/chembl/activity",
+        "hash-123",
+        "batch-123",
+        "silver:chembl.activity@hash-123",
+    }
+    allowed_keys_by_metric = {
+        "control_plane_manifest_writes_total": {"pipeline", "run_type", "status"},
+        "control_plane_ledger_appends_total": {"pipeline", "event_type", "status"},
+        "control_plane_reads_total": {"store", "operation", "status"},
+        "control_plane_read_duration_seconds": {"store", "operation", "status"},
+    }
+
+    def _assert_labels(metric_name: str, labels: dict[str, object]) -> None:
+        assert set(labels).issubset(allowed_keys_by_metric[metric_name])
+        assert forbidden_keys.isdisjoint(labels)
+        for value in labels.values():
+            rendered = str(value)
+            assert rendered not in forbidden_values
+            assert not rendered.startswith("/tmp/")
+
+    for call in metrics.increment_counter.call_args_list:
+        metric_name = call.args[0]
+        labels = call.args[2]
+        assert metric_name in allowed_keys_by_metric
+        _assert_labels(metric_name, labels)
+
+    for call in metrics.observe_histogram.call_args_list:
+        metric_name = call.args[0]
+        labels = call.args[2]
+        assert metric_name in allowed_keys_by_metric
+        _assert_labels(metric_name, labels)

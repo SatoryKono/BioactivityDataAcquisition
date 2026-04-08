@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError
@@ -106,16 +108,93 @@ def _extract_run_type(record: JsonDict, error_details: JsonDict) -> str:
     """Resolve run_type from structured fields if available."""
     for source in (
         error_details.get("run_type"),
+        error_details.get("_run_type"),
         record.get("run_type"),
+        record.get("_run_type"),
     ):
         if isinstance(source, str) and source.strip():
             return source.strip()
     return ""
 
 
+def _parse_run_type_from_manifest_payload(payload: object) -> str | None:
+    """Extract run_type from one run-manifest JSON payload."""
+    if not isinstance(payload, dict):
+        return None
+    candidate = payload.get("run_type")
+    if not isinstance(candidate, str):
+        return None
+    normalized = candidate.strip()
+    return normalized or None
+
+
+def _resolve_run_manifest_root(base_path: str) -> Path | None:
+    """Resolve run-manifest root directory from quarantine base path."""
+    quarantine_root = Path(base_path).resolve()
+    candidate_roots = (
+        quarantine_root.parent / "control" / "run_manifest",
+        quarantine_root.parent / "control_plane" / "run_manifest",
+    )
+    for root in candidate_roots:
+        if (root / "_by_run_id").exists():
+            return root
+    return None
+
+
+def _build_run_type_lookup(
+    table_records: list[JsonDict],
+    *,
+    base_path: str,
+) -> dict[str, str]:
+    """Build run_id -> run_type mapping from control-plane run manifests."""
+    manifest_root = _resolve_run_manifest_root(base_path)
+    if manifest_root is None:
+        return {}
+
+    run_index_root = manifest_root / "_by_run_id"
+    run_type_by_run_id: dict[str, str] = {}
+    manifest_run_type_cache: dict[str, str | None] = {}
+
+    for record in table_records:
+        run_id_raw = record.get("run_id")
+        if not isinstance(run_id_raw, str):
+            continue
+        run_id = run_id_raw.strip()
+        if not run_id or run_id in run_type_by_run_id:
+            continue
+
+        run_index_path = run_index_root / f"{run_id}.txt"
+        try:
+            manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if not manifest_id:
+            continue
+
+        if manifest_id not in manifest_run_type_cache:
+            manifest_path = manifest_root / f"{manifest_id}.json"
+            try:
+                manifest_payload = json.loads(
+                    manifest_path.read_text(encoding="utf-8")
+                )
+            except (OSError, json.JSONDecodeError):
+                manifest_run_type_cache[manifest_id] = None
+            else:
+                manifest_run_type_cache[manifest_id] = (
+                    _parse_run_type_from_manifest_payload(manifest_payload)
+                )
+
+        run_type = manifest_run_type_cache.get(manifest_id)
+        if run_type:
+            run_type_by_run_id[run_id] = run_type
+
+    return run_type_by_run_id
+
+
 def _normalize_filtered_row(
     record: JsonDict,
     *,
+    run_type_lookup: dict[str, str] | None,
     include_payload: bool,
     include_payload_preview: bool,
 ) -> JsonDict:
@@ -130,11 +209,17 @@ def _normalize_filtered_row(
         else record.get("error_code", "")
     )
 
+    extracted_run_type = _extract_run_type(record, error_details)
+    if not extracted_run_type and run_type_lookup is not None:
+        run_id_value = record.get("run_id")
+        if isinstance(run_id_value, str):
+            extracted_run_type = run_type_lookup.get(run_id_value.strip(), "")
+
     normalized: JsonDict = {
         "ingestion_ts": ingestion_ts_raw,
         "pipeline": record.get("pipeline", ""),
         "run_id": record.get("run_id", ""),
-        "run_type": _extract_run_type(record, error_details),
+        "run_type": extracted_run_type,
         "payload_hash": record.get("payload_hash", ""),
         "reason_code": error_details.get("reason_code", ""),
         "rule_type": error_details.get("rule_type", ""),
@@ -167,9 +252,18 @@ def _normalize_filter_values(raw: str | None) -> set[str] | None:
     candidate = raw.strip()
     if not candidate:
         return None
-    if candidate.lower() in {"*", "all", "__all", ".*"}:
+    wildcard_tokens = {"*", "all", "__all", "$__all", "$all", ".*"}
+    if candidate.lower() in wildcard_tokens:
         return None
-    values = {item.strip() for item in candidate.split(",") if item.strip()}
+
+    values: set[str] = set()
+    for item in candidate.split(","):
+        normalized = item.strip()
+        if not normalized:
+            continue
+        if normalized.lower() in wildcard_tokens:
+            continue
+        values.add(normalized)
     return values or None
 
 
@@ -188,6 +282,19 @@ def _single_filter_value(raw: str | None) -> str | None:
     if values is None or len(values) != 1:
         return None
     return next(iter(values))
+
+
+def _collect_string_field_values(
+    rows: list[JsonDict],
+    field_name: str,
+) -> list[str]:
+    """Collect unique non-empty string values for one normalized row field."""
+    values = {
+        value.strip()
+        for row in rows
+        if isinstance((value := row.get(field_name)), str) and value.strip()
+    }
+    return sorted(values)
 
 
 def _parse_time_bound(value: str | None) -> datetime | None:
@@ -216,6 +323,7 @@ def _clamp_limit(limit: int, *, default: int = 50, hard_cap: int = 500) -> int:
 def _iter_filtered_rows(
     table_records: list[JsonDict],
     *,
+    run_type_lookup: dict[str, str] | None,
     pipeline: str | None,
     run_type: str | None,
     reason_code: str | None,
@@ -241,6 +349,7 @@ def _iter_filtered_rows(
     for record in table_records:
         row = _normalize_filtered_row(
             record,
+            run_type_lookup=run_type_lookup,
             include_payload=include_payload,
             include_payload_preview=include_payload_preview,
         )
@@ -307,8 +416,10 @@ def _load_filtered_rows(
         filters=filters,
     )
     table_records: list[JsonDict] = arrow_table.to_pylist()
+    run_type_lookup = _build_run_type_lookup(table_records, base_path=base_path)
     return _iter_filtered_rows(
         table_records,
+        run_type_lookup=run_type_lookup,
         pipeline=pipeline,
         run_type=run_type,
         reason_code=reason_code,
@@ -400,9 +511,11 @@ def get_filtered_record(
     table_records: list[JsonDict] = arrow_table.to_pylist()
     if not table_records:
         return None
+    run_type_lookup = _build_run_type_lookup(table_records, base_path=base_path)
 
     rows = _iter_filtered_rows(
         table_records,
+        run_type_lookup=run_type_lookup,
         pipeline=pipeline,
         run_type=None,
         reason_code=None,
@@ -453,46 +566,10 @@ def get_filtered_filter_options(
         include_payload_preview=False,
     )
 
-    pipelines = sorted(
-        {
-            row.get("pipeline", "")
-            for row in rows
-            if isinstance(row.get("pipeline"), str) and row.get("pipeline")
-        }
-    )
-    run_types = sorted(
-        {
-            row.get("run_type", "")
-            for row in rows
-            if isinstance(row.get("run_type"), str) and row.get("run_type")
-        }
-    )
-    reason_codes = sorted(
-        {
-            row.get("reason_code", "")
-            for row in rows
-            if isinstance(row.get("reason_code"), str) and row.get("reason_code")
-        }
-    )
-    fields = sorted(
-        {
-            row.get("field", "")
-            for row in rows
-            if isinstance(row.get("field"), str) and row.get("field")
-        }
-    )
-    run_ids = sorted(
-        {
-            row.get("run_id", "")
-            for row in rows
-            if isinstance(row.get("run_id"), str) and row.get("run_id")
-        }
-    )
-
     return {
-        "pipelines": pipelines,
-        "run_types": run_types,
-        "reason_codes": reason_codes,
-        "fields": fields,
-        "run_ids": run_ids,
+        "pipelines": _collect_string_field_values(rows, "pipeline"),
+        "run_types": _collect_string_field_values(rows, "run_type"),
+        "reason_codes": _collect_string_field_values(rows, "reason_code"),
+        "fields": _collect_string_field_values(rows, "field"),
+        "run_ids": _collect_string_field_values(rows, "run_id"),
     }

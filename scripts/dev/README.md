@@ -45,6 +45,7 @@ Preferred runners automatically select the OS-appropriate environment:
 ```bash
 bash scripts/dev/run_pytest.sh tests/unit --narrow --timeout=120 --lf
 bash scripts/dev/run_mypy.sh
+bash scripts/dev/pretest_guardrails.sh --scope full
 bash scripts/dev/run_pytest_sharded.sh
 bash scripts/dev/run_pytest_sharded.sh --stream
 bash scripts/dev/run_pytest_sharded.sh --tail
@@ -82,6 +83,13 @@ Behavior differs slightly by platform:
   first, so missing pytest plugins can be auto-installed in the selected Python environment.
 - `.\scripts\dev\run_pytest.ps1` assumes `.venv-win` is already prepared via
   `.\scripts\dev\setup_env_windows.ps1` or `make setup-plugins`.
+
+For broad bash test runs, the shell runners also execute
+`bash scripts/dev/pretest_guardrails.sh --mode auto --scope full` before the
+real pytest process unless you pass `--skip-preflight`. The preflight cleans
+common cache/build artifacts, refreshes the scripts inventory manifest, checks
+inventory/lifecycle/catalog governance, verifies docs, and runs a targeted
+fail-fast architecture slice for the recurring doc/governance regressions.
 
 ## Integration And E2E Quick Paths
 
@@ -136,6 +144,7 @@ python -m scripts.dev <command> [args...]
 | `setup --ci`     | `scripts/dev/dev_setup.sh`               | Legacy placeholder mode; not recommended for current setup       |
 | `install-deps`   | `scripts/dev/install_deps.py`            | Auxiliary helper script, not a full project bootstrap            |
 | `probe-quality`  | `scripts/dev/quality_gate_probe.py`      | Measure narrow pytest/mypy startup latency and timeout behavior  |
+| `pretest-guardrails` | `scripts/dev/pretest_guardrails.sh`  | Run cleanup + repo/docs/architecture preflight                   |
 | `run-tests`      | `scripts/dev/run_tests.py`               | Run tests                                                        |
 | `pytest-sharded` | `scripts/dev/run_pytest_sharded.sh`      | Run the recommended path-based pytest shards                     |
 | `mock-metrics`   | `scripts/dev/metrics_mock_server.py`     | Start mock metrics server                                        |
@@ -151,6 +160,7 @@ python -m scripts.dev <command> [args...]
 | `setup --quick`  | Legacy compatibility entrypoint only; use `make install` + targeted verify commands instead                         | Manual, exceptional use only                           |
 | `setup --ci`     | Legacy compatibility entrypoint only; CI should use the maintained repo commands                                    | CI migration/legacy compatibility only                 |
 | `install-deps`   | Specialized helper for one auxiliary package; not for normal repo setup                                             | Manual, rare maintenance task                          |
+| `pretest-guardrails` | Before broad bash pytest runs when you want drift/governance issues caught up front                            | Manual, or auto-triggered by bash pytest runners       |
 | `run-tests`      | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `cov`  | Manual, during development                             |
 | `pytest-sharded` | Faster local feedback for the large pytest suite by running stable path-based shards through the maintained wrapper | Manual, during development                             |
 | `mock-metrics`   | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data               | Manual, during dashboard development                   |
@@ -166,6 +176,7 @@ python -m scripts.dev <command> [args...]
 | `scripts/dev/run_tests.ps1`               | Run tests (PowerShell variant)                                                            |
 | `scripts/dev/run_mypy.sh`                 | Run mypy with local-environment fallbacks (shell variant)                                 |
 | `scripts/dev/run_mypy.ps1`                | Run mypy with local-environment fallbacks (PowerShell variant)                            |
+| `scripts/dev/pretest_guardrails.sh`       | Run cleanup + repo/docs/architecture preflight before broad bash pytest runs              |
 | `scripts/dev/run_pytest.sh`               | Run pytest directly                                                                       |
 | `scripts/dev/run_pytest.ps1`              | Run pytest directly (PowerShell variant)                                                  |
 | `scripts/dev/run_pytest_sharded.sh`       | Run the recommended path-based pytest shard plan (shell variant)                          |

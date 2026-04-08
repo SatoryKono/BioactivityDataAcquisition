@@ -134,11 +134,41 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded S7 stability troubleshooting helper; either attach it to a canonical developer workflow with explicit call-sites or remove it after the stabilization wave completes."
     },
+    "scripts/dev/fix_hypothesis_db.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded WSL-mounted checkout repair helper for Hypothesis state; remove it once the pytest wrappers no longer need manual cache recovery tooling."
+    },
+    "scripts/dev/run_pytest_off_mnt.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded mounted-WSL troubleshooting launcher that copies the repo off /mnt for pytest execution; remove it after the mixed Windows-WSL workflow is stabilized."
+    },
+    "scripts/dev/run_pytest_wsl_env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded WSL bootstrap troubleshooting wrapper while mounted-checkout environment setup remains fragile; fold its behavior into canonical dev setup or remove it."
+    },
     "scripts/diagnostics/_tmp_inspect_vcr.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded troubleshooting helper; rename or remove it before promoting it as a stable diagnostics command."
+    },
+    "scripts/ops/create_runmanifest_runledger_issue.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded maintainer helper for manual run-manifest/run-ledger issue creation; prefer generalized issue automation for any future workflow."
+    },
+    "scripts/ops/start_health_server.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a local operator helper for starting the health server from Windows shells; do not expand it into a canonical contributor workflow without stronger call-site evidence."
     },
     "scripts/repo/finalize_docs_issues_2638_2643.sh": {
       "owner": "@bioetl-platform",
@@ -153,6 +183,12 @@
       "review_by": "2026-05-31",
       "replacement": "scripts/repo/check_scripts_inventory.py",
       "sunset_date": "2026-06-30"
+    },
+    "scripts/qa/py_review_orchestrator.py": {
+      "owner": "platform-architecture",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical standalone review orchestrator snapshot; prefer the governed py-review-orchestrator skill and current reports workflow instead of extending this orphan script."
     },
     "src/tools/scripts/generate_contracts.py": {
       "owner": "platform-architecture",

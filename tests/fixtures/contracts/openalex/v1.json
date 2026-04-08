@@ -8,7 +8,8 @@
         "results[0]": "dict",
         "results[0].id": "str",
         "results[0].doi": "str",
-        "meta": "dict"
+        "meta": "dict",
+        "meta.count": "int"
       }
     },
     "works_search_endpoint": {
@@ -16,7 +17,8 @@
         "results": "list",
         "results[0]": "dict",
         "results[0].id": "str",
-        "meta": "dict"
+        "meta": "dict",
+        "meta.count": "int"
       }
     },
     "health_probe_shape": {
@@ -24,7 +26,8 @@
         "results": "list",
         "results[0]": "dict",
         "results[0].id": "str",
-        "meta": "dict"
+        "meta": "dict",
+        "meta.count": "int"
       }
     }
   }

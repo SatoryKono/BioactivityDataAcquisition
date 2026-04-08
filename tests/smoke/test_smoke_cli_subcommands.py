@@ -13,6 +13,7 @@ from bioetl.interfaces.cli.main import cli
 
 _SUBCOMMANDS = [
     "run",
+    "run-manifest",
     "run-all",
     "run-composite",
     "health",

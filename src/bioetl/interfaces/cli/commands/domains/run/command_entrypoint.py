@@ -21,6 +21,124 @@ CommandDecorator = Callable[[CommandCallback], CommandCallback]
 CommandDecoratorFactory = Callable[..., CommandDecorator]
 
 
+def _add_core_options() -> Callable:
+    """Add core CLI options to the command."""
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--pipeline",
+            callback=validate_pipeline_name,
+            required=True,
+            help="Pipeline to run",
+        )(cmd)
+        cmd = typed_with_run_type_option("Type of run")(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--resume", is_flag=True, help="Resume from last checkpoint"
+        )(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--start-offset",
+            type=int,
+            default=None,
+            help="Start extraction from specific record offset (skips checkpoint). "
+            "Use after crash to resume from known position.",
+        )(cmd)
+        return cmd
+
+
+def _add_filter_options() -> Callable:
+    """Add filter-related CLI options."""
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = typed_with_limit_option("Maximum number of records to process")(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--input-csv",
+            type=click.Path(exists=True),
+            help="Path to CSV file with filter IDs",
+        )(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--filter-column",
+            type=str,
+            help="Column name in CSV containing filter IDs (default: 'id')",
+        )(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--filter-field",
+            type=str,
+            help="API field name to filter by (default: 'molecule_chembl_id')",
+        )(cmd)
+        return cmd
+
+
+def _add_execution_options() -> Callable:
+    """Add execution control options."""
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = typed_with_dry_run_option(
+            "Preview cleanup without execution (for rebuild/backfill)"
+        )(cmd)
+        cmd = typed_with_yes_option("Skip confirmation prompt for rebuild/backfill")(cmd)
+        return cmd
+
+
+def _add_vacuum_options() -> Callable:
+    """Add Delta table vacuum options."""
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--vacuum-after-run",
+            is_flag=True,
+            default=None,
+            help="Run VACUUM on Delta tables after successful run (overrides YAML config)",
+        )(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--vacuum-retention-days",
+            type=int,
+            default=None,
+            help="Minimum age of files to remove during VACUUM (days, overrides YAML config)",
+        )(cmd)
+        return cmd
+
+
+def _add_debug_options(default_health_server_port: int) -> Callable:
+    """Add debugging and monitoring options."""
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = typed_with_debug_option()(cmd)
+        cmd = typed_with_health_server_options(default_health_server_port)(cmd)
+        return cmd
+
+
+def _add_tracing_options() -> Callable:
+    """Add tracing configuration options."""
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--tracing/--no-tracing",
+            "enable_tracing",
+            default=None,
+            help="Override distributed tracing for this run",
+        )(cmd)
+        return cmd
+
+
+def _add_cache_options() -> Callable:
+    """Add Bronze cache options."""
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--use-cached-bronze/--no-cached-bronze",
+            "use_cached_bronze",
+            default=False,
+            help="Load data from Bronze cache instead of API",
+            show_default=True,
+        )(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--cached-bronze-date",
+            type=str,
+            default=None,
+            help="Filter Bronze cache by date (YYYY-MM-DD)",
+        )(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--cached-bronze-path",
+            type=click.Path(exists=True),
+            default=None,
+            help="Explicit path to Bronze cache directory",
+        )(cmd)
+        return cmd
+
+
 def build_run_click_command(
     *,
     validate_pipeline_name: Callable[..., object],
@@ -40,128 +158,19 @@ def build_run_click_command(
     )
 
     @click.command()  # type: ignore[untyped-decorator]
-    @click.option(  # type: ignore[untyped-decorator]
-        "--pipeline",
-        callback=validate_pipeline_name,
-        required=True,
-        help="Pipeline to run",
-    )
-    @typed_with_run_type_option("Type of run")
-    @click.option(  # type: ignore[untyped-decorator]
-        "--resume", is_flag=True, help="Resume from last checkpoint"
-    )
-    @click.option(  # type: ignore[untyped-decorator]
-        "--start-offset",
-        type=int,
-        default=None,
-        help="Start extraction from specific record offset (skips checkpoint). "
-        "Use after crash to resume from known position.",
-    )
-    @typed_with_limit_option("Maximum number of records to process")
-    @click.option(  # type: ignore[untyped-decorator]
-        "--input-csv",
-        type=click.Path(exists=True),
-        help="Path to CSV file with filter IDs",
-    )
-    @click.option(  # type: ignore[untyped-decorator]
-        "--filter-column",
-        type=str,
-        help="Column name in CSV containing filter IDs (default: 'id')",
-    )
-    @click.option(  # type: ignore[untyped-decorator]
-        "--filter-field",
-        type=str,
-        help="API field name to filter by (default: 'molecule_chembl_id')",
-    )
-    @typed_with_dry_run_option(
-        "Preview cleanup without execution (for rebuild/backfill)"
-    )
-    @typed_with_yes_option("Skip confirmation prompt for rebuild/backfill")
-    @click.option(  # type: ignore[untyped-decorator]
-        "--vacuum-after-run",
-        is_flag=True,
-        default=None,
-        help="Run VACUUM on Delta tables after successful run (overrides YAML config)",
-    )
-    @click.option(  # type: ignore[untyped-decorator]
-        "--vacuum-retention-days",
-        type=int,
-        default=None,
-        help="Minimum age of files to remove during VACUUM (days, overrides YAML config)",
-    )
-    @typed_with_debug_option()
-    @typed_with_health_server_options(default_health_server_port)
-    @click.option(  # type: ignore[untyped-decorator]
-        "--tracing/--no-tracing",
-        "enable_tracing",
-        default=None,
-        help="Override distributed tracing for this run",
-    )
-    @click.option(  # type: ignore[untyped-decorator]
-        "--use-cached-bronze/--no-cached-bronze",
-        "use_cached_bronze",
-        default=False,
-        help="Load data from Bronze cache instead of API",
-        show_default=True,
-    )
-    @click.option(  # type: ignore[untyped-decorator]
-        "--cached-bronze-date",
-        type=str,
-        default=None,
-        help="Filter Bronze cache by date (YYYY-MM-DD)",
-    )
-    @click.option(  # type: ignore[untyped-decorator]
-        "--cached-bronze-path",
-        type=click.Path(exists=True),
-        default=None,
-        help="Explicit path to Bronze cache directory",
-    )
     @click.pass_context  # type: ignore[untyped-decorator]
-    def run_command(
-        ctx: click.Context,
-        pipeline: str,
-        run_type: str,
-        resume: bool,
-        start_offset: int | None,
-        limit: int | None,
-        input_csv: str | None,
-        filter_column: str | None,
-        filter_field: str | None,
-        dry_run: bool,
-        yes: bool,
-        vacuum_after_run: bool | None,
-        vacuum_retention_days: int | None,
-        debug: bool,
-        health_server: bool,
-        health_port: int,
-        enable_tracing: bool | None,
-        use_cached_bronze: bool,
-        cached_bronze_date: str | None,
-        cached_bronze_path: str | None,
-    ) -> None:
+    def run_command(ctx: click.Context, **kwargs) -> None:
         """Run an ETL pipeline."""
-        run_callback(
-            ctx,
-            pipeline=pipeline,
-            run_type=run_type,
-            resume=resume,
-            start_offset=start_offset,
-            limit=limit,
-            input_csv=input_csv,
-            filter_column=filter_column,
-            filter_field=filter_field,
-            dry_run=dry_run,
-            yes=yes,
-            vacuum_after_run=vacuum_after_run,
-            vacuum_retention_days=vacuum_retention_days,
-            debug=debug,
-            health_server=health_server,
-            health_port=health_port,
-            enable_tracing=enable_tracing,
-            use_cached_bronze=use_cached_bronze,
-            cached_bronze_date=cached_bronze_date,
-            cached_bronze_path=cached_bronze_path,
-        )
+        run_callback(ctx, **kwargs)
+
+    # Apply all option groups
+    run_command = _add_core_options()(run_command)
+    run_command = _add_filter_options()(run_command)
+    run_command = _add_execution_options()(run_command)
+    run_command = _add_vacuum_options()(run_command)
+    run_command = _add_debug_options(default_health_server_port)(run_command)
+    run_command = _add_tracing_options()(run_command)
+    run_command = _add_cache_options()(run_command)
 
     return run_command
 

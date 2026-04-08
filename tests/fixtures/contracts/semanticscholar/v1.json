@@ -8,6 +8,8 @@
         "data[0]": "dict",
         "data[0].paperId": "str",
         "data[0].title": "str",
+        "offset": "int",
+        "next": "int",
         "total": "int"
       }
     },

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol, cast
 from urllib.parse import parse_qs, unquote, urlsplit
@@ -10,8 +11,6 @@ from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
-    import asyncio
-
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.domain.ports import HealthMonitorPort
 

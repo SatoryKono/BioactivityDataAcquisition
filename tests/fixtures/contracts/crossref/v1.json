@@ -17,7 +17,9 @@
         "message": "dict",
         "message.items": "list",
         "message.items[0]": "dict",
-        "message.items[0].DOI": "str"
+        "message.items[0].DOI": "str",
+        "message.items-per-page": "int",
+        "message.total-results": "int"
       }
     },
     "agency_lookup_for_doi": {

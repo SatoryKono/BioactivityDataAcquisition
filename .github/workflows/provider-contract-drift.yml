@@ -1,0 +1,70 @@
+name: Provider Contract Drift
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/provider-contract-drift.yml"
+      - "configs/quality/test_matrix.yaml"
+      - "docs/03-guides/testing.md"
+      - "scripts/qa/__main__.py"
+      - "scripts/qa/README.md"
+      - "scripts/qa/report_provider_contract_drift.py"
+      - "tests/contract/**"
+      - "tests/fixtures/contracts/**"
+      - "tests/fixtures/vcr/**"
+  push:
+    branches: [main, develop]
+    paths:
+      - ".github/workflows/provider-contract-drift.yml"
+      - "configs/quality/test_matrix.yaml"
+      - "docs/03-guides/testing.md"
+      - "scripts/qa/__main__.py"
+      - "scripts/qa/README.md"
+      - "scripts/qa/report_provider_contract_drift.py"
+      - "tests/contract/**"
+      - "tests/fixtures/contracts/**"
+      - "tests/fixtures/vcr/**"
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  replay-gate:
+    name: Replay Drift Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          uv-extras: "tests"
+          uv-sync-args: ""
+
+      - name: Run replay contract suites
+        run: |
+          uv run python -m pytest \
+            tests/contract/test_provider_contract_drift_helper.py \
+            tests/contract/test_provider_contract_snapshot_registry.py \
+            tests/contract/test_provider_contract_replay_registry.py \
+            tests/contract/test_provider_contract_drift_replay.py \
+            -q --tb=short
+
+      - name: Generate provider drift artifact
+        run: |
+          uv run python -m scripts.qa report-provider-contract-drift \
+            --output provider-contract-drift-report.json \
+            --fail-on breaking
+
+      - name: Upload provider drift artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-contract-drift-report
+          path: provider-contract-drift-report.json
+          retention-days: 30

@@ -13,7 +13,7 @@ Prioritize structural correctness, semantic clarity, and maintainability over de
 This skill has two operation modes:
 
 - Generic Mermaid mode: use for standalone diagrams or unknown repositories.
-- BioETL project mode: use when working inside this repository (`BioactivityDataAcquisition2`).
+- BioETL project mode: use when working inside this repository (`BioactivityDataAcquisition`).
 
 ## Mode Selection
 

@@ -135,7 +135,7 @@ See [Composite Pipeline Diagram](../02-architecture/diagrams/foundation/29-compo
 ```bash
 # Clone and setup
 git clone <repo-url>
-cd BioactivityDataAcquisition2
+cd BioactivityDataAcquisition
 make install
 
 # Run a pipeline

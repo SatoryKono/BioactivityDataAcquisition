@@ -42,6 +42,12 @@ control-plane и lineage health: manifest writes, ledger appends, checkpoint
 compatibility, lineage refs missing, composite source-selection decisions и
 lineage fragment outcomes.
 
+Новый `bioetl-control-plane-v1` собирает агрегированные панели по manifest
+writes, ledger appends, checkpoint compatibility и read failures. Это dashboard
+показывает доли ошибок и предлагает direct link на alert `BioETLControlPlaneReadFailureRate`
+(runbook: `docs/05-operations/runbooks/observability-checklist.md`) для быстрого
+реагирования на контрольные-plane regressions.
+
 `bioetl-runtime` считается канонической triage-точкой для runtime hygiene:
 warnings, unstructured logs и Prometheus-backed alert conditions. Он не
 заменяет `overview`/`dq`/`provider-health`, а собирает log+alert surface в одном

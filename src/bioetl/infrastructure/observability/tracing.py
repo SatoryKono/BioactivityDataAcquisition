@@ -199,8 +199,7 @@ def _get_otlp_insecure_setting() -> str | None:
     return None
 
 
-def _build_telemetry_exporter() -> Any:
-    # Any: exporter class is selected dynamically between console and OTLP implementations.
+def _build_telemetry_exporter() -> Any:  # Any: exporter class is selected dynamically between console and OTLP implementations.
     """Create the most appropriate tracing exporter for the current runtime."""
     if not OTLP_AVAILABLE or _OtlpExporterClass is None:
         return ConsoleSpanExporter()

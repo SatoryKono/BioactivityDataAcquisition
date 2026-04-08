@@ -4,7 +4,7 @@ Date: 2026-03-30
 
 ## Scope
 
-Current shipped dashboards from [grafana/dashboards](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards):
+Current shipped dashboards from [grafana/dashboards](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/grafana/dashboards):
 
 - `bioetl-overview-v2`
 - `bioetl-dq-v2`
@@ -13,8 +13,8 @@ Current shipped dashboards from [grafana/dashboards](/mnt/e/g-drive/05_AI/github
 
 Audit evidence sources:
 
-- shipped dashboard JSON files in [grafana/dashboards](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards)
-- fresh live screenshots in [output/playwright](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright)
+- shipped dashboard JSON files in [grafana/dashboards](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/grafana/dashboards)
+- fresh live screenshots in [output/playwright](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/output/playwright)
 - direct live checks against local Grafana / Prometheus / Loki during the audit
 
 ## Audit Method
@@ -28,8 +28,8 @@ Audit evidence sources:
 
 ### 1. Overview
 
-Dashboard file: [bioetl-overview-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-overview-v2.json)
-Screenshot: [bioetl-overview-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-overview-v2.png)
+Dashboard file: [bioetl-overview-v2.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/grafana/dashboards/bioetl-overview-v2.json)
+Screenshot: [bioetl-overview-v2.png](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/output/playwright/bioetl-overview-v2.png)
 
 Overall status: Healthy dashboard with live pipeline degradation signal
 Confidence: High
@@ -67,8 +67,8 @@ Recommendations:
 
 ### 2. Data Quality
 
-Dashboard file: [bioetl-dq-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-dq-v2.json)
-Screenshot: [bioetl-dq-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-dq-v2.png)
+Dashboard file: [bioetl-dq-v2.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/grafana/dashboards/bioetl-dq-v2.json)
+Screenshot: [bioetl-dq-v2.png](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/output/playwright/bioetl-dq-v2.png)
 
 Overall status: Healthy dashboard with downstream completion gap
 Confidence: High
@@ -109,8 +109,8 @@ Recommendations:
 
 ### 3. Provider Health
 
-Dashboard file: [bioetl-provider-health-v2.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-provider-health-v2.json)
-Screenshot: [bioetl-provider-health-v2.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-provider-health-v2.png)
+Dashboard file: [bioetl-provider-health-v2.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/grafana/dashboards/bioetl-provider-health-v2.json)
+Screenshot: [bioetl-provider-health-v2.png](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/output/playwright/bioetl-provider-health-v2.png)
 
 Overall status: Healthy
 Confidence: High
@@ -135,8 +135,8 @@ Recommendations:
 
 ### 4. Runtime
 
-Dashboard file: [bioetl-runtime.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/grafana/dashboards/bioetl-runtime.json)
-Screenshot: [bioetl-runtime.png](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/output/playwright/bioetl-runtime.png)
+Dashboard file: [bioetl-runtime.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/grafana/dashboards/bioetl-runtime.json)
+Screenshot: [bioetl-runtime.png](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/output/playwright/bioetl-runtime.png)
 
 Overall status: Healthy with one live alert signal to investigate
 Confidence: High

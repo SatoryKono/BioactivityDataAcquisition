@@ -1,0 +1,37 @@
+{
+  "interactions": [
+    {
+      "request": {
+        "body": null,
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "User-Agent": [
+            "BioETL/1.0 (mailto:test@example.com)"
+          ]
+        },
+        "method": "GET",
+        "uri": "https://api.crossref.org/works/10.1038%2Fs41586-020-2649-2/agency"
+      },
+      "response": {
+        "body": {
+          "string": "{\"status\": \"ok\", \"message-type\": \"work-agency\", \"message-version\": \"1.0.0\", \"message\": {\"DOI\": \"10.1038/s41586-020-2649-2\", \"agency\": {\"id\": \"crossref\", \"label\": \"Crossref\"}}}"
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json;charset=utf-8"
+          ],
+          "Date": [
+            "Tue, 07 Apr 2026 10:51:51 GMT"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        }
+      }
+    }
+  ],
+  "version": 1
+}

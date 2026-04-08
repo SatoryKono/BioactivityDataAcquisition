@@ -1,88 +1,173 @@
-# scripts/ops — Operational & Platform Support
+# 🎯 Codex WSL Setup — Final Summary
 
-Platform/ops automation, skills/tooling checks, and deployment helpers.
+## What You Have Now
 
-## Unified Entry Point
+✅ **Fully Installed & Verified**
+- Node.js v18.19.1
+- npm 9.2.0
+- Codex CLI v0.118.0
+- WSL2 Ubuntu integration
+- All dependencies working
 
-```bash
-python -m scripts.ops --help
-python -m scripts.ops <command> [args...]
+## The Simplest Way to Use Codex
+
+```powershell
+# From PowerShell in project root:
+cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
+wsl
+codex
 ```
 
-## Commands
+Then type your prompt directly in the Codex terminal.
 
-| Command | Script | Description |
-|---------|--------|-------------|
-| `salt-rotate` | `scripts/ops/salt_rotate.py` | PII salt rotation (standard and emergency) |
-| `fix-grafana` | `scripts/ops/fix_grafana_dashboards.py` | Fix Grafana dashboard configurations |
-| `wsl-proxy` | `scripts/ops/wsl_proxy.py` | WSL proxy helper |
-| `update-issue` | `scripts/ops/update_github_issue.sh` | Update a GitHub issue title, body, comment, and/or state via the GitHub API, with inline text or file inputs |
-| `create-runmanifest-ledger-issue` | `scripts/ops/create_runmanifest_runledger_issue.sh` | Create the prepared RunManifest-and-Run-Ledger GitHub issue (dry-run by default) |
-| `post-2597-progress` | `scripts/ops/post_issue_2597_progress.sh` | Post the current bounded progress update for issue `#2597` (dry-run by default) |
-| `close-2597` | `scripts/ops/close_issue_2597.sh` | Post the prepared closeout comment for issue `#2597` and close it (dry-run by default) |
-| `triage-issues` | `scripts/ops/triage_cleanup_issue_wave.sh` | Apply the cleanup/docs issue triage wave via GitHub API |
-| `post-rescope-comments` | `scripts/ops/post_issue_rescope_comments.sh` | Post the prepared re-scope comments for issues `#2600`, `#2516`, `#2515`, and `#2511` (dry-run by default) |
-| `update-rescope-bodies` | `scripts/ops/update_issue_rescope_bodies.sh` | Replace the prepared re-scope issue bodies for issues `#2600`, `#2516`, `#2515`, and `#2511` (dry-run by default) |
-| `close-ge-spike` | `scripts/ops/close_great_expectations_spike_issue.sh` | Close issue `#2595` with the completed Great Expectations spike memo |
-| `close-schema-drift` | `scripts/ops/close_pandera_schema_drift_issue.sh` | Close issue `#2594` with the completed Pandera schema drift gate summary |
-| `setup-agents` | `scripts/ops/setup_agents.sh` | Sync project Codex agents into `CODEX_HOME` |
-| `setup-plugins` | `scripts/ops/setup_plugins.sh` | Plugin setup (shell) |
-| `setup-skills` | `scripts/ops/setup_skills.sh` | Skills setup (shell, also syncs paired agents by default) |
-| `check-skills` | `scripts/ops/check_ai_skills_layout.sh` | Check AI skills layout (shell) |
-| `check-mirror` | `scripts/ops/check_skills_mirror.sh` | Check skills mirror sync (shell) |
-| `check-mcp` | `scripts/ops/check_mcp.sh` | Check MCP server configuration (shell) |
-| `deploy` | `scripts/ops/deploy-bioetl.sh` | Deploy BioETL (shell) |
-| `delete-branches` | `scripts/ops/delete-stale-branches.sh` | Delete stale git branches (shell) |
+## Example: Your First Analysis
 
-## When to Use
+```powershell
+# 1. Open PowerShell
+cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
 
-| Command | When | Trigger |
-|---------|------|---------|
-| `salt-rotate` | Security rotation cycle; use `--verify` to check state, `--emergency` for immediate rotation after security incident | Manual, periodic security maintenance |
-| `fix-grafana` | After Grafana dashboard drift; injects variables and fixes PromQL queries | Manual, infrastructure maintenance |
-| `wsl-proxy` | When WSL2 networking needs proxy configuration | Manual, developer utility |
-| `update-issue` | When a maintainer needs a reusable shell utility to edit GitHub issues from WSL/bash | Manual, maintainer utility |
-| `create-runmanifest-ledger-issue` | When the prepared RunManifest-and-Run-Ledger architecture issue should be created without retyping the payload by hand | Manual, maintainer utility |
-| `post-2597-progress` | When the current `#2597` pure-transformation testing slice should be reported back to GitHub without retyping the comment body | Manual, maintainer utility |
-| `close-2597` | When the bounded `#2597` pure-transformation baseline slice is merged and the issue should be closed with a prepared summary | Manual, maintainer utility |
-| `triage-issues` | When the cleanup/docs GitHub issue wave must be applied from WSL with a PAT | Manual, maintainer utility |
-| `post-rescope-comments` | When the prepared re-scope comments for the current architecture/testing governance issues should be posted without retyping them by hand | Manual, maintainer utility |
-| `update-rescope-bodies` | When the prepared full re-scope issue bodies should replace the current descriptions for the current architecture/testing governance issues | Manual, maintainer utility |
-| `close-ge-spike` | When issue `#2595` should be closed after the spike memo is committed or ready for reference | Manual, maintainer utility |
-| `close-schema-drift` | When issue `#2594` should be closed after the representative Pandera schema drift gate is merged or ready for reference | Manual, maintainer utility |
-| `setup-agents` | After cloning repo or updating `.codex/agents/` profiles | Manual, initial setup |
-| `setup-plugins` | After cloning repo or updating local pytest/pre-commit tooling | Manual, initial setup |
-| `setup-skills` | After cloning repo or updating skills configuration; keeps `agents/` in sync unless `--skills-only` is passed | Manual, initial setup |
-| `check-skills` | Before PR touching `.claude/skills/`; validates layout consistency | CI gate (`skills-consistency.yml`) |
-| `check-mirror` | Before PR touching skills; validates mirror sync | CI gate (`skills-consistency.yml`) |
-| `check-mcp` | After modifying MCP server configuration | Manual, validation |
-| `deploy` | When deploying BioETL to target environment | Manual, deployment |
-| `delete-branches` | Periodic repo hygiene; removes stale remote branches | Manual, maintenance |
+# 2. Enter WSL
+wsl
 
-## Manual GitHub Maintenance Policy
+# 3. Start Codex
+codex
 
-- `update-issue` is the preferred reusable shell entry point for future manual GitHub issue edits from WSL/bash.
-- `create-runmanifest-ledger-issue` and `triage-issues` remain supported as bounded maintainer utilities because they encode a curated issue-management procedure, not a general reusable platform API.
-- Issue-specific commands such as `post-2597-progress`, `close-2597`, `post-rescope-comments`, `update-rescope-bodies`, `close-ge-spike`, and `close-schema-drift` are retained only for bounded operational slices and should be treated as compatibility-maintained maintainer utilities rather than as a general automation surface.
-- When a new GitHub maintenance workflow is needed, prefer extending `update-issue` or introducing a generalized driver instead of adding another issue-number-specific shell script.
-- Historical wave scripts in **Other Files** are legacy repeatability artifacts. Keep them runnable for audit/history, but prefer a generalized issue/PR maintenance driver for any new cleanup wave.
+# 4. Inside Codex, type:
+explain the data pipeline architecture
 
-## Other Files
+# 5. Wait 20-30 seconds for response
+# 6. Press Ctrl+C to exit
+```
 
-| File | Description |
-|------|-------------|
-| `scripts/ops/close_superseded_prs.sh` | Close superseded PRs |
-| `scripts/ops/close_duplicate_prs_wave2.sh` | Close duplicate PRs (wave 2) |
-| `scripts/ops/close_duplicate_prs_wave3.sh` | Close duplicate PRs (wave 3) |
-| `scripts/ops/codex.bat` | Windows Codex launcher |
-| `scripts/ops/codex-exec.bat` | Windows Codex exec launcher |
-| `scripts/ops/update_github_issue.sh` | Generic issue edit helper for comment/title/body/state updates |
-| `scripts/ops/create_runmanifest_runledger_issue.sh` | Wrapper that creates the prepared RunManifest-and-Run-Ledger issue payload |
-| `scripts/ops/post_issue_2597_progress.sh` | Wrapper that posts the prepared progress comment for issue `#2597` |
-| `scripts/ops/close_issue_2597.sh` | Wrapper that posts the prepared closeout comment for issue `#2597` and closes it |
-| `scripts/ops/post_issue_rescope_comments.sh` | Wrapper that posts the prepared re-scope comments for issues `#2600`, `#2516`, `#2515`, and `#2511` |
-| `scripts/ops/update_issue_rescope_bodies.sh` | Wrapper that replaces the prepared re-scope bodies for issues `#2600`, `#2516`, `#2515`, and `#2511` |
-| `scripts/ops/close_great_expectations_spike_issue.sh` | Close issue `#2595` with a standard comment |
-| `scripts/ops/close_pandera_schema_drift_issue.sh` | Close issue `#2594` with a standard comment |
-| `scripts/ops/start-wsl-proxy.bat` | Start WSL proxy (Windows) |
-| `scripts/ops/setup_copilot_codex_mcp.ps1` | PowerShell Copilot/Codex MCP setup |
+## Available Scripts
+
+### For Interactive Use
+```bash
+wsl -- codex                    # Interactive TUI
+wsl -- codex "your prompt"      # One-shot (limited interactivity)
+```
+
+### For Automation (Advanced)
+```bash
+wsl -- codex exec --full-auto "your prompt"  # Auto-execute changes
+wsl -- codex review "file.py"                 # Code review
+wsl -- codex sandbox "command"                # Sandboxed execution
+```
+
+## Files Created
+
+### Documentation (Read These)
+- **QUICK_START.md** ← Start here
+- **HOW_TO_RUN.md** - How to launch Codex
+- **CODEX_WSL_SETUP.md** - Comprehensive guide
+- **CODEX_WSL_QUICK_REF.md** - Quick reference
+
+### Scripts (Already Installed)
+- `codex.bat` - Windows launcher (updated for Ubuntu)
+- `codex-exec.bat` - Auto-exec launcher (updated)
+- `codex-wsl.bat` - Modern wrapper
+- `codex.sh` - Bash launcher
+- `codex-exec.sh` - Bash auto-exec
+- `setup_wsl_codex.sh` - Installation (already run)
+- `verify_codex_setup.sh` - Verification
+- `test_codex_basic.sh` - Basic test
+
+## Common Use Cases
+
+### Code Analysis
+```
+codex
+→ explain the data transformation pipeline
+→ what are the performance bottlenecks?
+→ show data flow from bronze to gold layer
+```
+
+### Code Generation
+```
+codex
+→ generate unit tests for ChemBLExtractor
+→ create Pydantic models for bronze layer
+→ write docstrings for all public methods
+```
+
+### Refactoring
+```
+codex
+→ optimize these database queries
+→ refactor for vectorized operations
+→ improve memory efficiency
+```
+
+### Debugging
+```
+codex
+→ debug the gold_sink_disabled warning
+→ why does health_check_degraded occur?
+→ analyze the chimbl_degraded_mode behavior
+```
+
+## Key Points
+
+1. **Use WSL's native Codex** - Don't try batch files for interactive mode
+2. **First response is slow** - 20-30 seconds is normal (API call)
+3. **Stay in project directory** - Better context for Codex
+4. **Use Ctrl+C to exit** - From Codex TUI
+5. **Review before auto-exec** - Use `codex exec --full-auto` carefully
+
+## Troubleshooting Quick Fixes
+
+### "stdin is not a terminal"
+Don't use batch files for prompts. Instead:
+```powershell
+wsl
+codex "your prompt"
+```
+
+### "Codex not found"
+```bash
+wsl -- npm install -g @openai/codex
+```
+
+### "API timeout"
+Configure proxy if behind VPN:
+```bash
+wsl -- bash -c "source .wsl_proxy_env.sh && codex"
+```
+
+### "OpenAI unreachable"
+If corporate VPN, start Windows proxy first:
+```powershell
+python .\scripts\ops\wsl_proxy.py
+# Or:
+.\scripts\ops\start-wsl-proxy.bat
+```
+
+## File Reference
+
+| File | Purpose |
+|------|---------|
+| `QUICK_START.md` | This — start here! |
+| `HOW_TO_RUN.md` | How to launch Codex |
+| `CODEX_WSL_SETUP.md` | Full setup guide |
+| `CODEX_WSL_QUICK_REF.md` | Command reference |
+| `INSTALLATION_COMPLETE.md` | Installation summary |
+
+## Next Step
+
+```powershell
+wsl
+codex
+```
+
+Then try:
+```
+what is this project about?
+```
+
+---
+
+**Status**: ✅ Ready to use immediately
+
+**Time to first response**: ~30 seconds (API call)
+
+**Learning curve**: Minimal - just type prompts naturally

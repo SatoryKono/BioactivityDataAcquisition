@@ -25,6 +25,7 @@ python -m scripts.qa <command> [args...]
 | `check-terminology`           | `lint_terminology.py`                     | Terminology linting against glossary                                                              |
 | `report-dep-map`              | `generate_architecture_dependency_map.py` | Generate/check architecture dependency map                                                        |
 | `report-vcr-metadata`         | `report_vcr_metadata_catalog.py`          | Generate/check canonical VCR metadata catalog                                                     |
+| `report-provider-contract-drift` | `report_provider_contract_drift.py`    | Generate provider contract drift diagnostics from replay cassettes                                |
 | `report-hotspots`             | `generate_hotspot_degradation_report.py`  | Generate performance hotspot degradation report                                                   |
 | `report-duplication-baseline` | `report_duplication_baseline.py`          | Generate report-only duplication baseline for `composition`/`application`                         |
 | `analyze-duplicate-functions` | `analyze_duplicate_functions.py`          | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |
@@ -46,6 +47,7 @@ python -m scripts.qa <command> [args...]
 | `check-terminology`           | After adding domain terms; validates code uses canonical terminology per `glossary.md`                                                           | CI gate (`architecture.yml`)               |
 | `report-dep-map`              | After changing imports in `src/bioetl/`; use `--check` for drift detection, `--update` to regenerate                                             | Pre-commit hook + CI gate                  |
 | `report-vcr-metadata`         | When updating VCR fixture governance rollout or sidecar inventory; use `--check` for drift detection, `--update` to regenerate                   | Architecture / test-governance maintenance |
+| `report-provider-contract-drift` | When reviewing provider-facing API drift in PR/CI; writes a machine-readable replay report and can fail on warnings/breaking drift            | Provider contract replay CI gate           |
 | `report-hotspots`             | After performance benchmark runs; generates degradation report from JSONL observations                                                           | Manual, on-demand                          |
 | `report-duplication-baseline` | When reviewing duplication pressure in `composition` or `application`; generates report-only baseline artifacts without creating a blocking gate | Manual, on-demand                          |
 | `analyze-duplicate-functions` | When you need the older duplicate-function AST report through the canonical QA entrypoint                                                        | Manual, audit/reporting                    |
@@ -71,6 +73,7 @@ python scripts/qa/generate_architecture_dependency_map.py --check
 python scripts/qa/generate_architecture_dependency_map.py --update
 python scripts/qa/report_vcr_metadata_catalog.py --check
 python scripts/qa/report_vcr_metadata_catalog.py --update
+python scripts/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking
 python scripts/qa/report_duplication_baseline.py
 python -m scripts.qa check-architecture
 python -m scripts.qa check-app-deps

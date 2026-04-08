@@ -25,6 +25,8 @@ YELLOW='\033[0;33m'
 NC='\033[0m'
 
 BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
+PYTEST_RUNTIME_ENV_FILE="$REPO_ROOT/.pytest_cache/setup_plugins_runtime.sh"
+TEMP_PYTEST_VENV_DIR="/tmp/$(basename "$REPO_ROOT")-pytest-runtime-venv"
 
 log_info() { echo -e "${BLUE}[setup-plugins]${NC} $1"; }
 log_ok() { echo -e "${GREEN}[setup-plugins]${NC} $1"; }
@@ -156,7 +158,31 @@ pytest_only_stamp_is_fresh() {
         [[ -e "$tracked" && "$tracked" -nt "$stamp_file" ]] && return 1
     done
 
-    return 0
+    run_python - <<'PY' >/dev/null 2>&1
+import importlib.util
+
+required = (
+    "pytest",
+    "pytest_asyncio",
+    "pytest_cov",
+    "xdist",
+    "pytest_timeout",
+    "pytest_vcr",
+    "syrupy",
+    "_hypothesis_pytestplugin",
+    "pydantic",
+    "pandas",
+    "httpx",
+    "click",
+    "structlog",
+    "pandera",
+    "respx",
+    "bandit",
+    "stevedore",
+)
+
+raise SystemExit(0 if all(importlib.util.find_spec(module) is not None for module in required) else 1)
+PY
 }
 
 mark_pytest_only_stamp() {
@@ -168,13 +194,182 @@ mark_pytest_only_stamp() {
     : > "$stamp_file"
 }
 
+find_bootstrap_python() {
+    local candidate
+    for candidate in "$PYTHON_BIN" python3 python; do
+        [[ -n "$candidate" ]] || continue
+        if command -v "$candidate" >/dev/null 2>&1; then
+            command -v "$candidate"
+            return 0
+        fi
+        if [[ -x "$candidate" ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+python_has_required_pytest_modules() {
+    local python_bin="$1"
+    [[ -n "$python_bin" ]] || return 1
+
+    local resolved_python=""
+    if command -v "$python_bin" >/dev/null 2>&1; then
+        resolved_python="$(command -v "$python_bin")"
+    elif [[ -x "$python_bin" ]]; then
+        resolved_python="$python_bin"
+    else
+        return 1
+    fi
+
+    "$resolved_python" - <<'PY' >/dev/null 2>&1
+import importlib.util
+
+required = (
+    "pytest",
+    "pytest_asyncio",
+    "pytest_cov",
+    "xdist",
+    "pytest_timeout",
+    "pytest_vcr",
+    "syrupy",
+    "_hypothesis_pytestplugin",
+    "pydantic",
+    "pandas",
+    "httpx",
+    "click",
+    "structlog",
+    "pandera",
+    "respx",
+    "bandit",
+    "stevedore",
+)
+
+raise SystemExit(0 if all(importlib.util.find_spec(module) is not None for module in required) else 1)
+PY
+}
+
+project_runtime_packages() {
+    local bootstrap_python
+    bootstrap_python="$(find_bootstrap_python)" || return 1
+
+    "$bootstrap_python" - <<'PY'
+from __future__ import annotations
+
+import tomllib
+from pathlib import Path
+
+data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+project = data["project"]
+
+deps: list[str] = []
+seen: set[str] = set()
+
+def extend(items: list[str]) -> None:
+    for item in items:
+        if item not in seen:
+            seen.add(item)
+            deps.append(item)
+
+extend(project.get("dependencies", []))
+optional = project.get("optional-dependencies", {})
+for key in ("tests", "dev", "tracing"):
+    extend(optional.get(key, []))
+
+for dep in deps:
+    print(dep)
+PY
+}
+
+ensure_temp_pytest_runtime_venv() {
+    local bootstrap_python
+    bootstrap_python="$(find_bootstrap_python)" || {
+        log_warn "Could not find a bootstrap Python to create temporary pytest runtime."
+        return 1
+    }
+
+    if [[ -d "$TEMP_PYTEST_VENV_DIR" ]]; then
+        "$bootstrap_python" -m venv --clear "$TEMP_PYTEST_VENV_DIR"
+    else
+        "$bootstrap_python" -m venv "$TEMP_PYTEST_VENV_DIR"
+    fi
+
+    local pip_cache_dir="/tmp/$(basename "$REPO_ROOT")-pip-cache"
+    mkdir -p "$pip_cache_dir"
+
+    local -a runtime_pkgs=()
+    mapfile -t runtime_pkgs < <(project_runtime_packages)
+    runtime_pkgs+=("$@")
+
+    PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install --upgrade pip setuptools wheel >/dev/null
+    if ! PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install "${runtime_pkgs[@]}"; then
+        log_warn "Temporary pytest runtime install failed; recreating the runtime from scratch"
+        "$bootstrap_python" -m venv --clear "$TEMP_PYTEST_VENV_DIR"
+        PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install --upgrade pip setuptools wheel >/dev/null
+        PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install "${runtime_pkgs[@]}"
+    fi
+
+    PYTHON_BIN="$TEMP_PYTEST_VENV_DIR/bin/python"
+    PYTHON_KIND="temp-posix-venv"
+}
+
+write_pytest_runtime_env_file() {
+    mkdir -p "$(dirname "$PYTEST_RUNTIME_ENV_FILE")"
+    if [[ "$USE_UV" == true ]]; then
+        rm -f "$PYTEST_RUNTIME_ENV_FILE"
+        return 0
+    fi
+
+    {
+        printf 'export BIOETL_PYTEST_RUNTIME_PYTHON=%q\n' "$PYTHON_BIN"
+    } >"$PYTEST_RUNTIME_ENV_FILE"
+}
+
+if [[ -f "$PYTEST_RUNTIME_ENV_FILE" ]]; then
+    # Reuse a previously bootstrapped temporary pytest runtime when the default
+    # interpreter is present but incomplete.
+    # shellcheck disable=SC1090
+    source "$PYTEST_RUNTIME_ENV_FILE"
+    if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]] && \
+        ! python_has_required_pytest_modules "$PYTHON_BIN" && \
+        python_has_required_pytest_modules "$BIOETL_PYTEST_RUNTIME_PYTHON"; then
+        PYTHON_BIN="$BIOETL_PYTEST_RUNTIME_PYTHON"
+        PYTHON_KIND="temp-posix-venv"
+    fi
+fi
+
 install_dev_dependencies() {
+    local pytest_pkgs=(
+        pytest
+        pytest-asyncio
+        pytest-cov
+        pytest-xdist
+        pytest-timeout
+        pytest-vcr
+        syrupy
+        hypothesis
+    )
+
     if [[ "$USE_UV" == true ]]; then
         log_info "Syncing dev/test dependencies via uv..."
         uv sync --extra dev --extra tests --extra tracing
     else
         log_info "Installing dev/test dependencies via pip..."
-        "$PYTHON_BIN" -m pip install -e ".[dev,tests,tracing]"
+        if "$PYTHON_BIN" -m pip install -e ".[dev,tests,tracing]"; then
+            return 0
+        fi
+        if [[ "$PYTHON_KIND" == "posix-venv" || "$PYTHON_KIND" == "windows-venv" ]]; then
+            log_warn "Editable install failed; creating temporary pytest runtime under /tmp"
+            ensure_temp_pytest_runtime_venv "${pytest_pkgs[@]}"
+            return 0
+        fi
+        log_warn "Pip install blocked by externally managed environment, retrying with --break-system-packages"
+        if "$PYTHON_BIN" -m pip install --break-system-packages -e ".[dev,tests,tracing]"; then
+            return 0
+        fi
+        log_warn "Still blocked; creating temporary pytest runtime under /tmp"
+        ensure_temp_pytest_runtime_venv "${pytest_pkgs[@]}"
     fi
 }
 
@@ -183,11 +378,23 @@ check_pytest_plugins() {
 import importlib.util
 
 required = {
+    "pytest": "pytest",
     "pytest_asyncio": "pytest-asyncio",
     "pytest_cov": "pytest-cov",
     "xdist": "pytest-xdist",
     "pytest_timeout": "pytest-timeout",
     "pytest_vcr": "pytest-vcr",
+    "syrupy": "syrupy",
+    "_hypothesis_pytestplugin": "hypothesis",
+    "pydantic": "pydantic",
+    "pandas": "pandas",
+    "httpx": "httpx",
+    "click": "click",
+    "structlog": "structlog",
+    "pandera": "pandera",
+    "respx": "respx",
+    "bandit": "bandit",
+    "stevedore": "stevedore",
 }
 missing = [pkg for module, pkg in required.items() if importlib.util.find_spec(module) is None]
 if missing:
@@ -324,5 +531,6 @@ else
     mark_pytest_only_stamp
 fi
 
+write_pytest_runtime_env_file
 install_precommit
 log_ok "Plugin setup completed"

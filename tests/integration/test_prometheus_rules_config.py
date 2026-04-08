@@ -135,6 +135,10 @@ def test_control_plane_traceability_alerts_reference_expected_metrics() -> None:
             "bioetl_lineage_refs_missing_total",
             "docs/05-operations/runbooks/traceability-signal-ownership.md",
         ),
+        "BioETLControlPlaneReadFailureRate": (
+            "bioetl_control_plane_reads_total",
+            "docs/05-operations/runbooks/observability-checklist.md",
+        ),
     }
 
     missing = [name for name in expected if name not in rule_map]
@@ -230,6 +234,7 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         "BioETLProviderFailureRateHigh": "warning",
         "BioETLProviderRetriesExhausted": "warning",
         "BioETLProviderRetriesExhaustedPersistent": "critical",
+        "BioETLControlPlaneReadFailureRate": "warning",
     }
     expected_expr_fragments = {
         "BioETLDQQuarantineRateHigh": ["> 0.05", "<= 0.2", ">= 20", "[30m]"],
@@ -274,6 +279,15 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         ],
         "BioETLProviderRetriesExhausted": ["> 0", "< 3", "[1h]"],
         "BioETLProviderRetriesExhaustedPersistent": [">= 3", "[1h]"],
+        "BioETLControlPlaneReadFailureRate": [
+            "bioetl_control_plane_reads_total",
+            "increase",
+            "clamp_min",
+            "[30m]",
+            "status=\"failed\"",
+            "store",
+            "operation",
+        ],
     }
     expected_for = {
         "BioETLDQQuarantineRateHigh": "10m",
@@ -287,6 +301,7 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         "BioETLProviderFailureRateHigh": "5m",
         "BioETLProviderRetriesExhausted": "5m",
         "BioETLProviderRetriesExhaustedPersistent": "10m",
+        "BioETLControlPlaneReadFailureRate": "15m",
     }
 
     for alert_name, severity in expected_labels.items():

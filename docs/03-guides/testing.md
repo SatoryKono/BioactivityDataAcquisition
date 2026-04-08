@@ -544,6 +544,9 @@ tests.yml
 
 contract-tests.yml
 └── scheduled/manual live contract workflow for tests/contract/
+
+provider-contract-drift.yml
+└── replay-based provider API drift gate for provider-facing snapshots
 ```
 
 Ключевые свойства текущего CI:
@@ -552,6 +555,13 @@ contract-tests.yml
 - `test-matrix` шардирует unit/integration/security по test groups и Python versions;
 - `coverage-verify` не rerun-ит весь suite, а объединяет shard coverage и отдельно догоняет только `serial` subset;
 - live contract tests вынесены в отдельный workflow и не являются частью обычного PR path;
+- replay drift gate работает отдельно от live path и использует существующие
+  `tests/fixtures/contracts/{provider}/v{version}.json` + curated VCR cassettes
+  как default PR/CI baseline;
+- live contract workflow guarded to repository `SatoryKono/BioactivityDataAcquisition2`; в нём `tests/contract/` запускаются только при `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и флаге `--network`;
+- `provider-contract-drift.yml` генерирует machine-readable artifact
+  `provider-contract-drift-report.json` и hard-fail'ит только на `breaking`
+  drift; `warning` остаётся видимым в artifact для PR review;
 - `duration-telemetry` собирает JUnit telemetry и публикует slow-test artifact.
 
 ## 7. Воспроизводимость и Проверка Зависимостей

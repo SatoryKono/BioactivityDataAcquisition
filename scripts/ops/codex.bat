@@ -4,7 +4,7 @@ setlocal EnableExtensions
 REM Launch Codex CLI through WSL2
 REM Codex will use the current working directory context
 
-set WSL_DISTRO=Debian
+set WSL_DISTRO=Ubuntu
 set "PATH=C:\Windows\System32;C:\Windows"
 
 REM Check Codex is installed

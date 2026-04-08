@@ -32,13 +32,15 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.run_context import RunContext
 
 
-def build_gold_lineage_fragment(
-    *,
+
+
+
+def _build_gold_nodes(
     run_context: RunContext,
     input_data: GoldMetadataInput,
-) -> LineageGraphFragment:
-    """Build canonical Gold lineage fragment from metadata input."""
-    created_at = fragment_timestamp(input_data.completed_at, input_data.started_at)
+    created_at: str,
+) -> tuple[list, list]:
+    """Build all nodes for the gold lineage fragment."""
     run = run_node(run_context)
     manifest = manifest_node(run_context)
     gold_dataset, composite_source_nodes, composite_source_edges = (
@@ -72,16 +74,37 @@ def build_gold_lineage_fragment(
         *lineage_transform_nodes,
         *composite_source_nodes,
     ]
-    edges = manifest_edges(
-        manifest=manifest,
-        run=run,
-        created_at=created_at,
-        run_context=run_context,
-    )
+    
     if manifest is not None:
         nodes.append(manifest)
     if gold_schema_node is not None:
         nodes.append(gold_schema_node)
+    
+    return nodes, composite_source_edges
+
+
+def _build_gold_edges(
+    run_context: RunContext,
+    input_data: GoldMetadataInput,
+    nodes: list,
+    created_at: str,
+    composite_source_edges: list[LineageEdge],
+) -> list[LineageEdge]:
+    """Build all edges for the gold lineage fragment."""
+    run = next(node for node in nodes if hasattr(node, 'run_id') and node.run_id == run_context.run_id)
+    gold_dataset = next(node for node in nodes if hasattr(node, 'table_name') and node.table_name == input_data.table_name)
+    silver_nodes = [node for node in nodes if hasattr(node, 'layer') and node.layer == 'silver']
+    lineage_transform_nodes = [node for node in nodes if hasattr(node, 'transform_type')]
+    gold_schema_node = next((node for node in nodes if hasattr(node, 'schema_type') and node.schema_type == 'gold'), None)
+    
+    edges = manifest_edges(
+        manifest=manifest_node(run_context),
+        run=run,
+        created_at=created_at,
+        run_context=run_context,
+    )
+    
+    if gold_schema_node is not None:
         edges.append(
             LineageEdge(
                 edge_type=LineageEdgeType.USED_SCHEMA,
@@ -92,6 +115,7 @@ def build_gold_lineage_fragment(
                 created_at=created_at,
             )
         )
+    
     edges.extend(
         LineageEdge(
             edge_type=LineageEdgeType.DERIVED_FROM,
@@ -103,7 +127,9 @@ def build_gold_lineage_fragment(
         )
         for silver_node in silver_nodes
     )
+    
     edges.extend(composite_source_edges)
+    
     if lineage_transform_nodes:
         edges.extend(
             transform_edges(
@@ -134,6 +160,24 @@ def build_gold_lineage_fragment(
                 created_at=created_at,
             )
         )
+    
+    return edges
+
+
+def build_gold_lineage_fragment(
+    *,
+    run_context: RunContext,
+    input_data: GoldMetadataInput,
+) -> LineageGraphFragment:
+    """Build canonical Gold lineage fragment from metadata input."""
+    created_at = fragment_timestamp(input_data.completed_at, input_data.started_at)
+    
+    # Build nodes
+    nodes, composite_source_edges = _build_gold_nodes(run_context, input_data, created_at)
+    
+    # Build edges
+    edges = _build_gold_edges(run_context, input_data, nodes, created_at, composite_source_edges)
+    
     return LineageGraphFragment(
         fragment_id=build_fragment_id(
             "gold",

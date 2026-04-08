@@ -5,6 +5,16 @@ resolve_docker_bin() {
   local candidates=()
   local docker_desktop_default="/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe"
 
+  local docker_linux
+  if command -v docker >/dev/null 2>&1; then
+    docker_linux="$(command -v docker)"
+  fi
+
+  # Prefer the Linux docker binary when running inside WSL/Unix so we hit the Unix socket
+  if [[ -n "${docker_linux}" ]]; then
+    candidates+=("${docker_linux}")
+  fi
+
   if [[ -x "${docker_desktop_default}" ]]; then
     candidates+=("${docker_desktop_default}")
   fi

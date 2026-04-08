@@ -2,6 +2,7 @@
 set -euo pipefail
 
 DRY_RUN=false
+PRESERVE_PYTEST_CACHE="${BIOETL_PREFLIGHT_PRESERVE_PYTEST_CACHE:-0}"
 
 for arg in "$@"; do
   case "$arg" in
@@ -40,6 +41,26 @@ format_bytes() {
   fi
 }
 
+safe_dir_size_bytes() {
+  local path="$1"
+  local size=""
+  if size="$(du -sb -- "$path" 2>/dev/null | awk 'NR == 1 { print $1 }')" && [[ "$size" =~ ^[0-9]+$ ]]; then
+    printf '%s\n' "$size"
+    return 0
+  fi
+  printf '0\n'
+}
+
+safe_file_size_bytes() {
+  local path="$1"
+  local size=""
+  if size="$(stat -c%s -- "$path" 2>/dev/null)" && [[ "$size" =~ ^[0-9]+$ ]]; then
+    printf '%s\n' "$size"
+    return 0
+  fi
+  printf '0\n'
+}
+
 FIND_ROOTS=(.)
 EXCLUDE_DIRS=(.git .venv .mypy_cache .pytest_cache .ruff_cache data .idea .vscode)
 
@@ -70,6 +91,9 @@ mapfile -t FILE_TARGETS < <(
 
 # Add cache directories explicitly in case they were pruned
 for cache_dir in .pytest_cache .mypy_cache .ruff_cache; do
+  if [[ "$cache_dir" == ".pytest_cache" && "$PRESERVE_PYTEST_CACHE" == "1" ]]; then
+    continue
+  fi
   if [[ -d "$cache_dir" ]]; then
     DIR_TARGETS+=("./$cache_dir")
   fi
@@ -81,13 +105,13 @@ fi
 
 dir_size_bytes=0
 for path in "${DIR_TARGETS[@]}"; do
-  size=$(du -sb "$path" 2>/dev/null | cut -f1 || echo 0)
+  size="$(safe_dir_size_bytes "$path")"
   dir_size_bytes=$((dir_size_bytes + size))
 done
 
 file_size_bytes=0
 for path in "${FILE_TARGETS[@]}"; do
-  size=$(stat -c%s "$path" 2>/dev/null || echo 0)
+  size="$(safe_file_size_bytes "$path")"
   file_size_bytes=$((file_size_bytes + size))
 done
 

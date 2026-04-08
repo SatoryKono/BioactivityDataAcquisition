@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
@@ -127,6 +128,37 @@ def test_file_store_emits_ledger_read_metric_on_miss(tmp_path) -> None:
         },
     )
     metrics.observe_histogram.assert_called_once()
+
+
+def test_file_store_preserves_append_only_jsonl_order(tmp_path) -> None:
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    first = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-append-only",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=datetime.now(UTC),
+        status="created",
+    )
+    second = RunLedgerEntry(
+        entry_id="entry-2",
+        manifest_id="manifest-append-only",
+        run_id=run_id,
+        event_type="run_started",
+        occurred_at=datetime.now(UTC),
+        status="running",
+    )
+
+    store.append(first)
+    store.append(second)
+
+    ledger_path = tmp_path / "run_ledger" / "manifest-append-only.jsonl"
+    lines = ledger_path.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 2
+    assert json.loads(lines[0])["entry_id"] == "entry-1"
+    assert json.loads(lines[1])["entry_id"] == "entry-2"
+    assert store.list_entries("manifest-append-only") == [first, second]
 
 
 def test_file_store_wraps_partial_append_failure_and_preserves_existing_events(
