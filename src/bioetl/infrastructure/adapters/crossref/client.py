@@ -19,12 +19,6 @@ from bioetl.infrastructure.adapters.common import (
 from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
     _CrossRefFallbackPolicyMixin,
 )
-from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
-    DoiBatchProcessor,
-)
-from bioetl.infrastructure.adapters.crossref._search_paginator import (
-    SearchPaginator,
-)
 from bioetl.infrastructure.adapters.crossref.client_fetch_helpers import (
     aclose_crossref_http_client,
     fetch_crossref_publications,
@@ -49,6 +43,10 @@ from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
 from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
     CrossRefResponseMapper,
+)
+from bioetl.infrastructure.adapters.crossref.types import (
+    CrossRefBatchFetcher,
+    CrossRefSearchPaginator,
 )
 
 __all__ = [
@@ -106,8 +104,8 @@ class CrossRefAdapter(
     fallback_fetch_service: FallbackFetchOrchestratorService
     query_builder: CrossRefQueryBuilder | None = None
     response_mapper: CrossRefResponseMapper | None = None
-    batch_fetcher: DoiBatchProcessor | None = None
-    search_paginator: SearchPaginator | None = None
+    batch_fetcher: CrossRefBatchFetcher | None = None
+    search_paginator: CrossRefSearchPaginator | None = None
     title_fallback_handler: CrossRefTitleFallbackHandler | None = None
     fetch_flow: CrossRefFetchFlow | None = None
 

@@ -29,6 +29,7 @@ if TYPE_CHECKING:
         RunnerInputs,
     )
     from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.control_plane import RunManifest
     from bioetl.infrastructure.config import Settings
 
 
@@ -326,16 +327,16 @@ def create_run_manifest(
 ) -> tuple[_ManifestControlPlaneRefs, RunLedgerService | None]:
     """Create immutable manifest before pipeline assembly begins."""
     yaml_config = inputs.yaml_config
-    
+
     # Resolve context values
     run_type_value, execution_context_value = _resolve_run_context_values(ctx)
-    
+
     # Resolve provider and entity
     provider, entity = _resolve_provider_entity(
         pipeline_name=ctx.pipeline_name,
         yaml_config=yaml_config,
     )
-    
+
     # Resolve contract identity
     (
         contract_ref,
@@ -344,40 +345,56 @@ def create_run_manifest(
         dq_policy_ref,
         rule_bundle_version,
     ) = _resolve_contract_identity(provider=provider, entity=entity)
-    
+
     # Create manifest store
     manifest_store = FileRunManifestStore(
         base_path=_control_plane_root(inputs.settings, "run_manifest"),
         metrics=inputs.observability.metrics,
     )
-    
+
     # Create ledger service if enabled
     ledger_service: RunLedgerService | None = None
     if ledger_enabled:
         ledger_service = _create_ledger_service(inputs, ctx)
-    
+
     # Build and create manifest
     manifest_create_request = _build_manifest_create_request(
-        ctx, inputs, provider, entity, run_type_value, execution_context_value,
-        effective_config_hash, contract_ref, contract_version, contract_schema_hash,
-        dq_policy_ref, rule_bundle_version, dq_contract_compatibility_hash,
-        effective_config_artifact_id
+        ctx,
+        inputs,
+        provider,
+        entity,
+        run_type_value,
+        execution_context_value,
+        effective_config_hash,
+        contract_ref,
+        contract_version,
+        contract_schema_hash,
+        dq_policy_ref,
+        rule_bundle_version,
+        dq_contract_compatibility_hash,
+        effective_config_artifact_id,
     )
-    
+
     manifest = RunManifestService(manifest_port=manifest_store).create_manifest(
         manifest_create_request
     )
-    
+
     # Update ledger service with manifest ID
     if ledger_service is not None:
         ledger_service.manifest_id = manifest.manifest_id
         ledger_service.record_manifest_created(manifest)
-    
+
     # Create control plane references
     control_plane_refs = _create_control_plane_refs(
-        manifest, effective_config_hash, dq_contract_compatibility_hash,
-        effective_config_artifact_id, contract_ref, contract_version,
-        contract_schema_hash, dq_policy_ref, rule_bundle_version
+        manifest,
+        effective_config_hash,
+        dq_contract_compatibility_hash,
+        effective_config_artifact_id,
+        contract_ref,
+        contract_version,
+        contract_schema_hash,
+        dq_policy_ref,
+        rule_bundle_version,
     )
-    
+
     return control_plane_refs, ledger_service

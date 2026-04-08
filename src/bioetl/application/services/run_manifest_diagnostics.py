@@ -79,7 +79,7 @@ def _process_ledger_entries(
         "data_contract_version": 0,
         "composite_run_id": 0,
     }
-    
+
     for entry in ledger_entries:
         family_counter.update([entry.event_family or "diagnostic"])
         type_counter.update([entry.event_type])
@@ -110,7 +110,7 @@ def _process_ledger_entries(
             correlation_anchor_gaps,
             entry,
         )
-    
+
     return (
         family_counter,
         type_counter,
@@ -158,7 +158,7 @@ def _build_final_summary(
         cross_validation_signal_present=cross_validation_signal_present,
     )
     next_steps = _build_next_steps(alert_signals)
-    
+
     summary = base_summary.copy()
     summary.update(
         {
@@ -191,10 +191,10 @@ def build_diagnostics_summary(
 ) -> dict[str, object]:
     """Build compact operator-oriented diagnostics summary."""
     base_summary = _build_base_summary(manifest)
-    
+
     if not ledger_entries:
         return base_summary
-    
+
     (
         family_counter,
         type_counter,
@@ -211,7 +211,7 @@ def build_diagnostics_summary(
         missing_link_count,
         correlation_anchor_gaps,
     ) = _process_ledger_entries(ledger_entries)
-    
+
     return _build_final_summary(
         base_summary,
         ledger_entries,

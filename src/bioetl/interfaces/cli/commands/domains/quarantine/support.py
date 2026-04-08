@@ -11,14 +11,14 @@ from typing import Protocol, TypeVar
 import click
 
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
+from bioetl.interfaces.cli.commands.domains.quarantine._run_scope_stats import (
+    RunManifestInspectionServiceProtocol,
+    enrich_run_scoped_stats,
+)
 from bioetl.interfaces.cli.commands.domains.quarantine.execution import (
     QuarantineExecutionPolicy,
     run_quarantine_async,
     run_quarantine_sync,
-)
-from bioetl.interfaces.cli.commands.domains.quarantine._run_scope_stats import (
-    RunManifestInspectionServiceProtocol,
-    enrich_run_scoped_stats,
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.rendering import (
     build_purge_preview_lines,

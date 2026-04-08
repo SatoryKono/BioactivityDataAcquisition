@@ -90,6 +90,8 @@ real pytest process unless you pass `--skip-preflight`. The preflight cleans
 common cache/build artifacts, refreshes the scripts inventory manifest, checks
 inventory/lifecycle/catalog governance, verifies docs, and runs a targeted
 fail-fast architecture slice for the recurring doc/governance regressions.
+The same preflight also checks the committed RF-06 hotspot-family baseline
+artifact via `python -m scripts.qa report-family-baseline --active-only --check`.
 
 ## Integration And E2E Quick Paths
 

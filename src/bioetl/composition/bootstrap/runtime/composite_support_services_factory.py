@@ -17,6 +17,9 @@ from bioetl.application.composite.join_key_normalization import (
 )
 from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
     bind_manifest_logger,
     build_composite_control_plane_bundle,
@@ -40,9 +43,6 @@ if TYPE_CHECKING:
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.application.services.run_ledger_service import RunLedgerService
-    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
-        CompositeInfrastructureContext,
-    )
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort

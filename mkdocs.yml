@@ -244,6 +244,9 @@ nav:
                     -   "Monitoring Index": 03-guides/dashboards/monitoring-index.md
                     -   "Variables Guide": 03-guides/dashboards/variables-guide.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
+    -   Engineering:
+            -   "Overview": 05-engineering/README.md
+            -   "Normalization Plan P0-P6": 05-engineering/normalization-plan-P0-P6.md
     -   Providers:
             -   "Overview": 04-reference/providers/README.md
             -   ChEMBL:

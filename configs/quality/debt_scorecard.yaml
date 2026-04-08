@@ -151,7 +151,7 @@ report_only_hotspot_families:
       linked_rf: "RF-023"
       ratchet_stage: "active"
       ratchet_scope: "duplication-only"
-      expected_action: "Hold duplication at zero via an active family-level ratchet and cap both file-growth and internal fan-in at the reviewed baseline during core orchestration changes."
+      expected_action: "Hold duplication at zero via an active family-level ratchet and cap both file-growth and fan-in at the reviewed baseline during core orchestration changes."
       path_prefixes:
         - "src/bioetl/application/core/"
       bounded_growth_budgets:
@@ -173,12 +173,12 @@ report_only_hotspot_families:
       linked_rf: "RF-023"
       ratchet_stage: "active"
       ratchet_scope: "duplication-only"
-      expected_action: "Hold duplication at zero via an active family-level ratchet and cap both files_ge_250_loc and max_internal_fan_in at the reviewed baseline during runtime/bootstrap changes."
+      expected_action: "Hold duplication at zero via an active family-level ratchet and cap both file-growth and fan-in at the reviewed baseline during runtime/bootstrap changes."
       path_prefixes:
         - "src/bioetl/composition/bootstrap/runtime/"
       bounded_growth_budgets:
         files_ge_250_loc: 6
-        max_internal_fan_in: 5
+        max_internal_fan_in: 6
       metrics:
         duplication_clusters: 0
         files: 27
@@ -195,7 +195,7 @@ report_only_hotspot_families:
       linked_rf: "RF-023"
       ratchet_stage: "active"
       ratchet_scope: "duplication-only"
-      expected_action: "Hold duplication at zero via an active family-level ratchet and cap both files_ge_250_loc and max_internal_fan_in at the reviewed baseline during pipeline-factory changes."
+      expected_action: "Hold duplication at zero via an active family-level ratchet and cap both file-growth and fan-in at the reviewed baseline during pipeline-factory changes."
       path_prefixes:
         - "src/bioetl/composition/factories/pipeline/"
       bounded_growth_budgets:

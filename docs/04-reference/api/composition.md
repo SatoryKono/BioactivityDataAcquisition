@@ -211,7 +211,7 @@ Current sanctioned public surfaces in `composition/`:
 
 | Module | Policy Role | New Code Guidance |
 |---|---|---|
-| `entrypoints` | `retained-entrypoint` stable public seam | Keep using as stable public entrypoint where broad composition surface is needed. |
+| `entrypoints` | `retained-entrypoint` stable public seam | Treat as execution-focused seam. For service/resource operations, import `services_api` / `resources_api` directly. |
 | `execution_api` | Narrow execution-focused public API | Prefer for new CLI/orchestration execution call sites. |
 | `services_api` | Narrow services-focused public API | Prefer for new service/bootstrap retrieval call sites. |
 | `resources_api` | Narrow resource-management public API | Prefer for new quarantine/checkpoint/lifecycle call sites. |
@@ -228,12 +228,19 @@ Governance status model and exit criteria for compatibility surfaces are tracked
 ## Entrypoints (`composition.entrypoints`)
 
 `composition.entrypoints` is a retained, stable public composition seam.
-It intentionally re-exports behavior from internal implementation modules while keeping
-external import paths stable.
+Its explicit public surface (`__all__`) is intentionally execution-focused:
 
-When new call sites only need one capability family, prefer the narrower
-`execution_api`, `services_api`, or `resources_api` modules instead of growing this
-retained facade.
+- `ArchiveOptions`, `PipelineRunResult`, `RunOptions`, `RunResult`, `VacuumOptions`
+- `build_pipeline_context`, `create_pipeline_runner`, `run_pipeline`
+- `ensure_metrics_server_started`, `maybe_start_metrics_server`, `push_metrics_to_gateway`, `start_metrics_server`
+- `bootstrap_composite_runner`, `load_composite_config`, `load_pipeline_config`
+
+Legacy service/resource symbols are still resolved through lazy compatibility lookup
+and emit `DeprecationWarning` with canonical targets.
+
+When new call sites only need one capability family, import the narrower
+`execution_api`, `services_api`, or `resources_api` modules directly instead of
+expanding `entrypoints`.
 
 ---
 
@@ -253,7 +260,7 @@ retained facade.
 | `builders` | `FilterConfigBuilder` -- builds filter configs from YAML |
 | `bootstrap_logger` | `BootstrapLogger` -- logging during bootstrap phase |
 | `bootstrap_contexts` | Context objects for bootstrap configuration |
-| `entrypoints` | Retained stable public composition seam (broad facade) |
+| `entrypoints` | Retained stable public composition seam (execution-first + legacy compatibility lookup) |
 | `execution_api` | Public execution-focused composition API |
 | `services_api` | Public services-focused composition API |
 | `resources_api` | Public resource-management composition API |

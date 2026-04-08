@@ -13,6 +13,9 @@ from bioetl.application.services.run_manifest_service import (
     RunManifestCreateRequest,
     RunManifestService,
 )
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads import (
     build_composite_launch_context_snapshot,
     build_composite_planned_artifacts,
@@ -27,9 +30,6 @@ from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManif
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
-        CompositeInfrastructureContext,
-    )
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config import Settings

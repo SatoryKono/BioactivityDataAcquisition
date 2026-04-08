@@ -346,5 +346,5 @@ def build_transition_table(
             execution_phase, phase_transition, transition_policy, phase_transition_rule
         ),
         # Terminal states have no outgoing transitions
-        **{phase: [] for phase in _get_terminal_phases()},
+        **{phase: [] for phase in _get_terminal_phases(execution_phase)},
     }

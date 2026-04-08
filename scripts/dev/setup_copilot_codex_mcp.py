@@ -17,6 +17,11 @@ OPENAI_DEVELOPER_DOCS_URL = "https://developers.openai.com/mcp"
 FETCH_MCP_VERSION = "2025.4.7"
 PDF_MCP_VERSION = "1.3.1"
 
+GITHUB_TOKEN_HINT = (
+    "Set GITHUB_PERSONAL_ACCESS_TOKEN in .env or in your shell before using "
+    "GitHub MCP tools. Shell values override .env."
+)
+
 
 def _github_server(root: Path) -> dict[str, object]:
     if os.name != "nt":
@@ -123,6 +128,8 @@ def _core_servers(root: Path) -> dict[str, dict[str, object]]:
         "prometheus": _wrapper_server(root, "mcp_prometheus_wrapper.sh"),
         "grafana": _wrapper_server(root, "mcp_grafana_wrapper.sh"),
         "brave-search": _wrapper_server(root, "mcp_brave_search_wrapper.sh"),
+        "neo4j-cypher": _wrapper_server(root, "mcp_neo4j_cypher_wrapper.sh"),
+        "neo4j-memory": _wrapper_server(root, "mcp_neo4j_memory_wrapper.sh"),
         "openaiDeveloperDocs": {
             "type": "http",
             "url": OPENAI_DEVELOPER_DOCS_URL,
@@ -164,9 +171,7 @@ def _codex_registration(root: Path) -> int:
     if codex_bin is None:
         print("[2/3] Codex CLI not found. Skipping Codex MCP registration.")
         print("[3/3] Done.")
-        print(
-            "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
-        )
+        print(GITHUB_TOKEN_HINT)
         return 0
 
     print("[2/3] Refreshing Codex MCP registrations")
@@ -203,9 +208,7 @@ def _codex_registration(root: Path) -> int:
         print(f"      {server_name} MCP registered in Codex.")
 
     print("[3/3] Done.")
-    print(
-        "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
-    )
+    print(GITHUB_TOKEN_HINT)
     return 0
 
 
@@ -217,9 +220,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.skip_codex:
         print("[2/3] Skipping Codex MCP registration (requested).")
         print("[3/3] Done.")
-        print(
-            "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
-        )
+        print(GITHUB_TOKEN_HINT)
         return 0
 
     return _codex_registration(root)

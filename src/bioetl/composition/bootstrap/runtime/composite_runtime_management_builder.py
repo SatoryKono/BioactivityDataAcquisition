@@ -9,6 +9,9 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_composite_checkpoint_port,
     bootstrap_quarantine_port,
 )
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
     RuntimeManagementServicesBundle,
@@ -21,9 +24,6 @@ if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint import CompositeCheckpointService
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
-        CompositeInfrastructureContext,
-    )
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
     from bioetl.infrastructure.config import Settings

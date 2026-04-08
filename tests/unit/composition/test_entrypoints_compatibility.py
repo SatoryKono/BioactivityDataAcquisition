@@ -1,0 +1,106 @@
+"""Compatibility and API-budget tests for ``bioetl.composition.entrypoints``."""
+
+from __future__ import annotations
+
+import importlib
+import sys
+
+import pytest
+
+
+def _reload_entrypoints_module():
+    sys.modules.pop("bioetl.composition.entrypoints", None)
+    return importlib.import_module("bioetl.composition.entrypoints")
+
+
+@pytest.mark.unit
+def test_entrypoints_all_is_execution_focused_budget() -> None:
+    """Explicit public entrypoint surface should stay narrow and execution-focused."""
+    entrypoints = _reload_entrypoints_module()
+
+    expected = {
+        "ArchiveOptions",
+        "PipelineRunResult",
+        "RunOptions",
+        "RunResult",
+        "VacuumOptions",
+        "bootstrap_composite_runner",
+        "build_pipeline_context",
+        "create_pipeline_runner",
+        "ensure_metrics_server_started",
+        "load_composite_config",
+        "load_pipeline_config",
+        "maybe_start_metrics_server",
+        "push_metrics_to_gateway",
+        "run_pipeline",
+        "start_metrics_server",
+    }
+
+    assert set(entrypoints.__all__) == expected
+    assert len(entrypoints.__all__) <= 16
+
+
+@pytest.mark.unit
+def test_entrypoints_legacy_service_symbol_warns_and_delegates() -> None:
+    """Legacy service symbol should resolve via services_api with deprecation warning."""
+    entrypoints = _reload_entrypoints_module()
+    from bioetl.composition import services_api
+
+    assert "get_checkpoint_service" not in entrypoints.__all__
+
+    with pytest.deprecated_call(
+        match=r"entrypoints\.get_checkpoint_service.*services_api"
+    ):
+        resolved = entrypoints.get_checkpoint_service
+
+    assert resolved is services_api.get_checkpoint_service
+
+
+@pytest.mark.unit
+def test_entrypoints_legacy_resource_symbol_warns_and_delegates() -> None:
+    """Legacy resource symbol should resolve via resources_api with warning."""
+    entrypoints = _reload_entrypoints_module()
+    from bioetl.composition import resources_api
+
+    assert "preview_cleanup" not in entrypoints.__all__
+
+    with pytest.deprecated_call(match=r"entrypoints\.preview_cleanup.*resources_api"):
+        resolved = entrypoints.preview_cleanup
+
+    assert resolved is resources_api.preview_cleanup
+
+
+@pytest.mark.unit
+def test_entrypoints_unknown_symbol_raises_attribute_error() -> None:
+    """Unknown symbols should fail fast."""
+    entrypoints = _reload_entrypoints_module()
+    with pytest.raises(AttributeError):
+        _ = entrypoints.not_existing_symbol
+
+
+@pytest.mark.unit
+def test_resource_management_api_alias_warns_and_reexports_resources_api() -> None:
+    """Deprecated module alias should warn and forward to resources_api symbols."""
+    sys.modules.pop("bioetl.composition.resource_management_api", None)
+
+    with pytest.deprecated_call(
+        match=r"resource_management_api.*resources_api"
+    ):
+        alias_module = importlib.import_module(
+            "bioetl.composition.resource_management_api"
+        )
+
+    from bioetl.composition import resources_api
+
+    assert alias_module.__all__ == resources_api.__all__
+    assert alias_module.get_checkpoint_manager is resources_api.get_checkpoint_manager
+
+
+@pytest.mark.unit
+def test_composition_package_root_exports_resources_api_module() -> None:
+    """Package root should expose canonical resources_api lazy export."""
+    composition_module = importlib.import_module("bioetl.composition")
+    resources_api_module = importlib.import_module("bioetl.composition.resources_api")
+
+    assert "resources_api" in composition_module.__all__
+    assert composition_module.resources_api is resources_api_module

@@ -224,8 +224,8 @@ class TestApplicationServicesExist:
 
 
 @pytest.mark.architecture
-class TestEntrypointsExportServices:
-    """Test that entrypoints exports the new services."""
+class TestEntrypointsLegacyServiceCompatibility:
+    """Test service getter compatibility behavior in composition entrypoints."""
 
     def test_entrypoints_exports_services(self):
         """Test that entrypoints exports getter functions for services."""
@@ -242,13 +242,17 @@ class TestEntrypointsExportServices:
             "entrypoints should export get_bronze_cleanup_service"
         )
 
-    def test_entrypoints_all_includes_services(self):
-        """Test that __all__ includes service getters."""
-        from bioetl.composition import entrypoints
+    def test_entrypoints_all_excludes_legacy_service_getters(self):
+        """Legacy service getters should be accessible but excluded from __all__."""
+        from bioetl.composition import entrypoints, services_api
 
-        assert "get_checkpoint_service" in entrypoints.__all__
-        assert "get_quarantine_service" in entrypoints.__all__
-        assert "get_bronze_cleanup_service" in entrypoints.__all__
+        assert "get_checkpoint_service" not in entrypoints.__all__
+        assert "get_quarantine_service" not in entrypoints.__all__
+        assert "get_bronze_cleanup_service" not in entrypoints.__all__
+
+        assert hasattr(services_api, "get_checkpoint_service")
+        assert hasattr(services_api, "get_quarantine_service")
+        assert hasattr(services_api, "get_bronze_cleanup_service")
 
 
 def get_runtime_imports_from_file(file_path: Path) -> list[str]:

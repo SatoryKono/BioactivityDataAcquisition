@@ -80,6 +80,30 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded maintainer helper for closing issue #2594 after the Pandera drift gate summary; do not treat it as a reusable automation entrypoint."
     },
+    "scripts/ops/neo4j_quick_start.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded local Neo4j/MCP bootstrap helper while the Neo4j memory tooling remains an operator-maintained troubleshooting surface; either promote it into a canonical supported workflow or remove it once those setup docs are retired."
+    },
+    "scripts/ops/print_neo4j_memory_seed.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a ready-to-paste maintainer helper for seeding BioETL facts into Neo4j memory; do not extend it as a general-purpose automation entrypoint."
+    },
+    "scripts/ops/smoke_test_final.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a Windows-side final verification helper for the historical Neo4j memory setup flow; prefer canonical cross-platform checks for any future contributor workflow."
+    },
+    "scripts/ops/smoke_test_neo4j_mcp_knowall.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a Windows-side smoke helper for the knowall Neo4j MCP path; do not treat it as a reusable automation surface for new operator flows."
+    },
     "scripts/ai/code-reviewer.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
@@ -170,11 +194,23 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a local operator helper for starting the health server from Windows shells; do not expand it into a canonical contributor workflow without stronger call-site evidence."
     },
+    "scripts/ops/verify_neo4j.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a cmd.exe compatibility verification helper for the historical Neo4j memory setup path; remove it if Windows command-prompt support is no longer needed."
+    },
     "scripts/repo/finalize_docs_issues_2638_2643.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded maintainer helper for the prepared docs issue-finalization batch; do not treat this issue-number-specific path as a reusable automation workflow."
+    },
+    "scripts/qa/hotspot_family_metrics.py": {
+      "owner": "platform-architecture",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain while RF-06 hotspot-family governance still relies on this shared metrics helper for architecture ratchet tests and baseline reporting; either promote it into a canonical supported metrics surface or remove it once those consumers converge elsewhere."
     },
     "scripts/qa/generate_reports.py": {
       "owner": "platform-architecture",

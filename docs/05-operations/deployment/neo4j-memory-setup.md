@@ -19,9 +19,10 @@ Last verified: '2026-03-29'
    cp .env.example .env
    ```
 
-2. Update Neo4j credentials in .env:
+2. Update Neo4j credentials in `.env`:
    ```bash
-   NEO4J-AUTH=neo4j/your-secure-password
+   NEO4J_AUTH=neo4j/your-secure-password
+   NEO4J_URI=bolt://localhost:7687
    ```
 
 3. Start Neo4j:
@@ -29,7 +30,17 @@ Last verified: '2026-03-29'
    docker compose up -d neo4j
    ```
 
-4. Access Neo4j Browser:
+4. Register the Neo4j Memory MCP server in Codex and VS Code workspace config:
+   ```bash
+   uv run python -m scripts.dev setup-mcp
+   ```
+
+5. Verify MCP registration:
+   ```bash
+   codex mcp get neo4j-memory
+   ```
+
+6. Access Neo4j Browser:
    - URL: http://localhost:7474/browser/
    - Username: neo4j
    - Password: (from NEO4J-AUTH)

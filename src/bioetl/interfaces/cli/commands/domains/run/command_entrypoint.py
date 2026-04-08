@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import cast
 
 import click
 
@@ -21,8 +20,11 @@ CommandDecorator = Callable[[CommandCallback], CommandCallback]
 CommandDecoratorFactory = Callable[..., CommandDecorator]
 
 
-def _add_core_options() -> Callable:
+def _add_core_options(
+    validate_pipeline_name: Callable[..., object],
+) -> Callable:
     """Add core CLI options to the command."""
+
     def decorator(cmd: CommandCallback) -> CommandCallback:
         cmd = click.option(  # type: ignore[untyped-decorator]
             "--pipeline",
@@ -30,7 +32,7 @@ def _add_core_options() -> Callable:
             required=True,
             help="Pipeline to run",
         )(cmd)
-        cmd = typed_with_run_type_option("Type of run")(cmd)
+        cmd = with_run_type_option("Type of run")(cmd)
         cmd = click.option(  # type: ignore[untyped-decorator]
             "--resume", is_flag=True, help="Resume from last checkpoint"
         )(cmd)
@@ -43,11 +45,14 @@ def _add_core_options() -> Callable:
         )(cmd)
         return cmd
 
+    return decorator
+
 
 def _add_filter_options() -> Callable:
     """Add filter-related CLI options."""
+
     def decorator(cmd: CommandCallback) -> CommandCallback:
-        cmd = typed_with_limit_option("Maximum number of records to process")(cmd)
+        cmd = with_limit_option("Maximum number of records to process")(cmd)
         cmd = click.option(  # type: ignore[untyped-decorator]
             "--input-csv",
             type=click.Path(exists=True),
@@ -65,19 +70,25 @@ def _add_filter_options() -> Callable:
         )(cmd)
         return cmd
 
+    return decorator
+
 
 def _add_execution_options() -> Callable:
     """Add execution control options."""
+
     def decorator(cmd: CommandCallback) -> CommandCallback:
-        cmd = typed_with_dry_run_option(
+        cmd = with_dry_run_option(
             "Preview cleanup without execution (for rebuild/backfill)"
         )(cmd)
-        cmd = typed_with_yes_option("Skip confirmation prompt for rebuild/backfill")(cmd)
+        cmd = with_yes_option("Skip confirmation prompt for rebuild/backfill")(cmd)
         return cmd
+
+    return decorator
 
 
 def _add_vacuum_options() -> Callable:
     """Add Delta table vacuum options."""
+
     def decorator(cmd: CommandCallback) -> CommandCallback:
         cmd = click.option(  # type: ignore[untyped-decorator]
             "--vacuum-after-run",
@@ -93,17 +104,23 @@ def _add_vacuum_options() -> Callable:
         )(cmd)
         return cmd
 
+    return decorator
+
 
 def _add_debug_options(default_health_server_port: int) -> Callable:
     """Add debugging and monitoring options."""
+
     def decorator(cmd: CommandCallback) -> CommandCallback:
-        cmd = typed_with_debug_option()(cmd)
-        cmd = typed_with_health_server_options(default_health_server_port)(cmd)
+        cmd = with_debug_option()(cmd)
+        cmd = with_health_server_options(default_health_server_port)(cmd)
         return cmd
+
+    return decorator
 
 
 def _add_tracing_options() -> Callable:
     """Add tracing configuration options."""
+
     def decorator(cmd: CommandCallback) -> CommandCallback:
         cmd = click.option(  # type: ignore[untyped-decorator]
             "--tracing/--no-tracing",
@@ -113,9 +130,12 @@ def _add_tracing_options() -> Callable:
         )(cmd)
         return cmd
 
+    return decorator
+
 
 def _add_cache_options() -> Callable:
     """Add Bronze cache options."""
+
     def decorator(cmd: CommandCallback) -> CommandCallback:
         cmd = click.option(  # type: ignore[untyped-decorator]
             "--use-cached-bronze/--no-cached-bronze",
@@ -138,6 +158,8 @@ def _add_cache_options() -> Callable:
         )(cmd)
         return cmd
 
+    return decorator
+
 
 def build_run_click_command(
     *,
@@ -147,16 +169,6 @@ def build_run_click_command(
 ) -> click.Command:
     """Build the canonical Click command object for ``bioetl run``."""
 
-    typed_with_run_type_option = cast(CommandDecoratorFactory, with_run_type_option)
-    typed_with_limit_option = cast(CommandDecoratorFactory, with_limit_option)
-    typed_with_dry_run_option = cast(CommandDecoratorFactory, with_dry_run_option)
-    typed_with_yes_option = cast(CommandDecoratorFactory, with_yes_option)
-    typed_with_debug_option = cast(CommandDecoratorFactory, with_debug_option)
-    typed_with_health_server_options = cast(
-        CommandDecoratorFactory,
-        with_health_server_options,
-    )
-
     @click.command()  # type: ignore[untyped-decorator]
     @click.pass_context  # type: ignore[untyped-decorator]
     def run_command(ctx: click.Context, **kwargs) -> None:
@@ -164,7 +176,7 @@ def build_run_click_command(
         run_callback(ctx, **kwargs)
 
     # Apply all option groups
-    run_command = _add_core_options()(run_command)
+    run_command = _add_core_options(validate_pipeline_name)(run_command)
     run_command = _add_filter_options()(run_command)
     run_command = _add_execution_options()(run_command)
     run_command = _add_vacuum_options()(run_command)

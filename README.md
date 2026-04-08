@@ -350,7 +350,7 @@ Windows PowerShell:
 What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
-- Registers `memory`, `filesystem`, `sequential-thinking`, `fetch`, `pdf`, `github`, `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, `brave-search`, and `openaiDeveloperDocs` in Codex CLI.
+- Registers `memory`, `filesystem`, `sequential-thinking`, `fetch`, `pdf`, `github`, `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, `brave-search`, `neo4j-cypher`, `neo4j-memory`, and `openaiDeveloperDocs` in Codex CLI.
 - Uses Docker-backed wrappers for `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, and `brave-search`.
 - Uses local defaults when not overridden:
   - `PROMETHEUS_URL=http://host.docker.internal:9090`
@@ -369,9 +369,22 @@ GRAFANA_SERVICE_ACCOUNT_TOKEN=
 BRAVE_API_KEY=
 DOCKERHUB_USERNAME=
 HUB_PAT_TOKEN=
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USERNAME=
+NEO4J_PASSWORD=
+NEO4J_DATABASE=neo4j
+NEO4J_AUTH=neo4j/bioetl_secure_password
+NEO4J_AUTH_USERNAME=
+NEO4J_AUTH_PASSWORD=
 ```
 
-Before using GitHub MCP tools, set a token in your shell:
+Before using GitHub MCP tools, prefer storing the token in the local untracked `.env` file:
+
+```bash
+GITHUB_PERSONAL_ACCESS_TOKEN="<your_pat>"
+```
+
+Shell export also works and overrides `.env` for the current session:
 
 ```bash
 export GITHUB_PERSONAL_ACCESS_TOKEN="<your_pat>"

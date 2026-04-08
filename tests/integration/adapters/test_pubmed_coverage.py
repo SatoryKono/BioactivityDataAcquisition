@@ -106,34 +106,21 @@ async def test_fetch_filtered_with_fallback(pubmed_adapter: PubMedAdapter):
     """
 
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
-        # Primary fetch (pmid 12345 and missing_id)
-        # fetch_filtered will be called with ["12345", "missing_id"]
-        # which results in id=12345,missing_id
-        respx_mock.get(
-            "efetch.fcgi",
-            params={
-                "id": "12345,missing_id",
-                "db": "pubmed",
-                "retmode": "xml",
-                "rettype": "abstract",
-                "email": "test@example.com",
-            },
-        ).mock(return_value=Response(200, text=mock_xml))
+        # RESPX does not reliably distinguish two query-param routes on the
+        # same path, so dispatch on the requested PMID batch explicitly.
+        def _mock_efetch(request) -> Response:
+            request_id = request.url.params["id"]
+            if request_id == "12345,missing_id":
+                return Response(200, text=mock_xml)
+            if request_id == "67890":
+                return Response(200, text=mock_fallback_xml)
+            return Response(404, text=f"unexpected efetch id: {request_id}")
+
+        efetch_route = respx_mock.get("efetch.fcgi").mock(side_effect=_mock_efetch)
         # Fallback search by title
-        respx_mock.get("esearch.fcgi").mock(
+        esearch_route = respx_mock.get("esearch.fcgi").mock(
             return_value=Response(200, json=mock_search_json)
         )
-        # Fallback fetch (pmid 67890)
-        respx_mock.get(
-            "efetch.fcgi",
-            params={
-                "id": "67890",
-                "db": "pubmed",
-                "retmode": "xml",
-                "rettype": "abstract",
-                "email": "test@example.com",
-            },
-        ).mock(return_value=Response(200, text=mock_fallback_xml))
 
         async with pubmed_adapter._http_client:
             records = []
@@ -151,6 +138,8 @@ async def test_fetch_filtered_with_fallback(pubmed_adapter: PubMedAdapter):
             pmids = [r["pmid"] for r in records]
             assert "12345" in pmids
             assert "67890" in pmids
+            assert esearch_route.called
+            assert efetch_route.call_count == 2
 
 
 @pytest.mark.integration

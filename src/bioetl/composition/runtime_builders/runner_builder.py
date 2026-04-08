@@ -174,7 +174,10 @@ def _resolve_optional_functions(
     assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None,
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None,
     assemble_filter_config_fn: Callable[..., InputFilterConfig | None] | None,
-    assemble_cached_bronze_context_fn: Callable[[PipelineRunContext], CachedBronzeContext] | None,
+    assemble_cached_bronze_context_fn: Callable[
+        [PipelineRunContext], CachedBronzeContext
+    ]
+    | None,
 ) -> tuple[
     Callable[..., ObservabilityBundle],
     Callable[..., ResolvedVacuumSettings],
@@ -184,11 +187,21 @@ def _resolve_optional_functions(
 ]:
     """Resolve optional function parameters to their implementations."""
     return (
-        build_observability_bundle if build_observability_bundle_fn is None else build_observability_bundle_fn,
-        assemble_vacuum_settings if assemble_vacuum_settings_fn is None else assemble_vacuum_settings_fn,
-        assemble_runtime_config if assemble_runtime_config_fn is None else assemble_runtime_config_fn,
-        assemble_filter_config if assemble_filter_config_fn is None else assemble_filter_config_fn,
-        assemble_cached_bronze_context if assemble_cached_bronze_context_fn is None else assemble_cached_bronze_context_fn,
+        build_observability_bundle
+        if build_observability_bundle_fn is None
+        else build_observability_bundle_fn,
+        assemble_vacuum_settings
+        if assemble_vacuum_settings_fn is None
+        else assemble_vacuum_settings_fn,
+        assemble_runtime_config
+        if assemble_runtime_config_fn is None
+        else assemble_runtime_config_fn,
+        assemble_filter_config
+        if assemble_filter_config_fn is None
+        else assemble_filter_config_fn,
+        assemble_cached_bronze_context
+        if assemble_cached_bronze_context_fn is None
+        else assemble_cached_bronze_context_fn,
     )
 
 
@@ -206,7 +219,13 @@ def _prepare_runner_inputs_with_resolved_functions(
     ],
 ) -> _RunnerInputs:
     """Prepare runner inputs using resolved function implementations."""
-    build_obs_bundle, assemble_vacuum, assemble_runtime, assemble_filter, assemble_cached_bronze = resolved_functions
+    (
+        build_obs_bundle,
+        assemble_vacuum,
+        assemble_runtime,
+        assemble_filter,
+        assemble_cached_bronze,
+    ) = resolved_functions
     return prepare_runner_inputs(
         ctx=ctx,
         get_settings_fn=get_settings_fn,
@@ -227,12 +246,14 @@ def _handle_control_plane_setup(
     """Handle control plane setup including manifest and ledger services."""
     manifest_enabled, ledger_enabled = _resolve_control_plane_flags(inputs.settings)
     run_ledger_service: RunLedgerService | None = None
-    
+
     if manifest_enabled:
-        control_plane_refs, run_ledger_service = create_run_manifest_with_effective_config(
-            ctx=ctx,
-            inputs=inputs,
-            ledger_enabled=ledger_enabled,
+        control_plane_refs, run_ledger_service = (
+            create_run_manifest_with_effective_config(
+                ctx=ctx,
+                inputs=inputs,
+                ledger_enabled=ledger_enabled,
+            )
         )
         ctx = attach_manifest_id(
             ctx,
@@ -250,7 +271,7 @@ def _handle_control_plane_setup(
             inputs,
             control_plane_refs.manifest_id,
         )
-    
+
     return ctx, inputs, run_ledger_service
 
 
@@ -305,7 +326,7 @@ def build_pipeline_runner(
         ensure_providers_loaded_fn=ensure_providers_loaded_fn,
         register_all_pipelines_fn=register_all_pipelines_fn,
     )
-    
+
     # Resolve optional functions
     resolved_functions = _resolve_optional_functions(
         build_observability_bundle_fn,
@@ -314,7 +335,7 @@ def build_pipeline_runner(
         assemble_filter_config_fn,
         assemble_cached_bronze_context_fn,
     )
-    
+
     # Prepare runner inputs
     inputs = _prepare_runner_inputs_with_resolved_functions(
         ctx=ctx,
@@ -323,19 +344,19 @@ def build_pipeline_runner(
         load_source_config_fn=load_source_config_fn,
         resolved_functions=resolved_functions,
     )
-    
+
     # Handle control plane setup
     ctx, inputs, run_ledger_service = _handle_control_plane_setup(ctx, inputs)
-    
+
     # Create and configure runner
     runner = _create_runner_from_factory(
         factory=effective_registry.get(ctx.pipeline_name).factory,
         ctx=ctx,
         inputs=inputs,
     )
-    
+
     # Attach ledger service if available
     if run_ledger_service is not None:
         attach_control_plane_collaborators(runner, run_ledger_service)
-    
+
     return runner

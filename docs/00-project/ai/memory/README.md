@@ -19,6 +19,10 @@ profiles в BioETL.
   `mcp-memory.json`
   — служебный memory snapshot для tooling/integration сценариев, не human
   source of truth.
+- **Neo4j project-memory seed pack**:
+  `neo4j-project-memory-seed.md` и `neo4j-project-memory-seed.json`
+  — phase-by-phase prompts и structured seed facts для заполнения
+  `@neo4j-memory` устойчивыми знаниями о проекте.
 
 ## Relationship To Other AI Surfaces
 

@@ -17,10 +17,6 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.crossref import CROSSREF_API_BASE, CrossRefAdapter
-from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
-    DoiBatchProcessor,
-)
-from bioetl.infrastructure.adapters.crossref._search_paginator import SearchPaginator
 from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_batch_fetcher,
     _create_default_crossref_query_builder,
@@ -35,14 +31,18 @@ from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryB
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
     CrossRefResponseMapper,
 )
+from bioetl.infrastructure.adapters.crossref.types import (
+    CrossRefBatchFetcher,
+    CrossRefSearchPaginator,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.common.dependency_context import (
         HttpAdapterDependencyContext,
     )
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
 __all__ = ["create_crossref_adapter"]
@@ -158,9 +158,9 @@ def _create_batch_fetcher(
     mailto: str,
     headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
-) -> DoiBatchProcessor:
+) -> CrossRefBatchFetcher:
     """Create batch fetcher with defaults."""
-    batch_fetcher = cast("DoiBatchProcessor | None", kwargs.get("batch_fetcher"))
+    batch_fetcher = cast("CrossRefBatchFetcher | None", kwargs.get("batch_fetcher"))
     if batch_fetcher is None:
         batch_fetcher = _create_default_crossref_batch_fetcher(
             http=http_client,
@@ -182,9 +182,12 @@ def _create_search_paginator(
     mailto: str,
     headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
-) -> SearchPaginator:
+) -> CrossRefSearchPaginator:
     """Create search paginator with defaults."""
-    search_paginator = cast("SearchPaginator | None", kwargs.get("search_paginator"))
+    search_paginator = cast(
+        "CrossRefSearchPaginator | None",
+        kwargs.get("search_paginator"),
+    )
     if search_paginator is None:
         search_paginator = _create_default_crossref_search_paginator(
             http=http_client,
