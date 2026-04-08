@@ -770,6 +770,7 @@ class TestHealthServerQuarantineExplorer:
             pipeline="chembl_activity",
         )
 
+
 class TestHealthServerWithMonitor:
     """Tests for health server with health monitor configured."""
 

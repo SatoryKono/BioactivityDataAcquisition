@@ -2,6 +2,18 @@
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
   "entries": {
+    "scripts/qa/py_review_orchestrator.py": {
+      "owner": "@bioetl-platform",
+      "decision": "active",
+      "review_by": "2026-07-15",
+      "next_step": "Actively used static analysis script for AST-based code reviews."
+    },
+    "scripts/ops/start-codex.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy utility for local testing; do not treat as an active pipeline dependency."
+    },
     "scripts/run_pytest.sh": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
