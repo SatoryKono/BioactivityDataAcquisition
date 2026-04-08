@@ -84,3 +84,70 @@ def test_path_resolution_diagnostics_include_breaking_severity(
     assert "severity=breaking" in message
     assert "path='message.items'" in message
     assert "missing key 'items'" in message
+
+
+def test_compare_provider_probe_to_snapshot_classifies_nullable_drift_as_warning(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write_snapshot(
+        tmp_path,
+        payload={
+            "provider": "demo",
+            "version": 1,
+            "probes": {
+                "probe": {
+                    "paths": {
+                        "message.title": "str",
+                    }
+                }
+            },
+        },
+    )
+    monkeypatch.setattr(drift, "CONTRACT_SNAPSHOTS_DIR", tmp_path)
+
+    report = drift.compare_provider_probe_to_snapshot(
+        "demo",
+        "probe",
+        {"message": {"title": None}},
+    )
+
+    assert report["status"] == "drift"
+    assert report["severity"] == "warning"
+    assert report["difference_count"] == 1
+    difference = report["differences"][0]
+    assert difference["kind"] == "type_changed"
+    assert difference["expected_type"] == "str"
+    assert difference["actual_type"] == "null"
+    assert difference["severity"] == "warning"
+
+
+def test_compare_provider_probe_to_snapshot_returns_benign_for_match(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write_snapshot(
+        tmp_path,
+        payload={
+            "provider": "demo",
+            "version": 1,
+            "probes": {
+                "probe": {
+                    "paths": {
+                        "status": "str",
+                    }
+                }
+            },
+        },
+    )
+    monkeypatch.setattr(drift, "CONTRACT_SNAPSHOTS_DIR", tmp_path)
+
+    report = drift.compare_provider_probe_to_snapshot(
+        "demo",
+        "probe",
+        {"status": "ok"},
+    )
+
+    assert report["status"] == "match"
+    assert report["severity"] == "benign"
+    assert report["difference_count"] == 0

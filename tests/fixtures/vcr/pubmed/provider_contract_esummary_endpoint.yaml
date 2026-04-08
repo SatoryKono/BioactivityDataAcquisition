@@ -1,0 +1,37 @@
+{
+  "interactions": [
+    {
+      "request": {
+        "body": null,
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "User-Agent": [
+            "BioETL/1.0 (contact@example.com)"
+          ]
+        },
+        "method": "GET",
+        "uri": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=33408181&retmode=json"
+      },
+      "response": {
+        "body": {
+          "string": "{\"header\": {\"type\": \"esummary\", \"version\": \"0.3\"}, \"result\": {\"uids\": [\"33408181\"], \"33408181\": {\"uid\": \"33408181\", \"pubdate\": \"2021 Feb 5\", \"epubdate\": \"2021 Jan 6\", \"source\": \"Science\", \"authors\": [{\"name\": \"Dan JM\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Mateus J\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Kato Y\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Hastie KM\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Yu ED\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Faliti CE\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Grifoni A\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Ramirez SI\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Haupt S\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Frazier A\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Nakao C\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Rayaprolu V\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Rawlings SA\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Peters B\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Krammer F\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Simon V\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Saphire EO\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Smith DM\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Weiskopf D\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Sette A\", \"authtype\": \"Author\", \"clusterid\": \"\"}, {\"name\": \"Crotty S\", \"authtype\": \"Author\", \"clusterid\": \"\"}], \"lastauthor\": \"Crotty S\", \"title\": \"Immunological memory to SARS-CoV-2 assessed for up to 8 months after infection.\", \"sorttitle\": \"immunological memory to sars cov 2 assessed for up to 8 months after infection\", \"volume\": \"371\", \"issue\": \"6529\", \"pages\": \"\", \"lang\": [\"eng\"], \"nlmuniqueid\": \"0404511\", \"issn\": \"0036-8075\", \"essn\": \"1095-9203\", \"pubtype\": [\"Journal Article\", \"Research Support, N.I.H., Extramural\"], \"recordstatus\": \"PubMed - indexed for MEDLINE\", \"pubstatus\": \"256\", \"articleids\": [{\"idtype\": \"pubmed\", \"idtypen\": 1, \"value\": \"33408181\"}, {\"idtype\": \"pmc\", \"idtypen\": 8, \"value\": \"PMC7919858\"}, {\"idtype\": \"pmcid\", \"idtypen\": 5, \"value\": \"pmc-id: PMC7919858;\"}, {\"idtype\": \"doi\", \"idtypen\": 3, \"value\": \"10.1126/science.abf4063\"}, {\"idtype\": \"pii\", \"idtypen\": 4, \"value\": \"science.abf4063\"}], \"history\": [{\"pubstatus\": \"received\", \"date\": \"2020/10/23 00:00\"}, {\"pubstatus\": \"accepted\", \"date\": \"2020/12/23 00:00\"}, {\"pubstatus\": \"pubmed\", \"date\": \"2021/01/08 06:00\"}, {\"pubstatus\": \"medline\", \"date\": \"2021/02/13 06:00\"}, {\"pubstatus\": \"entrez\", \"date\": \"2021/01/07 06:00\"}, {\"pubstatus\": \"pmc-release\", \"date\": \"2021/03/01 00:00\"}], \"references\": [{\"refsource\": \"bioRxiv. 2020 Dec 18:2020.11.15.383323. doi: 10.1101/2020.11.15.383323.\", \"reftype\": \"Update of\", \"pmid\": 33442687, \"note\": \"\"}], \"attributes\": [\"Has Abstract\"], \"pmcrefcount\": 84, \"fulljournalname\": \"Science (New York, N.Y.)\", \"elocationid\": \"doi: 10.1126/science.abf4063\", \"doctype\": \"citation\", \"srccontriblist\": [], \"booktitle\": \"\", \"medium\": \"\", \"edition\": \"\", \"publisherlocation\": \"\", \"publishername\": \"\", \"srcdate\": \"\", \"reportnumber\": \"\", \"availablefromurl\": \"\", \"locationlabel\": \"\", \"doccontriblist\": [], \"docdate\": \"\", \"bookname\": \"\", \"chapter\": \"\", \"sortpubdate\": \"2021/02/05 00:00\", \"sortfirstauthor\": \"Dan JM\", \"vernaculartitle\": \"\"}}}"
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ],
+          "Date": [
+            "Tue, 07 Apr 2026 10:51:54 GMT"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        }
+      }
+    }
+  ],
+  "version": 1
+}

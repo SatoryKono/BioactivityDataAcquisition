@@ -12,7 +12,7 @@ if "%~1"=="" (
     exit /b 1
 )
 
-set WSL_DISTRO=Debian
+set WSL_DISTRO=Ubuntu
 set SCRIPT_DIR=%~dp0
 
 REM Get absolute path

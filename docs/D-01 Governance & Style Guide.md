@@ -1,23 +1,35 @@
 ______________________________________________________________________
 
-Version: 0.1.0
-Status: superseded
-Class: internal
+Version: 0.2.0
+Status: active (legacy stub)
+Class: internal reference
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-01'
+  Last verified: '2026-04-07'
 
 ______________________________________________________________________
 
-# D-01 Governance & Style Guide документации BioETL
+# D-01 Governance & Style Guide
 
-Этот файл сохранён только как historical stub для обратных ссылок.
+Этот файл сохранён как исторический stub, который документирует базовую ориентацию по governance/стилю. Он не содержит нормативных правил, а служит точкой входа к актуальной публикуемой версии.
 
-Нормативная Markdown-версия D-01 теперь находится по каноническому пути:
+## Что теперь является source of truth
 
-- [docs/00-project/governance/01-documentation-governance-style-guide.md](00-project/governance/01-documentation-governance-style-guide.md)
+- `docs/00-project/governance/01-documentation-governance-style-guide.md` — главный живой документ, описывающий шаблоны, workflow, поддержание метаданных и контрольные точки для документации BioETL.
+- `docs/00-project/RULES.md` — содержит конкретные требования по DI, импортам, схемам, журналированию, provider health, naming convention и другим governance-аспектам, которые должны соблюдаться при разработке нового кода.
 
-Для active governance, template index и control-plane documentation rules
-используйте именно канонический published документ.
+## Как использовать этот stub
+
+1. Перейдите в каноническую версию по ссылке выше; она должна использоваться в первую очередь.
+2. Если вам нужно сослаться на governance/стиль в сторонних документах или почтовых тракерах, указывайте `D-01` как reference id, но включайте URL на `docs/00-project/governance/01-documentation-governance-style-guide.md`.
+3. При изменении канонического документа обновите `Last verified` здесь и добавьте краткое summary изменений (например, на случай ссылок из внешних repo). 
+
+## Краткие указания
+
+- Не копируйте содержимое canonical doc сюда; вместо этого укажите ссылку.
+- Не поддерживайте отдельную версию в других местах — используйте `docs/00-project/governance/...`.
+- Версия `0.2.0` отражает текущий статус stub (обновите дедлайн/версию только при изменении описания stub’а).
+
+План: оставаться light-weight, но гарантировать, что D-01 всегда направляет на текущую governance-версию.

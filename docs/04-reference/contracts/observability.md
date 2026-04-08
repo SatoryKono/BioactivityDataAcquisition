@@ -104,6 +104,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 | `bioetl_lineage_fragments_emitted_total`       | Counter   | `pipeline,layer,status`                  | Попытки публикации lineage fragments                                               |
 | `bioetl_lineage_refs_missing_total`            | Counter   | `pipeline,layer,ref_type`                | Missing upstream lineage references detected during persistence                    |
 | `bioetl_composite_source_selection_total`      | Counter   | `pipeline,decision_type,selected_source` | Low-cardinality composite source-selection decisions recorded during persistence   |
+| `bioetl_control_plane_reads_total`             | Counter   | `store,operation,status`                  | Срез outcomes manifest/ledger/lineage lookup paths для success/miss/fail агрегатов |
 | `bioetl_records_processed_total`               | Counter   | `pipeline,stage,run_type`                | throughput                                                                         |
 | `bioetl_errors_total`                          | Counter   | `pipeline,stage,error_code`              | taxonomy входа                                                                     |
 | `bioetl_http_request_duration_seconds`         | Histogram | `provider,method,status`                 | HTTP latency                                                                       |
@@ -121,6 +122,12 @@ Guardrail для новых метрик control-plane/traceability:
 - агрегировать по `pipeline`, `run_type`, `event_type`, `layer`, `status`,
   `disposition`, а детализацию по конкретному запуску получать через
   `run-manifest show` и sidecar/control-plane артефакты.
+
+Новый `bioetl-control-plane-v1` dashboard собирает агрегаты manifest write
+failures, ledger append failures, checkpoint compatibility и read failures, а
+alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/observability-checklist.md`)
+визуализирует процент failed reads для каждого store/operation. Это панель
+является первичной точкой диагностики control-plane regressions.
 
 ### 3.1 Enum mappings
 
@@ -192,6 +199,7 @@ Guardrail для новых метрик control-plane/traceability:
 | `bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}` | `increase(...) > 0` за `30m`                 | P2       | `docs/05-operations/runbooks/checkpoint-debugging.md`          |
 | `bioetl_lineage_fragments_emitted_total{status="failed"}`                      | `increase(...) > 0` за `15m`                 | P2       | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
 | `bioetl_lineage_refs_missing_total`                                            | `increase(...) > 0` за `15m`                 | P2       | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
+| `bioetl_control_plane_reads_total{status="failed"}`                            | `(sum by (store, operation) (increase(bioetl_control_plane_reads_total{status="failed"}[30m])) / clamp_min(sum by (store, operation) (increase(bioetl_control_plane_reads_total[30m])), 1)) > 0.05` | P2       | `docs/05-operations/runbooks/observability-checklist.md`       |
 | `bioetl_data_source_retry_exhausted_total`                                     | `1-2` exhaustions за `1h`                    | P2       | `docs/05-operations/runbooks/incident-response.md`             |
 | `bioetl_data_source_retry_exhausted_total`                                     | `>=3` exhaustions за `1h`                    | P1       | `docs/05-operations/runbooks/incident-response.md`             |
 | `bioetl_rate_limiter_wait_seconds`                                             | `histogram_quantile(0.95, ...) > 1` за `10m` | P3       | `docs/05-operations/runbooks/observability-checklist.md`       |

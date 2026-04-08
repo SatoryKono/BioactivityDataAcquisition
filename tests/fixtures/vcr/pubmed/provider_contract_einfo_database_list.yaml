@@ -1,0 +1,37 @@
+{
+  "interactions": [
+    {
+      "request": {
+        "body": null,
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "User-Agent": [
+            "BioETL/1.0 (contact@example.com)"
+          ]
+        },
+        "method": "GET",
+        "uri": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?retmode=json"
+      },
+      "response": {
+        "body": {
+          "string": "{\"header\": {\"type\": \"einfo\", \"version\": \"0.3\"}, \"einforesult\": {\"dblist\": [\"pubmed\", \"protein\", \"nuccore\", \"ipg\", \"nucleotide\", \"structure\", \"genome\", \"annotinfo\", \"assembly\", \"bioproject\", \"biosample\", \"blastdbinfo\", \"books\", \"cdd\", \"clinvar\", \"gap\", \"gapplus\", \"grasp\", \"dbvar\", \"gene\", \"gds\", \"geoprofiles\", \"medgen\", \"mesh\", \"nlmcatalog\", \"omim\", \"orgtrack\", \"pmc\", \"proteinclusters\", \"pcassay\", \"protfam\", \"pccompound\", \"pcsubstance\", \"seqannot\", \"snp\", \"sra\", \"taxonomy\", \"biocollections\", \"gtr\"], \"dbinfo\": []}}"
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ],
+          "Date": [
+            "Tue, 07 Apr 2026 10:55:42 GMT"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        }
+      }
+    }
+  ],
+  "version": 1
+}

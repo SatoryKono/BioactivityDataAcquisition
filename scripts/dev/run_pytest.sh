@@ -9,19 +9,35 @@ export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
 export BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
 export PYTHONPYCACHEPREFIX="${PYTHONPYCACHEPREFIX:-/tmp/bioetl-pycache}"
+PYTEST_RUNTIME_ENV_FILE="$REPO_ROOT/.pytest_cache/setup_plugins_runtime.sh"
 
 DEFAULT_FLAGS=(--cov=src/bioetl --cov-report=term -q --maxfail=1)
+DEFAULT_IGNORES=(--ignore=.cache --ignore=.pytest_cache --ignore=.hypothesis)
 PYTEST_ARGS=("$@")
 PYTEST_PLUGIN_ARGS=()
 PYTEST_NARROW="${BIOETL_PYTEST_NARROW:-0}"
 FILTERED_PYTEST_ARGS=()
+SKIP_PREFLIGHT="${BIOETL_SKIP_PREFLIGHT:-0}"
+PREFLIGHT_SCOPE="${BIOETL_PREFLIGHT_SCOPE:-}"
 
 for arg in "${PYTEST_ARGS[@]}"; do
     if [[ "$arg" == "--narrow" ]]; then
         PYTEST_NARROW=1
         continue
     fi
+    if [[ "$arg" == "--skip-preflight" ]]; then
+        SKIP_PREFLIGHT=1
+        continue
+    fi
     FILTERED_PYTEST_ARGS+=("$arg")
+done
+
+for arg in "${PYTEST_ARGS[@]}"; do
+    case "$arg" in
+        --ignore=.cache|--ignore=.pytest_cache|--ignore=.hypothesis)
+            DEFAULT_IGNORES=("${DEFAULT_IGNORES[@]/$arg}")
+            ;;
+    esac
 done
 
 PYTEST_ARGS=("${FILTERED_PYTEST_ARGS[@]}")
@@ -79,7 +95,7 @@ _needs_cov_plugin() {
     local arg
     for arg in "$@"; do
         case "$arg" in
-            --cov|--cov=*|--cov-report|--cov-report=*|--cov-config|--cov-config=*)
+            --cov|--cov=*|--cov-report|--cov-report=*|--cov-config|--cov-config=*|--no-cov)
                 return 0
                 ;;
         esac
@@ -146,6 +162,16 @@ _collect_selected_test_paths() {
 
 _has_selected_test_paths() {
     [[ "${#_SELECTED_TEST_PATHS[@]}" -gt 0 ]]
+}
+
+_selected_has_exact_test_root() {
+    local target
+    for target in "${_SELECTED_TEST_PATHS[@]}"; do
+        if [[ "$target" == "tests" ]]; then
+            return 0
+        fi
+    done
+    return 1
 }
 
 _paths_match_any() {
@@ -217,12 +243,93 @@ _needs_hypothesis_plugin_for_selection() {
         tests/architecture/test_port_contracts_hypothesis.py
 }
 
+python_has_required_test_runtime() {
+    local python_bin="$1"
+    [[ -x "$python_bin" ]] || return 1
+    "$python_bin" - <<'PY' >/dev/null 2>&1
+import importlib.util
+
+required = (
+    "pytest",
+    "pytest_asyncio",
+    "pytest_cov",
+    "xdist",
+    "pytest_timeout",
+    "pytest_vcr",
+    "syrupy",
+    "_hypothesis_pytestplugin",
+    "pydantic",
+    "pandas",
+    "httpx",
+    "click",
+    "structlog",
+    "pandera",
+    "respx",
+)
+
+raise SystemExit(0 if all(importlib.util.find_spec(module) is not None for module in required) else 1)
+PY
+}
+
+should_run_preflight() {
+    if [[ "$SKIP_PREFLIGHT" == "1" || "${BIOETL_PREFLIGHT_DONE:-0}" == "1" || "${BIOETL_PREFLIGHT_ACTIVE:-0}" == "1" ]]; then
+        return 1
+    fi
+
+    if [[ "$PYTEST_NARROW" == "1" ]]; then
+        return 1
+    fi
+
+    local arg
+    for arg in "${PYTEST_ARGS[@]}"; do
+        case "$arg" in
+            --help|-h|--version|-V|--collect-only|--co)
+                return 1
+                ;;
+        esac
+    done
+
+    if [[ -n "$PREFLIGHT_SCOPE" ]]; then
+        return 0
+    fi
+
+    if ! _has_selected_test_paths; then
+        return 0
+    fi
+
+    if _selected_has_exact_test_root; then
+        return 0
+    fi
+
+    _paths_match_any tests/architecture tests/integration tests/e2e tests/contract tests/smoke
+}
+
+determine_preflight_scope() {
+    if [[ -n "$PREFLIGHT_SCOPE" ]]; then
+        printf '%s\n' "$PREFLIGHT_SCOPE"
+        return 0
+    fi
+    printf '%s\n' "full"
+}
+
 if _needs_cov_plugin "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}" && [[ -z "${COVERAGE_FILE:-}" ]]; then
     mkdir -p /tmp/bioetl-coverage
-    export COVERAGE_FILE="/tmp/bioetl-coverage/.coverage.$$.sqlite"
+    coverage_file="$(mktemp /tmp/bioetl-coverage/.coverage.XXXXXX.sqlite)"
+    rm -f "$coverage_file"
+    export COVERAGE_FILE="$coverage_file"
 fi
 
 _collect_selected_test_paths "${PYTEST_ARGS[@]}"
+
+if should_run_preflight && [[ -f "scripts/dev/pretest_guardrails.sh" ]]; then
+    preflight_scope="$(determine_preflight_scope)"
+    preflight_cmd=(bash scripts/dev/pretest_guardrails.sh --mode auto --scope "$preflight_scope")
+    if [[ "${BIOETL_PREFLIGHT_STRICT_DOCS:-0}" == "1" ]]; then
+        preflight_cmd+=(--strict-docs)
+    fi
+    BIOETL_PREFLIGHT_ACTIVE=1 "${preflight_cmd[@]}"
+    export BIOETL_PREFLIGHT_DONE=1
+fi
 
 if [[ "$PYTEST_NARROW" == "1" ]]; then
     export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
@@ -277,12 +384,23 @@ if [[ -f "scripts/ops/setup_plugins.sh" ]]; then
     bash scripts/ops/setup_plugins.sh --pytest-only
 fi
 
-if [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]]; then
-    exec "$BIOETL_WSL_VENV_DIR/bin/python" -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
+if [[ -f "$PYTEST_RUNTIME_ENV_FILE" ]]; then
+    # setup_plugins.sh may provision a temporary pytest runtime under /tmp when
+    # the configured WSL venv is missing pytest or is not writable.
+    # shellcheck disable=SC1090
+    source "$PYTEST_RUNTIME_ENV_FILE"
 fi
 
-if [[ -x ".venv/bin/python" ]]; then
-    exec .venv/bin/python -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
+if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]] && python_has_required_test_runtime "$BIOETL_PYTEST_RUNTIME_PYTHON"; then
+    exec "$BIOETL_PYTEST_RUNTIME_PYTHON" -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
+fi
+
+if [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]] && python_has_required_test_runtime "$BIOETL_WSL_VENV_DIR/bin/python"; then
+    exec "$BIOETL_WSL_VENV_DIR/bin/python" -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
+fi
+
+if [[ -x ".venv/bin/python" ]] && python_has_required_test_runtime ".venv/bin/python"; then
+    exec .venv/bin/python -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
 fi
 
 if [[ -d ".venv-win" ]]; then
@@ -291,15 +409,15 @@ if [[ -d ".venv-win" ]]; then
 fi
 
 if command -v uv >/dev/null 2>&1; then
-    exec uv run python -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
+    exec uv run python -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
 fi
 
 if command -v python >/dev/null 2>&1; then
-    exec python -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
+    exec python -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
 fi
 
 if command -v python3 >/dev/null 2>&1; then
-    exec python3 -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
+    exec python3 -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
 fi
 
 echo "[run_pytest][error] Python runtime is not available."

@@ -153,6 +153,30 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     ]
 
 
+def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = RunID(uuid4())
+    manifest = _make_manifest(manifest_id="manifest-no-ledger", run_id=run_id)
+    manifest_store.save(manifest)
+    service = RunManifestInspectionService(manifest_port=manifest_store)
+
+    result = service.show("manifest-no-ledger")
+
+    assert result.manifest == manifest
+    assert result.ledger_entries == ()
+    assert result.diagnostics == {
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "config_hash": "deadbeef",
+        "effective_config_hash": "deadbeef",
+        "contract_ref": "chembl_activity",
+        "contract_version": "1.2.0",
+        "dq_policy_ref": "chembl_activity.gold",
+        "rule_bundle_version": "2026.03",
+        "dq_contract_compatibility_hash": "compat-hash-1",
+        "effective_config_artifact_id": "eca-123",
+    }
+
+
 def test_show_collects_artifact_diagnostic_links() -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()

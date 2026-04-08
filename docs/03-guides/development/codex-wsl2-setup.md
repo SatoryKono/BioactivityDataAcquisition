@@ -184,7 +184,7 @@ model = "gpt-5.4"
 model_provider = "openai"
 personality = "pragmatic"
 
-[projects.'/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2']
+[projects.'/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition']
 trust_level = "trusted"
 
 [features]
@@ -257,7 +257,7 @@ ______________________________________________________________________
 
 ```bash
 # BioETL project alias
-export BIOETL_DIR="/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2"
+export BIOETL_DIR="/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition"
 alias cdp="cd $BIOETL_DIR"
 alias cx="cd $BIOETL_DIR && codex"
 alias cxe="cd $BIOETL_DIR && codex exec --full-auto"

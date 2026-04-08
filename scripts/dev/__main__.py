@@ -9,6 +9,7 @@ Commands:
     setup              Legacy compatibility setup facade (shell)
     setup --quick      Legacy quick-mode guidance facade (shell)
     setup --ci         Legacy CI-mode guidance facade (shell)
+    pretest-guardrails Run repository/docs/architecture preflight (shell)
     pytest-sharded     Run the recommended path-based pytest shards (shell)
     install-deps       Install project dependencies
     probe-quality      Measure narrow pytest/mypy startup and timeout behavior
@@ -36,6 +37,7 @@ COMMANDS: dict[str, str] = {
 
 SHELL_COMMANDS: dict[str, str] = {
     "setup": "dev_setup.sh",
+    "pretest-guardrails": "pretest_guardrails.sh",
     "pytest-sharded": "run_pytest_sharded.sh",
 }
 

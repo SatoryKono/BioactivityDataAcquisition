@@ -8,6 +8,8 @@
 [![Version](https://img.shields.io/badge/version-6.1.0-blue)](CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](.github/SECURITY.md)
 
+> **Canonical repository:** [SatoryKono/BioactivityDataAcquisition2](https://github.com/SatoryKono/BioactivityDataAcquisition2)
+
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data
 from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, analysis-ready **Delta Lake** warehouse.
 
@@ -189,12 +191,12 @@ bash scripts/dev/run_mypy.sh
 1. **Clone and Install**:
    Initialize the virtual environment and install project dependencies.
 
-   ```bash
-   git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
-   cd BioactivityDataAcquisition2
+```bash
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
+cd BioactivityDataAcquisition2
 
-   # Preferred manual path
-   uv sync --extra dev --extra tracing
+# Preferred manual path
+uv sync --extra dev --extra tracing
    # Add --extra docs if you need MkDocs/site builds
    uv sync --extra dev --extra tracing --extra docs
 

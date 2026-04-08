@@ -192,6 +192,7 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_lineage_fragments_emitted_total`       | Counter | pipeline, layer, status                  | Попытки публикации lineage fragments                                              |
 | `bioetl_lineage_refs_missing_total`            | Counter | pipeline, layer, ref_type                | Missing upstream lineage references during persistence                            |
 | `bioetl_composite_source_selection_total`      | Counter | pipeline, decision_type, selected_source | Low-cardinality composite source-selection decisions during composite persistence |
+| `bioetl_control_plane_reads_total`             | Counter | store, operation, status                  | Срез успехов/промахов/провалов manifest/ledger/lineage lookup-путей              |
 
 > Guardrail: для control-plane/traceability метрик нельзя использовать
 > `run_id`, `manifest_id`, paths и другие high-cardinality идентификаторы как
@@ -201,6 +202,13 @@ curl http://localhost:8000/metrics | grep bioetl_
 > `selected_source` для `bioetl_composite_source_selection_total` остаётся
 > допустимым label, потому что это bounded provider/source vocabulary, а не
 > per-run или per-record идентификатор.
+
+Дополнительный контрольный экран `bioetl-control-plane-v1.json` собирает
+агрегированные панели по manifest write failures, ledger append failures,
+checkpoint compatibility и read failures. Основной операторский alert для
+чтений — `BioETLControlPlaneReadFailureRate` — перебрасывает в
+`docs/05-operations/runbooks/observability-checklist.md`, если доля провалов
+чтений по store/operation превышает 5% за 30 минут.
 
 #### Transformer Metrics
 

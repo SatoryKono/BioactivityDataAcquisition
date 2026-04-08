@@ -227,3 +227,4 @@ docs/reports/branch-full-diff-matrix-2026-03-01.csv
 /g-drive05_AIgithubBioactivityDataAcquisition2.pytest-tmpinfra-integ
 /site_strict_check3
 docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/EV-documentation-internal-surface-governance-strict-mkdocs-build-remains-green-under-current-boundary.yaml
+/.venv-docs

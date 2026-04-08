@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     DEFAULT_SILVER_MERGE_POLICY,
     AdaptiveRetryPolicy,
     SilverMergeResiliencePolicy,
 )
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.config import Settings
 
 __all__ = [
     "create_silver_atomic_retry_policy",

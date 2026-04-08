@@ -142,6 +142,16 @@ The current replay-enabled resume path is implemented for composite checkpoints.
   `manifest_id`, runtime treats this as checkpoint incompatibility and raises a
   checkpoint conflict instead of silently continuing.
 
+## Observability & Metrics
+
+- Aggregated control-plane telemetry lives in `grafana/dashboards/bioetl-control-plane-v1.json`.
+  Этот dashboard показывает manifest write failures, ledger append failures,
+  checkpoint compatibility incompatibilities и read failure ratio scoped по
+  `$pipeline/$run_type`.
+- Alert `BioETLControlPlaneReadFailureRate` (see `docs/05-operations/runbooks/observability-checklist.md`)
+  сигнализирует, когда доля failed control-plane reads по store/operation
+  превышает 5% за 30 минут и служит дополнительной точкой входа для traceability incidents.
+
 ## Run Manifest Contract
 
 `RunManifest` is immutable and captures launch-time intent plus reproducibility

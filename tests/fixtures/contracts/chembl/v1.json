@@ -6,6 +6,7 @@
         "activities[0].activity_id": "int",
         "activities[0].assay_chembl_id": "str",
         "page_meta.limit": "int",
+        "page_meta.offset": "int",
         "page_meta.total_count": "int"
       }
     },
@@ -15,6 +16,7 @@
         "molecules[0].molecule_chembl_id": "str",
         "molecules[0].molecule_type": "str",
         "page_meta.limit": "int",
+        "page_meta.offset": "int",
         "page_meta.total_count": "int"
       }
     },
@@ -24,6 +26,7 @@
         "targets[0].target_chembl_id": "str",
         "targets[0].target_type": "str",
         "page_meta.limit": "int",
+        "page_meta.offset": "int",
         "page_meta.total_count": "int"
       }
     }

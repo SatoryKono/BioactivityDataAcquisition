@@ -2,19 +2,24 @@
 
 from __future__ import annotations
 
-import json
-import re
-from pathlib import Path
-from typing import Any, cast
 from collections.abc import Mapping
-
-import pytest
+import json
+from pathlib import Path
+import re
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_SNAPSHOTS_DIR = ROOT / "tests" / "fixtures" / "contracts"
 _PATH_TOKEN_RE = re.compile(r"([^\.\[]*)(?:\[(\d+)\])?")
 _ALLOWED_TYPE_NAMES = frozenset({"bool", "dict", "float", "int", "list", "null", "str"})
 _BREAKING_SEVERITY = "breaking"
+_WARNING_SEVERITY = "warning"
+_BENIGN_SEVERITY = "benign"
+_SEVERITY_RANK = {
+    _BENIGN_SEVERITY: 0,
+    _WARNING_SEVERITY: 1,
+    _BREAKING_SEVERITY: 2,
+}
 
 
 class ContractPathResolutionError(ValueError):
@@ -53,6 +58,8 @@ def assert_provider_probe_matches_snapshot(
     version: int = 1,
 ) -> None:
     """Assert provider payload shape matches the stored probe snapshot."""
+    import pytest
+
     snapshot = load_provider_contract_snapshot(provider, version=version)
     snapshot_probes = snapshot.get("probes", {})
     if probe not in snapshot_probes:
@@ -77,25 +84,106 @@ def assert_provider_probe_matches_snapshot(
             "(UPDATE_SNAPSHOTS=1)"
         )
 
-    mismatches = [
-        path
-        for path, expected_type in expected_paths.items()
-        if actual_paths.get(path) != expected_type
-    ]
-    if mismatches:
+    report = compare_provider_probe_to_snapshot(
+        provider,
+        probe,
+        payload,
+        version=version,
+    )
+    difference_count = cast(int, report["difference_count"])
+    if difference_count:
         lines = [
             f"{provider}.{probe}: provider contract snapshot drift detected",
-            f"severity={_BREAKING_SEVERITY}",
-            f"paths_checked={len(expected_paths)}",
-            f"mismatched_paths={len(mismatches)}",
+            f"severity={report['severity']}",
+            f"paths_checked={report['paths_checked']}",
+            f"mismatched_paths={difference_count}",
         ]
-        for path in mismatches:
+        for difference in cast(list[dict[str, Any]], report["differences"]):
+            path = cast(str, difference["path"])
+            expected_type = cast(str | None, difference["expected_type"])
+            actual_type = cast(str | None, difference["actual_type"])
+            detail = cast(str, difference["detail"])
             lines.append(
-                f"  {path}: expected {expected_paths[path]!r}, "
-                f"got {actual_paths.get(path)!r}"
+                f"  {path}: expected {expected_type!r}, got {actual_type!r} "
+                f"({difference['severity']}; {detail})"
             )
         lines.append("If intentional, run: UPDATE_SNAPSHOTS=1 pytest ...")
         pytest.fail("\n".join(lines))
+
+
+def compare_provider_probe_to_snapshot(
+    provider: str,
+    probe: str,
+    payload: Any,
+    *,
+    version: int = 1,
+) -> dict[str, Any]:
+    """Build a machine-readable drift report for a provider probe."""
+    snapshot = load_provider_contract_snapshot(provider, version=version)
+    snapshot_probes = snapshot.get("probes", {})
+    if probe not in snapshot_probes:
+        raise AssertionError(
+            f"{provider} snapshot registry is missing probe {probe!r}. "
+            "Add it to tests/fixtures/contracts before enabling the drift check."
+        )
+
+    probe_snapshot = cast(Mapping[str, Any], snapshot_probes[probe])
+    expected_paths = cast(Mapping[str, str], probe_snapshot.get("paths", {}))
+    actual_paths: dict[str, str] = {}
+    differences: list[dict[str, Any]] = []
+
+    for path, expected_type in expected_paths.items():
+        try:
+            value = _resolve_path(payload, path)
+        except ContractPathResolutionError as exc:
+            differences.append(
+                {
+                    "path": path,
+                    "kind": "missing_path",
+                    "expected_type": expected_type,
+                    "actual_type": None,
+                    "severity": _BREAKING_SEVERITY,
+                    "detail": str(exc),
+                }
+            )
+            continue
+
+        actual_type = _infer_type_name(value)
+        actual_paths[path] = actual_type
+        if actual_type == expected_type:
+            continue
+        differences.append(
+            {
+                "path": path,
+                "kind": "type_changed",
+                "expected_type": expected_type,
+                "actual_type": actual_type,
+                "severity": _classify_type_change(
+                    expected_type=expected_type,
+                    actual_type=actual_type,
+                ),
+                "detail": _describe_type_change(
+                    expected_type=expected_type,
+                    actual_type=actual_type,
+                ),
+            }
+        )
+
+    severity = _max_severity(
+        cast(list[str], [difference["severity"] for difference in differences])
+    )
+    return {
+        "provider": provider,
+        "probe": probe,
+        "version": version,
+        "paths_checked": len(expected_paths),
+        "difference_count": len(differences),
+        "severity": severity,
+        "status": "match" if not differences else "drift",
+        "expected_paths": dict(expected_paths),
+        "actual_paths": actual_paths,
+        "differences": differences,
+    }
 
 
 def assert_provider_snapshot_registry_shape(snapshot: Mapping[str, Any]) -> None:
@@ -118,6 +206,8 @@ def assert_provider_snapshot_registry_shape(snapshot: Mapping[str, Any]) -> None
 def _extract_actual_path_types(
     payload: Any, expected_paths: Mapping[str, Any]
 ) -> dict[str, str]:
+    import pytest
+
     actual_paths: dict[str, str] = {}
     for path in expected_paths:
         try:
@@ -180,3 +270,25 @@ def _infer_type_name(value: Any) -> str:
     if isinstance(value, float):
         return "float"
     return "str"
+
+
+def _classify_type_change(*, expected_type: str, actual_type: str) -> str:
+    if actual_type == "null" and expected_type != "null":
+        return _WARNING_SEVERITY
+    if {expected_type, actual_type} <= {"int", "float"}:
+        return _WARNING_SEVERITY
+    return _BREAKING_SEVERITY
+
+
+def _describe_type_change(*, expected_type: str, actual_type: str) -> str:
+    if actual_type == "null" and expected_type != "null":
+        return "path became nullable"
+    if {expected_type, actual_type} <= {"int", "float"}:
+        return "numeric type changed"
+    return "provider-facing path type changed"
+
+
+def _max_severity(severities: list[str]) -> str:
+    if not severities:
+        return _BENIGN_SEVERITY
+    return max(severities, key=lambda value: _SEVERITY_RANK.get(value, -1))

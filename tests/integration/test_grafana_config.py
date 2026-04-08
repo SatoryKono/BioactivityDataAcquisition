@@ -185,6 +185,7 @@ def test_dashboard_has_required_variables(dashboard_path):
         "bioetl-dq-v2.json": {"pipeline", "run_type"},
         "bioetl-runtime.json": {"pipeline", "run_type"},
         "bioetl-provider-health-v2.json": {"provider"},
+        "bioetl-control-plane-v1.json": {"pipeline", "run_type"},
         "bioetl-silver-reject-explorer.json": {
             "pipeline",
             "run_type",
@@ -237,6 +238,19 @@ def test_variable_query_sources(dashboard_path):
     }
 
     if dashboard_path.name == "bioetl-silver-reject-explorer.json":
+        def _extract_query_url(variable: dict[str, object]) -> str:
+            """Extract endpoint URL for Infinity query variables."""
+            query = variable.get("query", {})
+            if not isinstance(query, dict):
+                return ""
+            infinity_query = query.get("infinityQuery")
+            if isinstance(infinity_query, dict):
+                url = infinity_query.get("url", "")
+                if isinstance(url, str):
+                    return url
+            legacy_url = query.get("query", "")
+            return legacy_url if isinstance(legacy_url, str) else ""
+
         for variable_name in (
             "pipeline",
             "run_type",
@@ -252,9 +266,8 @@ def test_variable_query_sources(dashboard_path):
                 f"Dashboard {dashboard_path.name} '{variable_name}' must use "
                 "Quarantine Explorer datasource"
             )
-            query = variable.get("query", {})
-            query_text = query.get("query", "") if isinstance(query, dict) else ""
-            assert "/ops/quarantine/filter-options" in query_text, (
+            query_url = _extract_query_url(variable)
+            assert "/ops/quarantine/filter-options" in query_url, (
                 f"Dashboard {dashboard_path.name} '{variable_name}' query must use "
                 "/ops/quarantine/filter-options endpoint"
             )
@@ -354,6 +367,12 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Silver Filter Rejects": "or vector(0)",
             "Soft Threshold Exceeded": "or vector(0)",
             "Silver Validation Failures": "or vector(0)",
+        },
+        "bioetl-control-plane-v1.json": {
+            "Manifest Write Failures": "or vector(0)",
+            "Ledger Append Failures": "or vector(0)",
+            "Checkpoint Compatibility Incompatibilities": "or vector(0)",
+            "Control-Plane Read Failures": "or vector(0)"
         },
     }
 
@@ -1107,6 +1126,7 @@ def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> No
         "bioetl-overview-v2.json",
         "bioetl-dq-v2.json",
         "bioetl-runtime.json",
+        "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
         "bioetl-silver-reject-explorer.json",
     )
@@ -1171,6 +1191,15 @@ def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None
     assert any(url == "/d/bioetl-silver-reject-explorer" for url in urls), (
         "Data Quality handoff must target /d/bioetl-silver-reject-explorer"
     )
+    silver_link = next(
+        (link for link in links if link.get("url") == "/d/bioetl-silver-reject-explorer"),
+        None,
+    )
+    assert silver_link is not None, "Silver Reject Explorer link must exist"
+    assert silver_link.get("includeVars") is False, (
+        "Data Quality handoff must not pass Prometheus variables into "
+        "Silver Reject Explorer"
+    )
 
 
 def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> None:
@@ -1204,6 +1233,9 @@ def test_explore_links_decode_to_valid_queries() -> None:
             "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
         },
         "bioetl-runtime.json": {
+            "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
+        },
+        "bioetl-control-plane-v1.json": {
             "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
         },
         "bioetl-provider-health-v2.json": {
@@ -1244,6 +1276,7 @@ def test_tempo_drilldown_uses_contextual_traceql_filters() -> None:
         "bioetl-overview-v2.json": ("${pipeline:regex}", "${run_type:regex}"),
         "bioetl-dq-v2.json": ("${pipeline:regex}", "${run_type:regex}"),
         "bioetl-runtime.json": ("${pipeline:regex}", "${run_type:regex}"),
+        "bioetl-control-plane-v1.json": ("${pipeline:regex}", "${run_type:regex}"),
         "bioetl-provider-health-v2.json": ("${provider:regex}",),
     }
 
@@ -1274,6 +1307,7 @@ def test_explore_drilldown_titles_disclose_tracing_profile_dependency() -> None:
         "bioetl-overview-v2.json",
         "bioetl-dq-v2.json",
         "bioetl-runtime.json",
+        "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
     )
 
@@ -1303,6 +1337,7 @@ def test_loki_drilldown_uses_safe_generic_entrypoint() -> None:
         "bioetl-overview-v2.json",
         "bioetl-dq-v2.json",
         "bioetl-runtime.json",
+        "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
     )
 
@@ -1321,3 +1356,27 @@ def test_loki_drilldown_uses_safe_generic_entrypoint() -> None:
             payload = json.loads(unquote(link["url"].split("left=", 1)[1]))
             expr = payload["queries"][0]["expr"]
             assert expr == '{job="bioetl"}'
+
+
+def test_control_plane_dashboard_exposes_working_runbook_link() -> None:
+    """Control-plane dashboard should link to a stable, published runbook target."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    runbook_link = next(
+        (
+            link
+            for link in dashboard.get("links", [])
+            if link.get("title") == "Observability Checklist (runbook)"
+        ),
+        None,
+    )
+
+    assert runbook_link is not None, (
+        "Control-plane dashboard must expose an Observability Checklist runbook link"
+    )
+    assert runbook_link.get("url") == (
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/"
+        "docs/05-operations/runbooks/observability-checklist.md"
+    ), "Control-plane dashboard runbook link must target the canonical GitHub doc"
+    assert runbook_link.get("targetBlank") is True, (
+        "External runbook link should open in a new tab"
+    )

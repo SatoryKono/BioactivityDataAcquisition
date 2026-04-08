@@ -209,6 +209,25 @@ class TestRunManifestCommands:
         ]
         assert "alert_signals" in payload["diagnostics"]
 
+    def test_show_yaml_outputs_manifest_and_diagnostics(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _FakeRunManifestService())
+
+        result = cli_runner.invoke(
+            cli,
+            ["run-manifest", "show", "manifest-1", "--format", "yaml"],
+        )
+
+        assert result.exit_code == 0
+        assert "manifest:" in result.output
+        assert "ledger_entries:" in result.output
+        assert "diagnostics:" in result.output
+        assert "latest_status: success" in result.output
+        assert "cross_validation_signal_present: true" in result.output
+
     def test_show_defaults_to_human_readable_text(
         self,
         cli_runner: CliRunner,
@@ -302,4 +321,29 @@ class TestRunManifestCommands:
         assert "Manifest Diff" in result.output
         assert "left_manifest_id: manifest-1" in result.output
         assert "right_manifest_id: manifest-2" in result.output
+        assert "field: runtime_config" in result.output
+
+    def test_diff_yaml_outputs_changed_fields(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _FakeRunManifestService())
+
+        result = cli_runner.invoke(
+            cli,
+            [
+                "run-manifest",
+                "diff",
+                "manifest-1",
+                "manifest-2",
+                "--format",
+                "yaml",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert "left_manifest_id: manifest-1" in result.output
+        assert "right_manifest_id: manifest-2" in result.output
+        assert "differences:" in result.output
         assert "field: runtime_config" in result.output

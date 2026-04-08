@@ -18,6 +18,7 @@ Commands:
     check-terminology    Terminology linting
     report-dep-map       Generate/check architecture dependency map
     report-vcr-metadata  Generate/check canonical VCR metadata catalog
+    report-provider-contract-drift  Generate provider contract drift diagnostics from replay cassettes
     report-hotspots      Generate hotspot degradation report
     report-duplication-baseline  Generate report-only duplication baseline
     analyze-duplicate-functions Analyze duplicate function names across selected code areas
@@ -43,6 +44,7 @@ COMMANDS: dict[str, str] = {
     "check-terminology": "lint_terminology.py",
     "report-dep-map": "generate_architecture_dependency_map.py",
     "report-vcr-metadata": "report_vcr_metadata_catalog.py",
+    "report-provider-contract-drift": "report_provider_contract_drift.py",
     "report-hotspots": "generate_hotspot_degradation_report.py",
     "report-duplication-baseline": "report_duplication_baseline.py",
     "analyze-duplicate-functions": "analyze_duplicate_functions.py",

@@ -251,7 +251,10 @@ fixture_governance:
     scope: bounded_live_provider_baseline
     documentation: tests/fixtures/contracts/README.md
     helper_module: tests/contract/_provider_contract_drift.py
+    replay_registry_module: tests/contract/_provider_contract_replay.py
     registry_test_module: tests/contract/test_provider_contract_snapshot_registry.py
+    replay_test_module: tests/contract/test_provider_contract_drift_replay.py
+    replay_report_command: python -m scripts.qa report-provider-contract-drift
     update_env_var: UPDATE_SNAPSHOTS
     providers:
       chembl:
@@ -305,7 +308,9 @@ fixture_governance:
 
 contract_testing:
   workflow_present: true
+  replay_gate_workflow: .github/workflows/provider-contract-drift.yml
   live_api_gate_mode: scheduled
+  replay_gate_mode: ci
   network_opt_in_required: true
   live_api_minimum_baseline:
     enforced_providers: [chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar]

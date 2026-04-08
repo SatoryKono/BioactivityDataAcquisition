@@ -28,6 +28,8 @@ DRY_RUN=0
 LIST_ONLY=0
 KEEP_COVERAGE_FILES=0
 DISABLE_COVERAGE=0
+SKIP_PREFLIGHT="${BIOETL_SKIP_PREFLIGHT:-0}"
+STRICT_DOCS_PREFLIGHT="${BIOETL_PREFLIGHT_STRICT_DOCS:-0}"
 SELECTED_WAVE=""
 SELECTED_SHARDS=()
 EXTRA_PYTEST_ARGS=()
@@ -127,6 +129,7 @@ Options:
   --tail                    Tail shard log files live with shard prefixes
                             Ignored when --stream is also set
   --dry-run                 Print commands without executing them
+  --skip-preflight          Skip repository/docs/architecture preflight
   --keep-coverage-files     Do not clean the coverage directory before/after
   -h, --help                Show this help
 
@@ -238,6 +241,10 @@ parse_args() {
                 DRY_RUN=1
                 shift
                 ;;
+            --skip-preflight)
+                SKIP_PREFLIGHT=1
+                shift
+                ;;
             --keep-coverage-files)
                 KEEP_COVERAGE_FILES=1
                 shift
@@ -338,6 +345,15 @@ default_tmp_coverage_dir() {
         "$$"
 }
 
+default_tmp_hypothesis_database_dir() {
+    local repo_name
+    repo_name="$(basename "$REPO_ROOT")"
+    printf '/tmp/%s-hypothesis-db-%s-%s\n' \
+        "$repo_name" \
+        "$(date +%Y%m%d-%H%M%S)" \
+        "$$"
+}
+
 normalize_coverage_dir_for_environment() {
     if [[ "$COVERAGE_DIR" != "$DEFAULT_COVERAGE_DIR" ]]; then
         return 0
@@ -355,6 +371,48 @@ normalize_coverage_dir_for_environment() {
     echo \
         "[run_pytest_sharded][info] Disabling pytest-cov for mounted WSL checkout to avoid coverage realpath timeouts under /mnt/*" \
         >&2
+}
+
+prepare_hypothesis_database_for_environment() {
+    if [[ -n "${HYPOTHESIS_DATABASE:-}" ]]; then
+        return 0
+    fi
+
+    if ! is_wsl_mounted_checkout; then
+        return 0
+    fi
+
+    HYPOTHESIS_DATABASE="$(default_tmp_hypothesis_database_dir)"
+    mkdir -p "$HYPOTHESIS_DATABASE"
+    export HYPOTHESIS_DATABASE
+    echo "[run_pytest_sharded][info] Using temp Hypothesis database $HYPOTHESIS_DATABASE for mounted WSL checkout $REPO_ROOT" >&2
+}
+
+run_preflight_if_needed() {
+    if [[ "$SKIP_PREFLIGHT" == "1" || "${BIOETL_PREFLIGHT_DONE:-0}" == "1" || "${BIOETL_PREFLIGHT_ACTIVE:-0}" == "1" ]]; then
+        return 0
+    fi
+
+    if [[ "$DRY_RUN" == "1" ]]; then
+        echo "[run_pytest_sharded][info] Dry-run mode: preflight skipped." >&2
+        return 0
+    fi
+
+    if [[ ! -f "$SCRIPT_DIR/pretest_guardrails.sh" ]]; then
+        return 0
+    fi
+
+    local -a preflight_cmd=(
+        bash "$SCRIPT_DIR/pretest_guardrails.sh"
+        --mode auto
+        --scope full
+    )
+    if [[ "$STRICT_DOCS_PREFLIGHT" == "1" ]]; then
+        preflight_cmd+=(--strict-docs)
+    fi
+
+    BIOETL_PREFLIGHT_ACTIVE=1 "${preflight_cmd[@]}"
+    export BIOETL_PREFLIGHT_DONE=1
 }
 
 cleanup_coverage_dir() {
@@ -538,12 +596,14 @@ combine_coverage() {
 
 main() {
     parse_args "$@"
-    normalize_coverage_dir_for_environment
-
     if [[ "$LIST_ONLY" == "1" ]]; then
         print_plan
         exit 0
     fi
+
+    run_preflight_if_needed
+    normalize_coverage_dir_for_environment
+    prepare_hypothesis_database_for_environment
 
     local -a selected_shards=()
     while IFS= read -r shard; do

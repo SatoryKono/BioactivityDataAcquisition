@@ -152,7 +152,20 @@ where = ["src"]
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-norecursedirs = [".venv", ".venv-win", ".venv-wsl", "venv", "env", "ENV", "node_modules"]
+norecursedirs = [
+    ".venv",
+    ".venv-win",
+    ".venv-wsl",
+    "venv",
+    "env",
+    "ENV",
+    "node_modules",
+    ".cache",
+    ".pytest_cache",
+    ".hypothesis",
+    ".python-user",
+    ".worktrees",
+]
 pythonpath = ["src", "."]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]

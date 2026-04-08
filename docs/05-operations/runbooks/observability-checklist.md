@@ -75,6 +75,10 @@ cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_name)'
   available for the active pipeline or provider.
 - Confirm the alert-condition panels in `2. Runtime` reflect the same symptom
   family the operator is investigating.
+- Spotlight the new `bioetl-control-plane-v1` aggregated view and confirm
+  `BioETLControlPlaneReadFailureRate` is either firing or cleared, depending on
+  whether control-plane reads have exceeded the 5% failure ratio limit in the
+  last 30 minutes.
 - If dashboard data is missing, stop and verify metrics publication before
   troubleshooting alerts.
 

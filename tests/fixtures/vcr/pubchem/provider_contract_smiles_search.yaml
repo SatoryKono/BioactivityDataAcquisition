@@ -1,0 +1,37 @@
+{
+  "interactions": [
+    {
+      "request": {
+        "body": null,
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "User-Agent": [
+            "BioETL/1.0"
+          ]
+        },
+        "method": "GET",
+        "uri": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/CC(=O)OC1=CC=CC=C1C(=O)O/cids/JSON"
+      },
+      "response": {
+        "body": {
+          "string": "{\"IdentifierList\": {\"CID\": [2244]}}"
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ],
+          "Date": [
+            "Tue, 07 Apr 2026 10:51:53 GMT"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        }
+      }
+    }
+  ],
+  "version": 1
+}

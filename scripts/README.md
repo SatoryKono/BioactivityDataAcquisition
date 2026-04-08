@@ -42,6 +42,19 @@ Canonical root-level direct paths retained for compatibility:
 - `scripts/generate_architecture_dependency_map.py`
 - `scripts/rerender_grafana_screenshots.py`
 
+Operational launcher examples retained under `scripts/ops/` include:
+
+- `scripts/ops/codex.bat`, `scripts/ops/codex-exec.bat`
+- `scripts/ops/mistral.sh`, `scripts/ops/mistral-exec.sh`
+- `scripts/ops/mistral.bat`, `scripts/ops/mistral-exec.bat`
+- `scripts/ops/start-wsl-proxy.bat`
+- `scripts/ops/setup_mistral_vibe.sh`
+
+See:
+
+- `docs/03-guides/development/codex-wsl2-setup.md`
+- `docs/03-guides/development/mistral-vibe-wsl2-setup.md`
+
 Inventory/governance should treat these root-level paths as legacy
 compatibility entrypoints unless a live CI/build/agent caller still depends on
 them directly.

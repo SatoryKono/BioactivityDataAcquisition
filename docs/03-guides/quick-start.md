@@ -26,6 +26,7 @@ TL;DR for setting up and running BioETL locally.
 
 ### Option A: Supported Local Bootstrap (Recommended)
 
+#```bash
 ```bash
 # Clone and enter directory
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git

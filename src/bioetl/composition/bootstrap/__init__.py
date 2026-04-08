@@ -89,7 +89,7 @@ _PUBLIC_EXPORTS: dict[str, str] = {
 }
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> Any:  # Any: lazy re-export preserves the original symbol type at lookup time.
     """Resolve bootstrap re-exports lazily to avoid eager runtime imports."""
     module_name = _PUBLIC_EXPORTS.get(name)
     if module_name is None:

@@ -123,6 +123,12 @@ Pushgateway publication на завершении run. Это позволяет
   привязаны к `$pipeline`, потому что underlying control-plane read metrics не
   несут pipeline label.
 
+- **Control-plane aggregate view**: используйте `bioetl-control-plane-v1` для
+  мониторинга aggregated manifest write failures, ledger append failures,
+  checkpoint compatibility и read failure ratio. Новое правило
+  `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/observability-checklist.md`)
+  срабатывает, если доля failed reads по store/operation превышает 5% за 30m.
+
 #### 3. 3. Provider Health
 
 Технический мониторинг состояния внешних API (ChEMBL, UniProt и др.).

@@ -7,7 +7,8 @@
         "@modelcontextprotocol/server-memory@2026.1.26"
       ],
       "env": {
-        "MEMORY_FILE_PATH": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\docs\\00-project\\ai\\memory\\mcp-memory.json"
+        "MEMORY_FILE_PATH": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/ai/memory/mcp-memory.json",
+        "NPM_CONFIG_CACHE": "/tmp/npm-cache"
       }
     },
     "filesystem": {
@@ -15,25 +16,101 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem@2026.1.14",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2"
-      ]
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2"
+      ],
+      "env": {
+        "NPM_CONFIG_CACHE": "/tmp/npm-cache"
+      }
     },
     "sequential-thinking": {
       "command": "npx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-sequential-thinking@2025.12.18"
+      ],
+      "env": {
+        "NPM_CONFIG_CACHE": "/tmp/npm-cache"
+      }
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "mcp-server-fetch==2025.4.7",
+        "mcp-server-fetch"
       ]
     },
-    "github": {
+    "pdf": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-github@2025.4.8"
+        "@modelcontextprotocol/server-pdf@1.3.1",
+        "--stdio"
       ],
       "env": {
-        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+        "NPM_CONFIG_CACHE": "/tmp/npm-cache"
       }
+    },
+    "github": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.claude/github-mcp-wrapper.sh"
+      ],
+      "env": {
+        "NPM_CONFIG_CACHE": "/tmp/npm-cache"
+      }
+    },
+    "docker": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_docker_wrapper.sh"
+      ]
+    },
+    "docker-docs": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_docker_docs_wrapper.sh"
+      ]
+    },
+    "context7": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_context7_wrapper.sh"
+      ]
+    },
+    "paper-search": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_paper_search_wrapper.sh"
+      ]
+    },
+    "dockerhub": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_dockerhub_wrapper.sh"
+      ]
+    },
+    "prometheus": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_prometheus_wrapper.sh"
+      ]
+    },
+    "grafana": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_grafana_wrapper.sh"
+      ]
+    },
+    "brave-search": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_brave_search_wrapper.sh"
+      ]
+    },
+    "openaiDeveloperDocs": {
+      "type": "http",
+      "url": "https://developers.openai.com/mcp"
     }
   }
 }
