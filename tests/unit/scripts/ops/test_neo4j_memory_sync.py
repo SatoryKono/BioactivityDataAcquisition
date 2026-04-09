@@ -184,6 +184,20 @@ def test_snapshot_contains_expected_relations() -> None:
         "BioETLPipelineRunFailed",
     ) in relation_keys
     assert (
+        "alert_surface",
+        "BioETLPipelineRunFailed",
+        "DEPENDS_ON",
+        "pipeline_surface",
+        "chembl_activity",
+    ) in relation_keys
+    assert (
+        "alert_surface",
+        "BioETLProviderFailureRateHigh",
+        "DEPENDS_ON",
+        "provider_surface",
+        "chembl",
+    ) in relation_keys
+    assert (
         "doc_artifact",
         "scripts/dev/README.md",
         "DESCRIBES",
