@@ -2,38 +2,22 @@
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
-from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
+from bioetl.application.core.pipeline_registry_wiring_api import ActivityTransformer
+from bioetl.application.core.pipeline_registry_wiring_api import (
     AssayParametersTransformer,
-)
-from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
-from bioetl.application.pipelines.chembl.cell_line_transformer import (
+    AssayTransformer,
     CellLineTransformer,
-)
-from bioetl.application.pipelines.chembl.compound_record_transformer import (
     CompoundRecordTransformer,
-)
-from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
-from bioetl.application.pipelines.chembl.protein_class_transformer import (
+    MoleculeTransformer,
     ProteinClassTransformer,
-)
-from bioetl.application.pipelines.chembl.publication_similarity_transformer import (
     PublicationSimilarityTransformer,
-)
-from bioetl.application.pipelines.chembl.publication_term_transformer import (
     PublicationTermTransformer,
-)
-from bioetl.application.pipelines.chembl.publication_transformer import (
     PublicationTransformer,
-)
-from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
     SubcellularFractionTransformer,
-)
-from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
+    TargetTransformer,
+    TissueTransformer,
 )
-from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
 from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
 from bioetl.domain.contracts import (
     ChEMBLActivityGoldSchema,
