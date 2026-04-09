@@ -69,6 +69,33 @@ def test_compute_config_hash_supports_mapping_cast_path() -> None:
 
 
 @pytest.mark.unit
+def test_compute_config_hash_is_stable_for_equivalent_mappings() -> None:
+    config_a = {
+        "provider": "chembl",
+        "entity": "publication",
+        "runtime": {"limit": 100, "resume": False},
+    }
+    config_b = {
+        "runtime": {"resume": False, "limit": 100},
+        "entity": "publication",
+        "provider": "chembl",
+    }
+
+    assert versioning.compute_config_hash(config_a) == versioning.compute_config_hash(
+        config_b
+    )
+
+
+@pytest.mark.unit
+def test_compute_config_hash_rejects_non_finite_numeric_values() -> None:
+    with pytest.raises(
+        ValueError,
+        match="Canonical JSON serialization does not allow NaN or Infinity",
+    ):
+        versioning.compute_config_hash({"provider": "chembl", "limit": float("inf")})
+
+
+@pytest.mark.unit
 def test_get_pipeline_version_reads_dict_version() -> None:
     assert versioning.get_pipeline_version({"version": "2.3.4"}) == "2.3.4"
 

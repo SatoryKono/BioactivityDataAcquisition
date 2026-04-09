@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.pipelines.generic import GenericPipeline
+from bioetl.application.core.pipeline_registry_wiring_api import GenericPipeline
 from bioetl.composition.factories.datasource.data_source_factory import (
     get_data_source_creator,
 )

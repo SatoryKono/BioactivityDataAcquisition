@@ -53,6 +53,7 @@ Last verified: '2026-04-09'
    dashboards, execution paths, curated policy surfaces, and a semantic
    impact-analysis layer for ports, adapters, pipelines, contracts, and alert
    rules. The current sync also includes protocol/class-level domain ports,
+<<<<<<< HEAD
    fine-grained `adapter_impl_surface` nodes for concrete adapter modules,
    richer contract-to-schema/config/control-plane/lineage links, direct pipeline
    runtime / validation / observability / test-coverage edges, and config-driven
@@ -61,6 +62,16 @@ Last verified: '2026-04-09'
    overlap and fallback tables. Shared/provider regression suites from
    `configs/quality/test_matrix.yaml` are also projected into direct
    `pipeline_surface -> TESTED_BY` links.
+||||||| e9a21369c
+   richer contract-to-schema/config links, and direct pipeline runtime /
+   validation / observability edges.
+=======
+   richer contract-to-schema/config/control-plane links, direct pipeline runtime /
+   validation / observability / test-coverage edges, and config-driven alert
+   mapping from `configs/quality/neo4j_memory_mapping.yaml`. Shared/provider
+   regression suites from `configs/quality/test_matrix.yaml` are also projected
+   into direct `pipeline_surface -> TESTED_BY` links.
+>>>>>>> feat/2712-audit-runtime-wiring
 
 8. When you intentionally want to remove stale repo-derived graph nodes from the
    current ingest wave, run the explicit prune mode:
@@ -100,7 +111,14 @@ Last verified: '2026-04-09'
     ```
     This checks snapshot invariants for the managed ontology layer and fails on
     missing required labels/relations, missing protocol-level port surfaces,
-    missing rich contract metadata, leaked ignored paths, or snapshot orphans.
+    missing rich contract metadata, missing pipeline-to-test or alert-to-contract
+    links, leaked ignored paths, or snapshot orphans.
+
+13. To run a full live gate against a real local Neo4j backend, apply the
+    deterministic sync, and fail on managed drift, use:
+    ```bash
+    python -m scripts.ci neo4j-memory-live
+    ```
 
 ## Memory Configuration Profiles
 

@@ -29,7 +29,7 @@ from bioetl.composition.runtime_builders.config_access import (
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 
 if TYPE_CHECKING:
-    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.domain.context import PipelineRunContext
 
 __all__ = [

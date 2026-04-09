@@ -60,6 +60,7 @@ from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunnerService,
     CompositeRunnerDependencies,
 )
+from bioetl.application.core.runner import PipelineRunner
 
 __all__ = [
     "JOIN_KEY_NORMALIZATION_POLICIES",
@@ -89,6 +90,7 @@ __all__ = [
     "KeyExtractorService",
     "MergeCollaboratorGroup",
     "MergeService",
+    "PipelineRunner",
     "create_chained_key_resolver",
     "create_seed_key_resolver",
     "parse_pipeline_name",
