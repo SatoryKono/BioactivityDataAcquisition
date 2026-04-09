@@ -1,10 +1,13 @@
 """Tests for contract registry implementation."""
 
+import hashlib
+import json
 from datetime import datetime
 
 import pytest
 import yaml
 
+from bioetl.domain.serialization import serialize_to_json_canonical
 from bioetl.domain.control_plane.contract_registry import (
     ContractRegistry,
     ContractRegistryEntry,
@@ -112,6 +115,8 @@ class TestContractRegistry:
         registry = ContractRegistry()
         assert len(registry.entries) == 0
         assert registry.registry_hash is None
+        assert registry.registry_hash_v1 is None
+        assert registry.registry_hash_v2 is None
 
     def test_registry_loading(self, tmp_path):
         """Test registry loading from YAML."""
@@ -143,6 +148,8 @@ class TestContractRegistry:
         assert len(registry.entries) == 1
         assert "test.contract.v1" in registry.entries
         assert registry.registry_hash is not None
+        assert registry.registry_hash_v1 is not None
+        assert registry.registry_hash_v2 is not None
 
     def test_registry_loading_invalid(self, tmp_path):
         """Test registry loading with invalid data."""
@@ -404,6 +411,117 @@ class TestContractRegistry:
         loaded_registry = ContractRegistry(output_file)
         assert len(loaded_registry.entries) == 1
         assert loaded_registry.registry_hash is not None
+
+    def test_registry_hash_exposes_v1_and_v2_during_migration(self):
+        """Registry should expose both legacy and canonical hash variants."""
+        registry = ContractRegistry()
+
+        identity = ContractIdentity(
+            contract_ref="test.contract.v1",
+            contract_version="1.0.0",
+            compatibility_level=CompatibilityLevel.PATCH,
+            schema_hash="a" * 64,
+        )
+
+        entry = ContractRegistryEntry(
+            identity=identity,
+            status=LifecycleStatus.ACTIVE,
+            source_path="src/schemas/test.v1.yaml",
+            supported_versions=["1.0.0"],
+            last_updated="2024-01-01T00:00:00Z",
+            owners=["test-team"],
+        )
+
+        registry.register_contract(entry)
+
+        assert registry.registry_hash_v1 is not None
+        assert registry.registry_hash_v2 is not None
+        assert registry.registry_hash == registry.registry_hash_v2
+        assert registry.registry_hash_v1 != registry.registry_hash_v2
+
+    def test_registry_hash_v2_matches_canonical_serializer_contract(self):
+        """Canonical registry hash must hash canonical JSON bytes only."""
+        registry = ContractRegistry()
+
+        identity = ContractIdentity(
+            contract_ref="test.contract.v1",
+            contract_version="1.0.0",
+            compatibility_level=CompatibilityLevel.PATCH,
+            schema_hash="a" * 64,
+        )
+
+        entry = ContractRegistryEntry(
+            identity=identity,
+            status=LifecycleStatus.ACTIVE,
+            source_path="src/schemas/test.v1.yaml",
+            supported_versions=["2.0.0", "1.0.0"],
+            last_updated="2024-01-01T00:00:00Z",
+            owners=["test-team"],
+        )
+
+        registry.register_contract(entry)
+        payload = {
+            "test.contract.v1": {
+                "identity": {
+                    "contract_version": "1.0.0",
+                    "schema_hash": "a" * 64,
+                },
+                "status": "active",
+                "supported_versions": ["1.0.0", "2.0.0"],
+            }
+        }
+
+        expected_v1 = hashlib.sha256(
+            json.dumps(payload, sort_keys=True).encode("utf-8")
+        ).hexdigest()
+        expected_v2 = hashlib.sha256(
+            serialize_to_json_canonical(payload).encode("utf-8")
+        ).hexdigest()
+
+        assert registry.registry_hash_v1 == expected_v1
+        assert registry.registry_hash_v2 == expected_v2
+
+    def test_registry_hash_is_deterministic_for_registration_order(self):
+        """Hash values should remain stable regardless of registration order."""
+        identity_a = ContractIdentity(
+            contract_ref="test.contract.a",
+            contract_version="1.0.0",
+            compatibility_level=CompatibilityLevel.PATCH,
+            schema_hash="a" * 64,
+        )
+        identity_b = ContractIdentity(
+            contract_ref="test.contract.b",
+            contract_version="1.0.0",
+            compatibility_level=CompatibilityLevel.MINOR,
+            schema_hash="b" * 64,
+        )
+        entry_a = ContractRegistryEntry(
+            identity=identity_a,
+            status=LifecycleStatus.ACTIVE,
+            source_path="src/schemas/test.a.yaml",
+            supported_versions=["1.0.0"],
+            last_updated="2024-01-01T00:00:00Z",
+            owners=["team-a"],
+        )
+        entry_b = ContractRegistryEntry(
+            identity=identity_b,
+            status=LifecycleStatus.DEPRECATED,
+            source_path="src/schemas/test.b.yaml",
+            supported_versions=["1.0.0"],
+            last_updated="2024-01-01T00:00:00Z",
+            owners=["team-b"],
+        )
+
+        registry_left = ContractRegistry()
+        registry_left.register_contract(entry_a)
+        registry_left.register_contract(entry_b)
+
+        registry_right = ContractRegistry()
+        registry_right.register_contract(entry_b)
+        registry_right.register_contract(entry_a)
+
+        assert registry_left.registry_hash_v1 == registry_right.registry_hash_v1
+        assert registry_left.registry_hash_v2 == registry_right.registry_hash_v2
 
 
 class TestRegistryValidationResult:
