@@ -1566,6 +1566,7 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
     adapter_nodes = _add_adapter_surfaces(snapshot, root, project, today, port_nodes, memory_mapping)
     contract_nodes = _add_contract_surfaces(snapshot, root, project, today, memory_mapping)
     pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
+    _add_pipeline_normalization_edges(snapshot, pipeline_nodes, memory_mapping)
     _add_pipeline_test_edges(snapshot, root, pipeline_nodes, memory_mapping)
     _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes, contract_nodes, memory_mapping)
     _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
@@ -2090,6 +2091,55 @@ def _add_pipeline_surfaces(
                         )
 
     return pipeline_nodes
+
+
+def _add_pipeline_normalization_edges(
+    snapshot: GraphSnapshot,
+    pipeline_nodes: dict[str, NodeKey],
+    memory_mapping: dict[str, object],
+) -> None:
+    normalization_mapping = memory_mapping.get("normalization")
+    if not isinstance(normalization_mapping, dict):
+        return
+
+    relation_type = str(normalization_mapping.get("relation_type", "DEPENDS_ON"))
+    entity_relation_type = str(normalization_mapping.get("entity_relation_type", relation_type))
+    defaults = normalization_mapping.get("defaults")
+    default_entity_modules: list[str] = []
+    default_composite_modules: list[str] = []
+    if isinstance(defaults, dict):
+        entity_defaults = defaults.get("entity")
+        composite_defaults = defaults.get("composite")
+        if isinstance(entity_defaults, dict):
+            default_entity_modules = _as_string_list(entity_defaults.get("modules"))
+        if isinstance(composite_defaults, dict):
+            default_composite_modules = _as_string_list(composite_defaults.get("modules"))
+
+    pipeline_entries = normalization_mapping.get("pipelines")
+    pipeline_overrides = pipeline_entries if isinstance(pipeline_entries, dict) else {}
+
+    for pipeline_name, pipeline_key in pipeline_nodes.items():
+        pipeline_node = snapshot.nodes.get(pipeline_key)
+        if pipeline_node is None:
+            continue
+        pipeline_kind = str(pipeline_node.properties.get("pipeline_kind", "entity"))
+        modules = list(default_entity_modules if pipeline_kind == "entity" else default_composite_modules)
+        pipeline_payload = pipeline_overrides.get(pipeline_name)
+        if isinstance(pipeline_payload, dict):
+            modules.extend(_as_string_list(pipeline_payload.get("modules")))
+
+        seen_modules: set[str] = set()
+        entity_key = NodeKey("entity_config", pipeline_name)
+        for module_path in modules:
+            if module_path in seen_modules:
+                continue
+            seen_modules.add(module_path)
+            module_key = NodeKey("module_surface", module_path)
+            if module_key not in snapshot.nodes:
+                continue
+            snapshot.add_relation(pipeline_key, relation_type, module_key, provenance="impact_normalization")
+            if pipeline_kind == "entity" and entity_key in snapshot.nodes:
+                snapshot.add_relation(entity_key, entity_relation_type, module_key, provenance="impact_normalization")
 
 
 def _add_pipeline_test_edges(
@@ -2694,6 +2744,18 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing pipeline_surface direct test coverage links")
+
+    if not any(
+        source_label == "pipeline_surface" and relation_type == "DEPENDS_ON" and target_label == "module_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing pipeline_surface -> DEPENDS_ON -> module_surface links")
+
+    if not any(
+        source_label == "entity_config" and relation_type == "DEPENDS_ON" and target_label == "module_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing entity_config -> DEPENDS_ON -> module_surface links")
 
     if not any(
         source_label == "alert_surface" and relation_type == "DEPENDS_ON" and target_label in {"pipeline_surface", "provider_surface"}

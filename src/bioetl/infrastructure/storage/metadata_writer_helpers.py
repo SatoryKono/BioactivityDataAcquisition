@@ -270,6 +270,15 @@ def _record_artifact_publication(
         "dataset_ref": lineage_context["dataset_ref"],
         "lineage_fragment_id": lineage_context["lineage_fragment_id"],
     }
+    input_snapshots = getattr(metadata.source, "input_snapshots", [])
+    if input_snapshots:
+        details["input_snapshot_count"] = len(input_snapshots)
+        details["input_snapshot_ids"] = [
+            snapshot.snapshot_id for snapshot in input_snapshots
+        ]
+        details["input_snapshot_content_hashes"] = [
+            snapshot.content_hash for snapshot in input_snapshots
+        ]
     recorder(layer, str(Path(base_path).resolve()), details)
 
 
