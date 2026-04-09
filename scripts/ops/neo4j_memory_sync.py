@@ -1524,10 +1524,22 @@ def _add_pipeline_surfaces(
     return pipeline_nodes
 
 
-def _add_alert_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+def _add_alert_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    pipeline_nodes: dict[str, NodeKey],
+) -> None:
     rules_root = root / "grafana" / "prometheus-rules"
     if not rules_root.is_dir():
         return
+
+    provider_nodes = sorted(
+        (key for key in snapshot.nodes if key.label == "provider_surface"),
+        key=lambda node: node.name,
+    )
+    pipeline_targets = sorted(pipeline_nodes.values(), key=lambda node: node.name)
 
     for rules_path in sorted(rules_root.glob("*.y*ml")):
         payload = _read_yaml(rules_path)
@@ -1573,6 +1585,16 @@ def _add_alert_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, t
                 )
                 snapshot.add_relation(project, "HAS_ALERT", alert, provenance="impact_alerts")
                 snapshot.add_relation(alert, "BACKED_BY", artifact, provenance="impact_alerts")
+
+                expr = str(rule.get("expr", ""))
+                dimension_text = " ".join(str(value) for value in annotations.values())
+                dimensions = _runtime_dimensions(expr, dimension_text)
+                if "pipeline" in dimensions:
+                    for pipeline in pipeline_targets:
+                        snapshot.add_relation(alert, "DEPENDS_ON", pipeline, provenance="impact_alerts")
+                if "provider" in dimensions:
+                    for provider in provider_nodes:
+                        snapshot.add_relation(alert, "DEPENDS_ON", provider, provenance="impact_alerts")
 
                 runbook = annotations.get("runbook")
                 if isinstance(runbook, str):
