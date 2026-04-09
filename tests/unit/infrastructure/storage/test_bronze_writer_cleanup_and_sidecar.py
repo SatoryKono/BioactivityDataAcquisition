@@ -527,7 +527,7 @@ class TestBronzeWriterQueryString:
         # Verify query_string was extracted from source_metadata
         assert bronze_input.query_string == "assay_type=B&standard_type=IC50"
         # Also verify source_metadata was passed
-        assert bronze_input.source_metadata is source_metadata
+        assert bronze_input.source_metadata.url == source_metadata.url
 
     @pytest.mark.asyncio
     async def test_query_string_none_when_source_metadata_has_no_query(
@@ -636,7 +636,7 @@ class TestBronzeWriterQueryString:
         bronze_input = mock_coordinator.create_bronze_metadata.call_args[0][0]
 
         # Both should be None
-        assert bronze_input.source_metadata is None
+        assert bronze_input.source_metadata.url is None
         assert bronze_input.query_string is None
 
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -42,7 +42,7 @@ def _make_ledger_entry(manifest: RunManifest) -> RunLedgerEntry:
         manifest_id=manifest.manifest_id,
         run_id=manifest.run_id,
         event_type="manifest_created",
-        occurred_at=datetime.utcnow(),
+        occurred_at=datetime.now(timezone.utc),
         status="success",
         details={"_diagnostic": {"pipeline": manifest.pipeline_name}},
     )
@@ -106,7 +106,7 @@ def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
         manifest_id=manifest.manifest_id,
         run_id=manifest.run_id,
         event_type="artifact_published",
-        occurred_at=datetime.utcnow(),
+        occurred_at=datetime.now(timezone.utc),
         status="published",
         dataset_ref="silver:chembl.activity@hash-123",
         lineage_fragment_id="silver:fragment-1",
