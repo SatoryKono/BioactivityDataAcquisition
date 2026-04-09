@@ -142,27 +142,75 @@ def _build_gold_edges(
         (node for node in nodes if node.node_type == LineageNodeType.SCHEMA),
         None,
     )
+    manifest = manifest_node(run_context)
 
-    edges = manifest_edges(
-        manifest=manifest_node(run_context),
-        run=run,
-        created_at=created_at,
+    edges = list(
+        manifest_edges(
+            manifest=manifest,
+            run=run,
+            created_at=created_at,
+            run_context=run_context,
+        )
+    )
+    schema_edge = _build_gold_schema_edge(
         run_context=run_context,
+        gold_dataset=gold_dataset,
+        gold_schema_node=gold_schema_node,
+        created_at=created_at,
+    )
+    if schema_edge is not None:
+        edges.append(schema_edge)
+    edges.extend(
+        _build_gold_dataset_input_edges(
+            run_context=run_context,
+            gold_dataset=gold_dataset,
+            silver_nodes=silver_nodes,
+            composite_source_edges=composite_source_edges,
+            created_at=created_at,
+        )
+    )
+    edges.extend(
+        _build_gold_production_edges(
+            run_context=run_context,
+            gold_dataset=gold_dataset,
+            run=run,
+            lineage_transform_nodes=lineage_transform_nodes,
+            created_at=created_at,
+        )
+    )
+    return edges
+
+
+def _build_gold_schema_edge(
+    *,
+    run_context: RunContext,
+    gold_dataset: LineageNodeRef,
+    gold_schema_node: LineageNodeRef | None,
+    created_at: datetime,
+) -> LineageEdge | None:
+    """Return the schema edge for a Gold dataset when a schema node exists."""
+    if gold_schema_node is None:
+        return None
+    return LineageEdge(
+        edge_type=LineageEdgeType.USED_SCHEMA,
+        source=gold_dataset,
+        target=gold_schema_node,
+        run_id=str(run_context.run_id),
+        manifest_id=run_context.manifest_id,
+        created_at=created_at,
     )
 
-    if gold_schema_node is not None:
-        edges.append(
-            LineageEdge(
-                edge_type=LineageEdgeType.USED_SCHEMA,
-                source=gold_dataset,
-                target=gold_schema_node,
-                run_id=str(run_context.run_id),
-                manifest_id=run_context.manifest_id,
-                created_at=created_at,
-            )
-        )
 
-    edges.extend(
+def _build_gold_dataset_input_edges(
+    *,
+    run_context: RunContext,
+    gold_dataset: LineageNodeRef,
+    silver_nodes: list[LineageNodeRef],
+    composite_source_edges: list[LineageEdge],
+    created_at: datetime,
+) -> list[LineageEdge]:
+    """Return all dataset-input edges feeding the Gold dataset."""
+    edges = [
         LineageEdge(
             edge_type=LineageEdgeType.DERIVED_FROM,
             source=gold_dataset,
@@ -172,31 +220,22 @@ def _build_gold_edges(
             created_at=created_at,
         )
         for silver_node in silver_nodes
-    )
-
+    ]
     edges.extend(composite_source_edges)
+    return edges
 
-    if lineage_transform_nodes:
-        edges.extend(
-            transform_edges(
-                run_context=run_context,
-                run=run,
-                transforms=lineage_transform_nodes,
-                created_at=created_at,
-            )
-        )
-        edges.append(
-            LineageEdge(
-                edge_type=LineageEdgeType.PRODUCED_BY,
-                source=gold_dataset,
-                target=lineage_transform_nodes[-1],
-                run_id=str(run_context.run_id),
-                manifest_id=run_context.manifest_id,
-                created_at=created_at,
-            )
-        )
-    else:
-        edges.append(
+
+def _build_gold_production_edges(
+    *,
+    run_context: RunContext,
+    gold_dataset: LineageNodeRef,
+    run: LineageNodeRef,
+    lineage_transform_nodes: list[LineageNodeRef],
+    created_at: datetime,
+) -> list[LineageEdge]:
+    """Return transform/run edges that explain Gold dataset production."""
+    if not lineage_transform_nodes:
+        return [
             LineageEdge(
                 edge_type=LineageEdgeType.PRODUCED_BY,
                 source=gold_dataset,
@@ -205,8 +244,25 @@ def _build_gold_edges(
                 manifest_id=run_context.manifest_id,
                 created_at=created_at,
             )
+        ]
+    edges = list(
+        transform_edges(
+            run_context=run_context,
+            run=run,
+            transforms=lineage_transform_nodes,
+            created_at=created_at,
         )
-
+    )
+    edges.append(
+        LineageEdge(
+            edge_type=LineageEdgeType.PRODUCED_BY,
+            source=gold_dataset,
+            target=lineage_transform_nodes[-1],
+            run_id=str(run_context.run_id),
+            manifest_id=run_context.manifest_id,
+            created_at=created_at,
+        )
+    )
     return edges
 
 

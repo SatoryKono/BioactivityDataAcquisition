@@ -15,6 +15,11 @@ from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
 )
 from bioetl.domain.events import PipelineEvent
+from bioetl.domain.normalization import (
+    normalize_contract_ref,
+    normalize_contract_version,
+    normalize_control_plane_sha256,
+)
 
 
 def _normalize_optional_anchor(value: object) -> str | None:
@@ -30,17 +35,19 @@ def get_expected_effective_config_hash(
 ) -> str | None:
     """Return effective-config hash anchor when checkpoint manager exposes it."""
     checkpoint_manager = getattr(host, "_checkpoint_manager", None)
-    return _normalize_optional_anchor(
-        getattr(checkpoint_manager, "expected_effective_config_hash", None)
+    return normalize_control_plane_sha256(
+        _normalize_optional_anchor(
+            getattr(checkpoint_manager, "expected_effective_config_hash", None)
+        )
     )
 
 
 def get_expected_contract_ref(host: _CompositeRunnerSupportHostProtocol) -> str | None:
     """Return contract-ref anchor from checkpoint manager or composite config."""
     checkpoint_manager = getattr(host, "_checkpoint_manager", None)
-    return _normalize_optional_anchor(
-        getattr(checkpoint_manager, "expected_contract_ref", None)
-    ) or _normalize_optional_anchor(getattr(host._config, "name", None))
+    return normalize_contract_ref(
+        _normalize_optional_anchor(getattr(checkpoint_manager, "expected_contract_ref", None))
+    ) or normalize_contract_ref(_normalize_optional_anchor(getattr(host._config, "name", None)))
 
 
 def get_expected_contract_version(
@@ -48,9 +55,13 @@ def get_expected_contract_version(
 ) -> str | None:
     """Return contract-version anchor from checkpoint manager or config."""
     checkpoint_manager = getattr(host, "_checkpoint_manager", None)
-    return _normalize_optional_anchor(
-        getattr(checkpoint_manager, "expected_contract_version", None)
-    ) or _normalize_optional_anchor(getattr(host._config, "version", None))
+    return normalize_contract_version(
+        _normalize_optional_anchor(
+            getattr(checkpoint_manager, "expected_contract_version", None)
+        )
+    ) or normalize_contract_version(
+        _normalize_optional_anchor(getattr(host._config, "version", None))
+    )
 
 
 def build_correlation_log_context(

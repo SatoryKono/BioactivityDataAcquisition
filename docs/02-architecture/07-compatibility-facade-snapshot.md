@@ -8,9 +8,9 @@
 - Curated inventory rows: `16`
 - Transition debt rows: `0`
 - Retained public entrypoints: `16`
-- Measured tracked modules: `29`
-- Measured-only modules outside curated inventory: `13`
-- Discovered docstring-tracked modules: `13`
+- Measured tracked modules: `30`
+- Measured-only modules outside curated inventory: `14`
+- Discovered docstring-tracked modules: `14`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 
@@ -28,6 +28,7 @@
 
 - `src/bioetl/application/composite/merger.py`
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
+- `src/bioetl/composition/bootstrap/runtime/composite_infrastructure_context.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/normalization_authors.py`
@@ -70,6 +71,7 @@
 - `src/bioetl/domain/normalization_pages.py` — owner: `bioetl.domain`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Deprecated compatibility wrapper for page-range normalization imports while callers migrate to bioetl.domain.normalization.pages.
 - `src/bioetl/domain/services/_date_helpers.py` — owner: `bioetl.domain.services`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility helper seam for legacy date-service imports that now delegate to bioetl.domain.normalization.dates.
 - `src/bioetl/interfaces/cli/commands/metrics_server_integration.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing metrics-server integration imports; first-party src should keep importing the canonical domains.health.metrics_server_integration module directly.
+- `src/bioetl/composition/bootstrap/runtime/composite_infrastructure_context.py` — owner: `bioetl.composition.bootstrap.runtime`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for runtime bootstrap imports that still target the legacy composite infrastructure context path while the canonical owner lives under bioetl.composition.bootstrap.
 - `src/bioetl/infrastructure/adapters/crossref/batch.py` — owner: `bioetl.infrastructure.adapters.crossref`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for CrossRef batch and pagination collaborators.
 
 ## Live Docstring Tracking Validation
@@ -77,6 +79,7 @@
 ### Discovered Docstring-Tracked Modules
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
+- `src/bioetl/composition/bootstrap/runtime/composite_infrastructure_context.py`
 - `src/bioetl/domain/normalization_authors.py`
 - `src/bioetl/domain/normalization_chembl.py`
 - `src/bioetl/domain/normalization_dates.py`

@@ -12,6 +12,7 @@ from bioetl.composition.runtime_builders.run_manifest_builder import (
     _ManifestControlPlaneRefs,
     create_run_manifest,
 )
+from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
@@ -46,7 +47,8 @@ def _iter_optional_control_plane_updates(
     dq_policy_ref: str | None = None,
     rule_bundle_version: str | None = None,
 ) -> tuple[tuple[str, str], ...]:
-    values = {
+    values = normalize_runtime_anchor_payload(
+        {
         "config_hash": config_hash,
         "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
         "effective_config_artifact_id": effective_config_artifact_id,
@@ -55,7 +57,8 @@ def _iter_optional_control_plane_updates(
         "contract_schema_hash": contract_schema_hash,
         "dq_policy_ref": dq_policy_ref,
         "rule_bundle_version": rule_bundle_version,
-    }
+        }
+    )
     return tuple(
         (field_name, field_value)
         for field_name, field_value in values.items()
@@ -77,12 +80,12 @@ def _build_dataclass_manifest_updates(
 
 
 def _apply_manifest_updates_to_mutable_context(
-    ctx: PipelineRunContext,
+    ctx: object,
     manifest_id: str,
     *,
     optional_updates: tuple[tuple[str, str], ...],
-) -> PipelineRunContext:
-    ctx.manifest_id = manifest_id
+) -> object:
+    setattr(ctx, "manifest_id", manifest_id)
     for field_name, field_value in optional_updates:
         setattr(ctx, field_name, field_value)
     return ctx
@@ -125,10 +128,13 @@ def attach_manifest_id(
             ),
         )
     if hasattr(ctx, "__dict__"):
-        return _apply_manifest_updates_to_mutable_context(
-            ctx,
-            manifest_id,
-            optional_updates=optional_updates,
+        return cast(
+            "PipelineRunContext",
+            _apply_manifest_updates_to_mutable_context(
+                ctx,
+                manifest_id,
+                optional_updates=optional_updates,
+            ),
         )
     raise TypeError("PipelineRunContext must support manifest_id attachment")
 

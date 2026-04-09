@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from bioetl.application.core.config import (
     ContentHashPolicyByVersion,
@@ -196,3 +200,194 @@ def test_finalize_pre_silver_skips_versioned_hash_projection_when_rollout_does_n
 
     assert silver_record is not None
     assert "_content_hashes_by_version" not in silver_record
+
+
+@pytest.mark.unit
+def test_profile_auto_resolves_for_chembl_activity() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "activity_id": " CHEMBL25 ",
+            "publication_doi": " HTTPS://doi.org/10.1000/ABC ",
+            "activity_properties": ' [{"rank":2,"kind":"b"},{"kind":"a","rank":1}] ',
+        }
+    )
+
+    assert processor.profile is not None
+    assert normalized["activity_id"] == "CHEMBL25"
+    assert normalized["publication_doi"] == "10.1000/abc"
+    assert normalized["activity_properties"] == '[{"kind":"b","rank":2},{"kind":"a","rank":1}]'
+
+
+@pytest.mark.unit
+def test_chembl_activity_profile_makes_content_hash_invariant_for_set_like_json_arrays() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+    record_a = {
+        "entity_id": "chembl:1",
+        "content_hash": "stale-a",
+        "activity_id": "CHEMBL25",
+        "publication_doi": "10.1000/abc",
+        "activity_properties": '[{"kind":"a","rank":1},{"kind":"b","rank":2}]',
+        "_run_id": "run-a",
+    }
+    record_b = {
+        "entity_id": "chembl:1",
+        "content_hash": "stale-b",
+        "activity_id": "CHEMBL25",
+        "publication_doi": "10.1000/abc",
+        "activity_properties": '[{"kind":"b","rank":2},{"kind":"a","rank":1}]',
+        "_run_id": "run-b",
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+
+
+@pytest.mark.unit
+def test_chembl_activity_content_hash_matches_golden_value() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+
+    normalized = processor.normalize_record(
+        {
+            "entity_id": "chembl:1",
+            "content_hash": "stale",
+            "activity_id": " CHEMBL25 ",
+            "publication_doi": " HTTPS://doi.org/10.1000/ABC ",
+            "publication_pmid": " 12345 ",
+            "standard_value": "1.2300000000",
+            "activity_properties": (
+                ' [{"kind":"b","rank":2},{"rank":1,"kind":"a"}] '
+            ),
+            "_run_id": "run-1",
+        }
+    )
+
+    assert (
+        normalized["content_hash"]
+        == "c066788d40b9881e1872940148940e127e498ca83dad4cecc88bab05abf34972"
+    )
+
+
+@pytest.mark.unit
+def test_chembl_activity_content_hash_ignores_meta_fields_and_equivalent_scalars() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+    record_a = {
+        "entity_id": "chembl:1",
+        "content_hash": "stale-a",
+        "activity_id": "CHEMBL25",
+        "publication_doi": "https://doi.org/10.1000/ABC",
+        "publication_pmid": "0012345",
+        "standard_value": "1.2300000000",
+        "activity_properties": '[{"kind":"a","rank":1},{"kind":"b","rank":2}]',
+        "_run_id": "run-a",
+        "_source_batch_id": "batch-a",
+        "_index": 1,
+    }
+    record_b = {
+        "entity_id": "chembl:2",
+        "content_hash": "stale-b",
+        "activity_id": "CHEMBL25",
+        "publication_doi": "10.1000/abc",
+        "publication_pmid": 12345,
+        "standard_value": 1.23,
+        "activity_properties": '[{"kind":"b","rank":2},{"kind":"a","rank":1}]',
+        "_run_id": "run-b",
+        "_source_batch_id": "batch-b",
+        "_index": 999,
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+    assert normalized_a["publication_pmid"] == "12345"
+    assert normalized_b["publication_pmid"] == "12345"
+
+
+@pytest.mark.unit
+def test_chembl_activity_content_hash_treats_blank_identifier_fields_like_none() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+    record_a = {
+        "entity_id": "chembl:1",
+        "content_hash": "stale-a",
+        "activity_id": "CHEMBL25",
+        "publication_doi": "   ",
+        "publication_pmid": None,
+        "standard_value": "1.23",
+    }
+    record_b = {
+        "entity_id": "chembl:1",
+        "content_hash": "stale-b",
+        "activity_id": "CHEMBL25",
+        "publication_doi": None,
+        "publication_pmid": "",
+        "standard_value": 1.23,
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["publication_doi"] is None
+    assert normalized_b["publication_pmid"] is None
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+
+
+@pytest.mark.unit
+@given(
+    activity_properties=st.permutations(
+        (
+            {"kind": "a", "rank": 1},
+            {"kind": "b", "rank": 2},
+            {"kind": "c", "rank": 3},
+        )
+    )
+)
+def test_chembl_activity_content_hash_is_permutation_invariant_for_set_like_json(
+    activity_properties: tuple[dict[str, object], ...],
+) -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+    base_record = {
+        "entity_id": "chembl:1",
+        "content_hash": "stale",
+        "activity_id": "CHEMBL25",
+        "publication_doi": "10.1000/abc",
+        "standard_value": 1.23,
+        "_run_id": "run-1",
+    }
+    canonical = processor.normalize_record(
+        {
+            **base_record,
+            "activity_properties": (
+                '[{"kind":"a","rank":1},{"kind":"b","rank":2},{"kind":"c","rank":3}]'
+            ),
+        }
+    )
+    candidate = processor.normalize_record(
+        {
+            **base_record,
+            "activity_properties": json.dumps(list(activity_properties)),
+        }
+    )
+
+    assert canonical["content_hash"] == candidate["content_hash"]

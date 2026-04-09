@@ -13,77 +13,13 @@ Hashing contract:
 from __future__ import annotations
 
 import hashlib
-import math
-from datetime import date, datetime
-from functools import singledispatch
-from typing import Any  # Any: required for singledispatch base case signature
 
 from bioetl.domain.types import JsonDict
 
 from ..constants import META_FIELDS
 from ..serialization import serialize_to_canonical_json
+from ._hashing_normalization import _normalize_value_for_hash
 from ..types import ContentHash, EntityID
-
-# =============================================================================
-# Singledispatch normalization helpers
-# =============================================================================
-
-
-@singledispatch
-def _normalize_value(
-    value: Any,  # Any: singledispatch requires Any for dispatch
-) -> Any:  # Any: singledispatch requires Any for dispatch
-    """Normalize a single value using singledispatch."""
-    return value
-
-
-@_normalize_value.register(float)
-def _normalize_float(value: float) -> float | None:
-    """Normalize a float value, handling NaN/Inf."""
-    if math.isnan(value) or math.isinf(value):
-        return None
-    return round(value, 10)
-
-
-@_normalize_value.register(datetime)
-def _normalize_datetime(value: datetime) -> str:
-    """Normalize datetime to date ISO string."""
-    return value.date().isoformat()
-
-
-@_normalize_value.register(date)
-def _normalize_date(value: date) -> str:
-    """Normalize date to ISO string."""
-    return value.isoformat()
-
-
-@_normalize_value.register(str)
-def _normalize_str(value: str) -> str:
-    """Normalize string by stripping whitespace."""
-    return value.strip()
-
-
-@_normalize_value.register(dict)
-def _normalize_dict(value: JsonDict) -> JsonDict:
-    """Normalize dict by recursively normalizing values."""
-    return {k: _normalize_value(v) for k, v in value.items()}
-
-
-@_normalize_value.register(list)
-def _normalize_list(value: list[object]) -> list[object]:
-    """Normalize list by recursively normalizing elements."""
-    return [_normalize_value(v) for v in value]
-
-
-# Keep registry visible for tooling to avoid false dead-code positives.
-_NORMALIZE_DISPATCH = (
-    _normalize_float,
-    _normalize_datetime,
-    _normalize_date,
-    _normalize_str,
-    _normalize_dict,
-    _normalize_list,
-)
 
 
 # =============================================================================
@@ -128,6 +64,7 @@ def normalize_for_hash(
     exclude_none: bool = False,
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
+    set_like_fields: set[str] | None = None,
 ) -> JsonDict:
     """Normalize record before hashing to ensure consistency.
 
@@ -141,7 +78,12 @@ def normalize_for_hash(
         Normalized dictionary with consistent value representations.
     """
     return {
-        key: _normalize_value(value)
+        key: _normalize_value_for_hash(
+            value,
+            sort_nested_sequences=bool(
+                set_like_fields is not None and key in set_like_fields
+            ),
+        )
         for key, value in record.items()
         if _should_include_field(
             key, value, exclude_none, include_fields, exclude_fields
@@ -170,6 +112,7 @@ def generate_content_hash(
     exclude_none: bool = False,
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
+    set_like_fields: set[str] | None = None,
 ) -> ContentHash:
     """Generate SHA256 content hash for record versioning.
 
@@ -192,6 +135,7 @@ def generate_content_hash(
         exclude_none=exclude_none,
         include_fields=include_fields,
         exclude_fields=exclude_fields,
+        set_like_fields=set_like_fields,
     )
     canonical = canonical_json_dumps(normalized)
     data = f"{provider}{canonical}"

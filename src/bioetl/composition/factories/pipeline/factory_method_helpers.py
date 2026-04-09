@@ -6,6 +6,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
+from bioetl.composition.factories.pipeline._factory_method_control_plane import (
+    apply_optional_control_plane_kwargs as _apply_optional_control_plane_kwargs,
+    resolve_strict_gold_validation as _resolve_strict_gold_validation,
+)
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationRequest,
 )
@@ -152,35 +156,6 @@ def build_create_pipeline_with_services_request(
         cached_bronze,
     )
 
-
-def _apply_optional_control_plane_kwargs(
-    kwargs: dict[str, object],
-    *,
-    manifest_id: str | None = None,
-    config_hash: str | None = None,
-    dq_contract_compatibility_hash: str | None = None,
-    effective_config_artifact_id: str | None = None,
-) -> None:
-    for key, value in {
-        "manifest_id": manifest_id,
-        "config_hash": config_hash,
-        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
-        "effective_config_artifact_id": effective_config_artifact_id,
-    }.items():
-        if value is not None:
-            kwargs[key] = value
-
-
-def _resolve_strict_gold_validation(
-    *,
-    runtime: RuntimeConfig,
-    settings: Settings,
-) -> bool:
-    return (
-        settings.env == "prod" and not settings.test_mode
-    ) or runtime.strict_gold_validation
-
-
 def create_transformer_instance(
     *,
     transformer_class: type[BaseTransformer] | None,
@@ -297,10 +272,10 @@ def create_pipeline_instance_with_services(
     return cast(
         "BasePipeline",
         cast(
-            "Any", create_pipeline_with_services
+            "Any", create_pipeline_with_services  # Any: factory callable keeps an open kwargs contract across compatibility seams.
         )(  # Any: factory callable keeps an open kwargs contract across compatibility seams.
             **cast(
-                "dict[str, Any]", create_pipeline_kwargs
+                "dict[str, Any]", create_pipeline_kwargs  # Any: kwargs bag mixes heterogeneous optional service values.
             )  # Any: kwargs bag mixes heterogeneous optional service values.
         ),
     )
@@ -348,10 +323,10 @@ def create_factory_runner(
     )
     # Any: factory callback signature is intentionally open for runtime/test seams.
     pipeline = cast(
-        "Any", create_with_services_fn
+        "Any", create_with_services_fn  # Any: factory callback stays open to provider-specific wiring extensions.
     )(  # Any: factory callback stays open to provider-specific wiring extensions.
         **cast(
-            "dict[str, Any]", create_with_services_kwargs
+            "dict[str, Any]", create_with_services_kwargs  # Any: kwargs bag carries heterogeneous optional service objects.
         )  # Any: kwargs bag carries heterogeneous optional service objects.
     )
     return assemble_runner_fn(

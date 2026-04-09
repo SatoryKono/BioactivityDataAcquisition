@@ -5,9 +5,17 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.config import ContentHashPolicyByVersion
+from bioetl.application.core.config import (
+    ContentHashPolicyByVersion,
+    ContentHashVersionPolicy,
+)
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.domain.normalization.profiles import (
+    FieldRule,
+    NormalizationProfile,
+    resolve_normalization_profile,
+)
 from bioetl.domain.normalization.dates import normalize_partial_date
 from bioetl.domain.normalization.identifiers import normalize_doi, normalize_pmid
 from bioetl.domain.normalization.json import (
@@ -50,10 +58,22 @@ class RecordNormalizationProcessor:
     """Normalize transformed Silver payloads before hash and merge steps."""
 
     provider: str
+    entity_type: str | None = None
+    profile: NormalizationProfile | None = None
     rule_set: NormalizationRulesPolicy = field(default_factory=NormalizationRulesPolicy)
     content_hash_include_fields: frozenset[str] = frozenset()
     content_hash_exclude_fields: frozenset[str] = frozenset()
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None
+
+    def __post_init__(self) -> None:
+        if self.profile is not None or self.entity_type is None:
+            return
+        resolved_profile = resolve_normalization_profile(
+            self.provider,
+            self.entity_type,
+        )
+        if resolved_profile is not None:
+            object.__setattr__(self, "profile", resolved_profile)
 
     def _should_project_hashes_by_version(self) -> bool:
         """Return True when rollout semantics require versioned content hashes."""
@@ -92,6 +112,11 @@ class RecordNormalizationProcessor:
                 exclude_none=True,
                 include_fields=include_fields,
                 exclude_fields=exclude_fields,
+                set_like_fields=(
+                    None
+                    if self.profile is None
+                    else set(self.profile.set_like_fields)
+                ),
             )
         )
 
@@ -108,36 +133,72 @@ class RecordNormalizationProcessor:
             for policy in self.content_hash_policy_by_version.policies
         }
 
+    def _profile_hash_fields(self) -> tuple[frozenset[str], frozenset[str]]:
+        """Return include/exclude fields supplied by the normalization profile."""
+        if self.profile is None:
+            return frozenset(), frozenset()
+        return self.profile.hash_included_fields, self.profile.hash_excluded_fields
+
+    def _select_hash_policy(
+        self,
+        *,
+        contract_version: str | None,
+    ) -> ContentHashVersionPolicy | None:
+        """Resolve the version-specific hash policy for one contract version."""
+        if self.content_hash_policy_by_version is None:
+            return None
+        target_version = (
+            contract_version or self.content_hash_policy_by_version.active_version
+        )
+        return (
+            self.content_hash_policy_by_version.for_version(target_version)
+            or self.content_hash_policy_by_version.active_policy
+        )
+
+    def _resolve_hash_include_fields(
+        self,
+        *,
+        profile_include: frozenset[str],
+        policy: ContentHashVersionPolicy | None,
+    ) -> set[str] | None:
+        """Return the include-field set for content hash generation."""
+        if policy is not None and policy.include_fields:
+            include_source = policy.include_fields
+        else:
+            include_source = profile_include or self.content_hash_include_fields
+        return set(include_source) if include_source else None
+
+    def _resolve_hash_exclude_fields(
+        self,
+        *,
+        profile_exclude: frozenset[str],
+        policy: ContentHashVersionPolicy | None,
+    ) -> set[str]:
+        """Return the exclude-field set for content hash generation."""
+        return (
+            set(self.content_hash_exclude_fields)
+            | set(profile_exclude)
+            | (set(policy.exclude_fields) if policy is not None else set())
+            | {"entity_id", "content_hash", "_content_hashes_by_version"}
+        )
+
     def _resolve_hash_policy(
         self,
         *,
         contract_version: str | None,
     ) -> tuple[set[str] | None, set[str]]:
-        policy = None
-        if self.content_hash_policy_by_version is not None:
-            target_version = (
-                contract_version or self.content_hash_policy_by_version.active_version
-            )
-            policy = self.content_hash_policy_by_version.for_version(target_version)
-            if policy is None:
-                policy = self.content_hash_policy_by_version.active_policy
-        include_source = (
-            policy.include_fields
-            if policy is not None
-            else self.content_hash_include_fields
+        profile_include, profile_exclude = self._profile_hash_fields()
+        policy = self._select_hash_policy(contract_version=contract_version)
+        return (
+            self._resolve_hash_include_fields(
+                profile_include=profile_include,
+                policy=policy,
+            ),
+            self._resolve_hash_exclude_fields(
+                profile_exclude=profile_exclude,
+                policy=policy,
+            ),
         )
-        exclude_source = (
-            policy.exclude_fields
-            if policy is not None
-            else self.content_hash_exclude_fields
-        )
-        include_fields = set(include_source) if include_source else None
-        exclude_fields = set(exclude_source) | {
-            "entity_id",
-            "content_hash",
-            "_content_hashes_by_version",
-        }
-        return include_fields, exclude_fields
 
     def finalize_pre_silver(
         self,
@@ -191,11 +252,16 @@ class RecordNormalizationProcessor:
         return normalized
 
     def _is_passthrough_field(self, field_name: str) -> bool:
-        return (
-            field_name.startswith("_") or field_name in self.rule_set.passthrough_fields
-        )
+        if field_name in self.rule_set.passthrough_fields:
+            return True
+        if field_name.startswith("_"):
+            return self._profile_rule(field_name) is None
+        return False
 
     def _normalize_field_value(self, field_name: str, value: object) -> object:
+        profile_rule = self._profile_rule(field_name)
+        if profile_rule is not None:
+            return self._normalize_profile_field_value(profile_rule, value)
         normalized_special = self._normalize_special_field(field_name, value)
         if normalized_special is not _UNHANDLED:
             return normalized_special
@@ -229,6 +295,17 @@ class RecordNormalizationProcessor:
         if stripped is None:
             return None
         return self._canonicalize_json_like_string(stripped)
+
+    def _profile_rule(self, field_name: str) -> FieldRule | None:
+        if self.profile is None:
+            return None
+        return self.profile.rule_for(field_name)
+
+    def _normalize_profile_field_value(self, rule: FieldRule, value: object) -> object:
+        normalized = rule.apply(value)
+        if isinstance(normalized, dict | list):
+            return serialize_json_canonical(normalized)
+        return normalized
 
     def _normalize_named_text_field(
         self,

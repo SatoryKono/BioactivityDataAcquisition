@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-08T18:16:19.674181+00:00",
+  "generated_at": "2026-04-09T06:00:37.092634+00:00",
   "summary": {
-    "total_scripts": 274,
+    "total_scripts": 276,
     "status_counts": {
-      "active": 230,
+      "active": 231,
       "legacy": 29,
-      "orphan": 14,
+      "orphan": 15,
       "unknown": 1
     },
     "reference_group_coverage": {
@@ -14,7 +14,7 @@
       "build": 31,
       "ci": 47,
       "docs": 115,
-      "scripts": 239,
+      "scripts": 240,
       "skills": 9,
       "tests": 89
     }
@@ -4040,7 +4040,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"check-drift\": \"check_doc_drift.py\","
         }
@@ -4130,7 +4130,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"check-docstrings\": \"check_docstring_coverage.py\","
         },
@@ -4151,7 +4151,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 111,
+          "line": 113,
           "source_group": "scripts",
           "text": "| `scripts/docs/chembl_matrix_structural_contract.py` | Shared runtime export helper used by the ChEMBL matrix structural contract/sync workflow |"
         }
@@ -4166,13 +4166,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 23,
+          "line": 24,
           "source_group": "scripts",
           "text": "| `enrich-matrix-normalization-details` | `scripts/docs/enrich_chembl_matrix_normalization_details.py` | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook  |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"enrich-matrix-normalization-details\": \"enrich_chembl_matrix_normalization_details.py\","
         }
@@ -4193,7 +4193,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"export-matrix-structural-contract\": \"export_chembl_matrix_structural_contract.py\","
         }
@@ -4208,13 +4208,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "| `filter-matrix-rows`                  | `scripts/docs/filter_chembl_matrix_rows.py`                  | Remove rows from the canonical ChEMBL matrix workbook by column value                 |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"filter-matrix-rows\": \"filter_chembl_matrix_rows.py\","
         }
@@ -4229,13 +4229,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "| `fix-links-auto`                      | `scripts/docs/fix_doc_links_auto.py`                         | Auto-fix broken documentation links                                                   |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"fix-links-auto\": \"fix_doc_links_auto.py\","
         }
@@ -4250,13 +4250,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "| `fix-links-explicit`                  | `scripts/docs/fix_doc_links_explicit.py`                     | Fix documentation links with explicit rules                                           |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 46,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"fix-links-explicit\": \"fix_doc_links_explicit.py\","
         }
@@ -4271,15 +4271,36 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "| `fix-link-warnings`                   | `scripts/docs/fix_link_warnings.py`                          | Fix link warnings in specified files                                                  |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 47,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"fix-link-warnings\": \"fix_link_warnings.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/docs/generate_chembl_activity_field_matrix.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "| `generate-field-matrix`               | `scripts/docs/generate_chembl_activity_field_matrix.py`      | Generate deterministic ChemBL Activity field-matrix artifacts directly from code      |"
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "\"generate-field-matrix\": \"generate_chembl_activity_field_matrix.py\","
         }
       ]
     },
@@ -4292,13 +4313,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 22,
+          "line": 23,
           "source_group": "scripts",
           "text": "| `build-matrix-dicts`                  | `scripts/docs/generate_chembl_matrix_dictionaries.py`        | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook     |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 40,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"build-matrix-dicts\": \"generate_chembl_matrix_dictionaries.py\","
         }
@@ -4313,13 +4334,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "| `normalize-matrix-values`             | `scripts/docs/normalize_chembl_matrix_workbook.py`           | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 43,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"normalize-matrix-values\": \"normalize_chembl_matrix_workbook.py\","
         }
@@ -4406,13 +4427,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "| `audit-sentence`                      | `scripts/docs/sentence_doc_audit.py`                         | Sentence-level documentation audit                                                    |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"audit-sentence\": \"sentence_doc_audit.py\","
         }
@@ -4427,13 +4448,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "| `sync-matrix-structural-policy`       | `scripts/docs/sync_chembl_matrix_structural_policy.py`       | Reconcile workbook policy columns with the current structural Silver policy semantics |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"sync-matrix-structural-policy\": \"sync_chembl_matrix_structural_policy.py\","
         }
@@ -4448,7 +4469,7 @@
       "references": [
         {
           "path": "scripts/docs/__main__.py",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"sync-repo-identity\": \"sync_repo_identity.py\","
         }
@@ -4469,7 +4490,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"verify\": \"verify_docs.py\","
         }
@@ -5397,7 +5418,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 21,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -6515,6 +6536,14 @@
           "text": "- `test_codex_basic.sh` - Basic test"
         }
       ]
+    },
+    {
+      "path": "scripts/ops/test_env_loading.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/triage_cleanup_issue_wave.sh",
@@ -8155,7 +8184,7 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 54,
+          "line": 55,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },

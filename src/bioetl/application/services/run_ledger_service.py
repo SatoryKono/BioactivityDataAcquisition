@@ -26,6 +26,7 @@ from bioetl.domain.control_plane.run_ledger import (
     canonicalize_run_ledger_stage_name,
     infer_ledger_event_family,
 )
+from bioetl.domain.normalization import normalize_run_ledger_payload
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
@@ -225,45 +226,48 @@ class RunLedgerService:
     ) -> RunLedgerEntry:
         """Create and append one ledger entry."""
         event_family = infer_ledger_event_family(event_type)
-        entry = RunLedgerEntry(
-            entry_id=self._entry_id_factory(),
-            manifest_id=self.manifest_id,
-            run_id=self.run_id,
-            event_type=event_type,
-            event_family=event_family,
-            occurred_at=datetime.now(UTC),
-            status=status,
-            stage=stage,
-            message=message,
-            error_type=error_type,
-            dataset_ref=dataset_ref,
-            lineage_fragment_id=lineage_fragment_id,
-            metrics_snapshot=metrics_snapshot,
-            details=build_run_ledger_diagnostic_details(
-                event_type=event_type,
-                event_family=event_family,
-                manifest_id=self.manifest_id,
-                run_id=self.run_id,
-                pipeline_name=self.pipeline_name,
-                provider=self.provider,
-                entity=self.entity,
-                run_type=self.run_type,
-                effective_config_hash=self.effective_config_hash,
-                contract_ref=self.contract_ref,
-                contract_version=self.contract_version,
-                dq_policy_ref=self.dq_policy_ref,
-                rule_bundle_version=self.rule_bundle_version,
-                dq_contract_compatibility_hash=self.dq_contract_compatibility_hash,
-                effective_config_artifact_id=self.effective_config_artifact_id,
-                composite_run_id=self.composite_run_id,
-                status=status,
-                stage=stage,
-                error_type=error_type,
-                dataset_ref=dataset_ref,
-                lineage_fragment_id=lineage_fragment_id,
-                details=details,
-            ),
+        payload = normalize_run_ledger_payload(
+            {
+                "entry_id": self._entry_id_factory(),
+                "manifest_id": self.manifest_id,
+                "run_id": self.run_id,
+                "event_type": event_type,
+                "event_family": event_family,
+                "occurred_at": datetime.now(UTC),
+                "status": status,
+                "stage": stage,
+                "message": message,
+                "error_type": error_type,
+                "dataset_ref": dataset_ref,
+                "lineage_fragment_id": lineage_fragment_id,
+                "metrics_snapshot": metrics_snapshot,
+                "details": build_run_ledger_diagnostic_details(
+                    event_type=event_type,
+                    event_family=event_family,
+                    manifest_id=self.manifest_id,
+                    run_id=self.run_id,
+                    pipeline_name=self.pipeline_name,
+                    provider=self.provider,
+                    entity=self.entity,
+                    run_type=self.run_type,
+                    effective_config_hash=self.effective_config_hash,
+                    contract_ref=self.contract_ref,
+                    contract_version=self.contract_version,
+                    dq_policy_ref=self.dq_policy_ref,
+                    rule_bundle_version=self.rule_bundle_version,
+                    dq_contract_compatibility_hash=self.dq_contract_compatibility_hash,
+                    effective_config_artifact_id=self.effective_config_artifact_id,
+                    composite_run_id=self.composite_run_id,
+                    status=status,
+                    stage=stage,
+                    error_type=error_type,
+                    dataset_ref=dataset_ref,
+                    lineage_fragment_id=lineage_fragment_id,
+                    details=details,
+                ),
+            }
         )
+        entry = RunLedgerEntry.from_dict(payload)
         self.ledger_port.append(entry)
         return entry
 

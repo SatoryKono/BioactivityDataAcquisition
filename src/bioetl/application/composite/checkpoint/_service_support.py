@@ -7,6 +7,7 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.domain.normalization import normalize_runtime_anchor_payload
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.exceptions import BioETLError, CheckpointConflictError, StorageError
 
@@ -48,12 +49,21 @@ def create_expected_checkpoint_context(
     composite_run_identity: str,
 ) -> ExpectedCheckpointContext:
     """Normalize nullable runtime anchors into a comparable checkpoint context."""
+    normalized = normalize_runtime_anchor_payload(
+        {
+            "effective_config_hash": effective_config_hash,
+            "contract_ref": contract_ref,
+            "contract_version": contract_version,
+            "manifest_id": manifest_id,
+            "composite_run_identity": composite_run_identity,
+        }
+    )
     return ExpectedCheckpointContext(
-        effective_config_hash=effective_config_hash or "",
-        contract_ref=contract_ref or "",
-        contract_version=contract_version or "",
-        manifest_id=manifest_id or "",
-        composite_run_identity=composite_run_identity,
+        effective_config_hash=normalized["effective_config_hash"] or "",
+        contract_ref=normalized["contract_ref"] or "",
+        contract_version=normalized["contract_version"] or "",
+        manifest_id=normalized["manifest_id"] or "",
+        composite_run_identity=normalized["composite_run_identity"] or "",
     )
 
 
@@ -156,22 +166,56 @@ def resolve_resume_checkpoint_filename(
     return latest_checkpoint_filename(storage=storage, glob_pattern=glob_pattern)
 
 
+def _coalesce_expected_anchor(current: str, expected: str) -> str:
+    """Prefer the persisted checkpoint anchor and fall back to the runtime one."""
+    return current or expected
+
+
+def _build_merged_anchor_payload(
+    *,
+    state: CompositeCheckpointState,
+    anchors: ExpectedCheckpointContext,
+) -> dict[str, str]:
+    """Return the raw anchor payload before normalization."""
+    return {
+        "effective_config_hash": _coalesce_expected_anchor(
+            state.effective_config_hash,
+            anchors.effective_config_hash,
+        ),
+        "contract_ref": _coalesce_expected_anchor(
+            state.contract_ref,
+            anchors.contract_ref,
+        ),
+        "contract_version": _coalesce_expected_anchor(
+            state.contract_version,
+            anchors.contract_version,
+        ),
+        "manifest_id": _coalesce_expected_anchor(
+            state.manifest_id,
+            anchors.manifest_id,
+        ),
+        "composite_run_identity": _coalesce_expected_anchor(
+            state.composite_run_identity,
+            anchors.composite_run_identity,
+        ),
+    }
+
+
 def merge_expected_anchors(
     state: CompositeCheckpointState,
     anchors: ExpectedCheckpointContext,
 ) -> CompositeCheckpointState:
     """Fill empty checkpoint anchors with the expected runtime anchor values."""
+    merged = normalize_runtime_anchor_payload(
+        _build_merged_anchor_payload(state=state, anchors=anchors)
+    )
     return replace(
         state,
-        effective_config_hash=(
-            state.effective_config_hash or anchors.effective_config_hash
-        ),
-        contract_ref=(state.contract_ref or anchors.contract_ref),
-        contract_version=(anchors.contract_version or state.contract_version),
-        manifest_id=(state.manifest_id or anchors.manifest_id),
-        composite_run_identity=(
-            state.composite_run_identity or anchors.composite_run_identity
-        ),
+        effective_config_hash=merged["effective_config_hash"] or "",
+        contract_ref=merged["contract_ref"] or "",
+        contract_version=merged["contract_version"] or "",
+        manifest_id=merged["manifest_id"] or "",
+        composite_run_identity=merged["composite_run_identity"] or "",
     )
 
 
@@ -201,6 +245,12 @@ def validate_resume_compatibility(
             _effective_hash_mismatch(
                 state=state,
                 expected_effective_config_hash=anchors.effective_config_hash,
+                logger=logger,
+                composite_name=composite_name,
+            ),
+            _manifest_id_mismatch(
+                state=state,
+                expected_manifest_id=anchors.manifest_id,
                 logger=logger,
                 composite_name=composite_name,
             ),
@@ -295,7 +345,7 @@ def fresh_checkpoint_state(
         run_id=run_id,
         effective_config_hash=anchors.effective_config_hash,
         contract_ref=anchors.contract_ref,
-        contract_version=anchors.contract_version or "1.0.0",
+        contract_version=anchors.contract_version,
         manifest_id=anchors.manifest_id,
         composite_run_identity=anchors.composite_run_identity,
         last_event_id=None,
@@ -375,5 +425,27 @@ def _effective_hash_mismatch(
         "Checkpoint missing effective_config_hash anchor; compatibility check is partial",
         composite=composite_name,
         reason_code="checkpoint_anchor_missing_effective_config_hash",
+    )
+    return None
+
+
+def _manifest_id_mismatch(
+    *,
+    state: CompositeCheckpointState,
+    expected_manifest_id: str,
+    logger: LoggerPort,
+    composite_name: str,
+) -> str | None:
+    if not expected_manifest_id:
+        return None
+    if state.manifest_id:
+        if state.manifest_id != expected_manifest_id:
+            return f"manifest_id {state.manifest_id!r} != {expected_manifest_id!r}"
+        return None
+
+    logger.warning(
+        "Checkpoint missing manifest_id anchor; compatibility check is partial",
+        composite=composite_name,
+        reason_code="checkpoint_anchor_missing_manifest_id",
     )
     return None

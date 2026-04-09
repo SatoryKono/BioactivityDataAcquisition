@@ -10,11 +10,15 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, is_dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from typing import cast
 from uuid import UUID
 
+from bioetl.domain.normalization.control_plane import (
+    normalize_control_plane_datetime,
+    normalize_control_plane_uuid,
+)
 from bioetl.domain.types import RunID, RunType
 
 __all__ = [
@@ -27,17 +31,20 @@ __all__ = [
 
 def _normalize_mapping(value: Mapping[object, object]) -> dict[str, object]:
     """Normalize nested mappings into JSON-serializable primitives."""
-    return {str(key): _normalize_serializable(item) for key, item in value.items()}
+    return {
+        str(key): _normalize_serializable(item)
+        for key, item in sorted(value.items(), key=lambda item: str(item[0]))
+    }
 
 
 def _normalize_scalar(value: object) -> object:
     """Normalize scalar values into JSON-serializable primitives."""
     if isinstance(value, datetime):
-        return value.isoformat()
+        return normalize_control_plane_datetime(value)
     if isinstance(value, Enum):
         return str(value.value)
     if isinstance(value, UUID):
-        return str(value)
+        return normalize_control_plane_uuid(value)
     return value
 
 
@@ -52,9 +59,25 @@ def _normalize_collection_value(value: object) -> object | None:
     """Normalize collection-like values into JSON-friendly shapes."""
     if isinstance(value, dict):
         return _normalize_mapping(value)
-    if isinstance(value, (list, tuple, set, frozenset)):
-        return [_normalize_serializable(item) for item in value]
-    return None
+    sequence_value = _normalize_sequence_value(value)
+    if sequence_value is not None:
+        return sequence_value
+    return _normalize_set_like_value(value)
+
+
+def _normalize_sequence_value(value: object) -> list[object] | None:
+    """Normalize ordered collection values when present."""
+    if not isinstance(value, (list, tuple)):
+        return None
+    return [_normalize_serializable(item) for item in value]
+
+
+def _normalize_set_like_value(value: object) -> list[object] | None:
+    """Normalize set-like values into deterministically sorted lists."""
+    if not isinstance(value, (set, frozenset)):
+        return None
+    normalized = [_normalize_serializable(item) for item in value]
+    return sorted(normalized, key=lambda item: str(item))
 
 
 def _normalize_serializable(value: object) -> object:
@@ -66,6 +89,13 @@ def _normalize_serializable(value: object) -> object:
     if collection_value is not None:
         return collection_value
     return _normalize_scalar(value)
+
+
+def _normalize_manifest_created_at(value: datetime) -> datetime:
+    """Canonicalize manifest timestamps to UTC-aware datetimes."""
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,6 +156,14 @@ class RunManifest:
     code_provenance: RunCodeProvenance
     source_refs: tuple[RunSourceRef, ...] = ()
     planned_artifacts: tuple[RunArtifactRef, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Keep manifest timestamps canonical across serialize/deserialize cycles."""
+        object.__setattr__(
+            self,
+            "created_at",
+            _normalize_manifest_created_at(self.created_at),
+        )
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable manifest payload."""

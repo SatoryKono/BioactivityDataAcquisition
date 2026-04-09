@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.domain.normalization import (
+    normalize_contract_ref,
+    normalize_contract_version,
+    normalize_control_plane_sha256,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.control_plane import RunManifest
     from bioetl.domain.types import RunID
@@ -57,7 +63,7 @@ def sync_manifest_runtime_defaults(
     host.run_type = _coalesce_missing(host.run_type, manifest.run_type.value)
     host.effective_config_hash = _coalesce_missing(
         host.effective_config_hash,
-        code_provenance.config_hash,
+        normalize_control_plane_sha256(code_provenance.config_hash),
     )
 
 
@@ -69,11 +75,11 @@ def sync_manifest_contract_defaults(
     code_provenance = manifest.code_provenance
     host.contract_ref = _coalesce_missing(
         host.contract_ref,
-        code_provenance.contract_ref,
+        normalize_contract_ref(code_provenance.contract_ref),
     )
     host.contract_version = _coalesce_missing(
         host.contract_version,
-        code_provenance.contract_version,
+        normalize_contract_version(code_provenance.contract_version),
     )
     host.dq_policy_ref = _coalesce_missing(
         host.dq_policy_ref,
@@ -130,6 +136,9 @@ def build_run_ledger_diagnostic_details(
         "manifest_id": manifest_id,
         "run_id": str(run_id),
     }
+    effective_config_hash = normalize_control_plane_sha256(effective_config_hash)
+    contract_ref = normalize_contract_ref(contract_ref)
+    contract_version = normalize_contract_version(contract_version)
     _apply_optional_diagnostic_anchor(diagnostic, "pipeline", pipeline_name)
     _apply_optional_diagnostic_anchor(diagnostic, "provider", provider)
     _apply_optional_diagnostic_anchor(diagnostic, "entity", entity)

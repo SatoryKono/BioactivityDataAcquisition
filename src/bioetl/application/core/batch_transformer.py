@@ -75,6 +75,7 @@ class BatchTransformer:
             return None
         return RecordNormalizationProcessor(
             provider=config.provider,
+            entity_type=config.entity_type,
             rule_set=config.normalization_rule_set,
             content_hash_include_fields=config.content_hash_include_fields,
             content_hash_exclude_fields=config.content_hash_exclude_fields,

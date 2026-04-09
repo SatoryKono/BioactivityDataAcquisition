@@ -229,6 +229,20 @@ class TestFilenameFormat:
         assert svc.expected_contract_version == "2.1.0"
         assert svc.expected_manifest_id == "manifest-123"
 
+    def test_normalizes_expected_anchor_properties(self) -> None:
+        """Expected checkpoint anchors are canonicalized on service construction."""
+        svc, _, _ = _make_service(
+            expected_effective_config_hash=" SHA256:ABC ",
+            expected_contract_ref=" Composite_Publication ",
+            expected_contract_version=" v2 ",
+            expected_manifest_id=" manifest-123 ",
+        )
+
+        assert svc.expected_effective_config_hash == "sha256:abc"
+        assert svc.expected_contract_ref == "composite_publication"
+        assert svc.expected_contract_version == "2.0.0"
+        assert svc.expected_manifest_id == "manifest-123"
+
 
 # ---------------------------------------------------------------------------
 # 2. load – fresh start (resume=False)
@@ -610,6 +624,26 @@ class TestLoadResume:
             seed_completed=True,
             manifest_id="manifest-123",
             last_event_id="entry-missing",
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        with pytest.raises(CheckpointConflictError):
+            await svc.load()
+
+    @pytest.mark.asyncio
+    async def test_resume_blocks_on_manifest_id_mismatch(self) -> None:
+        """Resume is blocked when checkpoint manifest_id mismatches expected anchor."""
+        svc, storage, _ = _make_service(
+            resume=True,
+            expected_manifest_id="manifest-current",
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            manifest_id="manifest-old",
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())

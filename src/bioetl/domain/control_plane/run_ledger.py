@@ -11,6 +11,16 @@ from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane._run_ledger_event_family import (
     infer_ledger_event_family,
 )
+from bioetl.domain.control_plane._run_ledger_serialization import (
+    load_details,
+    load_metrics_snapshot,
+    load_optional_str,
+    normalize_ledger_value,
+)
+from bioetl.domain.normalization.control_plane import (
+    normalize_control_plane_datetime,
+    normalize_control_plane_uuid,
+)
 from bioetl.domain.events import ORDINARY_PIPELINE_STAGE_NAMES
 from bioetl.domain.types import RunID
 
@@ -86,24 +96,6 @@ def canonicalize_run_ledger_stage_name(stage: str) -> str:
             f"Unsupported run-ledger stage {stage!r}; expected one of: {valid_stages}"
         )
     return normalized_stage
-
-
-def _normalize_ledger_value(value: object) -> object:
-    """Normalize nested values into JSON-safe primitives."""
-    if isinstance(value, dict):
-        return {str(key): _normalize_ledger_value(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple, set, frozenset)):
-        return [_normalize_ledger_value(item) for item in value]
-    return _normalize_ledger_scalar(value)
-
-
-def _normalize_ledger_scalar(value: object) -> object:
-    """Normalize scalar ledger values into JSON-safe primitives."""
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, UUID):
-        return str(value)
-    return value
 
 
 def _normalize_run_ledger_stage(event_type: str, stage: str | None) -> str | None:
@@ -245,7 +237,7 @@ class RunLedgerEntry:
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable ledger payload."""
         return {
-            key: _normalize_ledger_value(value) for key, value in asdict(self).items()
+            key: normalize_ledger_value(value) for key, value in asdict(self).items()
         }
 
     @classmethod
@@ -256,34 +248,14 @@ class RunLedgerEntry:
             manifest_id=str(payload["manifest_id"]),
             run_id=RunID(UUID(str(payload["run_id"]))),
             event_type=str(payload["event_type"]),
-            event_family=_load_optional_str(payload, "event_family"),
+            event_family=load_optional_str(payload, "event_family"),
             occurred_at=datetime.fromisoformat(str(payload["occurred_at"])),
-            status=_load_optional_str(payload, "status"),
+            status=load_optional_str(payload, "status"),
             stage=None if payload.get("stage") is None else str(payload["stage"]),
-            message=_load_optional_str(payload, "message"),
-            error_type=_load_optional_str(payload, "error_type"),
-            dataset_ref=_load_optional_str(payload, "dataset_ref"),
-            lineage_fragment_id=_load_optional_str(payload, "lineage_fragment_id"),
-            metrics_snapshot=_load_metrics_snapshot(payload.get("metrics_snapshot")),
-            details=_load_details(payload.get("details")),
+            message=load_optional_str(payload, "message"),
+            error_type=load_optional_str(payload, "error_type"),
+            dataset_ref=load_optional_str(payload, "dataset_ref"),
+            lineage_fragment_id=load_optional_str(payload, "lineage_fragment_id"),
+            metrics_snapshot=load_metrics_snapshot(payload.get("metrics_snapshot")),
+            details=load_details(payload.get("details")),
         )
-
-
-def _load_optional_str(payload: dict[str, object], key: str) -> str | None:
-    """Extract an optional string field from a serialized mapping."""
-    value = payload.get(key)
-    return None if value is None else str(value)
-
-
-def _load_metrics_snapshot(raw_metrics: object) -> dict[str, int] | None:
-    """Deserialize metrics snapshot payload safely."""
-    if not isinstance(raw_metrics, dict):
-        return None
-    return {str(key): int(value) for key, value in raw_metrics.items()}
-
-
-def _load_details(raw_details: object) -> dict[str, object] | None:
-    """Deserialize arbitrary details payload safely."""
-    if not isinstance(raw_details, dict):
-        return None
-    return {str(key): value for key, value in raw_details.items()}

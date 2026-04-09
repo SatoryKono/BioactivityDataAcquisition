@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.domain.normalization import normalize_runtime_anchor_payload
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,
@@ -21,6 +22,15 @@ if TYPE_CHECKING:
 
 def to_dict(checkpoint_state: CompositeCheckpointState) -> dict[str, object]:
     """Convert checkpoint state to a JSON-compatible dictionary."""
+    normalized_anchors = normalize_runtime_anchor_payload(
+        {
+            "effective_config_hash": checkpoint_state.effective_config_hash,
+            "contract_ref": checkpoint_state.contract_ref,
+            "contract_version": checkpoint_state.contract_version,
+            "manifest_id": checkpoint_state.manifest_id,
+            "composite_run_identity": checkpoint_state.composite_run_identity,
+        }
+    )
     return {
         "composite_name": checkpoint_state.composite_name,
         "run_id": checkpoint_state.run_id,
@@ -38,11 +48,11 @@ def to_dict(checkpoint_state: CompositeCheckpointState) -> dict[str, object]:
         "merge_completed": checkpoint_state.merge_completed,
         "merge_result": checkpoint_state.merge_result,
         "checkpoint_schema_version": checkpoint_state.checkpoint_schema_version,
-        "effective_config_hash": checkpoint_state.effective_config_hash,
-        "contract_ref": checkpoint_state.contract_ref,
-        "contract_version": checkpoint_state.contract_version,
-        "manifest_id": checkpoint_state.manifest_id,
-        "composite_run_identity": checkpoint_state.composite_run_identity,
+        "effective_config_hash": normalized_anchors["effective_config_hash"],
+        "contract_ref": normalized_anchors["contract_ref"],
+        "contract_version": normalized_anchors["contract_version"],
+        "manifest_id": normalized_anchors["manifest_id"],
+        "composite_run_identity": normalized_anchors["composite_run_identity"],
         "last_event_id": checkpoint_state.last_event_id,
         "last_event_occurred_at": (
             checkpoint_state.last_event_occurred_at.isoformat()
@@ -66,6 +76,15 @@ def from_dict(data: JsonDict) -> CompositeCheckpointState:
     """Rebuild checkpoint state from serialized payload."""
     from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 
+    normalized_anchors = normalize_runtime_anchor_payload(
+        {
+            "effective_config_hash": data.get("effective_config_hash"),
+            "contract_ref": data.get("contract_ref"),
+            "contract_version": data.get("contract_version"),
+            "manifest_id": data.get("manifest_id"),
+            "composite_run_identity": data.get("composite_run_identity"),
+        }
+    )
     return CompositeCheckpointState(
         composite_name=data["composite_name"],
         run_id=data["run_id"],
@@ -79,11 +98,11 @@ def from_dict(data: JsonDict) -> CompositeCheckpointState:
         merge_completed=data.get("merge_completed", False),
         merge_result=data.get("merge_result"),
         checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),
-        effective_config_hash=data.get("effective_config_hash", ""),
-        contract_ref=data.get("contract_ref", ""),
-        contract_version=data.get("contract_version", "1.0.0"),
-        manifest_id=data.get("manifest_id", ""),
-        composite_run_identity=data.get("composite_run_identity", ""),
+        effective_config_hash=normalized_anchors["effective_config_hash"] or "",
+        contract_ref=normalized_anchors["contract_ref"] or "",
+        contract_version=normalized_anchors["contract_version"] or "",
+        manifest_id=normalized_anchors["manifest_id"] or "",
+        composite_run_identity=normalized_anchors["composite_run_identity"] or "",
         last_event_id=_parse_optional_string(data.get("last_event_id")),
         last_event_occurred_at=_parse_timestamp(data.get("last_event_occurred_at")),
         created_at=_parse_timestamp(data.get("created_at")),

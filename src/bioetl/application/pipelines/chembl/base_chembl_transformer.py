@@ -266,6 +266,7 @@ def _normalize_chembl_business_data(
     """Normalize ChEMBL business data before legacy hash finalization."""
     return RecordNormalizationProcessor(
         provider=transformer.provider,
+        entity_type=transformer.entity_type,
     ).normalize_business_data(business_data)
 
 

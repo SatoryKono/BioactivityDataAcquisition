@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import replace
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.run_ledger_service import RunLedgerService
 from bioetl.composition import PipelineRegistry, create_registry
@@ -19,6 +18,10 @@ from bioetl.composition.runtime_builders.config_access import (
 from bioetl.composition.runtime_builders.control_plane import (
     attach_manifest_id,
     create_run_manifest_with_effective_config,
+)
+from bioetl.composition.runtime_builders._runner_builder_support import (
+    bind_manifest_logger_context as _bind_manifest_logger_context,
+    resolve_control_plane_flags as _resolve_control_plane_flags,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
     ResolvedVacuumSettings,
@@ -58,22 +61,6 @@ if TYPE_CHECKING:
 
 
 __all__ = ["build_pipeline_runner"]
-
-
-class _LoggerBindableObservability(Protocol):
-    logger: object
-
-
-def _resolve_control_plane_flags(settings: object) -> tuple[bool, bool]:
-    """Resolve control-plane feature flags with backwards-compatible defaults."""
-    pipeline_settings = getattr(settings, "pipeline", None)
-    control_plane = getattr(pipeline_settings, "control_plane", None)
-    manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
-    ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
-    if not manifest_enabled:
-        return False, False
-    return True, ledger_enabled
-
 
 def _initialize_registry(
     *,
@@ -118,56 +105,6 @@ def _create_runner_from_factory(
             cached_bronze=inputs.cached_bronze,
         ),
     )
-
-
-def _bind_manifest_logger_context(
-    inputs: _RunnerInputs,
-    manifest_id: str,
-) -> _RunnerInputs:
-    """Bind ``manifest_id`` into runtime observability when available.
-
-    The manifest identifier becomes available only after control-plane
-    artifacts are materialized. Rebinding it here keeps critical runtime logs
-    linkable to the manifest/ledger artifacts without expanding application
-    layer contracts.
-    """
-    observability = getattr(inputs, "observability", None)
-    rebound_observability = _rebind_observability_logger(
-        observability=observability,
-        manifest_id=manifest_id,
-    )
-    if rebound_observability is observability:
-        return inputs
-    if isinstance(inputs, _RunnerInputs):
-        return replace(
-            inputs,
-            observability=cast("ObservabilityBundle", rebound_observability),
-        )
-    return inputs
-
-
-def _rebind_observability_logger(
-    *,
-    observability: object,
-    manifest_id: str,
-) -> object:
-    """Return observability with ``manifest_id`` bound to its logger context."""
-    bind_fn = getattr(observability, "bind", None)
-    if callable(bind_fn):
-        return bind_fn(manifest_id=manifest_id)
-
-    logger = getattr(observability, "logger", None)
-    logger_bind = getattr(logger, "bind", None)
-    if not callable(logger_bind):
-        return observability
-
-    typed_observability = cast("_LoggerBindableObservability", observability)
-    try:
-        typed_observability.logger = logger_bind(manifest_id=manifest_id)
-    except (AttributeError, TypeError):
-        return observability
-    return observability
-
 
 def _resolve_optional_functions(
     build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None,
