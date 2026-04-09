@@ -12,6 +12,8 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.runtime_builders._runner_builder_support import (
     bind_manifest_logger_context as _bind_manifest_logger_context,
+)
+from bioetl.composition.runtime_builders._runner_builder_support import (
     resolve_control_plane_flags as _resolve_control_plane_flags,
 )
 from bioetl.composition.runtime_builders.config_access import (
@@ -71,6 +73,7 @@ class PipelineRunnerProtocol(Protocol):
         """Attach the run-ledger collaborator."""
         ...
 
+
 def _initialize_registry(
     *,
     registry: PipelineRegistry | None,
@@ -114,6 +117,7 @@ def _create_runner_from_factory(
             cached_bronze=inputs.cached_bronze,
         ),
     )
+
 
 def _resolve_optional_functions(
     build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None,

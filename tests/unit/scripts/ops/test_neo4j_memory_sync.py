@@ -194,6 +194,48 @@ def test_snapshot_contains_expected_relations() -> None:
         "chembl.activity",
     ) in relation_keys
     assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/core/record_normalization_processor.py",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/normalization/profiles/_chembl_activity_fields.py",
+    ) in relation_keys
+    assert (
+        "entity_config",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/normalization/chembl.py",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "crossref_publication",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/core/record_normalization_processor.py",
+    ) in relation_keys
+    assert (
+        "entity_config",
+        "crossref_publication",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/normalization/text.py",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "composite_activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/composite/join_key_normalization.py",
+    ) in relation_keys
+    assert (
         "contract_surface",
         "pubmed.publication",
         "DEPENDS_ON",

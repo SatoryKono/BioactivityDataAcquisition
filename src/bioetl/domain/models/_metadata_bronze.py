@@ -26,6 +26,7 @@ __all__ = [
     "BronzeMetadata",
     "BronzeOutputExt",
     "FileOutputMetadata",
+    "InputSnapshotRef",
     "RateLimitInfo",
     "SourceMetadata",
 ]
@@ -96,6 +97,43 @@ class APIRequestDetails(BaseModel):
     )
 
 
+class InputSnapshotRef(BaseModel):
+    """Immutable snapshot reference for one external-input batch.
+
+    Attributes:
+        snapshot_id: Stable identifier for the captured input snapshot.
+        content_hash: SHA256 hash of the captured payload bytes/content.
+        immutable_uri: Immutable local/object-store URI for exact replay.
+        query_fingerprint: Optional normalized query fingerprint for lookup.
+        etag: Optional upstream entity tag captured at fetch time.
+        last_modified: Optional upstream last-modified marker.
+        captured_at: UTC timestamp when the snapshot was captured.
+    """
+
+    snapshot_id: str = Field(description="Stable identifier for the input snapshot")
+    content_hash: str = Field(description="SHA256 hash of the captured input content")
+    immutable_uri: str | None = Field(
+        default=None,
+        description="Immutable URI or file path for replaying the captured payload",
+    )
+    query_fingerprint: str | None = Field(
+        default=None,
+        description="Optional normalized query fingerprint for snapshot lookup",
+    )
+    etag: str | None = Field(
+        default=None,
+        description="Optional upstream entity tag captured at fetch time",
+    )
+    last_modified: str | None = Field(
+        default=None,
+        description="Optional upstream last-modified marker",
+    )
+    captured_at: datetime | None = Field(
+        default=None,
+        description="UTC timestamp when the snapshot was captured",
+    )
+
+
 class SourceMetadata(BaseModel):
     """Data source information for Bronze layer.
 
@@ -113,6 +151,7 @@ class SourceMetadata(BaseModel):
         total_requests: Total number of API requests made.
         total_response_bytes: Total bytes received from all requests.
         avg_request_duration_ms: Average request duration in milliseconds.
+        input_snapshots: Immutable snapshot references for replayable input batches.
     """
 
     type: Literal["api", "csv", "parquet"] = Field(
@@ -134,6 +173,10 @@ class SourceMetadata(BaseModel):
     )
     avg_request_duration_ms: float = Field(
         default=0.0, description="Average request duration in milliseconds"
+    )
+    input_snapshots: list[InputSnapshotRef] = Field(
+        default_factory=list,
+        description="Immutable snapshot references for replayable input batches",
     )
 
 

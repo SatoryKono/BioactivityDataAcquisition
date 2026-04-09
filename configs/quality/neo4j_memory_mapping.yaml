@@ -27,6 +27,33 @@ pipeline_tests:
   ownership_config: "configs/quality/test_matrix.yaml"
   provider_regression_suites: true
 
+normalization:
+  relation_type: "DEPENDS_ON"
+  entity_relation_type: "DEPENDS_ON"
+  defaults:
+    entity:
+      modules:
+        - "src/bioetl/application/core/record_normalization_processor.py"
+        - "src/bioetl/domain/normalization/text.py"
+        - "src/bioetl/domain/normalization/identifiers.py"
+        - "src/bioetl/domain/normalization/dates.py"
+        - "src/bioetl/domain/normalization/json.py"
+    composite:
+      modules:
+        - "src/bioetl/application/composite/join_key_normalization.py"
+        - "src/bioetl/application/composite/join_key_resolution.py"
+        - "src/bioetl/application/composite/key_extractor.py"
+  pipelines:
+    chembl_activity:
+      modules:
+        - "src/bioetl/application/core/record_normalization_processor.py"
+        - "src/bioetl/domain/normalization/profiles/_chembl_activity_fields.py"
+        - "src/bioetl/domain/normalization/chembl.py"
+        - "src/bioetl/domain/normalization/control_plane.py"
+        - "src/bioetl/domain/normalization/identifiers.py"
+        - "src/bioetl/domain/normalization/dates.py"
+        - "src/bioetl/domain/normalization/text.py"
+
 contracts:
   registry_source_prefixes:
     - "bioetl.domain.contracts.gold"

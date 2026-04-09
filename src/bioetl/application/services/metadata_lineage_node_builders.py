@@ -142,6 +142,9 @@ def source_system_node(
             "api_version": (
                 None if source_metadata is None else source_metadata.api_version
             ),
+            "input_snapshot_count": (
+                0 if source_metadata is None else len(source_metadata.input_snapshots)
+            ),
         },
     )
 
@@ -166,6 +169,13 @@ def _source_request_attributes(
         "api_request_count": len(source_metadata.api_requests),
         "total_requests": source_metadata.total_requests,
         "total_response_bytes": source_metadata.total_response_bytes,
+        "input_snapshot_count": len(source_metadata.input_snapshots),
+        "input_snapshot_ids": [
+            snapshot.snapshot_id for snapshot in source_metadata.input_snapshots
+        ],
+        "input_snapshot_content_hashes": [
+            snapshot.content_hash for snapshot in source_metadata.input_snapshots
+        ],
     }
 
 

@@ -2,16 +2,8 @@
 
 from __future__ import annotations
 
-<<<<<<< HEAD
 from bioetl.application.core.pipeline_registry_wiring_api import (
     ActivityTransformer,
-||||||| e9a21369c
-from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
-from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
-=======
-from bioetl.application.core.pipeline_registry_wiring_api import ActivityTransformer
-from bioetl.application.core.pipeline_registry_wiring_api import (
->>>>>>> feat/2712-audit-runtime-wiring
     AssayParametersTransformer,
     AssayTransformer,
     CellLineTransformer,
