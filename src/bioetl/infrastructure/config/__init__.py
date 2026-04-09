@@ -60,6 +60,12 @@ def __getattr__(name: str) -> type:
         )
 
         return load_composite_config  # type: ignore[return-value]
+    if name == "load_workflow_config":
+        from bioetl.infrastructure.config.workflow_config_api import (
+            load_workflow_config,
+        )
+
+        return load_workflow_config  # type: ignore[return-value]
     if name == "load_source_config":
         from bioetl.infrastructure.config.source_config_loader import (
             load_source_config,
@@ -85,5 +91,6 @@ __all__ = [
     "load_pipeline_config",
     "load_pipeline_contract_policy",
     "load_source_config",
+    "load_workflow_config",
     "yaml_config_to_domain",
 ]
