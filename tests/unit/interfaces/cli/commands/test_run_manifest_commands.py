@@ -149,6 +149,32 @@ class _FakeRunManifestService:
                     ),
                 ],
             },
+            identity_graph={
+                "run_id": str(self._run_id),
+                "manifest_id": "manifest-1",
+                "execution_fingerprint": "fingerprint-1",
+                "effective_config_hash": "deadbeef",
+                "contract_ref": "chembl_activity",
+                "contract_version": "1.2.0",
+                "planned_artifacts": [
+                    {
+                        "layer": "gold",
+                        "path": "/tmp/output/gold/chembl/activity",
+                    }
+                ],
+                "published_artifacts": [
+                    {
+                        "event_type": "artifact_published",
+                        "stage": "gold",
+                        "dataset_ref": "gold:chembl.activity@1",
+                        "lineage_fragment_id": "gold:fragment-1",
+                        "artifact_path": "/tmp/output/gold/chembl/activity",
+                        "metadata_path": "/tmp/output/gold/chembl/activity/_metadata.yaml",
+                        "run_id": str(self._run_id),
+                        "manifest_id": "manifest-1",
+                    }
+                ],
+            },
         )
 
     def diff(
@@ -235,6 +261,7 @@ class TestRunManifestCommands:
         assert payload["manifest"]["manifest_id"] == "manifest-1"
         assert payload["ledger_entries"][0]["event_type"] == "run_finished"
         assert payload["diagnostics"]["latest_status"] == "success"
+        assert payload["identity_graph"]["manifest_id"] == "manifest-1"
         assert payload["diagnostics"]["contract_version"] == "1.2.0"
         assert payload["diagnostics"]["dq_rule_ids"] == ["gold.not_null.id"]
         assert payload["diagnostics"]["cross_validation_rule_ids"] == [
@@ -285,7 +312,7 @@ class TestRunManifestCommands:
         assert "published_artifact_count: 1" in result.output
         assert "artifact_refs" in result.output
         assert "identity_graph_complete: true" in result.output
-        assert "identity_graph" in result.output
+        assert "Identity Graph" in result.output
         assert "lineage_fragment_ids" in result.output
         assert "missing_artifact_links: 0" in result.output
         assert "gold.not_null.id" in result.output

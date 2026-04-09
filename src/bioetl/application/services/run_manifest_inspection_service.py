@@ -28,6 +28,7 @@ class RunManifestInspectionResult:
     manifest: RunManifest
     ledger_entries: tuple[RunLedgerEntry, ...] = ()
     diagnostics: dict[str, object] = field(default_factory=dict)
+    identity_graph: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         """Return JSON/YAML-safe payload for CLI presentation."""
@@ -35,6 +36,7 @@ class RunManifestInspectionResult:
             "manifest": self.manifest.to_dict(),
             "ledger_entries": [entry.to_dict() for entry in self.ledger_entries],
             "diagnostics": self.diagnostics,
+            "identity_graph": self.identity_graph,
         }
 
 
@@ -86,10 +88,12 @@ class RunManifestInspectionService:
         if self.ledger_port is not None:
             ledger_entries = tuple(self.ledger_port.list_entries(manifest.manifest_id))
         diagnostics = build_diagnostics_summary(manifest, ledger_entries)
+        identity_graph = self._build_identity_graph(manifest, diagnostics)
         return RunManifestInspectionResult(
             manifest=manifest,
             ledger_entries=ledger_entries,
             diagnostics=diagnostics,
+            identity_graph=identity_graph,
         )
 
     def diff(
@@ -126,6 +130,31 @@ class RunManifestInspectionService:
             if manifest is not None:
                 return manifest
         raise ValueError(f"Run manifest not found for identifier: {identifier}")
+
+    @staticmethod
+    def _build_identity_graph(
+        manifest: RunManifest,
+        diagnostics: dict[str, object],
+    ) -> dict[str, object]:
+        """Return one operator-facing run identity graph payload."""
+        existing = diagnostics.get("identity_graph")
+        if isinstance(existing, dict):
+            return existing
+
+        code_provenance = manifest.code_provenance
+        return {
+            "run_id": str(manifest.run_id),
+            "manifest_id": manifest.manifest_id,
+            "execution_fingerprint": manifest.execution_fingerprint,
+            "effective_config_hash": code_provenance.config_hash,
+            "contract_ref": code_provenance.contract_ref,
+            "contract_version": code_provenance.contract_version,
+            "planned_artifacts": [
+                {"layer": artifact.layer, "path": artifact.path}
+                for artifact in manifest.planned_artifacts
+            ],
+            "published_artifacts": [],
+        }
 
     @staticmethod
     def _parse_run_id(identifier: str) -> RunID | None:

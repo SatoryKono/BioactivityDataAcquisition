@@ -142,6 +142,16 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     assert result.diagnostics["config_hash"] == "deadbeef"
     assert result.diagnostics["contract_ref"] == "chembl_activity"
     assert result.diagnostics["contract_version"] == "1.2.0"
+    assert result.identity_graph == {
+        "run_id": str(run_id),
+        "manifest_id": "manifest-1",
+        "execution_fingerprint": "fingerprint-manifest-1",
+        "effective_config_hash": "deadbeef",
+        "contract_ref": "chembl_activity",
+        "contract_version": "1.2.0",
+        "planned_artifacts": [],
+        "published_artifacts": [],
+    }
     assert result.diagnostics["identity_graph"]["manifest_id"] == "manifest-1"
     assert result.diagnostics["identity_graph"]["run_id"] == str(run_id)
     assert result.diagnostics["identity_graph"]["published_artifacts"] == []
@@ -169,6 +179,16 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
 
     assert result.manifest == manifest
     assert result.ledger_entries == ()
+    assert result.identity_graph == {
+        "run_id": str(run_id),
+        "manifest_id": "manifest-no-ledger",
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "effective_config_hash": "deadbeef",
+        "contract_ref": "chembl_activity",
+        "contract_version": "1.2.0",
+        "planned_artifacts": [],
+        "published_artifacts": [],
+    }
     assert result.diagnostics == {
         "manifest_id": "manifest-no-ledger",
         "run_id": str(run_id),
@@ -235,6 +255,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
             "artifact_path": "/tmp/output/silver/chembl/activity",
         }
     ]
+    assert result.identity_graph == result.diagnostics["identity_graph"]
     assert result.diagnostics["identity_graph"]["published_artifacts"] == [
         {
             "event_type": "artifact_published",
@@ -509,6 +530,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
     result = service.show(manifest.manifest_id)
 
     assert result.manifest.code_provenance.config_hash == artifact.effective_config_hash
+    assert result.identity_graph == result.diagnostics["identity_graph"]
     assert result.diagnostics["config_hash"] == artifact.effective_config_hash
     assert result.diagnostics["effective_config_artifact_id"] == "eca-chain-1"
     assert result.diagnostics["artifact_refs"] == [

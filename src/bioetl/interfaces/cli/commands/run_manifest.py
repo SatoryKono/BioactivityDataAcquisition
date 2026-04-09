@@ -190,7 +190,6 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                     "identity_graph_complete",
                     diagnostics.get("identity_graph_complete"),
                 ),
-                ("identity_graph", diagnostics.get("identity_graph")),
                 ("dq_rule_ids", diagnostics.get("dq_rule_ids")),
                 ("dq_dispositions", diagnostics.get("dq_dispositions")),
                 ("dq_report_paths", diagnostics.get("dq_report_paths")),
@@ -219,11 +218,34 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
     return lines
 
 
+def _render_identity_graph_section(identity_graph: object) -> list[str]:
+    """Render one explicit identity-graph reconstruction section."""
+    lines: list[str] = []
+    if not isinstance(identity_graph, dict):
+        return lines
+    _append_section(
+        lines,
+        "Identity Graph",
+        (
+            ("run_id", identity_graph.get("run_id")),
+            ("manifest_id", identity_graph.get("manifest_id")),
+            ("execution_fingerprint", identity_graph.get("execution_fingerprint")),
+            ("effective_config_hash", identity_graph.get("effective_config_hash")),
+            ("contract_ref", identity_graph.get("contract_ref")),
+            ("contract_version", identity_graph.get("contract_version")),
+            ("planned_artifacts", identity_graph.get("planned_artifacts")),
+            ("published_artifacts", identity_graph.get("published_artifacts")),
+        ),
+    )
+    return lines
+
+
 def _render_show_payload(payload: dict[str, object]) -> str:
     """Render one manifest inspection payload in human-readable form."""
     manifest = payload.get("manifest", {})
     ledger_entries = payload.get("ledger_entries", [])
     diagnostics = payload.get("diagnostics", {})
+    identity_graph = payload.get("identity_graph", {})
 
     if not isinstance(manifest, dict):
         return json.dumps(payload, indent=2, default=str)
@@ -239,6 +261,11 @@ def _render_show_payload(payload: dict[str, object]) -> str:
     if lines and (isinstance(ledger_entries, list) and ledger_entries):
         lines.append("")
     lines.extend(_render_diagnostics_section(diagnostics))
+
+    identity_graph_lines = _render_identity_graph_section(identity_graph)
+    if lines and identity_graph_lines:
+        lines.append("")
+    lines.extend(identity_graph_lines)
 
     return "\n".join(lines)
 
