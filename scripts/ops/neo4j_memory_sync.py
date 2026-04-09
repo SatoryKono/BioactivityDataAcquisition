@@ -26,6 +26,7 @@ DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BATCH_SIZE = 100
 DEFAULT_INGEST_WAVE = "repo_sync_v1"
 DEFAULT_MANAGED_BY = "neo4j_memory_sync"
+DEFAULT_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
 DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "project",
     "doc_source_surface",
@@ -562,6 +563,19 @@ def _read_json(path: Path) -> dict[str, object]:
     return {}
 
 
+def _load_memory_mapping(root: Path) -> dict[str, object]:
+    mapping_path = root / DEFAULT_MEMORY_MAPPING_PATH
+    if not mapping_path.is_file():
+        return {}
+    return _read_yaml(mapping_path)
+
+
+def _as_string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if isinstance(item, str)]
+
+
 def _rel_path(root: Path, path: Path) -> str:
     return path.relative_to(root).as_posix()
 
@@ -594,6 +608,11 @@ def _resolve_repo_path(root: Path, base_path: Path, raw_path: str) -> Path | Non
     if candidate.exists():
         return candidate
     return None
+
+
+def _path_contains_any_token(path: Path, tokens: list[str]) -> bool:
+    normalized = _read_text(path).lower()
+    return any(token.lower() in normalized for token in tokens)
 
 
 def _parse_python_ast(path: Path) -> ast.AST | None:
@@ -800,20 +819,43 @@ def _runtime_dimensions(*parts: str) -> set[str]:
 
 def _select_alert_targets(
     snapshot: GraphSnapshot,
+    alert_name: str,
     group_name: str,
     expr: str,
     dimensions: set[str],
     pipeline_nodes: dict[str, NodeKey],
     provider_nodes: list[NodeKey],
-) -> tuple[list[NodeKey], list[NodeKey]]:
+    contract_nodes: dict[str, NodeKey],
+    memory_mapping: dict[str, object],
+) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
     normalized = f"{group_name} {expr}".lower()
+    alerts_config = memory_mapping.get("alerts")
+    groups = alerts_config.get("groups") if isinstance(alerts_config, dict) else {}
+    rules = alerts_config.get("rules") if isinstance(alerts_config, dict) else {}
+    group_rule = groups.get(group_name) if isinstance(groups, dict) and isinstance(groups.get(group_name), dict) else {}
+    alert_rule = rules.get(alert_name) if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict) else {}
+
+    pipeline_mode = str(alert_rule.get("pipelines", group_rule.get("pipelines", "auto")))
+    pipeline_kind = str(alert_rule.get("pipeline_kind", group_rule.get("pipeline_kind", "any")))
+    provider_mode = str(alert_rule.get("providers", group_rule.get("providers", "auto")))
+    contract_mode = str(alert_rule.get("contracts", group_rule.get("contracts", "none")))
+
     pipeline_targets: list[NodeKey] = []
-    provider_targets: list[NodeKey] = []
-
-    if "provider" in dimensions or "provider_health" in normalized or "bioetl_health_check_" in normalized:
-        provider_targets = provider_nodes
-
-    if "pipeline" in dimensions:
+    if pipeline_mode == "all":
+        pipeline_targets = list(pipeline_nodes.values())
+    elif pipeline_mode == "entity":
+        pipeline_targets = [
+            node
+            for node in pipeline_nodes.values()
+            if snapshot.nodes[node].properties.get("pipeline_kind") == "entity"
+        ]
+    elif pipeline_mode == "composite":
+        pipeline_targets = [
+            node
+            for node in pipeline_nodes.values()
+            if snapshot.nodes[node].properties.get("pipeline_kind") == "composite"
+        ]
+    elif pipeline_mode == "auto" and "pipeline" in dimensions:
         pipeline_targets = list(pipeline_nodes.values())
         if (
             "entity" in dimensions
@@ -822,13 +864,41 @@ def _select_alert_targets(
             or 'stage="bronze"' in normalized
             or "bioetl_data_freshness_seconds" in normalized
         ):
-            pipeline_targets = [
-                node
-                for node in pipeline_targets
-                if snapshot.nodes[node].properties.get("pipeline_kind") == "entity"
-            ]
+            pipeline_kind = "entity"
 
-    return pipeline_targets, provider_targets
+    if pipeline_kind in {"entity", "composite"}:
+        pipeline_targets = [
+            node
+            for node in pipeline_targets
+            if snapshot.nodes[node].properties.get("pipeline_kind") == pipeline_kind
+        ]
+
+    provider_targets: list[NodeKey] = []
+    if provider_mode == "all":
+        provider_targets = provider_nodes
+    elif provider_mode == "auto" and (
+        "provider" in dimensions or "provider_health" in normalized or "bioetl_health_check_" in normalized
+    ):
+        provider_targets = provider_nodes
+
+    contract_targets: list[NodeKey] = []
+    if contract_mode == "all":
+        contract_targets = list(contract_nodes.values())
+    elif contract_mode == "mapped":
+        mapped_contracts = {
+            relation.target
+            for relation in snapshot.relations.values()
+            if relation.source in pipeline_targets
+            and relation.relation_type == "DEPENDS_ON"
+            and relation.target.label == "contract_surface"
+        }
+        contract_targets = sorted(mapped_contracts, key=lambda node: node.name)
+
+    return (
+        sorted(set(pipeline_targets), key=lambda node: node.name),
+        sorted(set(provider_targets), key=lambda node: node.name),
+        sorted(set(contract_targets), key=lambda node: node.name),
+    )
 
 
 def _normalize_env_value(raw: str) -> str:
@@ -1408,13 +1478,15 @@ def _add_policy_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, 
 
 
 def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    memory_mapping = _load_memory_mapping(root)
     port_nodes = _add_port_surfaces(snapshot, root, project, today)
     adapter_nodes = _add_adapter_surfaces(snapshot, root, project, today, port_nodes)
-    contract_nodes = _add_contract_surfaces(snapshot, root, project, today)
+    contract_nodes = _add_contract_surfaces(snapshot, root, project, today, memory_mapping)
     pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
-    _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes)
+    _add_pipeline_test_edges(snapshot, root, pipeline_nodes, memory_mapping)
+    _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes, contract_nodes, memory_mapping)
     _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
-    _add_pipeline_operational_edges(snapshot, pipeline_nodes)
+    _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
 
 
 def _add_port_surfaces(
@@ -1572,6 +1644,7 @@ def _add_contract_surfaces(
     root: Path,
     project: NodeKey,
     today: str,
+    memory_mapping: dict[str, object],
 ) -> dict[str, NodeKey]:
     registry_path = root / "configs" / "base" / "contract_registry.yaml"
     if not registry_path.is_file():
@@ -1592,6 +1665,28 @@ def _add_contract_surfaces(
     entries = payload.get("entries")
     if not isinstance(entries, dict):
         return {}
+
+    contracts_mapping = memory_mapping.get("contracts")
+    source_prefixes = tuple(
+        _as_string_list(
+            contracts_mapping.get("registry_source_prefixes")
+            if isinstance(contracts_mapping, dict)
+            else None
+        )
+        or [
+            "bioetl.domain.contracts.gold",
+            "bioetl.domain.schemas",
+        ]
+    )
+    control_plane_modules = _as_string_list(
+        contracts_mapping.get("control_plane_modules") if isinstance(contracts_mapping, dict) else None
+    )
+    control_plane_docs = _as_string_list(
+        contracts_mapping.get("control_plane_docs") if isinstance(contracts_mapping, dict) else None
+    )
+    control_plane_anchor_fields = _as_string_list(
+        contracts_mapping.get("control_plane_anchor_fields") if isinstance(contracts_mapping, dict) else None
+    )
 
     contract_nodes: dict[str, NodeKey] = {}
     for contract_ref, raw_entry in sorted(entries.items()):
@@ -1635,10 +1730,7 @@ def _add_contract_surfaces(
                 for imported_module in sorted(
                     _imported_repo_modules(
                         resolved,
-                        (
-                            "bioetl.domain.contracts.gold",
-                            "bioetl.domain.schemas",
-                        ),
+                        source_prefixes,
                     )
                 ):
                     dependency_key = _resolve_python_module_surface(root, imported_module)
@@ -1697,6 +1789,30 @@ def _add_contract_surfaces(
                     confidence="high",
                 )
                 snapshot.add_relation(contract, "BACKED_BY", artifact, provenance="impact_contracts")
+
+        for module_path in control_plane_modules:
+            resolved_module = root / module_path
+            if not resolved_module.is_file() or not _path_contains_any_token(resolved_module, control_plane_anchor_fields):
+                continue
+            module_key = NodeKey("module_surface", _rel_path(root, resolved_module))
+            if module_key in snapshot.nodes:
+                snapshot.add_relation(contract, "DEPENDS_ON", module_key, provenance="impact_contracts_control_plane")
+
+        for doc_path in control_plane_docs:
+            resolved_doc = root / doc_path
+            if not resolved_doc.is_file() or not _path_contains_any_token(resolved_doc, control_plane_anchor_fields):
+                continue
+            artifact = snapshot.add_node(
+                "doc_artifact",
+                doc_path,
+                summary=f"Control-plane contract reference for `{contract_ref}`.",
+                source_path=doc_path,
+                source_kind="control_plane_contract_doc",
+                last_verified=today,
+                ingest_wave="repo_sync_v1",
+                confidence="high",
+            )
+            snapshot.add_relation(contract, "DESCRIBED_IN", artifact, provenance="impact_contracts_control_plane")
 
     return contract_nodes
 

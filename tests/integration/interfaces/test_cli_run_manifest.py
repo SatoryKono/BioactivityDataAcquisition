@@ -74,6 +74,16 @@ class _FakeRunManifestService:
                     "cross_validation_signal_present": False,
                 },
             },
+            identity_graph={
+                "run_id": str(self.run_id),
+                "manifest_id": "manifest-integration",
+                "execution_fingerprint": "fingerprint-integration",
+                "effective_config_hash": "deadbeef",
+                "contract_ref": None,
+                "contract_version": None,
+                "planned_artifacts": [],
+                "published_artifacts": [],
+            },
         )
 
     def diff(self, left_identifier: str, right_identifier: str) -> RunManifestDiffResult:
@@ -128,6 +138,7 @@ def test_run_manifest_show_yaml_uses_top_level_cli_wiring(
     assert result.exit_code == 0
     assert "manifest:" in result.output
     assert "diagnostics:" in result.output
+    assert "identity_graph:" in result.output
     assert "latest_status: success" in result.output
 
 
