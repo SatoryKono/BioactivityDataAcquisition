@@ -1063,12 +1063,14 @@ def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today
             snapshot.add_relation(artifact, "TESTS_LAYER", NodeKey("layer_family", layer_name), provenance="test_graph")
             if len(parts) > 4:
                 family_name = f"{layer_name}/{parts[3]}"
-                snapshot.add_relation(
-                    artifact,
-                    "TESTS_PACKAGE_FAMILY",
-                    NodeKey("package_family", family_name),
-                    provenance="test_graph",
-                )
+                family_key = NodeKey("package_family", family_name)
+                if family_key in snapshot.nodes:
+                    snapshot.add_relation(
+                        artifact,
+                        "TESTS_PACKAGE_FAMILY",
+                        family_key,
+                        provenance="test_graph",
+                    )
 
 
 def _add_policy_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
