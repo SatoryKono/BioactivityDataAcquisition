@@ -103,6 +103,7 @@ jobs:
           uv run pytest \
             tests/architecture/test_port_contracts_hypothesis.py \
             -v --tb=short \
+            -m hypothesis \
             --junit-xml=hypothesis-contracts-results.xml
         env:
           HYPOTHESIS_PROFILE: ci
