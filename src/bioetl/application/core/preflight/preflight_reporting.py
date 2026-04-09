@@ -63,18 +63,17 @@ def record_preflight_metrics(
 ) -> None:
     """Record preflight validation metrics."""
     pipeline = host._config.pipeline_name
-    run_id = str(host._context.run_id)
 
     host._metrics.set_gauge(
         "preflight_medallion_policy_valid",
         1.0 if report.medallion_policy_valid else 0.0,
-        {"pipeline": pipeline, "run_id": run_id},
+        {"pipeline": pipeline},
     )
 
     host._metrics.set_gauge(
         "preflight_config_errors_total",
         float(len(report.config_errors)),
-        {"pipeline": pipeline, "run_id": run_id},
+        {"pipeline": pipeline},
     )
 
 
