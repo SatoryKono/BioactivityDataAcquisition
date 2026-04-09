@@ -31,6 +31,8 @@ dependencies = [
     "pandera>=0.20",
     # Providers (RULES.md Appendix A)
     "pubchempy>=1.0.4",
+    # Secure XML parsing for PubMed payloads (XXE/billion-laughs mitigation)
+    "defusedxml>=0.7.1",
     # Metrics
     "prometheus-client>=0.20",
     # CLI (EXC-008: Click chosen over Typer)

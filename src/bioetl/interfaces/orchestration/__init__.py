@@ -13,7 +13,7 @@ Current status:
 
 For pipeline execution, use composition public APIs:
     from bioetl.composition.execution_api import run_pipeline
-    from bioetl.composition.services_api import get_pipeline_runner_service
+    from bioetl.composition.execution_api import get_pipeline_runner_service
 """
 
 from __future__ import annotations

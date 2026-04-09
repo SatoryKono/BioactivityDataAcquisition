@@ -11,7 +11,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.composition import PipelineRegistry
+    from bioetl.composition.registry_api import PipelineRegistry
 
 __all__ = [
     "build_cli_registry",
@@ -22,16 +22,14 @@ __all__ = [
 
 def create_registry() -> PipelineRegistry:
     """Create a fresh registry via the public composition facade."""
-    from bioetl.composition import create_registry as _impl
+    from bioetl.composition.registry_api import create_registry as _impl
 
     return _impl()
 
 
 def register_all_pipelines(*, registry: PipelineRegistry | None = None) -> None:
     """Register pipelines via the public composition facade."""
-    from bioetl.composition.factories.pipeline.registry import (
-        register_all_pipelines as _impl,
-    )
+    from bioetl.composition.registry_api import register_all_pipelines as _impl
 
     _impl(registry=registry)
 

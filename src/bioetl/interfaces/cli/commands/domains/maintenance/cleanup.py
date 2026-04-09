@@ -9,10 +9,10 @@ import asyncio
 
 import click
 
+from bioetl.composition.maintenance_api import get_bronze_cleanup_service
 from bioetl.composition.resources_api import (
     preview_cleanup as preview_pipeline_cleanup,
 )
-from bioetl.composition.services_api import get_bronze_cleanup_service
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,

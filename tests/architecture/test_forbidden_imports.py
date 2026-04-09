@@ -389,10 +389,149 @@ class TestInterfacesBootstrapIsolation:
             "Interfaces layer must not import bioetl.composition.entrypoints.\n"
             "Use sanctioned modules such as:\n"
             "  - bioetl.composition.execution_api\n"
-            "  - bioetl.composition.services_api\n"
+            "  - bioetl.composition.registry_api\n"
+            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.health_api\n"
+            "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.resources_api\n"
             "  - bioetl.composition.composite_api\n"
             "  - bioetl.composition.observability_api\n\n"
+            "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
+        )
+
+    def test_interfaces_no_direct_composition_root_imports(self, src_dir: Path) -> None:
+        """Interfaces must use specialized composition APIs instead of package root imports."""
+        interfaces_path = src_dir / "bioetl" / "interfaces"
+        assert interfaces_path.exists(), "Interfaces layer not found"
+
+        violations: list[str] = []
+        for py_file in interfaces_path.rglob("*.py"):
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    if node.module == "bioetl.composition":
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+                elif isinstance(node, ast.Import):
+                    if any(alias.name == "bioetl.composition" for alias in node.names):
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+
+        assert not violations, (
+            "Interfaces layer must not import the bioetl.composition package root.\n"
+            "Use specialized public APIs instead:\n"
+            "  - bioetl.composition.execution_api\n"
+            "  - bioetl.composition.registry_api\n"
+            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.health_api\n"
+            "  - bioetl.composition.maintenance_api\n"
+            "  - bioetl.composition.resources_api\n"
+            "  - bioetl.composition.composite_api\n"
+            "  - bioetl.composition.observability_api\n\n"
+            "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
+        )
+
+    def test_interfaces_no_direct_services_api_imports(self, src_dir: Path) -> None:
+        """Interfaces must consume narrow service APIs instead of services_api."""
+        interfaces_path = src_dir / "bioetl" / "interfaces"
+        assert interfaces_path.exists(), "Interfaces layer not found"
+
+        violations: list[str] = []
+        for py_file in interfaces_path.rglob("*.py"):
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    if node.module == "bioetl.composition.services_api":
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+                elif isinstance(node, ast.Import):
+                    if any(
+                        alias.name == "bioetl.composition.services_api"
+                        for alias in node.names
+                    ):
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+
+        assert not violations, (
+            "Interfaces layer must not import bioetl.composition.services_api.\n"
+            "Use narrow public APIs instead:\n"
+            "  - bioetl.composition.execution_api\n"
+            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.health_api\n"
+            "  - bioetl.composition.maintenance_api\n"
+            "  - bioetl.composition.registry_api\n"
+            "  - bioetl.composition.resources_api\n"
+            "  - bioetl.composition.composite_api\n"
+            "  - bioetl.composition.observability_api\n\n"
+            "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
+        )
+
+    def test_interfaces_no_direct_registry_internal_imports(
+        self, src_dir: Path
+    ) -> None:
+        """Interfaces must consume registry_api instead of registry internals."""
+        interfaces_path = src_dir / "bioetl" / "interfaces"
+        assert interfaces_path.exists(), "Interfaces layer not found"
+
+        forbidden_modules = {
+            "bioetl.composition.registry",
+            "bioetl.composition.registry_default",
+        }
+        violations: list[str] = []
+        for py_file in interfaces_path.rglob("*.py"):
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    if node.module in forbidden_modules:
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+                elif isinstance(node, ast.Import):
+                    if any(alias.name in forbidden_modules for alias in node.names):
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+
+        assert not violations, (
+            "Interfaces layer must not import composition registry internals.\n"
+            "Use bioetl.composition.registry_api instead.\n\n"
+            "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
+        )
+
+    def test_interfaces_no_direct_composition_factories_imports(
+        self, src_dir: Path
+    ) -> None:
+        """Interfaces must not import composition factories directly."""
+        interfaces_path = src_dir / "bioetl" / "interfaces"
+        assert interfaces_path.exists(), "Interfaces layer not found"
+
+        violations: list[str] = []
+        for py_file in interfaces_path.rglob("*.py"):
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    if node.module is not None and node.module.startswith(
+                        "bioetl.composition.factories"
+                    ):
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+                elif isinstance(node, ast.Import):
+                    if any(
+                        alias.name.startswith("bioetl.composition.factories")
+                        for alias in node.names
+                    ):
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+
+        assert not violations, (
+            "Interfaces layer must not import composition factory internals.\n"
+            "Use sanctioned public APIs such as bioetl.composition.registry_api.\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 

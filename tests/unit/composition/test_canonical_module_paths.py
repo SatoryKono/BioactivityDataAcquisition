@@ -49,3 +49,99 @@ def test_pipeline_configs_import_warns_and_reexports_registry_manifest() -> None
 
     assert PIPELINE_CONFIGS is not None
     assert PipelineFactoryConfig is not None
+
+
+def test_registry_api_reexports_canonical_registry_symbols() -> None:
+    """Canonical registry API should expose the package-root registry types."""
+    from bioetl.composition import (
+        PipelineDefinition,
+        PipelineRegistry,
+        create_registry,
+        get_default_registry,
+    )
+    from bioetl.composition.registry_api import (
+        PipelineDefinition as CanonicalPipelineDefinition,
+        PipelineRegistry as CanonicalPipelineRegistry,
+        create_registry as canonical_create_registry,
+        get_default_registry as canonical_get_default_registry,
+    )
+
+    assert CanonicalPipelineDefinition is PipelineDefinition
+    assert CanonicalPipelineRegistry is PipelineRegistry
+    assert canonical_create_registry is create_registry
+    assert canonical_get_default_registry is get_default_registry
+
+
+def test_registry_api_surface_stays_narrow() -> None:
+    """Registry API should stay limited to the sanctioned registry seam."""
+    import bioetl.composition.registry_api as registry_api
+
+    assert set(registry_api.__all__) == {
+        "PipelineDefinition",
+        "PipelineRegistry",
+        "create_registry",
+        "get_default_registry",
+        "register_all_pipelines",
+    }
+
+
+def test_registry_api_reexports_pipeline_registration() -> None:
+    """Registry API should expose the canonical pipeline registration seam."""
+    from bioetl.composition.registry_api import register_all_pipelines
+    from bioetl.composition.factories.pipeline.registry import (
+        register_all_pipelines as canonical_register_all_pipelines,
+    )
+
+    assert register_all_pipelines is canonical_register_all_pipelines
+
+
+def test_execution_api_reexports_pipeline_runner_service() -> None:
+    """Execution API should expose the canonical pipeline runner service seam."""
+    from bioetl.composition.execution_api import (
+        get_pipeline_runner_service as canonical_get_pipeline_runner_service,
+    )
+    from bioetl.composition.services_api import get_pipeline_runner_service
+
+    assert canonical_get_pipeline_runner_service is get_pipeline_runner_service
+
+
+def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
+    """Control-plane API should expose canonical admin and inspection seams."""
+    from bioetl.composition.control_plane_api import (
+        get_adr_service as canonical_get_adr_service,
+        get_config_service as canonical_get_config_service,
+    )
+    from bioetl.composition.services_api import get_adr_service, get_config_service
+
+    assert canonical_get_adr_service is get_adr_service
+    assert canonical_get_config_service is get_config_service
+
+
+def test_health_api_reexports_canonical_health_services() -> None:
+    """Health API should expose the canonical health and quarantine seams."""
+    from bioetl.composition.health_api import (
+        get_health_service as canonical_get_health_service,
+        get_quarantine_service as canonical_get_quarantine_service,
+    )
+    from bioetl.composition.services_api import (
+        get_health_service,
+        get_quarantine_service,
+    )
+
+    assert canonical_get_health_service is get_health_service
+    assert canonical_get_quarantine_service is get_quarantine_service
+
+
+def test_maintenance_api_reexports_canonical_maintenance_services() -> None:
+    """Maintenance API should expose the canonical maintenance service seams."""
+    from bioetl.composition.maintenance_api import (
+        get_bronze_cleanup_service as canonical_get_bronze_cleanup_service,
+        get_vacuum_service as canonical_get_vacuum_service,
+    )
+    from bioetl.composition.services_api import (
+        get_bronze_cleanup_service,
+        get_vacuum_service,
+    )
+
+    assert canonical_get_bronze_cleanup_service is get_bronze_cleanup_service
+    assert canonical_get_vacuum_service is get_vacuum_service

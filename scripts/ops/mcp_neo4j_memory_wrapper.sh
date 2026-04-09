@@ -7,8 +7,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./load_repo_env.sh
+export BIOETL_SKIP_ENV_LOCAL=1
 source "${SCRIPT_DIR}/load_repo_env.sh"
 load_repo_env_if_present
+unset BIOETL_SKIP_ENV_LOCAL
 
 parse_neo4j_auth() {
     local auth_value="${1:-}"

@@ -48,7 +48,7 @@ def get_lifecycle_service() -> MedallionLifecycleService:
 
 def get_vacuum_service() -> VacuumService:
     """Load the vacuum service through composition on demand."""
-    from bioetl.composition.services_api import get_vacuum_service as _impl
+    from bioetl.composition.maintenance_api import get_vacuum_service as _impl
 
     return _impl()
 

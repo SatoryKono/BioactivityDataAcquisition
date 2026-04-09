@@ -74,7 +74,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.cli_run_orchestration_service import (
         CliRunOrchestrationService,
     )
-    from bioetl.composition import PipelineRegistry
+    from bioetl.composition.registry_api import PipelineRegistry
 
 __all__ = [
     "build_run_options",
@@ -117,7 +117,7 @@ def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> object:
     """Resolve the pipeline runner service lazily for runtime helpers."""
-    from bioetl.composition.services_api import (
+    from bioetl.composition.execution_api import (
         get_pipeline_runner_service as _impl,
     )
 

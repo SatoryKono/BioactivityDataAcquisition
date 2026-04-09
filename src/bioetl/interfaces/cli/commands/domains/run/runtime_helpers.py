@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.cli_run_orchestration_contracts import (
         RunPreparedPipelineCallable,
     )
-    from bioetl.composition import PipelineRegistry
+    from bioetl.composition.registry_api import PipelineRegistry
 
     class PipelineRunnerService(Protocol):
         """Protocol for pipeline runner services used by CLI runtime helpers."""
@@ -42,7 +42,7 @@ def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Resolve the pipeline runner service lazily for CLI runtime helpers."""
-    from bioetl.composition.services_api import get_pipeline_runner_service as _impl
+    from bioetl.composition.execution_api import get_pipeline_runner_service as _impl
 
     return _impl(registry=registry)
 

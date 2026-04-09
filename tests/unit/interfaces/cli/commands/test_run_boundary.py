@@ -24,7 +24,7 @@ def test_run_module_reexports_canonical_run_command_symbols() -> None:
 
 
 @pytest.mark.unit
-def test_get_pipeline_runner_service_delegates_to_services_api() -> None:
+def test_get_pipeline_runner_service_delegates_to_execution_api() -> None:
     """Run command module should lazily delegate service resolution."""
     import bioetl.interfaces.cli.commands.run as run_module
 
@@ -32,7 +32,7 @@ def test_get_pipeline_runner_service_delegates_to_services_api() -> None:
     registry = MagicMock()
 
     with patch(
-        "bioetl.composition.services_api.get_pipeline_runner_service",
+        "bioetl.composition.execution_api.get_pipeline_runner_service",
         return_value=service,
     ) as mock_get_pipeline_runner_service:
         result = run_module.get_pipeline_runner_service(registry=registry)

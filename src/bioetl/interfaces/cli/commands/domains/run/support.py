@@ -40,14 +40,14 @@ from bioetl.interfaces.cli.formatters import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition import PipelineRegistry
+    from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.ports import LoggerPort
 
 
 @cache
 def _load_pipeline_registry_type() -> type[PipelineRegistry]:
     """Resolve PipelineRegistry lazily so command imports stay lightweight."""
-    from bioetl.composition import PipelineRegistry
+    from bioetl.composition.registry_api import PipelineRegistry
 
     return PipelineRegistry
 

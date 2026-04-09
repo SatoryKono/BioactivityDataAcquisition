@@ -1,6 +1,21 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Invoke-CheckedCommand {
+    param(
+        [Parameter(Mandatory = $true)]
+        [scriptblock]$Command,
+        [Parameter(Mandatory = $true)]
+        [string]$ErrorMessage
+    )
+
+    & $Command
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error $ErrorMessage
+        exit $LASTEXITCODE
+    }
+}
+
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = Resolve-Path (Join-Path $ScriptDir "../..")
 Set-Location $RepoRoot
@@ -25,15 +40,11 @@ if ((Test-Path (Join-Path $RepoRoot ".venv")) -and -not (Test-Path (Join-Path $R
 }
 
 if (Get-Command uv -ErrorAction SilentlyContinue) {
-    uv venv $VenvDir --python 3.13
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "[setup_env_windows][error] uv venv failed."
-        exit $LASTEXITCODE
-    }
+    Invoke-CheckedCommand -Command { uv venv $VenvDir --python 3.13 --allow-existing } -ErrorMessage "[setup_env_windows][error] uv venv failed."
 
     $env:VIRTUAL_ENV = $VenvDir
     $env:PATH = "$VenvDir\Scripts;$env:PATH"
-    uv sync --active --extra dev --extra tracing
+    & uv sync --active --extra dev --extra tracing
     if ($LASTEXITCODE -ne 0) {
         Write-Error "[setup_env_windows][error] uv sync failed."
         Write-Host "[setup_env_windows][hint] Retry with the same command; UV_HTTP_TIMEOUT defaults to $env:UV_HTTP_TIMEOUT seconds."
@@ -41,16 +52,17 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     }
 } else {
     if (Get-Command py -ErrorAction SilentlyContinue) {
-        py -3.13 -m venv $VenvDir
+        Invoke-CheckedCommand -Command { py -3.13 -m venv --clear $VenvDir } -ErrorMessage "[setup_env_windows][error] py -3.13 -m venv failed."
     } elseif (Get-Command python -ErrorAction SilentlyContinue) {
-        python -m venv $VenvDir
+        Invoke-CheckedCommand -Command { python -m venv --clear $VenvDir } -ErrorMessage "[setup_env_windows][error] python -m venv failed."
     } else {
         Write-Error "[setup_env_windows][error] Neither uv, py, nor python is available."
         exit 1
     }
 
-    & $VenvPython -m pip install --upgrade pip setuptools wheel
-    & $VenvPython -m pip install -e ".[dev,tracing]"
+    Invoke-CheckedCommand -Command { & $VenvPython -m ensurepip --upgrade } -ErrorMessage "[setup_env_windows][error] ensurepip failed."
+    Invoke-CheckedCommand -Command { & $VenvPython -m pip install --upgrade pip setuptools wheel } -ErrorMessage "[setup_env_windows][error] pip bootstrap failed."
+    Invoke-CheckedCommand -Command { & $VenvPython -m pip install -e ".[dev,tracing]" } -ErrorMessage "[setup_env_windows][error] editable install failed."
 }
 
 Write-Host "[setup_env_windows][ok] Environment ready at .venv-win"

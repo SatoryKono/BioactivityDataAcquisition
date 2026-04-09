@@ -10,18 +10,42 @@ import os
 import re
 import sys
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import TypeAlias
+from typing import TypeAlias, TypeVar
 from urllib import error, parse, request
 
 import yaml
 
 JsonScalar: TypeAlias = str | int | float | bool | None
 JsonValue: TypeAlias = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
+T = TypeVar("T")
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BATCH_SIZE = 100
+DEFAULT_INGEST_WAVE = "repo_sync_v1"
+DEFAULT_MANAGED_BY = "neo4j_memory_sync"
+DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
+    "project",
+    "doc_source_surface",
+    "doc_artifact",
+    "decision",
+    "risk",
+    "policy_surface",
+    "layer_family",
+    "package_family",
+    "module_surface",
+    "provider_surface",
+    "entity_config",
+    "composite_config",
+    "config_artifact",
+    "dashboard_surface",
+    "quality_gate",
+    "script_surface",
+    "execution_path",
+    "test_surface",
+    "test_artifact",
+)
 KNOWN_LAYERS = ("domain", "application", "infrastructure", "composition", "interfaces")
 TEST_SURFACES: dict[str, str] = {
     "unit": "unit tests",
@@ -98,6 +122,155 @@ CURATED_QUALITY_GATES: tuple[dict[str, object], ...] = (
     {
         "name": "pretest guardrails",
         "summary": "Broad preflight for cleanup, docs, inventory, and architecture drift.",
+    },
+)
+CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
+    {
+        "name": "hexagonal import matrix",
+        "summary": (
+            "Import boundaries are strict: domain imports only domain, application imports domain plus itself, "
+            "infrastructure imports domain plus itself, composition can wire all layers except interfaces, "
+            "and interfaces can depend on all layers."
+        ),
+        "source_path": "docs/00-project/RULES.md",
+        "artifact_label": "doc_artifact",
+        "governs_layers": KNOWN_LAYERS,
+    },
+    {
+        "name": "medallion storage contract",
+        "summary": (
+            "BioETL follows Bronze to Silver to Gold medallion flow. Silver must use Delta Lake rather than raw "
+            "Parquet, and Pandera remains the schema validation standard across dataframe boundaries."
+        ),
+        "source_path": "docs/00-project/RULES.md",
+        "artifact_label": "doc_artifact",
+    },
+    {
+        "name": "provider support matrix",
+        "summary": (
+            "Primary provider set includes ChEMBL, PubChem, PubMed, Semantic Scholar, CrossRef, OpenAlex, "
+            "and UniProt for bioactivity acquisition and enrichment workflows."
+        ),
+        "source_path": "docs/00-project/RULES.md",
+        "artifact_label": "doc_artifact",
+    },
+    {
+        "name": "hexagonal package layout",
+        "summary": (
+            "Source layout is organized into domain, application, infrastructure, composition, and interfaces. "
+            "Domain stays pure, composition owns wiring, interfaces expose CLI entrypoints, and architecture tests "
+            "enforce cross-layer boundaries."
+        ),
+        "source_path": "docs/00-project/RULES.md",
+        "artifact_label": "doc_artifact",
+        "governs_layers": KNOWN_LAYERS,
+    },
+    {
+        "name": "pipeline assembly model",
+        "summary": (
+            "BioETL assembles provider ingestion, transformation, schema validation, and medallion storage flow "
+            "through composition-layer factories and config-driven pipeline definitions rather than hard-coded "
+            "business wiring inside domain or application layers."
+        ),
+        "source_path": "docs/00-project/RULES.md",
+        "artifact_label": "doc_artifact",
+        "governs_layers": ("composition", "application"),
+    },
+    {
+        "name": "observability surface model",
+        "summary": (
+            "Operational visibility is centered on Grafana dashboards backed primarily by Prometheus metrics, "
+            "with dashboard JSON in grafana/dashboards as the factual source of shipped behavior and dedicated "
+            "guides for dashboard extension work."
+        ),
+        "source_path": "docs/03-guides/dashboards/dashboard-extension-llm.md",
+        "artifact_label": "doc_artifact",
+        "governs_docs": ("grafana dashboards json",),
+    },
+    {
+        "name": "testing strategy matrix",
+        "summary": (
+            "Testing is intentionally stratified across unit, integration, e2e, architecture, contract, "
+            "and optional benchmark surfaces. ADR-042 and the published testing guide define when each "
+            "surface is appropriate and keep scope explicit."
+        ),
+        "source_path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
+        "artifact_label": "doc_artifact",
+        "governs_test_surfaces": ("unit tests", "integration tests", "e2e tests", "architecture tests", "contract tests"),
+    },
+    {
+        "name": "quality gate stack",
+        "summary": (
+            "The main repository gate stack combines pytest, mypy --strict, VCR execution policy, docs verification, "
+            "config validation, and pretest guardrails."
+        ),
+        "source_path": "docs/03-guides/testing.md",
+        "artifact_label": "doc_artifact",
+        "governs_quality_gates": ("pytest", "mypy --strict", "docs verification", "config validation", "pretest guardrails"),
+    },
+    {
+        "name": "VCR replay discipline",
+        "summary": (
+            "Integration and e2e work is replay-first. VCR cassettes are refreshed in a targeted way rather than "
+            "broad uncontrolled rewrites, and machine-readable policy keeps the replay contract synchronized with the test matrix."
+        ),
+        "source_path": "docs/03-guides/testing.md",
+        "artifact_label": "doc_artifact",
+        "governs_test_surfaces": ("integration tests", "e2e tests"),
+    },
+    {
+        "name": "target enrichment bridge",
+        "summary": (
+            "Target enrichment crosses provider boundaries: ChEMBL supplies target-centric seed records while UniProt "
+            "contributes reviewed protein metadata and an idmapping surface that translates ChEMBL target identifiers into UniProt accessions."
+        ),
+        "source_path": "configs/providers/uniprot.yaml",
+        "artifact_label": "config_artifact",
+    },
+    {
+        "name": "publication enrichment mesh",
+        "summary": (
+            "Publication enrichment is intentionally multi-provider. ChEMBL contributes source publication references, "
+            "while PubMed, CrossRef, OpenAlex, and Semantic Scholar enrich publication metadata through PMID, DOI, title, "
+            "and citation-oriented resolution paths."
+        ),
+        "source_path": "configs/quality/test_matrix.yaml",
+        "artifact_label": "config_artifact",
+    },
+    {
+        "name": "integration and VCR execution policy",
+        "summary": "Tracked machine-readable policy for integration and VCR execution scope, replay modes, and suite inventory.",
+        "source_path": "configs/quality/integration_vcr_policy.yaml",
+        "artifact_label": "config_artifact",
+        "governs_test_surfaces": ("integration tests", "e2e tests"),
+        "governs_quality_gates": ("pytest",),
+    },
+    {
+        "name": "docs verification guide",
+        "summary": "Published workflow defining the verification path for docs surface and repo-only supporting material boundaries.",
+        "source_path": "docs/03-guides/docs-verification.md",
+        "artifact_label": "doc_artifact",
+        "governs_quality_gates": ("docs verification",),
+    },
+    {
+        "name": "published docs boundary",
+        "summary": "Published docs in docs/00-05 and README define active supported behavior; repo-only material must not override them.",
+        "source_path": "docs/03-guides/docs-verification.md",
+        "artifact_label": "doc_artifact",
+    },
+    {
+        "name": "default VCR record mode",
+        "summary": "CI defaults to none; local defaults to once unless explicitly overridden.",
+        "source_path": "configs/quality/integration_vcr_policy.yaml",
+        "artifact_label": "config_artifact",
+        "governs_test_surfaces": ("integration tests", "e2e tests"),
+    },
+    {
+        "name": "targeted cassette refresh",
+        "summary": "Targeted VCR refresh uses new_episodes; broad rewrites are not the supported default path.",
+        "source_path": "configs/quality/integration_vcr_policy.yaml",
+        "artifact_label": "config_artifact",
+        "governs_test_surfaces": ("integration tests", "e2e tests"),
     },
 )
 CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
@@ -302,6 +475,34 @@ def _parser() -> argparse.ArgumentParser:
         default=DEFAULT_BATCH_SIZE,
         help="Maximum statements per Neo4j commit request.",
     )
+    parser.add_argument(
+        "--prune-stale",
+        action="store_true",
+        help=(
+            "Delete stale repo-derived nodes after sync. "
+            "This only targets the current ingest wave and resets managed relations "
+            "between repo-managed nodes before recreating them."
+        ),
+    )
+    parser.add_argument(
+        "--full-reset-managed-wave",
+        action="store_true",
+        help=(
+            "Delete the entire current managed ingest wave before rebuilding it. "
+            "This removes all repo-managed nodes for the current wave and any relations "
+            "attached to them, then recreates the wave from the current repository state."
+        ),
+    )
+    parser.add_argument(
+        "--prune-legacy-unmanaged",
+        action="store_true",
+        help=(
+            "Delete unmanaged legacy nodes for repo-derived labels after sync. "
+            "This is intended to converge the repo graph to managed-only state for "
+            "labels now owned by deterministic sync, while leaving unrelated labels "
+            "such as MemoryEntity untouched."
+        ),
+    )
     return parser
 
 
@@ -406,6 +607,7 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_dashboard_graph(snapshot, root, project, today)
     _add_quality_and_scripts(snapshot, root, project, today)
     _add_test_graph(snapshot, root, project, today)
+    _add_policy_surfaces(snapshot, root, project, today)
     return snapshot
 
 
@@ -852,6 +1054,54 @@ def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today
                 )
 
 
+def _add_policy_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    for policy_payload in CURATED_POLICY_SURFACES:
+        policy = snapshot.add_node(
+            "policy_surface",
+            str(policy_payload["name"]),
+            summary=str(policy_payload["summary"]),
+            source_path=str(policy_payload["source_path"]),
+            source_kind="repo_policy_surface",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(project, "HAS_POLICY_SURFACE", policy, provenance="curated_policy")
+
+        source_path = str(policy_payload["source_path"])
+        artifact_label = str(policy_payload["artifact_label"])
+        artifact = snapshot.add_node(
+            artifact_label,
+            source_path,
+            summary=str(policy_payload["summary"]),
+            source_path=source_path,
+            source_kind="policy_artifact",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(policy, "BACKED_BY", artifact, provenance="curated_policy")
+
+        for layer_name in policy_payload.get("governs_layers", ()):
+            snapshot.add_relation(policy, "GOVERNS", NodeKey("layer_family", str(layer_name)), provenance="curated_policy")
+        for gate_name in policy_payload.get("governs_quality_gates", ()):
+            snapshot.add_relation(policy, "GOVERNS", NodeKey("quality_gate", str(gate_name)), provenance="curated_policy")
+        for test_surface_name in policy_payload.get("governs_test_surfaces", ()):
+            snapshot.add_relation(
+                policy,
+                "GOVERNS",
+                NodeKey("test_surface", str(test_surface_name)),
+                provenance="curated_policy",
+            )
+        for doc_source_name in policy_payload.get("governs_docs", ()):
+            snapshot.add_relation(
+                policy,
+                "GOVERNS",
+                NodeKey("doc_source_surface", str(doc_source_name)),
+                provenance="curated_policy",
+            )
+
+
 class Neo4jHttpClient:
     def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
         self._endpoint = f"{base_uri}/db/{database}/tx/commit"
@@ -876,7 +1126,19 @@ class Neo4jHttpClient:
             raise RuntimeError(f"Neo4j returned errors: {errors}")
 
 
-def _node_statement(node: GraphNode) -> dict[str, JsonValue]:
+def _sync_run_id() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _managed_properties(properties: dict[str, JsonValue], sync_run: str) -> dict[str, JsonValue]:
+    managed = dict(properties)
+    managed["managed_by"] = DEFAULT_MANAGED_BY
+    managed["sync_run"] = sync_run
+    managed.setdefault("ingest_wave", DEFAULT_INGEST_WAVE)
+    return managed
+
+
+def _node_statement(node: GraphNode, sync_run: str) -> dict[str, JsonValue]:
     return {
         "statement": (
             f"MERGE (n:`{node.key.label}` {{name: $name}}) "
@@ -884,12 +1146,12 @@ def _node_statement(node: GraphNode) -> dict[str, JsonValue]:
         ),
         "parameters": {
             "name": node.key.name,
-            "properties": node.properties,
+            "properties": _managed_properties(node.properties, sync_run),
         },
     }
 
 
-def _relation_statement(relation: GraphRelation) -> dict[str, JsonValue]:
+def _relation_statement(relation: GraphRelation, sync_run: str) -> dict[str, JsonValue]:
     return {
         "statement": (
             f"MERGE (a:`{relation.source.label}` {{name: $source_name}}) "
@@ -900,7 +1162,84 @@ def _relation_statement(relation: GraphRelation) -> dict[str, JsonValue]:
         "parameters": {
             "source_name": relation.source.name,
             "target_name": relation.target.name,
-            "properties": relation.properties,
+            "properties": _managed_properties(relation.properties, sync_run),
+        },
+    }
+
+
+def _reset_managed_relations_statement(relation_types: list[str]) -> dict[str, JsonValue]:
+    return {
+        "statement": (
+            "MATCH (a)-[r]->(b) "
+            "WHERE type(r) IN $relation_types "
+            "AND (r.managed_by = $managed_by "
+            "OR (a.ingest_wave = $ingest_wave AND b.ingest_wave = $ingest_wave)) "
+            "DELETE r"
+        ),
+        "parameters": {
+            "relation_types": relation_types,
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+        },
+    }
+
+
+def _prune_stale_relations_statement(sync_run: str) -> dict[str, JsonValue]:
+    return {
+        "statement": (
+            "MATCH ()-[r]->() "
+            "WHERE (r.managed_by = $managed_by OR r.ingest_wave = $ingest_wave) "
+            "AND coalesce(r.sync_run, '') <> $sync_run "
+            "DELETE r"
+        ),
+        "parameters": {
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+            "sync_run": sync_run,
+        },
+    }
+
+
+def _prune_stale_nodes_statement(sync_run: str) -> dict[str, JsonValue]:
+    return {
+        "statement": (
+            "MATCH (n) "
+            "WHERE n.ingest_wave = $ingest_wave "
+            "AND coalesce(n.sync_run, '') <> $sync_run "
+            "DETACH DELETE n"
+        ),
+        "parameters": {
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+            "sync_run": sync_run,
+        },
+    }
+
+
+def _delete_managed_wave_nodes_statement() -> dict[str, JsonValue]:
+    return {
+        "statement": (
+            "MATCH (n) "
+            "WHERE n.ingest_wave = $ingest_wave "
+            "AND coalesce(n.managed_by, $managed_by) = $managed_by "
+            "DETACH DELETE n"
+        ),
+        "parameters": {
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+            "managed_by": DEFAULT_MANAGED_BY,
+        },
+    }
+
+
+def _prune_legacy_unmanaged_nodes_statement(managed_labels: list[str]) -> dict[str, JsonValue]:
+    return {
+        "statement": (
+            "MATCH (n) "
+            "WHERE any(label IN labels(n) WHERE label IN $managed_labels) "
+            "AND coalesce(n.managed_by, '') = '' "
+            "DETACH DELETE n"
+        ),
+        "parameters": {
+            "managed_labels": managed_labels,
         },
     }
 
@@ -910,16 +1249,33 @@ def sync_snapshot(
     root: Path,
     http_uri: str | None,
     batch_size: int,
+    prune_stale: bool = False,
+    full_reset_managed_wave: bool = False,
+    prune_legacy_unmanaged: bool = False,
 ) -> None:
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
-    node_statements = [_node_statement(node) for node in snapshot.nodes.values()]
-    relation_statements = [_relation_statement(relation) for relation in snapshot.relations.values()]
-    for statements in _batched(node_statements + relation_statements, batch_size):
+    sync_run = _sync_run_id()
+    node_statements = [_node_statement(node, sync_run) for node in snapshot.nodes.values()]
+    relation_statements = [_relation_statement(relation, sync_run) for relation in snapshot.relations.values()]
+    if full_reset_managed_wave:
+        client.execute([_delete_managed_wave_nodes_statement()])
+    for statements in _batched(node_statements, batch_size):
         client.execute(statements)
+    if prune_stale and relation_statements:
+        relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
+        client.execute([_reset_managed_relations_statement(relation_types)])
+    for statements in _batched(relation_statements, batch_size):
+        client.execute(statements)
+    if prune_stale:
+        client.execute([_prune_stale_relations_statement(sync_run)])
+        client.execute([_prune_stale_nodes_statement(sync_run)])
+    if prune_legacy_unmanaged:
+        managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
+        client.execute([_prune_legacy_unmanaged_nodes_statement(managed_labels)])
 
 
-def _batched[T](items: list[T], size: int) -> list[list[T]]:
+def _batched(items: list[T], size: int) -> list[list[T]]:
     return [items[index : index + size] for index in range(0, len(items), size)]
 
 
@@ -929,7 +1285,10 @@ def _write_export(path: Path, snapshot: GraphSnapshot) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = _parser().parse_args(argv)
+    parser = _parser()
+    args = parser.parse_args(argv)
+    if args.prune_stale and args.full_reset_managed_wave:
+        parser.error("--prune-stale and --full-reset-managed-wave cannot be used together")
     root = args.root.resolve()
     snapshot = build_snapshot(root)
     stats = snapshot.stats()
@@ -938,7 +1297,15 @@ def main(argv: list[str] | None = None) -> int:
         _write_export(args.export, snapshot)
         print(f"Exported graph snapshot to {args.export}")
     if args.apply:
-        sync_snapshot(snapshot, root, args.http_uri, args.batch_size)
+        sync_snapshot(
+            snapshot,
+            root,
+            args.http_uri,
+            args.batch_size,
+            prune_stale=args.prune_stale,
+            full_reset_managed_wave=args.full_reset_managed_wave,
+            prune_legacy_unmanaged=args.prune_legacy_unmanaged,
+        )
         print("Neo4j sync completed.")
     return 0
 

@@ -13,7 +13,7 @@ from bioetl.application.services import (
     RunOptions,
     RunResult,
 )
-from bioetl.composition import PipelineRegistry
+from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,

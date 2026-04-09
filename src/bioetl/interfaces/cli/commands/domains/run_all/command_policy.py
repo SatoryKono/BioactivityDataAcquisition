@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import NoReturn, Protocol
 
 from bioetl.application.services import RunOptions
-from bioetl.composition import PipelineRegistry
+from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,
     PipelineRegistryView,

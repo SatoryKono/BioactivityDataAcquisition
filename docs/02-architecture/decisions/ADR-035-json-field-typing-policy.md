@@ -34,7 +34,7 @@ ______________________________________________________________________
 ### Canonical format
 
 - Тип в Pandera: `Series[str]`.
-- **Serialization (MUST)**: `json.dumps(obj, sort-keys=True, separators=(',', ':'), ensure-ascii=True)`.
+- **Serialization (MUST)**: canonical JSON helper with stable key ordering, compact separators, and ASCII-safe deterministic output.
 - **Null semantics (MUST)**: отсутствие данных хранится как `NULL` (`None`).
 - **MUST NOT**: новые JSON-like поля задавать как `pa.list-(...)` или `Series[object]`.
 - **MAY (временно)**: legacy поля native list/object остаются до controlled migration.
