@@ -8,8 +8,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
-from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_wiring_api import (
+    CompositePipelineRunnerService,
+)
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )

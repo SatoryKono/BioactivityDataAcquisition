@@ -6,9 +6,9 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointService
-from bioetl.application.composite.join_key_normalization import (
+from bioetl.application.composite.runtime_wiring_api import (
     JOIN_KEY_NORMALIZATION_POLICIES,
+    CompositeCheckpointService,
     validate_join_key_normalization_policies,
 )
 from bioetl.composition.bootstrap.composite_infrastructure_context import (

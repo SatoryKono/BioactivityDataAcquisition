@@ -12,6 +12,9 @@ This package contains application services for composite pipeline orchestration:
 - CompositePreflightValidationService: Preflight validation for field_priorities
 
 See ADR-026 for architectural decisions.
+
+Internal composition-facing seams:
+- ``bioetl.application.composite.runtime_wiring_api`` — bootstrap/runtime wiring
 """
 
 from __future__ import annotations

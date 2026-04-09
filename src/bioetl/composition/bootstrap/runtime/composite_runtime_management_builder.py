@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
+from bioetl.application.composite.runtime_wiring_api import FSMStateHelperService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_composite_checkpoint_port,
     bootstrap_quarantine_port,
@@ -26,8 +26,10 @@ from bioetl.domain.normalization import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.application.composite.checkpoint import CompositeCheckpointService
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+    from bioetl.application.composite.runtime_wiring_api import (
+        CompositeCheckpointService,
+    )
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort

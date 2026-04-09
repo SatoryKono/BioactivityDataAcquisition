@@ -27,6 +27,11 @@ def _build_base_summary(
     """Build base summary from manifest code provenance."""
     code_provenance = manifest.code_provenance
     return {
+        "manifest_id": manifest.manifest_id,
+        "run_id": str(manifest.run_id),
+        "pipeline_name": manifest.pipeline_name,
+        "provider": manifest.provider,
+        "entity": manifest.entity,
         "execution_fingerprint": manifest.execution_fingerprint,
         "config_hash": code_provenance.config_hash,
         "effective_config_hash": code_provenance.config_hash,
@@ -38,6 +43,10 @@ def _build_base_summary(
             code_provenance.dq_contract_compatibility_hash
         ),
         "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
+        "planned_artifacts": [
+            {"layer": artifact.layer, "path": artifact.path}
+            for artifact in manifest.planned_artifacts
+        ],
     }
 
 
@@ -130,6 +139,7 @@ def _process_ledger_entries(
 
 
 def _build_final_summary(
+    manifest: RunManifest,
     base_summary: dict[str, object],
     ledger_entries: tuple[RunLedgerEntry, ...],
     family_counter: Counter[str],
@@ -158,6 +168,16 @@ def _build_final_summary(
         cross_validation_signal_present=cross_validation_signal_present,
     )
     next_steps = _build_next_steps(alert_signals)
+    identity_graph = {
+        "run_id": str(manifest.run_id),
+        "manifest_id": manifest.manifest_id,
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "effective_config_hash": base_summary.get("effective_config_hash"),
+        "contract_ref": base_summary.get("contract_ref"),
+        "contract_version": base_summary.get("contract_version"),
+        "planned_artifacts": list(base_summary.get("planned_artifacts", [])),
+        "published_artifacts": artifact_refs,
+    }
 
     summary = base_summary.copy()
     summary.update(
@@ -168,6 +188,8 @@ def _build_final_summary(
             "event_family_counts": dict(sorted(family_counter.items())),
             "event_type_counts": dict(sorted(type_counter.items())),
             "artifact_refs": artifact_refs,
+            "planned_artifact_count": len(manifest.planned_artifacts),
+            "published_artifact_count": len(artifact_refs),
             "lineage_fragment_ids": sorted(lineage_fragment_ids),
             "missing_artifact_links": missing_link_count,
             "dq_rule_ids": sorted(dq_rule_ids),
@@ -178,6 +200,11 @@ def _build_final_summary(
             "cross_validation_config_paths": sorted(cross_validation_config_paths),
             "cross_validation_signal_present": cross_validation_signal_present,
             "correlation_anchor_gaps": correlation_anchor_gaps,
+            "identity_graph_complete": (
+                missing_link_count == 0
+                and not any(correlation_anchor_gaps.values())
+            ),
+            "identity_graph": identity_graph,
             "alert_signals": alert_signals,
             "next_steps": next_steps,
         }
@@ -213,6 +240,7 @@ def build_diagnostics_summary(
     ) = _process_ledger_entries(ledger_entries)
 
     return _build_final_summary(
+        manifest,
         base_summary,
         ledger_entries,
         family_counter,
@@ -237,13 +265,28 @@ def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
         return None
     details = entry.details or {}
     artifact_path = details.get("artifact_path")
-    return {
+    artifact_ref: dict[str, object] = {
         "event_type": entry.event_type,
         "stage": entry.stage,
         "dataset_ref": entry.dataset_ref,
         "lineage_fragment_id": entry.lineage_fragment_id,
         "artifact_path": None if artifact_path is None else str(artifact_path),
     }
+    for detail_key in (
+        "metadata_path",
+        "artifact_kind",
+        "record_count",
+        "total_bytes",
+        "pipeline_name",
+        "provider",
+        "entity",
+        "run_id",
+        "manifest_id",
+    ):
+        detail_value = details.get(detail_key)
+        if detail_value is not None:
+            artifact_ref[detail_key] = detail_value
+    return artifact_ref
 
 
 def _build_alert_signals(

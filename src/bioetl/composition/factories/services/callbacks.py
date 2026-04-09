@@ -7,7 +7,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.protocols import (
+from bioetl.application.core.runtime_wiring_api import (
+    BasePipeline,
     GoldFilterCallback,
     GoldTransformCallback,
     TransformCallback,
@@ -15,7 +16,6 @@ from bioetl.application.core.protocols import (
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 
 if TYPE_CHECKING:
-    from bioetl.application.core.base import BasePipeline
     from bioetl.domain.ports import DataNormalizationPort
     from bioetl.domain.services import DataNormalizationConfig
 

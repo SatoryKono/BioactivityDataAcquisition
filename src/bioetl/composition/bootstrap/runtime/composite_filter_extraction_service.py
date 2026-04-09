@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from bioetl.application.composite.join_key_normalization import (
+from bioetl.application.composite.runtime_wiring_api import (
     JOIN_KEY_NORMALIZATION_POLICIES,
     JoinKeyNormalizationPolicy,
     stringify_join_key_value,

@@ -6,17 +6,20 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointService
-from bioetl.application.composite.cross_validator import (
-    EnrichmentCrossValidator,
-)
-from bioetl.application.composite.join_execution import JoinHow
-from bioetl.application.composite.join_key_normalization import (
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_wiring_api import (
     JOIN_KEY_NORMALIZATION_POLICIES,
+    CompositeCheckpointService,
+    DependencyCoordinatorService,
+    EnrichmentCoordinatorService,
+    EnrichmentCrossValidator,
+    FSMStateHelperService,
+    JoinHow,
+    KeyExtractorService,
+    MergeCollaboratorGroup,
+    MergeService,
     validate_join_key_normalization_policies,
 )
-from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
-from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
@@ -35,12 +38,6 @@ from bioetl.infrastructure.storage.delta_reader import DeltaReader
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-    from bioetl.application.composite.dependency_coordinator import (
-        DependencyCoordinatorService,
-    )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.domain.composite.config import CompositeConfig

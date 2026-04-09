@@ -251,12 +251,19 @@ def _record_artifact_publication(
     """Emit the optional control-plane artifact publication callback."""
     if recorder is None:
         return
+    manifest_id = str(metadata.runtime.manifest_id or "").strip()
+    if not manifest_id:
+        raise RuntimeError(
+            "Control-plane artifact publication requires metadata.runtime.manifest_id"
+        )
     lineage_context = _resolve_lineage_log_context(metadata)
     details: dict[str, object] = {
         "artifact_kind": "layer_output",
         "metadata_path": metadata_path,
         "record_count": int(metadata.output.record_count),
         "total_bytes": int(metadata.output.total_bytes),
+        "run_id": str(metadata.runtime.run_id),
+        "manifest_id": manifest_id,
         "pipeline_name": metadata.pipeline.name,
         "provider": metadata.pipeline.provider,
         "entity": metadata.pipeline.entity,

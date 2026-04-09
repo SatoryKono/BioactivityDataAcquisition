@@ -6,23 +6,22 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
-from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-from bioetl.application.core.batch_processing_service import BatchProcessingComponents
-from bioetl.application.core.batch_transformer import BatchTransformer
-from bioetl.application.core.batch_writer import BatchWriter, BatchWriterOptions
-from bioetl.application.core.protocols import (
+from bioetl.application.core.runtime_wiring_api import (
+    BatchMetricsRecorderService,
+    BatchProcessingComponents,
+    BatchTransformer,
+    BatchWriter,
+    BatchWriterOptions,
     GoldFilterCallback,
     GoldTransformCallback,
-    TransformCallback,
-)
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
-from bioetl.application.core.record_normalization_processor import (
+    PipelineService,
+    QuarantineManagerService,
     RecordNormalizationProcessor,
+    RecordProcessorConfig,
+    TransformCallback,
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import GoldValidatorPort, TracingPort

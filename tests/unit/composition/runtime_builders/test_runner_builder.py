@@ -526,6 +526,73 @@ def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enable
     assert ledger_payload["event_type"] == "manifest_created"
 
 
+def test_build_pipeline_runner_aborts_before_factory_create_when_manifest_persistence_fails(
+    tmp_path: Path,
+) -> None:
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    with (
+        patch(
+            "bioetl.composition.runtime_builders.run_manifest_builder.FileRunManifestStore.save",
+            side_effect=OSError("manifest write failed"),
+        ),
+        pytest.raises(OSError, match="manifest write failed"),
+    ):
+        runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            ensure_providers_loaded_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=lambda: SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(heartbeat_interval=30),
+                test_mode=False,
+            ),
+            load_pipeline_config_fn=lambda _: SimpleNamespace(
+                provider="chembl",
+                entity_type="activity",
+                version="2.0.0",
+                maintenance=SimpleNamespace(
+                    auto_vacuum=False,
+                    vacuum_retention_days=7,
+                ),
+                input_filter=SimpleNamespace(),
+                business_primary_keys=["activity_id"],
+                technical_primary_key="entity_id",
+            ),
+            build_observability_bundle_fn=lambda **_: _namespace_observability(
+                SimpleNamespace(info=lambda *_, **__: None),
+            ),
+            assemble_vacuum_settings_fn=lambda **_: "vacuum",
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental",
+                limit=25,
+            ),
+            assemble_filter_config_fn=lambda **_: None,
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+        )
+
+    assert fake_factory.kwargs is None
+    assert not (
+        tmp_path / "output" / "control" / "run_ledger"
+    ).exists()
+
+
 def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
     tmp_path: Path,
 ) -> None:
@@ -644,10 +711,10 @@ def test_build_pipeline_runner_binds_manifest_id_into_namespace_logger(
     assert fake_factory.kwargs["observability"].logger is bound_logger
 
 
-def test_build_pipeline_runner_skips_control_plane_when_manifest_disabled(
+def test_build_pipeline_runner_requires_manifest_control_plane_when_manifest_disabled(
     tmp_path: Path,
 ) -> None:
-    """Builder should skip manifest+ledger artifacts when control plane is disabled."""
+    """Builder should fail closed when manifest rollout is disabled."""
     fake_factory = _FakeFactory()
     fake_registry = _FakeRegistry(factory=fake_factory)
 
@@ -666,43 +733,45 @@ def test_build_pipeline_runner_skips_control_plane_when_manifest_disabled(
         input_filter=SimpleNamespace(enabled=False),
     )
 
-    runner_builder.build_pipeline_runner(
-        context,
-        registry=fake_registry,
-        ensure_providers_loaded_fn=lambda: None,
-        register_all_pipelines_fn=lambda registry=None: None,
-        get_settings_fn=lambda: SimpleNamespace(
-            data_dir=str(tmp_path),
-            pipeline=SimpleNamespace(
-                heartbeat_interval=30,
-                control_plane=SimpleNamespace(
-                    run_manifest_enabled=False,
-                    run_ledger_enabled=False,
+    with pytest.raises(
+        RuntimeError,
+        match="Pipeline execution requires run manifests",
+    ):
+        runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            ensure_providers_loaded_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=lambda: SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    heartbeat_interval=30,
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=False,
+                        run_ledger_enabled=False,
+                    ),
                 ),
+                test_mode=False,
             ),
-            test_mode=False,
-        ),
-        load_pipeline_config_fn=lambda _: SimpleNamespace(
-            provider="chembl",
-            entity_type="activity",
-            version="2.0.0",
-            maintenance=None,
-            input_filter=SimpleNamespace(),
-            business_primary_keys=["activity_id"],
-            technical_primary_key="entity_id",
-        ),
-        build_observability_bundle_fn=lambda **_: _namespace_observability(
-            SimpleNamespace(info=lambda *_, **__: None),
-        ),
-        assemble_vacuum_settings_fn=lambda **_: None,
-        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
-        assemble_filter_config_fn=lambda **_: None,
-        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
-    )
+            load_pipeline_config_fn=lambda _: SimpleNamespace(
+                provider="chembl",
+                entity_type="activity",
+                version="2.0.0",
+                maintenance=None,
+                input_filter=SimpleNamespace(),
+                business_primary_keys=["activity_id"],
+                technical_primary_key="entity_id",
+            ),
+            build_observability_bundle_fn=lambda **_: _namespace_observability(
+                SimpleNamespace(info=lambda *_, **__: None),
+            ),
+            assemble_vacuum_settings_fn=lambda **_: None,
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+            assemble_filter_config_fn=lambda **_: None,
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+        )
 
-    assert isinstance(fake_factory.kwargs, dict)
-    assert fake_factory.kwargs["manifest_id"] is None
-    assert fake_factory.runner.attached_run_ledger_service is None
+    assert fake_factory.kwargs is None
     assert not (tmp_path / "output" / "control" / "run_manifest").exists()
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 

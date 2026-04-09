@@ -5,13 +5,18 @@ from typing import Generic, TypeVar
 
 import pyarrow as pa
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.application.core.base_transformer.types import TransformerDependencyContext
-from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.core.factory_wiring_api import (
+    BasePipeline,
+    PipelineRunner,
+    PipelineService,
+)
+from bioetl.application.core.transformer_wiring_api import (
+    BaseTransformer,
+    TransformerDependencyContext,
+)
 from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorProtocol, get_data_source_creator
+    DataSourceCreatorProtocol,
+    get_data_source_creator,
 )
 from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
 from bioetl.composition.factories.pipeline.assembler_helpers import (
@@ -33,7 +38,11 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
-from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig, SilverFilterConfig
+from bioetl.domain.filtering import (
+    GoldFilterConfig,
+    InputFilterConfig,
+    SilverFilterConfig,
+)
 from bioetl.domain.ports import (
     ContractPolicyPort,
     DataNormalizationPort,

@@ -59,6 +59,14 @@ class RunLedgerService:
 
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:
         """Record manifest creation as the first control-plane event."""
+        if self.manifest_id != manifest.manifest_id:
+            raise ValueError(
+                "RunLedgerService manifest_id must match the persisted manifest before recording ledger events"
+            )
+        if self.run_id != manifest.run_id:
+            raise ValueError(
+                "RunLedgerService run_id must match the persisted manifest before recording ledger events"
+            )
         # Keep the first event diagnostics stable around runtime anchors.
         sync_manifest_runtime_defaults(self, manifest)
         entry = self._append(
@@ -172,6 +180,10 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record a published layer artifact tied to this manifest."""
+        if dataset_ref is None and lineage_fragment_id is None:
+            raise ValueError(
+                "Artifact publication requires dataset_ref or lineage_fragment_id"
+            )
         payload: dict[str, object] = {"artifact_path": artifact_path}
         if details:
             payload.update(details)
@@ -225,6 +237,7 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Create and append one ledger entry."""
+        self._validate_manifest_linkage()
         event_family = infer_ledger_event_family(event_type)
         payload = normalize_run_ledger_payload(
             {
@@ -270,6 +283,14 @@ class RunLedgerService:
         entry = RunLedgerEntry.from_dict(payload)
         self.ledger_port.append(entry)
         return entry
+
+    def _validate_manifest_linkage(self) -> None:
+        """Reject lifecycle events that are not tied to a persisted manifest."""
+        manifest_id = self.manifest_id.strip()
+        if not manifest_id or manifest_id == "pending":
+            raise RuntimeError(
+                "Run ledger events require a persisted manifest_id before append"
+            )
 
     def _append_run_outcome(
         self,

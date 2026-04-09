@@ -28,7 +28,13 @@ profiles в BioETL.
   — строит repo-derived graph snapshot из docs/configs/src/tests/scripts,
   curated policy surfaces, а также semantic impact-analysis layer для
   `port_surface`, `adapter_surface`, `pipeline_surface`, `contract_surface`
-  и `alert_surface`, и
+  и `alert_surface`.
+  Текущий ontology layer уже включает:
+  `Protocol/class`-level `port_surface`,
+  richer `contract_surface` links к registry/config/schema modules и
+  published artifacts, direct `pipeline_surface -> RUNS_VIA/VALIDATED_BY/OBSERVED_BY`
+  edges и selective `alert_surface -> DEPENDS_ON -> pipeline/provider` mapping.
+  Tooling
   может синхронизировать его в локальный Neo4j backend без ручных prompt waves.
   Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
   он пересобирает managed relations и удаляет только stale repo-derived nodes
@@ -45,6 +51,11 @@ profiles в BioETL.
   `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:
   этот режим после rebuild удаляет legacy unmanaged nodes для label-семейств,
   которые теперь полностью принадлежат deterministic sync.
+  Для CI/snapshot gate используй
+  `python -m scripts.ci neo4j-memory`:
+  он проверяет ontology invariants без живого Neo4j и падает при drift по
+  required labels/relations, protocol-level ports, rich contract metadata,
+  runtime links или orphan nodes в snapshot.
 
 ## Relationship To Other AI Surfaces
 

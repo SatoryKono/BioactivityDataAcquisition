@@ -207,7 +207,29 @@ class RunManifestService:
             ),
         )
         self.manifest_port.save(manifest)
+        self._assert_manifest_persisted(manifest)
         return manifest
+
+    def _assert_manifest_persisted(self, manifest: RunManifest) -> None:
+        """Fail closed when a persisted manifest cannot be reconstructed."""
+        persisted_by_manifest_id = self.manifest_port.get(manifest.manifest_id)
+        if persisted_by_manifest_id is None:
+            raise RuntimeError(
+                "Run manifest persistence failed: manifest is not resolvable by manifest_id"
+            )
+        if persisted_by_manifest_id.run_id != manifest.run_id:
+            raise RuntimeError(
+                "Run manifest persistence failed: persisted manifest run_id does not match the requested run_id"
+            )
+        persisted_by_run_id = self.manifest_port.get_by_run_id(manifest.run_id)
+        if persisted_by_run_id is None:
+            raise RuntimeError(
+                "Run manifest persistence failed: manifest is not resolvable by run_id"
+            )
+        if persisted_by_run_id.manifest_id != manifest.manifest_id:
+            raise RuntimeError(
+                "Run manifest persistence failed: run_id resolves to a different manifest_id"
+            )
 
     def _build_manifest_payload(
         self,

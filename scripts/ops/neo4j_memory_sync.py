@@ -281,6 +281,21 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
 )
 CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
     {
+        "name": "uv run python -m bioetl run --pipeline",
+        "platform": "ci_uv",
+        "summary": "Canonical CI and single-OS pipeline runtime path.",
+    },
+    {
+        "name": "\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m bioetl run --pipeline",
+        "platform": "wsl",
+        "summary": "WSL/Linux pipeline runtime path for the stable WSL virtualenv.",
+    },
+    {
+        "name": ".\\.venv-win\\Scripts\\python.exe -m bioetl run --pipeline",
+        "platform": "windows",
+        "summary": "PowerShell pipeline runtime path for .venv-win.",
+    },
+    {
         "name": "uv run python -m pytest",
         "platform": "ci_uv",
         "summary": "Canonical CI and single-OS pytest execution path.",
@@ -450,6 +465,14 @@ class GraphSnapshot:
         }
 
 
+@dataclass(frozen=True)
+class PortSurfaceDescriptor:
+    surface_name: str
+    class_name: str
+    module_name: str
+    source_path: str
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Build and optionally sync a deterministic BioETL graph into Neo4j.",
@@ -573,12 +596,137 @@ def _resolve_repo_path(root: Path, base_path: Path, raw_path: str) -> Path | Non
     return None
 
 
-def _imported_port_surfaces(path: Path) -> set[str]:
+def _parse_python_ast(path: Path) -> ast.AST | None:
     if not path.is_file() or path.suffix != ".py":
-        return set()
+        return None
     try:
-        tree = ast.parse(_read_text(path), filename=str(path))
+        return ast.parse(_read_text(path), filename=str(path))
     except SyntaxError:
+        return None
+
+
+def _is_protocol_base(node: ast.expr) -> bool:
+    if isinstance(node, ast.Name):
+        return node.id == "Protocol"
+    if isinstance(node, ast.Attribute):
+        return node.attr == "Protocol"
+    if isinstance(node, ast.Subscript):
+        return _is_protocol_base(node.value)
+    return False
+
+
+def _is_dataframe_model_base(node: ast.expr) -> bool:
+    if isinstance(node, ast.Name):
+        return node.id == "DataFrameModel"
+    if isinstance(node, ast.Attribute):
+        return node.attr == "DataFrameModel"
+    if isinstance(node, ast.Subscript):
+        return _is_dataframe_model_base(node.value)
+    return False
+
+
+def _protocol_class_names(path: Path) -> list[str]:
+    tree = _parse_python_ast(path)
+    if tree is None:
+        return []
+
+    protocol_names: list[str] = []
+    for node in tree.body:
+        if not isinstance(node, ast.ClassDef):
+            continue
+        if any(_is_protocol_base(base) for base in node.bases):
+            protocol_names.append(node.name)
+    return protocol_names
+
+
+def _dataframe_model_class_names(path: Path) -> list[str]:
+    tree = _parse_python_ast(path)
+    if tree is None:
+        return []
+
+    class_names: list[str] = []
+    for node in tree.body:
+        if not isinstance(node, ast.ClassDef):
+            continue
+        if any(_is_dataframe_model_base(base) for base in node.bases):
+            class_names.append(node.name)
+    return class_names
+
+
+def _imported_symbols(path: Path) -> list[tuple[str, str, str]]:
+    tree = _parse_python_ast(path)
+    if tree is None:
+        return []
+
+    imports: list[tuple[str, str, str]] = []
+    for node in tree.body:
+        if not isinstance(node, ast.ImportFrom) or node.module is None:
+            continue
+        for alias in node.names:
+            imports.append((node.module, alias.name, alias.asname or alias.name))
+    return imports
+
+
+def _build_port_surface_catalog(
+    root: Path,
+) -> tuple[list[PortSurfaceDescriptor], dict[str, set[str]], dict[str, dict[str, str]]]:
+    ports_root = root / "src" / "bioetl" / "domain" / "ports"
+    if not ports_root.is_dir():
+        return [], {}, {}
+
+    descriptors: list[PortSurfaceDescriptor] = []
+    module_surfaces: dict[str, set[str]] = {}
+    symbol_index: dict[str, dict[str, str]] = {}
+    init_paths: list[tuple[str, Path]] = []
+
+    for port_path in sorted(ports_root.rglob("*.py")):
+        if _is_ignored_repo_path(port_path) or "noop" in port_path.parts:
+            continue
+        relative_path = _rel_path(root, port_path)
+        module_name = _python_surface_name(relative_path)
+        init_paths.append((module_name, port_path)) if port_path.name == "__init__.py" else None
+        for class_name in _protocol_class_names(port_path):
+            surface_name = f"{module_name}.{class_name}"
+            descriptors.append(
+                PortSurfaceDescriptor(
+                    surface_name=surface_name,
+                    class_name=class_name,
+                    module_name=module_name,
+                    source_path=relative_path,
+                )
+            )
+            module_surfaces.setdefault(module_name, set()).add(surface_name)
+            symbol_index.setdefault(module_name, {})[class_name] = surface_name
+
+    changed = True
+    while changed:
+        changed = False
+        for module_name, init_path in init_paths:
+            exported_surfaces = module_surfaces.setdefault(module_name, set())
+            exported_symbols = symbol_index.setdefault(module_name, {})
+            for imported_module, imported_name, alias_name in _imported_symbols(init_path):
+                if not imported_module.startswith("bioetl.domain.ports"):
+                    continue
+                target = symbol_index.get(imported_module, {}).get(imported_name)
+                if target is None:
+                    continue
+                if exported_symbols.get(alias_name) != target:
+                    exported_symbols[alias_name] = target
+                    changed = True
+                if target not in exported_surfaces:
+                    exported_surfaces.add(target)
+                    changed = True
+
+    return descriptors, module_surfaces, symbol_index
+
+
+def _imported_port_surfaces(
+    path: Path,
+    port_module_surfaces: dict[str, set[str]],
+    port_symbol_index: dict[str, dict[str, str]],
+) -> set[str]:
+    tree = _parse_python_ast(path)
+    if tree is None:
         return set()
 
     imported: set[str] = set()
@@ -586,9 +734,43 @@ def _imported_port_surfaces(path: Path) -> set[str]:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 if alias.name.startswith("bioetl.domain.ports"):
-                    imported.add(alias.name)
+                    imported.update(port_module_surfaces.get(alias.name, set()))
         elif isinstance(node, ast.ImportFrom) and node.module is not None:
             if node.module.startswith("bioetl.domain.ports"):
+                if any(alias.name == "*" for alias in node.names):
+                    imported.update(port_module_surfaces.get(node.module, set()))
+                    continue
+                for alias in node.names:
+                    target = port_symbol_index.get(node.module, {}).get(alias.name)
+                    if target is not None:
+                        imported.add(target)
+    return imported
+
+
+def _resolve_python_module_surface(root: Path, module_name: str) -> NodeKey | None:
+    relative_py = Path("src") / Path(*module_name.split("."))
+    file_candidate = root / relative_py.with_suffix(".py")
+    if file_candidate.is_file():
+        return NodeKey("module_surface", _rel_path(root, file_candidate))
+    init_candidate = root / relative_py / "__init__.py"
+    if init_candidate.is_file():
+        return NodeKey("module_surface", _rel_path(root, init_candidate))
+    return None
+
+
+def _imported_repo_modules(path: Path, prefixes: tuple[str, ...]) -> set[str]:
+    tree = _parse_python_ast(path)
+    if tree is None:
+        return set()
+
+    imported: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name.startswith(prefixes):
+                    imported.add(alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module is not None:
+            if node.module.startswith(prefixes):
                 imported.add(node.module)
     return imported
 
@@ -614,6 +796,39 @@ def _runtime_dimensions(*parts: str) -> set[str]:
         if re.search(rf"\b{dim}\b", combined):
             dimensions.add(dim)
     return dimensions
+
+
+def _select_alert_targets(
+    snapshot: GraphSnapshot,
+    group_name: str,
+    expr: str,
+    dimensions: set[str],
+    pipeline_nodes: dict[str, NodeKey],
+    provider_nodes: list[NodeKey],
+) -> tuple[list[NodeKey], list[NodeKey]]:
+    normalized = f"{group_name} {expr}".lower()
+    pipeline_targets: list[NodeKey] = []
+    provider_targets: list[NodeKey] = []
+
+    if "provider" in dimensions or "provider_health" in normalized or "bioetl_health_check_" in normalized:
+        provider_targets = provider_nodes
+
+    if "pipeline" in dimensions:
+        pipeline_targets = list(pipeline_nodes.values())
+        if (
+            "entity" in dimensions
+            or "bioetl_dq_" in normalized
+            or "bioetl_silver_" in normalized
+            or 'stage="bronze"' in normalized
+            or "bioetl_data_freshness_seconds" in normalized
+        ):
+            pipeline_targets = [
+                node
+                for node in pipeline_targets
+                if snapshot.nodes[node].properties.get("pipeline_kind") == "entity"
+            ]
+
+    return pipeline_targets, provider_targets
 
 
 def _normalize_env_value(raw: str) -> str:
@@ -1199,6 +1414,7 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
     pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
     _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes)
     _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
+    _add_pipeline_operational_edges(snapshot, pipeline_nodes)
 
 
 def _add_port_surfaces(
@@ -1213,26 +1429,46 @@ def _add_port_surfaces(
 
     family = NodeKey("package_family", "domain/ports")
     port_nodes: set[NodeKey] = set()
-    for port_path in sorted(ports_root.rglob("*.py")):
-        if _is_ignored_repo_path(port_path) or "noop" in port_path.parts:
-            continue
-        relative_path = _rel_path(root, port_path)
-        surface_name = _python_surface_name(relative_path)
+    facade = snapshot.add_node(
+        "port_surface",
+        "bioetl.domain.ports",
+        summary="Canonical facade exporting stable domain port protocols.",
+        source_path="src/bioetl/domain/ports/__init__.py",
+        source_kind="domain_port_facade",
+        granularity="facade",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    port_nodes.add(facade)
+    snapshot.add_relation(project, "HAS_PORT", facade, provenance="impact_ports")
+    if family in snapshot.nodes:
+        snapshot.add_relation(family, "CONTAINS", facade, provenance="impact_ports")
+    facade_module = NodeKey("module_surface", "src/bioetl/domain/ports/__init__.py")
+    if facade_module in snapshot.nodes:
+        snapshot.add_relation(facade, "BACKED_BY", facade_module, provenance="impact_ports")
+
+    descriptors, _, _ = _build_port_surface_catalog(root)
+    for descriptor in descriptors:
         port = snapshot.add_node(
             "port_surface",
-            surface_name,
-            summary=f"Domain port surface `{surface_name}`.",
-            source_path=relative_path,
-            source_kind="domain_port",
+            descriptor.surface_name,
+            summary=f"Domain port protocol `{descriptor.class_name}`.",
+            source_path=descriptor.source_path,
+            source_kind="domain_port_protocol",
+            port_name=descriptor.class_name,
+            port_module=descriptor.module_name,
+            granularity="protocol_class",
             last_verified=today,
             ingest_wave="repo_sync_v1",
             confidence="high",
         )
         port_nodes.add(port)
         snapshot.add_relation(project, "HAS_PORT", port, provenance="impact_ports")
+        snapshot.add_relation(facade, "CONTAINS", port, provenance="impact_ports")
         if family in snapshot.nodes:
             snapshot.add_relation(family, "CONTAINS", port, provenance="impact_ports")
-        module_key = NodeKey("module_surface", relative_path)
+        module_key = NodeKey("module_surface", descriptor.source_path)
         if module_key in snapshot.nodes:
             snapshot.add_relation(port, "BACKED_BY", module_key, provenance="impact_ports")
     return port_nodes
@@ -1251,6 +1487,7 @@ def _add_adapter_surfaces(
 
     adapter_family = NodeKey("package_family", "infrastructure/adapters")
     port_names = {node.name for node in port_nodes}
+    _, port_module_surfaces, port_symbol_index = _build_port_surface_catalog(root)
     adapter_nodes: dict[str, NodeKey] = {}
 
     for child in sorted(adapters_root.iterdir()):
@@ -1282,7 +1519,9 @@ def _add_adapter_surfaces(
             for module_path in sorted(child.rglob("*.py")):
                 if _is_ignored_repo_path(module_path):
                     continue
-                imported_ports.update(_imported_port_surfaces(module_path))
+                imported_ports.update(
+                    _imported_port_surfaces(module_path, port_module_surfaces, port_symbol_index)
+                )
             for port_name in sorted(imported_ports):
                 if port_name in port_names:
                     snapshot.add_relation(
@@ -1316,7 +1555,7 @@ def _add_adapter_surfaces(
         module_key = NodeKey("module_surface", relative_path)
         if module_key in snapshot.nodes:
             snapshot.add_relation(adapter, "BACKED_BY", module_key, provenance="impact_adapters")
-        for port_name in sorted(_imported_port_surfaces(child)):
+        for port_name in sorted(_imported_port_surfaces(child, port_module_surfaces, port_symbol_index)):
             if port_name in port_names:
                 snapshot.add_relation(
                     adapter,
@@ -1358,6 +1597,7 @@ def _add_contract_surfaces(
     for contract_ref, raw_entry in sorted(entries.items()):
         if not isinstance(contract_ref, str) or not isinstance(raw_entry, dict):
             continue
+        identity = raw_entry.get("identity") if isinstance(raw_entry.get("identity"), dict) else {}
         contract = snapshot.add_node(
             "contract_surface",
             contract_ref,
@@ -1365,6 +1605,13 @@ def _add_contract_surfaces(
             source_path=_rel_path(root, registry_path),
             source_kind="contract_registry",
             status=raw_entry.get("status"),
+            contract_version=identity.get("contract_version"),
+            compatibility_level=identity.get("compatibility_level"),
+            schema_hash=identity.get("schema_hash"),
+            dq_policy_ref=raw_entry.get("dq_policy_ref") or identity.get("dq_policy_ref"),
+            rule_bundle_version=raw_entry.get("rule_bundle_version") or identity.get("rule_bundle_version"),
+            owners=raw_entry.get("owners"),
+            supported_versions=raw_entry.get("supported_versions"),
             last_verified=today,
             ingest_wave="repo_sync_v1",
             confidence="high",
@@ -1385,9 +1632,40 @@ def _add_contract_surfaces(
                 module_key = NodeKey("module_surface", _rel_path(root, resolved))
                 if module_key in snapshot.nodes:
                     snapshot.add_relation(contract, "BACKED_BY", module_key, provenance="impact_contracts")
+                for imported_module in sorted(
+                    _imported_repo_modules(
+                        resolved,
+                        (
+                            "bioetl.domain.contracts.gold",
+                            "bioetl.domain.schemas",
+                        ),
+                    )
+                ):
+                    dependency_key = _resolve_python_module_surface(root, imported_module)
+                    if dependency_key is not None and dependency_key in snapshot.nodes:
+                        snapshot.add_relation(contract, "DEPENDS_ON", dependency_key, provenance="impact_contracts")
+                schema_classes = _dataframe_model_class_names(resolved)
+                if schema_classes:
+                    snapshot.add_node(
+                        "contract_surface",
+                        contract_ref,
+                        schema_classes=schema_classes,
+                    )
 
         contract_config_path = (root / "configs" / "contracts" / contract_ref.replace(".", "/")).with_suffix(".yaml")
         if contract_config_path.is_file():
+            contract_config = _read_yaml(contract_config_path)
+            snapshot.add_node(
+                "contract_surface",
+                contract_ref,
+                contract_config_version=contract_config.get("contract_version"),
+                contract_config_ref=contract_config.get("contract_ref"),
+                soft_fail_threshold=contract_config.get("soft_fail_threshold"),
+                hard_fail_threshold=contract_config.get("hard_fail_threshold"),
+                strict_validation=contract_config.get("strict_validation"),
+                invalid_record_policy=contract_config.get("invalid_record_policy"),
+                default_disposition_policy=contract_config.get("default_disposition_policy"),
+            )
             artifact = snapshot.add_node(
                 "config_artifact",
                 _rel_path(root, contract_config_path),
@@ -1450,6 +1728,7 @@ def _add_pipeline_surfaces(
             summary=pipeline_summary,
             source_path=_rel_path(root, entity_path),
             source_kind="entity_pipeline",
+            pipeline_kind="entity",
             provider=provider_name,
             entity=entity_name,
             last_verified=today,
@@ -1485,6 +1764,7 @@ def _add_pipeline_surfaces(
             summary=f"Composite pipeline `{composite_name}`.",
             source_path=_rel_path(root, composite_path),
             source_kind="composite_pipeline",
+            pipeline_kind="composite",
             last_verified=today,
             ingest_wave="repo_sync_v1",
             confidence="high",
@@ -1589,12 +1869,18 @@ def _add_alert_surfaces(
                 expr = str(rule.get("expr", ""))
                 dimension_text = " ".join(str(value) for value in annotations.values())
                 dimensions = _runtime_dimensions(expr, dimension_text)
-                if "pipeline" in dimensions:
-                    for pipeline in pipeline_targets:
-                        snapshot.add_relation(alert, "DEPENDS_ON", pipeline, provenance="impact_alerts")
-                if "provider" in dimensions:
-                    for provider in provider_nodes:
-                        snapshot.add_relation(alert, "DEPENDS_ON", provider, provenance="impact_alerts")
+                selected_pipelines, selected_providers = _select_alert_targets(
+                    snapshot,
+                    group_name,
+                    expr,
+                    dimensions,
+                    pipeline_nodes,
+                    provider_nodes,
+                )
+                for pipeline in selected_pipelines:
+                    snapshot.add_relation(alert, "DEPENDS_ON", pipeline, provenance="impact_alerts")
+                for provider in selected_providers:
+                    snapshot.add_relation(alert, "DEPENDS_ON", provider, provenance="impact_alerts")
 
                 runbook = annotations.get("runbook")
                 if isinstance(runbook, str):
@@ -1646,6 +1932,56 @@ def _add_governance_edges(
         for node_key in sorted(snapshot.nodes, key=lambda node: (node.label, node.name)):
             if node_key.label == "alert_surface":
                 snapshot.add_relation(observability_policy, "GOVERNS", node_key, provenance="impact_governance")
+
+
+def _add_pipeline_operational_edges(
+    snapshot: GraphSnapshot,
+    pipeline_nodes: dict[str, NodeKey],
+) -> None:
+    runtime_paths = [
+        NodeKey("execution_path", "uv run python -m bioetl run --pipeline"),
+        NodeKey(
+            "execution_path",
+            "\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m bioetl run --pipeline",
+        ),
+        NodeKey("execution_path", ".\\.venv-win\\Scripts\\python.exe -m bioetl run --pipeline"),
+    ]
+    validation_gates = [
+        NodeKey("quality_gate", "pytest"),
+        NodeKey("quality_gate", "config validation"),
+    ]
+    common_dashboards = [
+        NodeKey("dashboard_surface", "bioetl-overview-v2"),
+        NodeKey("dashboard_surface", "bioetl-runtime"),
+    ]
+    entity_dashboards = [
+        NodeKey("dashboard_surface", "bioetl-dq-v2"),
+        NodeKey("dashboard_surface", "bioetl-silver-reject-explorer"),
+    ]
+    composite_dashboards = [
+        NodeKey("dashboard_surface", "bioetl-control-plane-v1"),
+    ]
+
+    for pipeline in sorted(pipeline_nodes.values(), key=lambda node: node.name):
+        pipeline_props = snapshot.nodes[pipeline].properties
+        pipeline_kind = pipeline_props.get("pipeline_kind")
+        for execution_path in runtime_paths:
+            if execution_path in snapshot.nodes:
+                snapshot.add_relation(pipeline, "RUNS_VIA", execution_path, provenance="impact_pipeline_ops")
+        for gate in validation_gates:
+            if gate in snapshot.nodes:
+                snapshot.add_relation(pipeline, "VALIDATED_BY", gate, provenance="impact_pipeline_ops")
+        for dashboard in common_dashboards:
+            if dashboard in snapshot.nodes:
+                snapshot.add_relation(pipeline, "OBSERVED_BY", dashboard, provenance="impact_pipeline_ops")
+        if pipeline_kind == "entity":
+            for dashboard in entity_dashboards:
+                if dashboard in snapshot.nodes:
+                    snapshot.add_relation(pipeline, "OBSERVED_BY", dashboard, provenance="impact_pipeline_ops")
+        elif pipeline_kind == "composite":
+            for dashboard in composite_dashboards:
+                if dashboard in snapshot.nodes:
+                    snapshot.add_relation(pipeline, "OBSERVED_BY", dashboard, provenance="impact_pipeline_ops")
 
 
 class Neo4jHttpClient:
@@ -1858,6 +2194,106 @@ def _write_export(path: Path, snapshot: GraphSnapshot) -> None:
 def _write_json(path: Path, payload: JsonValue) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def snapshot_orphans(snapshot: GraphSnapshot) -> list[NodeKey]:
+    degrees = {key: 0 for key in snapshot.nodes}
+    for relation in snapshot.relations.values():
+        degrees[relation.source] = degrees.get(relation.source, 0) + 1
+        degrees[relation.target] = degrees.get(relation.target, 0) + 1
+    return sorted(
+        (key for key, degree in degrees.items() if degree == 0),
+        key=lambda key: (key.label, key.name),
+    )
+
+
+def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
+    stats = snapshot.stats()
+    issues: list[str] = []
+    required_labels = (
+        "port_surface",
+        "adapter_surface",
+        "pipeline_surface",
+        "contract_surface",
+        "alert_surface",
+        "execution_path",
+        "quality_gate",
+        "dashboard_surface",
+    )
+    required_relation_types = (
+        "DEPENDS_ON",
+        "GOVERNS",
+        "RUNS_VIA",
+        "VALIDATED_BY",
+        "OBSERVED_BY",
+    )
+    for label in required_labels:
+        if int(stats["labels"].get(label, 0)) <= 0:
+            issues.append(f"missing required label population: {label}")
+    for relation_type in required_relation_types:
+        if int(stats["relation_types"].get(relation_type, 0)) <= 0:
+            issues.append(f"missing required relation population: {relation_type}")
+
+    if NodeKey("port_surface", "bioetl.domain.ports") not in snapshot.nodes:
+        issues.append("missing bioetl.domain.ports facade port surface")
+
+    protocol_ports = [
+        node
+        for node in snapshot.nodes.values()
+        if node.key.label == "port_surface" and node.properties.get("granularity") == "protocol_class"
+    ]
+    if not protocol_ports:
+        issues.append("missing protocol-class port surfaces")
+
+    rich_contracts = [
+        node
+        for node in snapshot.nodes.values()
+        if node.key.label == "contract_surface"
+        and node.properties.get("dq_policy_ref")
+        and node.properties.get("schema_classes")
+    ]
+    if not rich_contracts:
+        issues.append("missing rich contract metadata on contract surfaces")
+
+    relation_keys = {
+        (rel.source.label, rel.source.name, rel.relation_type, rel.target.label)
+        for rel in snapshot.relations.values()
+    }
+    if not any(
+        source_label == "contract_surface" and relation_type == "DEPENDS_ON" and target_label == "module_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing contract_surface -> DEPENDS_ON -> module_surface relations")
+
+    if not any(
+        source_label == "pipeline_surface" and relation_type == "RUNS_VIA" and target_label == "execution_path"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing pipeline_surface operational runtime links")
+
+    if not any(
+        source_label == "alert_surface" and relation_type == "DEPENDS_ON" and target_label in {"pipeline_surface", "provider_surface"}
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing alert_surface dependency links")
+
+    ignored_paths = [
+        node.key.name
+        for node in snapshot.nodes.values()
+        if "__pycache__" in node.key.name
+            or "__pycache__" in str(node.properties.get("source_path", ""))
+    ]
+    if ignored_paths:
+        issues.append(f"ignored runtime paths leaked into snapshot: {sorted(set(ignored_paths))[:5]}")
+
+    orphan_nodes = snapshot_orphans(snapshot)
+    if orphan_nodes:
+        issues.append(
+            "snapshot contains orphan nodes: "
+            + ", ".join(f"{node.label}:{node.name}" for node in orphan_nodes[:10])
+        )
+
+    return issues
 
 
 def _build_diff_entries(snapshot_counts: dict[str, int], live_counts: dict[str, int]) -> list[dict[str, JsonValue]]:

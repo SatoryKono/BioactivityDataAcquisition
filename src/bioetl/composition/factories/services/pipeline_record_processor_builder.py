@@ -6,9 +6,11 @@ from collections.abc import Awaitable, Callable, Iterable, Mapping
 from itertools import chain
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.config import (
+from bioetl.application.core.runtime_wiring_api import (
+    BasePipeline,
     ContentHashPolicyByVersion,
     ContentHashVersionPolicy,
+    RecordProcessor,
     RecordProcessorConfig,
 )
 from bioetl.domain.types import (
@@ -21,8 +23,6 @@ if TYPE_CHECKING:
     import pandera as pdr
     import pyarrow as pa
 
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.record_processor import RecordProcessor
     from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
     from bioetl.domain.config import DQConfig
     from bioetl.domain.ports import GoldValidatorPort, TracingPort

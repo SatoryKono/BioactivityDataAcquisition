@@ -6,8 +6,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_wiring_api import (
+    CompositePipelineRunnerService,
+)
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.ports import LoggerPort
 

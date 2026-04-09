@@ -4,18 +4,16 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.batch_processing_service import (
+from bioetl.application.core.runtime_wiring_api import (
+    BasePipeline,
     BatchProcessingComponents,
     BatchProcessingService,
-)
-from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
+    BatchTracingManagerService,
+    GoldFilterCallback,
+    QuarantineManagerService,
+    RecordProcessorConfig,
 )
-from bioetl.application.core.batch_tracing import BatchTracingManagerService
-from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.protocols import GoldFilterCallback
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.ports import (
