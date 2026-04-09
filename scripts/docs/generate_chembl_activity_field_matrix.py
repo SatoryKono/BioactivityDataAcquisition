@@ -20,7 +20,9 @@ from bioetl.domain.normalization.profiles import (  # noqa: E402
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
-from bioetl.domain.schemas.chembl.activity import ActivitySchema  # noqa: E402
+from bioetl.infrastructure.schemas.silver_chembl_core import (  # noqa: E402
+    CHEMBL_ACTIVITY_SCHEMA,
+)
 
 DEFAULT_OUT_DIR = Path("docs/reports/generated/chembl_activity_field_matrix")
 CSV_NAME = "chembl_activity_field_matrix.csv"
@@ -28,32 +30,82 @@ MD_NAME = "chembl_activity_field_matrix.md"
 DOCX_NAME = "chembl_activity_field_matrix.docx"
 PDF_NAME = "chembl_activity_field_matrix.pdf"
 
+CSV_COLUMNS = (
+    "field_name",
+    "type",
+    "category",
+    "current_normalization",
+    "proposed_normalization",
+    "include_in_content_hash",
+    "set_like",
+    "normalizer",
+    "notes",
+)
+
+_PROPOSED_NORMALIZATION_OVERRIDES: dict[str, str] = {}
+
+
+def _normalizer_name(normalizer: Any) -> str:
+    """Return a deterministic display name for one field normalizer."""
+    return getattr(normalizer, "__name__", type(normalizer).__name__)
+
+
+def _render_current_normalization(*, normalizer_name: str, include_in_hash: bool, set_like: bool) -> str:
+    """Render the active normalization contract from one field rule."""
+    parts = [f"normalizer={normalizer_name}"]
+    parts.append(
+        "content_hash=included" if include_in_hash else "content_hash=excluded"
+    )
+    if set_like:
+        parts.append("hash_order=set_like")
+    return "; ".join(parts)
+
+
+def _render_proposed_normalization(field_name: str, current_normalization: str) -> str:
+    """Render planned normalization contract with deterministic fallback.
+
+    The current normalization profile is the only canonical source of active
+    rules today. Until separate planned overrides are introduced, the proposed
+    normalization remains aligned with the current contract.
+    """
+    return _PROPOSED_NORMALIZATION_OVERRIDES.get(field_name, current_normalization)
+
 
 def build_field_matrix_rows() -> list[dict[str, str]]:
     """Build one deterministic field matrix from the canonical schema + profile."""
-    schema = ActivitySchema.to_schema()
+    schema_fields = tuple(CHEMBL_ACTIVITY_SCHEMA.names)
+    profile_fields = tuple(sorted(CHEMBL_ACTIVITY_SCHEMA_FIELDS))
+    if tuple(sorted(schema_fields)) != profile_fields:
+        raise ValueError("CHEMBL_ACTIVITY_SCHEMA and profile fields are out of sync")
     rows: list[dict[str, str]] = []
-    for field_name in sorted(CHEMBL_ACTIVITY_SCHEMA_FIELDS):
+    for field_name in sorted(schema_fields):
         rule = CHEMBL_ACTIVITY_PROFILE.rule_for(field_name)
         if rule is None:
             raise ValueError(f"Missing profile rule for {field_name}")
-        field = schema.columns[field_name]
+        field = CHEMBL_ACTIVITY_SCHEMA.field(field_name)
+        normalizer_name = _normalizer_name(rule.normalizer)
+        current_normalization = _render_current_normalization(
+            normalizer_name=normalizer_name,
+            include_in_hash=rule.include_in_hash,
+            set_like=rule.set_like,
+        )
         rows.append(
             {
                 "field_name": field_name,
-                "schema_dtype": str(field.dtype),
+                "type": str(field.type),
                 "category": (
                     "meta"
                     if field_name in CHEMBL_ACTIVITY_PROFILE.meta_fields
                     else "business"
                 ),
+                "current_normalization": current_normalization,
+                "proposed_normalization": _render_proposed_normalization(
+                    field_name,
+                    current_normalization,
+                ),
                 "include_in_content_hash": "true" if rule.include_in_hash else "false",
                 "set_like": "true" if rule.set_like else "false",
-                "normalizer": getattr(
-                    rule.normalizer,
-                    "__name__",
-                    type(rule.normalizer).__name__,
-                ),
+                "normalizer": normalizer_name,
                 "notes": rule.notes or "",
             }
         )
@@ -65,7 +117,7 @@ def render_csv(rows: list[dict[str, str]]) -> str:
     output = io.StringIO()
     writer = csv.DictWriter(
         output,
-        fieldnames=list(rows[0].keys()),
+        fieldnames=list(CSV_COLUMNS),
         lineterminator="\n",
     )
     writer.writeheader()
