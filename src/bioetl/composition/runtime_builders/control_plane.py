@@ -85,7 +85,7 @@ def _apply_manifest_updates_to_mutable_context(
     *,
     optional_updates: tuple[tuple[str, str], ...],
 ) -> object:
-    setattr(ctx, "manifest_id", manifest_id)
+    ctx.manifest_id = manifest_id
     for field_name, field_value in optional_updates:
         setattr(ctx, field_name, field_value)
     return ctx

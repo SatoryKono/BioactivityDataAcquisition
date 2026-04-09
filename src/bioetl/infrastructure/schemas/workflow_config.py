@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow import (

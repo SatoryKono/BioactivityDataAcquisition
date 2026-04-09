@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.normalization import normalize_runtime_anchor_payload
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,
@@ -14,6 +13,7 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.normalization import normalize_runtime_anchor_payload
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

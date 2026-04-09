@@ -16,11 +16,11 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root))
     sys.path.insert(0, str(repo_root / "src"))
 
-from bioetl.domain.normalization.profiles import (  # noqa: E402
+from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
-from bioetl.infrastructure.schemas.silver_chembl_core import (  # noqa: E402
+from bioetl.infrastructure.schemas.silver_chembl_core import (
     CHEMBL_ACTIVITY_SCHEMA,
 )
 

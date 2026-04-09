@@ -73,7 +73,7 @@ def build_composite_control_plane_bundle(
     infra_context: CompositeInfrastructureContext,
 ) -> CompositeControlPlaneBundle:
     """Materialize manifest/ledger artifacts for one composite execution."""
-    manifest_enabled, ledger_enabled = resolve_composite_control_plane_flags(
+    _manifest_enabled, ledger_enabled = resolve_composite_control_plane_flags(
         infra_context.settings
     )
 

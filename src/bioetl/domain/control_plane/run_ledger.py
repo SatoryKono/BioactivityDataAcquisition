@@ -17,10 +17,6 @@ from bioetl.domain.control_plane._run_ledger_serialization import (
     load_optional_str,
     normalize_ledger_value,
 )
-from bioetl.domain.normalization.control_plane import (
-    normalize_control_plane_datetime,
-    normalize_control_plane_uuid,
-)
 from bioetl.domain.events import ORDINARY_PIPELINE_STAGE_NAMES
 from bioetl.domain.types import RunID
 

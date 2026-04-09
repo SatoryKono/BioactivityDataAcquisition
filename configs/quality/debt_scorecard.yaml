@@ -29,11 +29,11 @@ governance:
     rationale: "Stabilizing architecture metrics through baseline ratcheting."
   coarse_budgets:
     ruff_error_count:
-      max_count: 28
+      max_count: 0
       owner: "@bioetl-architecture"
       linked_rf: "RF-ARCH-009"
-      rationale: "Temporary hold while composite runtime hotspot cleanup is still active."
-      ratchet_policy: "hold until RF-ARCH-009 removes current composite lint debt"
+      rationale: "Ruff backlog for src/bioetl has been retired; CI now enforces zero source-level lint debt."
+      ratchet_policy: "ratchet only downward from zero"
     mypy_error_count:
       max_count: 0
       owner: "@bioetl-architecture"

@@ -11,7 +11,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime, timezone
 from pathlib import Path
 from typing import TypeAlias, TypeVar
 from urllib import error, parse, request
@@ -2447,7 +2447,7 @@ def _add_pipeline_operational_edges(
 class Neo4jHttpClient:
     def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
         self._endpoint = f"{base_uri}/db/{database}/tx/commit"
-        auth_token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+        auth_token = base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
         self._headers = {
             "Authorization": f"Basic {auth_token}",
             "Content-Type": "application/json",
@@ -2494,7 +2494,7 @@ class Neo4jHttpClient:
 
 
 def _sync_run_id() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _managed_properties(properties: dict[str, JsonValue], sync_run: str) -> dict[str, JsonValue]:
@@ -2657,7 +2657,7 @@ def _write_json(path: Path, payload: JsonValue) -> None:
 
 
 def snapshot_orphans(snapshot: GraphSnapshot) -> list[NodeKey]:
-    degrees = {key: 0 for key in snapshot.nodes}
+    degrees = dict.fromkeys(snapshot.nodes, 0)
     for relation in snapshot.relations.values():
         degrees[relation.source] = degrees.get(relation.source, 0) + 1
         degrees[relation.target] = degrees.get(relation.target, 0) + 1
