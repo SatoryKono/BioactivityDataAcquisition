@@ -11,12 +11,13 @@ These utilities support PipelineMetadata population as per RULES.md §2.3.
 from __future__ import annotations
 
 import hashlib
-import json
 import subprocess
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as pkg_version
 from typing import TYPE_CHECKING
+
+from bioetl.domain.normalization import serialize_json_canonical
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -121,8 +122,8 @@ def compute_config_hash(
     # Normalize for deterministic serialization
     normalized = _normalize_for_hash(config_dict)
 
-    # Serialize to JSON with sorted keys and no whitespace
-    json_str = json.dumps(normalized, sort_keys=True, separators=(",", ":"))
+    # Reuse the same canonical JSON contract as the run-manifest fingerprint.
+    json_str = serialize_json_canonical(normalized)
 
     # Compute SHA256 hash
     return hashlib.sha256(json_str.encode("utf-8")).hexdigest()

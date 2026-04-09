@@ -63,7 +63,7 @@ if TYPE_CHECKING:
 
     import polars as pl
 
-    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.domain.ports import LockPort, LoggerPort
 
 __all__ = [

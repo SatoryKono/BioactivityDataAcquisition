@@ -33,8 +33,8 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import (
         CompositePreflightValidator,
         FSMStateHelperService,
+        PipelineRunner,
     )
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (

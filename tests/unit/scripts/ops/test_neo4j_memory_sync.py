@@ -55,6 +55,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         "bioetl.domain.ports.runtime.runner.RunnablePort",
     ) in node_keys
     assert ("adapter_surface", "bioetl.infrastructure.adapters.chembl") in node_keys
+    assert (
+        "adapter_impl_surface",
+        "bioetl.infrastructure.adapters.chembl.client",
+    ) in node_keys
     assert ("pipeline_surface", "chembl_activity") in node_keys
     assert ("contract_surface", "chembl.activity") in node_keys
     assert ("alert_surface", "BioETLPipelineRunFailed") in node_keys
@@ -157,6 +161,20 @@ def test_snapshot_contains_expected_relations() -> None:
     assert (
         "adapter_surface",
         "bioetl.infrastructure.adapters.chembl",
+        "CONTAINS",
+        "adapter_impl_surface",
+        "bioetl.infrastructure.adapters.chembl.client",
+    ) in relation_keys
+    assert (
+        "adapter_impl_surface",
+        "bioetl.infrastructure.adapters.chembl.client",
+        "DEPENDS_ON",
+        "port_surface",
+        "bioetl.domain.ports.observability.logging.LoggerPort",
+    ) in relation_keys
+    assert (
+        "adapter_surface",
+        "bioetl.infrastructure.adapters.chembl",
         "DEPENDS_ON",
         "port_surface",
         "bioetl.domain.ports.observability.logging.LoggerPort",
@@ -188,6 +206,55 @@ def test_snapshot_contains_expected_relations() -> None:
         "BACKED_BY",
         "config_artifact",
         "configs/contracts/chembl/activity.yaml",
+    ) in relation_keys
+    assert (
+        "contract_surface",
+        "chembl.activity",
+        "DESCRIBED_IN",
+        "doc_artifact",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+    ) in relation_keys
+    assert (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/services/run_manifest_service.py",
+    ) in relation_keys
+    assert (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
+    ) in relation_keys
+    assert (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/interfaces/cli/commands/run_manifest.py",
+    ) in relation_keys
+    assert (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/services/lineage_inspection_service.py",
+    ) in relation_keys
+    assert (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/composition/bootstrap/cli/lineage.py",
+    ) in relation_keys
+    assert (
+        "contract_surface",
+        "chembl.activity",
+        "DESCRIBED_IN",
+        "doc_artifact",
+        "docs/05-operations/runbooks/traceability-signal-ownership.md",
     ) in relation_keys
     assert (
         "policy_surface",
@@ -233,6 +300,27 @@ def test_snapshot_contains_expected_relations() -> None:
     ) in relation_keys
     assert (
         "pipeline_surface",
+        "chembl_activity",
+        "TESTED_BY",
+        "test_artifact",
+        "tests/integration/pipelines/test_chembl_activity.py",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "TESTED_BY",
+        "test_artifact",
+        "tests/unit/infrastructure/adapters/chembl/test_request_metadata.py",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "TESTED_BY",
+        "test_surface",
+        "integration tests",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
         "composite_activity",
         "OBSERVED_BY",
         "dashboard_surface",
@@ -254,6 +342,20 @@ def test_snapshot_contains_expected_relations() -> None:
     ) in relation_keys
     assert (
         "alert_surface",
+        "BioETLPipelineRunFailed",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-runtime",
+    ) in relation_keys
+    assert (
+        "alert_surface",
+        "BioETLPipelineRunFailed",
+        "DEPENDS_ON",
+        "contract_surface",
+        "chembl.activity",
+    ) in relation_keys
+    assert (
+        "alert_surface",
         "BioETLDQSoftThresholdExceeded",
         "DEPENDS_ON",
         "pipeline_surface",
@@ -269,9 +371,30 @@ def test_snapshot_contains_expected_relations() -> None:
     assert (
         "alert_surface",
         "BioETLProviderFailureRateHigh",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-provider-health-v2",
+    ) in relation_keys
+    assert (
+        "alert_surface",
+        "BioETLProviderFailureRateHigh",
         "DEPENDS_ON",
         "provider_surface",
         "chembl",
+    ) in relation_keys
+    assert (
+        "alert_surface",
+        "BioETLControlPlaneReadFailureRate",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-control-plane-v1",
+    ) in relation_keys
+    assert (
+        "alert_surface",
+        "BioETLControlPlaneReadFailureRate",
+        "DEPENDS_ON",
+        "contract_surface",
+        "chembl.activity",
     ) in relation_keys
     assert (
         "doc_artifact",
@@ -400,6 +523,7 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "module_surface",
         "port_surface",
         "adapter_surface",
+        "adapter_impl_surface",
         "pipeline_surface",
         "contract_surface",
         "alert_surface",
