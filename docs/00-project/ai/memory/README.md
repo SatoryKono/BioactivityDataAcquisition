@@ -23,6 +23,10 @@ profiles в BioETL.
   `neo4j-project-memory-seed.md` и `neo4j-project-memory-seed.json`
   — phase-by-phase prompts и structured seed facts для заполнения
   `@neo4j-memory` устойчивыми знаниями о проекте.
+- **Deterministic Neo4j sync tooling**:
+  `python -m scripts.ops sync-neo4j-memory`
+  — строит repo-derived graph snapshot из docs/configs/src/tests/scripts и
+  может синхронизировать его в локальный Neo4j backend без ручных prompt waves.
 
 ## Relationship To Other AI Surfaces
 

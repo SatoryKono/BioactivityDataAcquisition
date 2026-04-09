@@ -11,12 +11,6 @@
         "NPM_CONFIG_CACHE": "/tmp/npm-cache"
       }
     },
-    "neo4j-cypher": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_neo4j_cypher_wrapper.sh"
-      ]
-    },
     "filesystem": {
       "command": "npx",
       "args": [
@@ -112,6 +106,18 @@
       "command": "bash",
       "args": [
         "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_brave_search_wrapper.sh"
+      ]
+    },
+    "neo4j-cypher": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_neo4j_cypher_wrapper.sh"
+      ]
+    },
+    "neo4j-memory": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_neo4j_memory_wrapper.sh"
       ]
     },
     "openaiDeveloperDocs": {

@@ -45,6 +45,11 @@ Last verified: '2026-03-29'
    - Username: neo4j
    - Password: (from NEO4J-AUTH)
 
+7. Build and sync the deterministic repo graph:
+   ```bash
+   python -m scripts.ops sync-neo4j-memory --apply
+   ```
+
 ## Memory Configuration Profiles
 
 ### Development (Local, 4GB host RAM)

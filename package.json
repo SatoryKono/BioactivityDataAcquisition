@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "neo4j-driver": "^6.0.1"
+    "neo4j-driver": "^6.0.1",
+    "rxjs": "^7.8.2"
   }
 }

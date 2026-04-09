@@ -1,0 +1,7 @@
+{
+  "statements": [
+    {
+      "statement": "RETURN 1 as test"
+    }
+  ]
+}
