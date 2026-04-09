@@ -33,7 +33,7 @@ Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 - `chembl` - ChEMBL adapter/pipeline
 - `pubchem` - PubChem adapter/pipeline
 - `pubmed` - PubMed adapter/pipeline
-- `opentargets` - Open Targets adapter/pipeline
+- `opentargets` - OpenAlex adapter/pipeline
 - `fda` - FDA adapter/pipeline
 
 **By layer:**
