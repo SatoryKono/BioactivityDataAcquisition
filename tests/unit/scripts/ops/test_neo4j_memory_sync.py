@@ -32,26 +32,28 @@ def test_derive_http_uri_from_bolt() -> None:
 
 def test_snapshot_contains_core_repo_surfaces() -> None:
     _, snapshot = _snapshot()
+    node_keys = {(key.label, key.name) for key in snapshot.nodes}
 
-    assert ("project", "BioETL") in {(key.label, key.name) for key in snapshot.nodes}
-    assert ("layer_family", "domain") in {(key.label, key.name) for key in snapshot.nodes}
-    assert ("package_family", "domain/ports") in {(key.label, key.name) for key in snapshot.nodes}
+    assert ("project", "BioETL") in node_keys
+    assert ("layer_family", "domain") in node_keys
+    assert ("package_family", "domain/ports") in node_keys
     assert (
         "module_surface",
         "src/bioetl/domain/config/pipeline.py",
-    ) in {(key.label, key.name) for key in snapshot.nodes}
-    assert ("provider_surface", "chembl") in {(key.label, key.name) for key in snapshot.nodes}
-    assert ("entity_config", "chembl_activity") in {(key.label, key.name) for key in snapshot.nodes}
-    assert ("composite_config", "composite_activity") in {(key.label, key.name) for key in snapshot.nodes}
-    assert ("dashboard_surface", "bioetl-overview-v2") in {(key.label, key.name) for key in snapshot.nodes}
-    assert ("policy_surface", "integration and VCR execution policy") in {
-        (key.label, key.name) for key in snapshot.nodes
-    }
-    assert ("script_surface", "scripts/dev/run_pytest.sh") in {(key.label, key.name) for key in snapshot.nodes}
+    ) in node_keys
+    assert ("provider_surface", "chembl") in node_keys
+    assert ("entity_config", "chembl_activity") in node_keys
+    assert ("composite_config", "composite_activity") in node_keys
+    assert ("dashboard_surface", "bioetl-overview-v2") in node_keys
+    assert ("policy_surface", "integration and VCR execution policy") in node_keys
+    assert ("script_surface", "scripts/dev/run_pytest.sh") in node_keys
     assert (
         "test_artifact",
         "tests/unit/scripts/ops/test_neo4j_memory_sync.py",
-    ) in {(key.label, key.name) for key in snapshot.nodes}
+    ) in node_keys
+    assert ("package_family", "composition/__pycache__") not in node_keys
+    assert ("package_family", "infrastructure/__pycache__") not in node_keys
+    assert ("package_family", "interfaces/__pycache__") not in node_keys
 
 
 def test_snapshot_contains_expected_relations() -> None:
