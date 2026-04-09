@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.services.run_ledger_service import RunLedgerService
 from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers import ensure_providers_loaded
+from bioetl.composition.runtime_builders._runner_builder_support import (
+    bind_manifest_logger_context as _bind_manifest_logger_context,
+    resolve_control_plane_flags as _resolve_control_plane_flags,
+)
 from bioetl.composition.runtime_builders.config_access import (
     get_settings,
     load_pipeline_config,
@@ -18,10 +22,6 @@ from bioetl.composition.runtime_builders.config_access import (
 from bioetl.composition.runtime_builders.control_plane import (
     attach_manifest_id,
     create_run_manifest_with_effective_config,
-)
-from bioetl.composition.runtime_builders._runner_builder_support import (
-    bind_manifest_logger_context as _bind_manifest_logger_context,
-    resolve_control_plane_flags as _resolve_control_plane_flags,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
     ResolvedVacuumSettings,
@@ -43,7 +43,6 @@ from bioetl.composition.runtime_builders.observability_builder import (
 from bioetl.domain.config import RuntimeConfig
 
 if TYPE_CHECKING:
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import (
         CachedBronzeContext,
         PipelineRunContext,
@@ -61,6 +60,16 @@ if TYPE_CHECKING:
 
 
 __all__ = ["build_pipeline_runner"]
+
+
+class PipelineRunnerProtocol(Protocol):
+    """Minimal runner contract returned by the runtime builder."""
+
+    services: object
+
+    def attach_run_ledger_service(self, service: RunLedgerService) -> None:
+        """Attach the run-ledger collaborator."""
+        ...
 
 def _initialize_registry(
     *,
@@ -81,9 +90,9 @@ def _create_runner_from_factory(
     factory: PipelineFactoryPort,
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
-) -> PipelineRunner:
+) -> PipelineRunnerProtocol:
     return cast(
-        "PipelineRunner",
+        "PipelineRunnerProtocol",
         factory.create_runner(
             run_id=ctx.run_id,
             runtime=inputs.runtime_config,
@@ -230,7 +239,7 @@ def build_pipeline_runner(
         [PipelineRunContext], CachedBronzeContext
     ]
     | None = None,
-) -> PipelineRunner:
+) -> PipelineRunnerProtocol:
     """Assemble and return a fully configured ``PipelineRunner``.
 
     Args:

@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.run_ledger_service import RunLedgerService
+
+
+class PipelineRunnerProtocol(Protocol):
+    """Minimal runner contract required for ledger collaborator attachment."""
+
+    services: object
+
+    def attach_run_ledger_service(self, service: RunLedgerService) -> None:
+        """Attach the run-ledger collaborator."""
+        ...
 
 
 def _record_artifact(
@@ -53,7 +62,7 @@ def _attach_artifact_recorder(
 
 
 def attach_control_plane_collaborators(
-    runner: PipelineRunner,
+    runner: PipelineRunnerProtocol,
     run_ledger_service: RunLedgerService,
 ) -> None:
     """Attach ledger collaborators to the runner and its metadata writers."""
