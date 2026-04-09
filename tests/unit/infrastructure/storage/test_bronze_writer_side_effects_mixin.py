@@ -11,6 +11,7 @@ import pytest
 from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
+from bioetl.domain.ports.metadata.coordinator import BronzeMetadataInput
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
     BronzeWriterSideEffectsMixin,
@@ -120,24 +121,28 @@ class TestBronzeWriterSideEffectsMixin:
         """Bundle-aware Bronze coordinator should persist lineage fragments."""
 
         class _Coordinator:
+            def __init__(self) -> None:
+                self.last_input: BronzeMetadataInput | None = None
+
             def create_bronze_metadata_bundle(
                 self,
-                input_data: object,
+                input_data: BronzeMetadataInput,
             ) -> MetadataLineageBundle:
-                _ = input_data
+                self.last_input = input_data
                 return MetadataLineageBundle(
                     metadata=metadata,
                     lineage_fragment=fragment,
                 )
 
-            def create_bronze_metadata(self, input_data: object) -> object:
-                _ = input_data
+            def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> object:
+                self.last_input = input_data
                 return metadata
 
         host = _Host(tmp_path)
         metadata = MagicMock()
         fragment = LineageGraphFragment(fragment_id="bronze:fragment-1")
-        host._metadata_coordinator = _Coordinator()
+        coordinator = _Coordinator()
+        host._metadata_coordinator = coordinator
         host._lineage_store = MagicMock()
         batch_path = tmp_path / "chembl" / "activity" / "file.jsonl.zst"
         batch_path.parent.mkdir(parents=True)
@@ -159,4 +164,6 @@ class TestBronzeWriterSideEffectsMixin:
 
         host._metadata_writer.write_bronze_metadata.assert_awaited_once()
         host._lineage_store.save.assert_called_once_with(fragment)
-        bronze_input = host._metadata_coordinator.create_bronze_metadata_bundle.__self__  # type: ignore[attr-defined]
+        assert coordinator.last_input is not None
+        assert len(coordinator.last_input.input_snapshots) == 1
+        assert coordinator.last_input.input_snapshots[0].immutable_uri == str(batch_path)
