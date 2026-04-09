@@ -12,6 +12,7 @@ from bioetl.domain.normalization.identifiers import (
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
 from bioetl.domain.normalization.text import normalize_string
+from bioetl.domain.value_objects import SMILES
 
 from ._chembl_activity_fields import (
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
@@ -155,6 +156,17 @@ def _normalize_publication_pmc_id(value: object) -> object:
     return normalize_pmc_id(value)
 
 
+def _normalize_smiles_value(value: object, *, is_canonical: bool) -> object:
+    if value is None or not isinstance(value, str):
+        return None
+    normalized = SMILES.from_raw(
+        value,
+        is_canonical=is_canonical,
+        mode="soft",
+    )
+    return str(normalized) if normalized is not None else None
+
+
 _SPECIAL_RULE_COMPONENTS: dict[str, tuple[Callable[[object], object], str]] = {
     "publication_doi": (
         _normalize_publication_doi,
@@ -167,6 +179,10 @@ _SPECIAL_RULE_COMPONENTS: dict[str, tuple[Callable[[object], object], str]] = {
     "publication_pmc_id": (
         _normalize_publication_pmc_id,
         "Normalize PMC identifier to canonical PMC-prefixed string.",
+    ),
+    "canonical_smiles": (
+        lambda value: _normalize_smiles_value(value, is_canonical=True),
+        "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
     ),
 }
 
