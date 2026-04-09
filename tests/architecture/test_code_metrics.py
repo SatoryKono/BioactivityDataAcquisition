@@ -236,15 +236,9 @@ class TestFunctionLength:
 
     EXEMPTIONS = get_registry_values("function_length")
 
-    # Maximum allowed violations (for tracking technical debt)
-    # Baseline updated 2026-01-27: filter config with fallback_column, updated function lengths
-    # Baseline updated 2026-01-27: added aggregator service, EnricherAggregator methods
-    # Baseline updated 2026-01-27: titles_match() added
-    # Baseline updated 2026-01-27: composite pipeline growth (dependencies phase, checkpoint)
-    # Baseline updated 2026-02-03: technical debt allowance + function growth
-    MAX_VIOLATIONS = (
-        165  # Increased from 145 to account for expanded docstrings (DSWARM-010)
-    )
+    # Ratchet policy: the current measured baseline is zero functions above 100 LOC.
+    # Any new violation should fail immediately instead of being absorbed by a stale debt budget.
+    MAX_VIOLATIONS = 0
 
     def test_functions_under_100_lines(
         self,
