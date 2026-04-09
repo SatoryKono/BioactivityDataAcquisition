@@ -8,6 +8,7 @@ from pathlib import Path
 
 import yaml
 
+from bioetl.domain.serialization import serialize_to_json_canonical
 from bioetl.domain.types import JsonDict
 
 from .contract_registry_helpers import (
@@ -63,7 +64,8 @@ class ContractRegistry:
         """Initialize contract registry, optionally loading it from a file path."""
         self.registry_path = registry_path
         self.entries: dict[str, ContractRegistryEntry] = {}
-        self._registry_hash: str | None = None
+        self._registry_hash_v1: str | None = None
+        self._registry_hash_v2: str | None = None
         if registry_path is not None and registry_path.is_file():
             self.load(registry_path)
 
@@ -109,11 +111,11 @@ class ContractRegistry:
             entries[str(contract_ref)] = parsed_entry
         return entries
 
-    def _calculate_registry_hash(self) -> None:
-        """Calculate SHA256 hash of canonical registry content."""
-        canonical_entries: dict[str, JsonDict] = {}
+    def _build_registry_hash_payload(self) -> JsonDict:
+        """Build the semantic payload used for registry hash generation."""
+        registry_entries: dict[str, JsonDict] = {}
         for contract_ref, entry in sorted(self.entries.items()):
-            canonical_entries[contract_ref] = {
+            registry_entries[contract_ref] = {
                 "identity": {
                     "contract_version": entry.identity.contract_version,
                     "schema_hash": entry.identity.schema_hash,
@@ -121,13 +123,32 @@ class ContractRegistry:
                 "status": entry.status.value,
                 "supported_versions": sorted(entry.supported_versions),
             }
-        canonical_repr = json.dumps(canonical_entries, sort_keys=True)
-        self._registry_hash = hashlib.sha256(canonical_repr.encode("utf-8")).hexdigest()
+        return registry_entries
+
+    def _calculate_registry_hash(self) -> None:
+        """Calculate legacy v1 and canonical v2 registry hashes."""
+        payload = self._build_registry_hash_payload()
+        legacy_repr = json.dumps(payload, sort_keys=True)
+        canonical_repr = serialize_to_json_canonical(payload)
+        self._registry_hash_v1 = hashlib.sha256(legacy_repr.encode("utf-8")).hexdigest()
+        self._registry_hash_v2 = hashlib.sha256(
+            canonical_repr.encode("utf-8")
+        ).hexdigest()
 
     @property
     def registry_hash(self) -> str | None:
-        """Return current registry hash."""
-        return self._registry_hash
+        """Return canonical registry hash (v2)."""
+        return self._registry_hash_v2
+
+    @property
+    def registry_hash_v1(self) -> str | None:
+        """Return legacy registry hash computed with stdlib json.dumps()."""
+        return self._registry_hash_v1
+
+    @property
+    def registry_hash_v2(self) -> str | None:
+        """Return canonical registry hash computed via serialize_json_canonical()."""
+        return self._registry_hash_v2
 
     def _validate_version_sequence(
         self,
