@@ -20,6 +20,7 @@ from bioetl.composition._services import (
     get_quarantine_service,
     get_run_manifest_service,
     get_vacuum_service,
+    load_workflow_config,
 )
 
 __all__ = [
@@ -40,4 +41,5 @@ __all__ = [
     "get_quarantine_service",
     "get_run_manifest_service",
     "get_vacuum_service",
+    "load_workflow_config",
 ]
