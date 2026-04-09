@@ -37,6 +37,14 @@ _CODE_PROVENANCE_SHA256_FIELDS = frozenset(
         "dq_contract_compatibility_hash",
     }
 )
+_RUNTIME_ANCHOR_SHA256_FIELDS = frozenset(
+    {
+        "config_hash",
+        "contract_schema_hash",
+        "dq_contract_compatibility_hash",
+        "effective_config_hash",
+    }
+)
 _SEMVER_PARTS = 3
 
 
@@ -119,7 +127,7 @@ def _normalize_runtime_anchor_hash(value: object | None) -> str | None:
 
 def _normalize_runtime_anchor_value(key: str, value: object | None) -> str | None:
     """Normalize one runtime anchor field according to its canonical contract."""
-    if key == "effective_config_hash":
+    if key in _RUNTIME_ANCHOR_SHA256_FIELDS:
         return _normalize_runtime_anchor_hash(value)
     if key == "contract_ref":
         return normalize_contract_ref(value)
