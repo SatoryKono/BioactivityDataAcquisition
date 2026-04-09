@@ -92,6 +92,42 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a ready-to-paste maintainer helper for seeding BioETL facts into Neo4j memory; do not extend it as a general-purpose automation entrypoint."
     },
+    "scripts/neo4j-recovery-checklist.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/neo4j-recovery-checklist.ps1 while historical docs and operator habits still reference the legacy root path."
+    },
+    "scripts/restart-docker.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/restart-docker.ps1 while historical docs and operator habits still reference the legacy root path."
+    },
+    "scripts/setup-neo4j-wsl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/setup-neo4j-wsl.sh while historical docs and operator habits still reference the legacy root path."
+    },
+    "scripts/ops/neo4j-recovery-checklist.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a Windows-side operator recovery checklist for the local Neo4j backend after Docker Desktop restarts; do not extend it into a canonical contributor workflow."
+    },
+    "scripts/ops/restart-docker.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded Windows-side Docker Desktop recovery helper for local Neo4j troubleshooting; prefer documented canonical setup flows for routine contributor work."
+    },
+    "scripts/ops/setup-neo4j-wsl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded WSL troubleshooting helper for reaching the Windows-hosted Docker Desktop Neo4j backend from mounted checkouts; either fold it into a canonical cross-platform setup flow or remove it once the mixed Windows-WSL path is stable."
+    },
     "scripts/ops/test_env_loading.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
