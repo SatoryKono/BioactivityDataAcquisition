@@ -94,6 +94,11 @@ def __getattr__(name: str) -> Any:  # Any: lazy re-export preserves the original
     module_name = _PUBLIC_EXPORTS.get(name)
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    from bioetl.infrastructure.compat.pandera_compat import (
+        apply_pandera_typing_compat_if_needed,
+    )
+
+    apply_pandera_typing_compat_if_needed()
     value = getattr(import_module(module_name), name)
     globals()[name] = value
     return value
