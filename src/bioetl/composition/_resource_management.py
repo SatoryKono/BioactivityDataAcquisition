@@ -8,7 +8,7 @@ Split from entrypoints.py per audit-package-structure-2026-02-07.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, ParamSpec, Protocol, TypeVar
 
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
@@ -25,14 +25,7 @@ from bioetl.composition.bootstrap import (
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
-    )
-    from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
-    from bioetl.application.core.quarantine_manager import QuarantineManagerService
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
+    from collections.abc import Awaitable
 
 
 __all__ = [
@@ -50,6 +43,52 @@ _P = ParamSpec("_P")
 _T = TypeVar("_T")
 
 
+class QuarantineManagerProtocol(Protocol):
+    """Minimal quarantine-manager contract exposed by resource management APIs."""
+
+    def inspect(self, limit: int = 100) -> Awaitable[list[JsonDict]]:
+        """Inspect quarantined records."""
+        ...
+
+
+class CheckpointManagerProtocol(Protocol):
+    """Minimal checkpoint-manager contract exposed by resource management APIs."""
+
+    def list_all(self) -> Awaitable[list[object]]:
+        """List available checkpoints."""
+        ...
+
+
+class MedallionLifecycleServiceProtocol(Protocol):
+    """Minimal lifecycle service contract used by maintenance entrypoints."""
+
+    def vacuum(
+        self,
+        *,
+        table: str,
+        retention_days: int,
+        dry_run: bool,
+    ) -> Awaitable[int]:
+        """Vacuum one table."""
+        ...
+
+    def archive(
+        self,
+        *,
+        table: str,
+        target_path: str,
+        remove_source: bool,
+    ) -> Awaitable[int]:
+        """Archive one table."""
+        ...
+
+
+class CleanupPreviewProtocol(Protocol):
+    """Minimal preview payload contract for cleanup dry-run operations."""
+
+    total_files: int
+
+
 def _bootstrap_registered_resource(
     bootstrap_fn: Callable[_P, _T],
     /,
@@ -61,7 +100,7 @@ def _bootstrap_registered_resource(
     return bootstrap_fn(*args, **kwargs)
 
 
-def get_quarantine_manager(pipeline: str) -> QuarantineManagerService:
+def get_quarantine_manager(pipeline: str) -> QuarantineManagerProtocol:
     """Get a quarantine manager for the given pipeline.
 
     Used for inspecting and managing quarantined (failed) records.
@@ -79,7 +118,7 @@ def get_quarantine_manager(pipeline: str) -> QuarantineManagerService:
     return _bootstrap_registered_resource(bootstrap_quarantine_manager, pipeline)
 
 
-def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
+def get_checkpoint_manager(pipeline: str) -> CheckpointManagerProtocol:
     """Get a checkpoint manager for the given pipeline.
 
     Used for listing, loading, and managing pipeline checkpoints.
@@ -97,7 +136,7 @@ def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
     return _bootstrap_registered_resource(bootstrap_checkpoint_manager, pipeline)
 
 
-def get_lifecycle_service() -> MedallionLifecycleService:
+def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
     """Get the lifecycle service for maintenance operations.
 
     Used for vacuum and archive operations on Delta tables.
@@ -158,7 +197,7 @@ async def archive_table(table: str, options: ArchiveOptions) -> int:
     return result
 
 
-async def preview_cleanup(pipeline: str) -> CleanupPreview:
+async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol:
     """Preview what data would be cleared for a pipeline.
 
     Used for dry-run mode of rebuild/backfill operations.
