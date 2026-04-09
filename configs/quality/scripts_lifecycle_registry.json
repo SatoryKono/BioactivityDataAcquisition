@@ -92,6 +92,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a ready-to-paste maintainer helper for seeding BioETL facts into Neo4j memory; do not extend it as a general-purpose automation entrypoint."
     },
+    "scripts/ops/test_env_loading.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded local smoke helper for validating repo .env loading in Neo4j/MCP setup flows; either fold this check into a canonical verification command or remove it once manual troubleshooting is no longer needed."
+    },
     "scripts/ops/smoke_test_final.ps1": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

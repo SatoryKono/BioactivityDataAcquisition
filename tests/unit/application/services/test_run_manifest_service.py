@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from uuid import uuid4
+from dataclasses import replace
+from uuid import UUID
+
+from hypothesis import given
+from hypothesis import strategies as st
 
 from bioetl.application.services.run_manifest_service import (
     RunManifestCreateRequest,
@@ -32,7 +36,7 @@ class _InMemoryRunManifestStore(RunManifestPort):
 
 def _make_request() -> RunManifestCreateRequest:
     return RunManifestCreateRequest(
-        run_id=RunID(uuid4()),
+        run_id=RunID(UUID("11111111-1111-1111-1111-111111111111")),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -98,3 +102,120 @@ def test_execution_fingerprint_is_stable_for_equivalent_requests() -> None:
 
     assert manifest_a.manifest_id != manifest_b.manifest_id
     assert manifest_a.execution_fingerprint == manifest_b.execution_fingerprint
+
+
+def test_execution_fingerprint_ignores_source_ref_and_artifact_order() -> None:
+    request = _make_request()
+    request_reordered = replace(
+        request,
+        launch_context={"resume": False, "limit": 100},
+        runtime_config={"limit": 100, "run_type": "incremental"},
+        resolved_config={"entity_type": "activity", "provider": "chembl"},
+        source_refs=tuple(reversed(request.source_refs)),
+        planned_artifacts=tuple(reversed(request.planned_artifacts)),
+    )
+    service = RunManifestService(
+        manifest_port=_InMemoryRunManifestStore(),
+        _manifest_id_factory=lambda: "manifest-a",
+    )
+
+    manifest = service.create_manifest(request)
+    manifest_reordered = service.create_manifest(request_reordered)
+
+    assert manifest.execution_fingerprint == manifest_reordered.execution_fingerprint
+
+
+def test_execution_fingerprint_matches_golden_value() -> None:
+    service = RunManifestService(
+        manifest_port=_InMemoryRunManifestStore(),
+        _manifest_id_factory=lambda: "manifest-golden",
+    )
+
+    manifest = service.create_manifest(_make_request())
+
+    assert (
+        manifest.execution_fingerprint
+        == "0db436c604a335766db29523c12d1e2b45c050eb0bce220ae111230f0a0730b3"
+    )
+
+
+@given(
+    source_refs=st.permutations(
+        (
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="assay_type=B",
+            ),
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="assay_type=F",
+            ),
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="assay_type=T",
+            ),
+        )
+    ),
+    planned_artifacts=st.permutations(
+        (
+            RunArtifactRef(layer="bronze", path="data/output/bronze/chembl/activity"),
+            RunArtifactRef(layer="silver", path="data/output/silver/chembl/activity"),
+            RunArtifactRef(layer="gold", path="data/output/gold/chembl/activity"),
+        )
+    ),
+)
+def test_execution_fingerprint_is_permutation_invariant_for_set_like_manifest_fields(
+    source_refs: tuple[RunSourceRef, ...],
+    planned_artifacts: tuple[RunArtifactRef, ...],
+) -> None:
+    service = RunManifestService(
+        manifest_port=_InMemoryRunManifestStore(),
+        _manifest_id_factory=lambda: "manifest-a",
+    )
+    canonical_request = replace(
+        _make_request(),
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="assay_type=B",
+            ),
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="assay_type=F",
+            ),
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="assay_type=T",
+            ),
+        ),
+        planned_artifacts=(
+            RunArtifactRef(layer="bronze", path="data/output/bronze/chembl/activity"),
+            RunArtifactRef(layer="silver", path="data/output/silver/chembl/activity"),
+            RunArtifactRef(layer="gold", path="data/output/gold/chembl/activity"),
+        ),
+        launch_context={"resume": False, "limit": 100},
+        runtime_config={"limit": 100, "run_type": "incremental"},
+        resolved_config={"entity_type": "activity", "provider": "chembl"},
+    )
+    request = replace(
+        canonical_request,
+        source_refs=source_refs,
+        planned_artifacts=planned_artifacts,
+    )
+
+    manifest = service.create_manifest(canonical_request)
+    manifest_permuted = service.create_manifest(request)
+
+    assert manifest.execution_fingerprint == manifest_permuted.execution_fingerprint

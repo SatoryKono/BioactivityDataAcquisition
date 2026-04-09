@@ -11,8 +11,7 @@ from bioetl.application.core.base_transformer.types import TransformerDependency
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorProtocol,
-    get_data_source_creator,
+    DataSourceCreatorProtocol, get_data_source_creator
 )
 from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
 from bioetl.composition.factories.pipeline.assembler_helpers import (
@@ -34,11 +33,7 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
-from bioetl.domain.filtering import (
-    GoldFilterConfig,
-    InputFilterConfig,
-    SilverFilterConfig,
-)
+from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig, SilverFilterConfig
 from bioetl.domain.ports import (
     ContractPolicyPort,
     DataNormalizationPort,
@@ -57,10 +52,8 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
 
-_factory_context = build_factory_context
-_extract_entity_type = extract_entity_type
-_extract_dq_configs = extract_dq_configs
-_assemble_runner_impl = assemble_runner_impl
+_factory_context, _extract_entity_type = build_factory_context, extract_entity_type
+_extract_dq_configs, _assemble_runner_impl = extract_dq_configs, assemble_runner_impl
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
@@ -92,10 +85,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             gold_schema,
             pandera_silver_schema,
         )
-        self.transformer_class, self.provider_registry = (
-            transformer_class,
-            provider_registry,
-        )
+        self.transformer_class, self.provider_registry = transformer_class, provider_registry
         self._create_data_source = resolve_data_source_creator(
             provider=provider,
             provider_registry=provider_registry,

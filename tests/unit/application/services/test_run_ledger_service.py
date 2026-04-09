@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from json import dumps
 from uuid import uuid4
 
 from bioetl.application.services.run_ledger_service import RunLedgerService
@@ -366,3 +367,26 @@ def test_record_dq_policy_applied_captures_trace_anchors() -> None:
         },
     }
     assert store.list_entries("manifest-1") == [entry]
+
+
+def test_record_stage_started_canonicalizes_nested_detail_order() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-canonical-details",
+    )
+
+    entry = service.record_stage_started(
+        stage="Seed",
+        details={"beta": {"z": 1, "a": 2}, "alpha": "value"},
+    )
+
+    assert list((entry.details or {}).keys()) == ["_diagnostic", "alpha", "beta"]
+    assert dumps(entry.to_dict()["details"], separators=(",", ":")) == (
+        '{"_diagnostic":{"contract_version":"v1","event_family":"pipeline.phase",'
+        f'"event_type":"stage_started","manifest_id":"manifest-1","run_id":"{run_id}",'
+        '"stage":"seed","status":"running"},"alpha":"value","beta":{"a":2,"z":1}}'
+    )

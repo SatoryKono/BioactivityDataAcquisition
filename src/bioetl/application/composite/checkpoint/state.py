@@ -34,7 +34,7 @@ class CompositeCheckpointState:
     checkpoint_schema_version: str = "1.0.0"
     effective_config_hash: str = ""
     contract_ref: str = ""
-    contract_version: str = "1.0.0"
+    contract_version: str = ""
     manifest_id: str = ""
     composite_run_identity: str = ""
     last_event_id: str | None = None

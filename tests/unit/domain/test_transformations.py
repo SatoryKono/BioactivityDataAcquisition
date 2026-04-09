@@ -93,6 +93,23 @@ class TestNormalizeForHash:
             "list": [None, "item"],
         }
 
+    def test_set_like_fields_ignore_list_order(self):
+        """Set-like fields should be order-insensitive while other lists stay stable."""
+        record_a = {
+            "tags": [{"name": "a"}, {"name": "b"}],
+            "ordered": [2, 1],
+        }
+        record_b = {
+            "tags": [{"name": "b"}, {"name": "a"}],
+            "ordered": [2, 1],
+        }
+
+        normalized_a = normalize_for_hash(record_a, set_like_fields={"tags"})
+        normalized_b = normalize_for_hash(record_b, set_like_fields={"tags"})
+
+        assert normalized_a == normalized_b
+        assert normalized_a["ordered"] == [2, 1]
+
 
 @pytest.mark.unit
 class TestCanonicalJson:
@@ -149,6 +166,24 @@ class TestGenerateContentHash:
         record2 = {"id": "123", "_run_id": "uuid-2"}
         hash1 = generate_content_hash(record1, "test")
         hash2 = generate_content_hash(record2, "test")
+        assert hash1 == hash2
+
+    def test_set_like_json_string_fields_ignore_array_order(self):
+        """JSON array strings can participate in order-insensitive hashing."""
+        record1 = {"activity_properties": '[{"name":"a"},{"name":"b"}]'}
+        record2 = {"activity_properties": '[{"name":"b"},{"name":"a"}]'}
+
+        hash1 = generate_content_hash(
+            record1,
+            "chembl",
+            set_like_fields={"activity_properties"},
+        )
+        hash2 = generate_content_hash(
+            record2,
+            "chembl",
+            set_like_fields={"activity_properties"},
+        )
+
         assert hash1 == hash2
 
     @settings(suppress_health_check=[HealthCheck.too_slow])

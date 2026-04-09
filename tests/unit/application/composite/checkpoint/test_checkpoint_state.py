@@ -650,6 +650,33 @@ class TestFromDict:
         assert state.completed_enrichers == frozenset()
         assert state.last_event_id is None
         assert state.last_event_occurred_at is None
+        assert state.contract_version == ""
+
+    def test_runtime_anchors_are_normalized_during_round_trip(self) -> None:
+        """Checkpoint serialization/deserialization canonicalizes runtime anchors."""
+        original = CompositeCheckpointState(
+            composite_name="c",
+            run_id="r",
+            effective_config_hash=" SHA256:ABC ",
+            contract_ref=" ChemBL.Activity ",
+            contract_version=" v2 ",
+            manifest_id=" manifest-123 ",
+            composite_run_identity=" run-42 ",
+        )
+
+        payload = original.to_dict()
+        restored = CompositeCheckpointState.from_dict(payload)
+
+        assert payload["effective_config_hash"] == "sha256:abc"
+        assert payload["contract_ref"] == "chembl.activity"
+        assert payload["contract_version"] == "2.0.0"
+        assert payload["manifest_id"] == "manifest-123"
+        assert payload["composite_run_identity"] == "run-42"
+        assert restored.effective_config_hash == "sha256:abc"
+        assert restored.contract_ref == "chembl.activity"
+        assert restored.contract_version == "2.0.0"
+        assert restored.manifest_id == "manifest-123"
+        assert restored.composite_run_identity == "run-42"
 
     def test_invalid_state_value_falls_back_to_not_started(self) -> None:
         """Corrupted state value produces NOT_STARTED without raising."""

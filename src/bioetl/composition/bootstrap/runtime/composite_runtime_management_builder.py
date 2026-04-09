@@ -17,6 +17,11 @@ from bioetl.composition.bootstrap.runtime.composite_support_service_bundles impo
     RuntimeManagementServicesBundle,
 )
 from bioetl.composition.services.versioning import compute_config_hash
+from bioetl.domain.normalization import (
+    normalize_contract_ref,
+    normalize_contract_version,
+    normalize_control_plane_sha256,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -59,8 +64,10 @@ def build_runtime_management_services(
             logger=logger,
             resume=runtime.resume,
             expected_effective_config_hash=expected_effective_config_hash,
-            expected_contract_ref=config.name,
-            expected_contract_version=getattr(config, "version", ""),
+            expected_contract_ref=normalize_contract_ref(config.name),
+            expected_contract_version=normalize_contract_version(
+                getattr(config, "version", "")
+            ),
             expected_manifest_id=(
                 None
                 if control_plane_bundle is None
@@ -99,7 +106,9 @@ def _resolve_expected_effective_config_hash(config: CompositeConfig) -> str:
     if not isinstance(payload, dict):
         return ""
     try:
-        return compute_config_hash(cast(dict[str, object], payload))
+        return normalize_control_plane_sha256(
+            compute_config_hash(cast(dict[str, object], payload))
+        ) or ""
     except (TypeError, ValueError):
         return ""
 
