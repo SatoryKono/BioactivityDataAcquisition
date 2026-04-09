@@ -2,18 +2,23 @@
 
 from __future__ import annotations
 
+import csv
+import io
 from pathlib import Path
 
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
+from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_ACTIVITY_SCHEMA
 from scripts.docs.generate_chembl_activity_field_matrix import (
+    CSV_COLUMNS,
     CSV_NAME,
     MD_NAME,
     build_artifacts,
     build_field_matrix_rows,
     check_artifacts,
+    render_csv,
     write_artifacts,
 )
 
@@ -33,6 +38,29 @@ def test_build_field_matrix_rows_covers_schema_and_hash_policy() -> None:
         == ("true" if "activity_properties" in CHEMBL_ACTIVITY_PROFILE.hash_included_fields else "false")
     )
     assert entity_id["include_in_content_hash"] == "false"
+    assert activity_properties["set_like"] == "true"
+    assert activity_properties["type"] == "string"
+    assert (
+        activity_properties["current_normalization"]
+        == "normalizer=_normalize_json_string; content_hash=included; hash_order=set_like"
+    )
+    assert (
+        activity_properties["proposed_normalization"]
+        == activity_properties["current_normalization"]
+    )
+    publication_year = next(row for row in rows if row["field_name"] == "publication_year")
+    assert publication_year["type"] == str(
+        CHEMBL_ACTIVITY_SCHEMA.field("publication_year").type
+    )
+
+
+def test_render_csv_uses_contract_column_order() -> None:
+    rows = build_field_matrix_rows()
+
+    rendered = render_csv(rows)
+    parsed = csv.DictReader(io.StringIO(rendered))
+
+    assert parsed.fieldnames == list(CSV_COLUMNS)
 
 
 def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
