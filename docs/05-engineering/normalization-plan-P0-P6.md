@@ -86,7 +86,7 @@ Last verified: '2026-04-09'
 | Manifest snapshot assembly | [run_manifest_builder.py](../../src/bioetl/composition/runtime_builders/run_manifest_builder.py) | Собирает launch/runtime/resolved config snapshots и runtime anchors |
 | Ledger append path | [run_ledger_service.py](../../src/bioetl/application/services/run_ledger_service.py) | Собирает lifecycle events и `_diagnostic` envelope перед append |
 | Ledger serialization model | [run_ledger.py](../../src/bioetl/domain/control_plane/run_ledger.py) | Нормализует JSON-safe payload формы и replay-oriented helpers |
-| Checkpoint identity path | [checkpoint_metadata_helpers.py](../../src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py) | Still computes a narrower checkpoint `execution_fingerprint` from runtime metadata through direct `json.dumps(..., sort_keys=True, separators=(',', ':'))` |
+| Checkpoint identity path | [checkpoint_metadata_helpers.py](../../src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py) | Computes a narrower checkpoint `execution_fingerprint` from runtime metadata through `normalize_runtime_anchor_payload(...)`, `serialize_json_canonical(...)`, then `sha256(...).hexdigest()` |
 | Meta field exclusion | [constants.py](../../src/bioetl/domain/constants.py) | Держит `META_FIELDS` |
 | Content hash normalization | [hashing.py](../../src/bioetl/domain/transformations/hashing.py) | Нормализует значения и считает `content_hash` |
 | Record-level heuristics | [record_normalization_processor.py](../../src/bioetl/application/core/record_normalization_processor.py) | Текущий fallback path для DOI/PMID/date/JSON normalization |
@@ -224,6 +224,11 @@ Important current-state note:
   [run_manifest_service.py](../../src/bioetl/application/services/run_manifest_service.py)
   and another narrower execution identity path in
   [checkpoint_metadata_helpers.py](../../src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py).
+- Both paths now use canonical normalization plus `serialize_json_canonical(...)`
+  before hashing.
+- The remaining distinction is payload scope, not serializer behavior:
+  checkpoint compatibility currently fingerprints a smaller runtime-anchor
+  payload than the full manifest spec.
 - `P2` must either converge these paths or make the distinction explicit and
   versioned. Silent divergence is not acceptable.
 
