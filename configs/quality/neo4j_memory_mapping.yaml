@@ -1,0 +1,141 @@
+version: "1.0.0"
+
+adapters:
+  fine_grained_enabled: true
+
+pipeline_operational:
+  runtime_paths:
+    - "uv run python -m bioetl run --pipeline"
+    - "\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m bioetl run --pipeline"
+    - ".\\.venv-win\\Scripts\\python.exe -m bioetl run --pipeline"
+  validation_gates:
+    - "pytest"
+    - "config validation"
+  dashboards:
+    common:
+      - "bioetl-overview-v2"
+      - "bioetl-runtime"
+    by_kind:
+      entity:
+        - "bioetl-dq-v2"
+        - "bioetl-silver-reject-explorer"
+      composite:
+        - "bioetl-control-plane-v1"
+
+pipeline_tests:
+  relation_type: "TESTED_BY"
+  ownership_config: "configs/quality/test_matrix.yaml"
+  provider_regression_suites: true
+
+contracts:
+  registry_source_prefixes:
+    - "bioetl.domain.contracts.gold"
+    - "bioetl.domain.schemas"
+  control_plane_modules:
+    - "src/bioetl/application/services/run_manifest_service.py"
+    - "src/bioetl/application/services/run_ledger_service.py"
+    - "src/bioetl/application/services/effective_config_service.py"
+    - "src/bioetl/application/services/config_dq_service.py"
+    - "src/bioetl/composition/runtime_builders/control_plane.py"
+    - "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
+    - "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py"
+  control_plane_runtime_modules:
+    - "src/bioetl/interfaces/cli/commands/run_manifest.py"
+    - "src/bioetl/infrastructure/control_plane/file_run_manifest_store.py"
+    - "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py"
+    - "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py"
+    - "src/bioetl/infrastructure/control_plane/file_lineage_store.py"
+  control_plane_docs:
+    - "docs/04-reference/contracts/run-manifest-ledger.md"
+    - "docs/05-operations/runbooks/run-manifest-inspection.md"
+    - "docs/05-operations/runbooks/traceability-signal-ownership.md"
+    - "docs/05-operations/runbooks/observability-checklist.md"
+  control_plane_anchor_fields:
+    - "contract_ref"
+    - "dq_policy_ref"
+    - "rule_bundle_version"
+    - "effective_config_artifact_id"
+    - "dq_contract_compatibility_hash"
+  lineage_modules:
+    - "src/bioetl/application/services/lineage_inspection_service.py"
+    - "src/bioetl/application/services/run_manifest_diagnostics.py"
+  lineage_runtime_modules:
+    - "src/bioetl/composition/bootstrap/cli/lineage.py"
+    - "src/bioetl/interfaces/cli/commands/lineage.py"
+    - "src/bioetl/infrastructure/control_plane/file_lineage_store.py"
+  lineage_docs:
+    - "docs/05-operations/runbooks/traceability-signal-ownership.md"
+    - "docs/05-operations/runbooks/run-manifest-inspection.md"
+    - "docs/03-guides/running-pipelines.md"
+  lineage_anchor_fields:
+    - "dataset_ref"
+    - "lineage_fragment_id"
+    - "contract_ref"
+    - "effective_config_artifact_id"
+    - "dq_policy_ref"
+    - "rule_bundle_version"
+
+alerts:
+  dashboard_fallbacks:
+    common:
+      - "bioetl-overview-v2"
+    groups:
+      bioetl_pipeline_runtime_observability:
+        - "bioetl-runtime"
+      bioetl_control_plane_traceability_observability:
+        - "bioetl-control-plane-v1"
+        - "bioetl-runtime"
+      bioetl_dq_observability:
+        - "bioetl-dq-v2"
+        - "bioetl-silver-reject-explorer"
+      bioetl_provider_health_observability:
+        - "bioetl-provider-health-v2"
+  groups:
+    bioetl_pipeline_runtime_observability:
+      pipelines: "all"
+      pipeline_kind: "any"
+      providers: "none"
+      contracts: "mapped"
+    bioetl_control_plane_traceability_observability:
+      pipelines: "all"
+      pipeline_kind: "any"
+      providers: "none"
+      contracts: "all"
+    bioetl_dq_observability:
+      pipelines: "all"
+      pipeline_kind: "entity"
+      providers: "none"
+      contracts: "mapped"
+    bioetl_provider_health_observability:
+      pipelines: "none"
+      pipeline_kind: "any"
+      providers: "all"
+      contracts: "none"
+  rules:
+    BioETLControlPlaneReadFailureRate:
+      pipelines: "none"
+      providers: "none"
+      contracts: "all"
+    BioETLCheckpointCompatibilityBlocked:
+      pipelines: "all"
+      pipeline_kind: "any"
+      contracts: "all"
+    BioETLLineageFragmentPersistenceFailed:
+      pipelines: "all"
+      pipeline_kind: "any"
+      contracts: "all"
+    BioETLLineageRefsMissing:
+      pipelines: "all"
+      pipeline_kind: "any"
+      contracts: "all"
+    BioETLDataFreshnessLagHigh:
+      pipelines: "all"
+      pipeline_kind: "entity"
+      contracts: "mapped"
+    BioETLDataFreshnessLagCritical:
+      pipelines: "all"
+      pipeline_kind: "entity"
+      contracts: "mapped"
+      dashboards:
+        - "bioetl-dq-v2"
+        - "bioetl-overview-v2"

@@ -21,6 +21,7 @@ import yaml
 JsonScalar: TypeAlias = str | int | float | bool | None
 JsonValue: TypeAlias = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
 T = TypeVar("T")
+BIOETL_METRIC_PATTERN = re.compile(r"\bbioetl_[a-zA-Z0-9_:]+")
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BATCH_SIZE = 100
@@ -39,6 +40,7 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "module_surface",
     "port_surface",
     "adapter_surface",
+    "adapter_impl_surface",
     "pipeline_surface",
     "contract_surface",
     "alert_surface",
@@ -615,6 +617,39 @@ def _path_contains_any_token(path: Path, tokens: list[str]) -> bool:
     return any(token.lower() in normalized for token in tokens)
 
 
+def _extract_bioetl_metrics(text: str) -> set[str]:
+    return set(BIOETL_METRIC_PATTERN.findall(text))
+
+
+def _dashboard_metric_index(root: Path) -> dict[NodeKey, set[str]]:
+    dashboards_root = root / "grafana" / "dashboards"
+    if not dashboards_root.is_dir():
+        return {}
+    metric_index: dict[NodeKey, set[str]] = {}
+    for dashboard_path in sorted(dashboards_root.glob("*.json")):
+        payload = _read_json(dashboard_path)
+        metrics: set[str] = set()
+        stack = list(payload.get("panels", [])) if isinstance(payload.get("panels"), list) else []
+        while stack:
+            panel = stack.pop()
+            if not isinstance(panel, dict):
+                continue
+            nested = panel.get("panels")
+            if isinstance(nested, list):
+                stack.extend(nested)
+            targets = panel.get("targets")
+            if not isinstance(targets, list):
+                continue
+            for target in targets:
+                if not isinstance(target, dict):
+                    continue
+                expr = target.get("expr")
+                if isinstance(expr, str):
+                    metrics.update(_extract_bioetl_metrics(expr))
+        metric_index[NodeKey("dashboard_surface", dashboard_path.stem)] = metrics
+    return metric_index
+
+
 def _parse_python_ast(path: Path) -> ast.AST | None:
     if not path.is_file() or path.suffix != ".py":
         return None
@@ -899,6 +934,54 @@ def _select_alert_targets(
         sorted(set(provider_targets), key=lambda node: node.name),
         sorted(set(contract_targets), key=lambda node: node.name),
     )
+
+
+def _select_alert_dashboards(
+    alert_name: str,
+    group_name: str,
+    expr: str,
+    dashboard_metrics: dict[NodeKey, set[str]],
+    memory_mapping: dict[str, object],
+) -> list[NodeKey]:
+    alerts_config = memory_mapping.get("alerts")
+    groups = alerts_config.get("groups") if isinstance(alerts_config, dict) else {}
+    rules = alerts_config.get("rules") if isinstance(alerts_config, dict) else {}
+    dashboard_fallbacks = (
+        alerts_config.get("dashboard_fallbacks")
+        if isinstance(alerts_config, dict) and isinstance(alerts_config.get("dashboard_fallbacks"), dict)
+        else {}
+    )
+    alert_rule = rules.get(alert_name) if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict) else {}
+    fallback_groups = dashboard_fallbacks.get("groups") if isinstance(dashboard_fallbacks, dict) else {}
+
+    explicit_dashboards = {
+        NodeKey("dashboard_surface", name)
+        for name in _as_string_list(alert_rule.get("dashboards"))
+    }
+    common_dashboards = {
+        NodeKey("dashboard_surface", name)
+        for name in _as_string_list(dashboard_fallbacks.get("common"))
+    }
+    group_dashboards = {
+        NodeKey("dashboard_surface", name)
+        for name in _as_string_list(
+            fallback_groups.get(group_name) if isinstance(fallback_groups, dict) else None
+        )
+    }
+
+    metrics = _extract_bioetl_metrics(expr)
+    metric_dashboards = {
+        dashboard
+        for dashboard, dashboard_metric_names in dashboard_metrics.items()
+        if metrics & dashboard_metric_names
+    }
+
+    selected = set(explicit_dashboards)
+    selected.update(metric_dashboards)
+    if not metric_dashboards:
+        selected.update(group_dashboards)
+    selected.update(common_dashboards)
+    return sorted(selected, key=lambda node: node.name)
 
 
 def _normalize_env_value(raw: str) -> str:
@@ -1480,7 +1563,7 @@ def _add_policy_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, 
 def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     memory_mapping = _load_memory_mapping(root)
     port_nodes = _add_port_surfaces(snapshot, root, project, today)
-    adapter_nodes = _add_adapter_surfaces(snapshot, root, project, today, port_nodes)
+    adapter_nodes = _add_adapter_surfaces(snapshot, root, project, today, port_nodes, memory_mapping)
     contract_nodes = _add_contract_surfaces(snapshot, root, project, today, memory_mapping)
     pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
     _add_pipeline_test_edges(snapshot, root, pipeline_nodes, memory_mapping)
@@ -1552,6 +1635,7 @@ def _add_adapter_surfaces(
     project: NodeKey,
     today: str,
     port_nodes: set[NodeKey],
+    memory_mapping: dict[str, object],
 ) -> dict[str, NodeKey]:
     adapters_root = root / "src" / "bioetl" / "infrastructure" / "adapters"
     if not adapters_root.is_dir():
@@ -1561,6 +1645,10 @@ def _add_adapter_surfaces(
     port_names = {node.name for node in port_nodes}
     _, port_module_surfaces, port_symbol_index = _build_port_surface_catalog(root)
     adapter_nodes: dict[str, NodeKey] = {}
+    adapter_mapping = memory_mapping.get("adapters")
+    fine_grained_enabled = bool(
+        adapter_mapping.get("fine_grained_enabled", True)
+    ) if isinstance(adapter_mapping, dict) else True
 
     for child in sorted(adapters_root.iterdir()):
         if _is_ignored_repo_path(child) or child.name.startswith("_"):
@@ -1591,6 +1679,35 @@ def _add_adapter_surfaces(
             for module_path in sorted(child.rglob("*.py")):
                 if _is_ignored_repo_path(module_path):
                     continue
+                if fine_grained_enabled and module_path.name != "__init__.py":
+                    impl_relative_path = _rel_path(root, module_path)
+                    impl_surface_name = _python_surface_name(impl_relative_path)
+                    impl_node = snapshot.add_node(
+                        "adapter_impl_surface",
+                        impl_surface_name,
+                        summary=f"Concrete adapter implementation `{impl_surface_name}`.",
+                        source_path=impl_relative_path,
+                        source_kind="adapter_impl_module",
+                        adapter_kind="implementation_module",
+                        granularity="concrete_module",
+                        last_verified=today,
+                        ingest_wave="repo_sync_v1",
+                        confidence="high",
+                    )
+                    snapshot.add_relation(adapter, "CONTAINS", impl_node, provenance="impact_adapter_impls")
+                    impl_module_key = NodeKey("module_surface", impl_relative_path)
+                    if impl_module_key in snapshot.nodes:
+                        snapshot.add_relation(impl_node, "BACKED_BY", impl_module_key, provenance="impact_adapter_impls")
+                    for port_name in sorted(
+                        _imported_port_surfaces(module_path, port_module_surfaces, port_symbol_index)
+                    ):
+                        if port_name in port_names:
+                            snapshot.add_relation(
+                                impl_node,
+                                "DEPENDS_ON",
+                                NodeKey("port_surface", port_name),
+                                provenance="impact_adapter_impls",
+                            )
                 imported_ports.update(
                     _imported_port_surfaces(module_path, port_module_surfaces, port_symbol_index)
                 )
@@ -1681,11 +1798,26 @@ def _add_contract_surfaces(
     control_plane_modules = _as_string_list(
         contracts_mapping.get("control_plane_modules") if isinstance(contracts_mapping, dict) else None
     )
+    control_plane_runtime_modules = _as_string_list(
+        contracts_mapping.get("control_plane_runtime_modules") if isinstance(contracts_mapping, dict) else None
+    )
+    lineage_modules = _as_string_list(
+        contracts_mapping.get("lineage_modules") if isinstance(contracts_mapping, dict) else None
+    )
+    lineage_runtime_modules = _as_string_list(
+        contracts_mapping.get("lineage_runtime_modules") if isinstance(contracts_mapping, dict) else None
+    )
     control_plane_docs = _as_string_list(
         contracts_mapping.get("control_plane_docs") if isinstance(contracts_mapping, dict) else None
     )
+    lineage_docs = _as_string_list(
+        contracts_mapping.get("lineage_docs") if isinstance(contracts_mapping, dict) else None
+    )
     control_plane_anchor_fields = _as_string_list(
         contracts_mapping.get("control_plane_anchor_fields") if isinstance(contracts_mapping, dict) else None
+    )
+    lineage_anchor_fields = _as_string_list(
+        contracts_mapping.get("lineage_anchor_fields") if isinstance(contracts_mapping, dict) else None
     )
 
     contract_nodes: dict[str, NodeKey] = {}
@@ -1798,6 +1930,30 @@ def _add_contract_surfaces(
             if module_key in snapshot.nodes:
                 snapshot.add_relation(contract, "DEPENDS_ON", module_key, provenance="impact_contracts_control_plane")
 
+        for module_path in control_plane_runtime_modules:
+            resolved_module = root / module_path
+            if not resolved_module.is_file():
+                continue
+            module_key = NodeKey("module_surface", _rel_path(root, resolved_module))
+            if module_key in snapshot.nodes:
+                snapshot.add_relation(contract, "DEPENDS_ON", module_key, provenance="impact_contracts_runtime")
+
+        for module_path in lineage_modules:
+            resolved_module = root / module_path
+            if not resolved_module.is_file() or not _path_contains_any_token(resolved_module, lineage_anchor_fields):
+                continue
+            module_key = NodeKey("module_surface", _rel_path(root, resolved_module))
+            if module_key in snapshot.nodes:
+                snapshot.add_relation(contract, "DEPENDS_ON", module_key, provenance="impact_contracts_lineage")
+
+        for module_path in lineage_runtime_modules:
+            resolved_module = root / module_path
+            if not resolved_module.is_file():
+                continue
+            module_key = NodeKey("module_surface", _rel_path(root, resolved_module))
+            if module_key in snapshot.nodes:
+                snapshot.add_relation(contract, "DEPENDS_ON", module_key, provenance="impact_contracts_lineage_runtime")
+
         for doc_path in control_plane_docs:
             resolved_doc = root / doc_path
             if not resolved_doc.is_file() or not _path_contains_any_token(resolved_doc, control_plane_anchor_fields):
@@ -1813,6 +1969,22 @@ def _add_contract_surfaces(
                 confidence="high",
             )
             snapshot.add_relation(contract, "DESCRIBED_IN", artifact, provenance="impact_contracts_control_plane")
+
+        for doc_path in lineage_docs:
+            resolved_doc = root / doc_path
+            if not resolved_doc.is_file() or not _path_contains_any_token(resolved_doc, lineage_anchor_fields):
+                continue
+            artifact = snapshot.add_node(
+                "doc_artifact",
+                doc_path,
+                summary=f"Lineage/traceability contract reference for `{contract_ref}`.",
+                source_path=doc_path,
+                source_kind="lineage_contract_doc",
+                last_verified=today,
+                ingest_wave="repo_sync_v1",
+                confidence="high",
+            )
+            snapshot.add_relation(contract, "DESCRIBED_IN", artifact, provenance="impact_contracts_lineage")
 
     return contract_nodes
 
@@ -1920,23 +2092,108 @@ def _add_pipeline_surfaces(
     return pipeline_nodes
 
 
+def _add_pipeline_test_edges(
+    snapshot: GraphSnapshot,
+    root: Path,
+    pipeline_nodes: dict[str, NodeKey],
+    memory_mapping: dict[str, object],
+) -> None:
+    tests_mapping = memory_mapping.get("pipeline_tests")
+    relation_type = str(tests_mapping.get("relation_type", "TESTED_BY")) if isinstance(tests_mapping, dict) else "TESTED_BY"
+    ownership_config = (
+        str(tests_mapping.get("ownership_config", "configs/quality/test_matrix.yaml"))
+        if isinstance(tests_mapping, dict)
+        else "configs/quality/test_matrix.yaml"
+    )
+    ownership_path = root / ownership_config
+    if not ownership_path.is_file():
+        return
+
+    payload = _read_yaml(ownership_path)
+    ownership = payload.get("entity_test_ownership")
+    if not isinstance(ownership, dict):
+        return
+    include_provider_regression_suites = bool(
+        tests_mapping.get("provider_regression_suites", True)
+    ) if isinstance(tests_mapping, dict) else True
+
+    entity_pipeline_index = {
+        (str(node.properties.get("provider")), str(node.properties.get("entity"))): node.key
+        for node in snapshot.nodes.values()
+        if node.key.label == "pipeline_surface" and node.properties.get("pipeline_kind") == "entity"
+    }
+    provider_pipeline_index: dict[str, list[NodeKey]] = {}
+    for node in snapshot.nodes.values():
+        if node.key.label != "pipeline_surface":
+            continue
+        provider = node.properties.get("provider")
+        if isinstance(provider, str):
+            provider_pipeline_index.setdefault(provider, []).append(node.key)
+
+    def link_test_target(pipeline_key: NodeKey, test_path: str, provenance: str) -> None:
+        artifact_key = NodeKey("test_artifact", test_path)
+        if artifact_key not in snapshot.nodes:
+            return
+        snapshot.add_relation(pipeline_key, relation_type, artifact_key, provenance=provenance)
+        suite_name = TEST_SURFACES.get(str(snapshot.nodes[artifact_key].properties.get("suite", "")))
+        if suite_name is not None:
+            snapshot.add_relation(
+                pipeline_key,
+                relation_type,
+                NodeKey("test_surface", suite_name),
+                provenance=provenance,
+            )
+
+    for contract_ref, raw_tests in ownership.items():
+        if not isinstance(contract_ref, str):
+            continue
+        if "." not in contract_ref:
+            continue
+        provider_name, entity_name = contract_ref.split(".", 1)
+        pipeline_key = entity_pipeline_index.get((provider_name, entity_name))
+        if pipeline_key is None:
+            continue
+        for test_path in _as_string_list(raw_tests):
+            link_test_target(pipeline_key, test_path, "impact_pipeline_tests")
+
+    suites = payload.get("provider_regression_suites")
+    if not include_provider_regression_suites or not isinstance(suites, dict):
+        return
+    for suite_name, suite_payload in suites.items():
+        if not isinstance(suite_payload, dict):
+            continue
+        providers = suite_payload.get("providers")
+        if not isinstance(providers, dict):
+            continue
+        for provider_name, raw_test_path in providers.items():
+            if not isinstance(provider_name, str) or not isinstance(raw_test_path, str):
+                continue
+            for pipeline_key in provider_pipeline_index.get(provider_name, []):
+                link_test_target(
+                    pipeline_key,
+                    raw_test_path,
+                    f"impact_pipeline_regression_suite:{suite_name}",
+                )
+
+
 def _add_alert_surfaces(
     snapshot: GraphSnapshot,
     root: Path,
     project: NodeKey,
     today: str,
     pipeline_nodes: dict[str, NodeKey],
+    contract_nodes: dict[str, NodeKey],
+    memory_mapping: dict[str, object],
 ) -> None:
     rules_root = root / "grafana" / "prometheus-rules"
     if not rules_root.is_dir():
         return
 
+    dashboard_metrics = _dashboard_metric_index(root)
     provider_nodes = sorted(
         (key for key in snapshot.nodes if key.label == "provider_surface"),
         key=lambda node: node.name,
     )
-    pipeline_targets = sorted(pipeline_nodes.values(), key=lambda node: node.name)
-
     for rules_path in sorted(rules_root.glob("*.y*ml")):
         payload = _read_yaml(rules_path)
         artifact = snapshot.add_node(
@@ -1985,18 +2242,32 @@ def _add_alert_surfaces(
                 expr = str(rule.get("expr", ""))
                 dimension_text = " ".join(str(value) for value in annotations.values())
                 dimensions = _runtime_dimensions(expr, dimension_text)
-                selected_pipelines, selected_providers = _select_alert_targets(
+                selected_pipelines, selected_providers, selected_contracts = _select_alert_targets(
                     snapshot,
+                    alert_name,
                     group_name,
                     expr,
                     dimensions,
                     pipeline_nodes,
                     provider_nodes,
+                    contract_nodes,
+                    memory_mapping,
                 )
                 for pipeline in selected_pipelines:
                     snapshot.add_relation(alert, "DEPENDS_ON", pipeline, provenance="impact_alerts")
                 for provider in selected_providers:
                     snapshot.add_relation(alert, "DEPENDS_ON", provider, provenance="impact_alerts")
+                for contract in selected_contracts:
+                    snapshot.add_relation(alert, "DEPENDS_ON", contract, provenance="impact_alerts")
+                for dashboard in _select_alert_dashboards(
+                    alert_name,
+                    group_name,
+                    expr,
+                    dashboard_metrics,
+                    memory_mapping,
+                ):
+                    if dashboard in snapshot.nodes:
+                        snapshot.add_relation(alert, "OBSERVED_BY", dashboard, provenance="impact_alerts")
 
                 runbook = annotations.get("runbook")
                 if isinstance(runbook, str):
@@ -2053,8 +2324,15 @@ def _add_governance_edges(
 def _add_pipeline_operational_edges(
     snapshot: GraphSnapshot,
     pipeline_nodes: dict[str, NodeKey],
+    memory_mapping: dict[str, object],
 ) -> None:
+    pipeline_ops = memory_mapping.get("pipeline_operational")
     runtime_paths = [
+        NodeKey("execution_path", name)
+        for name in _as_string_list(
+            pipeline_ops.get("runtime_paths") if isinstance(pipeline_ops, dict) else None
+        )
+    ] or [
         NodeKey("execution_path", "uv run python -m bioetl run --pipeline"),
         NodeKey(
             "execution_path",
@@ -2063,18 +2341,34 @@ def _add_pipeline_operational_edges(
         NodeKey("execution_path", ".\\.venv-win\\Scripts\\python.exe -m bioetl run --pipeline"),
     ]
     validation_gates = [
+        NodeKey("quality_gate", name)
+        for name in _as_string_list(
+            pipeline_ops.get("validation_gates") if isinstance(pipeline_ops, dict) else None
+        )
+    ] or [
         NodeKey("quality_gate", "pytest"),
         NodeKey("quality_gate", "config validation"),
     ]
+    dashboards_cfg = pipeline_ops.get("dashboards") if isinstance(pipeline_ops, dict) else {}
     common_dashboards = [
+        NodeKey("dashboard_surface", name)
+        for name in _as_string_list(dashboards_cfg.get("common") if isinstance(dashboards_cfg, dict) else None)
+    ] or [
         NodeKey("dashboard_surface", "bioetl-overview-v2"),
         NodeKey("dashboard_surface", "bioetl-runtime"),
     ]
+    kind_dashboards = dashboards_cfg.get("by_kind") if isinstance(dashboards_cfg, dict) else {}
     entity_dashboards = [
+        NodeKey("dashboard_surface", name)
+        for name in _as_string_list(kind_dashboards.get("entity") if isinstance(kind_dashboards, dict) else None)
+    ] or [
         NodeKey("dashboard_surface", "bioetl-dq-v2"),
         NodeKey("dashboard_surface", "bioetl-silver-reject-explorer"),
     ]
     composite_dashboards = [
+        NodeKey("dashboard_surface", name)
+        for name in _as_string_list(kind_dashboards.get("composite") if isinstance(kind_dashboards, dict) else None)
+    ] or [
         NodeKey("dashboard_surface", "bioetl-control-plane-v1"),
     ]
 
@@ -2329,6 +2623,7 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     required_labels = (
         "port_surface",
         "adapter_surface",
+        "adapter_impl_surface",
         "pipeline_surface",
         "contract_surface",
         "alert_surface",
@@ -2342,6 +2637,7 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "RUNS_VIA",
         "VALIDATED_BY",
         "OBSERVED_BY",
+        "TESTED_BY",
     )
     for label in required_labels:
         if int(stats["labels"].get(label, 0)) <= 0:
@@ -2382,16 +2678,46 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append("missing contract_surface -> DEPENDS_ON -> module_surface relations")
 
     if not any(
+        source_label == "contract_surface" and relation_type == "DESCRIBED_IN" and target_label == "doc_artifact"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing contract_surface -> DESCRIBED_IN -> doc_artifact relations")
+
+    if not any(
         source_label == "pipeline_surface" and relation_type == "RUNS_VIA" and target_label == "execution_path"
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing pipeline_surface operational runtime links")
 
     if not any(
+        source_label == "pipeline_surface" and relation_type == "TESTED_BY" and target_label == "test_artifact"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing pipeline_surface direct test coverage links")
+
+    if not any(
         source_label == "alert_surface" and relation_type == "DEPENDS_ON" and target_label in {"pipeline_surface", "provider_surface"}
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing alert_surface dependency links")
+
+    if not any(
+        source_label == "alert_surface" and relation_type == "DEPENDS_ON" and target_label == "contract_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing alert_surface -> DEPENDS_ON -> contract_surface links")
+
+    if not any(
+        source_label == "alert_surface" and relation_type == "OBSERVED_BY" and target_label == "dashboard_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing alert_surface -> OBSERVED_BY -> dashboard_surface links")
+
+    if not any(
+        source_label == "adapter_surface" and relation_type == "CONTAINS" and target_label == "adapter_impl_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing adapter_surface -> CONTAINS -> adapter_impl_surface links")
 
     ignored_paths = [
         node.key.name

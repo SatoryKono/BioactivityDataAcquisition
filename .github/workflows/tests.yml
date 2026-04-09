@@ -192,6 +192,41 @@ jobs:
                       tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_infrastructure_complexity \
                       -q --tb=short
 
+    neo4j-memory-live-audit:
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        needs: governance-preflight
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    python-version: "3.11"
+
+            -   name: Start local Neo4j for live audit
+                run: docker compose up -d neo4j
+
+            -   name: Wait for Neo4j HTTP health
+                run: |
+                    for attempt in $(seq 1 90); do
+                      if curl -fsS http://localhost:7474/browser/ >/dev/null; then
+                        exit 0
+                      fi
+                      sleep 2
+                    done
+                    echo "Neo4j HTTP endpoint did not become ready in time" >&2
+                    exit 1
+
+            -   name: Apply sync and validate live Neo4j audit
+                run: uv run python -m scripts.ci neo4j-memory-live
+
+            -   name: Stop local Neo4j
+                if: always()
+                run: docker compose down -v neo4j
+
     config-schema-preflight:
         runs-on: ubuntu-latest
         timeout-minutes: 10

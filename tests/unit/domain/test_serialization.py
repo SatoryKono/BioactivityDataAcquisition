@@ -117,6 +117,22 @@ class TestSerializeToJsonCanonical:
         result2 = serialize_to_json_canonical(data)
         assert result1 == result2
 
+    def test_canonical_rejects_nan(self) -> None:
+        """Canonical serialization rejects NaN to preserve cross-runtime parity."""
+        with pytest.raises(
+            ValueError,
+            match="Canonical JSON serialization does not allow NaN or Infinity",
+        ):
+            serialize_to_json_canonical({"value": float("nan")})
+
+    def test_canonical_rejects_infinity(self) -> None:
+        """Canonical serialization rejects Infinity to preserve cross-runtime parity."""
+        with pytest.raises(
+            ValueError,
+            match="Canonical JSON serialization does not allow NaN or Infinity",
+        ):
+            serialize_to_json_canonical({"value": float("inf")})
+
 
 class TestSerializeToCanonicalJson:
     """Tests for serialize_to_canonical_json alias."""
