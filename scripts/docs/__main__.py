@@ -13,6 +13,7 @@ Commands:
     check-kpi          Report documentation KPI metrics
     export-matrix-structural-contract Export canonical runtime structural contract for ChEMBL matrix sync
     generate-field-matrix Generate code-derived ChemBL Activity field-matrix artifacts
+    generate-pipeline-normalization-matrix Generate code-derived normalization field-matrix artifacts for all pipelines
     build-matrix-dicts Generate ChEMBL matrix inventory and sheet dictionaries
     enrich-matrix-normalization-details Populate exact per-row normalization details in the ChEMBL matrix workbook
     filter-matrix-rows Remove rows from ChEMBL matrix workbook by column value
@@ -39,6 +40,7 @@ COMMANDS: dict[str, str] = {
     "check-kpi": "report_docs_kpi.py",
     "export-matrix-structural-contract": "export_chembl_matrix_structural_contract.py",
     "generate-field-matrix": "generate_chembl_activity_field_matrix.py",
+    "generate-pipeline-normalization-matrix": "generate_pipeline_normalization_field_matrix.py",
     "build-matrix-dicts": "generate_chembl_matrix_dictionaries.py",
     "enrich-matrix-normalization-details": "enrich_chembl_matrix_normalization_details.py",
     "filter-matrix-rows": "filter_chembl_matrix_rows.py",
