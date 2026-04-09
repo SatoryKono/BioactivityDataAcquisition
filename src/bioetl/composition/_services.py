@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.lock_service import LockService
     from bioetl.composition import PipelineRegistry
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
+    from bioetl.domain.workflow import WorkflowConfig
 
 
 __all__ = [
@@ -64,6 +65,7 @@ __all__ = [
     "get_quarantine_service",
     "get_run_manifest_service",
     "get_vacuum_service",
+    "load_workflow_config",
 ]
 
 
@@ -195,6 +197,15 @@ def get_config_service() -> ConfigService:
     """
     _ensure_registrations()
     return bootstrap_config_service()
+
+
+def load_workflow_config(name: str) -> WorkflowConfig:
+    """Load workflow YAML through the canonical composition service seam."""
+    from bioetl.infrastructure.config.workflow_config_api import (
+        load_workflow_config as load_workflow_config_impl,
+    )
+
+    return load_workflow_config_impl(name)
 
 
 def get_contract_migration_service() -> ContractMigrationService:
