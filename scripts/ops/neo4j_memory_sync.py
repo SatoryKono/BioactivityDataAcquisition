@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import base64
 import json
 import os
@@ -35,6 +36,11 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "layer_family",
     "package_family",
     "module_surface",
+    "port_surface",
+    "adapter_surface",
+    "pipeline_surface",
+    "contract_surface",
+    "alert_surface",
     "provider_surface",
     "entity_config",
     "composite_config",
@@ -542,8 +548,72 @@ def _module_dotted_name(relative_path: str) -> str:
     return without_suffix.replace("/", ".")
 
 
+def _python_surface_name(relative_path: str) -> str:
+    if relative_path.endswith("/__init__.py"):
+        dotted = relative_path.removesuffix("/__init__.py").replace("/", ".")
+    else:
+        dotted = _module_dotted_name(relative_path)
+    return dotted.removeprefix("src.")
+
+
 def _is_ignored_repo_path(path: Path) -> bool:
     return "__pycache__" in path.parts
+
+
+def _resolve_repo_path(root: Path, base_path: Path, raw_path: str) -> Path | None:
+    candidate = Path(raw_path)
+    if not candidate.is_absolute():
+        candidate = (base_path.parent / candidate).resolve()
+    try:
+        candidate.relative_to(root.resolve())
+    except ValueError:
+        return None
+    if candidate.exists():
+        return candidate
+    return None
+
+
+def _imported_port_surfaces(path: Path) -> set[str]:
+    if not path.is_file() or path.suffix != ".py":
+        return set()
+    try:
+        tree = ast.parse(_read_text(path), filename=str(path))
+    except SyntaxError:
+        return set()
+
+    imported: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name.startswith("bioetl.domain.ports"):
+                    imported.add(alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module is not None:
+            if node.module.startswith("bioetl.domain.ports"):
+                imported.add(node.module)
+    return imported
+
+
+def _runtime_dimensions(*parts: str) -> set[str]:
+    combined = " ".join(parts)
+    dimensions = set()
+    for dim in (
+        "pipeline",
+        "provider",
+        "entity",
+        "layer",
+        "run_type",
+        "stage",
+        "table",
+        "metric",
+        "anomaly_type",
+        "event_type",
+        "store",
+        "operation",
+        "ref_type",
+    ):
+        if re.search(rf"\b{dim}\b", combined):
+            dimensions.add(dim)
+    return dimensions
 
 
 def _normalize_env_value(raw: str) -> str:
@@ -621,6 +691,7 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_quality_and_scripts(snapshot, root, project, today)
     _add_test_graph(snapshot, root, project, today)
     _add_policy_surfaces(snapshot, root, project, today)
+    _add_impact_analysis_surfaces(snapshot, root, project, today)
     return snapshot
 
 
@@ -1119,6 +1190,440 @@ def _add_policy_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, 
                 NodeKey("doc_source_surface", str(doc_source_name)),
                 provenance="curated_policy",
             )
+
+
+def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    port_nodes = _add_port_surfaces(snapshot, root, project, today)
+    adapter_nodes = _add_adapter_surfaces(snapshot, root, project, today, port_nodes)
+    contract_nodes = _add_contract_surfaces(snapshot, root, project, today)
+    pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
+    _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes)
+    _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
+
+
+def _add_port_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+) -> set[NodeKey]:
+    ports_root = root / "src" / "bioetl" / "domain" / "ports"
+    if not ports_root.is_dir():
+        return set()
+
+    family = NodeKey("package_family", "domain/ports")
+    port_nodes: set[NodeKey] = set()
+    for port_path in sorted(ports_root.rglob("*.py")):
+        if _is_ignored_repo_path(port_path) or "noop" in port_path.parts:
+            continue
+        relative_path = _rel_path(root, port_path)
+        surface_name = _python_surface_name(relative_path)
+        port = snapshot.add_node(
+            "port_surface",
+            surface_name,
+            summary=f"Domain port surface `{surface_name}`.",
+            source_path=relative_path,
+            source_kind="domain_port",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        port_nodes.add(port)
+        snapshot.add_relation(project, "HAS_PORT", port, provenance="impact_ports")
+        if family in snapshot.nodes:
+            snapshot.add_relation(family, "CONTAINS", port, provenance="impact_ports")
+        module_key = NodeKey("module_surface", relative_path)
+        if module_key in snapshot.nodes:
+            snapshot.add_relation(port, "BACKED_BY", module_key, provenance="impact_ports")
+    return port_nodes
+
+
+def _add_adapter_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    port_nodes: set[NodeKey],
+) -> dict[str, NodeKey]:
+    adapters_root = root / "src" / "bioetl" / "infrastructure" / "adapters"
+    if not adapters_root.is_dir():
+        return {}
+
+    adapter_family = NodeKey("package_family", "infrastructure/adapters")
+    port_names = {node.name for node in port_nodes}
+    adapter_nodes: dict[str, NodeKey] = {}
+
+    for child in sorted(adapters_root.iterdir()):
+        if _is_ignored_repo_path(child) or child.name.startswith("_"):
+            continue
+        if child.is_dir():
+            relative_path = _rel_path(root, child)
+            surface_name = relative_path.replace("/", ".").removeprefix("src.")
+            adapter = snapshot.add_node(
+                "adapter_surface",
+                surface_name,
+                summary=f"Immediate adapter package surface `{surface_name}`.",
+                source_path=relative_path,
+                source_kind="adapter_package",
+                adapter_kind="package",
+                granularity="immediate_child",
+                last_verified=today,
+                ingest_wave="repo_sync_v1",
+                confidence="high",
+            )
+            adapter_nodes[child.name] = adapter
+            snapshot.add_relation(project, "HAS_ADAPTER", adapter, provenance="impact_adapters")
+            if adapter_family in snapshot.nodes:
+                snapshot.add_relation(adapter_family, "CONTAINS", adapter, provenance="impact_adapters")
+            provider_key = NodeKey("provider_surface", child.name)
+            if provider_key in snapshot.nodes:
+                snapshot.add_relation(provider_key, "PROVIDES", adapter, provenance="impact_adapters")
+            imported_ports: set[str] = set()
+            for module_path in sorted(child.rglob("*.py")):
+                if _is_ignored_repo_path(module_path):
+                    continue
+                imported_ports.update(_imported_port_surfaces(module_path))
+            for port_name in sorted(imported_ports):
+                if port_name in port_names:
+                    snapshot.add_relation(
+                        adapter,
+                        "DEPENDS_ON",
+                        NodeKey("port_surface", port_name),
+                        provenance="impact_adapters",
+                    )
+            continue
+
+        if child.suffix != ".py" or child.name == "__init__.py":
+            continue
+        relative_path = _rel_path(root, child)
+        surface_name = _python_surface_name(relative_path)
+        adapter = snapshot.add_node(
+            "adapter_surface",
+            surface_name,
+            summary=f"Immediate adapter module surface `{surface_name}`.",
+            source_path=relative_path,
+            source_kind="adapter_module",
+            adapter_kind="module",
+            granularity="immediate_child",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        adapter_nodes[child.stem] = adapter
+        snapshot.add_relation(project, "HAS_ADAPTER", adapter, provenance="impact_adapters")
+        if adapter_family in snapshot.nodes:
+            snapshot.add_relation(adapter_family, "CONTAINS", adapter, provenance="impact_adapters")
+        module_key = NodeKey("module_surface", relative_path)
+        if module_key in snapshot.nodes:
+            snapshot.add_relation(adapter, "BACKED_BY", module_key, provenance="impact_adapters")
+        for port_name in sorted(_imported_port_surfaces(child)):
+            if port_name in port_names:
+                snapshot.add_relation(
+                    adapter,
+                    "DEPENDS_ON",
+                    NodeKey("port_surface", port_name),
+                    provenance="impact_adapters",
+                )
+
+    return adapter_nodes
+
+
+def _add_contract_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+) -> dict[str, NodeKey]:
+    registry_path = root / "configs" / "base" / "contract_registry.yaml"
+    if not registry_path.is_file():
+        return {}
+
+    registry_artifact = snapshot.add_node(
+        "config_artifact",
+        _rel_path(root, registry_path),
+        summary="Contract registry for published data contracts.",
+        source_path=_rel_path(root, registry_path),
+        source_kind="contract_registry",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+
+    payload = _read_yaml(registry_path)
+    entries = payload.get("entries")
+    if not isinstance(entries, dict):
+        return {}
+
+    contract_nodes: dict[str, NodeKey] = {}
+    for contract_ref, raw_entry in sorted(entries.items()):
+        if not isinstance(contract_ref, str) or not isinstance(raw_entry, dict):
+            continue
+        contract = snapshot.add_node(
+            "contract_surface",
+            contract_ref,
+            summary=f"Published contract surface `{contract_ref}`.",
+            source_path=_rel_path(root, registry_path),
+            source_kind="contract_registry",
+            status=raw_entry.get("status"),
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        contract_nodes[contract_ref] = contract
+        snapshot.add_relation(project, "HAS_CONTRACT", contract, provenance="impact_contracts")
+        snapshot.add_relation(contract, "BACKED_BY", registry_artifact, provenance="impact_contracts")
+
+        provider_name = contract_ref.split(".", 1)[0]
+        provider_key = NodeKey("provider_surface", provider_name)
+        if provider_key in snapshot.nodes:
+            snapshot.add_relation(provider_key, "DEFINES", contract, provenance="impact_contracts")
+
+        source_path = raw_entry.get("source_path")
+        if isinstance(source_path, str):
+            resolved = _resolve_repo_path(root, registry_path, source_path)
+            if resolved is not None:
+                module_key = NodeKey("module_surface", _rel_path(root, resolved))
+                if module_key in snapshot.nodes:
+                    snapshot.add_relation(contract, "BACKED_BY", module_key, provenance="impact_contracts")
+
+        contract_config_path = (root / "configs" / "contracts" / contract_ref.replace(".", "/")).with_suffix(".yaml")
+        if contract_config_path.is_file():
+            artifact = snapshot.add_node(
+                "config_artifact",
+                _rel_path(root, contract_config_path),
+                summary=f"Contract policy config for `{contract_ref}`.",
+                source_path=_rel_path(root, contract_config_path),
+                source_kind="contract_config",
+                last_verified=today,
+                ingest_wave="repo_sync_v1",
+                confidence="high",
+            )
+            snapshot.add_relation(contract, "BACKED_BY", artifact, provenance="impact_contracts")
+
+        published_artifacts = raw_entry.get("published_artifacts")
+        if isinstance(published_artifacts, list):
+            for published_path in published_artifacts:
+                if not isinstance(published_path, str):
+                    continue
+                resolved = _resolve_repo_path(root, registry_path, published_path)
+                if resolved is None:
+                    continue
+                artifact = snapshot.add_node(
+                    "doc_artifact",
+                    _rel_path(root, resolved),
+                    summary=f"Published contract artifact for `{contract_ref}`.",
+                    source_path=_rel_path(root, resolved),
+                    source_kind="published_contract",
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="high",
+                )
+                snapshot.add_relation(contract, "BACKED_BY", artifact, provenance="impact_contracts")
+
+    return contract_nodes
+
+
+def _add_pipeline_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    contract_nodes: dict[str, NodeKey],
+    adapter_nodes: dict[str, NodeKey],
+) -> dict[str, NodeKey]:
+    pipeline_nodes: dict[str, NodeKey] = {}
+
+    entities_root = root / "configs" / "entities"
+    for entity_path in sorted(entities_root.rglob("*.yaml")):
+        payload = _read_yaml(entity_path)
+        provider_name = str(payload.get("provider", entity_path.parent.name))
+        entity_name = str(payload.get("entity", entity_path.stem))
+        pipeline_payload = payload.get("pipeline")
+        pipeline_name = f"{provider_name}_{entity_name}"
+        pipeline_summary = f"Entity pipeline `{pipeline_name}`."
+        if isinstance(pipeline_payload, dict):
+            pipeline_name = str(pipeline_payload.get("pipeline_name", pipeline_name))
+            pipeline_summary = str(pipeline_payload.get("description", pipeline_summary))
+        pipeline = snapshot.add_node(
+            "pipeline_surface",
+            pipeline_name,
+            summary=pipeline_summary,
+            source_path=_rel_path(root, entity_path),
+            source_kind="entity_pipeline",
+            provider=provider_name,
+            entity=entity_name,
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        pipeline_nodes[pipeline_name] = pipeline
+        snapshot.add_relation(project, "HAS_PIPELINE", pipeline, provenance="impact_pipelines")
+
+        entity_key = NodeKey("entity_config", pipeline_name)
+        if entity_key in snapshot.nodes:
+            snapshot.add_relation(pipeline, "BACKED_BY", entity_key, provenance="impact_pipelines")
+        provider_key = NodeKey("provider_surface", provider_name)
+        if provider_key in snapshot.nodes:
+            snapshot.add_relation(pipeline, "DEPENDS_ON", provider_key, provenance="impact_pipelines")
+        adapter_key = adapter_nodes.get(provider_name)
+        if adapter_key is not None:
+            snapshot.add_relation(pipeline, "DEPENDS_ON", adapter_key, provenance="impact_pipelines")
+        contract_key = contract_nodes.get(f"{provider_name}.{entity_name}")
+        if contract_key is not None:
+            snapshot.add_relation(pipeline, "DEPENDS_ON", contract_key, provenance="impact_pipelines")
+
+    composites_root = root / "configs" / "composites"
+    for composite_path in sorted(composites_root.glob("*.yaml")):
+        payload = _read_yaml(composite_path)
+        composite = payload.get("composite")
+        composite_name = composite_path.stem
+        if isinstance(composite, dict):
+            composite_name = str(composite.get("name", composite_name))
+        pipeline = snapshot.add_node(
+            "pipeline_surface",
+            composite_name,
+            summary=f"Composite pipeline `{composite_name}`.",
+            source_path=_rel_path(root, composite_path),
+            source_kind="composite_pipeline",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        pipeline_nodes[composite_name] = pipeline
+        snapshot.add_relation(project, "HAS_PIPELINE", pipeline, provenance="impact_pipelines")
+
+        composite_key = NodeKey("composite_config", composite_name)
+        if composite_key in snapshot.nodes:
+            snapshot.add_relation(pipeline, "BACKED_BY", composite_key, provenance="impact_pipelines")
+
+        if isinstance(composite, dict):
+            seed = composite.get("seed")
+            if isinstance(seed, dict):
+                seed_pipeline = seed.get("pipeline")
+                if isinstance(seed_pipeline, str) and seed_pipeline in pipeline_nodes:
+                    snapshot.add_relation(
+                        pipeline,
+                        "DEPENDS_ON",
+                        pipeline_nodes[seed_pipeline],
+                        provenance="impact_pipelines",
+                    )
+            dependencies = composite.get("dependencies")
+            if isinstance(dependencies, list):
+                for dependency in dependencies:
+                    if not isinstance(dependency, dict):
+                        continue
+                    dependency_pipeline = dependency.get("pipeline")
+                    if isinstance(dependency_pipeline, str) and dependency_pipeline in pipeline_nodes:
+                        snapshot.add_relation(
+                            pipeline,
+                            "DEPENDS_ON",
+                            pipeline_nodes[dependency_pipeline],
+                            provenance="impact_pipelines",
+                        )
+
+    return pipeline_nodes
+
+
+def _add_alert_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    rules_root = root / "grafana" / "prometheus-rules"
+    if not rules_root.is_dir():
+        return
+
+    for rules_path in sorted(rules_root.glob("*.y*ml")):
+        payload = _read_yaml(rules_path)
+        artifact = snapshot.add_node(
+            "config_artifact",
+            _rel_path(root, rules_path),
+            summary=f"Prometheus alert rules file `{rules_path.name}`.",
+            source_path=_rel_path(root, rules_path),
+            source_kind="prometheus_rules",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        groups = payload.get("groups")
+        if not isinstance(groups, list):
+            continue
+        for group in groups:
+            if not isinstance(group, dict):
+                continue
+            group_name = str(group.get("name", rules_path.stem))
+            rules = group.get("rules")
+            if not isinstance(rules, list):
+                continue
+            for rule in rules:
+                if not isinstance(rule, dict):
+                    continue
+                alert_name = rule.get("alert")
+                if not isinstance(alert_name, str):
+                    continue
+                annotations = rule.get("annotations") if isinstance(rule.get("annotations"), dict) else {}
+                labels = rule.get("labels") if isinstance(rule.get("labels"), dict) else {}
+                alert = snapshot.add_node(
+                    "alert_surface",
+                    alert_name,
+                    summary=str(annotations.get("summary", f"Prometheus alert `{alert_name}`.")),
+                    source_path=_rel_path(root, rules_path),
+                    source_kind="prometheus_alert_rule",
+                    group=group_name,
+                    severity=labels.get("severity"),
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="high",
+                )
+                snapshot.add_relation(project, "HAS_ALERT", alert, provenance="impact_alerts")
+                snapshot.add_relation(alert, "BACKED_BY", artifact, provenance="impact_alerts")
+
+                runbook = annotations.get("runbook")
+                if isinstance(runbook, str):
+                    runbook_path = root / runbook
+                    if runbook_path.is_file():
+                        doc = snapshot.add_node(
+                            "doc_artifact",
+                            runbook,
+                            summary=f"Runbook referenced by alert `{alert_name}`.",
+                            source_path=runbook,
+                            source_kind="alert_runbook",
+                            last_verified=today,
+                            ingest_wave="repo_sync_v1",
+                            confidence="high",
+                        )
+                        snapshot.add_relation(alert, "DESCRIBED_IN", doc, provenance="impact_alerts")
+
+
+def _add_governance_edges(
+    snapshot: GraphSnapshot,
+    port_nodes: set[NodeKey],
+    adapter_nodes: dict[str, NodeKey],
+    pipeline_nodes: dict[str, NodeKey],
+    contract_nodes: dict[str, NodeKey],
+) -> None:
+    for policy_name in ("hexagonal import matrix", "hexagonal package layout"):
+        policy = NodeKey("policy_surface", policy_name)
+        if policy not in snapshot.nodes:
+            continue
+        for port in sorted(port_nodes, key=lambda node: node.name):
+            snapshot.add_relation(policy, "GOVERNS", port, provenance="impact_governance")
+        for adapter in sorted(adapter_nodes.values(), key=lambda node: node.name):
+            snapshot.add_relation(policy, "GOVERNS", adapter, provenance="impact_governance")
+
+    pipeline_policy = NodeKey("policy_surface", "pipeline assembly model")
+    if pipeline_policy in snapshot.nodes:
+        for pipeline in sorted(pipeline_nodes.values(), key=lambda node: node.name):
+            snapshot.add_relation(pipeline_policy, "GOVERNS", pipeline, provenance="impact_governance")
+
+    contract_policy = NodeKey("policy_surface", "medallion storage contract")
+    if contract_policy in snapshot.nodes:
+        for contract in sorted(contract_nodes.values(), key=lambda node: node.name):
+            snapshot.add_relation(contract_policy, "GOVERNS", contract, provenance="impact_governance")
+        for pipeline in sorted(pipeline_nodes.values(), key=lambda node: node.name):
+            snapshot.add_relation(contract_policy, "GOVERNS", pipeline, provenance="impact_governance")
+
+    observability_policy = NodeKey("policy_surface", "observability surface model")
+    if observability_policy in snapshot.nodes:
+        for node_key in sorted(snapshot.nodes, key=lambda node: (node.label, node.name)):
+            if node_key.label == "alert_surface":
+                snapshot.add_relation(observability_policy, "GOVERNS", node_key, provenance="impact_governance")
 
 
 class Neo4jHttpClient:

@@ -26,7 +26,9 @@ profiles в BioETL.
 - **Deterministic Neo4j sync tooling**:
   `python -m scripts.ops sync-neo4j-memory`
   — строит repo-derived graph snapshot из docs/configs/src/tests/scripts,
-  curated policy surfaces и
+  curated policy surfaces, а также semantic impact-analysis layer для
+  `port_surface`, `adapter_surface`, `pipeline_surface`, `contract_surface`
+  и `alert_surface`, и
   может синхронизировать его в локальный Neo4j backend без ручных prompt waves.
   Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
   он пересобирает managed relations и удаляет только stale repo-derived nodes

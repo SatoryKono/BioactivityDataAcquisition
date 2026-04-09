@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-09T12:31:44.302294+00:00",
+  "generated_at": "2026-04-09T16:11:13.307533+00:00",
   "summary": {
-    "total_scripts": 282,
+    "total_scripts": 284,
     "status_counts": {
-      "active": 231,
+      "active": 233,
       "legacy": 29,
       "orphan": 21,
       "unknown": 1
@@ -14,9 +14,9 @@
       "build": 31,
       "ci": 47,
       "docs": 115,
-      "scripts": 240,
+      "scripts": 242,
       "skills": 9,
-      "tests": 89
+      "tests": 90
     }
   },
   "scripts": [
@@ -1350,7 +1350,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 12,
       "references": [
         {
           "path": "scripts/dev/README.md",
@@ -1463,7 +1463,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 33,
+      "reference_count": 35,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -1522,7 +1522,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 34,
+      "reference_count": 36,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -1589,7 +1589,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 46,
+      "reference_count": 47,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -1648,7 +1648,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 58,
+      "reference_count": 64,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -3880,7 +3880,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 81,
+      "reference_count": 82,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4480,7 +4480,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
@@ -4493,6 +4493,12 @@
           "line": 35,
           "source_group": "scripts",
           "text": "\"verify\": \"verify_docs.py\","
+        },
+        {
+          "path": "scripts/ops/neo4j_memory_sync.py",
+          "line": 322,
+          "source_group": "scripts",
+          "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
         }
       ]
     },
@@ -4623,8 +4629,38 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 13,
       "references": [
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 27,
+          "source_group": "docs",
+          "text": "`python -m scripts.ops sync-neo4j-memory`"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 31,
+          "source_group": "docs",
+          "text": "Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 34,
+          "source_group": "docs",
+          "text": "Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 38,
+          "source_group": "docs",
+          "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 43,
+          "source_group": "docs",
+          "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:"
+        },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
           "line": 151,
@@ -4632,10 +4668,16 @@
           "text": "| `scripts.ops`         | `uv run python -m scripts.ops`         | Ops: salt rotation, Grafana, deploy        |"
         },
         {
-          "path": "scripts/README.md",
-          "line": 89,
-          "source_group": "scripts",
-          "text": "| `ops`         | `python -m scripts.ops salt-rotate`                   | Operational automation |"
+          "path": "docs/05-operations/deployment/neo4j-memory-setup.md",
+          "line": 50,
+          "source_group": "docs",
+          "text": "python -m scripts.ops sync-neo4j-memory --apply"
+        },
+        {
+          "path": "docs/05-operations/deployment/neo4j-memory-setup.md",
+          "line": 58,
+          "source_group": "docs",
+          "text": "python -m scripts.ops sync-neo4j-memory --apply --prune-stale"
         }
       ]
     },
@@ -4672,7 +4714,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 46,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"check-skills\": \"check_ai_skills_layout.sh\","
         }
@@ -4711,7 +4753,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"check-mcp\": \"check_mcp.sh\","
         }
@@ -4870,7 +4912,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"close-ge-spike\": \"close_great_expectations_spike_issue.sh\","
         },
@@ -4906,7 +4948,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"close-schema-drift\": \"close_pandera_schema_drift_issue.sh\","
         },
@@ -5235,7 +5277,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"delete-branches\": \"delete-stale-branches.sh\","
         }
@@ -5286,7 +5328,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"deploy\": \"deploy-bioetl.sh\","
         }
@@ -5358,7 +5400,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"fix-grafana\": \"fix_grafana_dashboards.py\","
         }
@@ -6009,6 +6051,21 @@
       "references": []
     },
     {
+      "path": "scripts/ops/neo4j_memory_sync.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "\"sync-neo4j-memory\": \"neo4j_memory_sync.py\","
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/neo4j_quick_start.sh",
       "type": "sh",
       "status": "unknown",
@@ -6135,7 +6192,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"salt_rotate.py\","
         }
@@ -6170,7 +6227,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 43,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"setup_agents.sh\","
         },
@@ -6293,7 +6350,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"setup-skills\": \"setup_skills.sh\","
         },
@@ -6586,7 +6643,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 40,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"triage-issues\": \"triage_cleanup_issue_wave.sh\","
         }
@@ -6601,7 +6658,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 39,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"update-issue\": \"update_github_issue.sh\","
         },
@@ -6899,7 +6956,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 54,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"analyze_duplicate_functions.py\","
         }
@@ -6920,7 +6977,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 55,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"calibrate_hotspot_budgets.py\","
         }
@@ -6941,7 +6998,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"check_application_deps.py\","
         },
@@ -6968,7 +7025,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"check_architecture.py\","
         },
@@ -7007,7 +7064,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"check-c901\": \"check_c901_baseline.py\","
         },
@@ -7034,7 +7091,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"check_constructor_args.py\","
         },
@@ -7082,7 +7139,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"check_naming_package_consistency.py\","
         },
@@ -7139,7 +7196,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"check_quality_exemptions.py\","
         }
@@ -7166,7 +7223,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"generate_architecture_debt_tasks.py\","
         },
@@ -7325,7 +7382,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"report-hotspots\": \"generate_hotspot_degradation_report.py\","
         }
@@ -7381,7 +7438,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"check-terminology\": \"lint_terminology.py\","
         },
@@ -7432,7 +7489,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"check-naming\": \"naming_audit.py\","
         },
@@ -7485,7 +7542,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"reduce_architecture_debt.py\","
         },
@@ -7542,9 +7599,24 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"report_duplication_baseline.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/qa/report_function_length_inventory.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/qa/__main__.py",
+          "line": 55,
+          "source_group": "scripts",
+          "text": "\"report-function-length-inventory\": \"report_function_length_inventory.py\","
         }
       ]
     },
@@ -7563,7 +7635,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"report-family-baseline\": \"report_hotspot_family_baseline.py\","
         }
@@ -7602,7 +7674,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"report_provider_contract_drift.py\","
         }
@@ -7647,7 +7719,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"report_vcr_metadata_catalog.py\","
         },
@@ -7674,7 +7746,7 @@
       "references": [
         {
           "path": "scripts/qa/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"sync_integration_vcr_policy.py\","
         }
@@ -8325,7 +8397,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 45,
+      "reference_count": 46,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -8839,7 +8911,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 122,
+          "line": 124,
           "source_group": "build",
           "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         },
