@@ -41,6 +41,18 @@ def test_entrypoints_all_is_execution_focused_budget() -> None:
 
 
 @pytest.mark.unit
+def test_entrypoints_legacy_symbol_budget_stays_frozen() -> None:
+    """Legacy compatibility lookup surface should stay intentionally bounded."""
+    entrypoints = _reload_entrypoints_module()
+
+    assert len(entrypoints._LEGACY_SYMBOL_TARGETS) == 22
+    assert set(entrypoints._LEGACY_SYMBOL_TARGETS.values()) == {
+        "bioetl.composition.resources_api",
+        "bioetl.composition.services_api",
+    }
+
+
+@pytest.mark.unit
 def test_entrypoints_legacy_service_symbol_warns_and_delegates() -> None:
     """Legacy service symbol should resolve via services_api with deprecation warning."""
     entrypoints = _reload_entrypoints_module()
@@ -104,3 +116,33 @@ def test_composition_package_root_exports_resources_api_module() -> None:
 
     assert "resources_api" in composition_module.__all__
     assert composition_module.resources_api is resources_api_module
+
+
+@pytest.mark.unit
+def test_composition_package_root_exports_registry_api_module() -> None:
+    """Package root should expose canonical registry_api lazy export."""
+    composition_module = importlib.import_module("bioetl.composition")
+    registry_api_module = importlib.import_module("bioetl.composition.registry_api")
+
+    assert "registry_api" in composition_module.__all__
+    assert composition_module.registry_api is registry_api_module
+
+
+@pytest.mark.unit
+def test_composition_package_root_exports_narrow_service_api_modules() -> None:
+    """Package root should expose the sanctioned narrow service API modules."""
+    composition_module = importlib.import_module("bioetl.composition")
+    control_plane_api_module = importlib.import_module(
+        "bioetl.composition.control_plane_api"
+    )
+    health_api_module = importlib.import_module("bioetl.composition.health_api")
+    maintenance_api_module = importlib.import_module(
+        "bioetl.composition.maintenance_api"
+    )
+
+    assert "control_plane_api" in composition_module.__all__
+    assert "health_api" in composition_module.__all__
+    assert "maintenance_api" in composition_module.__all__
+    assert composition_module.control_plane_api is control_plane_api_module
+    assert composition_module.health_api is health_api_module
+    assert composition_module.maintenance_api is maintenance_api_module

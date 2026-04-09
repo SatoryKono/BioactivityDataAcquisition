@@ -4,7 +4,9 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
 . (Join-Path $PSScriptRoot "load_repo_env.ps1")
+$env:BIOETL_SKIP_ENV_LOCAL = "1"
 Import-BioetlRepoEnv -RepoRoot $repoRoot
+Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
 
 if (-not $env:NEO4J_URI) {
     $env:NEO4J_URI = "bolt://localhost:7687"

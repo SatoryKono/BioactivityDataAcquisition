@@ -5,7 +5,7 @@ Class: published
 Owner: Architecture / Domain
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-08'
+Last verified: '2026-04-09'
 ---
 
 # Normalization Plan P0–P6
@@ -49,7 +49,7 @@ Last verified: '2026-04-08'
 | `META_FIELDS` | Технические поля, которые не должны участвовать в identity/content hashing | [constants.py](../../src/bioetl/domain/constants.py) |
 | business fields | Поля, описывающие сущность или событие по смыслу, а не по operational trace | this document + entity/profile contracts |
 | runtime anchors | Control-plane поля вроде `contract_ref`, `contract_version`, `effective_config_hash`, влияющие на runtime compatibility | this document + checkpoint/control-plane seams |
-| canonical JSON | JSON with stable key order and compact separators, used as the only byte representation before hashing | [hashing.py](../../src/bioetl/domain/transformations/hashing.py) |
+| canonical JSON | JSON with stable key order, compact separators, and ASCII-safe deterministic serialization, used as the only byte representation before hashing | [json.py](../../src/bioetl/domain/normalization/json.py), [serialization.py](../../src/bioetl/domain/serialization.py) |
 | `NormalizationProfile` | Явный field-by-field contract для record normalization и hash inclusion policy | target state for `P4`–`P5` |
 | set-like collection | Список, для которого порядок не несёт бизнес-смысла и может быть канонизирован явно по contract/profile rule | target state for `P4`–`P5` |
 
@@ -71,18 +71,22 @@ Last verified: '2026-04-08'
    чтение настроек или скрытую генерацию времени.
 7. Порядок в списках сохраняется по умолчанию; permutation-invariant behavior
    разрешён только для явно помеченных set-like полей.
-8. Все SHA-256 style anchors должны иметь канонический вид: lowercase, 64 hex
-   chars, без префиксов и без произвольного formatting.
+8. `content_hash` и `execution_fingerprint` используют canonical lexical form
+   `lowercase 64-char hex` без префикса.
+9. Hash-like runtime anchors не следует автоматически считать тем же lexical
+   contract: например, `effective_config_hash` today normalizes through
+   `normalize_control_plane_sha256(...)`, lowercases text, but may preserve a
+   historical `sha256:` prefix when that value already exists in the payload.
 
 ## Current Code Seams
 
 | Concern | Current seam | Current role |
 | --- | --- | --- |
-| Manifest fingerprint path | [run_manifest_service.py](../../src/bioetl/application/services/run_manifest_service.py) | Строит `execution_fingerprint` напрямую через `json.dumps(..., sort_keys=True)` |
+| Manifest fingerprint path | [run_manifest_service.py](../../src/bioetl/application/services/run_manifest_service.py) | Normalizes manifest spec through `normalize_run_manifest_spec(...)`, serializes only through `serialize_json_canonical(...)`, then computes `sha256(...).hexdigest()` |
 | Manifest snapshot assembly | [run_manifest_builder.py](../../src/bioetl/composition/runtime_builders/run_manifest_builder.py) | Собирает launch/runtime/resolved config snapshots и runtime anchors |
 | Ledger append path | [run_ledger_service.py](../../src/bioetl/application/services/run_ledger_service.py) | Собирает lifecycle events и `_diagnostic` envelope перед append |
 | Ledger serialization model | [run_ledger.py](../../src/bioetl/domain/control_plane/run_ledger.py) | Нормализует JSON-safe payload формы и replay-oriented helpers |
-| Checkpoint identity path | [checkpoint_metadata_helpers.py](../../src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py) | Собирает checkpoint `execution_fingerprint` из runtime metadata |
+| Checkpoint identity path | [checkpoint_metadata_helpers.py](../../src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py) | Still computes a narrower checkpoint `execution_fingerprint` from runtime metadata through direct `json.dumps(..., sort_keys=True, separators=(',', ':'))` |
 | Meta field exclusion | [constants.py](../../src/bioetl/domain/constants.py) | Держит `META_FIELDS` |
 | Content hash normalization | [hashing.py](../../src/bioetl/domain/transformations/hashing.py) | Нормализует значения и считает `content_hash` |
 | Record-level heuristics | [record_normalization_processor.py](../../src/bioetl/application/core/record_normalization_processor.py) | Текущий fallback path для DOI/PMID/date/JSON normalization |
@@ -139,12 +143,24 @@ Example:
 
 ### SHA-256 / hash anchor policy
 
-- Canonical lexical form: lowercase 64-char hex.
-- No `sha256:` prefix.
-- No uppercase letters.
-- `content_hash`, `execution_fingerprint`, and `effective_config_hash` may all
-  use SHA-256 as encoding, but they remain different artifacts with different
-  input payloads and different business meaning.
+This document distinguishes hash artifacts instead of flattening them into one
+"universal SHA-256 format":
+
+- `content_hash`: lowercase 64-char hex from
+  `sha256(provider + canonical_json(normalized_record)).hexdigest()`.
+- `execution_fingerprint`: lowercase 64-char hex from
+  `sha256(canonical_json(normalized_control_plane_payload)).hexdigest()` for
+  the run-manifest path.
+- `effective_config_hash`, `config_hash`, and similar runtime anchors:
+  hash-like identifiers whose lexical contract is field-specific and may still
+  preserve historical `sha256:` prefixes on some surfaces.
+
+Implications:
+
+- `content_hash` and `execution_fingerprint` have no `sha256:` prefix.
+- Runtime-anchor fields must be documented by field contract, not inferred from
+  `content_hash`/`execution_fingerprint`.
+- Lowercasing remains part of canonical comparison for hash-like anchor text.
 
 ### Float and numeric policy
 
@@ -193,17 +209,23 @@ Example:
    `code_provenance`, `source_refs`, and `planned_artifacts`.
 2. Exclude persist-only identifiers and timestamps:
    `manifest_id`, `created_at`, `entry_id`, `occurred_at`.
-3. Serialize through canonical JSON.
-4. Compute lowercase SHA-256 hex of that canonical payload.
+3. Normalize through
+   [`normalize_run_manifest_spec(...)`](../../src/bioetl/domain/normalization/control_plane.py).
+4. Serialize only through
+   [`serialize_json_canonical(...)`](../../src/bioetl/domain/normalization/json.py)
+   or its public alias in
+   [`serialization.py`](../../src/bioetl/domain/serialization.py).
+5. Compute lowercase SHA-256 hex of that canonical payload via
+   `hashlib.sha256(canonical.encode("utf-8")).hexdigest()`.
 
 Important current-state note:
 
-- The repository currently has one fingerprint path in
+- The repository currently has one canonical manifest fingerprint path in
   [run_manifest_service.py](../../src/bioetl/application/services/run_manifest_service.py)
   and another narrower execution identity path in
   [checkpoint_metadata_helpers.py](../../src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py).
-- `P2` must make any intentional distinction explicit. Silent divergence is not
-  acceptable.
+- `P2` must either converge these paths or make the distinction explicit and
+  versioned. Silent divergence is not acceptable.
 
 ### Manual reproduction of `content_hash`
 
@@ -211,8 +233,14 @@ Important current-state note:
 2. Remove all technical fields excluded by `META_FIELDS`, underscore-prefix
    policy, and entity/profile-specific exclude rules.
 3. Apply field-level normalization rules.
-4. Serialize to canonical JSON.
-5. Compute `sha256(provider + canonical_json(normalized_record))`.
+4. Normalize recursively through
+   [`normalize_for_hash(...)`](../../src/bioetl/domain/transformations/hashing.py).
+5. Serialize only through
+   [`canonical_json_dumps(...)`](../../src/bioetl/domain/transformations/hashing.py),
+   which delegates to
+   [`serialize_to_canonical_json(...)`](../../src/bioetl/domain/serialization.py).
+6. Compute lowercase SHA-256 hex of
+   `provider + canonical_json(normalized_record)`.
 
 Current ChemBL Activity baseline is declared in
 [activity.yaml](../../configs/entities/chembl/activity.yaml).
@@ -268,13 +296,13 @@ Current ChemBL Activity baseline is declared in
 
 ### Objective
 
-Сделать `execution_fingerprint` функцией от нормализованного control-plane
-payload, а не от случайной упаковки manifest input.
+Завершить выравнивание execution-identity paths вокруг одного явно описанного
+control-plane contract.
 
 ### Target state
 
 - [run_manifest_service.py](../../src/bioetl/application/services/run_manifest_service.py)
-  normalizes input before hashing;
+  remains the canonical manifest path and already normalizes input before hashing;
 - canonical JSON is the only byte representation before fingerprinting;
 - permutation of semantically set-like inputs does not change the fingerprint;
 - checkpoint execution identity either reuses the same canonical helper or
@@ -415,3 +443,16 @@ python3 -m scripts.docs verify --skip-build
 - [ADR-044 Run Manifest and Run Ledger](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
 - [Run Manifest Inspection](../05-operations/runbooks/run-manifest-inspection.md)
 - [Checkpoint Debugging](../05-operations/runbooks/checkpoint-debugging.md)
+
+## Cleanup Tail Outside This Source-of-Truth Scope
+
+The following published pages still contain legacy wording or examples that
+should be cleaned up in a separate follow-up if they are meant to reflect the
+current lexical contract:
+
+- [ADR-029 Output Metadata Unification](../02-architecture/decisions/ADR-029-output-metadata-unification.md)
+  still shows `content_hash: "sha256:..."` in an example payload.
+- Publication/schema reference pages under `docs/04-reference/**` still contain
+  legacy `sha256:` examples for `content_hash`.
+- Agent/internal guidance such as `docs/00-project/ai/agents/guides/CODEX.md`
+  still mentions `canonical-json-dumps(...)` as a literal algorithm string.

@@ -5,7 +5,7 @@ Class: published
 Owner: Architecture / Domain
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-09'
 ---
 
 # Content Hash Identity Policy (Canonical)
@@ -34,12 +34,18 @@ anchors, and ChemBL Activity is coordinated by
 
 `content_hash` is computed as:
 
-`sha256(provider + canonical_json_dumps(normalized_record))`
+`sha256(provider + canonical_json(normalized_record)).hexdigest()`
+
+The resulting lexical form is plain lowercase 64-character hex without a
+`sha256:` prefix.
 
 Before hashing:
 
 1. Normalize values (`NaN/Inf -> null`, float rounding, date ISO, string strip).
 1. Exclude all technical metadata fields from identity.
+1. Serialize only through the canonical JSON helper in
+   `src/bioetl/domain/serialization.py` /
+   `src/bioetl/domain/normalization/json.py`.
 
 ### Metadata exclusion policy (MUST)
 

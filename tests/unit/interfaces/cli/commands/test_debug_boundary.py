@@ -8,7 +8,7 @@ import pytest
 
 
 @pytest.mark.unit
-def test_get_pipeline_runner_service_delegates_to_services_api() -> None:
+def test_get_pipeline_runner_service_delegates_to_execution_api() -> None:
     """Debug command module should lazily delegate service resolution."""
     import bioetl.interfaces.cli.commands.debug as debug_module
 
@@ -16,7 +16,7 @@ def test_get_pipeline_runner_service_delegates_to_services_api() -> None:
     registry = MagicMock()
 
     with patch(
-        "bioetl.composition.services_api.get_pipeline_runner_service",
+        "bioetl.composition.execution_api.get_pipeline_runner_service",
         return_value=service,
     ) as mock_get_pipeline_runner_service:
         result = debug_module.get_pipeline_runner_service(registry=registry)

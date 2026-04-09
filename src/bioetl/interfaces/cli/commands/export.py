@@ -24,7 +24,7 @@ __all__ = ["ExportFormat", "export_command"]
 
 def get_export_service() -> ExportService:
     """Load the export service through composition on demand."""
-    from bioetl.composition.services_api import get_export_service as _impl
+    from bioetl.composition.control_plane_api import get_export_service as _impl
 
     return _impl()
 

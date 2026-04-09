@@ -49,6 +49,33 @@ Last verified: '2026-03-29'
    ```bash
    python -m scripts.ops sync-neo4j-memory --apply
    ```
+   This snapshot now covers repo-derived docs, configs, layers/modules, tests,
+   dashboards, execution paths, and curated policy surfaces.
+
+8. When you intentionally want to remove stale repo-derived graph nodes from the
+   current ingest wave, run the explicit prune mode:
+   ```bash
+   python -m scripts.ops sync-neo4j-memory --apply --prune-stale
+   ```
+   This mode is destructive for stale repo-derived nodes and resets managed
+   relations between repo-managed nodes before recreating them.
+
+9. When you need a full rebuild of the current managed repo graph wave, use:
+   ```bash
+   python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave
+   ```
+   This mode is more destructive than `--prune-stale`: it deletes the entire
+   current managed wave before recreating it from the repository snapshot.
+
+10. When you intentionally want repo-derived labels to converge to
+    managed-only state, including cleanup of older unmanaged nodes from earlier
+    manual/legacy ingestion waves, run:
+    ```bash
+    python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged
+    ```
+    This mode keeps unrelated labels such as `MemoryEntity` intact, but it
+    deletes unmanaged legacy nodes for the repo-derived label families now owned
+    by deterministic sync.
 
 ## Memory Configuration Profiles
 

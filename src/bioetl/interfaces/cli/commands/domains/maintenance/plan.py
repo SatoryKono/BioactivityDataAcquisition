@@ -31,7 +31,9 @@ __all__ = [
 
 def get_contract_migration_service() -> ContractMigrationService:
     """Load the contract migration service through composition on demand."""
-    from bioetl.composition.services_api import get_contract_migration_service as _impl
+    from bioetl.composition.maintenance_api import (
+        get_contract_migration_service as _impl,
+    )
 
     return _impl()
 

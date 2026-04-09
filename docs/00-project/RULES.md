@@ -404,7 +404,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 - Pandera-контракты типизируют JSON-like поля как `Series[str]` (не `Series[object]`).
 - Трансформеры сериализуют list/dict через каноническую сериализацию до записи в Silver/Gold.
-- **Serialization**: `json.dumps(obj, sort-keys=True, separators=(',', ':'), ensure-ascii=True)`.
+- **Serialization**: canonical JSON helper with stable key ordering, compact separators, and ASCII-safe deterministic output (`serialize_to_canonical_json(...)` / `serialize_json_canonical(...)`).
 - **Null semantics**: отсутствие данных хранится как `NULL` (`None`), а не `'[]'`, `'{}'` или sentinel.
 - Пустые коллекции нормализуются в `NULL` (`None`), а не `[]`/`{}` строками.
 
@@ -486,10 +486,10 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 | Сценарий                             | Стратегия ID                                                        |
 | ------------------------------------ | ------------------------------------------------------------------- |
 | Источник предоставляет стабильный ID | Использовать как есть (`chembl-id`, `pubchem-cid`)                  |
-| ID отсутствует                       | **Content Hash**: `sha256(provider + canonical-json-dumps(record))` |
+| ID отсутствует                       | **Content Hash**: lowercase SHA-256 hex от `provider + canonical_json(normalized_record)` |
 
-- **Алгоритм**: `sha256(provider + canonical-json-dumps(record))`
-- **Canonical JSON**: `json.dumps(obj, sort-keys=True, separators=(',', ':'), ensure-ascii=True)`.
+- **Алгоритм**: `sha256(provider + canonical_json(normalized_record)).hexdigest()`
+- **Canonical JSON**: строится только через canonical serialization helper, а не через ad-hoc `json.dumps(...)` call-site.
   - **Float Precision**: Все значения типа float принудительно округляются: `round(val, 10)` для нивелирования различий архитектур процессоров.
 
 ### 2.9.1. Robust Content Hash

@@ -363,13 +363,13 @@ ______________________________________________________________________
 #### REQ-ID-001
 
 - **Уровень**: MUST
-- **Описание**: Алгоритм Content Hash: `sha256(provider + canonical-json-dumps(record))`
+- **Описание**: Алгоритм `content_hash`: lowercase SHA-256 hex от `provider + canonical_json(normalized_record)` через canonical serialization helper.
 - **Проверка**: Unit-тест генерации ID — результат соответствует алгоритму
 
 #### REQ-ID-002
 
 - **Уровень**: MUST
-- **Описание**: Canonical JSON: `json.dumps(obj, sort-keys=True, separators=(',', ':'), ensure-ascii=True)`
+- **Описание**: Canonical JSON строится только через domain serialization helper с stable key ordering, compact separators и ASCII-safe deterministic output.
 - **Проверка**: Unit-тест — JSON формат соответствует спецификации
 
 #### REQ-ID-003

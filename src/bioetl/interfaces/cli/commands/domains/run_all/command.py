@@ -73,14 +73,14 @@ if TYPE_CHECKING:
     from bioetl.application.services.pipeline_runner_service import (
         PipelineRunnerService,
     )
-    from bioetl.composition import PipelineRegistry
+    from bioetl.composition.registry_api import PipelineRegistry
 
 
 def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Load the pipeline runner service through composition on demand."""
-    from bioetl.composition.services_api import get_pipeline_runner_service as _impl
+    from bioetl.composition.execution_api import get_pipeline_runner_service as _impl
 
     return _impl(registry=registry)
 

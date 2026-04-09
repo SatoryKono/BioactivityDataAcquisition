@@ -43,14 +43,14 @@ def test_get_lifecycle_service_delegates_to_resources_api() -> None:
 
 
 @pytest.mark.unit
-def test_get_vacuum_service_delegates_to_services_api() -> None:
+def test_get_vacuum_service_delegates_to_maintenance_api() -> None:
     """Vacuum command module should lazily delegate vacuum service resolution."""
     import bioetl.interfaces.cli.commands.vacuum as vacuum_module
 
     service = MagicMock()
 
     with patch(
-        "bioetl.composition.services_api.get_vacuum_service",
+        "bioetl.composition.maintenance_api.get_vacuum_service",
         return_value=service,
     ) as mock_get_vacuum_service:
         result = vacuum_module.get_vacuum_service()

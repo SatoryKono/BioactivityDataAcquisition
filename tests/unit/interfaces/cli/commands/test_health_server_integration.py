@@ -37,8 +37,8 @@ class TestHealthServerContext:
             assert server is None
 
     @pytest.mark.asyncio
-    @patch("bioetl.composition.services_api.get_quarantine_service")
-    @patch("bioetl.composition.services_api.get_health_server_dependencies")
+    @patch("bioetl.composition.health_api.get_quarantine_service")
+    @patch("bioetl.composition.health_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_enabled_starts_and_stops_server(
         self,
@@ -65,8 +65,8 @@ class TestHealthServerContext:
         mock_server.stop.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("bioetl.composition.services_api.get_quarantine_service")
-    @patch("bioetl.composition.services_api.get_health_server_dependencies")
+    @patch("bioetl.composition.health_api.get_quarantine_service")
+    @patch("bioetl.composition.health_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_stops_server_on_exception(
         self,
@@ -91,8 +91,8 @@ class TestHealthServerContext:
         mock_server.stop.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("bioetl.composition.services_api.get_quarantine_service")
-    @patch("bioetl.composition.services_api.get_health_server_dependencies")
+    @patch("bioetl.composition.health_api.get_quarantine_service")
+    @patch("bioetl.composition.health_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_custom_host_port(
         self,
@@ -121,8 +121,8 @@ class TestHealthServerContext:
             assert call_kwargs["quarantine_service"] is None
 
     @pytest.mark.asyncio
-    @patch("bioetl.composition.services_api.get_quarantine_service")
-    @patch("bioetl.composition.services_api.get_health_server_dependencies")
+    @patch("bioetl.composition.health_api.get_quarantine_service")
+    @patch("bioetl.composition.health_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch("click.echo")
     async def test_context_continues_when_port_in_use(

@@ -4,7 +4,20 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.ops.neo4j_memory_sync import build_snapshot, derive_http_uri
+from scripts.ops.neo4j_memory_sync import (
+    DEFAULT_INGEST_WAVE,
+    DEFAULT_LEGACY_PRUNE_LABELS,
+    DEFAULT_MANAGED_BY,
+    _delete_managed_wave_nodes_statement,
+    build_snapshot,
+    derive_http_uri,
+    _node_statement,
+    _prune_legacy_unmanaged_nodes_statement,
+    _prune_stale_nodes_statement,
+    _prune_stale_relations_statement,
+    _relation_statement,
+    _reset_managed_relations_statement,
+)
 
 
 def _snapshot() -> tuple[Path, object]:
@@ -31,6 +44,9 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("entity_config", "chembl_activity") in {(key.label, key.name) for key in snapshot.nodes}
     assert ("composite_config", "composite_activity") in {(key.label, key.name) for key in snapshot.nodes}
     assert ("dashboard_surface", "bioetl-overview-v2") in {(key.label, key.name) for key in snapshot.nodes}
+    assert ("policy_surface", "integration and VCR execution policy") in {
+        (key.label, key.name) for key in snapshot.nodes
+    }
     assert ("script_surface", "scripts/dev/run_pytest.sh") in {(key.label, key.name) for key in snapshot.nodes}
     assert (
         "test_artifact",
@@ -74,6 +90,20 @@ def test_snapshot_contains_expected_relations() -> None:
         "src/bioetl/domain/config/pipeline.py",
     ) in relation_keys
     assert (
+        "project",
+        "BioETL",
+        "HAS_POLICY_SURFACE",
+        "policy_surface",
+        "integration and VCR execution policy",
+    ) in relation_keys
+    assert (
+        "policy_surface",
+        "integration and VCR execution policy",
+        "GOVERNS",
+        "test_surface",
+        "integration tests",
+    ) in relation_keys
+    assert (
         "doc_artifact",
         "scripts/dev/README.md",
         "DESCRIBES",
@@ -94,3 +124,78 @@ def test_snapshot_contains_expected_relations() -> None:
         "layer_family",
         "scripts",
     ) not in relation_keys
+
+
+def test_sync_statements_include_management_metadata() -> None:
+    _, snapshot = _snapshot()
+    project_node = snapshot.nodes[next(key for key in snapshot.nodes if key.label == "project" and key.name == "BioETL")]
+    relation = next(iter(snapshot.relations.values()))
+
+    node_statement = _node_statement(project_node, "sync-run-1")
+    relation_statement = _relation_statement(relation, "sync-run-1")
+
+    node_properties = node_statement["parameters"]["properties"]
+    relation_properties = relation_statement["parameters"]["properties"]
+
+    assert node_properties["managed_by"] == DEFAULT_MANAGED_BY
+    assert node_properties["ingest_wave"] == DEFAULT_INGEST_WAVE
+    assert node_properties["sync_run"] == "sync-run-1"
+    assert relation_properties["managed_by"] == DEFAULT_MANAGED_BY
+    assert relation_properties["ingest_wave"] == DEFAULT_INGEST_WAVE
+    assert relation_properties["sync_run"] == "sync-run-1"
+
+
+def test_prune_statements_target_repo_sync_subgraph() -> None:
+    reset_statement = _reset_managed_relations_statement(["CONTAINS", "DEFINED_BY"])
+    prune_relations_statement = _prune_stale_relations_statement("sync-run-2")
+    prune_nodes_statement = _prune_stale_nodes_statement("sync-run-2")
+    full_reset_statement = _delete_managed_wave_nodes_statement()
+    legacy_prune_statement = _prune_legacy_unmanaged_nodes_statement(["quality_gate", "execution_path"])
+
+    assert "type(r) IN $relation_types" in reset_statement["statement"]
+    assert reset_statement["parameters"]["relation_types"] == ["CONTAINS", "DEFINED_BY"]
+    assert reset_statement["parameters"]["managed_by"] == DEFAULT_MANAGED_BY
+    assert reset_statement["parameters"]["ingest_wave"] == DEFAULT_INGEST_WAVE
+
+    assert "coalesce(r.sync_run, '') <> $sync_run" in prune_relations_statement["statement"]
+    assert prune_relations_statement["parameters"]["managed_by"] == DEFAULT_MANAGED_BY
+    assert prune_relations_statement["parameters"]["ingest_wave"] == DEFAULT_INGEST_WAVE
+    assert prune_relations_statement["parameters"]["sync_run"] == "sync-run-2"
+
+    assert "DETACH DELETE n" in prune_nodes_statement["statement"]
+    assert prune_nodes_statement["parameters"]["ingest_wave"] == DEFAULT_INGEST_WAVE
+    assert prune_nodes_statement["parameters"]["sync_run"] == "sync-run-2"
+
+    assert "DETACH DELETE n" in full_reset_statement["statement"]
+    assert full_reset_statement["parameters"]["ingest_wave"] == DEFAULT_INGEST_WAVE
+    assert full_reset_statement["parameters"]["managed_by"] == DEFAULT_MANAGED_BY
+
+    assert "any(label IN labels(n) WHERE label IN $managed_labels)" in legacy_prune_statement["statement"]
+    assert "coalesce(n.managed_by, '') = ''" in legacy_prune_statement["statement"]
+    assert legacy_prune_statement["parameters"]["managed_labels"] == ["quality_gate", "execution_path"]
+
+
+def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
+    expected_labels = {
+        "project",
+        "doc_source_surface",
+        "doc_artifact",
+        "decision",
+        "risk",
+        "policy_surface",
+        "layer_family",
+        "package_family",
+        "module_surface",
+        "provider_surface",
+        "entity_config",
+        "composite_config",
+        "config_artifact",
+        "dashboard_surface",
+        "quality_gate",
+        "script_surface",
+        "execution_path",
+        "test_surface",
+        "test_artifact",
+    }
+
+    assert set(DEFAULT_LEGACY_PRUNE_LABELS) == expected_labels

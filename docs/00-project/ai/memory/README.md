@@ -25,8 +25,21 @@ profiles в BioETL.
   `@neo4j-memory` устойчивыми знаниями о проекте.
 - **Deterministic Neo4j sync tooling**:
   `python -m scripts.ops sync-neo4j-memory`
-  — строит repo-derived graph snapshot из docs/configs/src/tests/scripts и
+  — строит repo-derived graph snapshot из docs/configs/src/tests/scripts,
+  curated policy surfaces и
   может синхронизировать его в локальный Neo4j backend без ручных prompt waves.
+  Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
+  он пересобирает managed relations и удаляет только stale repo-derived nodes
+  текущей ingest wave, а не весь graph.
+  Для полного пересоздания текущей managed wave используй
+  `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:
+  этот режим сначала удаляет весь repo-managed subgraph текущей волны, а потом
+  пересобирает его из текущего состояния репозитория.
+  Если нужно довести repo-derived labels до полностью deterministic managed-only
+  состояния, используй
+  `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:
+  этот режим после rebuild удаляет legacy unmanaged nodes для label-семейств,
+  которые теперь полностью принадлежат deterministic sync.
 
 ## Relationship To Other AI Surfaces
 

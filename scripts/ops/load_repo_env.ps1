@@ -16,7 +16,11 @@ function Import-BioetlRepoEnv {
     } else {
         Join-Path $RepoRoot ".env"
     }
-    $envLocalFile = Join-Path $RepoRoot ".env.local"
+    $envLocalFile = if ($env:BIOETL_SKIP_ENV_LOCAL -eq "1") {
+        $null
+    } else {
+        Join-Path $RepoRoot ".env.local"
+    }
 
     if (-not (Test-Path $envFile) -and -not (Test-Path $envLocalFile)) {
         $env:BIOETL_REPO_ENV_LOADED = "1"
@@ -28,7 +32,10 @@ function Import-BioetlRepoEnv {
         $shellEnv[$_.Name] = $_.Value
     }
 
-    $filesToLoad = @($envFile, $envLocalFile)
+    $filesToLoad = @($envFile)
+    if ($envLocalFile) {
+        $filesToLoad += $envLocalFile
+    }
     foreach ($file in $filesToLoad) {
         if (-not (Test-Path $file)) {
             continue

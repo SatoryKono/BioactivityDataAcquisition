@@ -8,14 +8,14 @@ import pytest
 
 
 @pytest.mark.unit
-def test_get_export_service_delegates_to_services_api() -> None:
+def test_get_export_service_delegates_to_control_plane_api() -> None:
     """Export command module should lazily delegate service resolution."""
     import bioetl.interfaces.cli.commands.export as export_module
 
     service = MagicMock()
 
     with patch(
-        "bioetl.composition.services_api.get_export_service",
+        "bioetl.composition.control_plane_api.get_export_service",
         return_value=service,
     ) as mock_get_export_service:
         result = export_module.get_export_service()

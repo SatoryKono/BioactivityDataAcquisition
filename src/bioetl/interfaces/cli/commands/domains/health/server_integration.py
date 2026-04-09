@@ -50,7 +50,7 @@ async def health_server_context(
         return
 
     # Import here to avoid circular imports and keep interfaces layer clean
-    from bioetl.composition.services_api import (
+    from bioetl.composition.health_api import (
         get_health_server_dependencies,
         get_quarantine_service,
     )

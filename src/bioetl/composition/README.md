@@ -9,7 +9,10 @@ together. No business logic lives here — only assembly, factory, and registrat
 composition/
 ├── entrypoints.py              # Retained execution-first seam (+ deprecated legacy lookups)
 ├── execution_api.py            # Canonical execution API
-├── services_api.py             # Canonical service-bootstrap API
+├── control_plane_api.py        # Canonical control-plane service API
+├── health_api.py               # Canonical health/quarantine service API
+├── maintenance_api.py          # Canonical maintenance service API
+├── services_api.py             # Legacy umbrella service-bootstrap API
 ├── resources_api.py            # Canonical resource-management API
 ├── resource_management_api.py  # Deprecated alias for resources_api (compat only)
 ├── registry.py                 # PipelineRegistry — maps (provider, entity) → pipeline class
@@ -123,10 +126,25 @@ StorageFactory
 ## Retained Entrypoint Policy
 
 - `composition.entrypoints` is a retained public seam with execution-focused `__all__`.
-- Service/resource helpers should come from `composition.services_api` and
-  `composition.resources_api`.
+- Runtime execution helpers should come from `composition.execution_api`.
+- Health and quarantine helpers should come from `composition.health_api`.
+- Maintenance helpers should come from `composition.maintenance_api`.
+- Administrative and inspection helpers should come from
+  `composition.control_plane_api`.
+- Resource helpers should come from `composition.resources_api`.
+- Registry consumers should use `composition.registry_api` instead of importing
+  the `composition` package root.
+- Interfaces must not import `composition.registry` or
+  `composition.registry_default` directly; `composition.registry_api` is the
+  only sanctioned registry seam outside composition internals.
+- Pipeline registration from interfaces/orchestration must also go through
+  `composition.registry_api.register_all_pipelines`, not
+  `composition.factories.pipeline.registry`.
 - Internal modules such as `_pipeline_execution`, `_resource_management`, and `_services`
   stay private to `composition/` plus dedicated entrypoint tests.
+- New first-party integration surfaces SHOULD prefer specialized `*_api.py`
+  seams over growing `entrypoints.py` or importing `composition.services_api`;
+  expand `entrypoints.py` only for explicit backward-compatibility reasons.
 - Composite runtime flows should use `load_composite_config()` as the stable
   public access seam over the canonical owner
   `bioetl.infrastructure.config.composite_config_api`, and
