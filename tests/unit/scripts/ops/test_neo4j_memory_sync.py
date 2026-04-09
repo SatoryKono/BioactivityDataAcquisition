@@ -143,6 +143,34 @@ def test_snapshot_contains_expected_relations() -> None:
         "package_family",
         "interfaces/test_cli_checkpoint_list.py",
     ) not in relation_keys
+    assert (
+        "test_artifact",
+        "tests/unit/domain/configs/test_base_configs.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "domain/configs",
+    ) not in relation_keys
+    assert (
+        "test_artifact",
+        "tests/unit/domain/hash_policy/test_hash_policy_stability.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "domain/hash_policy",
+    ) not in relation_keys
+    assert (
+        "test_artifact",
+        "tests/unit/infrastructure/factories/test_factories.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "infrastructure/factories",
+    ) not in relation_keys
+    assert (
+        "test_artifact",
+        "tests/unit/interfaces/factories/test_pipeline_factories.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "interfaces/factories",
+    ) not in relation_keys
 
 
 def test_sync_statements_include_management_metadata() -> None:
