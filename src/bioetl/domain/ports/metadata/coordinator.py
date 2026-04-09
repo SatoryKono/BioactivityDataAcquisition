@@ -21,6 +21,7 @@ if TYPE_CHECKING:
         BronzeMetadata,
         GoldMetadata,
         GovernanceMetadata,
+        InputSnapshotRef,
         SilverMetadata,
         SourceMetadata,
     )
@@ -60,6 +61,7 @@ class BronzeMetadataInput:
     started_at: datetime
     completed_at: datetime
     source_metadata: SourceMetadata | None = None
+    input_snapshots: tuple[InputSnapshotRef, ...] = ()
     query_string: str | None = None
     governance: GovernanceMetadata | None = None
 

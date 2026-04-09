@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from bioetl.domain.models.metadata import InputSnapshotRef
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze.reporting_helpers import (
     BronzeAuditWriteRequest,
@@ -64,3 +65,27 @@ class TestBuildBronzeMetadataInput:
 
         assert result.record_count == 3
         assert result.query_string == "foo=bar"
+
+    def test_preserves_input_snapshots(self) -> None:
+        """Metadata input should carry replay-safe input snapshot refs."""
+        result = build_bronze_metadata_input(
+            BronzeMetadataInputRequest(
+                batch_id=BatchID("batch-3"),
+                record_count=1,
+                compressed_size=32,
+                output_path="chembl/activity/file.jsonl.zst",
+                started_at=datetime(2025, 1, 1, 12, 0, tzinfo=UTC),
+                completed_at=datetime(2025, 1, 1, 12, 1, tzinfo=UTC),
+                source_metadata=None,
+                input_snapshots=(
+                    InputSnapshotRef(
+                        snapshot_id="snap-1",
+                        content_hash="a" * 64,
+                        immutable_uri="/tmp/batch.jsonl.zst",
+                    ),
+                ),
+            )
+        )
+
+        assert len(result.input_snapshots) == 1
+        assert result.input_snapshots[0].snapshot_id == "snap-1"
