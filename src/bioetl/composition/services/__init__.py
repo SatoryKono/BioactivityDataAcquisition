@@ -11,7 +11,7 @@ Services:
 
 from __future__ import annotations
 
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.composition._services import MetadataCoordinator
 from bioetl.composition.services.versioning import (
     compute_config_hash,
     get_git_commit,

@@ -11,8 +11,8 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
-from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition import PipelineRegistry
+from bioetl.composition._services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline_runner,
     maybe_start_metrics_server,

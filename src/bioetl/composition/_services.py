@@ -4,7 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition._pipeline_execution import _ensure_registrations
+from bioetl.application.services import (
+    PipelineRunResult as PipelineRunResult,
+)
+from bioetl.application.services import RunOptions as RunOptions
+from bioetl.application.services import RunResult as RunResult
+from bioetl.application.services.metadata_coordinator import (
+    MetadataCoordinator as MetadataCoordinator,
+)
 from bioetl.composition.bootstrap import (
     HealthServerDependencies,
     bootstrap_adr_service,
@@ -67,6 +74,15 @@ __all__ = [
     "get_vacuum_service",
     "load_workflow_config",
 ]
+
+
+def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
+    """Ensure providers and pipelines are registered lazily to avoid cycles."""
+    from bioetl.composition._pipeline_execution import (
+        _ensure_registrations as ensure_registrations_impl,
+    )
+
+    ensure_registrations_impl(registry=registry)
 
 
 def get_checkpoint_service() -> CheckpointService:

@@ -16,6 +16,7 @@ from bioetl.domain.models.metadata import (
     DQSummary,
     EnvironmentMetadata,
     FileOutputMetadata,
+    InputSnapshotRef,
     LineageMetadata,
     PipelineMetadata,
     RuntimeMetadata,
@@ -138,6 +139,41 @@ async def test_write_bronze_metadata_records_artifact_publication(tmp_path) -> N
     assert details["provider"] == "chembl"
     assert details["dataset_ref"] is None
     assert details["lineage_fragment_id"] == "bronze:fragment-1"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_bronze_metadata_records_input_snapshot_refs(tmp_path) -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+    captured: list[tuple[str, str, dict[str, object] | None]] = []
+    metadata = _make_bronze_metadata()
+    metadata.source.input_snapshots = [
+        InputSnapshotRef(
+            snapshot_id="chembl-activity-batch-001",
+            content_hash="a" * 64,
+            immutable_uri="snapshots/chembl/activity/batch-001.jsonl.zst",
+            query_fingerprint="f" * 64,
+        )
+    ]
+    writer.attach_artifact_recorder(
+        lambda layer, artifact_path, details=None: captured.append(
+            (layer, artifact_path, details)
+        )
+    )
+
+    await writer.write_bronze_metadata(
+        base_path=tmp_path / "output" / "bronze" / "chembl" / "activity",
+        metadata=metadata,
+        provider="chembl",
+        entity="activity",
+    )
+
+    assert len(captured) == 1
+    details = captured[0][2]
+    assert details is not None
+    assert details["input_snapshot_count"] == 1
+    assert details["input_snapshot_ids"] == ["chembl-activity-batch-001"]
+    assert details["input_snapshot_content_hashes"] == ["a" * 64]
 
 
 @pytest.mark.unit
