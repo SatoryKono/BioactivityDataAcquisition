@@ -465,6 +465,15 @@ def _parser() -> argparse.ArgumentParser:
         help="Write the generated graph snapshot as JSON.",
     )
     parser.add_argument(
+        "--report",
+        type=Path,
+        help=(
+            "Write an audit report as JSON. "
+            "The report includes snapshot stats, live managed/unmanaged summaries, "
+            "label and relation diffs, and orphan summaries."
+        ),
+    )
+    parser.add_argument(
         "--http-uri",
         type=str,
         help="Explicit Neo4j HTTP endpoint, e.g. http://localhost:7474.",
@@ -772,7 +781,7 @@ def _add_layer_topology(snapshot: GraphSnapshot, root: Path, project: NodeKey, t
             relative_path = _rel_path(root, module_path)
             parts = Path(relative_path).parts
             family_key: NodeKey
-            if len(parts) >= 4:
+            if len(parts) >= 5:
                 family_name = f"{layer_name}/{parts[3]}"
                 family_key = NodeKey("package_family", family_name)
             else:
@@ -1052,7 +1061,7 @@ def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today
         layer_name = parts[2] if len(parts) > 2 and parts[2] in KNOWN_LAYERS else None
         if layer_name is not None:
             snapshot.add_relation(artifact, "TESTS_LAYER", NodeKey("layer_family", layer_name), provenance="test_graph")
-            if len(parts) > 3:
+            if len(parts) > 4:
                 family_name = f"{layer_name}/{parts[3]}"
                 snapshot.add_relation(
                     artifact,
@@ -1120,7 +1129,7 @@ class Neo4jHttpClient:
             "Accept": "application/json",
         }
 
-    def execute(self, statements: list[dict[str, JsonValue]]) -> None:
+    def execute(self, statements: list[dict[str, JsonValue]]) -> dict[str, object]:
         payload = json.dumps({"statements": statements}).encode("utf-8")
         req = request.Request(self._endpoint, data=payload, headers=self._headers, method="POST")
         try:
@@ -1132,6 +1141,31 @@ class Neo4jHttpClient:
         errors = body.get("errors", [])
         if errors:
             raise RuntimeError(f"Neo4j returned errors: {errors}")
+        return body
+
+    def query(self, statement: str, parameters: dict[str, JsonValue] | None = None) -> list[dict[str, JsonValue]]:
+        body = self.execute(
+            [
+                {
+                    "statement": statement,
+                    "parameters": parameters or {},
+                }
+            ]
+        )
+        results = body.get("results", [])
+        if not results:
+            return []
+        result = results[0]
+        columns = result.get("columns", [])
+        rows: list[dict[str, JsonValue]] = []
+        for entry in result.get("data", []):
+            raw_row = entry.get("row", [])
+            row = {
+                str(column): raw_row[index]
+                for index, column in enumerate(columns)
+            }
+            rows.append(row)
+        return rows
 
 
 def _sync_run_id() -> str:
@@ -1162,8 +1196,8 @@ def _node_statement(node: GraphNode, sync_run: str) -> dict[str, JsonValue]:
 def _relation_statement(relation: GraphRelation, sync_run: str) -> dict[str, JsonValue]:
     return {
         "statement": (
-            f"MERGE (a:`{relation.source.label}` {{name: $source_name}}) "
-            f"MERGE (b:`{relation.target.label}` {{name: $target_name}}) "
+            f"MATCH (a:`{relation.source.label}` {{name: $source_name}}) "
+            f"MATCH (b:`{relation.target.label}` {{name: $target_name}}) "
             f"MERGE (a)-[r:`{relation.relation_type}`]->(b) "
             "SET r += $properties"
         ),
@@ -1292,6 +1326,192 @@ def _write_export(path: Path, snapshot: GraphSnapshot) -> None:
     path.write_text(json.dumps(snapshot.to_dict(), indent=2) + "\n", encoding="utf-8")
 
 
+def _write_json(path: Path, payload: JsonValue) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def _build_diff_entries(snapshot_counts: dict[str, int], live_counts: dict[str, int]) -> list[dict[str, JsonValue]]:
+    entries: list[dict[str, JsonValue]] = []
+    for name in sorted(set(snapshot_counts) | set(live_counts)):
+        snapshot_value = snapshot_counts.get(name, 0)
+        live_value = live_counts.get(name, 0)
+        entries.append(
+            {
+                "name": name,
+                "snapshot": snapshot_value,
+                "live_managed": live_value,
+                "delta": live_value - snapshot_value,
+            }
+        )
+    return entries
+
+
+def _live_repo_label_rows(client: Neo4jHttpClient, managed_labels: list[str]) -> list[dict[str, JsonValue]]:
+    return client.query(
+        (
+            "MATCH (n) "
+            "UNWIND labels(n) AS label "
+            "WITH label, n "
+            "WHERE label IN $managed_labels "
+            "RETURN label, "
+            "count(n) AS total, "
+            "sum(CASE WHEN coalesce(n.managed_by, '') = $managed_by THEN 1 ELSE 0 END) AS managed, "
+            "sum(CASE WHEN coalesce(n.managed_by, '') = '' THEN 1 ELSE 0 END) AS unmanaged "
+            "ORDER BY label"
+        ),
+        {
+            "managed_labels": managed_labels,
+            "managed_by": DEFAULT_MANAGED_BY,
+        },
+    )
+
+
+def _live_managed_relation_rows(client: Neo4jHttpClient) -> list[dict[str, JsonValue]]:
+    return client.query(
+        (
+            "MATCH ()-[r]->() "
+            "WHERE coalesce(r.managed_by, '') = $managed_by "
+            "AND coalesce(r.ingest_wave, '') = $ingest_wave "
+            "RETURN type(r) AS relation_type, count(r) AS total "
+            "ORDER BY relation_type"
+        ),
+        {
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+        },
+    )
+
+
+def _live_orphan_rows(client: Neo4jHttpClient) -> list[dict[str, JsonValue]]:
+    return client.query(
+        (
+            "MATCH (n) "
+            "WHERE coalesce(n.managed_by, '') = $managed_by "
+            "AND coalesce(n.ingest_wave, '') = $ingest_wave "
+            "AND NOT (n)--() "
+            "UNWIND labels(n) AS label "
+            "RETURN label, count(n) AS count, collect(n.name)[0..10] AS samples "
+            "ORDER BY count DESC, label"
+        ),
+        {
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+        },
+    )
+
+
+def _live_unmanaged_repo_rows(client: Neo4jHttpClient, managed_labels: list[str]) -> list[dict[str, JsonValue]]:
+    return client.query(
+        (
+            "MATCH (n) "
+            "UNWIND labels(n) AS label "
+            "WITH label, n "
+            "WHERE label IN $managed_labels "
+            "AND coalesce(n.managed_by, '') = '' "
+            "RETURN label, count(n) AS count, collect(n.name)[0..10] AS samples "
+            "ORDER BY count DESC, label"
+        ),
+        {
+            "managed_labels": managed_labels,
+        },
+    )
+
+
+def _live_scalar(client: Neo4jHttpClient, statement: str, parameters: dict[str, JsonValue]) -> int:
+    rows = client.query(statement, parameters)
+    if not rows:
+        return 0
+    value = next(iter(rows[0].values()), 0)
+    return int(value) if isinstance(value, (int, float)) else 0
+
+
+def build_audit_report(
+    snapshot: GraphSnapshot,
+    root: Path,
+    http_uri: str | None,
+) -> dict[str, JsonValue]:
+    base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
+    client = Neo4jHttpClient(base_uri, username, password, database)
+    managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
+    snapshot_stats = snapshot.stats()
+    live_label_rows = _live_repo_label_rows(client, managed_labels)
+    live_relation_rows = _live_managed_relation_rows(client)
+    orphan_rows = _live_orphan_rows(client)
+    unmanaged_rows = _live_unmanaged_repo_rows(client, managed_labels)
+
+    live_managed_label_counts = {
+        str(row["label"]): int(row["managed"])
+        for row in live_label_rows
+        if isinstance(row.get("label"), str)
+    }
+    live_managed_relation_counts = {
+        str(row["relation_type"]): int(row["total"])
+        for row in live_relation_rows
+        if isinstance(row.get("relation_type"), str)
+    }
+    managed_node_total = _live_scalar(
+        client,
+        (
+            "MATCH (n) "
+            "WHERE coalesce(n.managed_by, '') = $managed_by "
+            "AND coalesce(n.ingest_wave, '') = $ingest_wave "
+            "RETURN count(n) AS value"
+        ),
+        {
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+        },
+    )
+    unmanaged_repo_node_total = _live_scalar(
+        client,
+        (
+            "MATCH (n) "
+            "WHERE any(label IN labels(n) WHERE label IN $managed_labels) "
+            "AND coalesce(n.managed_by, '') = '' "
+            "RETURN count(n) AS value"
+        ),
+        {
+            "managed_labels": managed_labels,
+        },
+    )
+    managed_relation_total = sum(live_managed_relation_counts.values())
+    orphan_total = sum(int(row["count"]) for row in orphan_rows if isinstance(row.get("count"), (int, float)))
+
+    return {
+        "generated_at": _sync_run_id(),
+        "managed_by": DEFAULT_MANAGED_BY,
+        "ingest_wave": DEFAULT_INGEST_WAVE,
+        "snapshot": snapshot_stats,
+        "managed_labels": managed_labels,
+        "live": {
+            "managed_node_total": managed_node_total,
+            "managed_relation_total": managed_relation_total,
+            "unmanaged_repo_node_total": unmanaged_repo_node_total,
+            "label_summary": live_label_rows,
+            "managed_relation_summary": live_relation_rows,
+            "orphan_summary": {
+                "total": orphan_total,
+                "by_label": orphan_rows,
+            },
+            "unmanaged_summary": {
+                "total": unmanaged_repo_node_total,
+                "by_label": unmanaged_rows,
+            },
+        },
+        "diff": {
+            "labels": _build_diff_entries(
+                {str(name): int(count) for name, count in snapshot_stats["labels"].items()},
+                live_managed_label_counts,
+            ),
+            "relation_types": _build_diff_entries(
+                {str(name): int(count) for name, count in snapshot_stats["relation_types"].items()},
+                live_managed_relation_counts,
+            ),
+        },
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
@@ -1315,6 +1535,10 @@ def main(argv: list[str] | None = None) -> int:
             prune_legacy_unmanaged=args.prune_legacy_unmanaged,
         )
         print("Neo4j sync completed.")
+    if args.report is not None:
+        report = build_audit_report(snapshot, root, args.http_uri)
+        _write_json(args.report, report)
+        print(f"Exported audit report to {args.report}")
     return 0
 
 

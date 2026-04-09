@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.datasource.adapter_helpers import (
@@ -46,6 +47,22 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 __all__ = ["create_crossref_adapter"]
+
+
+@dataclass(frozen=True)
+class _CrossRefAdapterComponents:
+    """Resolved adapter collaborators for CrossRef adapter construction."""
+
+    metrics: MetricsPort | None
+    error_handler: ErrorHandlerPort
+    adapter_metrics: AdapterMetricsRecorder
+    request_collector: APIRequestCollector
+    fallback_fetch_service: FallbackFetchOrchestratorService
+    query_builder: CrossRefQueryBuilder
+    response_mapper: CrossRefResponseMapper
+    batch_fetcher: CrossRefBatchFetcher
+    search_paginator: CrossRefSearchPaginator
+    title_fallback_handler: CrossRefTitleFallbackHandler
 
 
 def _resolve_mailto(
@@ -219,6 +236,61 @@ def _create_title_fallback_handler(
     return title_fallback_handler
 
 
+def _build_crossref_components(
+    *,
+    kwargs: dict[str, object],
+    http_client: UnifiedHTTPClient,
+    logger: LoggerPort,
+    settings: Settings | None,
+) -> _CrossRefAdapterComponents:
+    """Resolve the full collaborator bundle used by CrossRefAdapter."""
+    mailto = _resolve_mailto(kwargs, settings)
+    metrics = cast("MetricsPort | None", kwargs.get("metrics"))
+    helper_services = _create_helper_services(logger, metrics)
+    (
+        error_handler,
+        adapter_metrics,
+        request_collector,
+        fallback_fetch_service,
+    ) = _resolve_optional_components(kwargs, helper_services)
+    query_builder = _create_query_builder(kwargs, mailto)
+    headers_fn = query_builder.build_headers
+    response_mapper = _create_response_mapper(kwargs)
+    search_paginator = _create_search_paginator(
+        kwargs,
+        http_client,
+        logger,
+        adapter_metrics,
+        mailto,
+        headers_fn,
+        request_collector,
+    )
+    return _CrossRefAdapterComponents(
+        metrics=metrics,
+        error_handler=error_handler,
+        adapter_metrics=adapter_metrics,
+        request_collector=request_collector,
+        fallback_fetch_service=fallback_fetch_service,
+        query_builder=query_builder,
+        response_mapper=response_mapper,
+        batch_fetcher=_create_batch_fetcher(
+            kwargs,
+            http_client,
+            logger,
+            adapter_metrics,
+            mailto,
+            headers_fn,
+            request_collector,
+        ),
+        search_paginator=search_paginator,
+        title_fallback_handler=_create_title_fallback_handler(
+            kwargs,
+            logger,
+            search_paginator.search,
+        ),
+    )
+
+
 def create_crossref_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
@@ -243,76 +315,36 @@ def create_crossref_adapter(
     Raises:
         ValueError: If mailto cannot be resolved or http_client/logger is None.
     """
-    # Resolve and validate dependencies
-    mailto = _resolve_mailto(kwargs, settings)
     http_client_resolved, logger_resolved = _require_dependencies(http_client, logger)
-
-    # Create helper services
-    metrics = cast("MetricsPort | None", kwargs.get("metrics"))
-    helper_services = _create_helper_services(logger_resolved, metrics)
-
-    # Resolve optional components
-    (
-        error_handler,
-        adapter_metrics,
-        request_collector,
-        fallback_fetch_service,
-    ) = _resolve_optional_components(kwargs, helper_services)
-
-    # Create query builder and get headers function
-    query_builder = _create_query_builder(kwargs, mailto)
-    headers_fn = query_builder.build_headers
-
-    # Create response mapper
-    response_mapper = _create_response_mapper(kwargs)
-
-    # Create batch fetcher
-    batch_fetcher = _create_batch_fetcher(
-        kwargs,
-        http_client_resolved,
-        logger_resolved,
-        adapter_metrics,
-        mailto,
-        headers_fn,
-        request_collector,
-    )
-
-    # Create search paginator
-    search_paginator = _create_search_paginator(
-        kwargs,
-        http_client_resolved,
-        logger_resolved,
-        adapter_metrics,
-        mailto,
-        headers_fn,
-        request_collector,
-    )
-
-    # Create title fallback handler
-    title_fallback_handler = _create_title_fallback_handler(
-        kwargs,
-        logger_resolved,
-        search_paginator.search,
+    components = _build_crossref_components(
+        kwargs=kwargs,
+        http_client=http_client_resolved,
+        logger=logger_resolved,
+        settings=settings,
     )
     batch_size = cast(int, kwargs.get("batch_size", 50))
-    dependency_context = cast("HttpAdapterDependencyContext | None", kwargs.get("dependency_context"))
+    dependency_context = cast(
+        "HttpAdapterDependencyContext | None",
+        kwargs.get("dependency_context"),
+    )
     fetch_flow = cast("CrossRefFetchFlow | None", kwargs.get("fetch_flow"))
+    mailto = _resolve_mailto(kwargs, settings)
 
     return CrossRefAdapter(
         http_client=http_client_resolved,
         logger=logger_resolved,
         mailto=mailto,
         batch_size=batch_size,
-        metrics=metrics,
+        metrics=components.metrics,
         dependency_context=dependency_context,
-        error_handler=error_handler,
-        adapter_metrics=adapter_metrics,
-        request_collector=request_collector,
-        fallback_fetch_service=fallback_fetch_service,
-        query_builder=query_builder,
-        response_mapper=response_mapper,
-        batch_fetcher=batch_fetcher,
-        search_paginator=search_paginator,
-        title_fallback_handler=title_fallback_handler,
+        error_handler=components.error_handler,
+        adapter_metrics=components.adapter_metrics,
+        request_collector=components.request_collector,
+        fallback_fetch_service=components.fallback_fetch_service,
+        query_builder=components.query_builder,
+        response_mapper=components.response_mapper,
+        batch_fetcher=components.batch_fetcher,
+        search_paginator=components.search_paginator,
+        title_fallback_handler=components.title_fallback_handler,
         fetch_flow=fetch_flow,
     )

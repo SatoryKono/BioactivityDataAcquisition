@@ -33,6 +33,7 @@ from .adapter import StorageAdapter
 
 if TYPE_CHECKING:
     from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
     from bioetl.domain.ports import (
         LoggerPort,
         MetricsPort,
@@ -41,6 +42,10 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.infrastructure.storage.delta.resilience import (
+        AdaptiveRetryPolicy,
+        SilverMergeResiliencePolicy,
+    )
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -143,19 +148,27 @@ def create_storage_adapter(
     """Create StorageAdapter with Bronze/Silver/Gold writers."""
     metadata_atomic_retry_policy = create_silver_atomic_retry_policy(settings)
     merge_resilience_policy = create_silver_merge_resilience_policy(settings)
-    silver_writer_flat = resolve_delta_writer_flat_structure(
-        ctx.silver_path,
-        provider=config.provider,
-        entity_type=config.entity_type,
-        flat_structure=ctx.silver_flat,
+    silver_writer = _create_silver_layer_writer(
+        ctx=ctx,
+        silver_writer_cls=silver_writer_cls,
+        config=config,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracing,
+        metadata_coordinator=metadata_coordinator,
+        silver_validator=silver_validator,
+        metadata_atomic_retry_policy=metadata_atomic_retry_policy,
+        merge_resilience_policy=merge_resilience_policy,
     )
-    gold_writer_flat = resolve_delta_writer_flat_structure(
-        ctx.gold_path,
-        provider=config.provider,
-        entity_type=config.entity_type,
-        flat_structure=ctx.gold_flat,
+    gold_writer = _create_gold_layer_writer(
+        ctx=ctx,
+        gold_writer_cls=gold_writer_cls,
+        config=config,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracing,
+        metadata_coordinator=metadata_coordinator,
     )
-
     bronze_writer = create_bronze_writer(
         writer_cls=bronze_writer_cls,
         base_path=ctx.bronze_path,
@@ -166,7 +179,34 @@ def create_storage_adapter(
         metadata_coordinator=metadata_coordinator,
         flat_structure=ctx.bronze_flat,
     )
-    silver_writer = create_silver_writer(
+    return StorageAdapter(
+        bronze_writer=bronze_writer,
+        silver_writer=silver_writer,
+        gold_writer=gold_writer,
+    )
+
+
+def _create_silver_layer_writer(
+    *,
+    ctx: StorageCreationContext,
+    silver_writer_cls: type[SilverWriter],
+    config: PipelineYamlConfig,
+    logger: LoggerPort,
+    metrics: MetricsPort,
+    tracing: TracingPort | None,
+    metadata_coordinator: MetadataCoordinator | None,
+    silver_validator: SilverValidatorPort | None,
+    metadata_atomic_retry_policy: AdaptiveRetryPolicy,
+    merge_resilience_policy: SilverMergeResiliencePolicy,
+) -> SilverWriter:
+    """Create the silver writer with normalized Delta path semantics."""
+    silver_writer_flat = resolve_delta_writer_flat_structure(
+        ctx.silver_path,
+        provider=config.provider,
+        entity_type=config.entity_type,
+        flat_structure=ctx.silver_flat,
+    )
+    return create_silver_writer(
         writer_cls=silver_writer_cls,
         base_path=resolve_delta_writer_base_path(
             ctx.silver_path,
@@ -186,12 +226,28 @@ def create_storage_adapter(
         metrics=metrics,
         metadata_atomic_retry_policy=metadata_atomic_retry_policy,
         merge_resilience_policy=merge_resilience_policy,
-        contract_rollout_policy=load_pipeline_contract_policy(
-            config.provider,
-            config.entity_type,
-        ).to_contract_rollout_policy(),
+        contract_rollout_policy=_load_contract_rollout_policy(config),
     )
-    gold_writer = create_gold_writer(
+
+
+def _create_gold_layer_writer(
+    *,
+    ctx: StorageCreationContext,
+    gold_writer_cls: type[GoldWriter],
+    config: PipelineYamlConfig,
+    logger: LoggerPort,
+    metrics: MetricsPort,
+    tracing: TracingPort | None,
+    metadata_coordinator: MetadataCoordinator | None,
+) -> GoldWriter:
+    """Create the gold writer with normalized Delta path semantics."""
+    gold_writer_flat = resolve_delta_writer_flat_structure(
+        ctx.gold_path,
+        provider=config.provider,
+        entity_type=config.entity_type,
+        flat_structure=ctx.gold_flat,
+    )
+    return create_gold_writer(
         writer_cls=gold_writer_cls,
         base_path=resolve_delta_writer_base_path(
             ctx.gold_path,
@@ -208,13 +264,13 @@ def create_storage_adapter(
         transform_steps=tuple(config.transform.steps),
         flat_structure=gold_writer_flat,
         metrics=metrics,
-        contract_rollout_policy=load_pipeline_contract_policy(
-            config.provider,
-            config.entity_type,
-        ).to_contract_rollout_policy(),
+        contract_rollout_policy=_load_contract_rollout_policy(config),
     )
-    return StorageAdapter(
-        bronze_writer=bronze_writer,
-        silver_writer=silver_writer,
-        gold_writer=gold_writer,
-    )
+
+
+def _load_contract_rollout_policy(config: PipelineYamlConfig) -> ContractRolloutPolicy:
+    """Resolve the contract rollout policy for storage layer writers."""
+    return load_pipeline_contract_policy(
+        config.provider,
+        config.entity_type,
+    ).to_contract_rollout_policy()

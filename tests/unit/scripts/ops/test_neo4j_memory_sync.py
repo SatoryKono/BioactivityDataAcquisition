@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from scripts.ops.neo4j_memory_sync import (
+    _build_diff_entries,
     DEFAULT_INGEST_WAVE,
     DEFAULT_LEGACY_PRUNE_LABELS,
     DEFAULT_MANAGED_BY,
@@ -54,6 +55,8 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("package_family", "composition/__pycache__") not in node_keys
     assert ("package_family", "infrastructure/__pycache__") not in node_keys
     assert ("package_family", "interfaces/__pycache__") not in node_keys
+    assert ("package_family", "composition/control_plane_api.py") not in node_keys
+    assert ("package_family", "interfaces/test_cli_checkpoint_list.py") not in node_keys
 
 
 def test_snapshot_contains_expected_relations() -> None:
@@ -125,6 +128,20 @@ def test_snapshot_contains_expected_relations() -> None:
         "TESTS_LAYER",
         "layer_family",
         "scripts",
+    ) not in relation_keys
+    assert (
+        "layer_family",
+        "composition",
+        "CONTAINS",
+        "module_surface",
+        "src/bioetl/composition/control_plane_api.py",
+    ) in relation_keys
+    assert (
+        "test_artifact",
+        "tests/integration/interfaces/test_cli_checkpoint_list.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "interfaces/test_cli_checkpoint_list.py",
     ) not in relation_keys
 
 
@@ -201,3 +218,31 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
     }
 
     assert set(DEFAULT_LEGACY_PRUNE_LABELS) == expected_labels
+
+
+def test_build_diff_entries_tracks_missing_and_extra_keys() -> None:
+    diff_entries = _build_diff_entries(
+        {"policy_surface": 16, "package_family": 52},
+        {"policy_surface": 16, "package_family": 50, "execution_path": 9},
+    )
+
+    assert diff_entries == [
+        {
+            "name": "execution_path",
+            "snapshot": 0,
+            "live_managed": 9,
+            "delta": 9,
+        },
+        {
+            "name": "package_family",
+            "snapshot": 52,
+            "live_managed": 50,
+            "delta": -2,
+        },
+        {
+            "name": "policy_surface",
+            "snapshot": 16,
+            "live_managed": 16,
+            "delta": 0,
+        },
+    ]

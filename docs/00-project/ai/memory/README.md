@@ -31,6 +31,9 @@ profiles в BioETL.
   Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
   он пересобирает managed relations и удаляет только stale repo-derived nodes
   текущей ingest wave, а не весь graph.
+  Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:
+  он пишет JSON-отчет с snapshot stats, live managed/unmanaged summary,
+  orphan summary и diff между snapshot и текущим managed graph.
   Для полного пересоздания текущей managed wave используй
   `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:
   этот режим сначала удаляет весь repo-managed subgraph текущей волны, а потом

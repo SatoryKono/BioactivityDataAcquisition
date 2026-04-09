@@ -27,11 +27,12 @@ from bioetl.domain.ports.noop import (
 )
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
-from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config import Settings, get_settings
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -39,6 +40,63 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 __all__ = [
     "bootstrap_storage_adapter",
 ]
+
+
+def _create_noop_runtime() -> tuple[NoOpLogger, NoOpMetrics, NoOpTracing]:
+    """Create the no-op observability collaborators used by bootstrap wiring."""
+    return NoOpLogger(), NoOpMetrics(), NoOpTracing()
+
+
+def _create_composite_metadata_services(
+    *,
+    settings: Settings,
+    output_dir: Path,
+    logger: NoOpLogger,
+    metrics: NoOpMetrics,
+) -> tuple[
+    MetadataWriter,
+    FileLineageStore,
+    MetadataCoordinator,
+    SilverMergeResiliencePolicy,
+]:
+    """Create shared metadata services and resilience policy for storage bootstrap."""
+    atomic_retry_policy = create_silver_atomic_retry_policy(settings)
+    merge_resilience_policy = create_silver_merge_resilience_policy(settings)
+    metadata_writer = MetadataWriter(
+        logger=logger,
+        atomic_replace_retry_policy=atomic_retry_policy,
+        metrics=metrics,
+    )
+    lineage_store = FileLineageStore(base_path=output_dir / "control" / "lineage")
+    run_context = RunContext(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=datetime.now(UTC),
+        pipeline_name="composite",
+        provider="composite",
+        entity="merged",
+    )
+    return (
+        metadata_writer,
+        lineage_store,
+        MetadataCoordinator(run_context=run_context),
+        merge_resilience_policy,
+    )
+
+
+def _create_csv_exporters(
+    *,
+    output_dir: Path,
+    logger: NoOpLogger,
+    enable_csv_export: bool,
+) -> tuple[CsvExporter | None, CsvExporter | None]:
+    """Create optional CSV exporters for silver and gold layers."""
+    if not enable_csv_export:
+        return None, None
+    return (
+        CsvExporter(base_path=str(output_dir / "silver"), logger=logger),
+        CsvExporter(base_path=str(output_dir / "gold"), logger=logger),
+    )
 
 
 def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdapter:
@@ -65,44 +123,26 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
         StorageAdapter configured for the current environment.
     """
     settings = get_settings()
-    noop_logger = NoOpLogger()
-    noop_metrics = NoOpMetrics()
-    noop_tracing = NoOpTracing()
+    noop_logger, noop_metrics, noop_tracing = _create_noop_runtime()
 
     # ADR-025: Use data/output/ hierarchy for consistency with pipeline configs
     output_dir = Path(settings.data_dir) / "output"
-    atomic_retry_policy = create_silver_atomic_retry_policy(settings)
-    merge_resilience_policy = create_silver_merge_resilience_policy(settings)
-
-    # Create metadata services for composite pipelines
-    metadata_writer = MetadataWriter(
+    (
+        metadata_writer,
+        lineage_store,
+        metadata_coordinator,
+        merge_resilience_policy,
+    ) = _create_composite_metadata_services(
+        settings=settings,
+        output_dir=output_dir,
         logger=noop_logger,
-        atomic_replace_retry_policy=atomic_retry_policy,
         metrics=noop_metrics,
     )
-    lineage_store = FileLineageStore(base_path=output_dir / "control" / "lineage")
-    run_context = RunContext(
-        run_id=RunID(uuid4()),
-        run_type=RunType.INCREMENTAL,
-        started_at=datetime.now(UTC),
-        pipeline_name="composite",
-        provider="composite",
-        entity="merged",
+    silver_csv_exporter, gold_csv_exporter = _create_csv_exporters(
+        output_dir=output_dir,
+        logger=noop_logger,
+        enable_csv_export=enable_csv_export,
     )
-    metadata_coordinator = MetadataCoordinator(run_context=run_context)
-
-    # Create CSV exporters if enabled (for composite pipelines)
-    silver_csv_exporter = None
-    gold_csv_exporter = None
-    if enable_csv_export:
-        silver_csv_exporter = CsvExporter(
-            base_path=str(output_dir / "silver"),
-            logger=noop_logger,
-        )
-        gold_csv_exporter = CsvExporter(
-            base_path=str(output_dir / "gold"),
-            logger=noop_logger,
-        )
 
     return StorageAdapter(
         bronze_writer=BronzeWriter(
