@@ -101,6 +101,9 @@ def test_normalize_run_ledger_payload_is_idempotent() -> None:
 def test_normalize_runtime_anchor_payload_coerces_canonical_contract_fields() -> None:
     normalized = normalize_runtime_anchor_payload(
         {
+            "config_hash": " SHA256:FACE ",
+            "dq_contract_compatibility_hash": " DEADBEEF ",
+            "contract_schema_hash": " ABC123 ",
             "effective_config_hash": " SHA256:ABCDEF ",
             "contract_ref": " ChemBL.Activity ",
             "contract_version": " v2 ",
@@ -110,6 +113,9 @@ def test_normalize_runtime_anchor_payload_coerces_canonical_contract_fields() ->
     )
 
     assert normalized == {
+        "config_hash": "sha256:face",
+        "dq_contract_compatibility_hash": "deadbeef",
+        "contract_schema_hash": "abc123",
         "effective_config_hash": "sha256:abcdef",
         "contract_ref": "chembl.activity",
         "contract_version": "2.0.0",
