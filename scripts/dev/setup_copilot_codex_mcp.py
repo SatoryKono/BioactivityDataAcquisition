@@ -18,8 +18,8 @@ FETCH_MCP_VERSION = "2025.4.7"
 PDF_MCP_VERSION = "1.3.1"
 
 GITHUB_TOKEN_HINT = (
-    "Set GITHUB_PERSONAL_ACCESS_TOKEN in .env or in your shell before using "
-    "GitHub MCP tools. Shell values override .env."
+    "GitHub MCP uses GITHUB_PERSONAL_ACCESS_TOKEN from repo .env/.env.local "
+    "automatically when present. Shell values still override repo env."
 )
 
 
@@ -155,26 +155,35 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _write_vscode_mcp(root: Path) -> None:
+def _write_json_atomic(path: Path, payload: dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # Atomic write keeps MCP config deterministic and avoids partial files.
+    tmp_path = path.with_suffix(f"{path.suffix}.tmp")
+    tmp_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp_path, path)
+
+
+def _write_project_configs(root: Path) -> None:
+    servers = _core_servers(root)
+
     vscode_mcp_path = root / ".vscode" / "mcp.json"
     print(f"[1/3] Writing VS Code MCP config: {vscode_mcp_path}")
-    vscode_mcp_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {"servers": _core_servers(root)}
-    # Atomic write keeps MCP config deterministic and avoids partial files.
-    tmp_path = vscode_mcp_path.with_suffix(".json.tmp")
-    tmp_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    os.replace(tmp_path, vscode_mcp_path)
+    _write_json_atomic(vscode_mcp_path, {"servers": servers})
+
+    project_mcp_path = root / ".mcp.json"
+    print(f"[2/3] Writing project MCP config: {project_mcp_path}")
+    _write_json_atomic(project_mcp_path, {"mcpServers": servers})
 
 
 def _codex_registration(root: Path) -> int:
     codex_bin = shutil.which("codex")
     if codex_bin is None:
-        print("[2/3] Codex CLI not found. Skipping Codex MCP registration.")
+        print("[3/3] Codex CLI not found. Skipping Codex MCP registration.")
         print("[3/3] Done.")
         print(GITHUB_TOKEN_HINT)
         return 0
 
-    print("[2/3] Refreshing Codex MCP registrations")
+    print("[3/3] Refreshing Codex MCP registrations")
     for server_name, server_config in _core_servers(root).items():
         subprocess.run(
             [codex_bin, "mcp", "remove", server_name],
@@ -215,10 +224,10 @@ def _codex_registration(root: Path) -> int:
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     root = args.root.resolve()
-    _write_vscode_mcp(root)
+    _write_project_configs(root)
 
     if args.skip_codex:
-        print("[2/3] Skipping Codex MCP registration (requested).")
+        print("[3/3] Skipping Codex MCP registration (requested).")
         print("[3/3] Done.")
         print(GITHUB_TOKEN_HINT)
         return 0

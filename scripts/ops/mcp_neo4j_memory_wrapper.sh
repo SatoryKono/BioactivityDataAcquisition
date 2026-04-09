@@ -39,7 +39,7 @@ export NEO4J_URI
 export NEO4J_USERNAME
 export NEO4J_PASSWORD
 export NEO4J_DATABASE
-export NPM_CONFIG_CACHE="/tmp/npm-cache"
+export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-/tmp/npm-cache}"
 
 # Run the Neo4j Memory MCP server
 exec npx -y @knowall-ai/mcp-neo4j-agent-memory@0.2.5 "$@"

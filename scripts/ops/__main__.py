@@ -8,6 +8,7 @@ Usage:
 Commands:
     salt-rotate        Rotate PII hashing salt
     fix-grafana        Fix Grafana dashboard configurations
+    sync-neo4j-memory  Build and optionally sync the deterministic Neo4j repo graph
     wsl-proxy          Start WSL proxy helper
     update-issue       Update a GitHub issue title/body/comment/state (shell)
     triage-issues      Triage cleanup/docs issue wave (shell)
@@ -32,6 +33,7 @@ from pathlib import Path
 COMMANDS: dict[str, str] = {
     "salt-rotate": "salt_rotate.py",
     "fix-grafana": "fix_grafana_dashboards.py",
+    "sync-neo4j-memory": "neo4j_memory_sync.py",
     "wsl-proxy": "wsl_proxy.py",
 }
 
