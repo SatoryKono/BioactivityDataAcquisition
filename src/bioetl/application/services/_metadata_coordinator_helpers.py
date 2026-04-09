@@ -55,7 +55,7 @@ def build_bronze_source_metadata(input_data: BronzeMetadataInput) -> SourceMetad
     )
     if input_data.source_metadata is not None:
         source = input_data.source_metadata
-        if input_data.query_string and source.query_string is None or snapshots:
+        if (input_data.query_string and source.query_string is None) or snapshots:
             update_data: dict[str, object] = {}
             if input_data.query_string and source.query_string is None:
                 update_data["query_string"] = input_data.query_string
