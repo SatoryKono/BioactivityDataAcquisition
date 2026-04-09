@@ -535,6 +535,57 @@ class TestInterfacesBootstrapIsolation:
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
+    def test_interfaces_composition_imports_stay_within_sanctioned_modules(
+        self, src_dir: Path
+    ) -> None:
+        """Interfaces may import only the approved composition public API modules."""
+        interfaces_path = src_dir / "bioetl" / "interfaces"
+        assert interfaces_path.exists(), "Interfaces layer not found"
+
+        allowed_modules = {
+            "bioetl.composition.composite_api",
+            "bioetl.composition.control_plane_api",
+            "bioetl.composition.execution_api",
+            "bioetl.composition.health_api",
+            "bioetl.composition.maintenance_api",
+            "bioetl.composition.observability_api",
+            "bioetl.composition.registry_api",
+            "bioetl.composition.resources_api",
+        }
+        violations: list[str] = []
+        for py_file in interfaces_path.rglob("*.py"):
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    module = node.module
+                    if module is not None and module.startswith("bioetl.composition."):
+                        if module not in allowed_modules:
+                            violations.append(
+                                f"{py_file.relative_to(src_dir)}:{node.lineno} -> {module}"
+                            )
+                elif isinstance(node, ast.Import):
+                    for alias in node.names:
+                        module = alias.name
+                        if module.startswith("bioetl.composition."):
+                            if module not in allowed_modules:
+                                violations.append(
+                                    f"{py_file.relative_to(src_dir)}:{node.lineno} -> {module}"
+                                )
+
+        assert not violations, (
+            "Interfaces layer imported non-sanctioned composition modules.\n"
+            "Allowed modules:\n"
+            "  - bioetl.composition.composite_api\n"
+            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.execution_api\n"
+            "  - bioetl.composition.health_api\n"
+            "  - bioetl.composition.maintenance_api\n"
+            "  - bioetl.composition.observability_api\n"
+            "  - bioetl.composition.registry_api\n"
+            "  - bioetl.composition.resources_api\n\n"
+            "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
+        )
+
 
 class TestLegacyNormalizersGuardrail:
     """RF-043: legacy_normalizers module must not be re-introduced.

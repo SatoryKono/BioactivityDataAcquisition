@@ -533,6 +533,10 @@ def _module_dotted_name(relative_path: str) -> str:
     return without_suffix.replace("/", ".")
 
 
+def _is_ignored_repo_path(path: Path) -> bool:
+    return "__pycache__" in path.parts
+
+
 def _normalize_env_value(raw: str) -> str:
     return raw.strip().strip('"').strip("'")
 
@@ -744,7 +748,9 @@ def _add_layer_topology(snapshot: GraphSnapshot, root: Path, project: NodeKey, t
             confidence="high",
         )
         snapshot.add_relation(project, "CONTAINS", layer, provenance="source_tree")
-        for family_path in sorted(path for path in layer_path.iterdir() if path.is_dir()):
+        for family_path in sorted(
+            path for path in layer_path.iterdir() if path.is_dir() and not _is_ignored_repo_path(path)
+        ):
             family_name = f"{layer_name}/{family_path.name}"
             family = snapshot.add_node(
                 "package_family",
@@ -760,6 +766,8 @@ def _add_layer_topology(snapshot: GraphSnapshot, root: Path, project: NodeKey, t
             snapshot.add_relation(layer, "CONTAINS", family, provenance="source_tree")
         for module_path in sorted(layer_path.rglob("*.py")):
             if module_path.name in {"__init__.py", "__main__.py"}:
+                continue
+            if _is_ignored_repo_path(module_path):
                 continue
             relative_path = _rel_path(root, module_path)
             parts = Path(relative_path).parts

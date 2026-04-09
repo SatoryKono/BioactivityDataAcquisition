@@ -30,7 +30,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.bootstrap.cli.health import HealthServerDependencies
+    from bioetl.composition.health_api import HealthServerDependencies
 
 
 def get_health_service() -> HealthService:

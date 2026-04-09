@@ -119,7 +119,11 @@ def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
 
 def test_health_api_reexports_canonical_health_services() -> None:
     """Health API should expose the canonical health and quarantine seams."""
+    from bioetl.composition.bootstrap.cli.health import (
+        HealthServerDependencies as CanonicalHealthServerDependencies,
+    )
     from bioetl.composition.health_api import (
+        HealthServerDependencies,
         get_health_service as canonical_get_health_service,
         get_quarantine_service as canonical_get_quarantine_service,
     )
@@ -128,6 +132,7 @@ def test_health_api_reexports_canonical_health_services() -> None:
         get_quarantine_service,
     )
 
+    assert HealthServerDependencies is CanonicalHealthServerDependencies
     assert canonical_get_health_service is get_health_service
     assert canonical_get_quarantine_service is get_quarantine_service
 
