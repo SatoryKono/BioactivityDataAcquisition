@@ -23,6 +23,8 @@ directly from their defining submodules:
   batch-runtime seam for internal DI assembly
 - ``bioetl.application.core.transformer_wiring_api``        — composition-facing
   transformer seam for internal DI assembly
+- ``bioetl.application.core.pipeline_registry_wiring_api``  — composition-facing
+  pipeline-registry seam for internal DI assembly
 
 Configuration consolidation (all in bioetl.domain.config):
 - PipelineConfig: Static pipeline configuration

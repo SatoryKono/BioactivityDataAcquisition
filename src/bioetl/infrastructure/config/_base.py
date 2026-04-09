@@ -103,6 +103,12 @@ class ObservabilitySettings(BaseSettings):
     tracing_enabled: bool = Field(default=False)
     """Enable OpenTelemetry tracing."""
 
+    audit_enabled: bool = Field(default=False)
+    """Enable file-backed audit logging for Medallion write operations."""
+
+    audit_base_path: Path | None = Field(default=None)
+    """Optional override path for audit JSONL files."""
+
     # Data Quality Monitor settings
     dq_monitor_enabled: bool = Field(default=False)
     """Enable data quality monitoring. Disabled by default."""
