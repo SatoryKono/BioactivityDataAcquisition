@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-09T17:19:47.430898+00:00",
+  "generated_at": "2026-04-09T18:30:53.473330+00:00",
   "summary": {
-    "total_scripts": 286,
+    "total_scripts": 287,
     "status_counts": {
-      "active": 235,
+      "active": 236,
       "legacy": 29,
       "orphan": 21,
       "unknown": 1
@@ -14,7 +14,7 @@
       "build": 31,
       "ci": 48,
       "docs": 115,
-      "scripts": 244,
+      "scripts": 245,
       "skills": 9,
       "tests": 90
     }
@@ -35,7 +35,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 443,
+          "line": 444,
           "source_group": "scripts",
           "text": "\"scripts/ai/code-reviewer.sh\","
         }
@@ -56,7 +56,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 444,
+          "line": 445,
           "source_group": "scripts",
           "text": "\"scripts/ai/data-engineer.sh\","
         }
@@ -77,7 +77,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 445,
+          "line": 446,
           "source_group": "scripts",
           "text": "\"scripts/ai/literature-researcher.sh\","
         }
@@ -98,7 +98,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 448,
+          "line": 449,
           "source_group": "scripts",
           "text": "\"scripts/archive/migrations/migrate_openalex_citation_count.py\","
         }
@@ -119,7 +119,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 449,
+          "line": 450,
           "source_group": "scripts",
           "text": "\"scripts/archive/migrations/migrate_pmid_to_string.py\","
         }
@@ -146,7 +146,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 450,
+          "line": 451,
           "source_group": "scripts",
           "text": "\"scripts/archive/migrations/rename_structure_fields.py\","
         }
@@ -179,13 +179,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 62,
+          "line": 80,
           "source_group": "docs",
           "text": "`python -m scripts.ci neo4j-memory`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 67,
+          "line": 85,
           "source_group": "docs",
           "text": "`python -m scripts.ci neo4j-memory-live`."
         },
@@ -2240,7 +2240,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 454,
+          "line": 455,
           "source_group": "scripts",
           "text": "\"scripts/diagnostics/_tmp_inspect_vcr.py\","
         }
@@ -4070,7 +4070,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"check-drift\": \"check_doc_drift.py\","
         }
@@ -4160,7 +4160,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"check-docstrings\": \"check_docstring_coverage.py\","
         },
@@ -4181,7 +4181,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 113,
+          "line": 115,
           "source_group": "scripts",
           "text": "| `scripts/docs/chembl_matrix_structural_contract.py` | Shared runtime export helper used by the ChEMBL matrix structural contract/sync workflow |"
         }
@@ -4196,13 +4196,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "| `enrich-matrix-normalization-details` | `scripts/docs/enrich_chembl_matrix_normalization_details.py` | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook  |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 43,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"enrich-matrix-normalization-details\": \"enrich_chembl_matrix_normalization_details.py\","
         }
@@ -4223,7 +4223,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"export-matrix-structural-contract\": \"export_chembl_matrix_structural_contract.py\","
         }
@@ -4238,13 +4238,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "| `filter-matrix-rows`                  | `scripts/docs/filter_chembl_matrix_rows.py`                  | Remove rows from the canonical ChEMBL matrix workbook by column value                 |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"filter-matrix-rows\": \"filter_chembl_matrix_rows.py\","
         }
@@ -4259,13 +4259,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "| `fix-links-auto`                      | `scripts/docs/fix_doc_links_auto.py`                         | Auto-fix broken documentation links                                                   |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 47,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"fix-links-auto\": \"fix_doc_links_auto.py\","
         }
@@ -4280,13 +4280,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "| `fix-links-explicit`                  | `scripts/docs/fix_doc_links_explicit.py`                     | Fix documentation links with explicit rules                                           |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"fix-links-explicit\": \"fix_doc_links_explicit.py\","
         }
@@ -4301,13 +4301,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "| `fix-link-warnings`                   | `scripts/docs/fix_link_warnings.py`                          | Fix link warnings in specified files                                                  |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"fix-link-warnings\": \"fix_link_warnings.py\","
         }
@@ -4328,7 +4328,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"generate-field-matrix\": \"generate_chembl_activity_field_matrix.py\","
         }
@@ -4343,15 +4343,36 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 23,
+          "line": 24,
           "source_group": "scripts",
           "text": "| `build-matrix-dicts`                  | `scripts/docs/generate_chembl_matrix_dictionaries.py`        | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook     |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"build-matrix-dicts\": \"generate_chembl_matrix_dictionaries.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/docs/generate_pipeline_normalization_field_matrix.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "| `generate-pipeline-normalization-matrix` | `scripts/docs/generate_pipeline_normalization_field_matrix.py` | Generate deterministic normalization field-matrix artifacts for all entity and composite p"
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 43,
+          "source_group": "scripts",
+          "text": "\"generate-pipeline-normalization-matrix\": \"generate_pipeline_normalization_field_matrix.py\","
         }
       ]
     },
@@ -4364,13 +4385,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "| `normalize-matrix-values`             | `scripts/docs/normalize_chembl_matrix_workbook.py`           | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"normalize-matrix-values\": \"normalize_chembl_matrix_workbook.py\","
         }
@@ -4457,13 +4478,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 31,
+          "line": 32,
           "source_group": "scripts",
           "text": "| `audit-sentence`                      | `scripts/docs/sentence_doc_audit.py`                         | Sentence-level documentation audit                                                    |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"audit-sentence\": \"sentence_doc_audit.py\","
         }
@@ -4478,13 +4499,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "| `sync-matrix-structural-policy`       | `scripts/docs/sync_chembl_matrix_structural_policy.py`       | Reconcile workbook policy columns with the current structural Silver policy semantics |"
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 46,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"sync-matrix-structural-policy\": \"sync_chembl_matrix_structural_policy.py\","
         }
@@ -4499,7 +4520,7 @@
       "references": [
         {
           "path": "scripts/docs/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"sync-repo-identity\": \"sync_repo_identity.py\","
         }
@@ -4520,13 +4541,13 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"verify\": \"verify_docs.py\","
         },
         {
           "path": "scripts/ops/neo4j_memory_sync.py",
-          "line": 344,
+          "line": 409,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
         }
@@ -4571,7 +4592,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 426,
+          "line": 427,
           "source_group": "scripts",
           "text": "\"scripts/generate_architecture_dependency_map.py\","
         },
@@ -4669,25 +4690,25 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 46,
+          "line": 64,
           "source_group": "docs",
           "text": "Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 49,
+          "line": 67,
           "source_group": "docs",
           "text": "Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 53,
+          "line": 71,
           "source_group": "docs",
           "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 58,
+          "line": 76,
           "source_group": "docs",
           "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:"
         },
@@ -4705,7 +4726,7 @@
         },
         {
           "path": "docs/05-operations/deployment/neo4j-memory-setup.md",
-          "line": 65,
+          "line": 79,
           "source_group": "docs",
           "text": "python -m scripts.ops sync-neo4j-memory --apply --prune-stale"
         }
@@ -4912,7 +4933,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 431,
+          "line": 432,
           "source_group": "scripts",
           "text": "\"scripts/ops/close_duplicate_prs_wave2.sh\","
         }
@@ -4927,7 +4948,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 432,
+          "line": 433,
           "source_group": "scripts",
           "text": "\"scripts/ops/close_duplicate_prs_wave3.sh\","
         }
@@ -4948,7 +4969,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 439,
+          "line": 440,
           "source_group": "scripts",
           "text": "\"scripts/ops/close_great_expectations_spike_issue.sh\","
         }
@@ -4963,7 +4984,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 436,
+          "line": 437,
           "source_group": "scripts",
           "text": "\"scripts/ops/close_issue_2597.sh\","
         }
@@ -4984,7 +5005,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 440,
+          "line": 441,
           "source_group": "scripts",
           "text": "\"scripts/ops/close_pandera_schema_drift_issue.sh\","
         }
@@ -4999,7 +5020,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 430,
+          "line": 431,
           "source_group": "scripts",
           "text": "\"scripts/ops/close_superseded_prs.sh\","
         }
@@ -6149,7 +6170,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 435,
+          "line": 436,
           "source_group": "scripts",
           "text": "\"scripts/ops/post_issue_2597_progress.sh\","
         }
@@ -6164,7 +6185,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 437,
+          "line": 438,
           "source_group": "scripts",
           "text": "\"scripts/ops/post_issue_rescope_comments.sh\","
         }
@@ -6727,7 +6748,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 438,
+          "line": 439,
           "source_group": "scripts",
           "text": "\"scripts/ops/update_issue_rescope_bodies.sh\","
         }
@@ -7270,7 +7291,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 44,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -7303,6 +7324,12 @@
           "text": "$(PY_RUN) scripts/qa/generate_architecture_dependency_map.py --check"
         },
         {
+          "path": "docs/00-project/RULES.md",
+          "line": 1425,
+          "source_group": "docs",
+          "text": "- `python scripts/qa/generate_architecture_dependency_map.py --update`"
+        },
+        {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
           "line": 67,
           "source_group": "docs",
@@ -7313,12 +7340,6 @@
           "line": 68,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update"
-        },
-        {
-          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 82,
-          "source_group": "docs",
-          "text": "- dependency map markdown/JSON: generated only by `scripts/qa/generate_architecture_dependency_map.py`"
         }
       ]
     },
@@ -7427,7 +7448,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 463,
+          "line": 464,
           "source_group": "scripts",
           "text": "\"scripts/qa/generate_reports.py\","
         }
@@ -8285,7 +8306,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 427,
+          "line": 428,
           "source_group": "scripts",
           "text": "\"scripts/rerender_grafana_screenshots.py\","
         }
@@ -8383,7 +8404,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 425,
+          "line": 426,
           "source_group": "scripts",
           "text": "\"scripts/run_pytest.ps1\","
         }
@@ -8416,7 +8437,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 424,
+          "line": 425,
           "source_group": "scripts",
           "text": "\"scripts/run_pytest.sh\","
         }
@@ -9321,7 +9342,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 465,
+          "line": 466,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_application_deps.py\","
         },
@@ -9342,7 +9363,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 464,
+          "line": 465,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_architecture.py\","
         },
@@ -9363,7 +9384,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 466,
+          "line": 467,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_constructor_args.py\","
         },
@@ -9384,7 +9405,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 457,
+          "line": 458,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/config_matrix_generator.py\","
         },
@@ -9456,7 +9477,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 458,
+          "line": 459,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         }
@@ -9477,7 +9498,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 459,
+          "line": 460,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/lint_terminology.py\","
         },
@@ -9498,7 +9519,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 460,
+          "line": 461,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/validate_unified_configs.py\","
         },

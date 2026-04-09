@@ -138,6 +138,7 @@ tracked_suite_inventory:
     - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
     - tests/integration/infrastructure/storage/test_gold_writer_versioning.py
     - tests/integration/infrastructure/storage/test_silver_writer.py
+    - tests/integration/infrastructure/storage/test_storage_factory_audit.py
     interface_cli_surfaces:
     - tests/integration/interfaces/test_cli_checkpoint_list.py
     - tests/integration/interfaces/test_cli_config_dq.py
