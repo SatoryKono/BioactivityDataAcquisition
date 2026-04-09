@@ -9,6 +9,7 @@ from uuid import uuid4
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunCodeProvenance,
+    RunInputSnapshotRef,
     RunManifest,
     RunSourceRef,
 )
@@ -42,6 +43,13 @@ def test_file_store_round_trips_manifest_by_id_and_run_id(tmp_path) -> None:
                 provider="chembl",
                 entity="activity",
                 pipeline_name="chembl_activity",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-1",
+                        content_hash="hash-1",
+                        immutable_uri="file:///snapshots/1.jsonl",
+                    ),
+                ),
             ),
         ),
         planned_artifacts=(

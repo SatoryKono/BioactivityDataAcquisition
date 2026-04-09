@@ -270,7 +270,11 @@ def _record_artifact_publication(
         "dataset_ref": lineage_context["dataset_ref"],
         "lineage_fragment_id": lineage_context["lineage_fragment_id"],
     }
-    input_snapshots = getattr(metadata.source, "input_snapshots", [])
+    input_snapshots = (
+        []
+        if not isinstance(metadata, BronzeMetadata)
+        else getattr(metadata.source, "input_snapshots", [])
+    )
     if input_snapshots:
         details["input_snapshot_count"] = len(input_snapshots)
         details["input_snapshot_ids"] = [

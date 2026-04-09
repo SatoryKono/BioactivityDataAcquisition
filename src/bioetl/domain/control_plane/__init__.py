@@ -16,6 +16,7 @@ from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
 from bioetl.domain.control_plane.run_manifest import (
     RunArtifactRef,
     RunCodeProvenance,
+    RunInputSnapshotRef,
     RunManifest,
     RunSourceRef,
 )
@@ -30,6 +31,7 @@ __all__ = [
     "ResolvedConfigSnapshot",
     "RunArtifactRef",
     "RunCodeProvenance",
+    "RunInputSnapshotRef",
     "RunLedgerEntry",
     "RunManifest",
     "RunSourceRef",
