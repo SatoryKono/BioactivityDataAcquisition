@@ -1,174 +1,509 @@
 #!/usr/bin/env bash
-# Delete stale and duplicate remote branches
-# Generated: 2026-02-20
-# Run with: bash scripts/delete-stale-branches.sh
-#
-# Part 1: 62 branches on outdated base (6000+ commits ahead of main)
-# Part 2: 31 duplicate codex branches (keeping canonical version of each task)
-# Total: 93 branches to delete
-
 set -euo pipefail
 
-RED='\033[0;31m'
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=./load_repo_env.sh
+source "${SCRIPT_DIR}/load_repo_env.sh"
+
+MODE="report"
+ASSUME_YES=0
+DO_FETCH=1
+
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
 NC='\033[0m'
 
-deleted=0
-failed=0
+PROTECTED_BRANCHES=(
+  "main"
+  "main_20250408"
+  "generate-review-reports-12039392608197755189"
+  "bolt-optimize-column-orderer-helpers-17720322478388326854"
+  "py-test-swarm-reports-17470800817558701356"
+  "dependabot/github_actions/actions/cache-5"
+  "codex/categorize-and-tidy-up-type-ignores"
+  "perf-async-metrics-server-1814537927827611323"
+)
 
-delete_branch() {
-  local branch="$1"
-  local reason="$2"
-  printf "${YELLOW}Deleting${NC} %-75s [%s] ... " "$branch" "$reason"
-  if git push origin --delete "$branch" 2>/dev/null; then
-    printf "${GREEN}OK${NC}\n"
-    ((deleted++))
-  else
-    printf "${RED}FAILED${NC}\n"
-    ((failed++))
+DELETE_CANDIDATES=(
+  "jules-run-code-review-orchestrator-6570426735123498990"
+  "test-swarm-reports-11115732830350980092"
+  "bolt-optimize-sorting-13782224520442588262"
+  "ai-hierarchical-code-review-377991794209424974"
+  "ai-code-review-11260436480377693745"
+  "jules-code-review-orchestrator-17605596549365275139"
+  "review/hierarchical-code-review-13047481877801782444"
+  "review-orchestrator-analysis-8687423604472367922"
+  "py-review-orchestrator-execution-7162427255251795129"
+  "py-review-orchestrator-ast-script-12739399795982722227"
+  "swarm-metrics-7763761693969922558"
+  "test-swarm-reports-6841942603068135714"
+  "test-swarm-reports-swarm-001-6464421493149807499"
+  "add-review-reports-14140296571349509559"
+  "add-py-review-reports-11144737295225843882"
+  "docs-code-review-5155988922031284115"
+  "tmp01"
+)
+
+usage() {
+  cat <<'EOF'
+Usage:
+  bash scripts/ops/delete-stale-branches.sh [--mode report|delete-local|delete-remote|delete-both] [--yes] [--no-fetch]
+
+Modes:
+  report         Show cleanup ledger only. Default and non-destructive.
+  delete-local   Delete only local candidate branches that are safe to remove.
+  delete-remote  Delete only remote candidate branches that are safe to remove.
+  delete-both    Delete local and remote candidate branches that are safe to remove.
+
+Safety rules:
+  - Protected branches are never deleted.
+  - Branches with open PRs are never deleted.
+  - Branches with unique commits ahead of origin/main are never deleted automatically.
+  - Non-report modes require --yes.
+
+Examples:
+  bash scripts/ops/delete-stale-branches.sh
+  bash scripts/ops/delete-stale-branches.sh --mode delete-remote --yes
+EOF
+}
+
+contains() {
+  local needle="$1"
+  shift
+  local item
+  for item in "$@"; do
+    if [[ "$item" == "$needle" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+have_command() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+resolve_python_runner() {
+  if have_command python3; then
+    PYTHON_RUNNER=(python3)
+  elif have_command python; then
+    PYTHON_RUNNER=(python)
+  elif have_command py; then
+    PYTHON_RUNNER=(py -3)
   fi
 }
 
-echo "============================================="
-echo " Deleting stale and duplicate remote branches"
-echo "============================================="
-echo ""
+resolve_tool_variants() {
+  if have_command gh; then
+    GH_CMD="gh"
+  elif have_command gh.exe; then
+    GH_CMD="gh.exe"
+  fi
 
-# -------------------------------------------------------
-# Part 1: Branches on outdated base (6000+ commits ahead)
-# -------------------------------------------------------
-echo "--- Part 1: Outdated base branches (62) ---"
-echo ""
+  if have_command curl; then
+    CURL_CMD="curl"
+  elif have_command curl.exe; then
+    CURL_CMD="curl.exe"
+  fi
+}
 
-# bolt branches (6 branches)
-delete_branch "bolt-optimize-pubmed-date-3789117081982362004" "outdated-base"
-delete_branch "bolt-perf-pubmed-date-parsing-12532949572236019825" "outdated-base"
-delete_branch "bolt-pubmed-optimization-11776621839494351834" "outdated-base"
-delete_branch "bolt-silver-writer-optimization-4078771543740170219" "outdated-base"
-delete_branch "bolt/optimize-silver-serialization-17048994287352894847" "outdated-base"
-delete_branch "bolt/pubmed-transformer-optimization-1564101723275582547" "outdated-base"
+prepare_git_auth() {
+  local origin_url configured_askpass
 
-# jules branches (2 branches)
-delete_branch "jules-11173321112583947796-657b8aa8" "outdated-base"
-delete_branch "jules-17546412591644239142-44ec5546" "outdated-base"
+  load_repo_env_if_present
 
-# claude branches on outdated base (35 branches)
-delete_branch "claude/analyze-validation-matrix-kFck8" "outdated-base"
-delete_branch "claude/audit-analysis-fixes-u9EkK" "outdated-base"
-delete_branch "claude/audit-documentation-2U4OL" "outdated-base"
-delete_branch "claude/audit-documentation-9AYo8" "outdated-base"
-delete_branch "claude/audit-documentation-MJcVu" "outdated-base"
-delete_branch "claude/audit-documentation-PM9XH" "outdated-base"
-delete_branch "claude/audit-documentation-jCzxu" "outdated-base"
-delete_branch "claude/bioetl-architecture-audit-nttXM" "outdated-base"
-delete_branch "claude/chembl-activity-silver-layer-NUL41" "outdated-base"
-delete_branch "claude/code-inventory-audit-prompt-WYRi3" "outdated-base"
-delete_branch "claude/collect-publication-types-dmJuX" "outdated-base"
-delete_branch "claude/consolidate-architecture-audits-EyVt3" "outdated-base"
-delete_branch "claude/consolidate-data-paths-fixes-PH1x6" "outdated-base"
-delete_branch "claude/debug-uniprot-idmapping-byhJj" "outdated-base"
-delete_branch "claude/document-pipeline-validation-cZ1Ai" "outdated-base"
-delete_branch "claude/fix-bioactivity-import-Z4YR2" "outdated-base"
-delete_branch "claude/fix-bioetl-audit-NnpMx" "outdated-base"
-delete_branch "claude/fix-bronze-dependencies-api-gYTeE" "outdated-base"
-delete_branch "claude/fix-cli-command-example-Zn8yy" "outdated-base"
-delete_branch "claude/fix-data-paths-guides-LM3On" "outdated-base"
-delete_branch "claude/fix-data-paths-guides-rRanJ" "outdated-base"
-delete_branch "claude/fix-factory-type-mismatch-Gycy6" "outdated-base"
-delete_branch "claude/fix-mypy-strict-errors-Nn92N" "outdated-base"
-delete_branch "claude/fix-pubmed-pii-security-NtpcU" "outdated-base"
-delete_branch "claude/inventory-code-duplication-z4DSx" "outdated-base"
-delete_branch "claude/inventory-duplicate-detection-k8gol" "outdated-base"
-delete_branch "claude/publication-validation-analysis-QG4pB" "outdated-base"
-delete_branch "claude/publication-validation-analysis-QUOBW" "outdated-base"
-delete_branch "claude/publication-validation-analysis-olBBu" "outdated-base"
-delete_branch "claude/refactor-bioetl-config-f14LT" "outdated-base"
-delete_branch "claude/remove-dead-events-BEFKQ" "outdated-base"
-delete_branch "claude/replace-executor-classes-VHoxN" "outdated-base"
-delete_branch "claude/schema-drift-documentation-cnkdv" "outdated-base"
-delete_branch "claude/standardize-publication-types-Ti3Vm" "outdated-base"
-delete_branch "claude/update-code-audit-report-aOveE" "outdated-base"
+  if [[ -n "${GH_TOKEN:-}" ]]; then
+    GITHUB_AUTH_TOKEN="${GH_TOKEN}"
+  elif [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    GITHUB_AUTH_TOKEN="${GITHUB_TOKEN}"
+  elif [[ -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
+    GITHUB_AUTH_TOKEN="${GITHUB_PERSONAL_ACCESS_TOKEN}"
+  fi
 
-# codex branches on outdated base (19 branches)
-delete_branch "codex/align-code-to-rules-or-update-documentation" "outdated-base"
-delete_branch "codex/audit-bioetl-configuration-structure" "outdated-base"
-delete_branch "codex/audit-bioetl-configuration-structure-9sa4bf" "outdated-base"
-delete_branch "codex/audit-bioetl-configuration-structure-shrax7" "outdated-base"
-delete_branch "codex/audit-composite-target-and-fix-errors" "outdated-base"
-delete_branch "codex/audit-recent-branches-for-correctness-and-errors" "outdated-base"
-delete_branch "codex/conduct-comprehensive-documentation-audit" "outdated-base"
-delete_branch "codex/fix-data-paths-in-guides" "outdated-base"
-delete_branch "codex/fix-data-paths-in-guides-c2u4ii" "outdated-base"
-delete_branch "codex/fix-data-paths-in-guides-izi1v9" "outdated-base"
-delete_branch "codex/refactor-lookup_methods-in-openalex.py" "outdated-base"
-delete_branch "codex/refactor-semanticscholar-and-pubchem-constants" "outdated-base"
-delete_branch "codex/refactor-semanticscholar-extractors" "outdated-base"
-delete_branch "codex/remove-dead-event-classes-from-events.py" "outdated-base"
-delete_branch "codex/remove-dead-event-classes-from-events.py-xtyvm3" "outdated-base"
-delete_branch "codex/remove-duplicate-pipeline-classes" "outdated-base"
-delete_branch "codex/remove-openalexpublicationrecord-and-clean-up-imports" "outdated-base"
-delete_branch "codex/remove-unused-classes-from-dq_report.py" "outdated-base"
-delete_branch "codex/review-recent-branches-and-merge-changes" "outdated-base"
-delete_branch "codex/review-recent-branches-and-merge-changes-vayd82" "outdated-base"
+  origin_url="$(git remote get-url origin 2>/dev/null || true)"
+  if [[ ! "$origin_url" =~ ^https://github\.com/ ]]; then
+    return 0
+  fi
 
-echo ""
+  configured_askpass="$(git config --get core.askpass || true)"
 
-# -------------------------------------------------------
-# Part 2: Duplicate codex branches (keeping canonical)
-# -------------------------------------------------------
-echo "--- Part 2: Duplicate codex branches (31) ---"
-echo "(Keeping the canonical/base version of each task)"
-echo ""
+  if [[ -n "$GITHUB_AUTH_TOKEN" ]]; then
+    TEMP_GIT_ASKPASS="$(mktemp)"
+    cat >"$TEMP_GIT_ASKPASS" <<'EOF'
+#!/usr/bin/env sh
+case "$1" in
+  *Username*) printf '%s\n' "x-access-token" ;;
+  *) printf '%s\n' "${BIOETL_GITHUB_PUSH_TOKEN:-}" ;;
+esac
+EOF
+    chmod 700 "$TEMP_GIT_ASKPASS"
+    export BIOETL_GITHUB_PUSH_TOKEN="$GITHUB_AUTH_TOKEN"
+    export GIT_ASKPASS="$TEMP_GIT_ASKPASS"
+    export GIT_TERMINAL_PROMPT=0
+    return 0
+  fi
 
-# conduct-architectural-audit-for-bioetl: keep base, delete 9 duplicates
-delete_branch "codex/conduct-architectural-audit-for-bioetl-0d72iw" "dup:audit"
-delete_branch "codex/conduct-architectural-audit-for-bioetl-267bw6" "dup:audit"
-delete_branch "codex/conduct-architectural-audit-for-bioetl-a9um58" "dup:audit"
-delete_branch "codex/conduct-architectural-audit-for-bioetl-bjpj6f" "dup:audit"
-delete_branch "codex/conduct-architectural-audit-for-bioetl-ek16yo" "dup:audit"
-delete_branch "codex/conduct-architectural-audit-for-bioetl-ekp0my" "dup:audit"
-delete_branch "codex/conduct-architectural-audit-for-bioetl-jciscn" "dup:audit"
-delete_branch "codex/conduct-architectural-audit-for-bioetl-px0bxe" "dup:audit"
-delete_branch "codex/conduct-architectural-audit-for-bioetl-t4pr4g" "dup:audit"
+  if [[ -n "$configured_askpass" && ! -x "$configured_askpass" ]]; then
+    printf "%b[FAIL]%b git core.askpass points to a missing file: %s\n" "$RED" "$NC" "$configured_askpass" >&2
+    printf "%b[FAIL]%b No GitHub token found in GH_TOKEN, GITHUB_TOKEN, or GITHUB_PERSONAL_ACCESS_TOKEN\n" "$RED" "$NC" >&2
+    exit 1
+  fi
+}
 
-# conduct-code-inventory-and-duplication-audit: keep base, delete 3
-delete_branch "codex/conduct-code-inventory-and-duplication-audit-3c56mh" "dup:inventory"
-delete_branch "codex/conduct-code-inventory-and-duplication-audit-7h7iyr" "dup:inventory"
-delete_branch "codex/conduct-code-inventory-and-duplication-audit-b4wzwo" "dup:inventory"
+validate_github_api_auth() {
+  local http_code
 
-# conduct-data-schema-audit-for-bioetl-pipelines: keep base, delete 2
-delete_branch "codex/conduct-data-schema-audit-for-bioetl-pipelines-oaswve" "dup:schema-audit"
-delete_branch "codex/conduct-data-schema-audit-for-bioetl-pipelines-pbn8h6" "dup:schema-audit"
+  if [[ -z "${REMOTE_REPO_SLUG}" || -z "${GITHUB_AUTH_TOKEN}" || -z "${CURL_CMD}" ]]; then
+    return 0
+  fi
 
-# conduct-data-schema-audit-for-pipelines: keep base, delete 3
-delete_branch "codex/conduct-data-schema-audit-for-pipelines-e8duku" "dup:schema-audit"
-delete_branch "codex/conduct-data-schema-audit-for-pipelines-hqg4s2" "dup:schema-audit"
-delete_branch "codex/conduct-data-schema-audit-for-pipelines-wkhju1" "dup:schema-audit"
+  http_code="$(
+    "$CURL_CMD" -sS -o /dev/null -w '%{http_code}' \
+      -H "Authorization: token ${GITHUB_AUTH_TOKEN}" \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      "https://api.github.com/user" || printf '000'
+  )"
 
-# create-architectural-change-plan-for-bioetl: keep base, delete 3
-delete_branch "codex/create-architectural-change-plan-for-bioetl-6v6zla" "dup:arch-plan"
-delete_branch "codex/create-architectural-change-plan-for-bioetl-8x3vzl" "dup:arch-plan"
-delete_branch "codex/create-architectural-change-plan-for-bioetl-f7msdt" "dup:arch-plan"
+  case "$http_code" in
+    200) return 0 ;;
+    401)
+      printf "%b[FAIL]%b GitHub API rejected the token with HTTP 401\n" "$RED" "$NC" >&2
+      printf "%b[FAIL]%b Check GITHUB_PERSONAL_ACCESS_TOKEN / GH_TOKEN / GITHUB_TOKEN in .env and ensure it is still valid\n" "$RED" "$NC" >&2
+      exit 1
+      ;;
+    403)
+      printf "%b[FAIL]%b GitHub API rejected the token with HTTP 403\n" "$RED" "$NC" >&2
+      printf "%b[FAIL]%b Token is present but likely lacks required repo/contents write permissions for branch deletion\n" "$RED" "$NC" >&2
+      exit 1
+      ;;
+    *)
+      printf "%b[FAIL]%b GitHub API auth preflight failed with HTTP %s\n" "$RED" "$NC" "$http_code" >&2
+      exit 1
+      ;;
+  esac
+}
 
-# refactor-bioetl-configuration-structure: keep base, delete 4
-delete_branch "codex/refactor-bioetl-configuration-structure-3i5df9" "dup:config-refactor"
-delete_branch "codex/refactor-bioetl-configuration-structure-3znbpy" "dup:config-refactor"
-delete_branch "codex/refactor-bioetl-configuration-structure-dwe5go" "dup:config-refactor"
-delete_branch "codex/refactor-bioetl-configuration-structure-jl7hsb" "dup:config-refactor"
+print_status() {
+  local color="$1"
+  local text="$2"
+  printf "%b%s%b" "$color" "$text" "$NC"
+}
 
-# unify-dto-field-names-in-chembl.py: keep base, delete 6
-delete_branch "codex/unify-dto-field-names-in-chembl.py-1ikmoz" "dup:dto-unify"
-delete_branch "codex/unify-dto-field-names-in-chembl.py-6s96sh" "dup:dto-unify"
-delete_branch "codex/unify-dto-field-names-in-chembl.py-8j7752" "dup:dto-unify"
-delete_branch "codex/unify-dto-field-names-in-chembl.py-by4p6i" "dup:dto-unify"
-delete_branch "codex/unify-dto-field-names-in-chembl.py-ix6wjf" "dup:dto-unify"
-delete_branch "codex/unify-dto-field-names-in-chembl.py-mwmn9z" "dup:dto-unify"
+resolve_repo_slug() {
+  local remote_url
+  remote_url="$(git remote get-url origin 2>/dev/null || true)"
+  if [[ "$remote_url" =~ github\.com[:/]+([^/]+/[^/.]+)(\.git)?$ ]]; then
+    printf "%s\n" "${BASH_REMATCH[1]}"
+  fi
+}
 
-# conduct-comprehensive-documentation-audit: keep nothing (base in outdated), delete suffix
-delete_branch "codex/conduct-comprehensive-documentation-audit-h810m4" "dup:doc-audit"
+REMOTE_REPO_SLUG="$(resolve_repo_slug)"
+OPEN_PR_LOOKUP_AVAILABLE=0
+PYTHON_RUNNER=()
+GH_CMD=""
+CURL_CMD=""
+TEMP_GIT_ASKPASS=""
+GITHUB_AUTH_TOKEN=""
 
-echo ""
-echo "============================================="
-printf "Done. ${GREEN}Deleted: %d${NC}, ${RED}Failed: %d${NC}\n" "$deleted" "$failed"
-echo "============================================="
+if [[ ! -d "${REPO_ROOT}/.git" ]]; then
+  printf "%b[FAIL]%b Not inside a git repository: %s\n" "$RED" "$NC" "$REPO_ROOT" >&2
+  exit 1
+fi
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mode)
+      [[ $# -ge 2 ]] || { usage; exit 1; }
+      MODE="$2"
+      shift 2
+      ;;
+    --yes)
+      ASSUME_YES=1
+      shift
+      ;;
+    --no-fetch)
+      DO_FETCH=0
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf "%b[FAIL]%b Unknown argument: %s\n" "$RED" "$NC" "$1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+case "$MODE" in
+  report|delete-local|delete-remote|delete-both) ;;
+  *)
+    printf "%b[FAIL]%b Unsupported mode: %s\n" "$RED" "$NC" "$MODE" >&2
+    usage
+    exit 1
+    ;;
+esac
+
+if [[ "$MODE" != "report" && "$ASSUME_YES" -ne 1 ]]; then
+  printf "%b[FAIL]%b Non-report modes require --yes\n" "$RED" "$NC" >&2
+  exit 1
+fi
+
+cd "$REPO_ROOT"
+resolve_python_runner
+resolve_tool_variants
+
+if [[ "$MODE" != "report" ]]; then
+  prepare_git_auth
+  validate_github_api_auth
+fi
+
+if [[ "$DO_FETCH" -eq 1 ]]; then
+  printf "%b[INFO]%b git fetch --all --prune\n" "$BLUE" "$NC"
+  git fetch --all --prune
+fi
+
+OPEN_PR_CACHE_FILE="$(mktemp)"
+OPEN_PR_API_RAW_FILE="$(mktemp)"
+cleanup() {
+  rm -f "$OPEN_PR_CACHE_FILE"
+  rm -f "$OPEN_PR_API_RAW_FILE"
+  rm -f "$TEMP_GIT_ASKPASS"
+}
+trap cleanup EXIT
+
+if [[ ${#PYTHON_RUNNER[@]} -gt 0 ]] && [[ -n "${REMOTE_REPO_SLUG}" ]] && [[ -n "${GH_CMD}" || -n "${CURL_CMD}" ]]; then
+  OPEN_PR_LOOKUP_AVAILABLE=1
+  if [[ -n "${GH_CMD}" ]]; then
+    "$GH_CMD" pr list --repo "$REMOTE_REPO_SLUG" --state open --limit 200 --json headRefName,number,url,title >"$OPEN_PR_CACHE_FILE" || printf "[]\n" >"$OPEN_PR_CACHE_FILE"
+  else
+    "$CURL_CMD" -fsSL "https://api.github.com/repos/${REMOTE_REPO_SLUG}/pulls?state=open&per_page=100" >"$OPEN_PR_API_RAW_FILE" || printf "[]\n" >"$OPEN_PR_API_RAW_FILE"
+    "${PYTHON_RUNNER[@]}" - "$OPEN_PR_API_RAW_FILE" <<'PY' >"$OPEN_PR_CACHE_FILE"
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fh:
+    payload = json.load(fh)
+rows = [
+    {
+        "headRefName": pr.get("head", {}).get("ref"),
+        "number": pr.get("number"),
+        "url": pr.get("html_url"),
+        "title": pr.get("title"),
+    }
+    for pr in payload
+]
+json.dump(rows, sys.stdout)
+PY
+  fi
+else
+  printf "[]\n" >"$OPEN_PR_CACHE_FILE"
+fi
+
+branch_has_open_pr() {
+  local branch="$1"
+  if [[ "$OPEN_PR_LOOKUP_AVAILABLE" -ne 1 ]]; then
+    return 1
+  fi
+  "${PYTHON_RUNNER[@]}" - "$OPEN_PR_CACHE_FILE" "$branch" <<'PY'
+import json
+import sys
+
+cache_path, branch = sys.argv[1], sys.argv[2]
+with open(cache_path, "r", encoding="utf-8") as fh:
+    prs = json.load(fh)
+for pr in prs:
+    if pr.get("headRefName") == branch:
+        print(f"{pr.get('number')}|{pr.get('url')}")
+        raise SystemExit(0)
+raise SystemExit(1)
+PY
+}
+
+remote_branch_exists() {
+  git show-ref --verify --quiet "refs/remotes/origin/$1"
+}
+
+local_branch_exists() {
+  git show-ref --verify --quiet "refs/heads/$1"
+}
+
+current_branch() {
+  git symbolic-ref --quiet --short HEAD 2>/dev/null || true
+}
+
+branch_is_merged_remote() {
+  local branch="$1"
+  git branch -r --merged origin/main | sed 's#^[ *]*origin/##' | grep -Fx -- "$branch" >/dev/null 2>&1
+}
+
+branch_ahead_count() {
+  local branch="$1"
+  local left_right
+  left_right="$(git rev-list --left-right --count "origin/main...origin/$branch" 2>/dev/null || printf '0\t999999')"
+  printf "%s\n" "${left_right#*	}"
+}
+
+recommendation_for_branch() {
+  local branch="$1"
+  local open_pr_result
+  if contains "$branch" "${PROTECTED_BRANCHES[@]}"; then
+    printf "KEEP:protected"
+    return 0
+  fi
+  if [[ "$OPEN_PR_LOOKUP_AVAILABLE" -ne 1 ]]; then
+    printf "REVIEW:pr-check-unavailable"
+    return 0
+  fi
+  if open_pr_result="$(branch_has_open_pr "$branch" 2>/dev/null)"; then
+    printf "KEEP:open-pr:%s" "$open_pr_result"
+    return 0
+  fi
+  if ! remote_branch_exists "$branch" && ! local_branch_exists "$branch"; then
+    printf "SKIP:not-found"
+    return 0
+  fi
+  if remote_branch_exists "$branch"; then
+    local ahead
+    ahead="$(branch_ahead_count "$branch")"
+    if [[ "$ahead" != "0" ]]; then
+      printf "REVIEW:unique-commits:%s" "$ahead"
+      return 0
+    fi
+    if branch_is_merged_remote "$branch"; then
+      printf "DELETE:merged"
+      return 0
+    fi
+  fi
+  printf "DELETE:candidate"
+}
+
+print_header() {
+  printf "%-58s %-6s %-7s %-7s %-8s %-24s %s\n" "branch" "local" "remote" "merged" "ahead" "recommendation" "details"
+  printf "%-58s %-6s %-7s %-7s %-8s %-24s %s\n" \
+    "----------------------------------------------------------" \
+    "------" "-------" "-------" "--------" \
+    "------------------------" \
+    "------------------------------"
+}
+
+delete_local_branch() {
+  local branch="$1"
+  local current
+  current="$(current_branch)"
+  if [[ "$current" == "$branch" ]]; then
+    printf "%b[SKIP]%b local %s (checked out)\n" "$YELLOW" "$NC" "$branch"
+    return 0
+  fi
+  if local_branch_exists "$branch"; then
+    git branch -D "$branch"
+  fi
+}
+
+delete_remote_branch() {
+  local branch="$1"
+  local encoded_branch api_url
+  if ! remote_branch_exists "$branch"; then
+    return 0
+  fi
+
+  if [[ -n "${REMOTE_REPO_SLUG}" && -n "${GITHUB_AUTH_TOKEN}" && -n "${CURL_CMD}" ]]; then
+    encoded_branch="${branch//\//%2F}"
+    api_url="https://api.github.com/repos/${REMOTE_REPO_SLUG}/git/refs/heads/${encoded_branch}"
+    "$CURL_CMD" -fsSL -X DELETE \
+      -H "Authorization: token ${GITHUB_AUTH_TOKEN}" \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      "$api_url" >/dev/null
+    return 0
+  fi
+
+  git push origin --delete "$branch"
+}
+
+print_header
+
+for branch in "${DELETE_CANDIDATES[@]}"; do
+  local_state="no"
+  remote_state="no"
+  merged_state="-"
+  ahead_state="-"
+  details=""
+  recommendation="$(recommendation_for_branch "$branch")"
+
+  if local_branch_exists "$branch"; then
+    local_state="yes"
+  fi
+  if remote_branch_exists "$branch"; then
+    remote_state="yes"
+    if branch_is_merged_remote "$branch"; then
+      merged_state="yes"
+    else
+      merged_state="no"
+    fi
+    ahead_state="$(branch_ahead_count "$branch")"
+  fi
+
+  case "$recommendation" in
+    KEEP:protected)
+      details="protected"
+      rec_display="$(print_status "$GREEN" "KEEP")"
+      ;;
+    KEEP:open-pr:*)
+      details="${recommendation#KEEP:open-pr:}"
+      rec_display="$(print_status "$GREEN" "KEEP")"
+      ;;
+    REVIEW:unique-commits:*)
+      details="ahead=${recommendation#REVIEW:unique-commits:}"
+      rec_display="$(print_status "$YELLOW" "REVIEW")"
+      ;;
+    REVIEW:pr-check-unavailable)
+      details="no gh/curl/python runtime for PR lookup"
+      rec_display="$(print_status "$YELLOW" "REVIEW")"
+      ;;
+    DELETE:merged)
+      details="merged into origin/main"
+      rec_display="$(print_status "$RED" "DELETE")"
+      ;;
+    DELETE:candidate)
+      details="candidate list, no open PR"
+      rec_display="$(print_status "$RED" "DELETE")"
+      ;;
+    SKIP:not-found)
+      details="not found locally/remotely"
+      rec_display="$(print_status "$BLUE" "SKIP")"
+      ;;
+    *)
+      details="$recommendation"
+      rec_display="$(print_status "$YELLOW" "REVIEW")"
+      ;;
+  esac
+
+  printf "%-58s %-6s %-7s %-7s %-8s %-24b %s\n" \
+    "$branch" "$local_state" "$remote_state" "$merged_state" "$ahead_state" "$rec_display" "$details"
+
+  if [[ "$MODE" == "report" ]]; then
+    continue
+  fi
+
+  case "$recommendation" in
+    DELETE:*)
+      if [[ "$MODE" == "delete-local" || "$MODE" == "delete-both" ]]; then
+        delete_local_branch "$branch"
+      fi
+      if [[ "$MODE" == "delete-remote" || "$MODE" == "delete-both" ]]; then
+        delete_remote_branch "$branch"
+      fi
+      ;;
+    *)
+      ;;
+  esac
+done
+
+printf "\n%b[OK]%b Completed mode=%s\n" "$GREEN" "$NC" "$MODE"
