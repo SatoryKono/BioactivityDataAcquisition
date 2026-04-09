@@ -20,6 +20,7 @@ from bioetl.domain.models.metadata import (
     GoldMetadata,
     GovernanceLineageConfig,
     GovernanceMetadata,
+    InputSnapshotRef,
     QualityExpectations,
     RunTypeEnum,
     SilverMetadata,
@@ -341,6 +342,40 @@ class TestBronzeMetadata:
         assert metadata.source.query_string == "injected_query=value"
         # Other source_metadata fields should be preserved
         assert metadata.source.url == "https://www.ebi.ac.uk/chembl/api/data/activity"
+
+    def test_bronze_metadata_preserves_input_snapshot_refs(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Bronze metadata should persist immutable input snapshot references."""
+        source = SourceMetadata(
+            type="api",
+            url="https://www.ebi.ac.uk/chembl/api/data/activity",
+            input_snapshots=[
+                InputSnapshotRef(
+                    snapshot_id="chembl-activity-batch-001",
+                    content_hash="a" * 64,
+                    immutable_uri="snapshots/chembl/activity/batch-001.jsonl.zst",
+                    query_fingerprint="f" * 64,
+                )
+            ],
+        )
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=100,
+            compressed_size=5000,
+            output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+            source_metadata=source,
+        )
+
+        metadata = coordinator.create_bronze_metadata(input_data)
+
+        assert len(metadata.source.input_snapshots) == 1
+        assert metadata.source.input_snapshots[0].snapshot_id == (
+            "chembl-activity-batch-001"
+        )
+        assert metadata.source.input_snapshots[0].content_hash == "a" * 64
 
     def test_bronze_metadata_query_string_defaults_to_none(
         self, coordinator: MetadataCoordinator
