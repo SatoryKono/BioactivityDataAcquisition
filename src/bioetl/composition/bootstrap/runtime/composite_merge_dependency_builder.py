@@ -5,26 +5,20 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.aggregator import EnricherAggregator
-from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.application.composite.column_orderer import ColumnOrderer
-from bioetl.application.composite.column_priority_orderer import (
+from bioetl.application.composite.runtime_wiring_api import (
+    CoalescePolicyService,
+    ColumnOrderer,
     ColumnPriorityOrderer,
-)
-from bioetl.application.composite.column_renamer import ColumnRenamer
-from bioetl.application.composite.conflict_resolver import ConflictResolverService
-from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-from bioetl.application.composite.dependency_joiner import DependencyJoinerService
-from bioetl.application.composite.join_execution import JoinHow
-from bioetl.application.composite.join_key_normalization import (
+    ColumnRenamer,
+    ConflictResolverService,
+    DependencyJoinerService,
+    EnricherAggregator,
+    EnricherDeduplicatorService,
+    JoinHow,
     JoinKeyNormalizationPolicy,
-)
-from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
-from bioetl.application.composite.join_planner import (
+    JoinKeyResolverService,
     JoinPlannerService,
     JoinPreparationCollaborators,
-)
-from bioetl.application.composite.join_planner_helpers import (
     parse_pipeline_name,
     resolve_field_aliases_from_registry,
 )

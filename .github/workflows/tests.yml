@@ -159,6 +159,9 @@ jobs:
             -   name: Validate scripts catalog governance policy
                 run: uv run python scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml
 
+            -   name: Validate deterministic Neo4j memory ontology invariants
+                run: uv run python -m scripts.ci neo4j-memory
+
             -   name: Validate hotspot-family baseline artifacts
                 run: uv run python -m scripts.qa report-family-baseline --active-only --check
 

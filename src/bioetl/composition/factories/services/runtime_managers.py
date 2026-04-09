@@ -5,21 +5,17 @@ Extracted from pipeline_builder.py to keep it within LOC limits.
 
 from __future__ import annotations
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.batch_checkpoint_recovery_service import (
+from bioetl.application.core.runtime_wiring_api import (
+    BasePipeline,
     BatchCheckpointRecoveryService,
-)
-from bioetl.application.core.batch_execution import (
     BatchExecutionLifecycleService,
     BatchExecutionRunService,
-)
-from bioetl.application.core.batch_executor import BatchExecutor
-from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
-from bioetl.application.core.batch_progress_service import BatchProgressService
-from bioetl.application.core.batch_tracing import BatchTracingManagerService
-from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.lifecycle.checkpoint_manager import (
+    BatchExecutor,
+    BatchMemoryManagerService,
+    BatchProgressService,
+    BatchTracingManagerService,
     CheckpointManagerService,
+    RecordProcessorConfig,
 )
 from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
 from bioetl.composition.factories.services.common_service_wiring import resolve_tracer

@@ -9,6 +9,8 @@ from typing import Any, cast
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
+import pytest
+
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
     _build_composite_manifest_create_request,
@@ -134,10 +136,14 @@ def test_resolve_composite_control_plane_flags_disables_ledger_when_manifest_dis
         )
     )
 
-    assert resolve_composite_control_plane_flags(settings) == (False, False)
+    with pytest.raises(
+        RuntimeError,
+        match="Composite execution requires run manifests",
+    ):
+        resolve_composite_control_plane_flags(settings)
 
 
-def test_build_composite_control_plane_bundle_returns_empty_bundle_when_manifest_disabled(
+def test_build_composite_control_plane_bundle_fails_closed_when_manifest_disabled(
     tmp_path: Path,
 ) -> None:
     config = cast(Any, _RichMockCompositeConfig())
@@ -162,14 +168,16 @@ def test_build_composite_control_plane_bundle_returns_empty_bundle_when_manifest
         ),
     )
 
-    bundle = build_composite_control_plane_bundle(
-        config=config,
-        runtime=runtime,
-        infra_context=infra_context,
-    )
+    with pytest.raises(
+        RuntimeError,
+        match="Composite execution requires run manifests",
+    ):
+        build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
 
-    assert bundle.manifest_id is None
-    assert bundle.run_ledger_service is None
     assert not (tmp_path / "output" / "control" / "run_manifest").exists()
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 

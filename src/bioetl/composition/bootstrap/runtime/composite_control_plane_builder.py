@@ -42,13 +42,16 @@ __all__ = [
 
 
 def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]:
-    """Resolve manifest/ledger feature flags with backwards-compatible defaults."""
+    """Resolve manifest/ledger feature flags for executable composite runs."""
     pipeline_settings = getattr(settings, "pipeline", None)
     control_plane = getattr(pipeline_settings, "control_plane", None)
     manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
     ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
     if not manifest_enabled:
-        return False, False
+        raise RuntimeError(
+            "Composite execution requires run manifests; set "
+            "pipeline.control_plane.run_manifest_enabled=true"
+        )
     return True, ledger_enabled
 
 
@@ -73,8 +76,6 @@ def build_composite_control_plane_bundle(
     manifest_enabled, ledger_enabled = resolve_composite_control_plane_flags(
         infra_context.settings
     )
-    if not manifest_enabled:
-        return CompositeControlPlaneBundle()
 
     config_hash = _resolve_effective_config_hash(config)
     contract_ref = config.name

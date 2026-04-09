@@ -82,8 +82,10 @@ if TYPE_CHECKING:
 
     import polars as pl
 
-    from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+    from bioetl.application.composite.runtime_wiring_api import (
+        CompositePipelineRunnerService,
+    )
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,

@@ -5,17 +5,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.batch_executor import BatchExecutor
-from bioetl.application.core.lifecycle.checkpoint_manager import (
+from bioetl.application.core.factory_wiring_api import (
+    BasePipeline,
+    BatchExecutor,
     CheckpointManagerService,
-)
-from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
-from bioetl.application.core.postrun.service import PostrunService
-from bioetl.application.core.preflight.service import PreflightService
-from bioetl.application.core.runner import (
+    LockCoordinator,
     PipelineRunner,
     PipelineRunnerDependencies,
+    PostrunService,
+    PreflightService,
 )
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService

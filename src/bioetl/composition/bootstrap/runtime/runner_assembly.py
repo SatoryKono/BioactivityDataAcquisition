@@ -7,20 +7,20 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointService
-from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-from bioetl.application.composite.dependency_coordinator import (
-    DependencyCoordinatorService,
-)
-from bioetl.application.composite.key_extractor import (
-    KeyExtractorService as _KeyExtractorService,
-)
-from bioetl.application.composite.merger import MergeService as _MergeService
-from bioetl.application.composite.runner_pkg import (
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_wiring_api import (
+    CompositeCheckpointService,
     CompositePipelineRunnerService,
     CompositeRunnerDependencies,
+    DependencyCoordinatorService,
+    EnrichmentCoordinatorService,
 )
-from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_wiring_api import (
+    KeyExtractorService as _KeyExtractorService,
+)
+from bioetl.application.composite.runtime_wiring_api import (
+    MergeService as _MergeService,
+)
 from bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring import (
     bootstrap_composite_runner_via_wiring,
 )
@@ -30,9 +30,9 @@ from bioetl.domain.ports import LoggerPort
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.application.composite.preflight_validator import (
+    from bioetl.application.composite.runtime_wiring_api import (
         CompositePreflightValidator,
+        FSMStateHelperService,
     )
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService

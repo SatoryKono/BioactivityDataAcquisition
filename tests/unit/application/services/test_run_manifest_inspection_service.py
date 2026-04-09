@@ -137,9 +137,14 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     assert result.diagnostics["latest_event_type"] == "run_finished"
     assert result.diagnostics["latest_status"] == "success"
     assert result.diagnostics["event_family_counts"] == {"pipeline.lifecycle": 1}
+    assert result.diagnostics["manifest_id"] == "manifest-1"
+    assert result.diagnostics["run_id"] == str(run_id)
     assert result.diagnostics["config_hash"] == "deadbeef"
     assert result.diagnostics["contract_ref"] == "chembl_activity"
     assert result.diagnostics["contract_version"] == "1.2.0"
+    assert result.diagnostics["identity_graph"]["manifest_id"] == "manifest-1"
+    assert result.diagnostics["identity_graph"]["run_id"] == str(run_id)
+    assert result.diagnostics["identity_graph"]["published_artifacts"] == []
     assert result.diagnostics["alert_signals"] == {
         "run_failed": False,
         "run_shutdown": False,
@@ -165,6 +170,11 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
     assert result.manifest == manifest
     assert result.ledger_entries == ()
     assert result.diagnostics == {
+        "manifest_id": "manifest-no-ledger",
+        "run_id": str(run_id),
+        "pipeline_name": "chembl_activity",
+        "provider": "chembl",
+        "entity": "activity",
         "execution_fingerprint": manifest.execution_fingerprint,
         "config_hash": "deadbeef",
         "effective_config_hash": "deadbeef",
@@ -174,6 +184,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "rule_bundle_version": "2026.03",
         "dq_contract_compatibility_hash": "compat-hash-1",
         "effective_config_artifact_id": "eca-123",
+        "planned_artifacts": [],
     }
 
 
@@ -216,6 +227,15 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "cross_validation_signal_present": False,
     }
     assert result.diagnostics["artifact_refs"] == [
+        {
+            "event_type": "artifact_published",
+            "stage": "silver",
+            "dataset_ref": "silver:chembl.activity@1",
+            "lineage_fragment_id": "silver:fragment-1",
+            "artifact_path": "/tmp/output/silver/chembl/activity",
+        }
+    ]
+    assert result.diagnostics["identity_graph"]["published_artifacts"] == [
         {
             "event_type": "artifact_published",
             "stage": "silver",
@@ -498,6 +518,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
             "dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-chain-1",
             "artifact_path": "data/output/silver/chembl/activity",
+            "metadata_path": "data/output/silver/chembl/activity/_metadata.yaml",
         }
     ]
     assert result.diagnostics["correlation_anchor_gaps"] == {

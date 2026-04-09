@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.base_transformer.contract_policy import (
+from bioetl.application.core.transformer_wiring_api import (
     DefaultContractPolicy,
-)
-from bioetl.application.core.base_transformer.structural_policy import (
     NoOpStructuralPolicy,
     StructuralPolicyProtocol,
-)
-from bioetl.application.core.base_transformer.types import (
     TransformerDependencyContext,
 )
 from bioetl.domain.ports import (

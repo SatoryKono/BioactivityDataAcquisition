@@ -27,6 +27,7 @@ from bioetl.interfaces.cli.main import cli
 class _FakeRunManifestService:
     def __init__(self) -> None:
         run_id = RunID(uuid4())
+        self._run_id = run_id
         created_at = datetime.now(UTC)
         self._manifest = RunManifest(
             manifest_id="manifest-1",
@@ -83,10 +84,42 @@ class _FakeRunManifestService:
                         "dataset_ref": "gold:chembl.activity@1",
                         "lineage_fragment_id": "gold:fragment-1",
                         "artifact_path": "/tmp/output/gold/chembl/activity",
+                        "metadata_path": "/tmp/output/gold/chembl/activity/_metadata.yaml",
+                        "run_id": str(self._run_id),
+                        "manifest_id": "manifest-1",
                     }
                 ],
+                "planned_artifact_count": 1,
+                "published_artifact_count": 1,
                 "lineage_fragment_ids": ["gold:fragment-1"],
                 "missing_artifact_links": 0,
+                "identity_graph_complete": True,
+                "identity_graph": {
+                    "run_id": str(self._run_id),
+                    "manifest_id": "manifest-1",
+                    "execution_fingerprint": "fingerprint-1",
+                    "effective_config_hash": "deadbeef",
+                    "contract_ref": "chembl_activity",
+                    "contract_version": "1.2.0",
+                    "planned_artifacts": [
+                        {
+                            "layer": "gold",
+                            "path": "/tmp/output/gold/chembl/activity",
+                        }
+                    ],
+                    "published_artifacts": [
+                        {
+                            "event_type": "artifact_published",
+                            "stage": "gold",
+                            "dataset_ref": "gold:chembl.activity@1",
+                            "lineage_fragment_id": "gold:fragment-1",
+                            "artifact_path": "/tmp/output/gold/chembl/activity",
+                            "metadata_path": "/tmp/output/gold/chembl/activity/_metadata.yaml",
+                            "run_id": str(self._run_id),
+                            "manifest_id": "manifest-1",
+                        }
+                    ],
+                },
                 "dq_rule_ids": ["gold.not_null.id"],
                 "dq_dispositions": ["fail"],
                 "dq_report_paths": ["/tmp/reports/gold_dq.json"],
@@ -248,7 +281,11 @@ class TestRunManifestCommands:
         assert "dq_policy_ref: chembl_activity.gold" in result.output
         assert "event_family_counts" in result.output
         assert "event_type_counts" in result.output
+        assert "planned_artifact_count: 1" in result.output
+        assert "published_artifact_count: 1" in result.output
         assert "artifact_refs" in result.output
+        assert "identity_graph_complete: true" in result.output
+        assert "identity_graph" in result.output
         assert "lineage_fragment_ids" in result.output
         assert "missing_artifact_links: 0" in result.output
         assert "gold.not_null.id" in result.output
@@ -258,6 +295,7 @@ class TestRunManifestCommands:
         assert "correlation_anchor_gaps" in result.output
         assert "/tmp/reports/gold_dq.json" in result.output
         assert "/tmp/output/gold/chembl/activity" in result.output
+        assert "/tmp/output/gold/chembl/activity/_metadata.yaml" in result.output
         assert (
             "Review DQ report artifacts, rule IDs, and contract policy anchors "
             "before retry or escalation." in result.output

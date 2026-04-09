@@ -110,6 +110,7 @@ def _make_silver_metadata() -> SilverMetadata:
 async def test_write_bronze_metadata_records_artifact_publication(tmp_path) -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     captured: list[tuple[str, str, dict[str, object] | None]] = []
+    metadata = _make_bronze_metadata()
     writer.attach_artifact_recorder(
         lambda layer, artifact_path, details=None: captured.append(
             (layer, artifact_path, details)
@@ -119,7 +120,7 @@ async def test_write_bronze_metadata_records_artifact_publication(tmp_path) -> N
     base_path = tmp_path / "output" / "bronze" / "chembl" / "activity"
     result = await writer.write_bronze_metadata(
         base_path=base_path,
-        metadata=_make_bronze_metadata(),
+        metadata=metadata,
         provider="chembl",
         entity="activity",
     )
@@ -132,6 +133,8 @@ async def test_write_bronze_metadata_records_artifact_publication(tmp_path) -> N
     assert details is not None
     assert details["metadata_path"].endswith("chembl_activity_metadata.yaml")
     assert details["record_count"] == 7
+    assert details["run_id"] == str(metadata.runtime.run_id)
+    assert details["manifest_id"] == "manifest-1"
     assert details["provider"] == "chembl"
     assert details["dataset_ref"] is None
     assert details["lineage_fragment_id"] == "bronze:fragment-1"
@@ -144,6 +147,7 @@ async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
 ) -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     captured: list[tuple[str, str, dict[str, object] | None]] = []
+    metadata = _make_silver_metadata()
     writer.attach_artifact_recorder(
         lambda layer, artifact_path, details=None: captured.append(
             (layer, artifact_path, details)
@@ -153,7 +157,7 @@ async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
     base_path = tmp_path / "output" / "silver" / "chembl" / "activity"
     result = await writer.write_silver_metadata(
         base_path=base_path,
-        metadata=_make_silver_metadata(),
+        metadata=metadata,
         provider="chembl",
         entity="activity",
     )
@@ -164,5 +168,29 @@ async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
     assert layer == "silver"
     assert artifact_path == str(base_path.resolve())
     assert details is not None
+    assert details["run_id"] == str(metadata.runtime.run_id)
+    assert details["manifest_id"] == "manifest-1"
     assert details["dataset_ref"] == "silver:chembl.activity@7"
     assert details["lineage_fragment_id"] == "silver:fragment-1"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_metadata_fails_when_control_plane_manifest_id_is_missing(
+    tmp_path,
+) -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+    writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
+    metadata = _make_bronze_metadata()
+    metadata.runtime.manifest_id = None
+
+    with pytest.raises(
+        RuntimeError,
+        match="Control-plane artifact publication requires metadata.runtime.manifest_id",
+    ):
+        await writer.write_bronze_metadata(
+            base_path=tmp_path / "output" / "bronze" / "chembl" / "activity",
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )

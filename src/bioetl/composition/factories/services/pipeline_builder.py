@@ -5,8 +5,8 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.application.core.batch_processing_service import BatchProcessingComponents
-from bioetl.application.core.lifecycle.checkpoint_manager import (
+from bioetl.application.core.runtime_wiring_api import (
+    BatchProcessingComponents,
     CheckpointManagerService,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
@@ -23,17 +23,17 @@ from bioetl.composition.factories.services.pipeline_record_processor_builder imp
 if TYPE_CHECKING:
     import pyarrow as pa
 
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.batch_executor import BatchExecutor
-    from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
-    from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.core.protocols import (
+    from bioetl.application.core.runtime_wiring_api import (
+        BasePipeline,
+        BatchExecutor,
         GoldFilterCallback,
         GoldTransformCallback,
+        PipelineService,
+        RecordProcessor,
+        RecordProcessorConfig,
+        ShutdownSignal,
         TransformCallback,
     )
-    from bioetl.application.core.record_processor import RecordProcessor
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier

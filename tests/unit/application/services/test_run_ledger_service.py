@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from json import dumps
 from uuid import uuid4
 
+import pytest
+
 from bioetl.application.services.run_ledger_service import RunLedgerService
 from bioetl.domain.control_plane import (
     RunCodeProvenance,
@@ -102,6 +104,38 @@ def test_record_manifest_created_appends_first_control_plane_event() -> None:
         },
     }
     assert store.list_entries("manifest-1") == [entry]
+
+
+def test_record_manifest_created_rejects_mismatched_manifest_identity() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="pending",
+        run_id=run_id,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="manifest_id must match the persisted manifest",
+    ):
+        service.record_manifest_created(_make_manifest(run_id))
+
+
+def test_record_run_started_rejects_missing_persisted_manifest_link() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="pending",
+        run_id=run_id,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="persisted manifest_id",
+    ):
+        service.record_run_started()
 
 
 def test_record_stage_started_captures_stage_and_details() -> None:
@@ -329,6 +363,26 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
             "lineage_fragment_id": "silver:fragment-1",
         },
     }
+
+
+def test_record_artifact_published_rejects_unlinked_artifact() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-unlinked",
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="Artifact publication requires dataset_ref or lineage_fragment_id",
+    ):
+        service.record_artifact_published(
+            layer="silver",
+            artifact_path="/tmp/output/silver/chembl/activity",
+        )
 
 
 def test_record_dq_policy_applied_captures_trace_anchors() -> None:

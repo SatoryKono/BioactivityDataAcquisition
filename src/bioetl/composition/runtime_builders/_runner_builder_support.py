@@ -16,13 +16,16 @@ class _LoggerBindableObservability(Protocol):
 
 
 def resolve_control_plane_flags(settings: object) -> tuple[bool, bool]:
-    """Resolve control-plane feature flags with backwards-compatible defaults."""
+    """Resolve control-plane feature flags for executable pipeline runs."""
     pipeline_settings = getattr(settings, "pipeline", None)
     control_plane = getattr(pipeline_settings, "control_plane", None)
     manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
     ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
     if not manifest_enabled:
-        return False, False
+        raise RuntimeError(
+            "Pipeline execution requires run manifests; set "
+            "pipeline.control_plane.run_manifest_enabled=true"
+        )
     return True, ledger_enabled
 
 

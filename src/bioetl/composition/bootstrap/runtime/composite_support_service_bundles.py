@@ -6,25 +6,21 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.application.composite.aggregator import EnricherAggregator
-    from bioetl.application.composite.checkpoint import CompositeCheckpointService
-    from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-    from bioetl.application.composite.column_orderer import ColumnOrderer
-    from bioetl.application.composite.column_priority_orderer import (
+    from bioetl.application.composite.runtime_wiring_api import (
+        CoalescePolicyService,
+        ColumnOrderer,
         ColumnPriorityOrderer,
-    )
-    from bioetl.application.composite.column_renamer import ColumnRenamer
-    from bioetl.application.composite.conflict_resolver import ConflictResolverService
-    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-    from bioetl.application.composite.deduplication import (
-        EnricherDeduplicatorService,
-    )
-    from bioetl.application.composite.dependency_coordinator import (
+        ColumnRenamer,
+        CompositeCheckpointService,
+        ConflictResolverService,
         DependencyCoordinatorService,
+        EnricherAggregator,
+        EnricherDeduplicatorService,
+        EnrichmentCoordinatorService,
+        FSMStateHelperService,
+        JoinPlannerService,
+        KeyExtractorService,
     )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.application.composite.join_planner import JoinPlannerService
-    from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.domain.ports import QuarantinePort

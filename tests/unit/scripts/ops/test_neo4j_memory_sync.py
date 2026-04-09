@@ -18,6 +18,7 @@ from scripts.ops.neo4j_memory_sync import (
     _prune_stale_relations_statement,
     _relation_statement,
     _reset_managed_relations_statement,
+    snapshot_invariant_issues,
 )
 
 
@@ -49,10 +50,15 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("policy_surface", "integration and VCR execution policy") in node_keys
     assert ("script_surface", "scripts/dev/run_pytest.sh") in node_keys
     assert ("port_surface", "bioetl.domain.ports") in node_keys
+    assert (
+        "port_surface",
+        "bioetl.domain.ports.runtime.runner.RunnablePort",
+    ) in node_keys
     assert ("adapter_surface", "bioetl.infrastructure.adapters.chembl") in node_keys
     assert ("pipeline_surface", "chembl_activity") in node_keys
     assert ("contract_surface", "chembl.activity") in node_keys
     assert ("alert_surface", "BioETLPipelineRunFailed") in node_keys
+    assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
     assert (
         "test_artifact",
         "tests/unit/scripts/ops/test_neo4j_memory_sync.py",
@@ -153,7 +159,7 @@ def test_snapshot_contains_expected_relations() -> None:
         "bioetl.infrastructure.adapters.chembl",
         "DEPENDS_ON",
         "port_surface",
-        "bioetl.domain.ports",
+        "bioetl.domain.ports.observability.logging.LoggerPort",
     ) in relation_keys
     assert (
         "pipeline_surface",
@@ -170,6 +176,20 @@ def test_snapshot_contains_expected_relations() -> None:
         "chembl.activity",
     ) in relation_keys
     assert (
+        "contract_surface",
+        "pubmed.publication",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/schemas/common/publication_base.py",
+    ) in relation_keys
+    assert (
+        "contract_surface",
+        "chembl.activity",
+        "BACKED_BY",
+        "config_artifact",
+        "configs/contracts/chembl/activity.yaml",
+    ) in relation_keys
+    assert (
         "policy_surface",
         "pipeline assembly model",
         "GOVERNS",
@@ -184,12 +204,68 @@ def test_snapshot_contains_expected_relations() -> None:
         "BioETLPipelineRunFailed",
     ) in relation_keys
     assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "RUNS_VIA",
+        "execution_path",
+        "uv run python -m bioetl run --pipeline",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "VALIDATED_BY",
+        "quality_gate",
+        "pytest",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "VALIDATED_BY",
+        "quality_gate",
+        "config validation",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-dq-v2",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "composite_activity",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-control-plane-v1",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "composite_activity",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-silver-reject-explorer",
+    ) not in relation_keys
+    assert (
         "alert_surface",
         "BioETLPipelineRunFailed",
         "DEPENDS_ON",
         "pipeline_surface",
         "chembl_activity",
     ) in relation_keys
+    assert (
+        "alert_surface",
+        "BioETLDQSoftThresholdExceeded",
+        "DEPENDS_ON",
+        "pipeline_surface",
+        "chembl_activity",
+    ) in relation_keys
+    assert (
+        "alert_surface",
+        "BioETLDQSoftThresholdExceeded",
+        "DEPENDS_ON",
+        "pipeline_surface",
+        "composite_activity",
+    ) not in relation_keys
     assert (
         "alert_surface",
         "BioETLProviderFailureRateHigh",
@@ -368,3 +444,9 @@ def test_build_diff_entries_tracks_missing_and_extra_keys() -> None:
             "delta": 0,
         },
     ]
+
+
+def test_snapshot_invariants_are_clean() -> None:
+    _, snapshot = _snapshot()
+
+    assert snapshot_invariant_issues(snapshot) == []

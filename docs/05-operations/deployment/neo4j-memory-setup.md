@@ -52,7 +52,9 @@ Last verified: '2026-04-09'
    This snapshot now covers repo-derived docs, configs, layers/modules, tests,
    dashboards, execution paths, curated policy surfaces, and a semantic
    impact-analysis layer for ports, adapters, pipelines, contracts, and alert
-   rules.
+   rules. The current sync also includes protocol/class-level domain ports,
+   richer contract-to-schema/config links, and direct pipeline runtime /
+   validation / observability edges.
 
 8. When you intentionally want to remove stale repo-derived graph nodes from the
    current ingest wave, run the explicit prune mode:
@@ -85,6 +87,14 @@ Last verified: '2026-04-09'
     This mode keeps unrelated labels such as `MemoryEntity` intact, but it
     deletes unmanaged legacy nodes for the repo-derived label families now owned
     by deterministic sync.
+
+12. To gate ontology drift in CI or locally without a live Neo4j backend, run:
+    ```bash
+    python -m scripts.ci neo4j-memory
+    ```
+    This checks snapshot invariants for the managed ontology layer and fails on
+    missing required labels/relations, missing protocol-level port surfaces,
+    missing rich contract metadata, leaked ignored paths, or snapshot orphans.
 
 ## Memory Configuration Profiles
 

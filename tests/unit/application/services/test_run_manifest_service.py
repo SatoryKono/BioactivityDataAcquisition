@@ -7,6 +7,7 @@ from uuid import UUID
 
 from hypothesis import given
 from hypothesis import strategies as st
+import pytest
 
 from bioetl.application.services.run_manifest_service import (
     RunManifestCreateRequest,
@@ -32,6 +33,11 @@ class _InMemoryRunManifestStore(RunManifestPort):
     def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
         manifest_id = self._by_run_id.get(str(run_id))
         return None if manifest_id is None else self._items.get(manifest_id)
+
+
+class _MissingLookupRunManifestStore(_InMemoryRunManifestStore):
+    def get(self, manifest_id: str) -> RunManifest | None:
+        return None
 
 
 def _make_request() -> RunManifestCreateRequest:
@@ -84,6 +90,20 @@ def test_create_manifest_persists_and_links_run_id() -> None:
     assert manifest.code_provenance.rule_bundle_version == "dq-rules.v1.0"
     assert store.get("manifest-1") == manifest
     assert store.get_by_run_id(manifest.run_id) == manifest
+
+
+def test_create_manifest_fails_closed_when_persisted_manifest_is_not_resolvable() -> None:
+    store = _MissingLookupRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing",
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="manifest is not resolvable by manifest_id",
+    ):
+        service.create_manifest(_make_request())
 
 
 def test_execution_fingerprint_is_stable_for_equivalent_requests() -> None:

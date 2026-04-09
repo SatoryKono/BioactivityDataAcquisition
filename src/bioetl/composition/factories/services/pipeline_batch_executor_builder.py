@@ -5,22 +5,16 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.batch_execution import (
+from bioetl.application.core.runtime_wiring_api import (
+    BatchExecutionFSM,
     BatchExecutionStateService,
-)
-from bioetl.application.core.batch_executor import (
     BatchExecutor,
     BatchExecutorDependencies,
-)
-from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
-)
-from bioetl.application.core.batch_processing_service import BatchProcessingComponents
-from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
-from bioetl.application.core.lifecycle.checkpoint_manager import (
+    BatchProcessingComponents,
     CheckpointManagerService,
+    GoldFilterCallback,
 )
-from bioetl.application.core.protocols import GoldFilterCallback
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services.pipeline_processing import (
     build_components_and_processing_service,
@@ -37,16 +31,15 @@ from bioetl.infrastructure.validation import PanderaGoldValidator
 if TYPE_CHECKING:
     import pyarrow as pa
 
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.batch_checkpoint_recovery_service import (
+    from bioetl.application.core.runtime_wiring_api import (
+        BasePipeline,
         BatchCheckpointRecoveryService,
+        BatchExecutionRunService,
+        BatchMemoryManagerService,
+        BatchProcessingService,
+        BatchProgressService,
+        ShutdownSignal,
     )
-    from bioetl.application.core.batch_execution import BatchExecutionRunService
-    from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
-    from bioetl.application.core.batch_processing_service import BatchProcessingService
-    from bioetl.application.core.batch_progress_service import BatchProgressService
-    from bioetl.application.core.batch_tracing import BatchTracingManagerService
-    from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.ports import (
         BatchIdGeneratorPort,

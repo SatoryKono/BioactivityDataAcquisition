@@ -124,6 +124,11 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
     summary = build_diagnostics_summary(manifest, ())
 
     assert summary == {
+        "manifest_id": "manifest-diagnostics",
+        "run_id": str(manifest.run_id),
+        "pipeline_name": "chembl_activity",
+        "provider": "chembl",
+        "entity": "activity",
         "execution_fingerprint": "fingerprint-diagnostics",
         "config_hash": "deadbeef",
         "effective_config_hash": "deadbeef",
@@ -133,6 +138,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "rule_bundle_version": "2026.03",
         "dq_contract_compatibility_hash": "compat-hash-1",
         "effective_config_artifact_id": "eca-123",
+        "planned_artifacts": [],
     }
 
 
@@ -175,7 +181,28 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
             "artifact_path": "data/output/silver/chembl/activity",
         }
     ]
+    assert summary["planned_artifact_count"] == 0
+    assert summary["published_artifact_count"] == 1
     assert summary["missing_artifact_links"] == 0
+    assert summary["identity_graph_complete"] is True
+    assert summary["identity_graph"] == {
+        "run_id": str(manifest.run_id),
+        "manifest_id": "manifest-diagnostics",
+        "execution_fingerprint": "fingerprint-diagnostics",
+        "effective_config_hash": "deadbeef",
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.2.0",
+        "planned_artifacts": [],
+        "published_artifacts": [
+            {
+                "event_type": "artifact_published",
+                "stage": "silver",
+                "dataset_ref": "silver:chembl.activity@1",
+                "lineage_fragment_id": "silver:fragment-1",
+                "artifact_path": "data/output/silver/chembl/activity",
+            }
+        ],
+    }
     assert summary["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
         "contract_ref": 0,
