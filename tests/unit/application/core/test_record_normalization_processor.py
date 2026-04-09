@@ -351,6 +351,50 @@ def test_chembl_activity_content_hash_treats_blank_identifier_fields_like_none()
 
 
 @pytest.mark.unit
+def test_normalize_record_softly_drops_invalid_smiles_from_payload_and_hash() -> None:
+    processor = RecordNormalizationProcessor(provider="pubchem")
+    record_with_invalid_smiles = {
+        "entity_id": "pubchem:1",
+        "content_hash": "stale-a",
+        "molecule_id": "2244",
+        "canonical_smiles": "invalid smiles with spaces",
+        "isomeric_smiles": "  C[C@H](O)CC  ",
+    }
+    record_with_missing_smiles = {
+        "entity_id": "pubchem:1",
+        "content_hash": "stale-b",
+        "molecule_id": "2244",
+        "canonical_smiles": None,
+        "isomeric_smiles": "C[C@H](O)CC",
+    }
+
+    normalized_invalid = processor.normalize_record(record_with_invalid_smiles)
+    normalized_missing = processor.normalize_record(record_with_missing_smiles)
+
+    assert normalized_invalid["canonical_smiles"] is None
+    assert normalized_invalid["isomeric_smiles"] == "C[C@H](O)CC"
+    assert normalized_invalid["content_hash"] == normalized_missing["content_hash"]
+
+
+@pytest.mark.unit
+def test_chembl_activity_profile_normalizes_canonical_smiles_via_smiles_value_object() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "activity_id": "CHEMBL25",
+            "canonical_smiles": " invalid smiles with spaces ",
+            "standard_value": "1.23",
+        }
+    )
+
+    assert normalized["canonical_smiles"] is None
+
+
+@pytest.mark.unit
 @given(
     activity_properties=st.permutations(
         (

@@ -7,13 +7,17 @@ with format validation and normalization.
 from __future__ import annotations
 
 import re
+from typing import Literal
 
+from bioetl.domain.validation import validate_smiles
 from bioetl.domain.value_objects.base import ValueObject
 
 __all__ = [
     "SMILES",
     "InChIKey",
 ]
+
+SMILESNormalizationMode = Literal["soft", "strict"]
 
 
 class InChIKey(ValueObject[str]):
@@ -134,7 +138,8 @@ class SMILES(ValueObject[str]):
 
     Invariants:
         - Must be a non-empty string
-        - Normalized by stripping whitespace
+        - Must satisfy the domain-level basic SMILES syntax contract
+        - Normalized by stripping outer whitespace
         - Optionally can be marked as canonical
     """
 
@@ -174,6 +179,8 @@ class SMILES(ValueObject[str]):
         normalized = value.strip()
         if not normalized:
             raise ValueError("SMILES cannot be empty")
+        if not validate_smiles(normalized):
+            raise ValueError(f"Invalid SMILES format: {value!r}")
 
         return normalized
 
@@ -202,21 +209,35 @@ class SMILES(ValueObject[str]):
         return cls(smiles, is_canonical=True)
 
     @classmethod
-    def from_raw(cls, raw: str | None, *, is_canonical: bool = False) -> SMILES | None:
+    def from_raw(
+        cls,
+        raw: str | None,
+        *,
+        is_canonical: bool = False,
+        mode: SMILESNormalizationMode = "soft",
+    ) -> SMILES | None:
         """Create SMILES from raw string with normalization.
 
         Args:
             raw: Raw SMILES string or None.
             is_canonical: Whether this is a canonical SMILES.
+            mode: ``soft`` returns None for invalid inputs; ``strict`` raises.
 
         Returns:
-            SMILES if valid, None if input is None, empty, or invalid.
+            SMILES if valid. In ``soft`` mode returns None when the input is
+            empty or invalid.
         """
+        if mode not in {"soft", "strict"}:
+            raise ValueError(f"Unsupported SMILES normalization mode: {mode!r}")
         if not raw or not raw.strip():
-            return None
+            if mode == "soft":
+                return None
+            raise ValueError("SMILES cannot be empty")
         try:
             return cls(raw, is_canonical=is_canonical)
         except ValueError:
+            if mode == "strict":
+                raise
             return None
 
     def __eq__(self, other: object) -> bool:

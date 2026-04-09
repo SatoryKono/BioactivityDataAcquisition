@@ -29,6 +29,7 @@ from bioetl.domain.normalization.text import (
     normalize_title,
 )
 from bioetl.domain.transformations import generate_content_hash
+from bioetl.domain.value_objects import SMILES
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -276,6 +277,8 @@ class RecordNormalizationProcessor:
     def _normalize_special_field(self, field_name: str, value: object) -> object:
         if value is None:
             return None
+        if self._is_smiles_field(field_name):
+            return self._normalize_smiles_field(field_name, value)
         if self._is_doi_field(field_name):
             return normalize_doi(value) if isinstance(value, str) else value
         if self._is_pmid_field(field_name):
@@ -350,3 +353,16 @@ class RecordNormalizationProcessor:
             or field_name.endswith("_date")
             or field_name.startswith("date_")
         )
+
+    def _is_smiles_field(self, field_name: str) -> bool:
+        return field_name == "smiles" or field_name.endswith("_smiles")
+
+    def _normalize_smiles_field(self, field_name: str, value: object) -> str | None:
+        if not isinstance(value, str):
+            return None
+        normalized = SMILES.from_raw(
+            value,
+            is_canonical=(field_name == "canonical_smiles"),
+            mode="soft",
+        )
+        return str(normalized) if normalized is not None else None

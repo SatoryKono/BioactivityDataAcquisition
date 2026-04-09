@@ -148,6 +148,21 @@ class TestSMILESValidation:
         assert result is not None
         assert result.is_canonical is True
 
+    def test_from_raw_soft_invalid_returns_none(self) -> None:
+        assert SMILES.from_raw("invalid smiles with spaces") is None
+
+    def test_from_raw_strict_invalid_raises(self) -> None:
+        with pytest.raises(ValueError, match="Invalid SMILES format"):
+            SMILES.from_raw("invalid smiles with spaces", mode="strict")
+
+    def test_from_raw_strict_blank_raises(self) -> None:
+        with pytest.raises(ValueError, match="cannot be empty"):
+            SMILES.from_raw("   ", mode="strict")
+
+    def test_invalid_smiles_characters_raise(self) -> None:
+        with pytest.raises(ValueError, match="Invalid SMILES format"):
+            SMILES("CCO🙂")
+
     def test_repr_basic(self) -> None:
         s = SMILES("CC")
         assert "CC" in repr(s)
