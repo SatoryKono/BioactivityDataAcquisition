@@ -7,9 +7,9 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.normalization import normalize_runtime_anchor_payload
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.exceptions import BioETLError, CheckpointConflictError, StorageError
+from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort

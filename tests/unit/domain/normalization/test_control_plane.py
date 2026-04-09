@@ -32,12 +32,31 @@ def test_normalize_run_manifest_spec_is_deterministic_for_set_like_refs() -> Non
                 "pipeline_name": "chembl_activity",
                 "entity": "activity",
                 "provider": "chembl",
+                "input_snapshots": [
+                    {
+                        "snapshot_id": "snapshot-b-2",
+                        "content_hash": "hash-b-2",
+                        "immutable_uri": "file:///snapshots/b-2.jsonl",
+                    },
+                    {
+                        "snapshot_id": "snapshot-b-1",
+                        "content_hash": "hash-b-1",
+                        "immutable_uri": "file:///snapshots/b-1.jsonl",
+                    },
+                ],
             },
             {
                 "pipeline_name": "chembl_activity",
                 "provider": "chembl",
                 "entity": "activity",
                 "query": "assay_type=F",
+                "input_snapshots": [
+                    {
+                        "snapshot_id": "snapshot-f-1",
+                        "content_hash": "hash-f-1",
+                        "immutable_uri": "file:///snapshots/f-1.jsonl",
+                    }
+                ],
             },
         ],
         "planned_artifacts": [
@@ -67,6 +86,18 @@ def test_normalize_run_manifest_spec_is_deterministic_for_set_like_refs() -> Non
         {"layer": "bronze", "path": "data/output/bronze/chembl/activity"},
         {"layer": "gold", "path": "data/output/gold/chembl/activity"},
     ]
+    assert normalized["source_refs"][0]["input_snapshots"] == [
+        {
+            "content_hash": "hash-b-1",
+            "immutable_uri": "file:///snapshots/b-1.jsonl",
+            "snapshot_id": "snapshot-b-1",
+        },
+        {
+            "content_hash": "hash-b-2",
+            "immutable_uri": "file:///snapshots/b-2.jsonl",
+            "snapshot_id": "snapshot-b-2",
+        },
+    ]
 
 
 def test_normalize_run_ledger_payload_is_idempotent() -> None:
@@ -95,7 +126,7 @@ def test_normalize_run_ledger_payload_is_idempotent() -> None:
     assert normalized["run_id"] == "11111111-1111-1111-1111-111111111111"
     assert normalized["occurred_at"] == "2026-04-08T12:53:47Z"
     assert normalized["metrics_snapshot"] == {"records_a": 1, "records_b": 2}
-    assert list((normalized["details"])) == ["_diagnostic", "alpha", "beta"]
+    assert list(normalized["details"]) == ["_diagnostic", "alpha", "beta"]
 
 
 def test_normalize_runtime_anchor_payload_coerces_canonical_contract_fields() -> None:

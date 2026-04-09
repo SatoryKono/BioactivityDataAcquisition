@@ -177,7 +177,7 @@ def test_execution_fingerprint_matches_golden_value() -> None:
 
     assert (
         manifest.execution_fingerprint
-        == "3310c9a134a19289b4cd39456f3935267e7908e0ad48b0a1c1638d98f05c08d1"
+        == "64f13976644204fa48aac79ff42dbd9c735e9b064c7f8f8fc76241dd0068eddf"
     )
 
 

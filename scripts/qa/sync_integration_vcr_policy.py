@@ -4,12 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from collections.abc import Iterable
 from pathlib import Path
-import sys
 
 import yaml
-
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "configs" / "quality" / "integration_vcr_policy.yaml"

@@ -18,9 +18,8 @@ from bioetl.domain.types import JsonDict
 
 from ..constants import META_FIELDS
 from ..serialization import serialize_to_canonical_json
-from ._hashing_normalization import _normalize_value_for_hash
 from ..types import ContentHash, EntityID
-
+from ._hashing_normalization import _normalize_value_for_hash
 
 # =============================================================================
 # Field inclusion helpers

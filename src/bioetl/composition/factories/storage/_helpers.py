@@ -34,7 +34,6 @@ from .adapter import StorageAdapter
 
 if TYPE_CHECKING:
     from bioetl.application.services.metadata_coordinator import MetadataCoordinator
-    from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
@@ -42,13 +41,14 @@ if TYPE_CHECKING:
         SilverValidatorPort,
         TracingPort,
     )
+    from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
     from bioetl.infrastructure.storage.delta.resilience import (
         AdaptiveRetryPolicy,
         SilverMergeResiliencePolicy,
     )
-    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 

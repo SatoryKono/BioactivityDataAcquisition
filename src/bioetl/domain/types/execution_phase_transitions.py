@@ -7,10 +7,6 @@ from bioetl.domain.types._execution_phase_transition_support import (
     PolicyT,
     RuleT,
     TransitionT,
-    _ExecutionPhaseNamespace,
-    _PhaseTransitionNamespace,
-    _PhaseTransitionRuleBuilder,
-    _TransitionPolicyNamespace,
     _build_cross_validation_transitions,
     _build_dependency_execution_transitions,
     _build_enrichment_transitions,
@@ -18,7 +14,11 @@ from bioetl.domain.types._execution_phase_transition_support import (
     _build_not_started_transitions,
     _build_preflight_transitions,
     _build_write_finalize_transitions,
+    _ExecutionPhaseNamespace,
     _get_terminal_phases,
+    _PhaseTransitionNamespace,
+    _PhaseTransitionRuleBuilder,
+    _TransitionPolicyNamespace,
 )
 
 

@@ -11,16 +11,16 @@ from bioetl.application.core.config import (
 )
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.domain.normalization.profiles import (
-    FieldRule,
-    NormalizationProfile,
-    resolve_normalization_profile,
-)
 from bioetl.domain.normalization.dates import normalize_partial_date
 from bioetl.domain.normalization.identifiers import normalize_doi, normalize_pmid
 from bioetl.domain.normalization.json import (
     canonicalize_json_string,
     serialize_json_canonical,
+)
+from bioetl.domain.normalization.profiles import (
+    FieldRule,
+    NormalizationProfile,
+    resolve_normalization_profile,
 )
 from bioetl.domain.normalization.text import (
     normalize_abstract,

@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from bioetl.composition.factories.pipeline._factory_method_control_plane import (
     apply_optional_control_plane_kwargs as _apply_optional_control_plane_kwargs,
+)
+from bioetl.composition.factories.pipeline._factory_method_control_plane import (
     resolve_strict_gold_validation as _resolve_strict_gold_validation,
 )
 from bioetl.composition.factories.pipeline.creation_support import (
@@ -269,14 +271,17 @@ def create_pipeline_instance_with_services(
         effective_config_artifact_id=request.effective_config_artifact_id,
     )
     # Any: compatibility seam forwards optional kwargs only when present.
+    # Any: factory callable keeps an open kwargs contract across compatibility seams.
     return cast(
         "BasePipeline",
         cast(
-            "Any", create_pipeline_with_services  # Any: factory callable keeps an open kwargs contract across compatibility seams.
-        )(  # Any: factory callable keeps an open kwargs contract across compatibility seams.
+            "Any",
+            create_pipeline_with_services,
+        )(
             **cast(
-                "dict[str, Any]", create_pipeline_kwargs  # Any: kwargs bag mixes heterogeneous optional service values.
-            )  # Any: kwargs bag mixes heterogeneous optional service values.
+                "dict[str, Any]",
+                create_pipeline_kwargs,  # Any: kwargs bag mixes heterogeneous optional service values.
+            )
         ),
     )
 
@@ -323,11 +328,13 @@ def create_factory_runner(
     )
     # Any: factory callback signature is intentionally open for runtime/test seams.
     pipeline = cast(
-        "Any", create_with_services_fn  # Any: factory callback stays open to provider-specific wiring extensions.
-    )(  # Any: factory callback stays open to provider-specific wiring extensions.
+        "Any",
+        create_with_services_fn,  # Any: factory callback stays open to provider-specific wiring extensions.
+    )(
         **cast(
-            "dict[str, Any]", create_with_services_kwargs  # Any: kwargs bag carries heterogeneous optional service objects.
-        )  # Any: kwargs bag carries heterogeneous optional service objects.
+            "dict[str, Any]",
+            create_with_services_kwargs,  # Any: kwargs bag carries heterogeneous optional service objects.
+        )
     )
     return assemble_runner_fn(
         pipeline=pipeline,
