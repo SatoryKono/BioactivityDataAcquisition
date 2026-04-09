@@ -118,72 +118,30 @@ class DomainInfraExceptionMapper:
         assert status_code is not None
 
         if status_code in _AUTH_STATUS_CODES:
-            self._raise_critical(
-                message=(
-                    f"{payload.provider} authentication failed "
-                    f"(HTTP {status_code}): {message}"
-                ),
-                reason_code="ADAPTER_AUTH_FAILED",
+            self._raise_authentication_error(
                 payload=payload,
+                status_code=status_code,
+                message=message,
             )
 
         if status_code == _RATE_LIMIT_STATUS_CODE:
-            retry_after = payload.retry_after or _DEFAULT_RETRY_AFTER_SECONDS
-            self._logger.info(
-                "http_error_wrapped_rate_limit",
-                provider=payload.provider,
-                status_code=status_code,
-                retry_after=retry_after,
-                recovery_action="retry_after_delay",
-            )
-            mapped_rate_limit = RateLimitExceededError(
-                message=message,
-                service_name=payload.provider,
-                retry_after=retry_after,
-            )
-            return self._decorate_mapped_error(
-                error=mapped_rate_limit,
-                reason_code="ADAPTER_HTTP_RATE_LIMIT",
+            return self._map_rate_limit_status(
                 payload=payload,
+                status_code=status_code,
+                message=message,
             )
 
         if status_code >= 500:
-            self._logger.info(
-                "http_error_wrapped_server_error",
-                provider=payload.provider,
-                status_code=status_code,
-                retry_after=payload.retry_after,
-                recovery_action="retry_with_backoff",
-            )
-            mapped_server_error = ServiceUnavailableError(
-                message=message,
-                service_name=payload.provider,
-                status_code=status_code,
-                retry_after=payload.retry_after,
-            )
-            return self._decorate_mapped_error(
-                error=mapped_server_error,
-                reason_code="ADAPTER_HTTP_SERVER_ERROR",
+            return self._map_server_error_status(
                 payload=payload,
+                status_code=status_code,
+                message=message,
             )
 
-        self._logger.debug(
-            "http_error_wrapped_generic",
-            provider=payload.provider,
-            status_code=status_code,
-            retry_after=payload.retry_after,
-            recovery_action="no_retry",
-        )
-        mapped_external = ExternalServiceError(
-            message=message,
-            service_name=payload.provider,
-            status_code=status_code,
-            retry_after=payload.retry_after,
-        )
-        return self._decorate_mapped_error(
-            error=mapped_external,
-            reason_code="ADAPTER_HTTP_ERROR",
+        return self._map_generic_http_error(
             payload=payload,
+            status_code=status_code,
+            message=message,
         )
 
     def _map_without_status_code(
@@ -272,6 +230,104 @@ class DomainInfraExceptionMapper:
         return self._decorate_mapped_error(
             error=mapped_external,
             reason_code="ADAPTER_EXTERNAL_ERROR",
+            payload=payload,
+        )
+
+    def _raise_authentication_error(
+        self,
+        *,
+        payload: DomainErrorMappingInput,
+        status_code: int,
+        message: str,
+    ) -> None:
+        """Raise the critical auth failure variant for HTTP 401/403 responses."""
+        self._raise_critical(
+            message=(
+                f"{payload.provider} authentication failed "
+                f"(HTTP {status_code}): {message}"
+            ),
+            reason_code="ADAPTER_AUTH_FAILED",
+            payload=payload,
+        )
+
+    def _map_rate_limit_status(
+        self,
+        *,
+        payload: DomainErrorMappingInput,
+        status_code: int,
+        message: str,
+    ) -> ExternalServiceError:
+        """Map HTTP 429 into RateLimitExceededError with retry metadata."""
+        retry_after = payload.retry_after or _DEFAULT_RETRY_AFTER_SECONDS
+        self._logger.info(
+            "http_error_wrapped_rate_limit",
+            provider=payload.provider,
+            status_code=status_code,
+            retry_after=retry_after,
+            recovery_action="retry_after_delay",
+        )
+        mapped_rate_limit = RateLimitExceededError(
+            message=message,
+            service_name=payload.provider,
+            retry_after=retry_after,
+        )
+        return self._decorate_mapped_error(
+            error=mapped_rate_limit,
+            reason_code="ADAPTER_HTTP_RATE_LIMIT",
+            payload=payload,
+        )
+
+    def _map_server_error_status(
+        self,
+        *,
+        payload: DomainErrorMappingInput,
+        status_code: int,
+        message: str,
+    ) -> ExternalServiceError:
+        """Map HTTP 5xx failures into ServiceUnavailableError."""
+        self._logger.info(
+            "http_error_wrapped_server_error",
+            provider=payload.provider,
+            status_code=status_code,
+            retry_after=payload.retry_after,
+            recovery_action="retry_with_backoff",
+        )
+        mapped_server_error = ServiceUnavailableError(
+            message=message,
+            service_name=payload.provider,
+            status_code=status_code,
+            retry_after=payload.retry_after,
+        )
+        return self._decorate_mapped_error(
+            error=mapped_server_error,
+            reason_code="ADAPTER_HTTP_SERVER_ERROR",
+            payload=payload,
+        )
+
+    def _map_generic_http_error(
+        self,
+        *,
+        payload: DomainErrorMappingInput,
+        status_code: int,
+        message: str,
+    ) -> ExternalServiceError:
+        """Map non-auth, non-rate-limit, non-5xx HTTP errors generically."""
+        self._logger.debug(
+            "http_error_wrapped_generic",
+            provider=payload.provider,
+            status_code=status_code,
+            retry_after=payload.retry_after,
+            recovery_action="no_retry",
+        )
+        mapped_external = ExternalServiceError(
+            message=message,
+            service_name=payload.provider,
+            status_code=status_code,
+            retry_after=payload.retry_after,
+        )
+        return self._decorate_mapped_error(
+            error=mapped_external,
+            reason_code="ADAPTER_HTTP_ERROR",
             payload=payload,
         )
 

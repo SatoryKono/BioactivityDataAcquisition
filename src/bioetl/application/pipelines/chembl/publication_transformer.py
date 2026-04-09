@@ -180,69 +180,76 @@ class PublicationTransformer(BaseChemblTransformer):
             "publication_id": str(primary_id),
             **map_field_groups(record, _PUBLICATION_GROUPS),
         }
+        self._normalize_publication_identity(data, record)
+        self._normalize_publication_text(data)
+        self._normalize_publication_authors(data)
+        self._apply_release_metadata(data, record)
+        self._apply_publication_defaults(data, primary_id, record)
+        return data
 
-        # Normalize publication_type to canonical kebab-case
+        # Any: generic domain entity; type varies by pipeline
+
+    def _normalize_publication_identity(
+        self,
+        data: GoldRecord,
+        record: BronzeRecord,
+    ) -> None:
+        """Normalize publication identifiers and value-object backed fields."""
         data["publication_type"] = normalize_publication_type(
             data.get("publication_type")
         )
-
-        # Normalize text fields using DataNormalizationService
-        # Level A: Bronze → Silver basic normalization
-        # - HTML cleanup, whitespace, unicode NFC, trim
-        normalizer = self._data_normalizer
-        data["title"] = normalizer.normalize_title(data.get("title"))
-        data["abstract"] = normalizer.normalize_abstract(data.get("abstract"))
-
-        # Validate DOI using Value Object (returns None for invalid/empty)
         data["publication_pmid"] = data.get("publication_pmid") or PMID(
             record.get("pmid")
         )
         doi = DOI.from_raw(data.get("publication_doi"))
         data["publication_doi"] = str(doi) if doi else None
         data["doi"] = data["publication_doi"]
-
-        # Validate year using PublicationYear Value Object
-        # Note: field_specs already maps year → publication_year
         data["publication_year"] = self.validate_value_object(
             PublicationYear, data.get("publication_year"), as_string=False
         )
         data["pmid"] = data.get("publication_pmid")
 
-        # Normalize authors using unified service (RULES.md §5.4)
-        # ChEMBL authors is a concatenated string - parse, hash, serialize to JSON
-        # Uses normalize_author_list() for unified cross-provider handling
+    def _normalize_publication_text(self, data: GoldRecord) -> None:
+        """Apply Level-A text normalization for title and abstract fields."""
+        normalizer = self._data_normalizer
+        data["title"] = normalizer.normalize_title(data.get("title"))
+        data["abstract"] = normalizer.normalize_abstract(data.get("abstract"))
+
+    def _normalize_publication_authors(self, data: GoldRecord) -> None:
+        """Normalize ChEMBL author strings into unified list/key representations."""
         raw_authors = data.get("authors")
+        normalizer = self._data_normalizer
         data["authors"] = normalizer.normalize_author_list(raw_authors)
         data["author_keys"] = normalizer.normalize_author_keys(raw_authors)
 
-        # Lookup metadata (direct extraction, no enrichment)
-        data["_lookup_method"] = "direct"
-        data["_original_id"] = str(primary_id)
-
-        # ChEMBL release metadata (nested object from API)
+    def _apply_release_metadata(
+        self,
+        data: GoldRecord,
+        record: BronzeRecord,
+    ) -> None:
+        """Copy nested ChEMBL release metadata into the business payload."""
         release_info = record.get("chembl_release")
         if release_info and isinstance(release_info, dict):
             data["chembl_release"] = release_info.get("chembl_release")
             data["creation_date"] = release_info.get("creation_date")
-        else:
-            data["chembl_release"] = None
-            data["creation_date"] = None
+            return
+        data["chembl_release"] = None
+        data["creation_date"] = None
 
-        # System field: data source identifier
+    def _apply_publication_defaults(
+        self,
+        data: GoldRecord,
+        primary_id: PrimaryId,
+        record: BronzeRecord,
+    ) -> None:
+        """Populate default metadata, citations, and missing publication fields."""
+        data["_lookup_method"] = "direct"
+        data["_original_id"] = str(primary_id)
         data["_source"] = "chembl"
-
-        # Unified publication fields (ChEMBL only provides citation_count)
-        citation_count = record.get("citation_count")
-        if citation_count is not None:
-            try:
-                data["citations_received"] = int(str(citation_count))
-            except (TypeError, ValueError):
-                data["citations_received"] = None
-        else:
-            data["citations_received"] = None
+        data["citations_received"] = self._parse_citation_count(
+            record.get("citation_count")
+        )
         data["citations_made"] = None
-
-        # Fields from PublicationBaseSchema that ChEMBL API doesn't provide
         data["pmc_id"] = None
         data["affiliation_list"] = None
         data["author_orcids"] = None
@@ -250,14 +257,18 @@ class PublicationTransformer(BaseChemblTransformer):
         data["language"] = None
         data["is_oa"] = None
         data["oa_status"] = None
-
-        # DQ flags (default: no warnings or errors)
         data["_dq_warn"] = False
         data["_dq_error"] = False
 
-        return data
-
-        # Any: generic domain entity; type varies by pipeline
+    @staticmethod
+    def _parse_citation_count(value: object) -> int | None:
+        """Parse the optional citation count into an integer when possible."""
+        if value is None:
+            return None
+        try:
+            return int(str(value))
+        except (TypeError, ValueError):
+            return None
 
     def entity_to_silver_record(
         self,

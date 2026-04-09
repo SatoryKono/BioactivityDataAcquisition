@@ -162,6 +162,83 @@ def _extract_author_bundle(
     }
 
 
+def _build_crossref_identity_fields(
+    *,
+    record: JsonDict,
+    doi: str,
+    author_bundle: dict[str, str | None],
+) -> GoldRecord:
+    """Build identity and publication-core fields for CrossRef payloads."""
+    return {
+        "doi": doi,
+        # Required PublicationBaseSchema fields unavailable in CrossRef payload.
+        "pmid": None,
+        "pmc_id": None,
+        "abstract": None,
+        "title": extract_first_string(record.get("title", [])),
+        **author_bundle,
+        "publication_type": normalize_publication_type(record.get("type")),
+        "_source": "crossref",
+        "_lookup_method": record.get("_lookup_method", "doi"),
+        "_original_id": record.get("_original_id"),
+    }
+
+
+def _build_crossref_metadata_fields(
+    *,
+    record: JsonDict,
+    journal_info: JsonDict,
+    page_info: JsonDict,
+    dates: JsonDict,
+    content_domain: JsonDict,
+    issn_by_type: JsonDict,
+    published_date: str | None,
+    publication_date: str | None,
+    publication_year: int | None,
+    classify_publication_type: Callable[[str | None], dict[str, str | None]],
+    serialize_json_list: Callable[[Sequence[object] | None], str | None],
+) -> GoldRecord:
+    """Build publication metadata fields for CrossRef payloads."""
+    return {
+        **journal_info,
+        **page_info,
+        **dates,
+        "publication_year": publication_year,
+        "publication_date": publication_date,
+        **classify_publication_type(record.get("type")),
+        "citations_received": record.get("is-referenced-by-count"),
+        "citations_made": record.get("references-count"),
+        "language": record.get("language"),
+        "license_url": extract_license_url(record),
+        "subject_keywords": serialize_json_list(record.get("subject", []) or []),
+        "is_oa": None,
+        "alternative_id": serialize_json_list(record.get("alternative-id", []) or []),
+        "journal_name_short": extract_first_string(record.get("short-container-title")),
+        "published": published_date,
+        "content_domain_domains": serialize_json_list(
+            content_domain.get("content_domain_domains", [])
+        ),
+        "content_domain_crossmark_restriction": content_domain.get(
+            "content_domain_crossmark_restriction"
+        ),
+        **issn_by_type,
+    }
+
+
+def _build_crossref_reference_fields(
+    *,
+    record: JsonDict,
+    references: str | None,
+) -> GoldRecord:
+    """Build reference and DQ fields for CrossRef payloads."""
+    return {
+        "references": references,
+        # DQ flags (MUST be last, per RULES.md §2.4)
+        "_dq_warn": False,
+        "_dq_error": False,
+    }
+
+
 def build_crossref_business_data(
     record: JsonDict,  # Any: raw CrossRef API record
     *,
@@ -214,41 +291,26 @@ def build_crossref_business_data(
     references = serialize_json(raw_references)
 
     return {
-        "doi": doi,
-        # Required PublicationBaseSchema fields unavailable in CrossRef payload.
-        "pmid": None,
-        "pmc_id": None,
-        "abstract": None,
-        "title": extract_first_string(record.get("title", [])),
-        **author_bundle,
-        **journal_info,
-        **page_info,
-        **dates,
-        "publication_year": validate_publication_year(raw_year),
-        "publication_date": publication_date,
-        "publication_type": normalize_publication_type(record.get("type")),
-        **classify_publication_type(record.get("type")),
-        "citations_received": record.get("is-referenced-by-count"),
-        "citations_made": record.get("references-count"),
-        "language": record.get("language"),
-        "license_url": extract_license_url(record),
-        "subject_keywords": serialize_json_list(record.get("subject", []) or []),
-        "_source": "crossref",
-        "is_oa": None,
-        "_lookup_method": record.get("_lookup_method", "doi"),
-        "_original_id": record.get("_original_id"),
-        "alternative_id": serialize_json_list(record.get("alternative-id", []) or []),
-        "journal_name_short": extract_first_string(record.get("short-container-title")),
-        "published": published_date,
-        "content_domain_domains": serialize_json_list(
-            content_domain.get("content_domain_domains", [])
+        **_build_crossref_identity_fields(
+            record=record,
+            doi=doi,
+            author_bundle=author_bundle,
         ),
-        "content_domain_crossmark_restriction": content_domain.get(
-            "content_domain_crossmark_restriction"
+        **_build_crossref_metadata_fields(
+            record=record,
+            journal_info=journal_info,
+            page_info=page_info,
+            dates=dates,
+            content_domain=content_domain,
+            issn_by_type=issn_by_type,
+            published_date=published_date,
+            publication_date=publication_date,
+            publication_year=validate_publication_year(raw_year),
+            classify_publication_type=classify_publication_type,
+            serialize_json_list=serialize_json_list,
         ),
-        **issn_by_type,
-        "references": references if isinstance(references, str) else None,
-        # DQ flags (MUST be last, per RULES.md §2.4)
-        "_dq_warn": False,
-        "_dq_error": False,
+        **_build_crossref_reference_fields(
+            record=record,
+            references=references if isinstance(references, str) else None,
+        ),
     }

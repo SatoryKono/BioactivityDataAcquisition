@@ -5,7 +5,7 @@ Class: internal-published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-09'
 ---
 
 # Neo4j Memory Configuration Guide
@@ -50,7 +50,9 @@ Last verified: '2026-03-29'
    python -m scripts.ops sync-neo4j-memory --apply
    ```
    This snapshot now covers repo-derived docs, configs, layers/modules, tests,
-   dashboards, execution paths, and curated policy surfaces.
+   dashboards, execution paths, curated policy surfaces, and a semantic
+   impact-analysis layer for ports, adapters, pipelines, contracts, and alert
+   rules.
 
 8. When you intentionally want to remove stale repo-derived graph nodes from the
    current ingest wave, run the explicit prune mode:

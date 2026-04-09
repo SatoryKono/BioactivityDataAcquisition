@@ -93,8 +93,9 @@ def _dq_config_to_dict(dq_config: DQConfig) -> JsonDict:
     }
 
 
-def _dict_to_artifact(artifact_dict: JsonDict) -> EffectiveConfigArtifact:
-    source_refs = [
+def _build_source_refs(artifact_dict: JsonDict) -> list[ConfigSourceRef]:
+    """Reconstruct source references from the serialized artifact payload."""
+    return [
         ConfigSourceRef(
             source_type=str(src["source_type"]),
             source_path=str(src["source_path"]),
@@ -103,32 +104,49 @@ def _dict_to_artifact(artifact_dict: JsonDict) -> EffectiveConfigArtifact:
         )
         for src in artifact_dict["source_refs"]
     ]
-    resolved_config = ResolvedConfigSnapshot(
-        config_type=str(artifact_dict["resolved_config"]["config_type"]),
-        config_data=dict(artifact_dict["resolved_config"]["config_data"]),
-        config_hash=str(artifact_dict["resolved_config"]["config_hash"]),
-        timestamp=datetime.fromisoformat(
-            str(artifact_dict["resolved_config"]["timestamp"])
-        ),
+
+
+def _build_resolved_config_snapshot(
+    artifact_dict: JsonDict,
+) -> ResolvedConfigSnapshot:
+    """Reconstruct the resolved config snapshot from serialized state."""
+    resolved = artifact_dict["resolved_config"]
+    return ResolvedConfigSnapshot(
+        config_type=str(resolved["config_type"]),
+        config_data=dict(resolved["config_data"]),
+        config_hash=str(resolved["config_hash"]),
+        timestamp=datetime.fromisoformat(str(resolved["timestamp"])),
     )
-    runtime_overrides = RuntimeOverrideSnapshot(
-        cli_overrides=dict(artifact_dict["runtime_overrides"]["cli_overrides"]),
-        env_overrides=dict(artifact_dict["runtime_overrides"]["env_overrides"]),
-        runtime_adjustments=dict(
-            artifact_dict["runtime_overrides"]["runtime_adjustments"]
-        ),
-        override_hash=str(artifact_dict["runtime_overrides"].get("override_hash", "")),
+
+
+def _build_runtime_override_snapshot(
+    artifact_dict: JsonDict,
+) -> RuntimeOverrideSnapshot:
+    """Reconstruct runtime override state from serialized artifact data."""
+    runtime_overrides = artifact_dict["runtime_overrides"]
+    return RuntimeOverrideSnapshot(
+        cli_overrides=dict(runtime_overrides["cli_overrides"]),
+        env_overrides=dict(runtime_overrides["env_overrides"]),
+        runtime_adjustments=dict(runtime_overrides["runtime_adjustments"]),
+        override_hash=str(runtime_overrides.get("override_hash", "")),
     )
-    effective_execution_config = EffectiveExecutionConfig(
-        config_data=dict(artifact_dict["effective_execution_config"]["config_data"]),
-        effective_hash=str(
-            artifact_dict["effective_execution_config"]["effective_hash"]
-        ),
-        timestamp=datetime.fromisoformat(
-            str(artifact_dict["effective_execution_config"]["timestamp"])
-        ),
+
+
+def _build_effective_execution_config(
+    artifact_dict: JsonDict,
+) -> EffectiveExecutionConfig:
+    """Reconstruct the effective execution config snapshot."""
+    effective = artifact_dict["effective_execution_config"]
+    return EffectiveExecutionConfig(
+        config_data=dict(effective["config_data"]),
+        effective_hash=str(effective["effective_hash"]),
+        timestamp=datetime.fromisoformat(str(effective["timestamp"])),
     )
-    dq_policy_refs = [
+
+
+def _build_dq_policy_refs(artifact_dict: JsonDict) -> list[DQPolicyRef]:
+    """Reconstruct DQ policy references from the serialized artifact payload."""
+    return [
         DQPolicyRef(
             contract_ref=str(ref["contract_ref"]),
             contract_version=str(ref["contract_version"]),
@@ -137,7 +155,11 @@ def _dict_to_artifact(artifact_dict: JsonDict) -> EffectiveConfigArtifact:
         )
         for ref in artifact_dict.get("dq_policy_refs", [])
     ]
-    dq_policy_snapshots = [
+
+
+def _build_dq_policy_snapshots(artifact_dict: JsonDict) -> list[DQPolicySnapshot]:
+    """Reconstruct DQ policy snapshots from the serialized artifact payload."""
+    return [
         DQPolicySnapshot(
             contract_ref=str(snapshot["contract_ref"]),
             contract_version=str(snapshot["contract_version"]),
@@ -153,38 +175,41 @@ def _dict_to_artifact(artifact_dict: JsonDict) -> EffectiveConfigArtifact:
         )
         for snapshot in artifact_dict.get("dq_policy_snapshots", [])
     ]
+
+
+def _build_resolution_policy(artifact_dict: JsonDict) -> ConfigResolutionPolicy:
+    """Reconstruct the config resolution policy from serialized artifact data."""
+    policy = artifact_dict["resolution_policy"]
+    return ConfigResolutionPolicy(
+        merge_strategy=str(policy["merge_strategy"]),
+        default_materialization=bool(policy["default_materialization"]),
+        strict_validation=bool(policy["strict_validation"]),
+        allow_runtime_overrides=bool(policy["allow_runtime_overrides"]),
+    )
+
+
+def _dict_to_artifact(artifact_dict: JsonDict) -> EffectiveConfigArtifact:
     return EffectiveConfigArtifact(
         artifact_id=str(artifact_dict["artifact_id"]),
         pipeline_name=str(artifact_dict["pipeline_name"]),
         pipeline_kind=str(artifact_dict["pipeline_kind"]),
-        source_refs=source_refs,
-        resolution_policy=ConfigResolutionPolicy(
-            merge_strategy=str(artifact_dict["resolution_policy"]["merge_strategy"]),
-            default_materialization=bool(
-                artifact_dict["resolution_policy"]["default_materialization"]
-            ),
-            strict_validation=bool(
-                artifact_dict["resolution_policy"]["strict_validation"]
-            ),
-            allow_runtime_overrides=bool(
-                artifact_dict["resolution_policy"]["allow_runtime_overrides"]
-            ),
-        ),
-        resolved_config=resolved_config,
-        runtime_overrides=runtime_overrides,
-        effective_execution_config=effective_execution_config,
+        source_refs=_build_source_refs(artifact_dict),
+        resolution_policy=_build_resolution_policy(artifact_dict),
+        resolved_config=_build_resolved_config_snapshot(artifact_dict),
+        runtime_overrides=_build_runtime_override_snapshot(artifact_dict),
+        effective_execution_config=_build_effective_execution_config(artifact_dict),
         resolved_config_hash=str(artifact_dict["resolved_config_hash"]),
         effective_config_hash=str(artifact_dict["effective_config_hash"]),
         source_fingerprint=str(artifact_dict["source_fingerprint"]),
         schema_version=str(artifact_dict.get("schema_version", "1.0")),
         created_at=datetime.fromisoformat(str(artifact_dict["created_at"])),
         contract_refs=[str(value) for value in artifact_dict.get("contract_refs", [])],
-        dq_policy_refs=dq_policy_refs,
+        dq_policy_refs=_build_dq_policy_refs(artifact_dict),
         dq_rule_bundle_versions=dict(artifact_dict.get("dq_rule_bundle_versions", {})),
         dq_contract_compatibility_hash=str(
             artifact_dict.get("dq_contract_compatibility_hash", "")
         ),
-        dq_policy_snapshots=dq_policy_snapshots,
+        dq_policy_snapshots=_build_dq_policy_snapshots(artifact_dict),
     )
 
 

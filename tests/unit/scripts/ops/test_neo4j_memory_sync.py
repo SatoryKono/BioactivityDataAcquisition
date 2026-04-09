@@ -48,6 +48,11 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("dashboard_surface", "bioetl-overview-v2") in node_keys
     assert ("policy_surface", "integration and VCR execution policy") in node_keys
     assert ("script_surface", "scripts/dev/run_pytest.sh") in node_keys
+    assert ("port_surface", "bioetl.domain.ports") in node_keys
+    assert ("adapter_surface", "bioetl.infrastructure.adapters.chembl") in node_keys
+    assert ("pipeline_surface", "chembl_activity") in node_keys
+    assert ("contract_surface", "chembl.activity") in node_keys
+    assert ("alert_surface", "BioETLPipelineRunFailed") in node_keys
     assert (
         "test_artifact",
         "tests/unit/scripts/ops/test_neo4j_memory_sync.py",
@@ -66,6 +71,41 @@ def test_snapshot_contains_expected_relations() -> None:
         for rel in snapshot.relations.values()
     }
 
+    assert (
+        "project",
+        "BioETL",
+        "HAS_PORT",
+        "port_surface",
+        "bioetl.domain.ports",
+    ) in relation_keys
+    assert (
+        "project",
+        "BioETL",
+        "HAS_ADAPTER",
+        "adapter_surface",
+        "bioetl.infrastructure.adapters.chembl",
+    ) in relation_keys
+    assert (
+        "project",
+        "BioETL",
+        "HAS_PIPELINE",
+        "pipeline_surface",
+        "chembl_activity",
+    ) in relation_keys
+    assert (
+        "project",
+        "BioETL",
+        "HAS_CONTRACT",
+        "contract_surface",
+        "chembl.activity",
+    ) in relation_keys
+    assert (
+        "project",
+        "BioETL",
+        "HAS_ALERT",
+        "alert_surface",
+        "BioETLPipelineRunFailed",
+    ) in relation_keys
     assert (
         "project",
         "BioETL",
@@ -107,6 +147,41 @@ def test_snapshot_contains_expected_relations() -> None:
         "GOVERNS",
         "test_surface",
         "integration tests",
+    ) in relation_keys
+    assert (
+        "adapter_surface",
+        "bioetl.infrastructure.adapters.chembl",
+        "DEPENDS_ON",
+        "port_surface",
+        "bioetl.domain.ports",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "adapter_surface",
+        "bioetl.infrastructure.adapters.chembl",
+    ) in relation_keys
+    assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "contract_surface",
+        "chembl.activity",
+    ) in relation_keys
+    assert (
+        "policy_surface",
+        "pipeline assembly model",
+        "GOVERNS",
+        "pipeline_surface",
+        "chembl_activity",
+    ) in relation_keys
+    assert (
+        "policy_surface",
+        "observability surface model",
+        "GOVERNS",
+        "alert_surface",
+        "BioETLPipelineRunFailed",
     ) in relation_keys
     assert (
         "doc_artifact",
@@ -233,6 +308,11 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "layer_family",
         "package_family",
         "module_surface",
+        "port_surface",
+        "adapter_surface",
+        "pipeline_surface",
+        "contract_surface",
+        "alert_surface",
         "provider_surface",
         "entity_config",
         "composite_config",
