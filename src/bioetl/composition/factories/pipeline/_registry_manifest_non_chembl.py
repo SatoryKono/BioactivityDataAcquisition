@@ -2,21 +2,15 @@
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.crossref.transformer import (
+from bioetl.application.core.pipeline_registry_wiring_api import (
     CrossRefPublicationTransformer,
-)
-from bioetl.application.pipelines.openalex.transformer import (
-    OpenAlexPublicationTransformer,
-)
-from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
-from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
-from bioetl.application.pipelines.semanticscholar.transformer import (
-    SemanticScholarPublicationTransformer,
-)
-from bioetl.application.pipelines.uniprot.idmapping_transformer import (
     IDMappingTransformer,
+    OpenAlexPublicationTransformer,
+    PubChemCompoundTransformer,
+    PubMedPublicationTransformer,
+    SemanticScholarPublicationTransformer,
+    UniProtProteinTransformer,
 )
-from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
 from bioetl.domain.contracts import (
     CrossRefPublicationGoldSchema,
