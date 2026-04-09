@@ -190,13 +190,34 @@ def normalize_run_manifest_spec(payload: Mapping[str, object]) -> dict[str, obje
     if isinstance(code_provenance, Mapping):
         normalized["code_provenance"] = _normalize_manifest_code_provenance(code_provenance)
 
-    for field_name in _MANIFEST_SET_LIKE_FIELDS:
+    source_refs = payload.get("source_refs")
+    if isinstance(source_refs, Sequence) and not isinstance(source_refs, (str, bytes)):
+        normalized["source_refs"] = canonicalize_container(
+            normalize_set_like_sequence(
+                _normalize_manifest_source_ref(item) for item in source_refs
+            )
+        )
+
+    for field_name in _MANIFEST_SET_LIKE_FIELDS - {"source_refs"}:
         raw_value = payload.get(field_name)
         if isinstance(raw_value, Sequence) and not isinstance(raw_value, (str, bytes)):
             normalized[field_name] = canonicalize_container(
                 normalize_set_like_sequence(raw_value)
             )
 
+    return normalized
+
+
+def _normalize_manifest_source_ref(item: object) -> object:
+    """Normalize one source-ref payload, including nested snapshot refs."""
+    if not isinstance(item, Mapping):
+        return item
+    normalized = normalize_mapping(item)
+    raw_snapshots = item.get("input_snapshots")
+    if isinstance(raw_snapshots, Sequence) and not isinstance(raw_snapshots, (str, bytes)):
+        normalized["input_snapshots"] = canonicalize_container(
+            normalize_set_like_sequence(raw_snapshots)
+        )
     return normalized
 
 

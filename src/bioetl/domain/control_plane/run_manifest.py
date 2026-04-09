@@ -24,6 +24,7 @@ from bioetl.domain.types import RunID, RunType
 __all__ = [
     "RunArtifactRef",
     "RunCodeProvenance",
+    "RunInputSnapshotRef",
     "RunManifest",
     "RunSourceRef",
 ]
@@ -99,6 +100,19 @@ def _normalize_manifest_created_at(value: datetime) -> datetime:
 
 
 @dataclass(frozen=True, slots=True)
+class RunInputSnapshotRef:
+    """Immutable snapshot reference captured for one external input batch."""
+
+    snapshot_id: str
+    content_hash: str
+    immutable_uri: str | None = None
+    query_fingerprint: str | None = None
+    etag: str | None = None
+    last_modified: str | None = None
+    captured_at: datetime | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class RunSourceRef:
     """Canonical source reference captured in a run manifest."""
 
@@ -106,6 +120,7 @@ class RunSourceRef:
     entity: str
     pipeline_name: str
     query: str | None = None
+    input_snapshots: tuple[RunInputSnapshotRef, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -237,8 +252,44 @@ def _load_source_refs(raw_sources: object) -> tuple[RunSourceRef, ...]:
             entity=str(item["entity"]),
             pipeline_name=str(item["pipeline_name"]),
             query=(None if item.get("query") is None else str(item["query"])),
+            input_snapshots=_load_input_snapshots(item.get("input_snapshots")),
         )
         for item in raw_sources
+        if isinstance(item, dict)
+    )
+
+
+def _load_input_snapshots(raw_snapshots: object) -> tuple[RunInputSnapshotRef, ...]:
+    """Deserialize immutable input snapshot references from serialized payload."""
+    if not isinstance(raw_snapshots, list):
+        return ()
+    return tuple(
+        RunInputSnapshotRef(
+            snapshot_id=str(item["snapshot_id"]),
+            content_hash=str(item["content_hash"]),
+            immutable_uri=(
+                None
+                if item.get("immutable_uri") is None
+                else str(item["immutable_uri"])
+            ),
+            query_fingerprint=(
+                None
+                if item.get("query_fingerprint") is None
+                else str(item["query_fingerprint"])
+            ),
+            etag=None if item.get("etag") is None else str(item["etag"]),
+            last_modified=(
+                None
+                if item.get("last_modified") is None
+                else str(item["last_modified"])
+            ),
+            captured_at=(
+                None
+                if item.get("captured_at") is None
+                else datetime.fromisoformat(str(item["captured_at"]))
+            ),
+        )
+        for item in raw_snapshots
         if isinstance(item, dict)
     )
 

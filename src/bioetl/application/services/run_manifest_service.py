@@ -11,6 +11,7 @@ from uuid import uuid4
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunCodeProvenance,
+    RunInputSnapshotRef,
     RunManifest,
     RunSourceRef,
 )
@@ -136,6 +137,44 @@ class RunManifestService:
                 entity=str(item["entity"]),
                 pipeline_name=str(item["pipeline_name"]),
                 query=(None if item.get("query") is None else str(item["query"])),
+                input_snapshots=self._hydrate_input_snapshots(
+                    list(item.get("input_snapshots", []))
+                ),
+            )
+            for item in payload
+            if isinstance(item, dict)
+        )
+
+    def _hydrate_input_snapshots(
+        self,
+        payload: list[object],
+    ) -> tuple[RunInputSnapshotRef, ...]:
+        """Rebuild immutable input snapshot refs from normalized payload data."""
+        return tuple(
+            RunInputSnapshotRef(
+                snapshot_id=str(item["snapshot_id"]),
+                content_hash=str(item["content_hash"]),
+                immutable_uri=(
+                    None
+                    if item.get("immutable_uri") is None
+                    else str(item["immutable_uri"])
+                ),
+                query_fingerprint=(
+                    None
+                    if item.get("query_fingerprint") is None
+                    else str(item["query_fingerprint"])
+                ),
+                etag=None if item.get("etag") is None else str(item["etag"]),
+                last_modified=(
+                    None
+                    if item.get("last_modified") is None
+                    else str(item["last_modified"])
+                ),
+                captured_at=(
+                    None
+                    if item.get("captured_at") is None
+                    else datetime.fromisoformat(str(item["captured_at"]))
+                ),
             )
             for item in payload
             if isinstance(item, dict)
@@ -266,6 +305,18 @@ class RunManifestService:
                     "entity": item.entity,
                     "pipeline_name": item.pipeline_name,
                     "query": item.query,
+                    "input_snapshots": [
+                        {
+                            "snapshot_id": snapshot.snapshot_id,
+                            "content_hash": snapshot.content_hash,
+                            "immutable_uri": snapshot.immutable_uri,
+                            "query_fingerprint": snapshot.query_fingerprint,
+                            "etag": snapshot.etag,
+                            "last_modified": snapshot.last_modified,
+                            "captured_at": snapshot.captured_at,
+                        }
+                        for snapshot in item.input_snapshots
+                    ],
                 }
                 for item in request.source_refs
             ],

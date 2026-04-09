@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from dataclasses import replace
 from uuid import UUID
 
@@ -13,7 +14,12 @@ from bioetl.application.services.run_manifest_service import (
     RunManifestCreateRequest,
     RunManifestService,
 )
-from bioetl.domain.control_plane import RunArtifactRef, RunManifest, RunSourceRef
+from bioetl.domain.control_plane import (
+    RunArtifactRef,
+    RunInputSnapshotRef,
+    RunManifest,
+    RunSourceRef,
+)
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID, RunType
 
@@ -56,6 +62,22 @@ def _make_request() -> RunManifestCreateRequest:
                 entity="activity",
                 pipeline_name="chembl_activity",
                 query="assay_type=B",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-b",
+                        content_hash="hash-b",
+                        immutable_uri="file:///snapshots/b.jsonl",
+                        query_fingerprint="query-b",
+                        captured_at=datetime(2026, 4, 9, 10, 0, tzinfo=UTC),
+                    ),
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-b-2",
+                        content_hash="hash-b-2",
+                        immutable_uri="file:///snapshots/b-2.jsonl",
+                        query_fingerprint="query-b-2",
+                        captured_at=datetime(2026, 4, 9, 10, 5, tzinfo=UTC),
+                    ),
+                ),
             ),
         ),
         planned_artifacts=(
@@ -155,7 +177,7 @@ def test_execution_fingerprint_matches_golden_value() -> None:
 
     assert (
         manifest.execution_fingerprint
-        == "0db436c604a335766db29523c12d1e2b45c050eb0bce220ae111230f0a0730b3"
+        == "3310c9a134a19289b4cd39456f3935267e7908e0ad48b0a1c1638d98f05c08d1"
     )
 
 
@@ -185,18 +207,36 @@ def test_execution_fingerprint_rejects_non_finite_numeric_payloads() -> None:
                 entity="activity",
                 pipeline_name="chembl_activity",
                 query="assay_type=B",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-b",
+                        content_hash="hash-b",
+                    ),
+                ),
             ),
             RunSourceRef(
                 provider="chembl",
                 entity="activity",
                 pipeline_name="chembl_activity",
                 query="assay_type=F",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-f",
+                        content_hash="hash-f",
+                    ),
+                ),
             ),
             RunSourceRef(
                 provider="chembl",
                 entity="activity",
                 pipeline_name="chembl_activity",
                 query="assay_type=T",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-t",
+                        content_hash="hash-t",
+                    ),
+                ),
             ),
         )
     ),
@@ -224,18 +264,36 @@ def test_execution_fingerprint_is_permutation_invariant_for_set_like_manifest_fi
                 entity="activity",
                 pipeline_name="chembl_activity",
                 query="assay_type=B",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-b",
+                        content_hash="hash-b",
+                    ),
+                ),
             ),
             RunSourceRef(
                 provider="chembl",
                 entity="activity",
                 pipeline_name="chembl_activity",
                 query="assay_type=F",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-f",
+                        content_hash="hash-f",
+                    ),
+                ),
             ),
             RunSourceRef(
                 provider="chembl",
                 entity="activity",
                 pipeline_name="chembl_activity",
                 query="assay_type=T",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-t",
+                        content_hash="hash-t",
+                    ),
+                ),
             ),
         ),
         planned_artifacts=(
@@ -257,3 +315,25 @@ def test_execution_fingerprint_is_permutation_invariant_for_set_like_manifest_fi
     manifest_permuted = service.create_manifest(request)
 
     assert manifest.execution_fingerprint == manifest_permuted.execution_fingerprint
+
+
+def test_execution_fingerprint_ignores_nested_input_snapshot_order() -> None:
+    service = RunManifestService(
+        manifest_port=_InMemoryRunManifestStore(),
+        _manifest_id_factory=lambda: "manifest-snapshots",
+    )
+    request = _make_request()
+    reordered = replace(
+        request,
+        source_refs=(
+            replace(
+                request.source_refs[0],
+                input_snapshots=tuple(reversed(request.source_refs[0].input_snapshots)),
+            ),
+        ),
+    )
+
+    manifest = service.create_manifest(request)
+    manifest_reordered = service.create_manifest(reordered)
+
+    assert manifest.execution_fingerprint == manifest_reordered.execution_fingerprint
