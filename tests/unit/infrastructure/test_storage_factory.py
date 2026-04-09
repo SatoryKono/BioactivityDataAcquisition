@@ -40,6 +40,10 @@ def mock_settings(tmp_path):
     settings.checkpoint_path = tmp_path / "checkpoints"
     settings.data_dir = tmp_path
     settings.test_mode = True  # Default to test mode
+    settings.observability = SimpleNamespace(
+        audit_enabled=False,
+        audit_base_path=None,
+    )
     settings.pipeline = SimpleNamespace(
         silver_resilience_enabled=True,
         silver_metadata_atomic_retry=SimpleNamespace(

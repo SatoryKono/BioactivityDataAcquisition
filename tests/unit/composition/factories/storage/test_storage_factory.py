@@ -53,6 +53,8 @@ def _make_settings(
     silver_path: Path,
     gold_path: Path,
     checkpoint_path: Path,
+    audit_enabled: bool = False,
+    audit_base_path: Path | None = None,
 ) -> SimpleNamespace:
     return SimpleNamespace(
         test_mode=test_mode,
@@ -60,6 +62,11 @@ def _make_settings(
         silver_path=silver_path,
         gold_path=gold_path,
         checkpoint_path=checkpoint_path,
+        data_dir=bronze_path.parent.parent,
+        observability=SimpleNamespace(
+            audit_enabled=audit_enabled,
+            audit_base_path=audit_base_path,
+        ),
         pipeline=SimpleNamespace(silver_resilience_enabled=False),
     )
 
@@ -329,3 +336,69 @@ def test_create_forwards_optional_runtime_collaborators_to_adapter_builder(
         metadata_coordinator=metadata_coordinator,
         silver_validator=silver_validator,
     )
+
+
+@pytest.mark.unit
+def test_create_uses_explicit_noop_audit_by_default(tmp_path: Path) -> None:
+    """Canonical storage path should always receive an explicit audit port."""
+    settings = _make_settings(
+        test_mode=True,
+        bronze_path=tmp_path / "test-root" / "bronze",
+        silver_path=tmp_path / "test-root" / "silver",
+        gold_path=tmp_path / "test-root" / "gold",
+        checkpoint_path=tmp_path / "test-root" / "checkpoints",
+    )
+    config = _make_config(
+        bronze_layer=_make_sink_layer(tmp_path / "yaml" / "bronze"),
+        silver_layer=_make_sink_layer(tmp_path / "yaml" / "silver"),
+        gold_layer=_make_sink_layer(tmp_path / "yaml" / "gold"),
+    )
+
+    result = StorageFactory.create(
+        settings=settings,
+        config=config,
+        logger=MagicMock(),
+        metrics=MagicMock(),
+    )
+
+    assert result.adapter.bronze._audit is not None
+    assert result.adapter.silver._audit is not None
+    assert result.adapter.gold._audit is not None
+
+
+@pytest.mark.unit
+def test_create_uses_file_audit_adapter_when_enabled(tmp_path: Path) -> None:
+    """Enabled audit should propagate one configured file adapter to all writers."""
+    audit_path = tmp_path / "audit"
+    settings = _make_settings(
+        test_mode=True,
+        bronze_path=tmp_path / "test-root" / "bronze",
+        silver_path=tmp_path / "test-root" / "silver",
+        gold_path=tmp_path / "test-root" / "gold",
+        checkpoint_path=tmp_path / "test-root" / "checkpoints",
+        audit_enabled=True,
+        audit_base_path=audit_path,
+    )
+    config = _make_config(
+        bronze_layer=_make_sink_layer(tmp_path / "yaml" / "bronze"),
+        silver_layer=_make_sink_layer(tmp_path / "yaml" / "silver"),
+        gold_layer=_make_sink_layer(tmp_path / "yaml" / "gold"),
+    )
+
+    result = StorageFactory.create(
+        settings=settings,
+        config=config,
+        logger=MagicMock(),
+        metrics=MagicMock(),
+    )
+
+    bronze_audit = result.adapter.bronze._audit
+    silver_audit = result.adapter.silver._audit
+    gold_audit = result.adapter.gold._audit
+    assert bronze_audit is not None
+    assert silver_audit is not None
+    assert gold_audit is not None
+    assert type(bronze_audit).__name__ == "FileAuditAdapter"
+    assert bronze_audit is silver_audit
+    assert bronze_audit is gold_audit
+    assert bronze_audit.base_path == audit_path

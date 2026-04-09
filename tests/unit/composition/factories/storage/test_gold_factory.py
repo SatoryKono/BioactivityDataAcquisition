@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.composition.factories.storage._gold import create_gold_writer
 from bioetl.domain.ports.noop import (
+    NoOpAudit,
     NoOpMetadataWriter,
     NoOpTracing,
 )
@@ -34,6 +35,7 @@ class TestCreateGoldWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -42,6 +44,7 @@ class TestCreateGoldWriter:
         assert result is expected
         call_kwargs = writer_cls.call_args[1]
         runtime_services = call_kwargs["runtime_services"]
+        assert isinstance(runtime_services.audit, NoOpAudit)
         assert isinstance(runtime_services.tracing, NoOpTracing)
         assert isinstance(runtime_services.metadata_writer, NoOpMetadataWriter)
 
@@ -58,6 +61,7 @@ class TestCreateGoldWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -82,6 +86,7 @@ class TestCreateGoldWriter:
             tracing=tracer,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -103,6 +108,7 @@ class TestCreateGoldWriter:
             tracing=None,
             csv_exporter=csv,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -123,6 +129,7 @@ class TestCreateGoldWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version="1.2.0",
             transform_steps=("step_a", "step_b"),
             flat_structure=True,
@@ -152,6 +159,7 @@ class TestCreateGoldWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -160,3 +168,25 @@ class TestCreateGoldWriter:
 
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["runtime_services"].contract_rollout_policy == rollout_policy
+
+    def test_passes_audit_port(self) -> None:
+        """audit is forwarded into Gold runtime services explicitly."""
+        writer_cls = MagicMock()
+        audit = MagicMock()
+
+        create_gold_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/gold"),
+            config=None,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            audit=audit,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert call_kwargs["runtime_services"].audit is audit
