@@ -85,8 +85,8 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import (
         CompositePipelineRunnerService,
+        PipelineRunner,
     )
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )

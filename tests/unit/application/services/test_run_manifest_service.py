@@ -159,6 +159,24 @@ def test_execution_fingerprint_matches_golden_value() -> None:
     )
 
 
+def test_execution_fingerprint_rejects_non_finite_numeric_payloads() -> None:
+    service = RunManifestService(
+        manifest_port=_InMemoryRunManifestStore(),
+        _manifest_id_factory=lambda: "manifest-non-finite",
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="Canonical JSON serialization does not allow NaN or Infinity",
+    ):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                launch_context={"limit": float("nan"), "resume": False},
+            )
+        )
+
+
 @given(
     source_refs=st.permutations(
         (

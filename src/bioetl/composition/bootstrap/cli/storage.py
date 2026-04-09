@@ -17,13 +17,13 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.lifecycle.cleanup_service import CleanupService
 from bioetl.application.services import (
     BronzeCleanupService,
     ContractMigrationService,
     ExportService,
     VacuumService,
 )
+from bioetl.application.services.admin_runtime_api import CleanupService
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition import get_default_registry
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter

@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-09T16:11:13.307533+00:00",
+  "generated_at": "2026-04-09T17:19:47.430898+00:00",
   "summary": {
-    "total_scripts": 284,
+    "total_scripts": 286,
     "status_counts": {
-      "active": 233,
+      "active": 235,
       "legacy": 29,
       "orphan": 21,
       "unknown": 1
@@ -12,9 +12,9 @@
     "reference_group_coverage": {
       "agents": 10,
       "build": 31,
-      "ci": 47,
+      "ci": 48,
       "docs": 115,
-      "scripts": 242,
+      "scripts": 244,
       "skills": 9,
       "tests": 90
     }
@@ -157,13 +157,37 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 21,
       "references": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 163,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.ci neo4j-memory"
+        },
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 224,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.ci neo4j-memory-live"
+        },
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 74,
           "source_group": "docs",
           "text": "uv run python -m scripts.ci quality-gate"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 62,
+          "source_group": "docs",
+          "text": "`python -m scripts.ci neo4j-memory`:"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 67,
+          "source_group": "docs",
+          "text": "`python -m scripts.ci neo4j-memory-live`."
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
@@ -182,30 +206,6 @@
           "line": 186,
           "source_group": "docs",
           "text": "uv run python -m scripts.ci run-tests"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 287,
-          "source_group": "docs",
-          "text": "python -m scripts.ci run-tests"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
-          "line": 267,
-          "source_group": "docs",
-          "text": "python -m scripts.ci quality-gate"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
-          "line": 268,
-          "source_group": "docs",
-          "text": "python -m scripts.ci debt-report"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
-          "line": 231,
-          "source_group": "docs",
-          "text": "python -m scripts.ci run-tests                 # Resilient pytest runner"
         }
       ]
     },
@@ -350,7 +350,7 @@
         },
         {
           "path": "scripts/ci/__main__.py",
-          "line": 29,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         }
@@ -389,7 +389,7 @@
         },
         {
           "path": "scripts/ci/__main__.py",
-          "line": 26,
+          "line": 28,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -434,7 +434,7 @@
         },
         {
           "path": "scripts/ci/__main__.py",
-          "line": 27,
+          "line": 29,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -449,6 +449,36 @@
           "line": 519,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ci/check_neo4j_memory_live_audit.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ci/__main__.py",
+          "line": 31,
+          "source_group": "scripts",
+          "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ci/check_neo4j_memory_ontology.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ci/__main__.py",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
       ]
     },
@@ -575,7 +605,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 560,
+          "line": 598,
           "source_group": "ci",
           "text": "scripts/ci/run_pytest_resilient.py \\"
         },
@@ -3890,13 +3920,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 218,
+          "line": 256,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 227,
+          "line": 265,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -4496,7 +4526,7 @@
         },
         {
           "path": "scripts/ops/neo4j_memory_sync.py",
-          "line": 322,
+          "line": 344,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
         }
@@ -4639,25 +4669,25 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 31,
+          "line": 46,
           "source_group": "docs",
           "text": "Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 34,
+          "line": 49,
           "source_group": "docs",
           "text": "Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 38,
+          "line": 53,
           "source_group": "docs",
           "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 43,
+          "line": 58,
           "source_group": "docs",
           "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:"
         },
@@ -4675,7 +4705,7 @@
         },
         {
           "path": "docs/05-operations/deployment/neo4j-memory-setup.md",
-          "line": 58,
+          "line": 65,
           "source_group": "docs",
           "text": "python -m scripts.ops sync-neo4j-memory --apply --prune-stale"
         }
@@ -7112,7 +7142,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 236,
+          "line": 274,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/check_docs_drift.py"
         }
@@ -7127,7 +7157,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 166,
+          "line": 169,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/check_naming_package_consistency.py --check"
         },
@@ -7262,7 +7292,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 233,
+          "line": 271,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/generate_architecture_dependency_map.py --check"
         },
@@ -7364,7 +7394,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 482,
+          "line": 520,
           "source_group": "ci",
           "text": "uv run python scripts/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -7761,13 +7791,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 169,
+          "line": 172,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/validate_dq_consistency.py"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 296,
+          "line": 334,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/validate_dq_consistency.py"
         },
@@ -8401,13 +8431,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 212,
+          "line": 250,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 215,
+          "line": 253,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         },
@@ -8479,7 +8509,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 209,
+          "line": 247,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/check_config_invariants.py"
         },
@@ -8728,7 +8758,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 230,
+          "line": 268,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/generate_pipeline_schema.py --check"
         },
@@ -8887,7 +8917,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 206,
+          "line": 244,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/validate_pipeline_configs.py"
         },

@@ -32,8 +32,15 @@ profiles в BioETL.
   Текущий ontology layer уже включает:
   `Protocol/class`-level `port_surface`,
   richer `contract_surface` links к registry/config/schema modules и
-  published artifacts, direct `pipeline_surface -> RUNS_VIA/VALIDATED_BY/OBSERVED_BY`
-  edges и selective `alert_surface -> DEPENDS_ON -> pipeline/provider` mapping.
+  published artifacts, control-plane anchors к run-manifest / effective-config
+  docs и services, direct
+  `pipeline_surface -> RUNS_VIA/VALIDATED_BY/OBSERVED_BY/TESTED_BY`
+  edges и config-driven selective
+  `alert_surface -> DEPENDS_ON -> pipeline/provider/contract_surface` mapping.
+  Rule tables для pipeline/alert/contract mapping живут в
+  `configs/quality/neo4j_memory_mapping.yaml`, а pipeline-to-test ownership
+  опирается на `configs/quality/test_matrix.yaml`, включая shared provider
+  regression suites.
   Tooling
   может синхронизировать его в локальный Neo4j backend без ручных prompt waves.
   Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
@@ -56,6 +63,8 @@ profiles в BioETL.
   он проверяет ontology invariants без живого Neo4j и падает при drift по
   required labels/relations, protocol-level ports, rich contract metadata,
   runtime links или orphan nodes в snapshot.
+  Для live gate с применением sync в реальный локальный Neo4j используй
+  `python -m scripts.ci neo4j-memory-live`.
 
 ## Relationship To Other AI Surfaces
 

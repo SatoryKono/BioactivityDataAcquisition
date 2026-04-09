@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, cast
@@ -73,11 +74,30 @@ def _serialize_with_stdlib(
         sort_keys=sort_keys,
         separators=(",", ":"),
         ensure_ascii=ensure_ascii,
+        allow_nan=False,
     )
+
+
+def _assert_no_non_finite_floats(value: object) -> None:
+    """Reject NaN/Infinity to keep canonical JSON stable across runtimes."""
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError(
+                "Canonical JSON serialization does not allow NaN or Infinity"
+            )
+        return
+    if isinstance(value, dict):
+        for nested_value in value.values():
+            _assert_no_non_finite_floats(nested_value)
+        return
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
+        for nested_value in value:
+            _assert_no_non_finite_floats(nested_value)
 
 
 def serialize_json_canonical(data: JsonDict | Sequence[object]) -> str:
     """Serialize data to deterministic canonical JSON string."""
+    _assert_no_non_finite_floats(data)
     if _ORJSON_AVAILABLE:
         return _serialize_with_orjson(data, sort_keys=True, ensure_ascii=True)
     return _serialize_with_stdlib(data, sort_keys=True, ensure_ascii=True)

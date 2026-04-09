@@ -16,7 +16,7 @@ from bioetl.domain.ports import LoggerPort
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
