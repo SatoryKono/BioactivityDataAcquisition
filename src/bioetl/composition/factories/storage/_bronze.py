@@ -15,7 +15,7 @@ from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
 if TYPE_CHECKING:
     from bioetl.application.services.metadata_coordinator import MetadataCoordinator
-    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.schemas.pipeline_config import SinkLayerConfig
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
@@ -29,6 +29,7 @@ def create_bronze_writer(
     metrics: MetricsPort,
     tracing: TracingPort | None,
     metadata_coordinator: MetadataCoordinator | None,
+    audit: AuditPort,
     flat_structure: bool,
 ) -> BronzeWriter:
     """Create configured Bronze writer.
@@ -65,7 +66,7 @@ def create_bronze_writer(
         json_path=None,
         runtime_services=BronzeWriterRuntimeServices(
             tracing=effective_tracing,
-            audit=None,
+            audit=audit,
             metadata_writer=metadata_writer,
             save_metadata=save_metadata,
             metadata_coordinator=metadata_coordinator,

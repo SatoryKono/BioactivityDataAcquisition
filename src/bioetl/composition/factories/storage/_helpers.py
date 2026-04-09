@@ -9,6 +9,7 @@ from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
 
+from ._audit import create_audit_port
 from ._bronze import create_bronze_writer
 from ._context_resolution import (
     StorageCreationContext,
@@ -35,6 +36,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
     from bioetl.domain.ports import (
+        AuditPort,
         LoggerPort,
         MetricsPort,
         SilverValidatorPort,
@@ -146,6 +148,7 @@ def create_storage_adapter(
     silver_validator: SilverValidatorPort | None,
 ) -> StorageAdapter:
     """Create StorageAdapter with Bronze/Silver/Gold writers."""
+    audit = create_audit_port(settings=settings, logger=logger)
     metadata_atomic_retry_policy = create_silver_atomic_retry_policy(settings)
     merge_resilience_policy = create_silver_merge_resilience_policy(settings)
     silver_writer = _create_silver_layer_writer(
@@ -157,6 +160,7 @@ def create_storage_adapter(
         tracing=tracing,
         metadata_coordinator=metadata_coordinator,
         silver_validator=silver_validator,
+        audit=audit,
         metadata_atomic_retry_policy=metadata_atomic_retry_policy,
         merge_resilience_policy=merge_resilience_policy,
     )
@@ -168,6 +172,7 @@ def create_storage_adapter(
         metrics=metrics,
         tracing=tracing,
         metadata_coordinator=metadata_coordinator,
+        audit=audit,
     )
     bronze_writer = create_bronze_writer(
         writer_cls=bronze_writer_cls,
@@ -177,6 +182,7 @@ def create_storage_adapter(
         metrics=metrics,
         tracing=tracing,
         metadata_coordinator=metadata_coordinator,
+        audit=audit,
         flat_structure=ctx.bronze_flat,
     )
     return StorageAdapter(
@@ -196,6 +202,7 @@ def _create_silver_layer_writer(
     tracing: TracingPort | None,
     metadata_coordinator: MetadataCoordinator | None,
     silver_validator: SilverValidatorPort | None,
+    audit: AuditPort,
     metadata_atomic_retry_policy: AdaptiveRetryPolicy,
     merge_resilience_policy: SilverMergeResiliencePolicy,
 ) -> SilverWriter:
@@ -219,6 +226,7 @@ def _create_silver_layer_writer(
         tracing=tracing,
         csv_exporter=ctx.silver_csv_exporter,
         metadata_coordinator=metadata_coordinator,
+        audit=audit,
         transform_version=config.transform.version,
         transform_steps=tuple(config.transform.steps),
         flat_structure=silver_writer_flat,
@@ -239,6 +247,7 @@ def _create_gold_layer_writer(
     metrics: MetricsPort,
     tracing: TracingPort | None,
     metadata_coordinator: MetadataCoordinator | None,
+    audit: AuditPort,
 ) -> GoldWriter:
     """Create the gold writer with normalized Delta path semantics."""
     gold_writer_flat = resolve_delta_writer_flat_structure(
@@ -260,6 +269,7 @@ def _create_gold_layer_writer(
         tracing=tracing,
         csv_exporter=ctx.gold_csv_exporter,
         metadata_coordinator=metadata_coordinator,
+        audit=audit,
         transform_version=config.transform.version,
         transform_steps=tuple(config.transform.steps),
         flat_structure=gold_writer_flat,

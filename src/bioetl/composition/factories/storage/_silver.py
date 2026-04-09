@@ -16,6 +16,7 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
 if TYPE_CHECKING:
     from bioetl.application.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
+        AuditPort,
         LoggerPort,
         MetricsPort,
         SilverValidatorPort,
@@ -39,6 +40,7 @@ def create_silver_writer(
     tracing: TracingPort | None,
     csv_exporter: CsvExporter | None,
     metadata_coordinator: MetadataCoordinator | None,
+    audit: AuditPort,
     transform_version: str | None,
     transform_steps: tuple[str, ...] | None,
     flat_structure: bool,
@@ -91,7 +93,7 @@ def create_silver_writer(
         tracing=tracing,
         write_policy=None,
         metrics=metrics,
-        audit=None,
+        audit=audit,
         silver_validator=silver_validator,
         metadata_writer=metadata_writer,
         metadata_coordinator=metadata_coordinator,

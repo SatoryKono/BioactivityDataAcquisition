@@ -18,7 +18,7 @@ from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
 if TYPE_CHECKING:
     from bioetl.application.services.metadata_coordinator import MetadataCoordinator
-    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
     from bioetl.infrastructure.schemas.pipeline_config import SinkLayerConfig
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -33,6 +33,7 @@ def create_gold_writer(
     tracing: TracingPort | None,
     csv_exporter: CsvExporter | None,
     metadata_coordinator: MetadataCoordinator | None,
+    audit: AuditPort,
     transform_version: str | None,
     transform_steps: tuple[str, ...] | None,
     flat_structure: bool,
@@ -75,7 +76,7 @@ def create_gold_writer(
             csv_exporter=csv_exporter,
             tracing=effective_tracing,
             metrics=metrics,
-            audit=None,
+            audit=audit,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
             lineage_store=lineage_store,

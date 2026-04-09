@@ -27,13 +27,18 @@ profiles в BioETL.
   `python -m scripts.ops sync-neo4j-memory`
   — строит repo-derived graph snapshot из docs/configs/src/tests/scripts,
   curated policy surfaces, а также semantic impact-analysis layer для
-  `port_surface`, `adapter_surface`, `pipeline_surface`, `contract_surface`
-  и `alert_surface`.
+  `port_surface`, `adapter_surface`, `adapter_impl_surface`,
+  `pipeline_surface`, `contract_surface` и `alert_surface`.
   Текущий ontology layer уже включает:
   `Protocol/class`-level `port_surface`,
-  richer `contract_surface` links к registry/config/schema modules и
-  published artifacts, direct `pipeline_surface -> RUNS_VIA/VALIDATED_BY/OBSERVED_BY`
-  edges и selective `alert_surface -> DEPENDS_ON -> pipeline/provider` mapping.
+  fine-grained `adapter_impl_surface` для concrete adapter modules,
+  richer `contract_surface` links к registry/config/schema modules, control-plane
+  и lineage/runtime anchors, direct
+  `pipeline_surface -> RUNS_VIA/VALIDATED_BY/OBSERVED_BY/TESTED_BY`
+  edges и config-driven selective
+  `alert_surface -> DEPENDS_ON -> pipeline/provider/contract_surface`
+  плюс `alert_surface -> OBSERVED_BY -> dashboard_surface` mapping по
+  PromQL/dashboard metric overlap и fallback tables.
   Tooling
   может синхронизировать его в локальный Neo4j backend без ручных prompt waves.
   Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
