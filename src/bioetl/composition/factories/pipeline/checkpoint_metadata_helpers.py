@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import hashlib
-import json
 from typing import TYPE_CHECKING
 
+from bioetl.domain.normalization import (
+    normalize_runtime_anchor_payload,
+    serialize_json_canonical,
+)
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 if TYPE_CHECKING:
@@ -29,23 +32,31 @@ def _coerce_optional_str(value: object | None) -> str | None:
 
 
 def _compute_execution_identity_fingerprint(
+    payload: dict[str, str | None],
+) -> str:
+    """Compute deterministic execution identity fingerprint for checkpoints."""
+    encoded = serialize_json_canonical(payload)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _normalize_execution_identity_payload(
     *,
     pipeline_name: str,
     run_type: str,
     pipeline_version: str | None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
-) -> str:
-    """Compute deterministic execution identity fingerprint for checkpoints."""
-    payload = {
-        "pipeline_name": pipeline_name,
-        "run_type": run_type,
-        "pipeline_version": pipeline_version,
-        "effective_config_hash": effective_config_hash,
-        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
-    }
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+) -> dict[str, str | None]:
+    """Return the canonical checkpoint execution-identity payload."""
+    return normalize_runtime_anchor_payload(
+        {
+            "pipeline_name": pipeline_name,
+            "run_type": run_type,
+            "pipeline_version": pipeline_version,
+            "effective_config_hash": effective_config_hash,
+            "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+        }
+    )
 
 
 def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetadata:
@@ -76,19 +87,22 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
 
     run_type = pipeline.runtime.run_type
     run_type_value = run_type.value if hasattr(run_type, "value") else str(run_type)
-    execution_fingerprint = _compute_execution_identity_fingerprint(
+    identity_payload = _normalize_execution_identity_payload(
         pipeline_name=pipeline.config.pipeline_name,
         run_type=run_type_value,
         pipeline_version=pipeline_version,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
     )
+    execution_fingerprint = _compute_execution_identity_fingerprint(
+        identity_payload
+    )
 
     return CheckpointMetadata(
         records_processed=0,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        pipeline_version=pipeline_version,
-        effective_config_hash=effective_config_hash,
+        dq_contract_compatibility_hash=identity_payload["dq_contract_compatibility_hash"],
+        pipeline_version=identity_payload["pipeline_version"],
+        effective_config_hash=identity_payload["effective_config_hash"],
         effective_config_artifact_id=effective_config_artifact_id,
         execution_fingerprint=execution_fingerprint,
         run_context={
