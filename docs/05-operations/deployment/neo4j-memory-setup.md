@@ -53,8 +53,14 @@ Last verified: '2026-04-09'
    dashboards, execution paths, curated policy surfaces, and a semantic
    impact-analysis layer for ports, adapters, pipelines, contracts, and alert
    rules. The current sync also includes protocol/class-level domain ports,
-   richer contract-to-schema/config links, and direct pipeline runtime /
-   validation / observability edges.
+   fine-grained `adapter_impl_surface` nodes for concrete adapter modules,
+   richer contract-to-schema/config/control-plane/lineage links, direct pipeline
+   runtime / validation / observability / test-coverage edges, and config-driven
+   alert mapping from `configs/quality/neo4j_memory_mapping.yaml`, including
+   `alert_surface -> OBSERVED_BY -> dashboard_surface` links derived from metric
+   overlap and fallback tables. Shared/provider regression suites from
+   `configs/quality/test_matrix.yaml` are also projected into direct
+   `pipeline_surface -> TESTED_BY` links.
 
 8. When you intentionally want to remove stale repo-derived graph nodes from the
    current ingest wave, run the explicit prune mode:
