@@ -17,17 +17,15 @@ Usage:
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
+from bioetl.domain.context import PipelineContext
 from bioetl.domain.resilience import CircuitBreakerConfig
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.application.core.protocols import (
-        GoldFilterCallback,
-        GoldTransformCallback,
-        TransformCallback,
-    )
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
         GoldDQConfigPort,
@@ -42,6 +40,35 @@ __all__ = [
     "PipelineCallbacksContext",
     "RateLimitContext",
 ]
+
+
+class TransformCallback(Protocol):
+    """Bronze-to-Silver transformation callback contract for composition wiring."""
+
+    def __call__(
+        self,
+        context: PipelineContext,
+        record: JsonDict,
+        index: int,
+    ) -> Awaitable[object | None]:
+        """Transform one bronze record."""
+        ...
+
+
+class GoldFilterCallback(Protocol):
+    """Gold-write predicate callback contract for composition wiring."""
+
+    def __call__(self, context: PipelineContext, record: JsonDict) -> bool:
+        """Decide whether one silver record should flow to Gold."""
+        ...
+
+
+class GoldTransformCallback(Protocol):
+    """Silver-to-Gold transformation callback contract for composition wiring."""
+
+    def __call__(self, context: PipelineContext, record: JsonDict) -> JsonDict:
+        """Transform one silver record for Gold output."""
+        ...
 
 
 @dataclass(frozen=True)

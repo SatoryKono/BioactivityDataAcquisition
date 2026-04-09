@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
     VacuumOptions,
@@ -12,7 +11,12 @@ from bioetl.composition._pipeline_execution import (
     push_metrics_to_gateway,
     run_pipeline,
 )
-from bioetl.composition._services import get_pipeline_runner_service
+from bioetl.composition._services import (
+    PipelineRunResult,
+    RunOptions,
+    RunResult,
+    get_pipeline_runner_service,
+)
 from bioetl.composition.bootstrap import maybe_start_metrics_server
 
 __all__ = [
