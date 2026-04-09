@@ -139,6 +139,9 @@ class TestBronzeWriterSideEffectsMixin:
         fragment = LineageGraphFragment(fragment_id="bronze:fragment-1")
         host._metadata_coordinator = _Coordinator()
         host._lineage_store = MagicMock()
+        batch_path = tmp_path / "chembl" / "activity" / "file.jsonl.zst"
+        batch_path.parent.mkdir(parents=True)
+        batch_path.write_bytes(b"side-effect-bronze")
 
         await host._maybe_write_bronze_metadata(
             run_id=RunID("run-1"),
@@ -156,3 +159,4 @@ class TestBronzeWriterSideEffectsMixin:
 
         host._metadata_writer.write_bronze_metadata.assert_awaited_once()
         host._lineage_store.save.assert_called_once_with(fragment)
+        bronze_input = host._metadata_coordinator.create_bronze_metadata_bundle.__self__  # type: ignore[attr-defined]

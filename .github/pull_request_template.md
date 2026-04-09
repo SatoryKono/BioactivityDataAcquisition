@@ -31,6 +31,17 @@
 - [ ] Type check passes (`mypy --strict src/bioetl/`)
 - [ ] Manual verification (describe below if applicable)
 
+## Architecture verification evidence
+
+<!-- Required for architecture/debt/gate/refactor changes. -->
+<!-- Record concrete before/after values and the exact gates you ran. -->
+
+- Before metrics:
+- After metrics:
+- Gates / verification:
+- Outcome: `improved` / `unchanged` / `worsened`
+- Justification (required for `unchanged` or `worsened`):
+
 ## Checklist
 
 - [ ] No new import boundary violations (ARCH-001)

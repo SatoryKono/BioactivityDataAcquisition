@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from bioetl.domain.models.metadata import SourceMetadata
+from bioetl.domain.models.metadata import InputSnapshotRef, SourceMetadata
 from bioetl.domain.ports import (
     AuditEntry,
     AuditLayer,
@@ -49,6 +49,7 @@ class BronzeMetadataInputRequest:
     started_at: datetime
     completed_at: datetime
     source_metadata: SourceMetadata | None
+    input_snapshots: tuple[InputSnapshotRef, ...] = ()
 
 
 def build_bronze_audit_entry(request: BronzeAuditWriteRequest) -> AuditEntry:
@@ -83,6 +84,7 @@ def build_bronze_metadata_input(
         started_at=request.started_at,
         completed_at=request.completed_at,
         source_metadata=request.source_metadata,
+        input_snapshots=request.input_snapshots,
         query_string=(
             request.source_metadata.query_string
             if request.source_metadata is not None

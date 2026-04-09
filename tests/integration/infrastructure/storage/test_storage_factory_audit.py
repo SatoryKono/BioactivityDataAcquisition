@@ -177,7 +177,9 @@ async def test_storage_factory_wires_file_audit_across_medallion_writers(
 
         entries = await bronze_audit.get_entries(run_id=run_id, limit=10)
     finally:
-        await bronze_audit.aclose()
+        await context.adapter.aclose()
+
+    assert bronze_audit._closed is True
 
     assert {entry.layer for entry in entries} == {
         AuditLayer.BRONZE,

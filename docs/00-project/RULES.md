@@ -1,11 +1,11 @@
 ---
-Version: 6.1.1
+Version: 6.1.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
   - BioETL Team
-Last verified: '2026-04-06'
+Last verified: '2026-04-09'
 ---
 
 # BioETL: Правила Проекта
@@ -1392,6 +1392,52 @@ rg -n "ChemblAdapter|GoldWriter|PreflightService" reports docs/00-project docs/0
 - `ChemblAdapter` (992 LOC): Делегирует 4 компонентам, когезивная ответственность
 - `GoldWriter` (960 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
 - `PreflightService` (841 LOC): 21 метод с единой ответственностью (preflight validation)
+
+#### 7.1.7. Evidence Loop Для Рефакторинга и Debt-Roadmap
+
+Любой PR или task closeout, который меняет архитектурные границы, public seams,
+quality gates, scorecard budgets, DI wiring или topology-рефакторинг, **MUST**
+оставлять воспроизводимый evidence block.
+
+Это требование распространяется на roadmap changesets уровня `RF-*`, hotspot
+cleanup, compatibility-facade refactors, import-boundary changes и budget
+ratchets.
+
+**Минимальный evidence block MUST содержать:**
+
+| Поле | Требование |
+| --- | --- |
+| **Before metrics** | Конкретные значения до изменения (`cross_layer_group_edges_total=...`, `ruff_error_count=...`, `files_ge_250_loc=...`) |
+| **After metrics** | Те же метрики после изменения |
+| **Gate / verification** | Список фактически запущенных quality gates, test files или команд |
+| **Outcome** | Один из статусов: `improved`, `unchanged`, `worsened` |
+| **Justification** | Обязателен для `unchanged` и `worsened`; должен объяснять, почему changeset принят |
+
+**Формат фиксации evidence SHOULD быть таким:**
+
+```markdown
+## Architecture verification evidence
+
+- Before metrics: `cross_layer_group_edges_total=267`, `composition -> application=174`
+- After metrics: `cross_layer_group_edges_total=265`, `composition -> application=149`
+- Gates:
+  - `pytest tests/architecture/test_regression_metrics.py -q`
+  - `python scripts/qa/generate_architecture_dependency_map.py --update`
+- Outcome: `improved`
+```
+
+**Дополнительные правила:**
+
+- `Outcome` **MUST** классифицироваться явно; нельзя оставлять его неявным в тексте summary.
+- Если изменение не улучшает целевую метрику, автор **MUST** указать, какая
+  вторичная метрика улучшилась или какой риск был снят.
+- Если изменение ухудшает метрику, PR **MUST** содержать follow-up issue или
+  ratchet-plan до merge.
+- Для scorecard/budget changes evidence **MUST** ссылаться на конкретный gate,
+  который теперь закрепляет новый baseline.
+- Для architecture-refactor PR evidence **SHOULD** опираться на active docs и
+  не использовать `docs/99-archive/` как нормативный источник текущего
+  состояния.
 
 ### 7.2. Обновление Документации
 

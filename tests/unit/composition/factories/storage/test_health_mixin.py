@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -39,6 +39,38 @@ def _make_mixin(
 async def test_aclose_is_noop() -> None:
     """aclose completes without error."""
     mixin = _make_mixin()
+    await mixin.aclose()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_aclose_closes_shared_audit_once() -> None:
+    """Shared audit adapter should be closed once through adapter shutdown."""
+    audit = SimpleNamespace(aclose=AsyncMock())
+    mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
+    mixin.bronze = SimpleNamespace(base_path="/tmp/bronze", _audit=audit)  # type: ignore[assignment]
+    mixin.silver = SimpleNamespace(  # type: ignore[assignment]
+        base_path="/tmp/silver",
+        get_table_path=MagicMock(),
+        _audit=audit,
+    )
+    mixin.gold = SimpleNamespace(  # type: ignore[assignment]
+        base_path="/tmp/gold",
+        get_table_path=MagicMock(),
+        _audit=audit,
+    )
+
+    await mixin.aclose()
+
+    audit.aclose.assert_awaited_once()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_aclose_skips_writers_without_explicit_audit() -> None:
+    """Shutdown should ignore writers that do not expose an explicit _audit attr."""
+    mixin = _make_mixin()
+
     await mixin.aclose()
 
 

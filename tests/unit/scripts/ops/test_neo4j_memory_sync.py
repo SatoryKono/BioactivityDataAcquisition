@@ -47,7 +47,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("entity_config", "chembl_activity") in node_keys
     assert ("composite_config", "composite_activity") in node_keys
     assert ("dashboard_surface", "bioetl-overview-v2") in node_keys
+    assert ("doc_source_surface", "architecture diagrams hub") in node_keys
+    assert ("doc_source_surface", "diagram governance workflow") in node_keys
     assert ("policy_surface", "integration and VCR execution policy") in node_keys
+    assert ("policy_surface", "diagram governance policy") in node_keys
     assert ("script_surface", "scripts/dev/run_pytest.sh") in node_keys
     assert ("port_surface", "bioetl.domain.ports") in node_keys
     assert (
@@ -63,6 +66,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("contract_surface", "chembl.activity") in node_keys
     assert ("alert_surface", "BioETLPipelineRunFailed") in node_keys
     assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
+    assert ("quality_gate", "diagram quality gates") in node_keys
     assert (
         "test_artifact",
         "tests/unit/scripts/ops/test_neo4j_memory_sync.py",
@@ -143,6 +147,34 @@ def test_snapshot_contains_expected_relations() -> None:
         "CONTAINS",
         "module_surface",
         "src/bioetl/domain/config/pipeline.py",
+    ) in relation_keys
+    assert (
+        "project",
+        "BioETL",
+        "HAS_DOC_SOURCE_SURFACE",
+        "doc_source_surface",
+        "architecture diagrams hub",
+    ) in relation_keys
+    assert (
+        "policy_surface",
+        "diagram governance policy",
+        "GOVERNS",
+        "quality_gate",
+        "diagram quality gates",
+    ) in relation_keys
+    assert (
+        "policy_surface",
+        "diagram governance policy",
+        "GOVERNS",
+        "test_surface",
+        "architecture tests",
+    ) in relation_keys
+    assert (
+        "policy_surface",
+        "diagram governance policy",
+        "GOVERNS",
+        "doc_source_surface",
+        "diagram governance workflow",
     ) in relation_keys
     assert (
         "project",

@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
@@ -19,7 +20,11 @@ from bioetl.infrastructure.storage.bronze.reporting_helpers import (
 
 if TYPE_CHECKING:
     from bioetl.domain.lineage import LineageGraphFragment
-    from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
+    from bioetl.domain.models.metadata import (
+        BronzeMetadata,
+        InputSnapshotRef,
+        SourceMetadata,
+    )
     from bioetl.domain.ports import MetadataCoordinatorPort
 
 __all__ = [
@@ -85,6 +90,11 @@ def prepare_bronze_metadata_write(
     request: BronzeMetadataWriteRequest,
 ) -> PreparedBronzeMetadataWrite:
     """Resolve metadata payload and target path for one Bronze write."""
+    source_metadata = _build_bronze_source_metadata_with_live_snapshot(
+        base_path=host.base_path,
+        relative_path=request.relative_path,
+        source_metadata=request.source_metadata,
+    )
     completed_at = calculate_bronze_completed_at(request.ingestion_ts, request.duration)
     metadata_base_path = resolve_bronze_metadata_base_path(
         base_path=host.base_path,
@@ -106,7 +116,7 @@ def prepare_bronze_metadata_write(
             started_at=request.ingestion_ts,
             completed_at=completed_at,
             duration_seconds=request.duration,
-            source_metadata=request.source_metadata,
+            source_metadata=source_metadata,
         )
         return PreparedBronzeMetadataWrite(
             metadata_base_path=metadata_base_path,
@@ -121,7 +131,8 @@ def prepare_bronze_metadata_write(
             output_path=request.relative_path,
             started_at=request.ingestion_ts,
             completed_at=completed_at,
-            source_metadata=request.source_metadata,
+            source_metadata=source_metadata,
+            input_snapshots=tuple(source_metadata.input_snapshots),
         )
     )
     create_bundle = (
@@ -149,3 +160,73 @@ def prepare_bronze_metadata_write(
         metadata_base_path=metadata_base_path,
         metadata=metadata,
     )
+
+
+def _build_bronze_source_metadata_with_live_snapshot(
+    *,
+    base_path: Path,
+    relative_path: str,
+    source_metadata: SourceMetadata | None,
+) -> SourceMetadata | None:
+    """Attach an immutable Bronze batch snapshot to source metadata when possible."""
+    full_path = base_path / relative_path
+    if not full_path.exists():
+        return source_metadata
+
+    snapshot = _build_live_input_snapshot_ref(
+        full_path=full_path,
+        relative_path=relative_path,
+        query_string=None if source_metadata is None else source_metadata.query_string,
+    )
+    if source_metadata is None:
+        from bioetl.domain.models.metadata import SourceMetadata
+
+        return SourceMetadata(type="api", input_snapshots=[snapshot])
+
+    for existing in source_metadata.input_snapshots:
+        if (
+            existing.snapshot_id == snapshot.snapshot_id
+            and existing.content_hash == snapshot.content_hash
+            and existing.immutable_uri == snapshot.immutable_uri
+        ):
+            return source_metadata
+
+    return source_metadata.model_copy(
+        update={"input_snapshots": [*source_metadata.input_snapshots, snapshot]}
+    )
+
+
+def _build_live_input_snapshot_ref(
+    *,
+    full_path: Path,
+    relative_path: str,
+    query_string: str | None,
+) -> InputSnapshotRef:
+    """Build a replayable snapshot ref from the persisted Bronze batch file."""
+    from bioetl.domain.models.metadata import InputSnapshotRef
+
+    content_hash = _compute_file_sha256(full_path)
+    query_fingerprint = (
+        None
+        if not query_string
+        else hashlib.sha256(query_string.encode("utf-8")).hexdigest()
+    )
+    snapshot_id = hashlib.sha256(
+        f"bronze:{relative_path}:{content_hash}".encode("utf-8")
+    ).hexdigest()
+    return InputSnapshotRef(
+        snapshot_id=snapshot_id,
+        content_hash=content_hash,
+        immutable_uri=str(full_path),
+        query_fingerprint=query_fingerprint,
+        captured_at=datetime.fromtimestamp(full_path.stat().st_mtime, tz=UTC),
+    )
+
+
+def _compute_file_sha256(path: Path) -> str:
+    """Hash the persisted Bronze batch bytes for replay-safe provenance."""
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()

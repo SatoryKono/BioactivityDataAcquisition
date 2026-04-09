@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -28,7 +29,12 @@ class StorageAdapterHealthMixin:
 
         Implements aclose() required by StoragePort protocol.
         """
-        pass  # Writers don't need explicit cleanup
+        for audit in self._iter_unique_audit_ports():
+            aclose = getattr(audit, "aclose", None)
+            if callable(aclose):
+                awaitable = aclose()
+                if isinstance(awaitable, Awaitable):
+                    await awaitable
 
     async def health_check(self) -> HealthStatus:
         """Check storage accessibility and write capability.
@@ -149,6 +155,30 @@ class StorageAdapterHealthMixin:
             and isinstance(file_count, int)
             and isinstance(exists, bool)
         )
+
+    def _iter_unique_audit_ports(self) -> list[object]:
+        """Return explicit per-writer audit ports without double-closing shared ones."""
+        seen: set[int] = set()
+        audits: list[object] = []
+        for writer in (self.bronze, self.silver, self.gold):
+            audit = self._get_explicit_writer_audit(writer)
+            if audit is None:
+                continue
+            audit_id = id(audit)
+            if audit_id in seen:
+                continue
+            seen.add(audit_id)
+            audits.append(audit)
+        return audits
+
+    @staticmethod
+    def _get_explicit_writer_audit(writer: object) -> object | None:
+        """Return a writer's explicitly assigned audit port when present."""
+        try:
+            writer_dict = vars(writer)
+        except TypeError:
+            return None
+        return writer_dict.get("_audit")
 
     @staticmethod
     def _check_directory_writable(dir_path: Path | str) -> bool:

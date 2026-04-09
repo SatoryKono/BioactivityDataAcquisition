@@ -91,6 +91,36 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
         "summary": "Canonical LLM playbook for shipped Grafana dashboards.",
     },
     {
+        "name": "architecture diagrams hub",
+        "path": "docs/02-architecture/diagrams/README.md",
+        "summary": "Canonical hub for architecture, class, foundation, and view diagram sources and publication artifacts.",
+    },
+    {
+        "name": "diagram governance ADR",
+        "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
+        "summary": "Accepted ADR defining diagram governance, palette, decomposition rules, and CI validation expectations.",
+    },
+    {
+        "name": "diagram governance workflow",
+        "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
+        "summary": "Operator workflow for maintaining canonical diagram trees, derived views, and publication bundles.",
+    },
+    {
+        "name": "diagram measured inventory",
+        "path": "docs/02-architecture/diagrams/governance/diagrams-index.md",
+        "summary": "Measured inventory of tracked diagram families and canonical source coverage.",
+    },
+    {
+        "name": "diagram views inventory",
+        "path": "docs/02-architecture/diagrams/governance/diagram-views-inventory.md",
+        "summary": "Measured inventory of derived Mermaid review views and decomposition coverage.",
+    },
+    {
+        "name": "diagram tooling readme",
+        "path": "scripts/diagrams/README.md",
+        "summary": "Repository entrypoint for diagram lint, render, bundle, and regression tooling.",
+    },
+    {
         "name": "docs verification guide",
         "path": "docs/03-guides/docs-verification.md",
         "summary": "Published workflow for docs verification and drift control.",
@@ -131,6 +161,10 @@ CURATED_QUALITY_GATES: tuple[dict[str, object], ...] = (
     {
         "name": "pretest guardrails",
         "summary": "Broad preflight for cleanup, docs, inventory, and architecture drift.",
+    },
+    {
+        "name": "diagram quality gates",
+        "summary": "Diagram lint, syntax validation, artifact checks, visual smoke, and nightly regression gates for Mermaid publication surfaces.",
     },
 )
 CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
@@ -260,6 +294,35 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
         "source_path": "docs/03-guides/docs-verification.md",
         "artifact_label": "doc_artifact",
         "governs_quality_gates": ("docs verification",),
+    },
+    {
+        "name": "diagram governance policy",
+        "summary": (
+            "Canonical architecture diagrams live under docs/02-architecture/diagrams with ADR-040, canonical policy, "
+            "measured inventories, and scripted lint/render/publication checks defining the supported workflow."
+        ),
+        "source_path": "docs/02-architecture/diagrams/governance/policy.md",
+        "artifact_label": "doc_artifact",
+        "governs_quality_gates": ("diagram quality gates",),
+        "governs_test_surfaces": ("architecture tests",),
+        "governs_docs": (
+            "architecture diagrams hub",
+            "diagram governance ADR",
+            "diagram governance workflow",
+            "diagram measured inventory",
+            "diagram views inventory",
+            "diagram tooling readme",
+        ),
+    },
+    {
+        "name": "diagram publication boundary",
+        "summary": (
+            "Canonical .mmd trees and derived Mermaid views are source of truth for diagrams; svg, png, bundles, "
+            "descriptions, and index files are publication artifacts regenerated from those sources."
+        ),
+        "source_path": "docs/02-architecture/diagrams/README.md",
+        "artifact_label": "doc_artifact",
+        "governs_docs": ("architecture diagrams hub", "diagram tooling readme"),
     },
     {
         "name": "published docs boundary",
