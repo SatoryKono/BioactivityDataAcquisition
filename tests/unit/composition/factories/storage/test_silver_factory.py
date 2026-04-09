@@ -9,11 +9,12 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.factories.storage._silver import create_silver_writer
-from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.domain.ports.noop import (
+    NoOpAudit,
     NoOpMetadataWriter,
     NoOpTracing,
 )
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 
 
 @pytest.mark.unit
@@ -34,6 +35,7 @@ class TestCreateSilverWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -43,6 +45,7 @@ class TestCreateSilverWriter:
         assert result is expected
         call_kwargs = writer_cls.call_args[1]
         runtime_services = call_kwargs["runtime_services"]
+        assert isinstance(runtime_services.audit, NoOpAudit)
         assert isinstance(runtime_services.tracing, NoOpTracing)
         assert isinstance(runtime_services.metadata_writer, NoOpMetadataWriter)
 
@@ -59,6 +62,7 @@ class TestCreateSilverWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -84,6 +88,7 @@ class TestCreateSilverWriter:
             tracing=tracer,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -106,6 +111,7 @@ class TestCreateSilverWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -129,6 +135,7 @@ class TestCreateSilverWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -154,6 +161,7 @@ class TestCreateSilverWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -177,6 +185,7 @@ class TestCreateSilverWriter:
             tracing=None,
             csv_exporter=csv,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -206,6 +215,7 @@ class TestCreateSilverWriter:
             tracing=None,
             csv_exporter=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             transform_version=None,
             transform_steps=None,
             flat_structure=False,
@@ -215,3 +225,26 @@ class TestCreateSilverWriter:
 
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["runtime_services"].contract_rollout_policy == rollout_policy
+
+    def test_passes_audit_port(self) -> None:
+        """audit is forwarded into Silver runtime services explicitly."""
+        writer_cls = MagicMock()
+        audit = MagicMock()
+
+        create_silver_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/silver"),
+            config=None,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            audit=audit,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            silver_validator=None,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert call_kwargs["runtime_services"].audit is audit

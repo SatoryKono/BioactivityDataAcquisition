@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.composition.factories.storage._bronze import create_bronze_writer
 from bioetl.domain.ports.noop import (
+    NoOpAudit,
     NoOpMetadataWriter,
     NoOpTracing,
 )
@@ -33,6 +34,7 @@ class TestCreateBronzeWriter:
             metrics=MagicMock(),
             tracing=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             flat_structure=False,
         )
 
@@ -42,6 +44,7 @@ class TestCreateBronzeWriter:
         runtime_services = call_kwargs["runtime_services"]
         assert runtime_services.save_metadata is False
         assert isinstance(runtime_services.tracing, NoOpTracing)
+        assert isinstance(runtime_services.audit, NoOpAudit)
         assert isinstance(runtime_services.metadata_writer, NoOpMetadataWriter)
 
     def test_uses_config_flags(self) -> None:
@@ -57,6 +60,7 @@ class TestCreateBronzeWriter:
             metrics=MagicMock(),
             tracing=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             flat_structure=False,
         )
 
@@ -78,6 +82,7 @@ class TestCreateBronzeWriter:
             metrics=MagicMock(),
             tracing=tracer,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             flat_structure=False,
         )
 
@@ -97,6 +102,7 @@ class TestCreateBronzeWriter:
             metrics=MagicMock(),
             tracing=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             flat_structure=False,
         )
 
@@ -117,6 +123,7 @@ class TestCreateBronzeWriter:
             metrics=MagicMock(),
             tracing=None,
             metadata_coordinator=None,
+            audit=NoOpAudit(),
             flat_structure=True,
         )
 
@@ -136,8 +143,29 @@ class TestCreateBronzeWriter:
             metrics=MagicMock(),
             tracing=None,
             metadata_coordinator=coordinator,
+            audit=NoOpAudit(),
             flat_structure=False,
         )
 
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["runtime_services"].metadata_coordinator is coordinator
+
+    def test_passes_audit_port(self) -> None:
+        """audit is forwarded into runtime services explicitly."""
+        writer_cls = MagicMock()
+        audit = MagicMock()
+
+        create_bronze_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/bronze"),
+            config=None,
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            tracing=None,
+            metadata_coordinator=None,
+            audit=audit,
+            flat_structure=False,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert call_kwargs["runtime_services"].audit is audit
