@@ -19,6 +19,9 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     build_planned_artifacts as _build_planned_artifacts,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
+    build_run_source_refs as _build_run_source_refs,
+)
+from bioetl.composition.runtime_builders._run_manifest_support import (
     control_plane_root as _control_plane_root,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
@@ -40,7 +43,6 @@ from bioetl.composition.services.versioning import (
     get_git_commit,
     get_pipeline_version,
 )
-from bioetl.domain.control_plane import RunSourceRef
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 
 if TYPE_CHECKING:
@@ -98,13 +100,12 @@ def _build_manifest_create_request(
         ),
         runtime_config=_to_serializable_mapping(inputs.runtime_config),
         resolved_config=_to_serializable_mapping(yaml_config),
-        source_refs=(
-            RunSourceRef(
-                provider=provider,
-                entity=entity,
-                pipeline_name=ctx.pipeline_name,
-                query=getattr(ctx, "query", None),
-            ),
+        source_refs=_build_run_source_refs(
+            ctx=ctx,
+            cached_bronze=inputs.cached_bronze,
+            settings=inputs.settings,
+            provider=provider,
+            entity=entity,
         ),
         planned_artifacts=_build_planned_artifacts(
             settings=inputs.settings,

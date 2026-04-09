@@ -71,15 +71,20 @@ def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None
     assert default_fn is runner_builder.ensure_providers_loaded
 
 
-def test_build_pipeline_runner_wires_dependencies() -> None:
+def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     """Builder should assemble dependencies and pass them to pipeline factory."""
     fake_factory = _FakeFactory()
     fake_registry = _FakeRegistry(factory=fake_factory)
+    bronze_root = tmp_path / "bronze-cache"
+    bronze_day = bronze_root / "2026-01-01"
+    bronze_day.mkdir(parents=True)
+    (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
 
     calls: dict[str, object] = {}
 
     def get_settings_fn() -> SimpleNamespace:
         return SimpleNamespace(
+            data_dir=str(tmp_path),
             pipeline=SimpleNamespace(heartbeat_interval=30),
             test_mode=False,
         )
@@ -116,7 +121,7 @@ def test_build_pipeline_runner_wires_dependencies() -> None:
     def assemble_cached_bronze_context_fn(_: object) -> SimpleNamespace:
         return SimpleNamespace(
             enabled=True,
-            bronze_path="/tmp/bronze",
+            bronze_path=str(bronze_root),
             bronze_date="2026-01-01",
         )
 
@@ -157,13 +162,23 @@ def test_build_pipeline_runner_wires_dependencies() -> None:
     assert fake_factory.kwargs is not None
     assert fake_factory.kwargs["runtime"] == "runtime"
     assert fake_factory.kwargs["cached_bronze"].enabled is True
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    assert isinstance(manifest_id, str)
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
+    )
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    source_refs = payload["source_refs"]
+    assert isinstance(source_refs, list)
+    assert len(source_refs) == 1
+    assert source_refs[0]["input_snapshots"][0]["immutable_uri"] == str(bronze_day)
+    assert source_refs[0]["input_snapshots"][0]["content_hash"]
     events = [event for event, _ in logger_calls]
     assert events[:2] == [
         "input_filter_enabled",
         "cached_bronze_mode_enabled",
     ]
     assert "effective_config_artifact_persisted" in events
-    assert isinstance(fake_factory.kwargs["manifest_id"], str)
 
 
 def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:

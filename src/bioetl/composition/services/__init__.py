@@ -11,7 +11,8 @@ Services:
 
 from __future__ import annotations
 
-from bioetl.composition._services import MetadataCoordinator
+from importlib import import_module
+
 from bioetl.composition.services.versioning import (
     compute_config_hash,
     get_git_commit,
@@ -25,6 +26,10 @@ from bioetl.domain.ports import (
     SilverMetadataInput,
 )
 
+_LAZY_EXPORT_MODULES: dict[str, str] = {
+    "MetadataCoordinator": "bioetl.composition._services",
+}
+
 __all__ = [
     "BronzeMetadataInput",
     "GoldMetadataInput",
@@ -34,3 +39,20 @@ __all__ = [
     "get_git_commit",
     "get_pipeline_version",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Resolve compatibility exports lazily to avoid bootstrap import cycles."""
+    try:
+        module_name = _LAZY_EXPORT_MODULES[name]
+    except KeyError as exc:  # pragma: no cover - standard attribute path
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+
+    value = getattr(import_module(module_name), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    """Expose lazy re-exports for help() and shell introspection."""
+    return sorted(set(globals()) | set(__all__))
