@@ -23,6 +23,7 @@ from bioetl.domain.models._metadata_bronze import (
     BronzeMetadata,
     BronzeOutputExt,
     FileOutputMetadata,
+    InputSnapshotRef,
     RateLimitInfo,
     SourceMetadata,
 )
@@ -71,6 +72,7 @@ __all__ = [
     "GoldOutputExt",
     "GovernanceLineageConfig",
     "GovernanceMetadata",
+    "InputSnapshotRef",
     "LineageMetadata",
     "PipelineMetadata",
     "QualityExpectations",
