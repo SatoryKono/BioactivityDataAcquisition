@@ -4,17 +4,24 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services import (
-    PipelineRunResult as PipelineRunResult,
+from bioetl.application.services.audit_inspection_service import (
+    AuditInspectionService as AuditInspectionService,
 )
-from bioetl.application.services import RunOptions as RunOptions
-from bioetl.application.services import RunResult as RunResult
 from bioetl.application.services.metadata_coordinator import (
     MetadataCoordinator as MetadataCoordinator,
 )
+from bioetl.application.services.observability_workflow_service import (
+    ObservabilityWorkflowService as ObservabilityWorkflowService,
+)
+from bioetl.application.services.pipeline_runner_service import (
+    PipelineRunResult as PipelineRunResult,
+)
+from bioetl.application.services.pipeline_runner_service import RunOptions as RunOptions
+from bioetl.application.services.pipeline_runner_service import RunResult as RunResult
 from bioetl.composition.bootstrap import (
     HealthServerDependencies,
     bootstrap_adr_service,
+    bootstrap_audit_inspection_service,
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
     bootstrap_config_service,
@@ -25,6 +32,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_lineage_service,
     bootstrap_lock_service,
     bootstrap_metrics_service,
+    bootstrap_observability_workflow_service,
     bootstrap_pipeline_runner_service,
     bootstrap_quarantine_port,
     bootstrap_quarantine_service,
@@ -57,6 +65,7 @@ if TYPE_CHECKING:
 __all__ = [
     "cleanup_bronze",
     "get_adr_service",
+    "get_audit_service",
     "get_bronze_cleanup_service",
     "get_checkpoint_service",
     "get_config_service",
@@ -67,6 +76,7 @@ __all__ = [
     "get_lineage_service",
     "get_lock_service",
     "get_metrics_service",
+    "get_observability_workflow_service",
     "get_pipeline_runner_service",
     "get_quarantine_port",
     "get_quarantine_service",
@@ -96,6 +106,12 @@ def get_checkpoint_service() -> CheckpointService:
     """
     _ensure_registrations()
     return bootstrap_checkpoint_service()
+
+
+def get_audit_service() -> AuditInspectionService:
+    """Get the audit diagnostics service."""
+    _ensure_registrations()
+    return bootstrap_audit_inspection_service()
 
 
 def get_quarantine_service() -> QuarantineService:
@@ -297,6 +313,12 @@ def get_metrics_service() -> MetricsService:
     """
     _ensure_registrations()
     return bootstrap_metrics_service()
+
+
+def get_observability_workflow_service() -> ObservabilityWorkflowService:
+    """Get the canonical audit/checkpoint observability workflow service."""
+    _ensure_registrations()
+    return bootstrap_observability_workflow_service()
 
 
 def get_adr_service() -> AdrServicePort:

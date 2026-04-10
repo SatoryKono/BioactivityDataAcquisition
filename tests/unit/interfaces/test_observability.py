@@ -168,6 +168,18 @@ def test_get_checkpoint_service_delegates_to_composition_services_api() -> None:
     mock_impl.assert_called_once_with()
 
 
+def test_get_audit_service_delegates_to_composition_services_api() -> None:
+    expected = mock.Mock()
+    with mock.patch(
+        "bioetl.composition.observability_api.get_audit_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = observability.get_audit_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
 def test_get_quarantine_service_delegates_to_composition_services_api() -> None:
     expected = mock.Mock()
     with mock.patch(
@@ -214,4 +226,17 @@ def test_get_observability_diagnostics_bundle_builds_unified_bundle() -> None:
         bundle = observability.get_observability_diagnostics_bundle()
 
     assert bundle is expected
+    mock_impl.assert_called_once_with()
+
+
+def test_get_observability_workflow_service_delegates_to_composition_services_api() -> None:
+    expected = mock.Mock()
+
+    with mock.patch(
+        "bioetl.composition.observability_api.get_observability_workflow_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = observability.get_observability_workflow_service()
+
+    assert result is expected
     mock_impl.assert_called_once_with()
