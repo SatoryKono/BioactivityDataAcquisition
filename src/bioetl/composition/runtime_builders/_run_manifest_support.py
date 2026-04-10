@@ -13,6 +13,7 @@ from uuid import UUID
 import yaml
 
 from bioetl.domain.control_plane import (
+    ReplayCapability,
     RunArtifactRef,
     RunInputSnapshotRef,
     RunSourceRef,
@@ -137,6 +138,16 @@ def build_run_source_refs(
     )
 
 
+def resolve_replay_capability(
+    source_refs: tuple[RunSourceRef, ...],
+) -> ReplayCapability:
+    """Classify whether one manifested run supports exact replay."""
+    has_input_snapshots = any(ref.input_snapshots for ref in source_refs)
+    if has_input_snapshots:
+        return ReplayCapability.EXACT_REPLAY_SUPPORTED
+    return ReplayCapability.REBUILD_ONLY
+
+
 def _build_cached_bronze_snapshot_refs(
     *,
     cached_bronze: object | None,
@@ -148,14 +159,16 @@ def _build_cached_bronze_snapshot_refs(
     """Build immutable snapshot refs for cached-Bronze executions."""
     if cached_bronze is None or not getattr(cached_bronze, "enabled", False):
         return ()
+    bronze_path = getattr(cached_bronze, "bronze_path", None)
+    bronze_date = getattr(cached_bronze, "bronze_date", None)
     bronze_root = (
-        Path(cached_bronze.bronze_path)
-        if getattr(cached_bronze, "bronze_path", None)
+        Path(str(bronze_path))
+        if bronze_path is not None
         else settings.bronze_path / provider / entity
     )
     batch_files = _resolve_cached_bronze_batch_files(
         bronze_root=bronze_root,
-        bronze_date=getattr(cached_bronze, "bronze_date", None),
+        bronze_date=cast("str | None", bronze_date),
     )
     if not batch_files:
         raise RuntimeError(
@@ -166,8 +179,8 @@ def _build_cached_bronze_snapshot_refs(
         batch_files=batch_files,
     )
     snapshot_scope = (
-        bronze_root / cached_bronze.bronze_date
-        if getattr(cached_bronze, "bronze_date", None)
+        bronze_root / str(bronze_date)
+        if bronze_date is not None
         else bronze_root
     )
     latest_mtime = max(file_path.stat().st_mtime for file_path in batch_files)
@@ -326,10 +339,10 @@ def create_control_plane_refs(
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
     contract_ref: str,
-    contract_version: str,
-    contract_schema_hash: str,
-    dq_policy_ref: str,
-    rule_bundle_version: str,
+    contract_version: str | None,
+    contract_schema_hash: str | None,
+    dq_policy_ref: str | None,
+    rule_bundle_version: str | None,
 ) -> ManifestControlPlaneRefs:
     """Build the compact control-plane refs bundle returned to callers."""
     return ManifestControlPlaneRefs(

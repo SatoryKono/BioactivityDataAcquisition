@@ -160,12 +160,12 @@ class RunManifestInspectionService:
         """Resolve manifest_id first, then run_id lookup when identifier is UUID-like."""
         manifest = self.manifest_port.get(identifier)
         if manifest is not None:
-            return manifest
+            return cast(RunManifest, manifest)
         run_id = self._parse_run_id(identifier)
         if run_id is not None:
             manifest = self.manifest_port.get_by_run_id(run_id)
             if manifest is not None:
-                return manifest
+                return cast(RunManifest, manifest)
         raise ValueError(f"Run manifest not found for identifier: {identifier}")
 
     @staticmethod
@@ -186,6 +186,14 @@ class RunManifestInspectionService:
             "effective_config_hash": code_provenance.config_hash,
             "contract_ref": code_provenance.contract_ref,
             "contract_version": code_provenance.contract_version,
+            "replay_capability": diagnostics.get(
+                "replay_capability",
+                manifest.replay_capability.value,
+            ),
+            "exact_replay_eligible": diagnostics.get(
+                "exact_replay_eligible",
+                manifest.replay_capability.value == "exact_replay_supported",
+            ),
             "replay_mode": diagnostics.get("replay_mode", "live_fetch"),
             "input_snapshot_count": diagnostics.get("input_snapshot_count", 0),
             "input_snapshots": diagnostics.get("input_snapshots", []),

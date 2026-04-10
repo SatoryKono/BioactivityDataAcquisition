@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from datetime import datetime
+from enum import Enum
 from uuid import UUID
 
 from bioetl.domain.control_plane._run_manifest_serialization import (
@@ -19,12 +20,20 @@ from bioetl.domain.control_plane._run_manifest_serialization import (
 from bioetl.domain.types import RunID, RunType
 
 __all__ = [
+    "ReplayCapability",
     "RunArtifactRef",
     "RunCodeProvenance",
     "RunInputSnapshotRef",
     "RunManifest",
     "RunSourceRef",
 ]
+
+
+class ReplayCapability(str, Enum):
+    """Exact-replay capability classification for one manifested run."""
+
+    EXACT_REPLAY_SUPPORTED = "exact_replay_supported"
+    REBUILD_ONLY = "rebuild_only"
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,6 +106,7 @@ class RunManifest:
     runtime_config: dict[str, object]
     resolved_config: dict[str, object]
     code_provenance: RunCodeProvenance
+    replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY
     source_refs: tuple[RunSourceRef, ...] = ()
     planned_artifacts: tuple[RunArtifactRef, ...] = ()
 
@@ -132,6 +142,7 @@ class RunManifest:
             runtime_config=_load_object_mapping(payload.get("runtime_config")),
             resolved_config=_load_object_mapping(payload.get("resolved_config")),
             code_provenance=_load_code_provenance(payload.get("code_provenance")),
+            replay_capability=_load_replay_capability(payload.get("replay_capability")),
             source_refs=_load_source_refs(payload.get("source_refs")),
             planned_artifacts=_load_artifacts(payload.get("planned_artifacts")),
         )
@@ -162,6 +173,13 @@ def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
             payload, "effective_config_artifact_id"
         ),
     )
+
+
+def _load_replay_capability(raw_value: object) -> ReplayCapability:
+    """Deserialize replay capability with a backward-compatible default."""
+    if raw_value is None:
+        return ReplayCapability.REBUILD_ONLY
+    return ReplayCapability(str(raw_value))
 
 
 def _load_object_mapping(raw_mapping: object) -> dict[str, object]:

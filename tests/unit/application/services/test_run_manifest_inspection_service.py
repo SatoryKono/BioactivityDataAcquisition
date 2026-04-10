@@ -18,6 +18,7 @@ from bioetl.application.services.run_manifest_service import (
 )
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
+    ReplayCapability,
     RunArtifactRef,
     RunCodeProvenance,
     RunInputSnapshotRef,
@@ -114,6 +115,7 @@ def _make_manifest(
             dq_contract_compatibility_hash="compat-hash-1",
             effective_config_artifact_id="eca-123",
         ),
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
         source_refs=source_refs
         or (
             RunSourceRef(
@@ -172,6 +174,8 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "effective_config_hash": "deadbeef",
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "replay_capability": "exact_replay_supported",
+        "exact_replay_eligible": True,
         "replay_mode": "exact_replay",
         "input_snapshot_count": 1,
         "input_snapshots": [
@@ -226,6 +230,8 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "effective_config_hash": "deadbeef",
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "replay_capability": "exact_replay_supported",
+        "exact_replay_eligible": True,
         "replay_mode": "exact_replay",
         "input_snapshot_count": 1,
         "input_snapshots": [
@@ -257,6 +263,8 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "effective_config_hash": "deadbeef",
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "replay_capability": "exact_replay_supported",
+        "exact_replay_eligible": True,
         "replay_mode": "exact_replay",
         "input_snapshot_count": 1,
         "input_snapshots": [
