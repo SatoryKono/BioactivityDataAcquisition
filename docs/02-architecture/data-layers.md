@@ -34,7 +34,7 @@ Last verified: '2026-03-29'
 | `run_id` | UUID | Идентификатор запуска пайплайна (в sidecar metadata). |
 | `batch_id` | UUID | Идентификатор пакета данных (в sidecar metadata). |
 
-**Примечание**: Metadata хранится в sidecar-файлах уровня файла (`.zst.meta.json` и `*_metadata.yaml`), а не как per-record поля. В Silver используются per-record системные поля (`_ingestion_ts`, `_run_id`, `_source_batch_id`).
+**Примечание**: Metadata хранится в sidecar-файлах уровня файла (`.zst.meta.json` и `*_metadata.yaml`), а не как per-record поля. Воспроизводимость Silver/Gold опирается на sidecar/control-plane anchors (`run_id`, `manifest_id`, `execution_fingerprint`, `content_hash`), а не на persisted occurrence-scoped поля в физических строках Delta.
 
 **Примечание**: Если источник возвращает массив JSON, он разбивается на отдельные строки (records).
 
@@ -87,12 +87,10 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 *   **Первичный ключ (Primary Key)**: Определяется для каждой сущности (например, `chembl-id`). Если естественного ключа нет, используется синтетический `content_hash`.
 *   **Логика Merge**:
-    *   Если запись с PK существует: Обновление (UPDATE).
+    *   Если запись с PK существует: Обновление (UPDATE) только при изменении содержимого (`content_hash`).
     *   Если запись не существует: Вставка (INSERT).
-*   **Приоритет обновлений (Conflict Resolution)**:
-    При конкурентных запусках (например, Backfill vs Incremental) используется поле `_run_type`.
-    Приоритет: `rebuild` > `backfill` > `incremental`.
-    *В коде*: Условный update в Delta Merge (см. `src/bioetl/infrastructure/storage/silver_writer.py`).
+*   **Conflict Resolution / Replay Safety**:
+    Runtime provenance (`run_id`, `run_type`, `source_batch_id`, `ingestion_ts`) может участвовать в orchestration, audit и sidecar metadata, но не считается частью persisted Silver/Gold row contract. Exact replay и идемпотентность должны определяться бизнес-ключами, `content_hash` и control-plane anchors, а не occurrence-scoped полями в строках Delta.
 
 ### 2.5. PII и Безопасность
 *   Поля, помеченные как чувствительные (PII), **ОБЯЗАНЫ** быть хэшированы перед записью в Silver.
@@ -117,7 +115,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 При переходе из Silver в Gold выполняется трансформация данных:
 
-*   **Фильтрация полей**: Public surface `BaseTransformer.transform_for_gold()` использует `GOLD_EXCLUDE_FIELDS` для фильтрации полей. В текущей версии `GOLD_EXCLUDE_FIELDS = frozenset()` (пустое множество) — все Silver-поля проходят в Gold без исключения.
+*   **Фильтрация полей**: Public surface `BaseTransformer.transform_for_gold()` применяет deterministic Gold persisted-row policy. Occurrence-scoped provenance (`_run_id`, `_run_type`, `_source_batch_id`, `_ingestion_ts`, composite runtime anchors) выводится в sidecar/control-plane artifacts и не должна попадать в физические Gold rows.
 *   **Плоская структура**: Gold содержит только плоские (scalar) поля для оптимизации аналитических запросов.
 *   **Реализация**: Константа `GOLD_EXCLUDE_FIELDS` объявлена в `src/bioetl/application/core/base_transformer/base.py`, а реализация `transform_for_gold()` вынесена в `src/bioetl/application/core/base_transformer_dependency_helpers_mixin.py`.
 
