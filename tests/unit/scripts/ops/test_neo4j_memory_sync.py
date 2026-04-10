@@ -52,6 +52,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("policy_surface", "integration and VCR execution policy") in node_keys
     assert ("policy_surface", "diagram governance policy") in node_keys
     assert ("script_surface", "scripts/dev/run_pytest.sh") in node_keys
+    assert ("script_surface", "scripts/diagrams/__main__.py") in node_keys
+    assert ("script_surface", "scripts/docs/__main__.py") in node_keys
+    assert ("script_surface", "scripts/schema/__main__.py") in node_keys
+    assert ("script_surface", "scripts/ops/__main__.py") in node_keys
     assert ("port_surface", "bioetl.domain.ports") in node_keys
     assert (
         "port_surface",
@@ -66,6 +70,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("contract_surface", "chembl.activity") in node_keys
     assert ("alert_surface", "BioETLPipelineRunFailed") in node_keys
     assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
+    assert ("execution_path", "uv run python -m scripts.diagrams lint") in node_keys
+    assert ("execution_path", "uv run python -m scripts.docs verify") in node_keys
+    assert ("execution_path", "uv run python -m scripts.schema validate-configs") in node_keys
+    assert ("execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json") in node_keys
     assert ("quality_gate", "diagram quality gates") in node_keys
     assert (
         "test_artifact",
@@ -78,461 +86,109 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("package_family", "interfaces/test_cli_checkpoint_list.py") not in node_keys
 
 
-def test_snapshot_contains_expected_relations() -> None:
-    _, snapshot = _snapshot()
-    relation_keys = {
+RelationKey = tuple[str, str, str, str, str]
+
+EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
+    ("project", "BioETL", "HAS_PORT", "port_surface", "bioetl.domain.ports"),
+    ("project", "BioETL", "HAS_ADAPTER", "adapter_surface", "bioetl.infrastructure.adapters.chembl"),
+    ("project", "BioETL", "HAS_PIPELINE", "pipeline_surface", "chembl_activity"),
+    ("project", "BioETL", "HAS_CONTRACT", "contract_surface", "chembl.activity"),
+    ("project", "BioETL", "HAS_ALERT", "alert_surface", "BioETLPipelineRunFailed"),
+    ("project", "BioETL", "HAS_PROVIDER", "provider_surface", "chembl"),
+    ("provider_surface", "chembl", "DEFINES", "entity_config", "chembl_activity"),
+    ("composite_config", "composite_activity", "DEPENDS_ON", "entity_config", "chembl_activity"),
+    ("package_family", "domain/config", "CONTAINS", "module_surface", "src/bioetl/domain/config/pipeline.py"),
+    ("project", "BioETL", "HAS_DOC_SOURCE_SURFACE", "doc_source_surface", "architecture diagrams hub"),
+    ("policy_surface", "diagram governance policy", "GOVERNS", "quality_gate", "diagram quality gates"),
+    ("policy_surface", "diagram governance policy", "GOVERNS", "test_surface", "architecture tests"),
+    ("policy_surface", "diagram governance policy", "GOVERNS", "doc_source_surface", "diagram governance workflow"),
+    ("project", "BioETL", "HAS_POLICY_SURFACE", "policy_surface", "integration and VCR execution policy"),
+    ("script_surface", "scripts/diagrams/__main__.py", "PROVIDES", "execution_path", "uv run python -m scripts.diagrams lint"),
+    ("execution_path", "uv run python -m scripts.diagrams lint", "EXECUTES_GATE", "quality_gate", "diagram quality gates"),
+    ("script_surface", "scripts/docs/__main__.py", "PROVIDES", "execution_path", "uv run python -m scripts.docs verify"),
+    ("execution_path", "uv run python -m scripts.docs verify", "EXECUTES_GATE", "quality_gate", "docs verification"),
+    ("script_surface", "scripts/schema/__main__.py", "PROVIDES", "execution_path", "uv run python -m scripts.schema validate-configs"),
+    ("execution_path", "uv run python -m scripts.schema validate-configs", "EXECUTES_GATE", "quality_gate", "config validation"),
+    ("script_surface", "scripts/ops/__main__.py", "PROVIDES", "execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json"),
+    ("policy_surface", "integration and VCR execution policy", "GOVERNS", "test_surface", "integration tests"),
+    ("adapter_surface", "bioetl.infrastructure.adapters.chembl", "CONTAINS", "adapter_impl_surface", "bioetl.infrastructure.adapters.chembl.client"),
+    ("adapter_impl_surface", "bioetl.infrastructure.adapters.chembl.client", "DEPENDS_ON", "port_surface", "bioetl.domain.ports.observability.logging.LoggerPort"),
+    ("adapter_surface", "bioetl.infrastructure.adapters.chembl", "DEPENDS_ON", "port_surface", "bioetl.domain.ports.observability.logging.LoggerPort"),
+    ("pipeline_surface", "chembl_activity", "DEPENDS_ON", "adapter_surface", "bioetl.infrastructure.adapters.chembl"),
+    ("pipeline_surface", "chembl_activity", "DEPENDS_ON", "contract_surface", "chembl.activity"),
+    ("pipeline_surface", "chembl_activity", "DEPENDS_ON", "module_surface", "src/bioetl/application/core/record_normalization_processor.py"),
+    ("pipeline_surface", "chembl_activity", "DEPENDS_ON", "module_surface", "src/bioetl/domain/normalization/profiles/_chembl_activity_fields.py"),
+    ("entity_config", "chembl_activity", "DEPENDS_ON", "module_surface", "src/bioetl/domain/normalization/chembl.py"),
+    ("pipeline_surface", "crossref_publication", "DEPENDS_ON", "module_surface", "src/bioetl/application/core/record_normalization_processor.py"),
+    ("entity_config", "crossref_publication", "DEPENDS_ON", "module_surface", "src/bioetl/domain/normalization/text.py"),
+    ("pipeline_surface", "composite_activity", "DEPENDS_ON", "module_surface", "src/bioetl/application/composite/join_key_normalization.py"),
+    ("contract_surface", "pubmed.publication", "DEPENDS_ON", "module_surface", "src/bioetl/domain/schemas/common/publication_base.py"),
+    ("contract_surface", "chembl.activity", "BACKED_BY", "config_artifact", "configs/contracts/chembl/activity.yaml"),
+    ("contract_surface", "chembl.activity", "DESCRIBED_IN", "doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md"),
+    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/application/services/run_manifest_service.py"),
+    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py"),
+    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/interfaces/cli/commands/run_manifest.py"),
+    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/application/services/lineage_inspection_service.py"),
+    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/composition/bootstrap/cli/lineage.py"),
+    ("contract_surface", "chembl.activity", "DESCRIBED_IN", "doc_artifact", "docs/05-operations/runbooks/traceability-signal-ownership.md"),
+    ("policy_surface", "pipeline assembly model", "GOVERNS", "pipeline_surface", "chembl_activity"),
+    ("policy_surface", "observability surface model", "GOVERNS", "alert_surface", "BioETLPipelineRunFailed"),
+    ("pipeline_surface", "chembl_activity", "RUNS_VIA", "execution_path", "uv run python -m bioetl run --pipeline"),
+    ("pipeline_surface", "chembl_activity", "VALIDATED_BY", "quality_gate", "pytest"),
+    ("pipeline_surface", "chembl_activity", "VALIDATED_BY", "quality_gate", "config validation"),
+    ("pipeline_surface", "chembl_activity", "OBSERVED_BY", "dashboard_surface", "bioetl-dq-v2"),
+    ("pipeline_surface", "chembl_activity", "TESTED_BY", "test_artifact", "tests/integration/pipelines/test_chembl_activity.py"),
+    ("pipeline_surface", "chembl_activity", "TESTED_BY", "test_artifact", "tests/unit/infrastructure/adapters/chembl/test_request_metadata.py"),
+    ("pipeline_surface", "chembl_activity", "TESTED_BY", "test_surface", "integration tests"),
+    ("pipeline_surface", "composite_activity", "OBSERVED_BY", "dashboard_surface", "bioetl-control-plane-v1"),
+    ("alert_surface", "BioETLPipelineRunFailed", "DEPENDS_ON", "pipeline_surface", "chembl_activity"),
+    ("alert_surface", "BioETLPipelineRunFailed", "OBSERVED_BY", "dashboard_surface", "bioetl-runtime"),
+    ("alert_surface", "BioETLPipelineRunFailed", "DEPENDS_ON", "contract_surface", "chembl.activity"),
+    ("alert_surface", "BioETLDQSoftThresholdExceeded", "DEPENDS_ON", "pipeline_surface", "chembl_activity"),
+    ("alert_surface", "BioETLProviderFailureRateHigh", "OBSERVED_BY", "dashboard_surface", "bioetl-provider-health-v2"),
+    ("alert_surface", "BioETLProviderFailureRateHigh", "DEPENDS_ON", "provider_surface", "chembl"),
+    ("alert_surface", "BioETLControlPlaneReadFailureRate", "OBSERVED_BY", "dashboard_surface", "bioetl-control-plane-v1"),
+    ("alert_surface", "BioETLControlPlaneReadFailureRate", "DEPENDS_ON", "contract_surface", "chembl.activity"),
+    ("doc_artifact", "scripts/dev/README.md", "DESCRIBES", "execution_path", "bash scripts/dev/run_pytest.sh"),
+    ("script_surface", "scripts/dev/run_pytest.sh", "PROVIDES", "execution_path", "bash scripts/dev/run_pytest.sh"),
+    ("layer_family", "composition", "CONTAINS", "module_surface", "src/bioetl/composition/control_plane_api.py"),
+)
+
+FORBIDDEN_RELATION_KEYS: tuple[RelationKey, ...] = (
+    ("pipeline_surface", "composite_activity", "OBSERVED_BY", "dashboard_surface", "bioetl-silver-reject-explorer"),
+    ("alert_surface", "BioETLDQSoftThresholdExceeded", "DEPENDS_ON", "pipeline_surface", "composite_activity"),
+    ("test_artifact", "tests/unit/scripts/ops/test_neo4j_memory_sync.py", "TESTS_LAYER", "layer_family", "scripts"),
+    ("test_artifact", "tests/integration/interfaces/test_cli_checkpoint_list.py", "TESTS_PACKAGE_FAMILY", "package_family", "interfaces/test_cli_checkpoint_list.py"),
+    ("test_artifact", "tests/unit/domain/configs/test_base_configs.py", "TESTS_PACKAGE_FAMILY", "package_family", "domain/configs"),
+    ("test_artifact", "tests/unit/domain/hash_policy/test_hash_policy_stability.py", "TESTS_PACKAGE_FAMILY", "package_family", "domain/hash_policy"),
+    ("test_artifact", "tests/unit/infrastructure/factories/test_factories.py", "TESTS_PACKAGE_FAMILY", "package_family", "infrastructure/factories"),
+    ("test_artifact", "tests/unit/interfaces/factories/test_pipeline_factories.py", "TESTS_PACKAGE_FAMILY", "package_family", "interfaces/factories"),
+)
+
+
+def _relation_keys(snapshot: object) -> set[RelationKey]:
+    return {
         (rel.source.label, rel.source.name, rel.relation_type, rel.target.label, rel.target.name)
         for rel in snapshot.relations.values()
     }
 
-    assert (
-        "project",
-        "BioETL",
-        "HAS_PORT",
-        "port_surface",
-        "bioetl.domain.ports",
-    ) in relation_keys
-    assert (
-        "project",
-        "BioETL",
-        "HAS_ADAPTER",
-        "adapter_surface",
-        "bioetl.infrastructure.adapters.chembl",
-    ) in relation_keys
-    assert (
-        "project",
-        "BioETL",
-        "HAS_PIPELINE",
-        "pipeline_surface",
-        "chembl_activity",
-    ) in relation_keys
-    assert (
-        "project",
-        "BioETL",
-        "HAS_CONTRACT",
-        "contract_surface",
-        "chembl.activity",
-    ) in relation_keys
-    assert (
-        "project",
-        "BioETL",
-        "HAS_ALERT",
-        "alert_surface",
-        "BioETLPipelineRunFailed",
-    ) in relation_keys
-    assert (
-        "project",
-        "BioETL",
-        "HAS_PROVIDER",
-        "provider_surface",
-        "chembl",
-    ) in relation_keys
-    assert (
-        "provider_surface",
-        "chembl",
-        "DEFINES",
-        "entity_config",
-        "chembl_activity",
-    ) in relation_keys
-    assert (
-        "composite_config",
-        "composite_activity",
-        "DEPENDS_ON",
-        "entity_config",
-        "chembl_activity",
-    ) in relation_keys
-    assert (
-        "package_family",
-        "domain/config",
-        "CONTAINS",
-        "module_surface",
-        "src/bioetl/domain/config/pipeline.py",
-    ) in relation_keys
-    assert (
-        "project",
-        "BioETL",
-        "HAS_DOC_SOURCE_SURFACE",
-        "doc_source_surface",
-        "architecture diagrams hub",
-    ) in relation_keys
-    assert (
-        "policy_surface",
-        "diagram governance policy",
-        "GOVERNS",
-        "quality_gate",
-        "diagram quality gates",
-    ) in relation_keys
-    assert (
-        "policy_surface",
-        "diagram governance policy",
-        "GOVERNS",
-        "test_surface",
-        "architecture tests",
-    ) in relation_keys
-    assert (
-        "policy_surface",
-        "diagram governance policy",
-        "GOVERNS",
-        "doc_source_surface",
-        "diagram governance workflow",
-    ) in relation_keys
-    assert (
-        "project",
-        "BioETL",
-        "HAS_POLICY_SURFACE",
-        "policy_surface",
-        "integration and VCR execution policy",
-    ) in relation_keys
-    assert (
-        "policy_surface",
-        "integration and VCR execution policy",
-        "GOVERNS",
-        "test_surface",
-        "integration tests",
-    ) in relation_keys
-    assert (
-        "adapter_surface",
-        "bioetl.infrastructure.adapters.chembl",
-        "CONTAINS",
-        "adapter_impl_surface",
-        "bioetl.infrastructure.adapters.chembl.client",
-    ) in relation_keys
-    assert (
-        "adapter_impl_surface",
-        "bioetl.infrastructure.adapters.chembl.client",
-        "DEPENDS_ON",
-        "port_surface",
-        "bioetl.domain.ports.observability.logging.LoggerPort",
-    ) in relation_keys
-    assert (
-        "adapter_surface",
-        "bioetl.infrastructure.adapters.chembl",
-        "DEPENDS_ON",
-        "port_surface",
-        "bioetl.domain.ports.observability.logging.LoggerPort",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "DEPENDS_ON",
-        "adapter_surface",
-        "bioetl.infrastructure.adapters.chembl",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "DEPENDS_ON",
-        "contract_surface",
-        "chembl.activity",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/application/core/record_normalization_processor.py",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/domain/normalization/profiles/_chembl_activity_fields.py",
-    ) in relation_keys
-    assert (
-        "entity_config",
-        "chembl_activity",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/domain/normalization/chembl.py",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "crossref_publication",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/application/core/record_normalization_processor.py",
-    ) in relation_keys
-    assert (
-        "entity_config",
-        "crossref_publication",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/domain/normalization/text.py",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "composite_activity",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/application/composite/join_key_normalization.py",
-    ) in relation_keys
-    assert (
-        "contract_surface",
-        "pubmed.publication",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/domain/schemas/common/publication_base.py",
-    ) in relation_keys
-    assert (
-        "contract_surface",
-        "chembl.activity",
-        "BACKED_BY",
-        "config_artifact",
-        "configs/contracts/chembl/activity.yaml",
-    ) in relation_keys
-    assert (
-        "contract_surface",
-        "chembl.activity",
-        "DESCRIBED_IN",
-        "doc_artifact",
-        "docs/04-reference/contracts/run-manifest-ledger.md",
-    ) in relation_keys
-    assert (
-        "contract_surface",
-        "chembl.activity",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/application/services/run_manifest_service.py",
-    ) in relation_keys
-    assert (
-        "contract_surface",
-        "chembl.activity",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
-    ) in relation_keys
-    assert (
-        "contract_surface",
-        "chembl.activity",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/interfaces/cli/commands/run_manifest.py",
-    ) in relation_keys
-    assert (
-        "contract_surface",
-        "chembl.activity",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/application/services/lineage_inspection_service.py",
-    ) in relation_keys
-    assert (
-        "contract_surface",
-        "chembl.activity",
-        "DEPENDS_ON",
-        "module_surface",
-        "src/bioetl/composition/bootstrap/cli/lineage.py",
-    ) in relation_keys
-    assert (
-        "contract_surface",
-        "chembl.activity",
-        "DESCRIBED_IN",
-        "doc_artifact",
-        "docs/05-operations/runbooks/traceability-signal-ownership.md",
-    ) in relation_keys
-    assert (
-        "policy_surface",
-        "pipeline assembly model",
-        "GOVERNS",
-        "pipeline_surface",
-        "chembl_activity",
-    ) in relation_keys
-    assert (
-        "policy_surface",
-        "observability surface model",
-        "GOVERNS",
-        "alert_surface",
-        "BioETLPipelineRunFailed",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "RUNS_VIA",
-        "execution_path",
-        "uv run python -m bioetl run --pipeline",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "VALIDATED_BY",
-        "quality_gate",
-        "pytest",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "VALIDATED_BY",
-        "quality_gate",
-        "config validation",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "OBSERVED_BY",
-        "dashboard_surface",
-        "bioetl-dq-v2",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "TESTED_BY",
-        "test_artifact",
-        "tests/integration/pipelines/test_chembl_activity.py",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "TESTED_BY",
-        "test_artifact",
-        "tests/unit/infrastructure/adapters/chembl/test_request_metadata.py",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "chembl_activity",
-        "TESTED_BY",
-        "test_surface",
-        "integration tests",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "composite_activity",
-        "OBSERVED_BY",
-        "dashboard_surface",
-        "bioetl-control-plane-v1",
-    ) in relation_keys
-    assert (
-        "pipeline_surface",
-        "composite_activity",
-        "OBSERVED_BY",
-        "dashboard_surface",
-        "bioetl-silver-reject-explorer",
-    ) not in relation_keys
-    assert (
-        "alert_surface",
-        "BioETLPipelineRunFailed",
-        "DEPENDS_ON",
-        "pipeline_surface",
-        "chembl_activity",
-    ) in relation_keys
-    assert (
-        "alert_surface",
-        "BioETLPipelineRunFailed",
-        "OBSERVED_BY",
-        "dashboard_surface",
-        "bioetl-runtime",
-    ) in relation_keys
-    assert (
-        "alert_surface",
-        "BioETLPipelineRunFailed",
-        "DEPENDS_ON",
-        "contract_surface",
-        "chembl.activity",
-    ) in relation_keys
-    assert (
-        "alert_surface",
-        "BioETLDQSoftThresholdExceeded",
-        "DEPENDS_ON",
-        "pipeline_surface",
-        "chembl_activity",
-    ) in relation_keys
-    assert (
-        "alert_surface",
-        "BioETLDQSoftThresholdExceeded",
-        "DEPENDS_ON",
-        "pipeline_surface",
-        "composite_activity",
-    ) not in relation_keys
-    assert (
-        "alert_surface",
-        "BioETLProviderFailureRateHigh",
-        "OBSERVED_BY",
-        "dashboard_surface",
-        "bioetl-provider-health-v2",
-    ) in relation_keys
-    assert (
-        "alert_surface",
-        "BioETLProviderFailureRateHigh",
-        "DEPENDS_ON",
-        "provider_surface",
-        "chembl",
-    ) in relation_keys
-    assert (
-        "alert_surface",
-        "BioETLControlPlaneReadFailureRate",
-        "OBSERVED_BY",
-        "dashboard_surface",
-        "bioetl-control-plane-v1",
-    ) in relation_keys
-    assert (
-        "alert_surface",
-        "BioETLControlPlaneReadFailureRate",
-        "DEPENDS_ON",
-        "contract_surface",
-        "chembl.activity",
-    ) in relation_keys
-    assert (
-        "doc_artifact",
-        "scripts/dev/README.md",
-        "DESCRIBES",
-        "execution_path",
-        "bash scripts/dev/run_pytest.sh",
-    ) in relation_keys
-    assert (
-        "script_surface",
-        "scripts/dev/run_pytest.sh",
-        "PROVIDES",
-        "execution_path",
-        "bash scripts/dev/run_pytest.sh",
-    ) in relation_keys
-    assert (
-        "test_artifact",
-        "tests/unit/scripts/ops/test_neo4j_memory_sync.py",
-        "TESTS_LAYER",
-        "layer_family",
-        "scripts",
-    ) not in relation_keys
-    assert (
-        "layer_family",
-        "composition",
-        "CONTAINS",
-        "module_surface",
-        "src/bioetl/composition/control_plane_api.py",
-    ) in relation_keys
-    assert (
-        "test_artifact",
-        "tests/integration/interfaces/test_cli_checkpoint_list.py",
-        "TESTS_PACKAGE_FAMILY",
-        "package_family",
-        "interfaces/test_cli_checkpoint_list.py",
-    ) not in relation_keys
-    assert (
-        "test_artifact",
-        "tests/unit/domain/configs/test_base_configs.py",
-        "TESTS_PACKAGE_FAMILY",
-        "package_family",
-        "domain/configs",
-    ) not in relation_keys
-    assert (
-        "test_artifact",
-        "tests/unit/domain/hash_policy/test_hash_policy_stability.py",
-        "TESTS_PACKAGE_FAMILY",
-        "package_family",
-        "domain/hash_policy",
-    ) not in relation_keys
-    assert (
-        "test_artifact",
-        "tests/unit/infrastructure/factories/test_factories.py",
-        "TESTS_PACKAGE_FAMILY",
-        "package_family",
-        "infrastructure/factories",
-    ) not in relation_keys
-    assert (
-        "test_artifact",
-        "tests/unit/interfaces/factories/test_pipeline_factories.py",
-        "TESTS_PACKAGE_FAMILY",
-        "package_family",
-        "interfaces/factories",
-    ) not in relation_keys
+
+def _assert_relation_membership(relation_keys: set[RelationKey], expected: tuple[RelationKey, ...]) -> None:
+    for relation_key in expected:
+        assert relation_key in relation_keys
+
+
+def _assert_relation_absence(relation_keys: set[RelationKey], forbidden: tuple[RelationKey, ...]) -> None:
+    for relation_key in forbidden:
+        assert relation_key not in relation_keys
+
+
+def test_snapshot_contains_expected_relations() -> None:
+    _, snapshot = _snapshot()
+    relation_keys = _relation_keys(snapshot)
+
+    _assert_relation_membership(relation_keys, EXPECTED_RELATION_KEYS)
+    _assert_relation_absence(relation_keys, FORBIDDEN_RELATION_KEYS)
 
 
 def test_sync_statements_include_management_metadata() -> None:

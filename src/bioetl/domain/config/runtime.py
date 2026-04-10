@@ -38,6 +38,7 @@ class RuntimeConfig:
     lock_ttl: int | None = 90
     query: str | None = None
     dry_run: bool = False
+    exact_replay: bool = False
 
     # VACUUM automation (Phase 1 refactoring)
     # When enabled, VACUUM is executed after successful pipeline run

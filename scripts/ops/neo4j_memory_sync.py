@@ -30,6 +30,9 @@ DEFAULT_MANAGED_BY = "neo4j_memory_sync"
 DEFAULT_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
 DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "project",
+    "repo_zone",
+    "directory_surface",
+    "file_surface",
     "doc_source_surface",
     "doc_artifact",
     "decision",
@@ -55,6 +58,32 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "test_surface",
     "test_artifact",
 )
+DEFAULT_FILE_STRUCTURE_REPO_ZONES: dict[str, tuple[str, ...]] = {
+    "src": ("src",),
+    "configs": ("configs",),
+    "tests": ("tests",),
+    "docs": ("docs",),
+    "scripts": ("scripts",),
+    "grafana": ("grafana",),
+}
+DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
+    "docs/99-archive",
+    "docs/exports",
+    "docs/reports/generated",
+    "docs/02-architecture/generated",
+    "docs/02-architecture/diagrams/bundles",
+    "docs/02-architecture/diagrams/architecture/png",
+    "docs/02-architecture/diagrams/architecture/svg",
+    "docs/02-architecture/diagrams/class-diagrams/png",
+    "docs/02-architecture/diagrams/class-diagrams/svg",
+    "docs/02-architecture/diagrams/foundation/png",
+    "docs/02-architecture/diagrams/foundation/svg",
+    "docs/02-architecture/diagrams/views/png",
+    "docs/02-architecture/diagrams/views/svg",
+    "docs/02-architecture/diagrams/descriptions/legacy",
+    "scripts/archive",
+)
+DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES: tuple[str, ...] = ("__pycache__",)
 KNOWN_LAYERS = ("domain", "application", "infrastructure", "composition", "interfaces")
 TEST_SURFACES: dict[str, str] = {
     "unit": "unit tests",
@@ -423,6 +452,106 @@ CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
         "script_path": "scripts/dev/pretest_guardrails.sh",
     },
 )
+CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
+    {
+        "readme_path": "scripts/diagrams/README.md",
+        "readme_summary": "Diagram tooling catalog covering lint, render, publication, and nightly validation workflows.",
+        "entrypoint_path": "scripts/diagrams/__main__.py",
+        "entrypoint_summary": "Unified Python entrypoint for diagram lint, check, fix, render, and nightly suite commands.",
+        "execution_paths": (
+            {
+                "name": "python -m scripts.diagrams",
+                "platform": "cross_platform",
+                "summary": "Unified local entrypoint for diagram tooling commands.",
+            },
+            {
+                "name": "uv run python -m scripts.diagrams lint",
+                "platform": "ci_uv",
+                "summary": "Canonical diagram lint path for Mermaid source validation.",
+                "gate": "diagram quality gates",
+            },
+            {
+                "name": "uv run python -m scripts.diagrams check-quality-gates",
+                "platform": "ci_uv",
+                "summary": "Canonical diagram regression gate for tracked Mermaid and publication invariants.",
+                "gate": "diagram quality gates",
+            },
+        ),
+    },
+    {
+        "readme_path": "scripts/docs/README.md",
+        "readme_summary": "Documentation tooling catalog covering verification, drift checks, matrix generation, and link maintenance.",
+        "entrypoint_path": "scripts/docs/__main__.py",
+        "entrypoint_summary": "Unified Python entrypoint for documentation verification, drift, and generated report workflows.",
+        "execution_paths": (
+            {
+                "name": "python -m scripts.docs",
+                "platform": "cross_platform",
+                "summary": "Unified local entrypoint for documentation tooling commands.",
+            },
+            {
+                "name": "uv run python -m scripts.docs verify",
+                "platform": "ci_uv",
+                "summary": "Canonical end-to-end docs verification chain.",
+                "gate": "docs verification",
+            },
+            {
+                "name": "uv run python -m scripts.docs check-links --links --specs --configs",
+                "platform": "ci_uv",
+                "summary": "Canonical docs link/spec/config verification path.",
+                "gate": "docs verification",
+            },
+        ),
+    },
+    {
+        "readme_path": "scripts/schema/README.md",
+        "readme_summary": "Schema and config tooling catalog covering validation, invariants, and contract generation.",
+        "entrypoint_path": "scripts/schema/__main__.py",
+        "entrypoint_summary": "Unified Python entrypoint for config validation, schema artifact generation, and contract audits.",
+        "execution_paths": (
+            {
+                "name": "python -m scripts.schema",
+                "platform": "cross_platform",
+                "summary": "Unified local entrypoint for schema and config tooling commands.",
+            },
+            {
+                "name": "uv run python -m scripts.schema validate-configs",
+                "platform": "ci_uv",
+                "summary": "Maintained JSON Schema validation path for unified pipeline configs.",
+                "gate": "config validation",
+            },
+            {
+                "name": "uv run python -m scripts.schema check-invariants",
+                "platform": "ci_uv",
+                "summary": "Canonical config invariant check for naming, auth, keys, and config CI policy.",
+                "gate": "config validation",
+            },
+        ),
+    },
+    {
+        "readme_path": "scripts/ops/README.md",
+        "readme_summary": "Operations tooling notes covering Codex/WSL setup and the scripts.ops command surface.",
+        "entrypoint_path": "scripts/ops/__main__.py",
+        "entrypoint_summary": "Unified Python entrypoint for operational helpers such as Neo4j memory sync, Grafana fixes, and shell-based ops tasks.",
+        "execution_paths": (
+            {
+                "name": "python -m scripts.ops",
+                "platform": "cross_platform",
+                "summary": "Unified local entrypoint for operational helper commands.",
+            },
+            {
+                "name": "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json",
+                "platform": "cross_platform",
+                "summary": "Canonical audit/report path for the deterministic Neo4j repo graph.",
+            },
+            {
+                "name": "python -m scripts.ops sync-neo4j-memory --apply",
+                "platform": "cross_platform",
+                "summary": "Canonical apply path for syncing the deterministic Neo4j repo graph.",
+            },
+        ),
+    },
+)
 
 
 @dataclass(frozen=True)
@@ -635,6 +764,32 @@ def _load_memory_mapping(root: Path) -> dict[str, object]:
     return _read_yaml(mapping_path)
 
 
+def _file_structure_config(memory_mapping: dict[str, object]) -> dict[str, object]:
+    payload = memory_mapping.get("file_structure", {})
+    if not isinstance(payload, dict):
+        payload = {}
+
+    raw_repo_zones = payload.get("repo_zones", {})
+    repo_zones: dict[str, tuple[str, ...]] = {}
+    if isinstance(raw_repo_zones, dict):
+        for zone_name, zone_paths in raw_repo_zones.items():
+            repo_zones[str(zone_name)] = tuple(_as_string_list(zone_paths))
+    if not repo_zones:
+        repo_zones = DEFAULT_FILE_STRUCTURE_REPO_ZONES
+
+    excluded_prefixes = tuple(
+        sorted(set(_as_string_list(payload.get("excluded_prefixes")) or list(DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES)))
+    )
+    excluded_dir_names = tuple(
+        sorted(set(_as_string_list(payload.get("excluded_dir_names")) or list(DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES)))
+    )
+    return {
+        "repo_zones": repo_zones,
+        "excluded_prefixes": excluded_prefixes,
+        "excluded_dir_names": excluded_dir_names,
+    }
+
+
 def _as_string_list(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
@@ -660,6 +815,19 @@ def _python_surface_name(relative_path: str) -> str:
 
 def _is_ignored_repo_path(path: Path) -> bool:
     return "__pycache__" in path.parts
+
+
+def _is_excluded_file_structure_path(relative_path: str, config: dict[str, object]) -> bool:
+    path = Path(relative_path)
+    excluded_dir_names = {
+        name for name in _as_string_list(config.get("excluded_dir_names")) if name
+    }
+    if any(part in excluded_dir_names for part in path.parts):
+        return True
+
+    normalized = relative_path.strip("/")
+    excluded_prefixes = [prefix.strip("/") for prefix in _as_string_list(config.get("excluded_prefixes")) if prefix]
+    return any(normalized == prefix or normalized.startswith(f"{prefix}/") for prefix in excluded_prefixes)
 
 
 def _resolve_repo_path(root: Path, base_path: Path, raw_path: str) -> Path | None:
@@ -1523,6 +1691,54 @@ def _add_quality_and_scripts(snapshot: GraphSnapshot, root: Path, project: NodeK
             if script_path.startswith("scripts/dev/"):
                 snapshot.add_relation(dev_readme, "DESCRIBES", execution, provenance="scripts_dev_readme")
 
+    for cluster in CURATED_SCRIPT_CLUSTERS:
+        readme_path = str(cluster["readme_path"])
+        readme = snapshot.add_node(
+            "doc_artifact",
+            readme_path,
+            summary=str(cluster["readme_summary"]),
+            source_path=readme_path,
+            source_kind="ops_doc",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(project, "HAS_DOC_ARTIFACT", readme, provenance="curated_scripts")
+
+        entrypoint_path = str(cluster["entrypoint_path"])
+        entrypoint = snapshot.add_node(
+            "script_surface",
+            entrypoint_path,
+            summary=str(cluster["entrypoint_summary"]),
+            source_path=entrypoint_path,
+            source_kind="script_surface",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+
+        for execution_payload in cluster["execution_paths"]:
+            execution = snapshot.add_node(
+                "execution_path",
+                str(execution_payload["name"]),
+                summary=str(execution_payload["summary"]),
+                platform=str(execution_payload["platform"]),
+                source_kind="execution_path",
+                last_verified=today,
+                ingest_wave="repo_sync_v1",
+                confidence="high",
+            )
+            snapshot.add_relation(entrypoint, "PROVIDES", execution, provenance="curated_script_clusters")
+            snapshot.add_relation(readme, "DESCRIBES", execution, provenance="curated_script_clusters")
+            gate_name = execution_payload.get("gate")
+            if isinstance(gate_name, str):
+                snapshot.add_relation(
+                    execution,
+                    "EXECUTES_GATE",
+                    NodeKey("quality_gate", gate_name),
+                    provenance="curated_script_clusters",
+                )
+
 
 def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     tests_root = root / "tests"
@@ -1634,6 +1850,121 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
     _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes, contract_nodes, memory_mapping)
     _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
+
+
+def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    memory_mapping = _load_memory_mapping(root)
+    config = _file_structure_config(memory_mapping)
+    zone_roots = config["repo_zones"]
+
+    for zone_name, relative_roots in zone_roots.items():
+        zone = snapshot.add_node(
+            "repo_zone",
+            zone_name,
+            summary=f"Primary repository zone `{zone_name}`.",
+            source_kind="file_structure_zone",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(project, "HAS_REPO_ZONE", zone, provenance="file_structure")
+
+        for relative_root in relative_roots:
+            zone_root = root / relative_root
+            if not zone_root.is_dir():
+                continue
+            for current_dir, dirnames, _ in os.walk(zone_root):
+                current_path = Path(current_dir)
+                relative_dir = _rel_path(root, current_path)
+                if _is_excluded_file_structure_path(relative_dir, config):
+                    dirnames[:] = []
+                    continue
+
+                dirnames[:] = sorted(
+                    name
+                    for name in dirnames
+                    if not _is_excluded_file_structure_path(_rel_path(root, current_path / name), config)
+                )
+                directory = snapshot.add_node(
+                    "directory_surface",
+                    relative_dir,
+                    summary=f"Primary repository directory `{relative_dir}`.",
+                    source_path=relative_dir,
+                    source_kind="file_structure_directory",
+                    repo_zone=zone_name,
+                    depth=len(Path(relative_dir).parts),
+                    is_primary=True,
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="high",
+                )
+                if relative_dir == relative_root:
+                    snapshot.add_relation(zone, "CONTAINS", directory, provenance="file_structure")
+                else:
+                    parent_key = NodeKey("directory_surface", _rel_path(root, current_path.parent))
+                    snapshot.add_relation(parent_key, "CONTAINS", directory, provenance="file_structure")
+
+    source_backed_labels = {
+        "layer_family",
+        "package_family",
+        "module_surface",
+        "doc_source_surface",
+        "doc_artifact",
+        "policy_surface",
+        "provider_surface",
+        "entity_config",
+        "composite_config",
+        "config_artifact",
+        "dashboard_surface",
+        "script_surface",
+        "test_surface",
+        "test_artifact",
+    }
+    for node in list(snapshot.nodes.values()):
+        if node.key.label not in source_backed_labels:
+            continue
+        source_path_value = node.properties.get("source_path")
+        if not isinstance(source_path_value, str) or not source_path_value:
+            continue
+        if _is_excluded_file_structure_path(source_path_value, config):
+            continue
+
+        source_path = root / source_path_value
+        if source_path.is_dir():
+            directory_key = NodeKey("directory_surface", source_path_value)
+            if directory_key in snapshot.nodes:
+                snapshot.add_relation(directory_key, "HOUSES", node.key, provenance="file_structure")
+            continue
+        if not source_path.is_file():
+            continue
+
+        parent_relative = _rel_path(root, source_path.parent)
+        file_surface = snapshot.add_node(
+            "file_surface",
+            source_path_value,
+            summary=f"Primary repository file `{source_path_value}`.",
+            source_path=source_path_value,
+            source_kind="file_structure_file",
+            repo_zone=next(
+                (
+                    zone_name
+                    for zone_name, relative_roots in zone_roots.items()
+                    if any(
+                        source_path_value == zone_root or source_path_value.startswith(f"{zone_root}/")
+                        for zone_root in relative_roots
+                    )
+                ),
+                None,
+            ),
+            suffix=source_path.suffix,
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        directory_key = NodeKey("directory_surface", parent_relative)
+        if directory_key in snapshot.nodes:
+            snapshot.add_relation(directory_key, "CONTAINS", file_surface, provenance="file_structure")
+        snapshot.add_relation(file_surface, "BACKS", node.key, provenance="file_structure")
 
 
 def _add_port_surfaces(

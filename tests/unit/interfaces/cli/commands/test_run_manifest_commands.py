@@ -75,6 +75,23 @@ class _FakeRunManifestService:
                 "rule_bundle_version": "2026.03",
                 "effective_config_artifact_id": "eca-123",
                 "dq_contract_compatibility_hash": "compat-hash-1",
+                "replay_mode": "exact_replay",
+                "input_snapshot_count": 1,
+                "input_snapshots": [
+                    {
+                        "provider": "chembl",
+                        "entity": "activity",
+                        "pipeline_name": "chembl_activity",
+                        "query": None,
+                        "snapshot_id": "snapshot-1",
+                        "content_hash": "sha256:snapshot-1",
+                        "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                        "query_fingerprint": None,
+                        "etag": None,
+                        "last_modified": None,
+                        "captured_at": None,
+                    }
+                ],
                 "event_family_counts": {"pipeline.lifecycle": 1},
                 "event_type_counts": {"run_finished": 1},
                 "artifact_refs": [
@@ -101,6 +118,23 @@ class _FakeRunManifestService:
                     "effective_config_hash": "deadbeef",
                     "contract_ref": "chembl_activity",
                     "contract_version": "1.2.0",
+                    "replay_mode": "exact_replay",
+                    "input_snapshot_count": 1,
+                    "input_snapshots": [
+                        {
+                            "provider": "chembl",
+                            "entity": "activity",
+                            "pipeline_name": "chembl_activity",
+                            "query": None,
+                            "snapshot_id": "snapshot-1",
+                            "content_hash": "sha256:snapshot-1",
+                            "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                            "query_fingerprint": None,
+                            "etag": None,
+                            "last_modified": None,
+                            "captured_at": None,
+                        }
+                    ],
                     "planned_artifacts": [
                         {
                             "layer": "gold",
@@ -156,6 +190,23 @@ class _FakeRunManifestService:
                 "effective_config_hash": "deadbeef",
                 "contract_ref": "chembl_activity",
                 "contract_version": "1.2.0",
+                "replay_mode": "exact_replay",
+                "input_snapshot_count": 1,
+                "input_snapshots": [
+                    {
+                        "provider": "chembl",
+                        "entity": "activity",
+                        "pipeline_name": "chembl_activity",
+                        "query": None,
+                        "snapshot_id": "snapshot-1",
+                        "content_hash": "sha256:snapshot-1",
+                        "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                        "query_fingerprint": None,
+                        "etag": None,
+                        "last_modified": None,
+                        "captured_at": None,
+                    }
+                ],
                 "planned_artifacts": [
                     {
                         "layer": "gold",

@@ -205,6 +205,10 @@ def _build_cached_bronze_context(options: RunOptions) -> CachedBronzeContext:
             path=options.cached_bronze_path,
             date=options.cached_bronze_date,
         )
+    if options.exact_replay:
+        raise ValueError(
+            "exact replay currently requires --use-cached-bronze with snapshot-backed Bronze inputs"
+        )
     return CachedBronzeContext.disabled()
 
 
@@ -231,6 +235,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         ignore_yaml_filter=options.ignore_yaml_filter,
         skip_gold=options.skip_gold,
         cached_bronze=_build_cached_bronze_context(options),
+        exact_replay=options.exact_replay,
         execution_context=ExecutionContext(options.execution_context),
     )
 

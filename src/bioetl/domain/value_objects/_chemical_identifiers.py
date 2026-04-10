@@ -227,18 +227,15 @@ class SMILES(ValueObject[str]):
             SMILES if valid. In ``soft`` mode returns None when the input is
             empty or invalid.
         """
-        if mode not in {"soft", "strict"}:
-            raise ValueError(f"Unsupported SMILES normalization mode: {mode!r}")
-        if not raw or not raw.strip():
-            if mode == "soft":
-                return None
-            raise ValueError("SMILES cannot be empty")
-        try:
-            return cls(raw, is_canonical=is_canonical)
-        except ValueError:
-            if mode == "strict":
-                raise
-            return None
+        _validate_smiles_normalization_mode(mode)
+        if _is_blank_smiles(raw):
+            return _handle_blank_smiles(mode)
+        return _build_smiles_from_raw(
+            cls,
+            raw,
+            is_canonical=is_canonical,
+            mode=mode,
+        )
 
     def __eq__(self, other: object) -> bool:
         """Compare by value and canonical flag."""
@@ -255,3 +252,38 @@ class SMILES(ValueObject[str]):
         if self._is_canonical:
             return f"SMILES({self._value!r}, is_canonical=True)"
         return f"SMILES({self._value!r})"
+
+
+def _validate_smiles_normalization_mode(mode: SMILESNormalizationMode) -> None:
+    """Reject unsupported SMILES normalization modes."""
+    if mode in {"soft", "strict"}:
+        return
+    raise ValueError(f"Unsupported SMILES normalization mode: {mode!r}")
+
+
+def _is_blank_smiles(raw: str | None) -> bool:
+    """Return whether the raw SMILES value is empty after trimming."""
+    return raw is None or not raw.strip()
+
+
+def _handle_blank_smiles(mode: SMILESNormalizationMode) -> None:
+    """Handle an empty raw SMILES input according to normalization mode."""
+    if mode == "soft":
+        return None
+    raise ValueError("SMILES cannot be empty")
+
+
+def _build_smiles_from_raw(
+    cls: type[SMILES],
+    raw: str,
+    *,
+    is_canonical: bool,
+    mode: SMILESNormalizationMode,
+) -> SMILES | None:
+    """Build a SMILES value object, honoring soft/strict error behavior."""
+    try:
+        return cls(raw, is_canonical=is_canonical)
+    except ValueError:
+        if mode == "strict":
+            raise
+        return None

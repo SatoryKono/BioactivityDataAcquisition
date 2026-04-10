@@ -90,6 +90,7 @@ class CliRunOrchestrationService:
         use_cached_bronze: bool,
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
+        exact_replay: bool = False,
         enable_tracing: bool | None = None,
     ) -> RunOptions:
         """Build RunOptions from CLI input.
@@ -109,6 +110,7 @@ class CliRunOrchestrationService:
             use_cached_bronze: If True, use a previously cached Bronze extract.
             cached_bronze_date: Date string for the cached Bronze snapshot.
             cached_bronze_path: File system path to the cached Bronze snapshot.
+            exact_replay: If True, require replay-safe snapshot-backed inputs.
 
         Returns:
             RunOptions populated from the provided CLI parameters.
@@ -128,6 +130,7 @@ class CliRunOrchestrationService:
             use_cached_bronze=use_cached_bronze,
             cached_bronze_path=cached_bronze_path,
             cached_bronze_date=cached_bronze_date,
+            exact_replay=exact_replay,
             enable_tracing=enable_tracing,
         )
 
@@ -151,6 +154,7 @@ class CliRunOrchestrationService:
         use_cached_bronze: bool,
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
+        exact_replay: bool = False,
         enable_tracing: bool | None = None,
     ) -> RunPreparationResult:
         """Validate raw CLI inputs and build a prepared execution request."""
@@ -161,6 +165,12 @@ class CliRunOrchestrationService:
         )
         if not validation.is_valid:
             return RunPreparationResult(error_message=validation.error_message)
+        if exact_replay and not use_cached_bronze:
+            return RunPreparationResult(
+                error_message=(
+                    "--exact-replay currently requires --use-cached-bronze with snapshot-backed Bronze inputs"
+                )
+            )
 
         return RunPreparationResult(
             request=RunExecutionRequest(
@@ -181,6 +191,7 @@ class CliRunOrchestrationService:
                     use_cached_bronze=use_cached_bronze,
                     cached_bronze_date=cached_bronze_date,
                     cached_bronze_path=cached_bronze_path,
+                    exact_replay=exact_replay,
                 ),
                 health_server=health_server,
                 health_port=health_port,

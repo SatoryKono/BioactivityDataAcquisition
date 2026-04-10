@@ -150,6 +150,61 @@ def _validate_execution_identity_compatibility(
             f"current={current_metadata.effective_config_hash}, "
             f"checkpoint={checkpoint_metadata.effective_config_hash}"
         )
+    if (
+        current_metadata.manifest_id
+        and checkpoint_metadata.manifest_id
+        and current_metadata.manifest_id != checkpoint_metadata.manifest_id
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Manifest identity mismatch: "
+            f"current={current_metadata.manifest_id}, "
+            f"checkpoint={checkpoint_metadata.manifest_id}"
+        )
+    if (
+        current_metadata.contract_ref
+        and checkpoint_metadata.contract_ref
+        and current_metadata.contract_ref != checkpoint_metadata.contract_ref
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Contract reference mismatch: "
+            f"current={current_metadata.contract_ref}, "
+            f"checkpoint={checkpoint_metadata.contract_ref}"
+        )
+    if (
+        current_metadata.contract_version
+        and checkpoint_metadata.contract_version
+        and current_metadata.contract_version != checkpoint_metadata.contract_version
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Contract version mismatch: "
+            f"current={current_metadata.contract_version}, "
+            f"checkpoint={checkpoint_metadata.contract_version}"
+        )
+    if current_metadata.exact_replay:
+        if checkpoint_metadata.exact_replay is not True:
+            execution_identity_compatible = False
+            messages.append(
+                "Exact replay mismatch: current run requires exact replay but checkpoint was not captured in exact replay mode"
+            )
+        elif not checkpoint_metadata.input_snapshot_ids:
+            execution_identity_compatible = False
+            messages.append(
+                "Exact replay requires checkpoint input snapshot anchors, but none were persisted"
+            )
+    if (
+        current_metadata.input_snapshot_ids
+        and checkpoint_metadata.input_snapshot_ids
+        and current_metadata.input_snapshot_ids != checkpoint_metadata.input_snapshot_ids
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Input snapshot identity mismatch: "
+            f"current={list(current_metadata.input_snapshot_ids)}, "
+            f"checkpoint={list(checkpoint_metadata.input_snapshot_ids)}"
+        )
     return execution_identity_compatible, messages
 
 

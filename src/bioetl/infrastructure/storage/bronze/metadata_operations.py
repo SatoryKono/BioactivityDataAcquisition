@@ -90,10 +90,22 @@ def prepare_bronze_metadata_write(
     request: BronzeMetadataWriteRequest,
 ) -> PreparedBronzeMetadataWrite:
     """Resolve metadata payload and target path for one Bronze write."""
-    source_metadata = _build_bronze_source_metadata_with_live_snapshot(
+    live_snapshot = _build_live_input_snapshot_ref_if_available(
         base_path=host.base_path,
         relative_path=request.relative_path,
-        source_metadata=request.source_metadata,
+        query_string=(
+            None
+            if request.source_metadata is None
+            else request.source_metadata.query_string
+        ),
+    )
+    source_metadata = (
+        None
+        if request.source_metadata is None
+        else _attach_live_snapshot_to_source_metadata(
+            source_metadata=request.source_metadata,
+            snapshot=live_snapshot,
+        )
     )
     completed_at = calculate_bronze_completed_at(request.ingestion_ts, request.duration)
     metadata_base_path = resolve_bronze_metadata_base_path(
@@ -104,6 +116,10 @@ def prepare_bronze_metadata_write(
     )
 
     if host._metadata_coordinator is None:
+        fallback_source_metadata = _build_bronze_source_metadata_with_live_snapshot(
+            source_metadata=request.source_metadata,
+            snapshot=live_snapshot,
+        )
         metadata = host._build_full_bronze_metadata(
             run_id=request.run_id,
             run_type=request.run_type,
@@ -116,7 +132,7 @@ def prepare_bronze_metadata_write(
             started_at=request.ingestion_ts,
             completed_at=completed_at,
             duration_seconds=request.duration,
-            source_metadata=source_metadata,
+            source_metadata=fallback_source_metadata,
         )
         return PreparedBronzeMetadataWrite(
             metadata_base_path=metadata_base_path,
@@ -124,30 +140,14 @@ def prepare_bronze_metadata_write(
         )
 
     bronze_input = build_bronze_metadata_input(
-        BronzeMetadataInputRequest(
-            batch_id=request.batch_id,
-            record_count=request.record_count,
-            compressed_size=request.compressed_size,
-            output_path=request.relative_path,
-            started_at=request.ingestion_ts,
+        _build_bronze_metadata_input_request(
+            request=request,
             completed_at=completed_at,
             source_metadata=source_metadata,
-            input_snapshots=tuple(source_metadata.input_snapshots),
+            live_snapshot=live_snapshot,
         )
     )
-    create_bundle = (
-        getattr(host._metadata_coordinator, "create_bronze_metadata_bundle", None)
-        if (
-            "create_bronze_metadata_bundle" in vars(host._metadata_coordinator)
-            or getattr(
-                type(host._metadata_coordinator),
-                "create_bronze_metadata_bundle",
-                None,
-            )
-            is not None
-        )
-        else None
-    )
+    create_bundle = _resolve_bronze_metadata_bundle_factory(host)
     if callable(create_bundle):
         bundle = create_bundle(bronze_input)
         return PreparedBronzeMetadataWrite(
@@ -162,27 +162,75 @@ def prepare_bronze_metadata_write(
     )
 
 
+def _build_bronze_metadata_input_request(
+    *,
+    request: BronzeMetadataWriteRequest,
+    completed_at: datetime,
+    source_metadata: SourceMetadata | None,
+    live_snapshot: InputSnapshotRef | None,
+) -> BronzeMetadataInputRequest:
+    """Build normalized Bronze metadata input payload for coordinator-backed flow."""
+    input_snapshots = (
+        ()
+        if source_metadata is None
+        else tuple(source_metadata.input_snapshots)
+    )
+    if live_snapshot is not None and source_metadata is None:
+        input_snapshots = (live_snapshot,)
+    return BronzeMetadataInputRequest(
+        batch_id=request.batch_id,
+        record_count=request.record_count,
+        compressed_size=request.compressed_size,
+        output_path=request.relative_path,
+        started_at=request.ingestion_ts,
+        completed_at=completed_at,
+        source_metadata=source_metadata,
+        input_snapshots=input_snapshots,
+    )
+
+
+def _resolve_bronze_metadata_bundle_factory(
+    host: _BronzeMetadataWriteHostProtocol,
+) -> object:
+    """Return bundle factory only when the coordinator exposes the override hook."""
+    coordinator = host._metadata_coordinator
+    if coordinator is None:
+        return None
+    if "create_bronze_metadata_bundle" not in vars(coordinator) and getattr(
+        type(coordinator),
+        "create_bronze_metadata_bundle",
+        None,
+    ) is None:
+        return None
+    return getattr(coordinator, "create_bronze_metadata_bundle", None)
+
+
 def _build_bronze_source_metadata_with_live_snapshot(
     *,
-    base_path: Path,
-    relative_path: str,
     source_metadata: SourceMetadata | None,
+    snapshot: InputSnapshotRef | None,
 ) -> SourceMetadata | None:
-    """Attach an immutable Bronze batch snapshot to source metadata when possible."""
-    full_path = base_path / relative_path
-    if not full_path.exists():
+    """Return source metadata enriched with the live snapshot when available."""
+    if snapshot is None:
         return source_metadata
-
-    snapshot = _build_live_input_snapshot_ref(
-        full_path=full_path,
-        relative_path=relative_path,
-        query_string=None if source_metadata is None else source_metadata.query_string,
-    )
     if source_metadata is None:
         from bioetl.domain.models.metadata import SourceMetadata
 
         return SourceMetadata(type="api", input_snapshots=[snapshot])
+    return _attach_live_snapshot_to_source_metadata(
+        source_metadata=source_metadata,
+        snapshot=snapshot,
+    )
 
+
+def _attach_live_snapshot_to_source_metadata(
+    *,
+    source_metadata: SourceMetadata,
+    snapshot: InputSnapshotRef | None,
+) -> SourceMetadata | None:
+    """Attach the snapshot in-place while preserving ``source_metadata`` identity."""
+    if snapshot is None:
+        return source_metadata
     for existing in source_metadata.input_snapshots:
         if (
             existing.snapshot_id == snapshot.snapshot_id
@@ -191,8 +239,24 @@ def _build_bronze_source_metadata_with_live_snapshot(
         ):
             return source_metadata
 
-    return source_metadata.model_copy(
-        update={"input_snapshots": [*source_metadata.input_snapshots, snapshot]}
+    source_metadata.input_snapshots.append(snapshot)
+    return source_metadata
+
+
+def _build_live_input_snapshot_ref_if_available(
+    *,
+    base_path: Path,
+    relative_path: str,
+    query_string: str | None,
+) -> InputSnapshotRef | None:
+    """Build a live snapshot ref only when the Bronze output file already exists."""
+    full_path = base_path / relative_path
+    if not full_path.exists():
+        return None
+    return _build_live_input_snapshot_ref(
+        full_path=full_path,
+        relative_path=relative_path,
+        query_string=query_string,
     )
 
 
@@ -212,7 +276,7 @@ def _build_live_input_snapshot_ref(
         else hashlib.sha256(query_string.encode("utf-8")).hexdigest()
     )
     snapshot_id = hashlib.sha256(
-        f"bronze:{relative_path}:{content_hash}".encode("utf-8")
+        f"bronze:{relative_path}:{content_hash}".encode()
     ).hexdigest()
     return InputSnapshotRef(
         snapshot_id=snapshot_id,

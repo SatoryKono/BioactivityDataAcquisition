@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-09T18:30:53.473330+00:00",
+  "generated_at": "2026-04-10T00:18:24.808813+00:00",
   "summary": {
     "total_scripts": 287,
     "status_counts": {
@@ -16,7 +16,7 @@
       "docs": 115,
       "scripts": 245,
       "skills": 9,
-      "tests": 90
+      "tests": 92
     }
   },
   "scripts": [
@@ -1678,7 +1678,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 64,
+      "reference_count": 63,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -2440,7 +2440,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 44,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -3910,7 +3910,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 82,
+      "reference_count": 90,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4680,7 +4680,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -8448,7 +8448,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 46,
+      "reference_count": 54,
       "references": [
         {
           "path": ".github/workflows/tests.yml",

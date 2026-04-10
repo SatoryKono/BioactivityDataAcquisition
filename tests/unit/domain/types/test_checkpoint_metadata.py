@@ -27,6 +27,11 @@ class TestCheckpointMetadata:
             effective_config_hash="cfg_hash",
             effective_config_artifact_id="artifact-42",
             execution_fingerprint="fingerprint-1",
+            manifest_id="manifest-1",
+            contract_ref="chembl.activity",
+            contract_version="1.2.3",
+            exact_replay=True,
+            input_snapshot_ids=("snap-a", "snap-b"),
             run_context={"test": "value"},
         )
 
@@ -38,6 +43,11 @@ class TestCheckpointMetadata:
         assert metadata.effective_config_hash == "cfg_hash"
         assert metadata.effective_config_artifact_id == "artifact-42"
         assert metadata.execution_fingerprint == "fingerprint-1"
+        assert metadata.manifest_id == "manifest-1"
+        assert metadata.contract_ref == "chembl.activity"
+        assert metadata.contract_version == "1.2.3"
+        assert metadata.exact_replay is True
+        assert metadata.input_snapshot_ids == ("snap-a", "snap-b")
         assert metadata.run_context == {"test": "value"}
 
     def test_checkpoint_metadata_minimal(self) -> None:
@@ -52,6 +62,11 @@ class TestCheckpointMetadata:
         assert metadata.effective_config_hash is None
         assert metadata.effective_config_artifact_id is None
         assert metadata.execution_fingerprint is None
+        assert metadata.manifest_id is None
+        assert metadata.contract_ref is None
+        assert metadata.contract_version is None
+        assert metadata.exact_replay is None
+        assert metadata.input_snapshot_ids == ()
         assert metadata.run_context is None
 
     def test_checkpoint_metadata_from_legacy(self) -> None:
@@ -61,6 +76,7 @@ class TestCheckpointMetadata:
             "dq_contract_compatibility_hash": "legacy_hash",
             "dq_policy_hash": "legacy_policy",
             "pipeline_version": "0.9.0",
+            "run_context": {"manifest_id": "manifest-legacy"},
         }
 
         metadata = CheckpointMetadata.from_legacy_metadata(legacy_metadata)
@@ -73,7 +89,8 @@ class TestCheckpointMetadata:
         assert metadata.effective_config_hash is None
         assert metadata.effective_config_artifact_id is None
         assert metadata.execution_fingerprint is None
-        assert metadata.run_context is None
+        assert metadata.manifest_id == "manifest-legacy"
+        assert metadata.run_context == {"manifest_id": "manifest-legacy"}
 
     def test_checkpoint_metadata_to_dict(self) -> None:
         """Test converting CheckpointMetadata to dictionary."""
@@ -81,6 +98,7 @@ class TestCheckpointMetadata:
             records_processed=200,
             dq_contract_compatibility_hash="hash123",
             pipeline_version="1.1.0",
+            exact_replay=False,
         )
 
         metadata_dict = metadata.to_dict()
@@ -88,6 +106,7 @@ class TestCheckpointMetadata:
         assert metadata_dict["records_processed"] == 200
         assert metadata_dict["dq_contract_compatibility_hash"] == "hash123"
         assert metadata_dict["pipeline_version"] == "1.1.0"
+        assert metadata_dict["exact_replay"] is False
         assert "dq_policy_hash" not in metadata_dict
         assert "dq_rule_bundle_version" not in metadata_dict
         assert "effective_config_hash" not in metadata_dict
@@ -104,6 +123,11 @@ class TestCheckpointMetadata:
             "effective_config_hash": "cfg_hash_2",
             "effective_config_artifact_id": "artifact-2",
             "execution_fingerprint": "fingerprint-2",
+            "manifest_id": "manifest-2",
+            "contract_ref": "chembl.activity",
+            "contract_version": "2.0.0",
+            "exact_replay": True,
+            "input_snapshot_ids": ["snap-1", "snap-2", "snap-1"],
             "run_context": {"source": "test"},
         }
 
@@ -115,6 +139,11 @@ class TestCheckpointMetadata:
         assert metadata.effective_config_hash == "cfg_hash_2"
         assert metadata.effective_config_artifact_id == "artifact-2"
         assert metadata.execution_fingerprint == "fingerprint-2"
+        assert metadata.manifest_id == "manifest-2"
+        assert metadata.contract_ref == "chembl.activity"
+        assert metadata.contract_version == "2.0.0"
+        assert metadata.exact_replay is True
+        assert metadata.input_snapshot_ids == ("snap-1", "snap-2")
         assert metadata.run_context == {"source": "test"}
         assert metadata.dq_policy_hash is None
         assert metadata.pipeline_version is None
@@ -217,6 +246,11 @@ class TestCheckpointMetadataSerialization:
             effective_config_hash="cfg_roundtrip",
             effective_config_artifact_id="artifact-roundtrip",
             execution_fingerprint="fingerprint-roundtrip",
+            manifest_id="manifest-roundtrip",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            exact_replay=True,
+            input_snapshot_ids=("snapshot-1", "snapshot-2"),
             run_context={"environment": "test", "debug": True},
         )
 
@@ -242,6 +276,11 @@ class TestCheckpointMetadataSerialization:
             == deserialized.effective_config_artifact_id
         )
         assert original.execution_fingerprint == deserialized.execution_fingerprint
+        assert original.manifest_id == deserialized.manifest_id
+        assert original.contract_ref == deserialized.contract_ref
+        assert original.contract_version == deserialized.contract_version
+        assert original.exact_replay == deserialized.exact_replay
+        assert original.input_snapshot_ids == deserialized.input_snapshot_ids
         assert original.run_context == deserialized.run_context
 
     def test_legacy_serialization_round_trip(self) -> None:

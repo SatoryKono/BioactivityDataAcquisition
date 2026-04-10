@@ -4,8 +4,20 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, TypeVar, cast
+from typing import Any, TypeVar, cast
 
+import pyarrow as pa
+
+from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.base_transformer.types import (
+    TransformerDependencyContext,
+)
+from bioetl.application.core.pipeline_services import PipelineService
+from bioetl.application.core.runner import PipelineRunner
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceCreatorProtocol,
+)
 from bioetl.composition.factories.pipeline._factory_method_control_plane import (
     apply_optional_control_plane_kwargs as _apply_optional_control_plane_kwargs,
 )
@@ -22,43 +34,29 @@ from bioetl.composition.factories.services.bundle import (
     build_pipeline_services,
     create_pipeline_with_services,
 )
+from bioetl.composition.observability import ObservabilityBundle
+from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.filtering import (
+    GoldFilterConfig,
+    InputFilterConfig,
+    SilverFilterConfig,
+)
+from bioetl.domain.ports import (
+    ContractPolicyPort,
+    DataNormalizationPort,
+    DataSourcePort,
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
+    PiiHasherPort,
+    TracingPort,
+)
 from bioetl.domain.services import IdentityService
+from bioetl.domain.types import GoldSchemaType, RunID
+from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
-
-if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.base_transformer.types import (
-        TransformerDependencyContext,
-    )
-    from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.factories.datasource.data_source_factory import (
-        DataSourceCreatorProtocol,
-    )
-    from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.domain.config import RuntimeConfig
-    from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import (
-        GoldFilterConfig,
-        InputFilterConfig,
-        SilverFilterConfig,
-    )
-    from bioetl.domain.ports import (
-        ContractPolicyPort,
-        DataNormalizationPort,
-        DataSourcePort,
-        DQMonitorPort,
-        LoggerPort,
-        MetricsPort,
-        PiiHasherPort,
-        TracingPort,
-    )
-    from bioetl.domain.types import GoldSchemaType, RunID
-    from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
@@ -275,11 +273,11 @@ def create_pipeline_instance_with_services(
     return cast(
         "BasePipeline",
         cast(
-            "Any",
+            "Any",  # Any: compatibility seam forwards provider-specific kwargs through an open factory signature.
             create_pipeline_with_services,
         )(
             **cast(
-                "dict[str, Any]",
+                "dict[str, Any]",  # Any: kwargs bag mixes heterogeneous optional service objects and config artifacts.
                 create_pipeline_kwargs,  # Any: kwargs bag mixes heterogeneous optional service values.
             )
         ),
@@ -328,11 +326,11 @@ def create_factory_runner(
     )
     # Any: factory callback signature is intentionally open for runtime/test seams.
     pipeline = cast(
-        "Any",
+        "Any",  # Any: provider-specific create_with_services callbacks intentionally keep an extensible return seam.
         create_with_services_fn,  # Any: factory callback stays open to provider-specific wiring extensions.
     )(
         **cast(
-            "dict[str, Any]",
+            "dict[str, Any]",  # Any: kwargs bag carries heterogeneous service dependencies for runtime assembly.
             create_with_services_kwargs,  # Any: kwargs bag carries heterogeneous optional service objects.
         )
     )

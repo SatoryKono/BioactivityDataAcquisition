@@ -122,6 +122,37 @@ class TestPrepareExecutionRequest:
         assert result.request is None
         assert result.error_message == "--start-offset requires --run-type=incremental"
 
+    def test_exact_replay_requires_cached_bronze(self) -> None:
+        service = CliRunOrchestrationService()
+
+        result = service.prepare_execution_request(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            resume=False,
+            start_offset=None,
+            limit=None,
+            input_csv=None,
+            filter_column=None,
+            filter_field=None,
+            dry_run=False,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+            debug=False,
+            health_server=True,
+            health_port=8080,
+            use_cached_bronze=False,
+            cached_bronze_date=None,
+            cached_bronze_path=None,
+            exact_replay=True,
+        )
+
+        assert result.is_valid is False
+        assert result.request is None
+        assert (
+            result.error_message
+            == "--exact-replay currently requires --use-cached-bronze with snapshot-backed Bronze inputs"
+        )
+
     def test_validate_start_offset_rejects_negative_offset(self) -> None:
         service = CliRunOrchestrationService()
 
@@ -170,6 +201,30 @@ class TestPrepareExecutionRequest:
         )
 
         assert options.vacuum_after_run is None
+
+    def test_build_options_propagates_exact_replay(self) -> None:
+        service = CliRunOrchestrationService()
+
+        options = service.build_options(
+            run_type="incremental",
+            resume=False,
+            start_offset=None,
+            limit=10,
+            input_csv=None,
+            filter_column=None,
+            filter_field=None,
+            dry_run=False,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+            debug=False,
+            use_cached_bronze=True,
+            cached_bronze_date="2026-03-12",
+            cached_bronze_path="/tmp/bronze",
+            exact_replay=True,
+        )
+
+        assert options.use_cached_bronze is True
+        assert options.exact_replay is True
 
 
 class TestExecutePipeline:

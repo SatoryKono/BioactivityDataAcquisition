@@ -1,5 +1,7 @@
 """Public workflow domain models and validators."""
 
+from __future__ import annotations
+
 from bioetl.domain.workflow.config import (
     TransformStepConfig,
     WorkflowConfig,

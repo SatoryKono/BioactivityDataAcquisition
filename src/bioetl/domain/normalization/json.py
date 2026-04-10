@@ -81,18 +81,33 @@ def _serialize_with_stdlib(
 def _assert_no_non_finite_floats(value: object) -> None:
     """Reject NaN/Infinity to keep canonical JSON stable across runtimes."""
     if isinstance(value, float):
-        if not math.isfinite(value):
-            raise ValueError(
-                "Canonical JSON serialization does not allow NaN or Infinity"
-            )
+        _assert_finite_float(value)
         return
+    for nested_value in _iter_nested_json_values(value):
+        _assert_no_non_finite_floats(nested_value)
+
+
+def _assert_finite_float(value: float) -> None:
+    """Reject one non-finite float value."""
+    if math.isfinite(value):
+        return
+    raise ValueError("Canonical JSON serialization does not allow NaN or Infinity")
+
+
+def _iter_nested_json_values(value: object) -> Sequence[object]:
+    """Return nested JSON-like values that need recursive inspection."""
     if isinstance(value, dict):
-        for nested_value in value.values():
-            _assert_no_non_finite_floats(nested_value)
-        return
-    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
-        for nested_value in value:
-            _assert_no_non_finite_floats(nested_value)
+        return list(value.values())
+    if _is_nested_json_sequence(value):
+        return value
+    return ()
+
+
+def _is_nested_json_sequence(value: object) -> bool:
+    """Return whether the value is a JSON-like sequence."""
+    return isinstance(value, Sequence) and not isinstance(
+        value, (str, bytes, bytearray)
+    )
 
 
 def serialize_json_canonical(data: JsonDict | Sequence[object]) -> str:

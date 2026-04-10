@@ -3,22 +3,12 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import TypedDict
 
+from bioetl.application.services._run_manifest_diagnostics_helpers import (
+    extract_dq_details,
+    update_correlation_anchor_gaps,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
-
-
-class DQDetailsSummary(TypedDict):
-    """Normalized DQ anchor sets extracted from one ledger entry."""
-
-    rule_ids: set[str]
-    dispositions: set[str]
-    report_paths: set[str]
-    violation_kinds: set[str]
-    cross_validation_rule_ids: set[str]
-    cross_validation_config_paths: set[str]
-    has_signal: bool
-    has_cross_validation_signal: bool
 
 
 def _build_base_summary(
@@ -26,7 +16,9 @@ def _build_base_summary(
 ) -> dict[str, object]:
     """Build base summary from manifest code provenance."""
     code_provenance = manifest.code_provenance
-    return {
+    exact_replay = bool(manifest.launch_context.get("exact_replay"))
+    input_snapshots = _collect_input_snapshot_refs(manifest)
+    summary: dict[str, object] = {
         "manifest_id": manifest.manifest_id,
         "run_id": str(manifest.run_id),
         "pipeline_name": manifest.pipeline_name,
@@ -48,6 +40,15 @@ def _build_base_summary(
             for artifact in manifest.planned_artifacts
         ],
     }
+    if exact_replay or input_snapshots:
+        summary.update(
+            {
+                "replay_mode": "exact_replay" if exact_replay else "live_fetch",
+                "input_snapshot_count": len(input_snapshots),
+                "input_snapshots": input_snapshots,
+            }
+        )
+    return summary
 
 
 def _process_ledger_entries(
@@ -102,7 +103,7 @@ def _process_ledger_entries(
                 missing_link_count += 1
         if entry.lineage_fragment_id:
             lineage_fragment_ids.add(entry.lineage_fragment_id)
-        dq_details = _extract_dq_details(entry)
+        dq_details = extract_dq_details(entry)
         dq_rule_ids.update(dq_details["rule_ids"])
         dq_dispositions.update(dq_details["dispositions"])
         dq_report_paths.update(dq_details["report_paths"])
@@ -115,7 +116,7 @@ def _process_ledger_entries(
         cross_validation_signal_present = (
             cross_validation_signal_present or dq_details["has_cross_validation_signal"]
         )
-        _update_correlation_anchor_gaps(
+        update_correlation_anchor_gaps(
             correlation_anchor_gaps,
             entry,
         )
@@ -178,6 +179,10 @@ def _build_final_summary(
         "planned_artifacts": list(base_summary.get("planned_artifacts", [])),
         "published_artifacts": artifact_refs,
     }
+    if "replay_mode" in base_summary:
+        identity_graph["replay_mode"] = base_summary["replay_mode"]
+        identity_graph["input_snapshot_count"] = base_summary["input_snapshot_count"]
+        identity_graph["input_snapshots"] = base_summary["input_snapshots"]
 
     summary = base_summary.copy()
     summary.update(
@@ -210,6 +215,39 @@ def _build_final_summary(
         }
     )
     return summary
+
+
+def _collect_input_snapshot_refs(manifest: RunManifest) -> list[dict[str, object]]:
+    """Return deterministic flattened snapshot provenance extracted from source refs."""
+    refs: list[dict[str, object]] = []
+    for source_ref in manifest.source_refs:
+        for snapshot in source_ref.input_snapshots:
+            refs.append(
+                {
+                    "provider": source_ref.provider,
+                    "entity": source_ref.entity,
+                    "pipeline_name": source_ref.pipeline_name,
+                    "query": source_ref.query,
+                    "snapshot_id": snapshot.snapshot_id,
+                    "content_hash": snapshot.content_hash,
+                    "immutable_uri": snapshot.immutable_uri,
+                    "query_fingerprint": snapshot.query_fingerprint,
+                    "etag": snapshot.etag,
+                    "last_modified": snapshot.last_modified,
+                    "captured_at": snapshot.captured_at.isoformat()
+                    if snapshot.captured_at is not None
+                    else None,
+                }
+            )
+    refs.sort(
+        key=lambda item: (
+            str(item.get("provider") or ""),
+            str(item.get("entity") or ""),
+            str(item.get("pipeline_name") or ""),
+            str(item.get("snapshot_id") or ""),
+        )
+    )
+    return refs
 
 
 def build_diagnostics_summary(
@@ -342,152 +380,6 @@ def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
     if not steps:
         steps.append("No alert signals detected; continue routine monitoring.")
     return steps
-
-
-def _collect_dq_values(
-    details: dict[str, object],
-    *,
-    single_key: str | None = None,
-    collection_keys: tuple[str, ...] = (),
-) -> set[str]:
-    """Collect one optional scalar key and list-like keys into a string set."""
-    values: set[str] = set()
-    if single_key is not None:
-        single_value = details.get(single_key)
-        if single_value is not None:
-            values.add(str(single_value))
-    for key in collection_keys:
-        values.update(_load_str_collection(details.get(key)))
-    return values
-
-
-def _extract_cross_validation_sets(
-    rule_ids: set[str],
-    config_paths: set[str],
-) -> tuple[set[str], set[str]]:
-    """Extract cross-validation specific subsets from DQ anchors."""
-    cross_validation_rule_ids = {
-        rule_id
-        for rule_id in rule_ids
-        if rule_id.startswith("composite.cross_validation.")
-    }
-    cross_validation_config_paths = {
-        config_path for config_path in config_paths if config_path == "cross_validation"
-    }
-    return cross_validation_rule_ids, cross_validation_config_paths
-
-
-def _has_dq_signal(
-    entry: RunLedgerEntry,
-    *,
-    rule_ids: set[str],
-    dispositions: set[str],
-    report_paths: set[str],
-) -> bool:
-    """Return whether a ledger entry carries any DQ signal."""
-    return (
-        entry.event_family == "dq"
-        or entry.event_type.startswith("dq_")
-        or bool(rule_ids)
-        or bool(dispositions)
-        or bool(report_paths)
-    )
-
-
-def _extract_dq_details(entry: RunLedgerEntry) -> DQDetailsSummary:
-    """Extract DQ-oriented anchors from one ledger entry."""
-    details = entry.details or {}
-    rule_ids = _collect_dq_values(
-        details,
-        single_key="rule_id",
-        collection_keys=("dq_rule_ids", "rule_ids"),
-    )
-    dispositions = _collect_dq_values(
-        details,
-        single_key="disposition",
-        collection_keys=("dq_dispositions", "dispositions"),
-    )
-    report_paths = _collect_dq_values(details, single_key="dq_report_path")
-    violation_kinds = _collect_dq_values(
-        details,
-        single_key="violation_kind",
-        collection_keys=("violation_kinds",),
-    )
-    config_paths = _collect_dq_values(
-        details,
-        single_key="config_path",
-        collection_keys=("config_paths",),
-    )
-    cross_validation_rule_ids, cross_validation_config_paths = (
-        _extract_cross_validation_sets(rule_ids, config_paths)
-    )
-    has_cross_validation_signal = (
-        bool(cross_validation_rule_ids)
-        or "cross_validation_mismatch" in violation_kinds
-        or bool(cross_validation_config_paths)
-    )
-    has_signal = _has_dq_signal(
-        entry,
-        rule_ids=rule_ids,
-        dispositions=dispositions,
-        report_paths=report_paths,
-    )
-    return {
-        "rule_ids": rule_ids,
-        "dispositions": dispositions,
-        "report_paths": report_paths,
-        "violation_kinds": violation_kinds,
-        "cross_validation_rule_ids": cross_validation_rule_ids,
-        "cross_validation_config_paths": cross_validation_config_paths,
-        "has_signal": has_signal,
-        "has_cross_validation_signal": has_cross_validation_signal,
-    }
-
-
-def _update_correlation_anchor_gaps(
-    gap_counter: dict[str, int],
-    entry: RunLedgerEntry,
-) -> None:
-    """Count missing correlation anchors for execution-critical ledger events."""
-    event_family = entry.event_family or "diagnostic"
-    if event_family == "diagnostic" and entry.event_type == "manifest_created":
-        return
-    if event_family not in {
-        "pipeline.lifecycle",
-        "pipeline.phase",
-        "artifact",
-        "dq",
-        "checkpoint",
-        "composite",
-    }:
-        return
-    diagnostic = _extract_diagnostic_context(entry)
-    if diagnostic.get("effective_config_hash") is None:
-        gap_counter["effective_config_hash"] += 1
-    if diagnostic.get("contract_ref") is None:
-        gap_counter["contract_ref"] += 1
-    if diagnostic.get("data_contract_version") is None:
-        gap_counter["data_contract_version"] += 1
-    if event_family in {"checkpoint", "composite"} and (
-        diagnostic.get("composite_run_id") is None
-    ):
-        gap_counter["composite_run_id"] += 1
-
-
-def _extract_diagnostic_context(entry: RunLedgerEntry) -> dict[str, object]:
-    """Return normalized diagnostic anchor payload from ledger entry details."""
-    details = entry.details or {}
-    raw_diagnostic = details.get("_diagnostic")
-    if not isinstance(raw_diagnostic, dict):
-        return {}
-    return {str(key): value for key, value in raw_diagnostic.items()}
-
-
-def _load_str_collection(raw_value: object) -> set[str]:
-    """Normalize list-like diagnostic payloads into string sets."""
-    if not isinstance(raw_value, list):
-        return set()
-    return {str(item) for item in raw_value}
 
 
 __all__ = ["build_diagnostics_summary"]

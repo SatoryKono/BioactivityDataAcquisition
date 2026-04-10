@@ -156,6 +156,13 @@ def _add_cache_options() -> Callable:
             default=None,
             help="Explicit path to Bronze cache directory",
         )(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--exact-replay/--no-exact-replay",
+            "exact_replay",
+            default=False,
+            help="Require snapshot-backed inputs and fail closed instead of live refetch",
+            show_default=True,
+        )(cmd)
         return cmd
 
     return decorator

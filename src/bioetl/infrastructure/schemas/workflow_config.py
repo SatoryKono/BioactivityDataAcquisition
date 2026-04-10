@@ -58,6 +58,7 @@ class WorkflowRunOptionsSchema(BaseModel):
     use_cached_bronze: bool | None = None
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
+    exact_replay: bool | None = None
     enable_tracing: bool | None = None
 
     def to_domain(self) -> WorkflowRunOptionsConfig:
@@ -91,6 +92,7 @@ class WorkflowRunOptionsSchema(BaseModel):
             use_cached_bronze=self.use_cached_bronze,
             cached_bronze_path=self.cached_bronze_path,
             cached_bronze_date=self.cached_bronze_date,
+            exact_replay=self.exact_replay,
             enable_tracing=self.enable_tracing,
         )
 

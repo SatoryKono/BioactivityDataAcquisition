@@ -81,6 +81,31 @@ def enrich_metadata_with_execution_identity(
             if metadata.execution_fingerprint is not None
             else identity.execution_fingerprint
         ),
+        manifest_id=(
+            metadata.manifest_id
+            if metadata.manifest_id is not None
+            else identity.manifest_id
+        ),
+        contract_ref=(
+            metadata.contract_ref
+            if metadata.contract_ref is not None
+            else identity.contract_ref
+        ),
+        contract_version=(
+            metadata.contract_version
+            if metadata.contract_version is not None
+            else identity.contract_version
+        ),
+        exact_replay=(
+            metadata.exact_replay
+            if metadata.exact_replay is not None
+            else identity.exact_replay
+        ),
+        input_snapshot_ids=(
+            metadata.input_snapshot_ids
+            if metadata.input_snapshot_ids
+            else identity.input_snapshot_ids
+        ),
         run_context=metadata.run_context
         if metadata.run_context is not None
         else identity.run_context,
@@ -99,8 +124,16 @@ def handle_incompatible_checkpoint(
     payload = {
         "pipeline": pipeline_name,
         "compatibility_policy": compatibility_policy,
+        "resume_rejected": compatibility_policy != "observe",
         "messages": messages,
         "checkpoint_metadata": checkpoint_metadata.to_dict(),
+        "checkpoint_identity": {
+            "manifest_id": checkpoint_metadata.manifest_id,
+            "contract_ref": checkpoint_metadata.contract_ref,
+            "contract_version": checkpoint_metadata.contract_version,
+            "exact_replay": checkpoint_metadata.exact_replay,
+            "input_snapshot_ids": list(checkpoint_metadata.input_snapshot_ids),
+        },
     }
     if compatibility_policy == "observe":
         logger.warning(

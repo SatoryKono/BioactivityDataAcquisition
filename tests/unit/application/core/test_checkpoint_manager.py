@@ -540,6 +540,11 @@ class TestCheckpointManagerCompatibilityPolicy:
                 effective_config_hash="cfg-hash",
                 effective_config_artifact_id="artifact-1",
                 execution_fingerprint="exec-fp",
+                manifest_id="manifest-1",
+                contract_ref="chembl.activity",
+                contract_version="1.0.0",
+                exact_replay=True,
+                input_snapshot_ids=("snapshot-1",),
             ),
         )
 
@@ -552,3 +557,55 @@ class TestCheckpointManagerCompatibilityPolicy:
         assert call_kwargs["metadata"]["effective_config_hash"] == "cfg-hash"
         assert call_kwargs["metadata"]["effective_config_artifact_id"] == "artifact-1"
         assert call_kwargs["metadata"]["execution_fingerprint"] == "exec-fp"
+        assert call_kwargs["metadata"]["manifest_id"] == "manifest-1"
+        assert call_kwargs["metadata"]["contract_ref"] == "chembl.activity"
+        assert call_kwargs["metadata"]["contract_version"] == "1.0.0"
+        assert call_kwargs["metadata"]["exact_replay"] is True
+        assert call_kwargs["metadata"]["input_snapshot_ids"] == ["snapshot-1"]
+
+    async def test_soft_fail_resume_logs_checkpoint_identity_payload(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {
+                "records_processed": 42,
+                "manifest_id": "manifest-old",
+                "contract_ref": "chembl.activity",
+                "contract_version": "1.0.0",
+                "exact_replay": True,
+                "input_snapshot_ids": ["snapshot-old"],
+            },
+        )
+        compatibility_service = MagicMock()
+        compatibility_service.validate_checkpoint_compatibility.return_value = (
+            CheckpointCompatibilityResult.incompatible_result(
+                dq_compatible=True,
+                pipeline_compatible=True,
+                execution_identity_compatible=False,
+                messages=["manifest mismatch"],
+            )
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=compatibility_service,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                manifest_id="manifest-new",
+            ),
+            compatibility_policy="soft_fail",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is None
+        warning_extra = mock_logger.warning.call_args.kwargs["extra"]
+        assert warning_extra["resume_rejected"] is True
+        assert warning_extra["checkpoint_identity"]["manifest_id"] == "manifest-old"
+        assert warning_extra["checkpoint_identity"]["exact_replay"] is True

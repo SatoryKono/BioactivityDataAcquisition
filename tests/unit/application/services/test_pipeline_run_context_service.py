@@ -131,3 +131,33 @@ class TestBuildContext:
         )
 
         assert context.tracing_enabled_override is True
+
+    def test_build_context_propagates_exact_replay(self) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="chembl_activity",
+            run_id=RunID(uuid4()),
+            options=RunOptions(
+                use_cached_bronze=True,
+                cached_bronze_path="bronze/cache",
+                cached_bronze_date="2026-03-18",
+                exact_replay=True,
+            ),
+        )
+
+        assert context.exact_replay is True
+        assert context.has_cached_bronze is True
+
+    def test_build_context_rejects_exact_replay_without_cached_bronze(self) -> None:
+        service = PipelineRunContextService()
+
+        with pytest.raises(
+            ValueError,
+            match="exact replay currently requires --use-cached-bronze",
+        ):
+            service.build_context(
+                pipeline_name="chembl_activity",
+                run_id=RunID(uuid4()),
+                options=RunOptions(exact_replay=True),
+            )

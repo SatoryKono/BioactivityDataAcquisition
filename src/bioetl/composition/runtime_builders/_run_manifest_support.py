@@ -82,6 +82,7 @@ def build_launch_context_snapshot(
         "log_level": getattr(ctx, "log_level", "INFO"),
         "ignore_yaml_filter": getattr(ctx, "ignore_yaml_filter", False),
         "skip_gold": getattr(ctx, "skip_gold", False),
+        "exact_replay": getattr(ctx, "exact_replay", False),
         "execution_context": execution_context_value,
         "vacuum": to_serializable_mapping(getattr(ctx, "vacuum", None)),
         "input_filter": to_serializable_mapping(getattr(ctx, "input_filter", None)),
@@ -114,19 +115,24 @@ def build_run_source_refs(
     entity: str,
 ) -> tuple[RunSourceRef, ...]:
     """Build manifest source refs, including cached-Bronze snapshot provenance."""
+    input_snapshots = _build_cached_bronze_snapshot_refs(
+        cached_bronze=cached_bronze,
+        settings=settings,
+        pipeline_name=ctx.pipeline_name,
+        provider=provider,
+        entity=entity,
+    )
+    if getattr(ctx, "exact_replay", False) and not input_snapshots:
+        raise RuntimeError(
+            "Exact replay requires immutable input snapshots; no snapshot-backed source refs were resolved for this run"
+        )
     return (
         RunSourceRef(
             provider=provider,
             entity=entity,
             pipeline_name=ctx.pipeline_name,
             query=getattr(ctx, "query", None),
-            input_snapshots=_build_cached_bronze_snapshot_refs(
-                cached_bronze=cached_bronze,
-                settings=settings,
-                pipeline_name=ctx.pipeline_name,
-                provider=provider,
-                entity=entity,
-            ),
+            input_snapshots=input_snapshots,
         ),
     )
 
@@ -166,7 +172,7 @@ def _build_cached_bronze_snapshot_refs(
     )
     latest_mtime = max(file_path.stat().st_mtime for file_path in batch_files)
     snapshot_id = hashlib.sha256(
-        f"{pipeline_name}:{snapshot_scope}:{content_hash}".encode("utf-8")
+        f"{pipeline_name}:{snapshot_scope}:{content_hash}".encode()
     ).hexdigest()
     return (
         RunInputSnapshotRef(

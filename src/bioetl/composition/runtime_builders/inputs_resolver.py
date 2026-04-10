@@ -162,6 +162,7 @@ def assemble_runtime_config(
         heartbeat_interval=heartbeat_interval,
         query=ctx.query,
         dry_run=ctx.dry_run,
+        exact_replay=getattr(ctx, "exact_replay", False),
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
         skip_gold=skip_gold,

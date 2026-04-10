@@ -183,27 +183,62 @@ def _apply_manifest_field_normalizer(
 def normalize_run_manifest_spec(payload: Mapping[str, object]) -> dict[str, object]:
     """Normalize a manifest fingerprint/persist payload into canonical primitives."""
     normalized = normalize_mapping(payload)
-
-    code_provenance = payload.get("code_provenance")
-    if isinstance(code_provenance, Mapping):
-        normalized["code_provenance"] = _normalize_manifest_code_provenance(code_provenance)
-
-    source_refs = payload.get("source_refs")
-    if isinstance(source_refs, Sequence) and not isinstance(source_refs, (str, bytes)):
-        normalized["source_refs"] = canonicalize_container(
-            normalize_set_like_sequence(
-                _normalize_manifest_source_ref(item) for item in source_refs
-            )
-        )
-
-    for field_name in _MANIFEST_SET_LIKE_FIELDS - {"source_refs"}:
-        raw_value = payload.get(field_name)
-        if isinstance(raw_value, Sequence) and not isinstance(raw_value, (str, bytes)):
-            normalized[field_name] = canonicalize_container(
-                normalize_set_like_sequence(raw_value)
-            )
-
+    _normalize_manifest_code_provenance_field(payload, normalized)
+    _normalize_manifest_source_refs_field(payload, normalized)
+    _normalize_manifest_set_like_fields(payload, normalized)
     return normalized
+
+
+def _normalize_manifest_code_provenance_field(
+    payload: Mapping[str, object],
+    normalized: dict[str, object],
+) -> None:
+    """Normalize nested code provenance when present."""
+    code_provenance = payload.get("code_provenance")
+    if not isinstance(code_provenance, Mapping):
+        return
+    normalized["code_provenance"] = _normalize_manifest_code_provenance(code_provenance)
+
+
+def _normalize_manifest_source_refs_field(
+    payload: Mapping[str, object],
+    normalized: dict[str, object],
+) -> None:
+    """Normalize nested source refs when present."""
+    source_refs = payload.get("source_refs")
+    if not _is_non_string_sequence(source_refs):
+        return
+    normalized["source_refs"] = canonicalize_container(
+        normalize_set_like_sequence(
+            _normalize_manifest_source_ref(item) for item in source_refs
+        )
+    )
+
+
+def _normalize_manifest_set_like_fields(
+    payload: Mapping[str, object],
+    normalized: dict[str, object],
+) -> None:
+    """Normalize remaining set-like manifest fields."""
+    for field_name in _MANIFEST_SET_LIKE_FIELDS - {"source_refs"}:
+        _normalize_manifest_set_like_field(payload, normalized, field_name)
+
+
+def _normalize_manifest_set_like_field(
+    payload: Mapping[str, object],
+    normalized: dict[str, object],
+    field_name: str,
+) -> None:
+    """Normalize one set-like manifest field when present."""
+    raw_value = payload.get(field_name)
+    if not _is_non_string_sequence(raw_value):
+        return
+    normalized[field_name] = canonicalize_container(normalize_set_like_sequence(raw_value))
+
+
+def _is_non_string_sequence(value: object) -> bool:
+    """Return whether the value is a sequence that should be canonicalized."""
+    return isinstance(value, Sequence) and not isinstance(value, (str, bytes))
 
 
 def _normalize_manifest_source_ref(item: object) -> object:

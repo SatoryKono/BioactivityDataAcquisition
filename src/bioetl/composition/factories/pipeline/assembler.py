@@ -59,11 +59,8 @@ from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
-
-
-_factory_context, _extract_entity_type = build_factory_context, extract_entity_type
-_extract_dq_configs, _assemble_runner_impl = extract_dq_configs, assemble_runner_impl
-
+_extract_entity_type, _extract_dq_configs = extract_entity_type, extract_dq_configs
+_assemble_runner_impl = assemble_runner_impl
 
 class GenericPipelineFactory(Generic[TPipeline]):
     """Composition-layer factory that assembles pipelines and runners."""
@@ -82,7 +79,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> None:
         if gold_schema is None:
             raise ValueError(
-                f"gold_schema is required for pipeline '{pipeline_name}' to enforce Gold validation."
+                f"gold_schema is required for pipeline '{pipeline_name}' "
+                "to enforce Gold validation."
             )
         self.pipeline_name, self.pipeline_class, self.provider = (
             pipeline_name,
@@ -159,7 +157,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> PipelineService:
         """Build shared runtime services used by pipeline creation and execution."""
         return build_factory_services(
-            factory_context=_factory_context(self),
+            factory_context=build_factory_context(self),
             request=_BuildFactoryServicesRequest(
                 settings,
                 logger,
@@ -253,15 +251,8 @@ def create_pipeline_factory(
 ) -> GenericPipelineFactory[TPipeline]:
     """Construct a `GenericPipelineFactory` with optional wiring overrides."""
     return GenericPipelineFactory(
-        pipeline_name,
-        pipeline_class,
-        provider,
-        silver_schema,
-        gold_schema,
-        pandera_silver_schema,
-        None,
-        transformer_class,
-        provider_registry,
+        pipeline_name, pipeline_class, provider, silver_schema, gold_schema,
+        pandera_silver_schema, None, transformer_class, provider_registry,
     )
 
 
