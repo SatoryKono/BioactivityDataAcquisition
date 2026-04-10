@@ -469,6 +469,7 @@ def test_chembl_activity_content_hash_is_permutation_invariant_for_set_like_json
     )
 
     assert canonical["content_hash"] == candidate["content_hash"]
+<<<<<<< Updated upstream
 
 
 @pytest.mark.unit
@@ -566,3 +567,58 @@ def test_pubchem_compound_profile_stabilizes_numeric_and_smiles_equivalence() ->
 
     assert normalized_a["canonical_smiles"] == "C"
     assert normalized_a["content_hash"] == normalized_b["content_hash"]
+||||||| Stash base
+=======
+
+
+@pytest.mark.unit
+def test_crossref_publication_profile_stabilizes_identifier_date_and_set_like_content_hash() -> None:
+    processor = RecordNormalizationProcessor(provider="crossref", entity_type="publication")
+
+    normalized = processor.normalize_business_data(
+        {
+            "doi": " https://doi.org/10.1000/XYZ ",
+            "publication_date": " 2024-01-02 ",
+            "title": "  Example   Title ",
+        }
+    )
+
+    assert normalized["doi"] == "10.1000/xyz"
+    assert normalized["publication_date"] == "2024-01-02"
+    assert normalized["title"] == "Example Title"
+    assert processor.compute_content_hash({"subject_keywords": ["alpha", "beta"]}) == (
+        processor.compute_content_hash({"subject_keywords": ["beta", "alpha"]})
+    )
+
+
+@pytest.mark.unit
+def test_pubmed_publication_profile_stabilizes_identifier_and_partial_dates() -> None:
+    processor = RecordNormalizationProcessor(provider="pubmed", entity_type="publication")
+
+    normalized = processor.normalize_business_data(
+        {
+            "pmid": " PMID:12345 ",
+            "pmc_id": " pmc123 ",
+            "publication_date": "2024-01",
+        }
+    )
+
+    assert normalized["pmid"] == "12345"
+    assert normalized["pmc_id"] == "PMC123"
+    assert normalized["publication_date"] == "2024-01-31"
+
+
+@pytest.mark.unit
+def test_pubchem_compound_profile_stabilizes_numeric_and_smiles_equivalence() -> None:
+    processor = RecordNormalizationProcessor(provider="pubchem", entity_type="compound")
+
+    normalized = processor.normalize_business_data(
+        {
+            "canonical_smiles": " C ",
+            "molecular_weight": " 12.34000000001 ",
+        }
+    )
+
+    assert normalized["canonical_smiles"] == "C"
+    assert normalized["molecular_weight"] == 12.34
+>>>>>>> Stashed changes

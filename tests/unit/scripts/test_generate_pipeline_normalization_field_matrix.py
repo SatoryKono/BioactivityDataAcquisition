@@ -31,16 +31,16 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     assert chembl_activity_doi["include_in_content_hash"] == "true"
 
     crossref_title = _row(rows, "crossref_publication", "title")
-    assert crossref_title["normalization_source"] == "fallback"
-    assert crossref_title["normalizer"] == "normalize_title"
+    assert crossref_title["normalization_source"] == "profile"
+    assert crossref_title["normalizer"] == "normalize_profile_title"
 
     pubmed_date = _row(rows, "pubmed_publication", "publication_date")
-    assert pubmed_date["normalization_source"] == "fallback"
-    assert pubmed_date["normalizer"] == "normalize_partial_date"
+    assert pubmed_date["normalization_source"] == "profile"
+    assert pubmed_date["normalizer"] == "normalize_profile_date"
 
     pubchem_smiles = _row(rows, "pubchem_compound", "canonical_smiles")
-    assert pubchem_smiles["normalization_source"] == "fallback"
-    assert pubchem_smiles["normalizer"] == "SMILES.from_raw(mode=soft)"
+    assert pubchem_smiles["normalization_source"] == "profile"
+    assert pubchem_smiles["normalizer"] == "_normalize_canonical_smiles"
 
 
 def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields() -> None:

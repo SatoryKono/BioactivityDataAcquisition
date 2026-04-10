@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 """Normalization profile for the PubMed Publication Silver schema."""
 
 from __future__ import annotations
@@ -136,3 +137,69 @@ PUBMED_PUBLICATION_PROFILE = build_standard_profile(
 )
 
 PUBMED_PUBLICATION_PROFILE.assert_covers_schema(PUBMED_PUBLICATION_SCHEMA_FIELDS)
+||||||| Stash base
+=======
+"""Normalization profile for the PubMed Publication Silver schema."""
+
+from __future__ import annotations
+
+from bioetl.infrastructure.schemas.silver_publications import PUBMED_PUBLICATION_SCHEMA
+
+from ._standard_profile_builder import build_standard_profile
+from .helpers import (
+    normalize_profile_doi,
+    normalize_profile_pmc_id,
+    normalize_profile_pmid,
+)
+
+__all__ = [
+    "PUBMED_PUBLICATION_PROFILE",
+    "PUBMED_PUBLICATION_SCHEMA_FIELDS",
+]
+
+PUBMED_PUBLICATION_SCHEMA_FIELDS = tuple(PUBMED_PUBLICATION_SCHEMA.names)
+
+_META_FIELDS = frozenset(
+    field_name for field_name in PUBMED_PUBLICATION_SCHEMA_FIELDS if field_name.startswith("_")
+) | {"content_hash", "entity_id"}
+
+_SPECIAL_RULES = {
+    "doi": (
+        normalize_profile_doi,
+        "Normalize DOI to canonical registry form before hashing.",
+    ),
+    "pmid": (
+        normalize_profile_pmid,
+        "Normalize PMID to digits-only canonical string.",
+    ),
+    "pmc_id": (
+        normalize_profile_pmc_id,
+        "Normalize PMC identifier to canonical PMC-prefixed string.",
+    ),
+}
+
+PUBMED_PUBLICATION_PROFILE = build_standard_profile(
+    profile_name="pubmed.publication",
+    description="Canonical normalization profile for the PubMed Publication Silver schema.",
+    schema_fields=PUBMED_PUBLICATION_SCHEMA_FIELDS,
+    meta_fields=_META_FIELDS,
+    title_fields={"title"},
+    abstract_fields={"abstract"},
+    date_fields={"date_completed", "date_revised", "pub_date", "publication_date"},
+    int_fields={
+        "author_count",
+        "chemical_count",
+        "citations_made",
+        "grant_count",
+        "keyword_count",
+        "mesh_heading_count",
+        "pub_day",
+        "pub_month",
+        "publication_year",
+    },
+    set_like_fields={"publication_types", "subject_keywords", "subject_mesh"},
+    special_rules=_SPECIAL_RULES,
+)
+
+PUBMED_PUBLICATION_PROFILE.assert_covers_schema(PUBMED_PUBLICATION_SCHEMA_FIELDS)
+>>>>>>> Stashed changes

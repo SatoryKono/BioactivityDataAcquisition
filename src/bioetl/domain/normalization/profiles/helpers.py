@@ -11,9 +11,15 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmid,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_string
+<<<<<<< Updated upstream
 from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_title as _normalize_title
+||||||| Stash base
+=======
+from bioetl.domain.normalization.text import normalize_title as _normalize_title
+>>>>>>> Stashed changes
 from bioetl.domain.value_objects import SMILES
 
 __all__ = [
@@ -134,7 +140,14 @@ def normalize_profile_pmid(value: object) -> object:
     """Normalize PMID-like profile values with bool protection."""
     if isinstance(value, bool):
         return None
-    if not isinstance(value, str | int):
+    if isinstance(value, str):
+        normalized = normalize_string(value)
+        if normalized is None:
+            return None
+        if normalized.lower().startswith("pmid:"):
+            return normalize_pmid(normalized[5:])
+        return normalize_pmid(normalized)
+    if not isinstance(value, int):
         return value
     return normalize_pmid(value)
 
