@@ -275,11 +275,11 @@ class TestOpenAlexPublicationTransformer:
         )
 
         assert result is not None
-        assert "_run_id" in result
-        assert "_run_type" in result
-        assert "_ingestion_ts" in result
+        assert "_run_id" not in result
+        assert "_run_type" not in result
+        assert "_ingestion_ts" not in result
         assert "_index" in result
-        assert result["_run_type"] == "incremental"
+        assert "_run_type" not in result
         assert result["_index"] == 0
 
     @pytest.mark.asyncio

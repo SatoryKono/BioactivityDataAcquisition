@@ -64,3 +64,15 @@ NONDETERMINISTIC_PERSISTED_FIELDS: frozenset[str] = frozenset(
         "_source_batch_id",
     }
 )
+
+# Application transformer output must not carry occurrence-scoped provenance
+# in canonical Silver/Gold row payloads. These anchors travel separately via
+# explicit write kwargs, sidecars, audit records, and control-plane artifacts.
+TRANSIENT_RUNTIME_PROVENANCE_SOURCE_FIELDS: frozenset[str] = frozenset(
+    {
+        "ingestion_ts",
+        "run_id",
+        "run_type",
+        "source_batch_id",
+    }
+)

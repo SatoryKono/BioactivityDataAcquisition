@@ -127,10 +127,6 @@ def silver_schema() -> pa.Schema:
         [
             pa.field("id", pa.string()),
             pa.field("value", pa.string()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
         ]
     )
 
@@ -151,15 +147,11 @@ class TestRunIdPropagation:
     ) -> None:
         """Test that the same run_id is propagated to both Bronze and Silver."""
 
-        # Create a transform that returns the record with lineage fields
-        # (simulating what BaseTransformer.entity_to_silver_record does)
+        # Canonical transformer output carries only business payload.
         async def transform(ctx, record, index):
             return {
                 "id": str(record.get("id")),
                 "value": record.get("value"),
-                "_run_id": str(ctx.run_id),
-                "_run_type": ctx.run_type.value,
-                "_ingestion_ts": ctx.started_at.isoformat(),
             }
 
         def gold_filter(ctx, record):
@@ -197,14 +189,16 @@ class TestRunIdPropagation:
         assert bronze_call_kwargs["run_id"] == run_id
         assert bronze_call_kwargs["run_type"] == RunType.INCREMENTAL
 
-        # Verify Silver was called with run_id in records
+        # Verify Silver was called with explicit run identity kwargs
         mock_storage.write_silver.assert_called_once()
         silver_call_kwargs = mock_storage.write_silver.call_args[1]
         silver_records = silver_call_kwargs["records"]
 
         assert len(silver_records) == 1
-        assert silver_records[0]["_run_id"] == str(run_id)
-        assert silver_records[0]["_run_type"] == RunType.INCREMENTAL.value
+        assert silver_call_kwargs["run_id"] == run_id
+        assert silver_call_kwargs["run_type"] == RunType.INCREMENTAL
+        assert "_run_id" not in silver_records[0]
+        assert "_run_type" not in silver_records[0]
 
     @pytest.mark.asyncio
     async def test_run_id_consistency_across_multiple_batches(
@@ -222,9 +216,6 @@ class TestRunIdPropagation:
             return {
                 "id": str(record.get("id")),
                 "value": record.get("value"),
-                "_run_id": str(ctx.run_id),
-                "_run_type": ctx.run_type.value,
-                "_ingestion_ts": ctx.started_at.isoformat(),
             }
 
         def gold_filter(ctx, record):
@@ -264,9 +255,11 @@ class TestRunIdPropagation:
         # Verify all Silver calls have the same run_id in records
         assert mock_storage.write_silver.call_count == 3
         for call in mock_storage.write_silver.call_args_list:
-            silver_records = call[1]["records"]
+            silver_call_kwargs = call[1]
+            silver_records = silver_call_kwargs["records"]
             for record in silver_records:
-                assert record["_run_id"] == str(run_id)
+                assert "_run_id" not in record
+            assert silver_call_kwargs["run_id"] == run_id
 
     @pytest.mark.asyncio
     async def test_different_run_types_propagated_correctly(
@@ -294,9 +287,6 @@ class TestRunIdPropagation:
                 return {
                     "id": str(record.get("id")),
                     "value": record.get("value"),
-                    "_run_id": str(ctx.run_id),
-                    "_run_type": ctx.run_type.value,
-                    "_ingestion_ts": ctx.started_at.isoformat(),
                 }
 
             def gold_filter(ctx, record):
@@ -332,5 +322,7 @@ class TestRunIdPropagation:
             assert bronze_kwargs["run_type"] == run_type
 
             # Verify Silver
-            silver_records = mock_storage.write_silver.call_args[1]["records"]
-            assert silver_records[0]["_run_type"] == run_type.value
+            silver_call_kwargs = mock_storage.write_silver.call_args[1]
+            silver_records = silver_call_kwargs["records"]
+            assert "_run_type" not in silver_records[0]
+            assert silver_call_kwargs["run_type"] == run_type

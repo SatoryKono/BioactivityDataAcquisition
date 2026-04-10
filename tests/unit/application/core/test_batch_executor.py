@@ -147,16 +147,13 @@ def shutdown_signal():
 
 @pytest.fixture
 def transform_callback():
-    """Create mock transform callback with lineage fields."""
+    """Create mock transform callback without transient lineage fields."""
 
     async def transform(ctx, record, index):
         await asyncio.sleep(0)
         return {
             "entity_id": record.get("id", "unknown"),
             "value": record.get("value"),
-            "_run_id": str(ctx.run_id),
-            "_run_type": ctx.run_type.value,
-            "_ingestion_ts": ctx.started_at.isoformat(),
         }
 
     return transform
@@ -707,11 +704,11 @@ class TestBatchExecutorProcessBatch:
 
         assert batch_id_factory.calls == 1
         assert mock_storage.write_bronze.call_args.kwargs["batch_id"] == fixed_batch_id
-        silver_records = mock_storage.write_silver.call_args.kwargs["records"]
+        silver_call_kwargs = mock_storage.write_silver.call_args.kwargs
+        silver_records = silver_call_kwargs["records"]
         assert silver_records
-        assert all(
-            rec.get("_source_batch_id") == str(fixed_batch_id) for rec in silver_records
-        )
+        assert all("_source_batch_id" not in rec for rec in silver_records)
+        assert silver_call_kwargs["source_batch_id"] == fixed_batch_id
         assert executor.get_run_statistics()["source_batch_ids"] == [
             str(fixed_batch_id)
         ]

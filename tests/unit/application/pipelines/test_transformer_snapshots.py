@@ -63,8 +63,9 @@ def normalize_for_snapshot(result: dict[str, Any] | None) -> dict[str, Any] | No
     Removes dynamic fields that change between runs:
     - entity_id (contains hash)
     - content_hash (contains hash)
-    - _run_id (UUID)
-    - _ingestion_ts (timestamp)
+    Legacy runtime provenance placeholders remain supported if older test
+    fixtures inject them, but canonical transformer output no longer includes
+    these fields.
     """
     if result is None:
         return None
