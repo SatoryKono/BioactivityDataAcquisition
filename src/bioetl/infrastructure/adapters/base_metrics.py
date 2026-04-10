@@ -58,7 +58,7 @@ class AdapterMetricsRecorder:
 
     """
 
-    metrics: MetricsPort
+    metrics: MetricsPort | None
     provider: str
     _p95_window_size: int = 50
     _request_duration_windows: dict[str, deque[float]] = field(
@@ -103,19 +103,19 @@ class AdapterMetricsRecorder:
         finally:
             duration = time.perf_counter() - start
             labels = {"provider": self.provider, "endpoint": endpoint}
+            if self.metrics is not None:
+                self.metrics.observe_histogram(
+                    "adapter_request_duration_seconds",
+                    duration,
+                    labels,
+                )
 
-            self.metrics.observe_histogram(
-                "adapter_request_duration_seconds",
-                duration,
-                labels,
-            )
-
-            self.metrics.increment_counter(
-                "adapter_requests_total",
-                1,
-                {**labels, "status": status},
-            )
-            self._record_request_p95(endpoint, duration)
+                self.metrics.increment_counter(
+                    "adapter_requests_total",
+                    1,
+                    {**labels, "status": status},
+                )
+                self._record_request_p95(endpoint, duration)
 
     def record_batch_size(self, endpoint: str, size: int) -> None:
         """Record batch size for a request.
@@ -131,6 +131,8 @@ class AdapterMetricsRecorder:
             - adapter_batch_size: Histogram with provider/endpoint labels
 
         """
+        if self.metrics is None:
+            return
         self.metrics.observe_histogram(
             "adapter_batch_size",
             float(size),
@@ -152,6 +154,8 @@ class AdapterMetricsRecorder:
             - adapter_dropped_duplicates_total: Counter with provider/entity_type labels
 
         """
+        if self.metrics is None:
+            return
         self.metrics.increment_counter(
             "adapter_dropped_duplicates_total",
             count,
@@ -184,6 +188,9 @@ class AdapterMetricsRecorder:
         total_hits = max(0, min(hits, total_candidates))
         labels = {"provider": self.provider, "operation": operation}
 
+        if self.metrics is None:
+            return
+
         if total_candidates > 0:
             self.metrics.increment_counter(
                 "adapter_fallback_attempts_total",
@@ -214,6 +221,8 @@ class AdapterMetricsRecorder:
 
         p95_index = int((len(sorted_samples) - 1) * 0.95)
         p95_value = sorted_samples[p95_index]
+        if self.metrics is None:
+            return
         self.metrics.set_gauge(
             "adapter_request_p95_seconds",
             p95_value,

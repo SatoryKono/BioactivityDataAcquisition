@@ -147,7 +147,8 @@ the canonical ingestion anchor carried into postrun/DQ evaluation for the run
 (currently `PipelineContext.started_at`, which is also propagated as the record
 `_ingestion_ts` default across runtime writes). The resulting lag reflects
 runtime age from that ingestion anchor rather than a wall-clock freshness
-publication timestamp.
+publication timestamp. Treat this metric as *run recency / ingestion-anchor lag*,
+not as authoritative source-publication freshness.
 
 ## Interpretation Rules
 
@@ -160,7 +161,9 @@ publication timestamp.
 - Freshness SLI/SLO review currently tracks the age of the latest successful
   run ingestion anchor. For exact source-ingestion chronology beyond the
   current run boundary, use manifests, lineage, and audit artifacts together
-  with the gauge value.
+  with the gauge value. Grafana/alert interpretations of
+  `bioetl_data_freshness_seconds` must preserve this semantics and must not
+  relabel it as source-publication freshness without an additional metric.
 - For local-only stacks, temporary tracing disablement or maintenance windows
   should be annotated in the incident log rather than silently ignored.
 

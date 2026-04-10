@@ -10,6 +10,11 @@ METRICS_BOOTSTRAP_PATH = Path(
     "src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py"
 )
 OBSERVABILITY_API_PATH = Path("src/bioetl/composition/observability_api.py")
+RUNTIME_OBSERVABILITY_PATH = Path(
+    "src/bioetl/composition/bootstrap/runtime/observability.py"
+)
+RUNTIME_INIT_PATH = Path("src/bioetl/composition/bootstrap/runtime/__init__.py")
+PIPELINE_EXECUTION_PATH = Path("src/bioetl/composition/_pipeline_execution.py")
 
 
 def _get_function_def(tree: ast.AST, name: str) -> ast.FunctionDef:
@@ -78,4 +83,50 @@ def test_observability_api_start_metrics_server_delegates_via_metrics_service() 
     assert "start" in called_attrs, (
         "composition.observability_api.start_metrics_server must delegate to "
         "MetricsService.start()."
+    )
+
+
+def test_runtime_observability_modules_do_not_reexport_raw_start_metrics_server() -> None:
+    """Legacy raw start_metrics_server exports must stay out of runtime bootstrap surface."""
+    for path in (RUNTIME_OBSERVABILITY_PATH, RUNTIME_INIT_PATH):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        exported_names: set[str] = set()
+        imported_names: set[str] = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                imported_names.update(alias.name for alias in node.names)
+            elif isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if not (
+                        isinstance(target, ast.Name) and target.id in {"__all__", "_PUBLIC_EXPORTS"}
+                    ):
+                        continue
+                    value = node.value
+                    if isinstance(value, ast.List):
+                        exported_names.update(
+                            elt.value
+                            for elt in value.elts
+                            if isinstance(elt, ast.Constant)
+                            and isinstance(elt.value, str)
+                        )
+                    elif isinstance(value, ast.Dict):
+                        exported_names.update(
+                            key.value
+                            for key in value.keys
+                            if isinstance(key, ast.Constant)
+                            and isinstance(key.value, str)
+                        )
+
+        assert "start_metrics_server" not in imported_names | exported_names, (
+            f"{path} must not import or re-export raw start_metrics_server; "
+            "use composition.observability_api.start_metrics_server instead."
+        )
+
+
+def test_pipeline_execution_uses_composition_pushgateway_seam() -> None:
+    """Pipeline execution must not import Pushgateway helpers from infrastructure directly."""
+    source = PIPELINE_EXECUTION_PATH.read_text(encoding="utf-8")
+    assert "infrastructure.observability.server" not in source, (
+        "_pipeline_execution.py must use composition-owned push_metrics_to_gateway "
+        "instead of importing infrastructure Pushgateway helpers directly."
     )

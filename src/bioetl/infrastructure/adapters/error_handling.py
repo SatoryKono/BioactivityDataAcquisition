@@ -9,7 +9,6 @@ from bioetl.domain.exceptions import (
     ExternalServiceError,
 )
 from bioetl.domain.ports import ErrorClassifierPort
-from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import ErrorType, JsonDict
 from bioetl.infrastructure.adapters._error_handling_support import (
     AdapterErrorContext,
@@ -54,7 +53,7 @@ class ErrorService:
         self._error_mapper = error_mapper or DomainInfraExceptionMapper(
             logger=self._logger
         )
-        self._metrics = metrics if metrics is not None else NoOpMetrics()
+        self._metrics = metrics
 
     def classify_http_error(
         self,

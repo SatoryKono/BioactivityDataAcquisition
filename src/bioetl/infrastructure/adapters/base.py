@@ -32,7 +32,6 @@ from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_adapter_metrics,
@@ -72,14 +71,14 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         http_client: UnifiedHTTPClient instance for making HTTP requests.
         provider_name: Unique identifier for the data provider.
         logger: LoggerPort instance for structured logging.
-        metrics: MetricsPort instance for metrics collection (defaults to NoOpMetrics).
+        metrics: MetricsPort instance for metrics collection.
 
     """
 
     http_client: UnifiedHTTPClient
     provider_name: str
     logger: LoggerPort
-    metrics: MetricsPort | None  # Runtime-resolved to NoOpMetrics if None
+    metrics: MetricsPort | None
     _error_handler: ErrorHandlerPort
     _adapter_metrics: AdapterMetricsRecorder
     _request_collector: APIRequestCollector
@@ -101,7 +100,6 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
             http_client: HTTP client for requests.
             logger: LoggerPort instance for structured logging (required).
             metrics: MetricsPort instance for metrics collection (optional).
-                    Defaults to NoOpMetrics if not provided.
             dependency_context: Explicit composition-owned dependency bundle for
                     runtime adapter collaborators. When provided, it is the
                     authoritative source for metrics, error handling, request
@@ -126,10 +124,8 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
             self._request_collector = dependency_context.request_collector
             return
 
-        self._metrics = metrics if metrics is not None else NoOpMetrics()
-        self.metrics = (
-            self._metrics
-        )  # Public alias required by HealthCheckMixin._get_metrics()
+        self._metrics = metrics
+        self.metrics = self._metrics
         self._error_handler = (
             error_handler
             if error_handler is not None
@@ -161,9 +157,8 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
                 return logger
         elif name == "_metrics":
             metrics = self.__dict__.get("metrics")
-            metrics_port = metrics if metrics is not None else NoOpMetrics()
-            object.__setattr__(self, "_metrics", metrics_port)
-            return metrics_port
+            object.__setattr__(self, "_metrics", metrics)
+            return metrics
 
         raise AttributeError(f"{type(self).__name__} object has no attribute {name!r}")
 
@@ -171,15 +166,13 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         """Initialize adapter metrics and request collector.
 
         Creates standardized AdapterMetricsRecorder and APIRequestCollector instances.
-        Resolves None metrics to NoOpMetrics for the metrics port.
 
         Called automatically from ``__init__``. For ``@dataclass`` subclasses
         that bypass ``__init__``, call explicitly from ``__post_init__``.
 
         """
-        metrics_port = self._metrics if self._metrics is not None else NoOpMetrics()
         self._adapter_metrics = create_default_adapter_metrics(
-            metrics=metrics_port,
+            metrics=self._metrics,
             provider=self.provider_name,
         )
         self._request_collector = create_default_request_collector()

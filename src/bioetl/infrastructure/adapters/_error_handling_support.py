@@ -67,7 +67,7 @@ def build_adapter_error_context(
 def emit_error_telemetry(
     *,
     logger: LoggerPort,
-    metrics: MetricsPort,
+    metrics: MetricsPort | None,
     provider: str,
     operation: str,
     error: Exception,
@@ -93,16 +93,17 @@ def emit_error_telemetry(
         error_class=type(error).__name__,
         **error_context.extra,
     )
-    metrics.increment_counter(
-        "adapter_error_taxonomy_total",
-        1,
-        {
-            "provider": provider,
-            "operation": operation,
-            "error_category": error_category.value,
-            "error_type": error_type.value,
-        },
-    )
+    if metrics is not None:
+        metrics.increment_counter(
+            "adapter_error_taxonomy_total",
+            1,
+            {
+                "provider": provider,
+                "operation": operation,
+                "error_category": error_category.value,
+                "error_type": error_type.value,
+            },
+        )
 
 
 def extract_retry_after(response: Response) -> float | None:

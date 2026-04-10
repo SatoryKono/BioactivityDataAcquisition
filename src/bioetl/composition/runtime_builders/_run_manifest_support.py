@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import hashlib
 from dataclasses import asdict, dataclass, is_dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -17,6 +16,9 @@ from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunInputSnapshotRef,
     RunSourceRef,
+)
+from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
+    build_cached_bronze_input_snapshot_refs,
 )
 
 if TYPE_CHECKING:
@@ -166,68 +168,16 @@ def _build_cached_bronze_snapshot_refs(
         if bronze_path is not None
         else settings.bronze_path / provider / entity
     )
-    batch_files = _resolve_cached_bronze_batch_files(
+    snapshot_refs = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date=cast("str | None", bronze_date),
+        pipeline_name=pipeline_name,
     )
-    if not batch_files:
+    if not snapshot_refs:
         raise RuntimeError(
             "Cached Bronze execution requires at least one persisted batch file for snapshot provenance"
         )
-    content_hash = _compute_cached_bronze_content_hash(
-        bronze_root=bronze_root,
-        batch_files=batch_files,
-    )
-    snapshot_scope = (
-        bronze_root / str(bronze_date)
-        if bronze_date is not None
-        else bronze_root
-    )
-    latest_mtime = max(file_path.stat().st_mtime for file_path in batch_files)
-    snapshot_id = hashlib.sha256(
-        f"{pipeline_name}:{snapshot_scope}:{content_hash}".encode()
-    ).hexdigest()
-    return (
-        RunInputSnapshotRef(
-            snapshot_id=snapshot_id,
-            content_hash=content_hash,
-            immutable_uri=str(snapshot_scope),
-            captured_at=datetime.fromtimestamp(latest_mtime, tz=UTC),
-        ),
-    )
-
-
-def _resolve_cached_bronze_batch_files(
-    *,
-    bronze_root: Path,
-    bronze_date: str | None,
-) -> list[Path]:
-    """Return cached Bronze batch files in deterministic order."""
-    search_root = bronze_root / bronze_date if bronze_date else bronze_root
-    if not search_root.exists():
-        return []
-    pattern = "batch_*.jsonl.zst" if bronze_date else "**/batch_*.jsonl.zst"
-    return sorted(search_root.glob(pattern))
-
-
-def _compute_cached_bronze_content_hash(
-    *,
-    bronze_root: Path,
-    batch_files: list[Path],
-) -> str:
-    """Compute a deterministic content hash over cached Bronze batch files."""
-    digest = hashlib.sha256()
-    for file_path in batch_files:
-        digest.update(str(file_path.relative_to(bronze_root)).encode("utf-8"))
-        digest.update(b"\0")
-        with file_path.open("rb") as stream:
-            while True:
-                chunk = stream.read(1024 * 1024)
-                if not chunk:
-                    break
-                digest.update(chunk)
-        digest.update(b"\0")
-    return digest.hexdigest()
+    return snapshot_refs
 
 
 def _coerce_optional_text(value: object) -> str | None:

@@ -32,7 +32,6 @@ __all__ = [
     "bootstrap_tracer_port",
     "load_composite_config",
     "maybe_start_metrics_server",
-    "start_metrics_server",
     "validate_observability_preflight",
 ]
 
@@ -55,7 +54,6 @@ _PUBLIC_EXPORTS: dict[str, str] = {
     "bootstrap_tracer_port": "bioetl.composition.bootstrap.runtime.observability",
     "load_composite_config": "bioetl.composition.bootstrap.runtime.composite",
     "maybe_start_metrics_server": "bioetl.composition.bootstrap.runtime.observability",
-    "start_metrics_server": "bioetl.composition.bootstrap.runtime.observability",
     "validate_observability_preflight": (
         "bioetl.composition.bootstrap.runtime.observability"
     ),

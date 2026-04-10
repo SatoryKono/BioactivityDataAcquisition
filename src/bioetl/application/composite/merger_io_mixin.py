@@ -11,6 +11,7 @@ from bioetl.domain.composite.result import MergeResult
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
+    from datetime import datetime
 
     import polars as pl
 
@@ -115,6 +116,7 @@ class MergeIOMixin(MergeOutputWriterMixin, _MergeInputLoaderMixin):
     async def _write_outputs(
         self,
         df: pl.DataFrame,
+        metadata_timestamp: datetime | None,
         run_id: str,
         sources_used: list[str],
     ) -> None:
@@ -132,6 +134,12 @@ class MergeIOMixin(MergeOutputWriterMixin, _MergeInputLoaderMixin):
             records=len(df),
         )
         await self._write_merged_gold(df, run_id=run_id, sources_used=sources_used)
+        await self._write_merged_gold(
+            df,
+            completed_at=metadata_timestamp,
+            run_id=run_id,
+            sources_used=sources_used,
+        )
 
     def _build_merge_result(
         self,

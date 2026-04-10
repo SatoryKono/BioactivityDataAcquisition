@@ -17,6 +17,13 @@ FORBIDDEN_TRACING_DEFAULT_PATHS = (
     Path("src/bioetl/composition/factories/storage/_gold.py"),
 )
 ADAPTERS_ROOT = Path("src/bioetl/infrastructure/adapters")
+FORBIDDEN_ADAPTER_NOOP_PATHS = (
+    Path("src/bioetl/infrastructure/adapters/base.py"),
+    Path("src/bioetl/infrastructure/adapters/http/client.py"),
+    Path("src/bioetl/infrastructure/adapters/sync_base.py"),
+    Path("src/bioetl/infrastructure/adapters/error_handling.py"),
+    Path("src/bioetl/infrastructure/adapters/_health_check_observability.py"),
+)
 FORBIDDEN_ENDPOINT_IDENTIFIERS = {
     "record_id",
     "run_id",
@@ -49,6 +56,17 @@ def test_storage_layers_do_not_construct_noop_tracing_defaults() -> None:
         assert "NoOpTracing" not in calls, (
             f"{path} must not construct NoOpTracing. "
             "Resolve tracing in top-level composition wiring instead."
+        )
+
+
+def test_infra_adapters_do_not_construct_noop_observability_defaults() -> None:
+    """Adapter observability fallbacks must be resolved above infrastructure adapters."""
+    for path in FORBIDDEN_ADAPTER_NOOP_PATHS:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        calls = _iter_called_names(tree)
+        assert "NoOpMetrics" not in calls and "NoOpTracing" not in calls, (
+            f"{path} must not construct NoOpMetrics/NoOpTracing. "
+            "Resolve null-object observability in composition-owned wiring."
         )
 
 

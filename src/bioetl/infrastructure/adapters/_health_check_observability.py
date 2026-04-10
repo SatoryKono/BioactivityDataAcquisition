@@ -9,13 +9,6 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.health_check_contract import HealthCheckContext
 
 
-def resolve_metrics(metrics: MetricsPort | None) -> MetricsPort:
-    """Return metrics port, defaulting to NoOpMetrics when absent."""
-    from bioetl.domain.ports.noop import NoOpMetrics
-
-    return metrics if metrics is not None else NoOpMetrics()
-
-
 def start_health_check(
     *,
     provider_name: str,
@@ -39,7 +32,6 @@ def handle_health_check_result(
     """Record logs and counters for a completed health probe result."""
     elapsed = ctx.elapsed_seconds
     labels = {"provider": ctx.provider}
-    metrics_port = resolve_metrics(metrics)
     if status == HealthStatus.HEALTHY:
         logger.debug(
             "health_check_passed",
@@ -48,11 +40,12 @@ def handle_health_check_result(
             status=status.value,
             latency_seconds=elapsed,
         )
-        metrics_port.increment_counter(
-            "health_check_success_total",
-            1,
-            labels,
-        )
+        if metrics is not None:
+            metrics.increment_counter(
+                "health_check_success_total",
+                1,
+                labels,
+            )
     elif status == HealthStatus.DEGRADED:
         logger.warning(
             "health_check_degraded",
@@ -61,11 +54,12 @@ def handle_health_check_result(
             status=status.value,
             latency_seconds=elapsed,
         )
-        metrics_port.increment_counter(
-            "health_check_degraded_total",
-            1,
-            labels,
-        )
+        if metrics is not None:
+            metrics.increment_counter(
+                "health_check_degraded_total",
+                1,
+                labels,
+            )
     else:
         logger.warning(
             "health_check_unhealthy",
@@ -74,16 +68,18 @@ def handle_health_check_result(
             status=status.value,
             latency_seconds=elapsed,
         )
-        metrics_port.increment_counter(
-            "health_check_failures_total",
-            1,
+        if metrics is not None:
+            metrics.increment_counter(
+                "health_check_failures_total",
+                1,
+                labels,
+            )
+    if metrics is not None:
+        metrics.observe_histogram(
+            "health_check_latency_seconds",
+            elapsed,
             labels,
         )
-    metrics_port.observe_histogram(
-        "health_check_latency_seconds",
-        elapsed,
-        labels,
-    )
 
 
 def handle_health_check_failure(
@@ -105,16 +101,16 @@ def handle_health_check_failure(
         latency_seconds=elapsed,
     )
 
-    metrics_port = resolve_metrics(metrics)
-    metrics_port.increment_counter(
-        "health_check_failures_total",
-        1,
-        labels,
-    )
-    metrics_port.observe_histogram(
-        "health_check_latency_seconds",
-        elapsed,
-        labels,
-    )
+    if metrics is not None:
+        metrics.increment_counter(
+            "health_check_failures_total",
+            1,
+            labels,
+        )
+        metrics.observe_histogram(
+            "health_check_latency_seconds",
+            elapsed,
+            labels,
+        )
 
     return HealthStatus.UNHEALTHY

@@ -1871,16 +1871,46 @@ def _parse_auth_pair(raw_auth: str | None) -> tuple[str | None, str | None]:
     return username or None, password or None
 
 
+def _env_flag_is_enabled(value: str | None) -> bool:
+    if value is None:
+        return False
+    return value.strip().casefold() not in {"", "0", "false", "no", "off"}
+
+
+def _default_neo4j_host(env: dict[str, str]) -> str:
+    if env.get("WSL_INTEROP") or env.get("WSL_DISTRO_NAME"):
+        return "host.docker.internal"
+    return "localhost"
+
+
 def resolve_neo4j_connection(root: Path, explicit_http_uri: str | None) -> tuple[str, str, str, str]:
     env = load_repo_env(root)
-    bolt_uri = env.get("NEO4J_URI", "bolt://localhost:7687")
-    username = env.get("NEO4J_USERNAME") or env.get("NEO4J_AUTH_USERNAME")
-    password = env.get("NEO4J_PASSWORD") or env.get("NEO4J_AUTH_PASSWORD")
-    database = env.get("NEO4J_DATABASE", "neo4j")
-    auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUTH"))
-    username = username or auth_username or "neo4j"
-    password = password or auth_password or "bioetl_secure_password"
-    http_uri = explicit_http_uri or env.get("NEO4J_HTTP_URI") or derive_http_uri(bolt_uri)
+    audit_mode = _env_flag_is_enabled(env.get("LIVE_AUDIT_MODE"))
+    default_host = _default_neo4j_host(env)
+
+    if audit_mode:
+        bolt_uri = env.get("NEO4J_AUDIT_URI") or env.get("NEO4J_URI") or f"bolt://{default_host}:7688"
+        username = env.get("NEO4J_AUDIT_USERNAME") or env.get("NEO4J_USERNAME") or env.get("NEO4J_AUTH_USERNAME")
+        password = env.get("NEO4J_AUDIT_PASSWORD") or env.get("NEO4J_PASSWORD") or env.get("NEO4J_AUTH_PASSWORD")
+        database = env.get("NEO4J_AUDIT_DATABASE") or env.get("NEO4J_DATABASE") or "neo4j"
+        auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUDIT_AUTH") or env.get("NEO4J_AUTH"))
+        username = username or auth_username or "neo4j"
+        password = password or auth_password or "audit_secure_password"
+        http_uri = (
+            explicit_http_uri
+            or env.get("NEO4J_AUDIT_HTTP_URI")
+            or env.get("NEO4J_HTTP_URI")
+            or f"http://{default_host}:7475"
+        )
+    else:
+        bolt_uri = env.get("NEO4J_URI", "bolt://localhost:7687")
+        username = env.get("NEO4J_USERNAME") or env.get("NEO4J_AUTH_USERNAME")
+        password = env.get("NEO4J_PASSWORD") or env.get("NEO4J_AUTH_PASSWORD")
+        database = env.get("NEO4J_DATABASE", "neo4j")
+        auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUTH"))
+        username = username or auth_username or "neo4j"
+        password = password or auth_password or "bioetl_secure_password"
+        http_uri = explicit_http_uri or env.get("NEO4J_HTTP_URI") or derive_http_uri(bolt_uri)
     return http_uri.rstrip("/"), username, password, database
 
 

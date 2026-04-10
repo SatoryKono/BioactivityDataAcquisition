@@ -69,6 +69,7 @@ class MergePostJoinWorkflowContext(Protocol):
     async def _write_outputs(
         self,
         df: pl.DataFrame,
+        metadata_timestamp: datetime | None,
         run_id: str,
         sources_used: list[str],
     ) -> None: ...
@@ -182,11 +183,17 @@ async def persist_and_build_result(
     sources_used: list[str],
     cv_stats: CrossValidationStats | None,
     quarantine_payloads: list[dict[str, object]],
+    metadata_timestamp: datetime | None,
     run_id: str,
     started_at: datetime,
 ) -> MergeResult:
     """Persist merge outputs and build the domain ``MergeResult``."""
-    await host._write_outputs(merged_df, run_id=run_id, sources_used=sources_used)
+    await host._write_outputs(
+        merged_df,
+        metadata_timestamp=metadata_timestamp,
+        run_id=run_id,
+        sources_used=sources_used,
+    )
     completed_at = datetime.now(tz=UTC)
     duration = (completed_at - started_at).total_seconds()
 

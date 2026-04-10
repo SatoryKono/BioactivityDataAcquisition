@@ -34,6 +34,7 @@ from scripts.ops.neo4j_memory_sync import (
     _prune_legacy_unmanaged_nodes_statement,
     _prune_stale_nodes_statement,
     _prune_stale_relations_statement,
+    resolve_neo4j_connection,
     _relation_statement,
     _reset_managed_relations_statement,
     snapshot_invariant_issues,
@@ -48,6 +49,46 @@ def _snapshot() -> tuple[Path, object]:
 def test_derive_http_uri_from_bolt() -> None:
     assert derive_http_uri("bolt://localhost:7687") == "http://localhost:7474"
     assert derive_http_uri("neo4j+s://graph.example.com:7687") == "https://graph.example.com:7474"
+
+
+def test_resolve_neo4j_connection_uses_audit_instance_when_live_audit_mode_enabled(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("LIVE_AUDIT_MODE", "1")
+    monkeypatch.delenv("WSL_INTEROP", raising=False)
+    monkeypatch.delenv("WSL_DISTRO_NAME", raising=False)
+    monkeypatch.delenv("NEO4J_URI", raising=False)
+    monkeypatch.delenv("NEO4J_HTTP_URI", raising=False)
+    monkeypatch.delenv("NEO4J_USERNAME", raising=False)
+    monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
+    monkeypatch.delenv("NEO4J_AUTH", raising=False)
+
+    http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
+
+    assert http_uri == "http://localhost:7475"
+    assert username == "neo4j"
+    assert password == "audit_secure_password"
+    assert database == "neo4j"
+
+
+def test_resolve_neo4j_connection_prefers_host_docker_internal_for_wsl_audit_mode(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("LIVE_AUDIT_MODE", "1")
+    monkeypatch.setenv("WSL_INTEROP", "/run/WSL/123_interop")
+    monkeypatch.delenv("NEO4J_URI", raising=False)
+    monkeypatch.delenv("NEO4J_HTTP_URI", raising=False)
+    monkeypatch.delenv("NEO4J_AUDIT_URI", raising=False)
+    monkeypatch.delenv("NEO4J_AUDIT_HTTP_URI", raising=False)
+
+    http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
+
+    assert http_uri == "http://host.docker.internal:7475"
+    assert username == "neo4j"
+    assert password == "audit_secure_password"
+    assert database == "neo4j"
 
 
 def test_snapshot_contains_core_repo_surfaces() -> None:

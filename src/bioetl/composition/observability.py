@@ -6,7 +6,7 @@ simplifying constructor signatures across the codebase.
 This module enforces the Unified Observability Contract:
 - logger: REQUIRED - pipeline cannot run without structured logging
 - metrics: REQUIRED - always valid implementation (NoOpMetrics fallback)
-- tracer: Optional - distributed tracing
+- tracer: REQUIRED - explicit TracingPort owned by composition
 - dq_monitor: Optional - data quality anomaly detection
 """
 
@@ -40,7 +40,7 @@ class ObservabilityBundle:
     Unified Observability Contract:
     - logger: REQUIRED - structured logger, cannot be None
     - metrics: REQUIRED - MetricsPort implementation (NoOpMetrics if disabled)
-    - tracer: Optional - distributed tracing port
+    - tracer: REQUIRED - distributed tracing port (use NoOpTracing if disabled)
     - dq_monitor: Optional - data quality anomaly detector
 
     Raises:
@@ -49,13 +49,13 @@ class ObservabilityBundle:
     Attributes:
         logger: Structured logger for the pipeline.
         metrics: Metrics collection port (never None - uses NoOpMetrics fallback).
-        tracer: Optional distributed tracing port.
+        tracer: Distributed tracing port (never None - use NoOpTracing if disabled).
         dq_monitor: Optional data quality anomaly detector.
     """
 
     logger: LoggerPort
     metrics: MetricsPort
-    tracer: TracingPort | None = None
+    tracer: TracingPort
     dq_monitor: DQMonitorPort | None = None
 
     def __post_init__(self) -> None:
@@ -70,13 +70,18 @@ class ObservabilityBundle:
                 "Metrics port is required. Use NoOpMetrics when metrics are disabled. "
                 "Use bootstrap_observability_bundle() to create a valid bundle."
             )
+        if self.tracer is None:
+            raise ObservabilityContractError(
+                "Tracer is required. Use NoOpTracing when tracing is disabled. "
+                "Use bootstrap_observability_bundle() to create a valid bundle."
+            )
 
     @classmethod
     def create(
         cls,
         logger: LoggerPort,
         metrics: MetricsPort,
-        tracer: TracingPort | None = None,
+        tracer: TracingPort,
         dq_monitor: DQMonitorPort | None = None,
     ) -> ObservabilityBundle:
         """Factory method for creating observability bundle.
@@ -87,7 +92,7 @@ class ObservabilityBundle:
         Args:
             logger: Structured logger instance (required).
             metrics: Metrics port implementation (required, use NoOpMetrics if disabled).
-            tracer: Optional tracer port.
+            tracer: Tracer port (required, use NoOpTracing if disabled).
             dq_monitor: Optional data quality monitor port.
 
         Returns:

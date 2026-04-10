@@ -92,6 +92,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a ready-to-paste maintainer helper for seeding BioETL facts into Neo4j memory; do not extend it as a general-purpose automation entrypoint."
     },
+    "scripts/ops/start-neo4j-audit.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded Windows-side Neo4j audit/bootstrap helper while the local graph-memory troubleshooting flow remains operator-maintained; either promote it into a documented supported workflow or remove it once the audit path is retired."
+    },
+    "scripts/ops/start-neo4j-audit.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded shell-side Neo4j audit/bootstrap helper while the local graph-memory troubleshooting flow remains operator-maintained; either promote it into a documented supported workflow or remove it once the audit path is retired."
+    },
     "scripts/neo4j-recovery-checklist.ps1": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",

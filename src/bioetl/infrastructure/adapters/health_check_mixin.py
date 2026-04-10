@@ -32,7 +32,6 @@ from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters._health_check_observability import (
     handle_health_check_failure,
     handle_health_check_result,
-    resolve_metrics,
     start_health_check,
 )
 from bioetl.infrastructure.adapters._health_check_policy import (
@@ -90,14 +89,14 @@ class HealthCheckMixin:
     provider_name: str
     _logger: LoggerPort
 
-    def _get_metrics(self) -> MetricsPort:
-        """Get metrics port, falling back to NoOpMetrics if None.
+    def _get_metrics(self) -> MetricsPort | None:
+        """Get metrics port for best-effort health-check telemetry.
 
         Returns:
-            MetricsPort instance (never None).
+            MetricsPort when configured, otherwise None.
 
         """
-        return resolve_metrics(self.metrics)
+        return self.metrics
 
     def _start_health_check(self) -> HealthCheckContext:
         """Start a health check context for timing.

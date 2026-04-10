@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.models.metadata import GoldMetadata
@@ -12,9 +12,6 @@ from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.lineage_persistence import (
     resolve_metadata_and_lineage_fragment,
-)
-from bioetl.infrastructure.storage.metadata.builder_base import (
-    _resolve_records_metadata_timestamp,
 )
 
 if TYPE_CHECKING:
@@ -97,8 +94,21 @@ def build_gold_merged_metadata_input(
 
 
 def _extract_completed_at(records: list[GoldRecord]) -> datetime | None:
-    """Extract canonical merged-write completion timestamp from record metadata."""
-    return cast(datetime | None, _resolve_records_metadata_timestamp(records))
+    """Extract merged-write timestamp only from persisted ingestion anchors."""
+    candidates: list[datetime] = []
+    for record in records:
+        ingestion_ts = record.get("_ingestion_ts")
+        if isinstance(ingestion_ts, datetime):
+            candidates.append(ingestion_ts)
+            continue
+        if isinstance(ingestion_ts, str):
+            try:
+                candidates.append(datetime.fromisoformat(ingestion_ts))
+            except ValueError:
+                continue
+    if not candidates:
+        return None
+    return min(candidates)
 
 
 def build_gold_metadata_payload(

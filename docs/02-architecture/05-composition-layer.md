@@ -158,7 +158,7 @@ import paths.
   для новых internal call sites в `interfaces`.
 - `composite_api.py`, `observability_api.py` — узкие façade-модули для composite runtime
   и observability-related call sites; `observability_api.py` является каноническим
-  public seam для metrics bootstrap и operator diagnostics bundle.
+  public seam для metrics bootstrap, Pushgateway publication и operator diagnostics bundle.
 - `_pipeline_execution.py`, `_resource_management.py`, `_services.py` — internal implementation
   modules; прямые импорты вне `composition/` запрещены policy-тестами.
 

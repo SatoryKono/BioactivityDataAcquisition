@@ -134,6 +134,30 @@ def test_interface_re_exports_from_composition_observability_api():
     )
 
 
+def test_push_metrics_to_gateway_delegates_via_composition_api() -> None:
+    logger = mock.Mock()
+
+    with mock.patch.object(
+        composition_observability_api,
+        "push_metrics_to_gateway",
+        return_value=True,
+    ) as mock_push_metrics:
+        result = observability.push_metrics_to_gateway(
+            run_label="bioetl",
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            logger=logger,
+        )
+
+    assert result is True
+    mock_push_metrics.assert_called_once_with(
+        run_label="bioetl",
+        pipeline_name="chembl_activity",
+        run_type="incremental",
+        logger=logger,
+    )
+
+
 def test_interface_exposes_metrics_server_error():
     """Verify MetricsServerError is exported from interface via domain.
 

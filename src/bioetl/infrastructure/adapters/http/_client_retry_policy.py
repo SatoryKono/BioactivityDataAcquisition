@@ -21,7 +21,7 @@ def _can_retry(
 
 
 def _record_request_metrics(
-    metrics: MetricsPort,
+    metrics: MetricsPort | None,
     provider: str,
     method: str,
     duration: float,
@@ -30,6 +30,8 @@ def _record_request_metrics(
     last_error: Exception | None,
 ) -> None:
     """Record request duration, retry, and error metrics."""
+    if metrics is None:
+        return
     labels = {
         "provider": provider,
         "method": method.upper(),

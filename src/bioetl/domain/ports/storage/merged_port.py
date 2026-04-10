@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from pandera.api.dataframe.container import DataFrameSchema
 
 __all__ = ["MergedStoragePort"]
@@ -53,6 +55,7 @@ class MergedStoragePort(Protocol):
         records: list[GoldRecord],
         primary_keys: list[str] | None = None,
         *,
+        completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -68,6 +71,7 @@ class MergedStoragePort(Protocol):
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            completed_at: Optional deterministic metadata timestamp for merged sidecars.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical_column_order()

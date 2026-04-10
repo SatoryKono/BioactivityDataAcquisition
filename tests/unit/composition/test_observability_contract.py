@@ -21,7 +21,7 @@ from bioetl.composition.observability import (
     ObservabilityBundle,
     ObservabilityContractError,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 
 
 @pytest.mark.unit
@@ -31,33 +31,41 @@ class TestObservabilityBundle:
     def test_bundle_requires_logger(self) -> None:
         """Test that bundle creation fails without logger."""
         mock_metrics = MagicMock()
+        tracer = NoOpTracing()
 
         with pytest.raises(ObservabilityContractError, match="Logger is required"):
-            ObservabilityBundle(logger=None, metrics=mock_metrics)  # type: ignore[arg-type]
+            ObservabilityBundle(
+                logger=None,
+                metrics=mock_metrics,
+                tracer=tracer,
+            )  # type: ignore[arg-type]
 
     def test_bundle_requires_metrics(self) -> None:
         """Test that bundle creation fails without metrics."""
         mock_logger = MagicMock()
+        tracer = NoOpTracing()
 
         with pytest.raises(
             ObservabilityContractError, match="Metrics port is required"
         ):
-            ObservabilityBundle(logger=mock_logger, metrics=None)  # type: ignore[arg-type]
+            ObservabilityBundle(
+                logger=mock_logger,
+                metrics=None,
+                tracer=tracer,
+            )  # type: ignore[arg-type]
 
-    def test_bundle_allows_optional_tracer_none(self) -> None:
-        """Test that tracer can be None."""
+    def test_bundle_requires_tracer(self) -> None:
+        """Test that tracer must be explicit even when tracing is disabled."""
         mock_logger = MagicMock()
         mock_metrics = MagicMock()
 
-        bundle = ObservabilityBundle(
-            logger=mock_logger,
-            metrics=mock_metrics,
-            tracer=None,
-            dq_monitor=None,
-        )
-
-        assert bundle.tracer is None
-        assert bundle.dq_monitor is None
+        with pytest.raises(ObservabilityContractError, match="Tracer is required"):
+            ObservabilityBundle(
+                logger=mock_logger,
+                metrics=mock_metrics,
+                tracer=None,  # type: ignore[arg-type]
+                dq_monitor=None,
+            )
 
     def test_bundle_create_factory_method(self) -> None:
         """Test factory method enforces contract."""
@@ -80,18 +88,29 @@ class TestObservabilityBundle:
         mock_logger = MagicMock()
         mock_logger.bind.return_value = MagicMock()
         mock_metrics = MagicMock()
+        tracer = NoOpTracing()
 
-        bundle = ObservabilityBundle(logger=mock_logger, metrics=mock_metrics)
+        bundle = ObservabilityBundle(
+            logger=mock_logger,
+            metrics=mock_metrics,
+            tracer=tracer,
+        )
         new_bundle = bundle.bind(run_id="test-123")
 
         assert new_bundle.metrics is mock_metrics
+        assert new_bundle.tracer is tracer
 
     def test_bundle_frozen(self) -> None:
         """Test that bundle is frozen (immutable)."""
         mock_logger = MagicMock()
         mock_metrics = MagicMock()
+        tracer = NoOpTracing()
 
-        bundle = ObservabilityBundle(logger=mock_logger, metrics=mock_metrics)
+        bundle = ObservabilityBundle(
+            logger=mock_logger,
+            metrics=mock_metrics,
+            tracer=tracer,
+        )
 
         with pytest.raises(FrozenInstanceError):
             bundle.metrics = MagicMock()  # type: ignore[misc]
@@ -101,14 +120,12 @@ class TestObservabilityBundle:
 class TestBootstrapObservability:
     """Tests for bootstrap_observability_bundle() function."""
 
-    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
     @patch("bioetl.composition.bootstrap.runtime.observability.PrometheusMetrics")
     @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
     def test_bootstrap_returns_valid_bundle(
         self,
         mock_unified_logger_cls: MagicMock,
         mock_prometheus: MagicMock,
-        mock_start_server: MagicMock,
     ) -> None:
         """Test that bootstrap returns bundle with valid implementations."""
         from bioetl.composition.bootstrap.runtime.observability import (
@@ -266,12 +283,10 @@ class TestBootstrapMetrics:
             # No warning should be raised
             assert len(w) == 0
 
-    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
     @patch("bioetl.composition.bootstrap.runtime.observability.PrometheusMetrics")
     def test_enabled_metrics_returns_prometheus_metrics(
         self,
         mock_prometheus: MagicMock,
-        mock_start_server: MagicMock,
     ) -> None:
         """Test that enabled metrics returns PrometheusMetrics."""
         from bioetl.composition.bootstrap.runtime.observability import (
@@ -489,12 +504,10 @@ class TestObservabilityPreflightValidation:
         # No warnings for real implementations
         mock_logger.warning.assert_not_called()
 
-    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
     @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
     def test_bootstrap_observability_bundle_calls_preflight_validation(
         self,
         mock_unified_logger_cls: MagicMock,
-        mock_start_server: MagicMock,
     ) -> None:
         """Test that bootstrap_observability_bundle calls preflight validation."""
         from bioetl.composition.bootstrap.runtime.observability import (

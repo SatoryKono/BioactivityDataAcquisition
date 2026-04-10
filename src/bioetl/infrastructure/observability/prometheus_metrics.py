@@ -107,7 +107,9 @@ class PrometheusMetrics(MetricsPort):
             registry=HISTOGRAMS,
             metric_kind="histogram",
         )
-        histogram.labels(**resolved_labels).observe(value)
+        histogram.labels(
+            **normalize_metric_dispatch_labels(name, resolved_labels)
+        ).observe(value)
 
     def increment_counter(
         self,
@@ -169,7 +171,9 @@ class PrometheusMetrics(MetricsPort):
             registry=GAUGES,
             metric_kind="gauge",
         )
-        gauge.labels(**resolved_labels).set(value)
+        gauge.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).set(
+            value
+        )
 
     def close(self) -> None:
         """Mark the metrics adapter as closed (idempotent)."""

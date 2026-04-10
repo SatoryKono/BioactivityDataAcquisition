@@ -41,6 +41,7 @@ __all__ = [
     "get_observability_workflow_service",
     "get_quarantine_service",
     "get_run_manifest_service",
+    "push_metrics_to_gateway",
     "start_metrics_server",
 ]
 
@@ -82,6 +83,36 @@ def start_metrics_server(
     if fail_fast and not result.success and result.error is not None:
         raise MetricsServerError(port=port, reason=result.error)
     return bool(result.success)
+
+
+def push_metrics_to_gateway(
+    run_label: str = "bioetl",
+    *,
+    pipeline_name: str | None = None,
+    run_type: str | None = None,
+    logger: LoggerPort | None = None,
+) -> bool:
+    """Push metrics through the canonical composition-owned observability seam."""
+    from bioetl.infrastructure.config import get_settings
+    from bioetl.infrastructure.observability.server import (
+        push_metrics_to_gateway as _push,
+    )
+
+    settings = get_settings()
+    gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
+    grouping_key: dict[str, str] = {}
+    if pipeline_name:
+        grouping_key["pipeline"] = pipeline_name
+    if run_type:
+        grouping_key["run_type"] = run_type
+    return bool(
+        _push(
+            gateway=gateway,
+            run_label=run_label,
+            grouping_key=grouping_key,
+            logger=logger,
+        )
+    )
 
 
 def get_audit_service() -> AuditInspectionService:

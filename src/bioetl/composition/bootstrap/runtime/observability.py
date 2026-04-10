@@ -17,7 +17,6 @@ from bioetl.infrastructure.observability import (
     OpenTelemetryTracer,
     PrometheusMetrics,
     UnifiedLogger,
-    start_metrics_server,
 )
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -47,7 +46,6 @@ __all__ = [
     "bootstrap_observability_bundle",
     "bootstrap_tracer_port",
     "maybe_start_metrics_server",
-    "start_metrics_server",
     "validate_observability_preflight",
 ]
 
