@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import warnings
 
+import pytest
+
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import (
     COUNTERS,
@@ -51,14 +53,16 @@ class TestPrometheusMetrics:
         assert end_val == start_val + 5
 
     def test_invalid_metric_name_histogram(self):
-        """Test that invalid histogram names are ignored or raise error (code ignores currently)."""
+        """Invalid histogram names must raise a contract error."""
         metrics = PrometheusMetrics()
-        metrics.observe_histogram("non_existent_metric", 10.0, {})
+        with pytest.raises(ValueError, match="Unknown Prometheus histogram metric"):
+            metrics.observe_histogram("non_existent_metric", 10.0, {})
 
     def test_invalid_metric_name_counter(self):
-        """Test that invalid counter names are ignored."""
+        """Invalid counter names must raise a contract error."""
         metrics = PrometheusMetrics()
-        metrics.increment_counter("non_existent_counter", 1, {})
+        with pytest.raises(ValueError, match="Unknown Prometheus counter metric"):
+            metrics.increment_counter("non_existent_counter", 1, {})
 
 
 class TestNoOpMetrics:
