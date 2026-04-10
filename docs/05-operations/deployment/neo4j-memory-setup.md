@@ -29,6 +29,9 @@ Last verified: '2026-04-09'
    ```bash
    docker compose up -d neo4j
    ```
+   `docker-compose.yml` now reads these optional env vars for memory tuning:
+   `NEO4J_HEAP_INITIAL`, `NEO4J_HEAP_MAX`, `NEO4J_PAGECACHE_SIZE`,
+   `NEO4J_TX_MAX_SIZE`, `NEO4J_GLOBAL_TX_MAX`.
 
 4. Register the Neo4j Memory MCP server in Codex and VS Code workspace config:
    ```bash
@@ -134,27 +137,40 @@ Last verified: '2026-04-09'
 
 ### Development (Local, 4GB host RAM)
 ```
-NEO4J-HEAP-INITIAL=512m
-NEO4J-HEAP-MAX=2g
-NEO4J-PAGECACHE=1g
-NEO4J-TX-MAX-SIZE=2g
+NEO4J_HEAP_INITIAL=512m
+NEO4J_HEAP_MAX=2g
+NEO4J_PAGECACHE_SIZE=1g
+NEO4J_TX_MAX_SIZE=2g
+NEO4J_GLOBAL_TX_MAX=4g
+```
+For the lightweight standalone `docker-compose.neo4j.yml` profile on Docker Desktop,
+use dedicated `NEO4J_LIGHT_*` variables so the heavier global `.env` settings do not
+override the lightweight profile:
+```bash
+NEO4J_LIGHT_HEAP_INITIAL=256m
+NEO4J_LIGHT_HEAP_MAX=1g
+NEO4J_LIGHT_PAGECACHE_SIZE=256m
+NEO4J_LIGHT_TX_MAX_SIZE=1g
+NEO4J_LIGHT_GLOBAL_TX_MAX=2g
+NEO4J_LIGHT_CONTAINER_MEMORY_LIMIT=2g
 ```
 
 ### Staging (8GB host RAM)
 ```
-NEO4J-HEAP-INITIAL=1g
-NEO4J-HEAP-MAX=4g
-NEO4J-PAGECACHE=2g
-NEO4J-TX-MAX-SIZE=4g
+NEO4J_HEAP_INITIAL=1g
+NEO4J_HEAP_MAX=4g
+NEO4J_PAGECACHE_SIZE=2g
+NEO4J_TX_MAX_SIZE=4g
+NEO4J_GLOBAL_TX_MAX=8g
 ```
 
 ### Production (16GB+ host RAM)
 ```
-NEO4J-HEAP-INITIAL=2g
-NEO4J-HEAP-MAX=8g
-NEO4J-PAGECACHE=6g
-NEO4J-TX-MAX-SIZE=8g
-NEO4J-GLOBAL-TX-MAX=50g
+NEO4J_HEAP_INITIAL=2g
+NEO4J_HEAP_MAX=8g
+NEO4J_PAGECACHE_SIZE=6g
+NEO4J_TX_MAX_SIZE=8g
+NEO4J_GLOBAL_TX_MAX=16g
 ```
 
 ## Memory Allocation Rules
@@ -173,12 +189,11 @@ NEO4J-GLOBAL-TX-MAX=50g
 
 | Setting | Purpose | Default |
 |---------|---------|---------|
-| `NEO4J-HEAP-INITIAL` | Starting JVM heap size | 512m |
-| `NEO4J-HEAP-MAX` | Maximum JVM heap size | 2g |
-| `NEO4J-PAGECACHE` | Graph store page cache | 1g |
-| `NEO4J-TX-MAX-SIZE` | Single transaction memory limit | 2g |
-| `NEO4J-GLOBAL-TX-MAX` | All active transactions combined | 20g |
-| `NEO4J-JVM-OPTS` | JVM garbage collector settings | G1GC |
+| `NEO4J_HEAP_INITIAL` | Starting JVM heap size | 512m |
+| `NEO4J_HEAP_MAX` | Maximum JVM heap size | 2g |
+| `NEO4J_PAGECACHE_SIZE` | Graph store page cache | 1g |
+| `NEO4J_TX_MAX_SIZE` | Single transaction memory limit | 2g |
+| `NEO4J_GLOBAL_TX_MAX` | All active transactions combined | 4g |
 
 ## Health Check
 

@@ -327,7 +327,8 @@ def _overengineered_candidates_statement() -> str:
         "candidate.test_anchor_count AS test_anchor_count, "
         "cycle.name AS blocked_by_cycle, "
         "labels(target) AS target_labels "
-        "ORDER BY candidate.simplification_score DESC, candidate.removable_score DESC, candidate.target_name ASC"
+        "ORDER BY candidate.simplification_score DESC, candidate.removable_score DESC, candidate.target_name ASC "
+        "LIMIT 50"
     )
 
 
@@ -349,7 +350,8 @@ def _removable_complexity_statement() -> str:
         "candidate.doc_anchor_count AS doc_anchor_count, "
         "candidate.test_anchor_count AS test_anchor_count, "
         "labels(target) AS target_labels "
-        "ORDER BY candidate.removable_score DESC, candidate.target_name ASC"
+        "ORDER BY candidate.removable_score DESC, candidate.target_name ASC "
+        "LIMIT 50"
     )
 
 
@@ -373,7 +375,8 @@ def _simplification_blockers_statement() -> str:
         "  WHEN blocker.name IS NULL THEN NULL "
         "  ELSE {name: blocker.name, labels: labels(blocker), relation: type(rel)} "
         "END) AS blockers "
-        "ORDER BY candidate.target_name ASC"
+        "ORDER BY candidate.target_name ASC "
+        "LIMIT 50"
     )
 
 

@@ -20,13 +20,14 @@ if __package__ in {None, ""}:
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
 )
-from bioetl.application.core.record_normalization_processor import (
-    RecordNormalizationProcessor,
-    _is_date_field,
-    _is_doi_field,
-    _is_pmid_field,
-    _is_smiles_field,
+from bioetl.application.core.normalization_fallbacks import (
+    is_date_field,
+    is_doi_field,
+    is_pmid_field,
+    is_smiles_field,
 )
+from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
+from bioetl.domain.normalization.profiles import resolve_normalization_profile
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_PARAMETERS_SCHEMA,
@@ -142,76 +143,76 @@ def _normalize_summary_from_policy(*, trim: bool, lowercase: bool) -> str:
     return "Composite join key is preserved as-is by explicit no-op policy."
 
 
-def _processor_fallback_contract(
-    processor: RecordNormalizationProcessor,
+def _fallback_contract(
+    rule_set: NormalizationRulesPolicy,
     *,
     field_name: str,
     field_type: str,
 ) -> tuple[str, str, str]:
-    if field_name in processor.rule_set.passthrough_fields:
+    if field_name in rule_set.passthrough_fields:
         return (
-            "generic_processor",
+            "fallback",
             "passthrough",
-            "Field is passed through unchanged by the record normalization processor.",
+            "Field is passed through unchanged by the canonical fallback normalization seam.",
         )
     if field_name.startswith("_"):
         return (
-            "generic_processor",
+            "fallback",
             "passthrough",
-            "Technical field is passed through unchanged when no profile rule is defined.",
+            "Technical field is passed through unchanged when no explicit profile rule is defined.",
         )
-    if field_name in processor.rule_set.title_fields:
+    if field_name in rule_set.title_fields:
         return (
-            "generic_processor",
+            "fallback",
             "normalize_title",
             "Normalize title text through HTML/entity cleanup and whitespace normalization.",
         )
-    if field_name in processor.rule_set.abstract_fields:
+    if field_name in rule_set.abstract_fields:
         return (
-            "generic_processor",
+            "fallback",
             "normalize_abstract",
             "Normalize abstract text through HTML/entity cleanup and whitespace normalization.",
         )
-    if field_name in processor.rule_set.oa_status_fields:
+    if field_name in rule_set.oa_status_fields:
         return (
-            "generic_processor",
+            "fallback",
             "normalize_oa_status",
             "Trim textual OA status and lowercase the resulting value.",
         )
-    if _is_doi_field(field_name, rule_set=processor.rule_set):
+    if is_doi_field(field_name, rule_set=rule_set):
         return (
-            "generic_processor",
-            "normalize_doi",
-            "Strip DOI URL/scheme prefixes and lowercase the DOI payload.",
+            "fallback",
+            "normalize_profile_doi",
+            "Normalize DOI through the canonical fallback identifier helper.",
         )
-    if _is_pmid_field(field_name, rule_set=processor.rule_set):
+    if is_pmid_field(field_name, rule_set=rule_set):
         return (
-            "generic_processor",
-            "normalize_pmid",
-            "Convert PMID to canonical digits-only string; invalid or zero-like values collapse to None.",
+            "fallback",
+            "normalize_profile_pmid",
+            "Normalize PMID through the canonical fallback identifier helper.",
         )
-    if _is_date_field(field_name, rule_set=processor.rule_set):
+    if is_date_field(field_name, rule_set=rule_set):
         return (
-            "generic_processor",
+            "fallback",
             "normalize_partial_date",
             "Canonicalize supported date text to the stable partial-date representation.",
         )
-    if _is_smiles_field(field_name):
+    if is_smiles_field(field_name):
         return (
-            "generic_processor",
+            "fallback",
             "SMILES.from_raw(mode=soft)",
             "Validate and trim SMILES text; invalid values collapse to None.",
         )
     if _looks_like_string_type(field_type):
         return (
-            "generic_processor",
+            "fallback",
             "normalize_string + canonicalize_json_string(json-like)",
             "Trim string values, collapse blanks to None, and canonicalize JSON-looking string payloads.",
         )
     return (
-        "generic_processor",
+        "fallback",
         "preserve_non_string",
-        "No field-specific normalizer is applied; non-string values are preserved as-is.",
+        "No field-specific fallback normalizer is applied; non-string values are preserved as-is.",
     )
 
 
@@ -222,12 +223,13 @@ def _build_entity_rows_for_pipeline(
     entity: str,
     schema: pa.Schema,
 ) -> list[dict[str, str]]:
-    processor = RecordNormalizationProcessor(provider=provider, entity_type=entity)
+    profile = resolve_normalization_profile(provider, entity)
+    rule_set = NormalizationRulesPolicy()
     rows: list[dict[str, str]] = []
     for field_name in schema.names:
         field = schema.field(field_name)
         field_type = str(field.type)
-        profile_rule = processor._profile_rule(field_name)
+        profile_rule = None if profile is None else profile.rule_for(field_name)
         if profile_rule is not None:
             rows.append(
                 {
@@ -245,8 +247,8 @@ def _build_entity_rows_for_pipeline(
             )
             continue
 
-        source, normalizer, summary = _processor_fallback_contract(
-            processor,
+        source, normalizer, summary = _fallback_contract(
+            rule_set,
             field_name=field_name,
             field_type=field_type,
         )

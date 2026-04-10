@@ -27,17 +27,19 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
 
     chembl_activity_doi = _row(rows, "chembl_activity", "publication_doi")
     assert chembl_activity_doi["normalization_source"] == "profile"
-    assert chembl_activity_doi["normalizer"] == "_normalize_publication_doi"
+    assert chembl_activity_doi["normalizer"] == "normalize_profile_doi"
     assert chembl_activity_doi["include_in_content_hash"] == "true"
 
     crossref_title = _row(rows, "crossref_publication", "title")
-    assert crossref_title["normalization_source"] == "generic_processor"
+    assert crossref_title["normalization_source"] == "fallback"
     assert crossref_title["normalizer"] == "normalize_title"
 
     pubmed_date = _row(rows, "pubmed_publication", "publication_date")
+    assert pubmed_date["normalization_source"] == "fallback"
     assert pubmed_date["normalizer"] == "normalize_partial_date"
 
     pubchem_smiles = _row(rows, "pubchem_compound", "canonical_smiles")
+    assert pubchem_smiles["normalization_source"] == "fallback"
     assert pubchem_smiles["normalizer"] == "SMILES.from_raw(mode=soft)"
 
 
