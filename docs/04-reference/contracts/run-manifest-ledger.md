@@ -253,6 +253,29 @@ Event taxonomy behavior:
   `composite_*`, `artifact_*`), and suffix-based phase events
   (`*_started`, `*_completed`) map to `pipeline.phase`.
 
+## Manifest Diff Classification
+
+`run-manifest diff` should classify differences between two manifests using the
+current control-plane reproducibility model:
+
+- `identical`: no top-level manifest differences are present;
+- `occurrence_only`: only occurrence-scoped fields such as `manifest_id`,
+  `run_id`, or `created_at` differ while `execution_fingerprint` is unchanged;
+- `semantic_drift`: manifests differ in semantic execution identity and
+  therefore are not exact semantic replays of the same computation;
+- `semantic_equivalent_with_noncanonical_differences`: manifests share the same
+  `execution_fingerprint`, but still differ in non-occurrence serialized fields
+  and should be investigated as normalization or contract drift.
+
+The diff payload should therefore expose:
+
+- `classification`
+- `semantic_equivalent`
+- `occurrence_only`
+- `occurrence_difference_fields`
+- `semantic_difference_fields`
+- `noncanonical_difference_fields`
+
 ## Canonical Stage Sets
 
 When `event_type` is `stage_started` or `stage_completed`, the current contract
