@@ -102,7 +102,8 @@ class StorageMaintenancePort(Protocol):
     ) -> int:
         """Deduplicate Silver table by primary keys after append-mode writes.
 
-        Keeps the latest record per primary key group (by _ingestion_ts).
+        Collapses exact duplicates by content identity and keeps one deterministic
+        winner per primary key group without relying on runtime ingestion timestamps.
 
         Args:
             table_name: Logical Silver table name.

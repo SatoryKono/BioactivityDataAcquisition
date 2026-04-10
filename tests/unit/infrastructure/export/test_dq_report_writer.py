@@ -142,7 +142,7 @@ class TestBuildLayerFilename:
         """Should build filename with provider and entity."""
         writer = DQReportWriter(base_path=tmp_path, logger=MagicMock())
         result = writer._build_layer_filename(
-            "silver", ".json", "chembl", "activity", "chembl_activity", "run-1"
+            "silver", ".json", "chembl", "activity", "chembl_activity"
         )
         assert result == "silver_chembl_activity_dq_report.json"
 
@@ -152,17 +152,15 @@ class TestBuildLayerFilename:
             base_path=tmp_path, logger=MagicMock(), flat_structure=True
         )
         result = writer._build_layer_filename(
-            "silver", ".json", None, None, "chembl.activity", "run-1"
+            "silver", ".json", None, None, "chembl.activity"
         )
         assert result == "silver_chembl_activity_dq_report.json"
 
     def test_without_provider_entity_non_flat(self, tmp_path: Path) -> None:
-        """Should use run_id in non-flat mode without provider/entity."""
+        """Should use normalized table name in non-flat mode without provider/entity."""
         writer = DQReportWriter(base_path=tmp_path, logger=MagicMock())
-        result = writer._build_layer_filename(
-            "gold", ".yaml", None, None, "some_table", "run-xyz"
-        )
-        assert result == "gold_run-xyz_dq_report.yaml"
+        result = writer._build_layer_filename("gold", ".yaml", None, None, "some_table")
+        assert result == "gold_some_table_dq_report.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -179,7 +177,7 @@ class TestResolveLayerOutputPath:
         writer = DQReportWriter(base_path=tmp_path, logger=MagicMock())
         output_dir = tmp_path / "custom" / "output"
         result = writer._resolve_layer_output_path(
-            "silver", output_dir, ".json", "chembl", "activity", "tbl", "run-1"
+            "silver", output_dir, ".json", "chembl", "activity", "tbl"
         )
         assert result == output_dir / "silver_chembl_activity_dq_report.json"
         assert output_dir.is_dir()
@@ -190,7 +188,7 @@ class TestResolveLayerOutputPath:
             base_path=tmp_path, logger=MagicMock(), flat_structure=True
         )
         result = writer._resolve_layer_output_path(
-            "silver", None, ".json", "chembl", "activity", "tbl", "run-1"
+            "silver", None, ".json", "chembl", "activity", "tbl"
         )
         assert result == tmp_path / "silver_chembl_activity_dq_report.json"
 
@@ -198,7 +196,7 @@ class TestResolveLayerOutputPath:
         """Should use layer/provider/entity directory structure."""
         writer = DQReportWriter(base_path=tmp_path, logger=MagicMock())
         result = writer._resolve_layer_output_path(
-            "gold", None, ".json", "chembl", "activity", "tbl", "run-1"
+            "gold", None, ".json", "chembl", "activity", "tbl"
         )
         expected = (
             tmp_path
@@ -215,10 +213,14 @@ class TestResolveLayerOutputPath:
         """Should split table name by underscore for directory structure."""
         writer = DQReportWriter(base_path=tmp_path, logger=MagicMock())
         result = writer._resolve_layer_output_path(
-            "silver", None, ".json", None, None, "chembl_activity", "run-1"
+            "silver", None, ".json", None, None, "chembl_activity"
         )
         expected = (
-            tmp_path / "silver" / "chembl" / "activity" / "silver_run-1_dq_report.json"
+            tmp_path
+            / "silver"
+            / "chembl"
+            / "activity"
+            / "silver_chembl_activity_dq_report.json"
         )
         assert result == expected
 
@@ -226,9 +228,11 @@ class TestResolveLayerOutputPath:
         """Should use table name as single directory."""
         writer = DQReportWriter(base_path=tmp_path, logger=MagicMock())
         result = writer._resolve_layer_output_path(
-            "silver", None, ".json", None, None, "simpletable", "run-1"
+            "silver", None, ".json", None, None, "simpletable"
         )
-        expected = tmp_path / "silver" / "simpletable" / "silver_run-1_dq_report.json"
+        expected = (
+            tmp_path / "silver" / "simpletable" / "silver_simpletable_dq_report.json"
+        )
         assert result == expected
 
 
