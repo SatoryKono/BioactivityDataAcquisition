@@ -37,6 +37,9 @@ _LAZY_EXPORT_MODULES: dict[str, str] = {
         "bioetl.application.services.observability_workflow_service"
     ),
     "CheckpointService": "bioetl.application.services.checkpoint_service",
+    "CheckpointAuditWorkflowResult": (
+        "bioetl.application.services.observability_workflow_service"
+    ),
     "ColumnInfo": "bioetl.application.services.export_service",
     "ConfigService": "bioetl.application.services.config_service",
     "ContractMigrationAction": (
@@ -104,6 +107,7 @@ __all__ = [
     "BronzeCleanupService",
     "CheckpointAuditWorkflowResult",
     "CheckpointService",
+    "CheckpointAuditWorkflowResult",
     "ColumnInfo",
     "ConfigService",
     "ContractMigrationAction",

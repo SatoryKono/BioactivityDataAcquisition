@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -36,7 +36,17 @@ def _entry() -> AuditEntry:
         records_count=42,
         metadata={"provider": "chembl"},
     )
+        run_id=RunID(uuid4()),
+        layer=AuditLayer.SILVER,
+        table_name="chembl_activity",
+        operation=AuditOperation.MERGE,
+        records_count=42,
+        metadata={"provider": "chembl"},
+    )
+    audit_port.get_entries.return_value = [entry]
 
+    service = AuditInspectionService(audit_port=audit_port)
+    result = await service.inspect_run(run_id, limit=25)
 
 @pytest.mark.asyncio
 async def test_inspect_run_queries_audit_port_with_parsed_run_id(
@@ -57,8 +67,14 @@ async def test_inspect_run_queries_audit_port_with_parsed_run_id(
         end_time=None,
         limit=7,
     )
+        layer=None,
+        table_name=None,
+        start_time=None,
+        end_time=None,
+    )
 
 
+@pytest.mark.asyncio
 @pytest.mark.asyncio
 async def test_inspect_table_resolves_string_layer(
     service: AuditInspectionService,
@@ -75,15 +91,25 @@ async def test_inspect_table_resolves_string_layer(
         limit=9,
     )
 
+        run_id=None,
+        layer=AuditLayer.SILVER,
+        table_name="chembl_activity",
+        start_time=None,
+        end_time=None,
+    )
 
+
+@pytest.mark.asyncio
 @pytest.mark.asyncio
 async def test_list_entries_rejects_invalid_run_id(
     service: AuditInspectionService,
 ) -> None:
     with pytest.raises(ValueError, match="Invalid run_id"):
         await service.list_entries(run_id="not-a-uuid")
+    with pytest.raises(ValueError, match="Invalid run_id"):
 
 
+@pytest.mark.asyncio
 @pytest.mark.asyncio
 async def test_aclose_delegates_to_port(
     service: AuditInspectionService,
@@ -92,3 +118,5 @@ async def test_aclose_delegates_to_port(
     await service.aclose()
 
     mock_audit_port.aclose.assert_awaited_once_with()
+    await service.aclose()
+

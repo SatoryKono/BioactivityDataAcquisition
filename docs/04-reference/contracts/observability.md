@@ -223,21 +223,20 @@ service getters:
 - `get_quarantine_service()`
 - `get_run_manifest_service()`
 - `get_lineage_service()`
+- `get_observability_workflow_service()`
 - `get_observability_diagnostics_bundle()`
 
 Это keeps-one-place discovery contract для public callers, при этом реальное
 создание зависимостей остаётся в composition layer.
 
-Для operator-facing workflows поверх raw services canonical path теперь должен
-идти через workflow helper surface:
+Для multi-step operator workflows каноническим application-level seam является
+`ObservabilityWorkflowService`:
 
-- `ObservabilityWorkflowService.inspect_audit_run(run_id, limit=...)`
-- `ObservabilityWorkflowService.inspect_checkpoint_workflow(pipeline_name, run_id=..., audit_limit=...)`
+- `inspect_audit_run(run_id, limit=...)`
+- `inspect_checkpoint_workflow(pipeline_name, run_id=..., audit_limit=...)`
 
-Эти helper workflows агрегируют audit entries, checkpoint inspection и
-best-effort run-manifest context без прямого проваливания orchestration logic в
-CLI или interfaces layer.
-
+Эти helpers агрегируют audit entries, checkpoint inspection и best-effort
+run-manifest context, не перенося orchestration в CLI или interface layer.
 ## 5. Provider Rate-Limit Baseline (as configured)
 
 Значения ниже берутся из `configs/providers/*.yaml` и отражают **текущую конфигурацию репозитория**, не внешние SLA провайдеров.
