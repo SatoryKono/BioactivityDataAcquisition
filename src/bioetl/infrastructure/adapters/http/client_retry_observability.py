@@ -34,6 +34,27 @@ class SpanLike(Protocol):
         ...
 
 
+class _NoOpSpan:
+    """Best-effort span used when tracing is intentionally disabled upstream."""
+
+    def __enter__(self) -> _NoOpSpan:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object | None,
+    ) -> object | None:
+        return None
+
+    def set_attribute(self, key: str, value: object) -> None:
+        _ = (key, value)
+
+    def record_exception(self, exception: Exception) -> None:
+        _ = exception
+
+
 class _OtelTracerLike(Protocol):
     """Minimal tracer contract returned by TracingPort.get_tracer()."""
 
@@ -55,7 +76,7 @@ class RetryStateLike(Protocol):
 
 
 def start_request_span(
-    tracer: TracingPort,
+    tracer: TracingPort | None,
     *,
     provider: str,
     run_id: RunID | None,
@@ -63,6 +84,10 @@ def start_request_span(
     url: str,
 ) -> SpanLike:
     """Create and enter the request span for retry orchestration."""
+    if tracer is None:
+        span = _NoOpSpan()
+        span.__enter__()
+        return span
     otel_tracer = cast(_OtelTracerLike, tracer.get_tracer("bioetl.http"))
     span = otel_tracer.start_as_current_span(
         f"http.{method.lower()}",

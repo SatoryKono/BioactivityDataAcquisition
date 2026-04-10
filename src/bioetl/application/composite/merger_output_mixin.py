@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     import polars as pl
 
     from bioetl.domain.composite.config import MergeConfig
@@ -70,6 +72,7 @@ class MergeOutputWriterMixin:
     async def _write_merged_gold(
         self,
         df: pl.DataFrame,
+        completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
     ) -> None:
@@ -98,6 +101,7 @@ class MergeOutputWriterMixin:
         await self._storage.write_gold_merged(
             table_name,
             records,
+            completed_at=completed_at,
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=True,

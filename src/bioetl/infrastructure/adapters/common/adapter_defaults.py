@@ -51,7 +51,7 @@ def create_default_fallback_service(
 
 def create_default_adapter_metrics(
     *,
-    metrics: MetricsPort,
+    metrics: MetricsPort | None,
     provider: str,
 ) -> AdapterMetricsRecorder:
     """Create default adapter metrics helper for non-DI call sites."""

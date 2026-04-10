@@ -1100,10 +1100,10 @@ class TestGoldWriterAudit:
             )
 
     @pytest.mark.asyncio
-    async def test_log_gold_audit_generates_run_id_fallback(
+    async def test_log_gold_audit_requires_run_id(
         self, gold_writer, valid_records, fixed_ingestion_ts
     ):
-        """Test _log_gold_audit generates run_id when not provided."""
+        """Test _log_gold_audit raises when run_id is not provided."""
         from unittest.mock import AsyncMock
 
         from bioetl.domain.medallion import GoldWriteMode
@@ -1111,15 +1111,16 @@ class TestGoldWriterAudit:
         mock_audit = AsyncMock()
         gold_writer._audit = mock_audit
 
-        await gold_writer._log_gold_audit(
-            table_name="test.table",
-            records=valid_records,
-            mode=GoldWriteMode.OVERWRITE,
-            ingestion_ts=fixed_ingestion_ts,
-            run_id=None,  # Should trigger fallback
-        )
+        with pytest.raises(ValueError, match="run_id is required"):
+            await gold_writer._log_gold_audit(
+                table_name="test.table",
+                records=valid_records,
+                mode=GoldWriteMode.OVERWRITE,
+                ingestion_ts=fixed_ingestion_ts,
+                run_id=None,
+            )
 
-        mock_audit.log_write.assert_called_once()
+        mock_audit.log_write.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_log_gold_audit_with_valid_data(

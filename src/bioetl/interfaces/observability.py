@@ -42,6 +42,7 @@ __all__ = [
     "get_observability_workflow_service",
     "get_quarantine_service",
     "get_run_manifest_service",
+    "push_metrics_to_gateway",
     "start_metrics_server",
 ]
 
@@ -64,6 +65,24 @@ def start_metrics_server(
         fail_fast=fail_fast,
         retry_count=retry_count,
         retry_delay=retry_delay,
+        logger=logger,
+    )
+
+
+def push_metrics_to_gateway(
+    run_label: str = "bioetl",
+    *,
+    pipeline_name: str | None = None,
+    run_type: str | None = None,
+    logger: LoggerPort | None = None,
+) -> bool:
+    """Push metrics through the canonical composition API."""
+    from bioetl.composition.observability_api import push_metrics_to_gateway as _impl
+
+    return _impl(
+        run_label=run_label,
+        pipeline_name=pipeline_name,
+        run_type=run_type,
         logger=logger,
     )
 

@@ -19,6 +19,7 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
     bronze_root = tmp_path / "bronze-cache"
     bronze_root.mkdir()
     (bronze_root / "batch_0001.jsonl.zst").write_bytes(b'{"id":1}\n')
+    (bronze_root / "batch_0002.jsonl.zst").write_bytes(b'{"id":2}\n')
 
     run_context = RunContext.create(
         run_id=uuid4(),
@@ -27,7 +28,7 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
         provider="chembl",
         entity="activity",
         pipeline_version="1.2.3",
-        config_hash="cfg-hash",
+        config_hash="a" * 64,
         manifest_id="manifest-1",
         contract_ref="chembl.activity",
         contract_version="1.0.0",
@@ -56,5 +57,6 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
     assert metadata.contract_ref == "chembl.activity"
     assert metadata.contract_version == "1.0.0"
     assert metadata.exact_replay is True
-    assert len(metadata.input_snapshot_ids) == 1
+    assert len(metadata.input_snapshot_ids) == 2
+    assert metadata.input_snapshot_ids == tuple(sorted(metadata.input_snapshot_ids))
     assert metadata.execution_fingerprint is not None

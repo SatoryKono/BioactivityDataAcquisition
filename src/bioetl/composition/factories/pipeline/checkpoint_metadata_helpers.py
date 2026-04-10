@@ -6,6 +6,9 @@ import hashlib
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
+    build_cached_bronze_input_snapshot_refs,
+)
 from bioetl.domain.normalization import (
     normalize_runtime_anchor_payload,
     serialize_json_canonical,
@@ -99,46 +102,12 @@ def _resolve_input_snapshot_ids(pipeline: BasePipeline) -> tuple[str, ...]:
         else settings.bronze_path / provider / entity
     )
     bronze_date = _coerce_optional_str(getattr(cached_bronze, "bronze_date", None))
-    search_root = bronze_root / bronze_date if bronze_date else bronze_root
-    if not search_root.exists():
-        return ()
-
-    pattern = "batch_*.jsonl.zst" if bronze_date else "**/batch_*.jsonl.zst"
-    batch_files = sorted(search_root.glob(pattern))
-    if not batch_files:
-        return ()
-
-    content_hash = _compute_cached_bronze_content_hash(
+    snapshot_refs = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
-        batch_files=batch_files,
+        bronze_date=bronze_date,
+        pipeline_name=pipeline.config.pipeline_name,
     )
-    snapshot_scope = search_root if bronze_date else bronze_root
-    snapshot_id = hashlib.sha256(
-        f"{pipeline.config.pipeline_name}:{snapshot_scope}:{content_hash}".encode(
-            "utf-8"
-        )
-    ).hexdigest()
-    return (snapshot_id,)
-
-
-def _compute_cached_bronze_content_hash(
-    *,
-    bronze_root: Path,
-    batch_files: list[Path],
-) -> str:
-    """Compute a deterministic content hash over cached Bronze batch files."""
-    digest = hashlib.sha256()
-    for file_path in batch_files:
-        digest.update(str(file_path.relative_to(bronze_root)).encode("utf-8"))
-        digest.update(b"\0")
-        with file_path.open("rb") as stream:
-            while True:
-                chunk = stream.read(1024 * 1024)
-                if not chunk:
-                    break
-                digest.update(chunk)
-        digest.update(b"\0")
-    return digest.hexdigest()
+    return tuple(snapshot.snapshot_id for snapshot in snapshot_refs)
 
 
 def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetadata:

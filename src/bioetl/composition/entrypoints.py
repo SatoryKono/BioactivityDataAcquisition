@@ -14,26 +14,6 @@ import warnings
 from importlib import import_module
 from typing import Any
 
-from bioetl.composition.composite_api import (
-    bootstrap_composite_runner,
-    load_composite_config,
-    load_pipeline_config,
-)
-from bioetl.composition.execution_api import (
-    ArchiveOptions,
-    PipelineRunResult,
-    RunOptions,
-    RunResult,
-    VacuumOptions,
-    build_pipeline_context,
-    create_pipeline_runner,
-    ensure_metrics_server_started,
-    maybe_start_metrics_server,
-    push_metrics_to_gateway,
-    run_pipeline,
-)
-from bioetl.composition.observability_api import start_metrics_server
-
 __all__ = [
     "ArchiveOptions",
     "PipelineRunResult",
@@ -51,6 +31,24 @@ __all__ = [
     "run_pipeline",
     "start_metrics_server",
 ]
+
+_PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
+    "ArchiveOptions": "bioetl.composition.execution_api",
+    "PipelineRunResult": "bioetl.composition.execution_api",
+    "RunOptions": "bioetl.composition.execution_api",
+    "RunResult": "bioetl.composition.execution_api",
+    "VacuumOptions": "bioetl.composition.execution_api",
+    "bootstrap_composite_runner": "bioetl.composition.composite_api",
+    "build_pipeline_context": "bioetl.composition.execution_api",
+    "create_pipeline_runner": "bioetl.composition.execution_api",
+    "ensure_metrics_server_started": "bioetl.composition.execution_api",
+    "load_composite_config": "bioetl.composition.composite_api",
+    "load_pipeline_config": "bioetl.composition.composite_api",
+    "maybe_start_metrics_server": "bioetl.composition.execution_api",
+    "push_metrics_to_gateway": "bioetl.composition.execution_api",
+    "run_pipeline": "bioetl.composition.execution_api",
+    "start_metrics_server": "bioetl.composition.observability_api",
+}
 
 _LEGACY_SYMBOL_TARGETS: dict[str, str] = {
     # services_api
@@ -81,11 +79,17 @@ _LEGACY_SYMBOL_TARGETS: dict[str, str] = {
 
 
 def __getattr__(name: str) -> Any:  # Any: lazy compatibility exports resolve to heterogeneous symbol types.
-    """Resolve deprecated legacy entrypoint symbols lazily."""
+    """Resolve public and deprecated entrypoint symbols lazily."""
+    module_name = _PUBLIC_SYMBOL_TARGETS.get(name)
+    if module_name is not None:
+        module = import_module(module_name)
+        value = getattr(module, name)
+        globals()[name] = value
+        return value
+
     module_name = _LEGACY_SYMBOL_TARGETS.get(name)
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
     module = import_module(module_name)
     value = getattr(module, name)
     warnings.warn(
@@ -102,4 +106,6 @@ def __getattr__(name: str) -> Any:  # Any: lazy compatibility exports resolve to
 
 def __dir__() -> list[str]:
     """Return stable introspection results including legacy compatibility names."""
-    return sorted(set(globals()) | set(__all__) | set(_LEGACY_SYMBOL_TARGETS))
+    return sorted(
+        set(globals()) | set(__all__) | set(_PUBLIC_SYMBOL_TARGETS) | set(_LEGACY_SYMBOL_TARGETS)
+    )

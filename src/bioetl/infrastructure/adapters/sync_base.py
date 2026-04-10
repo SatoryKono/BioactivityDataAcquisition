@@ -36,7 +36,6 @@ from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
 
 if TYPE_CHECKING:
@@ -77,7 +76,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
 
     provider_name: str
     logger: LoggerPort
-    metrics: MetricsPort | None  # Runtime-resolved to NoOpMetrics if None
+    metrics: MetricsPort | None
     rate_limiter: TokenBucketRateLimiter
     circuit_breaker: CircuitBreakerGuard
     thread_pool: ThreadPoolExecutor
@@ -122,8 +121,6 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
             dependency_context.metrics
             if dependency_context is not None
             else metrics
-            if metrics is not None
-            else NoOpMetrics()
         )
         resolved_error_handler = (
             dependency_context.error_handler

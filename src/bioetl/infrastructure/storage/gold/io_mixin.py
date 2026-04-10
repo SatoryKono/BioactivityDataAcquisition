@@ -45,6 +45,7 @@ class _GoldMergedMetadataWriterProtocol(Protocol):
         table_path: str,
         table_name: str,
         records: list[GoldRecord],
+        completed_at: datetime | None = None,
         schema: DataFrameSchema | None = None,
     ) -> None: ...
 
@@ -100,6 +101,7 @@ class _GoldMergedWriteRequest:
     records: list[GoldRecord]
     primary_keys: list[str] | None
     schema: DataFrameSchema | None
+    completed_at: datetime | None
     run_id: str | None
     sources_used: list[str] | None
     preserve_column_order: bool = False
@@ -206,6 +208,7 @@ async def _write_gold_merged_sidecar(
         table_path=prepared.table_path,
         table_name=prepared.request.table_name,
         records=prepared.request.records,
+        completed_at=prepared.request.completed_at,
         schema=prepared.request.schema,
     )
 
@@ -246,6 +249,7 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
         records: list[GoldRecord],
         primary_keys: list[str] | None = None,
         *,
+        completed_at: datetime | None = None,
         schema: DataFrameSchema | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
@@ -264,6 +268,7 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
             records=records,
             primary_keys=primary_keys,
             schema=schema,
+            completed_at=completed_at,
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=preserve_column_order,

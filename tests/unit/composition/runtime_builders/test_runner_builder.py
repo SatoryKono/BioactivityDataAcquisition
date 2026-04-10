@@ -11,6 +11,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import observability_builder
@@ -79,6 +80,9 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     bronze_day = bronze_root / "2026-01-01"
     bronze_day.mkdir(parents=True)
     (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
+    (bronze_day / "batch_2026-01-01_extra.jsonl.zst").write_bytes(
+        b"snapshot-bytes-2"
+    )
 
     calls: dict[str, object] = {}
 
@@ -171,8 +175,16 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     source_refs = payload["source_refs"]
     assert isinstance(source_refs, list)
     assert len(source_refs) == 1
-    assert source_refs[0]["input_snapshots"][0]["immutable_uri"] == str(bronze_day)
-    assert source_refs[0]["input_snapshots"][0]["content_hash"]
+    snapshots = source_refs[0]["input_snapshots"]
+    assert len(snapshots) == 2
+    assert sorted(snapshot["immutable_uri"] for snapshot in snapshots) == [
+        str(bronze_day / "batch_2026-01-01_demo.jsonl.zst"),
+        str(bronze_day / "batch_2026-01-01_extra.jsonl.zst"),
+    ]
+    assert all(snapshot["content_hash"] for snapshot in snapshots)
+    assert [snapshot["snapshot_id"] for snapshot in snapshots] == sorted(
+        snapshot["snapshot_id"] for snapshot in snapshots
+    )
     events = [event for event, _ in logger_calls]
     assert events[:2] == [
         "input_filter_enabled",
@@ -621,7 +633,11 @@ def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
     base_logger = MagicMock()
     bound_logger = MagicMock()
     base_logger.bind.return_value = bound_logger
-    bundle = ObservabilityBundle(logger=base_logger, metrics=MagicMock())
+    bundle = ObservabilityBundle(
+        logger=base_logger,
+        metrics=MagicMock(),
+        tracer=NoOpTracing(),
+    )
 
     context = SimpleNamespace(
         pipeline_name="chembl_activity",

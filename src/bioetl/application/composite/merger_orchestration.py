@@ -195,6 +195,7 @@ async def execute_merge_request(
         sources_used=loaded.sources_used,
         cv_stats=post_join_context.cv_stats,
         quarantine_payloads=post_join_context.quarantine_payloads,
+        metadata_timestamp=request.metadata_timestamp,
         run_id=request.run_id,
         started_at=started_at,
     )

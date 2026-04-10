@@ -11,8 +11,8 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
+from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition import PipelineRegistry
-from bioetl.composition._services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline_runner,
     maybe_start_metrics_server,
@@ -69,11 +69,7 @@ def push_metrics_to_gateway(
     pipeline_name: str | None = None,
     run_type: str | None = None,
 ) -> bool:
-    """Push current metrics to Prometheus Pushgateway.
-
-    Reads gateway URL from settings (BIOETL_PUSHGATEWAY_URL) and delegates
-    to the infrastructure layer. Uses pipeline_name as grouping key so that
-    successive pipeline runs don't overwrite each other's metrics.
+    """Push current metrics to Prometheus Pushgateway via composition.
 
     Args:
         run_label: Run label for pushed metrics.
@@ -83,22 +79,15 @@ def push_metrics_to_gateway(
     Returns:
         True if push succeeded, False otherwise.
     """
-    from bioetl.infrastructure.observability.server import (
+    from bioetl.composition.observability_api import (
         push_metrics_to_gateway as _push,
     )
 
-    settings = get_settings()
-    gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
-    grouping_key: dict[str, str] = {}
-    if pipeline_name:
-        grouping_key["pipeline"] = pipeline_name
-    if run_type:
-        grouping_key["run_type"] = run_type
     return bool(
         _push(
-            gateway=gateway,
             run_label=run_label,
-            grouping_key=grouping_key,
+            pipeline_name=pipeline_name,
+            run_type=run_type,
         )
     )
 

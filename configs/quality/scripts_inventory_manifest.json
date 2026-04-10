@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-10T15:31:23.779713+00:00",
+  "generated_at": "2026-04-10T17:10:33.950588+00:00",
   "summary": {
-    "total_scripts": 289,
+    "total_scripts": 291,
     "status_counts": {
       "active": 238,
       "legacy": 29,
-      "orphan": 21,
+      "orphan": 23,
       "unknown": 1
     },
     "reference_group_coverage": {
@@ -6617,6 +6617,22 @@
           "text": "| `start-codex.bat` | Existing quick launcher | PowerShell |"
         }
       ]
+    },
+    {
+      "path": "scripts/ops/start-neo4j-audit.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/start-neo4j-audit.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/start-wsl-proxy.bat",

@@ -48,12 +48,12 @@ class HTTPClientRetryMixin:
     """Retry policy orchestration extracted from UnifiedHTTPClient."""
 
     retry_config: RetryConfig
-    _metrics: MetricsPort
+    _metrics: MetricsPort | None
     provider: str
     logger: LoggerPort | None
     rate_limiter: RateLimiterPort
     circuit_breaker: CircuitBreakerPort
-    _tracer: TracingPort
+    _tracer: TracingPort | None
     run_id: RunID | None
 
     def _get_client(self) -> httpx.AsyncClient:
@@ -84,11 +84,12 @@ class HTTPClientRetryMixin:
 
     def _record_retry_budget_exhausted(self, method: str, url: str) -> None:
         """Emit retry-budget exhaustion metrics and warning log."""
-        self._metrics.increment_counter(
-            "http_retry_budget_exhausted_total",
-            1,
-            {"provider": self.provider, "method": method.upper()},
-        )
+        if self._metrics is not None:
+            self._metrics.increment_counter(
+                "http_retry_budget_exhausted_total",
+                1,
+                {"provider": self.provider, "method": method.upper()},
+            )
         if self.logger:
             self.logger.warning(
                 "http_retry_budget_exhausted",

@@ -7,10 +7,6 @@ from typing import TYPE_CHECKING
 
 import httpx
 
-from bioetl.domain.ports.noop import (
-    NoOpMetrics,
-    NoOpTracing,
-)
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.client_context_mixin import (
     HTTPClientContextMixin,
@@ -57,10 +53,10 @@ class UnifiedHTTPClient(
     logger: LoggerPort | None = None
 
     _client: httpx.AsyncClient | None = field(init=False, default=None)
-    _tracer: TracingPort = field(init=False)
-    _metrics: MetricsPort = field(init=False)
+    _tracer: TracingPort | None = field(init=False)
+    _metrics: MetricsPort | None = field(init=False)
 
     def __post_init__(self) -> None:
-        """Initialize observability defaults when custom ports are not supplied."""
-        self._tracer = self.tracer if self.tracer is not None else NoOpTracing()
-        self._metrics = self.metrics if self.metrics is not None else NoOpMetrics()
+        """Mirror injected observability ports without constructing fallbacks."""
+        self._tracer = self.tracer
+        self._metrics = self.metrics

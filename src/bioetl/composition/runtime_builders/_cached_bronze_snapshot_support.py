@@ -1,0 +1,72 @@
+"""Shared cached-Bronze snapshot helpers for exact-replay provenance."""
+
+from __future__ import annotations
+
+import hashlib
+from datetime import UTC, datetime
+from pathlib import Path
+
+from bioetl.domain.control_plane import RunInputSnapshotRef
+
+__all__ = [
+    "build_cached_bronze_input_snapshot_refs",
+]
+
+
+def build_cached_bronze_input_snapshot_refs(
+    *,
+    bronze_root: Path,
+    bronze_date: str | None,
+    pipeline_name: str,
+) -> tuple[RunInputSnapshotRef, ...]:
+    """Return deterministic batch-level snapshot refs for cached-Bronze replay."""
+    search_root = bronze_root / bronze_date if bronze_date else bronze_root
+    if not search_root.exists():
+        return ()
+
+    pattern = "batch_*.jsonl.zst" if bronze_date else "**/batch_*.jsonl.zst"
+    batch_files = sorted(search_root.glob(pattern))
+    if not batch_files:
+        return ()
+
+    return tuple(
+        _build_cached_bronze_snapshot_ref(
+            bronze_root=bronze_root,
+            batch_file=batch_file,
+            pipeline_name=pipeline_name,
+        )
+        for batch_file in batch_files
+    )
+
+
+def _build_cached_bronze_snapshot_ref(
+    *,
+    bronze_root: Path,
+    batch_file: Path,
+    pipeline_name: str,
+) -> RunInputSnapshotRef:
+    """Build one immutable snapshot ref for one cached Bronze batch file."""
+    content_hash = _compute_cached_bronze_batch_content_hash(batch_file)
+    relative_path = str(batch_file.relative_to(bronze_root))
+    snapshot_id = hashlib.sha256(
+        f"{pipeline_name}:{relative_path}:{content_hash}".encode("utf-8")
+    ).hexdigest()
+    captured_at = datetime.fromtimestamp(batch_file.stat().st_mtime, tz=UTC)
+    return RunInputSnapshotRef(
+        snapshot_id=snapshot_id,
+        content_hash=content_hash,
+        immutable_uri=str(batch_file),
+        captured_at=captured_at,
+    )
+
+
+def _compute_cached_bronze_batch_content_hash(batch_file: Path) -> str:
+    """Compute the content hash for one persisted cached-Bronze batch file."""
+    digest = hashlib.sha256()
+    with batch_file.open("rb") as stream:
+        while True:
+            chunk = stream.read(1024 * 1024)
+            if not chunk:
+                break
+            digest.update(chunk)
+    return digest.hexdigest()

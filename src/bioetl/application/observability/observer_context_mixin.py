@@ -6,6 +6,11 @@ import time
 from typing import TYPE_CHECKING, Self
 
 from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
+from bioetl.domain.aggregates.events import (
+    PipelineCompleted,
+    PipelineFailed,
+    PipelineShutdown,
+)
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
@@ -145,18 +150,24 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
         exc_val: BaseException | None,
     ) -> None:
         """Emit final pipeline lifecycle event."""
+        from bioetl.application.observability.observer import LifecyclePhase
+
         log_ctx = {
             "duration_seconds": duration,
             "status": status,
             "phase": "cleanup",
         }
         if status == "failed":
-            self._emit_contract_event(
-                PipelineEvent.FAILED,
-                severity="error",
-                **log_ctx,
-                error=str(exc_val),
-                error_type=type(exc_val).__name__,
+            self.emit_domain_event(
+                PipelineFailed(
+                    occurred_at=self._build_pipeline_result_timestamp(),
+                    run_id=self.run_id,
+                    pipeline_name=self.pipeline_name,
+                    failed_stage="unknown",
+                    error=str(exc_val),
+                    error_type=type(exc_val).__name__,
+                ),
+                phase=LifecyclePhase.CLEANUP,
             )
             return
         if status == "shutdown":
@@ -172,6 +183,13 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
             severity="info",
             **log_ctx,
         )
+
+    @staticmethod
+    def _build_pipeline_result_timestamp() -> datetime:
+        """Return a timezone-aware timestamp for terminal domain-event publication."""
+        from datetime import UTC, datetime
+
+        return datetime.now(tz=UTC)
 
     def _close_span_safely(
         self,

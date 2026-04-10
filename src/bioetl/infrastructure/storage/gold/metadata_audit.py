@@ -9,6 +9,10 @@ from typing import Protocol
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation, LoggerPort
 from bioetl.domain.types import GoldRecord, RunID
+from bioetl.infrastructure.storage._audit_normalization import (
+    require_audit_run_id,
+    require_audit_timestamp,
+)
 
 __all__ = ["_GoldAuditWriteRequest", "_build_gold_audit_entry"]
 
@@ -30,25 +34,18 @@ def _build_gold_audit_entry(
     host: _GoldMetadataAuditHostProtocol,
     request: _GoldAuditWriteRequest,
 ) -> AuditEntry:
-    if request.ingestion_ts is not None:
-        timestamp = request.ingestion_ts
-    else:
-        host.logger.warning(
-            "audit_missing_ingestion_ts",
-            table=request.table_name,
-            mode=request.mode.value,
-        )
-        raise ValueError("ingestion_ts is required for audit logging")
-
-    if request.run_id is not None:
-        audit_run_id = request.run_id
-    else:
-        host.logger.warning(
-            "audit_missing_run_id",
-            table=request.table_name,
-            mode=request.mode.value,
-        )
-        raise ValueError("run_id is required for audit logging")
+    timestamp = require_audit_timestamp(
+        logger=host.logger,
+        timestamp=request.ingestion_ts,
+        table_name=request.table_name,
+        mode=request.mode.value,
+    )
+    audit_run_id = require_audit_run_id(
+        logger=host.logger,
+        run_id=request.run_id,
+        table_name=request.table_name,
+        mode=request.mode.value,
+    )
 
     operation_map = {
         GoldWriteMode.OVERWRITE: AuditOperation.OVERWRITE,

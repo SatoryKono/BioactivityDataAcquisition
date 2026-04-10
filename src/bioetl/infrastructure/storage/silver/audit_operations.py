@@ -9,6 +9,10 @@ from typing import Protocol
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation, LoggerPort
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
+from bioetl.infrastructure.storage._audit_normalization import (
+    require_audit_run_id,
+    require_audit_timestamp,
+)
 
 __all__ = ["_SilverAuditWriteRequest", "_build_silver_audit_entry"]
 
@@ -47,30 +51,23 @@ def _build_silver_audit_entry(
     Silver audit is strict: ``run_id`` and ``ingestion_ts`` are required so the
     medallion traceability contract matches Gold.
     """
-    if request.ingestion_ts is None:
-        host.logger.warning(
-            "audit_missing_ingestion_ts",
-            table=request.table_name,
-            mode=request.mode.value,
-        )
-        raise ValueError("ingestion_ts is required for audit logging")
-
-    if request.run_id is None:
-        host.logger.warning(
-            "audit_missing_run_id",
-            table=request.table_name,
-            mode=request.mode.value,
-        )
-        raise ValueError("run_id is required for audit logging")
-
-    timestamp = request.ingestion_ts
-    if timestamp.tzinfo is None:
-        raise ValueError("ingestion_ts must be timezone-aware")
+    timestamp = require_audit_timestamp(
+        logger=host.logger,
+        timestamp=request.ingestion_ts,
+        table_name=request.table_name,
+        mode=request.mode.value,
+    )
+    audit_run_id = require_audit_run_id(
+        logger=host.logger,
+        run_id=request.run_id,
+        table_name=request.table_name,
+        mode=request.mode.value,
+    )
 
     operation = _SILVER_AUDIT_OPERATION_MAP[request.mode]
 
     return AuditEntry(
-        run_id=request.run_id,
+        run_id=audit_run_id,
         timestamp=timestamp,
         layer=AuditLayer.SILVER,
         table_name=request.table_name,

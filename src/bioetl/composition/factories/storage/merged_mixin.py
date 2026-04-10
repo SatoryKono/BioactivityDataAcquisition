@@ -123,6 +123,7 @@ class StorageAdapterMergedMixin:
         ],
         primary_keys: list[str] | None = None,
         *,
+        completed_at: object | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -136,6 +137,7 @@ class StorageAdapterMergedMixin:
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            completed_at: Optional deterministic metadata timestamp for merged sidecars.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
@@ -148,6 +150,7 @@ class StorageAdapterMergedMixin:
             records,
             primary_keys,
             schema=schema,
+            completed_at=completed_at,
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=preserve_column_order,

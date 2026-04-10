@@ -91,6 +91,13 @@ class TestAdapterMetrics:
         with adapter_metrics.measure_request("/activity"):
             pass
 
+    def test_measure_request_without_metrics_is_best_effort(self):
+        """Missing metrics port should not break adapter request flow."""
+        adapter_metrics = AdapterMetricsRecorder(metrics=None, provider="chembl")
+
+        with adapter_metrics.measure_request("/activity"):
+            pass
+
     def test_record_batch_size(self):
         """Test that record_batch_size records histogram metric."""
         mock_metrics = MagicMock()

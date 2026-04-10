@@ -11,6 +11,7 @@ import yaml
 import zstandard as zstd
 
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+from bioetl.composition.factories import _observability_wiring
 from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.config import get_pipeline_config, get_settings
@@ -161,6 +162,7 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
     snapshots_second = source_refs_second[0].get("input_snapshots")
     assert isinstance(snapshots_first, list) and snapshots_first
     assert isinstance(snapshots_second, list) and snapshots_second
+    assert snapshots_first == snapshots_second
     assert isinstance(snapshots_first[0].get("snapshot_id"), str)
     assert isinstance(snapshots_first[0].get("content_hash"), str)
     assert isinstance(snapshots_first[0].get("immutable_uri"), str)
@@ -177,19 +179,70 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
         code_provenance_first["effective_config_artifact_id"]
         == code_provenance_second["effective_config_artifact_id"]
     )
+    semantic_first = effective_first["semantic_artifact"]
+    semantic_second = effective_second["semantic_artifact"]
+    assert effective_first["artifact_id"] == effective_second["artifact_id"]
+    assert semantic_first["effective_config_hash"] == semantic_second[
+        "effective_config_hash"
+    ]
+    assert semantic_first["dq_contract_compatibility_hash"] == semantic_second[
+        "dq_contract_compatibility_hash"
+    ]
 
-    runtime_adjustments_first = effective_first.get("runtime_overrides", {}).get(
-        "runtime_adjustments", {}
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+
+@pytest.mark.integration
+@pytest.mark.no_api
+@pytest.mark.asyncio
+async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Exact replay must stay offline and avoid live data source construction."""
+    fixture_entry = _load_tracked_fixture_entry()
+    fixture_path_raw = fixture_entry.get("fixture_path")
+    assert isinstance(fixture_path_raw, str) and fixture_path_raw
+
+    tracked_fixture_path = PROJECT_ROOT / fixture_path_raw
+    cached_root = tmp_path / "cached_bronze" / "chembl" / "activity"
+    batch_path = _materialize_cached_bronze_batch(
+        tracked_fixture_path=tracked_fixture_path,
+        cache_root=cached_root,
+        date="2026-03-25",
     )
-    runtime_adjustments_second = effective_second.get("runtime_overrides", {}).get(
-        "runtime_adjustments", {}
+
+    data_dir = tmp_path / "runtime_data"
+    monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
+    monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
+
+    def _raise_live_data_source(*args: object, **kwargs: object) -> object:
+        raise AssertionError(
+            "exact replay attempted live data source construction instead of offline cached Bronze replay"
+        )
+
+    monkeypatch.setattr(
+        _observability_wiring,
+        "_create_data_source",
+        _raise_live_data_source,
     )
-    assert runtime_adjustments_first.get("pipeline_name") == _PIPELINE_NAME
-    assert runtime_adjustments_second.get("pipeline_name") == _PIPELINE_NAME
-    assert runtime_adjustments_first.get(
-        "cached_bronze"
-    ) == runtime_adjustments_second.get("cached_bronze")
-    assert runtime_adjustments_first.get("limit") == 5
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+    run_id = await _run_cached_fixture_pipeline(cached_bronze_path=cached_root)
+    manifest_payload, _effective_payload = _load_control_plane_payloads(
+        data_dir=data_dir,
+        run_id=run_id,
+    )
+    snapshots = manifest_payload["source_refs"][0]["input_snapshots"]
+
+    assert manifest_payload["launch_context"]["exact_replay"] is True
+    assert manifest_payload["runtime_config"]["exact_replay"] is True
+    assert len(snapshots) == 1
+    assert snapshots[0]["immutable_uri"] == str(batch_path)
 
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
