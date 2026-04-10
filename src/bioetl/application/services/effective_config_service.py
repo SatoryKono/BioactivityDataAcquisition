@@ -196,17 +196,33 @@ def _serialize_artifact(artifact: EffectiveConfigArtifact) -> str:
     payload = {
         "artifact_id": artifact.artifact_id,
         "schema_version": artifact.schema_version,
+        "semantic_artifact": _semantic_artifact_payload(artifact),
+        "occurrence_envelope": _occurrence_envelope_payload(artifact),
+    }
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
+def _semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
+    return {
+        "artifact_id": artifact.artifact_id,
+        "schema_version": artifact.schema_version,
         "pipeline_name": artifact.pipeline_name,
         "pipeline_kind": artifact.pipeline_kind,
         "source_refs": [_to_jsonable(src) for src in artifact.source_refs],
         "resolution_policy": _to_jsonable(artifact.resolution_policy),
-        "resolved_config": _to_jsonable(artifact.resolved_config),
+        "resolved_config": {
+            "config_type": artifact.resolved_config.config_type,
+            "config_data": _to_jsonable(artifact.resolved_config.config_data),
+            "config_hash": artifact.resolved_config.config_hash,
+        },
         "runtime_overrides": _to_jsonable(artifact.runtime_overrides),
-        "effective_execution_config": _to_jsonable(artifact.effective_execution_config),
+        "effective_execution_config": {
+            "config_data": _to_jsonable(artifact.effective_execution_config.config_data),
+            "effective_hash": artifact.effective_execution_config.effective_hash,
+        },
         "resolved_config_hash": artifact.resolved_config_hash,
         "effective_config_hash": artifact.effective_config_hash,
         "source_fingerprint": artifact.source_fingerprint,
-        "created_at": artifact.created_at.isoformat(),
         "contract_refs": artifact.contract_refs,
         "dq_policy_refs": [_to_jsonable(ref) for ref in artifact.dq_policy_refs],
         "dq_rule_bundle_versions": artifact.dq_rule_bundle_versions,
@@ -215,7 +231,16 @@ def _serialize_artifact(artifact: EffectiveConfigArtifact) -> str:
             _to_jsonable(snapshot) for snapshot in artifact.dq_policy_snapshots
         ],
     }
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
+def _occurrence_envelope_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
+    return {
+        "created_at": artifact.created_at.isoformat(),
+        "resolved_config_timestamp": artifact.resolved_config.timestamp.isoformat(),
+        "effective_execution_timestamp": (
+            artifact.effective_execution_config.timestamp.isoformat()
+        ),
+    }
 
 
 class EffectiveConfigService:
@@ -287,8 +312,16 @@ class EffectiveConfigService:
         )
 
     def serialize_artifact(self, artifact: EffectiveConfigArtifact) -> str:
-        """Serialize one effective-config artifact to a stable JSON string."""
+        """Serialize one persisted artifact envelope with semantic + occurrence data."""
         return _serialize_artifact(artifact)
+
+    def serialize_semantic_artifact(self, artifact: EffectiveConfigArtifact) -> str:
+        """Serialize only the semantic effective-config payload deterministically."""
+        return json.dumps(
+            _semantic_artifact_payload(artifact),
+            sort_keys=True,
+            separators=(",", ":"),
+        )
 
     def compute_artifact_hashes(
         self, artifact: EffectiveConfigArtifact
