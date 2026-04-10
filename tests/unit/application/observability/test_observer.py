@@ -7,6 +7,7 @@ Tests cover:
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -14,6 +15,10 @@ import pytest
 
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 from bioetl.application.observability.observer import LifecyclePhase, PipelineObserver
+from bioetl.domain.aggregates.events import (
+    PipelineCompleted,
+    QuarantineEntryResolved,
+)
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.observability_contract import (
     ObservabilityContractPayload,
@@ -881,3 +886,65 @@ class TestObserverContractSchema:
             assert required_metric_labels.issubset(set(labels))
             for key in required_metric_labels:
                 assert str(labels[key]).strip() != ""
+
+
+def test_emit_domain_event_projects_pipeline_completed(
+    metrics_mock, logger_mock, run_id
+):
+    observer = PipelineObserver(
+        pipeline_name="chembl_activity",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics_mock,
+        logger=logger_mock,
+    )
+    event = PipelineCompleted(
+        occurred_at=datetime(2026, 4, 10, tzinfo=UTC),
+        run_id=run_id,
+        pipeline_name="chembl_activity",
+        records_processed=17,
+        duration_seconds=1.5,
+        stages_count=4,
+    )
+
+    observer.emit_domain_event(event)
+
+    logger_mock.info.assert_called_once()
+    log_call = logger_mock.info.call_args
+    assert log_call[0][0] == "pipeline_finished"
+    assert log_call[1]["event_family"] == "pipeline.lifecycle"
+    assert log_call[1]["records_processed"] == 17
+    metric_calls = [
+        call
+        for call in metrics_mock.increment_counter.call_args_list
+        if call[0][0] == "observability_events_total"
+    ]
+    assert len(metric_calls) == 1
+    assert metric_calls[0][1]["labels"]["event"] == "pipeline_finished"
+
+
+def test_emit_domain_event_allows_explicit_phase_override(
+    metrics_mock, logger_mock, run_id
+):
+    observer = PipelineObserver(
+        pipeline_name="chembl_activity",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics_mock,
+        logger=logger_mock,
+    )
+    event = QuarantineEntryResolved(
+        occurred_at=datetime(2026, 4, 10, tzinfo=UTC),
+        run_id=run_id,
+        entry_id="entry-1",
+        resolution="reprocessed",
+        resolved_by="operator",
+    )
+
+    observer.emit_domain_event(event, phase=LifecyclePhase.CLEANUP)
+
+    logger_mock.info.assert_called_once()
+    log_call = logger_mock.info.call_args
+    assert log_call[0][0] == "quarantine_entry_resolved"
+    assert log_call[1]["event_family"] == "quarantine"
+    assert log_call[1]["resolution"] == "reprocessed"
