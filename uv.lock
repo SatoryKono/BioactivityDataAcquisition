@@ -167,6 +167,7 @@ source = { editable = "." }
 dependencies = [
     { name = "arro3-core" },
     { name = "click" },
+    { name = "defusedxml" },
     { name = "deltalake" },
     { name = "httpx" },
     { name = "orjson" },
@@ -271,6 +272,7 @@ requires-dist = [
     { name = "bandit", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=1.7" },
     { name = "basedpyright", marker = "extra == 'dev'", specifier = ">=1.0" },
     { name = "click", specifier = ">=8.1" },
+    { name = "defusedxml", specifier = ">=0.7.1" },
     { name = "deltalake", specifier = ">=0.18" },
     { name = "detect-secrets", marker = "extra == 'dev'", specifier = ">=1.4" },
     { name = "detect-secrets", marker = "extra == 'tests'", specifier = ">=1.4" },
