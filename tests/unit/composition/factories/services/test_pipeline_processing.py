@@ -99,7 +99,7 @@ class TestBuildComponentsAndProcessingService:
         mock_quarantine_manager_cls.assert_called_once_with(
             quarantine_port=pipeline.services.quarantine,
             pipeline_name=processor_config.pipeline_name,
-            metrics=components.batch_metrics,
+            metrics=pipeline.services.metrics,
         )
         mock_support_service_cls.assert_called_once_with(
             services=pipeline.services,

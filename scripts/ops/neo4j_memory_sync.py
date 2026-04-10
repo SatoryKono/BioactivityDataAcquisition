@@ -61,6 +61,22 @@ ANALYSIS_RELATION_TYPES: tuple[str, ...] = (
     "JUSTIFIED_BY_RUNTIME",
     "BLOCKED_BY_VARIANCE",
 )
+RETIREMENT_NODE_LABELS: tuple[str, ...] = (
+    "retirement_candidate",
+    "development_cycle_surface",
+)
+RETIREMENT_RELATION_TYPES: tuple[str, ...] = (
+    "CANDIDATE_FOR_REMOVAL",
+    "OWNED_BY_CYCLE",
+    "BLOCKED_FROM_DELETION_BY",
+)
+COMPLEXITY_NODE_LABELS: tuple[str, ...] = ("complexity_candidate",)
+COMPLEXITY_RELATION_TYPES: tuple[str, ...] = (
+    "HAS_COMPLEXITY_SIGNAL",
+    "CANDIDATE_FOR_SIMPLIFICATION",
+    "JUSTIFIED_BY_RUNTIME",
+    "BLOCKED_BY_VARIANCE",
+)
 DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "project",
     "repo_zone",
@@ -704,19 +720,36 @@ def _filtered_snapshot(
     snapshot: GraphSnapshot,
     only_labels: tuple[str, ...] = (),
     only_analysis_layer: bool = False,
+    only_retirement_layer: bool = False,
+    only_complexity_layer: bool = False,
 ) -> GraphSnapshot:
     allowed_labels = set(only_labels)
     if only_analysis_layer:
         allowed_labels |= set(ANALYSIS_NODE_LABELS)
+    if only_retirement_layer:
+        allowed_labels |= set(RETIREMENT_NODE_LABELS)
+    if only_complexity_layer:
+        allowed_labels |= set(COMPLEXITY_NODE_LABELS)
     if not allowed_labels:
         return snapshot
 
     filtered = GraphSnapshot()
+    allowed_analysis_relation_types = set()
+    if only_analysis_layer:
+        allowed_analysis_relation_types |= set(ANALYSIS_RELATION_TYPES)
+    if only_retirement_layer:
+        allowed_analysis_relation_types |= set(RETIREMENT_RELATION_TYPES)
+    if only_complexity_layer:
+        allowed_analysis_relation_types |= set(COMPLEXITY_RELATION_TYPES)
+    if not allowed_analysis_relation_types:
+        allowed_analysis_relation_types = set(ANALYSIS_RELATION_TYPES)
     for key, node in snapshot.nodes.items():
         if key.label in allowed_labels:
             filtered.nodes[key] = node
     for rel_key, relation in snapshot.relations.items():
         if relation.relation_type in ANALYSIS_RELATION_TYPES:
+            if relation.relation_type not in allowed_analysis_relation_types:
+                continue
             if only_analysis_layer or relation.source.label in allowed_labels or relation.target.label in allowed_labels:
                 filtered.relations[rel_key] = relation
             continue
@@ -881,6 +914,22 @@ def _parser() -> argparse.ArgumentParser:
         help=(
             "Limit apply/export/report snapshot operations to the analysis layer "
             "(retirement/development-cycle/complexity nodes and their relations)."
+        ),
+    )
+    parser.add_argument(
+        "--only-retirement-layer",
+        action="store_true",
+        help=(
+            "Limit apply/export/report snapshot operations to the retirement analysis layer "
+            "(retirement/development-cycle nodes and retirement relations)."
+        ),
+    )
+    parser.add_argument(
+        "--only-complexity-layer",
+        action="store_true",
+        help=(
+            "Limit apply/export/report snapshot operations to the complexity analysis layer "
+            "(complexity nodes and complexity relations)."
         ),
     )
     return parser
@@ -4356,11 +4405,19 @@ def sync_snapshot(
     prune_legacy_unmanaged: bool = False,
     only_labels: tuple[str, ...] = (),
     only_analysis_layer: bool = False,
+    only_retirement_layer: bool = False,
+    only_complexity_layer: bool = False,
 ) -> None:
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
     sync_run = _sync_run_id()
-    snapshot = _filtered_snapshot(snapshot, only_labels=only_labels, only_analysis_layer=only_analysis_layer)
+    snapshot = _filtered_snapshot(
+        snapshot,
+        only_labels=only_labels,
+        only_analysis_layer=only_analysis_layer,
+        only_retirement_layer=only_retirement_layer,
+        only_complexity_layer=only_complexity_layer,
+    )
     managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
     node_groups: dict[str, list[dict[str, JsonValue]]] = {}
     for node in snapshot.nodes.values():
@@ -5103,19 +5160,25 @@ def build_fast_analysis_audit_report(
     client = Neo4jHttpClient(base_uri, username, password, database)
     snapshot_stats = snapshot.stats()
 
-    snapshot_label_counts = {
-        label: int(snapshot_stats["labels"].get(label, 0)) for label in CRITICAL_ANALYSIS_NODE_LABELS
-    }
+    active_labels = tuple(
+        label for label in CRITICAL_ANALYSIS_NODE_LABELS if int(snapshot_stats["labels"].get(label, 0)) > 0
+    )
+    active_relation_types = tuple(
+        relation_type
+        for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
+        if int(snapshot_stats["relation_types"].get(relation_type, 0)) > 0
+    )
+    snapshot_label_counts = {label: int(snapshot_stats["labels"].get(label, 0)) for label in active_labels}
     snapshot_relation_counts = {
         relation_type: int(snapshot_stats["relation_types"].get(relation_type, 0))
-        for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
+        for relation_type in active_relation_types
     }
     live_managed_label_counts = {
-        label: _live_managed_node_count(client, label) for label in CRITICAL_ANALYSIS_NODE_LABELS
+        label: _live_managed_node_count(client, label) for label in active_labels
     }
     live_managed_relation_counts = {
         relation_type: _live_managed_relation_count(client, relation_type)
-        for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
+        for relation_type in active_relation_types
     }
 
     return {
@@ -5128,18 +5191,18 @@ def build_fast_analysis_audit_report(
             "labels": snapshot_label_counts,
             "relation_types": snapshot_relation_counts,
         },
-        "managed_labels": list(CRITICAL_ANALYSIS_NODE_LABELS),
+        "managed_labels": list(active_labels),
         "live": {
             "managed_node_total": sum(live_managed_label_counts.values()),
             "managed_relation_total": sum(live_managed_relation_counts.values()),
             "unmanaged_repo_node_total": 0,
             "label_summary": [
                 {"label": label, "managed": live_managed_label_counts[label], "count": live_managed_label_counts[label], "unmanaged": 0}
-                for label in CRITICAL_ANALYSIS_NODE_LABELS
+                for label in active_labels
             ],
             "managed_relation_summary": [
                 {"relation_type": relation_type, "total": live_managed_relation_counts[relation_type]}
-                for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
+                for relation_type in active_relation_types
             ],
             "orphan_summary": {"total": 0, "by_label": []},
             "unmanaged_summary": {"total": 0, "by_label": []},
@@ -5188,6 +5251,8 @@ def main(argv: list[str] | None = None) -> int:
         build_snapshot(root),
         only_labels=tuple(args.only_label),
         only_analysis_layer=args.only_analysis_layer,
+        only_retirement_layer=args.only_retirement_layer,
+        only_complexity_layer=args.only_complexity_layer,
     )
     stats = snapshot.stats()
     print(json.dumps(stats, indent=2))
@@ -5205,6 +5270,8 @@ def main(argv: list[str] | None = None) -> int:
             prune_legacy_unmanaged=args.prune_legacy_unmanaged,
             only_labels=tuple(args.only_label),
             only_analysis_layer=args.only_analysis_layer,
+            only_retirement_layer=args.only_retirement_layer,
+            only_complexity_layer=args.only_complexity_layer,
         )
         post_apply_report = build_fast_analysis_audit_report(snapshot, root, args.http_uri)
         critical_issues = _critical_analysis_audit_issues(post_apply_report)
