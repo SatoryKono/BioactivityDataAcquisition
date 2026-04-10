@@ -136,7 +136,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 | `bioetl_provider_health_status`                | Gauge     | `provider`                               | см. mapping ниже                                                                   |
 | `bioetl_circuit_breaker_state`                 | Gauge     | `adapter`                                | 0/1/2 mapping                                                                      |
 | `bioetl_dq_validation_score`                   | Gauge     | `pipeline,entity`                        | 0..1                                                                               |
-| `bioetl_data_freshness_seconds`                | Gauge     | `pipeline,entity`                        | unix timestamp последней успешной DQ/postrun freshness publication; age считается как `time() - metric` |
+| `bioetl_data_freshness_seconds`                | Gauge     | `pipeline,entity`                        | unix timestamp ingestion anchor успешного запуска (сейчас `PipelineContext.started_at`); age считается как `time() - metric` |
 | `bioetl_quarantine_operator_operations_total`  | Counter   | `operation,status`                       | bounded operator actions for inspect/replay/purge/update workflows                 |
 | `bioetl_quarantine_operator_duration_seconds`  | Histogram | `operation,status`                       | latency of quarantine operator workflows                                           |
 
@@ -240,10 +240,9 @@ signal rather than a shipped Prometheus alert baseline. It tracks bounded
 composite arbitration activity (`decision_type`, `selected_source`) but does
 not, by itself, indicate an incident condition.
 
-`bioetl_data_freshness_seconds` currently reflects runtime freshness publication
-time, not an immutable upstream ingestion anchor. Alerts and SLO review should
-treat it as an operational staleness proxy until anchor-derived freshness is
-introduced in runtime code.
+`bioetl_data_freshness_seconds` currently reflects the ingestion anchor carried
+into successful runtime evaluation (currently `PipelineContext.started_at`),
+not a separate postrun wall-clock publication timestamp.
 
 ## 7. Error Taxonomy (domain canonical)
 

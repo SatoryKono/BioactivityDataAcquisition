@@ -105,7 +105,9 @@ def normalize_profile_float(value: object) -> object:
         return None
     if isinstance(coerced, str):
         return coerced
-    return round(coerced, 10) if math.isfinite(coerced) else None
+    if isinstance(coerced, float):
+        return round(coerced, 10) if math.isfinite(coerced) else None
+    return value
 
 
 def _coerce_profile_float(value: object) -> float | str | None | object:
