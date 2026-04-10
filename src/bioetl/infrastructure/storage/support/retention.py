@@ -18,17 +18,35 @@ from __future__ import annotations
 __all__ = ["RetentionPolicy"]
 
 import asyncio
-from typing import TYPE_CHECKING, Any
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, cast
 
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
+from bioetl.domain.transformations import canonical_json_dumps, normalize_for_hash
 from bioetl.domain.exceptions import TableNotFoundError
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
+
+
+def _primary_key_tuple(
+    row: JsonDict,
+    primary_keys: Sequence[str],
+) -> tuple[object, ...]:
+    """Return one stable primary-key tuple for a Delta row."""
+    return tuple(row.get(key) for key in primary_keys)
+
+
+def _content_identity(row: JsonDict) -> str:
+    """Return deterministic content identity for one Delta row."""
+    content_hash = row.get("content_hash")
+    if content_hash is not None:
+        return str(content_hash)
+    return cast(str, canonical_json_dumps(normalize_for_hash(row)))
 
 
 class RetentionPolicy:
@@ -177,13 +195,17 @@ class RetentionPolicy:
         table_name: str,
         primary_keys: list[str],
     ) -> int:
-        """Deduplicate Silver table by primary keys, keeping the latest record.
+        """Deduplicate Silver table by primary keys using deterministic content identity.
 
-        Performs a self-merge: reads all rows, deduplicates by primary_keys
-        keeping the row with the latest _ingestion_ts, then overwrites the table.
+        The compaction contract is intentionally content-aware:
+        - exact duplicate rows for one business key collapse by
+          ``(primary_keys, content identity)``
+        - conflicting rows for one business key choose a deterministic winner
+          by the lexicographically smallest content identity
 
-        Used after append-mode pipeline runs to compact duplicates into a
-        single deduplicated table in one pass (vs per-batch merge).
+        This avoids relying on runtime ingestion timestamps, which would make
+        replay and publication semantics depend on occurrence metadata rather than
+        persisted content.
 
         Args:
             table_name: Table name (e.g., 'chembl/activity').
@@ -200,7 +222,6 @@ class RetentionPolicy:
 
         def _dedup() -> int:
             import pyarrow as pa
-            import pyarrow.compute as pc
             from deltalake import DeltaTable as DT
             from deltalake import write_deltalake
 
@@ -214,48 +235,33 @@ class RetentionPolicy:
             if total_before == 0:
                 return 0
 
-            if "_ingestion_ts" in table.schema.names:
-                sort_keys: list[tuple[str, str]] = [("_ingestion_ts", "descending")]
-            elif "content_hash" in table.schema.names:
-                sort_keys = [("content_hash", "ascending")]
-            else:
-                sort_keys = [(key, "ascending") for key in primary_keys]
-
-            # When runtime ingestion timestamps are unavailable in persisted rows,
-            # retain a deterministic row order so post-run deduplication remains
-            # safe until full content-aware idempotency lands in #2726.
-            sort_indices = pc.sort_indices(
-                table,
-                sort_keys=sort_keys,
+            ranked_rows = sorted(
+                (
+                    (
+                        _primary_key_tuple(row, primary_keys),
+                        _content_identity(row),
+                        row,
+                    )
+                    for row in table.to_pylist()
+                ),
+                key=lambda item: (item[0], item[1]),
             )
-            sorted_table = table.take(sort_indices)
 
-            # Build composite key column for dedup
-            if len(primary_keys) == 1:
-                key_col = sorted_table.column(primary_keys[0])
-                key_arrays = key_col
-            else:
-                # Concatenate PKs into a single string key
-                pk_cols = [
-                    pc.cast(sorted_table.column(pk), pa.string()) for pk in primary_keys
-                ]
-                sep = pa.scalar("|")
-                key_arrays = pk_cols[0]
-                for col in pk_cols[1:]:
-                    key_arrays = pc.binary_join_element_wise(key_arrays, col, sep)
+            seen_exact_keys: set[tuple[tuple[object, ...], str]] = set()
+            seen_primary_keys: set[tuple[object, ...]] = set()
+            deduped_rows: list[JsonDict] = []
+            for primary_key, content_identity, row in ranked_rows:
+                exact_key = (primary_key, content_identity)
+                if exact_key in seen_exact_keys:
+                    continue
+                seen_exact_keys.add(exact_key)
+                if primary_key in seen_primary_keys:
+                    continue
+                seen_primary_keys.add(primary_key)
+                deduped_rows.append(row)
 
-            # Keep first occurrence according to the deterministic sort policy.
-            seen: set[Any] = set()  # Any: PK values may be str, int, or None
-            keep_mask = []
-            for val in key_arrays.to_pylist():
-                if val not in seen:
-                    seen.add(val)
-                    keep_mask.append(True)
-                else:
-                    keep_mask.append(False)
-
-            deduped = sorted_table.filter(keep_mask)
-            duplicates_removed: int = total_before - int(deduped.num_rows)
+            deduped = pa.Table.from_pylist(deduped_rows, schema=table.schema)
+            duplicates_removed = total_before - len(deduped_rows)
 
             if duplicates_removed > 0:
                 write_deltalake(
@@ -265,7 +271,7 @@ class RetentionPolicy:
                     schema_mode="overwrite",
                 )
 
-            return duplicates_removed
+            return int(duplicates_removed)
 
         result: int = await loop.run_in_executor(None, _dedup)
         return result
