@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import polars as pl
@@ -46,7 +47,11 @@ class TestAddLineage:
         }
 
         result = mixin._add_lineage(
-            df, enrichment_results, run_id="run-1", sources_used=["seed"]
+            df,
+            enrichment_results,
+            run_id="run-1",
+            metadata_timestamp=None,
+            sources_used=["seed"],
         )
 
         assert "_composite_run_id" in result.columns
@@ -70,6 +75,7 @@ class TestAddLineage:
             df,
             enrichment_results={},
             run_id="run-2",
+            metadata_timestamp=datetime(2026, 4, 10, 0, 0, 0, tzinfo=UTC),
             sources_used=["seed"],
             dependency_results=dep_results,
         )
@@ -77,6 +83,7 @@ class TestAddLineage:
         status_str = result["_enrichment_status"][0]
         assert "dep_a" in status_str
         assert "success" in status_str
+        assert result["_lineage_created_at"][0] == "2026-04-10T00:00:00+00:00"
 
 
 @pytest.mark.unit
