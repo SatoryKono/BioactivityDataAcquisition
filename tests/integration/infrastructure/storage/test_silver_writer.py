@@ -189,6 +189,61 @@ async def test_write_silver_merge_is_idempotent_for_identical_input(
 
 
 @pytest.mark.asyncio
+async def test_write_silver_merge_ignores_metadata_only_rerun(
+    silver_writer, temp_delta_path, sample_schema_with_content_hash
+):
+    """Metadata-only reruns should not rewrite existing Silver rows."""
+    first_records = [
+        {
+            "id": "1",
+            "val": "A",
+            "content_hash": str(generate_content_hash({"id": "1", "val": "A"}, "test")),
+            "_run_id": "run1",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch1",
+            "_ingestion_ts": "2023-01-01T00:00:00",
+        }
+    ]
+    rerun_records = [
+        {
+            "id": "1",
+            "val": "A",
+            "content_hash": str(generate_content_hash({"id": "1", "val": "A"}, "test")),
+            "_run_id": "run2",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch2",
+            "_ingestion_ts": "2023-01-02T00:00:00",
+        }
+    ]
+
+    await silver_writer.write_silver(
+        table_name="test_merge_metadata_only_rerun",
+        records=first_records,
+        primary_keys=["id"],
+        schema=sample_schema_with_content_hash,
+    )
+
+    dt = DeltaTable(f"{temp_delta_path}/test_merge_metadata_only_rerun")
+    first_rows = (
+        dt.to_pandas().sort_values("id").reset_index(drop=True).to_dict(orient="records")
+    )
+
+    await silver_writer.write_silver(
+        table_name="test_merge_metadata_only_rerun",
+        records=rerun_records,
+        primary_keys=["id"],
+        schema=sample_schema_with_content_hash,
+    )
+
+    dt = DeltaTable(f"{temp_delta_path}/test_merge_metadata_only_rerun")
+    second_rows = (
+        dt.to_pandas().sort_values("id").reset_index(drop=True).to_dict(orient="records")
+    )
+
+    assert second_rows == first_rows
+
+
+@pytest.mark.asyncio
 async def test_write_silver_append_mode(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
