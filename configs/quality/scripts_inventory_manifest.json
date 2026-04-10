@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-10T10:36:10.762657+00:00",
+  "generated_at": "2026-04-10T09:32:48.564237+00:00",
   "summary": {
     "total_scripts": 289,
     "status_counts": {
@@ -4565,7 +4565,7 @@
         },
         {
           "path": "scripts/ops/neo4j_memory_sync.py",
-          "line": 477,
+          "line": 461,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
         }
