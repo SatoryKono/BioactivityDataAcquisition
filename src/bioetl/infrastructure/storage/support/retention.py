@@ -214,10 +214,19 @@ class RetentionPolicy:
             if total_before == 0:
                 return 0
 
-            # Sort by _ingestion_ts descending so first occurrence = latest
+            if "_ingestion_ts" in table.schema.names:
+                sort_keys: list[tuple[str, str]] = [("_ingestion_ts", "descending")]
+            elif "content_hash" in table.schema.names:
+                sort_keys = [("content_hash", "ascending")]
+            else:
+                sort_keys = [(key, "ascending") for key in primary_keys]
+
+            # When runtime ingestion timestamps are unavailable in persisted rows,
+            # retain a deterministic row order so post-run deduplication remains
+            # safe until full content-aware idempotency lands in #2726.
             sort_indices = pc.sort_indices(
                 table,
-                sort_keys=[("_ingestion_ts", "descending")],
+                sort_keys=sort_keys,
             )
             sorted_table = table.take(sort_indices)
 
@@ -235,7 +244,7 @@ class RetentionPolicy:
                 for col in pk_cols[1:]:
                     key_arrays = pc.binary_join_element_wise(key_arrays, col, sep)
 
-            # Keep first occurrence (latest by _ingestion_ts)
+            # Keep first occurrence according to the deterministic sort policy.
             seen: set[Any] = set()  # Any: PK values may be str, int, or None
             keep_mask = []
             for val in key_arrays.to_pylist():

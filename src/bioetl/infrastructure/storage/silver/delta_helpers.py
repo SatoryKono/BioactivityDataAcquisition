@@ -90,15 +90,10 @@ def _build_merge_update_predicate(records: pa.Table | pa.RecordBatchReader) -> s
     """Build the Silver merge update predicate for rerun-safe writes."""
     schema = records.schema
     if "content_hash" not in schema.names:
-        return _RUN_TYPE_PRECEDENCE_PREDICATE
+        return "true"
 
-    source_precedence = _RUN_TYPE_PRECEDENCE_EXPR.format(alias="source")
-    target_precedence = _RUN_TYPE_PRECEDENCE_EXPR.format(alias="target")
     content_changed = _build_content_changed_predicate()
-    return (
-        f"({source_precedence} > {target_precedence}) "
-        f"OR ({source_precedence} = {target_precedence} AND ({content_changed}))"
-    )
+    return content_changed
 
 
 def _build_merge_condition(primary_keys: list[str]) -> str:

@@ -8,6 +8,7 @@ import pyarrow as pa
 import pytest
 
 from bioetl.infrastructure.storage.gold.io_delta_mixins import (
+    _GoldWriterExecutorArrowMixin,
     _SimpleGoldWriteRequest,
     _build_simple_gold_write,
     _gold_write_retry_delay,
@@ -15,6 +16,13 @@ from bioetl.infrastructure.storage.gold.io_delta_mixins import (
     _run_gold_write_with_retry,
 )
 from datetime import UTC
+
+
+class _ArrowHost(_GoldWriterExecutorArrowMixin):
+    """Minimal concrete host for `_to_arrow_table` regression tests."""
+
+    def __init__(self) -> None:
+        self.logger = MagicMock()
 
 
 @pytest.mark.unit
@@ -69,6 +77,24 @@ class TestBuildSimpleGoldWrite:
         )
         prepared = _build_simple_gold_write(host, request)
         assert prepared.arrow_data.column("id").to_pylist() == [1, 2, 3]
+
+    def test_executor_arrow_table_strips_runtime_occurrence_fields(self) -> None:
+        """Physical Gold rows should exclude run-scoped provenance columns."""
+        host = _ArrowHost()
+
+        arrow_table = host._to_arrow_table(
+            [
+                {
+                    "id": 1,
+                    "name": "a",
+                    "_run_id": "run-1",
+                    "_ingestion_ts": "2024-01-01T00:00:00Z",
+                    "_lineage_created_at": "2024-01-01T00:00:00Z",
+                }
+            ]
+        )
+
+        assert arrow_table.column_names == ["id", "name"]
 
 
 @pytest.mark.unit
