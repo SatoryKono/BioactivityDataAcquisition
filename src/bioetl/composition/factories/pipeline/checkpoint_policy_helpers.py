@@ -38,10 +38,8 @@ def resolve_checkpoint_compatibility_policy(
         logger_port.warning(
             "Unsupported checkpoint compatibility policy in settings; "
             "falling back to soft_fail.",
-            extra={
-                "pipeline": pipeline.config.pipeline_name,
-                "policy": raw_policy,
-                "default": _DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY,
-            },
+            pipeline=pipeline.config.pipeline_name,
+            policy=raw_policy,
+            default=_DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY,
         )
     return _DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.observability import ObservabilityContractError
 from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,
@@ -29,16 +30,16 @@ __all__ = [
 
 
 def validate_observability_preflight_impl(
-    *,
     tracer: TracingPort,
     metrics: MetricsPort,
     environment: str,
     logger: LoggerPort,
+    allow_noop_in_prod: bool = False,
 ) -> None:
     """Validate observability components for production readiness.
 
     Emits structured warnings when NoOp implementations are used in production.
-    No-ops in non-production environments are silently accepted.
+    By default, production fails closed unless explicit override is enabled.
 
     Args:
         tracer: TracingPort to validate; warns if NoOpTracing in production.
@@ -56,6 +57,13 @@ def validate_observability_preflight_impl(
             recommendation="Set BIOETL_OBSERVABILITY__TRACING_ENABLED=true "
             "and configure OpenTelemetry endpoint",
         )
+        if not allow_noop_in_prod:
+            raise ObservabilityContractError(
+                "NoOpTracing is not allowed in prod. "
+                "Enable tracing or set "
+                "BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD=true "
+                "for an explicit override."
+            )
 
     if isinstance(metrics, NoOpMetrics):
         logger.warning(
@@ -64,6 +72,13 @@ def validate_observability_preflight_impl(
             recommendation="Set BIOETL_OBSERVABILITY__METRICS_ENABLED=true "
             "to enable Prometheus metrics collection",
         )
+        if not allow_noop_in_prod:
+            raise ObservabilityContractError(
+                "NoOpMetrics is not allowed in prod. "
+                "Enable metrics or set "
+                "BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD=true "
+                "for an explicit override."
+            )
 
 
 def bootstrap_observability_bundle_impl(
@@ -78,7 +93,7 @@ def bootstrap_observability_bundle_impl(
     dq_monitor_bootstrapper: Callable[
         [Settings, LoggerPort | None], DQMonitorPort | None
     ],
-    preflight_validator: Callable[[TracingPort, MetricsPort, str, LoggerPort], None],
+    preflight_validator: Callable[[TracingPort, MetricsPort, str, LoggerPort, bool], None],
 ) -> ObservabilityBundle:
     """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run.
 
@@ -121,7 +136,13 @@ def bootstrap_observability_bundle_impl(
         dq_monitor=dq_monitor,
     )
 
-    preflight_validator(tracer, metrics, settings.env, logger)
+    preflight_validator(
+        tracer,
+        metrics,
+        settings.env,
+        logger,
+        settings.observability.allow_noop_observability_in_prod,
+    )
 
     return bundle
 
@@ -143,10 +164,8 @@ def _log_observability_initialized(
     """
     logger.info(
         "observability_initialized",
-        extra={
-            "stage": "bootstrap",
-            "metrics_type": type(metrics).__name__,
-            "tracer_type": type(tracer).__name__,
-            "dq_monitor_enabled": dq_monitor is not None,
-        },
+        stage="bootstrap",
+        metrics_type=type(metrics).__name__,
+        tracer_type=type(tracer).__name__,
+        dq_monitor_enabled=dq_monitor is not None,
     )

@@ -201,7 +201,7 @@ async def test_probe_mode_downgrades_unhealthy_status_with_deterministic_reason(
     mode_latency_calls = [
         call
         for call in metrics.observe_histogram.call_args_list
-        if call[0][0] == "health_check_mode_latency_ms"
+        if call[0][0] == "health_check_mode_latency_seconds"
     ]
     assert len(mode_latency_calls) == 1
     assert mode_latency_calls[0][0][2] == {

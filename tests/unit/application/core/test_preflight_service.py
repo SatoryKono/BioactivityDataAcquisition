@@ -649,7 +649,7 @@ class TestValidateMedallionConfig:
 
         # Check that strict_mode is logged
         call_kwargs = mock_logger.warning.call_args
-        assert "extra" in call_kwargs.kwargs or len(call_kwargs.args) > 1
+        assert call_kwargs.kwargs["strict_mode"] is True
 
 
 @pytest.mark.unit

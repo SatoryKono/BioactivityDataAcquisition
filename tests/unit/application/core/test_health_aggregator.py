@@ -382,7 +382,7 @@ class TestHealthAggregatorMetrics:
 
         await aggregator.check_all(services)
 
-        # data_source emits health_check_latency_ms + health_check_mode_latency_ms
+        # data_source emits health_check_latency_seconds + mode latency
         assert mock_metrics.observe_histogram.call_count == 2
 
     @pytest.mark.asyncio

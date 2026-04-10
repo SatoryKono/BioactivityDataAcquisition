@@ -26,6 +26,7 @@ from bioetl.composition.bootstrap.cli.checkpoint import (
     bootstrap_quarantine_manager,
     bootstrap_quarantine_service,
 )
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.ports import (
     CheckpointPort,
     CompositeCheckpointPort,
@@ -324,3 +325,15 @@ class TestBootstrapQuarantineService:
 
         # QuarantineService uses quarantine_port attribute (dataclass)
         assert isinstance(result.quarantine_port, UnifiedQuarantineAdapter)
+
+    def test_bootstrap_quarantine_service_wires_noop_metrics(self):
+        """CLI quarantine service should inject an explicit NoOpMetrics port."""
+        with patch(
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
+        ) as mock_settings:
+            mock_settings.return_value = MagicMock(
+                quarantine_path=Path("/tmp/quarantine")
+            )
+            result = bootstrap_quarantine_service()
+
+        assert isinstance(result.metrics, NoOpMetrics)

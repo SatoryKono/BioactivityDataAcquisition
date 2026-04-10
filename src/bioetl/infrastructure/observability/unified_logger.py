@@ -34,6 +34,7 @@ from __future__ import annotations
 
 __all__ = ["StageType", "UnifiedLogger", "create_unified_logger"]
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Literal, Self
 
 import structlog
@@ -50,6 +51,7 @@ StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup
 # Default stage when not provided (for LoggerPort compatibility)
 _DEFAULT_STAGE: StageType = "init"
 _EVENT_KWARG: str = "event"
+_EXTRA_KWARG: str = "extra"
 
 
 class UnifiedLogger:
@@ -145,16 +147,25 @@ class UnifiedLogger:
     def _sanitize_kwargs(
         kwargs: JsonDict,  # Any: structlog-compatible API
     ) -> JsonDict:  # Any: structlog-compatible API
-        """Drop kwargs that conflict with structlog positional parameters.
+        """Normalize structured log kwargs into one flat schema.
 
         Returns:
-            Dictionary with 'event' key removed if present, original dict otherwise.
+            Dictionary with conflicting reserved keys removed and nested
+            ``extra={...}`` context flattened into the top level.
         """
-        if _EVENT_KWARG in kwargs:
-            sanitized = dict(kwargs)
-            sanitized.pop(_EVENT_KWARG, None)
-            return sanitized
-        return kwargs
+        sanitized = dict(kwargs)
+        sanitized.pop(_EVENT_KWARG, None)
+        extra_context = sanitized.pop(_EXTRA_KWARG, None)
+
+        if isinstance(extra_context, Mapping):
+            for key, value in extra_context.items():
+                if key == _EVENT_KWARG or key in sanitized:
+                    continue
+                sanitized[key] = value
+        elif extra_context is not None:
+            sanitized[_EXTRA_KWARG] = extra_context
+
+        return sanitized
 
     def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log an informational message.
@@ -172,7 +183,7 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        context = self._ensure_stage(self._sanitize_kwargs(kwargs))
         return self._logger.info(_event, **context)
 
     def warning(
@@ -194,7 +205,7 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        context = self._ensure_stage(self._sanitize_kwargs(kwargs))
         return self._logger.warning(_event, **context)
 
     def error(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
@@ -213,7 +224,7 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        context = self._ensure_stage(self._sanitize_kwargs(kwargs))
         return self._logger.error(_event, **context)
 
     def debug(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
@@ -229,7 +240,7 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        context = self._ensure_stage(self._sanitize_kwargs(kwargs))
         return self._logger.debug(_event, **context)
 
     def exception(
@@ -251,7 +262,7 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        context = self._ensure_stage(self._sanitize_kwargs(kwargs))
         return self._logger.exception(_event, **context)
 
 

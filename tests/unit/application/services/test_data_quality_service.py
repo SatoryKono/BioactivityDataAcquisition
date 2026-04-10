@@ -10,7 +10,26 @@ import pytest
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.domain.config import DQConfig
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
+from bioetl.domain.value_objects.dq_anomaly import (
+    DQAnomaly,
+    DQAnomalySeverity,
+    DQAnomalyType,
+)
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
+
+
+def _sample_anomaly(metric_name: str = "error_rate") -> DQAnomaly:
+    return DQAnomaly(
+        metric_name=metric_name,
+        current_value=0.2,
+        baseline_mean=0.05,
+        baseline_stddev=0.01,
+        anomaly_type=DQAnomalyType.THRESHOLD_EXCEEDED,
+        severity=DQAnomalySeverity.HIGH,
+        z_score=15.0,
+        timestamp=datetime.now(UTC),
+        message=f"{metric_name} exceeded expected range",
+    )
 
 
 @pytest.fixture
@@ -576,11 +595,14 @@ class TestDQResult:
         result = DQResult(
             error_rate=0.05,
             status=DQEvaluationStatus.PASSED,
-            anomalies=["anomaly1", "anomaly2"],  # type: ignore
+            anomalies=[_sample_anomaly("error_rate"), _sample_anomaly("gold_yield")],  # type: ignore[arg-type]
         )
 
         assert isinstance(result.anomalies, tuple)
-        assert result.anomalies == ("anomaly1", "anomaly2")
+        assert [anomaly.metric_name for anomaly in result.anomalies] == [
+            "error_rate",
+            "gold_yield",
+        ]
 
     def test_dq_result_properties(self):
         """Test DQResult property methods."""
@@ -605,7 +627,11 @@ class TestDQResult:
         result = DQResult(
             error_rate=0.05,
             status=DQEvaluationStatus.PASSED,
-            anomalies=("a", "b", "c"),
+            anomalies=(
+                _sample_anomaly("error_rate"),
+                _sample_anomaly("gold_yield"),
+                _sample_anomaly("record_count"),
+            ),
         )
 
         assert result.anomalies_count == 3

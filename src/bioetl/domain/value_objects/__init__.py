@@ -66,6 +66,12 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "ConcentrationUnit",
     ),
     "ConfidenceScore": ("bioetl.domain.value_objects.activity", "ConfidenceScore"),
+    "DQAnomaly": ("bioetl.domain.value_objects.dq_anomaly", "DQAnomaly"),
+    "DQAnomalySeverity": (
+        "bioetl.domain.value_objects.dq_anomaly",
+        "DQAnomalySeverity",
+    ),
+    "DQAnomalyType": ("bioetl.domain.value_objects.dq_anomaly", "DQAnomalyType"),
     "DQEvaluationStatus": (
         "bioetl.domain.value_objects.dq_result",
         "DQEvaluationStatus",
@@ -132,6 +138,9 @@ __all__ = [
     "Concentration",
     "ConcentrationUnit",
     "ConfidenceScore",
+    "DQAnomaly",
+    "DQAnomalySeverity",
+    "DQAnomalyType",
     "DQEvaluationStatus",
     "HeavyAtomCount",
     "HydrogenBondCount",

@@ -130,22 +130,18 @@ class _MedallionClearMixin:
         if result.dry_run:
             self.logger.info(
                 "DRY RUN: Would clear storage",
-                extra={
-                    "policy": policy.clear_policy.value,
-                    "silver_table": silver_table,
-                    "gold_table": gold_table,
-                    "silver_would_clear": result.silver_cleared,
-                    "gold_would_clear": result.gold_cleared,
-                },
+                policy=policy.clear_policy.value,
+                silver_table=silver_table,
+                gold_table=gold_table,
+                silver_would_clear=result.silver_cleared,
+                gold_would_clear=result.gold_cleared,
             )
         elif result.total_cleared > 0:
             self.logger.info(
                 "Cleared storage",
-                extra={
-                    "policy": policy.clear_policy.value,
-                    "silver_cleared": result.silver_cleared,
-                    "gold_cleared": result.gold_cleared,
-                },
+                policy=policy.clear_policy.value,
+                silver_cleared=result.silver_cleared,
+                gold_cleared=result.gold_cleared,
             )
 
 
@@ -201,12 +197,10 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
 
         self.logger.debug(
             "Medallion prepare completed",
-            extra={
-                "run_type": runtime.run_type.value,
-                "clear_policy": policy.clear_policy.value,
-                "silver_cleared": result.silver_cleared,
-                "gold_cleared": result.gold_cleared,
-            },
+            run_type=runtime.run_type.value,
+            clear_policy=policy.clear_policy.value,
+            silver_cleared=result.silver_cleared,
+            gold_cleared=result.gold_cleared,
         )
 
         return PrepareResult(clear_result=result, policy=policy)
@@ -242,12 +236,10 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
 
         self.logger.info(
             "Starting storage optimization",
-            extra={
-                "stage": "optimize",
-                "retention_days": runtime.vacuum_retention_days,
-                "dry_run": runtime.dry_run,
-                "target": silver_table,
-            },
+            stage="optimize",
+            retention_days=runtime.vacuum_retention_days,
+            dry_run=runtime.dry_run,
+            target=silver_table,
         )
 
         try:

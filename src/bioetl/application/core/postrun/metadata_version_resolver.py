@@ -69,7 +69,7 @@ class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
                 runtime=self._runtime,
                 error=error,
                 spec=self._FAILURE_POLICY,
-                extra={
+                log_fields={
                     "layer": layer,
                     "table_path": table_path,
                 },

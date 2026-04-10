@@ -586,8 +586,8 @@ class TestProviderHealthMonitorUpdateFromResult:
 
         # Should have called observe_histogram for latency
         mock_metrics.observe_histogram.assert_called_with(
-            "health_check_latency_ms",
-            45.5,
+            "health_check_latency_seconds",
+            0.0455,
             labels={"provider": "chembl"},
         )
 

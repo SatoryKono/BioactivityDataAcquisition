@@ -1208,10 +1208,12 @@ def test_canonical_observability_builder_uses_noop_when_disabled() -> None:
         pipeline="chembl_activity",
         run_id=uuid4(),
         settings=SimpleNamespace(
+            env="dev",
             observability=SimpleNamespace(
                 tracing_enabled=False,
                 metrics_enabled=False,
                 dq_monitor_enabled=False,
+                allow_noop_observability_in_prod=False,
             )
         ),
         logger_factory=logger_factory,
@@ -1238,6 +1240,7 @@ def test_canonical_observability_builder_configures_dq_monitor_thresholds() -> N
     dq_monitor_factory = MagicMock(return_value=dq_monitor)
 
     settings = SimpleNamespace(
+        env="dev",
         observability=SimpleNamespace(
             tracing_enabled=True,
             metrics_enabled=True,
@@ -1247,6 +1250,7 @@ def test_canonical_observability_builder_configures_dq_monitor_thresholds() -> N
             dq_min_baseline_samples=12,
             dq_error_rate_max=0.3,
             dq_quality_score_min=0.7,
+            allow_noop_observability_in_prod=False,
         )
     )
 

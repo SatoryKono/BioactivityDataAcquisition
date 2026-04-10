@@ -168,25 +168,89 @@ class PostrunService:
     def _record_run_span_attributes(self, span: Span, result: PostrunResult) -> None:
         """Attach postrun outcome attributes to the active tracing span."""
         span.set_attribute("bioetl.dq_status", result.dq.status.value)
+        span.set_attribute("bioetl.dq_anomalies_count", result.dq.anomalies_count)
+        span.set_attribute("bioetl.dq_has_critical", result.dq.has_critical)
+        span.set_attribute("bioetl.dq_check_duration_ms", result.dq.check_duration_ms)
+        span.set_attribute(
+            "bioetl.dq_reports_generated",
+            bool(result.dq_reports and result.dq_reports.any_generated),
+        )
+        span.set_attribute(
+            "bioetl.dq_reports_count",
+            0 if result.dq_reports is None else result.dq_reports.reports_count,
+        )
+        span.set_attribute("bioetl.compaction_status", result.compaction.status)
+        span.set_attribute(
+            "bioetl.compaction_duplicates_removed",
+            result.compaction.duplicates_removed,
+        )
+        span.set_attribute("bioetl.vacuum_skipped", result.vacuum.skipped)
+        span.set_attribute(
+            "bioetl.vacuum_silver_files_removed",
+            result.vacuum.silver_files_removed,
+        )
+        span.set_attribute(
+            "bioetl.vacuum_gold_files_removed",
+            result.vacuum.gold_files_removed,
+        )
 
     def _run_dq_phase(self, executor: ExecutorMetricsPort) -> DQResult:
         """Execute data-quality evaluation for the completed run."""
-        return self.run_dq_checks(executor)
+        with self._postrun_span("postrun.dq_evaluation") as span:
+            result = self.run_dq_checks(executor)
+            span.set_attribute("bioetl.dq_status", result.status.value)
+            span.set_attribute("bioetl.dq_anomalies_count", result.anomalies_count)
+            span.set_attribute("bioetl.dq_has_critical", result.has_critical)
+            span.set_attribute(
+                "bioetl.dq_check_duration_ms",
+                result.check_duration_ms,
+            )
+            return result
 
     async def _run_compaction_phase(self) -> CompactionResult:
         """Execute the compaction phase for Silver when the policy allows it."""
-        return await self.run_silver_compact_if_needed()
+        with self._postrun_span("postrun.compaction") as span:
+            result = await self.run_silver_compact_if_needed()
+            span.set_attribute("bioetl.compaction_status", result.status)
+            span.set_attribute(
+                "bioetl.compaction_duplicates_removed",
+                result.duplicates_removed,
+            )
+            if result.error is not None:
+                span.set_attribute("bioetl.compaction_error", result.error)
+            return result
 
     async def _run_dq_report_phase(
         self,
         dq_context: DQReportContext | None,
     ) -> DQReportResult | None:
         """Generate postrun DQ reports for the current run."""
-        return await self._generate_dq_reports(dq_context)
+        with self._postrun_span("postrun.dq_reports") as span:
+            result = await self._generate_dq_reports(dq_context)
+            span.set_attribute(
+                "bioetl.dq_reports_generated",
+                bool(result and result.any_generated),
+            )
+            span.set_attribute(
+                "bioetl.dq_reports_count",
+                0 if result is None else result.reports_count,
+            )
+            return result
 
     async def _run_vacuum_phase(self) -> VacuumResult:
         """Execute VACUUM finalization for the current run."""
-        return await self.run_vacuum_if_enabled()
+        with self._postrun_span("postrun.vacuum") as span:
+            result = await self.run_vacuum_if_enabled()
+            span.set_attribute("bioetl.vacuum_skipped", result.skipped)
+            span.set_attribute(
+                "bioetl.vacuum_silver_files_removed",
+                result.silver_files_removed,
+            )
+            span.set_attribute(
+                "bioetl.vacuum_gold_files_removed",
+                result.gold_files_removed,
+            )
+            return result
 
     async def _run_final_metadata_phase(
         self,
@@ -194,10 +258,16 @@ class PostrunService:
         dq_reports: DQReportResult | None,
     ) -> None:
         """Persist final metadata when metadata collaborators are configured."""
-        await self._metadata_write_orchestrator.write_final_metadata_if_available(
-            executor,
-            dq_reports,
-        )
+        with self._postrun_span("postrun.final_metadata") as span:
+            await self._metadata_write_orchestrator.write_final_metadata_if_available(
+                executor,
+                dq_reports,
+            )
+            span.set_attribute("bioetl.final_metadata_phase_completed", True)
+            span.set_attribute(
+                "bioetl.dq_reports_available",
+                dq_reports is not None,
+            )
 
     def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
         """Check data quality metrics and report anomalies.

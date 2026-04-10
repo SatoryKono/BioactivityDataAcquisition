@@ -11,6 +11,7 @@ Verifies that:
 from __future__ import annotations
 
 from dataclasses import FrozenInstanceError
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -127,6 +128,7 @@ class TestBootstrapObservability:
         settings.observability.metrics_server_enabled = False
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
+        settings.observability.allow_noop_observability_in_prod = False
 
         bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
@@ -157,6 +159,7 @@ class TestBootstrapObservability:
         settings.observability.metrics_enabled = False
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
+        settings.observability.allow_noop_observability_in_prod = False
 
         bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
@@ -183,6 +186,7 @@ class TestBootstrapObservability:
         settings.observability.metrics_enabled = False
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
+        settings.observability.allow_noop_observability_in_prod = False
 
         bootstrap_observability_bundle(
             pipeline="test_pipeline",
@@ -193,12 +197,34 @@ class TestBootstrapObservability:
         # Verify initialization was logged
         mock_logger.info.assert_called_with(
             "observability_initialized",
-            extra={
-                "stage": "bootstrap",
-                "metrics_type": "NoOpMetrics",
-                "tracer_type": "NoOpTracing",
-                "dq_monitor_enabled": False,
-            },
+            stage="bootstrap",
+            metrics_type="NoOpMetrics",
+            tracer_type="NoOpTracing",
+            dq_monitor_enabled=False,
+        )
+
+    def test_application_and_composition_logging_avoid_nested_extra_payloads(
+        self,
+    ) -> None:
+        """Application and composition code should use flat LoggerPort kwargs."""
+        repo_root = Path(__file__).resolve().parents[3]
+        source_roots = (
+            repo_root / "src" / "bioetl" / "application",
+            repo_root / "src" / "bioetl" / "composition",
+        )
+
+        offenders: list[str] = []
+        for source_root in source_roots:
+            for path in source_root.rglob("*.py"):
+                if "tests" in path.parts:
+                    continue
+                text = path.read_text(encoding="utf-8")
+                if "extra=" in text:
+                    offenders.append(str(path.relative_to(repo_root)))
+
+        assert offenders == [], (
+            "Nested LoggerPort extra payloads are forbidden in application/"
+            f"composition. Offenders: {offenders}"
         )
 
 
@@ -350,22 +376,24 @@ class TestObservabilityPreflightValidation:
     """
 
     def test_observability_production_warning_noop_tracing(self) -> None:
-        """Test that NoOpTracing in production logs warning."""
+        """Test that NoOpTracing in production logs warning and fails closed."""
         from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
+        from bioetl.composition.observability import ObservabilityContractError
         from bioetl.domain.ports.noop import NoOpTracing
 
         mock_logger = MagicMock()
         mock_metrics = MagicMock()
         noop_tracer = NoOpTracing()
 
-        validate_observability_preflight(
-            tracer=noop_tracer,
-            metrics=mock_metrics,
-            environment="prod",
-            logger=mock_logger,
-        )
+        with pytest.raises(ObservabilityContractError, match="NoOpTracing"):
+            validate_observability_preflight(
+                tracer=noop_tracer,
+                metrics=mock_metrics,
+                environment="prod",
+                logger=mock_logger,
+            )
 
         # Verify warning was logged for NoOpTracing
         mock_logger.warning.assert_called_once()
@@ -374,7 +402,7 @@ class TestObservabilityPreflightValidation:
         assert "traces will be lost" in call_args[1]["message"]
 
     def test_observability_production_warning_noop_metrics(self) -> None:
-        """Test that NoOpMetrics in production logs warning."""
+        """Test that NoOp implementations only warn when explicit override is enabled."""
         from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
@@ -389,6 +417,7 @@ class TestObservabilityPreflightValidation:
             metrics=noop_metrics,
             environment="prod",
             logger=mock_logger,
+            allow_noop_in_prod=True,
         )
 
         # Verify both warnings were logged
@@ -480,6 +509,7 @@ class TestObservabilityPreflightValidation:
         settings.observability.metrics_enabled = False
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
+        settings.observability.allow_noop_observability_in_prod = True
 
         bootstrap_observability_bundle(
             pipeline="test_pipeline",
