@@ -101,6 +101,10 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "execution_path",
     "test_surface",
     "test_artifact",
+    "storage_surface",
+    "runtime_evidence_surface",
+    "workflow_surface",
+    "workflow_job_surface",
 )
 DEFAULT_FILE_STRUCTURE_REPO_ZONES: dict[str, tuple[str, ...]] = {
     "src": ("src",),
@@ -109,6 +113,7 @@ DEFAULT_FILE_STRUCTURE_REPO_ZONES: dict[str, tuple[str, ...]] = {
     "docs": ("docs",),
     "scripts": ("scripts",),
     "grafana": ("grafana",),
+    ".github": (".github",),
 }
 DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "docs/99-archive",
@@ -1946,6 +1951,10 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_policy_surfaces(snapshot, root, project, today)
     _add_impact_analysis_surfaces(snapshot, root, project, today)
     _add_file_structure_surfaces(snapshot, root, project, today)
+    _add_storage_data_surfaces(snapshot, root, project, today)
+    _add_control_plane_runtime_evidence(snapshot, root, project, today)
+    _add_ci_workflow_graph(snapshot, root, project, today)
+    _add_docs_to_code_drift_edges(snapshot, root)
     _add_retirement_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     _add_complexity_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     return snapshot
@@ -2584,6 +2593,9 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
         "pipeline_surface",
         "contract_surface",
         "alert_surface",
+        "runtime_evidence_surface",
+        "workflow_surface",
+        "workflow_job_surface",
     }
     for node in list(snapshot.nodes.values()):
         if node.key.label not in source_backed_labels:
@@ -2671,6 +2683,496 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
             hub_key = NodeKey("directory_surface", promoted_hub)
             if hub_key in snapshot.nodes:
                 snapshot.add_relation(hub_key, "HOUSES", relation.source, provenance="file_structure_inferred")
+
+
+def _merge_storage_layer_config(
+    base_sink: dict[str, object],
+    pipeline_sink: dict[str, object],
+    layer_name: str,
+) -> dict[str, object]:
+    merged: dict[str, object] = {}
+    base_layer = base_sink.get(layer_name)
+    if isinstance(base_layer, dict):
+        merged.update(base_layer)
+    override_layer = pipeline_sink.get(layer_name)
+    if isinstance(override_layer, dict):
+        merged.update(override_layer)
+    return merged
+
+
+def _storage_ref_from_output_path(raw_path: str) -> str:
+    normalized = raw_path.strip().strip("/")
+    if normalized.startswith("data/output/"):
+        normalized = normalized.removeprefix("data/output/")
+    return normalized
+
+
+def _add_storage_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    ref: str,
+    *,
+    summary: str,
+    layer: str,
+    today: str,
+    storage_kind: str,
+    provider: str | None = None,
+    entity: str | None = None,
+    pipeline_name: str | None = None,
+    format_name: str | None = None,
+    mode: str | None = None,
+    enabled: bool | None = None,
+) -> NodeKey:
+    surface = snapshot.add_node(
+        "storage_surface",
+        ref,
+        summary=summary,
+        layer=layer,
+        storage_kind=storage_kind,
+        provider=provider,
+        entity=entity,
+        pipeline_name=pipeline_name,
+        format=format_name,
+        mode=mode,
+        enabled=enabled,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_STORAGE_SURFACE", surface, provenance="storage_surfaces")
+    return surface
+
+
+def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    base_pipeline_path = root / "configs" / "base" / "pipeline.yaml"
+    base_payload = _read_yaml(base_pipeline_path) if base_pipeline_path.is_file() else {}
+    base_sink = base_payload.get("sink") if isinstance(base_payload.get("sink"), dict) else {}
+
+    entities_root = root / "configs" / "entities"
+    for entity_path in sorted(entities_root.rglob("*.yaml")):
+        payload = _read_yaml(entity_path)
+        provider_name = str(payload.get("provider", entity_path.parent.name))
+        entity_name = str(payload.get("entity", entity_path.stem))
+        pipeline_payload = payload.get("pipeline") if isinstance(payload.get("pipeline"), dict) else {}
+        pipeline_name = str(pipeline_payload.get("pipeline_name", f"{provider_name}_{entity_name}"))
+        pipeline_key = NodeKey("pipeline_surface", pipeline_name)
+        entity_key = NodeKey("entity_config", pipeline_name)
+        config_artifact = NodeKey("config_artifact", _rel_path(root, entity_path))
+        pipeline_sink = pipeline_payload.get("sink") if isinstance(pipeline_payload.get("sink"), dict) else {}
+
+        layer_nodes: dict[str, NodeKey] = {}
+        for layer_name in ("bronze", "silver", "gold"):
+            layer_config = _merge_storage_layer_config(base_sink, pipeline_sink, layer_name)
+            enabled = bool(layer_config.get("enabled", True))
+            if layer_name == "gold" and not enabled:
+                continue
+            storage_ref = f"{layer_name}/{provider_name}/{entity_name}"
+            surface = _add_storage_surface(
+                snapshot,
+                project,
+                storage_ref,
+                summary=f"{layer_name.title()} storage surface for `{pipeline_name}`.",
+                layer=layer_name,
+                today=today,
+                storage_kind="entity_layer_output",
+                provider=provider_name,
+                entity=entity_name,
+                pipeline_name=pipeline_name,
+                format_name=str(layer_config.get("format")) if layer_config.get("format") is not None else None,
+                mode=str(layer_config.get("mode")) if layer_config.get("mode") is not None else None,
+                enabled=enabled,
+            )
+            layer_nodes[layer_name] = surface
+            if pipeline_key in snapshot.nodes:
+                snapshot.add_relation(pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
+            if entity_key in snapshot.nodes:
+                snapshot.add_relation(entity_key, "WRITES_TO", surface, provenance="storage_surfaces")
+            if config_artifact in snapshot.nodes:
+                snapshot.add_relation(surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
+
+        if "bronze" in layer_nodes and "silver" in layer_nodes:
+            snapshot.add_relation(layer_nodes["bronze"], "PROMOTES_TO", layer_nodes["silver"], provenance="storage_surfaces")
+        if "silver" in layer_nodes and "gold" in layer_nodes:
+            snapshot.add_relation(layer_nodes["silver"], "PROMOTES_TO", layer_nodes["gold"], provenance="storage_surfaces")
+
+    composites_root = root / "configs" / "composites"
+    for composite_path in sorted(composites_root.glob("*.yaml")):
+        payload = _read_yaml(composite_path)
+        composite_payload = payload.get("composite") if isinstance(payload.get("composite"), dict) else {}
+        composite_name = str(composite_payload.get("name", composite_path.stem))
+        pipeline_key = NodeKey("pipeline_surface", composite_name)
+        config_artifact = NodeKey("config_artifact", _rel_path(root, composite_path))
+
+        seed_payload = composite_payload.get("seed") if isinstance(composite_payload.get("seed"), dict) else {}
+        seed_table = seed_payload.get("silver_table")
+        if isinstance(seed_table, str) and seed_table.strip():
+            seed_surface = _add_storage_surface(
+                snapshot,
+                project,
+                seed_table.strip(),
+                summary=f"Seed storage surface for composite pipeline `{composite_name}`.",
+                layer="silver",
+                today=today,
+                storage_kind="composite_seed_input",
+                pipeline_name=composite_name,
+            )
+            if pipeline_key in snapshot.nodes:
+                snapshot.add_relation(pipeline_key, "DEPENDS_ON", seed_surface, provenance="storage_surfaces")
+            if config_artifact in snapshot.nodes:
+                snapshot.add_relation(seed_surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
+
+        dependencies = composite_payload.get("dependencies")
+        if isinstance(dependencies, list):
+            for dependency in dependencies:
+                if not isinstance(dependency, dict):
+                    continue
+                silver_table = dependency.get("silver_table")
+                if not isinstance(silver_table, str) or not silver_table.strip():
+                    continue
+                dependency_surface = _add_storage_surface(
+                    snapshot,
+                    project,
+                    silver_table.strip(),
+                    summary=f"Dependency storage surface for composite pipeline `{composite_name}`.",
+                    layer="silver",
+                    today=today,
+                    storage_kind="composite_dependency_input",
+                    pipeline_name=composite_name,
+                )
+                if pipeline_key in snapshot.nodes:
+                    snapshot.add_relation(
+                        pipeline_key,
+                        "DEPENDS_ON",
+                        dependency_surface,
+                        provenance="storage_surfaces",
+                        required=bool(dependency.get("required", False)),
+                    )
+                if config_artifact in snapshot.nodes:
+                    snapshot.add_relation(dependency_surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
+
+        merge_payload = composite_payload.get("merge") if isinstance(composite_payload.get("merge"), dict) else {}
+        output_payload = merge_payload.get("output") if isinstance(merge_payload.get("output"), dict) else {}
+        layer_nodes: dict[str, NodeKey] = {}
+        for layer_name in ("silver", "gold"):
+            output_path = output_payload.get(layer_name)
+            if not isinstance(output_path, str) or not output_path.strip():
+                continue
+            storage_ref = _storage_ref_from_output_path(output_path)
+            surface = _add_storage_surface(
+                snapshot,
+                project,
+                storage_ref,
+                summary=f"{layer_name.title()} output surface for composite pipeline `{composite_name}`.",
+                layer=layer_name,
+                today=today,
+                storage_kind="composite_layer_output",
+                pipeline_name=composite_name,
+            )
+            layer_nodes[layer_name] = surface
+            if pipeline_key in snapshot.nodes:
+                snapshot.add_relation(pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
+            if config_artifact in snapshot.nodes:
+                snapshot.add_relation(surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
+        if "silver" in layer_nodes and "gold" in layer_nodes:
+            snapshot.add_relation(layer_nodes["silver"], "PROMOTES_TO", layer_nodes["gold"], provenance="storage_surfaces")
+
+
+def _add_control_plane_runtime_evidence(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+) -> None:
+    evidence_specs = (
+        {
+            "name": "run_manifest",
+            "summary": "Control-plane runtime evidence for immutable run manifests.",
+            "source_path": "docs/04-reference/contracts/run-manifest-ledger.md",
+            "docs": (
+                "docs/04-reference/contracts/run-manifest-ledger.md",
+                "docs/05-operations/runbooks/run-manifest-inspection.md",
+                "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
+            ),
+            "modules": (
+                "src/bioetl/domain/control_plane/run_manifest.py",
+                "src/bioetl/application/services/run_manifest_service.py",
+                "src/bioetl/application/services/run_manifest_diagnostics.py",
+                "src/bioetl/application/services/run_manifest_inspection_service.py",
+                "src/bioetl/interfaces/cli/commands/run_manifest.py",
+                "src/bioetl/composition/bootstrap/cli/run_manifest.py",
+                "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
+            ),
+            "storage_refs": (
+                ("control/run_manifest/{manifest_id}.json", "json"),
+                ("control/run_manifest/_by_run_id/{run_id}.txt", "index"),
+            ),
+        },
+        {
+            "name": "run_ledger",
+            "summary": "Control-plane runtime evidence for append-only run ledgers.",
+            "source_path": "docs/04-reference/contracts/run-manifest-ledger.md",
+            "docs": (
+                "docs/04-reference/contracts/run-manifest-ledger.md",
+                "docs/05-operations/runbooks/run-manifest-inspection.md",
+                "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
+            ),
+            "modules": (
+                "src/bioetl/domain/control_plane/run_ledger.py",
+                "src/bioetl/application/services/run_ledger_service.py",
+            ),
+            "storage_refs": (
+                ("control/run_ledger/{manifest_id}.jsonl", "jsonl"),
+                ("control/run_ledger/_by_run_id/{run_id}.txt", "index"),
+            ),
+        },
+        {
+            "name": "effective_config_artifact",
+            "summary": "Runtime evidence for effective configuration artifacts and hashes.",
+            "source_path": "docs/04-reference/components/config-runtime-artifacts.md",
+            "docs": (
+                "docs/04-reference/components/config-runtime-artifacts.md",
+                "docs/05-operations/runbooks/run-manifest-inspection.md",
+            ),
+            "modules": (
+                "src/bioetl/domain/control_plane/effective_config_artifact.py",
+                "src/bioetl/composition/services/effective_config_serializer.py",
+                "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
+            ),
+            "storage_refs": (),
+        },
+        {
+            "name": "lineage",
+            "summary": "Runtime evidence for artifact lineage and inspection surfaces.",
+            "source_path": "docs/05-operations/runbooks/traceability-signal-ownership.md",
+            "docs": (
+                "docs/05-operations/runbooks/traceability-signal-ownership.md",
+                "docs/04-reference/contracts/run-manifest-ledger.md",
+            ),
+            "modules": (
+                "src/bioetl/application/services/lineage_inspection_service.py",
+                "src/bioetl/composition/bootstrap/cli/lineage.py",
+            ),
+            "storage_refs": (),
+        },
+    )
+
+    for spec in evidence_specs:
+        surface = snapshot.add_node(
+            "runtime_evidence_surface",
+            str(spec["name"]),
+            summary=str(spec["summary"]),
+            source_path=str(spec["source_path"]),
+            source_kind="runtime_evidence_surface",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(project, "HAS_RUNTIME_EVIDENCE", surface, provenance="runtime_evidence")
+        for doc_path in spec["docs"]:
+            doc_key = NodeKey("doc_artifact", str(doc_path))
+            if doc_key in snapshot.nodes:
+                snapshot.add_relation(surface, "DESCRIBED_IN", doc_key, provenance="runtime_evidence")
+        for module_path in spec["modules"]:
+            module_key = NodeKey("module_surface", str(module_path))
+            if module_key in snapshot.nodes:
+                snapshot.add_relation(surface, "BACKED_BY", module_key, provenance="runtime_evidence")
+        for storage_ref, suffix in spec["storage_refs"]:
+            storage = _add_storage_surface(
+                snapshot,
+                project,
+                storage_ref,
+                summary=f"Control-plane storage surface `{storage_ref}`.",
+                layer="control",
+                today=today,
+                storage_kind="control_plane_artifact",
+            )
+            snapshot.add_relation(surface, "WRITES_TO", storage, provenance="runtime_evidence", suffix=suffix)
+
+
+def _workflow_script_targets(run_text: str) -> set[NodeKey]:
+    targets: set[NodeKey] = set()
+    module_pattern = re.compile(r"(?:uv\s+run\s+)?python(?:3)?\s+-m\s+scripts\.([a-zA-Z0-9_]+)")
+    for match in module_pattern.finditer(run_text):
+        script_path = f"scripts/{match.group(1)}/__main__.py"
+        targets.add(NodeKey("script_surface", script_path))
+
+    path_pattern = re.compile(r"(?<![A-Za-z0-9_./-])((?:scripts|tests|configs|src|docs|grafana|\\.github)/[A-Za-z0-9_./-]+)")
+    for match in path_pattern.finditer(run_text):
+        candidate = match.group(1).rstrip(".,:)")
+        targets.add(NodeKey("script_surface", candidate))
+        targets.add(NodeKey("file_surface", candidate))
+        targets.add(NodeKey("directory_surface", candidate))
+    return targets
+
+
+def _workflow_quality_gates(run_text: str) -> tuple[str, ...]:
+    lowered = run_text.lower()
+    gates: list[str] = []
+    if "pytest" in lowered:
+        gates.append("pytest")
+    if "mypy" in lowered:
+        gates.append("mypy --strict")
+    if "scripts.docs" in lowered or "check-links" in lowered or "build_docs_site.sh" in lowered:
+        gates.append("docs verification")
+    if "validate_pipeline_configs" in lowered or "scripts.schema" in lowered or "check_config_invariants" in lowered:
+        gates.append("config validation")
+    if "neo4j-memory" in lowered:
+        gates.append("deterministic neo4j memory ontology invariants")
+    return tuple(dict.fromkeys(gates))
+
+
+def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    workflows_root = root / ".github" / "workflows"
+    if not workflows_root.is_dir():
+        return
+
+    workflow_nodes: dict[str, NodeKey] = {}
+    job_nodes: dict[tuple[str, str], NodeKey] = {}
+    for workflow_path in sorted(workflows_root.glob("*.y*ml")):
+        payload = _read_yaml(workflow_path)
+        workflow_name = workflow_path.stem
+        title = payload.get("name") if isinstance(payload.get("name"), str) else workflow_name
+        relative_path = _rel_path(root, workflow_path)
+        workflow = snapshot.add_node(
+            "workflow_surface",
+            workflow_name,
+            summary=f"GitHub Actions workflow `{title}`.",
+            source_path=relative_path,
+            source_kind="github_actions_workflow",
+            workflow_title=title,
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        workflow_nodes[workflow_name] = workflow
+        snapshot.add_relation(project, "HAS_WORKFLOW", workflow, provenance="workflow_graph")
+
+        jobs = payload.get("jobs")
+        if not isinstance(jobs, dict):
+            continue
+        for job_id, job_payload in jobs.items():
+            if not isinstance(job_payload, dict):
+                continue
+            job_name = f"{workflow_name}::{job_id}"
+            job = snapshot.add_node(
+                "workflow_job_surface",
+                job_name,
+                summary=f"GitHub Actions job `{job_id}` in workflow `{title}`.",
+                source_path=relative_path,
+                source_kind="github_actions_job",
+                workflow=workflow_name,
+                job_id=str(job_id),
+                runs_on=str(job_payload.get("runs-on")) if job_payload.get("runs-on") is not None else None,
+                last_verified=today,
+                ingest_wave="repo_sync_v1",
+                confidence="high",
+            )
+            job_nodes[(workflow_name, str(job_id))] = job
+            snapshot.add_relation(workflow, "CONTAINS", job, provenance="workflow_graph")
+
+            steps = job_payload.get("steps")
+            if isinstance(steps, list):
+                for step in steps:
+                    if not isinstance(step, dict):
+                        continue
+                    run_text = step.get("run")
+                    if not isinstance(run_text, str):
+                        continue
+                    for target in sorted(_workflow_script_targets(run_text), key=lambda item: (item.label, item.name)):
+                        if target in snapshot.nodes:
+                            snapshot.add_relation(job, "RUNS_VIA", target, provenance="workflow_graph")
+                    for gate_name in _workflow_quality_gates(run_text):
+                        gate_key = NodeKey("quality_gate", gate_name)
+                        if gate_key in snapshot.nodes:
+                            snapshot.add_relation(job, "EXECUTES_GATE", gate_key, provenance="workflow_graph")
+
+        for job_id, job_payload in jobs.items():
+            if not isinstance(job_payload, dict):
+                continue
+            job = job_nodes.get((workflow_name, str(job_id)))
+            if job is None:
+                continue
+            needs_payload = job_payload.get("needs")
+            needs: list[str] = []
+            if isinstance(needs_payload, str):
+                needs = [needs_payload]
+            elif isinstance(needs_payload, list):
+                needs = [str(item) for item in needs_payload if isinstance(item, str)]
+            for dependency_id in needs:
+                dependency_key = job_nodes.get((workflow_name, dependency_id))
+                if dependency_key is not None:
+                    snapshot.add_relation(job, "DEPENDS_ON", dependency_key, provenance="workflow_graph")
+
+
+def _normalize_docs_repo_reference(raw_ref: str) -> str | None:
+    candidate = raw_ref.strip().strip("`").rstrip(".,:;)]}")
+    if not candidate:
+        return None
+    if candidate.endswith("/**"):
+        candidate = candidate[: -len("/**")]
+    elif "/*." in candidate:
+        candidate = candidate.rsplit("/", 1)[0]
+    elif candidate.endswith("/*"):
+        candidate = candidate[: -len("/*")]
+    candidate = candidate.rstrip("/")
+    allowed_prefixes = ("src/", "configs/", "scripts/", "tests/", "docs/", "grafana/", ".github/")
+    if candidate in {"README.md", "mkdocs.yml"}:
+        return candidate
+    if any(candidate.startswith(prefix) for prefix in allowed_prefixes):
+        return candidate
+    return None
+
+
+def _resolve_docs_reference_target(
+    snapshot: GraphSnapshot,
+    ref: str,
+) -> NodeKey | None:
+    exact_candidates = (
+        NodeKey("module_surface", ref),
+        NodeKey("script_surface", ref),
+        NodeKey("test_artifact", ref),
+        NodeKey("config_artifact", ref),
+        NodeKey("workflow_surface", Path(ref).stem if ref.startswith(".github/workflows/") else ref),
+        NodeKey("file_surface", ref),
+        NodeKey("directory_surface", ref),
+    )
+    for candidate in exact_candidates:
+        if candidate in snapshot.nodes:
+            return candidate
+
+    for node in snapshot.nodes.values():
+        source_path = node.properties.get("source_path")
+        if isinstance(source_path, str) and source_path == ref:
+            return node.key
+    return None
+
+
+def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
+    path_pattern = re.compile(
+        r"(?<![A-Za-z0-9_./-])("
+        r"README\.md|mkdocs\.yml|\.github/[A-Za-z0-9_./*-]+|"
+        r"(?:src|configs|scripts|tests|docs|grafana)/[A-Za-z0-9_./*-]+"
+        r")"
+    )
+    doc_like_labels = {"doc_source_surface", "doc_artifact", "policy_surface"}
+    for node in list(snapshot.nodes.values()):
+        if node.key.label not in doc_like_labels:
+            continue
+        source_path = node.properties.get("source_path")
+        if not isinstance(source_path, str):
+            continue
+        doc_path = root / source_path
+        if not doc_path.is_file():
+            continue
+        text = _read_text(doc_path)
+        for match in sorted(set(path_pattern.findall(text))):
+            normalized = _normalize_docs_repo_reference(match)
+            if normalized is None:
+                continue
+            target = _resolve_docs_reference_target(snapshot, normalized)
+            if target is None or target == node.key:
+                continue
+            snapshot.add_relation(node.key, "DESCRIBES", target, provenance="docs_code_drift")
 
 
 def _add_port_surfaces(
@@ -4990,7 +5492,7 @@ def sync_snapshot(
         analysis_relation_batch_size,
         "analysis relation",
     )
-    verification_sync_run = sync_run if targeted_mode else None
+    verification_sync_run = sync_run if (targeted_mode or prune_stale) else None
     _retry_critical_analysis_groups(
         client,
         analysis_node_groups,

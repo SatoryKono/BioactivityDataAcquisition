@@ -40,6 +40,7 @@ from scripts.ops.neo4j_memory_sync import (
     resolve_neo4j_connection,
     _relation_statement,
     _reset_managed_relations_statement,
+    sync_snapshot,
     _verify_expected_group_counts,
     snapshot_invariant_issues,
     _targeted_apply_external_anchor_keys,
@@ -128,18 +129,21 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("project", "BioETL") in node_keys
     assert ("repo_zone", "src") in node_keys
     assert ("repo_zone", "docs") in node_keys
+    assert ("repo_zone", ".github") in node_keys
     assert ("directory_surface", "src/bioetl/application/core") in node_keys
     assert ("directory_surface", "configs/entities/chembl") in node_keys
     assert ("directory_surface", "tests/architecture") in node_keys
     assert ("directory_surface", "docs/02-architecture/diagrams") in node_keys
     assert ("directory_surface", "scripts/ops") in node_keys
     assert ("directory_surface", "grafana/dashboards") in node_keys
+    assert ("directory_surface", ".github/workflows") in node_keys
     assert ("file_surface", "src/bioetl/application/core/record_normalization_processor.py") in node_keys
     assert ("file_surface", "configs/entities/chembl/activity.yaml") in node_keys
     assert ("file_surface", "docs/02-architecture/diagrams/README.md") in node_keys
     assert ("file_surface", "scripts/ops/__main__.py") in node_keys
     assert ("file_surface", "tests/architecture/test_diagram_quality_gates.py") in node_keys
     assert ("file_surface", "grafana/dashboards/bioetl-runtime.json") in node_keys
+    assert ("file_surface", ".github/workflows/tests.yml") in node_keys
     assert ("layer_family", "domain") in node_keys
     assert ("package_family", "domain/ports") in node_keys
     assert (
@@ -163,6 +167,9 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("provider_surface", "chembl") in node_keys
     assert ("entity_config", "chembl_activity") in node_keys
     assert ("composite_config", "composite_activity") in node_keys
+    assert ("storage_surface", "silver/chembl/activity") in node_keys
+    assert ("storage_surface", "silver/composite/activity") in node_keys
+    assert ("storage_surface", "control/run_manifest/{manifest_id}.json") in node_keys
     assert ("dashboard_surface", "bioetl-overview-v2") in node_keys
     assert ("doc_source_surface", "architecture diagrams hub") in node_keys
     assert ("doc_source_surface", "diagram governance workflow") in node_keys
@@ -189,6 +196,12 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("pipeline_surface", "chembl_activity") in node_keys
     assert ("contract_surface", "chembl.activity") in node_keys
     assert ("alert_surface", "BioETLPipelineRunFailed") in node_keys
+    assert ("runtime_evidence_surface", "run_manifest") in node_keys
+    assert ("runtime_evidence_surface", "run_ledger") in node_keys
+    assert ("runtime_evidence_surface", "effective_config_artifact") in node_keys
+    assert ("runtime_evidence_surface", "lineage") in node_keys
+    assert ("workflow_surface", "tests") in node_keys
+    assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
     assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
     assert ("execution_path", "uv run python -m scripts.diagrams lint") in node_keys
     assert ("execution_path", "uv run python -m scripts.docs verify") in node_keys
@@ -254,6 +267,10 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("directory_surface", "grafana/dashboards", "CONTAINS", "file_surface", "grafana/dashboards/bioetl-runtime.json"),
     ("directory_surface", "grafana/dashboards", "HOUSES", "dashboard_surface", "bioetl-runtime"),
     ("file_surface", "grafana/dashboards/bioetl-runtime.json", "BACKS", "dashboard_surface", "bioetl-runtime"),
+    ("repo_zone", ".github", "CONTAINS", "directory_surface", ".github"),
+    ("directory_surface", ".github/workflows", "CONTAINS", "file_surface", ".github/workflows/tests.yml"),
+    ("directory_surface", ".github/workflows", "HOUSES", "workflow_surface", "tests"),
+    ("file_surface", ".github/workflows/tests.yml", "BACKS", "workflow_surface", "tests"),
     ("directory_surface", "configs/contracts", "HOUSES", "contract_surface", "chembl.activity"),
     ("directory_surface", "configs/contracts/chembl", "HOUSES", "contract_surface", "chembl.activity"),
     ("directory_surface", "configs/quality", "HOUSES", "policy_surface", "integration and VCR execution policy"),
@@ -268,6 +285,11 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("project", "BioETL", "HAS_PROVIDER", "provider_surface", "chembl"),
     ("provider_surface", "chembl", "DEFINES", "entity_config", "chembl_activity"),
     ("composite_config", "composite_activity", "DEPENDS_ON", "entity_config", "chembl_activity"),
+    ("project", "BioETL", "HAS_STORAGE_SURFACE", "storage_surface", "silver/chembl/activity"),
+    ("pipeline_surface", "chembl_activity", "WRITES_TO", "storage_surface", "silver/chembl/activity"),
+    ("pipeline_surface", "composite_activity", "DEPENDS_ON", "storage_surface", "silver/chembl/activity"),
+    ("pipeline_surface", "composite_activity", "WRITES_TO", "storage_surface", "silver/composite/activity"),
+    ("storage_surface", "silver/composite/activity", "PROMOTES_TO", "storage_surface", "gold/composite/activity"),
     ("package_family", "domain/config", "CONTAINS", "module_surface", "src/bioetl/domain/config/pipeline.py"),
     ("project", "BioETL", "HAS_DOC_SOURCE_SURFACE", "doc_source_surface", "architecture diagrams hub"),
     ("policy_surface", "diagram governance policy", "GOVERNS", "quality_gate", "diagram quality gates"),
@@ -320,6 +342,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("alert_surface", "BioETLProviderFailureRateHigh", "DEPENDS_ON", "provider_surface", "chembl"),
     ("alert_surface", "BioETLControlPlaneReadFailureRate", "OBSERVED_BY", "dashboard_surface", "bioetl-control-plane-v1"),
     ("alert_surface", "BioETLControlPlaneReadFailureRate", "DEPENDS_ON", "contract_surface", "chembl.activity"),
+    ("project", "BioETL", "HAS_RUNTIME_EVIDENCE", "runtime_evidence_surface", "run_manifest"),
+    ("runtime_evidence_surface", "run_manifest", "BACKED_BY", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
+    ("runtime_evidence_surface", "run_manifest", "WRITES_TO", "storage_surface", "control/run_manifest/{manifest_id}.json"),
+    ("project", "BioETL", "HAS_WORKFLOW", "workflow_surface", "tests"),
+    ("workflow_surface", "tests", "CONTAINS", "workflow_job_surface", "tests::governance-preflight"),
+    ("workflow_job_surface", "tests::governance-preflight", "EXECUTES_GATE", "quality_gate", "deterministic neo4j memory ontology invariants"),
+    ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
+    ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/infrastructure/config/_base.py"),
     ("doc_artifact", "scripts/dev/README.md", "DESCRIBES", "execution_path", "bash scripts/dev/run_pytest.sh"),
     ("script_surface", "scripts/dev/run_pytest.sh", "PROVIDES", "execution_path", "bash scripts/dev/run_pytest.sh"),
     ("layer_family", "composition", "CONTAINS", "module_surface", "src/bioetl/composition/control_plane_api.py"),
@@ -606,6 +636,10 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "execution_path",
         "test_surface",
         "test_artifact",
+        "storage_surface",
+        "runtime_evidence_surface",
+        "workflow_surface",
+        "workflow_job_surface",
     }
 
     assert set(DEFAULT_LEGACY_PRUNE_LABELS) == expected_labels
@@ -1043,6 +1077,44 @@ def test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks
     )
 
     assert any(params.get("sync_run") == "run-123" for params in seen_params)
+
+
+def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(monkeypatch, tmp_path: Path) -> None:
+    snapshot = GraphSnapshot()
+    snapshot.add_node("complexity_candidate", "candidate-1")
+    captured_retry_sync_runs: list[str | None] = []
+    captured_verify_sync_runs: list[str | None] = []
+
+    class StubClient:
+        def execute(self, statements, *, context=None) -> dict[str, object]:
+            return {"results": [], "errors": []}
+
+        def query(self, statement, parameters=None, *, context=None) -> list[dict[str, object]]:
+            return []
+
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.resolve_neo4j_connection", lambda root, http_uri: ("http://localhost:7474", "neo4j", "password", "neo4j"))
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.Neo4jHttpClient", lambda *args, **kwargs: StubClient())
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._sync_run_id", lambda: "run-123")
+
+    def _retry(*args, **kwargs) -> None:
+        captured_retry_sync_runs.append(kwargs.get("sync_run"))
+
+    def _verify(*args, **kwargs) -> None:
+        captured_verify_sync_runs.append(kwargs.get("sync_run"))
+
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._retry_critical_analysis_groups", _retry)
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._verify_expected_group_counts", _verify)
+
+    sync_snapshot(
+        snapshot,
+        tmp_path,
+        None,
+        batch_size=10,
+        prune_stale=True,
+    )
+
+    assert captured_retry_sync_runs == ["run-123"]
+    assert captured_verify_sync_runs == ["run-123"]
 
 
 def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(monkeypatch, tmp_path: Path) -> None:
