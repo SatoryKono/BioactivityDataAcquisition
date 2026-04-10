@@ -216,7 +216,7 @@ Interpretation examples:
 - `artifact_published` with empty `artifact_refs` indicates traceability degradation;
 - `missing_artifact_links > 0` means artifact events are missing `dataset_ref` and/or `lineage_fragment_id` anchors;
 - `correlation_anchor_gaps.effective_config_hash > 0` means execution-critical ledger events lost effective config linkage;
-- `correlation_anchor_gaps.data_contract_version > 0` on failure-critical runs means contract traceability is incomplete.
+- `correlation_anchor_gaps.contract_version > 0` on failure-critical runs means contract traceability is incomplete.
 
 ## Compliance
 

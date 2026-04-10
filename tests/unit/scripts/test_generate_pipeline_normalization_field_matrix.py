@@ -43,14 +43,26 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     assert pubchem_smiles["normalizer"] == "_normalize_canonical_smiles"
 
     openalex_title = _row(rows, "openalex_publication", "title")
-    assert openalex_title["normalization_source"] == "fallback_business"
-    assert openalex_title["normalizer"] == "normalize_title"
+    assert openalex_title["normalization_source"] == "profile"
+    assert openalex_title["normalizer"] == "normalize_profile_title"
 
-    openalex_run_id = _row(rows, "openalex_publication", "_run_id")
+    semanticscholar_title = _row(rows, "semanticscholar_publication", "title")
+    assert semanticscholar_title["normalization_source"] == "profile"
+    assert semanticscholar_title["normalizer"] == "normalize_profile_title"
+
+    chembl_molecule_smiles = _row(rows, "chembl_molecule", "canonical_smiles")
+    assert chembl_molecule_smiles["normalization_source"] == "profile"
+    assert chembl_molecule_smiles["normalizer"] == "_normalize_canonical_smiles"
+
+    uniprot_protein_name = _row(rows, "uniprot_protein", "protein_name")
+    assert uniprot_protein_name["normalization_source"] == "profile"
+    assert uniprot_protein_name["normalizer"] == "normalize_profile_title"
+
+    chembl_assay_run_id = _row(rows, "chembl_assay", "_run_id")
     assert (
-        openalex_run_id["normalization_source"] == "fallback_technical_passthrough"
+        chembl_assay_run_id["normalization_source"] == "fallback_technical_passthrough"
     )
-    assert openalex_run_id["normalizer"] == "passthrough"
+    assert chembl_assay_run_id["normalizer"] == "passthrough"
 
 
 def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields() -> None:
