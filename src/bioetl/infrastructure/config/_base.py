@@ -103,6 +103,9 @@ class ObservabilitySettings(BaseSettings):
     tracing_enabled: bool = Field(default=False)
     """Enable OpenTelemetry tracing."""
 
+    allow_noop_observability_in_prod: bool = Field(default=False)
+    """Allow NoOp metrics/tracing in prod without failing bootstrap validation."""
+
     audit_enabled: bool = Field(default=False)
     """Enable file-backed audit logging for Medallion write operations."""
 

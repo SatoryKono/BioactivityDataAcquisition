@@ -7,16 +7,16 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-04-09'
 
 ______________________________________________________________________
 
 # BioETL Observability Specification (DD)
 
-Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-04**.
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-09**.
 
 - Статус: `active`
-- Версия: `3.3.0`
+- Версия: `3.4.0`
 - Scope: `logs + metrics + tracing + correlation + provider health + control plane + traceability`
 - Source of truth: код в `src/bioetl/**/observability*`, `src/bioetl/application/observability/*`, `src/bioetl/infrastructure/adapters/http/*`
 
@@ -78,6 +78,10 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 
 - Каноническое runtime-поле времени: `timestamp`
 - Переходный alias `ts` допустим только на уровне downstream-нормализации
+- Канонический structured logging path использует flat top-level поля
+- `extra={...}` разрешён только как compatibility input и должен
+  разворачиваться в top-level runtime payload; явные kwargs имеют приоритет над
+  вложенными значениями
 
 ### 2.3 Correlation
 
@@ -85,11 +89,22 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 - HTTP клиент добавляет заголовок `X-Correlation-ID: <run_id>` при наличии `run_id`
 - Tracing span attributes включают `bioetl.run_id`
 
+### 2.4 Application lifecycle and DQ contract
+
+- `PipelineObserver` является каноническим lifecycle emitter для ordinary
+  pipeline runs
+- Lifecycle phase emissions используют low-cardinality `phase` labels и не
+  подменяются ad-hoc logging-only path
+- `DQMonitorPort.check_quality()` возвращает typed domain anomalies:
+  `list[DQAnomaly]`
+- Postrun observability должна использовать structured spans/events для
+  compaction, DQ evaluation, DQ report generation, vacuum и final metadata
+
 ## 3. Runtime Metrics Contract
 
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py` и экспортируется через `metrics_definitions.py`.
 
-Текущий размер каталога: **84** метрики (`metrics_export_names.py`).
+Текущий размер каталога: **85** метрик (`metrics_export_names.py`).
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
 
@@ -109,11 +124,14 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 | `bioetl_errors_total`                          | Counter   | `pipeline,stage,error_code`              | taxonomy входа                                                                     |
 | `bioetl_http_request_duration_seconds`         | Histogram | `provider,method,status`                 | HTTP latency                                                                       |
 | `bioetl_http_request_errors_total`             | Counter   | `provider,method,error_type`             | HTTP errors                                                                        |
+| `bioetl_health_check_latency_seconds`          | Histogram | `provider`                               | Canonical provider health-check latency metric family (seconds only)               |
 | `bioetl_data_source_retry_exhausted_total`     | Counter   | `provider,operation`                     | exhausted retries                                                                  |
 | `bioetl_provider_health_status`                | Gauge     | `provider`                               | см. mapping ниже                                                                   |
 | `bioetl_circuit_breaker_state`                 | Gauge     | `adapter`                                | 0/1/2 mapping                                                                      |
 | `bioetl_dq_validation_score`                   | Gauge     | `pipeline,entity`                        | 0..1                                                                               |
 | `bioetl_data_freshness_seconds`                | Gauge     | `pipeline,entity`                        | unix timestamp последнего успешного ingestion; age считается как `time() - metric` |
+| `bioetl_quarantine_operator_operations_total`  | Counter   | `operation,status`                       | bounded operator actions for inspect/replay/purge/update workflows                 |
+| `bioetl_quarantine_operator_duration_seconds`  | Histogram | `operation,status`                       | latency of quarantine operator workflows                                           |
 
 Guardrail для новых метрик control-plane/traceability:
 
@@ -122,6 +140,9 @@ Guardrail для новых метрик control-plane/traceability:
 - агрегировать по `pipeline`, `run_type`, `event_type`, `layer`, `status`,
   `disposition`, а детализацию по конкретному запуску получать через
   `run-manifest show` и sidecar/control-plane артефакты.
+- provider health-check latency MUST use `_seconds` families only; `_ms`
+  latency families для provider health-check path считаются legacy и не должны
+  добавляться в новые dashboards, alerts или runtime emission paths
 
 Новый `bioetl-control-plane-v1` dashboard собирает агрегаты manifest write
 failures, ledger append failures, checkpoint compatibility и read failures, а
@@ -156,6 +177,9 @@ alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/ob
 Текущее состояние:
 
 - Спаны создаются на pipeline и HTTP-операциях
+- `postrun.run` дополнительно декомпозирован на nested spans:
+  `postrun.compaction`, `postrun.dq_evaluation`, `postrun.dq_reports`,
+  `postrun.vacuum`, `postrun.final_metadata`
 - `logging_config.py` автоматически добавляет `trace_id` и `span_id` в structlog-записи,
   если в текущем контексте есть активный OTel span
 - При отключённом tracing или отсутствии активного span лог-схема деградирует
@@ -219,9 +243,14 @@ not, by itself, indicate an incident condition.
 
 ## 8. Known Drifts and Required Follow-ups
 
-| ID      | Severity | Drift                                                  | Evidence                                                                                                 |
-| ------- | -------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| OBS-001 | HIGH     | Часть docs использует `bioetl-...` вместо `bioetl_...` | `docs/02-architecture/observability-layers.md`, `docs/05-operations/runbooks/observability-checklist.md` |
+- На момент `2026-04-09` явных drift'ов внутри канонического observability
+  contract pack (`docs/02-architecture/observability-layers.md`,
+  `docs/04-reference/contracts/observability.md`,
+  `docs/05-operations/01-monitoring-guide.md`,
+  `docs/05-operations/sli-slo-baseline.md`) не зафиксировано.
+- Дополнительные runbook/dashboard drift'ы должны отслеживаться обычным
+  documentation-audit потоком, а не оставаться неявными внутри core contract
+  doc.
 
 ## 9. Definition of Done for observability doc sync
 

@@ -8,9 +8,8 @@ __all__ = [
     "HEALTH_CHECK_DEGRADED_TOTAL",
     "HEALTH_CHECK_DURATION_SECONDS",
     "HEALTH_CHECK_FAILURES_TOTAL",
-    "HEALTH_CHECK_LATENCY_MS",
     "HEALTH_CHECK_LATENCY_SECONDS",
-    "HEALTH_CHECK_MODE_LATENCY_MS",
+    "HEALTH_CHECK_MODE_LATENCY_SECONDS",
     "HEALTH_CHECK_MODE_STATUS",
     "HEALTH_CHECK_STATUS",
     "HEALTH_CHECK_SUCCESS_TOTAL",
@@ -52,20 +51,6 @@ HEALTH_CHECK_MODE_STATUS = Gauge(
     ["component", "mode"],
 )
 
-HEALTH_CHECK_LATENCY_MS = Histogram(
-    "bioetl_health_check_latency_ms",
-    "Health check latency in milliseconds",
-    ["provider"],
-    buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
-)
-
-HEALTH_CHECK_MODE_LATENCY_MS = Histogram(
-    "bioetl_health_check_mode_latency_ms",
-    "Health check latency in milliseconds by health-check mode",
-    ["provider", "mode"],
-    buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
-)
-
 HEALTH_CHECK_SUCCESS_TOTAL = Counter(
     "bioetl_health_check_success_total",
     "Total successful health checks",
@@ -94,6 +79,13 @@ HEALTH_CHECK_LATENCY_SECONDS = Histogram(
     "bioetl_health_check_latency_seconds",
     "Health check latency in seconds",
     ["provider"],
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
+)
+
+HEALTH_CHECK_MODE_LATENCY_SECONDS = Histogram(
+    "bioetl_health_check_mode_latency_seconds",
+    "Health check latency in seconds by health-check mode",
+    ["provider", "mode"],
     buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
 )
 

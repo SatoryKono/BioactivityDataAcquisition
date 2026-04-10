@@ -116,6 +116,18 @@ class _GoldWriterSimpleDeltaMixin(_GoldWriterExecutorArrowMixin):
 class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
     """SCD2 write and merge primitives with deterministic retries."""
 
+    @staticmethod
+    def _build_content_changed_predicate(
+        source_alias: str = "source",
+        target_alias: str = "target",
+    ) -> str:
+        """Build a null-safe content-hash change predicate."""
+        return (
+            f"{source_alias}.content_hash <> {target_alias}.content_hash "
+            f"OR ({source_alias}.content_hash IS NULL AND {target_alias}.content_hash IS NOT NULL) "
+            f"OR ({source_alias}.content_hash IS NOT NULL AND {target_alias}.content_hash IS NULL)"
+        )
+
     async def _write_scd2(
         self,
         table_path: str,
@@ -158,6 +170,14 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         )
         merge_condition += f" AND target.{current_flag_col} = true"
         ts_iso = ingestion_ts.isoformat()
+        update_kwargs: dict[str, object] = {
+            "updates": {
+                valid_to_col: f"'{ts_iso}'",
+                current_flag_col: "false",
+            }
+        }
+        if "content_hash" in new_data.schema.names:
+            update_kwargs["predicate"] = self._build_content_changed_predicate()
 
         await self._run_in_executor(
             lambda: (
@@ -169,12 +189,7 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
                     source_alias="source",
                     target_alias="target",
                 )
-                .when_matched_update(
-                    updates={
-                        valid_to_col: f"'{ts_iso}'",
-                        current_flag_col: "false",
-                    }
-                )
+                .when_matched_update(**update_kwargs)
                 .when_not_matched_insert_all()
                 .execute()
             )

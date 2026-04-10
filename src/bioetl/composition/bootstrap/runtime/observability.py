@@ -57,6 +57,7 @@ def validate_observability_preflight(
     metrics: MetricsPort,
     environment: str,
     logger: LoggerPort,
+    allow_noop_in_prod: bool = False,
 ) -> None:
     """Validate observability components for production readiness.
 
@@ -71,6 +72,7 @@ def validate_observability_preflight(
         metrics=metrics,
         environment=environment,
         logger=logger,
+        allow_noop_in_prod=allow_noop_in_prod,
     )
 
 
@@ -180,8 +182,8 @@ def bootstrap_dq_monitor_port(
     return _bootstrap_dq_monitor_port_impl(
         settings=settings,
         logger=logger,
-        monitor_cls=DataQualityMonitorService,
-        noop_logger_cls=NoOpLogger,
+        monitor_factory=DataQualityMonitorService,
+        noop_logger_factory=NoOpLogger,
     )
 
 

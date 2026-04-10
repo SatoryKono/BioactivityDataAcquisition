@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.3
+Version: 1.0.4
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-05'
+  Last verified: '2026-04-09'
 
 ______________________________________________________________________
 
@@ -23,6 +23,10 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 surface interpretation and shipped alert semantics, and use
 [runbooks/observability-checklist.md](runbooks/observability-checklist.md) for
 operator validation and incident-readiness checks.
+
+`SLI/SLO Baseline` complements both documents: use
+[sli-slo-baseline.md](sli-slo-baseline.md) for numeric operational objectives,
+target windows, and alert-to-SLI mapping.
 
 ## 1. Архитектура наблюдаемости
 
@@ -165,6 +169,16 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
 - **Top Reject Reasons / Fields / Signatures**: агрегаты в том же scoped контексте.
 - **Datasource**: `Quarantine Explorer` (JSON/Infinity), не Prometheus.
 - **Drilldown**: links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces` и row-level link в CLI-команду.
+
+#### Quarantine operator metrics
+
+CLI and bootstrap-backed quarantine operations now emit bounded operator metrics:
+
+- `bioetl_quarantine_operator_operations_total`
+- `bioetl_quarantine_operator_duration_seconds`
+
+Use them when investigating replay/purge/update/inspect regressions that do not
+surface clearly through record-level reject exploration.
 
 #### Silver Filter Rejects Handoff
 

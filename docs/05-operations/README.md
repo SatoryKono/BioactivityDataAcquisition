@@ -1,11 +1,11 @@
 ---
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-02'
+Last verified: '2026-04-09'
 ---
 
 # Operations Documentation
@@ -30,6 +30,8 @@ standard runbook path.
 
 | Section | Description |
 |---------|-------------|
+| [Monitoring Guide](01-monitoring-guide.md) | Dashboard interpretation, alert-backed signals, and monitoring workflow |
+| [SLI/SLO Baseline](sli-slo-baseline.md) | Operational service-level indicators and target baselines for the local runtime |
 | [Runbooks](runbooks/index.md) | Operational playbooks for incident response |
 | [Performance Baselines](performance-baselines.md) | Expected performance metrics |
 | [VACUUM Retention](vacuum-retention.md) | Delta Lake vacuum retention policies |
@@ -52,6 +54,8 @@ standard runbook path.
 
 ### Monitoring
 
+- [Monitoring Guide](01-monitoring-guide.md)
+- [SLI/SLO Baseline](sli-slo-baseline.md)
 - [Observability Checklist](runbooks/observability-checklist.md)
 - [Checkpoint Debugging](runbooks/checkpoint-debugging.md)
 - [Run Manifest Inspection](runbooks/run-manifest-inspection.md)

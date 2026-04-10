@@ -56,9 +56,8 @@ from bioetl.infrastructure.observability.metrics import (
     HEALTH_CHECK_DEGRADED_TOTAL,
     HEALTH_CHECK_DURATION_SECONDS,
     HEALTH_CHECK_FAILURES_TOTAL,
-    HEALTH_CHECK_LATENCY_MS,
     HEALTH_CHECK_LATENCY_SECONDS,
-    HEALTH_CHECK_MODE_LATENCY_MS,
+    HEALTH_CHECK_MODE_LATENCY_SECONDS,
     HEALTH_CHECK_MODE_STATUS,
     HEALTH_CHECK_STATUS,
     HEALTH_CHECK_SUCCESS_TOTAL,
@@ -78,6 +77,8 @@ from bioetl.infrastructure.observability.metrics import (
     PREFLIGHT_MEDALLION_POLICY_VALID,
     PROBE_MODE_FALLBACK_TOTAL,
     PROVIDER_HEALTH_STATUS,
+    QUARANTINE_OPERATOR_DURATION_SECONDS,
+    QUARANTINE_OPERATOR_OPERATIONS_TOTAL,
     QUARANTINE_RECORDS_TOTAL,
     RATE_LIMITER_TOKENS_AVAILABLE,
     RATE_LIMITER_WAIT_SECONDS,
@@ -158,12 +159,14 @@ STORAGE_MEDALLION_REGISTRY = MetricRegistryFamily(
         "lineage_fragments_emitted_total": LINEAGE_FRAGMENTS_EMITTED_TOTAL,
         "lineage_refs_missing_total": LINEAGE_REFS_MISSING_TOTAL,
         "composite_source_selection_total": COMPOSITE_SOURCE_SELECTION_TOTAL,
+        "quarantine_operator_operations_total": QUARANTINE_OPERATOR_OPERATIONS_TOTAL,
     },
     gauges={},
     histograms={
         "vacuum_duration_seconds": VACUUM_DURATION_SECONDS,
         "archive_duration_seconds": ARCHIVE_DURATION_SECONDS,
         "bronze_write_duration_seconds": BRONZE_WRITE_DURATION_SECONDS,
+        "quarantine_operator_duration_seconds": QUARANTINE_OPERATOR_DURATION_SECONDS,
     },
 )
 
@@ -240,9 +243,8 @@ SYSTEM_PROCESS_REGISTRY = MetricRegistryFamily(
     },
     histograms={
         "health_check_duration_seconds": HEALTH_CHECK_DURATION_SECONDS,
-        "health_check_latency_ms": HEALTH_CHECK_LATENCY_MS,
-        "health_check_mode_latency_ms": HEALTH_CHECK_MODE_LATENCY_MS,
         "health_check_latency_seconds": HEALTH_CHECK_LATENCY_SECONDS,
+        "health_check_mode_latency_seconds": HEALTH_CHECK_MODE_LATENCY_SECONDS,
     },
 )
 

@@ -53,14 +53,15 @@ def record_health_metrics(
         return
 
     provider_labels = {"provider": health_result.provider}
+    latency_seconds = health_result.latency_ms / 1000.0
     metrics.observe_histogram(
         metric_health_latency,
-        health_result.latency_ms,
+        latency_seconds,
         provider_labels,
     )
     metrics.observe_histogram(
         metric_health_mode_latency,
-        health_result.latency_ms,
+        latency_seconds,
         {"provider": health_result.provider, "mode": health_check_mode},
     )
 

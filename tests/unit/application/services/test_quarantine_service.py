@@ -57,11 +57,21 @@ def mock_quarantine_port():
 
 
 @pytest.fixture
-def quarantine_service(mock_quarantine_port, mock_logger):
+def mock_metrics():
+    """Create a mock metrics port."""
+    metrics = MagicMock()
+    metrics.increment_counter = MagicMock()
+    metrics.observe_histogram = MagicMock()
+    return metrics
+
+
+@pytest.fixture
+def quarantine_service(mock_quarantine_port, mock_logger, mock_metrics):
     """Create a QuarantineService instance."""
     return QuarantineService(
         quarantine_port=mock_quarantine_port,
         logger=mock_logger,
+        metrics=mock_metrics,
     )
 
 
@@ -104,6 +114,16 @@ class TestQuarantineServiceInspect:
             pipeline="pipeline1",
             limit=10,
             error_code=None,
+        )
+        quarantine_service.metrics.increment_counter.assert_called_with(
+            "quarantine_operator_operations_total",
+            1,
+            labels={"operation": "inspect", "status": "success"},
+        )
+        quarantine_service.metrics.observe_histogram.assert_called_with(
+            "quarantine_operator_duration_seconds",
+            pytest.approx(0.0, abs=1.0),
+            labels={"operation": "inspect", "status": "success"},
         )
 
     @pytest.mark.asyncio
@@ -235,6 +255,11 @@ class TestQuarantineServiceFilteredExplorer:
         mock_quarantine_port.get_filtered_record.assert_called_once_with(
             payload_hash="missing",
             pipeline="pipeline1",
+        )
+        quarantine_service.metrics.increment_counter.assert_called_with(
+            "quarantine_operator_operations_total",
+            1,
+            labels={"operation": "filtered_get", "status": "not_found"},
         )
 
     @pytest.mark.asyncio
@@ -403,6 +428,11 @@ class TestQuarantineServiceMarkAsReprocessed:
 
         assert count == 1
         assert mock_quarantine_port.update_status.call_count == 1
+        quarantine_service.metrics.increment_counter.assert_called_with(
+            "quarantine_operator_operations_total",
+            1,
+            labels={"operation": "mark_reprocessed", "status": "partial"},
+        )
 
 
 @pytest.mark.unit
@@ -454,6 +484,11 @@ class TestQuarantineServiceUpdateStatus:
         )
 
         assert result is False
+        quarantine_service.metrics.increment_counter.assert_called_with(
+            "quarantine_operator_operations_total",
+            1,
+            labels={"operation": "update_status", "status": "not_found"},
+        )
 
 
 @pytest.mark.unit

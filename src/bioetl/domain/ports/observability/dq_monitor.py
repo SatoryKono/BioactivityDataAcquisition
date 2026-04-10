@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
+
+from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
 
 
 @runtime_checkable
@@ -30,14 +32,14 @@ class DQMonitorPort(Protocol):
     def check_quality(
         self,
         metrics: dict[str, float],
-    ) -> list[Any]:  # Any: list[AnomalyRecord] (infrastructure type)
+    ) -> list[DQAnomaly]:
         """Evaluate metrics against baselines and return detected anomalies.
 
         Args:
             metrics: Mapping of metric name to current observed value.
 
         Returns:
-            List of anomaly objects for metrics that deviate from their baselines.
+            List of domain anomaly DTOs for metrics that deviate from baseline.
         """
         ...
 

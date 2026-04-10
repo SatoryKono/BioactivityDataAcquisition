@@ -39,8 +39,6 @@ from bioetl.application.core.runner_execution_flow import (
     validate_infrastructure,
 )
 from bioetl.application.core.runner_flow import (
-    emit_pipeline_completion,
-    emit_pipeline_start,
     extract_checkpoint_offset,
     record_run_failed,
     record_run_finished,
@@ -222,7 +220,6 @@ class PipelineRunner:
         - Flushes tracer spans before shutdown
         - Handles tracer close errors without failing the pipeline
         """
-        emit_pipeline_start(self)
         record_run_started(self)
         try:
             shutdown_recorded = await self._run_pipeline_lifecycle()
@@ -256,8 +253,7 @@ class PipelineRunner:
         record_run_shutdown(self)
 
     def _record_successful_completion(self) -> None:
-        """Emit canonical completion log + ledger entries for successful runs."""
-        emit_pipeline_completion(self)
+        """Append the canonical successful terminal ledger entry."""
         record_run_finished(self)
 
     async def _cleanup_after_run(self) -> None:
