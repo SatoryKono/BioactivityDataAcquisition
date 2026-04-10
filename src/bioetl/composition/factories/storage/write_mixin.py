@@ -89,6 +89,11 @@ class StorageAdapterWriteMixin:
         column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
         key_nullability_rules: list[KeyNullabilityRule] | None = None,
+        *,
+        run_id: RunID | None = None,
+        run_type: RunType | None = None,
+        source_batch_id: BatchID | None = None,
+        ingestion_ts: datetime | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to Silver layer.
 
@@ -106,6 +111,10 @@ class StorageAdapterWriteMixin:
                 for complete lineage tracking (REQ-LINEAGE-001).
             key_nullability_rules: Optional per-column nullability override rules
                 applied during Silver write to relax or tighten key constraints.
+            run_id: Optional run identifier for tracing, audit, and metadata.
+            run_type: Optional run type for tracing and audit semantics.
+            source_batch_id: Optional Bronze batch identifier for lineage metadata.
+            ingestion_ts: Optional ingestion timestamp for audit correlation.
 
         Returns:
             SilverWriteResult with table info and Delta version for Gold lineage tracking
@@ -126,6 +135,10 @@ class StorageAdapterWriteMixin:
             column_order=column_order,
             bronze_refs=bronze_refs,
             key_nullability_rules=key_nullability_rules,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
         )
 
     async def write_gold(

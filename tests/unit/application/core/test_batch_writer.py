@@ -138,23 +138,14 @@ class TestBatchWriterBronze:
 class TestBatchWriterSilver:
     """Tests for BatchWriter.write_silver method."""
 
-    async def test_write_silver_adds_metadata(
+    async def test_write_silver_passes_runtime_provenance_separately(
         self, batch_writer, mock_storage, mock_context
     ):
-        """Test that Silver records get _source_batch_id from BatchWriter.
-
-        Note: _run_id, _run_type, _ingestion_ts are added by the transformer
-        (BaseTransformer.entity_to_silver_record), not by BatchWriter.
-        BatchWriter only adds/updates _source_batch_id.
-        """
-        # Records already have lineage fields from transformer
+        """BatchWriter forwards Silver provenance without mutating records."""
         records = [
             {
                 "entity_id": "1",
                 "value": 10,
-                "_run_id": str(mock_context.run_id),
-                "_run_type": mock_context.run_type.value,
-                "_ingestion_ts": mock_context.started_at.isoformat(),
             }
         ]
         batch_id = BatchID(uuid4())
@@ -165,10 +156,14 @@ class TestBatchWriterSilver:
         call_kwargs = mock_storage.write_silver.call_args[1]
         silver_records = call_kwargs["records"]
         assert len(silver_records) == 1
-        assert silver_records[0]["_run_id"] == str(mock_context.run_id)
-        assert silver_records[0]["_run_type"] == mock_context.run_type.value
-        assert silver_records[0]["_source_batch_id"] == str(batch_id)
-        assert "_ingestion_ts" in silver_records[0]
+        assert "_run_id" not in silver_records[0]
+        assert "_run_type" not in silver_records[0]
+        assert "_source_batch_id" not in silver_records[0]
+        assert "_ingestion_ts" not in silver_records[0]
+        assert call_kwargs["run_id"] == mock_context.run_id
+        assert call_kwargs["run_type"] == mock_context.run_type
+        assert call_kwargs["source_batch_id"] == batch_id
+        assert call_kwargs["ingestion_ts"] == ingestion_ts
 
     async def test_write_silver_uses_table_config(self, mock_storage, mock_context):
         """Test that table configuration is applied."""

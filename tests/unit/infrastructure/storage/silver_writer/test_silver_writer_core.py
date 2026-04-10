@@ -171,24 +171,18 @@ class TestSilverWriterValidation:
     ) -> None:
         """Tracing helper should create span context and delegate pipeline execution."""
         from datetime import UTC, datetime
+        from uuid import uuid4
 
         import pyarrow as pa
 
+        from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver.pipeline_helpers import (
             _SilverWriteExecutionContext,
             _SilverWriteInvocation,
             execute_silver_write_with_tracing,
         )
 
-        records = [
-            {
-                "entity_id": "CHEMBL123",
-                "_run_id": "uuid-123",
-                "_run_type": "incremental",
-                "_source_batch_id": "batch-456",
-                "_ingestion_ts": "2025-01-15T12:00:00Z",
-            }
-        ]
+        records = [{"entity_id": "CHEMBL123"}]
         schema = pa.Table.from_pylist(records).schema
         tracing = MagicMock()
         tracer = MagicMock()
@@ -211,6 +205,10 @@ class TestSilverWriterValidation:
             column_order=None,
             bronze_refs=None,
             key_nullability_rules=None,
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            source_batch_id=BatchID(uuid4()),
+            ingestion_ts=datetime.fromisoformat("2025-01-15T12:00:00+00:00"),
         )
 
         async def execute_pipeline(
@@ -226,17 +224,13 @@ class TestSilverWriterValidation:
             assert ctx.on_schema_mismatch == "ignore"
             assert ctx.bronze_refs is None
             assert ctx.key_nullability_rules is None
+            assert ctx.run_id == invocation.run_id
+            assert ctx.run_type == invocation.run_type
+            assert ctx.source_batch_id == invocation.source_batch_id
+            assert ctx.ingestion_ts == invocation.ingestion_ts
             assert ctx.span is span
             assert isinstance(ctx.start_perf, float)
-            assert invocation.records == [
-                {
-                    "entity_id": "CHEMBL123",
-                    "_run_id": "uuid-123",
-                    "_run_type": "incremental",
-                    "_source_batch_id": "batch-456",
-                    "_ingestion_ts": "2025-01-15T12:00:00Z",
-                }
-            ]
+            assert invocation.records == [{"entity_id": "CHEMBL123"}]
             return expected_result
 
         result = await execute_silver_write_with_tracing(
@@ -259,7 +253,10 @@ class TestSilverWriterValidation:
         span.set_attribute.assert_any_call("bioetl.record_count", 1)
         span.set_attribute.assert_any_call("bioetl.provider", "test")
         span.set_attribute.assert_any_call("bioetl.entity_type", "table")
-        span.set_attribute.assert_any_call("bioetl.pipeline_run_id", "uuid-123")
+        span.set_attribute.assert_any_call(
+            "bioetl.pipeline_run_id",
+            str(invocation.run_id),
+        )
         span.set_attribute.assert_any_call("bioetl.run_type", "incremental")
 
     @pytest.mark.asyncio
@@ -268,24 +265,18 @@ class TestSilverWriterValidation:
     ) -> None:
         """Tracing helper should expose provider/entity/run context for operations."""
         from datetime import UTC, datetime
+        from uuid import UUID
 
         import pyarrow as pa
 
+        from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver.pipeline_helpers import (
             _SilverWriteExecutionContext,
             _SilverWriteInvocation,
             execute_silver_write_with_tracing,
         )
 
-        records = [
-            {
-                "entity_id": "CHEMBL123",
-                "_run_id": "run-001",
-                "_run_type": "incremental",
-                "_source_batch_id": "batch-456",
-                "_ingestion_ts": "2025-01-15T12:00:00Z",
-            }
-        ]
+        records = [{"entity_id": "CHEMBL123"}]
         schema = pa.Table.from_pylist(records).schema
         tracing = MagicMock()
         tracer = MagicMock()
@@ -305,6 +296,10 @@ class TestSilverWriterValidation:
             column_order=None,
             bronze_refs=None,
             key_nullability_rules=None,
+            run_id=RunID(UUID("00000000-0000-0000-0000-000000000001")),
+            run_type=RunType.INCREMENTAL,
+            source_batch_id=BatchID(UUID("00000000-0000-0000-0000-000000000002")),
+            ingestion_ts=datetime.fromisoformat("2025-01-15T12:00:00+00:00"),
         )
 
         async def execute_pipeline(
@@ -325,7 +320,10 @@ class TestSilverWriterValidation:
 
         span.set_attribute.assert_any_call("bioetl.provider", "chembl")
         span.set_attribute.assert_any_call("bioetl.entity_type", "activity")
-        span.set_attribute.assert_any_call("bioetl.pipeline_run_id", "run-001")
+        span.set_attribute.assert_any_call(
+            "bioetl.pipeline_run_id",
+            "00000000-0000-0000-0000-000000000001",
+        )
         span.set_attribute.assert_any_call("bioetl.run_type", "incremental")
 
     @pytest.mark.asyncio
@@ -369,6 +367,10 @@ class TestSilverWriterValidation:
             column_order=None,
             bronze_refs=None,
             key_nullability_rules=None,
+            run_id=None,
+            run_type=None,
+            source_batch_id=None,
+            ingestion_ts=None,
         )
 
         async def execute_pipeline(
@@ -444,6 +446,10 @@ class TestSilverWriterValidation:
             column_order=None,
             bronze_refs=None,
             key_nullability_rules=None,
+            run_id=None,
+            run_type=None,
+            source_batch_id=None,
+            ingestion_ts=None,
         )
         ctx = _SilverWriteExecutionContext(
             table_name="test.table",
@@ -455,6 +461,10 @@ class TestSilverWriterValidation:
             column_order=None,
             bronze_refs=None,
             key_nullability_rules=None,
+            run_id=None,
+            run_type=None,
+            source_batch_id=None,
+            ingestion_ts=None,
             started_at=datetime.now(UTC),
             start_perf=123.0,
             span=span,
@@ -547,6 +557,10 @@ class TestSilverWriterValidation:
             column_order=None,
             bronze_refs=None,
             key_nullability_rules=None,
+            run_id=None,
+            run_type=None,
+            source_batch_id=None,
+            ingestion_ts=None,
         )
         ctx = _SilverWriteExecutionContext(
             table_name="test.table",
@@ -558,6 +572,10 @@ class TestSilverWriterValidation:
             column_order=None,
             bronze_refs=None,
             key_nullability_rules=None,
+            run_id=None,
+            run_type=None,
+            source_batch_id=None,
+            ingestion_ts=None,
             started_at=datetime.now(UTC),
             start_perf=123.0,
             span=span,
@@ -643,8 +661,12 @@ class TestSilverWriterValidation:
             )
 
     @pytest.mark.asyncio
-    async def test_write_silver_missing_metadata_raises(self, noop_logger):
-        """Test write_silver raises ValueError for missing metadata."""
+    async def test_write_silver_allows_records_without_runtime_metadata(
+        self, noop_logger
+    ):
+        """Public Silver write accepts records without embedded runtime provenance."""
+        from unittest.mock import AsyncMock
+
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
@@ -654,40 +676,55 @@ class TestSilverWriterValidation:
 
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
 
-        with pytest.raises(ValueError, match="Records missing required metadata"):
-            await writer.write_silver(
-                table_name="test.table",
-                records=records,
-                primary_keys=["entity_id"],
-                schema=dummy_schema,
-            )
+        writer._write_single_target = AsyncMock(return_value=None)  # type: ignore[method-assign]
+
+        await writer.write_silver(
+            table_name="test.table",
+            records=records,
+            primary_keys=["entity_id"],
+            schema=dummy_schema,
+        )
+
+        writer._write_single_target.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_write_silver_missing_run_id_raises(self, noop_logger):
-        """Test write_silver raises ValueError when _run_id is missing."""
+    async def test_write_silver_passes_explicit_runtime_provenance(self, noop_logger):
+        """Public Silver write forwards provenance outside the row payload."""
+        from datetime import UTC, datetime
+        from unittest.mock import AsyncMock
+        from uuid import UUID
+
+        from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
-        records = [
-            {
-                "entity_id": "CHEMBL123",
-                "_run_type": "incremental",
-                "_source_batch_id": "batch-456",
-                "_ingestion_ts": "2025-01-15T12:00:00Z",
-            }
-        ]
+        records = [{"entity_id": "CHEMBL123"}]
 
         import pyarrow as pa
 
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
+        writer._write_single_target = AsyncMock(return_value=None)  # type: ignore[method-assign]
+        run_id = RunID(UUID("00000000-0000-0000-0000-000000000010"))
+        source_batch_id = BatchID(UUID("00000000-0000-0000-0000-000000000011"))
+        ingestion_ts = datetime(2025, 1, 15, 12, 0, tzinfo=UTC)
 
-        with pytest.raises(ValueError, match="Records missing required metadata"):
-            await writer.write_silver(
-                table_name="test.table",
-                records=records,
-                primary_keys=["entity_id"],
-                schema=dummy_schema,
-            )
+        await writer.write_silver(
+            table_name="test.table",
+            records=records,
+            primary_keys=["entity_id"],
+            schema=dummy_schema,
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
+        )
+
+        writer._write_single_target.assert_awaited_once()
+        kwargs = writer._write_single_target.await_args.kwargs
+        assert kwargs["run_id"] == run_id
+        assert kwargs["run_type"] == RunType.INCREMENTAL
+        assert kwargs["source_batch_id"] == source_batch_id
+        assert kwargs["ingestion_ts"] == ingestion_ts
 
     @pytest.mark.asyncio
     async def test_write_silver_builds_invocation_and_delegates_to_tracing_helper(

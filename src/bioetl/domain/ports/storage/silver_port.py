@@ -9,7 +9,10 @@ from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from bioetl.domain.config import KeyNullabilityRule
+    from bioetl.domain.types import BatchID, RunID, RunType
 
 __all__ = ["SilverStoragePort"]
 
@@ -35,6 +38,11 @@ class SilverStoragePort(Protocol):
         column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
         key_nullability_rules: list[KeyNullabilityRule] | None = None,
+        *,
+        run_id: RunID | None = None,
+        run_type: RunType | None = None,
+        source_batch_id: BatchID | None = None,
+        ingestion_ts: datetime | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to the Silver layer.
 
@@ -54,6 +62,10 @@ class SilverStoragePort(Protocol):
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
             key_nullability_rules: Optional rules for key nullability handling.
+            run_id: Optional pipeline run identifier for tracing/audit metadata.
+            run_type: Optional pipeline run type for tracing/audit metadata.
+            source_batch_id: Optional source batch identifier for Silver lineage.
+            ingestion_ts: Optional ingestion timestamp used for audit/forensics.
 
         Returns:
             SilverWriteResult with table info and Delta version for Gold lineage tracking

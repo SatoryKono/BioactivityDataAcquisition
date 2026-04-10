@@ -149,6 +149,10 @@ async def test_storage_factory_wires_file_audit_across_medallion_writers(
             schema=silver_schema,
             mode="append",
             bronze_refs=[bronze_result],
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            source_batch_id=batch_id,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         assert silver_result is not None
