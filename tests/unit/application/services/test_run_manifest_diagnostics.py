@@ -141,6 +141,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "replay_capability": "rebuild_only",
         "exact_replay_eligible": False,
         "planned_artifacts": [],
+        "occurrence_only_diagnostics": [],
     }
 
 

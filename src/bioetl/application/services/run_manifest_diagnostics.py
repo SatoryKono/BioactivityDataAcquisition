@@ -44,6 +44,7 @@ def _build_base_summary(
             {"layer": artifact.layer, "path": artifact.path}
             for artifact in manifest.planned_artifacts
         ],
+        "occurrence_only_diagnostics": [],
     }
     if exact_replay or input_snapshots:
         summary.update(
