@@ -15,15 +15,23 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root / "src"))
 
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
+    FALLBACK_BUSINESS,
+    FALLBACK_TECHNICAL_PASSTHROUGH,
     build_field_matrix_rows,
 )
+
+FALLBACK_SOURCES = {
+    FALLBACK_BUSINESS,
+    FALLBACK_TECHNICAL_PASSTHROUGH,
+}
 
 
 def _fallback_rows() -> list[dict[str, str]]:
     rows = build_field_matrix_rows()
     return sorted(
-        (row for row in rows if row["normalization_source"] == "fallback"),
+        (row for row in rows if row["normalization_source"] in FALLBACK_SOURCES),
         key=lambda row: (
+            row["normalization_source"],
             row["pipeline_name"],
             row["field_name"],
             row["normalizer"],
@@ -34,10 +42,22 @@ def _fallback_rows() -> list[dict[str, str]]:
 def _build_payload(rows: list[dict[str, str]]) -> dict[str, object]:
     per_pipeline = Counter(row["pipeline_name"] for row in rows)
     per_normalizer = Counter(row["normalizer"] for row in rows)
+    per_source = Counter(row["normalization_source"] for row in rows)
     return {
         "mode": "report-only",
         "fallback_field_count": len(rows),
+        "fallback_business_field_count": per_source[FALLBACK_BUSINESS],
+        "fallback_technical_passthrough_field_count": per_source[
+            FALLBACK_TECHNICAL_PASSTHROUGH
+        ],
         "pipelines_with_fallback_count": len(per_pipeline),
+        "sources": [
+            {"normalization_source": source, "field_count": count}
+            for source, count in sorted(
+                per_source.items(),
+                key=lambda item: (-item[1], item[0]),
+            )
+        ],
         "pipelines": [
             {"pipeline_name": pipeline_name, "fallback_field_count": count}
             for pipeline_name, count in sorted(
@@ -67,6 +87,8 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
         "",
         "- mode: report-only",
         f"- fallback_field_count: `{fallback_field_count}`",
+        f"- fallback_business_field_count: `{payload['fallback_business_field_count']}`",
+        f"- fallback_technical_passthrough_field_count: `{payload['fallback_technical_passthrough_field_count']}`",
         f"- pipelines_with_fallback_count: `{payload['pipelines_with_fallback_count']}`",
         "",
     ]
@@ -74,6 +96,12 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
     if fallback_field_count == 0:
         lines.append("All pipeline fields are covered by explicit normalization contracts.")
         return "\n".join(lines)
+
+    lines.extend(["## Fallback Categories", ""])
+    for item in list(payload["sources"])[:limit]:
+        lines.append(
+            f"- `{item['normalization_source']}` covers `{item['field_count']}` fields"
+        )
 
     lines.extend(["## Top Pipelines", ""])
     for item in list(pipelines)[:limit]:
@@ -88,7 +116,8 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
     lines.extend(["", "## Sample Entries", ""])
     for row in list(entries)[:limit]:
         lines.append(
-            f"- `{row['pipeline_name']}.{row['field_name']}` -> `{row['normalizer']}`"
+            f"- `{row['pipeline_name']}.{row['field_name']}` -> `{row['normalizer']}` "
+            f"(`{row['normalization_source']}`)"
         )
 
     return "\n".join(lines)

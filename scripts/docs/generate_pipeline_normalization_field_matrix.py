@@ -72,6 +72,9 @@ CSV_COLUMNS = (
     "notes",
 )
 
+FALLBACK_BUSINESS = "fallback_business"
+FALLBACK_TECHNICAL_PASSTHROUGH = "fallback_technical_passthrough"
+
 ENTITY_SILVER_SCHEMA_REGISTRY: dict[str, Any] = {
     "chembl_activity": CHEMBL_ACTIVITY_SCHEMA,
     "chembl_assay": CHEMBL_ASSAY_SCHEMA,
@@ -151,66 +154,66 @@ def _fallback_contract(
 ) -> tuple[str, str, str]:
     if field_name in rule_set.passthrough_fields:
         return (
-            "fallback",
+            FALLBACK_TECHNICAL_PASSTHROUGH,
             "passthrough",
             "Field is passed through unchanged by the canonical fallback normalization seam.",
         )
     if field_name.startswith("_"):
         return (
-            "fallback",
+            FALLBACK_TECHNICAL_PASSTHROUGH,
             "passthrough",
             "Technical field is passed through unchanged when no explicit profile rule is defined.",
         )
     if field_name in rule_set.title_fields:
         return (
-            "fallback",
+            FALLBACK_BUSINESS,
             "normalize_title",
             "Normalize title text through HTML/entity cleanup and whitespace normalization.",
         )
     if field_name in rule_set.abstract_fields:
         return (
-            "fallback",
+            FALLBACK_BUSINESS,
             "normalize_abstract",
             "Normalize abstract text through HTML/entity cleanup and whitespace normalization.",
         )
     if field_name in rule_set.oa_status_fields:
         return (
-            "fallback",
+            FALLBACK_BUSINESS,
             "normalize_oa_status",
             "Trim textual OA status and lowercase the resulting value.",
         )
     if is_doi_field(field_name, rule_set=rule_set):
         return (
-            "fallback",
+            FALLBACK_BUSINESS,
             "normalize_profile_doi",
             "Normalize DOI through the canonical fallback identifier helper.",
         )
     if is_pmid_field(field_name, rule_set=rule_set):
         return (
-            "fallback",
+            FALLBACK_BUSINESS,
             "normalize_profile_pmid",
             "Normalize PMID through the canonical fallback identifier helper.",
         )
     if is_date_field(field_name, rule_set=rule_set):
         return (
-            "fallback",
+            FALLBACK_BUSINESS,
             "normalize_partial_date",
             "Canonicalize supported date text to the stable partial-date representation.",
         )
     if is_smiles_field(field_name):
         return (
-            "fallback",
+            FALLBACK_BUSINESS,
             "SMILES.from_raw(mode=soft)",
             "Validate and trim SMILES text; invalid values collapse to None.",
         )
     if _looks_like_string_type(field_type):
         return (
-            "fallback",
+            FALLBACK_BUSINESS,
             "normalize_string + canonicalize_json_string(json-like)",
             "Trim string values, collapse blanks to None, and canonicalize JSON-looking string payloads.",
         )
     return (
-        "fallback",
+        FALLBACK_BUSINESS,
         "preserve_non_string",
         "No field-specific fallback normalizer is applied; non-string values are preserved as-is.",
     )

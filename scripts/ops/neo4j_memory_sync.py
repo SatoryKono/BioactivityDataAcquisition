@@ -44,6 +44,20 @@ CRITICAL_ANALYSIS_RELATION_TYPES: tuple[str, ...] = (
     "JUSTIFIED_BY_RUNTIME",
     "BLOCKED_BY_VARIANCE",
 )
+ANALYSIS_NODE_LABELS: tuple[str, ...] = (
+    "retirement_candidate",
+    "development_cycle_surface",
+    "complexity_candidate",
+)
+ANALYSIS_RELATION_TYPES: tuple[str, ...] = (
+    "CANDIDATE_FOR_REMOVAL",
+    "OWNED_BY_CYCLE",
+    "BLOCKED_FROM_DELETION_BY",
+    "HAS_COMPLEXITY_SIGNAL",
+    "CANDIDATE_FOR_SIMPLIFICATION",
+    "JUSTIFIED_BY_RUNTIME",
+    "BLOCKED_BY_VARIANCE",
+)
 DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "project",
     "repo_zone",
@@ -683,6 +697,31 @@ class GraphSnapshot:
         }
 
 
+def _filtered_snapshot(
+    snapshot: GraphSnapshot,
+    only_labels: tuple[str, ...] = (),
+    only_analysis_layer: bool = False,
+) -> GraphSnapshot:
+    allowed_labels = set(only_labels)
+    if only_analysis_layer:
+        allowed_labels |= set(ANALYSIS_NODE_LABELS)
+    if not allowed_labels:
+        return snapshot
+
+    filtered = GraphSnapshot()
+    for key, node in snapshot.nodes.items():
+        if key.label in allowed_labels:
+            filtered.nodes[key] = node
+    for rel_key, relation in snapshot.relations.items():
+        if relation.relation_type in ANALYSIS_RELATION_TYPES:
+            if only_analysis_layer or relation.source.label in allowed_labels or relation.target.label in allowed_labels:
+                filtered.relations[rel_key] = relation
+            continue
+        if relation.source.label in allowed_labels and relation.target.label in allowed_labels:
+            filtered.relations[rel_key] = relation
+    return filtered
+
+
 @dataclass(frozen=True)
 class PortSurfaceDescriptor:
     surface_name: str
@@ -814,6 +853,23 @@ def _parser() -> argparse.ArgumentParser:
             "This is intended to converge the repo graph to managed-only state for "
             "labels now owned by deterministic sync, while leaving unrelated labels "
             "such as MemoryEntity untouched."
+        ),
+    )
+    parser.add_argument(
+        "--only-label",
+        action="append",
+        default=[],
+        help=(
+            "Limit apply/export/report snapshot operations to one or more node labels. "
+            "Useful for targeted sync debugging, e.g. --only-label complexity_candidate."
+        ),
+    )
+    parser.add_argument(
+        "--only-analysis-layer",
+        action="store_true",
+        help=(
+            "Limit apply/export/report snapshot operations to the analysis layer "
+            "(retirement/development-cycle/complexity nodes and their relations)."
         ),
     )
     return parser
