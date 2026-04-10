@@ -16,6 +16,15 @@ from bioetl.composition.factories.pipeline.runner_assembly import (
 
 
 def _make_pipeline() -> SimpleNamespace:
+    run_context = SimpleNamespace(
+        pipeline_version="1.0.0",
+        config_hash="a" * 64,
+        dq_contract_compatibility_hash="b" * 64,
+        manifest_id="manifest-123",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        effective_config_artifact_id="artifact-123",
+    )
     services = SimpleNamespace(
         checkpoint=MagicMock(),
         lock=MagicMock(),
@@ -23,7 +32,7 @@ def _make_pipeline() -> SimpleNamespace:
         storage=MagicMock(),
         dq_monitor=MagicMock(),
         dq_report_service=MagicMock(),
-        metadata_coordinator=MagicMock(),
+        metadata_coordinator=SimpleNamespace(run_context=run_context),
         metadata_writer=MagicMock(),
     )
     config = SimpleNamespace(

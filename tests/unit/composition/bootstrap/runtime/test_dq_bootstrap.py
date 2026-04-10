@@ -1,8 +1,4 @@
-"""Unit tests for DQ monitor bootstrap helpers.
-
-Tests bootstrap_dq_monitor_port and its deprecated alias bootstrap_dq_monitor,
-verifying correct wiring and feature-flag gating.
-"""
+"""Unit tests for DQ monitor bootstrap helpers."""
 
 from __future__ import annotations
 
@@ -45,123 +41,95 @@ class TestBootstrapDqMonitorPort:
     """Tests for bootstrap_dq_monitor_port."""
 
     def test_returns_none_when_disabled(self) -> None:
-        """Should return None when dq_monitor_enabled is False."""
         settings = _make_settings(enabled=False)
-
-        result = bootstrap_dq_monitor_port(settings=settings)
-
-        assert result is None
+        assert bootstrap_dq_monitor_port(settings=settings) is None
 
     def test_returns_dq_monitor_port_when_enabled(self) -> None:
-        """Should return a DQMonitorPort implementation when enabled."""
         settings = _make_settings(enabled=True)
-
         result = bootstrap_dq_monitor_port(settings=settings)
-
         assert result is not None
         assert isinstance(result, DQMonitorPort)
 
     def test_uses_noop_logger_when_none_provided(self) -> None:
-        """Should create a NoOpLogger when logger parameter is None."""
-        mock_noop_cls = MagicMock(return_value=NoOpLogger())
-        mock_monitor_cls = MagicMock()
+        mock_noop_factory = MagicMock(return_value=NoOpLogger())
+        mock_monitor_factory = MagicMock()
         mock_monitor = MagicMock(spec=DQMonitorPort)
         mock_monitor.detector = MagicMock()
-        mock_monitor_cls.return_value = mock_monitor
-
-        settings = _make_settings(enabled=True)
+        mock_monitor_factory.return_value = mock_monitor
 
         bootstrap_dq_monitor_port(
-            settings=settings,
+            settings=_make_settings(enabled=True),
             logger=None,
-            monitor_cls=mock_monitor_cls,
-            noop_logger_cls=mock_noop_cls,
+            monitor_factory=mock_monitor_factory,
+            noop_logger_factory=mock_noop_factory,
         )
 
-        mock_noop_cls.assert_called_once()
+        mock_noop_factory.assert_called_once()
 
     def test_uses_provided_logger(self) -> None:
-        """Should use the provided logger, not create a new NoOpLogger."""
-        mock_noop_cls = MagicMock()
-        mock_monitor_cls = MagicMock()
+        mock_noop_factory = MagicMock()
+        mock_monitor_factory = MagicMock()
         mock_monitor = MagicMock(spec=DQMonitorPort)
         mock_monitor.detector = MagicMock()
-        mock_monitor_cls.return_value = mock_monitor
-
+        mock_monitor_factory.return_value = mock_monitor
         provided_logger = MagicMock()
-        settings = _make_settings(enabled=True)
 
         bootstrap_dq_monitor_port(
-            settings=settings,
+            settings=_make_settings(enabled=True),
             logger=provided_logger,
-            monitor_cls=mock_monitor_cls,
-            noop_logger_cls=mock_noop_cls,
+            monitor_factory=mock_monitor_factory,
+            noop_logger_factory=mock_noop_factory,
         )
 
-        mock_noop_cls.assert_not_called()
-        call_kwargs = mock_monitor_cls.call_args.kwargs
-        assert call_kwargs["logger"] is provided_logger
+        mock_noop_factory.assert_not_called()
+        assert mock_monitor_factory.call_args.kwargs["logger"] is provided_logger
 
     def test_passes_baseline_window_to_monitor(self) -> None:
-        """Should pass dq_baseline_window from settings to monitor constructor."""
         mock_monitor = MagicMock(spec=DQMonitorPort)
         mock_monitor.detector = MagicMock()
-        mock_monitor_cls = MagicMock(return_value=mock_monitor)
-
-        settings = _make_settings(enabled=True, baseline_window=14)
+        mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
         bootstrap_dq_monitor_port(
-            settings=settings,
-            monitor_cls=mock_monitor_cls,
+            settings=_make_settings(enabled=True, baseline_window=14),
+            monitor_factory=mock_monitor_factory,
         )
 
-        call_kwargs = mock_monitor_cls.call_args.kwargs
-        assert call_kwargs["baseline_window"] == 14
+        assert mock_monitor_factory.call_args.kwargs["baseline_window"] == 14
 
     def test_passes_z_score_threshold_to_monitor(self) -> None:
-        """Should pass dq_z_score_threshold from settings to monitor constructor."""
         mock_monitor = MagicMock(spec=DQMonitorPort)
         mock_monitor.detector = MagicMock()
-        mock_monitor_cls = MagicMock(return_value=mock_monitor)
-
-        settings = _make_settings(enabled=True, z_score_threshold=3.0)
+        mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
         bootstrap_dq_monitor_port(
-            settings=settings,
-            monitor_cls=mock_monitor_cls,
+            settings=_make_settings(enabled=True, z_score_threshold=3.0),
+            monitor_factory=mock_monitor_factory,
         )
 
-        call_kwargs = mock_monitor_cls.call_args.kwargs
-        assert call_kwargs["z_score_threshold"] == 3.0
+        assert mock_monitor_factory.call_args.kwargs["z_score_threshold"] == 3.0
 
     def test_configures_min_baseline_samples(self) -> None:
-        """Should set detector.min_baseline_samples from settings."""
         mock_monitor = MagicMock(spec=DQMonitorPort)
         mock_detector = MagicMock()
         mock_monitor.detector = mock_detector
-        mock_monitor_cls = MagicMock(return_value=mock_monitor)
-
-        settings = _make_settings(enabled=True, min_baseline_samples=5)
+        mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
         bootstrap_dq_monitor_port(
-            settings=settings,
-            monitor_cls=mock_monitor_cls,
+            settings=_make_settings(enabled=True, min_baseline_samples=5),
+            monitor_factory=mock_monitor_factory,
         )
 
         assert mock_detector.min_baseline_samples == 5
 
     def test_sets_error_rate_threshold(self) -> None:
-        """Should configure error_rate threshold via detector.set_threshold."""
         mock_monitor = MagicMock(spec=DQMonitorPort)
         mock_detector = MagicMock()
         mock_monitor.detector = mock_detector
-        mock_monitor_cls = MagicMock(return_value=mock_monitor)
-
-        settings = _make_settings(enabled=True, error_rate_max=0.15)
+        mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
         bootstrap_dq_monitor_port(
-            settings=settings,
-            monitor_cls=mock_monitor_cls,
+            settings=_make_settings(enabled=True, error_rate_max=0.15),
+            monitor_factory=mock_monitor_factory,
         )
 
         mock_detector.set_threshold.assert_any_call(
@@ -171,17 +139,14 @@ class TestBootstrapDqMonitorPort:
         )
 
     def test_sets_quality_score_threshold(self) -> None:
-        """Should configure quality_score threshold via detector.set_threshold."""
         mock_monitor = MagicMock(spec=DQMonitorPort)
         mock_detector = MagicMock()
         mock_monitor.detector = mock_detector
-        mock_monitor_cls = MagicMock(return_value=mock_monitor)
-
-        settings = _make_settings(enabled=True, quality_score_min=0.90)
+        mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
         bootstrap_dq_monitor_port(
-            settings=settings,
-            monitor_cls=mock_monitor_cls,
+            settings=_make_settings(enabled=True, quality_score_min=0.90),
+            monitor_factory=mock_monitor_factory,
         )
 
         mock_detector.set_threshold.assert_any_call(
@@ -190,25 +155,21 @@ class TestBootstrapDqMonitorPort:
             max_value=1.0,
         )
 
-    def test_di_monitor_cls_receives_correct_args(self) -> None:
-        """Monitor class should be constructed with logger, baseline_window, z_score_threshold."""
+    def test_monitor_factory_receives_correct_args(self) -> None:
         mock_monitor = MagicMock(spec=DQMonitorPort)
         mock_monitor.detector = MagicMock()
-        mock_monitor_cls = MagicMock(return_value=mock_monitor)
-
-        settings = _make_settings(
-            enabled=True,
-            baseline_window=10,
-            z_score_threshold=2.0,
-        )
+        mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
         bootstrap_dq_monitor_port(
-            settings=settings,
-            monitor_cls=mock_monitor_cls,
+            settings=_make_settings(
+                enabled=True,
+                baseline_window=10,
+                z_score_threshold=2.0,
+            ),
+            monitor_factory=mock_monitor_factory,
         )
 
-        mock_monitor_cls.assert_called_once()
-        kwargs = mock_monitor_cls.call_args.kwargs
+        kwargs = mock_monitor_factory.call_args.kwargs
         assert "logger" in kwargs
         assert kwargs["baseline_window"] == 10
         assert kwargs["z_score_threshold"] == 2.0

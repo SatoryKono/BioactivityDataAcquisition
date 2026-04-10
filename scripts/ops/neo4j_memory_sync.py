@@ -791,7 +791,7 @@ def _file_structure_config(memory_mapping: dict[str, object]) -> dict[str, objec
 
 
 def _as_string_list(value: object) -> list[str]:
-    if not isinstance(value, list):
+    if not isinstance(value, (list, tuple)):
         return []
     return [str(item) for item in value if isinstance(item, str)]
 

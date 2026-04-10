@@ -168,4 +168,5 @@ def test_observability_runtime_signatures_stable() -> None:
         "metrics",
         "environment",
         "logger",
+        "allow_noop_in_prod",
     )

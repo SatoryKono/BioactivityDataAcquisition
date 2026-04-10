@@ -30,6 +30,8 @@ __all__ = [
     "FILTER_IDS_LOADED_TOTAL",
     "PIPELINE_DURATION_SECONDS",
     "QUARANTINE_RECORDS_TOTAL",
+    "QUARANTINE_OPERATOR_DURATION_SECONDS",
+    "QUARANTINE_OPERATOR_OPERATIONS_TOTAL",
     "RECORDS_PROCESSED_TOTAL",
     "SILVER_FILTER_REJECTIONS_TOTAL",
     "VACUUM_DURATION_SECONDS",
@@ -83,6 +85,18 @@ QUARANTINE_RECORDS_TOTAL = Counter(
     "bioetl_quarantine_records_total",
     "Total number of records written to quarantine",
     ["pipeline", "reason"],
+)
+
+QUARANTINE_OPERATOR_OPERATIONS_TOTAL = Counter(
+    "bioetl_quarantine_operator_operations_total",
+    "Total number of quarantine explorer/admin operations by operation and status",
+    ["operation", "status"],
+)
+
+QUARANTINE_OPERATOR_DURATION_SECONDS = Histogram(
+    "bioetl_quarantine_operator_duration_seconds",
+    "Duration of quarantine explorer/admin operations in seconds",
+    ["operation", "status"],
 )
 
 SILVER_FILTER_REJECTIONS_TOTAL = Counter(

@@ -295,15 +295,19 @@ def test-activity-schema-handles-null-smiles():
 
 - Key Prometheus metrics:
 
-- `bioetl-dq-records-processed-total{provider, entity}`
+- `bioetl_records_processed_total{pipeline, stage, run_type}`
 
-- `bioetl-dq-records-passed-total{provider, entity}`
+- `bioetl_dq_validation_score{pipeline, entity}`
 
-- `bioetl-dq-records-failed-total{provider, entity}`
+- `bioetl_dq_validation_record_count{pipeline, entity}`
 
-- `bioetl-dq-soft-threshold-exceeded-total{provider, entity}`
+- `bioetl_dq_validation_failures_total{pipeline, stage, severity}`
 
-- `bioetl-dq-check-duration-ms{provider, entity}`
+- `bioetl_dq_records_quarantined_total{pipeline, entity, error_type}`
+
+- `bioetl_dq_soft_threshold_exceeded{pipeline}`
+
+- `bioetl_dq_check_duration_ms{pipeline}`
 
 ### Provenance Notes
 

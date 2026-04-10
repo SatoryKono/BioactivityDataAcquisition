@@ -55,6 +55,13 @@ class _DeltaWriteDispatchPolicy:
     write_merge: _DeltaWriteHandler
 
 
+_RUN_TYPE_PRECEDENCE_EXPR = (
+    "CASE "
+    "WHEN {alias}._run_type = 'rebuild' THEN 3 "
+    "WHEN {alias}._run_type = 'backfill' THEN 2 "
+    "ELSE 1 END"
+)
+
 _RUN_TYPE_PRECEDENCE_PREDICATE = (
     "CASE "
     "WHEN source._run_type = 'rebuild' THEN 3 "
@@ -65,6 +72,33 @@ _RUN_TYPE_PRECEDENCE_PREDICATE = (
     "WHEN target._run_type = 'backfill' THEN 2 "
     "ELSE 1 END"
 )
+
+
+def _build_content_changed_predicate(
+    source_alias: str = "source",
+    target_alias: str = "target",
+) -> str:
+    """Build a null-safe content-hash change predicate."""
+    return (
+        f"{source_alias}.content_hash <> {target_alias}.content_hash "
+        f"OR ({source_alias}.content_hash IS NULL AND {target_alias}.content_hash IS NOT NULL) "
+        f"OR ({source_alias}.content_hash IS NOT NULL AND {target_alias}.content_hash IS NULL)"
+    )
+
+
+def _build_merge_update_predicate(records: pa.Table | pa.RecordBatchReader) -> str:
+    """Build the Silver merge update predicate for rerun-safe writes."""
+    schema = records.schema
+    if "content_hash" not in schema.names:
+        return _RUN_TYPE_PRECEDENCE_PREDICATE
+
+    source_precedence = _RUN_TYPE_PRECEDENCE_EXPR.format(alias="source")
+    target_precedence = _RUN_TYPE_PRECEDENCE_EXPR.format(alias="target")
+    content_changed = _build_content_changed_predicate()
+    return (
+        f"({source_precedence} > {target_precedence}) "
+        f"OR ({source_precedence} = {target_precedence} AND ({content_changed}))"
+    )
 
 
 def _build_merge_condition(primary_keys: list[str]) -> str:
@@ -82,6 +116,7 @@ def _build_merge_execute_callable(
     """Build the blocking Delta merge callable for ``run_in_executor``."""
 
     def _execute() -> Any:  # Any: Delta merge returns heterogeneous result
+        update_predicate = _build_merge_update_predicate(records)
         return (
             dt.merge(
                 source=records,
@@ -90,7 +125,7 @@ def _build_merge_execute_callable(
                 target_alias="target",
                 merge_schema=merge_schema,
             )
-            .when_matched_update_all(predicate=_RUN_TYPE_PRECEDENCE_PREDICATE)
+            .when_matched_update_all(predicate=update_predicate)
             .when_not_matched_insert_all()
             .execute()
         )

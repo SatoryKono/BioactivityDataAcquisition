@@ -1,63 +1,185 @@
 ---
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-09'
 ---
 
 # Observability Layers Architecture
 
 ## Overview
 
-BioETL implements a layered approach to observability, separating the **Definition** of what to observe from the **Implementation** of how to store/transmit it.
+BioETL keeps observability inside the Ports & Adapters model:
 
-## Application Layer (src/bioetl/application/observability/)
+- domain defines observability contracts and value objects
+- application emits lifecycle, DQ, and postrun signals through those contracts
+- infrastructure implements concrete logging, metrics, tracing, and anomaly-monitoring adapters
+- composition owns the single supported runtime wiring path
 
-This layer focuses on **Domain Events** and **Pipeline Lifecycle**.
+The design goal is twofold:
 
-*   **PipelineObserver**: A context manager that wraps pipeline execution.
-    *   *Role*: Captures Start/Success/Failure events.
-    *   *Metrics*: Duration, Status.
-    *   *Logs*: Structured lifecycle logs.
+- keep `run_id`-level correlation in logs, traces, and control-plane artifacts
+- keep Prometheus metrics low-cardinality and aggregated by bounded labels only
 
-## Infrastructure Layer (src/bioetl/infrastructure/observability/)
+## Domain Layer
 
-This layer provides the concrete **Adapters** for observability ports.
+The domain layer defines the observability contracts:
 
-*   **PrometheusMetrics**: Implements `MetricsPort`.
-    *   *Role*: Exposes metrics via HTTP endpoint.
-*   **Structlog**: Implements `LoggerPort` (implicitly via duck typing).
-*   **OpenTelemetry**: (Optional) Implements `TracingPort`.
+- `LoggerPort`
+- `MetricsPort`
+- `TracingPort`
+- `DQMonitorPort`
+
+The domain layer also owns typed DQ anomaly value objects used across the port
+boundary:
+
+- `DQAnomaly`
+- `DQAnomalyType`
+- `DQAnomalySeverity`
+
+The domain layer does not import concrete logging libraries, Prometheus client
+types, or OpenTelemetry implementations.
+
+## Application Layer
+
+The application layer is responsible for emitting execution signals, not for
+choosing where they are stored.
+
+### Pipeline lifecycle
+
+`PipelineObserver` is the canonical lifecycle emitter for ordinary pipeline
+runs. The runner orchestration uses it to emit:
+
+- phase start and completion events
+- phase duration metrics
+- structured lifecycle logs
+- preflight health-check results
+- DQ anomaly signals
+- vacuum results
+
+Current ordinary-run phase mapping:
+
+- `preflight` -> `PREFLIGHT`
+- `prepare_medallion_layers` -> `LIFECYCLE_CLEAR`
+- `execute_pipeline` -> `EXECUTION`
+- `postrun` -> `POSTRUN`
+- `checkpoint_finalize` -> `CLEANUP`
+
+### Postrun tracing
+
+`PostrunService` emits a top-level `postrun.run` span and nested spans for the
+major postrun phases:
+
+- `postrun.compaction`
+- `postrun.dq_evaluation`
+- `postrun.dq_reports`
+- `postrun.vacuum`
+- `postrun.final_metadata`
+
+This keeps postrun diagnostics correlated without pushing high-cardinality
+identifiers into metric labels.
+
+### DQ contract use
+
+`DataQualityService` consumes typed `DQAnomaly` objects from `DQMonitorPort`
+rather than infrastructure-specific anomaly payloads.
+
+## Infrastructure Layer
+
+The infrastructure layer provides concrete adapters for the domain ports.
+
+### Logging
+
+- `UnifiedLogger` is the canonical `LoggerPort` implementation
+- `structlog` remains an implementation detail behind `UnifiedLogger`
+- flat top-level structured fields are canonical
+- nested `extra={...}` payloads are flattened as a compatibility behavior, with
+  explicit top-level kwargs taking precedence
+
+### Metrics
+
+- `PrometheusMetrics` implements `MetricsPort`
+- metric export names are defined centrally in
+  `src/bioetl/infrastructure/observability/metrics_export_names.py`
+- the current exported catalog size is **85 metrics**
+- provider health-check latency is standardized on seconds-based metric families
+  (`bioetl_health_check_latency_seconds`,
+  `bioetl_health_check_mode_latency_seconds`)
+
+### Tracing
+
+- `OpenTelemetryTracer` implements `TracingPort` when tracing is enabled
+- `NoOpTracing` is the valid null-object fallback in non-tracing contexts
+- `UnifiedLogger` enriches logs with `trace_id` and `span_id` when an active
+  span exists
+
+### Additional operator signals
+
+Infrastructure and application wiring now expose bounded operator metrics for
+quarantine actions:
+
+- `bioetl_quarantine_operator_operations_total`
+- `bioetl_quarantine_operator_duration_seconds`
+
+These metrics are intended for operational diagnosis of inspect/replay/purge and
+related workflows, not for per-record drill-down.
+
+## Composition Layer
+
+The composition layer owns runtime observability assembly.
+
+The supported runtime path is the bootstrap bundle under
+`src/bioetl/composition/bootstrap/runtime/`. This path is responsible for:
+
+- creating logger, metrics, tracing, and optional DQ-monitor dependencies
+- enforcing production observability policy
+- failing closed in `prod` when metrics or tracing resolve to no-op
+  implementations, unless an explicit override is configured
+
+Compatibility wrappers may exist for older builder entrypoints, but they must
+delegate back to the canonical bootstrap path rather than reimplementing
+assembly logic.
 
 ## Interaction Diagram
 
 ```mermaid
 sequenceDiagram
-    participant App as Application (Pipeline)
+    participant Comp as Composition Bootstrap
+    participant App as PipelineRunner
     participant Obs as PipelineObserver
-    participant Port as MetricsPort (Interface)
-    participant Infra as PrometheusMetrics (Impl)
+    participant Port as MetricsPort / LoggerPort / TracingPort
+    participant Infra as Infra Adapters
 
-    App->>Obs: enter()
-    Obs->>Port: increment-counter(started)
-    Port->>Infra: INC bioetl_pipeline_runs_total
+    Comp->>App: inject logger, metrics, tracer, dq_monitor
+    App->>Obs: emit_phase_started(PREFLIGHT)
+    Obs->>Port: lifecycle metric/log/trace emission
+    Port->>Infra: Prometheus / UnifiedLogger / OTel
 
-    App->>App: process-batch()
+    App->>App: execute pipeline stages
 
-    App->>Obs: exit(success)
-    Obs->>Port: observe-histogram(duration)
-    Port->>Infra: OBS bioetl_pipeline_duration_seconds
+    App->>Obs: emit_dq_anomaly(...)
+    Obs->>Port: bounded DQ signals
+    Port->>Infra: counter/log emission
+
+    App->>Obs: emit_vacuum_result(...)
+    Obs->>Port: maintenance metrics/logs
+    Port->>Infra: histogram/counter emission
 ```
 
-## Metrics Standards
+## Observability Standards
 
-All metrics MUST follow these naming conventions:
+All shipped observability must follow these rules:
 
-*   Prefix: `bioetl_`
-*   Common Labels: `pipeline`, `run_type`, `stage`, `provider`, `adapter`
-*   Current registry size: **68 metrics** (see `src/bioetl/infrastructure/observability/metrics_export_names.py`)
+- metric names use the `bioetl_` prefix
+- metric labels stay low-cardinality
+- `run_id`, `manifest_id`, payload hashes, filesystem paths, and other
+  per-run/per-record identifiers must not appear in Prometheus labels
+- logs keep `run_id`, `pipeline`, and `stage` for correlation
+- traces keep `bioetl.run_id` and phase-specific attributes
 
-See `docs/04-reference/contracts/observability.md` for the current canonical contract (v3.0.0).
+See [observability.md](../04-reference/contracts/observability.md) for the
+canonical runtime contract and [sli-slo-baseline.md](../05-operations/sli-slo-baseline.md)
+for the operational baseline built on top of those signals.

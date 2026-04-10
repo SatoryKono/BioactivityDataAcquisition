@@ -133,17 +133,14 @@ class MedallionConfigValidator:
         if errors:
             self._logger.warning(
                 "Write mode validation found issues",
-                extra={
-                    "error_count": len(errors),
-                    "errors": [
-                        {"field": err.field, "rule": err.rule} for err in errors
-                    ],
-                },
+                error_count=len(errors),
+                errors=[{"field": err.field, "rule": err.rule} for err in errors],
             )
             return
         self._logger.debug(
             "Write mode validation passed",
-            extra={"silver_mode": silver_mode_value, "gold_mode": gold_mode_value},
+            silver_mode=silver_mode_value,
+            gold_mode=gold_mode_value,
         )
 
     def _log_medallion_validation_result(
@@ -152,18 +149,14 @@ class MedallionConfigValidator:
         if errors:
             self._logger.warning(
                 "Medallion config validation found issues",
-                extra={
-                    "error_count": len(errors),
-                    "errors": [
-                        {"field": err.field, "rule": err.rule} for err in errors
-                    ],
-                    "strict_mode": runtime.strict_validation,
-                },
+                error_count=len(errors),
+                errors=[{"field": err.field, "rule": err.rule} for err in errors],
+                strict_mode=runtime.strict_validation,
             )
         else:
             self._logger.debug(
                 "Medallion config validation passed",
-                extra={"run_type": runtime.run_type.value},
+                run_type=runtime.run_type.value,
             )
 
 

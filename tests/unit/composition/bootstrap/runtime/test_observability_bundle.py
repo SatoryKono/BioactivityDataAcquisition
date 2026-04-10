@@ -8,22 +8,63 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.observability import ObservabilityBundle, ObservabilityContractError
 from bioetl.domain.ports.noop import (
     NoOpMetrics,
     NoOpTracing,
 )
 
-
 _FIXED_UUID = UUID("abcdef01-2345-6789-abcd-ef0123456789")
+
+
+def _settings(env: str = "dev", *, allow_noop: bool = False) -> SimpleNamespace:
+    return SimpleNamespace(
+        env=env,
+        observability=SimpleNamespace(
+            allow_noop_observability_in_prod=allow_noop,
+        ),
+    )
 
 
 @pytest.mark.unit
 class TestValidateObservabilityPreflightImpl:
     """Tests for validate_observability_preflight_impl."""
 
-    def test_noop_tracing_warns_in_prod(self) -> None:
-        """NoOpTracing in production environment triggers a warning log."""
+    def test_noop_tracing_warns_and_fails_closed_in_prod(self) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            validate_observability_preflight_impl,
+        )
+
+        logger = MagicMock()
+        with pytest.raises(ObservabilityContractError, match="NoOpTracing"):
+            validate_observability_preflight_impl(
+                tracer=NoOpTracing(),
+                metrics=MagicMock(spec=["increment"]),
+                environment="prod",
+                logger=logger,
+            )
+
+        logger.warning.assert_called_once()
+        assert logger.warning.call_args[0][0] == "noop_tracing_in_production"
+
+    def test_noop_metrics_warns_and_fails_closed_in_prod(self) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            validate_observability_preflight_impl,
+        )
+
+        logger = MagicMock()
+        with pytest.raises(ObservabilityContractError, match="NoOpMetrics"):
+            validate_observability_preflight_impl(
+                tracer=MagicMock(),
+                metrics=NoOpMetrics(),
+                environment="prod",
+                logger=logger,
+            )
+
+        logger.warning.assert_called_once()
+        assert logger.warning.call_args[0][0] == "noop_metrics_in_production"
+
+    def test_noop_implementations_only_warn_when_override_enabled(self) -> None:
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
             validate_observability_preflight_impl,
         )
@@ -31,45 +72,17 @@ class TestValidateObservabilityPreflightImpl:
         logger = MagicMock()
         validate_observability_preflight_impl(
             tracer=NoOpTracing(),
-            metrics=MagicMock(spec=["increment"]),
-            environment="prod",
-            logger=logger,
-        )
-
-        logger.warning.assert_any_call(
-            "noop_tracing_in_production",
-            message="NoOpTracing in production - traces will be lost",
-            recommendation=(
-                "Set BIOETL_OBSERVABILITY__TRACING_ENABLED=true "
-                "and configure OpenTelemetry endpoint"
-            ),
-        )
-
-    def test_noop_metrics_warns_in_prod(self) -> None:
-        """NoOpMetrics in production environment triggers a warning log."""
-        from bioetl.composition.bootstrap.runtime.observability_bundle import (
-            validate_observability_preflight_impl,
-        )
-
-        logger = MagicMock()
-        validate_observability_preflight_impl(
-            tracer=MagicMock(),
             metrics=NoOpMetrics(),
             environment="prod",
             logger=logger,
+            allow_noop_in_prod=True,
         )
 
-        logger.warning.assert_any_call(
-            "noop_metrics_in_production",
-            message="NoOpMetrics in production - metrics will be lost",
-            recommendation=(
-                "Set BIOETL_OBSERVABILITY__METRICS_ENABLED=true "
-                "to enable Prometheus metrics collection"
-            ),
-        )
+        event_names = [call[0][0] for call in logger.warning.call_args_list]
+        assert "noop_tracing_in_production" in event_names
+        assert "noop_metrics_in_production" in event_names
 
     def test_non_prod_environment_silent(self) -> None:
-        """Non-production environments do not emit warnings even with NoOps."""
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
             validate_observability_preflight_impl,
         )
@@ -85,7 +98,6 @@ class TestValidateObservabilityPreflightImpl:
         logger.warning.assert_not_called()
 
     def test_real_implementations_no_warn_in_prod(self) -> None:
-        """Real tracer and metrics in prod do not trigger warnings."""
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
             validate_observability_preflight_impl,
         )
@@ -106,7 +118,6 @@ class TestBootstrapObservabilityBundleImpl:
     """Tests for bootstrap_observability_bundle_impl."""
 
     def test_returns_observability_bundle(self) -> None:
-        """Function returns an ObservabilityBundle with all components."""
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
             bootstrap_observability_bundle_impl,
         )
@@ -115,12 +126,11 @@ class TestBootstrapObservabilityBundleImpl:
         tracer = MagicMock()
         metrics = MagicMock()
         dq_monitor = MagicMock()
-        settings = SimpleNamespace(env="dev")
 
         bundle = bootstrap_observability_bundle_impl(
             pipeline="test_pipe",
             run_id=_FIXED_UUID,
-            settings=settings,
+            settings=_settings(),
             log_level="INFO",
             logger_bootstrapper=lambda _p, _r, _l: logger,
             tracer_bootstrapper=lambda _s: tracer,
@@ -135,8 +145,7 @@ class TestBootstrapObservabilityBundleImpl:
         assert bundle.metrics is metrics
         assert bundle.dq_monitor is dq_monitor
 
-    def test_calls_preflight_validator(self) -> None:
-        """preflight_validator is called with assembled components."""
+    def test_calls_preflight_validator_with_allow_flag(self) -> None:
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
             bootstrap_observability_bundle_impl,
         )
@@ -144,8 +153,8 @@ class TestBootstrapObservabilityBundleImpl:
         tracer = MagicMock()
         metrics = MagicMock()
         logger = MagicMock()
-        settings = SimpleNamespace(env="prod")
         preflight = MagicMock()
+        settings = _settings(env="prod", allow_noop=True)
 
         bootstrap_observability_bundle_impl(
             pipeline="p",
@@ -159,21 +168,25 @@ class TestBootstrapObservabilityBundleImpl:
             preflight_validator=preflight,
         )
 
-        preflight.assert_called_once_with(tracer, metrics, "prod", logger)
+        preflight.assert_called_once_with(
+            tracer,
+            metrics,
+            "prod",
+            logger,
+            True,
+        )
 
-    def test_logs_observability_initialized(self) -> None:
-        """Emits observability_initialized info log after assembly."""
+    def test_logs_observability_initialized_with_flat_context(self) -> None:
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
             bootstrap_observability_bundle_impl,
         )
 
         logger = MagicMock()
-        settings = SimpleNamespace(env="dev")
 
         bootstrap_observability_bundle_impl(
             pipeline="p",
             run_id=_FIXED_UUID,
-            settings=settings,
+            settings=_settings(),
             log_level="INFO",
             logger_bootstrapper=lambda _p, _r, _l: logger,
             tracer_bootstrapper=lambda _s: MagicMock(),
@@ -182,5 +195,10 @@ class TestBootstrapObservabilityBundleImpl:
             preflight_validator=MagicMock(),
         )
 
-        logger.info.assert_called_once()
-        assert logger.info.call_args[0][0] == "observability_initialized"
+        logger.info.assert_called_once_with(
+            "observability_initialized",
+            stage="bootstrap",
+            metrics_type="MagicMock",
+            tracer_type="MagicMock",
+            dq_monitor_enabled=False,
+        )

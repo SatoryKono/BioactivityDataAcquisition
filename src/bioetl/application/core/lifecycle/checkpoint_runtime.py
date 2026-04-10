@@ -138,13 +138,13 @@ def handle_incompatible_checkpoint(
     if compatibility_policy == "observe":
         logger.warning(
             "Checkpoint compatibility mismatch observed; resume continues.",
-            extra=payload,
+            **payload,
         )
         return checkpoint_metadata
     if compatibility_policy == "soft_fail":
         logger.warning(
             "Checkpoint compatibility mismatch; resume blocked by soft_fail policy.",
-            extra=payload,
+            **payload,
         )
         return None
     raise ValueError(

@@ -85,7 +85,8 @@ def log_preflight_started(
     """Log preflight start event."""
     host._logger.info(
         "Starting preflight validation",
-        extra={"stage": "preflight", "strict_mode": strict_validation},
+        stage="preflight",
+        strict_mode=strict_validation,
     )
 
 
@@ -98,13 +99,11 @@ def log_preflight_completed(
     """Log preflight completion event."""
     host._logger.info(
         "Preflight validation completed",
-        extra={
-            "stage": "preflight",
-            "medallion_policy_valid": report.medallion_policy_valid,
-            "config_error_count": len(report.config_errors),
-            "is_healthy": is_healthy,
-            "should_block": report.should_block_startup,
-        },
+        stage="preflight",
+        medallion_policy_valid=report.medallion_policy_valid,
+        config_error_count=len(report.config_errors),
+        is_healthy=is_healthy,
+        should_block=report.should_block_startup,
     )
 
 

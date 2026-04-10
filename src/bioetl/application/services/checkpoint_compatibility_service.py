@@ -266,12 +266,12 @@ def _log_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) ->
     if compatible:
         logger.info(
             "Checkpoint compatibility validation passed",
-            extra={"messages": messages},
+            messages=messages,
         )
         return
     logger.warning(
         "Checkpoint compatibility validation failed",
-        extra={"messages": messages},
+        messages=messages,
     )
 
 
@@ -281,12 +281,12 @@ def _log_lenient_result(
     if compatible:
         logger.info(
             "Checkpoint minimum compatibility validation passed (lenient mode)",
-            extra={"messages": messages},
+            messages=messages,
         )
         return
     logger.warning(
         "Checkpoint minimum compatibility validation failed (lenient mode)",
-        extra={"messages": messages},
+        messages=messages,
     )
 
 

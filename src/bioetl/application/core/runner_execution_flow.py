@@ -15,20 +15,26 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.observability.observer import LifecyclePhase
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
+from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointManagerService,
     )
+    from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.postrun.service import PostrunService
     from bioetl.application.core.preflight.service import PreflightService
+    from bioetl.application.observability.observer import PipelineObserver
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
+    from bioetl.domain.types import HealthReport
+    from bioetl.domain.value_objects import DQAnomaly
 
 
 _PREFLIGHT_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[0]
@@ -36,6 +42,13 @@ _PREPARE_MEDALLION_LAYERS_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[1]
 _EXECUTE_PIPELINE_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[2]
 _POSTRUN_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[3]
 _CHECKPOINT_FINALIZE_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[4]
+_PHASE_BY_STAGE_NAME = {
+    _PREFLIGHT_STAGE_NAME: LifecyclePhase.PREFLIGHT,
+    _PREPARE_MEDALLION_LAYERS_STAGE_NAME: LifecyclePhase.LIFECYCLE_CLEAR,
+    _EXECUTE_PIPELINE_STAGE_NAME: LifecyclePhase.EXECUTION,
+    _POSTRUN_STAGE_NAME: LifecyclePhase.POSTRUN,
+    _CHECKPOINT_FINALIZE_STAGE_NAME: LifecyclePhase.CLEANUP,
+}
 
 
 class _PipelineRunnerExecutionHostProtocol(Protocol):
@@ -47,6 +60,7 @@ class _PipelineRunnerExecutionHostProtocol(Protocol):
     _preflight_service: PreflightService
     _postrun_service: PostrunService
     _lifecycle_service: MedallionLifecycleService
+    _observer: PipelineObserver
 
     async def _resolve_execution_offset(self) -> int | None: ...
 
@@ -70,15 +84,94 @@ class _ExecutionCycleContext:
     offset: int | None
 
 
+def _phase_for_stage_name(stage_name: str) -> LifecyclePhase:
+    """Resolve observer phase name for one canonical runner stage."""
+    return _PHASE_BY_STAGE_NAME[stage_name]
+
+
+def _emit_preflight_health_results(
+    host: _PipelineRunnerExecutionHostProtocol,
+    report: HealthReport | None,
+) -> None:
+    """Emit component-level preflight health results through PipelineObserver."""
+    if report is None:
+        return
+    for result in report.results:
+        host._observer.emit_health_check_result(
+            component=result.component,
+            healthy=result.status != HealthStatus.UNHEALTHY,
+            duration_ms=result.duration_seconds * 1000.0,
+            health_status=result.status.value,
+            runner_stage=_PREFLIGHT_STAGE_NAME,
+        )
+
+
+def _emit_postrun_observability(
+    host: _PipelineRunnerExecutionHostProtocol,
+    result: PostrunResult,
+) -> None:
+    """Emit DQ anomaly and VACUUM events from one postrun result."""
+    for anomaly in result.dq.anomalies:
+        host._observer.emit_dq_anomaly(
+            metric_name=anomaly.metric_name,
+            severity=anomaly.severity.value,
+            anomaly_type=anomaly.anomaly_type.value,
+            current_value=anomaly.current_value,
+            baseline_mean=anomaly.baseline_mean,
+            baseline_stddev=anomaly.baseline_stddev,
+            z_score=anomaly.z_score,
+            message=anomaly.message,
+            runner_stage=_POSTRUN_STAGE_NAME,
+        )
+
+    if result.vacuum.skipped:
+        return
+
+    host._observer.emit_vacuum_result(
+        layer="silver",
+        table=host._config.effective_silver_table,
+        files_removed=result.vacuum.silver_files_removed,
+        runner_stage=_POSTRUN_STAGE_NAME,
+    )
+
+    if not getattr(host._runtime, "skip_gold", False):
+        host._observer.emit_vacuum_result(
+            layer="gold",
+            table=host._config.effective_gold_table,
+            files_removed=result.vacuum.gold_files_removed,
+            runner_stage=_POSTRUN_STAGE_NAME,
+        )
+
+
 async def _run_tracked_stage(
     host: _PipelineRunnerExecutionHostProtocol,
     stage_name: str,
     operation: Callable[[], Awaitable[None]],
 ) -> None:
     """Execute one ordinary runner stage with canonical ledger bookkeeping."""
+    phase = _phase_for_stage_name(stage_name)
     host._record_stage_started(stage_name)
-    await operation()
+    start_time = host._observer.emit_phase_started(
+        phase,
+        runner_stage=stage_name,
+    )
+    try:
+        await operation()
+    except Exception as exc:
+        host._observer.emit_phase_completed(
+            phase,
+            start_time,
+            success=False,
+            runner_stage=stage_name,
+            error_type=type(exc).__name__,
+        )
+        raise
     host._record_stage_completed(stage_name)
+    host._observer.emit_phase_completed(
+        phase,
+        start_time,
+        runner_stage=stage_name,
+    )
 
 
 async def _run_tracked_stages(
@@ -173,15 +266,17 @@ async def execute_pipeline(
 async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Run the postrun workflow using the executor's resolved DQ context."""
     dq_context = host._executor.get_dq_context()
-    await host._postrun_service.run(
+    result = await host._postrun_service.run(
         executor=host._executor,
         dq_context=dq_context,
     )
+    _emit_postrun_observability(host, result)
 
 
 async def validate_infrastructure(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Validate infrastructure health before pipeline execution."""
-    await host._preflight_service.validate_infrastructure(host._services)
+    report = await host._preflight_service.validate_infrastructure(host._services)
+    _emit_preflight_health_results(host, report)
 
 
 async def prepare_medallion_layers(host: _PipelineRunnerExecutionHostProtocol) -> None:

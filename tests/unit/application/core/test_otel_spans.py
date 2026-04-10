@@ -418,9 +418,9 @@ class TestPostrunServiceSpan:
         await service.run(executor=self._make_executor())
 
         mock_tracer.get_tracer.assert_called_with("bioetl.postrun")
-        span_name = mock_tracer.get_tracer.return_value.start_as_current_span.call_args[
+        span_name = mock_tracer.get_tracer.return_value.start_as_current_span.call_args_list[
             0
-        ][0]
+        ].args[0]
         assert span_name == "postrun.run"
 
     @pytest.mark.asyncio
@@ -452,6 +452,52 @@ class TestPostrunServiceSpan:
         mock_span.set_attribute.assert_any_call("bioetl.dq_status", "passed")
 
     @pytest.mark.asyncio
+    async def test_postrun_run_starts_nested_phase_spans(self) -> None:
+        """Verify postrun tracing covers compaction, DQ, reports, vacuum, metadata."""
+        mock_tracer = _make_mock_tracer()
+        service = self._build_postrun_service(tracer=mock_tracer)
+
+        await service.run(executor=self._make_executor())
+
+        started_span_names = [
+            call.args[0]
+            for call in mock_tracer.get_tracer.return_value.start_as_current_span.call_args_list
+        ]
+        assert started_span_names == [
+            "postrun.run",
+            "postrun.compaction",
+            "postrun.dq_evaluation",
+            "postrun.dq_reports",
+            "postrun.vacuum",
+            "postrun.final_metadata",
+        ]
+
+    @pytest.mark.asyncio
+    async def test_postrun_run_sets_detailed_outcome_attributes(self) -> None:
+        """Verify detailed postrun attributes are attached to the active spans."""
+        mock_tracer = _make_mock_tracer()
+        service = self._build_postrun_service(tracer=mock_tracer)
+
+        await service.run(executor=self._make_executor())
+
+        mock_span = (
+            mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        )
+        mock_span.set_attribute.assert_any_call("bioetl.dq_reports_count", 0)
+        mock_span.set_attribute.assert_any_call(
+            "bioetl.compaction_duplicates_removed",
+            0,
+        )
+        mock_span.set_attribute.assert_any_call(
+            "bioetl.vacuum_silver_files_removed",
+            0,
+        )
+        mock_span.set_attribute.assert_any_call(
+            "bioetl.final_metadata_phase_completed",
+            True,
+        )
+
+    @pytest.mark.asyncio
     async def test_postrun_run_span_is_entered_and_exited(self) -> None:
         """Verify span context manager is entered and exited cleanly."""
         mock_tracer = _make_mock_tracer()
@@ -462,8 +508,8 @@ class TestPostrunServiceSpan:
         mock_span = (
             mock_tracer.get_tracer.return_value.start_as_current_span.return_value
         )
-        mock_span.__enter__.assert_called_once()
-        mock_span.__exit__.assert_called_once()
+        assert mock_span.__enter__.call_count == 6
+        assert mock_span.__exit__.call_count == 6
 
     @pytest.mark.asyncio
     async def test_postrun_run_span_records_error_on_exception(self) -> None:

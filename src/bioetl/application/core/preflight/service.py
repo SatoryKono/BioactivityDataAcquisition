@@ -66,7 +66,7 @@ class PreflightService:
         """
         self._logger.info(
             "Validating infrastructure health",
-            extra={"stage": "health_check"},
+            stage="health_check",
         )
 
         start_time = time.perf_counter()
@@ -77,13 +77,11 @@ class PreflightService:
 
         self._logger.info(
             "Infrastructure health check completed",
-            extra={
-                "stage": "health_check",
-                "overall_status": report.overall_status.value,
-                "is_healthy": report.is_healthy,
-                "components_checked": len(report.results),
-                "duration_seconds": round(duration, 4),
-            },
+            stage="health_check",
+            overall_status=report.overall_status.value,
+            is_healthy=report.is_healthy,
+            components_checked=len(report.results),
+            duration_seconds=round(duration, 4),
         )
 
         self._health_aggregator.assert_healthy(report)
