@@ -54,6 +54,28 @@ def _is_json_like_string(value: str) -> bool:
     )
 
 
+def _is_doi_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> bool:
+    return field_name in rule_set.doi_fields or field_name.endswith(_DOI_SUFFIXES)
+
+
+def _is_pmid_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> bool:
+    return field_name in rule_set.pmid_fields or field_name.endswith(_PMID_SUFFIXES)
+
+
+def _is_date_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> bool:
+    if field_name.endswith("_ts"):
+        return False
+    return (
+        field_name in rule_set.date_fields
+        or field_name.endswith("_date")
+        or field_name.startswith("date_")
+    )
+
+
+def _is_smiles_field(field_name: str) -> bool:
+    return field_name == "smiles" or field_name.endswith("_smiles")
+
+
 @dataclass(frozen=True, slots=True)
 class RecordNormalizationProcessor:
     """Normalize transformed Silver payloads before hash and merge steps."""
@@ -277,15 +299,15 @@ class RecordNormalizationProcessor:
     def _normalize_special_field(self, field_name: str, value: object) -> object:
         if value is None:
             return None
-        if self._is_smiles_field(field_name):
+        if _is_smiles_field(field_name):
             return self._normalize_smiles_field(field_name, value)
-        if self._is_doi_field(field_name):
+        if _is_doi_field(field_name, rule_set=self.rule_set):
             return normalize_doi(value) if isinstance(value, str) else value
-        if self._is_pmid_field(field_name):
+        if _is_pmid_field(field_name, rule_set=self.rule_set):
             if isinstance(value, bool):
                 return None
             return normalize_pmid(value) if isinstance(value, str | int) else value
-        if self._is_date_field(field_name):
+        if _is_date_field(field_name, rule_set=self.rule_set):
             return normalize_partial_date(value) if isinstance(value, str) else value
         return _UNHANDLED
 
@@ -334,28 +356,6 @@ class RecordNormalizationProcessor:
         except ValueError:
             return value
         return canonical_json if canonical_json is not None else value
-
-    def _is_doi_field(self, field_name: str) -> bool:
-        return field_name in self.rule_set.doi_fields or field_name.endswith(
-            _DOI_SUFFIXES
-        )
-
-    def _is_pmid_field(self, field_name: str) -> bool:
-        return field_name in self.rule_set.pmid_fields or field_name.endswith(
-            _PMID_SUFFIXES
-        )
-
-    def _is_date_field(self, field_name: str) -> bool:
-        if field_name.endswith("_ts"):
-            return False
-        return (
-            field_name in self.rule_set.date_fields
-            or field_name.endswith("_date")
-            or field_name.startswith("date_")
-        )
-
-    def _is_smiles_field(self, field_name: str) -> bool:
-        return field_name == "smiles" or field_name.endswith("_smiles")
 
     def _normalize_smiles_field(self, field_name: str, value: object) -> str | None:
         if not isinstance(value, str):

@@ -8,16 +8,13 @@ descriptors.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import asdict, dataclass, is_dataclass
-from datetime import UTC, datetime
-from enum import Enum
-from typing import cast
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from uuid import UUID
 
-from bioetl.domain.normalization.control_plane import (
-    normalize_control_plane_datetime,
-    normalize_control_plane_uuid,
+from bioetl.domain.control_plane._run_manifest_serialization import (
+    normalize_manifest_created_at,
+    normalize_manifest_serializable,
 )
 from bioetl.domain.types import RunID, RunType
 
@@ -28,75 +25,6 @@ __all__ = [
     "RunManifest",
     "RunSourceRef",
 ]
-
-
-def _normalize_mapping(value: Mapping[object, object]) -> dict[str, object]:
-    """Normalize nested mappings into JSON-serializable primitives."""
-    return {
-        str(key): _normalize_serializable(item)
-        for key, item in sorted(value.items(), key=lambda item: str(item[0]))
-    }
-
-
-def _normalize_scalar(value: object) -> object:
-    """Normalize scalar values into JSON-serializable primitives."""
-    if isinstance(value, datetime):
-        return normalize_control_plane_datetime(value)
-    if isinstance(value, Enum):
-        return str(value.value)
-    if isinstance(value, UUID):
-        return normalize_control_plane_uuid(value)
-    return value
-
-
-def _normalize_dataclass_value(value: object) -> dict[str, object] | None:
-    """Normalize dataclass instances when present."""
-    if not is_dataclass(value) or isinstance(value, type):
-        return None
-    return _normalize_mapping(cast("Mapping[object, object]", asdict(value)))
-
-
-def _normalize_collection_value(value: object) -> object | None:
-    """Normalize collection-like values into JSON-friendly shapes."""
-    if isinstance(value, dict):
-        return _normalize_mapping(value)
-    sequence_value = _normalize_sequence_value(value)
-    if sequence_value is not None:
-        return sequence_value
-    return _normalize_set_like_value(value)
-
-
-def _normalize_sequence_value(value: object) -> list[object] | None:
-    """Normalize ordered collection values when present."""
-    if not isinstance(value, (list, tuple)):
-        return None
-    return [_normalize_serializable(item) for item in value]
-
-
-def _normalize_set_like_value(value: object) -> list[object] | None:
-    """Normalize set-like values into deterministically sorted lists."""
-    if not isinstance(value, (set, frozenset)):
-        return None
-    normalized = [_normalize_serializable(item) for item in value]
-    return sorted(normalized, key=lambda item: str(item))
-
-
-def _normalize_serializable(value: object) -> object:
-    """Normalize nested values into JSON-serializable primitives."""
-    dataclass_value = _normalize_dataclass_value(value)
-    if dataclass_value is not None:
-        return dataclass_value
-    collection_value = _normalize_collection_value(value)
-    if collection_value is not None:
-        return collection_value
-    return _normalize_scalar(value)
-
-
-def _normalize_manifest_created_at(value: datetime) -> datetime:
-    """Canonicalize manifest timestamps to UTC-aware datetimes."""
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
 
 
 @dataclass(frozen=True, slots=True)
@@ -177,13 +105,14 @@ class RunManifest:
         object.__setattr__(
             self,
             "created_at",
-            _normalize_manifest_created_at(self.created_at),
+            normalize_manifest_created_at(self.created_at),
         )
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable manifest payload."""
         return {
-            key: _normalize_serializable(value) for key, value in asdict(self).items()
+            key: normalize_manifest_serializable(value)
+            for key, value in asdict(self).items()
         }
 
     @classmethod
@@ -264,34 +193,45 @@ def _load_input_snapshots(raw_snapshots: object) -> tuple[RunInputSnapshotRef, .
     if not isinstance(raw_snapshots, list):
         return ()
     return tuple(
-        RunInputSnapshotRef(
-            snapshot_id=str(item["snapshot_id"]),
-            content_hash=str(item["content_hash"]),
-            immutable_uri=(
-                None
-                if item.get("immutable_uri") is None
-                else str(item["immutable_uri"])
-            ),
-            query_fingerprint=(
-                None
-                if item.get("query_fingerprint") is None
-                else str(item["query_fingerprint"])
-            ),
-            etag=None if item.get("etag") is None else str(item["etag"]),
-            last_modified=(
-                None
-                if item.get("last_modified") is None
-                else str(item["last_modified"])
-            ),
-            captured_at=(
-                None
-                if item.get("captured_at") is None
-                else datetime.fromisoformat(str(item["captured_at"]))
-            ),
-        )
+        _load_input_snapshot_ref(item)
         for item in raw_snapshots
         if isinstance(item, dict)
     )
+
+
+def _load_input_snapshot_ref(item: dict[str, object]) -> RunInputSnapshotRef:
+    """Deserialize one immutable input snapshot reference."""
+    return RunInputSnapshotRef(
+        snapshot_id=str(item["snapshot_id"]),
+        content_hash=str(item["content_hash"]),
+        immutable_uri=_load_optional_snapshot_text(item, "immutable_uri"),
+        query_fingerprint=_load_optional_snapshot_text(item, "query_fingerprint"),
+        etag=_load_optional_snapshot_text(item, "etag"),
+        last_modified=_load_optional_snapshot_text(item, "last_modified"),
+        captured_at=_load_optional_snapshot_datetime(item, "captured_at"),
+    )
+
+
+def _load_optional_snapshot_text(
+    item: dict[str, object],
+    field_name: str,
+) -> str | None:
+    """Deserialize one optional snapshot text field."""
+    raw_value = item.get(field_name)
+    if raw_value is None:
+        return None
+    return str(raw_value)
+
+
+def _load_optional_snapshot_datetime(
+    item: dict[str, object],
+    field_name: str,
+) -> datetime | None:
+    """Deserialize one optional snapshot datetime field."""
+    raw_value = item.get(field_name)
+    if raw_value is None:
+        return None
+    return datetime.fromisoformat(str(raw_value))
 
 
 def _load_artifacts(raw_artifacts: object) -> tuple[RunArtifactRef, ...]:

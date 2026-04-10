@@ -79,6 +79,7 @@ class RunOptions:
     use_cached_bronze: bool = False
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
+    exact_replay: bool = False
     enable_tracing: bool | None = None
 
 

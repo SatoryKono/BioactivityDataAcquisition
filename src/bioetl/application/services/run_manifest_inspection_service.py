@@ -149,6 +149,9 @@ class RunManifestInspectionService:
             "effective_config_hash": code_provenance.config_hash,
             "contract_ref": code_provenance.contract_ref,
             "contract_version": code_provenance.contract_version,
+            "replay_mode": diagnostics.get("replay_mode", "live_fetch"),
+            "input_snapshot_count": diagnostics.get("input_snapshot_count", 0),
+            "input_snapshots": diagnostics.get("input_snapshots", []),
             "planned_artifacts": [
                 {"layer": artifact.layer, "path": artifact.path}
                 for artifact in manifest.planned_artifacts

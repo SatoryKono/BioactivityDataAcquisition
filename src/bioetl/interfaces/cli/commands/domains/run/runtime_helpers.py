@@ -68,6 +68,7 @@ def build_run_command_input(
     use_cached_bronze: bool,
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
+    exact_replay: bool = False,
 ) -> RunCommandInput:
     """Build normalized CLI payload for policy-based execution."""
     return RunCommandInput(
@@ -90,6 +91,7 @@ def build_run_command_input(
         use_cached_bronze=use_cached_bronze,
         cached_bronze_date=cached_bronze_date,
         cached_bronze_path=cached_bronze_path,
+        exact_replay=exact_replay,
     )
 
 

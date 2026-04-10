@@ -87,6 +87,7 @@ async def _run_cached_fixture_pipeline(*, cached_bronze_path: Path) -> RunID:
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=5,
+        exact_replay=True,
         cached_bronze=CachedBronzeContext.from_options(
             path=str(cached_bronze_path),
             date="2026-03-25",
@@ -148,6 +149,21 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
 
     code_provenance_first = manifest_first["code_provenance"]
     code_provenance_second = manifest_second["code_provenance"]
+    assert manifest_first["launch_context"]["exact_replay"] is True
+    assert manifest_second["launch_context"]["exact_replay"] is True
+    assert manifest_first["runtime_config"]["exact_replay"] is True
+    assert manifest_second["runtime_config"]["exact_replay"] is True
+    source_refs_first = manifest_first.get("source_refs")
+    source_refs_second = manifest_second.get("source_refs")
+    assert isinstance(source_refs_first, list) and source_refs_first
+    assert isinstance(source_refs_second, list) and source_refs_second
+    snapshots_first = source_refs_first[0].get("input_snapshots")
+    snapshots_second = source_refs_second[0].get("input_snapshots")
+    assert isinstance(snapshots_first, list) and snapshots_first
+    assert isinstance(snapshots_second, list) and snapshots_second
+    assert isinstance(snapshots_first[0].get("snapshot_id"), str)
+    assert isinstance(snapshots_first[0].get("content_hash"), str)
+    assert isinstance(snapshots_first[0].get("immutable_uri"), str)
     assert code_provenance_first["contract_ref"] == "chembl.activity"
     assert code_provenance_second["contract_ref"] == "chembl.activity"
     assert isinstance(code_provenance_first.get("contract_version"), str)

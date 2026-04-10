@@ -162,6 +162,7 @@ class TestPrepareRunRequest:
             use_cached_bronze=False,
             cached_bronze_date=None,
             cached_bronze_path=None,
+            exact_replay=False,
             exit_func=exit_func,
         )
 
@@ -201,6 +202,7 @@ class TestPrepareRunRequest:
                 use_cached_bronze=False,
                 cached_bronze_date=None,
                 cached_bronze_path=None,
+                exact_replay=False,
                 exit_func=MagicMock(side_effect=SystemExit(ExitCode.CONFIG_ERROR)),
             )
 
@@ -366,6 +368,7 @@ class TestRunCommandFlow:
                     use_cached_bronze=False,
                     cached_bronze_date=None,
                     cached_bronze_path=None,
+                    exact_replay=False,
                 ),
                 service=service,
                 execute_run=execute_run,
@@ -421,6 +424,7 @@ class TestRunCommandFlow:
                     use_cached_bronze=False,
                     cached_bronze_date=None,
                     cached_bronze_path=None,
+                    exact_replay=False,
                 ),
                 service=service,
                 execute_run=execute_run,
@@ -435,6 +439,56 @@ class TestRunCommandFlow:
         health_info_presenter.assert_called_once_with(request)
         result_finalizer.assert_called_once_with(result)
         exit_func.assert_not_called()
+
+    def test_forwards_exact_replay_to_request_preparation(self) -> None:
+        service = MagicMock(spec=CliRunOrchestrationService)
+        request = _make_request()
+        service.prepare_execution_request.return_value = RunPreparationResult(
+            request=request
+        )
+        execute_run = MagicMock(return_value=_make_result())
+        health_info_presenter = MagicMock()
+        result_finalizer = MagicMock(side_effect=SystemExit(ExitCode.OK))
+        exit_func = MagicMock(side_effect=SystemExit(ExitCode.OK))
+
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.domains.run.command_policy.handle_destructive_step",
+                return_value=True,
+            ),
+            pytest.raises(SystemExit),
+        ):
+            run_command_flow(
+                cli_input=RunCommandInput(
+                    pipeline="chembl_activity",
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=None,
+                    limit=10,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    yes=True,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    health_server=False,
+                    health_port=8081,
+                    enable_tracing=None,
+                    use_cached_bronze=True,
+                    cached_bronze_date="2026-03-12",
+                    cached_bronze_path="/tmp/bronze",
+                    exact_replay=True,
+                ),
+                service=service,
+                execute_run=execute_run,
+                health_info_presenter=health_info_presenter,
+                result_finalizer=result_finalizer,
+                exit_func=exit_func,
+            )
+
+        assert service.prepare_execution_request.call_args.kwargs["exact_replay"] is True
 
 
 # ---------------------------------------------------------------------------

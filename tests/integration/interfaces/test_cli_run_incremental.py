@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
+from bioetl.interfaces.cli.exit_codes import ExitCode
 
 pytestmark = pytest.mark.integration
 
@@ -78,6 +79,7 @@ class TestCliRunIncremental:
 
         assert "--limit" in result.output
         assert "Maximum number of records" in result.output
+        assert "--exact-replay" in result.output
 
     def test_run_incremental_success(
         self,
@@ -149,6 +151,19 @@ class TestCliRunIncremental:
 
         assert result.exit_code == 0
         assert "0.1.0" in result.output or "version" in result.output.lower()
+
+    def test_run_exact_replay_requires_cached_bronze(
+        self,
+        cli_runner: CliRunner,
+        temp_env: dict[str, str],
+    ) -> None:
+        result = cli_runner.invoke(
+            _get_cli(),
+            ["run", "--pipeline", "chembl_activity", "--exact-replay"],
+        )
+
+        assert result.exit_code == ExitCode.CONFIG_ERROR
+        assert "--exact-replay currently requires --use-cached-bronze" in result.output
 
 
 class TestCliRunTypes:

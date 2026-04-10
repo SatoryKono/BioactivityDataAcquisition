@@ -22,6 +22,10 @@ if TYPE_CHECKING:
     from bioetl.domain.workflow.dag import _WorkflowStepLike
 
 
+_RUN_OPTIONS_MULTI_FILTER_IDS = "multi_filter_ids"
+_RUN_OPTIONS_FILTER_IDS = "filter_ids"
+
+
 @dataclass(frozen=True, slots=True)
 class WorkflowRunOptionsConfig:
     """Partial run-options contract allowed in workflow YAML."""
@@ -47,18 +51,12 @@ class WorkflowRunOptionsConfig:
     use_cached_bronze: bool | None = None
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
+    exact_replay: bool | None = None
     enable_tracing: bool | None = None
 
     def merged_with(self, override: WorkflowRunOptionsConfig) -> WorkflowRunOptionsConfig:
         """Return a merged config where non-null override values win."""
-        merged_values = {
-            field.name: (
-                override_value
-                if (override_value := getattr(override, field.name)) is not None
-                else getattr(self, field.name)
-            )
-            for field in fields(self)
-        }
+        merged_values = _merge_workflow_run_option_values(self, override)
         return WorkflowRunOptionsConfig(**merged_values)
 
     def to_mapping(self) -> JsonDict:
@@ -68,16 +66,7 @@ class WorkflowRunOptionsConfig:
             value = getattr(self, field.name)
             if value is None:
                 continue
-            if field.name == "multi_filter_ids" and isinstance(value, dict):
-                result[field.name] = {
-                    key: list(items)
-                    for key, items in value.items()
-                }
-                continue
-            if field.name == "filter_ids" and isinstance(value, tuple):
-                result[field.name] = list(value)
-                continue
-            result[field.name] = value
+            result[field.name] = _serialize_workflow_run_option_value(field.name, value)
         return result
 
 
@@ -136,3 +125,49 @@ class WorkflowConfig:
             if step.step_id == step_id:
                 return step
         return None
+
+
+def _merge_workflow_run_option_values(
+    base: WorkflowRunOptionsConfig,
+    override: WorkflowRunOptionsConfig,
+) -> dict[str, object | None]:
+    """Merge two workflow run-option payloads."""
+    return {
+        field.name: _resolve_workflow_run_option_value(base, override, field.name)
+        for field in fields(base)
+    }
+
+
+def _resolve_workflow_run_option_value(
+    base: WorkflowRunOptionsConfig,
+    override: WorkflowRunOptionsConfig,
+    field_name: str,
+) -> object | None:
+    """Return one merged workflow run-option value."""
+    override_value = getattr(override, field_name)
+    if override_value is not None:
+        return cast("object", override_value)
+    return cast("object | None", getattr(base, field_name))
+
+
+def _serialize_workflow_run_option_value(field_name: str, value: object) -> object:
+    """Serialize one workflow run-option value for JSON-compatible mappings."""
+    if field_name == _RUN_OPTIONS_MULTI_FILTER_IDS:
+        return _serialize_multi_filter_ids(value)
+    if field_name == _RUN_OPTIONS_FILTER_IDS:
+        return _serialize_filter_ids(value)
+    return value
+
+
+def _serialize_multi_filter_ids(value: object) -> object:
+    """Serialize ``multi_filter_ids`` into a JSON-compatible mapping."""
+    if not isinstance(value, dict):
+        return value
+    return {key: list(items) for key, items in value.items()}
+
+
+def _serialize_filter_ids(value: object) -> object:
+    """Serialize ``filter_ids`` into a JSON-compatible list."""
+    if not isinstance(value, tuple):
+        return value
+    return list(value)

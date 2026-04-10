@@ -216,6 +216,95 @@ class TestCheckpointCompatibilityService:
         assert result.execution_identity_compatible is False
         assert any("Execution fingerprint mismatch" in msg for msg in result.messages)
 
+    def test_validate_manifest_identity_mismatch(self) -> None:
+        """Manifest identity mismatch should block resume."""
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            manifest_id="manifest-current",
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            manifest_id="manifest-checkpoint",
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert any("Manifest identity mismatch" in msg for msg in result.messages)
+
+    def test_validate_contract_version_mismatch(self) -> None:
+        """Contract version mismatch should block resume."""
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            contract_ref="chembl.activity",
+            contract_version="2.0.0",
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert any("Contract version mismatch" in msg for msg in result.messages)
+
+    def test_validate_exact_replay_requires_snapshot_anchors(self) -> None:
+        """Exact replay resumes should fail when snapshot anchors are missing."""
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            exact_replay=True,
+            input_snapshot_ids=("snapshot-a",),
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            exact_replay=True,
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert any("requires checkpoint input snapshot anchors" in msg for msg in result.messages)
+
+    def test_validate_input_snapshot_identity_mismatch(self) -> None:
+        """Snapshot identity mismatches should block replay-safe resume."""
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            exact_replay=True,
+            input_snapshot_ids=("snapshot-a",),
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            exact_replay=True,
+            input_snapshot_ids=("snapshot-b",),
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert any("Input snapshot identity mismatch" in msg for msg in result.messages)
+
     def test_validate_minimum_compatibility_same_contracts(self) -> None:
         """Test lenient mode with same DQ contracts."""
         current = CheckpointMetadata(

@@ -20,6 +20,7 @@ from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunCodeProvenance,
+    RunInputSnapshotRef,
     RunSourceRef,
     RunLedgerEntry,
     RunManifest,
@@ -92,8 +93,12 @@ def _make_manifest(
         pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
-        launch_context={"limit": limit},
-        runtime_config={"run_type": run_type.value, "limit": limit},
+        launch_context={"limit": limit, "exact_replay": True},
+        runtime_config={
+            "run_type": run_type.value,
+            "limit": limit,
+            "exact_replay": True,
+        },
         resolved_config={"provider": "chembl", "entity_type": "activity"},
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
@@ -105,6 +110,20 @@ def _make_manifest(
             rule_bundle_version="2026.03",
             dq_contract_compatibility_hash="compat-hash-1",
             effective_config_artifact_id="eca-123",
+        ),
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-1",
+                        content_hash="sha256:snapshot-1",
+                        immutable_uri="file:///tmp/bronze/batch_1.jsonl.zst",
+                    ),
+                ),
+            ),
         ),
     )
 
@@ -149,6 +168,23 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "effective_config_hash": "deadbeef",
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "replay_mode": "exact_replay",
+        "input_snapshot_count": 1,
+        "input_snapshots": [
+            {
+                "provider": "chembl",
+                "entity": "activity",
+                "pipeline_name": "chembl_activity",
+                "query": None,
+                "snapshot_id": "snapshot-1",
+                "content_hash": "sha256:snapshot-1",
+                "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                "query_fingerprint": None,
+                "etag": None,
+                "last_modified": None,
+                "captured_at": None,
+            }
+        ],
         "planned_artifacts": [],
         "published_artifacts": [],
     }
@@ -186,6 +222,23 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "effective_config_hash": "deadbeef",
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "replay_mode": "exact_replay",
+        "input_snapshot_count": 1,
+        "input_snapshots": [
+            {
+                "provider": "chembl",
+                "entity": "activity",
+                "pipeline_name": "chembl_activity",
+                "query": None,
+                "snapshot_id": "snapshot-1",
+                "content_hash": "sha256:snapshot-1",
+                "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                "query_fingerprint": None,
+                "etag": None,
+                "last_modified": None,
+                "captured_at": None,
+            }
+        ],
         "planned_artifacts": [],
         "published_artifacts": [],
     }
@@ -200,6 +253,23 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "effective_config_hash": "deadbeef",
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "replay_mode": "exact_replay",
+        "input_snapshot_count": 1,
+        "input_snapshots": [
+            {
+                "provider": "chembl",
+                "entity": "activity",
+                "pipeline_name": "chembl_activity",
+                "query": None,
+                "snapshot_id": "snapshot-1",
+                "content_hash": "sha256:snapshot-1",
+                "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                "query_fingerprint": None,
+                "etag": None,
+                "last_modified": None,
+                "captured_at": None,
+            }
+        ],
         "dq_policy_ref": "chembl_activity.gold",
         "rule_bundle_version": "2026.03",
         "dq_contract_compatibility_hash": "compat-hash-1",

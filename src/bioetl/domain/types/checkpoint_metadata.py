@@ -7,6 +7,7 @@ for resume compatibility validation.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import cast
 
 from bioetl.domain.types import JsonDict
 
@@ -24,6 +25,11 @@ class CheckpointMetadata:
         effective_config_hash: Canonical effective-config hash for execution identity.
         effective_config_artifact_id: Effective-config artifact reference for provenance.
         execution_fingerprint: Stable execution identity fingerprint.
+        manifest_id: Persisted run-manifest identifier for resume identity checks.
+        contract_ref: Canonical contract reference for checkpoint compatibility.
+        contract_version: Canonical contract version for checkpoint compatibility.
+        exact_replay: Whether the checkpoint was created under exact-replay mode.
+        input_snapshot_ids: Snapshot identities required for replay-safe resume.
         run_context: Additional run context information.
     """
 
@@ -35,6 +41,11 @@ class CheckpointMetadata:
     effective_config_hash: str | None = None
     effective_config_artifact_id: str | None = None
     execution_fingerprint: str | None = None
+    manifest_id: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    exact_replay: bool | None = None
+    input_snapshot_ids: tuple[str, ...] = ()
     run_context: JsonDict | None = None  # Any: run context has heterogeneous values
 
     @staticmethod
@@ -60,6 +71,20 @@ class CheckpointMetadata:
                 "effective_config_artifact_id"
             ),
             execution_fingerprint=legacy_metadata.get("execution_fingerprint"),
+            manifest_id=cast(
+                "str | None",
+                legacy_metadata.get("manifest_id")
+                or _extract_manifest_id_from_run_context(legacy_metadata),
+            ),
+            contract_ref=cast("str | None", legacy_metadata.get("contract_ref")),
+            contract_version=cast(
+                "str | None",
+                legacy_metadata.get("contract_version"),
+            ),
+            exact_replay=cast("bool | None", legacy_metadata.get("exact_replay")),
+            input_snapshot_ids=_coerce_snapshot_ids(
+                legacy_metadata.get("input_snapshot_ids")
+            ),
             run_context=legacy_metadata.get("run_context"),
         )
 
@@ -78,10 +103,17 @@ class CheckpointMetadata:
             ("effective_config_hash", self.effective_config_hash),
             ("effective_config_artifact_id", self.effective_config_artifact_id),
             ("execution_fingerprint", self.execution_fingerprint),
+            ("manifest_id", self.manifest_id),
+            ("contract_ref", self.contract_ref),
+            ("contract_version", self.contract_version),
+            ("exact_replay", self.exact_replay),
+            ("input_snapshot_ids", list(self.input_snapshot_ids)),
             ("run_context", self.run_context),
         )
         for key, value in optional_values:
-            if value:
+            if value is None or value == "" or value == () or value == [] or value == {}:
+                continue
+            else:
                 result[key] = value
         return result
 
@@ -104,8 +136,43 @@ class CheckpointMetadata:
             effective_config_hash=data.get("effective_config_hash"),
             effective_config_artifact_id=data.get("effective_config_artifact_id"),
             execution_fingerprint=data.get("execution_fingerprint"),
+            manifest_id=cast(
+                "str | None",
+                data.get("manifest_id") or _extract_manifest_id_from_run_context(data),
+            ),
+            contract_ref=cast("str | None", data.get("contract_ref")),
+            contract_version=cast("str | None", data.get("contract_version")),
+            exact_replay=cast("bool | None", data.get("exact_replay")),
+            input_snapshot_ids=_coerce_snapshot_ids(data.get("input_snapshot_ids")),
             run_context=data.get("run_context"),
         )
+
+
+def _extract_manifest_id_from_run_context(data: JsonDict) -> str | None:
+    """Backfill manifest_id from legacy run_context payloads when present."""
+    run_context = data.get("run_context")
+    if not isinstance(run_context, dict):
+        return None
+    manifest_id = run_context.get("manifest_id")
+    if manifest_id is None:
+        return None
+    text = str(manifest_id).strip()
+    return text or None
+
+
+def _coerce_snapshot_ids(value: object | None) -> tuple[str, ...]:
+    """Normalize persisted snapshot identifiers into a stable tuple."""
+    if not isinstance(value, (list, tuple)):
+        return ()
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        text = str(item).strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        normalized.append(text)
+    return tuple(normalized)
 
 
 @dataclass(frozen=True, slots=True)

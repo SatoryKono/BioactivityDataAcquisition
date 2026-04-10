@@ -171,6 +171,7 @@ class PipelineRunContext:
     cached_bronze: CachedBronzeContext = field(
         default_factory=CachedBronzeContext.disabled
     )
+    exact_replay: bool = False
 
     limit: int | None = None
     query: str | None = None

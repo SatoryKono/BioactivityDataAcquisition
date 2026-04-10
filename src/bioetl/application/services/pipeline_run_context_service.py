@@ -87,6 +87,7 @@ class PipelineRunContextService:
             vacuum=vacuum,
             log_level=options.log_level,
             cached_bronze=cached_bronze,
+            exact_replay=options.exact_replay,
             tracing_enabled_override=options.enable_tracing,
         )
 
@@ -109,6 +110,10 @@ class PipelineRunContextService:
 
     def _build_cached_bronze(self, options: RunOptions) -> CachedBronzeContext:
         """Resolve cached Bronze context from options."""
+        if options.exact_replay and not options.use_cached_bronze:
+            raise ValueError(
+                "exact replay currently requires --use-cached-bronze with snapshot-backed Bronze inputs"
+            )
         if options.use_cached_bronze:
             return CachedBronzeContext.from_options(
                 path=options.cached_bronze_path,
