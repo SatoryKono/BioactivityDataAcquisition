@@ -315,8 +315,7 @@ class TestCheckpointManagerFullScanOnly:
         await manager.load_checkpoint()
 
         warning_call = mock_logger.warning.call_args
-        extra = warning_call[1].get("extra", {})
-        assert extra.get("pipeline") == "pubmed_publication"
+        assert warning_call.kwargs["pipeline"] == "pubmed_publication"
 
     async def test_load_checkpoint_works_normally_without_strategy(
         self, mock_checkpoint_port, mock_logger
@@ -696,7 +695,7 @@ class TestCheckpointManagerCompatibilityPolicy:
         result = await manager.load_checkpoint()
 
         assert result is None
-        warning_extra = mock_logger.warning.call_args.kwargs["extra"]
+        warning_extra = mock_logger.warning.call_args.kwargs
         assert warning_extra["resume_rejected"] is True
         assert warning_extra["checkpoint_identity"]["manifest_id"] == "manifest-old"
         assert warning_extra["checkpoint_identity"]["exact_replay"] is True

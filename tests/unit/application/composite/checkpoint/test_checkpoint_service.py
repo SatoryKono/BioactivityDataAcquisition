@@ -31,6 +31,8 @@ from bioetl.domain.types import RunID
 # ---------------------------------------------------------------------------
 
 FIXED_CHECKPOINT_TIME = datetime(2024, 6, 2, 12, 0, tzinfo=UTC)
+VALID_EFFECTIVE_HASH = "a" * 64
+ALTERNATE_EFFECTIVE_HASH = "b" * 64
 
 
 def _freeze_checkpoint_support_now(
@@ -221,13 +223,13 @@ class TestFilenameFormat:
     def test_exposes_expected_anchor_properties(self) -> None:
         """Expected checkpoint anchors stay readable for dependent helpers."""
         svc, _, _ = _make_service(
-            expected_effective_config_hash="hash-123",
+            expected_effective_config_hash=VALID_EFFECTIVE_HASH,
             expected_contract_ref="composite_publication",
             expected_contract_version="2.1.0",
             expected_manifest_id="manifest-123",
         )
 
-        assert svc.expected_effective_config_hash == "hash-123"
+        assert svc.expected_effective_config_hash == VALID_EFFECTIVE_HASH
         assert svc.expected_contract_ref == "composite_publication"
         assert svc.expected_contract_version == "2.1.0"
         assert svc.expected_manifest_id == "manifest-123"
@@ -235,13 +237,13 @@ class TestFilenameFormat:
     def test_normalizes_expected_anchor_properties(self) -> None:
         """Expected checkpoint anchors are canonicalized on service construction."""
         svc, _, _ = _make_service(
-            expected_effective_config_hash=" SHA256:ABC ",
+            expected_effective_config_hash=f" SHA256:{'A' * 64} ",
             expected_contract_ref=" Composite_Publication ",
             expected_contract_version=" v2 ",
             expected_manifest_id=" manifest-123 ",
         )
 
-        assert svc.expected_effective_config_hash == "sha256:abc"
+        assert svc.expected_effective_config_hash == VALID_EFFECTIVE_HASH
         assert svc.expected_contract_ref == "composite_publication"
         assert svc.expected_contract_version == "2.0.0"
         assert svc.expected_manifest_id == "manifest-123"
@@ -481,7 +483,7 @@ class TestLoadResume:
         svc, storage, logger = _make_service(
             resume=True,
             expected_contract_ref="composite_publication",
-            expected_effective_config_hash="abc123",
+            expected_effective_config_hash=VALID_EFFECTIVE_HASH,
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -510,7 +512,7 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             expected_contract_ref="composite_publication",
-            expected_effective_config_hash="hash-current",
+            expected_effective_config_hash=VALID_EFFECTIVE_HASH,
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -519,7 +521,7 @@ class TestLoadResume:
             seed_completed=True,
             contract_ref="composite_publication",
             contract_version="1.0.0",
-            effective_config_hash="hash-old",
+            effective_config_hash=ALTERNATE_EFFECTIVE_HASH,
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())
@@ -765,7 +767,7 @@ class TestLoadWarnOnOverwrite:
         """Fresh load should seed expected compatibility anchors into checkpoint state."""
         svc, storage, _ = _make_service(
             resume=False,
-            expected_effective_config_hash="hash-123",
+            expected_effective_config_hash=VALID_EFFECTIVE_HASH,
             expected_contract_ref="composite_publication",
             expected_contract_version="2.1.0",
         )
@@ -773,7 +775,7 @@ class TestLoadWarnOnOverwrite:
 
         state = await svc.load()
 
-        assert state.effective_config_hash == "hash-123"
+        assert state.effective_config_hash == VALID_EFFECTIVE_HASH
         assert state.contract_ref == "composite_publication"
         assert state.contract_version == "2.1.0"
         assert state.composite_run_identity == "run-001"
