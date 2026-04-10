@@ -97,6 +97,13 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
   explicit canonical projection в runtime observability vocabulary через
   `bioetl.domain.observability_event_mapping` и могут эмититься через
   `PipelineObserver.emit_domain_event(...)` без введения отдельного event bus
+- frozen code-level contract для runtime event publication задаётся в
+  `bioetl.domain.runtime_observability_publication_contract`; канонические
+  emitters ограничены `PipelineObserver.emit_event` и
+  `PipelineObserver.emit_domain_event`
+- direct logger-only publication не считается canonical path для lifecycle /
+  typed domain events; structured logs/metrics/spans являются side effects
+  canonical observer emission
 - Lifecycle phase emissions используют low-cardinality `phase` labels и не
   подменяются ad-hoc logging-only path
 - `MetricsPort` остаётся transport-level observability port; pipeline-specific
