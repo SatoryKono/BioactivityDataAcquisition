@@ -212,7 +212,7 @@ def _build_live_input_snapshot_ref(
         else hashlib.sha256(query_string.encode("utf-8")).hexdigest()
     )
     snapshot_id = hashlib.sha256(
-        f"bronze:{relative_path}:{content_hash}".encode("utf-8")
+        f"bronze:{relative_path}:{content_hash}".encode()
     ).hexdigest()
     return InputSnapshotRef(
         snapshot_id=snapshot_id,
