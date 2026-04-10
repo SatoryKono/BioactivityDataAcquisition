@@ -6,6 +6,7 @@ Defines the RuntimeConfig value object for CLI / runtime execution parameters.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from typing import Literal
 
 from bioetl.domain.types import RunType
@@ -39,6 +40,7 @@ class RuntimeConfig:
     query: str | None = None
     dry_run: bool = False
     exact_replay: bool = False
+    replay_anchor_date: str | None = None
 
     # VACUUM automation (Phase 1 refactoring)
     # When enabled, VACUUM is executed after successful pipeline run
@@ -78,6 +80,7 @@ class RuntimeConfig:
         """Validate runtime config."""
         self._validate_positive_values()
         self._validate_health_check_mode()
+        self._validate_replay_anchor_date()
 
     def _validate_positive_values(self) -> None:
         """Validate that numeric fields have positive values."""
@@ -114,6 +117,18 @@ class RuntimeConfig:
                 "health_check_mode must be 'strict' or 'probe', "
                 f"got {self.health_check_mode!r}"
             )
+
+    def _validate_replay_anchor_date(self) -> None:
+        """Validate the optional exact-replay date anchor."""
+        if self.replay_anchor_date is None:
+            return
+        try:
+            date.fromisoformat(self.replay_anchor_date)
+        except ValueError as exc:
+            raise ValueError(
+                "replay_anchor_date must be an ISO date string (YYYY-MM-DD), "
+                f"got {self.replay_anchor_date!r}"
+            ) from exc
 
     @property
     def effective_lock_ttl(self) -> int:

@@ -21,6 +21,7 @@ def _make_context(**overrides: object) -> SimpleNamespace:
         "limit": None,
         "query": None,
         "dry_run": False,
+        "exact_replay": False,
         "skip_gold": False,
         "start_offset": None,
         "ignore_yaml_filter": False,
@@ -133,6 +134,32 @@ def test_prepare_runner_inputs_applies_tracing_override_before_bundle_build() ->
 
     assert observed["tracing_enabled"] is True
     assert result.settings.observability.tracing_enabled is True
+
+
+@pytest.mark.unit
+def test_assemble_runtime_config_propagates_replay_anchor_date_for_exact_replay() -> (
+    None
+):
+    result = inputs_resolver.assemble_runtime_config(
+        ctx=_make_context(
+            exact_replay=True,
+            cached_bronze=SimpleNamespace(
+                enabled=True,
+                bronze_path="/tmp/bronze",
+                bronze_date="2026-04-10",
+            ),
+        ),
+        heartbeat_interval=30,
+        vacuum=inputs_resolver.ResolvedVacuumSettings(
+            enabled=False,
+            retention_days=7,
+        ),
+        health_check_mode="strict",
+        skip_gold=False,
+    )
+
+    assert result.exact_replay is True
+    assert result.replay_anchor_date == "2026-04-10"
 
 
 @pytest.mark.unit

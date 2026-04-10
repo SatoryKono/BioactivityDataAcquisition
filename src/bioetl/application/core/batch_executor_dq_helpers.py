@@ -14,7 +14,6 @@ __all__ = [
 
 import json
 from collections.abc import Callable
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
@@ -192,14 +191,14 @@ def build_dq_report_context(
             for rule in dq_config.key_nullability_rules
         ]
 
-    now_utc = datetime.now(UTC)
-    current_date_str = now_utc.strftime("%Y-%m-%d")
+    dq_timestamp = context.replay_timestamp_anchor or context.started_at
+    current_date_str = dq_timestamp.strftime("%Y-%m-%d")
     dq_entity = extract_dq_entity(config)
 
     return DQReportContext(
         run_id=str(context.run_id),
         pipeline_name=config.pipeline_name,
-        timestamp=now_utc,
+        timestamp=dq_timestamp,
         provider=config.provider,
         entity=dq_entity,
         bronze_records=bronze_records or None,
