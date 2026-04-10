@@ -4,51 +4,35 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.admin_runtime_api import CheckpointManagerService
-from bioetl.application.services import PipelineRunResult as PipelineRunResult
-from bioetl.application.services import RunOptions as RunOptions
-from bioetl.application.services import RunResult as RunResult
-from bioetl.application.services.audit_inspection_service import AuditInspectionService
-from bioetl.application.services.bronze_cleanup_service import (
+from bioetl.application.services import (
     BronzeCleanupResult,
     BronzeCleanupService,
-)
-from bioetl.application.services.checkpoint_service import CheckpointService
-from bioetl.application.services.config_service import ConfigService
-from bioetl.application.services.contract_migration_service import (
+    ConfigService,
     ContractMigrationService,
-)
-from bioetl.application.services.export_service import ExportService
-from bioetl.application.services.health_service import HealthService
-from bioetl.application.services.lineage_inspection_service import (
+    ExportService,
+    HealthService,
     LineageInspectionService,
+    MetricsService,
+    ObservabilityWorkflowService,
+    PipelineRunResult,
+    PipelineRunnerService,
+    QuarantineService,
+    RunManifestInspectionService,
+    RunOptions,
+    RunResult,
+    VacuumService,
 )
+from bioetl.application.services.audit_inspection_service import AuditInspectionService
+from bioetl.application.services.checkpoint_service import CheckpointService
 from bioetl.application.services.lock_service import LockService
-from bioetl.application.services.metadata_coordinator import (
-    MetadataCoordinator as MetadataCoordinator,
-)
-from bioetl.application.services.metrics_service import MetricsService
-from bioetl.application.services.observability_workflow_service import (
-    ObservabilityWorkflowService as ObservabilityWorkflowService,
-)
-from bioetl.application.services.pipeline_runner_service import (
-    PipelineRunResult as PipelineRunResult,
-)
-from bioetl.application.services.pipeline_runner_service import RunOptions as RunOptions
-from bioetl.application.services.pipeline_runner_service import RunResult as RunResult
 from bioetl.composition.bootstrap import (
     HealthServerDependencies,
     bootstrap_adr_service,
     bootstrap_audit_inspection_service,
     bootstrap_bronze_cleanup_service,
-)
     bootstrap_checkpoint_service,
-    bootstrap_observability_workflow_service,
-    bootstrap_quarantine_service,
-)
-from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
-from bioetl.composition.bootstrap.cli.health import (
-    HealthServerDependencies,
+    bootstrap_config_service,
+    bootstrap_contract_migration_service,
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
     bootstrap_lineage_service,
@@ -59,14 +43,9 @@ from bioetl.composition.bootstrap.cli.health import (
     bootstrap_quarantine_port,
     bootstrap_quarantine_service,
     bootstrap_run_manifest_service,
-)
-from bioetl.composition.bootstrap.cli.storage import (
-    bootstrap_bronze_cleanup_service,
-    bootstrap_contract_migration_service,
-    bootstrap_export_service,
     bootstrap_vacuum_service,
 )
-from bioetl.composition.bootstrap.runtime import bootstrap_pipeline_runner_service
+from bioetl.composition.bootstrap.cli.storage import bootstrap_export_service
 
 if TYPE_CHECKING:
     from bioetl.composition import PipelineRegistry
@@ -124,6 +103,8 @@ def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_registrations()
     return bootstrap_audit_inspection_service()
+
+
 def get_quarantine_service() -> QuarantineService:
     """Get a quarantine service for administrative operations.
 
@@ -329,12 +310,6 @@ def get_metrics_service() -> MetricsService:
     """
     _ensure_registrations()
     return bootstrap_metrics_service()
-
-
-def get_observability_workflow_service() -> ObservabilityWorkflowService:
-    """Get the canonical audit/checkpoint observability workflow service."""
-    _ensure_registrations()
-    return bootstrap_observability_workflow_service()
 
 
 def get_adr_service() -> AdrServicePort:

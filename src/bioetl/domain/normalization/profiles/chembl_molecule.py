@@ -6,16 +6,14 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles.helpers import normalize_profile_smiles
-from bioetl.infrastructure.schemas.silver_chembl_extended import (
-    CHEMBL_MOLECULE_SCHEMA,
-)
+from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 
 __all__ = [
     "CHEMBL_MOLECULE_PROFILE",
     "CHEMBL_MOLECULE_SCHEMA_FIELDS",
 ]
 
-CHEMBL_MOLECULE_SCHEMA_FIELDS = tuple(CHEMBL_MOLECULE_SCHEMA.names)
+CHEMBL_MOLECULE_SCHEMA_FIELDS = tuple(MoleculeSchema.to_schema().columns.keys())
 
 _META_FIELDS = frozenset(
     {

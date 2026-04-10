@@ -5,14 +5,14 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.infrastructure.schemas.silver_compounds import UNIPROT_ID_MAPPING_SCHEMA
+from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
 
 __all__ = [
     "UNIPROT_IDMAPPING_PROFILE",
     "UNIPROT_IDMAPPING_SCHEMA_FIELDS",
 ]
 
-UNIPROT_IDMAPPING_SCHEMA_FIELDS = tuple(UNIPROT_ID_MAPPING_SCHEMA.names)
+UNIPROT_IDMAPPING_SCHEMA_FIELDS = tuple(IDMappingSchema.to_schema().columns.keys())
 
 _META_FIELDS = frozenset(
     {

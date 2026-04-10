@@ -5,16 +5,24 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.infrastructure.schemas.silver_publications import (
-    CROSSREF_PUBLICATION_SCHEMA,
-)
+from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 
 __all__ = [
     "CROSSREF_PUBLICATION_PROFILE",
     "CROSSREF_PUBLICATION_SCHEMA_FIELDS",
 ]
 
-CROSSREF_PUBLICATION_SCHEMA_FIELDS = tuple(CROSSREF_PUBLICATION_SCHEMA.names)
+_CROSSREF_PUBLICATION_BASE_FIELDS = tuple(
+    PublicationEnrichedSchema.to_schema().columns.keys()
+)
+_CROSSREF_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
+    field
+    for field in ("publication_doi", "publication_pmid", "publication_pmc_id")
+    if field not in _CROSSREF_PUBLICATION_BASE_FIELDS
+)
+CROSSREF_PUBLICATION_SCHEMA_FIELDS = (
+    _CROSSREF_PUBLICATION_BASE_FIELDS + _CROSSREF_PUBLICATION_COMPAT_IDENTIFIER_FIELDS
+)
 
 _META_FIELDS = frozenset(
     {
@@ -23,7 +31,6 @@ _META_FIELDS = frozenset(
         "_run_id",
         "_run_type",
         "_source_batch_id",
-        "_source",
         "_ingestion_ts",
         "_index",
         "_lookup_method",
