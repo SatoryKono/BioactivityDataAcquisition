@@ -115,7 +115,6 @@ class DQReportWriter:
         provider: str | None,
         entity: str | None,
         target_table: str,
-        run_id: str,
     ) -> str:
         """Build filename for Silver/Gold DQ report.
 
@@ -125,17 +124,14 @@ class DQReportWriter:
             provider: Provider name for filename.
             entity: Entity name for filename.
             target_table: Target table name (fallback for naming).
-            run_id: Run ID (fallback for naming).
 
         Returns:
             Generated filename.
         """
         if provider and entity:
             return f"{layer}_{provider}_{entity}_dq_report{extension}"
-        if self._flat_structure:
-            flat_table_name = target_table.replace(".", "_")
-            return f"{layer}_{flat_table_name}_dq_report{extension}"
-        return f"{layer}_{run_id}_dq_report{extension}"
+        normalized_table_name = target_table.replace(".", "_")
+        return f"{layer}_{normalized_table_name}_dq_report{extension}"
 
     def _resolve_layer_output_path(
         self,
@@ -145,7 +141,6 @@ class DQReportWriter:
         provider: str | None,
         entity: str | None,
         target_table: str,
-        run_id: str,
     ) -> Path:
         """Resolve final report file path for Silver/Gold DQ outputs.
 
@@ -153,7 +148,7 @@ class DQReportWriter:
             Resolved Path for the DQ report file following the layer directory convention.
         """
         filename = self._build_layer_filename(
-            layer, extension, provider, entity, target_table, run_id
+            layer, extension, provider, entity, target_table
         )
 
         if output_path is not None:
@@ -203,7 +198,6 @@ class DQReportWriter:
             provider,
             entity,
             report.target_table,
-            report.run_id,
         )
         return await self._write_report(report, resolved_path, format)
 
@@ -237,7 +231,6 @@ class DQReportWriter:
             provider,
             entity,
             report.target_table,
-            report.run_id,
         )
         return await self._write_report(report, resolved_path, format)
 
