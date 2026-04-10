@@ -64,9 +64,11 @@ profiles в BioETL.
   `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:
   этот режим сначала удаляет весь repo-managed subgraph текущей волны, а потом
   пересобирает его из текущего состояния репозитория.
-  В текущем Windows-host режиме `development_cycle_surface` остается
-  snapshot/export-only surface и не синхронизируется в live Neo4j, потому что
-  этот label воспроизводимо дестабилизирует локальный container backend.
+  Current-cycle semantics больше не хранятся отдельным label
+  `development_cycle_surface`: они проецируются как properties на
+  `module_surface` / `class_surface` / `function_surface` / `method_surface`
+  и на candidate nodes, чтобы deterministic live sync не зависел от отдельного
+  проблемного analysis label.
   Если нужно довести repo-derived labels до полностью deterministic managed-only
   состояния, используй
   `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:

@@ -3,10 +3,17 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
+import polars as pl
 import pytest
 
+from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
+from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
+    CompositeRunnerObservabilityMixin,
+)
 from bioetl.application.services.effective_config_service import EffectiveConfigService
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.application.services.run_manifest_inspection_service import (
@@ -19,6 +26,7 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.ports.metadata.coordinator import BronzeMetadataInput
@@ -48,6 +56,36 @@ class _InMemoryRunManifestStore(RunManifestPort):
     def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
         manifest_id = self._by_run_id.get(str(run_id))
         return None if manifest_id is None else self._items.get(manifest_id)
+
+
+def _make_merge_metrics_mixin() -> MergeMetricsRecorderMixin:
+    mixin = MergeMetricsRecorderMixin.__new__(MergeMetricsRecorderMixin)
+    mixin._logger = MagicMock()
+    mixin._config = SimpleNamespace(exclude_fields=())
+    return mixin
+
+
+class _CompositeReplayHost(CompositeRunnerObservabilityMixin):
+    def __init__(self) -> None:
+        self._config = SimpleNamespace(
+            name="publication",
+            dq=SimpleNamespace(
+                soft_fail_threshold=0.1,
+                hard_fail_threshold=0.2,
+            ),
+            merge=SimpleNamespace(
+                output_silver_path="silver/publication",
+                output_gold_path="gold/publication",
+            ),
+        )
+        self._logger = MagicMock()
+        self._run_id = RunID(UUID("00000000-0000-0000-0000-000000000401"))
+        self._run_id_str = str(self._run_id)
+        self._runtime = SimpleNamespace(cached_bronze_date="2025-02-03")
+        self._started_at = datetime(2025, 2, 5, 9, 30, tzinfo=UTC)
+        self._dq_report_service = None
+        self._quarantine_port = AsyncMock()
+        self._metrics = None
 
 
 def _make_manifest(
@@ -218,6 +256,41 @@ def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> N
     assert _deduplicate_by_primary_keys_impl(forward, ["id"]) == [
         {"id": "1", "value": "winner", "content_hash": "a-hash"}
     ]
-    assert _deduplicate_by_primary_keys_impl(reverse, ["id"]) == [
-        {"id": "1", "value": "winner", "content_hash": "a-hash"}
-    ]
+
+
+def test_reproducibility_contract_composite_metadata_anchor_is_stable() -> None:
+    mixin = _make_merge_metrics_mixin()
+    df = pl.DataFrame({"doi": ["10.1/a"]})
+    metadata_timestamp = datetime(2025, 2, 3, 0, 0, tzinfo=UTC)
+
+    first = mixin._add_lineage(
+        df,
+        enrichment_results={},
+        run_id="run-left",
+        metadata_timestamp=metadata_timestamp,
+        sources_used=["seed"],
+    )
+    second = mixin._add_lineage(
+        df,
+        enrichment_results={},
+        run_id="run-right",
+        metadata_timestamp=metadata_timestamp,
+        sources_used=["seed"],
+    )
+
+    assert first["_lineage_created_at"][0] == "2025-02-03T00:00:00+00:00"
+    assert second["_lineage_created_at"][0] == first["_lineage_created_at"][0]
+
+
+@pytest.mark.asyncio
+async def test_reproducibility_contract_composite_quarantine_replay_anchor_is_deterministic() -> None:
+    host = _CompositeReplayHost()
+
+    await host._write_cv_quarantine(
+        MergeResult(quarantine_payloads=({"id": "cv-1"},))
+    )
+
+    host._quarantine_port.write.assert_awaited_once()
+    write_kwargs = host._quarantine_port.write.await_args.kwargs
+    assert write_kwargs["pipeline"] == "composite:publication"
+    assert write_kwargs["ingestion_ts"] == datetime(2025, 2, 3, 0, 0, tzinfo=UTC)

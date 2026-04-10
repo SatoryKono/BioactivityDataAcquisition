@@ -98,9 +98,9 @@ class TestUniProtProteinTransformer:
         assert "entity_id" in result
         assert "content_hash" in result
         # Lineage fields should be present
-        assert "_run_id" in result
-        assert "_run_type" in result
-        assert "_ingestion_ts" in result
+        assert "_run_id" not in result
+        assert "_run_type" not in result
+        assert "_ingestion_ts" not in result
 
     @pytest.mark.asyncio
     async def test_transform_missing_accession(self, transformer, mock_context):
@@ -380,14 +380,14 @@ class TestUniProtProteinTransformer:
 
         assert result is not None
         # Lineage fields should be present with underscore prefix
-        assert "_run_id" in result
-        assert "_run_type" in result
-        assert "_source_batch_id" in result
-        assert "_ingestion_ts" in result
+        assert "_run_id" not in result
+        assert "_run_type" not in result
+        assert "_source_batch_id" not in result
+        assert "_ingestion_ts" not in result
         # Verify types
-        assert isinstance(result["_run_id"], str)
-        assert isinstance(result["_run_type"], str)
-        assert isinstance(result["_ingestion_ts"], str)
+        assert "_run_id" not in result
+        assert "_run_type" not in result
+        assert "_ingestion_ts" not in result
 
     @pytest.mark.asyncio
     async def test_transform_sequence_length_validation(

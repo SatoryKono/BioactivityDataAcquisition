@@ -84,7 +84,6 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "method_surface",
     "duplication_cluster",
     "retirement_candidate",
-    "development_cycle_surface",
     "complexity_candidate",
     "port_surface",
     "adapter_surface",
@@ -909,6 +908,14 @@ def _parser() -> argparse.ArgumentParser:
             "Delete the entire current managed ingest wave before rebuilding it. "
             "This removes all repo-managed nodes for the current wave and any relations "
             "attached to them, then recreates the wave from the current repository state."
+        ),
+    )
+    parser.add_argument(
+        "--apply-normalization-evidence-only",
+        action="store_true",
+        help=(
+            "Refresh only live normalization evidence on existing pipeline_surface and "
+            "entity_config nodes without rebuilding the full repo snapshot."
         ),
     )
     parser.add_argument(
@@ -3273,8 +3280,6 @@ def _add_retirement_analysis_surfaces(
         "BACKS",
         "HOUSES",
         "CANDIDATE_FOR_REMOVAL",
-        "OWNED_BY_CYCLE",
-        "BLOCKED_FROM_DELETION_BY",
     }
 
     incoming: dict[NodeKey, list[GraphRelation]] = {}
@@ -4029,6 +4034,89 @@ def _add_pipeline_normalization_evidence(
             snapshot.add_relation(entity_key, "DEPENDS_ON", module_key, provenance="normalization_registry")
 
 
+def _normalization_evidence_statements() -> list[dict[str, JsonValue]]:
+    evidence_by_pipeline = _build_normalization_pipeline_evidence()
+    statements: list[dict[str, JsonValue]] = []
+    for pipeline_name, evidence in sorted(evidence_by_pipeline.items()):
+        module_path = evidence.get("normalization_profile_module_path")
+        params: dict[str, JsonValue] = {
+            "pipeline_name": pipeline_name,
+            "normalization_profile_registered": bool(
+                evidence.get("normalization_profile_registered", False)
+            ),
+            "normalization_profile_module_path": (
+                str(module_path) if isinstance(module_path, str) and module_path else None
+            ),
+            "profile_field_count": int(evidence.get("profile_field_count", 0)),
+            "fallback_field_count": int(evidence.get("fallback_field_count", 0)),
+            "fallback_business_field_count": int(
+                evidence.get("fallback_business_field_count", 0)
+            ),
+            "fallback_technical_passthrough_field_count": int(
+                evidence.get("fallback_technical_passthrough_field_count", 0)
+            ),
+            "module_path": str(module_path) if isinstance(module_path, str) and module_path else None,
+        }
+        statements.append(
+            {
+                "statement": """
+MATCH (p:pipeline_surface {name: $pipeline_name})
+SET p.normalization_profile_registered = $normalization_profile_registered,
+    p.normalization_profile_module_path = $normalization_profile_module_path,
+    p.profile_field_count = $profile_field_count,
+    p.fallback_field_count = $fallback_field_count,
+    p.fallback_business_field_count = $fallback_business_field_count,
+    p.fallback_technical_passthrough_field_count = $fallback_technical_passthrough_field_count
+WITH p
+OPTIONAL MATCH (p)-[rp:DEPENDS_ON {provenance: 'normalization_registry'}]->(:module_surface)
+DELETE rp
+WITH p
+OPTIONAL MATCH (e:entity_config {name: $pipeline_name})
+SET e.normalization_profile_registered = $normalization_profile_registered,
+    e.normalization_profile_module_path = $normalization_profile_module_path,
+    e.profile_field_count = $profile_field_count,
+    e.fallback_field_count = $fallback_field_count,
+    e.fallback_business_field_count = $fallback_business_field_count,
+    e.fallback_technical_passthrough_field_count = $fallback_technical_passthrough_field_count
+WITH p, e
+OPTIONAL MATCH (e)-[re:DEPENDS_ON {provenance: 'normalization_registry'}]->(:module_surface)
+DELETE re
+WITH p, e
+OPTIONAL MATCH (m:module_surface {name: $module_path})
+FOREACH (_ IN CASE WHEN m IS NULL THEN [] ELSE [1] END |
+    MERGE (p)-[:DEPENDS_ON {provenance: 'normalization_registry'}]->(m)
+)
+FOREACH (_ IN CASE WHEN e IS NULL OR m IS NULL THEN [] ELSE [1] END |
+    MERGE (e)-[:DEPENDS_ON {provenance: 'normalization_registry'}]->(m)
+)
+RETURN $pipeline_name AS pipeline_name
+""".strip(),
+                "parameters": params,
+            }
+        )
+    return statements
+
+
+def apply_normalization_evidence_only(
+    root: Path,
+    http_uri: str | None,
+    batch_size: int = DEFAULT_BATCH_SIZE,
+) -> dict[str, JsonValue]:
+    client = Neo4jHttpClient(
+        http_uri or _load_env(root).http_uri,
+        _load_env(root).username,
+        _load_env(root).password,
+        _load_env(root).database,
+    )
+    statements = _normalization_evidence_statements()
+    for index in range(0, len(statements), batch_size):
+        client.execute(statements[index : index + batch_size])
+    return {
+        "pipeline_count": len(statements),
+        "updated_at": datetime.now(tz=UTC).isoformat(),
+    }
+
+
 def _add_pipeline_test_edges(
     snapshot: GraphSnapshot,
     root: Path,
@@ -4524,33 +4612,6 @@ def _prune_legacy_unmanaged_nodes_statement(managed_labels: list[str]) -> dict[s
     }
 
 
-def _without_development_cycle_live_sync(snapshot: GraphSnapshot) -> GraphSnapshot:
-    filtered = GraphSnapshot()
-    skipped_label = "development_cycle_surface"
-    skipped_relation_types = {"OWNED_BY_CYCLE", "BLOCKED_FROM_DELETION_BY"}
-
-    for node in snapshot.nodes.values():
-        if node.key.label == skipped_label:
-            continue
-        filtered.add_node(node.key.label, node.key.name, **node.properties)
-
-    for relation in snapshot.relations.values():
-        if relation.relation_type in skipped_relation_types:
-            continue
-        if relation.source.label == skipped_label or relation.target.label == skipped_label:
-            continue
-        if relation.source not in filtered.nodes or relation.target not in filtered.nodes:
-            continue
-        filtered.add_relation(
-            relation.source,
-            relation.relation_type,
-            relation.target,
-            **relation.properties,
-        )
-
-    return filtered
-
-
 def sync_snapshot(
     snapshot: GraphSnapshot,
     root: Path,
@@ -4574,10 +4635,6 @@ def sync_snapshot(
         only_retirement_layer=only_retirement_layer,
         only_complexity_layer=only_complexity_layer,
     )
-    # Workaround: development_cycle_surface consistently destabilizes the live
-    # Neo4j container on Windows-host HTTP sync. Keep it in snapshot/export
-    # flows, but exclude it from live writes until the backend issue is root-caused.
-    snapshot = _without_development_cycle_live_sync(snapshot)
     managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
     node_groups: dict[str, list[dict[str, JsonValue]]] = {}
     for node in snapshot.nodes.values():
@@ -4602,7 +4659,7 @@ def sync_snapshot(
                 if deleted == 0:
                     break
     _execute_grouped_statements(client, core_node_groups, batch_size, "core node")
-    if "complexity_candidate" in analysis_node_groups or "development_cycle_surface" in analysis_node_groups:
+    if "complexity_candidate" in analysis_node_groups:
         analysis_node_batch_size = 1
     elif "retirement_candidate" in analysis_node_groups:
         analysis_node_batch_size = max(1, min(batch_size, 5))

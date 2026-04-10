@@ -104,9 +104,11 @@ Last verified: '2026-04-09'
     This mode keeps unrelated labels such as `MemoryEntity` intact, but it
     deletes unmanaged legacy nodes for the repo-derived label families now owned
     by deterministic sync.
-    Current workaround: `development_cycle_surface` remains snapshot/export-only
-    in Windows-host live sync, because writing that label reproducibly
-    destabilizes the local Neo4j container backend.
+    Current-cycle semantics are now projected directly onto code surfaces and
+    candidate nodes as properties, rather than a separate
+    `development_cycle_surface` label. This keeps Windows-host live sync stable
+    while preserving `current-cycle-code`, `dead-code-candidates`, and
+    removable-complexity query semantics.
 
 12. To gate ontology drift in CI or locally without a live Neo4j backend, run:
     ```bash
