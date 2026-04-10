@@ -4102,12 +4102,8 @@ def apply_normalization_evidence_only(
     http_uri: str | None,
     batch_size: int = DEFAULT_BATCH_SIZE,
 ) -> dict[str, JsonValue]:
-    client = Neo4jHttpClient(
-        http_uri or _load_env(root).http_uri,
-        _load_env(root).username,
-        _load_env(root).password,
-        _load_env(root).database,
-    )
+    base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
+    client = Neo4jHttpClient(base_uri, username, password, database)
     statements = _normalization_evidence_statements()
     for index in range(0, len(statements), batch_size):
         client.execute(statements[index : index + batch_size])
