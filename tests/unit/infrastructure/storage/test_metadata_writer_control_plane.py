@@ -47,6 +47,7 @@ def _make_bronze_metadata() -> BronzeMetadata:
         ),
         source=SourceMetadata(type="api", url="https://example.org"),
         output=BaseOutputMetadata(
+            artifact_id="bronze_batch:batch-1",
             record_count=7,
             total_bytes=1024,
             lineage_fragment_id="bronze:fragment-1",
@@ -93,6 +94,7 @@ def _make_silver_metadata() -> SilverMetadata:
         ),
         dq_summary=DQSummary(total_records=7, valid_records=7),
         output=BaseOutputMetadata(
+            artifact_id="silver:chembl.activity@7",
             record_count=7,
             total_bytes=2048,
             lineage_fragment_id="silver:fragment-1",
@@ -132,6 +134,7 @@ async def test_write_bronze_metadata_records_artifact_publication(tmp_path) -> N
     assert layer == "bronze"
     assert artifact_path == str(base_path.resolve())
     assert details is not None
+    assert details["artifact_id"] == "bronze_batch:batch-1"
     assert details["metadata_path"].endswith("chembl_activity_metadata.yaml")
     assert details["record_count"] == 7
     assert details["run_id"] == str(metadata.runtime.run_id)
@@ -206,6 +209,7 @@ async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
     assert details is not None
     assert details["run_id"] == str(metadata.runtime.run_id)
     assert details["manifest_id"] == "manifest-1"
+    assert details["artifact_id"] == "silver:chembl.activity@7"
     assert details["dataset_ref"] == "silver:chembl.activity@7"
     assert details["lineage_fragment_id"] == "silver:fragment-1"
 
@@ -223,6 +227,28 @@ async def test_write_metadata_fails_when_control_plane_manifest_id_is_missing(
     with pytest.raises(
         RuntimeError,
         match="Control-plane artifact publication requires metadata.runtime.manifest_id",
+    ):
+        await writer.write_bronze_metadata(
+            base_path=tmp_path / "output" / "bronze" / "chembl" / "activity",
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing(
+    tmp_path,
+) -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+    writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
+    metadata = _make_bronze_metadata()
+    metadata.output.artifact_id = None
+
+    with pytest.raises(
+        RuntimeError,
+        match="Control-plane artifact publication requires metadata.output.artifact_id",
     ):
         await writer.write_bronze_metadata(
             base_path=tmp_path / "output" / "bronze" / "chembl" / "activity",

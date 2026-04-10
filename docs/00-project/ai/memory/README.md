@@ -68,6 +68,16 @@ profiles в BioETL.
   runtime links или orphan nodes в snapshot.
   Для live gate с применением sync в реальный локальный Neo4j используй
   `python -m scripts.ci neo4j-memory-live`.
+  Для operator-facing ownership shortcuts используй
+  `python -m scripts.ops query-neo4j-memory <profile> <name>`, например:
+  `python -m scripts.ops query-neo4j-memory owner-contract chembl.activity`,
+  `python -m scripts.ops query-neo4j-memory owner-pipeline chembl_activity`,
+  `python -m scripts.ops query-neo4j-memory owner-alert BioETLPipelineRunFailed`,
+  `python -m scripts.ops query-neo4j-memory owner-doc "architecture diagrams hub"`.
+  Для ближайших semantic edges используй `neighbors-*` профили, например:
+  `python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity`,
+  `python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed`,
+  `python -m scripts.ops query-neo4j-memory neighbors-contract chembl.activity`.
 
 ## Relationship To Other AI Surfaces
 

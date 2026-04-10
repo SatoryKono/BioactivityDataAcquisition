@@ -625,35 +625,23 @@ class TestHealthServerQuarantineExplorer:
         assert "Quarantine explorer unavailable" in body
 
     @pytest.mark.asyncio
-    async def test_records_endpoint_supports_all_pipeline_scope(
+    async def test_records_endpoint_requires_pipeline_scope(
         self,
         running_server_with_quarantine: tuple[HealthServer, MagicMock],
     ) -> None:
-        """List endpoint should allow omitting pipeline for all-pipeline scope."""
+        """List endpoint should reject unscoped pipeline reads."""
         server, service = running_server_with_quarantine
         port = self._get_server_port(server)
-        status_code, _, body = await self._send_request(
+        status_code, status_text, body = await self._send_request(
             port,
             "GET",
             "/ops/quarantine/filtered-records?limit=10&offset=0",
         )
 
-        assert status_code == 200
-        data = json.loads(body)
-        assert data["total"] == 0
-        service.list_filtered_records.assert_awaited_once_with(
-            pipeline=None,
-            run_type=None,
-            reason_code=None,
-            field=None,
-            run_id=None,
-            payload_hash=None,
-            from_ts=None,
-            to_ts=None,
-            limit=10,
-            offset=0,
-            sort="ingestion_ts_desc",
-        )
+        assert status_code == 400
+        assert status_text == "Missing required query parameter: pipeline"
+        assert "Missing required query parameter: pipeline" in body
+        service.list_filtered_records.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_records_endpoint_delegates_to_quarantine_service(
@@ -691,61 +679,44 @@ class TestHealthServerQuarantineExplorer:
         )
 
     @pytest.mark.asyncio
-    async def test_stats_endpoint_supports_all_pipeline_scope(
+    async def test_stats_endpoint_requires_pipeline_scope(
         self,
         running_server_with_quarantine: tuple[HealthServer, MagicMock],
     ) -> None:
-        """Stats endpoint should allow omitting pipeline for all-pipeline scope."""
+        """Stats endpoint should reject unscoped pipeline reads."""
         server, service = running_server_with_quarantine
         port = self._get_server_port(server)
 
-        status_code, _, body = await self._send_request(
+        status_code, status_text, body = await self._send_request(
             port,
             "GET",
             "/ops/quarantine/filtered-stats?reason_code=missing_required_field",
         )
 
-        assert status_code == 200
-        data = json.loads(body)
-        assert data["total"] == 0
-        service.get_filtered_stats.assert_awaited_once_with(
-            pipeline=None,
-            run_type=None,
-            reason_code="missing_required_field",
-            field=None,
-            run_id=None,
-            payload_hash=None,
-            from_ts=None,
-            to_ts=None,
-        )
+        assert status_code == 400
+        assert status_text == "Missing required query parameter: pipeline"
+        assert "Missing required query parameter: pipeline" in body
+        service.get_filtered_stats.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def test_filter_options_endpoint_supports_all_pipeline_scope(
+    async def test_filter_options_endpoint_requires_pipeline_scope(
         self,
         running_server_with_quarantine: tuple[HealthServer, MagicMock],
     ) -> None:
-        """Filter-options endpoint should allow omitting pipeline."""
+        """Filter-options endpoint should reject unscoped pipeline reads."""
         server, service = running_server_with_quarantine
         port = self._get_server_port(server)
 
-        status_code, _, body = await self._send_request(
+        status_code, status_text, body = await self._send_request(
             port,
             "GET",
             "/ops/quarantine/filter-options?run_type=incremental",
         )
 
-        assert status_code == 200
-        data = json.loads(body)
-        assert "pipelines" in data
-        service.get_filtered_filter_options.assert_awaited_once_with(
-            pipeline=None,
-            run_type="incremental",
-            reason_code=None,
-            field=None,
-            run_id=None,
-            from_ts=None,
-            to_ts=None,
-        )
+        assert status_code == 400
+        assert status_text == "Missing required query parameter: pipeline"
+        assert "Missing required query parameter: pipeline" in body
+        service.get_filtered_filter_options.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_record_detail_endpoint_returns_404(

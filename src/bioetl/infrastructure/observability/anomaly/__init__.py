@@ -1,4 +1,4 @@
-"""AnomalyRecord detection for data quality monitoring.
+"""Typed anomaly detection for data quality monitoring.
 
 Implements baseline comparison and threshold-based detection for:
 - Record count anomalies (sudden drops/spikes)
@@ -17,7 +17,7 @@ Usage:
     # Check for anomalies
     anomaly = detector.detect("record_count", 500)
     if anomaly:
-        logger.warning(f"AnomalyRecord detected: {anomaly}")
+        logger.warning(f"DQ anomaly detected: {anomaly}")
 """
 
 from __future__ import annotations
@@ -38,6 +38,7 @@ from bioetl.infrastructure.observability.anomaly.types import (
 
 __all__ = [
     "AnomalyDetector",
+    # Backward-compatible aliases; domain-owned DQAnomaly* is the canonical boundary contract.
     "AnomalyRecord",
     "AnomalySeverity",
     "AnomalyType",

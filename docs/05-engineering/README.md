@@ -23,7 +23,7 @@ service files, ADRs, and config fragments.
 
 | Document | Purpose |
 | --- | --- |
-| [Normalization Plan P0–P6](normalization-plan-P0-P6.md) | Canonical engineering plan for RunManifest, RunLedger, runtime anchors, and ChemBL Activity normalization |
+| [Normalization Plan P0–P6](normalization_plan_P0_P6.md) | Canonical engineering plan for RunManifest, RunLedger, runtime anchors, and ChemBL Activity normalization |
 
 ## Related published surfaces
 

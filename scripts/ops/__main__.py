@@ -9,6 +9,7 @@ Commands:
     salt-rotate        Rotate PII hashing salt
     fix-grafana        Fix Grafana dashboard configurations
     sync-neo4j-memory  Build and optionally sync the deterministic Neo4j repo graph
+    query-neo4j-memory Query deterministic Neo4j memory ownership and neighbor shortcuts
     wsl-proxy          Start WSL proxy helper
     update-issue       Update a GitHub issue title/body/comment/state (shell)
     triage-issues      Triage cleanup/docs issue wave (shell)
@@ -34,6 +35,7 @@ COMMANDS: dict[str, str] = {
     "salt-rotate": "salt_rotate.py",
     "fix-grafana": "fix_grafana_dashboards.py",
     "sync-neo4j-memory": "neo4j_memory_sync.py",
+    "query-neo4j-memory": "neo4j_memory_query.py",
     "wsl-proxy": "wsl_proxy.py",
 }
 

@@ -783,10 +783,12 @@ def _file_structure_config(memory_mapping: dict[str, object]) -> dict[str, objec
     excluded_dir_names = tuple(
         sorted(set(_as_string_list(payload.get("excluded_dir_names")) or list(DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES)))
     )
+    promoted_hubs = tuple(sorted(set(_as_string_list(payload.get("promoted_hubs")))))
     return {
         "repo_zones": repo_zones,
         "excluded_prefixes": excluded_prefixes,
         "excluded_dir_names": excluded_dir_names,
+        "promoted_hubs": promoted_hubs,
     }
 
 
@@ -828,6 +830,17 @@ def _is_excluded_file_structure_path(relative_path: str, config: dict[str, objec
     normalized = relative_path.strip("/")
     excluded_prefixes = [prefix.strip("/") for prefix in _as_string_list(config.get("excluded_prefixes")) if prefix]
     return any(normalized == prefix or normalized.startswith(f"{prefix}/") for prefix in excluded_prefixes)
+
+
+def _promoted_directory_hubs(relative_path: str, config: dict[str, object]) -> list[str]:
+    promoted = {entry.strip("/") for entry in _as_string_list(config.get("promoted_hubs")) if entry}
+    path = Path(relative_path)
+    matches: list[str] = []
+    for index in range(1, len(path.parts) + 1):
+        candidate = Path(*path.parts[:index]).as_posix()
+        if candidate in promoted:
+            matches.append(candidate)
+    return matches
 
 
 def _resolve_repo_path(root: Path, base_path: Path, raw_path: str) -> Path | None:
@@ -1920,6 +1933,9 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
         "script_surface",
         "test_surface",
         "test_artifact",
+        "pipeline_surface",
+        "contract_surface",
+        "alert_surface",
     }
     for node in list(snapshot.nodes.values()):
         if node.key.label not in source_backed_labels:
@@ -1935,6 +1951,10 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
             directory_key = NodeKey("directory_surface", source_path_value)
             if directory_key in snapshot.nodes:
                 snapshot.add_relation(directory_key, "HOUSES", node.key, provenance="file_structure")
+            for promoted_hub in _promoted_directory_hubs(source_path_value, config):
+                hub_key = NodeKey("directory_surface", promoted_hub)
+                if hub_key in snapshot.nodes:
+                    snapshot.add_relation(hub_key, "HOUSES", node.key, provenance="file_structure")
             continue
         if not source_path.is_file():
             continue
@@ -1965,7 +1985,44 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
         directory_key = NodeKey("directory_surface", parent_relative)
         if directory_key in snapshot.nodes:
             snapshot.add_relation(directory_key, "CONTAINS", file_surface, provenance="file_structure")
+            snapshot.add_relation(directory_key, "HOUSES", node.key, provenance="file_structure")
+        for promoted_hub in _promoted_directory_hubs(parent_relative, config):
+            hub_key = NodeKey("directory_surface", promoted_hub)
+            if hub_key in snapshot.nodes:
+                snapshot.add_relation(hub_key, "HOUSES", node.key, provenance="file_structure")
         snapshot.add_relation(file_surface, "BACKS", node.key, provenance="file_structure")
+
+    relation_backed_types = {"BACKED_BY", "DESCRIBED_IN", "DEFINED_BY"}
+    file_backed_labels = {"doc_artifact", "config_artifact", "module_surface", "script_surface", "test_artifact"}
+    for relation in list(snapshot.relations.values()):
+        if relation.relation_type not in relation_backed_types:
+            continue
+        if relation.target.label not in file_backed_labels:
+            continue
+        target_node = snapshot.nodes.get(relation.target)
+        if target_node is None:
+            continue
+        source_path_value = target_node.properties.get("source_path")
+        if not isinstance(source_path_value, str) or not source_path_value:
+            continue
+        if _is_excluded_file_structure_path(source_path_value, config):
+            continue
+
+        target_path = root / source_path_value
+        if target_path.is_dir():
+            parent_relative = source_path_value
+        elif target_path.is_file():
+            parent_relative = _rel_path(root, target_path.parent)
+        else:
+            continue
+
+        directory_key = NodeKey("directory_surface", parent_relative)
+        if directory_key in snapshot.nodes:
+            snapshot.add_relation(directory_key, "HOUSES", relation.source, provenance="file_structure_inferred")
+        for promoted_hub in _promoted_directory_hubs(parent_relative, config):
+            hub_key = NodeKey("directory_surface", promoted_hub)
+            if hub_key in snapshot.nodes:
+                snapshot.add_relation(hub_key, "HOUSES", relation.source, provenance="file_structure_inferred")
 
 
 def _add_port_surfaces(
@@ -3144,6 +3201,24 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing directory_surface -> HOUSES -> package_family links")
+
+    if not any(
+        source_label == "directory_surface" and relation_type == "HOUSES" and target_label == "entity_config"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing directory_surface -> HOUSES -> entity_config links")
+
+    if not any(
+        source_label == "directory_surface" and relation_type == "HOUSES" and target_label == "doc_source_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing directory_surface -> HOUSES -> doc_source_surface links")
+
+    if not any(
+        source_label == "directory_surface" and relation_type == "HOUSES" and target_label == "test_artifact"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing directory_surface -> HOUSES -> test_artifact links")
 
     if not any(
         source_label == "contract_surface" and relation_type == "DEPENDS_ON" and target_label == "module_surface"

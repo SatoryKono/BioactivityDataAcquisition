@@ -109,6 +109,17 @@ Last verified: '2026-04-09'
     python -m scripts.ci neo4j-memory-live
     ```
 
+14. For operator-facing ownership lookups on the deterministic file-structure
+    layer, use:
+    ```bash
+    python -m scripts.ops query-neo4j-memory owner-contract chembl.activity
+    python -m scripts.ops query-neo4j-memory owner-pipeline chembl_activity
+    python -m scripts.ops query-neo4j-memory owner-alert BioETLPipelineRunFailed
+    python -m scripts.ops query-neo4j-memory owner-doc "architecture diagrams hub"
+    python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity
+    python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed
+    ```
+
 ## Memory Configuration Profiles
 
 ### Development (Local, 4GB host RAM)

@@ -11,11 +11,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
-from bioetl.infrastructure.observability.anomaly.types import (
-    AnomalySeverity,
-    AnomalyType,
+from bioetl.domain.value_objects.dq_anomaly import (
+    DQAnomaly,
+    DQAnomalySeverity,
+    DQAnomalyType,
 )
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
 
 
 @pytest.fixture
@@ -42,8 +43,12 @@ class TestDQMonitorAnomalyDetection:
         )
 
         assert len(anomalies) == 1
-        assert anomalies[0].anomaly_type == AnomalyType.SPIKE
-        assert anomalies[0].severity in (AnomalySeverity.HIGH, AnomalySeverity.CRITICAL)
+        assert isinstance(anomalies[0], DQAnomaly)
+        assert anomalies[0].anomaly_type == DQAnomalyType.SPIKE
+        assert anomalies[0].severity in (
+            DQAnomalySeverity.HIGH,
+            DQAnomalySeverity.CRITICAL,
+        )
 
     def test_dq_monitor_detects_drop(self, mock_logger: MagicMock) -> None:
         """DQ Monitor should detect record count drop."""
@@ -59,7 +64,7 @@ class TestDQMonitorAnomalyDetection:
         )
 
         assert len(anomalies) == 1
-        assert anomalies[0].anomaly_type == AnomalyType.DROP
+        assert anomalies[0].anomaly_type == DQAnomalyType.DROP
 
     def test_dq_monitor_threshold_exceeded(self, mock_logger: MagicMock) -> None:
         """DQ Monitor should detect threshold violations."""
@@ -71,8 +76,8 @@ class TestDQMonitorAnomalyDetection:
         )
 
         assert len(anomalies) == 1
-        assert anomalies[0].anomaly_type == AnomalyType.THRESHOLD_EXCEEDED
-        assert anomalies[0].severity == AnomalySeverity.CRITICAL
+        assert anomalies[0].anomaly_type == DQAnomalyType.THRESHOLD_EXCEEDED
+        assert anomalies[0].severity == DQAnomalySeverity.CRITICAL
 
     def test_dq_monitor_no_anomalies_within_range(self, mock_logger: MagicMock) -> None:
         """DQ Monitor should not detect anomalies for normal values."""
@@ -132,7 +137,7 @@ class TestDQMonitorSeverityLevels:
         )
 
         assert len(anomalies) == 1
-        assert anomalies[0].severity == AnomalySeverity.LOW
+        assert anomalies[0].severity == DQAnomalySeverity.LOW
 
     def test_critical_severity_for_extreme_deviation(
         self, mock_logger: MagicMock
@@ -150,7 +155,7 @@ class TestDQMonitorSeverityLevels:
         )
 
         assert len(anomalies) == 1
-        assert anomalies[0].severity == AnomalySeverity.CRITICAL
+        assert anomalies[0].severity == DQAnomalySeverity.CRITICAL
 
 
 @pytest.mark.integration

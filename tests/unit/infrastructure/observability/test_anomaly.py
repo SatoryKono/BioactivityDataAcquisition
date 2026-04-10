@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import statistics
 from datetime import UTC, datetime
+from typing import get_type_hints
 from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
 from bioetl.infrastructure.observability.anomaly import (
     AnomalyRecord,
     AnomalyDetector,
@@ -462,6 +464,26 @@ class TestDataQualityMonitor:
         )  # Low value
 
         assert len(anomalies) == 1
+        assert isinstance(anomalies[0], DQAnomaly)
+
+    def test_check_quality_annotation_uses_domain_dto(self, mock_logger: MagicMock):
+        """Public monitor boundary should advertise the domain DTO, not infrastructure aliases."""
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
+
+        raw_annotation = DataQualityMonitorService.check_quality.__annotations__[
+            "return"
+        ]
+        assert raw_annotation == "list[DQAnomaly]"
+
+        resolved_annotation = get_type_hints(DataQualityMonitorService.check_quality).get(
+            "return"
+        )
+        if resolved_annotation is not None and not isinstance(
+            resolved_annotation, str
+        ):
+            assert resolved_annotation == list[DQAnomaly]
 
     def test_update_baseline_from_metrics_normal(self, mock_logger: MagicMock):
         """Test update_baseline_from_metrics with normal values."""

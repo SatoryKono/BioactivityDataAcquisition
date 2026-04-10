@@ -244,6 +244,7 @@ class BaseOutputMetadata(BaseModel):
     ADR-029: Output metadata unification.
 
     Attributes:
+        artifact_id: Canonical output artifact identifier for the sidecar payload.
         record_count: Total records written to layer.
         total_bytes: Total size in bytes (compressed for Bronze, on-disk for Delta).
         content_hash: SHA256 hash of content for change detection.
@@ -254,6 +255,10 @@ class BaseOutputMetadata(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    artifact_id: str | None = Field(
+        default=None,
+        description="Canonical output artifact identifier for sidecar/lineage linkage",
+    )
     record_count: int = Field(
         default=0,
         ge=0,

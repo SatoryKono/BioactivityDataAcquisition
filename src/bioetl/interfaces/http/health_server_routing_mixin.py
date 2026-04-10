@@ -176,7 +176,7 @@ class HealthServerRoutingMixin:
     ) -> None:
         """Handle paginated list endpoint for filtered Silver records."""
         assert self._quarantine_service is not None
-        pipeline = self._read_optional_param(query, "pipeline")
+        pipeline = self._read_required_param(query, "pipeline")
         limit = self._read_int_param(query, "limit", default=50, minimum=1)
         offset = self._read_int_param(query, "offset", default=0, minimum=0)
         payload = await self._quarantine_service.list_filtered_records(
@@ -202,7 +202,7 @@ class HealthServerRoutingMixin:
     ) -> None:
         """Handle aggregate stats endpoint for filtered Silver records."""
         assert self._quarantine_service is not None
-        pipeline = self._read_optional_param(query, "pipeline")
+        pipeline = self._read_required_param(query, "pipeline")
         payload = await self._quarantine_service.get_filtered_stats(
             pipeline=pipeline,
             run_type=self._read_optional_param(query, "run_type"),
@@ -223,7 +223,7 @@ class HealthServerRoutingMixin:
     ) -> None:
         """Handle variable-options endpoint for filtered Silver records."""
         assert self._quarantine_service is not None
-        pipeline = self._read_optional_param(query, "pipeline")
+        pipeline = self._read_required_param(query, "pipeline")
         payload = await self._quarantine_service.get_filtered_filter_options(
             pipeline=pipeline,
             run_type=self._read_optional_param(query, "run_type"),
@@ -246,7 +246,7 @@ class HealthServerRoutingMixin:
         assert self._quarantine_service is not None
         payload = await self._quarantine_service.get_filtered_record(
             payload_hash=payload_hash,
-            pipeline=self._read_optional_param(query, "pipeline"),
+            pipeline=self._read_required_param(query, "pipeline"),
         )
         response_support = cast(_HealthResponseSupport, self)
         if payload is None:
