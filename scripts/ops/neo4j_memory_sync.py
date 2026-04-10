@@ -5474,6 +5474,14 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.prune_stale and args.full_reset_managed_wave:
         parser.error("--prune-stale and --full-reset-managed-wave cannot be used together")
+    if args.apply_normalization_evidence_only:
+        summary = apply_normalization_evidence_only(
+            args.root.resolve(),
+            args.http_uri,
+            batch_size=args.batch_size,
+        )
+        print(json.dumps(summary, indent=2))
+        return 0
     root = args.root.resolve()
     snapshot = _filtered_snapshot(
         build_snapshot(root),
