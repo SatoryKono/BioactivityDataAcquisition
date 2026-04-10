@@ -325,6 +325,7 @@ def test_compatibility_details():
     details = result.details
     assert "phase_compatibility" in details
     assert "config_compatibility" in details
+    assert "execution_identity_compatibility" in details
     assert "schema_compatibility" in details
     assert "current_identity" in details
     assert "checkpoint_identity" in details
@@ -333,6 +334,74 @@ def test_compatibility_details():
     # Check identity details
     assert details["current_identity"]["composite_run_identity"] == "run-001"
     assert details["checkpoint_identity"]["composite_run_identity"] == "run-002"
+    assert details["current_identity"]["runtime_anchor_fingerprint"]
+    assert details["checkpoint_identity"]["runtime_anchor_fingerprint"]
+
+
+def test_execution_fingerprint_takes_precedence_over_runtime_anchors():
+    """Explicit execution fingerprints should drive identity compatibility first."""
+    service = CheckpointCompatibilityServiceV2()
+
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        execution_fingerprint="fp-current",
+        manifest_id="manifest-shared",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+    )
+
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        execution_fingerprint="fp-checkpoint",
+        manifest_id="manifest-shared",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+    )
+
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert (
+        result.details["execution_identity_compatibility"]["reason"]
+        == "execution_fingerprint_mismatch"
+    )
+
+
+def test_runtime_anchor_fingerprint_is_used_when_execution_fingerprint_missing():
+    """Fallback execution identity should use the normalized runtime-anchor contract."""
+    service = CheckpointCompatibilityServiceV2()
+
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        manifest_id="manifest-a",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        effective_config_artifact_id="artifact-001",
+    )
+
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        manifest_id="manifest-b",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        effective_config_artifact_id="artifact-001",
+    )
+
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert (
+        result.details["execution_identity_compatibility"]["reason"]
+        == "runtime_anchor_fingerprint_mismatch"
+    )
 
 
 def test_schema_version_delta_config():
