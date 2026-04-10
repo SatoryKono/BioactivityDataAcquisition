@@ -439,6 +439,10 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     effective_payload = json.loads(effective_config_path.read_text(encoding="utf-8"))
     assert isinstance(effective_payload, dict)
     assert effective_payload["artifact_id"] == effective_config_artifact_id
+    assert effective_payload["semantic_artifact"]["artifact_id"] == (
+        effective_config_artifact_id
+    )
+    assert "occurrence_envelope" in effective_payload
 
     effective_index_path = (
         tmp_path
