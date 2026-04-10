@@ -2,13 +2,20 @@
 
 from __future__ import annotations
 
+import io
+from urllib import error
+
 from pathlib import Path
 
 from scripts.ops.neo4j_memory_sync import (
     _build_normalization_pipeline_evidence,
     _build_diff_entries,
+    _critical_analysis_audit_issues,
+    _live_managed_node_counts,
+    _live_managed_relation_counts,
     _normalization_evidence_statements,
     apply_normalization_evidence_only,
+    build_fast_analysis_audit_report,
     DEFAULT_INGEST_WAVE,
     DEFAULT_LEGACY_PRUNE_LABELS,
     DEFAULT_MANAGED_BY,
@@ -16,6 +23,7 @@ from scripts.ops.neo4j_memory_sync import (
     NodeKey,
     build_snapshot,
     derive_http_uri,
+    Neo4jHttpClient,
     _node_statement,
     _prune_legacy_unmanaged_nodes_statement,
     _prune_stale_nodes_statement,
@@ -289,6 +297,12 @@ def test_normalization_evidence_statements_cover_registry_and_fallback_metrics()
 
 def test_apply_normalization_evidence_only_executes_batched_statements(monkeypatch) -> None:
     executed_batches: list[list[dict[str, object]]] = []
+    batch_contexts: list[str | None] = []
+    stub_statements = [
+        {"statement": "RETURN 1 AS ok", "parameters": {"pipeline_name": "chembl_activity"}},
+        {"statement": "RETURN 1 AS ok", "parameters": {"pipeline_name": "pubmed_publication"}},
+        {"statement": "RETURN 1 AS ok", "parameters": {"pipeline_name": "crossref_publication"}},
+    ]
 
     class StubClient:
         def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
@@ -297,23 +311,41 @@ def test_apply_normalization_evidence_only_executes_batched_statements(monkeypat
             self.password = password
             self.database = database
 
-        def execute(self, statements: list[dict[str, object]]) -> dict[str, object]:
+        def execute(
+            self,
+            statements: list[dict[str, object]],
+            *,
+            context: str | None = None,
+        ) -> dict[str, object]:
             executed_batches.append(statements)
+            batch_contexts.append(context)
             return {"results": [], "errors": []}
 
     monkeypatch.setattr("scripts.ops.neo4j_memory_sync.Neo4jHttpClient", StubClient)
+    monkeypatch.setattr(
+        "scripts.ops.neo4j_memory_sync._normalization_evidence_statements",
+        lambda: list(stub_statements),
+    )
     root = Path(__file__).resolve().parents[4]
 
     summary = apply_normalization_evidence_only(
         root,
         "http://host.docker.internal:7474",
-        batch_size=7,
+        batch_size=2,
     )
 
-    evidence = _build_normalization_pipeline_evidence()
-    assert summary["pipeline_count"] == len(evidence)
+    assert summary["pipeline_count"] == len(stub_statements)
+    assert summary["completed_statement_count"] == len(stub_statements)
+    assert summary["batch_count"] == len(executed_batches)
+    assert summary["batch_size"] == 2
+    assert len(summary["batches"]) == len(executed_batches)
     assert executed_batches
-    assert sum(len(batch) for batch in executed_batches) == len(evidence)
+    assert sum(len(batch) for batch in executed_batches) == len(stub_statements)
+    assert batch_contexts
+    assert batch_contexts[0] is not None
+    assert "normalization evidence batch 1/" in str(batch_contexts[0])
+    assert summary["batches"][0]["pipeline_start"] == "chembl_activity"
+    assert summary["batches"][0]["pipeline_end"] == "pubmed_publication"
 
 
 def _assert_relation_absence(relation_keys: set[RelationKey], forbidden: tuple[RelationKey, ...]) -> None:
@@ -528,6 +560,140 @@ def test_build_diff_entries_tracks_missing_and_extra_keys() -> None:
             "delta": 0,
         },
     ]
+
+
+def test_live_managed_count_helpers_batch_labels_and_relations() -> None:
+    class StubClient:
+        def query(
+            self,
+            statement: str,
+            parameters: dict[str, object] | None = None,
+            *,
+            context: str | None = None,
+        ) -> list[dict[str, object]]:
+            assert context is not None
+            assert parameters is not None
+            if "UNWIND $labels AS label" in statement:
+                return [
+                    {"label": "retirement_candidate", "count": 4},
+                    {"label": "complexity_candidate", "count": 2},
+                ]
+            if "UNWIND $relation_types AS relation_type" in statement:
+                return [
+                    {"relation_type": "CANDIDATE_FOR_REMOVAL", "count": 3},
+                    {"relation_type": "CANDIDATE_FOR_SIMPLIFICATION", "count": 1},
+                ]
+            raise AssertionError(f"Unexpected statement: {statement}")
+
+    client = StubClient()
+
+    label_counts = _live_managed_node_counts(
+        client,  # type: ignore[arg-type]
+        ("retirement_candidate", "complexity_candidate"),
+        context="fast audit label summary",
+    )
+    relation_counts = _live_managed_relation_counts(
+        client,  # type: ignore[arg-type]
+        ("CANDIDATE_FOR_REMOVAL", "CANDIDATE_FOR_SIMPLIFICATION"),
+        context="fast audit relation summary",
+    )
+
+    assert label_counts == {
+        "retirement_candidate": 4,
+        "complexity_candidate": 2,
+    }
+    assert relation_counts == {
+        "CANDIDATE_FOR_REMOVAL": 3,
+        "CANDIDATE_FOR_SIMPLIFICATION": 1,
+    }
+
+
+def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -> None:
+    class StubSnapshot:
+        def stats(self) -> dict[str, object]:
+            return {
+                "node_count": 6,
+                "relation_count": 4,
+                "labels": {
+                    "retirement_candidate": 4,
+                    "complexity_candidate": 2,
+                },
+                "relation_types": {
+                    "CANDIDATE_FOR_REMOVAL": 3,
+                    "CANDIDATE_FOR_SIMPLIFICATION": 1,
+                },
+            }
+
+    snapshot = StubSnapshot()
+    query_calls: list[str] = []
+
+    class StubClient:
+        def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
+            self.base_uri = base_uri
+            self.username = username
+            self.password = password
+            self.database = database
+
+        def query(
+            self,
+            statement: str,
+            parameters: dict[str, object] | None = None,
+            *,
+            context: str | None = None,
+        ) -> list[dict[str, object]]:
+            query_calls.append(context or "")
+            if "UNWIND $labels AS label" in statement:
+                labels = list(parameters["labels"]) if isinstance(parameters, dict) else []
+                return [
+                    {"label": label, "count": int(snapshot.stats()["labels"].get(label, 0))}
+                    for label in labels
+                ]
+            if "UNWIND $relation_types AS relation_type" in statement:
+                relation_types = list(parameters["relation_types"]) if isinstance(parameters, dict) else []
+                return [
+                    {
+                        "relation_type": relation_type,
+                        "count": int(snapshot.stats()["relation_types"].get(relation_type, 0)),
+                    }
+                    for relation_type in relation_types
+                ]
+            raise AssertionError(f"Unexpected statement: {statement}")
+
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.Neo4jHttpClient", StubClient)
+    root = Path(__file__).resolve().parents[4]
+
+    report = build_fast_analysis_audit_report(snapshot, root, "http://localhost:7474")  # type: ignore[arg-type]
+
+    assert query_calls == [
+        "fast audit label summary",
+        "fast audit relation summary",
+    ]
+    assert _critical_analysis_audit_issues(report) == []
+
+
+def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) -> None:
+    def _raise_http_error(req: object, timeout: int = 60) -> object:
+        raise error.HTTPError(
+            "http://localhost:7474/db/neo4j/tx/commit",
+            400,
+            "Bad Request",
+            hdrs=None,
+            fp=io.BytesIO(b'{"errors":[{"message":"Cypher failed"}]}'),
+        )
+
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.request.urlopen", _raise_http_error)
+    client = Neo4jHttpClient("http://localhost:7474", "neo4j", "password", "neo4j")
+
+    try:
+        client.execute([], context="fast audit label summary")
+    except RuntimeError as exc:
+        message = str(exc)
+    else:  # pragma: no cover - defensive
+        raise AssertionError("Expected RuntimeError")
+
+    assert "fast audit label summary" in message
+    assert "query/runtime error" in message
+    assert "transport error" not in message
 
 
 def test_snapshot_invariants_are_clean() -> None:
