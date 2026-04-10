@@ -5,8 +5,8 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.infrastructure.schemas.silver_publications import (
-    SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+from bioetl.domain.schemas.semanticscholar.publication import (
+    SemanticScholarPublicationSchema,
 )
 
 __all__ = [
@@ -14,8 +14,17 @@ __all__ = [
     "SEMANTICSCHOLAR_PUBLICATION_SCHEMA_FIELDS",
 ]
 
-SEMANTICSCHOLAR_PUBLICATION_SCHEMA_FIELDS = tuple(
-    SEMANTICSCHOLAR_PUBLICATION_SCHEMA.names
+_SEMANTICSCHOLAR_PUBLICATION_BASE_FIELDS = tuple(
+    SemanticScholarPublicationSchema.to_schema().columns.keys()
+)
+_SEMANTICSCHOLAR_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
+    field
+    for field in ("publication_doi", "publication_pmid", "publication_pmc_id")
+    if field not in _SEMANTICSCHOLAR_PUBLICATION_BASE_FIELDS
+)
+SEMANTICSCHOLAR_PUBLICATION_SCHEMA_FIELDS = (
+    _SEMANTICSCHOLAR_PUBLICATION_BASE_FIELDS
+    + _SEMANTICSCHOLAR_PUBLICATION_COMPAT_IDENTIFIER_FIELDS
 )
 
 _META_FIELDS = frozenset(
@@ -25,7 +34,6 @@ _META_FIELDS = frozenset(
         "_run_id",
         "_run_type",
         "_source_batch_id",
-        "_source",
         "_ingestion_ts",
         "_index",
         "_lookup_method",

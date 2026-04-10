@@ -6,14 +6,16 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles.helpers import normalize_profile_smiles
-from bioetl.infrastructure.schemas.silver_compounds import PUBCHEM_COMPOUND_SCHEMA
+from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
 
 __all__ = [
     "PUBCHEM_COMPOUND_PROFILE",
     "PUBCHEM_COMPOUND_SCHEMA_FIELDS",
 ]
 
-PUBCHEM_COMPOUND_SCHEMA_FIELDS = tuple(PUBCHEM_COMPOUND_SCHEMA.names)
+PUBCHEM_COMPOUND_SCHEMA_FIELDS = tuple(
+    PubchemMoleculeSchema.to_schema().columns.keys()
+)
 
 _META_FIELDS = frozenset(
     {

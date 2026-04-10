@@ -5,14 +5,14 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.infrastructure.schemas.silver_chembl import CHEMBL_ASSAY_SCHEMA
+from bioetl.domain.schemas.chembl.assay import AssaySchema
 
 __all__ = [
     "CHEMBL_ASSAY_PROFILE",
     "CHEMBL_ASSAY_SCHEMA_FIELDS",
 ]
 
-CHEMBL_ASSAY_SCHEMA_FIELDS = tuple(CHEMBL_ASSAY_SCHEMA.names)
+CHEMBL_ASSAY_SCHEMA_FIELDS = tuple(AssaySchema.to_schema().columns.keys())
 
 _META_FIELDS = frozenset(
     {

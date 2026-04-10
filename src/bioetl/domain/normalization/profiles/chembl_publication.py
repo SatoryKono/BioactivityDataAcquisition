@@ -5,14 +5,24 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.infrastructure.schemas.silver_chembl import CHEMBL_PUBLICATION_SCHEMA
+from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
 __all__ = [
     "CHEMBL_PUBLICATION_PROFILE",
     "CHEMBL_PUBLICATION_SCHEMA_FIELDS",
 ]
 
-CHEMBL_PUBLICATION_SCHEMA_FIELDS = tuple(CHEMBL_PUBLICATION_SCHEMA.names)
+_CHEMBL_PUBLICATION_BASE_FIELDS = tuple(
+    ChemblPublicationSchema.to_schema().columns.keys()
+)
+_CHEMBL_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
+    field
+    for field in ("publication_doi", "publication_pmid", "publication_pmc_id")
+    if field not in _CHEMBL_PUBLICATION_BASE_FIELDS
+)
+CHEMBL_PUBLICATION_SCHEMA_FIELDS = (
+    _CHEMBL_PUBLICATION_BASE_FIELDS + _CHEMBL_PUBLICATION_COMPAT_IDENTIFIER_FIELDS
+)
 
 _META_FIELDS = frozenset(
     {
@@ -21,7 +31,6 @@ _META_FIELDS = frozenset(
         "_run_id",
         "_run_type",
         "_source_batch_id",
-        "_source",
         "_ingestion_ts",
         "_index",
         "_lookup_method",

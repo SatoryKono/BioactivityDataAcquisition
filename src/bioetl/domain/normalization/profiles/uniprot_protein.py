@@ -5,14 +5,14 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.infrastructure.schemas.silver_compounds import UNIPROT_PROTEIN_SCHEMA
+from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
 
 __all__ = [
     "UNIPROT_PROTEIN_PROFILE",
     "UNIPROT_PROTEIN_SCHEMA_FIELDS",
 ]
 
-UNIPROT_PROTEIN_SCHEMA_FIELDS = tuple(UNIPROT_PROTEIN_SCHEMA.names)
+UNIPROT_PROTEIN_SCHEMA_FIELDS = tuple(UniprotTargetSchema.to_schema().columns.keys())
 
 _META_FIELDS = frozenset(
     {

@@ -5,16 +5,24 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.infrastructure.schemas.silver_publications import (
-    OPENALEX_PUBLICATION_SCHEMA,
-)
+from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 
 __all__ = [
     "OPENALEX_PUBLICATION_PROFILE",
     "OPENALEX_PUBLICATION_SCHEMA_FIELDS",
 ]
 
-OPENALEX_PUBLICATION_SCHEMA_FIELDS = tuple(OPENALEX_PUBLICATION_SCHEMA.names)
+_OPENALEX_PUBLICATION_BASE_FIELDS = tuple(
+    OpenAlexPublicationSchema.to_schema().columns.keys()
+)
+_OPENALEX_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
+    field
+    for field in ("publication_doi", "publication_pmid", "publication_pmc_id")
+    if field not in _OPENALEX_PUBLICATION_BASE_FIELDS
+)
+OPENALEX_PUBLICATION_SCHEMA_FIELDS = (
+    _OPENALEX_PUBLICATION_BASE_FIELDS + _OPENALEX_PUBLICATION_COMPAT_IDENTIFIER_FIELDS
+)
 
 _META_FIELDS = frozenset(
     {
@@ -23,7 +31,6 @@ _META_FIELDS = frozenset(
         "_run_id",
         "_run_type",
         "_source_batch_id",
-        "_source",
         "_ingestion_ts",
         "_index",
         "_lookup_method",
