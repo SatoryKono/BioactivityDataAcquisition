@@ -6,7 +6,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage.bronze.metadata_operations import (
@@ -22,7 +21,7 @@ from bioetl.infrastructure.storage.lineage_persistence import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import (
         AuditPort,
         LineageStorePort,
@@ -41,23 +40,6 @@ if TYPE_CHECKING:
         _metrics: MetricsPort
         base_path: Path
         logger: LoggerPort
-
-        def _build_full_bronze_metadata(
-            self,
-            *,
-            run_id: RunID,
-            run_type: RunType,
-            provider: str,
-            entity: str,
-            batch_id: BatchID,
-            record_count: int,
-            compressed_size: int,
-            output_path: str,
-            started_at: datetime,
-            completed_at: datetime,
-            duration_seconds: float,
-            source_metadata: SourceMetadata | None,
-        ) -> BronzeMetadata: ...
 
         async def _calculate_checksum(self, path: Path) -> str: ...
 
@@ -116,8 +98,6 @@ class BronzeWriterSideEffectsMixin:
     ) -> None:
         """Create and persist Bronze metadata through the canonical coordinator path."""
         host = cast("_BronzeWriterSideEffectsHost", self)
-        if isinstance(host._metadata_writer, NoOpMetadataWriter):
-            return
         prepared = prepare_bronze_metadata_write(
             host,
             BronzeMetadataWriteRequest(

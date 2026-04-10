@@ -51,6 +51,7 @@ class TestCreateBronzeWriter:
         """Reads save_json and save_metadata from config."""
         writer_cls = MagicMock()
         config = SimpleNamespace(save_json=True, save_metadata=True)
+        coordinator = MagicMock()
 
         create_bronze_writer(
             writer_cls=writer_cls,
@@ -59,7 +60,7 @@ class TestCreateBronzeWriter:
             logger=MagicMock(),
             metrics=MagicMock(),
             tracing=None,
-            metadata_coordinator=None,
+            metadata_coordinator=coordinator,
             audit=NoOpAudit(),
             flat_structure=False,
         )
@@ -93,6 +94,7 @@ class TestCreateBronzeWriter:
         """Creates real MetadataWriter when save_metadata is True."""
         writer_cls = MagicMock()
         config = SimpleNamespace(save_json=False, save_metadata=True)
+        coordinator = MagicMock()
 
         create_bronze_writer(
             writer_cls=writer_cls,
@@ -101,7 +103,7 @@ class TestCreateBronzeWriter:
             logger=MagicMock(),
             metrics=MagicMock(),
             tracing=None,
-            metadata_coordinator=None,
+            metadata_coordinator=coordinator,
             audit=NoOpAudit(),
             flat_structure=False,
         )
@@ -110,6 +112,27 @@ class TestCreateBronzeWriter:
         assert not isinstance(
             call_kwargs["runtime_services"].metadata_writer, NoOpMetadataWriter
         )
+
+    def test_raises_when_save_metadata_enabled_without_coordinator(self) -> None:
+        """save_metadata wiring must fail closed without a coordinator."""
+        writer_cls = MagicMock()
+        config = SimpleNamespace(save_json=False, save_metadata=True)
+
+        with pytest.raises(
+            RuntimeError,
+            match="Bronze metadata publication requires MetadataCoordinator",
+        ):
+            create_bronze_writer(
+                writer_cls=writer_cls,
+                base_path=Path("/data/bronze"),
+                config=config,
+                logger=MagicMock(),
+                metrics=MagicMock(),
+                tracing=None,
+                metadata_coordinator=None,
+                audit=NoOpAudit(),
+                flat_structure=False,
+            )
 
     def test_passes_flat_structure(self) -> None:
         """flat_structure flag is forwarded to writer constructor."""

@@ -245,6 +245,11 @@ class TestBronzeWriterMetadataSidecar:
         mock_metadata_writer.write_bronze_metadata = AsyncMock(
             return_value="/path/to/_metadata.yaml"
         )
+        mock_bundle = MagicMock()
+        mock_bundle.metadata = MagicMock()
+        mock_bundle.lineage_fragment = MagicMock()
+        mock_coordinator = MagicMock()
+        mock_coordinator.create_bronze_metadata_bundle.return_value = mock_bundle
 
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -252,6 +257,7 @@ class TestBronzeWriterMetadataSidecar:
             metrics=noop_metrics,
             metadata_writer=mock_metadata_writer,
             save_metadata=True,
+            metadata_coordinator=mock_coordinator,
         )
 
         await writer.write_bronze(
@@ -275,10 +281,7 @@ class TestBronzeWriterMetadataSidecar:
 
         # Verify metadata structure
         metadata = call_args.kwargs["metadata"]
-        assert metadata.runtime.run_id == str(run_id)
-        assert metadata.pipeline.provider == "chembl"
-        assert metadata.pipeline.entity == "activity"
-        assert metadata.output.record_count == len(sample_records)
+        assert metadata is mock_bundle.metadata
 
     @pytest.mark.asyncio
     async def test_metadata_writer_not_called_when_save_metadata_disabled(
@@ -321,7 +324,7 @@ class TestBronzeWriterMetadataSidecar:
         mock_metadata_writer.write_bronze_metadata.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_noop_metadata_writer_used_by_default(
+    async def test_write_bronze_fails_closed_when_save_metadata_enabled_without_coordinator(
         self,
         tmp_path: Path,
         noop_logger: NoOpLogger,
@@ -332,30 +335,28 @@ class TestBronzeWriterMetadataSidecar:
         run_type: RunType,
         ingestion_ts: datetime,
     ) -> None:
-        """Test that NoOpMetadataWriter is used when not provided."""
+        """Canonical Bronze metadata publication must require a coordinator."""
         writer = BronzeWriter(
             base_path=tmp_path,
             logger=noop_logger,
             metrics=noop_metrics,
-            # No metadata_writer provided - should use NoOp
-            save_metadata=True,  # Enabled but with NoOp
+            save_metadata=True,
         )
 
-        # Should not raise even though save_metadata=True
-        result = await writer.write_bronze(
-            records=iter(sample_records),
-            provider="chembl",
-            entity="activity",
-            date=ingestion_ts,
-            batch_id=batch_id,
-            run_id=run_id,
-            run_type=run_type,
-            ingestion_ts=ingestion_ts,
-        )
-
-        # Verify data was written
-        assert result.relative_path.endswith(".jsonl.zst")
-        assert (tmp_path / result.relative_path).exists()
+        with pytest.raises(
+            RuntimeError,
+            match="MetadataCoordinator with create_bronze_metadata_bundle is required",
+        ):
+            await writer.write_bronze(
+                records=iter(sample_records),
+                provider="chembl",
+                entity="activity",
+                date=ingestion_ts,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+            )
 
     @pytest.mark.asyncio
     async def test_build_full_bronze_metadata_structure(
@@ -479,8 +480,10 @@ class TestBronzeWriterQueryString:
 
         # Create mock metadata coordinator
         mock_coordinator = MagicMock()
-        mock_metadata = MagicMock()
-        mock_coordinator.create_bronze_metadata.return_value = mock_metadata
+        mock_bundle = MagicMock()
+        mock_bundle.metadata = MagicMock()
+        mock_bundle.lineage_fragment = MagicMock()
+        mock_coordinator.create_bronze_metadata_bundle.return_value = mock_bundle
 
         # Create mock metadata writer
         mock_metadata_writer = AsyncMock()
@@ -516,9 +519,9 @@ class TestBronzeWriterQueryString:
             source_metadata=source_metadata,
         )
 
-        # Verify create_bronze_metadata was called with BronzeMetadataInput
-        mock_coordinator.create_bronze_metadata.assert_called_once()
-        call_args = mock_coordinator.create_bronze_metadata.call_args
+        # Verify create_bronze_metadata_bundle was called with BronzeMetadataInput
+        mock_coordinator.create_bronze_metadata_bundle.assert_called_once()
+        call_args = mock_coordinator.create_bronze_metadata_bundle.call_args
 
         # Get the BronzeMetadataInput argument
         bronze_input = call_args[0][0]
@@ -547,8 +550,10 @@ class TestBronzeWriterQueryString:
         from bioetl.domain.models.metadata import SourceMetadata
 
         mock_coordinator = MagicMock()
-        mock_metadata = MagicMock()
-        mock_coordinator.create_bronze_metadata.return_value = mock_metadata
+        mock_bundle = MagicMock()
+        mock_bundle.metadata = MagicMock()
+        mock_bundle.lineage_fragment = MagicMock()
+        mock_coordinator.create_bronze_metadata_bundle.return_value = mock_bundle
 
         mock_metadata_writer = AsyncMock()
         mock_metadata_writer.write_bronze_metadata = AsyncMock()
@@ -581,9 +586,9 @@ class TestBronzeWriterQueryString:
             source_metadata=source_metadata,
         )
 
-        # Verify create_bronze_metadata was called
-        mock_coordinator.create_bronze_metadata.assert_called_once()
-        bronze_input = mock_coordinator.create_bronze_metadata.call_args[0][0]
+        # Verify create_bronze_metadata_bundle was called
+        mock_coordinator.create_bronze_metadata_bundle.assert_called_once()
+        bronze_input = mock_coordinator.create_bronze_metadata_bundle.call_args[0][0]
 
         # query_string should be None
         assert bronze_input.query_string is None
@@ -604,8 +609,10 @@ class TestBronzeWriterQueryString:
         from unittest.mock import AsyncMock, MagicMock
 
         mock_coordinator = MagicMock()
-        mock_metadata = MagicMock()
-        mock_coordinator.create_bronze_metadata.return_value = mock_metadata
+        mock_bundle = MagicMock()
+        mock_bundle.metadata = MagicMock()
+        mock_bundle.lineage_fragment = MagicMock()
+        mock_coordinator.create_bronze_metadata_bundle.return_value = mock_bundle
 
         mock_metadata_writer = AsyncMock()
         mock_metadata_writer.write_bronze_metadata = AsyncMock()
@@ -632,8 +639,8 @@ class TestBronzeWriterQueryString:
             # source_metadata not passed - defaults to None
         )
 
-        mock_coordinator.create_bronze_metadata.assert_called_once()
-        bronze_input = mock_coordinator.create_bronze_metadata.call_args[0][0]
+        mock_coordinator.create_bronze_metadata_bundle.assert_called_once()
+        bronze_input = mock_coordinator.create_bronze_metadata_bundle.call_args[0][0]
 
         # Both should be None
         assert bronze_input.source_metadata is None
