@@ -50,3 +50,17 @@ META_FIELDS: frozenset[str] = frozenset(
         "_source",
     }
 )
+
+# Persisted Delta rows must not carry occurrence-scoped provenance fields.
+# These values belong in sidecars, manifests, audit logs, and lineage artifacts,
+# not in the physical Silver/Gold dataset bytes.
+NONDETERMINISTIC_PERSISTED_FIELDS: frozenset[str] = frozenset(
+    {
+        "_composite_run_id",
+        "_ingestion_ts",
+        "_lineage_created_at",
+        "_run_id",
+        "_run_type",
+        "_source_batch_id",
+    }
+)

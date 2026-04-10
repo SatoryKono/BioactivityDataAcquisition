@@ -48,8 +48,9 @@ class TestSilverWriterMergedMixin:
 
         assert prepared.table_path == "/tmp/silver/test/table"
         assert prepared.arrow_table.column_names == canonical_column_order(
-            ["name", "_run_id", "id"]
+            ["name", "id"]
         )
+        assert "_run_id" not in prepared.arrow_table.column_names
 
     def test_prepare_merged_silver_write_preserves_input_order_when_requested(
         self,
@@ -67,7 +68,7 @@ class TestSilverWriterMergedMixin:
             )
         )
 
-        assert prepared.arrow_table.column_names == ["name", "_run_id", "id"]
+        assert prepared.arrow_table.column_names == ["name", "id"]
 
     def test_prepare_merged_silver_write_sorts_by_primary_keys(self) -> None:
         """Merged write prep should preserve deterministic primary-key sorting."""

@@ -134,7 +134,7 @@ class TestEffectiveConfigService:
         assert effective_config["auto_adjust"] is True  # Added by override
 
     def test_artifact_id_generation(self) -> None:
-        """Test automatic artifact ID generation."""
+        """Automatic artifact IDs should be deterministic semantic anchors."""
         artifact1 = self.service.create_effective_config_artifact(
             pipeline_name="test1",
             pipeline_kind="standard",
@@ -153,8 +153,30 @@ class TestEffectiveConfigService:
 
         # Should have different auto-generated IDs
         assert artifact1.artifact_id != artifact2.artifact_id
-        assert artifact1.artifact_id.startswith("config_")
-        assert artifact2.artifact_id.startswith("config_")
+        assert artifact1.artifact_id.startswith("effective-config-")
+        assert artifact2.artifact_id.startswith("effective-config-")
+
+    def test_artifact_id_is_stable_for_identical_semantic_inputs(self) -> None:
+        """Identical semantic inputs must yield the same artifact ID."""
+        kwargs = {
+            "pipeline_name": "test_pipeline",
+            "pipeline_kind": "standard",
+            "resolved_config": {"pipeline": {"name": "test_pipeline"}},
+            "runtime_overrides": {"runtime": {"limit": 5}},
+            "source_refs": [
+                ConfigSourceRef(
+                    source_type="file",
+                    source_path="configs/entities/test/pipeline.yaml",
+                    source_hash="abc123",
+                    priority=1,
+                )
+            ],
+        }
+
+        artifact1 = self.service.create_effective_config_artifact(**kwargs)
+        artifact2 = self.service.create_effective_config_artifact(**kwargs)
+
+        assert artifact1.artifact_id == artifact2.artifact_id
 
     def test_custom_artifact_id(self) -> None:
         """Test custom artifact ID usage."""

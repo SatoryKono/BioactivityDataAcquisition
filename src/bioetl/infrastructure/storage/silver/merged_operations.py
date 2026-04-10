@@ -13,6 +13,9 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
+from bioetl.infrastructure.storage.delta.schema_ops import (
+    drop_nondeterministic_persisted_fields,
+)
 
 __all__ = [
     "_MergedSilverWriteRequest",
@@ -59,14 +62,15 @@ def _prepare_merged_silver_write(
     request: _MergedSilverWriteRequest,
 ) -> _PreparedMergedSilverWrite:
     """Prepare normalized Arrow payload and resolved table path for merged writes."""
+    arrow_table = host._arrow_converter.convert_records_to_arrow(
+        request.records,
+        primary_keys=request.primary_keys,
+        apply_column_order=not request.preserve_column_order,
+    )
     return _PreparedMergedSilverWrite(
         request=request,
         table_path=host._resolve_table_path(request.table_name),
-        arrow_table=host._arrow_converter.convert_records_to_arrow(
-            request.records,
-            primary_keys=request.primary_keys,
-            apply_column_order=not request.preserve_column_order,
-        ),
+        arrow_table=drop_nondeterministic_persisted_fields(arrow_table),
     )
 
 

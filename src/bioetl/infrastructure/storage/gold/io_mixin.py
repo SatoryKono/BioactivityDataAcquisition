@@ -9,6 +9,9 @@ from typing import TYPE_CHECKING, Protocol, cast
 import pyarrow as pa
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.infrastructure.storage.delta.schema_ops import (
+    drop_nondeterministic_persisted_fields,
+)
 from bioetl.infrastructure.storage.gold.io_delta_mixins import (
     _GoldWriterExecutorArrowMixin,
     _GoldWriterScd2MergeMixin,
@@ -122,6 +125,7 @@ def _prepare_gold_merged_table(
 
     module = _load_gold_writer_module()
     arrow_table = module.coerce_null_types_for_delta(pa.Table.from_pylist(records))
+    arrow_table = drop_nondeterministic_persisted_fields(arrow_table)
     if not preserve_column_order:
         ordered_columns = canonical_column_order(list(arrow_table.column_names))
         arrow_table = arrow_table.select(ordered_columns)

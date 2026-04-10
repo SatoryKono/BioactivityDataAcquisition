@@ -40,6 +40,31 @@ def _write_test_table(
     write_deltalake(str(table_dir), table, mode=mode)
 
 
+def _write_content_hash_table(
+    table_dir: Path,
+    records: list[dict],
+    mode: str = "append",
+) -> None:
+    """Write records to a Delta table without ingestion timestamps."""
+    table_dir.mkdir(parents=True, exist_ok=True)
+    schema = pa.schema(
+        [
+            pa.field("activity_id", pa.string()),
+            pa.field("value", pa.float64()),
+            pa.field("content_hash", pa.string()),
+        ]
+    )
+    table = pa.table(
+        [
+            pa.array([r["activity_id"] for r in records]),
+            pa.array([r["value"] for r in records]),
+            pa.array([r["content_hash"] for r in records]),
+        ],
+        schema=schema,
+    )
+    write_deltalake(str(table_dir), table, mode=mode)
+
+
 @pytest.mark.asyncio
 async def test_deduplicate_removes_duplicates(tmp_delta_dir: Path) -> None:
     """Dedup should keep latest record per PK."""
@@ -162,3 +187,33 @@ async def test_deduplicate_missing_table(tmp_delta_dir: Path) -> None:
 
     with pytest.raises(TableNotFoundError):
         await mgr.deduplicate_silver("nonexistent", primary_keys=["activity_id"])
+
+
+@pytest.mark.asyncio
+async def test_deduplicate_uses_content_hash_when_ingestion_ts_missing(
+    tmp_delta_dir: Path,
+) -> None:
+    """Dedup should remain deterministic when persisted rows omit ingestion timestamps."""
+    table_path = tmp_delta_dir / "test_entity_hash_only"
+    _write_content_hash_table(
+        table_path,
+        [
+            {"activity_id": "1", "value": 10.0, "content_hash": "z-hash"},
+            {"activity_id": "1", "value": 9.0, "content_hash": "a-hash"},
+            {"activity_id": "2", "value": 20.0, "content_hash": "m-hash"},
+        ],
+    )
+
+    mgr = RetentionPolicy(base_path=str(tmp_delta_dir))
+    removed = await mgr.deduplicate_silver(
+        "test_entity_hash_only", primary_keys=["activity_id"]
+    )
+
+    assert removed == 1
+
+    from deltalake import DeltaTable
+
+    rows = DeltaTable(str(table_path)).to_pyarrow_table().to_pylist()
+    id1_rows = [row for row in rows if row["activity_id"] == "1"]
+    assert len(id1_rows) == 1
+    assert id1_rows[0]["content_hash"] == "a-hash"

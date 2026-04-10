@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pyarrow as pa
 
+from bioetl.domain.constants import NONDETERMINISTIC_PERSISTED_FIELDS
+
 
 def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
     """Coerce Null-typed columns to concrete types for Delta Lake compatibility."""
@@ -24,3 +26,27 @@ def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
                 col_idx, pa.field(field.name, pa.list_(pa.string())), empty_lists
             )
     return table
+
+
+def drop_nondeterministic_persisted_fields(table: pa.Table) -> pa.Table:
+    """Drop occurrence-scoped provenance fields from persisted Delta rows.
+
+    Runtime provenance remains available in in-memory records, sidecars, run
+    manifests, and audit artifacts. This helper only affects the physical
+    Silver/Gold dataset payload written to Delta.
+    """
+
+    removable = [
+        column_name
+        for column_name in table.column_names
+        if column_name in NONDETERMINISTIC_PERSISTED_FIELDS
+    ]
+    if not removable:
+        return table
+
+    persisted_columns = [
+        column_name
+        for column_name in table.column_names
+        if column_name not in NONDETERMINISTIC_PERSISTED_FIELDS
+    ]
+    return table.select(persisted_columns)
