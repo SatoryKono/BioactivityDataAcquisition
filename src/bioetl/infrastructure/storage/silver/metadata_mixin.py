@@ -186,6 +186,7 @@ class SilverWriterMetadataMixin:
         table_name: str,
         records: list[BronzeRecord],
         primary_keys: list[str],
+        completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
     ) -> None:
@@ -203,6 +204,7 @@ class SilverWriterMetadataMixin:
                 table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,
+                completed_at=completed_at,
                 run_id=run_id,
                 sources_used=sources_used,
             ),

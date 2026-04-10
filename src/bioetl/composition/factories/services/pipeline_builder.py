@@ -23,6 +23,7 @@ from bioetl.composition.factories.services.pipeline_record_processor_builder imp
 if TYPE_CHECKING:
     import pyarrow as pa
 
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.application.core.runtime_wiring_api import (
         BasePipeline,
         BatchExecutor,
@@ -62,6 +63,7 @@ def create_batch_processing_components(
     gold_transform_callback: GoldTransformCallback,
     gold_validator: GoldValidatorPort,
     tracer: TracingPort | None = None,
+    domain_event_emitter: DomainEventEmitter | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
 ) -> BatchProcessingComponents:
     """Create batch metrics/transformer/writer stack via composition DI."""
@@ -75,6 +77,7 @@ def create_batch_processing_components(
         gold_transform_callback=gold_transform_callback,
         gold_validator=gold_validator,
         tracer=tracer,
+        domain_event_emitter=domain_event_emitter,
         lock_validator=lock_validator,
     )
 
@@ -150,6 +153,7 @@ def create_batch_executor_from_pipeline(
     gold_output_path: str | None = None,
     flat_structure: bool = False,
     batch_id_factory: BatchIdGeneratorPort | None = None,
+    domain_event_emitter: DomainEventEmitter | None = None,
 ) -> BatchExecutor:
     """Create BatchExecutor from pipeline using delegated component factories."""
     return build_batch_executor_from_pipeline(
@@ -170,6 +174,7 @@ def create_batch_executor_from_pipeline(
         gold_output_path=gold_output_path,
         flat_structure=flat_structure,
         batch_id_factory=batch_id_factory,
+        domain_event_emitter=domain_event_emitter,
     )
 
 

@@ -80,6 +80,8 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     planned_artifacts = (
         RunArtifactRef(layer="silver", path="data/output/silver/composite/publication"),
     )
+    runtime_snapshot = {"resume": True, "enrich_only": ["openalex_publication"]}
+    resolved_snapshot = {"name": "composite_publication"}
 
     with (
         patch(
@@ -93,6 +95,14 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
         patch(
             "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.build_composite_planned_artifacts",
             return_value=planned_artifacts,
+        ),
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.build_composite_runtime_config_snapshot",
+            return_value=runtime_snapshot,
+        ),
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.build_composite_resolved_config_snapshot",
+            return_value=resolved_snapshot,
         ),
         patch(
             "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_git_commit",
@@ -113,8 +123,8 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.provider == "composite"
     assert request.entity == "composite_publication"
     assert request.launch_context == {"resume": True}
-    assert request.runtime_config == _normalize_object(runtime)
-    assert request.resolved_config == _normalize_object(config)
+    assert request.runtime_config == runtime_snapshot
+    assert request.resolved_config == resolved_snapshot
     assert request.source_refs == source_refs
     assert request.planned_artifacts == planned_artifacts
     assert request.pipeline_version == "1.0.0"
@@ -122,6 +132,17 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.config_hash == "hash-123"
     assert request.contract_ref == "composite_publication"
     assert request.contract_version == "1.0.0"
+
+
+def test_normalize_object_delegates_to_shared_manifest_support() -> None:
+    config = cast(Any, _MockCompositeConfig())
+
+    result = _normalize_object(config)
+
+    assert result == {
+        "name": "composite_publication",
+        "version": "1.0.0",
+    }
 
 
 def test_resolve_composite_control_plane_flags_disables_ledger_when_manifest_disabled() -> (

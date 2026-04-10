@@ -171,15 +171,15 @@ def create_mock_merger() -> AsyncMock:
     from bioetl.domain.composite.result import MergeResult
 
     merger = AsyncMock()
-    merger.merge = AsyncMock(
-        return_value=MergeResult(
-            records_merged=100,
-            records_from_seed=100,
-            records_enriched=0,
-            records_fully_enriched=0,
-            duration_seconds=1.0,
-        )
+    merge_result = MergeResult(
+        records_merged=100,
+        records_from_seed=100,
+        records_enriched=0,
+        records_fully_enriched=0,
+        duration_seconds=1.0,
     )
+    merger.merge = AsyncMock(return_value=merge_result)
+    merger.execute_request = AsyncMock(return_value=merge_result)
     return merger
 
 

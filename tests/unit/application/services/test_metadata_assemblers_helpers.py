@@ -111,8 +111,6 @@ def test_extract_composite_output_ext_returns_none_for_empty_or_plain_records() 
 def test_extract_composite_output_ext_parses_composite_and_lineage_fields() -> None:
     records = [
         {
-            "_composite_run_id": "cmp-001",
-            "_lineage_created_at": "2026-03-17T11:00:00+00:00",
             "_source_providers": "['chembl', 'uniprot']",
             "_enrichment_status": "{'chembl':'ok','uniprot':'ok'}",
         }
@@ -122,6 +120,8 @@ def test_extract_composite_output_ext_parses_composite_and_lineage_fields() -> N
         partition_count=3,
         schema_validation_enabled=True,
         schema_validation_strict=False,
+        composite_run_id="cmp-001",
+        lineage_created_at=datetime(2026, 3, 17, 11, 0, tzinfo=UTC),
     )
 
     assert ext is not None
@@ -141,8 +141,10 @@ def test_extract_composite_output_ext_defaults_schema_status_when_not_enabled() 
         [{"_source_providers": ["chembl"]}],
         partition_count=1,
         schema_validation_enabled=False,
+        composite_run_id="cmp-002",
     )
     assert ext is not None
+    assert ext.composite_run_id == "cmp-002"
     assert ext.schema_validation.status == "not_run"
 
 

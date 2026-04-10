@@ -89,6 +89,8 @@ def _build_silver_nodes(
             records=input_data.records,
             composite_name=f"{run_context.provider}.{run_context.entity}",
             created_at=created_at,
+            composite_run_id=input_data.composite_run_id,
+            lineage_created_at=input_data.lineage_created_at,
         )
     )
     bronze_nodes = bronze_batch_nodes_for_silver(

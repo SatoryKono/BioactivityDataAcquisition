@@ -21,6 +21,7 @@ __all__ = [
     "DQ_BASELINE_SAMPLES",
     "DQ_BASELINE_UPDATED",
     "DQ_CHECK_DURATION_MS",
+    "DQ_MONITOR_ENABLED",
     "DQ_RECORDS_QUARANTINED_TOTAL",
     "DQ_VALIDATION_FAILURES_TOTAL",
     "DQ_VALIDATION_RECORD_COUNT",
@@ -189,6 +190,12 @@ DQ_CHECK_DURATION_MS = Histogram(
     "Duration of data quality check in milliseconds",
     ["pipeline"],
     buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000],
+)
+
+DQ_MONITOR_ENABLED = Gauge(
+    "bioetl_dq_monitor_enabled",
+    "Whether anomaly detection is configured for the pipeline/entity (1 enabled, 0 disabled)",
+    ["pipeline", "entity"],
 )
 
 DQ_BASELINE_UPDATED = Counter(

@@ -9,6 +9,8 @@ import pytest
 from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads import (
     build_composite_launch_context_snapshot,
     build_composite_planned_artifacts,
+    build_composite_resolved_config_snapshot,
+    build_composite_runtime_config_snapshot,
     build_composite_source_refs,
 )
 
@@ -89,3 +91,27 @@ def test_build_composite_planned_artifacts_returns_silver_then_gold_targets() ->
         ("silver", "silver/publications"),
         ("gold", "gold/publications"),
     ]
+
+
+@pytest.mark.unit
+def test_build_composite_runtime_config_snapshot_normalizes_sequences() -> None:
+    runtime = _build_runtime()
+
+    result = build_composite_runtime_config_snapshot(runtime)
+
+    assert result["resume"] is True
+    assert result["enrich_only"] == ["openalex_publications"]
+    assert result["cached_bronze_enrichers"] == ["openalex_publications"]
+    assert result["cached_bronze_dependencies"] == ["crossref_publications"]
+
+
+@pytest.mark.unit
+def test_build_composite_resolved_config_snapshot_normalizes_nested_payloads() -> None:
+    config = _build_config()
+
+    result = build_composite_resolved_config_snapshot(config)
+
+    assert result["name"] == "publications"
+    assert result["seed"] == {"pipeline": "pubmed_publications"}
+    assert result["dependencies"] == [{"pipeline": "crossref_publications"}]
+    assert result["enrichers"] == [{"pipeline": "openalex_publications"}]

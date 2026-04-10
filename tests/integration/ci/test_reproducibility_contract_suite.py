@@ -270,7 +270,7 @@ def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> N
     ]
 
 
-def test_reproducibility_contract_composite_metadata_anchor_is_stable() -> None:
+def test_reproducibility_contract_composite_rows_exclude_runtime_anchors() -> None:
     mixin = _make_merge_metrics_mixin()
     df = pl.DataFrame({"doi": ["10.1/a"]})
     metadata_timestamp = datetime(2025, 2, 3, 0, 0, tzinfo=UTC)
@@ -290,8 +290,9 @@ def test_reproducibility_contract_composite_metadata_anchor_is_stable() -> None:
         sources_used=["seed"],
     )
 
-    assert first["_lineage_created_at"][0] == "2025-02-03T00:00:00+00:00"
-    assert second["_lineage_created_at"][0] == first["_lineage_created_at"][0]
+    assert "_composite_run_id" not in first.columns
+    assert "_lineage_created_at" not in first.columns
+    assert first.columns == second.columns
 
 
 @pytest.mark.asyncio

@@ -47,6 +47,7 @@ def test_build_stage_metrics_cover_all_terminal_counts() -> None:
         pipeline_name="seed",
         records_extracted=10,
         records_silver=9,
+        keys_generated=9,
     )
     dependency_results = {
         "dep_ok": DependencyResult(
@@ -109,6 +110,7 @@ def test_build_composite_run_completion_metrics_omits_merge_when_absent() -> Non
             pipeline_name="seed",
             records_extracted=3,
             records_silver=2,
+            keys_generated=2,
         ),
         dependency_results={},
         enrichment_results={},

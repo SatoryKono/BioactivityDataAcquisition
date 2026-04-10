@@ -31,6 +31,7 @@ from bioetl.infrastructure.validation import PanderaGoldValidator
 if TYPE_CHECKING:
     import pyarrow as pa
 
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.application.core.runtime_wiring_api import (
         BasePipeline,
         BatchCheckpointRecoveryService,
@@ -68,6 +69,7 @@ def create_batch_executor_from_pipeline(
     gold_output_path: str | None = None,
     flat_structure: bool = False,
     batch_id_factory: BatchIdGeneratorPort | None = None,
+    domain_event_emitter: DomainEventEmitter | None = None,
 ) -> BatchExecutor:
     """Create BatchExecutor from pipeline using delegated component factories."""
     gold_filter = _resolve_gold_filter(pipeline=pipeline, callbacks=callbacks)
@@ -107,6 +109,7 @@ def create_batch_executor_from_pipeline(
         gold_filter=gold_filter,
         gold_validator=gold_validator,
         tracer=tracer,
+        domain_event_emitter=domain_event_emitter,
         lock_validator=lock_validator,
         tracing_manager=tracing_manager,
         batch_id_factory=effective_batch_id_factory,

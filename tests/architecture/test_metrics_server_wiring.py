@@ -15,6 +15,10 @@ RUNTIME_OBSERVABILITY_PATH = Path(
 )
 RUNTIME_INIT_PATH = Path("src/bioetl/composition/bootstrap/runtime/__init__.py")
 PIPELINE_EXECUTION_PATH = Path("src/bioetl/composition/_pipeline_execution.py")
+OBSERVABILITY_RESOLUTION_PATH = Path("src/bioetl/composition/observability_resolution.py")
+RUNTIME_OBSERVABILITY_BUILDER_PATH = Path(
+    "src/bioetl/composition/runtime_builders/observability_builder.py"
+)
 
 
 def _get_function_def(tree: ast.AST, name: str) -> ast.FunctionDef:
@@ -160,4 +164,26 @@ def test_pipeline_execution_uses_composition_pushgateway_seam() -> None:
     assert "infrastructure.observability.server" not in source, (
         "_pipeline_execution.py must use composition-owned push_metrics_to_gateway "
         "instead of importing infrastructure Pushgateway helpers directly."
+    )
+
+
+def test_runtime_observability_builder_delegates_noop_resolution_to_canonical_helper() -> None:
+    """Compatibility builder must not reintroduce ad-hoc NoOp observability imports."""
+    source = RUNTIME_OBSERVABILITY_BUILDER_PATH.read_text(encoding="utf-8")
+    assert "from bioetl.domain.ports.noop" not in source, (
+        "runtime_builders/observability_builder.py must not import NoOp ports "
+        "directly; use composition.observability_resolution instead."
+    )
+    assert "composition.observability_resolution" in source, (
+        "runtime_builders/observability_builder.py must delegate fallback "
+        "resolution to composition.observability_resolution."
+    )
+
+
+def test_canonical_observability_resolution_owns_noop_port_imports() -> None:
+    """Composition-owned fallback helper remains the single shared NoOp resolution seam."""
+    source = OBSERVABILITY_RESOLUTION_PATH.read_text(encoding="utf-8")
+    assert "from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing" in source, (
+        "observability_resolution.py should remain the composition-owned seam "
+        "for shared NoOp metrics/tracing resolution."
     )

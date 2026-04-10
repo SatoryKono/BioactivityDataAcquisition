@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.runtime_wiring_api import (
     BasePipeline,
@@ -22,6 +23,9 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
+
 
 def build_components_and_processing_service(
     *,
@@ -32,6 +36,7 @@ def build_components_and_processing_service(
     gold_filter: GoldFilterCallback,
     gold_validator: GoldValidatorPort,
     tracer: TracingPort | None,
+    domain_event_emitter: DomainEventEmitter | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None,
     tracing_manager: BatchTracingManagerService,
     batch_id_factory: BatchIdGeneratorPort,
@@ -66,12 +71,14 @@ def build_components_and_processing_service(
         gold_transform_callback=callbacks.gold_transform,
         gold_validator=gold_validator,
         tracer=tracer,
+        domain_event_emitter=domain_event_emitter,
         lock_validator=lock_validator,
     )
     quarantine_manager = QuarantineManagerService(
         quarantine_port=pipeline.services.quarantine,
         pipeline_name=processor_config.pipeline_name,
         metrics=pipeline.services.metrics,
+        domain_event_emitter=domain_event_emitter,
     )
     support_service = BatchProcessingSupportService(
         services=pipeline.services,
@@ -81,6 +88,8 @@ def build_components_and_processing_service(
         writer=components.writer,
         tracing=tracing_manager,
         quarantine_manager=quarantine_manager,
+        run_id=pipeline.context.run_id,
+        domain_event_emitter=domain_event_emitter,
     )
     batch_processing_service = BatchProcessingService(
         services=pipeline.services,

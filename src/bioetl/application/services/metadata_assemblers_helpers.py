@@ -73,6 +73,8 @@ def _extract_composite_output_ext(
     *,
     schema_validation_enabled: bool = False,
     schema_validation_strict: bool | None = None,
+    composite_run_id: str | None = None,
+    lineage_created_at: datetime | None = None,
 ) -> CompositeOutputExt | None:
     """Extract composite output metadata from merged Gold records."""
     return extract_composite_output_ext(
@@ -80,6 +82,8 @@ def _extract_composite_output_ext(
         partition_count=partition_count,
         schema_validation_enabled=schema_validation_enabled,
         schema_validation_strict=schema_validation_strict,
+        composite_run_id=composite_run_id,
+        lineage_created_at=lineage_created_at,
     )
 
 

@@ -185,6 +185,7 @@ def _build_batch_executor(
     *,
     checkpoint_manager: CheckpointManagerService,
     lock_manager: LockCoordinator,
+    observer: PipelineObserver,
 ) -> BatchExecutor:
     dq_output_paths = extract_dq_output_paths(context.yaml_config)
     return ServicesBuilder.create_batch_executor_from_pipeline(
@@ -200,6 +201,7 @@ def _build_batch_executor(
         silver_output_path=dq_output_paths.silver_path,
         gold_output_path=dq_output_paths.gold_path,
         flat_structure=dq_output_paths.flat_structure,
+        domain_event_emitter=observer,
     )
 
 
@@ -258,15 +260,16 @@ def _assemble_runner_parts(
         context_holder=LockContextHolder(),
     )
     preflight_service = _build_preflight_service(context)
+    observer = _build_observer(context)
     postrun_service = _build_postrun_service_for_pipeline(
         context,
         lifecycle_service=lifecycle_service,
     )
-    observer = _build_observer(context)
     batch_executor = _build_batch_executor(
         context,
         checkpoint_manager=checkpoint_manager,
         lock_manager=lock_manager,
+        observer=observer,
     )
     return RunnerAssemblyParts(
         checkpoint_manager=checkpoint_manager,

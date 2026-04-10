@@ -208,6 +208,11 @@ class TestDataQualityServiceThresholds:
 
         assert result.status == DQEvaluationStatus.WARNING
         assert result.error_rate == pytest.approx(0.10)
+        mock_metrics.set_gauge.assert_any_call(
+            "dq_monitor_enabled",
+            0.0,
+            {"pipeline": "test_pipeline", "entity": "test_entity"},
+        )
         warning_events = [call.args[0] for call in mock_logger.warning.call_args_list]
         assert "DQ soft threshold exceeded" in warning_events
         assert "dq_monitor_disabled" in warning_events

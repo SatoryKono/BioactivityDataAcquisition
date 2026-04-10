@@ -148,6 +148,7 @@ class GoldWriterMetadataMixin:
         table_name: str,
         records: list[GoldRecord],
         completed_at: datetime | None = None,
+        run_id: RunID | None = None,
         schema: DataFrameSchema | None = None,
     ) -> None:
         if isinstance(self._metadata_writer, NoOpMetadataWriter):
@@ -159,6 +160,7 @@ class GoldWriterMetadataMixin:
                 table_name=table_name,
                 records=records,
                 completed_at=completed_at,
+                run_id=run_id,
                 schema=schema,
             ),
         )

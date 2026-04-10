@@ -86,6 +86,8 @@ def _build_gold_nodes(
             records=input_data.records,
             composite_name=input_data.table_name,
             created_at=created_at,
+            composite_run_id=input_data.composite_run_id,
+            lineage_created_at=input_data.lineage_created_at,
         )
     )
     silver_nodes = silver_source_nodes(input_data)

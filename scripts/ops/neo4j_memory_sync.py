@@ -5177,6 +5177,61 @@ def _targeted_apply_required_anchor_labels(snapshot: GraphSnapshot) -> tuple[str
     return tuple(sorted(required_labels))
 
 
+def _targeted_apply_external_anchor_keys(snapshot: GraphSnapshot) -> tuple[NodeKey, ...]:
+    present_keys = set(snapshot.nodes)
+    external_anchor_keys: set[NodeKey] = set()
+    for relation in snapshot.relations.values():
+        if relation.source not in present_keys:
+            external_anchor_keys.add(relation.source)
+        if relation.target not in present_keys:
+            external_anchor_keys.add(relation.target)
+    return tuple(sorted(external_anchor_keys, key=lambda key: (key.label, key.name)))
+
+
+def _missing_managed_anchor_keys(
+    client: Neo4jHttpClient,
+    anchor_keys: tuple[NodeKey, ...],
+    *,
+    context: str,
+) -> tuple[NodeKey, ...]:
+    if not anchor_keys:
+        return ()
+
+    missing_keys: list[NodeKey] = []
+    chunk_size = 250
+    for start in range(0, len(anchor_keys), chunk_size):
+        chunk = anchor_keys[start : start + chunk_size]
+        rows = client.query(
+            (
+                "UNWIND $anchors AS anchor "
+                "OPTIONAL MATCH (n) "
+                "WHERE anchor.label IN labels(n) "
+                "AND n.name = anchor.name "
+                "AND coalesce(n.managed_by, '') = $managed_by "
+                "AND coalesce(n.ingest_wave, '') = $ingest_wave "
+                "RETURN anchor.label AS label, anchor.name AS name, count(n) AS count "
+                "ORDER BY label, name"
+            ),
+            {
+                "anchors": [{"label": key.label, "name": key.name} for key in chunk],
+                "managed_by": DEFAULT_MANAGED_BY,
+                "ingest_wave": DEFAULT_INGEST_WAVE,
+            },
+            context=context,
+        )
+        live_counts = {
+            NodeKey(str(row["label"]), str(row["name"])): int(row["count"])
+            for row in rows
+            if isinstance(row.get("label"), str)
+            and isinstance(row.get("name"), str)
+            and isinstance(row.get("count"), (int, float))
+        }
+        for key in chunk:
+            if live_counts.get(key, 0) == 0:
+                missing_keys.append(key)
+    return tuple(missing_keys)
+
+
 def _ensure_targeted_apply_prerequisites(
     client: Neo4jHttpClient,
     snapshot: GraphSnapshot,
@@ -5197,7 +5252,24 @@ def _ensure_targeted_apply_prerequisites(
         raise RuntimeError(
             f"{mode_description} requires pre-existing managed anchor labels in the live graph, "
             f"but these labels are missing or empty: {missing_summary}. "
-            "Run a base sync first (for example `python -m scripts.ops sync-neo4j-memory --apply`)."
+            "Run a base sync first (for example `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`)."
+        )
+    external_anchor_keys = _targeted_apply_external_anchor_keys(snapshot)
+    missing_anchor_keys = _missing_managed_anchor_keys(
+        client,
+        external_anchor_keys,
+        context=f"{mode_description} prerequisite anchor node check",
+    )
+    if missing_anchor_keys:
+        sample = ", ".join(
+            f"`{key.label}:{key.name}`" for key in missing_anchor_keys[:10]
+        )
+        remainder = len(missing_anchor_keys) - min(len(missing_anchor_keys), 10)
+        remainder_suffix = f" and {remainder} more" if remainder > 0 else ""
+        raise RuntimeError(
+            f"{mode_description} requires pre-existing managed anchor nodes in the live graph, "
+            f"but these nodes are missing: {sample}{remainder_suffix}. "
+            "Run a base sync first (for example `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`)."
         )
 
 

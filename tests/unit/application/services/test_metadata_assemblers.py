@@ -216,10 +216,8 @@ class TestGoldMetadataService:
             records=[
                 {
                     "activity_id": 1,
-                    "_composite_run_id": "cmp-001",
                     "_source_providers": "['chembl', 'pubchem']",
                     "_enrichment_status": "{'chembl': 'ok'}",
-                    "_lineage_created_at": "2026-03-19T10:30:00+00:00",
                 }
             ],
             silver_refs=[SilverRef("silver.activity", "/tmp/silver/activity", 9)],
@@ -231,6 +229,8 @@ class TestGoldMetadataService:
             ),
             completed_at=completed_at,
             partition_count=2,
+            composite_run_id="cmp-001",
+            lineage_created_at=datetime(2026, 3, 19, 10, 30, tzinfo=UTC),
             schema_validation_enabled=True,
             schema_validation_strict=False,
             dq_report_path="/tmp/reports/gold_dq.json",

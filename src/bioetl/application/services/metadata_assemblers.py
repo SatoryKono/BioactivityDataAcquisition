@@ -170,6 +170,8 @@ class GoldMetadataService:
             partition_count=input_data.partition_count,
             schema_validation_enabled=input_data.schema_validation_enabled,
             schema_validation_strict=input_data.schema_validation_strict,
+            composite_run_id=input_data.composite_run_id,
+            lineage_created_at=input_data.lineage_created_at,
         )
         output = _build_gold_output(
             input_data=input_data,

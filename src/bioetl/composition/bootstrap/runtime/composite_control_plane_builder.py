@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, is_dataclass
-from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
@@ -19,10 +17,16 @@ from bioetl.composition.bootstrap.composite_infrastructure_context import (
 from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads import (
     build_composite_launch_context_snapshot,
     build_composite_planned_artifacts,
+    build_composite_resolved_config_snapshot,
+    build_composite_runtime_config_snapshot,
     build_composite_source_refs,
 )
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
+)
+from bioetl.composition.runtime_builders._run_manifest_support import (
+    control_plane_root as _shared_control_plane_root,
+    to_serializable_mapping as _shared_to_serializable_mapping,
 )
 from bioetl.composition.services.versioning import compute_config_hash, get_git_commit
 from bioetl.domain.types import RunID, RunType
@@ -131,8 +135,8 @@ def _build_composite_manifest_create_request(
         provider="composite",
         entity=config.name,
         launch_context=build_composite_launch_context_snapshot(config, runtime),
-        runtime_config=_normalize_object(runtime),
-        resolved_config=_normalize_object(config),
+        runtime_config=build_composite_runtime_config_snapshot(runtime),
+        resolved_config=build_composite_resolved_config_snapshot(config),
         source_refs=build_composite_source_refs(config),
         planned_artifacts=build_composite_planned_artifacts(config),
         pipeline_version=contract_version or None,
@@ -196,37 +200,9 @@ def _coerce_run_id(run_id: str) -> RunID:
 
 def _control_plane_root(settings: Settings, leaf: str) -> Path:
     """Return the canonical control-plane output root for one leaf namespace."""
-    return Path(getattr(settings, "data_dir", "data")) / "output" / "control" / leaf
+    return _shared_control_plane_root(settings, leaf)
 
 
 def _normalize_object(value: object) -> dict[str, object]:
     """Convert dataclasses/models into stable JSON-safe mappings."""
-    if hasattr(value, "to_dict"):
-        payload = value.to_dict()
-    elif hasattr(value, "model_dump"):
-        payload = value.model_dump(mode="json", exclude_none=True)
-    elif is_dataclass(value) and not isinstance(value, type):
-        payload = asdict(value)
-    elif hasattr(value, "__dict__"):
-        payload = {
-            key: item for key, item in vars(value).items() if not key.startswith("_")
-        }
-    else:
-        payload = {"value": value}
-    normalized = _normalize_value(payload)
-    if not isinstance(normalized, dict):
-        raise TypeError("Composite control-plane payload must normalize to mapping")
-    return normalized
-
-
-def _normalize_value(value: object) -> object:
-    """Normalize nested values into JSON-safe primitives."""
-    if isinstance(value, dict):
-        return {str(key): _normalize_value(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple, set, frozenset)):
-        return [_normalize_value(item) for item in value]
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, UUID):
-        return str(value)
-    return value
+    return _shared_to_serializable_mapping(value)

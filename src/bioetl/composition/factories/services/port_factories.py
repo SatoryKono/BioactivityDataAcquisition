@@ -5,7 +5,7 @@ Extracted from BaseServicesFactory to keep factory.py within LOC limits.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
 from bioetl.domain.ports import (
@@ -14,13 +14,10 @@ from bioetl.domain.ports import (
     MetricsPort,
     QuarantinePort,
 )
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
-
-if TYPE_CHECKING:
-    from bioetl.composition.factories.storage import StorageContext
-    from bioetl.infrastructure.config import Settings
 
 __all__ = [
     "create_checkpoint",
@@ -40,16 +37,18 @@ def create_lock() -> LockPort:
     return lock
 
 
-def create_checkpoint(storage_ctx: StorageContext) -> CheckpointPort:
+def create_checkpoint(storage_ctx: object) -> CheckpointPort:
     """Create local filesystem checkpoint."""
-    checkpoint = LocalCheckpointAdapter(base_path=storage_ctx.checkpoints_path)
+    checkpoint = LocalCheckpointAdapter(
+        base_path=getattr(storage_ctx, "checkpoints_path")
+    )
     assert isinstance(checkpoint, CheckpointPort), (
         f"LocalCheckpointAdapter must implement CheckpointPort, got {type(checkpoint)}"
     )
     return checkpoint
 
 
-def create_quarantine(settings: Settings) -> QuarantinePort:
+def create_quarantine(settings: object) -> QuarantinePort:
     """Create unified quarantine storage."""
     quarantine = UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
     assert isinstance(quarantine, QuarantinePort), (
@@ -58,8 +57,11 @@ def create_quarantine(settings: Settings) -> QuarantinePort:
     return quarantine
 
 
-def create_metrics(settings: Settings) -> MetricsPort:
+def create_metrics(settings: object) -> MetricsPort:
     """Create metrics port based on settings."""
+    if not _metrics_enabled(settings):
+        return NoOpMetrics(warn_on_use=False)
+
     metrics: object = resolve_metrics_port(metrics=None, settings=settings)
 
     if isinstance(metrics, MetricsPort):
@@ -84,3 +86,11 @@ def is_metrics_port_like(candidate: object) -> bool:
         callable(getattr(candidate, method_name, None))
         for method_name in required_methods
     )
+
+
+def _metrics_enabled(settings: object) -> bool:
+    """Support both legacy flat settings and current nested observability config."""
+    observability = getattr(settings, "observability", None)
+    if observability is not None and hasattr(observability, "metrics_enabled"):
+        return bool(getattr(observability, "metrics_enabled"))
+    return bool(getattr(settings, "metrics_enabled", False))

@@ -88,13 +88,20 @@ class TestWriteMergedSilver:
     async def test_writes_records_to_storage(self) -> None:
         mixin = _make_mixin()
         df = pl.DataFrame({"doi": ["10.1/a"]})
+        completed_at = datetime(2026, 4, 10, tzinfo=UTC)
 
-        await mixin._write_merged_silver(df, run_id="r1", sources_used=["seed"])
+        await mixin._write_merged_silver(
+            df,
+            completed_at=completed_at,
+            run_id="r1",
+            sources_used=["seed"],
+        )
 
         mixin._storage.write_silver_merged.assert_awaited_once()
         call_kwargs = mixin._storage.write_silver_merged.call_args
         assert call_kwargs[0][0] == "composite/pub"  # table_name after stripping
         assert call_kwargs[1]["run_id"] == "r1"
+        assert call_kwargs[1]["completed_at"] == completed_at
 
 
 @pytest.mark.unit

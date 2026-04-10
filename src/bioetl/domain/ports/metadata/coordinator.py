@@ -89,6 +89,8 @@ class SilverMetadataInput:
         governance: Optional governance metadata from pipeline config.
         started_at: UTC timestamp when Silver write started.
         completed_at: UTC timestamp when Silver write completed.
+        composite_run_id: Optional composite run identifier routed outside row payloads.
+        lineage_created_at: Optional composite lineage anchor routed outside row payloads.
         total_bytes: Total size in bytes (ADR-029).
     """
 
@@ -114,6 +116,8 @@ class SilverMetadataInput:
     governance: GovernanceMetadata | None = None
     started_at: datetime | None = None
     completed_at: datetime | None = None
+    composite_run_id: str | None = None
+    lineage_created_at: datetime | None = None
     total_bytes: int = 0  # ADR-029: Total size in bytes
 
 
@@ -156,6 +160,8 @@ class GoldMetadataInput:
         governance: Optional governance metadata from pipeline config.
         total_bytes: Total size in bytes (ADR-029).
         partition_count: Number of partitions (ADR-029).
+        composite_run_id: Optional composite run identifier routed outside row payloads.
+        lineage_created_at: Optional composite lineage anchor routed outside row payloads.
         schema_validation_enabled: Whether schema validation ran before write.
         schema_validation_strict: Whether validation used strict mode.
         dq_rule_provenance: List of DQ rule provenance entries for traceability.
@@ -182,6 +188,8 @@ class GoldMetadataInput:
     governance: GovernanceMetadata | None = None
     total_bytes: int = 0  # ADR-029: Total size in bytes
     partition_count: int = 0  # ADR-029: Number of partitions
+    composite_run_id: str | None = None
+    lineage_created_at: datetime | None = None
     schema_validation_enabled: bool = False
     schema_validation_strict: bool | None = None
     dq_rule_provenance: list[DQRuleProvenance] | None = None

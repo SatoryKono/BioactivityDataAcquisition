@@ -13,6 +13,7 @@ from bioetl.application.core.quarantine_manager import (
     FilteredQuarantineEntry,
     QuarantineManagerService,
 )
+from bioetl.domain.aggregates.events import QuarantineEntryCreated, RecordQuarantined
 from bioetl.domain.types import BatchID, ErrorType, RunID
 
 
@@ -200,6 +201,37 @@ class TestQuarantineManagerBulkWrites:
             "quarantined",
             1,
         )
+
+    @pytest.mark.asyncio
+    async def test_quarantine_record_emits_typed_quarantine_events(
+        self,
+        quarantine_port: MagicMock,
+        metrics: MagicMock,
+    ) -> None:
+        """Single-record quarantine should publish creation and quarantine events."""
+        event_emitter = MagicMock()
+        manager = QuarantineManagerService(
+            quarantine_port=quarantine_port,
+            pipeline_name="chembl_activity",
+            metrics=metrics,
+            domain_event_emitter=event_emitter,
+        )
+        batch_id = BatchID(uuid4())
+        run_id = RunID(uuid4())
+        ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
+
+        await manager.quarantine_record(
+            record={"activity_id": "1"},
+            error_type=ErrorType.INVALID_DATA,
+            batch_id=batch_id,
+            error_details="bad value",
+            run_id=run_id,
+            ingestion_ts=ingestion_ts,
+        )
+
+        emitted_events = [call.args[0] for call in event_emitter.emit_domain_event.call_args_list]
+        assert any(isinstance(event, QuarantineEntryCreated) for event in emitted_events)
+        assert any(isinstance(event, RecordQuarantined) for event in emitted_events)
 
     @pytest.mark.asyncio
     async def test_quarantine_records_empty_list_is_noop(

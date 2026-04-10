@@ -88,10 +88,14 @@ def _normalize_composite_lineage_payload(
     sample: Mapping[str, object],
     *,
     composite_name: str,
+    composite_run_id: str | None = None,
+    lineage_created_at: datetime | None = None,
 ) -> dict[str, object]:
     """Normalize legacy stringified lineage fields before VO reconstruction."""
     payload = dict(sample)
     payload.setdefault("_composite_name", composite_name)
+    if composite_run_id is not None:
+        payload["_composite_run_id"] = composite_run_id
     payload["_source_providers"] = parse_composite_list(
         payload.get("_source_providers")
     )
@@ -101,8 +105,10 @@ def _normalize_composite_lineage_payload(
     payload["_field_sources"] = parse_composite_field_sources(
         payload.get("_field_sources")
     )
-    payload["_lineage_created_at"] = parse_lineage_created_at(
-        payload.get("_lineage_created_at")
+    payload["_lineage_created_at"] = (
+        lineage_created_at
+        if lineage_created_at is not None
+        else parse_lineage_created_at(payload.get("_lineage_created_at"))
     )
     return payload
 
@@ -186,6 +192,8 @@ def extract_composite_output_ext(
     partition_count: int | None = None,
     schema_validation_enabled: bool = False,
     schema_validation_strict: bool | None = None,
+    composite_run_id: str | None = None,
+    lineage_created_at: datetime | None = None,
 ) -> CompositeOutputExt | None:
     """Extract composite output extension from merged records.
 
@@ -195,7 +203,11 @@ def extract_composite_output_ext(
     if not records:
         return None
 
-    sample = records[0]
+    sample = dict(records[0])
+    if composite_run_id is not None:
+        sample["_composite_run_id"] = composite_run_id
+    if lineage_created_at is not None:
+        sample["_lineage_created_at"] = lineage_created_at.isoformat()
     if not _has_composite_lineage_fields(sample):
         return None
 
@@ -213,6 +225,8 @@ def extract_composite_lineage_metadata(
     records: Sequence[Mapping[str, object]],
     *,
     composite_name: str,
+    composite_run_id: str | None = None,
+    lineage_created_at: datetime | None = None,
 ) -> CompositeLineageMetadata | None:
     """Extract one ``CompositeLineageMetadata`` payload from merged records.
 
@@ -222,7 +236,11 @@ def extract_composite_lineage_metadata(
     if not records:
         return None
 
-    sample = records[0]
+    sample = dict(records[0])
+    if composite_run_id is not None:
+        sample["_composite_run_id"] = composite_run_id
+    if lineage_created_at is not None:
+        sample["_lineage_created_at"] = lineage_created_at.isoformat()
     if not _has_composite_lineage_fields(sample):
         return None
 
@@ -230,5 +248,7 @@ def extract_composite_lineage_metadata(
         _normalize_composite_lineage_payload(
             sample,
             composite_name=composite_name,
+            composite_run_id=composite_run_id,
+            lineage_created_at=lineage_created_at,
         )
     )
