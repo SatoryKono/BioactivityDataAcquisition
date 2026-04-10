@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import ast
 import base64
+import hashlib
 import json
 import os
 import re
@@ -41,6 +42,10 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "layer_family",
     "package_family",
     "module_surface",
+    "class_surface",
+    "function_surface",
+    "method_surface",
+    "duplication_cluster",
     "port_surface",
     "adapter_surface",
     "adapter_impl_surface",
@@ -668,6 +673,40 @@ class PortSurfaceDescriptor:
     source_path: str
 
 
+@dataclass(frozen=True)
+class DuplicateFamilyConfig:
+    name: str
+    roots: tuple[str, ...]
+    package_family: str
+    promotion_targets: tuple[NodeKey, ...]
+
+
+@dataclass
+class CallableDescriptor:
+    node_key: NodeKey
+    family_name: str
+    package_family: str
+    source_path: str
+    callable_name: str
+    parent_class: str | None
+    surface_kind: str
+    ast_shape_hash: str
+    signature_hash: str
+    ast_node_count: int
+    semantic_tags: tuple[str, ...]
+
+
+@dataclass
+class ClassDescriptor:
+    node_key: NodeKey
+    family_name: str
+    package_family: str
+    source_path: str
+    class_name: str
+    base_names: tuple[str, ...]
+    method_names: tuple[str, ...]
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Build and optionally sync a deterministic BioETL graph into Neo4j.",
@@ -792,6 +831,48 @@ def _file_structure_config(memory_mapping: dict[str, object]) -> dict[str, objec
     }
 
 
+def _duplication_analysis_config(memory_mapping: dict[str, object]) -> dict[str, object]:
+    payload = memory_mapping.get("duplication_analysis", {})
+    if not isinstance(payload, dict):
+        payload = {}
+
+    raw_families = payload.get("families", {})
+    families: list[DuplicateFamilyConfig] = []
+    if isinstance(raw_families, dict):
+        for family_name, family_payload in raw_families.items():
+            if not isinstance(family_payload, dict):
+                continue
+            roots = tuple(_as_string_list(family_payload.get("roots")))
+            package_family = str(family_payload.get("package_family", "")).strip()
+            if not roots or not package_family:
+                continue
+            promotion_targets: list[NodeKey] = []
+            raw_targets = family_payload.get("promotion_targets", [])
+            if isinstance(raw_targets, list):
+                for raw_target in raw_targets:
+                    if not isinstance(raw_target, dict):
+                        continue
+                    label = str(raw_target.get("label", "")).strip()
+                    name = str(raw_target.get("name", "")).strip()
+                    if label and name:
+                        promotion_targets.append(NodeKey(label, name))
+            families.append(
+                DuplicateFamilyConfig(
+                    name=str(family_name),
+                    roots=roots,
+                    package_family=package_family,
+                    promotion_targets=tuple(promotion_targets),
+                )
+            )
+
+    return {
+        "enabled": bool(payload.get("enabled", True)),
+        "min_cluster_size": int(payload.get("min_cluster_size", 2) or 2),
+        "min_ast_nodes": int(payload.get("min_ast_nodes", 12) or 12),
+        "families": tuple(families),
+    }
+
+
 def _as_string_list(value: object) -> list[str]:
     if not isinstance(value, (list, tuple)):
         return []
@@ -901,6 +982,110 @@ def _parse_python_ast(path: Path) -> ast.AST | None:
         return ast.parse(_read_text(path), filename=str(path))
     except SyntaxError:
         return None
+
+
+def _base_name(node: ast.expr) -> str:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return node.attr
+    if isinstance(node, ast.Subscript):
+        return _base_name(node.value)
+    if isinstance(node, ast.Call):
+        return _base_name(node.func)
+    return ""
+
+
+def _signature_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
+    args = node.args
+    payload = {
+        "async": isinstance(node, ast.AsyncFunctionDef),
+        "posonly": len(args.posonlyargs),
+        "args": len(args.args),
+        "kwonly": len(args.kwonlyargs),
+        "vararg": args.vararg is not None,
+        "kwarg": args.kwarg is not None,
+        "decorators": len(node.decorator_list),
+    }
+    encoded = json.dumps(payload, sort_keys=True)
+    return hashlib.sha1(encoded.encode("utf-8")).hexdigest()
+
+
+class _ShapeNormalizer(ast.NodeTransformer):
+    def visit_arg(self, node: ast.arg) -> ast.arg:  # noqa: N802
+        return ast.copy_location(ast.arg(arg="ARG", annotation=None, type_comment=None), node)
+
+    def visit_Name(self, node: ast.Name) -> ast.AST:  # noqa: N802
+        return ast.copy_location(ast.Name(id="VAR", ctx=node.ctx), node)
+
+    def visit_Attribute(self, node: ast.Attribute) -> ast.AST:  # noqa: N802
+        value = self.visit(node.value)
+        return ast.copy_location(ast.Attribute(value=value, attr="ATTR", ctx=node.ctx), node)
+
+    def visit_Constant(self, node: ast.Constant) -> ast.AST:  # noqa: N802
+        value = node.value
+        if value is None or isinstance(value, bool):
+            return node
+        replacement: JsonScalar
+        if isinstance(value, str):
+            replacement = "STR"
+        elif isinstance(value, (int, float, complex)):
+            replacement = 0
+        elif isinstance(value, bytes):
+            replacement = "BYTES"
+        else:
+            replacement = "CONST"
+        return ast.copy_location(ast.Constant(value=replacement), node)
+
+
+def _normalized_callable_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
+    module = ast.Module(body=node.body, type_ignores=[])
+    normalized = _ShapeNormalizer().visit(module)
+    ast.fix_missing_locations(normalized)
+    dumped = ast.dump(normalized, annotate_fields=True, include_attributes=False)
+    return hashlib.sha1(dumped.encode("utf-8")).hexdigest()
+
+
+def _callable_ast_node_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
+    return sum(1 for _ in ast.walk(node))
+
+
+def _semantic_tags(relative_path: str, symbol_name: str) -> tuple[str, ...]:
+    normalized = f"{relative_path} {symbol_name}".lower()
+    tags = []
+    for tag in (
+        "normalize",
+        "health",
+        "retry",
+        "fallback",
+        "merge",
+        "join",
+        "request",
+        "response",
+        "contract",
+        "schema",
+        "manifest",
+        "lineage",
+        "metadata",
+        "pipeline",
+    ):
+        if tag in normalized:
+            tags.append(tag)
+    return tuple(sorted(set(tags)))
+
+
+def _family_for_path(relative_path: str, config: dict[str, object]) -> DuplicateFamilyConfig | None:
+    families = config.get("families", ())
+    if not isinstance(families, tuple):
+        return None
+    best: DuplicateFamilyConfig | None = None
+    for family in families:
+        if not isinstance(family, DuplicateFamilyConfig):
+            continue
+        if any(relative_path == root or relative_path.startswith(f"{root}/") for root in family.roots):
+            if best is None or max(len(root) for root in family.roots) > max(len(root) for root in best.roots):
+                best = family
+    return best
 
 
 def _is_protocol_base(node: ast.expr) -> bool:
@@ -1864,6 +2049,7 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
     _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes, contract_nodes, memory_mapping)
     _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
+    _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
 
 
 def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
@@ -1922,6 +2108,9 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
         "layer_family",
         "package_family",
         "module_surface",
+        "class_surface",
+        "function_surface",
+        "method_surface",
         "doc_source_surface",
         "doc_artifact",
         "policy_surface",
@@ -2440,6 +2629,251 @@ def _add_contract_surfaces(
             snapshot.add_relation(contract, "DESCRIBED_IN", artifact, provenance="impact_contracts_lineage")
 
     return contract_nodes
+
+
+def _extract_code_duplication_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    memory_mapping: dict[str, object],
+) -> None:
+    config = _duplication_analysis_config(memory_mapping)
+    if not bool(config.get("enabled", True)):
+        return
+
+    min_cluster_size = int(config.get("min_cluster_size", 2))
+    min_ast_nodes = int(config.get("min_ast_nodes", 12))
+
+    class_descriptors: dict[NodeKey, ClassDescriptor] = {}
+    callable_descriptors: dict[NodeKey, CallableDescriptor] = {}
+    class_name_index: dict[str, list[NodeKey]] = {}
+
+    for module in list(snapshot.nodes.values()):
+        if module.key.label != "module_surface":
+            continue
+        relative_path = module.key.name
+        family = _family_for_path(relative_path, config)
+        if family is None:
+            continue
+
+        module_path = root / relative_path
+        tree = _parse_python_ast(module_path)
+        if tree is None:
+            continue
+        dotted_path = str(module.properties.get("dotted_path") or _module_dotted_name(relative_path))
+
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef):
+                class_key = snapshot.add_node(
+                    "class_surface",
+                    f"{dotted_path}.{node.name}",
+                    summary=f"Class surface `{node.name}` from `{dotted_path}`.",
+                    source_path=relative_path,
+                    source_kind="python_class_surface",
+                    family_name=family.name,
+                    package_family=family.package_family,
+                    class_name=node.name,
+                    base_names=sorted(filter(None, (_base_name(base) for base in node.bases))),
+                    semantic_tags=list(_semantic_tags(relative_path, node.name)),
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="medium",
+                )
+                snapshot.add_relation(module.key, "DECLARES", class_key, provenance="code_duplication")
+                class_descriptor = ClassDescriptor(
+                    node_key=class_key,
+                    family_name=family.name,
+                    package_family=family.package_family,
+                    source_path=relative_path,
+                    class_name=node.name,
+                    base_names=tuple(sorted(filter(None, (_base_name(base) for base in node.bases)))),
+                    method_names=tuple(
+                        child.name
+                        for child in node.body
+                        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    ),
+                )
+                class_descriptors[class_key] = class_descriptor
+                class_name_index.setdefault(node.name, []).append(class_key)
+
+                for child in node.body:
+                    if not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        continue
+                    method_key = snapshot.add_node(
+                        "method_surface",
+                        f"{dotted_path}.{node.name}.{child.name}",
+                        summary=f"Method surface `{node.name}.{child.name}` from `{dotted_path}`.",
+                        source_path=relative_path,
+                        source_kind="python_method_surface",
+                        family_name=family.name,
+                        package_family=family.package_family,
+                        callable_name=child.name,
+                        parent_class=node.name,
+                        signature_hash=_signature_hash(child),
+                        ast_shape_hash=_normalized_callable_hash(child),
+                        ast_node_count=_callable_ast_node_count(child),
+                        semantic_tags=list(_semantic_tags(relative_path, child.name)),
+                        last_verified=today,
+                        ingest_wave="repo_sync_v1",
+                        confidence="medium",
+                    )
+                    snapshot.add_relation(class_key, "DECLARES", method_key, provenance="code_duplication")
+                    callable_descriptors[method_key] = CallableDescriptor(
+                        node_key=method_key,
+                        family_name=family.name,
+                        package_family=family.package_family,
+                        source_path=relative_path,
+                        callable_name=child.name,
+                        parent_class=node.name,
+                        surface_kind="method_surface",
+                        ast_shape_hash=str(snapshot.nodes[method_key].properties["ast_shape_hash"]),
+                        signature_hash=str(snapshot.nodes[method_key].properties["signature_hash"]),
+                        ast_node_count=int(snapshot.nodes[method_key].properties["ast_node_count"]),
+                        semantic_tags=tuple(_semantic_tags(relative_path, child.name)),
+                    )
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                function_key = snapshot.add_node(
+                    "function_surface",
+                    f"{dotted_path}.{node.name}",
+                    summary=f"Function surface `{node.name}` from `{dotted_path}`.",
+                    source_path=relative_path,
+                    source_kind="python_function_surface",
+                    family_name=family.name,
+                    package_family=family.package_family,
+                    callable_name=node.name,
+                    signature_hash=_signature_hash(node),
+                    ast_shape_hash=_normalized_callable_hash(node),
+                    ast_node_count=_callable_ast_node_count(node),
+                    semantic_tags=list(_semantic_tags(relative_path, node.name)),
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="medium",
+                )
+                snapshot.add_relation(module.key, "DECLARES", function_key, provenance="code_duplication")
+                callable_descriptors[function_key] = CallableDescriptor(
+                    node_key=function_key,
+                    family_name=family.name,
+                    package_family=family.package_family,
+                    source_path=relative_path,
+                    callable_name=node.name,
+                    parent_class=None,
+                    surface_kind="function_surface",
+                    ast_shape_hash=str(snapshot.nodes[function_key].properties["ast_shape_hash"]),
+                    signature_hash=str(snapshot.nodes[function_key].properties["signature_hash"]),
+                    ast_node_count=int(snapshot.nodes[function_key].properties["ast_node_count"]),
+                    semantic_tags=tuple(_semantic_tags(relative_path, node.name)),
+                )
+
+    class_method_index: dict[tuple[NodeKey, str], NodeKey] = {}
+    for callable_descriptor in callable_descriptors.values():
+        if callable_descriptor.surface_kind != "method_surface" or callable_descriptor.parent_class is None:
+            continue
+        owner_name = callable_descriptor.node_key.name.rsplit(".", 1)[0]
+        owner_key = NodeKey("class_surface", owner_name)
+        class_method_index[(owner_key, callable_descriptor.callable_name)] = callable_descriptor.node_key
+
+    for class_descriptor in class_descriptors.values():
+        class_node = snapshot.nodes[class_descriptor.node_key]
+        base_names = class_node.properties.get("base_names")
+        if not isinstance(base_names, list):
+            continue
+        for base_name in base_names:
+            if not isinstance(base_name, str) or not base_name:
+                continue
+            base_candidates = class_name_index.get(base_name, [])
+            if len(base_candidates) != 1:
+                continue
+            base_class = base_candidates[0]
+            snapshot.add_relation(class_descriptor.node_key, "DEPENDS_ON", base_class, provenance="code_duplication")
+            for method_name in class_descriptor.method_names:
+                base_method = class_method_index.get((base_class, method_name))
+                current_method = class_method_index.get((class_descriptor.node_key, method_name))
+                if base_method is not None and current_method is not None:
+                    snapshot.add_relation(current_method, "OVERRIDES", base_method, provenance="code_duplication")
+
+    grouped: dict[tuple[str, str, str], list[CallableDescriptor]] = {}
+    for descriptor in callable_descriptors.values():
+        if descriptor.ast_node_count < min_ast_nodes:
+            continue
+        grouped.setdefault(
+            (descriptor.family_name, descriptor.surface_kind, descriptor.ast_shape_hash),
+            [],
+        ).append(descriptor)
+
+    for (family_name, surface_kind, shape_hash), members in sorted(grouped.items()):
+        if len(members) < min_cluster_size:
+            continue
+        unique_members = sorted(members, key=lambda item: item.node_key.name)
+        cluster = snapshot.add_node(
+            "duplication_cluster",
+            f"{family_name}:{surface_kind}:{shape_hash[:12]}",
+            summary=f"Potential duplicate logic cluster for `{family_name}` {surface_kind}.",
+            source_kind="semantic_duplication_cluster",
+            family_name=family_name,
+            surface_kind=surface_kind,
+            duplicate_count=len(unique_members),
+            ast_shape_hash=shape_hash,
+            semantic_tags=sorted({tag for member in unique_members for tag in member.semantic_tags}),
+            promotion_score=round(min(0.99, 0.35 + (0.1 * len(unique_members))), 2),
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="medium",
+        )
+        snapshot.add_relation(project, "CONTAINS", cluster, provenance="code_duplication")
+        for member in unique_members:
+            snapshot.add_relation(cluster, "CONTAINS", member.node_key, provenance="code_duplication")
+        for index, left in enumerate(unique_members):
+            for right in unique_members[index + 1 :]:
+                snapshot.add_relation(left.node_key, "SAME_SHAPE_AS", right.node_key, provenance="code_duplication")
+                snapshot.add_relation(right.node_key, "SAME_SHAPE_AS", left.node_key, provenance="code_duplication")
+
+        family = next(
+            (
+                item
+                for item in config.get("families", ())
+                if isinstance(item, DuplicateFamilyConfig) and item.name == family_name
+            ),
+            None,
+        )
+        promotion_target: NodeKey | None = None
+        if surface_kind == "method_surface":
+            common_base_candidates: set[NodeKey] | None = None
+            method_name = unique_members[0].callable_name
+            if all(member.callable_name == method_name and member.parent_class for member in unique_members):
+                for member in unique_members:
+                    member_class = NodeKey("class_surface", member.node_key.name.rsplit(".", 1)[0])
+                    candidate_set = {
+                        relation.target
+                        for relation in snapshot.relations.values()
+                        if relation.source == member.node_key
+                        and relation.relation_type == "OVERRIDES"
+                        and relation.target.label == "method_surface"
+                    }
+                    class_targets = {
+                        NodeKey("class_surface", target.name.rsplit(".", 1)[0]) for target in candidate_set
+                    }
+                    common_base_candidates = (
+                        class_targets
+                        if common_base_candidates is None
+                        else common_base_candidates & class_targets
+                    )
+                if common_base_candidates:
+                    promotion_target = sorted(common_base_candidates, key=lambda item: item.name)[0]
+
+        if promotion_target is None and isinstance(family, DuplicateFamilyConfig):
+            for candidate in family.promotion_targets:
+                if candidate in snapshot.nodes:
+                    promotion_target = candidate
+                    break
+        if promotion_target is not None:
+            snapshot.add_relation(cluster, "CAN_PROMOTE_TO", promotion_target, provenance="code_duplication")
+
+        package_family = NodeKey("package_family", unique_members[0].package_family)
+        for relation in list(snapshot.relations.values()):
+            if relation.relation_type != "TESTS_PACKAGE_FAMILY" or relation.target != package_family:
+                continue
+            snapshot.add_relation(cluster, "COVERED_BY_TEST", relation.source, provenance="code_duplication")
 
 
 def _add_pipeline_surfaces(
@@ -3126,6 +3560,10 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "repo_zone",
         "directory_surface",
         "file_surface",
+        "class_surface",
+        "function_surface",
+        "method_surface",
+        "duplication_cluster",
         "port_surface",
         "adapter_surface",
         "adapter_impl_surface",
@@ -3139,12 +3577,16 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     required_relation_types = (
         "BACKS",
         "HOUSES",
+        "DECLARES",
         "DEPENDS_ON",
         "GOVERNS",
         "RUNS_VIA",
         "VALIDATED_BY",
         "OBSERVED_BY",
         "TESTED_BY",
+        "SAME_SHAPE_AS",
+        "CAN_PROMOTE_TO",
+        "COVERED_BY_TEST",
     )
     for label in required_labels:
         if int(stats["labels"].get(label, 0)) <= 0:
@@ -3219,6 +3661,36 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing directory_surface -> HOUSES -> test_artifact links")
+
+    if not any(
+        source_label == "module_surface" and relation_type == "DECLARES" and target_label == "class_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing module_surface -> DECLARES -> class_surface links")
+
+    if not any(
+        source_label == "class_surface" and relation_type == "DECLARES" and target_label == "method_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing class_surface -> DECLARES -> method_surface links")
+
+    if not any(
+        source_label == "module_surface" and relation_type == "DECLARES" and target_label == "function_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing module_surface -> DECLARES -> function_surface links")
+
+    if not any(
+        source_label == "duplication_cluster" and relation_type == "CAN_PROMOTE_TO"
+        for source_label, _, relation_type, _ in relation_keys
+    ):
+        issues.append("missing duplication_cluster promotion targets")
+
+    if not any(
+        source_label in {"method_surface", "function_surface"} and relation_type == "SAME_SHAPE_AS"
+        for source_label, _, relation_type, _ in relation_keys
+    ):
+        issues.append("missing callable duplication links")
 
     if not any(
         source_label == "contract_surface" and relation_type == "DEPENDS_ON" and target_label == "module_surface"
