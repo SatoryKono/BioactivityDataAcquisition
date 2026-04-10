@@ -3381,31 +3381,19 @@ def _add_retirement_analysis_surfaces(
             deletion_score += 2
         deletion_score -= cycle_score
 
-        development_cycle: NodeKey | None = None
         if cycle_score >= 3:
-            development_cycle = snapshot.add_node(
-                "development_cycle_surface",
-                f"{node.key.label}:{node.key.name}",
-                summary=f"Current-cycle code surface `{node.key.name}` in `{family.name}`.",
-                source_path=source_path,
-                source_kind="development_cycle_surface",
-                family_name=family.name,
-                target_label=node.key.label,
-                target_name=node.key.name,
-                cycle_status="current_cycle",
-                cycle_score=cycle_score,
-                recent_age_days=recent_age_days,
-                wip_markers=wip_markers,
-                runtime_anchor_count=runtime_count,
-                config_anchor_count=config_count,
-                doc_anchor_count=doc_count,
-                test_anchor_count=test_count,
-                last_verified=today,
-                ingest_wave="repo_sync_v1",
-                confidence="medium",
+            snapshot.add_node(
+                node.key.label,
+                node.key.name,
+                current_cycle_status="current_cycle",
+                current_cycle_score=cycle_score,
+                current_cycle_recent_age_days=recent_age_days,
+                current_cycle_wip_markers=wip_markers,
+                current_cycle_runtime_anchor_count=runtime_count,
+                current_cycle_config_anchor_count=config_count,
+                current_cycle_doc_anchor_count=doc_count,
+                current_cycle_test_anchor_count=test_count,
             )
-            snapshot.add_relation(project, "CONTAINS", development_cycle, provenance="retirement_analysis")
-            snapshot.add_relation(node.key, "OWNED_BY_CYCLE", development_cycle, provenance="retirement_analysis")
 
         if deletion_score < config.dead_score_threshold:
             continue
@@ -3433,14 +3421,16 @@ def _add_retirement_analysis_surfaces(
             config_anchors=sorted(anchor_names["config"]),
             doc_anchors=sorted(anchor_names["docs"]),
             test_anchors=sorted(anchor_names["tests"]),
+            blocked_by_current_cycle=cycle_score >= 3,
+            blocked_by_current_cycle_target_name=node.key.name if cycle_score >= 3 else None,
+            blocked_by_current_cycle_score=cycle_score if cycle_score >= 3 else None,
+            blocked_by_current_cycle_wip_markers=wip_markers if cycle_score >= 3 else None,
             last_verified=today,
             ingest_wave="repo_sync_v1",
             confidence=confidence,
         )
         snapshot.add_relation(project, "CONTAINS", candidate, provenance="retirement_analysis")
         snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="retirement_analysis")
-        if development_cycle is not None:
-            snapshot.add_relation(candidate, "BLOCKED_FROM_DELETION_BY", development_cycle, provenance="retirement_analysis")
 
 
 def _add_complexity_analysis_surfaces(
@@ -3469,8 +3459,6 @@ def _add_complexity_analysis_surfaces(
         "BACKS",
         "HOUSES",
         "CANDIDATE_FOR_REMOVAL",
-        "OWNED_BY_CYCLE",
-        "BLOCKED_FROM_DELETION_BY",
         "HAS_COMPLEXITY_SIGNAL",
         "CANDIDATE_FOR_SIMPLIFICATION",
         "JUSTIFIED_BY_RUNTIME",
@@ -3698,15 +3686,8 @@ def _add_complexity_analysis_surfaces(
         if deprecation_markers:
             removable_score += 2
 
-        blocked_cycles = sorted(
-            {
-                relation.target
-                for relation in outgoing.get(node.key, ())
-                if relation.relation_type == "OWNED_BY_CYCLE" and relation.target.label == "development_cycle_surface"
-            },
-            key=lambda item: item.name,
-        )
-        if blocked_cycles:
+        blocked_by_current_cycle = bool(node.properties.get("current_cycle_status"))
+        if blocked_by_current_cycle:
             removable_score -= 3
 
         if complexity_score < config.complexity_score_threshold and removable_score < config.removable_score_threshold:
@@ -3714,7 +3695,7 @@ def _add_complexity_analysis_surfaces(
 
         classification = "overengineered_active"
         removal_confidence = "low"
-        if removable_score >= config.removable_score_threshold and not blocked_cycles:
+        if removable_score >= config.removable_score_threshold and not blocked_by_current_cycle:
             classification = "removable_complexity"
             removal_confidence = "high" if removable_score >= config.removable_score_threshold + 2 else "medium"
         elif runtime_count == 0 and config_count == 0 and doc_count == 0:
@@ -3749,7 +3730,10 @@ def _add_complexity_analysis_surfaces(
             indirection_markers=indirection_markers,
             stateful_markers=stateful_markers,
             deprecation_markers=deprecation_markers,
-            blocked_by_cycle=bool(blocked_cycles),
+            blocked_by_current_cycle=blocked_by_current_cycle,
+            blocked_by_current_cycle_target_name=node.key.name if blocked_by_current_cycle else None,
+            blocked_by_current_cycle_score=node.properties.get("current_cycle_score") if blocked_by_current_cycle else None,
+            blocked_by_current_cycle_wip_markers=node.properties.get("current_cycle_wip_markers") if blocked_by_current_cycle else None,
             runtime_anchors=[anchor.name for anchor in runtime_anchors[: config.blocker_anchor_limit]],
             config_anchors=[anchor.name for anchor in config_anchors[: config.blocker_anchor_limit]],
             doc_anchors=[anchor.name for anchor in doc_anchors[: config.blocker_anchor_limit]],
@@ -3763,8 +3747,6 @@ def _add_complexity_analysis_surfaces(
         snapshot.add_relation(candidate, "CANDIDATE_FOR_SIMPLIFICATION", node.key, provenance="complexity_analysis")
         if classification == "removable_complexity":
             snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="complexity_analysis")
-        for cycle in blocked_cycles:
-            snapshot.add_relation(candidate, "BLOCKED_FROM_DELETION_BY", cycle, provenance="complexity_analysis")
         for anchor in runtime_anchors[: config.blocker_anchor_limit]:
             snapshot.add_relation(candidate, "JUSTIFIED_BY_RUNTIME", anchor, provenance="complexity_analysis")
         for anchor in [*config_anchors[: config.blocker_anchor_limit], *doc_anchors[: config.blocker_anchor_limit]]:
