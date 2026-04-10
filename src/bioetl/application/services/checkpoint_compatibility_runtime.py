@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Final
 
+from bioetl.domain.normalization import compute_runtime_anchor_fingerprint
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.execution_phase import ExecutionPhase
 from bioetl.domain.types.validation_result import CompositeValidationReport
@@ -160,6 +161,7 @@ def determine_verdict_value(
     mode: str,
     phase_result: JsonDict,
     config_result: JsonDict,
+    execution_identity_result: JsonDict,
     schema_result: JsonDict,
     validation_report: CompositeValidationReport | None,
 ) -> str:
@@ -168,6 +170,7 @@ def determine_verdict_value(
         return _determine_lenient_verdict(
             phase_result=phase_result,
             config_result=config_result,
+            execution_identity_result=execution_identity_result,
             schema_result=schema_result,
         )
     if mode == _MODE_LEGACY:
@@ -175,6 +178,7 @@ def determine_verdict_value(
     return _determine_strict_verdict(
         phase_result=phase_result,
         config_result=config_result,
+        execution_identity_result=execution_identity_result,
         schema_result=schema_result,
         validation_report=validation_report,
     )
@@ -184,12 +188,14 @@ def _determine_strict_verdict(
     *,
     phase_result: JsonDict,
     config_result: JsonDict,
+    execution_identity_result: JsonDict,
     schema_result: JsonDict,
     validation_report: CompositeValidationReport | None,
 ) -> str:
     if (
         phase_result["severity"] == _SEVERITY_MAJOR
         or config_result["severity"] == _SEVERITY_MAJOR
+        or execution_identity_result["severity"] == _SEVERITY_MAJOR
         or schema_result["severity"] == _SEVERITY_MAJOR
     ):
         return _VERDICT_MAJOR_INCOMPATIBLE
@@ -197,6 +203,7 @@ def _determine_strict_verdict(
     if (
         phase_result["severity"] == _SEVERITY_MINOR
         or config_result["severity"] == _SEVERITY_MINOR
+        or execution_identity_result["severity"] == _SEVERITY_MINOR
         or schema_result["severity"] == _SEVERITY_MINOR
     ):
         return _VERDICT_MINOR_INCOMPATIBLE
@@ -210,12 +217,14 @@ def _determine_lenient_verdict(
     *,
     phase_result: JsonDict,
     config_result: JsonDict,
+    execution_identity_result: JsonDict,
     schema_result: JsonDict,
 ) -> str:
     if phase_result["severity"] == _SEVERITY_MAJOR:
         return _VERDICT_MAJOR_INCOMPATIBLE
     if (
         config_result["severity"] == _SEVERITY_MAJOR
+        or execution_identity_result["severity"] == _SEVERITY_MAJOR
         or schema_result["severity"] == _SEVERITY_MAJOR
     ):
         return _VERDICT_MINOR_INCOMPATIBLE
@@ -314,12 +323,105 @@ def generate_message(
     return message
 
 
+def check_execution_identity_compatibility(
+    *,
+    current_execution_fingerprint: str | None,
+    checkpoint_execution_fingerprint: str | None,
+    current_manifest_id: str | None,
+    checkpoint_manifest_id: str | None,
+    current_contract_ref: str | None,
+    checkpoint_contract_ref: str | None,
+    current_contract_version: str | None,
+    checkpoint_contract_version: str | None,
+    current_effective_config_hash: str | None,
+    checkpoint_effective_config_hash: str | None,
+    current_effective_config_artifact_id: str | None,
+    checkpoint_effective_config_artifact_id: str | None,
+) -> JsonDict:
+    """Check execution identity using manifest fingerprint first, then runtime anchors."""
+    if current_execution_fingerprint and checkpoint_execution_fingerprint:
+        if current_execution_fingerprint == checkpoint_execution_fingerprint:
+            return {
+                "compatible": True,
+                "reason": "identical_execution_fingerprint",
+                "severity": _SEVERITY_NONE,
+            }
+        return {
+            "compatible": False,
+            "reason": "execution_fingerprint_mismatch",
+            "severity": _SEVERITY_MAJOR,
+        }
+
+    current_runtime_anchor_fingerprint = _compute_runtime_anchor_fingerprint(
+        manifest_id=current_manifest_id,
+        contract_ref=current_contract_ref,
+        contract_version=current_contract_version,
+        effective_config_hash=current_effective_config_hash,
+        effective_config_artifact_id=current_effective_config_artifact_id,
+    )
+    checkpoint_runtime_anchor_fingerprint = _compute_runtime_anchor_fingerprint(
+        manifest_id=checkpoint_manifest_id,
+        contract_ref=checkpoint_contract_ref,
+        contract_version=checkpoint_contract_version,
+        effective_config_hash=checkpoint_effective_config_hash,
+        effective_config_artifact_id=checkpoint_effective_config_artifact_id,
+    )
+    if (
+        current_runtime_anchor_fingerprint
+        and checkpoint_runtime_anchor_fingerprint
+        and current_runtime_anchor_fingerprint == checkpoint_runtime_anchor_fingerprint
+    ):
+        return {
+            "compatible": True,
+            "reason": "identical_runtime_anchor_fingerprint",
+            "severity": _SEVERITY_NONE,
+        }
+    if current_runtime_anchor_fingerprint and checkpoint_runtime_anchor_fingerprint:
+        return {
+            "compatible": False,
+            "reason": "runtime_anchor_fingerprint_mismatch",
+            "severity": _SEVERITY_MAJOR,
+        }
+    return {
+        "compatible": True,
+        "reason": "execution_identity_not_enforced",
+        "severity": _SEVERITY_NONE,
+    }
+
+
+def _compute_runtime_anchor_fingerprint(
+    *,
+    manifest_id: str | None,
+    contract_ref: str | None,
+    contract_version: str | None,
+    effective_config_hash: str | None,
+    effective_config_artifact_id: str | None,
+) -> str | None:
+    """Build the narrow runtime-anchor fingerprint when enough anchors exist."""
+    payload = {
+        "manifest_id": manifest_id,
+        "contract_ref": contract_ref,
+        "contract_version": contract_version,
+        "effective_config_hash": effective_config_hash,
+        "effective_config_artifact_id": effective_config_artifact_id,
+    }
+    filtered_payload = {key: value for key, value in payload.items() if value is not None}
+    if not filtered_payload:
+        return None
+    return compute_runtime_anchor_fingerprint(filtered_payload)
+
+
 def build_identity_details(
     *,
     effective_config_hash: str,
     execution_phase: ExecutionPhase,
     checkpoint_schema_version: str,
     composite_run_identity: str | None,
+    execution_fingerprint: str | None,
+    manifest_id: str | None,
+    contract_ref: str | None,
+    contract_version: str | None,
+    effective_config_artifact_id: str | None,
 ) -> JsonDict:
     """Build canonical identity details payload."""
     return {
@@ -327,6 +429,19 @@ def build_identity_details(
         "execution_phase": execution_phase.value,
         "checkpoint_schema_version": checkpoint_schema_version,
         "composite_run_identity": composite_run_identity or "",
+        "execution_fingerprint": execution_fingerprint or "",
+        "manifest_id": manifest_id or "",
+        "contract_ref": contract_ref or "",
+        "contract_version": contract_version or "",
+        "effective_config_artifact_id": effective_config_artifact_id or "",
+        "runtime_anchor_fingerprint": _compute_runtime_anchor_fingerprint(
+            manifest_id=manifest_id,
+            contract_ref=contract_ref,
+            contract_version=contract_version,
+            effective_config_hash=effective_config_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
+        )
+        or "",
     }
 
 
@@ -334,6 +449,7 @@ def generate_details(
     *,
     phase_result: JsonDict,
     config_result: JsonDict,
+    execution_identity_result: JsonDict,
     schema_result: JsonDict,
     current_identity_details: JsonDict,
     checkpoint_identity_details: JsonDict,
@@ -345,6 +461,7 @@ def generate_details(
     return {
         "phase_compatibility": phase_result,
         "config_compatibility": config_result,
+        "execution_identity_compatibility": execution_identity_result,
         "schema_compatibility": schema_result,
         "current_identity": current_identity_details,
         "checkpoint_identity": checkpoint_identity_details,
