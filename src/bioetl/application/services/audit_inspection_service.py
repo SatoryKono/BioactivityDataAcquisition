@@ -1,4 +1,5 @@
 """Application service for inspecting persisted audit entries."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -16,11 +17,13 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class AuditInspectionResult:
+    """Operator-facing audit query result."""
 
     query: dict[str, object] = field(default_factory=dict)
     entries: tuple[AuditEntry, ...] = field(default_factory=tuple)
 
     def to_dict(self) -> dict[str, object]:
+        """Return a JSON-safe representation."""
         return {
             "query": self.query,
             "entries": [entry.to_dict() for entry in self.entries],
@@ -29,6 +32,7 @@ class AuditInspectionResult:
 
 @dataclass(slots=True)
 class AuditInspectionService:
+    """Read-only audit inspection service."""
 
     audit_port: AuditPort
 
@@ -36,12 +40,13 @@ class AuditInspectionService:
         self,
         *,
         run_id: str | None = None,
+        layer: AuditLayer | str | None = None,
         table_name: str | None = None,
         start_time: datetime | None = None,
         end_time: datetime | None = None,
         limit: int = 100,
     ) -> AuditInspectionResult:
-        """Query audit entries using optional operator-facing filters."""
+        """Query audit entries using operator-facing filters."""
         resolved_run_id = self._parse_run_id(run_id) if run_id is not None else None
         resolved_layer = self._resolve_layer(layer)
         entries = tuple(
@@ -63,6 +68,7 @@ class AuditInspectionService:
                 "end_time": end_time.isoformat() if end_time else None,
                 "limit": limit,
             },
+            entries=entries,
         )
 
     async def inspect_run(
@@ -78,6 +84,7 @@ class AuditInspectionService:
         self,
         table_name: str,
         *,
+        layer: AuditLayer | str | None = None,
         limit: int = 100,
     ) -> AuditInspectionResult:
         """Return recent audit entries for one table/path target."""
@@ -88,6 +95,7 @@ class AuditInspectionService:
         )
 
     async def aclose(self) -> None:
+        """Close the underlying audit port."""
         await self.audit_port.aclose()
 
     @staticmethod
@@ -98,6 +106,7 @@ class AuditInspectionService:
         try:
             return RunID(UUID(run_id))
         except (TypeError, ValueError) as exc:
+            raise ValueError(f"Invalid run_id: {run_id}") from exc
 
     @staticmethod
     def _resolve_layer(layer: AuditLayer | str | None) -> AuditLayer | None:
@@ -107,3 +116,4 @@ class AuditInspectionService:
         try:
             return AuditLayer(layer.lower())
         except ValueError as exc:
+            raise ValueError(f"Invalid audit layer: {layer}") from exc

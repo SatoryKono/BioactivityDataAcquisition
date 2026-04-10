@@ -1,8 +1,4 @@
-"""Canonical public observability composition API.
-
-This module is the sanctioned public seam for observability-related runtime
-helpers that need composition-owned dependency assembly.
-"""
+"""Canonical public observability composition API."""
 
 from __future__ import annotations
 
@@ -51,20 +47,11 @@ class ObservabilityDiagnosticsBundle:
     audit_service: AuditInspectionService
     health_service: HealthService
     checkpoint_service: CheckpointService
-    audit_service: AuditInspectionService
     metrics_service: MetricsService
     workflow_service: ObservabilityWorkflowService
     quarantine_service: QuarantineService
     run_manifest_service: RunManifestInspectionService
     lineage_service: LineageInspectionService
-    workflow_service: ObservabilityWorkflowService
-
-
-def get_audit_service() -> AuditInspectionService:
-    """Load the audit diagnostics service through composition on demand."""
-    from bioetl.composition.services_api import get_audit_service as _impl
-
-    return _impl()
 
 
 def get_audit_service() -> AuditInspectionService:
@@ -81,6 +68,13 @@ def get_checkpoint_service() -> CheckpointService:
     return _impl()
 
 
+def get_health_service() -> HealthService:
+    """Load the health diagnostics service through composition on demand."""
+    from bioetl.composition.services_api import get_health_service as _impl
+
+    return _impl()
+
+
 def get_metrics_service() -> MetricsService:
     """Load the metrics diagnostics service through composition on demand."""
     from bioetl.composition.services_api import get_metrics_service as _impl
@@ -93,11 +87,6 @@ def get_observability_workflow_service() -> ObservabilityWorkflowService:
     from bioetl.composition.services_api import (
         get_observability_workflow_service as _impl,
     )
-
-    return _impl()
-def get_health_service() -> HealthService:
-    """Load the health diagnostics service through composition on demand."""
-    from bioetl.composition.services_api import get_health_service as _impl
 
     return _impl()
 
@@ -125,16 +114,13 @@ def get_lineage_service() -> LineageInspectionService:
 
 def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
     """Return the canonical unified observability diagnostics bundle."""
-
     return ObservabilityDiagnosticsBundle(
         audit_service=get_audit_service(),
         health_service=get_health_service(),
         checkpoint_service=get_checkpoint_service(),
-        audit_service=get_audit_service(),
         metrics_service=get_metrics_service(),
         workflow_service=get_observability_workflow_service(),
         quarantine_service=get_quarantine_service(),
         run_manifest_service=get_run_manifest_service(),
         lineage_service=get_lineage_service(),
-        workflow_service=get_observability_workflow_service(),
     )
