@@ -210,6 +210,7 @@ DQ_VALIDATION_REGISTRY = MetricRegistryFamily(
         "dq_records_quarantined_total": DQ_RECORDS_QUARANTINED_TOTAL,
         "dq_anomaly_detected": DQ_ANOMALY_DETECTED,
         "dq_baseline_updated": DQ_BASELINE_UPDATED,
+        "dq_monitor_disabled_total": DQ_MONITOR_DISABLED_TOTAL,
         "dq_report_generated_total": DQ_REPORT_GENERATED_TOTAL,
         "dq_report_skipped_total": DQ_REPORT_SKIPPED_TOTAL,
         "dq_soft_threshold_exceeded": DQ_SOFT_THRESHOLD_EXCEEDED,

@@ -21,6 +21,7 @@ from bioetl.application.services.run_manifest_inspection_service import (
 )
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
+    RunLedgerEntry,
     RunArtifactRef,
     RunCodeProvenance,
     RunManifest,
@@ -56,6 +57,17 @@ class _InMemoryRunManifestStore(RunManifestPort):
     def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
         manifest_id = self._by_run_id.get(str(run_id))
         return None if manifest_id is None else self._items.get(manifest_id)
+
+
+class _InMemoryRunLedgerStore:
+    def __init__(self) -> None:
+        self._items: dict[str, list[RunLedgerEntry]] = {}
+
+    def append(self, entry: RunLedgerEntry) -> None:
+        self._items.setdefault(entry.manifest_id, []).append(entry)
+
+    def list_entries(self, manifest_id: str) -> tuple[RunLedgerEntry, ...]:
+        return tuple(self._items.get(manifest_id, ()))
 
 
 def _make_merge_metrics_mixin() -> MergeMetricsRecorderMixin:
@@ -294,3 +306,60 @@ async def test_reproducibility_contract_composite_quarantine_replay_anchor_is_de
     write_kwargs = host._quarantine_port.write.await_args.kwargs
     assert write_kwargs["pipeline"] == "composite:publication"
     assert write_kwargs["ingestion_ts"] == datetime(2025, 2, 3, 0, 0, tzinfo=UTC)
+    assert write_kwargs["metadata"]["artifact_policy"] == "occurrence_only_diagnostic"
+    assert (
+        write_kwargs["metadata"]["replay_contract"] == "excluded_from_exact_replay"
+    )
+
+
+def test_reproducibility_contract_composite_quarantine_is_explicitly_occurrence_only() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000402"))
+    manifest = _make_manifest(
+        manifest_id="manifest-composite-quarantine",
+        run_id=run_id,
+        execution_fingerprint="fp-stable",
+    )
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-composite-cv-1",
+            manifest_id=manifest.manifest_id,
+            run_id=run_id,
+            event_type="dq_policy_applied",
+            occurred_at=datetime(2025, 2, 3, tzinfo=UTC),
+            event_family="dq",
+            status="quarantined",
+            stage="cross_validation",
+            details={
+                "rule_id": "composite.cross_validation.quarantine",
+                "disposition": "quarantine",
+                "violation_kind": "cross_validation_mismatch",
+                "config_path": "cross_validation",
+                "artifact_policy": "occurrence_only_diagnostic",
+                "replay_contract": "excluded_from_exact_replay",
+                "diagnostic_scope": "composite_cross_validation_quarantine",
+            },
+        )
+    )
+
+    result = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    ).show(manifest.manifest_id)
+
+    assert (
+        result.diagnostics["cross_validation_quarantine_policy"]
+        == "occurrence_only_diagnostic"
+    )
+    assert (
+        result.diagnostics["cross_validation_quarantine_replay_contract"]
+        == "excluded_from_exact_replay"
+    )
+    assert result.diagnostics["occurrence_only_diagnostics"] == [
+        "composite_cross_validation_quarantine"
+    ]
+    assert result.identity_graph["occurrence_only_diagnostics"] == [
+        "composite_cross_validation_quarantine"
+    ]

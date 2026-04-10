@@ -207,6 +207,18 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                     diagnostics.get("cross_validation_config_paths"),
                 ),
                 (
+                    "cross_validation_quarantine_policy",
+                    diagnostics.get("cross_validation_quarantine_policy"),
+                ),
+                (
+                    "cross_validation_quarantine_replay_contract",
+                    diagnostics.get("cross_validation_quarantine_replay_contract"),
+                ),
+                (
+                    "occurrence_only_diagnostics",
+                    diagnostics.get("occurrence_only_diagnostics"),
+                ),
+                (
                     "cross_validation_signal_present",
                     diagnostics.get("cross_validation_signal_present"),
                 ),
@@ -242,6 +254,10 @@ def _render_identity_graph_section(identity_graph: object) -> list[str]:
             ("input_snapshots", identity_graph.get("input_snapshots")),
             ("planned_artifacts", identity_graph.get("planned_artifacts")),
             ("published_artifacts", identity_graph.get("published_artifacts")),
+            (
+                "occurrence_only_diagnostics",
+                identity_graph.get("occurrence_only_diagnostics"),
+            ),
         ),
     )
     return lines

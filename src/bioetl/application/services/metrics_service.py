@@ -17,7 +17,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError, MetricsServerError
-from bioetl.domain.ports import MetricsServerPort
+from bioetl.domain.ports import MetricsPublisherPort, MetricsServerPort
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -25,9 +25,11 @@ if TYPE_CHECKING:
 # Re-export for backward compatibility
 __all__ = [
     "MetricsServerError",
+    "MetricsPublisherPort",
     "MetricsServerPort",
     "MetricsServerStatus",
     "MetricsService",
+    "PushResult",
     "StartResult",
 ]
 
@@ -75,6 +77,17 @@ class StartResult:
     error: str | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class PushResult:
+    """Result of publishing metrics to an external gateway."""
+
+    success: bool
+    gateway: str
+    run_label: str
+    grouping_key: dict[str, str]
+    error: str | None = None
+
+
 @dataclass
 class MetricsService:
     """Service for metrics server operations.
@@ -98,6 +111,7 @@ class MetricsService:
 
     logger: LoggerPort
     _server: MetricsServerPort
+    _publisher: MetricsPublisherPort | None = field(default=None, repr=False)
     _port: int | None = field(default=None, repr=False)
     _started_at: datetime | None = field(default=None, repr=False)
 
@@ -223,3 +237,83 @@ class MetricsService:
             True if server is running, False otherwise.
         """
         return self._server.is_running()
+
+    def push_to_gateway(
+        self,
+        *,
+        gateway: str,
+        run_label: str = "bioetl",
+        grouping_key: dict[str, str] | None = None,
+    ) -> PushResult:
+        """Publish current metrics snapshot through the explicit publisher port."""
+        labels = dict(grouping_key or {})
+        if self._publisher is None:
+            error = "Metrics publisher is not configured"
+            self.logger.warning(
+                "Metrics gateway publication unavailable",
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+                error=error,
+            )
+            return PushResult(
+                success=False,
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+                error=error,
+            )
+
+        try:
+            success = self._publisher.push_to_gateway(
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+            )
+        except _METRICS_START_ERRORS as exc:
+            error = str(exc)
+            self.logger.warning(
+                "Metrics gateway publication failed",
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+                error=error,
+                error_type=type(exc).__name__,
+            )
+            return PushResult(
+                success=False,
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+                error=error,
+            )
+
+        if success:
+            self.logger.info(
+                "Metrics gateway publication completed",
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+            )
+            return PushResult(
+                success=True,
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+            )
+
+        error = "Publisher returned unsuccessful result"
+        self.logger.warning(
+            "Metrics gateway publication failed",
+            gateway=gateway,
+            run_label=run_label,
+            grouping_key=labels,
+            error=error,
+        )
+        return PushResult(
+            success=False,
+            gateway=gateway,
+            run_label=run_label,
+            grouping_key=labels,
+            error=error,
+        )

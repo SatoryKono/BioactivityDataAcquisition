@@ -8,6 +8,10 @@ from bioetl.application.core.transformer_wiring_api import (
     StructuralPolicyProtocol,
     TransformerDependencyContext,
 )
+from bioetl.composition.observability_resolution import (
+    resolve_metrics_port,
+    resolve_tracing_port,
+)
 from bioetl.domain.ports import (
     ContractPolicyPort,
     DataNormalizationPort,
@@ -37,8 +41,8 @@ def build_transformer_dependencies(
 ) -> TransformerDependencyContext:
     """Build explicit transformer collaborators in the composition layer."""
     return TransformerDependencyContext(
-        tracer=tracer if tracer is not None else NoOpTracing(),
-        metrics=metrics if metrics is not None else NoOpMetrics(),
+        tracer=resolve_tracing_port(tracer=tracer),
+        metrics=resolve_metrics_port(metrics=metrics),
         identity_service=(
             identity_service if identity_service is not None else IdentityService()
         ),

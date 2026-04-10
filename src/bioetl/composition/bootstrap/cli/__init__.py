@@ -22,42 +22,53 @@ Components:
 """
 
 from __future__ import annotations
+from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap.cli.adr import bootstrap_adr_service
-from bioetl.composition.bootstrap.cli.checkpoint import (
-    bootstrap_audit_inspection_service,
-    bootstrap_checkpoint_manager,
-    bootstrap_checkpoint_service,
-    bootstrap_observability_workflow_service,
-    bootstrap_quarantine_manager,
-    bootstrap_quarantine_service,
-)
-from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
-from bioetl.composition.bootstrap.cli.health import (
-    HealthServerDependencies,
-    bootstrap_health_server_dependencies,
-    bootstrap_health_service,
-)
-from bioetl.composition.bootstrap.cli.lineage import bootstrap_lineage_service
-from bioetl.composition.bootstrap.cli.lock import bootstrap_lock_service
-from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
-from bioetl.composition.bootstrap.cli.noop import (
-    create_noop_logger,
-    create_noop_metrics,
-    create_noop_observability_bundle,
-    create_noop_tracing,
-)
-from bioetl.composition.bootstrap.cli.run_manifest import (
-    bootstrap_run_manifest_service,
-)
-from bioetl.composition.bootstrap.cli.storage import (
-    bootstrap_bronze_cleanup_service,
-    bootstrap_cleanup_service,
-    bootstrap_contract_migration_service,
-    bootstrap_export_service,
-    bootstrap_lifecycle_service,
-    bootstrap_vacuum_service,
-)
+if TYPE_CHECKING:
+    from bioetl.composition.bootstrap.cli.health import (
+        HealthServerDependencies,
+        bootstrap_health_server_dependencies,
+        bootstrap_health_service,
+    )
+
+
+_CLI_EXPORT_MODULES = {
+    "HealthServerDependencies": "bioetl.composition.bootstrap.cli.health",
+    "bootstrap_adr_service": "bioetl.composition.bootstrap.cli.adr",
+    "bootstrap_audit_inspection_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_bronze_cleanup_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_checkpoint_manager": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_checkpoint_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_cleanup_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_config_service": "bioetl.composition.bootstrap.cli.config",
+    "bootstrap_contract_migration_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_export_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli.health",
+    "bootstrap_health_service": "bioetl.composition.bootstrap.cli.health",
+    "bootstrap_lifecycle_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_lineage_service": "bioetl.composition.bootstrap.cli.lineage",
+    "bootstrap_lock_service": "bioetl.composition.bootstrap.cli.lock",
+    "bootstrap_metrics_service": "bioetl.composition.bootstrap.cli.metrics",
+    "bootstrap_observability_workflow_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_quarantine_manager": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_quarantine_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_run_manifest_service": "bioetl.composition.bootstrap.cli.run_manifest",
+    "bootstrap_vacuum_service": "bioetl.composition.bootstrap.cli.storage",
+    "create_noop_logger": "bioetl.composition.bootstrap.cli.noop",
+    "create_noop_metrics": "bioetl.composition.bootstrap.cli.noop",
+    "create_noop_observability_bundle": "bioetl.composition.bootstrap.cli.noop",
+    "create_noop_tracing": "bioetl.composition.bootstrap.cli.noop",
+}
+
+
+def __getattr__(name: str) -> object:
+    """Load CLI bootstrap helpers on demand to avoid package import cycles."""
+    module_name = _CLI_EXPORT_MODULES.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    module = __import__(module_name, fromlist=[name])
+    return getattr(module, name)
 
 __all__ = [
     "HealthServerDependencies",
