@@ -14,6 +14,7 @@ from bioetl.application.services.run_manifest_service import (
     RunManifestService,
 )
 from bioetl.domain.control_plane import (
+    ReplayCapability,
     RunArtifactRef,
     RunInputSnapshotRef,
     RunManifest,
@@ -90,6 +91,7 @@ def _make_request() -> RunManifestCreateRequest:
         contract_schema_hash="abc123",
         dq_policy_ref="chembl.dq.v1",
         rule_bundle_version="dq-rules.v1.0",
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
     )
 
 
@@ -176,7 +178,7 @@ def test_execution_fingerprint_matches_golden_value() -> None:
 
     assert (
         manifest.execution_fingerprint
-        == "64f13976644204fa48aac79ff42dbd9c735e9b064c7f8f8fc76241dd0068eddf"
+        == "b0d9b8785149f57cc60d7ed00f2170905981f607cdd4bac5c1f9a4469c6d0061"
     )
 
 

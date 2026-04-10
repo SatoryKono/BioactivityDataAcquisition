@@ -14,6 +14,7 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 )
 from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
 from bioetl.domain.control_plane.run_manifest import (
+    ReplayCapability,
     RunArtifactRef,
     RunCodeProvenance,
     RunInputSnapshotRef,
@@ -28,6 +29,7 @@ __all__ = [
     "EffectiveConfigArtifact",
     "EffectiveConfigHashes",
     "EffectiveExecutionConfig",
+    "ReplayCapability",
     "ResolvedConfigSnapshot",
     "RunArtifactRef",
     "RunCodeProvenance",

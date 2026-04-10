@@ -47,6 +47,7 @@ class MergeExecutionRequest:
     enrichers: Sequence[EnricherConfig]
     enrichment_results: dict[str, EnrichmentResult]
     run_id: str
+    metadata_timestamp: datetime | None = None
     seed_pipeline: str | None = None
     dependencies: Sequence[DependencyConfig] | None = None
     dependency_results: dict[str, DependencyResult] | None = None
@@ -179,6 +180,7 @@ async def execute_merge_request(
         enrichment_results=request.enrichment_results,
         effective_seed_pipeline=loaded.effective_seed_pipeline,
         run_id=request.run_id,
+        metadata_timestamp=request.metadata_timestamp,
         sources_used=loaded.sources_used,
         dependency_results=request.dependency_results,
         enricher_dfs=loaded.enricher_dfs,

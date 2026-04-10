@@ -31,6 +31,9 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_contract_identity as _resolve_contract_identity,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
+    resolve_replay_capability as _resolve_replay_capability,
+)
+from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_provider_entity as _resolve_provider_entity,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
@@ -78,15 +81,22 @@ def _build_manifest_create_request(
     execution_context_value: str,
     effective_config_hash: str,
     contract_ref: str,
-    contract_version: str,
-    contract_schema_hash: str,
-    dq_policy_ref: str,
-    rule_bundle_version: str,
+    contract_version: str | None,
+    contract_schema_hash: str | None,
+    dq_policy_ref: str | None,
+    rule_bundle_version: str | None,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
 ) -> RunManifestCreateRequest:
     """Build the manifest create request."""
     yaml_config = inputs.yaml_config
+    source_refs = _build_run_source_refs(
+        ctx=ctx,
+        cached_bronze=inputs.cached_bronze,
+        settings=inputs.settings,
+        provider=provider,
+        entity=entity,
+    )
     return RunManifestCreateRequest(
         run_id=ctx.run_id,
         run_type=getattr(ctx, "run_type", "incremental"),
@@ -100,13 +110,7 @@ def _build_manifest_create_request(
         ),
         runtime_config=_to_serializable_mapping(inputs.runtime_config),
         resolved_config=_to_serializable_mapping(yaml_config),
-        source_refs=_build_run_source_refs(
-            ctx=ctx,
-            cached_bronze=inputs.cached_bronze,
-            settings=inputs.settings,
-            provider=provider,
-            entity=entity,
-        ),
+        source_refs=source_refs,
         planned_artifacts=_build_planned_artifacts(
             settings=inputs.settings,
             provider=provider,
@@ -122,6 +126,7 @@ def _build_manifest_create_request(
         rule_bundle_version=rule_bundle_version,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,
+        replay_capability=_resolve_replay_capability(source_refs),
     )
 
 def create_run_manifest(
