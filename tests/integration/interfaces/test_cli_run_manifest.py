@@ -92,6 +92,11 @@ class _FakeRunManifestService:
         return RunManifestDiffResult(
             left_manifest_id="manifest-integration",
             right_manifest_id="manifest-other",
+            classification="semantic_drift",
+            semantic_equivalent=False,
+            occurrence_only=False,
+            occurrence_difference_fields=("manifest_id", "run_id"),
+            semantic_difference_fields=("launch_context",),
             differences=(
                 RunManifestDiffEntry(
                     field="launch_context",
@@ -163,4 +168,6 @@ def test_run_manifest_diff_yaml_uses_top_level_cli_wiring(
     assert result.exit_code == 0
     assert "left_manifest_id: manifest-integration" in result.output
     assert "right_manifest_id: manifest-other" in result.output
+    assert "classification: semantic_drift" in result.output
+    assert "semantic_equivalent: false" in result.output
     assert "field: launch_context" in result.output

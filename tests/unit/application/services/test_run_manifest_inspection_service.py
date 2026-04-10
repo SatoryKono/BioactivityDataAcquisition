@@ -82,12 +82,15 @@ def _make_manifest(
     run_type: RunType = RunType.INCREMENTAL,
     config_hash: str = "deadbeef",
     limit: int = 100,
+    execution_fingerprint: str | None = None,
+    created_at: datetime | None = None,
+    source_refs: tuple[RunSourceRef, ...] | None = None,
 ) -> RunManifest:
     return RunManifest(
         manifest_id=manifest_id,
-        execution_fingerprint=f"fingerprint-{manifest_id}",
+        execution_fingerprint=execution_fingerprint or f"fingerprint-{manifest_id}",
         schema_version="1.0",
-        created_at=datetime.now(UTC),
+        created_at=created_at or datetime.now(UTC),
         run_id=run_id,
         run_type=run_type,
         pipeline_name="chembl_activity",
@@ -111,7 +114,8 @@ def _make_manifest(
             dq_contract_compatibility_hash="compat-hash-1",
             effective_config_artifact_id="eca-123",
         ),
-        source_refs=(
+        source_refs=source_refs
+        or (
             RunSourceRef(
                 provider="chembl",
                 entity="activity",
@@ -499,12 +503,88 @@ def test_diff_reports_changed_top_level_fields() -> None:
     diff_fields = {entry.field for entry in result.differences}
     assert result.left_manifest_id == "manifest-left"
     assert result.right_manifest_id == "manifest-right"
+    assert result.classification == "semantic_drift"
+    assert result.semantic_equivalent is False
+    assert result.occurrence_only is False
+    assert "run_type" in result.semantic_difference_fields
     assert "manifest_id" in diff_fields
     assert "run_id" in diff_fields
     assert "run_type" in diff_fields
     assert "launch_context" in diff_fields
     assert "runtime_config" in diff_fields
     assert "code_provenance" in diff_fields
+
+
+def test_diff_classifies_occurrence_only_replay_runs() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    created_at = datetime(2025, 1, 1, tzinfo=UTC)
+    left = _make_manifest(
+        manifest_id="manifest-left",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000201")),
+        execution_fingerprint="fingerprint-same",
+        created_at=created_at,
+    )
+    right = _make_manifest(
+        manifest_id="manifest-right",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000202")),
+        execution_fingerprint="fingerprint-same",
+        created_at=created_at,
+    )
+    manifest_store.save(left)
+    manifest_store.save(right)
+    service = RunManifestInspectionService(manifest_port=manifest_store)
+
+    result = service.diff("manifest-left", "manifest-right")
+
+    assert result.classification == "occurrence_only"
+    assert result.semantic_equivalent is True
+    assert result.occurrence_only is True
+    assert result.occurrence_difference_fields == ("manifest_id", "run_id")
+    assert result.semantic_difference_fields == ()
+    assert result.noncanonical_difference_fields == ()
+
+
+def test_diff_classifies_semantic_equivalent_noncanonical_differences() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    created_at = datetime(2025, 1, 1, tzinfo=UTC)
+    shared_fingerprint = "fingerprint-same"
+    left = _make_manifest(
+        manifest_id="manifest-left",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000203")),
+        execution_fingerprint=shared_fingerprint,
+        created_at=created_at,
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="fixture://a",
+            ),
+            RunSourceRef(
+                provider="pubchem",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="fixture://b",
+            ),
+        ),
+    )
+    right = _make_manifest(
+        manifest_id="manifest-right",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000204")),
+        execution_fingerprint=shared_fingerprint,
+        created_at=created_at,
+        source_refs=tuple(reversed(left.source_refs)),
+    )
+    manifest_store.save(left)
+    manifest_store.save(right)
+    service = RunManifestInspectionService(manifest_port=manifest_store)
+
+    result = service.diff("manifest-left", "manifest-right")
+
+    assert result.classification == "semantic_equivalent_with_noncanonical_differences"
+    assert result.semantic_equivalent is True
+    assert result.occurrence_only is False
+    assert result.noncanonical_difference_fields == ("source_refs",)
 
 
 def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> None:
