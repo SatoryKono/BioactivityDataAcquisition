@@ -127,7 +127,8 @@ entity_id = f"semanticscholar:{paper_id}"
 ### Content Hash
 
 Вычисляется по бизнес-полям для дедупликации:
-- Исключаются lineage поля (`_run_id`, `_ingestion_ts`, etc.)
+- Исключаются occurrence-scoped provenance anchors (`_run_id`, `_run_type`,
+  `_source_batch_id`, `_ingestion_ts` и др.)
 - Исключаются lookup metadata поля (`_lookup_method`, `_original_id`)
 - None-значения исключаются из хэша
 
@@ -368,13 +369,14 @@ gold_filters:
   "_source": "semanticscholar",
   "_lookup_method": "doi",
   "_original_id": null,
-  "_run_id": "...",
-  "_run_type": "incremental",
-  "_ingestion_ts": "2026-01-06T12:00:00Z",
   "entity_id": "semanticscholar:a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
   "content_hash": "sha256:..."
 }
 ```
+
+Occurrence-scoped provenance (`run_id`, `run_type`, `source_batch_id`,
+`ingestion_ts`) публикуется через sidecar/control-plane artifacts, а не через
+persisted Silver/Gold rows.
 
 ---
 

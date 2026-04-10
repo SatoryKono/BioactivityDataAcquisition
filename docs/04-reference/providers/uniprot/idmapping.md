@@ -56,15 +56,16 @@ ______________________________________________________________________
 | `mapping_status` | `str`  | `found`, `not_found`, `error`, `multiple` | Результат маппинга                         |
 | `_dq_warn`       | `bool` | `True`, `False`                           | DQ предупреждение (`True` для `not_found`) |
 
-### Lineage Metadata
+### Occurrence-Scoped Provenance
 
 | Поле            | Тип   | Описание                             |
 | --------------- | ----- | ------------------------------------ |
 | `content_hash`  | `str` | SHA256 от business data              |
-| `_run_id`       | `str` | UUID запуска пайплайна               |
-| `_run_type`     | `str` | `incremental`, `backfill`, `rebuild` |
-| `_ingestion_ts` | `str` | Timestamp ingestion (ISO 8601)       |
 | `_index`        | `int` | Порядковый номер записи              |
+
+`run_id`, `run_type`, `source_batch_id` и `ingestion_ts` не входят в
+persisted Silver/Gold row contract. Эти occurrence-scoped anchors публикуются
+через metadata sidecar, lineage fragments, run manifest и run ledger.
 
 ______________________________________________________________________
 
@@ -204,8 +205,7 @@ CHEMBL9999999
     "uniprot_accession": "P00742",
     "mapping_status": "found",
     "_dq_warn": false,
-    "_run_id": "...",
-    "_ingestion_ts": "2026-01-06T..."
+    "content_hash": "sha256:..."
   },
   {
     "entity_id": "chembl:uniprot:CHEMBL9999999",
@@ -213,8 +213,7 @@ CHEMBL9999999
     "uniprot_accession": null,
     "mapping_status": "not_found",
     "_dq_warn": true,
-    "_run_id": "...",
-    "_ingestion_ts": "2026-01-06T..."
+    "content_hash": "sha256:..."
   }
 ]
 ```

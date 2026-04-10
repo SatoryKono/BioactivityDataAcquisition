@@ -264,13 +264,13 @@ sink:
 
 Оптимизированная схема lineage:
 
-- **Silver Record**: Содержит `_source_batch_id` (FK).
-- **Lineage Metadata**: Sidecar-файлы `*_metadata.yaml` и модели metadata хранят маппинг `_source_batch_id` -> список файлов Bronze (local paths), версию трансформации и параметры запуска.
+- **Silver / Gold Persisted Rows**: Не содержат occurrence-scoped provenance (`_run_id`, `_run_type`, `_source_batch_id`, `_ingestion_ts`).
+- **Lineage Metadata**: Sidecar-файлы `*_metadata.yaml` и модели metadata хранят canonical Bronze lineage anchor (`_source_batch_id` или formal Bronze artifact ref), маппинг на Bronze artifacts, версию трансформации и параметры запуска.
   Полные пути к файлам в каждой строке данных хранить запрещено (избыточность).
 
 ### 2.4. Политика Backfill / Replay
 
-- **Metadata**: Обязательные поля `_run_id` (UUID), `_run_type` (`incremental` | `backfill` | `rebuild`).
+- **Metadata / Control Plane**: Обязательные runtime anchors `_run_id` (UUID), `_run_type` (`incremental` | `backfill` | `rebuild`) публикуются через manifest / ledger / sidecar / audit artifacts, а не через persisted Silver/Gold rows.
 - **Merge Priority**: `rebuild` > `backfill` > `incremental`. При конфликте версий побеждает более "полный" тип запуска.
 - **Concurrency Constraint**: В один момент времени для одной сущности допустим только один процесс записи типа `rebuild` или `backfill`. Параллельный запуск запрещен (Lock должен это гарантировать).
 
@@ -682,12 +682,12 @@ silver:
 
 gold:
   include-groups: [system, identifiers, title]
-  exclude-fields: [_dq_*, _source_batch_id]
+  exclude-fields: [_dq_*, _index]
   rename-fields:
     # Use Silver output names (not original!)
     document-id: publication-id         # Silver renamed entity-id → document-id
     content-version: version-hash       # Silver renamed content-hash → content-version
-    _run_id: pipeline-run-id            # Original name (not renamed in Silver)
+    pmid: pubmed-id
 ```
 
 **Rename Chain:**
@@ -697,7 +697,7 @@ Original → Silver → Gold
 ---------------------------------
 entity-id → document-id → publication-id
 content-hash → content-version → version-hash
-_run_id → _run_id → pipeline-run-id
+pmid → pmid → pubmed-id
 ```
 
 **Когда использовать:**
@@ -708,7 +708,7 @@ _run_id → _run_id → pipeline-run-id
 **Best Practice:**
 
 - Сохранять оригинальные имена в Silver (упрощает отладку)
-- Применять бизнес-имена только в Gold (`_run_id` → `pipeline-run-id`, `pmid` → `pubmed-id`)
+- Применять бизнес-имена только в Gold (`pmid` → `pubmed-id`)
 
 ## 3. Обработка Ошибок и Наблюдаемость
 
@@ -1686,7 +1686,7 @@ pipeline:
 schema:
   column_groups:
     - name: system
-      fields: [entity_id, content_hash, _run_id, _source_batch_id, _ingestion_ts]
+      fields: [entity_id, content_hash, _source, _index]
     - name: business
       fields: [activity_id, assay_id, molecule_id, standard_value, standard_type, standard_units]
     - name: dq
@@ -1696,7 +1696,7 @@ schema:
     alias_policy: preserve
   gold:
     include_groups: [system, business]
-    exclude_fields: [_dq_*, _source_batch_id]
+    exclude_fields: [_dq_*, _index]
     alias_policy: canonical
 
 quality:
@@ -1742,8 +1742,8 @@ filters:
 contracts:
   primary_key: [activity_id]
   merge_keys: [activity_id]
-  rename_map: {run_id: _run_id}
-  hash_exclude: [_ingestion_ts, _run_id]
+  rename_map: {source: _source}
+  hash_exclude: [_dq_warn, _dq_error, _index]
 
 hash_policy:
   hash_policy:

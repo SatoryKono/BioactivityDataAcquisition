@@ -103,18 +103,17 @@ ______________________________________________________________________
 
 ### 3.4. Системные поля
 
-Системные колонки добавляются runtime/base-transformer слоем:
+Persisted system columns для Silver/Gold row contract:
 
 - `entity_id`
 - `content_hash`
-- `_run_id`
-- `_run_type`
-- `_source_batch_id`
-- `_ingestion_ts`
+- `_source`
 - `_index`
 
 Документация не фиксирует буквальную формулу `entity_id`; текущая реализация
 делегирует вычисление identity/hash в общий базовый transformer/service слой.
+Occurrence-scoped provenance (`_run_id`, `_run_type`, `_source_batch_id`,
+`_ingestion_ts`) публикуется отдельно через sidecar/control-plane artifacts.
 
 ______________________________________________________________________
 

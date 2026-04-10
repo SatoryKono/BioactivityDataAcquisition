@@ -32,8 +32,10 @@ Last verified: '2026-03-29'
   `last_page`, `doi`, `pmid`, and `affiliations` are handled via
   config-level `field_aliases` where supported; they are not the canonical
   published contract.
-- DQ/meta fields use underscore-prefixed names such as `_dq_warn`,
-  `_dq_error`, `_run_id`, and `_source_batch_id`.
+- DQ fields use underscore-prefixed names such as `_dq_warn` and `_dq_error`.
+- Occurrence-scoped lineage anchors such as `_run_id`, `_run_type`,
+  `_source_batch_id`, and `_ingestion_ts` are published via sidecar/control-plane
+  artifacts rather than persisted Silver/Gold rows.
 
 ## Why This Page Was Demoted
 
