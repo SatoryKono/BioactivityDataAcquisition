@@ -83,7 +83,7 @@ class TestBuildGoldMergedMetadataInput:
         assert result.schema_validation_enabled is True
         assert result.schema_validation_strict is True
 
-    def test_prefers_lineage_created_at_then_ingestion_ts(self) -> None:
+    def test_prefers_ingestion_ts_over_lineage_created_at(self) -> None:
         result = build_gold_merged_metadata_input(
             table_path="gold/publication",
             table_name="composite.publication",
@@ -98,7 +98,20 @@ class TestBuildGoldMergedMetadataInput:
         )
 
         assert result.completed_at is not None
-        assert result.completed_at.month == 5
+        assert result.completed_at.month == 6
+
+    def test_ignores_lineage_created_at_without_explicit_or_ingestion_anchor(self) -> None:
+        result = build_gold_merged_metadata_input(
+            table_path="gold/publication",
+            table_name="composite.publication",
+            records=[{"_lineage_created_at": "2025-05-01T08:00:00+00:00", "id": 2}],
+            completed_at=None,
+            schema=None,
+            transform_version=None,
+            transform_steps=(),
+        )
+
+        assert result.completed_at is None
 
     def test_prefers_explicit_completed_at_over_record_timestamp(self) -> None:
         result = build_gold_merged_metadata_input(

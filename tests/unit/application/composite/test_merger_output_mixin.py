@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
@@ -104,10 +105,18 @@ class TestWriteMergedGold:
     async def test_writes_records_to_gold(self) -> None:
         mixin = _make_mixin()
         df = pl.DataFrame({"doi": ["10.1/a"]})
+        completed_at = datetime(2026, 4, 10, tzinfo=UTC)
 
-        await mixin._write_merged_gold(df, run_id="r1", sources_used=["seed"])
+        await mixin._write_merged_gold(
+            df,
+            completed_at=completed_at,
+            run_id="r1",
+            sources_used=["seed"],
+        )
 
         mixin._storage.write_gold_merged.assert_awaited_once()
+        call_kwargs = mixin._storage.write_gold_merged.call_args.kwargs
+        assert call_kwargs["completed_at"] == completed_at
 
     @pytest.mark.asyncio
     async def test_filters_trash_columns_when_registry_present(self) -> None:

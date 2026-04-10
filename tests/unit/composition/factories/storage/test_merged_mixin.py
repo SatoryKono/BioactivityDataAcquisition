@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
@@ -85,9 +86,11 @@ async def test_write_gold_merged_uses_composite_schema() -> None:
     """write_gold_merged looks up schema from _COMPOSITE_GOLD_SCHEMAS."""
     mixin = _make_mixin()
     records = [{"id": 1}]
-    await mixin.write_gold_merged("test.table", records)
+    completed_at = datetime(2026, 4, 10, tzinfo=UTC)
+    await mixin.write_gold_merged("test.table", records, completed_at=completed_at)
     call_kwargs = mixin.gold.write_gold_merged.call_args
     assert call_kwargs[1]["schema"] is mixin._COMPOSITE_GOLD_SCHEMAS["test.table"]
+    assert call_kwargs[1]["completed_at"] == completed_at
 
 
 @pytest.mark.unit
