@@ -5,8 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Final, TypedDict
+
+DEFAULT_ROOT = Path(__file__).resolve().parents[2]
+if str(DEFAULT_ROOT) not in sys.path:
+    sys.path.insert(0, str(DEFAULT_ROOT))
 
 try:
     from scripts.ops.neo4j_memory_sync import (
@@ -15,16 +20,11 @@ try:
         resolve_neo4j_connection,
     )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution path
-    import sys
-
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     from scripts.ops.neo4j_memory_sync import (
         JsonValue,
         Neo4jHttpClient,
         resolve_neo4j_connection,
     )
-
-DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 
 DEFAULT_NEIGHBOR_RELATION_TYPES: Final[tuple[str, ...]] = (
     "DEPENDS_ON",
@@ -121,7 +121,7 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
     },
     "current-cycle-code": {
         "mode": "current_cycle_code",
-        "target_label": "development_cycle_surface",
+        "target_label": "code_surface",
         "title": "Current-cycle code surfaces",
     },
     "overengineered-candidates": {
@@ -315,7 +315,6 @@ def _dead_code_candidates_statement() -> str:
         "MATCH (candidate:retirement_candidate) "
         "WHERE $name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name "
         "OPTIONAL MATCH (candidate)-[:CANDIDATE_FOR_REMOVAL]->(target) "
-        "OPTIONAL MATCH (candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle) "
         "RETURN candidate.name AS candidate_name, "
         "candidate.family_name AS family_name, "
         "candidate.target_label AS target_label, "
@@ -331,30 +330,31 @@ def _dead_code_candidates_statement() -> str:
         "candidate.test_anchor_count AS test_anchor_count, "
         "target.name AS removal_target, "
         "labels(target) AS removal_target_labels, "
-        "cycle.name AS blocked_by_cycle "
+        "candidate.blocked_by_current_cycle_target_name AS blocked_by_cycle "
         "ORDER BY candidate.deletion_score DESC, candidate.target_name ASC"
     )
 
 
 def _current_cycle_code_statement() -> str:
     return (
-        "MATCH (cycle:development_cycle_surface) "
-        "WHERE $name = 'all' OR cycle.family_name = $name OR cycle.target_name = $name "
-        "OPTIONAL MATCH (target)-[:OWNED_BY_CYCLE]->(cycle) "
-        "RETURN cycle.name AS cycle_name, "
-        "cycle.family_name AS family_name, "
-        "cycle.target_label AS target_label, "
-        "cycle.target_name AS target_name, "
-        "cycle.cycle_status AS cycle_status, "
-        "cycle.cycle_score AS cycle_score, "
-        "cycle.recent_age_days AS recent_age_days, "
-        "cycle.wip_markers AS wip_markers, "
-        "cycle.runtime_anchor_count AS runtime_anchor_count, "
-        "cycle.config_anchor_count AS config_anchor_count, "
-        "cycle.doc_anchor_count AS doc_anchor_count, "
-        "cycle.test_anchor_count AS test_anchor_count, "
+        "MATCH (target) "
+        "WHERE any(label IN labels(target) WHERE label IN ['module_surface','class_surface','function_surface','method_surface']) "
+        "AND coalesce(target.current_cycle_status, '') <> '' "
+        "AND ($name = 'all' OR target.family_name = $name OR target.name = $name) "
+        "RETURN target.name AS cycle_name, "
+        "target.family_name AS family_name, "
+        "head(labels(target)) AS target_label, "
+        "target.name AS target_name, "
+        "target.current_cycle_status AS cycle_status, "
+        "target.current_cycle_score AS cycle_score, "
+        "target.current_cycle_recent_age_days AS recent_age_days, "
+        "target.current_cycle_wip_markers AS wip_markers, "
+        "target.current_cycle_runtime_anchor_count AS runtime_anchor_count, "
+        "target.current_cycle_config_anchor_count AS config_anchor_count, "
+        "target.current_cycle_doc_anchor_count AS doc_anchor_count, "
+        "target.current_cycle_test_anchor_count AS test_anchor_count, "
         "labels(target) AS target_labels "
-        "ORDER BY cycle.cycle_score DESC, cycle.target_name ASC"
+        "ORDER BY target.current_cycle_score DESC, target.name ASC"
     )
 
 
@@ -363,7 +363,6 @@ def _overengineered_candidates_statement() -> str:
         "MATCH (candidate:complexity_candidate) "
         "WHERE $name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name "
         "OPTIONAL MATCH (candidate)-[:CANDIDATE_FOR_SIMPLIFICATION]->(target) "
-        "OPTIONAL MATCH (candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle) "
         "RETURN candidate.name AS candidate_name, "
         "candidate.family_name AS family_name, "
         "candidate.target_label AS target_label, "
@@ -381,7 +380,7 @@ def _overengineered_candidates_statement() -> str:
         "candidate.config_anchor_count AS config_anchor_count, "
         "candidate.doc_anchor_count AS doc_anchor_count, "
         "candidate.test_anchor_count AS test_anchor_count, "
-        "cycle.name AS blocked_by_cycle, "
+        "candidate.blocked_by_current_cycle_target_name AS blocked_by_cycle, "
         "labels(target) AS target_labels "
         "ORDER BY candidate.simplification_score DESC, candidate.removable_score DESC, candidate.target_name ASC "
         "LIMIT 50"
@@ -415,7 +414,6 @@ def _simplification_blockers_statement() -> str:
     return (
         "MATCH (candidate:complexity_candidate) "
         "WHERE $name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name "
-        "OPTIONAL MATCH (candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle) "
         "OPTIONAL MATCH (candidate)-[rel:JUSTIFIED_BY_RUNTIME|BLOCKED_BY_VARIANCE]->(blocker) "
         "RETURN candidate.name AS candidate_name, "
         "candidate.family_name AS family_name, "
@@ -426,7 +424,7 @@ def _simplification_blockers_statement() -> str:
         "candidate.config_anchor_count AS config_anchor_count, "
         "candidate.doc_anchor_count AS doc_anchor_count, "
         "candidate.test_anchor_count AS test_anchor_count, "
-        "collect(DISTINCT cycle.name) AS cycle_blockers, "
+        "[candidate.blocked_by_current_cycle_target_name] AS cycle_blockers, "
         "collect(DISTINCT CASE "
         "  WHEN blocker.name IS NULL THEN NULL "
         "  ELSE {name: blocker.name, labels: labels(blocker), relation: type(rel)} "

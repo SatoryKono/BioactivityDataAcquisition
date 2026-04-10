@@ -26,14 +26,14 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class AuditRunWorkflowResult:
-    """Combined audit and manifest context for a run."""
+    """Aggregate operator view for one run's audit context."""
 
     run_id: str
     audit: AuditInspectionResult
     run_manifest: RunManifestInspectionResult | None = None
 
     def to_dict(self) -> dict[str, object]:
-        """Return a JSON-safe representation."""
+        """Return a JSON-safe representation for CLI or API responses."""
         return {
             "run_id": self.run_id,
             "audit": self.audit.to_dict(),
@@ -45,7 +45,7 @@ class AuditRunWorkflowResult:
 
 @dataclass(frozen=True, slots=True)
 class CheckpointAuditWorkflowResult:
-    """Combined checkpoint, audit, and manifest context for a pipeline."""
+    """Aggregate operator view for one checkpoint and related audit context."""
 
     pipeline_name: str
     checkpoint: CheckpointInfo | None
@@ -53,18 +53,10 @@ class CheckpointAuditWorkflowResult:
     run_manifest: RunManifestInspectionResult | None = None
 
     def to_dict(self) -> dict[str, object]:
-        """Return a JSON-safe representation."""
+        """Return a JSON-safe representation for CLI or API responses."""
         return {
             "pipeline_name": self.pipeline_name,
-            "checkpoint": (
-                {
-                    "pipeline_name": self.checkpoint.pipeline_name,
-                    "run_id": self.checkpoint.run_id,
-                    "metadata": self.checkpoint.metadata,
-                }
-                if self.checkpoint is not None
-                else None
-            ),
+            "checkpoint": self.checkpoint,
             "audit": self.audit.to_dict(),
             "run_manifest": (
                 self.run_manifest.to_dict() if self.run_manifest is not None else None
@@ -74,7 +66,7 @@ class CheckpointAuditWorkflowResult:
 
 @dataclass(slots=True)
 class ObservabilityWorkflowService:
-    """Coordinator for checkpoint, audit, and run-manifest diagnostics."""
+    """Compose audit, checkpoint, and run-manifest diagnostics workflows."""
 
     audit_service: AuditInspectionService
     checkpoint_service: CheckpointService
@@ -86,7 +78,7 @@ class ObservabilityWorkflowService:
         *,
         limit: int = 100,
     ) -> AuditRunWorkflowResult:
-        """Inspect audit history for a run and attach manifest context when present."""
+        """Return audit entries and best-effort manifest context for one run."""
         audit = await self.audit_service.inspect_run(run_id, limit=limit)
         run_manifest = self._resolve_run_manifest(run_id)
         return AuditRunWorkflowResult(
@@ -102,7 +94,7 @@ class ObservabilityWorkflowService:
         run_id: str | None = None,
         audit_limit: int = 100,
     ) -> CheckpointAuditWorkflowResult:
-        """Inspect checkpoint state and derive audit context from the effective run id."""
+        """Return checkpoint state and any related audit/run-manifest context."""
         checkpoint = await self.checkpoint_service.get_checkpoint(pipeline_name)
         resolved_run_id = run_id or (
             checkpoint.run_id if checkpoint is not None else None
@@ -124,7 +116,10 @@ class ObservabilityWorkflowService:
                 run_manifest=None,
             )
 
-        audit = await self.audit_service.inspect_run(resolved_run_id, limit=audit_limit)
+        audit = await self.audit_service.inspect_run(
+            resolved_run_id,
+            limit=audit_limit,
+        )
         run_manifest = self._resolve_run_manifest(resolved_run_id)
         return CheckpointAuditWorkflowResult(
             pipeline_name=pipeline_name,
@@ -135,12 +130,12 @@ class ObservabilityWorkflowService:
 
     def _resolve_run_manifest(
         self,
-        run_id: str,
+        identifier: str,
     ) -> RunManifestInspectionResult | None:
-        """Resolve manifest context when the optional service is wired."""
+        """Resolve manifest context best-effort without failing the workflow."""
         if self.run_manifest_service is None:
             return None
         try:
-            return self.run_manifest_service.show(run_id)
+            return self.run_manifest_service.show(identifier)
         except ValueError:
             return None

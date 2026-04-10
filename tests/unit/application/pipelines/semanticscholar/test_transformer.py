@@ -338,8 +338,8 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["_run_id"] == "12345678-1234-5678-1234-567812345678"
-        assert result["_run_type"] == "incremental"
+        assert "_run_id" not in result
+        assert "_run_type" not in result
         assert result["_index"] == 0
 
     @pytest.mark.asyncio

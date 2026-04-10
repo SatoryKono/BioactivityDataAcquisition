@@ -1,4 +1,9 @@
-"""Observability interface compatibility facade for BioETL."""
+"""Observability interface compatibility facade for BioETL.
+
+This module remains import-safe for interface-layer consumers, but the
+canonical public observability API now lives in
+``bioetl.composition.observability_api``.
+"""
 
 from __future__ import annotations
 
@@ -63,16 +68,16 @@ def start_metrics_server(
     )
 
 
-def get_audit_service() -> AuditInspectionService:
-    """Load the audit diagnostics service through the canonical composition API."""
-    from bioetl.composition.observability_api import get_audit_service as _impl
+def get_checkpoint_service() -> CheckpointService:
+    """Load the checkpoint diagnostics service through the canonical composition API."""
+    from bioetl.composition.observability_api import get_checkpoint_service as _impl
 
     return _impl()
 
 
-def get_checkpoint_service() -> CheckpointService:
-    """Load the checkpoint diagnostics service through the canonical composition API."""
-    from bioetl.composition.observability_api import get_checkpoint_service as _impl
+def get_audit_service() -> AuditInspectionService:
+    """Load the audit diagnostics service through the canonical composition API."""
+    from bioetl.composition.observability_api import get_audit_service as _impl
 
     return _impl()
 

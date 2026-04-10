@@ -5,11 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.admin_runtime_api import CheckpointManagerService
-from bioetl.application.services.pipeline_runner_service import (
+from bioetl.application.services.admin_runtime_api import CheckpointManagerService
+from bioetl.application.services import (
     PipelineRunResult as PipelineRunResult,
 )
-from bioetl.application.services.pipeline_runner_service import RunOptions as RunOptions
-from bioetl.application.services.pipeline_runner_service import RunResult as RunResult
+from bioetl.application.services import RunOptions as RunOptions
+from bioetl.application.services import RunResult as RunResult
 from bioetl.application.services.audit_inspection_service import AuditInspectionService
 from bioetl.application.services.bronze_cleanup_service import (
     BronzeCleanupResult,
