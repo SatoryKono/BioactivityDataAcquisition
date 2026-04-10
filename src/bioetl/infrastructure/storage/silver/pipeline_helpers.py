@@ -15,10 +15,9 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.ports import TracingPort
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 

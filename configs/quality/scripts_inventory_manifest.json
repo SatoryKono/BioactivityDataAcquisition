@@ -1,12 +1,6 @@
 {
   "schema_version": "1.0",
-<<<<<<< Updated upstream
-  "generated_at": "2026-04-10T09:32:48.564237+00:00",
-||||||| Stash base
-  "generated_at": "2026-04-10T09:42:52.810632+00:00",
-=======
-  "generated_at": "2026-04-10T10:02:36.800405+00:00",
->>>>>>> Stashed changes
+  "generated_at": "2026-04-10T10:21:59.815534+00:00",
   "summary": {
     "total_scripts": 289,
     "status_counts": {
@@ -4571,7 +4565,7 @@
         },
         {
           "path": "scripts/ops/neo4j_memory_sync.py",
-          "line": 461,
+          "line": 475,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
         }

@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio as _asyncio
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal, cast
 
 import pyarrow as pa
@@ -73,8 +74,6 @@ write_deltalake = _write_deltalake
 # in this root module while the implementations live in split validation helpers.
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.ports import LineageStorePort, LoggerPort
     from bioetl.domain.types import BatchID, RunID, RunType
