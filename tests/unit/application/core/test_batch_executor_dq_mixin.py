@@ -116,6 +116,7 @@ def test_collect_dq_data_skips_unserializable_records_and_tracks_outputs() -> No
 
     assert Path(harness._last_bronze_path or "") == Path("bronze/file.jsonl")
     assert len(harness._bronze_records_for_dq) == 1
+    assert harness._bronze_records_for_dq[0] == b'{"ok":1}'
     assert harness._silver_records_for_dq == [{"silver": "value"}]
     assert harness._gold_records_for_dq == [{"gold": "value"}]
 
@@ -238,6 +239,34 @@ def test_reservoir_add_respects_max_sample_size(
         harness._reservoir_add(reservoir, i)
 
     assert len(reservoir) == 3
+
+
+def test_reservoir_add_is_order_independent_for_same_items(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(dq_mixin_module, "_DQ_MAX_SAMPLE_SIZE", 3)
+    first_harness = _BatchExecutorDQHarness()
+    second_harness = _BatchExecutorDQHarness()
+
+    first_reservoir: list[dict[str, object]] = []
+    second_reservoir: list[dict[str, object]] = []
+    records = [
+        {"id": "4", "payload": "d"},
+        {"id": "2", "payload": "b"},
+        {"id": "1", "payload": "a"},
+        {"id": "5", "payload": "e"},
+        {"id": "3", "payload": "c"},
+    ]
+
+    for record in records:
+        first_harness._reservoir_add(first_reservoir, record)
+    for record in reversed(records):
+        second_harness._reservoir_add(second_reservoir, record)
+
+    normalize = lambda items: sorted(
+        _BatchExecutorDQMixin._serialize_dq_sample_item(item) for item in items
+    )
+    assert normalize(first_reservoir) == normalize(second_reservoir)
 
 
 def test_get_dq_context_returns_none_when_collection_disabled() -> None:
