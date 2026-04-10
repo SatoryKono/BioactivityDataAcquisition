@@ -20,6 +20,7 @@ from bioetl.domain.types.dq_contracts import (
     DQRuleOutcome,
     DQViolationKind,
 )
+from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
 
 
 class DQEvaluationStatus(StrEnum):
@@ -67,7 +68,7 @@ class DQResult:
 
     error_rate: float
     status: DQEvaluationStatus
-    anomalies: tuple[object, ...] = field(default_factory=tuple)
+    anomalies: tuple[DQAnomaly, ...] = field(default_factory=tuple)
     has_critical: bool = False
     check_duration_ms: float = 0.0
     rule_outcomes: tuple[DQRuleOutcome, ...] = field(default_factory=tuple)

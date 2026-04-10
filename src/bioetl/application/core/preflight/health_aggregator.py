@@ -42,8 +42,8 @@ class HealthAggregator:
     METRIC_HEALTH_STATUS = "health_check_status"
     METRIC_HEALTH_MODE_STATUS = "health_check_mode_status"
     METRIC_HEALTH_DURATION = "health_check_duration_seconds"
-    METRIC_HEALTH_LATENCY = "health_check_latency_ms"
-    METRIC_HEALTH_MODE_LATENCY = "health_check_mode_latency_ms"
+    METRIC_HEALTH_LATENCY = "health_check_latency_seconds"
+    METRIC_HEALTH_MODE_LATENCY = "health_check_mode_latency_seconds"
     METRIC_PROBE_MODE_FALLBACK_TOTAL = "probe_mode_fallback_total"
 
     def __init__(

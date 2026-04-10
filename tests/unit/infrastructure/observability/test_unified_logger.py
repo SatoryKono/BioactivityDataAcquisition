@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -130,6 +131,40 @@ class TestUnifiedLogger:
 
         # Without stage should not raise, defaults to "init"
         logger.exception("Exception occurred")
+
+    def test_unified_logger_flattens_extra_context(self) -> None:
+        """Nested extra payloads should be flattened into the top-level event."""
+        logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
+
+        logger.info(
+            "bootstrap_complete",
+            extra={"stage": "bootstrap", "metrics_type": "NoOpMetrics"},
+        )
+
+        logger._logger.info.assert_called_once_with(
+            "bootstrap_complete",
+            stage="bootstrap",
+            metrics_type="NoOpMetrics",
+        )
+
+    def test_unified_logger_explicit_kwargs_override_extra_context(self) -> None:
+        """Explicit kwargs must win over conflicting extra payload values."""
+        logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
+
+        logger.info(
+            "health_check",
+            stage="validate",
+            component="storage",
+            extra={"stage": "bootstrap", "component": "data_source", "event": "bad"},
+        )
+
+        logger._logger.info.assert_called_once_with(
+            "health_check",
+            stage="validate",
+            component="storage",
+        )
 
 
 @pytest.mark.unit

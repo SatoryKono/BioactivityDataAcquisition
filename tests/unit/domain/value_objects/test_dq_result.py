@@ -2,9 +2,30 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 
+from bioetl.domain.value_objects.dq_anomaly import (
+    DQAnomaly,
+    DQAnomalySeverity,
+    DQAnomalyType,
+)
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
+
+
+def _sample_anomaly(metric_name: str = "error_rate") -> DQAnomaly:
+    return DQAnomaly(
+        metric_name=metric_name,
+        current_value=0.2,
+        baseline_mean=0.05,
+        baseline_stddev=0.01,
+        anomaly_type=DQAnomalyType.THRESHOLD_EXCEEDED,
+        severity=DQAnomalySeverity.HIGH,
+        z_score=15.0,
+        timestamp=datetime.now(UTC),
+        message=f"{metric_name} exceeded expected range",
+    )
 
 
 @pytest.mark.unit
@@ -50,11 +71,12 @@ class TestDQResult:
         result = DQResult(
             error_rate=0.10,
             status=DQEvaluationStatus.WARNING,
-            anomalies=("anomaly1", "anomaly2"),
+            anomalies=(_sample_anomaly("error_rate"), _sample_anomaly("silver_yield")),
             has_critical=False,
             check_duration_ms=45.7,
         )
-        assert result.anomalies == ("anomaly1", "anomaly2")
+        assert result.anomalies[0].metric_name == "error_rate"
+        assert result.anomalies[1].metric_name == "silver_yield"
         assert result.check_duration_ms == 45.7
 
     def test_list_anomalies_converted_to_tuple(self) -> None:
@@ -62,10 +84,13 @@ class TestDQResult:
         result = DQResult(
             error_rate=0.05,
             status=DQEvaluationStatus.WARNING,
-            anomalies=["anomaly1", "anomaly2"],  # type: ignore[arg-type]
+            anomalies=[_sample_anomaly("error_rate"), _sample_anomaly("silver_yield")],  # type: ignore[arg-type]
         )
         assert isinstance(result.anomalies, tuple)
-        assert result.anomalies == ("anomaly1", "anomaly2")
+        assert [anomaly.metric_name for anomaly in result.anomalies] == [
+            "error_rate",
+            "silver_yield",
+        ]
 
     def test_is_passed_when_passed(self) -> None:
         """Test is_passed returns True for PASSED status."""
@@ -104,7 +129,11 @@ class TestDQResult:
         result = DQResult(
             error_rate=0.10,
             status=DQEvaluationStatus.WARNING,
-            anomalies=("a1", "a2", "a3"),
+            anomalies=(
+                _sample_anomaly("error_rate"),
+                _sample_anomaly("silver_yield"),
+                _sample_anomaly("gold_yield"),
+            ),
         )
         assert result.anomalies_count == 3
 

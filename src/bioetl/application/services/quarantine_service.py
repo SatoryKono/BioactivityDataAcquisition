@@ -13,6 +13,7 @@ __all__ = ["QuarantineRecord", "QuarantineService"]
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.application.services._quarantine_service_filtered_mixin import (
@@ -21,7 +22,11 @@ from bioetl.application.services._quarantine_service_filtered_mixin import (
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, QuarantinePort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
+
+
+_QUARANTINE_OPERATOR_DURATION_METRIC = "quarantine_operator_duration_seconds"
+_QUARANTINE_OPERATOR_OPERATIONS_METRIC = "quarantine_operator_operations_total"
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,6 +71,29 @@ class QuarantineService(QuarantineServiceFilteredMixin):
 
     quarantine_port: QuarantinePort
     logger: LoggerPort
+    metrics: MetricsPort | None = None
+
+    def _record_operator_metrics(
+        self,
+        *,
+        operation: str,
+        status: str,
+        duration_seconds: float,
+    ) -> None:
+        """Record bounded admin/explorer metrics when a metrics port is available."""
+        if self.metrics is None:
+            return
+        labels = {"operation": operation, "status": status}
+        self.metrics.increment_counter(
+            _QUARANTINE_OPERATOR_OPERATIONS_METRIC,
+            1,
+            labels=labels,
+        )
+        self.metrics.observe_histogram(
+            _QUARANTINE_OPERATOR_DURATION_METRIC,
+            duration_seconds,
+            labels=labels,
+        )
 
     async def inspect(
         self,
@@ -83,6 +111,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
         Returns:
             List of QuarantineRecord objects.
         """
+        start_time = perf_counter()
         self.logger.debug(
             "Inspecting quarantine",
             pipeline=pipeline,
@@ -90,11 +119,19 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             error_code=error_code,
         )
 
-        raw_records = await self.quarantine_port.inspect(
-            pipeline=pipeline,
-            limit=limit,
-            error_code=error_code,
-        )
+        try:
+            raw_records = await self.quarantine_port.inspect(
+                pipeline=pipeline,
+                limit=limit,
+                error_code=error_code,
+            )
+        except Exception:
+            self._record_operator_metrics(
+                operation="inspect",
+                status="failed",
+                duration_seconds=perf_counter() - start_time,
+            )
+            raise
 
         records = [
             QuarantineRecord(
@@ -113,6 +150,11 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             pipeline=pipeline,
             record_count=len(records),
         )
+        self._record_operator_metrics(
+            operation="inspect",
+            status="success",
+            duration_seconds=perf_counter() - start_time,
+        )
 
         return records
 
@@ -130,14 +172,28 @@ class QuarantineService(QuarantineServiceFilteredMixin):
         Returns:
             Dictionary with quarantine statistics by error code.
         """
+        start_time = perf_counter()
         self.logger.debug("Getting quarantine stats", pipeline=pipeline)
 
-        stats = await self.quarantine_port.get_stats(pipeline, error_code)
+        try:
+            stats = await self.quarantine_port.get_stats(pipeline, error_code)
+        except Exception:
+            self._record_operator_metrics(
+                operation="stats",
+                status="failed",
+                duration_seconds=perf_counter() - start_time,
+            )
+            raise
 
         self.logger.info(
             "Got quarantine stats",
             pipeline=pipeline,
             stats=stats,
+        )
+        self._record_operator_metrics(
+            operation="stats",
+            status="success",
+            duration_seconds=perf_counter() - start_time,
         )
 
         return stats
@@ -162,6 +218,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             List of quarantine records suitable for replay.
         """
         now = datetime.now(tz=UTC)
+        start_time = perf_counter()
         self.logger.info(
             "Replaying quarantine records",
             pipeline=pipeline,
@@ -169,19 +226,32 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             max_age_days=max_age_days,
         )
 
-        records = list(
-            self.quarantine_port.replay(
-                pipeline=pipeline,
-                error_code=error_code,
-                max_age_days=max_age_days,
-                now=now,
+        try:
+            records = list(
+                self.quarantine_port.replay(
+                    pipeline=pipeline,
+                    error_code=error_code,
+                    max_age_days=max_age_days,
+                    now=now,
+                )
             )
-        )
+        except Exception:
+            self._record_operator_metrics(
+                operation="replay",
+                status="failed",
+                duration_seconds=perf_counter() - start_time,
+            )
+            raise
 
         self.logger.info(
             "Replay records retrieved",
             pipeline=pipeline,
             record_count=len(records),
+        )
+        self._record_operator_metrics(
+            operation="replay",
+            status="success",
+            duration_seconds=perf_counter() - start_time,
         )
 
         return records
@@ -202,9 +272,13 @@ class QuarantineService(QuarantineServiceFilteredMixin):
         Returns:
             Number of records successfully marked.
         """
+        start_time = perf_counter()
         count = 0
+        candidate_records = 0
         for rec in records:
             payload_hash = rec.get("payload_hash")
+            if payload_hash:
+                candidate_records += 1
             if payload_hash and self.quarantine_port.update_status(
                 payload_hash, QuarantineRecordStatus.REPROCESSED
             ):
@@ -213,6 +287,12 @@ class QuarantineService(QuarantineServiceFilteredMixin):
         self.logger.info(
             "Marked records as reprocessed",
             record_count=count,
+        )
+        status = "success" if count == len(records) else "partial"
+        self._record_operator_metrics(
+            operation="mark_reprocessed",
+            status=status,
+            duration_seconds=perf_counter() - start_time,
         )
         return count
 
@@ -234,22 +314,36 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             Number of records deleted.
         """
         now = datetime.now(tz=UTC)
+        start_time = perf_counter()
         self.logger.info(
             "Purging old quarantine records",
             pipeline=pipeline,
             older_than_days=older_than_days,
         )
 
-        count = self.quarantine_port.purge(
-            pipeline=pipeline,
-            older_than_days=older_than_days,
-            now=now,
-        )
+        try:
+            count = self.quarantine_port.purge(
+                pipeline=pipeline,
+                older_than_days=older_than_days,
+                now=now,
+            )
+        except Exception:
+            self._record_operator_metrics(
+                operation="purge",
+                status="failed",
+                duration_seconds=perf_counter() - start_time,
+            )
+            raise
 
         self.logger.info(
             "Purged quarantine records",
             pipeline=pipeline,
             records_purged=count,
+        )
+        self._record_operator_metrics(
+            operation="purge",
+            status="success",
+            duration_seconds=perf_counter() - start_time,
         )
 
         return count
@@ -271,13 +365,22 @@ class QuarantineService(QuarantineServiceFilteredMixin):
         Returns:
             True if record was found and updated, False otherwise.
         """
+        start_time = perf_counter()
         self.logger.debug(
             "Updating quarantine status",
             payload_hash=payload_hash,
             new_status=new_status.value,
         )
 
-        success = self.quarantine_port.update_status(payload_hash, new_status)
+        try:
+            success = self.quarantine_port.update_status(payload_hash, new_status)
+        except Exception:
+            self._record_operator_metrics(
+                operation="update_status",
+                status="failed",
+                duration_seconds=perf_counter() - start_time,
+            )
+            raise
 
         if success:
             self.logger.info(
@@ -291,6 +394,11 @@ class QuarantineService(QuarantineServiceFilteredMixin):
                 payload_hash=payload_hash,
             )
 
+        self._record_operator_metrics(
+            operation="update_status",
+            status="success" if success else "not_found",
+            duration_seconds=perf_counter() - start_time,
+        )
         return success
 
     async def aclose(self) -> None:

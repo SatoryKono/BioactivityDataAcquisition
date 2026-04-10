@@ -45,7 +45,7 @@ def apply_postrun_failure_policy(
     runtime: object,
     error: BaseException,
     spec: PostrunFailurePolicySpec,
-    extra: dict[str, object] | None = None,
+    log_fields: dict[str, object] | None = None,
     emit_warning_error_log: bool = False,
 ) -> bool:
     """Log one postrun failure according to strict/warning mode policy.
@@ -53,7 +53,7 @@ def apply_postrun_failure_policy(
     Returns:
         True when the caller should re-raise the exception, False otherwise.
     """
-    log_extra = dict(extra or {})
+    log_extra = dict(log_fields or {})
 
     if is_strict_validation_enabled(runtime):
         logger.error(
@@ -87,7 +87,7 @@ def apply_postrun_failure_policy_or_raise(
     runtime: object,
     error: BaseException,
     spec: PostrunFailurePolicySpec,
-    extra: dict[str, object] | None = None,
+    log_fields: dict[str, object] | None = None,
     emit_warning_error_log: bool = False,
 ) -> None:
     """Apply warning/strict policy and re-raise when strict mode demands it."""
@@ -96,7 +96,7 @@ def apply_postrun_failure_policy_or_raise(
         runtime=runtime,
         error=error,
         spec=spec,
-        extra=extra,
+        log_fields=log_fields,
         emit_warning_error_log=emit_warning_error_log,
     )
     if should_raise:
@@ -118,7 +118,7 @@ class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
         self: _HasPostrunFailureHandling,
         error: BaseException,
         *,
-        extra: dict[str, object] | None = None,
+        log_fields: dict[str, object] | None = None,
         emit_warning_error_log: bool = False,
     ) -> None:
         """Apply postrun warning/strict policy using instance-held collaborators."""
@@ -127,6 +127,6 @@ class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
             runtime=self._runtime,
             error=error,
             spec=self._FAILURE_POLICY,
-            extra=extra,
+            log_fields=log_fields,
             emit_warning_error_log=emit_warning_error_log,
         )

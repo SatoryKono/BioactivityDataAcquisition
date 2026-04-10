@@ -97,11 +97,9 @@ class CheckpointManagerService:
                 "Checkpoint resume blocked for full_scan_only pipeline. "
                 "Each run performs a full scan; deduplication via content_hash on Silver. "
                 "See ADR-031 for details.",
-                extra={
-                    "pipeline": self._pipeline_name,
-                    "loading_strategy": self._loading_strategy.value,
-                    "resume_requested": True,
-                },
+                pipeline=self._pipeline_name,
+                loading_strategy=self._loading_strategy.value,
+                resume_requested=True,
             )
             return None
 
@@ -139,15 +137,13 @@ class CheckpointManagerService:
                     else:
                         self._logger.info(
                             "Checkpoint compatibility validation passed.",
-                            extra={
-                                "pipeline": self._pipeline_name,
-                                "messages": compatibility_result.messages,
-                            },
+                            pipeline=self._pipeline_name,
+                            messages=compatibility_result.messages,
                         )
 
                 self._logger.info(
                     "Found compatible checkpoint",
-                    extra={"metadata": checkpoint_metadata.to_dict()},
+                    metadata=checkpoint_metadata.to_dict(),
                 )
                 return checkpoint_metadata
         return None
