@@ -5,6 +5,9 @@ Tests the metadata building utilities extracted from SilverWriter and GoldWriter
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+from types import SimpleNamespace
+
 import pytest
 
 from bioetl.infrastructure.storage.metadata_builder import (
@@ -66,6 +69,7 @@ class TestSilverMetadataBuilder:
     def test_build_merged_metadata_basic(self) -> None:
         """Should build valid SilverMetadata for merged composite data."""
         builder = SilverMetadataBuilder()
+        completed_at = datetime(2026, 1, 1, 10, 0, tzinfo=UTC)
         records = [
             {"id": 1, "name": "test1", "_cv_warn": True},
             {"id": 2, "name": "test2", "_cv_error": True, "_cv_quarantine": True},
@@ -77,12 +81,14 @@ class TestSilverMetadataBuilder:
             primary_keys=["id"],
             run_id="run-123",
             sources_used=["seed", "crossref"],
+            completed_at=completed_at,
         )
 
         assert metadata.runtime.run_id == "run-123"
         assert metadata.pipeline.name == "composite_publication"
         assert metadata.pipeline.provider == "composite"
         assert metadata.pipeline.entity == "publication"
+        assert metadata.output.artifact_id == "silver:composite.publication"
         assert metadata.delta.table_path == "/data/silver/composite/publication"
         assert metadata.delta.rows_inserted == 2
         assert metadata.dq_summary.total_records == 2
@@ -130,6 +136,7 @@ class TestSilverMetadataBuilder:
             table_name="test.entity",
             records=records,
             primary_keys=["id"],
+            completed_at=datetime(2026, 1, 1, 10, 0, tzinfo=UTC),
         )
 
         assert metadata.lineage.transform_version == "2.0.0"
@@ -143,6 +150,7 @@ class TestSilverMetadataBuilder:
             table_name="test.entity",
             records=[],
             primary_keys=["id"],
+            completed_at=datetime(2026, 1, 1, 10, 0, tzinfo=UTC),
         )
 
         assert metadata.delta.rows_inserted == 0
@@ -163,14 +171,52 @@ class TestGoldMetadataBuilder:
             table_name="chembl.activity",
             records=records,
             mode=GoldWriteMode.OVERWRITE,
+            ingestion_ts=datetime(2026, 1, 1, 10, 0, tzinfo=UTC),
         )
 
         assert metadata.pipeline.name == "chembl_activity"
         assert metadata.pipeline.provider == "chembl"
         assert metadata.pipeline.entity == "activity"
+        assert metadata.output.artifact_id == "gold:chembl.activity"
         assert metadata.dq_summary.total_records == 1
         assert metadata.output.record_count == 1
         assert metadata.scd is None  # No SCD for OVERWRITE mode
+
+    def test_build_fallback_metadata_uses_silver_refs_for_lineage(self) -> None:
+        """Fallback Gold metadata should preserve upstream Silver lineage refs."""
+        from bioetl.domain.medallion import GoldWriteMode
+
+        builder = GoldMetadataBuilder()
+        metadata = builder.build_fallback_metadata(
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.OVERWRITE,
+            ingestion_ts=datetime(2026, 1, 1, 10, 0, tzinfo=UTC),
+            silver_refs=[
+                SimpleNamespace(
+                    table_name="chembl.activity",
+                    delta_version=12,
+                )
+            ],
+        )
+
+        assert metadata.lineage.source_tables == {"chembl.activity": 12}
+
+    def test_build_fallback_metadata_requires_deterministic_timestamp(self) -> None:
+        """Fallback Gold metadata should fail without a deterministic time anchor."""
+        from bioetl.domain.medallion import GoldWriteMode
+
+        builder = GoldMetadataBuilder()
+
+        with pytest.raises(
+            ValueError,
+            match="Deterministic metadata timestamp requires explicit time",
+        ):
+            builder.build_fallback_metadata(
+                table_name="chembl.activity",
+                records=[{"id": 1}],
+                mode=GoldWriteMode.OVERWRITE,
+            )
 
     def test_build_fallback_metadata_scd2_mode(self) -> None:
         """Should include SCD metadata for SCD2 mode."""
@@ -188,6 +234,7 @@ class TestGoldMetadataBuilder:
             records=records,
             mode=GoldWriteMode.SCD2,
             scd_config=scd_config,
+            ingestion_ts=datetime(2026, 1, 1, 10, 0, tzinfo=UTC),
         )
 
         assert metadata.scd is not None
@@ -224,6 +271,7 @@ class TestGoldMetadataBuilder:
         assert metadata.pipeline.name == "composite_publication"
         assert metadata.pipeline.provider == "composite"
         assert metadata.pipeline.entity == "publication"
+        assert metadata.output.artifact_id == "gold:composite/publication"
         assert metadata.output.record_count == 2
         assert metadata.output.composite_run_id == "run-456"
         assert metadata.output_ext.composite_run_id == "run-456"
@@ -272,6 +320,7 @@ class TestGoldMetadataBuilder:
             table_name="test.entity",
             records=records,
             primary_keys=["id"],
+            completed_at=datetime(2026, 1, 1, 10, 0, tzinfo=UTC),
         )
 
         assert metadata.lineage.transform_version == "1.5.0"

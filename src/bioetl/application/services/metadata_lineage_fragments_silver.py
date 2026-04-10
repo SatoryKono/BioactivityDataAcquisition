@@ -141,11 +141,13 @@ def _build_silver_edges(
         node for node in nodes if node.node_type == LineageNodeType.TRANSFORM
     ]
 
-    edges = manifest_edges(
+    edges: list[LineageEdge] = list(
+        manifest_edges(
         manifest=manifest_node(run_context),
         run=run,
         created_at=created_at,
         run_context=run_context,
+        )
     )
 
     edges.extend(
@@ -202,7 +204,11 @@ def build_silver_lineage_fragment(
     input_data: SilverMetadataInput,
 ) -> LineageGraphFragment:
     """Build canonical Silver lineage fragment from metadata input."""
-    created_at = fragment_timestamp(input_data.completed_at, input_data.started_at)
+    created_at = fragment_timestamp(
+        input_data.completed_at,
+        input_data.started_at,
+        run_context.started_at,
+    )
 
     # Build nodes
     nodes, composite_source_edges = _build_silver_nodes(

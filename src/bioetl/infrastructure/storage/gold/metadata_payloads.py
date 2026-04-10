@@ -10,6 +10,9 @@ from bioetl.domain.models.metadata import GoldMetadata
 from bioetl.domain.ports import GoldMetadataInput, MetadataCoordinatorPort
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.metadata.builder_base import (
+    _resolve_records_metadata_timestamp,
+)
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
@@ -80,7 +83,7 @@ def build_gold_merged_metadata_input(
         table_name=table_name,
         records=records,
         mode=GoldWriteMode.OVERWRITE,
-        completed_at=_extract_completed_at(records[0]),
+        completed_at=_extract_completed_at(records),
         transform_version=transform_version,
         transform_steps=transform_steps,
         total_bytes=0,
@@ -90,16 +93,9 @@ def build_gold_merged_metadata_input(
     )
 
 
-def _extract_completed_at(first_record: GoldRecord) -> datetime | None:
-    """Extract canonical merged-write completion timestamp from one record."""
-    completed_at_raw = first_record.get("_lineage_created_at") or first_record.get(
-        "_ingestion_ts"
-    )
-    if isinstance(completed_at_raw, str):
-        return datetime.fromisoformat(completed_at_raw)
-    if isinstance(completed_at_raw, datetime):
-        return completed_at_raw
-    return None
+def _extract_completed_at(records: list[GoldRecord]) -> datetime | None:
+    """Extract canonical merged-write completion timestamp from record metadata."""
+    return _resolve_records_metadata_timestamp(records)
 
 
 def build_gold_metadata_payload(
@@ -139,6 +135,7 @@ def build_gold_metadata_payload(
         scd_config=scd_config,
         ingestion_ts=ingestion_ts,
         run_id=run_id,
+        silver_refs=silver_refs,
         gold_schema=gold_schema,
         transform_version=transform_version,
         transform_steps=transform_steps,
@@ -184,6 +181,7 @@ def build_gold_metadata_via_fallback(
     scd_config: ScdConfig | None,
     ingestion_ts: datetime | None,
     run_id: RunID | None,
+    silver_refs: list[SilverWriteResult] | None,
     gold_schema: object | None,
     transform_version: str | None,
     transform_steps: tuple[str, ...],
@@ -202,5 +200,6 @@ def build_gold_metadata_via_fallback(
         scd_config=scd_config,
         ingestion_ts=ingestion_ts,
         run_id=run_id,
+        silver_refs=silver_refs,
         gold_schema=gold_schema,
     )

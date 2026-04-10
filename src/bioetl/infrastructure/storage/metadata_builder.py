@@ -9,7 +9,7 @@ Implements RULES.md §2.3 and ADR-026 for metadata creation.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl import __version__ as BIOETL_VERSION
@@ -19,9 +19,12 @@ from bioetl.domain.services.composite_metadata_helpers import (
 from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
 from bioetl.domain.types import JsonDict, ScdConfig
 from bioetl.infrastructure.storage.metadata.builder_base import (
+    _build_gold_artifact_id,
+    _build_silver_artifact_id,
     _get_git_commit_cached,
     _MetadataBuilderBase,
     _parse_table_name,
+    _resolve_metadata_timestamp,
 )
 
 if TYPE_CHECKING:
@@ -32,6 +35,7 @@ if TYPE_CHECKING:
         DQSummary,
         GoldMetadata,
         GoldOutputExt,
+        LineageMetadata,
         PipelineMetadata,
         RuntimeMetadata,
         SCDMetadata,
@@ -60,6 +64,7 @@ class SilverMetadataBuilder(_MetadataBuilderBase):
         sources_used: list[str] | None = None,
         version_after: int | None = None,
         partition_by: list[str] | None = None,
+        completed_at: datetime | None = None,
     ) -> SilverMetadata:
         """Build Silver metadata for merged composite data.
 
@@ -73,7 +78,10 @@ class SilverMetadataBuilder(_MetadataBuilderBase):
             SilverOutputExt,
         )
 
-        now = datetime.now(UTC)
+        now = _resolve_metadata_timestamp(
+            explicit=completed_at,
+            records=records,
+        )
         runtime, pipeline, lineage = self._build_composite_runtime_pipeline_lineage(
             table_name=table_name,
             now=now,
@@ -90,6 +98,7 @@ class SilverMetadataBuilder(_MetadataBuilderBase):
         )
         dq_summary = self._build_merged_dq_summary(records)
         output = BaseOutputMetadata(
+            artifact_id=_build_silver_artifact_id(table_name, version_after),
             record_count=len(records),
             write_started_at=now,
             write_completed_at=now,
@@ -157,6 +166,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         *,
         records: list[JsonDict],  # Any: heterogeneous metadata values
         now: datetime,
+        artifact_id: str,
     ) -> tuple[DQSummary, BaseOutputMetadata, GoldOutputExt | CompositeOutputExt]:
         """Build DQ summary and unified output structures for fallback mode.
 
@@ -175,7 +185,29 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
             records=records,
             now=now,
         )
+        output.artifact_id = artifact_id
         return dq_summary, output, output_ext
+
+    def _build_fallback_lineage(
+        self,
+        *,
+        silver_refs: list[object] | None,
+    ) -> "LineageMetadata":
+        """Build deterministic fallback lineage metadata."""
+        from bioetl.domain.models.metadata import LineageMetadata
+
+        source_tables: dict[str, int] = {}
+        for ref in silver_refs or []:
+            table_name = getattr(ref, "table_name", None)
+            delta_version = getattr(ref, "delta_version", None)
+            if isinstance(table_name, str) and isinstance(delta_version, int):
+                source_tables[table_name] = delta_version
+
+        return LineageMetadata(
+            transform_version=self._transform_version or "1.0.0",
+            transform_steps=list(self._transform_steps),
+            source_tables=source_tables,
+        )
 
     def _build_fallback_scd_metadata(
         self,
@@ -214,6 +246,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         scd_config: ScdConfig | None = None,
         ingestion_ts: datetime | None = None,
         run_id: object | None = None,
+        silver_refs: list[object] | None = None,
         gold_schema: object | None = None,
     ) -> GoldMetadata:
         """Build Gold metadata using fallback logic (no coordinator).
@@ -221,21 +254,22 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         Returns:
             GoldMetadata instance with runtime, pipeline, DQ, SCD, and environment info.
         """
-        from bioetl.domain.models.metadata import (
-            GoldMetadata,
-            LineageMetadata,
-        )
+        from bioetl.domain.models.metadata import GoldMetadata
 
-        now = ingestion_ts or datetime.now(UTC)
+        now = _resolve_metadata_timestamp(
+            explicit=ingestion_ts,
+            records=records,
+        )
         runtime, pipeline = self._build_fallback_runtime_and_pipeline(
             table_name=table_name,
             now=now,
             run_id=run_id,
         )
-        lineage = LineageMetadata()
+        lineage = self._build_fallback_lineage(silver_refs=silver_refs)
         dq_summary, output, output_ext = self._build_fallback_dq_and_output(
             records=records,
             now=now,
+            artifact_id=_build_gold_artifact_id(table_name),
         )
         scd = self._build_fallback_scd_metadata(mode=mode, scd_config=scd_config)
         schema_info = extract_schema_metadata(gold_schema)
@@ -284,6 +318,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         gold_schema: object | None = None,
+        completed_at: datetime | None = None,
     ) -> GoldMetadata:
         """Build Gold metadata for merged composite data.
 
@@ -294,7 +329,10 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
             GoldMetadata,
         )
 
-        now = datetime.now(UTC)
+        now = _resolve_metadata_timestamp(
+            explicit=completed_at,
+            records=records,
+        )
         runtime, pipeline, lineage = self._build_composite_runtime_pipeline_lineage(
             table_name=table_name,
             now=now,
@@ -306,6 +344,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
             records=records,
             now=now,
         )
+        output.artifact_id = _build_gold_artifact_id(table_name)
         schema_info = extract_schema_metadata(gold_schema)
 
         return GoldMetadata(
