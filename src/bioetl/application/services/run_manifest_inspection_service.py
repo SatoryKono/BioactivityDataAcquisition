@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+from typing import cast
 from uuid import UUID
 
 from bioetl.application.services.run_manifest_diagnostics import (
@@ -19,6 +20,8 @@ __all__ = [
     "RunManifestInspectionResult",
     "RunManifestInspectionService",
 ]
+
+_OCCURRENCE_ONLY_DIFF_FIELDS = frozenset({"manifest_id", "run_id", "created_at"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,12 +67,26 @@ class RunManifestDiffResult:
     left_manifest_id: str
     right_manifest_id: str
     differences: tuple[RunManifestDiffEntry, ...]
+    classification: str = "identical"
+    semantic_equivalent: bool = True
+    occurrence_only: bool = False
+    occurrence_difference_fields: tuple[str, ...] = ()
+    semantic_difference_fields: tuple[str, ...] = ()
+    noncanonical_difference_fields: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         """Return JSON/YAML-safe payload for CLI presentation."""
         return {
             "left_manifest_id": self.left_manifest_id,
             "right_manifest_id": self.right_manifest_id,
+            "classification": self.classification,
+            "semantic_equivalent": self.semantic_equivalent,
+            "occurrence_only": self.occurrence_only,
+            "occurrence_difference_fields": list(self.occurrence_difference_fields),
+            "semantic_difference_fields": list(self.semantic_difference_fields),
+            "noncanonical_difference_fields": list(
+                self.noncanonical_difference_fields
+            ),
             "differences": [entry.to_dict() for entry in self.differences],
         }
 
@@ -113,10 +130,30 @@ class RunManifestInspectionService:
             for field in sorted(set(left_payload) | set(right_payload))
             if not self._json_equal(left_payload.get(field), right_payload.get(field))
         )
+        classification = self._classify_manifest_diff(
+            left_manifest=left_manifest,
+            right_manifest=right_manifest,
+            differences=diff_fields,
+        )
         return RunManifestDiffResult(
             left_manifest_id=left_manifest.manifest_id,
             right_manifest_id=right_manifest.manifest_id,
             differences=diff_fields,
+            classification=str(classification["classification"]),
+            semantic_equivalent=bool(classification["semantic_equivalent"]),
+            occurrence_only=bool(classification["occurrence_only"]),
+            occurrence_difference_fields=cast(
+                tuple[str, ...],
+                classification["occurrence_difference_fields"],
+            ),
+            semantic_difference_fields=cast(
+                tuple[str, ...],
+                classification["semantic_difference_fields"],
+            ),
+            noncanonical_difference_fields=cast(
+                tuple[str, ...],
+                classification["noncanonical_difference_fields"],
+            ),
         )
 
     def _resolve_manifest(self, identifier: str) -> RunManifest:
@@ -175,3 +212,58 @@ class RunManifestInspectionService:
             sort_keys=True,
             default=str,
         )
+
+    @staticmethod
+    def _classify_manifest_diff(
+        *,
+        left_manifest: RunManifest,
+        right_manifest: RunManifest,
+        differences: tuple[RunManifestDiffEntry, ...],
+    ) -> dict[str, object]:
+        """Classify a manifest diff into occurrence-only vs semantic drift."""
+        diff_fields = tuple(entry.field for entry in differences)
+        if not diff_fields:
+            return {
+                "classification": "identical",
+                "semantic_equivalent": True,
+                "occurrence_only": False,
+                "occurrence_difference_fields": (),
+                "semantic_difference_fields": (),
+                "noncanonical_difference_fields": (),
+            }
+
+        occurrence_difference_fields = tuple(
+            field for field in diff_fields if field in _OCCURRENCE_ONLY_DIFF_FIELDS
+        )
+        non_occurrence_fields = tuple(
+            field for field in diff_fields if field not in _OCCURRENCE_ONLY_DIFF_FIELDS
+        )
+        semantic_equivalent = (
+            left_manifest.execution_fingerprint == right_manifest.execution_fingerprint
+        )
+        if semantic_equivalent and not non_occurrence_fields:
+            return {
+                "classification": "occurrence_only",
+                "semantic_equivalent": True,
+                "occurrence_only": True,
+                "occurrence_difference_fields": occurrence_difference_fields,
+                "semantic_difference_fields": (),
+                "noncanonical_difference_fields": (),
+            }
+        if semantic_equivalent:
+            return {
+                "classification": "semantic_equivalent_with_noncanonical_differences",
+                "semantic_equivalent": True,
+                "occurrence_only": False,
+                "occurrence_difference_fields": occurrence_difference_fields,
+                "semantic_difference_fields": (),
+                "noncanonical_difference_fields": non_occurrence_fields,
+            }
+        return {
+            "classification": "semantic_drift",
+            "semantic_equivalent": False,
+            "occurrence_only": False,
+            "occurrence_difference_fields": occurrence_difference_fields,
+            "semantic_difference_fields": non_occurrence_fields or diff_fields,
+            "noncanonical_difference_fields": (),
+        }

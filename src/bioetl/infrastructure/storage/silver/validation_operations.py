@@ -13,6 +13,7 @@ from bioetl.domain.exceptions import (
     PolicyViolationError,
     SchemaViolationError,
 )
+from bioetl.domain.transformations import canonical_json_dumps, normalize_for_hash
 from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode
 from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _collect_key_violations as _collect_key_violations,
@@ -57,6 +58,22 @@ __all__ = [
 ]  # NOTE: _check_schema_drift, _detect_schema_drift, _build_* re-exported from schema_drift_operations
 
 _VERSIONED_TABLE_SUFFIX_RE = re.compile(r"__v\d+_\d+_\d+$")
+
+
+def _primary_key_tuple(
+    record: BronzeRecord,
+    primary_keys: list[str],
+) -> tuple[object, ...]:
+    """Return one stable primary-key tuple for a batch record."""
+    return tuple(record.get(primary_key) for primary_key in primary_keys)
+
+
+def _content_identity(record: BronzeRecord) -> str:
+    """Return deterministic content identity for one batch record."""
+    content_hash = record.get("content_hash")
+    if content_hash is not None:
+        return str(content_hash)
+    return str(canonical_json_dumps(normalize_for_hash(record)))
 
 
 @dataclass(frozen=True, slots=True)
@@ -161,16 +178,44 @@ def _deduplicate_by_primary_keys_impl(
     records: list[BronzeRecord],
     primary_keys: list[str],
 ) -> list[BronzeRecord]:
-    """Deduplicate records based on primary keys in the current batch."""
+    """Deduplicate records by business key using deterministic content identity.
+
+    The current-batch contract mirrors Silver retention compaction:
+    - exact duplicate rows for one business key collapse by
+      ``(primary_keys, content identity)``
+    - conflicting rows for one business key choose the lexicographically
+      smallest content identity
+
+    This makes winner selection independent of incoming row order.
+    """
     if not primary_keys or not records:
         return records
 
-    # Any: primary key values are heterogeneous (str | int | None)
-    unique_records: dict[tuple[Any, ...], BronzeRecord] = {}
-    for record in records:
-        key = tuple(record.get(primary_key) for primary_key in primary_keys)
-        unique_records[key] = record
-    return list(unique_records.values())
+    ranked_records = sorted(
+        (
+            (
+                _primary_key_tuple(record, primary_keys),
+                _content_identity(record),
+                record,
+            )
+            for record in records
+        ),
+        key=lambda item: (item[0], item[1]),
+    )
+
+    seen_exact_keys: set[tuple[tuple[Any, ...], str]] = set()
+    seen_primary_keys: set[tuple[Any, ...]] = set()
+    deduplicated: list[BronzeRecord] = []
+    for primary_key, content_identity, record in ranked_records:
+        exact_key = (primary_key, content_identity)
+        if exact_key in seen_exact_keys:
+            continue
+        seen_exact_keys.add(exact_key)
+        if primary_key in seen_primary_keys:
+            continue
+        seen_primary_keys.add(primary_key)
+        deduplicated.append(record)
+    return deduplicated
 
 
 def _to_policy_write_mode_impl(mode: SilverWriteMode) -> WriteMode:
