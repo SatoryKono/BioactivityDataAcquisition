@@ -324,3 +324,47 @@ def test_metadata_builder_compat_module_is_confined_to_dedicated_tests(
         "metadata_builder_composite_helpers leaked beyond dedicated compatibility "
         "coverage:\n" + "\n".join(violations)
     )
+
+
+@pytest.mark.architecture
+def test_metadata_builder_module_file_has_been_removed() -> None:
+    """Legacy storage metadata builder module should stay deleted."""
+    metadata_builder_path = (
+        Path("src/bioetl/infrastructure/storage/metadata_builder.py")
+    )
+    assert not metadata_builder_path.exists(), (
+        "Legacy storage metadata builder must stay removed: "
+        "src/bioetl/infrastructure/storage/metadata_builder.py"
+    )
+
+
+@pytest.mark.architecture
+def test_metadata_builder_module_is_not_used_in_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src must not import the removed metadata_builder module."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name="bioetl.infrastructure.storage.metadata_builder",
+        allowed_files=frozenset(),
+    )
+    assert not violations, (
+        "metadata_builder leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_metadata_builder_module_is_not_used_in_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Tests must not keep importing the removed metadata_builder module."""
+    violations = _iter_module_import_violations(
+        test_ast_cache,
+        module_name="bioetl.infrastructure.storage.metadata_builder",
+        allowed_files=frozenset(),
+    )
+    assert not violations, (
+        "metadata_builder leaked into tests after coordinator-only hardening:\n"
+        + "\n".join(violations)
+    )
