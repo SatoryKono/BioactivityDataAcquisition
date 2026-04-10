@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-10T09:26:29.347850+00:00",
+  "generated_at": "2026-04-10T09:32:48.564237+00:00",
   "summary": {
     "total_scripts": 289,
     "status_counts": {
@@ -4318,32 +4318,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 114,
-          "source_group": "docs",
-          "text": "| Matrix generation | [generate_chembl_activity_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_chembl_activity_field_matrix.py) | Deterministically emit"
-        },
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 195,
-          "source_group": "docs",
-          "text": "- [generate_chembl_activity_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_chembl_activity_field_matrix.py)"
-        },
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 414,
-          "source_group": "docs",
-          "text": "- [generate_chembl_activity_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_chembl_activity_field_matrix.py) already generates deterministic artifacts"
-        },
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 505,
-          "source_group": "docs",
-          "text": "python3 scripts/docs/generate_chembl_activity_field_matrix.py --check"
-        },
         {
           "path": "scripts/docs/README.md",
           "line": 22,
@@ -4384,8 +4360,26 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
+          "line": 117,
+          "source_group": "docs",
+          "text": "| Matrix generation | [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) | Determin"
+        },
+        {
+          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
+          "line": 198,
+          "source_group": "docs",
+          "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py)"
+        },
+        {
+          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
+          "line": 450,
+          "source_group": "docs",
+          "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 23,

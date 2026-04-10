@@ -340,12 +340,13 @@ run_auto_fix() {
     [[ "$MODE" == "auto" ]] || return 0
     [[ "$RUN_AUTO_FIX" == "1" ]] || return 0
 
-    run_step inventory-sync \
-        "$PYTHON_BIN" -m scripts.repo sync-inventory --write
     run_step integration-vcr-policy-sync \
         "$PYTHON_BIN" -m scripts.qa sync-integration-vcr-policy --write
     run_step repo-identity-sync \
         "$PYTHON_BIN" -m scripts.docs sync-repo-identity --write
+    # Keep inventory refresh last because sync-repo-identity may rewrite script files.
+    run_step inventory-sync \
+        "$PYTHON_BIN" -m scripts.repo sync-inventory --write
 }
 
 run_repo_checks() {
