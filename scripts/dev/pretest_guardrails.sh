@@ -347,6 +347,8 @@ run_auto_fix() {
     # Keep inventory refresh last because sync-repo-identity may rewrite script files.
     run_step inventory-sync \
         "$PYTHON_BIN" -m scripts.repo sync-inventory --write
+    run_step hotspot-family-baseline-sync \
+        "$PYTHON_BIN" -m scripts.qa report-family-baseline --update
 }
 
 run_repo_checks() {

@@ -180,13 +180,13 @@ class TestCheckpointCompatibilityService:
             records_processed=1000,
             dq_contract_compatibility_hash="same_hash",
             pipeline_version="1.0.0",
-            effective_config_hash="cfg-new",
+            effective_config_hash="a" * 64,
         )
         checkpoint = CheckpointMetadata(
             records_processed=500,
             dq_contract_compatibility_hash="same_hash",
             pipeline_version="1.0.0",
-            effective_config_hash="cfg-old",
+            effective_config_hash="b" * 64,
         )
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)

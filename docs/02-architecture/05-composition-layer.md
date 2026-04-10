@@ -157,7 +157,8 @@ import paths.
 - `execution_api.py`, `services_api.py`, `resources_api.py` — узкие sanctioned public APIs
   для новых internal call sites в `interfaces`.
 - `composite_api.py`, `observability_api.py` — узкие façade-модули для composite runtime
-  и observability-related call sites.
+  и observability-related call sites; `observability_api.py` является каноническим
+  public seam для metrics bootstrap и operator diagnostics bundle.
 - `_pipeline_execution.py`, `_resource_management.py`, `_services.py` — internal implementation
   modules; прямые импорты вне `composition/` запрещены policy-тестами.
 
