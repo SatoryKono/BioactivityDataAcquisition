@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+from types import ModuleType
 from unittest import mock
 
 from bioetl.composition import observability_api
@@ -7,10 +9,13 @@ from bioetl.composition import observability_api
 
 def test_get_metrics_service_delegates_to_services_api() -> None:
     expected = mock.Mock()
-    with mock.patch(
-        "bioetl.composition.services_api.get_metrics_service",
-        return_value=expected,
-    ) as mock_impl:
+    fake_services_api = ModuleType("bioetl.composition.services_api")
+    mock_impl = mock.Mock(return_value=expected)
+    fake_services_api.get_metrics_service = mock_impl
+    with mock.patch.dict(
+        sys.modules,
+        {"bioetl.composition.services_api": fake_services_api},
+    ):
         result = observability_api.get_metrics_service()
 
     assert result is expected
@@ -19,10 +24,13 @@ def test_get_metrics_service_delegates_to_services_api() -> None:
 
 def test_get_audit_service_delegates_to_services_api() -> None:
     expected = mock.Mock()
-    with mock.patch(
-        "bioetl.composition.services_api.get_audit_service",
-        return_value=expected,
-    ) as mock_impl:
+    fake_services_api = ModuleType("bioetl.composition.services_api")
+    mock_impl = mock.Mock(return_value=expected)
+    fake_services_api.get_audit_service = mock_impl
+    with mock.patch.dict(
+        sys.modules,
+        {"bioetl.composition.services_api": fake_services_api},
+    ):
         result = observability_api.get_audit_service()
 
     assert result is expected
@@ -31,10 +39,13 @@ def test_get_audit_service_delegates_to_services_api() -> None:
 
 def test_get_observability_workflow_service_delegates_to_services_api() -> None:
     expected = mock.Mock()
-    with mock.patch(
-        "bioetl.composition.services_api.get_observability_workflow_service",
-        return_value=expected,
-    ) as mock_impl:
+    fake_services_api = ModuleType("bioetl.composition.services_api")
+    mock_impl = mock.Mock(return_value=expected)
+    fake_services_api.get_observability_workflow_service = mock_impl
+    with mock.patch.dict(
+        sys.modules,
+        {"bioetl.composition.services_api": fake_services_api},
+    ):
         result = observability_api.get_observability_workflow_service()
 
     assert result is expected

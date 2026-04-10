@@ -98,17 +98,17 @@ def test_dead_code_candidates_statement_filters_family_and_blockers() -> None:
     assert "MATCH (candidate:retirement_candidate)" in statement
     assert "$name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name" in statement
     assert "(candidate)-[:CANDIDATE_FOR_REMOVAL]->(target)" in statement
-    assert "(candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle)" in statement
+    assert "candidate.blocked_by_current_cycle_target_name AS blocked_by_cycle" in statement
     assert "ORDER BY candidate.deletion_score DESC" in statement
 
 
 def test_current_cycle_code_statement_filters_family_and_targets() -> None:
     statement = _current_cycle_code_statement()
 
-    assert "MATCH (cycle:development_cycle_surface)" in statement
-    assert "$name = 'all' OR cycle.family_name = $name OR cycle.target_name = $name" in statement
-    assert "(target)-[:OWNED_BY_CYCLE]->(cycle)" in statement
-    assert "ORDER BY cycle.cycle_score DESC" in statement
+    assert "MATCH (target)" in statement
+    assert "coalesce(target.current_cycle_status, '') <> ''" in statement
+    assert "$name = 'all' OR target.family_name = $name OR target.name = $name" in statement
+    assert "ORDER BY target.current_cycle_score DESC" in statement
 
 
 def test_overengineered_candidates_statement_filters_family_and_complexity_scores() -> None:
@@ -117,6 +117,7 @@ def test_overengineered_candidates_statement_filters_family_and_complexity_score
     assert "MATCH (candidate:complexity_candidate)" in statement
     assert "$name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name" in statement
     assert "(candidate)-[:CANDIDATE_FOR_SIMPLIFICATION]->(target)" in statement
+    assert "candidate.blocked_by_current_cycle_target_name AS blocked_by_cycle" in statement
     assert "ORDER BY candidate.simplification_score DESC" in statement
 
 
@@ -133,9 +134,8 @@ def test_simplification_blockers_statement_collects_cycles_and_blockers() -> Non
     statement = _simplification_blockers_statement()
 
     assert "MATCH (candidate:complexity_candidate)" in statement
-    assert "(candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle)" in statement
     assert "[rel:JUSTIFIED_BY_RUNTIME|BLOCKED_BY_VARIANCE]" in statement
-    assert "collect(DISTINCT cycle.name) AS cycle_blockers" in statement
+    assert "[candidate.blocked_by_current_cycle_target_name] AS cycle_blockers" in statement
 
 
 def test_format_rows_renders_operator_summary() -> None:
