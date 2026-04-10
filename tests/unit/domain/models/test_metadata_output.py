@@ -34,6 +34,7 @@ class TestBaseOutputMetadata:
         """GIVEN no arguments WHEN creating BaseOutputMetadata THEN defaults applied."""
         output = BaseOutputMetadata()
 
+        assert output.artifact_id is None
         assert output.record_count == 0
         assert output.total_bytes == 0
         assert output.content_hash is None
@@ -47,6 +48,7 @@ class TestBaseOutputMetadata:
         completed = datetime(2025, 1, 1, 12, 0, 5, 500000, tzinfo=UTC)
 
         output = BaseOutputMetadata(
+            artifact_id="silver:chembl.activity@7",
             record_count=1000,
             total_bytes=50000,
             content_hash="sha256:abc123",
@@ -54,6 +56,7 @@ class TestBaseOutputMetadata:
             write_completed_at=completed,
         )
 
+        assert output.artifact_id == "silver:chembl.activity@7"
         assert output.record_count == 1000
         assert output.total_bytes == 50000
         assert output.content_hash == "sha256:abc123"

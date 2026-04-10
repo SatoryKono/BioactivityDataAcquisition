@@ -391,6 +391,10 @@ def _load_filtered_rows(
     include_payload_preview: bool,
 ) -> list[JsonDict]:
     """Read Silver-filter rows and apply scoped filtering in-memory."""
+    pipeline_single = _single_filter_value(pipeline)
+    if not pipeline_single:
+        raise ValueError("Filtered quarantine reads require a scoped pipeline")
+
     try:
         dt = DeltaTable(base_path, storage_options=storage_options)
     except TableNotFoundError:
@@ -406,10 +410,7 @@ def _load_filtered_rows(
     if payload_hash_single:
         filters.append(("payload_hash", "=", payload_hash_single))
 
-    partitions: list[tuple[str, str, object]] | None = None
-    pipeline_single = _single_filter_value(pipeline)
-    if pipeline_single:
-        partitions = [("pipeline", "=", pipeline_single)]
+    partitions: list[tuple[str, str, object]] = [("pipeline", "=", pipeline_single)]
 
     arrow_table = dt.to_pyarrow_table(
         partitions=partitions,
@@ -490,6 +491,10 @@ def get_filtered_record(
     pipeline: str | None = None,
 ) -> JsonDict | None:
     """Return detailed Silver-filter record by payload hash."""
+    pipeline_single = _single_filter_value(pipeline)
+    if not pipeline_single:
+        raise ValueError("Filtered quarantine record lookup requires a scoped pipeline")
+
     try:
         dt = DeltaTable(base_path, storage_options=storage_options)
     except TableNotFoundError:
@@ -499,10 +504,7 @@ def get_filtered_record(
         ("error_code", "=", "FILTERED_OUT_SILVER"),
         ("payload_hash", "=", payload_hash),
     ]
-    partitions: list[tuple[str, str, object]] | None = None
-    pipeline_single = _single_filter_value(pipeline)
-    if pipeline_single:
-        partitions = [("pipeline", "=", pipeline_single)]
+    partitions: list[tuple[str, str, object]] = [("pipeline", "=", pipeline_single)]
 
     arrow_table = dt.to_pyarrow_table(
         partitions=partitions,

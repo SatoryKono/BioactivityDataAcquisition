@@ -15,6 +15,7 @@ from typing import get_type_hints
 import pytest
 
 from bioetl.domain import ports
+from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
 
 # ============================================================================
 # Port Lifecycle Contract Tests
@@ -120,6 +121,19 @@ class TestLoggerPortContract:
         """LoggerPort MUST have bind() for context propagation."""
         assert hasattr(ports.LoggerPort, "bind"), (
             "LoggerPort MUST define bind() for structured context"
+        )
+
+
+class TestDQMonitorPortTypingContract:
+    """Tests for typed DQ anomaly boundary contract."""
+
+    def test_dq_monitor_port_returns_typed_domain_dto(self) -> None:
+        """DQMonitorPort.check_quality() MUST return domain-owned DQAnomaly DTOs."""
+        hints = get_type_hints(ports.DQMonitorPort.check_quality)
+
+        assert hints["return"] == list[DQAnomaly], (
+            "DQMonitorPort.check_quality() MUST return list[DQAnomaly] "
+            "instead of Any or infrastructure-shaped anomaly objects."
         )
 
 

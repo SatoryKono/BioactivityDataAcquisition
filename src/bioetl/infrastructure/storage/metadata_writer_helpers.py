@@ -256,9 +256,15 @@ def _record_artifact_publication(
         raise RuntimeError(
             "Control-plane artifact publication requires metadata.runtime.manifest_id"
         )
+    artifact_id = str(metadata.output.artifact_id or "").strip()
+    if not artifact_id:
+        raise RuntimeError(
+            "Control-plane artifact publication requires metadata.output.artifact_id"
+        )
     lineage_context = _resolve_lineage_log_context(metadata)
     details: dict[str, object] = {
         "artifact_kind": "layer_output",
+        "artifact_id": artifact_id,
         "metadata_path": metadata_path,
         "record_count": int(metadata.output.record_count),
         "total_bytes": int(metadata.output.total_bytes),

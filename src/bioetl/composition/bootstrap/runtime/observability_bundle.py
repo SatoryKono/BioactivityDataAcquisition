@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.observability import ObservabilityContractError
+from bioetl.composition.observability import (
+    ObservabilityBundle,
+    ObservabilityContractError,
+)
 from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,

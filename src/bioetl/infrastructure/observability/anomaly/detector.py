@@ -1,4 +1,4 @@
-"""AnomalyRecord detector with configurable strategy.
+"""Typed anomaly detector with configurable strategy.
 
 Main entry point for anomaly detection functionality.
 """
@@ -11,12 +11,12 @@ import statistics
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.infrastructure.observability.anomaly.detectors.zscore import ZScoreDetector
-from bioetl.infrastructure.observability.anomaly.types import (
-    AnomalyRecord,
-    AnomalySeverity,
-    AnomalyType,
+from bioetl.domain.value_objects.dq_anomaly import (
+    DQAnomaly,
+    DQAnomalySeverity,
+    DQAnomalyType,
 )
+from bioetl.infrastructure.observability.anomaly.detectors.zscore import ZScoreDetector
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -110,7 +110,7 @@ class AnomalyDetector:
 
     def detect(
         self, metric_name: str, current_value: float, timestamp: datetime | None = None
-    ) -> AnomalyRecord | None:
+    ) -> DQAnomaly | None:
         """Detect anomaly in current value.
 
         Args:
@@ -119,7 +119,7 @@ class AnomalyDetector:
             timestamp: Timestamp for the anomaly (should be created in application layer)
 
         Returns:
-            AnomalyRecord if detected, None otherwise
+            Typed domain anomaly if detected, None otherwise.
         """
         if anomaly := self._check_thresholds(metric_name, current_value, timestamp):
             return anomaly
@@ -137,11 +137,11 @@ class AnomalyDetector:
 
     def _check_thresholds(
         self, metric_name: str, current_value: float, timestamp: datetime | None = None
-    ) -> AnomalyRecord | None:
+    ) -> DQAnomaly | None:
         """Check if the current value exceeds configured thresholds.
 
         Returns:
-            AnomalyRecord if a configured threshold is exceeded, None otherwise.
+            Typed domain anomaly if a configured threshold is exceeded, None otherwise.
         """
         if metric_name not in self._thresholds:
             return None
@@ -163,11 +163,11 @@ class AnomalyDetector:
         min_val: float,
         max_val: float,
         timestamp: datetime,
-    ) -> AnomalyRecord:
+    ) -> DQAnomaly:
         """Create anomaly for threshold breach.
 
         Returns:
-            AnomalyRecord instance with THRESHOLD_EXCEEDED type and CRITICAL severity.
+            Typed domain anomaly with threshold-exceeded semantics.
         """
         baseline_mean = (min_val + max_val) / 2
         baseline_stddev = (max_val - min_val) / 4
@@ -185,13 +185,13 @@ class AnomalyDetector:
                 f"Value {current_value:.2f} exceeds maximum threshold {max_val:.2f}"
             )
 
-        return AnomalyRecord(
+        return DQAnomaly(
             metric_name=metric_name,
             current_value=current_value,
             baseline_mean=baseline_mean,
             baseline_stddev=baseline_stddev,
-            anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
-            severity=AnomalySeverity.CRITICAL,
+            anomaly_type=DQAnomalyType.THRESHOLD_EXCEEDED,
+            severity=DQAnomalySeverity.CRITICAL,
             z_score=z_score,
             timestamp=timestamp,
             message=message,

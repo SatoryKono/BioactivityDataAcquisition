@@ -810,7 +810,10 @@ class TestUnifiedQuarantineFilteredExplorer:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = await quarantine.get_filtered_record(payload_hash="missing")
+        result = await quarantine.get_filtered_record(
+            payload_hash="missing",
+            pipeline="test",
+        )
 
         assert result is None
 
@@ -892,10 +895,10 @@ class TestUnifiedQuarantineFilteredExplorer:
         assert result["run_types"] == ["incremental"]
 
     @pytest.mark.asyncio
-    async def test_list_filtered_records_supports_multi_pipeline_scope(
+    async def test_list_filtered_records_requires_scoped_pipeline(
         self, quarantine, mock_delta_table
     ):
-        """List endpoint should support multi-pipeline CSV scope."""
+        """List endpoint should reject unscoped or multi-pipeline reads."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
         mock_arrow_table.to_pylist.return_value = [
@@ -923,21 +926,20 @@ class TestUnifiedQuarantineFilteredExplorer:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = await quarantine.list_filtered_records(
-            pipeline="chembl_activity,pubchem_activity",
-            limit=50,
-            offset=0,
-        )
-
-        assert result["total"] == 2
-        pipelines = {item["pipeline"] for item in result["items"]}
-        assert pipelines == {"chembl_activity", "pubchem_activity"}
+        with pytest.raises(
+            ValueError, match="Filtered quarantine reads require a scoped pipeline"
+        ):
+            await quarantine.list_filtered_records(
+                pipeline="chembl_activity,pubchem_activity",
+                limit=50,
+                offset=0,
+            )
 
     @pytest.mark.asyncio
-    async def test_list_filtered_records_treats_grafana_all_tokens_as_wildcards(
+    async def test_list_filtered_records_rejects_grafana_all_scope_tokens(
         self, quarantine, mock_delta_table
     ):
-        """Grafana $__all markers should not over-filter record-level rows."""
+        """Grafana $__all markers should not bypass scoped pipeline enforcement."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
         mock_arrow_table.to_pylist.return_value = [
@@ -973,24 +975,23 @@ class TestUnifiedQuarantineFilteredExplorer:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = await quarantine.list_filtered_records(
-            pipeline="$__all",
-            run_type="$__all",
-            reason_code="$__all",
-            field="$__all",
-            limit=50,
-            offset=0,
-        )
-
-        assert result["total"] == 2
-        pipelines = {item["pipeline"] for item in result["items"]}
-        assert pipelines == {"chembl_activity", "pubchem_activity"}
+        with pytest.raises(
+            ValueError, match="Filtered quarantine reads require a scoped pipeline"
+        ):
+            await quarantine.list_filtered_records(
+                pipeline="$__all",
+                run_type="$__all",
+                reason_code="$__all",
+                field="$__all",
+                limit=50,
+                offset=0,
+            )
 
     @pytest.mark.asyncio
-    async def test_get_filtered_filter_options_without_pipeline_scope(
+    async def test_get_filtered_filter_options_requires_pipeline_scope(
         self, quarantine, mock_delta_table
     ):
-        """Filter options should include pipelines when pipeline scope is omitted."""
+        """Filter options should reject unscoped pipeline reads."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
         mock_arrow_table.to_pylist.return_value = [
@@ -1026,10 +1027,10 @@ class TestUnifiedQuarantineFilteredExplorer:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = await quarantine.get_filtered_filter_options(pipeline=None)
-
-        assert result["pipelines"] == ["chembl_activity", "pubchem_activity"]
-        assert result["run_types"] == ["full", "incremental"]
+        with pytest.raises(
+            ValueError, match="Filtered quarantine reads require a scoped pipeline"
+        ):
+            await quarantine.get_filtered_filter_options(pipeline=None)
 
 
 @pytest.mark.unit

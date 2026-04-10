@@ -1,7 +1,4 @@
-"""Data quality monitoring using anomaly detection.
-
-Combines multiple detectors to monitor data quality metrics.
-"""
+"""Data quality monitoring using typed domain anomaly DTOs."""
 
 from __future__ import annotations
 
@@ -11,11 +8,8 @@ __all__ = ["DataQualityMonitorService"]
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.domain.value_objects.dq_anomaly import DQAnomaly, DQAnomalySeverity
 from bioetl.infrastructure.observability.anomaly.detector import AnomalyDetector
-from bioetl.infrastructure.observability.anomaly.types import (
-    AnomalyRecord,
-    AnomalySeverity,
-)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -94,7 +88,7 @@ class DataQualityMonitorService:
 
     def check_quality(
         self, metrics: dict[str, float], timestamp: datetime | None = None
-    ) -> list[AnomalyRecord]:
+    ) -> list[DQAnomaly]:
         """Check metrics for quality issues.
 
         Args:
@@ -102,9 +96,9 @@ class DataQualityMonitorService:
             timestamp: Timestamp for anomalies (should be created in application layer)
 
         Returns:
-            List of detected anomalies
+            List of detected domain anomaly DTOs.
         """
-        anomalies: list[AnomalyRecord] = []
+        anomalies: list[DQAnomaly] = []
 
         for metric_name, current_value in metrics.items():
             anomaly = self.detector.detect(metric_name, current_value, timestamp)
@@ -124,7 +118,7 @@ class DataQualityMonitorService:
         """
         anomalies = self.check_quality(metrics, timestamp)
         critical_anomalies = [
-            a for a in anomalies if a.severity == AnomalySeverity.CRITICAL
+            a for a in anomalies if a.severity == DQAnomalySeverity.CRITICAL
         ]
 
         if critical_anomalies:

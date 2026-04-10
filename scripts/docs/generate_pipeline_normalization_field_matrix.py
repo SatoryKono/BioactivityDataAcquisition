@@ -22,6 +22,10 @@ from bioetl.application.composite.join_key_normalization import (
 )
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
+    _is_date_field,
+    _is_doi_field,
+    _is_pmid_field,
+    _is_smiles_field,
 )
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
@@ -174,25 +178,25 @@ def _processor_fallback_contract(
             "normalize_oa_status",
             "Trim textual OA status and lowercase the resulting value.",
         )
-    if processor._is_doi_field(field_name):
+    if _is_doi_field(field_name, rule_set=processor.rule_set):
         return (
             "generic_processor",
             "normalize_doi",
             "Strip DOI URL/scheme prefixes and lowercase the DOI payload.",
         )
-    if processor._is_pmid_field(field_name):
+    if _is_pmid_field(field_name, rule_set=processor.rule_set):
         return (
             "generic_processor",
             "normalize_pmid",
             "Convert PMID to canonical digits-only string; invalid or zero-like values collapse to None.",
         )
-    if processor._is_date_field(field_name):
+    if _is_date_field(field_name, rule_set=processor.rule_set):
         return (
             "generic_processor",
             "normalize_partial_date",
             "Canonicalize supported date text to the stable partial-date representation.",
         )
-    if processor._is_smiles_field(field_name):
+    if _is_smiles_field(field_name):
         return (
             "generic_processor",
             "SMILES.from_raw(mode=soft)",

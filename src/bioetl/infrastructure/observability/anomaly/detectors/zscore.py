@@ -11,12 +11,12 @@ import statistics
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.infrastructure.observability.anomaly.detectors.base import DetectorStrategy
-from bioetl.infrastructure.observability.anomaly.types import (
-    AnomalyRecord,
-    AnomalySeverity,
-    AnomalyType,
+from bioetl.domain.value_objects.dq_anomaly import (
+    DQAnomaly,
+    DQAnomalySeverity,
+    DQAnomalyType,
 )
+from bioetl.infrastructure.observability.anomaly.detectors.base import DetectorStrategy
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -41,7 +41,7 @@ class ZScoreDetector(DetectorStrategy):
         baseline: Sequence[float],
         threshold: float = 2.0,
         timestamp: datetime | None = None,
-    ) -> AnomalyRecord | None:
+    ) -> DQAnomaly | None:
         """Detect anomaly using Z-score method.
 
         Args:
@@ -52,7 +52,7 @@ class ZScoreDetector(DetectorStrategy):
             timestamp: Timestamp.
 
         Returns:
-            The AnomalyRecord | None result.
+            The typed domain anomaly result, if any.
         """
         if len(baseline) < self.MIN_SAMPLES:
             return None
@@ -93,20 +93,22 @@ class ZScoreDetector(DetectorStrategy):
         stddev: float,
         z_score: float,
         timestamp: datetime,
-    ) -> AnomalyRecord:
-        """Create AnomalyRecord object from detection results.
+    ) -> DQAnomaly:
+        """Create a typed anomaly DTO from detection results.
 
         Returns:
-            AnomalyRecord instance with SPIKE or DROP type based on deviation direction.
+            Typed domain anomaly with SPIKE or DROP type based on deviation direction.
         """
-        anomaly_type = AnomalyType.SPIKE if current_value > mean else AnomalyType.DROP
+        anomaly_type = (
+            DQAnomalyType.SPIKE if current_value > mean else DQAnomalyType.DROP
+        )
         severity = self.get_severity(z_score)
         message = (
             f"{anomaly_type.value.capitalize()} detected: value {current_value:.2f} is "
             f"{z_score:.2f} std deviations from baseline mean {mean:.2f}"
         )
 
-        return AnomalyRecord(
+        return DQAnomaly(
             metric_name=metric_name,
             current_value=current_value,
             baseline_mean=mean,
@@ -118,7 +120,7 @@ class ZScoreDetector(DetectorStrategy):
             message=message,
         )
 
-    def get_severity(self, score: float) -> AnomalySeverity:
+    def get_severity(self, score: float) -> DQAnomalySeverity:
         """Map Z-score to severity level.
 
         Args:
@@ -128,9 +130,9 @@ class ZScoreDetector(DetectorStrategy):
             Severity.
         """
         if score >= 5.0:
-            return AnomalySeverity.CRITICAL
+            return DQAnomalySeverity.CRITICAL
         if score >= 4.0:
-            return AnomalySeverity.HIGH
+            return DQAnomalySeverity.HIGH
         if score >= 3.0:
-            return AnomalySeverity.MEDIUM
-        return AnomalySeverity.LOW
+            return DQAnomalySeverity.MEDIUM
+        return DQAnomalySeverity.LOW

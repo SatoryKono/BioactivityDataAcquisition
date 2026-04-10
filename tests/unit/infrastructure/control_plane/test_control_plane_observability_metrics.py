@@ -121,8 +121,17 @@ def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
 
     assert manifest_store.get(manifest.manifest_id) == manifest
     assert manifest_store.get_by_run_id(manifest.run_id) == manifest
-    assert ledger_store.list_entries(manifest.manifest_id) == [entry]
-    assert ledger_store.list_entries_by_run_id(manifest.run_id) == [entry]
+
+    manifest_entries = ledger_store.list_entries(manifest.manifest_id)
+    run_entries = ledger_store.list_entries_by_run_id(manifest.run_id)
+    assert len(manifest_entries) == 1
+    assert len(run_entries) == 1
+    for loaded_entry in (manifest_entries[0], run_entries[0]):
+        assert loaded_entry.entry_id == entry.entry_id
+        assert loaded_entry.manifest_id == entry.manifest_id
+        assert loaded_entry.run_id == entry.run_id
+        assert loaded_entry.event_type == entry.event_type
+        assert loaded_entry.status == entry.status
 
     forbidden_keys = {
         "run_id",

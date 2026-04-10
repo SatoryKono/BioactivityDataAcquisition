@@ -1517,6 +1517,7 @@ class TestLineageFragments:
         assert isinstance(bundle, MetadataLineageBundle)
         assert bundle.metadata.lineage.source_batch_ids == ["batch-001"]
         assert bundle.metadata.lineage.transform_steps == ["normalize", "validate"]
+        assert bundle.metadata.output.artifact_id == "silver:chembl.activity@4"
         assert (
             bundle.metadata.output.lineage_fragment_id
             == bundle.lineage_fragment.fragment_id
@@ -1551,6 +1552,7 @@ class TestLineageFragments:
         assert isinstance(bundle, MetadataLineageBundle)
         assert bundle.metadata.lineage.source_tables == {"chembl.activity": 12}
         assert bundle.metadata.lineage.transform_steps == ["merge"]
+        assert bundle.metadata.output.artifact_id == "gold:chembl.activity"
         assert (
             bundle.metadata.output.lineage_fragment_id
             == bundle.lineage_fragment.fragment_id
@@ -1575,6 +1577,7 @@ class TestLineageFragments:
         bundle = coordinator.create_bronze_metadata_bundle(input_data)
 
         assert isinstance(bundle, MetadataLineageBundle)
+        assert bundle.metadata.output.artifact_id == f"bronze_batch:{input_data.batch_id}"
         assert (
             bundle.metadata.output.lineage_fragment_id
             == bundle.lineage_fragment.fragment_id
