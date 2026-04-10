@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+import re
 
 from bioetl.domain._observability_contract_primitives import (
     REQUIRED_OBSERVABILITY_FIELDS,
@@ -27,7 +28,16 @@ __all__ = [
     "missing_observability_fields",
     "normalize_observability_context",
     "normalize_observability_metric_labels",
+    "normalize_observability_pipeline_label",
 ]
+
+_VERSIONED_PIPELINE_SUFFIX_RE = re.compile(r"__v\d+_\d+_\d+$")
+_UUID_LIKE_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
+_HASH_LIKE_RE = re.compile(r"^(?:sha256:)?[0-9a-f]{32,}$", re.IGNORECASE)
+_WINDOWS_DRIVE_PREFIX_RE = re.compile(r"^[A-Za-z]:[\\/]")
 
 
 @dataclass(frozen=True)
@@ -178,7 +188,7 @@ def normalize_observability_metric_labels(
     )
     event = coerce_non_empty(normalized.get("event"), fallback="unknown_event")
     provider = coerce_non_empty(normalized.get("provider"), fallback="unknown")
-    pipeline = coerce_non_empty(normalized.get("pipeline"), fallback="unknown")
+    pipeline = normalize_observability_pipeline_label(normalized.get("pipeline"))
     severity = normalize_severity(normalized.get("severity"), fallback="info")
     error_type = coerce_non_empty(normalized.get("error_type"), fallback="none")
     return {
@@ -188,6 +198,18 @@ def normalize_observability_metric_labels(
         "severity": severity,
         "error_type": error_type,
     }
+
+
+def normalize_observability_pipeline_label(value: object) -> str:
+    """Collapse unbounded runtime values into a canonical low-cardinality label."""
+    raw_value = coerce_non_empty(value, fallback="unknown")
+    candidate = raw_value.strip()
+    if _looks_like_path(candidate):
+        candidate = _extract_path_basename(candidate)
+    candidate = _sanitize_pipeline_label(candidate)
+    if not candidate or _looks_like_unbounded_identifier(candidate):
+        return "unknown"
+    return candidate
 
 
 def missing_observability_fields(context: Mapping[str, object]) -> tuple[str, ...]:
@@ -223,3 +245,24 @@ def build_observability_contract_payload(
         context=normalized,
         metric_labels=normalize_observability_metric_labels(normalized),
     )
+
+
+def _looks_like_path(value: str) -> bool:
+    return "/" in value or "\\" in value or bool(_WINDOWS_DRIVE_PREFIX_RE.match(value))
+
+
+def _extract_path_basename(value: str) -> str:
+    parts = [part for part in re.split(r"[\\/]+", value) if part and part != "."]
+    return parts[-1] if parts else ""
+
+
+def _sanitize_pipeline_label(value: str) -> str:
+    normalized = _VERSIONED_PIPELINE_SUFFIX_RE.sub("", value.strip())
+    normalized = normalized.replace(".", "_").replace("-", "_").replace(" ", "_")
+    normalized = re.sub(r"[^A-Za-z0-9_]+", "_", normalized)
+    normalized = re.sub(r"_+", "_", normalized).strip("_").lower()
+    return normalized
+
+
+def _looks_like_unbounded_identifier(value: str) -> bool:
+    return bool(_UUID_LIKE_RE.match(value) or _HASH_LIKE_RE.match(value))

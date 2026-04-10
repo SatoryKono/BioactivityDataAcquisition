@@ -29,6 +29,10 @@ profiles в BioETL.
   curated policy surfaces, а также semantic impact-analysis layer для
   `port_surface`, `adapter_surface`, `adapter_impl_surface`,
   `pipeline_surface`, `contract_surface` и `alert_surface`.
+  Дополнительно memory хранит code-duplication layer для high-signal families:
+  `class_surface`, `function_surface`, `method_surface` и
+  `duplication_cluster`, чтобы искать повторяющуюся логику и кандидатов на
+  вынос в base/shared parent surfaces.
   Текущий ontology layer уже включает:
   `Protocol/class`-level `port_surface`,
   fine-grained `adapter_impl_surface` для concrete adapter modules,

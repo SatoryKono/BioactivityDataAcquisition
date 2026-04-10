@@ -54,6 +54,8 @@ Last verified: '2026-04-09'
    impact-analysis layer for ports, adapters, pipelines, contracts, and alert
    rules. The current sync also includes protocol/class-level domain ports,
    fine-grained `adapter_impl_surface` nodes for concrete adapter modules,
+   `class_surface` / `function_surface` / `method_surface` code surfaces,
+   `duplication_cluster` promotion candidates for high-signal families,
    richer contract-to-schema/config/control-plane/lineage links, direct pipeline
    runtime / validation / observability / test-coverage edges, and config-driven
    alert mapping from `configs/quality/neo4j_memory_mapping.yaml`, including

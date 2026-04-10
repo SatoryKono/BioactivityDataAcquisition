@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
+from itertools import permutations
 from datetime import UTC, datetime
 from dataclasses import replace
 from uuid import UUID
 
-from hypothesis import given
-from hypothesis import strategies as st
 import pytest
 
 from bioetl.application.services.run_manifest_service import (
@@ -199,54 +198,59 @@ def test_execution_fingerprint_rejects_non_finite_numeric_payloads() -> None:
         )
 
 
-@given(
-    source_refs=st.permutations(
-        (
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                query="assay_type=B",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-b",
-                        content_hash="hash-b",
-                    ),
-                ),
+_PERMUTATION_SOURCE_REFS = (
+    RunSourceRef(
+        provider="chembl",
+        entity="activity",
+        pipeline_name="chembl_activity",
+        query="assay_type=B",
+        input_snapshots=(
+            RunInputSnapshotRef(
+                snapshot_id="snapshot-b",
+                content_hash="hash-b",
             ),
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                query="assay_type=F",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-f",
-                        content_hash="hash-f",
-                    ),
-                ),
-            ),
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                query="assay_type=T",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-t",
-                        content_hash="hash-t",
-                    ),
-                ),
-            ),
-        )
+        ),
     ),
-    planned_artifacts=st.permutations(
-        (
-            RunArtifactRef(layer="bronze", path="data/output/bronze/chembl/activity"),
-            RunArtifactRef(layer="silver", path="data/output/silver/chembl/activity"),
-            RunArtifactRef(layer="gold", path="data/output/gold/chembl/activity"),
-        )
+    RunSourceRef(
+        provider="chembl",
+        entity="activity",
+        pipeline_name="chembl_activity",
+        query="assay_type=F",
+        input_snapshots=(
+            RunInputSnapshotRef(
+                snapshot_id="snapshot-f",
+                content_hash="hash-f",
+            ),
+        ),
     ),
+    RunSourceRef(
+        provider="chembl",
+        entity="activity",
+        pipeline_name="chembl_activity",
+        query="assay_type=T",
+        input_snapshots=(
+            RunInputSnapshotRef(
+                snapshot_id="snapshot-t",
+                content_hash="hash-t",
+            ),
+        ),
+    ),
+)
+
+_PERMUTATION_ARTIFACTS = (
+    RunArtifactRef(layer="bronze", path="data/output/bronze/chembl/activity"),
+    RunArtifactRef(layer="silver", path="data/output/silver/chembl/activity"),
+    RunArtifactRef(layer="gold", path="data/output/gold/chembl/activity"),
+)
+
+
+@pytest.mark.parametrize(
+    ("source_refs", "planned_artifacts"),
+    [
+        (source_refs, planned_artifacts)
+        for source_refs in permutations(_PERMUTATION_SOURCE_REFS)
+        for planned_artifacts in permutations(_PERMUTATION_ARTIFACTS)
+    ],
 )
 def test_execution_fingerprint_is_permutation_invariant_for_set_like_manifest_fields(
     source_refs: tuple[RunSourceRef, ...],
@@ -258,49 +262,8 @@ def test_execution_fingerprint_is_permutation_invariant_for_set_like_manifest_fi
     )
     canonical_request = replace(
         _make_request(),
-        source_refs=(
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                query="assay_type=B",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-b",
-                        content_hash="hash-b",
-                    ),
-                ),
-            ),
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                query="assay_type=F",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-f",
-                        content_hash="hash-f",
-                    ),
-                ),
-            ),
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                query="assay_type=T",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-t",
-                        content_hash="hash-t",
-                    ),
-                ),
-            ),
-        ),
-        planned_artifacts=(
-            RunArtifactRef(layer="bronze", path="data/output/bronze/chembl/activity"),
-            RunArtifactRef(layer="silver", path="data/output/silver/chembl/activity"),
-            RunArtifactRef(layer="gold", path="data/output/gold/chembl/activity"),
-        ),
+        source_refs=_PERMUTATION_SOURCE_REFS,
+        planned_artifacts=_PERMUTATION_ARTIFACTS,
         launch_context={"resume": False, "limit": 100},
         runtime_config={"limit": 100, "run_type": "incremental"},
         resolved_config={"entity_type": "activity", "provider": "chembl"},

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -16,8 +15,8 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.normalization import (
+    compute_manifest_execution_fingerprint,
     normalize_run_manifest_spec,
-    serialize_json_canonical,
 )
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID, RunType
@@ -327,9 +326,8 @@ class RunManifestService:
         }
 
     def _compute_execution_fingerprint(self, *, payload: dict[str, object]) -> str:
-        """Compute a deterministic fingerprint for replay/equivalence checks."""
-        canonical = serialize_json_canonical(payload)
-        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+        """Compute the canonical manifest execution fingerprint contract."""
+        return compute_manifest_execution_fingerprint(payload)
 
 
 RunManifestCreateRequest = RunManifestCreateSpec
