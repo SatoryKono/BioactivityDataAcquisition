@@ -46,7 +46,13 @@ class _InMemoryRunLedgerStore(RunLedgerPort):
         raise ValueError(f"missing watermark {after_entry_id!r}")
 
 
-def _make_manifest(run_id: RunID) -> RunManifest:
+def _make_manifest(
+    run_id: RunID,
+    *,
+    contract_ref: str | None = None,
+    contract_version: str | None = None,
+    effective_config_artifact_id: str | None = None,
+) -> RunManifest:
     return RunManifest(
         manifest_id="manifest-1",
         execution_fingerprint="fingerprint-1",
@@ -64,6 +70,9 @@ def _make_manifest(run_id: RunID) -> RunManifest:
             pipeline_version="1.0.0",
             git_commit="abc1234",
             config_hash="deadbeef",
+            contract_ref=contract_ref,
+            contract_version=contract_version,
+            effective_config_artifact_id=effective_config_artifact_id,
         ),
     )
 
@@ -90,7 +99,7 @@ def test_record_manifest_created_appends_first_control_plane_event() -> None:
         "provider": "chembl",
         "entity": "activity",
         "_diagnostic": {
-            "contract_version": "v1",
+            "diagnostic_contract_version": "v1",
             "event_type": "manifest_created",
             "event_family": "diagnostic",
             "manifest_id": "manifest-1",
@@ -120,6 +129,34 @@ def test_record_manifest_created_rejects_mismatched_manifest_identity() -> None:
         match="manifest_id must match the persisted manifest",
     ):
         service.record_manifest_created(_make_manifest(run_id))
+
+
+def test_record_run_started_uses_canonical_identity_anchor_names() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-canonical-anchors",
+    )
+
+    service.record_manifest_created(
+        _make_manifest(
+            run_id,
+            contract_ref="chembl.activity",
+            contract_version="1.2.0",
+            effective_config_artifact_id="eca-123",
+        )
+    )
+    entry = service.record_run_started()
+
+    diagnostic = (entry.details or {})["_diagnostic"]
+    assert diagnostic["diagnostic_contract_version"] == "v1"
+    assert diagnostic["contract_ref"] == "chembl.activity"
+    assert diagnostic["contract_version"] == "1.2.0"
+    assert diagnostic["effective_config_artifact_id"] == "eca-123"
+    assert "data_contract_version" not in diagnostic
 
 
 def test_record_run_started_rejects_missing_persisted_manifest_link() -> None:
@@ -160,7 +197,7 @@ def test_record_stage_started_captures_stage_and_details() -> None:
     assert entry.details == {
         "count": 1,
         "_diagnostic": {
-            "contract_version": "v1",
+            "diagnostic_contract_version": "v1",
             "event_type": "stage_started",
             "event_family": "pipeline.phase",
             "manifest_id": "manifest-1",
@@ -195,7 +232,7 @@ def test_record_run_failed_captures_message_and_metrics() -> None:
     assert entry.metrics_snapshot == {"records_fetched": 10}
     assert entry.details == {
         "_diagnostic": {
-            "contract_version": "v1",
+            "diagnostic_contract_version": "v1",
             "event_type": "run_failed",
             "event_family": "pipeline.lifecycle",
             "manifest_id": "manifest-1",
@@ -249,7 +286,7 @@ def test_record_run_finished_captures_success_metrics() -> None:
     assert entry.metrics_snapshot == {"records_gold": 9}
     assert entry.details == {
         "_diagnostic": {
-            "contract_version": "v1",
+            "diagnostic_contract_version": "v1",
             "event_type": "run_finished",
             "event_family": "pipeline.lifecycle",
             "manifest_id": "manifest-1",
@@ -279,7 +316,7 @@ def test_record_run_shutdown_captures_shutdown_metrics() -> None:
     assert entry.metrics_snapshot == {"records_silver": 3}
     assert entry.details == {
         "_diagnostic": {
-            "contract_version": "v1",
+            "diagnostic_contract_version": "v1",
             "event_type": "run_shutdown",
             "event_family": "pipeline.lifecycle",
             "manifest_id": "manifest-1",
@@ -313,7 +350,7 @@ def test_record_stage_completed_captures_stage_and_metrics() -> None:
     assert entry.details == {
         "result": "ok",
         "_diagnostic": {
-            "contract_version": "v1",
+            "diagnostic_contract_version": "v1",
             "event_type": "stage_completed",
             "event_family": "pipeline.phase",
             "manifest_id": "manifest-1",
@@ -352,7 +389,7 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
         "artifact_path": "/tmp/output/silver/chembl/activity",
         "metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml",
         "_diagnostic": {
-            "contract_version": "v1",
+            "diagnostic_contract_version": "v1",
             "event_type": "artifact_published",
             "event_family": "artifact",
             "manifest_id": "manifest-1",
@@ -411,7 +448,7 @@ def test_record_dq_policy_applied_captures_trace_anchors() -> None:
         "disposition": "fail",
         "dq_report_path": "/tmp/output/gold/chembl/activity/_dq.json",
         "_diagnostic": {
-            "contract_version": "v1",
+            "diagnostic_contract_version": "v1",
             "event_type": "dq_policy_applied",
             "event_family": "dq",
             "manifest_id": "manifest-1",
@@ -440,7 +477,7 @@ def test_record_stage_started_canonicalizes_nested_detail_order() -> None:
 
     assert list((entry.details or {}).keys()) == ["_diagnostic", "alpha", "beta"]
     assert dumps(entry.to_dict()["details"], separators=(",", ":")) == (
-        '{"_diagnostic":{"contract_version":"v1","event_family":"pipeline.phase",'
+        '{"_diagnostic":{"diagnostic_contract_version":"v1","event_family":"pipeline.phase",'
         f'"event_type":"stage_started","manifest_id":"manifest-1","run_id":"{run_id}",'
         '"stage":"seed","status":"running"},"alpha":"value","beta":{"a":2,"z":1}}'
     )

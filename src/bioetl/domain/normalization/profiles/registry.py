@@ -8,14 +8,26 @@ from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_activity import (
     CHEMBL_ACTIVITY_PROFILE,
 )
+from bioetl.domain.normalization.profiles.chembl_molecule import (
+    CHEMBL_MOLECULE_PROFILE,
+)
 from bioetl.domain.normalization.profiles.crossref_publication import (
     CROSSREF_PUBLICATION_PROFILE,
+)
+from bioetl.domain.normalization.profiles.openalex_publication import (
+    OPENALEX_PUBLICATION_PROFILE,
 )
 from bioetl.domain.normalization.profiles.pubchem_compound import (
     PUBCHEM_COMPOUND_PROFILE,
 )
 from bioetl.domain.normalization.profiles.pubmed_publication import (
     PUBMED_PUBLICATION_PROFILE,
+)
+from bioetl.domain.normalization.profiles.semanticscholar_publication import (
+    SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+)
+from bioetl.domain.normalization.profiles.uniprot_protein import (
+    UNIPROT_PROTEIN_PROFILE,
 )
 
 __all__ = [
@@ -42,9 +54,13 @@ def build_normalization_profile_registry() -> Mapping[tuple[str, str], Normaliza
     """Return the immutable registry of shipped normalization profiles."""
     return {
         ("chembl", "activity"): CHEMBL_ACTIVITY_PROFILE,
+        ("chembl", "molecule"): CHEMBL_MOLECULE_PROFILE,
         ("crossref", "publication"): CROSSREF_PUBLICATION_PROFILE,
+        ("openalex", "publication"): OPENALEX_PUBLICATION_PROFILE,
         ("pubchem", "compound"): PUBCHEM_COMPOUND_PROFILE,
         ("pubmed", "publication"): PUBMED_PUBLICATION_PROFILE,
+        ("semanticscholar", "publication"): SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+        ("uniprot", "protein"): UNIPROT_PROTEIN_PROFILE,
     }
 
 

@@ -117,6 +117,7 @@ tracked_suite_inventory:
     - tests/integration/test_cross_provider_doi_normalization.py
     governance_and_runtime_surfaces:
       control_plane:
+      - tests/integration/ci/test_reproducibility_contract_suite.py
       - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
       - tests/integration/test_preflight_health_modes.py
       - tests/integration/test_runner_lifecycle.py
