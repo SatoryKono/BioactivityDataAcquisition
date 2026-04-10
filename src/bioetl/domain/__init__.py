@@ -26,6 +26,10 @@ from __future__ import annotations
 from importlib import import_module as _import_module
 
 _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
+    "DomainEventObservabilityEnvelope": (
+        "bioetl.domain.observability_event_mapping",
+        "DomainEventObservabilityEnvelope",
+    ),
     "PipelineEvent": ("bioetl.domain.events", "PipelineEvent"),
     "composite": ("bioetl.domain.composite", "composite"),
     "constants": ("bioetl.domain.constants", "constants"),
@@ -42,6 +46,10 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "bioetl.domain.observability_contract",
         "observability_contract",
     ),
+    "map_domain_event_to_observability_event": (
+        "bioetl.domain.observability_event_mapping",
+        "map_domain_event_to_observability_event",
+    ),
     "types_config_validation": (
         "bioetl.domain.types_config_validation",
         "types_config_validation",
@@ -49,6 +57,7 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
 }
 
 __all__ = [
+    "DomainEventObservabilityEnvelope",
     "PipelineEvent",
     "composite",
     "control_plane",
@@ -56,6 +65,7 @@ __all__ = [
     "context_filtering",
     "get_version",
     "lineage",
+    "map_domain_event_to_observability_event",
     "observability_contract",
     "types_config_validation",
     # Data contracts (subpackage)
