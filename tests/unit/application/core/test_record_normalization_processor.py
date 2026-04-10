@@ -609,6 +609,161 @@ def test_crossref_publication_profile_stabilizes_identifier_date_and_set_like_co
 
 
 @pytest.mark.unit
+def test_chembl_assay_profile_makes_content_hash_invariant_for_equivalent_scalar_and_json_forms() -> None:
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="assay")
+    record_a = {
+        "entity_id": "chembl:assay-a",
+        "content_hash": "stale-a",
+        "assay_id": " CHEMBL-ASSAY-1 ",
+        "target_id": " CHEMBL-TARGET-1 ",
+        "assay_pref_name": " Example <b>Assay</b> ",
+        "confidence_score": "7",
+        "assay_taxonomy_id": "9606",
+        "score": "1.2300000000",
+        "variant_sequence_json": '{"b":2,"a":1}',
+        "_run_id": "run-a",
+        "_source_batch_id": "batch-a",
+    }
+    record_b = {
+        "entity_id": "chembl:assay-b",
+        "content_hash": "stale-b",
+        "assay_id": "CHEMBL-ASSAY-1",
+        "target_id": "CHEMBL-TARGET-1",
+        "assay_pref_name": "Example Assay",
+        "confidence_score": 7,
+        "assay_taxonomy_id": 9606.0,
+        "score": 1.23,
+        "variant_sequence_json": '{"a":1,"b":2}',
+        "_run_id": "run-b",
+        "_source_batch_id": "batch-b",
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["assay_pref_name"] == "Example Assay"
+    assert normalized_a["confidence_score"] == 7
+    assert normalized_a["assay_taxonomy_id"] == 9606.0
+    assert normalized_a["variant_sequence_json"] == '{"a":1,"b":2}'
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+
+
+@pytest.mark.unit
+def test_chembl_publication_profile_makes_content_hash_invariant_for_equivalent_identifier_and_date_forms() -> None:
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="publication")
+    record_a = {
+        "entity_id": "chembl:publication-a",
+        "content_hash": "stale-a",
+        "publication_id": "CHEMBL-PUB-1",
+        "title": " Example <b>Publication</b> ",
+        "doi": " HTTPS://doi.org/10.1000/ABC ",
+        "publication_doi": "10.1000/ABC",
+        "pmid": " PMID:12345 ",
+        "publication_pmc_id": " pmc123 ",
+        "publication_date": "2024-02",
+        "citations_received": "12",
+        "_run_id": "run-a",
+        "_source_batch_id": "batch-a",
+        "_original_id": "legacy-a",
+    }
+    record_b = {
+        "entity_id": "chembl:publication-b",
+        "content_hash": "stale-b",
+        "publication_id": "CHEMBL-PUB-1",
+        "title": "Example Publication",
+        "doi": "10.1000/abc",
+        "publication_doi": "https://doi.org/10.1000/abc",
+        "pmid": 12345,
+        "publication_pmc_id": "PMC123",
+        "publication_date": "2024-02-29",
+        "citations_received": 12,
+        "_run_id": "run-b",
+        "_source_batch_id": "batch-b",
+        "_original_id": "legacy-b",
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["title"] == "Example Publication"
+    assert normalized_a["doi"] == "10.1000/abc"
+    assert normalized_a["pmid"] == "12345"
+    assert normalized_a["publication_pmc_id"] == "PMC123"
+    assert normalized_a["publication_date"] == "2024-02-29"
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+
+
+@pytest.mark.unit
+def test_chembl_target_profile_makes_content_hash_invariant_for_equivalent_numeric_anchor_forms() -> None:
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="target")
+    record_a = {
+        "entity_id": "chembl:target-a",
+        "content_hash": "stale-a",
+        "target_id": " CHEMBL-TARGET-1 ",
+        "pref_name": " Example <b>Target</b> ",
+        "primary_component_id": "123.0",
+        "taxonomy_id": "9606",
+        "cross_references": '{"b":2,"a":1}',
+        "_run_id": "run-a",
+    }
+    record_b = {
+        "entity_id": "chembl:target-b",
+        "content_hash": "stale-b",
+        "target_id": "CHEMBL-TARGET-1",
+        "pref_name": "Example Target",
+        "primary_component_id": 123.0,
+        "taxonomy_id": 9606.0,
+        "cross_references": '{"a":1,"b":2}',
+        "_run_id": "run-b",
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["pref_name"] == "Example Target"
+    assert normalized_a["primary_component_id"] == 123.0
+    assert normalized_a["taxonomy_id"] == 9606.0
+    assert normalized_a["cross_references"] == '{"a":1,"b":2}'
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+
+
+@pytest.mark.unit
+def test_uniprot_idmapping_profile_makes_content_hash_invariant_for_equivalent_numeric_and_title_forms() -> None:
+    processor = RecordNormalizationProcessor(provider="uniprot", entity_type="idmapping")
+    record_a = {
+        "entity_id": "uniprot:idmapping-a",
+        "content_hash": "stale-a",
+        "target_id": " CHEMBL-TARGET-1 ",
+        "protein_name": " Example <b>Protein</b> ",
+        "annotation_score": "5",
+        "sequence_length": "120",
+        "sequence_mass": "12345",
+        "taxonomy_id": "9606",
+        "_run_id": "run-a",
+    }
+    record_b = {
+        "entity_id": "uniprot:idmapping-b",
+        "content_hash": "stale-b",
+        "target_id": "CHEMBL-TARGET-1",
+        "protein_name": "Example Protein",
+        "annotation_score": 5,
+        "sequence_length": 120,
+        "sequence_mass": 12345,
+        "taxonomy_id": 9606,
+        "_run_id": "run-b",
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["protein_name"] == "Example Protein"
+    assert normalized_a["annotation_score"] == 5
+    assert normalized_a["sequence_length"] == 120
+    assert normalized_a["sequence_mass"] == 12345
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+
+
+@pytest.mark.unit
 def test_pubmed_publication_profile_stabilizes_identifier_and_partial_dates() -> None:
     processor = RecordNormalizationProcessor(provider="pubmed", entity_type="publication")
 

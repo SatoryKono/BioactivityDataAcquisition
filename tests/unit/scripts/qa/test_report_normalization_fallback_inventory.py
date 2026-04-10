@@ -15,14 +15,18 @@ from scripts.qa.report_normalization_fallback_inventory import (
 def test_fallback_rows_include_unprofiled_entity_fields() -> None:
     rows = _fallback_rows()
 
+    assert not any(row["pipeline_name"] == "chembl_assay" for row in rows)
+    assert not any(row["pipeline_name"] == "chembl_publication" for row in rows)
+    assert not any(row["pipeline_name"] == "chembl_target" for row in rows)
+    assert not any(row["pipeline_name"] == "uniprot_idmapping" for row in rows)
     assert any(
-        row["pipeline_name"] == "chembl_assay"
+        row["pipeline_name"] == "chembl_assay_parameters"
         and row["field_name"] == "assay_id"
         and row["normalization_source"] == "fallback_business"
         for row in rows
     )
     assert any(
-        row["pipeline_name"] == "chembl_assay"
+        row["pipeline_name"] == "chembl_assay_parameters"
         and row["field_name"] == "_run_id"
         and row["normalization_source"] == "fallback_technical_passthrough"
         for row in rows

@@ -7,9 +7,21 @@ from bioetl.domain.normalization.profiles.chembl_activity import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
+from bioetl.domain.normalization.profiles.chembl_assay import (
+    CHEMBL_ASSAY_PROFILE,
+    CHEMBL_ASSAY_SCHEMA_FIELDS,
+)
 from bioetl.domain.normalization.profiles.chembl_molecule import (
     CHEMBL_MOLECULE_PROFILE,
     CHEMBL_MOLECULE_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.chembl_publication import (
+    CHEMBL_PUBLICATION_PROFILE,
+    CHEMBL_PUBLICATION_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.chembl_target import (
+    CHEMBL_TARGET_PROFILE,
+    CHEMBL_TARGET_SCHEMA_FIELDS,
 )
 from bioetl.domain.normalization.profiles.crossref_publication import (
     CROSSREF_PUBLICATION_PROFILE,
@@ -37,6 +49,10 @@ from bioetl.domain.normalization.profiles.semanticscholar_publication import (
     SEMANTICSCHOLAR_PUBLICATION_PROFILE,
     SEMANTICSCHOLAR_PUBLICATION_SCHEMA_FIELDS,
 )
+from bioetl.domain.normalization.profiles.uniprot_idmapping import (
+    UNIPROT_IDMAPPING_PROFILE,
+    UNIPROT_IDMAPPING_SCHEMA_FIELDS,
+)
 from bioetl.domain.normalization.profiles.uniprot_protein import (
     UNIPROT_PROTEIN_PROFILE,
     UNIPROT_PROTEIN_SCHEMA_FIELDS,
@@ -45,8 +61,14 @@ from bioetl.domain.normalization.profiles.uniprot_protein import (
 __all__ = [
     "CHEMBL_ACTIVITY_PROFILE",
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
+    "CHEMBL_ASSAY_PROFILE",
+    "CHEMBL_ASSAY_SCHEMA_FIELDS",
     "CHEMBL_MOLECULE_PROFILE",
     "CHEMBL_MOLECULE_SCHEMA_FIELDS",
+    "CHEMBL_PUBLICATION_PROFILE",
+    "CHEMBL_PUBLICATION_SCHEMA_FIELDS",
+    "CHEMBL_TARGET_PROFILE",
+    "CHEMBL_TARGET_SCHEMA_FIELDS",
     "CROSSREF_PUBLICATION_PROFILE",
     "CROSSREF_PUBLICATION_SCHEMA_FIELDS",
     "NORMALIZATION_PROFILE_REGISTRY",
@@ -58,6 +80,8 @@ __all__ = [
     "PUBMED_PUBLICATION_SCHEMA_FIELDS",
     "SEMANTICSCHOLAR_PUBLICATION_PROFILE",
     "SEMANTICSCHOLAR_PUBLICATION_SCHEMA_FIELDS",
+    "UNIPROT_IDMAPPING_PROFILE",
+    "UNIPROT_IDMAPPING_SCHEMA_FIELDS",
     "UNIPROT_PROTEIN_PROFILE",
     "UNIPROT_PROTEIN_SCHEMA_FIELDS",
     "FieldRule",

@@ -4,12 +4,16 @@ from __future__ import annotations
 
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
+    CHEMBL_ASSAY_PROFILE,
     CHEMBL_MOLECULE_PROFILE,
+    CHEMBL_PUBLICATION_PROFILE,
+    CHEMBL_TARGET_PROFILE,
     CROSSREF_PUBLICATION_PROFILE,
     OPENALEX_PUBLICATION_PROFILE,
     PUBCHEM_COMPOUND_PROFILE,
     PUBMED_PUBLICATION_PROFILE,
     SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+    UNIPROT_IDMAPPING_PROFILE,
     UNIPROT_PROTEIN_PROFILE,
 )
 from bioetl.domain.normalization.profiles.registry import (
@@ -22,7 +26,10 @@ from bioetl.domain.normalization.profiles.registry import (
 
 def test_registry_contains_canonical_chembl_activity_profile() -> None:
     assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "activity")] is CHEMBL_ACTIVITY_PROFILE
+    assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "assay")] is CHEMBL_ASSAY_PROFILE
     assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "molecule")] is CHEMBL_MOLECULE_PROFILE
+    assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "publication")] is CHEMBL_PUBLICATION_PROFILE
+    assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "target")] is CHEMBL_TARGET_PROFILE
     assert (
         NORMALIZATION_PROFILE_REGISTRY[("crossref", "publication")]
         is CROSSREF_PUBLICATION_PROFILE
@@ -37,6 +44,7 @@ def test_registry_contains_canonical_chembl_activity_profile() -> None:
         NORMALIZATION_PROFILE_REGISTRY[("semanticscholar", "publication")]
         is SEMANTICSCHOLAR_PUBLICATION_PROFILE
     )
+    assert NORMALIZATION_PROFILE_REGISTRY[("uniprot", "idmapping")] is UNIPROT_IDMAPPING_PROFILE
     assert NORMALIZATION_PROFILE_REGISTRY[("uniprot", "protein")] is UNIPROT_PROTEIN_PROFILE
 
 
@@ -73,7 +81,13 @@ def test_normalize_coordinates_rejects_blank_entity() -> None:
 
 def test_resolve_profile_uses_registry_coordinates() -> None:
     assert resolve_normalization_profile(" ChEMBL ", " Activity ") is CHEMBL_ACTIVITY_PROFILE
+    assert resolve_normalization_profile(" ChEMBL ", " Assay ") is CHEMBL_ASSAY_PROFILE
     assert resolve_normalization_profile(" ChEMBL ", " Molecule ") is CHEMBL_MOLECULE_PROFILE
+    assert (
+        resolve_normalization_profile(" ChEMBL ", " Publication ")
+        is CHEMBL_PUBLICATION_PROFILE
+    )
+    assert resolve_normalization_profile(" ChEMBL ", " Target ") is CHEMBL_TARGET_PROFILE
     assert (
         resolve_normalization_profile(" CrossRef ", " Publication ")
         is CROSSREF_PUBLICATION_PROFILE
@@ -86,5 +100,6 @@ def test_resolve_profile_uses_registry_coordinates() -> None:
         resolve_normalization_profile(" SemanticScholar ", " Publication ")
         is SEMANTICSCHOLAR_PUBLICATION_PROFILE
     )
+    assert resolve_normalization_profile(" UniProt ", " IdMapping ") is UNIPROT_IDMAPPING_PROFILE
     assert resolve_normalization_profile(" UniProt ", " Protein ") is UNIPROT_PROTEIN_PROFILE
     assert resolve_normalization_profile("chembl", None) is None

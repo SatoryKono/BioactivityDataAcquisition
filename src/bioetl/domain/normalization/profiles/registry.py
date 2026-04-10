@@ -8,8 +8,17 @@ from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_activity import (
     CHEMBL_ACTIVITY_PROFILE,
 )
+from bioetl.domain.normalization.profiles.chembl_assay import (
+    CHEMBL_ASSAY_PROFILE,
+)
 from bioetl.domain.normalization.profiles.chembl_molecule import (
     CHEMBL_MOLECULE_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_publication import (
+    CHEMBL_PUBLICATION_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_target import (
+    CHEMBL_TARGET_PROFILE,
 )
 from bioetl.domain.normalization.profiles.crossref_publication import (
     CROSSREF_PUBLICATION_PROFILE,
@@ -25,6 +34,9 @@ from bioetl.domain.normalization.profiles.pubmed_publication import (
 )
 from bioetl.domain.normalization.profiles.semanticscholar_publication import (
     SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+)
+from bioetl.domain.normalization.profiles.uniprot_idmapping import (
+    UNIPROT_IDMAPPING_PROFILE,
 )
 from bioetl.domain.normalization.profiles.uniprot_protein import (
     UNIPROT_PROTEIN_PROFILE,
@@ -54,12 +66,16 @@ def build_normalization_profile_registry() -> Mapping[tuple[str, str], Normaliza
     """Return the immutable registry of shipped normalization profiles."""
     return {
         ("chembl", "activity"): CHEMBL_ACTIVITY_PROFILE,
+        ("chembl", "assay"): CHEMBL_ASSAY_PROFILE,
         ("chembl", "molecule"): CHEMBL_MOLECULE_PROFILE,
+        ("chembl", "publication"): CHEMBL_PUBLICATION_PROFILE,
+        ("chembl", "target"): CHEMBL_TARGET_PROFILE,
         ("crossref", "publication"): CROSSREF_PUBLICATION_PROFILE,
         ("openalex", "publication"): OPENALEX_PUBLICATION_PROFILE,
         ("pubchem", "compound"): PUBCHEM_COMPOUND_PROFILE,
         ("pubmed", "publication"): PUBMED_PUBLICATION_PROFILE,
         ("semanticscholar", "publication"): SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+        ("uniprot", "idmapping"): UNIPROT_IDMAPPING_PROFILE,
         ("uniprot", "protein"): UNIPROT_PROTEIN_PROFILE,
     }
 
