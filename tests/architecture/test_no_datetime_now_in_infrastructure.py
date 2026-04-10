@@ -36,11 +36,6 @@ ALLOWED_PATHS: set[str] = {
     # Uses datetime.now(UTC) for request timestamp when caller doesn't provide one.
     # This is for audit/debugging metadata, not Bronze/Silver/Gold data determinism.
     "adapters/common/api_request_collector.py",
-    # infrastructure/storage/metadata_builder.py
-    # Uses datetime.now(UTC) for metadata sidecar timestamps (build_merged_metadata).
-    # This is for audit/lineage metadata, not Bronze/Silver/Gold data determinism.
-    # Similar to silver_writer.py and gold_writer.py timestamp usage.
-    "storage/metadata_builder.py",
 }
 
 

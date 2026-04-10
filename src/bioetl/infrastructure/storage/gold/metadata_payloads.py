@@ -22,7 +22,6 @@ __all__ = [
     "build_gold_metadata_input",
     "build_gold_metadata_payload",
     "build_gold_metadata_via_coordinator",
-    "build_gold_metadata_via_fallback",
 ]
 
 
@@ -163,36 +162,4 @@ def build_gold_metadata_via_coordinator(
             transform_version=transform_version,
             transform_steps=transform_steps,
         )
-    )
-
-
-def build_gold_metadata_via_fallback(
-    *,
-    table_name: str,
-    records: list[GoldRecord],
-    mode: GoldWriteMode,
-    scd_config: ScdConfig | None,
-    ingestion_ts: datetime | None,
-    run_id: RunID | None,
-    silver_refs: list[SilverWriteResult] | None,
-    gold_schema: object | None,
-    transform_version: str | None,
-    transform_steps: tuple[str, ...],
-) -> GoldMetadata:
-    """Create Gold metadata via the legacy fallback metadata builder."""
-    from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
-
-    builder = GoldMetadataBuilder(
-        transform_version=transform_version,
-        transform_steps=transform_steps,
-    )
-    return builder.build_fallback_metadata(
-        table_name=table_name,
-        records=records,
-        mode=mode,
-        scd_config=scd_config,
-        ingestion_ts=ingestion_ts,
-        run_id=run_id,
-        silver_refs=silver_refs,
-        gold_schema=gold_schema,
     )
