@@ -19,6 +19,9 @@ from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold.metadata_mixin import (
     GoldWriterMetadataMixin,
 )
+from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
+    make_produced_artifact_fragment,
+)
 
 
 def _make_run_id() -> RunID:
@@ -262,10 +265,28 @@ class TestWriteGoldMetadata:
     @pytest.mark.asyncio
     async def test_writes_metadata_for_non_empty_records(self) -> None:
         """Lines 318-336: writes metadata when records present."""
-        coordinator = MagicMock()
-        coordinator.create_gold_metadata = MagicMock(return_value=MagicMock())
+        from bioetl.application.services.metadata_lineage_bundle import (
+            MetadataLineageBundle,
+        )
 
-        mixin = _ConcreteGoldMixin(metadata_coordinator=coordinator)
+        metadata = MagicMock()
+
+        class _Coordinator:
+            def create_gold_metadata_bundle(
+                self,
+                input_data: object,
+            ) -> MetadataLineageBundle:
+                _ = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=make_produced_artifact_fragment(
+                        fragment_id="gold:write-fragment",
+                        layer="gold",
+                        logical_name="chembl.activity",
+                    ),
+                )
+
+        mixin = _ConcreteGoldMixin(metadata_coordinator=_Coordinator())
         records = [{"id": 1}]
 
         await mixin._write_gold_metadata(
@@ -283,25 +304,39 @@ class TestWriteGoldMetadata:
     @pytest.mark.asyncio
     async def test_prepares_resolved_metadata_context_before_write(self) -> None:
         """Standard Gold metadata path should resolve provider/entity before persist."""
+        from bioetl.application.services.metadata_lineage_bundle import (
+            MetadataLineageBundle,
+        )
+
         metadata = MagicMock()
-        mixin = _ConcreteGoldMixin(metadata_coordinator=MagicMock())
+
+        class _Coordinator:
+            def create_gold_metadata_bundle(
+                self,
+                input_data: object,
+            ) -> MetadataLineageBundle:
+                _ = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=make_produced_artifact_fragment(
+                        fragment_id="gold:resolved-fragment",
+                        layer="gold",
+                        logical_name="chembl.activity",
+                    ),
+                )
+
+        mixin = _ConcreteGoldMixin(metadata_coordinator=_Coordinator())
         mixin._write_gold_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
-        with patch(
-            "bioetl.infrastructure.storage.gold.metadata_operations.build_gold_metadata_payload",
-            return_value=metadata,
-        ) as mock_build:
-            await mixin._write_gold_metadata(
-                table_path="gold/chembl/activity",
-                table_name="chembl.activity",
-                records=[{"id": 1}],
-                mode=GoldWriteMode.APPEND,
-                scd_config=None,
-                ingestion_ts=None,
-                run_id=None,
-            )
-
-        mock_build.assert_called_once()
+        await mixin._write_gold_metadata(
+            table_path="gold/chembl/activity",
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.APPEND,
+            scd_config=None,
+            ingestion_ts=None,
+            run_id=None,
+        )
         mixin._write_gold_metadata_file.assert_awaited_once_with(
             table_path="gold/chembl/activity",
             metadata=metadata,
@@ -327,29 +362,48 @@ class TestWriteGoldMergedMetadata:
         mixin._metadata_writer.write_gold_metadata.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_no_coordinator_skips_write_with_debug_log(self) -> None:
-        """Lines 373-379: no metadata_coordinator logs debug and returns."""
+    async def test_no_coordinator_fails_closed(self) -> None:
+        """Merged Gold metadata must fail closed without the coordinator bundle."""
         mixin = _ConcreteGoldMixin(metadata_coordinator=None)
         records = [{"id": 1, "_source_providers": ["chembl"]}]
 
-        await mixin._write_gold_merged_metadata(
-            table_path="gold/t",
-            table_name="composite.publication",
-            records=records,
-        )
+        with pytest.raises(
+            RuntimeError,
+            match="create_gold_metadata_bundle is required for Gold metadata publication",
+        ):
+            await mixin._write_gold_merged_metadata(
+                table_path="gold/t",
+                table_name="composite.publication",
+                records=records,
+            )
 
         mixin._metadata_writer.write_gold_metadata.assert_not_called()
-        mixin.logger.debug.assert_called()
-        debug_call = mixin.logger.debug.call_args
-        assert debug_call[0][0] == "gold_merged_metadata_skipped"
 
     @pytest.mark.asyncio
     async def test_with_coordinator_writes_metadata(self) -> None:
         """Lines 380-395: coordinator present writes metadata."""
-        coordinator = MagicMock()
-        coordinator.create_gold_metadata = MagicMock(return_value=MagicMock())
+        from bioetl.application.services.metadata_lineage_bundle import (
+            MetadataLineageBundle,
+        )
 
-        mixin = _ConcreteGoldMixin(metadata_coordinator=coordinator)
+        metadata = MagicMock()
+
+        class _Coordinator:
+            def create_gold_metadata_bundle(
+                self,
+                input_data: object,
+            ) -> MetadataLineageBundle:
+                _ = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=make_produced_artifact_fragment(
+                        fragment_id="gold:merged-write-fragment",
+                        layer="gold",
+                        logical_name="composite.publication",
+                    ),
+                )
+
+        mixin = _ConcreteGoldMixin(metadata_coordinator=_Coordinator())
         records = [{"id": 1}]
 
         await mixin._write_gold_merged_metadata(
@@ -358,16 +412,33 @@ class TestWriteGoldMergedMetadata:
             records=records,
         )
 
-        coordinator.create_gold_metadata.assert_called_once()
         mixin._metadata_writer.write_gold_metadata.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_prepares_merged_metadata_context_before_write(self) -> None:
         """Merged Gold metadata path should resolve provider/entity before persist."""
+        from bioetl.application.services.metadata_lineage_bundle import (
+            MetadataLineageBundle,
+        )
+
         metadata = MagicMock()
-        coordinator = MagicMock()
-        coordinator.create_gold_metadata = MagicMock(return_value=metadata)
-        mixin = _ConcreteGoldMixin(metadata_coordinator=coordinator)
+
+        class _Coordinator:
+            def create_gold_metadata_bundle(
+                self,
+                input_data: object,
+            ) -> MetadataLineageBundle:
+                _ = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=make_produced_artifact_fragment(
+                        fragment_id="gold:merged-context-fragment",
+                        layer="gold",
+                        logical_name="composite.publication",
+                    ),
+                )
+
+        mixin = _ConcreteGoldMixin(metadata_coordinator=_Coordinator())
         mixin._write_gold_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         with patch(

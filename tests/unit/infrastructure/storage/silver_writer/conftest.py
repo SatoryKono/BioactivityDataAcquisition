@@ -7,6 +7,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
+    make_produced_artifact_fragment,
+)
 
 
 @pytest.fixture
@@ -43,6 +46,9 @@ def mock_metadata_coordinator():
     """Create a mock MetadataCoordinator that returns proper SilverMetadata."""
     from datetime import UTC, datetime
 
+    from bioetl.application.services.metadata_lineage_bundle import (
+        MetadataLineageBundle,
+    )
     from bioetl.domain.models.metadata import (
         BaseOutputMetadata,
         DeltaMetrics,
@@ -111,4 +117,14 @@ def mock_metadata_coordinator():
         )
 
     coordinator.create_silver_metadata = create_silver_metadata
+    coordinator.create_silver_metadata_bundle = (
+        lambda input_data: MetadataLineageBundle(
+            metadata=create_silver_metadata(input_data),
+            lineage_fragment=make_produced_artifact_fragment(
+                fragment_id="silver:fixture-fragment",
+                layer="silver",
+                logical_name="test.table",
+            ),
+        )
+    )
     return coordinator

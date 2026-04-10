@@ -19,6 +19,9 @@ from bioetl.infrastructure.storage.gold.metadata_operations import (
     _persist_gold_metadata_write,
     _prepare_gold_metadata_write,
 )
+from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
+    make_produced_artifact_fragment,
+)
 
 
 @pytest.mark.unit
@@ -75,8 +78,25 @@ class TestPrepareGoldMetadataWrite:
 
     def test_resolves_provider_entity_and_builds_metadata(self) -> None:
         """Should call host methods to resolve provider/entity and build metadata."""
+        metadata = MagicMock()
+
+        class _Coordinator:
+            def create_gold_metadata_bundle(
+                self,
+                input_data: object,
+            ) -> MetadataLineageBundle:
+                _ = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=make_produced_artifact_fragment(
+                        fragment_id="gold:prepared-fragment",
+                        layer="gold",
+                        logical_name="chembl.compound",
+                    ),
+                )
+
         host = MagicMock()
-        host._metadata_coordinator = None
+        host._metadata_coordinator = _Coordinator()
         host._transform_version = "1.0.0"
         host._transform_steps = ("normalize",)
 
@@ -91,20 +111,36 @@ class TestPrepareGoldMetadataWrite:
             ingestion_ts=None,
             run_id=None,
         )
-        metadata = MagicMock()
-        from unittest.mock import patch
-
-        with patch(
-            "bioetl.infrastructure.storage.gold.metadata_operations.build_gold_metadata_payload",
-            return_value=metadata,
-        ) as mock_build:
-            prepared = _prepare_gold_metadata_write(host, request)
+        prepared = _prepare_gold_metadata_write(host, request)
 
         assert isinstance(prepared, _PreparedGoldMetadataWrite)
         assert prepared.provider_name == "chembl"
         assert prepared.entity_name == "compound"
         assert prepared.metadata is metadata
-        mock_build.assert_called_once()
+
+    def test_raises_when_coordinator_bundle_is_missing(self) -> None:
+        host = MagicMock()
+        host._metadata_coordinator = None
+        host._transform_version = "1.0.0"
+        host._transform_steps = ()
+
+        from bioetl.domain.medallion import GoldWriteMode
+
+        request = _GoldMetadataWriteRequest(
+            table_path="/tmp/gold/chembl_compound",
+            table_name="chembl_compound",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.APPEND,
+            scd_config=None,
+            ingestion_ts=None,
+            run_id=None,
+        )
+
+        with pytest.raises(
+            RuntimeError,
+            match="create_gold_metadata_bundle is required for Gold metadata publication",
+        ):
+            _prepare_gold_metadata_write(host, request)
 
     def test_uses_bundle_when_concrete_coordinator_supports_lineage(self) -> None:
         """Concrete coordinators with bundle seam should surface lineage fragments."""
@@ -125,9 +161,10 @@ class TestPrepareGoldMetadataWrite:
                 return metadata
 
         metadata = MagicMock()
-        fragment = LineageGraphFragment(
+        fragment = make_produced_artifact_fragment(
             fragment_id="gold:fragment-1",
-            created_at=datetime.now(UTC),
+            layer="gold",
+            logical_name="chembl.compound",
         )
         host = MagicMock()
         host._metadata_coordinator = _Coordinator()
@@ -345,8 +382,8 @@ class TestMaybePrepareGoldMergedMetadataWrite:
         result = _maybe_prepare_gold_merged_metadata_write(host, request)
         assert result is None
 
-    def test_returns_none_when_coordinator_is_none(self) -> None:
-        """Should skip and log when metadata coordinator is not configured."""
+    def test_raises_when_coordinator_is_none(self) -> None:
+        """Merged Gold metadata must fail closed without a coordinator."""
         host = MagicMock()
         host._metadata_coordinator = None
         host._transform_version = "1.0.0"
@@ -356,14 +393,32 @@ class TestMaybePrepareGoldMergedMetadataWrite:
             table_name="merged_table",
             records=[{"id": 1}],
         )
-        result = _maybe_prepare_gold_merged_metadata_write(host, request)
-        assert result is None
-        host.logger.debug.assert_called_once()
+        with pytest.raises(
+            RuntimeError,
+            match="create_gold_metadata_bundle is required for Gold metadata publication",
+        ):
+            _maybe_prepare_gold_merged_metadata_write(host, request)
 
     def test_prepares_merged_metadata_via_module_helper(self) -> None:
+        metadata = MagicMock()
+
+        class _Coordinator:
+            def create_gold_metadata_bundle(
+                self,
+                input_data: object,
+            ) -> MetadataLineageBundle:
+                self.last_input = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=make_produced_artifact_fragment(
+                        fragment_id="gold:merged-fragment",
+                        layer="gold",
+                        logical_name="composite.publication",
+                    ),
+                )
+
         host = MagicMock()
-        host._metadata_coordinator = MagicMock()
-        host._metadata_coordinator.create_gold_metadata.return_value = MagicMock()
+        host._metadata_coordinator = _Coordinator()
         host._transform_version = "2.0.0"
         host._transform_steps = ("normalize",)
         request = _GoldMergedMetadataWriteRequest(
@@ -375,8 +430,7 @@ class TestMaybePrepareGoldMergedMetadataWrite:
         prepared = _maybe_prepare_gold_merged_metadata_write(host, request)
 
         assert prepared is not None
-        host._metadata_coordinator.create_gold_metadata.assert_called_once()
-        input_arg = host._metadata_coordinator.create_gold_metadata.call_args.args[0]
+        input_arg = host._metadata_coordinator.last_input
         assert input_arg.transform_version == "2.0.0"
         assert prepared.provider_name == "composite"
         assert prepared.entity_name == "publication"
