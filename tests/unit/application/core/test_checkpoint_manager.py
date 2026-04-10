@@ -34,6 +34,14 @@ def mock_logger():
 
 
 @pytest.fixture
+def mock_metrics():
+    """Create mock MetricsPort."""
+    metrics = MagicMock()
+    metrics.increment_counter = MagicMock()
+    return metrics
+
+
+@pytest.fixture
 def checkpoint_manager(mock_checkpoint_port, mock_logger):
     """Create CheckpointManager instance."""
     run_id = uuid4()
@@ -95,6 +103,34 @@ class TestCheckpointManagerLoadCheckpoint:
         mock_checkpoint_port.load.assert_called_once_with("test_pipeline")
         mock_logger.info.assert_called()
 
+    async def test_load_checkpoint_emits_loaded_metric(
+        self, mock_checkpoint_port, mock_logger, mock_metrics
+    ):
+        """Successful resume emits bounded checkpoint load status."""
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 1000},
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+            run_id=uuid4(),
+            resume=True,
+            metrics=mock_metrics,
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is not None
+        mock_metrics.increment_counter.assert_called_once_with(
+            "checkpoint_load_events_total",
+            1,
+            {"pipeline": "test_pipeline", "status": "loaded"},
+        )
+
     async def test_load_checkpoint_when_resume_true_but_no_checkpoint(
         self, mock_checkpoint_port, mock_logger
     ):
@@ -114,6 +150,30 @@ class TestCheckpointManagerLoadCheckpoint:
 
         assert result is None
         mock_checkpoint_port.load.assert_called_once()
+
+    async def test_load_checkpoint_emits_missing_metric_when_not_found(
+        self, mock_checkpoint_port, mock_logger, mock_metrics
+    ):
+        """Missing checkpoint emits bounded missing status."""
+        mock_checkpoint_port.load.return_value = None
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+            run_id=uuid4(),
+            resume=True,
+            metrics=mock_metrics,
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is None
+        mock_metrics.increment_counter.assert_called_once_with(
+            "checkpoint_load_events_total",
+            1,
+            {"pipeline": "test_pipeline", "status": "missing"},
+        )
 
     async def test_load_checkpoint_when_resume_false(
         self, mock_checkpoint_port, mock_logger
@@ -210,6 +270,31 @@ class TestCheckpointManagerFullScanOnly:
         mock_logger.warning.assert_called_once()
         warning_call = mock_logger.warning.call_args
         assert "full_scan_only" in warning_call[0][0].lower()
+
+    async def test_load_checkpoint_emits_blocked_metric_when_full_scan_only(
+        self, mock_checkpoint_port, mock_logger, mock_metrics
+    ) -> None:
+        """Blocked resume path emits bounded blocked status."""
+        from bioetl.domain.medallion import LoadingStrategy
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_publication",
+            run_id=uuid4(),
+            resume=True,
+            loading_strategy=LoadingStrategy.FULL_SCAN_ONLY,
+            metrics=mock_metrics,
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is None
+        mock_metrics.increment_counter.assert_called_once_with(
+            "checkpoint_load_events_total",
+            1,
+            {"pipeline": "chembl_publication", "status": "blocked"},
+        )
 
     async def test_load_checkpoint_warning_includes_pipeline_name(
         self, mock_checkpoint_port, mock_logger
@@ -412,7 +497,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     """Tests for checkpoint compatibility policy behavior."""
 
     async def test_soft_fail_policy_blocks_resume_on_incompatibility(
-        self, mock_checkpoint_port, mock_logger
+        self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
         saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
@@ -435,6 +520,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             pipeline_name="chembl_activity",
             run_id=uuid4(),
             resume=True,
+            metrics=mock_metrics,
             checkpoint_compatibility_service=compatibility_service,
             current_metadata=CheckpointMetadata(
                 records_processed=0,
@@ -447,6 +533,11 @@ class TestCheckpointManagerCompatibilityPolicy:
 
         assert result is None
         mock_logger.warning.assert_called()
+        mock_metrics.increment_counter.assert_called_once_with(
+            "checkpoint_load_events_total",
+            1,
+            {"pipeline": "chembl_activity", "status": "incompatible"},
+        )
 
     async def test_observe_policy_allows_resume_on_incompatibility(
         self, mock_checkpoint_port, mock_logger

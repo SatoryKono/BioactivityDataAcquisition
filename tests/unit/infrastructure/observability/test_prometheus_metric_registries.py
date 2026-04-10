@@ -72,7 +72,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 86
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 87
 
 
 @pytest.mark.unit
@@ -83,6 +83,7 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "control_plane_reads_total" in COUNTERS
     assert "traced_runs_total" in COUNTERS
     assert "checkpoint_compatibility_events_total" in COUNTERS
+    assert "checkpoint_load_events_total" in COUNTERS
     assert "structural_policy_events_total" in COUNTERS
     assert "structural_policy_shadow_comparisons_total" in COUNTERS
     assert "control_plane_read_duration_seconds" in HISTOGRAMS
@@ -97,6 +98,7 @@ def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> No
         "control_plane_manifest_writes_total": {"pipeline", "run_type", "status"},
         "control_plane_ledger_appends_total": {"pipeline", "event_type", "status"},
         "checkpoint_compatibility_events_total": {"pipeline", "disposition"},
+        "checkpoint_load_events_total": {"pipeline", "status"},
         "lineage_fragments_emitted_total": {"pipeline", "layer", "status"},
         "lineage_refs_missing_total": {"pipeline", "layer", "ref_type"},
         "composite_source_selection_total": {

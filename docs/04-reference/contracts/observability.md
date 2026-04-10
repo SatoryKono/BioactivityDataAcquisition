@@ -114,7 +114,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py`
 и собирается через `prometheus_metric_registries.py`.
 
-Текущий размер каталога: **86** метрик
+Текущий размер каталога: **87** метрик
 (`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`).
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
@@ -127,6 +127,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 | `bioetl_control_plane_manifest_writes_total`   | Counter   | `pipeline,run_type,status`               | Попытки записи immutable run manifest                                              |
 | `bioetl_control_plane_ledger_appends_total`    | Counter   | `pipeline,event_type,status`             | Попытки append в run ledger                                                        |
 | `bioetl_checkpoint_compatibility_events_total` | Counter   | `pipeline,disposition`                   | Итоги resume/checkpoint compatibility policy                                       |
+| `bioetl_checkpoint_load_events_total`          | Counter   | `pipeline,status`                        | Bounded checkpoint load decisions (`loaded`, `missing`, `blocked`, `incompatible`, `failed`) |
 | `bioetl_lineage_fragments_emitted_total`       | Counter   | `pipeline,layer,status`                  | Попытки публикации lineage fragments                                               |
 | `bioetl_lineage_refs_missing_total`            | Counter   | `pipeline,layer,ref_type`                | Missing upstream lineage references detected during persistence                    |
 | `bioetl_composite_source_selection_total`      | Counter   | `pipeline,decision_type,selected_source` | Low-cardinality composite source-selection decisions recorded during persistence   |
@@ -208,6 +209,7 @@ Operator diagnostics не ограничиваются только `health` и 
 service getters:
 
 - `get_health_service()`
+- `get_checkpoint_service()`
 - `get_metrics_service()`
 - `get_quarantine_service()`
 - `get_run_manifest_service()`

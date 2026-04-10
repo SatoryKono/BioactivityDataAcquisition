@@ -12,7 +12,7 @@ from bioetl.application.core.lifecycle.checkpoint_runtime import (
     validate_compatibility_policy,
 )
 from bioetl.domain.medallion import LoadingStrategy
-from bioetl.domain.ports import CheckpointPort, LoggerPort
+from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort
 from bioetl.domain.types import RunID
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
@@ -34,6 +34,7 @@ class CheckpointManagerService:
         resume: bool,
         *,
         loading_strategy: LoadingStrategy | None = None,
+        metrics: MetricsPort | None = None,
         checkpoint_compatibility_service: object | None = None,
         current_metadata: CheckpointMetadata | None = None,
         compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail",
@@ -60,9 +61,23 @@ class CheckpointManagerService:
         self._run_id = run_id
         self._resume = resume
         self._loading_strategy = loading_strategy
+        self._metrics = metrics
         self._compatibility_service = checkpoint_compatibility_service
         self._current_metadata = current_metadata
         self._compatibility_policy = validate_compatibility_policy(compatibility_policy)
+
+    def _emit_checkpoint_load_status(self, status: str) -> None:
+        """Emit bounded checkpoint load outcome for runtime resume decisions."""
+        if self._metrics is None:
+            return
+        self._metrics.increment_counter(
+            "checkpoint_load_events_total",
+            1,
+            {
+                "pipeline": self._pipeline_name,
+                "status": status,
+            },
+        )
 
     @property
     def current_metadata(self) -> CheckpointMetadata | None:
@@ -93,6 +108,7 @@ class CheckpointManagerService:
             and self._loading_strategy is not None
             and not self._loading_strategy.allows_checkpoint_resume
         ):
+            self._emit_checkpoint_load_status("blocked")
             self._logger.warning(
                 "Checkpoint resume blocked for full_scan_only pipeline. "
                 "Each run performs a full scan; deduplication via content_hash on Silver. "
@@ -104,7 +120,11 @@ class CheckpointManagerService:
             return None
 
         if self._resume:
-            checkpoint_data = await self._checkpoint.load(self._pipeline_name)
+            try:
+                checkpoint_data = await self._checkpoint.load(self._pipeline_name)
+            except Exception:
+                self._emit_checkpoint_load_status("failed")
+                raise
             if checkpoint_data:
                 _, legacy_metadata = checkpoint_data
 
@@ -127,13 +147,22 @@ class CheckpointManagerService:
                     )
 
                     if not compatibility_result.compatible:
-                        return handle_incompatible_checkpoint(
-                            logger=self._logger,
-                            pipeline_name=self._pipeline_name,
-                            compatibility_policy=self._compatibility_policy,
-                            checkpoint_metadata=checkpoint_metadata,
-                            messages=compatibility_result.messages,
-                        )
+                        try:
+                            result = handle_incompatible_checkpoint(
+                                logger=self._logger,
+                                pipeline_name=self._pipeline_name,
+                                compatibility_policy=self._compatibility_policy,
+                                checkpoint_metadata=checkpoint_metadata,
+                                messages=compatibility_result.messages,
+                            )
+                        except Exception:
+                            self._emit_checkpoint_load_status("incompatible")
+                            raise
+                        if result is None:
+                            self._emit_checkpoint_load_status("incompatible")
+                            return None
+                        self._emit_checkpoint_load_status("loaded")
+                        return result
                     else:
                         self._logger.info(
                             "Checkpoint compatibility validation passed.",
@@ -145,7 +174,9 @@ class CheckpointManagerService:
                     "Found compatible checkpoint",
                     metadata=checkpoint_metadata.to_dict(),
                 )
+                self._emit_checkpoint_load_status("loaded")
                 return checkpoint_metadata
+            self._emit_checkpoint_load_status("missing")
         return None
 
     async def save_checkpoint(self, metadata: CheckpointMetadata | int) -> None:

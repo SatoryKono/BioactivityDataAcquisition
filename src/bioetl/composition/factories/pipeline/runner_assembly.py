@@ -98,6 +98,7 @@ def _build_checkpoint_manager(
         run_id=pipeline.run_id,
         resume=pipeline.runtime.resume,
         loading_strategy=cast(LoadingStrategy | None, pipeline.config.loading_strategy),
+        metrics=pipeline.services.metrics,
         checkpoint_compatibility_service=compatibility_service,
         current_metadata=current_metadata,
         compatibility_policy=compatibility_policy,
