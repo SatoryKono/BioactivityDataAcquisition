@@ -36,9 +36,6 @@ class _Host(BronzeWriterSideEffectsMixin):
         self._flat_structure = False
         self.base_path = tmp_path
 
-    def _build_full_bronze_metadata(self, **kwargs: object) -> MagicMock:  # type: ignore[override]
-        return MagicMock()
-
     async def _calculate_checksum(self, path: Path) -> str:
         return "abc123checksum"
 
@@ -197,3 +194,30 @@ class TestBronzeWriterSideEffectsMixin:
         assert coordinator.last_input is not None
         assert len(coordinator.last_input.input_snapshots) == 1
         assert coordinator.last_input.input_snapshots[0].immutable_uri == str(batch_path)
+
+    @pytest.mark.asyncio
+    async def test_maybe_write_bronze_metadata_fails_closed_without_coordinator(
+        self, tmp_path: Path
+    ) -> None:
+        host = _Host(tmp_path)
+        batch_path = tmp_path / "chembl" / "activity" / "file.jsonl.zst"
+        batch_path.parent.mkdir(parents=True)
+        batch_path.write_bytes(b"side-effect-bronze")
+
+        with pytest.raises(
+            RuntimeError,
+            match="MetadataCoordinator with create_bronze_metadata_bundle is required",
+        ):
+            await host._maybe_write_bronze_metadata(
+                run_id=RunID("run-1"),
+                run_type=RunType.INCREMENTAL,
+                provider="chembl",
+                entity="activity",
+                batch_id=BatchID("batch-1"),
+                record_count=2,
+                compressed_size=128,
+                relative_path="chembl/activity/file.jsonl.zst",
+                ingestion_ts=datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC),
+                duration=1.5,
+                source_metadata=None,
+            )
