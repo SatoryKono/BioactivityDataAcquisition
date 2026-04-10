@@ -30,6 +30,20 @@ DEFAULT_BATCH_SIZE = 20
 DEFAULT_INGEST_WAVE = "repo_sync_v1"
 DEFAULT_MANAGED_BY = "neo4j_memory_sync"
 DEFAULT_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
+CRITICAL_ANALYSIS_NODE_LABELS: tuple[str, ...] = (
+    "retirement_candidate",
+    "development_cycle_surface",
+    "complexity_candidate",
+)
+CRITICAL_ANALYSIS_RELATION_TYPES: tuple[str, ...] = (
+    "CANDIDATE_FOR_REMOVAL",
+    "OWNED_BY_CYCLE",
+    "BLOCKED_FROM_DELETION_BY",
+    "HAS_COMPLEXITY_SIGNAL",
+    "CANDIDATE_FOR_SIMPLIFICATION",
+    "JUSTIFIED_BY_RUNTIME",
+    "BLOCKED_BY_VARIANCE",
+)
 DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "project",
     "repo_zone",
@@ -4262,6 +4276,7 @@ def sync_snapshot(
         relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
         client.execute([_reset_managed_relations_statement(relation_types)])
     _execute_grouped_statements(client, relation_groups, batch_size, "relation")
+    _retry_critical_analysis_groups(client, node_groups, relation_groups, batch_size)
     if prune_stale:
         client.execute([_prune_stale_relations_statement(sync_run)])
         client.execute([_prune_stale_nodes_statement(sync_run)])
@@ -4290,6 +4305,87 @@ def _execute_grouped_statements(
                     f"(batch {batch_index}/{len(_batched(statements, batch_size))}, "
                     f"{len(batch)} statements)"
                 ) from exc
+
+
+def _live_managed_node_count(client: Neo4jHttpClient, label: str) -> int:
+    rows = client.query(
+        f"MATCH (n:`{label}`) "
+        "WHERE n.managed_by = $managed_by "
+        "RETURN count(n) AS count",
+        {"managed_by": DEFAULT_MANAGED_BY},
+    )
+    return int(rows[0]["count"]) if rows else 0
+
+
+def _live_managed_relation_count(client: Neo4jHttpClient, relation_type: str) -> int:
+    rows = client.query(
+        f"MATCH ()-[r:`{relation_type}`]->() "
+        "WHERE r.managed_by = $managed_by "
+        "RETURN count(r) AS count",
+        {"managed_by": DEFAULT_MANAGED_BY},
+    )
+    return int(rows[0]["count"]) if rows else 0
+
+
+def _retry_critical_analysis_groups(
+    client: Neo4jHttpClient,
+    node_groups: dict[str, list[dict[str, JsonValue]]],
+    relation_groups: dict[str, list[dict[str, JsonValue]]],
+    batch_size: int,
+) -> None:
+    retry_batch_size = max(1, min(batch_size, 5))
+
+    missing_node_labels = [
+        label
+        for label in CRITICAL_ANALYSIS_NODE_LABELS
+        if label in node_groups and _live_managed_node_count(client, label) != len(node_groups[label])
+    ]
+    if missing_node_labels:
+        _execute_grouped_statements(
+            client,
+            {label: node_groups[label] for label in missing_node_labels},
+            retry_batch_size,
+            "critical node retry",
+        )
+
+    missing_relation_types = [
+        relation_type
+        for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
+        if relation_type in relation_groups
+        and _live_managed_relation_count(client, relation_type) != len(relation_groups[relation_type])
+    ]
+    if missing_relation_types:
+        _execute_grouped_statements(
+            client,
+            {relation_type: relation_groups[relation_type] for relation_type in missing_relation_types},
+            retry_batch_size,
+            "critical relation retry",
+        )
+
+    missing_after_retry: list[str] = []
+    for label in CRITICAL_ANALYSIS_NODE_LABELS:
+        if label not in node_groups:
+            continue
+        live_count = _live_managed_node_count(client, label)
+        expected = len(node_groups[label])
+        if live_count != expected:
+            missing_after_retry.append(
+                f"label `{label}` expected {expected}, live managed {live_count}"
+            )
+    for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES:
+        if relation_type not in relation_groups:
+            continue
+        live_count = _live_managed_relation_count(client, relation_type)
+        expected = len(relation_groups[relation_type])
+        if live_count != expected:
+            missing_after_retry.append(
+                f"relation `{relation_type}` expected {expected}, live managed {live_count}"
+            )
+    if missing_after_retry:
+        raise RuntimeError(
+            "Post-apply verification failed for critical analysis groups: "
+            + "; ".join(missing_after_retry)
+        )
 
 
 def _write_export(path: Path, snapshot: GraphSnapshot) -> None:
