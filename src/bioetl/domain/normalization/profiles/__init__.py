@@ -7,6 +7,18 @@ from bioetl.domain.normalization.profiles.chembl_activity import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
+from bioetl.domain.normalization.profiles.crossref_publication import (
+    CROSSREF_PUBLICATION_PROFILE,
+    CROSSREF_PUBLICATION_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.pubchem_compound import (
+    PUBCHEM_COMPOUND_PROFILE,
+    PUBCHEM_COMPOUND_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.pubmed_publication import (
+    PUBMED_PUBLICATION_PROFILE,
+    PUBMED_PUBLICATION_SCHEMA_FIELDS,
+)
 from bioetl.domain.normalization.profiles.registry import (
     NORMALIZATION_PROFILE_REGISTRY,
     build_normalization_profile_registry,
@@ -17,9 +29,15 @@ from bioetl.domain.normalization.profiles.registry import (
 __all__ = [
     "CHEMBL_ACTIVITY_PROFILE",
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
+    "CROSSREF_PUBLICATION_PROFILE",
+    "CROSSREF_PUBLICATION_SCHEMA_FIELDS",
     "NORMALIZATION_PROFILE_REGISTRY",
     "FieldRule",
     "NormalizationProfile",
+    "PUBCHEM_COMPOUND_PROFILE",
+    "PUBCHEM_COMPOUND_SCHEMA_FIELDS",
+    "PUBMED_PUBLICATION_PROFILE",
+    "PUBMED_PUBLICATION_SCHEMA_FIELDS",
     "build_normalization_profile_registry",
     "normalize_normalization_profile_coordinates",
     "resolve_normalization_profile",

@@ -29,6 +29,9 @@ from bioetl.infrastructure.storage.lineage_persistence import (
     persist_lineage_fragment_if_present,
     resolve_metadata_and_lineage_fragment,
 )
+from bioetl.infrastructure.storage.metadata.builder_base import (
+    _resolve_metadata_timestamp,
+)
 from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
 if TYPE_CHECKING:
@@ -255,11 +258,17 @@ async def _prepare_silver_merged_metadata_write(
         table_path=request.table_path,
         table_name=request.table_name,
     )
+    merged_completed_at = _resolve_metadata_timestamp(
+        explicit=None,
+        records=request.records,
+    )
     silver_input = SilverMetadataInput(
         table_path=request.table_path,
         records=request.records,
         primary_keys=request.primary_keys,
         mode=SilverWriteMode.DELETE,
+        started_at=merged_completed_at,
+        completed_at=merged_completed_at,
         version_after=context.version_after,
         transform_version=host._transform_version,
         transform_steps=host._transform_steps,
@@ -281,6 +290,7 @@ async def _prepare_silver_merged_metadata_write(
             run_id=request.run_id,
             sources_used=request.sources_used,
             version_after=context.version_after,
+            completed_at=merged_completed_at,
         ),
     )
     return _PreparedSilverMetadataWriteOperation(

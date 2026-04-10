@@ -140,7 +140,7 @@ async def test_write_bronze_metadata_records_artifact_publication(tmp_path) -> N
     assert details["run_id"] == str(metadata.runtime.run_id)
     assert details["manifest_id"] == "manifest-1"
     assert details["provider"] == "chembl"
-    assert details["dataset_ref"] is None
+    assert details["dataset_ref"] == "bronze_batch:batch-1"
     assert details["lineage_fragment_id"] == "bronze:fragment-1"
 
 

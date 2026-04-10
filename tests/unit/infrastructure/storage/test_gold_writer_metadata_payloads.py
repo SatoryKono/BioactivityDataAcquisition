@@ -85,14 +85,17 @@ class TestBuildGoldMergedMetadataInput:
         result = build_gold_merged_metadata_input(
             table_path="gold/publication",
             table_name="composite.publication",
-            records=[{"_ingestion_ts": "2025-06-01T08:00:00", "id": 1}],
+            records=[
+                {"_ingestion_ts": "2025-06-01T08:00:00", "id": 1},
+                {"_lineage_created_at": "2025-05-01T08:00:00+00:00", "id": 2},
+            ],
             schema=None,
             transform_version=None,
             transform_steps=(),
         )
 
         assert result.completed_at is not None
-        assert result.completed_at.month == 6
+        assert result.completed_at.month == 5
 
 
 @pytest.mark.unit
@@ -112,6 +115,7 @@ class TestBuildGoldMetadataViaFallback:
                 scd_config=None,
                 ingestion_ts=None,
                 run_id=None,
+                silver_refs=None,
                 gold_schema=None,
                 transform_version="1.0.0",
                 transform_steps=("normalize",),
@@ -124,6 +128,7 @@ class TestBuildGoldMetadataViaFallback:
             scd_config=None,
             ingestion_ts=None,
             run_id=None,
+            silver_refs=None,
             gold_schema=None,
         )
 
