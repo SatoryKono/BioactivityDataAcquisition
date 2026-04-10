@@ -86,7 +86,7 @@ def _process_ledger_entries(
     correlation_anchor_gaps = {
         "effective_config_hash": 0,
         "contract_ref": 0,
-        "data_contract_version": 0,
+        "contract_version": 0,
         "composite_run_id": 0,
     }
 

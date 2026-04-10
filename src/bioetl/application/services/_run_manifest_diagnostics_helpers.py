@@ -142,8 +142,8 @@ def update_correlation_anchor_gaps(
         gap_counter["effective_config_hash"] += 1
     if diagnostic.get("contract_ref") is None:
         gap_counter["contract_ref"] += 1
-    if diagnostic.get("data_contract_version") is None:
-        gap_counter["data_contract_version"] += 1
+    if _extract_contract_version_anchor(diagnostic) is None:
+        gap_counter["contract_version"] += 1
     if event_family in {"checkpoint", "composite"} and (
         diagnostic.get("composite_run_id") is None
     ):
@@ -157,6 +157,13 @@ def extract_diagnostic_context(entry: RunLedgerEntry) -> dict[str, object]:
     if not isinstance(raw_diagnostic, dict):
         return {}
     return {str(key): value for key, value in raw_diagnostic.items()}
+
+
+def _extract_contract_version_anchor(diagnostic: dict[str, object]) -> object | None:
+    """Return canonical or legacy contract-version anchor from diagnostics."""
+    if "contract_version" in diagnostic:
+        return diagnostic.get("contract_version")
+    return diagnostic.get("data_contract_version")
 
 
 def load_str_collection(raw_value: object) -> set[str]:

@@ -224,6 +224,123 @@ def test_profile_auto_resolves_for_chembl_activity() -> None:
 
 
 @pytest.mark.unit
+def test_profile_auto_resolves_for_chembl_molecule() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="molecule",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "molecule_id": " CHEMBL25 ",
+            "pref_name": "  Example <b>Molecule</b>  ",
+            "canonical_smiles": " CCO ",
+            "molecular_weight": "123.4500000000",
+        }
+    )
+
+    assert processor.profile is not None
+    assert normalized["molecule_id"] == "CHEMBL25"
+    assert normalized["pref_name"] == "Example Molecule"
+    assert normalized["canonical_smiles"] == "CCO"
+    assert normalized["molecular_weight"] == 123.45
+
+
+@pytest.mark.unit
+def test_profile_auto_resolves_for_semanticscholar_publication() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="semanticscholar",
+        entity_type="publication",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "paper_id": " S2:1 ",
+            "title": "  Example <b>Title</b>  ",
+            "doi": " HTTPS://doi.org/10.1000/ABC ",
+            "pmid": " PMID:12345 ",
+            "publication_date": "2024-02",
+            "tldr": "  Short <i>summary</i>  ",
+        }
+    )
+
+    assert processor.profile is not None
+    assert normalized["paper_id"] == "S2:1"
+    assert normalized["title"] == "Example Title"
+    assert normalized["doi"] == "10.1000/abc"
+    assert normalized["pmid"] == "12345"
+    assert normalized["publication_date"] == "2024-02-29"
+    assert normalized["tldr"] == "Short summary"
+
+
+@pytest.mark.unit
+def test_openalex_publication_profile_makes_content_hash_invariant_for_set_like_lists() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="openalex",
+        entity_type="publication",
+    )
+    record_a = {
+        "entity_id": "openalex:1",
+        "content_hash": "stale-a",
+        "openalex_id": "W1",
+        "doi": "HTTPS://doi.org/10.1000/ABC",
+        "title": " Example title ",
+        "publication_date": "2024-02",
+        "institution_ids": ["i2", "i1"],
+        "subject_keywords": ["z", "a"],
+        "_run_id": "run-a",
+    }
+    record_b = {
+        "entity_id": "openalex:2",
+        "content_hash": "stale-b",
+        "openalex_id": "W1",
+        "doi": "10.1000/abc",
+        "title": "Example title",
+        "publication_date": "2024-02-29",
+        "institution_ids": ["i1", "i2"],
+        "subject_keywords": ["a", "z"],
+        "_run_id": "run-b",
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+
+
+@pytest.mark.unit
+def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_name_order() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="uniprot",
+        entity_type="protein",
+    )
+    record_a = {
+        "entity_id": "uniprot:1",
+        "content_hash": "stale-a",
+        "accession": "P12345",
+        "protein_name": " Example <b>protein</b> ",
+        "annotation_score": "5",
+        "gene_names": ["GENE2", "GENE1"],
+        "_run_id": "run-a",
+    }
+    record_b = {
+        "entity_id": "uniprot:2",
+        "content_hash": "stale-b",
+        "accession": "P12345",
+        "protein_name": "Example protein",
+        "annotation_score": 5,
+        "gene_names": ["GENE1", "GENE2"],
+        "_run_id": "run-b",
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["protein_name"] == "Example protein"
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+
+
+@pytest.mark.unit
 def test_chembl_activity_profile_makes_content_hash_invariant_for_set_like_json_arrays() -> None:
     processor = RecordNormalizationProcessor(
         provider="chembl",

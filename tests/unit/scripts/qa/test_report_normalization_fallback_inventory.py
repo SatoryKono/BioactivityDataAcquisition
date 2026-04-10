@@ -16,13 +16,13 @@ def test_fallback_rows_include_unprofiled_entity_fields() -> None:
     rows = _fallback_rows()
 
     assert any(
-        row["pipeline_name"] == "openalex_publication"
-        and row["field_name"] == "title"
+        row["pipeline_name"] == "chembl_assay"
+        and row["field_name"] == "assay_id"
         and row["normalization_source"] == "fallback_business"
         for row in rows
     )
     assert any(
-        row["pipeline_name"] == "openalex_publication"
+        row["pipeline_name"] == "chembl_assay"
         and row["field_name"] == "_run_id"
         and row["normalization_source"] == "fallback_technical_passthrough"
         for row in rows

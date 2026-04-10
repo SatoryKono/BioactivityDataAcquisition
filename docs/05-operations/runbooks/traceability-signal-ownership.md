@@ -87,7 +87,7 @@ ______________________________________________________________________
 
 - `contract_ref`
 
-- `data_contract_version`
+- `contract_version`
 
 - `dq_policy_ref`
 

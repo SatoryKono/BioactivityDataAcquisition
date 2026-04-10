@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bioetl.domain.control_plane import RunManifest
     from bioetl.domain.types import RunID
 
-LEDGER_DETAILS_CONTRACT_VERSION = "v1"
+LEDGER_DIAGNOSTIC_CONTRACT_VERSION = "v1"
 
 
 class _RunLedgerDefaultsHost(Protocol):
@@ -130,7 +130,7 @@ def build_run_ledger_diagnostic_details(
         normalized_details.update(details)
 
     diagnostic: dict[str, object] = {
-        "contract_version": LEDGER_DETAILS_CONTRACT_VERSION,
+        "diagnostic_contract_version": LEDGER_DIAGNOSTIC_CONTRACT_VERSION,
         "event_type": event_type,
         "event_family": event_family,
         "manifest_id": manifest_id,
@@ -151,7 +151,7 @@ def build_run_ledger_diagnostic_details(
     _apply_optional_diagnostic_anchor(diagnostic, "contract_ref", contract_ref)
     _apply_optional_diagnostic_anchor(
         diagnostic,
-        "data_contract_version",
+        "contract_version",
         contract_version,
     )
     _apply_optional_diagnostic_anchor(diagnostic, "dq_policy_ref", dq_policy_ref)
