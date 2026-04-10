@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
+from typing import cast
 
 import click
 
@@ -32,7 +33,7 @@ def get_run_manifest_service() -> RunManifestInspectionService:
         get_run_manifest_service as _impl,
     )
 
-    return _impl()
+    return cast("RunManifestInspectionService", _impl())
 
 
 def _format_scalar(value: object) -> str:
@@ -253,6 +254,13 @@ def _render_show_payload(payload: dict[str, object]) -> str:
     diagnostics = payload.get("diagnostics", {})
     identity_graph = payload.get("identity_graph", {})
 
+    if not isinstance(ledger_entries, list):
+        ledger_entries = []
+    if not isinstance(diagnostics, dict):
+        diagnostics = {}
+    if not isinstance(identity_graph, dict):
+        identity_graph = {}
+
     if not isinstance(manifest, dict):
         return json.dumps(payload, indent=2, default=str)
 
@@ -285,7 +293,24 @@ def _render_diff_payload(payload: dict[str, object]) -> str:
         "Manifest Diff",
         f"  left_manifest_id: {_format_scalar(left_manifest_id)}",
         f"  right_manifest_id: {_format_scalar(right_manifest_id)}",
+        f"  classification: {_format_scalar(payload.get('classification'))}",
+        f"  semantic_equivalent: {_format_scalar(payload.get('semantic_equivalent'))}",
+        f"  occurrence_only: {_format_scalar(payload.get('occurrence_only'))}",
     ]
+    for label in (
+        "occurrence_difference_fields",
+        "semantic_difference_fields",
+        "noncanonical_difference_fields",
+    ):
+        value = payload.get(label)
+        if value in (None, [], ()):
+            continue
+        rendered = _format_block(value)
+        if len(rendered) == 1:
+            lines.append(f"  {label}: {rendered[0]}")
+            continue
+        lines.append(f"  {label}:")
+        lines.extend(f"    {line}" for line in rendered)
     if not isinstance(differences, list) or not differences:
         lines.append("  differences: 0")
         return "\n".join(lines)
