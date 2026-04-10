@@ -16,6 +16,7 @@ from bioetl.application.core.batch_processing_contracts import BatchProcessingOu
 from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
 )
+from bioetl.domain.aggregates.events import BatchCreated, BatchSealed
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports import BatchIdGeneratorPort
 from bioetl.domain.types import BatchID, BronzeRecord
@@ -113,6 +114,14 @@ class BatchProcessingService:
         ingestion_ts = self._context.started_at
         source_metadata = self._get_source_metadata(query_string)
         span = self._tracing.start_batch_span(batch_id, len(records), start_index)
+        self._support.emit_domain_event(
+            BatchCreated(
+                occurred_at=ingestion_ts,
+                run_id=self._context.run_id,
+                batch_id=batch_id,
+                record_count=len(records),
+            )
+        )
 
         return cast(
             "BatchProcessingOutcome",
@@ -157,6 +166,21 @@ class BatchProcessingService:
             records=records,
             batch_id=batch_id,
             start_index=start_index,
+        )
+        self._support.emit_domain_event(
+            BatchSealed(
+                occurred_at=ingestion_ts,
+                run_id=self._context.run_id,
+                batch_id=batch_id,
+                record_count=len(records),
+                valid_count=max(
+                    len(records)
+                    - transform_result.quarantined_count
+                    - transform_result.filtered_out_count,
+                    0,
+                ),
+                quarantined_count=transform_result.quarantined_count,
+            )
         )
         await self._support.write_silver_gold_concurrent(
             transform_result=transform_result,

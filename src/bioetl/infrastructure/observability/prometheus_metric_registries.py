@@ -44,6 +44,7 @@ from bioetl.infrastructure.observability.metrics import (
     DQ_BASELINE_SAMPLES,
     DQ_BASELINE_UPDATED,
     DQ_CHECK_DURATION_MS,
+    DQ_MONITOR_ENABLED,
     DQ_MONITOR_DISABLED_TOTAL,
     DQ_CONTEXT_BUILD_FAILURES_TOTAL,
     DQ_RECORDS_QUARANTINED_TOTAL,
@@ -220,6 +221,7 @@ DQ_VALIDATION_REGISTRY = MetricRegistryFamily(
     },
     gauges={
         "dq_baseline_samples": DQ_BASELINE_SAMPLES,
+        "dq_monitor_enabled": DQ_MONITOR_ENABLED,
         "dq_validation_record_count": DQ_VALIDATION_RECORD_COUNT,
         "dq_validation_score": DQ_VALIDATION_SCORE,
         "data_freshness_seconds": DATA_FRESHNESS_SECONDS,

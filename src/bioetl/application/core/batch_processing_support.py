@@ -24,13 +24,15 @@ from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
     QuarantineManagerService,
 )
+from bioetl.domain.aggregates.events import BatchFailed, BatchWritten, DomainEvent
 from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.models.metadata import SourceMetadata
-from bioetl.domain.types import BatchID, BronzeRecord, ErrorType
+from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, RunID
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
@@ -56,6 +58,8 @@ class BatchProcessingSupportService:
         writer: BatchWriter,
         tracing: BatchTracingManagerService,
         quarantine_manager: QuarantineManagerService,
+        run_id: RunID | None = None,
+        domain_event_emitter: DomainEventEmitter | None = None,
     ) -> None:
         """Store shared collaborators for one batch-processing family slice."""
         self._services = services
@@ -65,6 +69,8 @@ class BatchProcessingSupportService:
         self._writer = writer
         self._tracing = tracing
         self._quarantine_manager = quarantine_manager
+        self._run_id = run_id
+        self._domain_event_emitter = domain_event_emitter
 
     def get_source_metadata(
         self,
@@ -102,6 +108,16 @@ class BatchProcessingSupportService:
         )
         self._batch_metrics.track_batch_size("bronze", len(records))
         self._batch_metrics.track_processed_records("bronze", len(records))
+        if self._run_id is not None:
+            self.emit_domain_event(
+                BatchWritten(
+                    occurred_at=ingestion_ts,
+                    run_id=self._run_id,
+                    batch_id=batch_id,
+                    layer="bronze",
+                    record_count=len(records),
+                )
+            )
         return result
 
     async def transform_and_track_metrics(
@@ -198,7 +214,23 @@ class BatchProcessingSupportService:
                         "gold", error, batch_id
                     ),
                 )
+            if self._run_id is not None:
+                self.emit_domain_event(
+                    BatchWritten(
+                        occurred_at=ingestion_ts,
+                        run_id=self._run_id,
+                        batch_id=batch_id,
+                        layer=layer,
+                        record_count=len(records),
+                    )
+                )
         except SchemaViolationError as e:
+            self._emit_batch_failed(
+                batch_id=batch_id,
+                layer=layer,
+                error=e,
+                occurred_at=ingestion_ts,
+            )
             self._logger.warning(
                 "schema_violation_quarantined",
                 layer=layer,
@@ -215,6 +247,14 @@ class BatchProcessingSupportService:
             await self._quarantine_manager.quarantine_records(
                 entries, batch_id, ingestion_ts=ingestion_ts
             )
+        except Exception as error:
+            self._emit_batch_failed(
+                batch_id=batch_id,
+                layer=layer,
+                error=error,
+                occurred_at=ingestion_ts,
+            )
+            raise
 
     def finalize_batch_span(
         self,
@@ -286,3 +326,31 @@ class BatchProcessingSupportService:
     ) -> list[BronzeWriteResult] | None:
         """Normalize Bronze write output into writer-compatible references."""
         return build_bronze_refs(bronze_result)
+
+    def emit_domain_event(self, event: DomainEvent) -> None:
+        """Best-effort publish of one typed domain event."""
+        if self._domain_event_emitter is None:
+            return
+        self._domain_event_emitter.emit_domain_event(event)
+
+    def _emit_batch_failed(
+        self,
+        *,
+        batch_id: BatchID,
+        layer: str,
+        error: Exception,
+        occurred_at: datetime,
+    ) -> None:
+        """Publish a typed batch-failed event before bubbling the error."""
+        if self._run_id is None:
+            return
+        self.emit_domain_event(
+            BatchFailed(
+                occurred_at=occurred_at,
+                run_id=self._run_id,
+                batch_id=batch_id,
+                layer=layer,
+                error=str(error),
+                error_type=type(error).__name__,
+            )
+        )

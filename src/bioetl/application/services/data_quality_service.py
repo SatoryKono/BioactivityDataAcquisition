@@ -106,6 +106,11 @@ class DataQualityService:
         if self._metrics:
             labels = {"pipeline": self._pipeline_name, "entity": self._entity_type}
             record_count = max(metrics.get("record_count", 0.0), 0.0)
+            self._metrics.set_gauge(
+                "dq_monitor_enabled",
+                1.0 if self._dq_monitor is not None else 0.0,
+                labels,
+            )
             self._metrics.set_gauge("dq_validation_score", 1.0 - error_rate, labels)
             self._metrics.set_gauge("dq_validation_record_count", record_count, labels)
             freshness_anchor = self._resolve_freshness_anchor_timestamp(metrics)

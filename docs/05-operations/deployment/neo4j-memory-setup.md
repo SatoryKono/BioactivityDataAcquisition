@@ -165,6 +165,24 @@ Last verified: '2026-04-09'
     flight and whether the time is being spent in evidence build or Neo4j
     roundtrips.
 
+16. For Windows-host / WSL live validation, use the fast audit as the default
+    health check and treat targeted analysis-layer syncs as dependent on a
+    current base graph:
+    ```bash
+    python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json
+    python -m scripts.ops sync-neo4j-memory --apply --only-retirement-layer
+    python -m scripts.ops sync-neo4j-memory --apply --only-complexity-layer
+    ```
+    `--report-fast` is the recommended operator path for quick local validation.
+    Targeted retirement/complexity syncs assume the live graph already contains
+    the required repo anchor nodes from a recent base sync. If the repository
+    changed and those anchors are stale or missing, targeted sync now fails fast
+    with the exact missing anchor nodes and a
+    `sync-neo4j-memory --apply --prune-stale` remediation hint instead of
+    drifting into a late relation-count mismatch. After repeated targeted runs,
+    prefer `--apply --prune-stale` over a plain `--apply` so stale managed rows
+    from older `sync_run` values do not pollute the next base verification pass.
+
 ## Memory Configuration Profiles
 
 ### Development (Local, 4GB host RAM)

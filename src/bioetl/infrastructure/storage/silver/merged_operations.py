@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol
 
 import pyarrow as pa
@@ -33,6 +34,7 @@ class _MergedSilverWriteRequest:
     table_name: str
     records: list[BronzeRecord]
     primary_keys: list[str] | None = None
+    completed_at: datetime | None = None
     run_id: str | None = None
     sources_used: list[str] | None = None
     preserve_column_order: bool = False

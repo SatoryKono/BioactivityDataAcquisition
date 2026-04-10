@@ -13,6 +13,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.batch_processing_service import (
+    BatchProcessingComponents,
     BatchProcessingOutcome,
     BatchProcessingService,
 )
@@ -20,6 +21,7 @@ from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
 )
 from bioetl.application.core.batch_transformer import TransformResult
+from bioetl.domain.aggregates.events import BatchCreated, BatchSealed
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import BatchID, BronzeRecord, RunType
 
@@ -162,6 +164,7 @@ def _make_service(
             writer=writer,
             tracing=tracing,
             quarantine_manager=MagicMock(),
+            run_id=context.run_id,
         ),
     )
 
@@ -279,6 +282,54 @@ class TestProcessBatchHappyPath:
         await svc.process_batch(records=records, start_index=0, query_string=None)
 
         mock_transformer.transform_batch.assert_awaited_once()
+
+    async def test_emits_batch_created_and_sealed_events(
+        self,
+        mock_context,
+        mock_services,
+        mock_config,
+        mock_logger,
+        mock_batch_metrics,
+        mock_transformer,
+        mock_writer,
+        mock_tracing,
+        mock_batch_id_factory,
+    ):
+        """process_batch emits typed batch lifecycle events through the support seam."""
+        event_emitter = MagicMock()
+        service = BatchProcessingService(
+            services=mock_services,
+            context=mock_context,
+            config=mock_config,
+            components=BatchProcessingComponents(
+                batch_metrics=mock_batch_metrics,
+                transformer=mock_transformer,
+                writer=mock_writer,
+            ),
+            tracing_manager=mock_tracing,
+            batch_id_factory=mock_batch_id_factory,
+            support_service=BatchProcessingSupportService(
+                services=mock_services,
+                logger=mock_logger,
+                batch_metrics=mock_batch_metrics,
+                transformer=mock_transformer,
+                writer=mock_writer,
+                tracing=mock_tracing,
+                quarantine_manager=MagicMock(),
+                run_id=mock_context.run_id,
+                domain_event_emitter=event_emitter,
+            ),
+        )
+
+        await service.process_batch(
+            records=[{"id": "1", "val": 10}],
+            start_index=0,
+            query_string=None,
+        )
+
+        emitted_events = [call.args[0] for call in event_emitter.emit_domain_event.call_args_list]
+        assert any(isinstance(event, BatchCreated) for event in emitted_events)
+        assert any(isinstance(event, BatchSealed) for event in emitted_events)
 
     async def test_calls_write_silver_when_silver_records_present(
         self,

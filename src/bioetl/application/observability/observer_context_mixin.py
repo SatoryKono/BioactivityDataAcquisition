@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Self
 
 from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
@@ -34,6 +35,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
     contract_version: str | None
     composite_run_id: str | None
     start_time: float | None
+    wall_start_time: datetime | None
     span: Span | None
     _completed_stage_count: int
     _terminal_records_processed: int
@@ -43,6 +45,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
     def __enter__(self) -> Self:
         """Start observation (Span + Log + Metric)."""
         self.start_time = time.monotonic()
+        self.wall_start_time = datetime.now(tz=UTC)
         self._start_trace_span()
         self._emit_contract_event(
             PipelineEvent.START,
@@ -162,7 +165,10 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
         if status == "failed":
             self.emit_domain_event(
                 PipelineFailed(
-                    occurred_at=self._build_pipeline_result_timestamp(),
+                    occurred_at=self._build_pipeline_result_timestamp(
+                        self.wall_start_time,
+                        duration,
+                    ),
                     run_id=self.run_id,
                     pipeline_name=self.pipeline_name,
                     failed_stage="unknown",
@@ -175,7 +181,10 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
         if status == "shutdown":
             self.emit_domain_event(
                 PipelineShutdown(
-                    occurred_at=self._build_pipeline_result_timestamp(),
+                    occurred_at=self._build_pipeline_result_timestamp(
+                        self.wall_start_time,
+                        duration,
+                    ),
                     run_id=self.run_id,
                     pipeline_name=self.pipeline_name,
                     records_processed=self._terminal_records_processed,
@@ -185,7 +194,10 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
             return
         self.emit_domain_event(
             PipelineCompleted(
-                occurred_at=self._build_pipeline_result_timestamp(),
+                occurred_at=self._build_pipeline_result_timestamp(
+                    self.wall_start_time,
+                    duration,
+                ),
                 run_id=self.run_id,
                 pipeline_name=self.pipeline_name,
                 records_processed=self._terminal_records_processed,
@@ -196,11 +208,14 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
         )
 
     @staticmethod
-    def _build_pipeline_result_timestamp() -> datetime:
-        """Return a timezone-aware timestamp for terminal domain-event publication."""
-        from datetime import UTC, datetime
-
-        return datetime.now(tz=UTC)
+    def _build_pipeline_result_timestamp(
+        wall_start_time: datetime | None,
+        duration_seconds: float,
+    ) -> datetime:
+        """Return terminal event timestamp derived from captured wall-clock start."""
+        if wall_start_time is None:
+            return datetime.now(tz=UTC)
+        return wall_start_time + timedelta(seconds=duration_seconds)
 
     def _close_span_safely(
         self,

@@ -46,6 +46,7 @@ class MergeOutputWriterMixin:
     async def _write_merged_silver(
         self,
         df: pl.DataFrame,
+        completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
     ) -> None:
@@ -53,6 +54,8 @@ class MergeOutputWriterMixin:
 
         Args:
             df: Merged DataFrame to persist; Null-typed columns are coerced to String first.
+            completed_at: Optional deterministic metadata timestamp routed into
+                merged Silver sidecar/control-plane metadata.
             run_id: Optional composite run identifier attached to the write for lineage.
             sources_used: Optional list of pipeline names that contributed to the merge,
                 attached to the write for provenance tracking.
@@ -64,6 +67,7 @@ class MergeOutputWriterMixin:
         await self._storage.write_silver_merged(
             table_name,
             records,
+            completed_at=completed_at,
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=True,

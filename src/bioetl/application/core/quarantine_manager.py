@@ -8,7 +8,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import NamedTuple
 
+from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
+from bioetl.domain.aggregates.events import RecordQuarantined
+from bioetl.domain.aggregates.quarantine_entry import QuarantineEntry
 from bioetl.domain.ports import MetricsPort, QuarantinePort, QuarantineWriteRequest
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict, RunID
 
@@ -66,6 +69,7 @@ class QuarantineManagerService:
         pipeline_name: str,
         metrics: MetricsPort | None = None,
         pipeline_metrics: PipelineMetricsRecorder | None = None,
+        domain_event_emitter: DomainEventEmitter | None = None,
     ) -> None:
         """Initialize QuarantineManager with explicit dependencies.
 
@@ -87,6 +91,7 @@ class QuarantineManagerService:
                 pipeline_name,
             )
         self._pipeline_metrics = resolved_pipeline_metrics
+        self._domain_event_emitter = domain_event_emitter
 
     def _track_quarantine_metrics(self, error_type: ErrorType, count: int) -> None:
         """Emit quarantine metrics through both legacy and current metric APIs."""
@@ -157,6 +162,15 @@ class QuarantineManagerService:
             metadata={"error_details": {"message": error_details}},
             ingestion_ts=ingestion_ts,
         )
+        self._emit_quarantine_events(
+            payload=record,
+            error_code=error_type.value,
+            error_message=error_details,
+            batch_id=batch_id,
+            run_id=run_id,
+            ingestion_ts=ingestion_ts,
+            metadata={"error_details": {"message": error_details}},
+        )
         self._track_quarantine_metrics(error_type, 1)
         self._track_processed_quarantined(1)
 
@@ -185,6 +199,18 @@ class QuarantineManagerService:
             for record, error_type, error_details in records
         ]
         await self._quarantine.write_many(write_requests)
+        for request, (_, error_type, error_details) in zip(
+            write_requests, records, strict=True
+        ):
+            self._emit_quarantine_events(
+                payload=request["payload"],
+                error_code=error_type.value,
+                error_message=error_details,
+                batch_id=batch_id,
+                run_id=run_id,
+                ingestion_ts=ingestion_ts,
+                metadata=request["metadata"],
+            )
         if self._metrics:
             counts_by_reason: dict[ErrorType, int] = {}
             for _, error_type, _ in records:
@@ -227,6 +253,18 @@ class QuarantineManagerService:
             ),
             ingestion_ts=ingestion_ts,
         )
+        self._emit_quarantine_events(
+            payload=record,
+            error_code=error_code,
+            error_message=error_details,
+            batch_id=batch_id,
+            run_id=run_id,
+            ingestion_ts=ingestion_ts,
+            metadata=_filtered_quarantine_metadata(
+                reason=error_details,
+                details=details,
+            ),
+        )
         if self._metrics:
             self._pipeline_metrics.record_quarantine_records(
                 reason=error_code,
@@ -261,6 +299,16 @@ class QuarantineManagerService:
             for entry in records
         ]
         await self._quarantine.write_many(write_requests)
+        for request, entry in zip(write_requests, records, strict=True):
+            self._emit_quarantine_events(
+                payload=request["payload"],
+                error_code=error_code,
+                error_message=entry.reason,
+                batch_id=batch_id,
+                run_id=run_id,
+                ingestion_ts=ingestion_ts,
+                metadata=request["metadata"],
+            )
         if self._metrics:
             self._pipeline_metrics.record_quarantine_records(
                 reason=error_code,
@@ -316,6 +364,55 @@ class QuarantineManagerService:
             error_code,
             run_id,
         )
+
+    def _emit_quarantine_events(
+        self,
+        *,
+        payload: BronzeRecord,
+        error_code: str,
+        error_message: str,
+        batch_id: BatchID,
+        run_id: RunID | None,
+        ingestion_ts: datetime,
+        metadata: JsonDict | None,
+    ) -> None:
+        """Publish typed quarantine events when stable correlation IDs are present."""
+        if self._domain_event_emitter is None or run_id is None:
+            return
+
+        entry = QuarantineEntry.create(
+            pipeline_name=self._pipeline_name,
+            error_code=error_code,
+            payload=payload,
+            run_id=run_id,
+            batch_id=batch_id,
+            created_at=ingestion_ts,
+            metadata=metadata,
+        )
+        for event in entry.collect_events():
+            self._domain_event_emitter.emit_domain_event(event)
+
+        self._domain_event_emitter.emit_domain_event(
+            RecordQuarantined(
+                occurred_at=ingestion_ts,
+                run_id=run_id,
+                batch_id=batch_id,
+                record_id=self._extract_record_id(payload),
+                error_code=error_code,
+                error_message=error_message,
+                content_hash=entry.payload_hash,
+            )
+        )
+
+    @staticmethod
+    def _extract_record_id(payload: BronzeRecord) -> str | None:
+        """Best-effort extraction of a stable record identifier from raw payloads."""
+        for key in ("record_id", "entity_id", "id", "activity_id", "compound_id"):
+            value = payload.get(key)
+            if value is None:
+                continue
+            return str(value)
+        return None
 
 
 QuarantineManager = QuarantineManagerService

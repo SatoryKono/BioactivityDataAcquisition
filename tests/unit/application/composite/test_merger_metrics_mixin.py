@@ -35,9 +35,9 @@ def _enricher_config(pipeline: str) -> EnricherConfig:
 
 @pytest.mark.unit
 class TestAddLineage:
-    """Test _add_lineage column injection."""
+    """Test _add_lineage semantic metadata injection."""
 
-    def test_adds_lineage_columns(self) -> None:
+    def test_adds_only_semantic_composite_columns(self) -> None:
         mixin = _make_mixin()
         df = pl.DataFrame({"doi": ["10.1/a"]})
         enrichment_results = {
@@ -54,11 +54,10 @@ class TestAddLineage:
             sources_used=["seed"],
         )
 
-        assert "_composite_run_id" in result.columns
         assert "_source_providers" in result.columns
         assert "_enrichment_status" in result.columns
-        assert "_lineage_created_at" in result.columns
-        assert result["_composite_run_id"][0] == "run-1"
+        assert "_composite_run_id" not in result.columns
+        assert "_lineage_created_at" not in result.columns
 
     def test_includes_dependency_results_in_status(self) -> None:
         mixin = _make_mixin()
@@ -83,7 +82,7 @@ class TestAddLineage:
         status_str = result["_enrichment_status"][0]
         assert "dep_a" in status_str
         assert "success" in status_str
-        assert result["_lineage_created_at"][0] == "2026-04-10T00:00:00+00:00"
+        assert "_lineage_created_at" not in result.columns
 
 
 @pytest.mark.unit

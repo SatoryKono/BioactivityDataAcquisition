@@ -31,9 +31,9 @@ def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
 def drop_nondeterministic_persisted_fields(table: pa.Table) -> pa.Table:
     """Drop occurrence-scoped provenance fields from persisted Delta rows.
 
-    Runtime provenance remains available in in-memory records, sidecars, run
-    manifests, and audit artifacts. This helper only affects the physical
-    Silver/Gold dataset payload written to Delta.
+    Runtime provenance remains available via explicit write kwargs, sidecars,
+    run manifests, lineage fragments, and audit artifacts. This helper only
+    affects the physical Silver/Gold dataset payload written to Delta.
     """
 
     removable = [

@@ -57,6 +57,7 @@ class TestBuildGoldMergedMetadataInput:
             table_name="composite.publication",
             records=[{"_lineage_created_at": "2025-01-15T10:00:00", "id": 1}],
             completed_at=None,
+            composite_run_id="cmp-1",
             schema=None,
             transform_version="2.0.0",
             transform_steps=("normalize", "enrich"),
@@ -65,6 +66,7 @@ class TestBuildGoldMergedMetadataInput:
         assert result.mode == GoldWriteMode.OVERWRITE
         assert result.transform_version == "2.0.0"
         assert result.transform_steps == ("normalize", "enrich")
+        assert result.composite_run_id == "cmp-1"
         assert result.schema_validation_enabled is False
 
     def test_enables_schema_validation_when_schema_present(self) -> None:
@@ -75,6 +77,7 @@ class TestBuildGoldMergedMetadataInput:
             table_name="composite.publication",
             records=[{"id": 1}],
             completed_at=None,
+            composite_run_id=None,
             schema=mock_schema,
             transform_version="1.0.0",
             transform_steps=(),
@@ -92,6 +95,7 @@ class TestBuildGoldMergedMetadataInput:
                 {"_lineage_created_at": "2025-05-01T08:00:00+00:00", "id": 2},
             ],
             completed_at=None,
+            composite_run_id=None,
             schema=None,
             transform_version=None,
             transform_steps=(),
@@ -106,6 +110,7 @@ class TestBuildGoldMergedMetadataInput:
             table_name="composite.publication",
             records=[{"_lineage_created_at": "2025-05-01T08:00:00+00:00", "id": 2}],
             completed_at=None,
+            composite_run_id=None,
             schema=None,
             transform_version=None,
             transform_steps=(),
@@ -119,6 +124,7 @@ class TestBuildGoldMergedMetadataInput:
             table_name="composite.publication",
             records=[{"_lineage_created_at": "2025-05-01T08:00:00+00:00", "id": 2}],
             completed_at=datetime(2025, 4, 1, 0, 0, 0),
+            composite_run_id="cmp-explicit",
             schema=None,
             transform_version=None,
             transform_steps=(),
@@ -126,6 +132,7 @@ class TestBuildGoldMergedMetadataInput:
 
         assert result.completed_at is not None
         assert result.completed_at.month == 4
+        assert result.lineage_created_at == datetime(2025, 4, 1, 0, 0, 0)
 
 
 @pytest.mark.unit

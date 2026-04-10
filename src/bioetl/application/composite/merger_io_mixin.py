@@ -126,7 +126,12 @@ class MergeIOMixin(MergeOutputWriterMixin, _MergeInputLoaderMixin):
             path=self._config.output_silver_path,
             records=len(df),
         )
-        await self._write_merged_silver(df, run_id=run_id, sources_used=sources_used)
+        await self._write_merged_silver(
+            df,
+            completed_at=metadata_timestamp,
+            run_id=run_id,
+            sources_used=sources_used,
+        )
 
         self._logger.info(
             "Writing merged Gold table",

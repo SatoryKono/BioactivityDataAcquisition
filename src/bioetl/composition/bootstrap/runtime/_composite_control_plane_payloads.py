@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.composition.runtime_builders._run_manifest_support import (
+    to_serializable_mapping,
+)
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.control_plane import RunArtifactRef, RunSourceRef
 from bioetl.domain.types import RunType
@@ -10,6 +13,8 @@ from bioetl.domain.types import RunType
 __all__ = [
     "build_composite_launch_context_snapshot",
     "build_composite_planned_artifacts",
+    "build_composite_resolved_config_snapshot",
+    "build_composite_runtime_config_snapshot",
     "build_composite_source_refs",
 ]
 
@@ -63,6 +68,20 @@ def build_composite_planned_artifacts(
         RunArtifactRef(layer="silver", path=config.merge.output_silver_path),
         RunArtifactRef(layer="gold", path=config.merge.output_gold_path),
     )
+
+
+def build_composite_runtime_config_snapshot(
+    runtime: CompositeRuntimeConfig,
+) -> dict[str, object]:
+    """Normalize composite runtime config into manifest-safe mapping."""
+    return to_serializable_mapping(runtime)
+
+
+def build_composite_resolved_config_snapshot(
+    config: CompositeConfig,
+) -> dict[str, object]:
+    """Normalize resolved composite config into manifest-safe mapping."""
+    return to_serializable_mapping(config)
 
 
 def _resolve_provider_entity(pipeline_name: str) -> tuple[str, str]:

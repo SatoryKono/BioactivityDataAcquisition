@@ -21,6 +21,8 @@ from bioetl.infrastructure.storage.silver.merged_operations import (
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -34,6 +36,7 @@ class _MergedSilverMetadataWriterProtocol(Protocol):
         table_name: str,
         records: list[BronzeRecord],
         primary_keys: list[str],
+        completed_at: datetime | None,
         run_id: str | None,
         sources_used: list[str] | None,
     ) -> Awaitable[None]: ...
@@ -106,6 +109,7 @@ class SilverWriterMergedMixin:
         records: list[BronzeRecord],
         primary_keys: list[str] | None = None,
         *,
+        completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -132,6 +136,7 @@ class SilverWriterMergedMixin:
                 table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,
+                completed_at=completed_at,
                 run_id=run_id,
                 sources_used=sources_used,
                 preserve_column_order=preserve_column_order,
@@ -156,6 +161,7 @@ class SilverWriterMergedMixin:
             table_name=prepared.request.table_name,
             records=prepared.request.records,
             primary_keys=prepared.request.primary_keys or [],
+            completed_at=prepared.request.completed_at,
             run_id=prepared.request.run_id,
             sources_used=prepared.request.sources_used,
         )

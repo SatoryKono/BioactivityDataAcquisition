@@ -18,6 +18,7 @@ from scripts.ops.neo4j_memory_sync import (
     _git_last_commit_age_days_bulk,
     _live_managed_node_counts,
     _live_managed_relation_counts,
+    _missing_managed_anchor_keys,
     main,
     _normalization_evidence_statements,
     apply_normalization_evidence_only,
@@ -41,6 +42,7 @@ from scripts.ops.neo4j_memory_sync import (
     _reset_managed_relations_statement,
     _verify_expected_group_counts,
     snapshot_invariant_issues,
+    _targeted_apply_external_anchor_keys,
     _targeted_apply_required_anchor_labels,
 )
 
@@ -674,6 +676,20 @@ def test_targeted_apply_required_anchor_labels_identifies_missing_base_labels() 
     assert _targeted_apply_required_anchor_labels(filtered) == ("class_surface",)
 
 
+def test_targeted_apply_external_anchor_keys_identifies_missing_base_nodes() -> None:
+    snapshot = GraphSnapshot()
+    project = snapshot.add_node("project", "BioETL")
+    class_surface = snapshot.add_node("class_surface", "pkg.Example")
+    complexity_candidate = snapshot.add_node("complexity_candidate", "class_surface:pkg.Example")
+    snapshot.add_relation(project, "CONTAINS", complexity_candidate)
+    snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
+    snapshot.add_relation(complexity_candidate, "CANDIDATE_FOR_SIMPLIFICATION", class_surface)
+
+    filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
+
+    assert _targeted_apply_external_anchor_keys(filtered) == (NodeKey("class_surface", "pkg.Example"),)
+
+
 def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_graph_is_empty() -> None:
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
@@ -711,6 +727,77 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_grap
 
     assert "Run a base sync first" in message
     assert "`class_surface`" in message
+
+
+def test_missing_managed_anchor_keys_reports_specific_nodes() -> None:
+    class StubClient:
+        def query(
+            self,
+            statement: str,
+            parameters: dict[str, object] | None = None,
+            *,
+            context: str | None = None,
+        ) -> list[dict[str, object]]:
+            assert context == "complexity-layer targeted sync prerequisite anchor node check"
+            assert parameters is not None
+            assert parameters["anchors"] == [
+                {"label": "class_surface", "name": "pkg.Example"},
+                {"label": "module_surface", "name": "src/pkg/example.py"},
+            ]
+            return [
+                {"label": "class_surface", "name": "pkg.Example", "count": 1},
+                {"label": "module_surface", "name": "src/pkg/example.py", "count": 0},
+            ]
+
+    missing = _missing_managed_anchor_keys(
+        StubClient(),  # type: ignore[arg-type]
+        (
+            NodeKey("class_surface", "pkg.Example"),
+            NodeKey("module_surface", "src/pkg/example.py"),
+        ),
+        context="complexity-layer targeted sync prerequisite anchor node check",
+    )
+
+    assert missing == (NodeKey("module_surface", "src/pkg/example.py"),)
+
+
+def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_anchor_nodes_are_missing() -> None:
+    snapshot = GraphSnapshot()
+    project = snapshot.add_node("project", "BioETL")
+    class_surface = snapshot.add_node("class_surface", "pkg.Example")
+    complexity_candidate = snapshot.add_node("complexity_candidate", "class_surface:pkg.Example")
+    snapshot.add_relation(project, "CONTAINS", complexity_candidate)
+    snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
+    filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
+
+    class StubClient:
+        def query(
+            self,
+            statement: str,
+            parameters: dict[str, object] | None = None,
+            *,
+            context: str | None = None,
+        ) -> list[dict[str, object]]:
+            assert parameters is not None
+            if context == "complexity-layer targeted sync prerequisite anchor check":
+                return [{"label": "class_surface", "count": 1}]
+            if context == "complexity-layer targeted sync prerequisite anchor node check":
+                return [{"label": "class_surface", "name": "pkg.Example", "count": 0}]
+            raise AssertionError(f"Unexpected context: {context}")
+
+    try:
+        _ensure_targeted_apply_prerequisites(
+            StubClient(),  # type: ignore[arg-type]
+            filtered,
+            mode_description="complexity-layer targeted sync",
+        )
+    except RuntimeError as exc:
+        message = str(exc)
+    else:
+        raise AssertionError("Expected prerequisite failure for missing anchor nodes")
+
+    assert "Run a base sync first" in message
+    assert "`class_surface:pkg.Example`" in message
 
 
 def test_live_managed_count_helpers_batch_labels_and_relations() -> None:

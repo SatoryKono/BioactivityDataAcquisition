@@ -37,6 +37,8 @@ def build_gold_metadata_input(
     gold_schema: object | None,
     transform_version: str | None,
     transform_steps: tuple[str, ...],
+    composite_run_id: str | None = None,
+    lineage_created_at: datetime | None = None,
 ) -> GoldMetadataInput:
     """Build the coordinator-facing Gold metadata input payload."""
     from bioetl.domain.ports import SilverRef
@@ -64,6 +66,8 @@ def build_gold_metadata_input(
         transform_version=transform_version,
         transform_steps=transform_steps,
         gold_schema=gold_schema,
+        composite_run_id=composite_run_id,
+        lineage_created_at=lineage_created_at,
     )
 
 
@@ -76,6 +80,7 @@ def build_gold_merged_metadata_input(
     schema: DataFrameSchema | None,
     transform_version: str | None,
     transform_steps: tuple[str, ...],
+    composite_run_id: str | None = None,
 ) -> GoldMetadataInput:
     """Build merged-table Gold metadata input payload."""
     return GoldMetadataInput(
@@ -84,6 +89,8 @@ def build_gold_merged_metadata_input(
         records=records,
         mode=GoldWriteMode.OVERWRITE,
         completed_at=completed_at or _extract_completed_at(records),
+        composite_run_id=composite_run_id,
+        lineage_created_at=completed_at,
         transform_version=transform_version,
         transform_steps=transform_steps,
         total_bytes=0,

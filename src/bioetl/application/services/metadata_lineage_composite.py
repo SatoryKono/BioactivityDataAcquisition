@@ -195,10 +195,14 @@ def _build_dataset_composite_lineage_components(
     records: Sequence[Mapping[str, object]] | None,
     composite_name: str,
     created_at: datetime,
+    composite_run_id: str | None = None,
+    lineage_created_at: datetime | None = None,
 ) -> tuple[LineageNodeRef, list[LineageNodeRef], list[LineageEdge]]:
     composite_lineage = extract_composite_lineage_metadata(
         records or [],
         composite_name=composite_name,
+        composite_run_id=composite_run_id,
+        lineage_created_at=lineage_created_at,
     )
     cv_summary = _build_cv_marker_summary(records)
     if composite_lineage is None and not cv_summary:

@@ -51,9 +51,9 @@ META_FIELDS: frozenset[str] = frozenset(
     }
 )
 
-# Persisted Delta rows may still carry core runtime provenance required by the
-# canonical Silver/Gold contracts. Only auxiliary control-plane fields that are
-# not part of persisted table schemas should be stripped before Delta writes.
+# Persisted Delta rows must not carry occurrence-scoped composite runtime
+# provenance. These anchors travel separately via explicit write kwargs,
+# sidecars, lineage fragments, run manifests, and audit artifacts.
 NONDETERMINISTIC_PERSISTED_FIELDS: frozenset[str] = frozenset(
     {
         "_composite_run_id",

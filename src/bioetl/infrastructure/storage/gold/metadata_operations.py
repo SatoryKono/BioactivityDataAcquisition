@@ -67,6 +67,7 @@ class _GoldMergedMetadataWriteRequest:
     table_name: str
     records: list[GoldRecord]
     completed_at: datetime | None = None
+    run_id: RunID | None = None
     schema: DataFrameSchema | None = None
 
 
@@ -211,6 +212,7 @@ def _prepare_gold_merged_metadata_write(
         table_name=request.table_name,
         records=request.records,
         completed_at=request.completed_at,
+        composite_run_id=None if request.run_id is None else str(request.run_id),
         schema=request.schema,
         transform_version=host._transform_version,
         transform_steps=host._transform_steps,

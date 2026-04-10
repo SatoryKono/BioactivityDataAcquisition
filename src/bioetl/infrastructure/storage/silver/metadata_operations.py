@@ -77,6 +77,7 @@ class _SilverMergedMetadataWriteRequest:
     table_name: str
     records: list[BronzeRecord]
     primary_keys: list[str]
+    completed_at: datetime | None = None
     run_id: str | None = None
     sources_used: list[str] | None = None
 
@@ -261,7 +262,7 @@ async def _prepare_silver_merged_metadata_write(
         table_name=request.table_name,
     )
     merged_completed_at = _resolve_metadata_timestamp(
-        explicit=None,
+        explicit=request.completed_at,
         records=request.records,
     )
     silver_input = SilverMetadataInput(
@@ -271,6 +272,8 @@ async def _prepare_silver_merged_metadata_write(
         mode=SilverWriteMode.DELETE,
         started_at=merged_completed_at,
         completed_at=merged_completed_at,
+        composite_run_id=request.run_id,
+        lineage_created_at=merged_completed_at,
         version_after=context.version_after,
         transform_version=host._transform_version,
         transform_steps=host._transform_steps,

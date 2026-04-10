@@ -741,10 +741,8 @@ class TestGoldMetadata:
         records = [
             {
                 "id": 1,
-                "_composite_run_id": "comp-run-123",
                 "_source_providers": "['seed', 'openalex']",
                 "_enrichment_status": "{'openalex': 'ok'}",
-                "_lineage_created_at": "2026-01-01T10:00:00+00:00",
             }
         ]
 
@@ -753,6 +751,8 @@ class TestGoldMetadata:
             table_name="composite.publication",
             records=records,
             mode=GoldWriteMode.OVERWRITE,
+            composite_run_id="comp-run-123",
+            lineage_created_at=datetime(2026, 1, 1, 10, 0, tzinfo=UTC),
             schema_validation_enabled=True,
             schema_validation_strict=True,
         )
@@ -1406,7 +1406,6 @@ class TestLineageFragments:
             records=[
                 {
                     "id": 1,
-                    "_composite_run_id": "comp-run-456",
                     "_source_providers": "['seed', 'crossref']",
                     "_enrichment_status": "{'crossref': 'success'}",
                     "_field_sources": "{'doi': 'seed', 'title': 'crossref'}",
@@ -1423,6 +1422,7 @@ class TestLineageFragments:
             primary_keys=["id"],
             mode=SilverWriteMode.DELETE,
             version_after=11,
+            composite_run_id="comp-run-456",
         )
 
         fragment = coordinator.build_silver_lineage_fragment(input_data)
@@ -1562,12 +1562,10 @@ class TestLineageFragments:
             records=[
                 {
                     "id": 1,
-                    "_composite_run_id": "comp-run-123",
                     "_source_providers": "['seed', 'openalex']",
                     "_enrichment_status": "{'openalex': 'success'}",
                     "_field_sources": "{'title': 'openalex', 'doi': 'seed'}",
                     "_seed_record_id": "seed-001",
-                    "_lineage_created_at": "2026-03-24T10:00:00+00:00",
                     "_cv_warn": True,
                     "_cv_error": False,
                     "_cv_quarantine": False,
@@ -1581,6 +1579,8 @@ class TestLineageFragments:
                 },
             ],
             mode=GoldWriteMode.OVERWRITE,
+            composite_run_id="comp-run-123",
+            lineage_created_at=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),
         )
 
         fragment = coordinator.build_gold_lineage_fragment(input_data)

@@ -36,6 +36,7 @@ class TestBuildComponentsAndProcessingService:
             ),
             context=SimpleNamespace(
                 logger=MagicMock(),
+                run_id="run-123",
                 run_type=MagicMock(value="incremental"),
             ),
         )
@@ -94,12 +95,14 @@ class TestBuildComponentsAndProcessingService:
             gold_transform_callback=callbacks.gold_transform,
             gold_validator=gold_validator,
             tracer=tracer,
+            domain_event_emitter=None,
             lock_validator=lock_validator,
         )
         mock_quarantine_manager_cls.assert_called_once_with(
             quarantine_port=pipeline.services.quarantine,
             pipeline_name=processor_config.pipeline_name,
             metrics=pipeline.services.metrics,
+            domain_event_emitter=None,
         )
         mock_support_service_cls.assert_called_once_with(
             services=pipeline.services,
@@ -109,6 +112,8 @@ class TestBuildComponentsAndProcessingService:
             writer=components.writer,
             tracing=tracing_manager,
             quarantine_manager=quarantine_manager,
+            run_id=pipeline.context.run_id,
+            domain_event_emitter=None,
         )
         mock_processing_service_cls.assert_called_once_with(
             services=pipeline.services,
