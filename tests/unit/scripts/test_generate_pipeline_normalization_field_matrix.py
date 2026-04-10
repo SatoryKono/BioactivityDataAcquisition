@@ -42,6 +42,16 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     assert pubchem_smiles["normalization_source"] == "profile"
     assert pubchem_smiles["normalizer"] == "_normalize_canonical_smiles"
 
+    openalex_title = _row(rows, "openalex_publication", "title")
+    assert openalex_title["normalization_source"] == "fallback_business"
+    assert openalex_title["normalizer"] == "normalize_title"
+
+    openalex_run_id = _row(rows, "openalex_publication", "_run_id")
+    assert (
+        openalex_run_id["normalization_source"] == "fallback_technical_passthrough"
+    )
+    assert openalex_run_id["normalizer"] == "passthrough"
+
 
 def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields() -> None:
     rows = build_field_matrix_rows()
