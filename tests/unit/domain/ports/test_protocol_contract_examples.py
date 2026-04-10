@@ -62,6 +62,11 @@ class TestStoragePortProtocol:
                 column_order: list[str] | None = None,
                 bronze_refs: list[BronzeWriteResult] | None = None,
                 key_nullability_rules: list[Any] | None = None,
+                *,
+                run_id: RunID | None = None,
+                run_type: Any = None,
+                source_batch_id: BatchID | None = None,
+                ingestion_ts: datetime | None = None,
             ) -> SilverWriteResult | None:
                 return None
 

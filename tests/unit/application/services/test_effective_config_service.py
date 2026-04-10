@@ -214,7 +214,27 @@ class TestEffectiveConfigService:
 
         parsed = json.loads(json_str)
         assert parsed["artifact_id"] == artifact.artifact_id
-        assert parsed["pipeline_name"] == "test_pipeline"
+        assert parsed["semantic_artifact"]["pipeline_name"] == "test_pipeline"
+        assert "occurrence_envelope" in parsed
+
+    def test_semantic_serialization_is_stable_across_occurrence_timestamps(self) -> None:
+        """Semantic serialization should ignore occurrence envelope timestamps."""
+        kwargs = {
+            "pipeline_name": "test_pipeline",
+            "pipeline_kind": "standard",
+            "resolved_config": {"pipeline": {"name": "test_pipeline"}},
+            "runtime_overrides": {"runtime": {"limit": 5}},
+            "source_refs": [],
+        }
+
+        artifact1 = self.service.create_effective_config_artifact(**kwargs)
+        artifact2 = self.service.create_effective_config_artifact(**kwargs)
+
+        assert artifact1.created_at != artifact2.created_at
+        assert (
+            self.service.serialize_semantic_artifact(artifact1)
+            == self.service.serialize_semantic_artifact(artifact2)
+        )
 
     def test_hash_computation_integration(self) -> None:
         """Test hash computation integration."""

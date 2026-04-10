@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.domain.medallion import SilverWriteMode
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
@@ -35,6 +35,18 @@ class _SilverWritePostwriteContext(Protocol):
 
     @property
     def partition_cols(self) -> list[str] | None: ...
+
+    @property
+    def run_id(self) -> RunID | None: ...
+
+    @property
+    def run_type(self) -> RunType | None: ...
+
+    @property
+    def source_batch_id(self) -> BatchID | None: ...
+
+    @property
+    def ingestion_ts(self) -> datetime | None: ...
 
     @property
     def started_at(self) -> datetime: ...
@@ -62,6 +74,10 @@ class _SilverWriterPostwriteSelf(Protocol):
         table_name: str,
         records: list[BronzeRecord],
         mode: SilverWriteMode,
+        run_id: RunID | None,
+        run_type: RunType | None,
+        source_batch_id: BatchID | None,
+        ingestion_ts: datetime | None,
     ) -> None: ...
 
     async def _finalize_silver_write_result(
@@ -74,6 +90,7 @@ class _SilverWriterPostwriteSelf(Protocol):
         validated_mode: SilverWriteMode,
         bronze_refs: list[BronzeWriteResult] | None,
         partition_cols: list[str] | None,
+        source_batch_id: BatchID | None,
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None: ...
@@ -100,6 +117,10 @@ class SilverWriterPostwriteMixin:
             table_name=ctx.table_name,
             records=payload.records,
             mode=payload.validated_mode,
+            run_id=ctx.run_id,
+            run_type=ctx.run_type,
+            source_batch_id=ctx.source_batch_id,
+            ingestion_ts=ctx.ingestion_ts,
         )
         return await self._finalize_silver_write_result(
             table_name=ctx.table_name,
@@ -109,6 +130,7 @@ class SilverWriterPostwriteMixin:
             validated_mode=payload.validated_mode,
             bronze_refs=ctx.bronze_refs,
             partition_cols=ctx.partition_cols,
+            source_batch_id=ctx.source_batch_id,
             started_at=ctx.started_at,
             start_perf=ctx.start_perf,
         )

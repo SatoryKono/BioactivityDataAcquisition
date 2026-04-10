@@ -22,7 +22,11 @@ class TestSilverWriterAudit:
     @pytest.mark.asyncio
     async def test_log_silver_audit_skips_when_no_audit(self, noop_logger):
         """Test _log_silver_audit does nothing when audit is None."""
+        from datetime import UTC, datetime
+        from uuid import uuid4
+
         from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -30,14 +34,22 @@ class TestSilverWriterAudit:
         # Should not raise, just return early
         await writer._log_silver_audit(
             table_name="test.table",
-            records=[{"_run_id": "uuid", "_ingestion_ts": "2025-01-01T00:00:00Z"}],
+            records=[{"entity_id": "CHEMBL1"}],
             mode=SilverWriteMode.MERGE,
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            source_batch_id=BatchID(uuid4()),
+            ingestion_ts=datetime(2025, 1, 1, tzinfo=UTC),
         )
 
     @pytest.mark.asyncio
-    async def test_log_silver_audit_skips_invalid_run_id(self, noop_logger):
-        """Test _log_silver_audit skips when run_id is invalid UUID."""
+    async def test_log_silver_audit_skips_missing_run_id(self, noop_logger):
+        """Test _log_silver_audit skips when run_id is missing."""
+        from datetime import UTC, datetime
+        from uuid import uuid4
+
         from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.domain.types import BatchID, RunType
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_audit = MagicMock()
@@ -45,24 +57,26 @@ class TestSilverWriterAudit:
             base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
         )
 
-        # Invalid UUID should skip audit logging
         await writer._log_silver_audit(
             table_name="test.table",
-            records=[
-                {"_run_id": "not-a-uuid", "_ingestion_ts": "2025-01-01T00:00:00Z"}
-            ],
+            records=[{"entity_id": "CHEMBL1"}],
             mode=SilverWriteMode.MERGE,
+            run_id=None,
+            run_type=RunType.INCREMENTAL,
+            source_batch_id=BatchID(uuid4()),
+            ingestion_ts=datetime(2025, 1, 1, tzinfo=UTC),
         )
 
-        # Audit should NOT be called due to invalid run_id
         mock_audit.log_write.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_log_silver_audit_with_valid_data(self, noop_logger):
         """Test _log_silver_audit logs correctly with valid data."""
+        from datetime import datetime
         from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_audit = MagicMock()
@@ -72,18 +86,15 @@ class TestSilverWriterAudit:
             base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
         )
 
-        valid_uuid = str(uuid4())
+        valid_uuid = uuid4()
         await writer._log_silver_audit(
             table_name="test.table",
-            records=[
-                {
-                    "_run_id": valid_uuid,
-                    "_ingestion_ts": "2025-01-01T12:00:00",
-                    "_run_type": "incremental",
-                    "_source_batch_id": "batch-123",
-                }
-            ],
+            records=[{"entity_id": "CHEMBL1"}],
             mode=SilverWriteMode.MERGE,
+            run_id=RunID(valid_uuid),
+            run_type=RunType.INCREMENTAL,
+            source_batch_id=BatchID(uuid4()),
+            ingestion_ts=datetime.fromisoformat("2025-01-01T12:00:00"),
         )
 
         mock_audit.log_write.assert_called_once()
@@ -95,6 +106,7 @@ class TestSilverWriterAudit:
         from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_audit = MagicMock()
@@ -104,30 +116,28 @@ class TestSilverWriterAudit:
             base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
         )
 
-        valid_uuid = str(uuid4())
+        valid_uuid = uuid4()
         ingestion_dt = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
         await writer._log_silver_audit(
             table_name="test.table",
-            records=[
-                {
-                    "_run_id": valid_uuid,
-                    "_ingestion_ts": ingestion_dt,  # datetime object
-                    "_run_type": "backfill",
-                    "_source_batch_id": "batch-456",
-                }
-            ],
+            records=[{"entity_id": "CHEMBL1"}],
             mode=SilverWriteMode.APPEND,
+            run_id=RunID(valid_uuid),
+            run_type=RunType.BACKFILL,
+            source_batch_id=BatchID(uuid4()),
+            ingestion_ts=ingestion_dt,
         )
 
         mock_audit.log_write.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_log_silver_audit_fallback_timestamp(self, noop_logger):
-        """Test _log_silver_audit uses fallback when ingestion_ts is invalid type."""
+        """Test _log_silver_audit uses fallback when ingestion_ts is missing."""
         from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_audit = MagicMock()
@@ -137,18 +147,15 @@ class TestSilverWriterAudit:
             base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
         )
 
-        valid_uuid = str(uuid4())
+        valid_uuid = uuid4()
         await writer._log_silver_audit(
             table_name="test.table",
-            records=[
-                {
-                    "_run_id": valid_uuid,
-                    "_ingestion_ts": 12345,  # Invalid type - will use fallback
-                    "_run_type": "rebuild",
-                    "_source_batch_id": "batch-789",
-                }
-            ],
+            records=[{"entity_id": "CHEMBL1"}],
             mode=SilverWriteMode.DELETE,
+            run_id=RunID(valid_uuid),
+            run_type=RunType.REBUILD,
+            source_batch_id=BatchID(uuid4()),
+            ingestion_ts=None,
         )
 
         mock_audit.log_write.assert_called_once()

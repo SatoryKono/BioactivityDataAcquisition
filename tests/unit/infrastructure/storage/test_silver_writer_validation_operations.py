@@ -120,18 +120,15 @@ class TestValidateRecords:
         with pytest.raises(ValueError, match="No records to write"):
             _validate_records(host, [], "test_table", schema)
 
-    def test_missing_metadata_fields_raises(self) -> None:
-        """Should raise ValueError when required metadata fields are missing."""
+    def test_records_without_runtime_metadata_pass(self) -> None:
+        """Silver validation should not require runtime provenance in row payload."""
         host = MagicMock()
         schema = pa.schema([("id", pa.int64())])
-        records = [
-            {"id": 1, "_run_id": "r1"}
-        ]  # missing _run_type, _source_batch_id, _ingestion_ts
-        with pytest.raises(ValueError, match="missing required metadata fields"):
-            _validate_records(host, records, "test_table", schema)
+        records = [{"id": 1}]
+        _validate_records(host, records, "test_table", schema)
 
     def test_valid_records_pass(self) -> None:
-        """Should pass when all metadata fields are present."""
+        """Silver validation accepts records regardless of runtime provenance fields."""
         host = MagicMock()
         schema = pa.schema([("id", pa.int64())])
         records = [
@@ -145,8 +142,8 @@ class TestValidateRecords:
         ]
         _validate_records(host, records, "test_table", schema)
 
-    def test_null_source_batch_id_raises(self) -> None:
-        """Should raise when _source_batch_id is present but null."""
+    def test_null_source_batch_id_in_payload_is_ignored(self) -> None:
+        """Runtime provenance should not be validated from row payload anymore."""
         host = MagicMock()
         schema = pa.schema([("id", pa.int64())])
         records = [
@@ -158,11 +155,10 @@ class TestValidateRecords:
                 "_ingestion_ts": "2025-01-01T00:00:00Z",
             }
         ]
-        with pytest.raises(ValueError, match="_source_batch_id"):
-            _validate_records(host, records, "test_table", schema)
+        _validate_records(host, records, "test_table", schema)
 
-    def test_blank_source_batch_id_raises(self) -> None:
-        """Should raise when _source_batch_id is blank."""
+    def test_blank_source_batch_id_in_payload_is_ignored(self) -> None:
+        """Blank row-level provenance should not fail Silver validation."""
         host = MagicMock()
         schema = pa.schema([("id", pa.int64())])
         records = [
@@ -174,8 +170,7 @@ class TestValidateRecords:
                 "_ingestion_ts": "2025-01-01T00:00:00Z",
             }
         ]
-        with pytest.raises(ValueError, match="_source_batch_id"):
-            _validate_records(host, records, "test_table", schema)
+        _validate_records(host, records, "test_table", schema)
 
 
 @pytest.mark.unit

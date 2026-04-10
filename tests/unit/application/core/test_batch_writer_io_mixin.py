@@ -222,17 +222,21 @@ class TestBatchWriterIOMixinBronze:
 class TestBatchWriterIOMixinSilver:
     """Tests for write_silver path in BatchWriterIOMixin."""
 
-    async def test_write_silver_injects_source_batch_id(
+    async def test_write_silver_passes_explicit_runtime_provenance(
         self, batch_writer, mock_storage, mock_context
     ):
-        """_source_batch_id is injected into every silver record."""
+        """Runtime provenance is passed separately, not injected into records."""
         records = [{"entity_id": "1"}]
         batch_id = BatchID(uuid4())
 
         await batch_writer.write_silver(records, batch_id, mock_context.started_at)
 
         kwargs = mock_storage.write_silver.call_args[1]
-        assert kwargs["records"][0]["_source_batch_id"] == str(batch_id)
+        assert kwargs["run_id"] == mock_context.run_id
+        assert kwargs["run_type"] == mock_context.run_type
+        assert kwargs["source_batch_id"] == batch_id
+        assert kwargs["ingestion_ts"] == mock_context.started_at
+        assert "_source_batch_id" not in kwargs["records"][0]
 
     async def test_write_silver_passes_table_name(
         self, mock_storage, mock_context, mock_gold_validator
