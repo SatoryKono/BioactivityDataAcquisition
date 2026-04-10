@@ -11,6 +11,9 @@ from bioetl.application.composite.checkpoint import (
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.merger import MergeService
+from bioetl.application.composite.merger_orchestration import (
+    MergeExecutionRequest,
+)
 from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import (
     CompositeConfig,
@@ -88,11 +91,11 @@ class _CompositeRunnerMergeStageHostProtocol(Protocol):
         self,
         enrichment_results: dict[str, EnrichmentResult],
         dependency_results: dict[str, DependencyResult] | None,
-    ) -> _PreparedMergeRequest: ...
+    ) -> MergeExecutionRequest: ...
 
     async def _run_prepared_merge_request(
         self,
-        request: _PreparedMergeRequest,
+        request: MergeExecutionRequest,
     ) -> MergeResult: ...
 
     async def _execute_started_merge_phase(
@@ -134,16 +137,3 @@ class _PreparedMergeInputs:
 
     enrichers: list[EnricherConfig]
     dependencies: list[DependencyConfig]
-
-
-@dataclass(frozen=True, slots=True)
-class _PreparedMergeRequest:
-    """Normalized merge request passed into the merger runtime seam."""
-
-    seed_table: str
-    seed_pipeline: str
-    enrichers: list[EnricherConfig]
-    enrichment_results: dict[str, EnrichmentResult]
-    run_id: str
-    dependencies: list[DependencyConfig]
-    dependency_results: dict[str, DependencyResult] | None

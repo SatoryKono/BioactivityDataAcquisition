@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.application.composite.merger_orchestration import (
+    MergeExecutionRequest,
+)
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner_constants import (
     PIPELINE_EXECUTION_ERRORS,
@@ -19,7 +22,6 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_runtime import (
 from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
     _CompositeRunnerMergeStageHostProtocol,
     _PreparedMergeInputs,
-    _PreparedMergeRequest,
 )
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -63,14 +65,14 @@ def build_merge_request(
     host: _CompositeRunnerMergeStageHostProtocol,
     enrichment_results: dict[str, EnrichmentResult],
     dependency_results: dict[str, DependencyResult] | None,
-) -> _PreparedMergeRequest:
+) -> MergeExecutionRequest:
     """Build the canonical merge request for the merger seam."""
     prepared_inputs = build_merge_inputs(
         host,
         enrichment_results,
         dependency_results,
     )
-    return _PreparedMergeRequest(
+    return MergeExecutionRequest(
         seed_table=host._config.seed.silver_table,
         seed_pipeline=host._config.seed.pipeline,
         enrichers=prepared_inputs.enrichers,
@@ -83,18 +85,10 @@ def build_merge_request(
 
 async def run_prepared_merge_request(
     host: _CompositeRunnerMergeStageHostProtocol,
-    request: _PreparedMergeRequest,
+    request: MergeExecutionRequest,
 ) -> MergeResult:
     """Run merger through a normalized request context."""
-    return await host._merger.merge(
-        seed_table=request.seed_table,
-        enrichers=request.enrichers,
-        enrichment_results=request.enrichment_results,
-        run_id=request.run_id,
-        seed_pipeline=request.seed_pipeline,
-        dependencies=request.dependencies,
-        dependency_results=request.dependency_results,
-    )
+    return await host._merger.execute_request(request)
 
 
 async def execute_started_merge_phase(

@@ -39,6 +39,19 @@ class MergeInputContext:
     dependency_dfs: dict[str, pl.DataFrame]
 
 
+@dataclass(frozen=True, slots=True)
+class MergeExecutionRequest:
+    """Canonical request envelope for one composite merge execution."""
+
+    seed_table: str
+    enrichers: Sequence[EnricherConfig]
+    enrichment_results: dict[str, EnrichmentResult]
+    run_id: str
+    seed_pipeline: str | None = None
+    dependencies: Sequence[DependencyConfig] | None = None
+    dependency_results: dict[str, DependencyResult] | None = None
+
+
 class MergeWorkflowContext(MergePostJoinWorkflowContext, Protocol):
     """Subset of MergeService API required by orchestration helpers."""
 
@@ -119,50 +132,67 @@ async def execute_merge_workflow(
     dependency_results: dict[str, DependencyResult] | None = None,
 ) -> MergeResult:
     """Execute the full composite merge workflow for ``MergeService``."""
-    started_at = datetime.now(tz=UTC)
-    loaded = await load_merge_inputs(
-        host,
+    request = MergeExecutionRequest(
         seed_table=seed_table,
         seed_pipeline=seed_pipeline,
         enrichers=enrichers,
         enrichment_results=enrichment_results,
+        run_id=run_id,
         dependencies=dependencies,
         dependency_results=dependency_results,
+    )
+    return await execute_merge_request(host, request)
+
+
+async def execute_merge_request(
+    host: MergeWorkflowContext,
+    request: MergeExecutionRequest,
+) -> MergeResult:
+    """Execute the full composite merge workflow from a canonical request."""
+    started_at = datetime.now(tz=UTC)
+    loaded = await load_merge_inputs(
+        host,
+        seed_table=request.seed_table,
+        seed_pipeline=request.seed_pipeline,
+        enrichers=request.enrichers,
+        enrichment_results=request.enrichment_results,
+        dependencies=request.dependencies,
+        dependency_results=request.dependency_results,
     )
 
     merged_df = await host._join_planner.apply_joins(
         seed_df=loaded.seed_df,
         enricher_dfs=loaded.enricher_dfs,
-        enrichers=enrichers,
+        enrichers=request.enrichers,
         seed_pipeline=loaded.effective_seed_pipeline,
     )
     merged_df = await host._apply_dependency_joins_if_needed(
         merged_df=merged_df,
         dependency_dfs=loaded.dependency_dfs,
-        dependencies=dependencies,
+        dependencies=request.dependencies,
         seed_pipeline=loaded.effective_seed_pipeline,
     )
     post_join_context = finalize_post_join_context(
         host,
         merged_df=merged_df,
-        enrichers=enrichers,
-        enrichment_results=enrichment_results,
+        enrichers=request.enrichers,
+        enrichment_results=request.enrichment_results,
         effective_seed_pipeline=loaded.effective_seed_pipeline,
-        run_id=run_id,
+        run_id=request.run_id,
         sources_used=loaded.sources_used,
-        dependency_results=dependency_results,
+        dependency_results=request.dependency_results,
         enricher_dfs=loaded.enricher_dfs,
     )
     return await persist_and_build_result(
         host,
         merged_df=post_join_context.merged_df,
-        enrichers=enrichers,
+        enrichers=request.enrichers,
         records_merged=post_join_context.records_merged,
         records_from_seed=loaded.records_from_seed,
         records_enriched=post_join_context.records_enriched,
         sources_used=loaded.sources_used,
         cv_stats=post_join_context.cv_stats,
         quarantine_payloads=post_join_context.quarantine_payloads,
-        run_id=run_id,
+        run_id=request.run_id,
         started_at=started_at,
     )

@@ -21,6 +21,8 @@ from bioetl.application.composite.merger_collaborators import (
 from bioetl.application.composite.merger_io_mixin import MergeIOMixin
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.composite.merger_orchestration import (
+    MergeExecutionRequest,
+    execute_merge_request,
     execute_merge_workflow,
 )
 from bioetl.domain.composite.result import (
@@ -146,13 +148,20 @@ class MergeService(
             MergeResult with merged record counts, source provenance, cross-validation
             stats, quarantine payloads, and duration metrics.
         """
-        return await execute_merge_workflow(
-            self,
+        request = MergeExecutionRequest(
             seed_table=seed_table,
+            seed_pipeline=seed_pipeline,
             enrichers=enrichers,
             enrichment_results=enrichment_results,
             run_id=run_id,
-            seed_pipeline=seed_pipeline,
             dependencies=dependencies,
             dependency_results=dependency_results,
         )
+        return await self.execute_request(request)
+
+    async def execute_request(
+        self,
+        request: MergeExecutionRequest,
+    ) -> MergeResult:
+        """Execute a canonical merge request envelope."""
+        return await execute_merge_request(self, request)

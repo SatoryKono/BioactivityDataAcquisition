@@ -32,7 +32,9 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_runtime import (
 from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
     _CompositeRunnerMergeStageHostProtocol,
     _PreparedMergeInputs,
-    _PreparedMergeRequest,
+)
+from bioetl.application.composite.merger_orchestration import (
+    MergeExecutionRequest,
 )
 from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig
@@ -141,13 +143,13 @@ class CompositeRunnerMergeStageMixin:
         self: _CompositeRunnerMergeStageHostProtocol,
         enrichment_results: dict[str, EnrichmentResult],
         dependency_results: dict[str, DependencyResult] | None,
-    ) -> _PreparedMergeRequest:
+    ) -> MergeExecutionRequest:
         """Build the canonical merge request for the merger seam."""
         return build_merge_request(self, enrichment_results, dependency_results)
 
     async def _run_prepared_merge_request(
         self: _CompositeRunnerMergeStageHostProtocol,
-        request: _PreparedMergeRequest,
+        request: MergeExecutionRequest,
     ) -> MergeResult:
         """Run merger through a normalized request context."""
         return await run_prepared_merge_request(self, request)
