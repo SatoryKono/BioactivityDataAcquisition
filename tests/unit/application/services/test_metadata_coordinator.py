@@ -174,6 +174,7 @@ class TestBronzeMetadata:
         assert isinstance(metadata, BronzeMetadata)
         assert metadata.layer == Layer.BRONZE
         assert metadata.version == "1.1"  # ADR-029 version bump
+        assert metadata.output.artifact_id == f"bronze_batch:{input_data.batch_id}"
 
     def test_bronze_runtime_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze runtime metadata contains correct values."""
@@ -196,6 +197,7 @@ class TestBronzeMetadata:
         assert metadata.runtime.started_at_utc == started_at
         assert metadata.runtime.completed_at_utc == completed_at
         assert metadata.runtime.duration_seconds == 3.0
+        assert metadata.output.artifact_id == f"bronze_batch:{input_data.batch_id}"
 
     def test_bronze_pipeline_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze pipeline metadata uses context values."""
