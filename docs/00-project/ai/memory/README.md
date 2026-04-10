@@ -56,10 +56,17 @@ profiles в BioETL.
   Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:
   он пишет JSON-отчет с snapshot stats, live managed/unmanaged summary,
   orphan summary и diff между snapshot и текущим managed graph.
+  Для быстрого operator health-check используй
+  `python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json`:
+  этот режим проверяет только critical analysis labels/relations и устойчивее
+  для Windows-host HTTP sync.
   Для полного пересоздания текущей managed wave используй
   `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:
   этот режим сначала удаляет весь repo-managed subgraph текущей волны, а потом
   пересобирает его из текущего состояния репозитория.
+  В текущем Windows-host режиме `development_cycle_surface` остается
+  snapshot/export-only surface и не синхронизируется в live Neo4j, потому что
+  этот label воспроизводимо дестабилизирует локальный container backend.
   Если нужно довести repo-derived labels до полностью deterministic managed-only
   состояния, используй
   `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:
