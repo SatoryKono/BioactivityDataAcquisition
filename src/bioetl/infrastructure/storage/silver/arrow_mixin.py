@@ -9,6 +9,9 @@ from typing import TYPE_CHECKING, Protocol
 import pyarrow as pa
 
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
+from bioetl.infrastructure.storage.delta.schema_ops import (
+    drop_nondeterministic_persisted_fields,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -43,10 +46,11 @@ class SilverWriterArrowMixin:
         Returns:
             PyArrow Table filtered to schema columns, ordered, and sorted by primary keys.
         """
-        return self._arrow_converter.convert_records_to_arrow_with_schema(
+        arrow_table = self._arrow_converter.convert_records_to_arrow_with_schema(
             records,
             schema,
             primary_keys=primary_keys,
             column_order=column_order,
             apply_column_order=True,
         )
+        return drop_nondeterministic_persisted_fields(arrow_table)

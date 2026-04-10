@@ -86,10 +86,10 @@ class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
         silver_df = dt_silver.to_pyarrow_table()
         assert len(silver_df) > 0, "Silver table is empty"
 
-        # Verify lineage fields in Silver
-        assert "_run_id" in silver_df.column_names
-        assert "_run_type" in silver_df.column_names
-        assert "_ingestion_ts" in silver_df.column_names
+        # Persisted Silver rows should exclude occurrence-scoped runtime metadata.
+        assert "_run_id" not in silver_df.column_names
+        assert "_run_type" not in silver_df.column_names
+        assert "_ingestion_ts" not in silver_df.column_names
 
         # Verify business fields in Silver
         assert "record_id" in silver_df.column_names

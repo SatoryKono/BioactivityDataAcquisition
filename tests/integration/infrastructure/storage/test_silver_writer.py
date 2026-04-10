@@ -270,6 +270,25 @@ async def test_write_silver_append_mode(
 
 
 @pytest.mark.asyncio
+async def test_write_silver_persisted_rows_strip_runtime_occurrence_fields(
+    silver_writer, temp_delta_path, sample_records, sample_schema
+):
+    """Persisted Silver rows should exclude run-scoped runtime provenance fields."""
+    await silver_writer.write_silver(
+        table_name="test_persisted_contract",
+        records=sample_records,
+        primary_keys=["id"],
+        schema=sample_schema,
+        mode="append",
+    )
+
+    dt = DeltaTable(f"{temp_delta_path}/test_persisted_contract")
+    table = dt.to_pyarrow_table()
+
+    assert table.column_names == ["id", "val"]
+
+
+@pytest.mark.asyncio
 async def test_write_silver_delete_mode(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
@@ -555,6 +574,31 @@ async def test_write_silver_merged_overwrites_existing(silver_writer, temp_delta
     df = dt.to_pandas()
     assert len(df) == 2
     assert set(df["id"]) == {"2", "3"}
+
+
+@pytest.mark.asyncio
+async def test_write_silver_merged_strips_runtime_occurrence_fields(
+    silver_writer, temp_delta_path
+):
+    """Merged Silver overwrite should not persist run-scoped provenance columns."""
+    await silver_writer.write_silver_merged(
+        table_name="test_merged_runtime_contract",
+        records=[
+            {
+                "id": "1",
+                "val": "A",
+                "_run_id": "run-1",
+                "_source_batch_id": "batch-1",
+                "_ingestion_ts": "2024-01-01T00:00:00Z",
+            }
+        ],
+        primary_keys=["id"],
+    )
+
+    dt = DeltaTable(f"{temp_delta_path}/test_merged_runtime_contract")
+    table = dt.to_pyarrow_table()
+
+    assert table.column_names == ["id", "val"]
 
 
 @pytest.mark.asyncio
