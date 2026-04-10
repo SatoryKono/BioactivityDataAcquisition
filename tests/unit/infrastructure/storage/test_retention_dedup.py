@@ -67,7 +67,7 @@ def _write_content_hash_table(
 
 @pytest.mark.asyncio
 async def test_deduplicate_removes_duplicates(tmp_delta_dir: Path) -> None:
-    """Dedup should keep latest record per PK."""
+    """Dedup should keep a deterministic winner without relying on timestamps."""
     table_path = tmp_delta_dir / "test_entity"
 
     # Write batch 1 (older)
@@ -116,11 +116,12 @@ async def test_deduplicate_removes_duplicates(tmp_delta_dir: Path) -> None:
     result = dt.to_pyarrow_table()
     assert result.num_rows == 3
 
-    # Verify the latest value for activity_id=1 is kept
+    # Verify the deterministic winner for activity_id=1 is kept.
+    # The compaction contract no longer depends on `_ingestion_ts`.
     rows = result.to_pylist()
     id1_rows = [r for r in rows if r["activity_id"] == "1"]
     assert len(id1_rows) == 1
-    assert id1_rows[0]["value"] == 15.0  # Latest value
+    assert id1_rows[0]["value"] == 10.0
 
 
 @pytest.mark.asyncio
@@ -217,3 +218,49 @@ async def test_deduplicate_uses_content_hash_when_ingestion_ts_missing(
     id1_rows = [row for row in rows if row["activity_id"] == "1"]
     assert len(id1_rows) == 1
     assert id1_rows[0]["content_hash"] == "a-hash"
+
+
+@pytest.mark.asyncio
+async def test_deduplicate_prefers_content_hash_over_ingestion_timestamp(
+    tmp_delta_dir: Path,
+) -> None:
+    """Content-aware winner selection should ignore newer ingestion timestamps."""
+    table_path = tmp_delta_dir / "test_entity_hash_and_ts"
+    table_path.mkdir(parents=True, exist_ok=True)
+    schema = pa.schema(
+        [
+            pa.field("activity_id", pa.string()),
+            pa.field("value", pa.float64()),
+            pa.field("content_hash", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ]
+    )
+    table = pa.table(
+        [
+            pa.array(["1", "1"]),
+            pa.array([10.0, 15.0]),
+            pa.array(["a-hash", "z-hash"]),
+            pa.array(["2024-01-01T00:00:00Z", "2024-01-02T00:00:00Z"]),
+        ],
+        schema=schema,
+    )
+    write_deltalake(str(table_path), table)
+
+    mgr = RetentionPolicy(base_path=str(tmp_delta_dir))
+    removed = await mgr.deduplicate_silver(
+        "test_entity_hash_and_ts", primary_keys=["activity_id"]
+    )
+
+    assert removed == 1
+
+    from deltalake import DeltaTable
+
+    rows = DeltaTable(str(table_path)).to_pyarrow_table().to_pylist()
+    assert rows == [
+        {
+            "activity_id": "1",
+            "value": 10.0,
+            "content_hash": "a-hash",
+            "_ingestion_ts": "2024-01-01T00:00:00Z",
+        }
+    ]
