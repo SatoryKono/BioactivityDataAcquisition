@@ -4531,7 +4531,9 @@ class Neo4jHttpClient:
     ) -> dict[str, object]:
         payload = json.dumps({"statements": statements}).encode("utf-8")
         last_exc: Exception | None = None
+        attempt_errors: list[str] = []
         for attempt in range(12):
+            endpoint = self._endpoint
             req = request.Request(self._endpoint, data=payload, headers=self._headers, method="POST")
             try:
                 with request.urlopen(req, timeout=60) as response:
@@ -4539,9 +4541,21 @@ class Neo4jHttpClient:
                 break
             except error.HTTPError as exc:  # pragma: no cover - live backend dependent
                 body_text = exc.read().decode("utf-8", errors="replace")
+                attempt_errors.append(
+                    self._format_transport_attempt(
+                        endpoint=endpoint,
+                        exc=exc,
+                        body_text=body_text,
+                    )
+                )
                 if exc.code in {429, 502, 503, 504}:
                     last_exc = RuntimeError(
-                        self._format_transport_error(exc, context=context, body_text=body_text)
+                        self._format_transport_error(
+                            exc,
+                            context=context,
+                            body_text=body_text,
+                            attempt_errors=attempt_errors,
+                        )
                     )
                     if self._fallback_endpoint and self._endpoint != self._fallback_endpoint:
                         self._endpoint = self._fallback_endpoint
@@ -4562,15 +4576,30 @@ class Neo4jHttpClient:
                 http.client.RemoteDisconnected,
             ) as exc:  # pragma: no cover - network errors vary per environment
                 last_exc = exc
+                attempt_errors.append(
+                    self._format_transport_attempt(endpoint=endpoint, exc=exc)
+                )
                 if self._fallback_endpoint and self._endpoint != self._fallback_endpoint:
                     self._endpoint = self._fallback_endpoint
                     self._fallback_endpoint = None
                     continue
                 if attempt == 11:
-                    raise RuntimeError(self._format_transport_error(exc, context=context)) from exc
+                    raise RuntimeError(
+                        self._format_transport_error(
+                            exc,
+                            context=context,
+                            attempt_errors=attempt_errors,
+                        )
+                    ) from exc
                 time.sleep(min(3.0, 0.5 * (attempt + 1)))
         else:  # pragma: no cover - loop always breaks or raises
-            raise RuntimeError(self._format_transport_error(last_exc, context=context))
+            raise RuntimeError(
+                self._format_transport_error(
+                    last_exc,
+                    context=context,
+                    attempt_errors=attempt_errors,
+                )
+            )
         body = json.loads(raw)
         errors = body.get("errors", [])
         if errors:
@@ -4619,12 +4648,28 @@ class Neo4jHttpClient:
         *,
         context: str | None,
         body_text: str | None = None,
+        attempt_errors: list[str] | None = None,
     ) -> str:
         prefix = self._context_prefix(context)
         detail = f"{exc}"
         if body_text:
             detail = f"{detail}; response={body_text[:500]}"
-        return f"{prefix}transport error reaching HTTP endpoint {self._endpoint}: {detail}"
+        attempts_suffix = ""
+        if attempt_errors:
+            attempts_suffix = " | attempts: " + " ; ".join(attempt_errors)
+        return f"{prefix}transport error reaching HTTP endpoint {self._endpoint}: {detail}{attempts_suffix}"
+
+    @staticmethod
+    def _format_transport_attempt(
+        *,
+        endpoint: str,
+        exc: Exception,
+        body_text: str | None = None,
+    ) -> str:
+        detail = f"{type(exc).__name__}: {exc}"
+        if body_text:
+            detail = f"{detail}; response={body_text[:200]}"
+        return f"{endpoint} -> {detail}"
 
     def _format_query_error(
         self,
@@ -5440,96 +5485,124 @@ def _build_diff_entries(snapshot_counts: dict[str, int], live_counts: dict[str, 
 
 
 def _live_repo_label_rows(client: Neo4jHttpClient, managed_labels: list[str]) -> list[dict[str, JsonValue]]:
-    rows: list[dict[str, JsonValue]] = []
-    for label in managed_labels:
-        total = _live_scalar(
-            client,
-            f"MATCH (n:`{label}`) RETURN count(n) AS value",
-            {},
-        )
-        managed = _live_scalar(
-            client,
-            f"MATCH (n:`{label}`) WHERE coalesce(n.managed_by, '') = $managed_by RETURN count(n) AS value",
-            {"managed_by": DEFAULT_MANAGED_BY},
-        )
-        unmanaged = _live_scalar(
-            client,
-            f"MATCH (n:`{label}`) WHERE coalesce(n.managed_by, '') = '' RETURN count(n) AS value",
-            {},
-        )
-        rows.append(
-            {
-                "label": label,
-                "total": total,
-                "managed": managed,
-                "unmanaged": unmanaged,
-            }
-        )
-    return rows
+    if not managed_labels:
+        return []
+    rows = client.query(
+        (
+            "UNWIND $managed_labels AS label "
+            "OPTIONAL MATCH (n) "
+            "WHERE label IN labels(n) "
+            "WITH label, count(n) AS total "
+            "OPTIONAL MATCH (managed_node) "
+            "WHERE label IN labels(managed_node) "
+            "AND coalesce(managed_node.managed_by, '') = $managed_by "
+            "AND coalesce(managed_node.ingest_wave, '') = $ingest_wave "
+            "WITH label, total, count(managed_node) AS managed "
+            "OPTIONAL MATCH (unmanaged_node) "
+            "WHERE label IN labels(unmanaged_node) "
+            "AND coalesce(unmanaged_node.managed_by, '') = '' "
+            "RETURN label, total, managed, count(unmanaged_node) AS unmanaged "
+            "ORDER BY label"
+        ),
+        {
+            "managed_labels": managed_labels,
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+        },
+        context="full audit label summary",
+    )
+    return [
+        {
+            "label": str(row["label"]),
+            "total": int(row["total"]),
+            "managed": int(row["managed"]),
+            "unmanaged": int(row["unmanaged"]),
+        }
+        for row in rows
+        if isinstance(row.get("label"), str)
+        and isinstance(row.get("total"), (int, float))
+        and isinstance(row.get("managed"), (int, float))
+        and isinstance(row.get("unmanaged"), (int, float))
+    ]
 
 
 def _live_managed_relation_rows(
     client: Neo4jHttpClient,
     relation_types: list[str],
 ) -> list[dict[str, JsonValue]]:
-    rows: list[dict[str, JsonValue]] = []
-    for relation_type in relation_types:
-        result = client.query(
-            (
-                f"MATCH ()-[r:`{relation_type}`]->() "
-                "WHERE coalesce(r.managed_by, '') = $managed_by "
-                "AND coalesce(r.ingest_wave, '') = $ingest_wave "
-                "RETURN $relation_type AS relation_type, count(r) AS total"
-            ),
-            {
-                "relation_type": relation_type,
-                "managed_by": DEFAULT_MANAGED_BY,
-                "ingest_wave": DEFAULT_INGEST_WAVE,
-            },
-        )
-        if result:
-            rows.extend(result)
-    return rows
+    counts = _live_managed_relation_counts(
+        client,
+        tuple(relation_types),
+        context="full audit relation summary",
+    )
+    return [
+        {"relation_type": relation_type, "total": total}
+        for relation_type, total in sorted(counts.items())
+    ]
 
 
 def _live_orphan_rows(client: Neo4jHttpClient, managed_labels: list[str]) -> list[dict[str, JsonValue]]:
-    rows: list[dict[str, JsonValue]] = []
-    for label in managed_labels:
-        result = client.query(
-            (
-                f"MATCH (n:`{label}`) "
-                "WHERE coalesce(n.managed_by, '') = $managed_by "
-                "AND coalesce(n.ingest_wave, '') = $ingest_wave "
-                "AND NOT (n)--() "
-                "RETURN $label AS label, count(n) AS count, collect(n.name)[0..10] AS samples"
-            ),
-            {
-                "label": label,
-                "managed_by": DEFAULT_MANAGED_BY,
-                "ingest_wave": DEFAULT_INGEST_WAVE,
-            },
-        )
-        if result and int(result[0].get("count", 0)):
-            rows.extend(result)
-    return rows
+    if not managed_labels:
+        return []
+    rows = client.query(
+        (
+            "UNWIND $managed_labels AS label "
+            "OPTIONAL MATCH (n) "
+            "WHERE label IN labels(n) "
+            "AND coalesce(n.managed_by, '') = $managed_by "
+            "AND coalesce(n.ingest_wave, '') = $ingest_wave "
+            "AND NOT (n)--() "
+            "RETURN label, count(n) AS count, collect(n.name)[0..10] AS samples "
+            "ORDER BY label"
+        ),
+        {
+            "managed_labels": managed_labels,
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+        },
+        context="full audit orphan summary",
+    )
+    return [
+        {
+            "label": str(row["label"]),
+            "count": int(row["count"]),
+            "samples": row.get("samples", []),
+        }
+        for row in rows
+        if isinstance(row.get("label"), str)
+        and isinstance(row.get("count"), (int, float))
+        and int(row["count"]) > 0
+    ]
 
 
 def _live_unmanaged_repo_rows(client: Neo4jHttpClient, managed_labels: list[str]) -> list[dict[str, JsonValue]]:
-    rows: list[dict[str, JsonValue]] = []
-    for label in managed_labels:
-        result = client.query(
-            (
-                f"MATCH (n:`{label}`) "
-                "WHERE coalesce(n.managed_by, '') = '' "
-                "RETURN $label AS label, count(n) AS count, collect(n.name)[0..10] AS samples"
-            ),
-            {
-                "label": label,
-            },
-        )
-        if result and int(result[0].get("count", 0)):
-            rows.extend(result)
-    return rows
+    if not managed_labels:
+        return []
+    rows = client.query(
+        (
+            "UNWIND $managed_labels AS label "
+            "OPTIONAL MATCH (n) "
+            "WHERE label IN labels(n) "
+            "AND coalesce(n.managed_by, '') = '' "
+            "RETURN label, count(n) AS count, collect(n.name)[0..10] AS samples "
+            "ORDER BY label"
+        ),
+        {
+            "managed_labels": managed_labels,
+        },
+        context="full audit unmanaged summary",
+    )
+    return [
+        {
+            "label": str(row["label"]),
+            "count": int(row["count"]),
+            "samples": row.get("samples", []),
+        }
+        for row in rows
+        if isinstance(row.get("label"), str)
+        and isinstance(row.get("count"), (int, float))
+        and int(row["count"]) > 0
+    ]
 
 
 def _live_scalar(client: Neo4jHttpClient, statement: str, parameters: dict[str, JsonValue]) -> int:
@@ -5565,30 +5638,9 @@ def build_audit_report(
         for row in live_relation_rows
         if isinstance(row.get("relation_type"), str)
     }
-    managed_node_total = _live_scalar(
-        client,
-        (
-            "MATCH (n) "
-            "WHERE coalesce(n.managed_by, '') = $managed_by "
-            "AND coalesce(n.ingest_wave, '') = $ingest_wave "
-            "RETURN count(n) AS value"
-        ),
-        {
-            "managed_by": DEFAULT_MANAGED_BY,
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-        },
-    )
-    unmanaged_repo_node_total = _live_scalar(
-        client,
-        (
-            "MATCH (n) "
-            "WHERE any(label IN labels(n) WHERE label IN $managed_labels) "
-            "AND coalesce(n.managed_by, '') = '' "
-            "RETURN count(n) AS value"
-        ),
-        {
-            "managed_labels": managed_labels,
-        },
+    managed_node_total = sum(int(row["managed"]) for row in live_label_rows if isinstance(row.get("managed"), (int, float)))
+    unmanaged_repo_node_total = sum(
+        int(row["count"]) for row in unmanaged_rows if isinstance(row.get("count"), (int, float))
     )
     managed_relation_total = sum(live_managed_relation_counts.values())
     orphan_total = sum(int(row["count"]) for row in orphan_rows if isinstance(row.get("count"), (int, float)))

@@ -14,10 +14,7 @@ from bioetl.domain.ports import (
     SilverValidatorPort,
     TracingPort,
 )
-from bioetl.domain.ports.noop import (
-    NoOpMetadataWriter,
-    NoOpTracing,
-)
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
@@ -33,7 +30,7 @@ class SilverWriterRuntimeServices:
     """Grouped runtime collaborators for ``SilverWriter``."""
 
     csv_exporter: CsvExporter | None
-    tracing: TracingPort
+    tracing: TracingPort | None
     write_policy: WriteModePolicy
     metrics: MetricsPort | None
     audit: AuditPort | None
@@ -55,7 +52,7 @@ def resolve_silver_writer_runtime(
     dq_calculator: DQMetricsCalculator | None,
     merge_resilience_policy: SilverMergeResiliencePolicy | None,
 ) -> tuple[
-    TracingPort,
+    TracingPort | None,
     WriteModePolicy,
     SilverValidatorPort,
     MetadataWriterPort,
@@ -64,7 +61,7 @@ def resolve_silver_writer_runtime(
 ]:
     """Resolve default runtime collaborators for ``SilverWriter``."""
     return (
-        tracing or NoOpTracing(),
+        tracing,
         write_policy or WriteModePolicy(),
         silver_validator or NoOpValidator(),
         metadata_writer or NoOpMetadataWriter(),

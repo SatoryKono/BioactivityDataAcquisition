@@ -49,6 +49,7 @@ if TYPE_CHECKING:
         MetricsPort,
         TracingPort,
     )
+from bioetl.domain.ports.noop import _NoOpSpan
 
 __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
 
@@ -71,7 +72,7 @@ BRONZE_REQUIRED_METADATA_FIELDS = (
 class BronzeWriterRuntimeServices:
     """Optional Bronze runtime collaborators grouped behind one local seam."""
 
-    tracing: TracingPort
+    tracing: TracingPort | None
     audit: AuditPort | None
     metadata_writer: MetadataWriterPort
     save_metadata: bool
@@ -135,11 +136,6 @@ class BronzeWriter(
             unexpected = ", ".join(sorted(legacy_kwargs))
             raise TypeError(f"Unexpected BronzeWriter options: {unexpected}")
 
-        if tracing is None:
-            from bioetl.domain.ports.noop import NoOpTracing
-
-            tracing = NoOpTracing()
-
         if metadata_writer is None:
             from bioetl.domain.ports.noop import NoOpMetadataWriter
 
@@ -199,8 +195,12 @@ class BronzeWriter(
         self,
         request: BronzeWriteRequest,
     ) -> BronzeWriteResult:
-        tracer = self._tracing.get_tracer(__name__)
-        with tracer.start_as_current_span("write_bronze") as span:
+        span_context = (
+            self._tracing.get_tracer(__name__).start_as_current_span("write_bronze")
+            if self._tracing is not None
+            else _NoOpSpan()
+        )
+        with span_context as span:
             span.set_attribute("provider", request.provider)
             span.set_attribute("entity", request.entity)
             span.set_attribute("batch_id", str(request.batch_id))

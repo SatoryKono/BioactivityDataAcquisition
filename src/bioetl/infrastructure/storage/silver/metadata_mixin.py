@@ -107,8 +107,6 @@ class SilverWriterMetadataMixin:
                 ingestion_ts=ingestion_ts,
             ),
         )
-        if audit_entry is None:
-            return
         await self._audit.log_write(audit_entry)
 
     async def _get_delta_version(self, table_path: str) -> int | None:

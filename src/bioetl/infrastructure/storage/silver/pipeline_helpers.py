@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.domain.ports.noop import _NoOpSpan
 
 
 __all__ = [
@@ -265,7 +266,7 @@ async def execute_silver_write_pipeline(
 
 async def execute_silver_write_with_tracing(
     *,
-    tracing: TracingPort,
+    tracing: TracingPort | None,
     module_name: str,
     invocation: _SilverWriteInvocation,
     started_at: datetime,
@@ -273,8 +274,12 @@ async def execute_silver_write_with_tracing(
     execute_pipeline: _SilverWritePipelineExecutor,
 ) -> SilverWriteResult | None:
     """Create the tracing span/context and delegate the Silver write pipeline."""
-    tracer = tracing.get_tracer(module_name)
-    with tracer.start_as_current_span("write_silver") as span:
+    span_context = (
+        tracing.get_tracer(module_name).start_as_current_span("write_silver")
+        if tracing is not None
+        else _NoOpSpan()
+    )
+    with span_context as span:
         set_silver_write_span_attributes(
             span,
             table_name=invocation.table_name,

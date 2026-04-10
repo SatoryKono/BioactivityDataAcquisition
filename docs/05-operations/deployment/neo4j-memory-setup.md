@@ -105,9 +105,9 @@ Last verified: '2026-04-09'
     deletes unmanaged legacy nodes for the repo-derived label families now owned
     by deterministic sync.
     Current-cycle semantics are now projected directly onto code surfaces and
-    candidate nodes as properties, rather than the old
-    `development_cycle_surface` label. This keeps Windows-host live sync stable
-    while preserving `current-cycle-code`, `dead-code-candidates`, and
+    candidate nodes as properties rather than a separate cycle label. This
+    keeps Windows-host live sync stable while preserving
+    `current-cycle-code`, `dead-code-candidates`, and
     removable-complexity query semantics.
 
 12. To gate ontology drift in CI or locally without a live Neo4j backend, run:
