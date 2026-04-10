@@ -54,6 +54,35 @@ file_structure:
 adapters:
   fine_grained_enabled: true
 
+duplication_analysis:
+  enabled: true
+  min_cluster_size: 2
+  min_ast_nodes: 12
+  families:
+    normalization_profiles:
+      roots:
+        - "src/bioetl/domain/normalization/profiles"
+      package_family: "domain/normalization"
+      promotion_targets:
+        - label: "module_surface"
+          name: "src/bioetl/domain/normalization/profiles/base.py"
+    adapter_layer:
+      roots:
+        - "src/bioetl/infrastructure/adapters"
+      package_family: "infrastructure/adapters"
+      promotion_targets:
+        - label: "class_surface"
+          name: "bioetl.infrastructure.adapters.base.BaseHttpAdapter"
+        - label: "module_surface"
+          name: "src/bioetl/infrastructure/adapters/base.py"
+    composite_layer:
+      roots:
+        - "src/bioetl/application/composite"
+      package_family: "application/composite"
+      promotion_targets:
+        - label: "package_family"
+          name: "application/composite"
+
 pipeline_operational:
   runtime_paths:
     - "uv run python -m bioetl run --pipeline"
