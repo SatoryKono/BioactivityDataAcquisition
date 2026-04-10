@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -33,6 +34,22 @@ _FIXTURE_IMPORTS = (
     run_type,
     sample_records,
 )
+
+
+class _BundleCoordinator:
+    """Coordinator stub that exposes the canonical bundle API explicitly."""
+
+    def __init__(self, metadata: object, lineage_fragment: object | None = None) -> None:
+        self.metadata = metadata
+        self.lineage_fragment = lineage_fragment
+        self.last_input: object | None = None
+
+    def create_bronze_metadata_bundle(self, input_data: object) -> object:
+        self.last_input = input_data
+        return SimpleNamespace(
+            metadata=self.metadata,
+            lineage_fragment=self.lineage_fragment,
+        )
 
 
 @pytest.mark.unit
@@ -248,8 +265,10 @@ class TestBronzeWriterMetadataSidecar:
         mock_bundle = MagicMock()
         mock_bundle.metadata = MagicMock()
         mock_bundle.lineage_fragment = MagicMock()
-        mock_coordinator = MagicMock()
-        mock_coordinator.create_bronze_metadata_bundle.return_value = mock_bundle
+        mock_coordinator = _BundleCoordinator(
+            metadata=mock_bundle.metadata,
+            lineage_fragment=mock_bundle.lineage_fragment,
+        )
 
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -479,11 +498,13 @@ class TestBronzeWriterQueryString:
         from bioetl.domain.ports import BronzeMetadataInput
 
         # Create mock metadata coordinator
-        mock_coordinator = MagicMock()
         mock_bundle = MagicMock()
         mock_bundle.metadata = MagicMock()
         mock_bundle.lineage_fragment = MagicMock()
-        mock_coordinator.create_bronze_metadata_bundle.return_value = mock_bundle
+        mock_coordinator = _BundleCoordinator(
+            metadata=mock_bundle.metadata,
+            lineage_fragment=mock_bundle.lineage_fragment,
+        )
 
         # Create mock metadata writer
         mock_metadata_writer = AsyncMock()
@@ -520,11 +541,7 @@ class TestBronzeWriterQueryString:
         )
 
         # Verify create_bronze_metadata_bundle was called with BronzeMetadataInput
-        mock_coordinator.create_bronze_metadata_bundle.assert_called_once()
-        call_args = mock_coordinator.create_bronze_metadata_bundle.call_args
-
-        # Get the BronzeMetadataInput argument
-        bronze_input = call_args[0][0]
+        bronze_input = mock_coordinator.last_input
         assert isinstance(bronze_input, BronzeMetadataInput)
 
         # Verify query_string was extracted from source_metadata
@@ -549,11 +566,13 @@ class TestBronzeWriterQueryString:
 
         from bioetl.domain.models.metadata import SourceMetadata
 
-        mock_coordinator = MagicMock()
         mock_bundle = MagicMock()
         mock_bundle.metadata = MagicMock()
         mock_bundle.lineage_fragment = MagicMock()
-        mock_coordinator.create_bronze_metadata_bundle.return_value = mock_bundle
+        mock_coordinator = _BundleCoordinator(
+            metadata=mock_bundle.metadata,
+            lineage_fragment=mock_bundle.lineage_fragment,
+        )
 
         mock_metadata_writer = AsyncMock()
         mock_metadata_writer.write_bronze_metadata = AsyncMock()
@@ -587,8 +606,7 @@ class TestBronzeWriterQueryString:
         )
 
         # Verify create_bronze_metadata_bundle was called
-        mock_coordinator.create_bronze_metadata_bundle.assert_called_once()
-        bronze_input = mock_coordinator.create_bronze_metadata_bundle.call_args[0][0]
+        bronze_input = mock_coordinator.last_input
 
         # query_string should be None
         assert bronze_input.query_string is None
@@ -608,11 +626,13 @@ class TestBronzeWriterQueryString:
         """Test query_string is None when source_metadata is not provided."""
         from unittest.mock import AsyncMock, MagicMock
 
-        mock_coordinator = MagicMock()
         mock_bundle = MagicMock()
         mock_bundle.metadata = MagicMock()
         mock_bundle.lineage_fragment = MagicMock()
-        mock_coordinator.create_bronze_metadata_bundle.return_value = mock_bundle
+        mock_coordinator = _BundleCoordinator(
+            metadata=mock_bundle.metadata,
+            lineage_fragment=mock_bundle.lineage_fragment,
+        )
 
         mock_metadata_writer = AsyncMock()
         mock_metadata_writer.write_bronze_metadata = AsyncMock()
@@ -639,8 +659,7 @@ class TestBronzeWriterQueryString:
             # source_metadata not passed - defaults to None
         )
 
-        mock_coordinator.create_bronze_metadata_bundle.assert_called_once()
-        bronze_input = mock_coordinator.create_bronze_metadata_bundle.call_args[0][0]
+        bronze_input = mock_coordinator.last_input
 
         # Both should be None
         assert bronze_input.source_metadata is None

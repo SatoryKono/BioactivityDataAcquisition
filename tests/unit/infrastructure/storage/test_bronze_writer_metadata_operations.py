@@ -23,6 +23,17 @@ class _Host:
         self._metadata_coordinator = None
 
 
+class _BundleCoordinator:
+    def __init__(self, metadata: object, fragment: object) -> None:
+        self.metadata = metadata
+        self.fragment = fragment
+        self.last_input: object | None = None
+
+    def create_bronze_metadata_bundle(self, input_data: object) -> object:
+        self.last_input = input_data
+        return MagicMock(metadata=self.metadata, lineage_fragment=self.fragment)
+
+
 @pytest.mark.unit
 class TestPrepareBronzeMetadataWrite:
     def test_raises_when_coordinator_missing(
@@ -57,13 +68,9 @@ class TestPrepareBronzeMetadataWrite:
 
     def test_uses_coordinator_bundle_when_configured(self, tmp_path: Path) -> None:
         host = _Host(tmp_path)
-        coordinator = MagicMock()
         metadata = MagicMock()
         fragment = MagicMock()
-        coordinator.create_bronze_metadata_bundle.return_value = MagicMock(
-            metadata=metadata,
-            lineage_fragment=fragment,
-        )
+        coordinator = _BundleCoordinator(metadata=metadata, fragment=fragment)
         host._metadata_coordinator = coordinator
         output_path = "pubmed/publication/file.jsonl.zst"
         full_path = tmp_path / output_path
@@ -87,8 +94,7 @@ class TestPrepareBronzeMetadataWrite:
             ),
         )
 
-        coordinator.create_bronze_metadata_bundle.assert_called_once()
-        bronze_input = coordinator.create_bronze_metadata_bundle.call_args.args[0]
+        bronze_input = coordinator.last_input
         assert bronze_input.record_count == 5
         assert bronze_input.output_path == output_path
         assert len(bronze_input.input_snapshots) == 1

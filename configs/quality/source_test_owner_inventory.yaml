@@ -169,12 +169,6 @@ modules:
     owner_tests:
       - tests/unit/infrastructure/adapters/pubchem/test_query_builder.py
 
-  - source: src/bioetl/infrastructure/storage/metadata_builder.py
-    ownership: direct_test
-    rationale: "Canonical metadata builder behavior stays on the direct same-path owner suite."
-    owner_tests:
-      - tests/unit/infrastructure/storage/test_metadata_builder.py
-
   - source: src/bioetl/infrastructure/storage/silver/runtime_helpers.py
     ownership: cluster_owner
     rationale: >

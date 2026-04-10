@@ -1,31 +1,31 @@
-version: '3.8'
+# Neo4j for MCP Memory - Production Ready
+# Data is ephemeral (no volumes) - MCP uses file fallback for persistence
 
 services:
   neo4j:
     image: neo4j:5.13-community
     container_name: bioetl-neo4j
-    command: ["neo4j", "console"]
     ports:
       - "7474:7474"
       - "7687:7687"
     environment:
-      NEO4J_AUTH: neo4j/bioetl_secure_password
+      # DO NOT use NEO4J_AUTH env var - causes restart conflicts
+      # Instead, use default credentials and change via API if needed
+      NEO4J_INITIAL_PASSWORD: bioetl_secure_password
       NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
-      # Lightweight Neo4j profile.
-      # Uses dedicated NEO4J_LIGHT_* vars so the heavy defaults from .env do not
-      # accidentally over-allocate memory and prevent container startup.
-      NEO4J_server_memory_heap_initial__size: ${NEO4J_LIGHT_HEAP_INITIAL:-256m}
-      NEO4J_server_memory_heap_max__size: ${NEO4J_LIGHT_HEAP_MAX:-1g}
-      NEO4J_server_memory_pagecache_size: ${NEO4J_LIGHT_PAGECACHE_SIZE:-256m}
-      NEO4J_db_memory_transaction_max: ${NEO4J_LIGHT_TX_MAX_SIZE:-1g}
-      NEO4J_dbms_memory_transaction_total_max: ${NEO4J_LIGHT_GLOBAL_TX_MAX:-2g}
-    # NO VOLUMES: Data is ephemeral (lost on restart)
-    # This is intentional for stability - MCP uses file fallback anyway
+      # Minimal memory (stable on Windows Docker)
+      NEO4J_server_memory_heap_initial__size: 128m
+      NEO4J_server_memory_heap_max__size: 256m
+      NEO4J_server_memory_pagecache_size: 64m
+      # Do NOT reinitialize password on restart
+      NEO4J_dbms_security_auth__provider: native
+    # Ephemeral - no volumes (data lost on restart, file fallback catches important data)
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7474"]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-    restart: unless-stopped
-    mem_limit: ${NEO4J_LIGHT_CONTAINER_MEMORY_LIMIT:-2g}
-    cpus: "${NEO4J_LIGHT_CONTAINER_CPU_LIMIT:-2.0}"
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+    restart: no
+    mem_limit: 1g
+    cpus: "1.0"
