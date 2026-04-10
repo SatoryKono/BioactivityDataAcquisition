@@ -145,7 +145,8 @@ entity_id = f"openalex:{openalex_id}"
 Вычисляется по бизнес-полям публикации для дедупликации:
 
 - Исключаются lookup-метаданные (`_lookup_method`, `_original_id`)
-- Исключаются lineage-поля (`_run_id`, `_ingestion_ts`, etc.)
+- Исключаются occurrence-scoped provenance anchors (`_run_id`, `_run_type`,
+  `_source_batch_id`, `_ingestion_ts` и др.)
 - None-значения исключаются из хэша
 
 ______________________________________________________________________
@@ -398,12 +399,13 @@ ______________________________________________________________________
   "_lookup_method": "doi",
   "_original_id": null,
   "_source": "openalex",
-  "content_hash": "sha256:abc123...",
-  "_run_id": "run-2026-01-06-001",
-  "_run_type": "incremental",
-  "_ingestion_ts": "2026-01-06T12:00:00Z"
+  "content_hash": "sha256:abc123..."
 }
 ```
+
+Occurrence-scoped provenance anchors публикуются через sidecar metadata,
+lineage fragments, run manifest и run ledger, а не через persisted Silver/Gold
+rows.
 
 ### Fallback Record Example
 

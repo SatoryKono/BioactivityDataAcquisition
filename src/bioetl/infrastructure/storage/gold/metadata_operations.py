@@ -13,6 +13,7 @@ from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_merged_metadata_input,
     build_gold_metadata_input,
 )
+from bioetl.infrastructure.storage.metadata.builder_base import _parse_table_name
 from bioetl.infrastructure.storage.lineage_persistence import (
     emit_composite_source_selection_metrics,
     emit_lineage_refs_missing_metric,
@@ -128,8 +129,6 @@ def _prepare_gold_metadata_write(
     request: _GoldMetadataWriteRequest,
 ) -> _PreparedGoldMetadataWrite:
     """Resolve provider/entity and build standard Gold metadata payload."""
-    from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
-
     provider_name, entity_name = _parse_table_name(request.table_name)
     gold_input = build_gold_metadata_input(
         table_path=request.table_path,
@@ -204,8 +203,6 @@ def _prepare_gold_merged_metadata_write(
     request: _GoldMergedMetadataWriteRequest,
 ) -> _PreparedGoldMetadataWrite:
     """Resolve provider/entity and build merged Gold metadata payload."""
-    from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
-
     provider_name, entity_name = _parse_table_name(request.table_name)
     coordinator = host._metadata_coordinator
     assert coordinator is not None

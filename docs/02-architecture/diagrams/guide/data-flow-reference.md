@@ -79,14 +79,18 @@ See `configs/entities/{provider}/{entity}.yaml` for specific configurations.
 
 ## Required Metadata Fields (§2.4)
 
-| Field              | Type      | Description                            |
-| ------------------ | --------- | -------------------------------------- |
-| `_run_id`          | UUID      | Pipeline execution ID                  |
-| `_run_type`        | Enum      | `incremental` / `backfill` / `rebuild` |
-| `_source_batch_id` | UUID      | Lineage reference in metadata sidecar  |
-| `_ingestion_ts`    | Timestamp | UTC ingestion time                     |
-| `content_hash`     | String    | SHA256 for deduplication               |
-| `_dq_warn`         | Boolean   | Data quality warning flag              |
+| Field             | Type      | Description                                           |
+| ----------------- | --------- | ----------------------------------------------------- |
+| `run_id`          | UUID      | Pipeline execution ID in control-plane / lineage      |
+| `run_type`        | Enum      | `incremental` / `backfill` / `rebuild` in run context |
+| `source_batch_id` | UUID      | Lineage reference in metadata sidecar / Bronze ref    |
+| `ingestion_ts`    | Timestamp | Runtime timestamp in sidecar / audit / lineage only   |
+| `content_hash`    | String    | SHA256 for deduplication                              |
+| `_dq_warn`        | Boolean   | Data quality warning flag                             |
+
+Persisted Silver/Gold rows keep only deterministic semantic system fields
+(`entity_id`, `content_hash`, `_source`, `_index`). Occurrence-scoped runtime
+anchors are published through sidecar/control-plane artifacts.
 
 ----------------------------------------------------------------------
 

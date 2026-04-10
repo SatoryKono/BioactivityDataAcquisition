@@ -30,9 +30,9 @@ from bioetl.infrastructure.storage.lineage_persistence import (
     resolve_metadata_and_lineage_fragment,
 )
 from bioetl.infrastructure.storage.metadata.builder_base import (
+    _parse_table_name,
     _resolve_metadata_timestamp,
 )
-from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
 if TYPE_CHECKING:
     from bioetl.domain.lineage import LineageGraphFragment

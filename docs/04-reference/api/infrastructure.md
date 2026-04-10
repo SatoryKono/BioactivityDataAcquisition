@@ -171,8 +171,6 @@ Each provider has its own `models.py` with API response models:
 | Class | Description |
 |---|---|
 | `MetadataWriter` | Writes metadata sidecar YAML files |
-| `SilverMetadataBuilder` | Builds Silver layer metadata payloads |
-| `GoldMetadataBuilder` | Builds Gold layer metadata payloads |
 
 ### Maintenance
 

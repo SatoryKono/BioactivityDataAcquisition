@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -12,7 +12,6 @@ from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_merged_metadata_input,
     build_gold_metadata_input,
     build_gold_metadata_payload,
-    build_gold_metadata_via_fallback,
 )
 
 
@@ -114,41 +113,6 @@ class TestBuildGoldMergedMetadataInput:
 
         assert result.completed_at is not None
         assert result.completed_at.month == 4
-
-
-@pytest.mark.unit
-class TestBuildGoldMetadataViaFallback:
-    """Tests for fallback metadata builder delegation."""
-
-    def test_delegates_to_gold_metadata_builder_with_contract_fields(self) -> None:
-        """Fallback helper should preserve the external metadata contract."""
-        with patch(
-            "bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder.build_fallback_metadata",
-            return_value=MagicMock(),
-        ) as mock_build:
-            build_gold_metadata_via_fallback(
-                table_name="chembl.activity",
-                records=[{"id": 1}],
-                mode=GoldWriteMode.OVERWRITE,
-                scd_config=None,
-                ingestion_ts=None,
-                run_id=None,
-                silver_refs=None,
-                gold_schema=None,
-                transform_version="1.0.0",
-                transform_steps=("normalize",),
-            )
-
-        mock_build.assert_called_once_with(
-            table_name="chembl.activity",
-            records=[{"id": 1}],
-            mode=GoldWriteMode.OVERWRITE,
-            scd_config=None,
-            ingestion_ts=None,
-            run_id=None,
-            silver_refs=None,
-            gold_schema=None,
-        )
 
 
 @pytest.mark.unit
