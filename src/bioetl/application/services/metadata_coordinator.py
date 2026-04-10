@@ -213,6 +213,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             pipeline=self._build_pipeline_metadata(),
             source=source,
             output=BaseOutputMetadata(
+                artifact_id=f"bronze_batch:{input_data.batch_id}",
                 record_count=input_data.record_count,
                 total_bytes=input_data.compressed_size,
                 write_started_at=input_data.started_at,
