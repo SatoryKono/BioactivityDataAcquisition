@@ -96,7 +96,7 @@ async def fetch_single_record_direct(
 
     try:
         start_time = time.perf_counter()
-        with host._adapter_metrics.measure_request(f"/{entity_type}/{record_id}"):
+        with host._adapter_metrics.measure_request(f"/{entity_type}/direct_record"):
             response = await host._http_client.get(direct_url, params=params)
         duration_ms = (time.perf_counter() - start_time) * 1000
 
