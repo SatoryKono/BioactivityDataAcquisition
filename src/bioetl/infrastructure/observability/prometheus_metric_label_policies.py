@@ -153,6 +153,36 @@ def normalize_metric_dispatch_labels(
     """Normalize metric labels for metrics with stricter label contracts."""
     if name == OBSERVABILITY_EVENTS_COUNTER_NAME:
         return normalize_observability_metric_labels(labels)
+    if name == "quarantine_records_total":
+        return {
+            **labels,
+            "reason": normalize_quarantine_reason(str(labels.get("reason", "other"))),
+        }
+    if name == "dq_validation_failures_total":
+        return {
+            **labels,
+            "stage": normalize_dq_stage(str(labels.get("stage", "other"))),
+            "severity": normalize_dq_severity(
+                str(labels.get("severity", "other"))
+            ),
+        }
+    if name == "silver_filter_rejections_total":
+        return {
+            **labels,
+            "reason_code": normalize_silver_filter_reason_code(
+                labels.get("reason_code")
+                if isinstance(labels.get("reason_code"), str)
+                else None
+            ),
+            "rule_type": normalize_silver_filter_rule_type(
+                labels.get("rule_type")
+                if isinstance(labels.get("rule_type"), str)
+                else None
+            ),
+            "field": normalize_silver_filter_field(
+                labels.get("field") if isinstance(labels.get("field"), str) else None
+            ),
+        }
     if name == "structural_policy_events_total":
         return {
             **labels,

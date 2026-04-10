@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
     from bioetl.domain.types import ErrorType, JsonDict
@@ -48,6 +50,7 @@ class BatchMetricsRecorderService:
         self._metrics = metrics
         self._pipeline_label = pipeline_label
         self._run_type_label = run_type_label
+        self._pipeline_metrics = PipelineMetricsRecorder(metrics, pipeline_label)
 
     def track_batch_size(self, stage: str, size: int) -> None:
         """Record the size of a batch at a specific stage.
@@ -120,13 +123,11 @@ class BatchMetricsRecorderService:
             severity: Failure severity (e.g. soft_fail, hard_fail).
             count: Number of failures.
         """
-        if self._metrics:
-            self._metrics.inc_dq_validation_failures(
-                pipeline=self._pipeline_label,
-                stage=stage,
-                severity=severity,
-                count=count,
-            )
+        self._pipeline_metrics.record_dq_validation_failures(
+            stage=stage,
+            severity=severity,
+            count=count,
+        )
 
     def track_quarantined_records(self, error_type: ErrorType, count: int) -> None:
         """Record number of quarantined records.
@@ -146,8 +147,7 @@ class BatchMetricsRecorderService:
                     "run_type": self._run_type_label,
                 },
             )
-            self._metrics.inc_quarantine_records(
-                pipeline=self._pipeline_label,
+            self._pipeline_metrics.record_quarantine_records(
                 reason=error_type.value,
                 count=count,
             )
@@ -183,8 +183,7 @@ class BatchMetricsRecorderService:
             if isinstance(maybe_field, str):
                 field = maybe_field
 
-        self._metrics.inc_silver_filter_rejections(
-            pipeline=self._pipeline_label,
+        self._pipeline_metrics.record_silver_filter_rejections(
             run_type=self._run_type_label,
             reason_code=reason_code,
             rule_type=rule_type,

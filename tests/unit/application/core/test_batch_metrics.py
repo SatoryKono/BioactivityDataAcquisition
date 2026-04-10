@@ -30,9 +30,6 @@ def mock_metrics() -> MagicMock:
     metrics.observe_histogram = MagicMock()
     metrics.increment_counter = MagicMock()
     metrics.set_gauge = MagicMock()
-    metrics.inc_dq_validation_failures = MagicMock()
-    metrics.inc_quarantine_records = MagicMock()
-    metrics.inc_silver_filter_rejections = MagicMock()
     return metrics
 
 
@@ -258,13 +255,16 @@ class TestTrackSilverFilterRejection:
             }
         )
 
-        mock_metrics.inc_silver_filter_rejections.assert_called_once_with(
-            pipeline="test_pipeline",
-            run_type="incremental",
-            reason_code="required_field_missing",
-            rule_type="required_fields",
-            field="publication_year",
-            count=1,
+        mock_metrics.increment_counter.assert_called_once_with(
+            "silver_filter_rejections_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "reason_code": "required_field_missing",
+                "rule_type": "required_fields",
+                "field": "publication_year",
+            },
         )
 
     def test_structural_rejects_use_structural_policy_rule_type(
@@ -279,13 +279,16 @@ class TestTrackSilverFilterRejection:
             }
         )
 
-        mock_metrics.inc_silver_filter_rejections.assert_called_once_with(
-            pipeline="test_pipeline",
-            run_type="incremental",
-            reason_code="optional_nonnullable_field_type_mismatch",
-            rule_type="structural_policy",
-            field="title",
-            count=1,
+        mock_metrics.increment_counter.assert_called_once_with(
+            "silver_filter_rejections_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "reason_code": "optional_nonnullable_field_type_mismatch",
+                "rule_type": "structural_policy",
+                "field": "title",
+            },
         )
 
     def test_no_op_when_metrics_none(
@@ -338,19 +341,22 @@ class TestTrackSilverFilterRejection:
 class TestTrackDQValidationFailure:
     """Tests for track_dq_validation_failure method."""
 
-    def test_calls_inc_dq_validation_failures(
+    def test_records_dq_validation_failures_via_generic_counter(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
     ) -> None:
-        """Test that inc_dq_validation_failures is called with correct params."""
+        """Test that DQ failures use the generic counter contract."""
         recorder.track_dq_validation_failure(
             stage="silver", severity="soft_fail", count=5
         )
 
-        mock_metrics.inc_dq_validation_failures.assert_called_once_with(
-            pipeline="test_pipeline",
-            stage="silver",
-            severity="soft_fail",
-            count=5,
+        mock_metrics.increment_counter.assert_called_once_with(
+            "dq_validation_failures_total",
+            5,
+            {
+                "pipeline": "test_pipeline",
+                "stage": "silver",
+                "severity": "soft_fail",
+            },
         )
 
     def test_default_count_is_one(
@@ -359,8 +365,8 @@ class TestTrackDQValidationFailure:
         """Test that default count=1 is used when not specified."""
         recorder.track_dq_validation_failure(stage="gold", severity="hard_fail")
 
-        call_kwargs = mock_metrics.inc_dq_validation_failures.call_args[1]
-        assert call_kwargs["count"] == 1
+        call_args = mock_metrics.increment_counter.call_args
+        assert call_args.args[1] == 1
 
     def test_no_op_when_metrics_none(
         self, recorder_no_metrics: BatchMetricsRecorderService
@@ -376,8 +382,8 @@ class TestTrackDQValidationFailure:
         """Test that pipeline label is passed to metrics."""
         recorder.track_dq_validation_failure(stage="bronze", severity="soft_fail")
 
-        call_kwargs = mock_metrics.inc_dq_validation_failures.call_args[1]
-        assert call_kwargs["pipeline"] == "test_pipeline"
+        call_labels = mock_metrics.increment_counter.call_args.args[2]
+        assert call_labels["pipeline"] == "test_pipeline"
 
 
 # ---------------------------------------------------------------------------
@@ -397,7 +403,7 @@ class TestTrackQuarantinedRecords:
             error_type=ErrorType.SCHEMA_VIOLATION, count=10
         )
 
-        mock_metrics.increment_counter.assert_called_once_with(
+        mock_metrics.increment_counter.assert_any_call(
             "dq_records_quarantined_total",
             10,
             {
@@ -407,16 +413,19 @@ class TestTrackQuarantinedRecords:
             },
         )
 
-    def test_calls_inc_quarantine_records(
+    def test_records_quarantine_records_via_generic_counter(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
     ) -> None:
-        """Test that inc_quarantine_records is also called."""
+        """Test that quarantine counters use the generic metric API."""
         recorder.track_quarantined_records(error_type=ErrorType.INVALID_DATA, count=3)
 
-        mock_metrics.inc_quarantine_records.assert_called_once_with(
-            pipeline="test_pipeline",
-            reason=ErrorType.INVALID_DATA.value,
-            count=3,
+        mock_metrics.increment_counter.assert_any_call(
+            "quarantine_records_total",
+            3,
+            {
+                "pipeline": "test_pipeline",
+                "reason": ErrorType.INVALID_DATA.value,
+            },
         )
 
     def test_no_op_when_metrics_none(
@@ -433,8 +442,13 @@ class TestTrackQuarantinedRecords:
         """Test that the error_type.value is used as reason label."""
         recorder.track_quarantined_records(error_type=ErrorType.DATA_QUALITY, count=1)
 
-        inc_kwargs = mock_metrics.inc_quarantine_records.call_args[1]
-        assert inc_kwargs["reason"] == ErrorType.DATA_QUALITY.value
+        quarantine_calls = [
+            call
+            for call in mock_metrics.increment_counter.call_args_list
+            if call.args and call.args[0] == "quarantine_records_total"
+        ]
+        assert quarantine_calls
+        assert quarantine_calls[0].args[2]["reason"] == ErrorType.DATA_QUALITY.value
 
     def test_includes_run_type_label_in_counter(
         self,
@@ -450,7 +464,13 @@ class TestTrackQuarantinedRecords:
             error_type=ErrorType.SCHEMA_VIOLATION, count=5
         )
 
-        counter_labels = mock_metrics.increment_counter.call_args[0][2]
+        legacy_calls = [
+            call
+            for call in mock_metrics.increment_counter.call_args_list
+            if call.args and call.args[0] == "dq_records_quarantined_total"
+        ]
+        assert legacy_calls
+        counter_labels = legacy_calls[0].args[2]
         assert counter_labels["run_type"] == "backfill"
 
 

@@ -115,50 +115,6 @@ class NoOpMetrics:
         del name, value, resolved_labels
         return None
 
-    def inc_quarantine_records(
-        self,
-        _pipeline: str,
-        _reason: str,
-        _count: int = 1,
-    ) -> None:
-        """No-op implementation — discards the quarantine record counter increment.
-
-        Args:
-            _pipeline: Pipeline name (ignored).
-            _reason: Quarantine reason label (ignored).
-            _count: Number of quarantined records (ignored).
-        """
-        return None
-
-    def inc_dq_validation_failures(
-        self,
-        _pipeline: str,
-        _stage: str,
-        _severity: str,
-        _count: int = 1,
-    ) -> None:
-        """No-op implementation — discards the DQ validation failure counter increment.
-
-        Args:
-            _pipeline: Pipeline name (ignored).
-            _stage: Processing stage label (ignored).
-            _severity: Failure severity label (ignored).
-            _count: Number of failures (ignored).
-        """
-        return None
-
-    def inc_silver_filter_rejections(
-        self,
-        _pipeline: str,
-        _run_type: str,
-        _reason_code: str | None = None,
-        _rule_type: str | None = None,
-        _field: str | None = None,
-        _count: int = 1,
-    ) -> None:
-        """No-op implementation for bounded Silver filter breakdown metrics."""
-        return None
-
     def close(self) -> None:
         """No-op implementation — no metrics backend to flush or close."""
         return None

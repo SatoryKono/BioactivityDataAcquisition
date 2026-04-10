@@ -98,62 +98,6 @@ class MetricsPort(Protocol):
         """
         ...
 
-    def inc_quarantine_records(
-        self,
-        pipeline: str,
-        reason: str,
-        count: int = 1,
-    ) -> None:
-        """Increment the quarantine records counter for a pipeline.
-
-        Args:
-            pipeline: Pipeline identifier label.
-            reason: Reason label describing why records were quarantined.
-            count: Number of quarantined records to add. Defaults to 1.
-        """
-        ...
-
-    def inc_dq_validation_failures(
-        self,
-        pipeline: str,
-        stage: str,
-        severity: str,
-        count: int = 1,
-    ) -> None:
-        """Increment the DQ validation failure counter for a pipeline stage.
-
-        Args:
-            pipeline: Pipeline identifier label.
-            stage: Processing stage where the failure occurred (e.g., 'silver').
-            severity: Severity label of the failure (e.g., 'error', 'warning').
-            count: Number of failures to add. Defaults to 1.
-        """
-        ...
-
-    def inc_silver_filter_rejections(
-        self,
-        pipeline: str,
-        run_type: str,
-        reason_code: str | None = None,
-        rule_type: str | None = None,
-        field: str | None = None,
-        count: int = 1,
-    ) -> None:
-        """Increment bounded Silver-filter rejection counters.
-
-        Args:
-            pipeline: Pipeline identifier label.
-            run_type: Run-type label associated with the rejected record.
-            reason_code: Structured reject reason code. Implementations must
-                normalize this to a bounded label vocabulary.
-            rule_type: Structured reject rule type. Implementations must
-                normalize this to a bounded label vocabulary.
-            field: Structured reject field name. Implementations must normalize
-                this to a bounded label vocabulary.
-            count: Number of rejections to add. Defaults to 1.
-        """
-        ...
-
     def close(self) -> None:
         """Flush pending metrics and release backend resources."""
         ...
