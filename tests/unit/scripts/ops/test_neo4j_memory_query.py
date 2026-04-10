@@ -3,6 +3,9 @@ from __future__ import annotations
 from scripts.ops.neo4j_memory_query import (
     _current_cycle_code_statement,
     _dead_code_candidates_statement,
+    _overengineered_candidates_statement,
+    _removable_complexity_statement,
+    _simplification_blockers_statement,
     QUERY_PROFILES,
     _duplication_cluster_statement,
     _format_rows,
@@ -24,6 +27,9 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["promotion-candidates"]["mode"] == "promotion_candidates"
     assert QUERY_PROFILES["dead-code-candidates"]["target_label"] == "retirement_candidate"
     assert QUERY_PROFILES["current-cycle-code"]["mode"] == "current_cycle_code"
+    assert QUERY_PROFILES["overengineered-candidates"]["target_label"] == "complexity_candidate"
+    assert QUERY_PROFILES["removable-complexity"]["mode"] == "removable_complexity"
+    assert QUERY_PROFILES["simplification-blockers"]["mode"] == "simplification_blockers"
 
 
 def test_ownership_statement_uses_target_label_and_directory_houses_edges() -> None:
@@ -82,6 +88,33 @@ def test_current_cycle_code_statement_filters_family_and_targets() -> None:
     assert "$name = 'all' OR cycle.family_name = $name OR cycle.target_name = $name" in statement
     assert "(target)-[:OWNED_BY_CYCLE]->(cycle)" in statement
     assert "ORDER BY cycle.cycle_score DESC" in statement
+
+
+def test_overengineered_candidates_statement_filters_family_and_complexity_scores() -> None:
+    statement = _overengineered_candidates_statement()
+
+    assert "MATCH (candidate:complexity_candidate)" in statement
+    assert "$name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name" in statement
+    assert "(candidate)-[:CANDIDATE_FOR_SIMPLIFICATION]->(target)" in statement
+    assert "ORDER BY candidate.simplification_score DESC" in statement
+
+
+def test_removable_complexity_statement_filters_classification() -> None:
+    statement = _removable_complexity_statement()
+
+    assert "MATCH (candidate:complexity_candidate)" in statement
+    assert "candidate.classification = 'removable_complexity'" in statement
+    assert "(candidate)-[:CANDIDATE_FOR_REMOVAL]->(target)" in statement
+    assert "ORDER BY candidate.removable_score DESC" in statement
+
+
+def test_simplification_blockers_statement_collects_cycles_and_blockers() -> None:
+    statement = _simplification_blockers_statement()
+
+    assert "MATCH (candidate:complexity_candidate)" in statement
+    assert "(candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle)" in statement
+    assert "[rel:JUSTIFIED_BY_RUNTIME|BLOCKED_BY_VARIANCE]" in statement
+    assert "collect(DISTINCT cycle.name) AS cycle_blockers" in statement
 
 
 def test_format_rows_renders_operator_summary() -> None:
@@ -240,6 +273,100 @@ def test_format_rows_renders_current_cycle_code_summary() -> None:
     assert "wip_markers=todo,temporary" in formatted
 
 
+def test_format_rows_renders_overengineered_candidates_summary() -> None:
+    formatted = _format_rows(
+        "overengineered-candidates",
+        "composite_layer",
+        [
+            {
+                "candidate_name": "module_surface:src/bioetl/application/composite/runner_pkg/runner.py",
+                "family_name": "composite_layer",
+                "target_label": "module_surface",
+                "target_name": "src/bioetl/application/composite/runner_pkg/runner.py",
+                "classification": "overengineered_stale",
+                "complexity_score": 6,
+                "simplification_score": 6,
+                "removable_score": 8,
+                "branch_count": 7,
+                "nesting_depth": 4,
+                "helper_call_count": 3,
+                "indirection_markers": ["compat", "runner"],
+                "stateful_markers": ["runner"],
+                "runtime_anchor_count": 0,
+                "config_anchor_count": 0,
+                "doc_anchor_count": 0,
+                "test_anchor_count": 0,
+                "blocked_by_cycle": "",
+            }
+        ],
+    )
+
+    assert "Overengineered candidates: `composite_layer`" in formatted
+    assert "target=src/bioetl/application/composite/runner_pkg/runner.py | label=module_surface | family=composite_layer" in formatted
+    assert "classification=overengineered_stale | complexity_score=6 | simplification_score=6 | removable_score=8" in formatted
+    assert "indirection_markers=compat,runner" in formatted
+
+
+def test_format_rows_renders_removable_complexity_summary() -> None:
+    formatted = _format_rows(
+        "removable-complexity",
+        "composite_layer",
+        [
+            {
+                "candidate_name": "module_surface:src/bioetl/application/composite/merger.py",
+                "family_name": "composite_layer",
+                "target_label": "module_surface",
+                "target_name": "src/bioetl/application/composite/merger.py",
+                "removable_score": 9,
+                "removal_confidence": "high",
+                "deprecation_markers": ["compat", "legacy"],
+                "runtime_anchor_count": 0,
+                "config_anchor_count": 0,
+                "doc_anchor_count": 0,
+                "test_anchor_count": 0,
+            }
+        ],
+    )
+
+    assert "Removable complexity candidates: `composite_layer`" in formatted
+    assert "target=src/bioetl/application/composite/merger.py | label=module_surface | family=composite_layer" in formatted
+    assert "removable_score=9 | removal_confidence=high" in formatted
+    assert "deprecation_markers=compat,legacy" in formatted
+
+
+def test_format_rows_renders_simplification_blockers_summary() -> None:
+    formatted = _format_rows(
+        "simplification-blockers",
+        "adapter_layer",
+        [
+            {
+                "candidate_name": "method_surface:src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count",
+                "family_name": "adapter_layer",
+                "target_label": "method_surface",
+                "target_name": "src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count",
+                "classification": "overengineered_active",
+                "runtime_anchor_count": 2,
+                "config_anchor_count": 1,
+                "doc_anchor_count": 0,
+                "test_anchor_count": 3,
+                "cycle_blockers": ["method_surface:src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count"],
+                "blockers": [
+                    {
+                        "name": "pubmed",
+                        "labels": ["provider_surface"],
+                        "relation": "BLOCKED_BY_VARIANCE",
+                    }
+                ],
+            }
+        ],
+    )
+
+    assert "Simplification blockers: `adapter_layer`" in formatted
+    assert "target=src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count | label=method_surface | family=adapter_layer" in formatted
+    assert "cycle_blocker=method_surface:src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count" in formatted
+    assert "blocker=pubmed | relation=BLOCKED_BY_VARIANCE | labels=provider_surface" in formatted
+
+
 def test_format_rows_handles_missing_results() -> None:
     formatted = _format_rows("owner-alert", "BioETLPipelineRunFailed", [])
 
@@ -274,3 +401,21 @@ def test_format_rows_handles_missing_current_cycle_code() -> None:
     formatted = _format_rows("current-cycle-code", "missing-family", [])
 
     assert formatted == "Current-cycle code surfaces: no current-cycle code surfaces found for `missing-family`."
+
+
+def test_format_rows_handles_missing_overengineered_candidates() -> None:
+    formatted = _format_rows("overengineered-candidates", "missing-family", [])
+
+    assert formatted == "Overengineered candidates: no overengineered candidates found for `missing-family`."
+
+
+def test_format_rows_handles_missing_removable_complexity() -> None:
+    formatted = _format_rows("removable-complexity", "missing-family", [])
+
+    assert formatted == "Removable complexity candidates: no removable complexity candidates found for `missing-family`."
+
+
+def test_format_rows_handles_missing_simplification_blockers() -> None:
+    formatted = _format_rows("simplification-blockers", "missing-family", [])
+
+    assert formatted == "Simplification blockers: no simplification blockers found for `missing-family`."

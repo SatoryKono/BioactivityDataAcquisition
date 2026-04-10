@@ -71,6 +71,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     ) in node_keys
     assert any(label == "retirement_candidate" for label, _ in node_keys)
     assert any(label == "development_cycle_surface" for label, _ in node_keys)
+    assert any(label == "complexity_candidate" for label, _ in node_keys)
     assert ("provider_surface", "chembl") in node_keys
     assert ("entity_config", "chembl_activity") in node_keys
     assert ("composite_config", "composite_activity") in node_keys
@@ -286,6 +287,26 @@ def test_snapshot_contains_duplication_clusters_with_promotion_targets() -> None
     )
 
 
+def test_snapshot_contains_complexity_candidates_with_simplification_links() -> None:
+    _, snapshot = _snapshot()
+
+    complexity_candidates = [
+        node for node in snapshot.nodes.values() if node.key.label == "complexity_candidate"
+    ]
+    assert complexity_candidates
+    assert any(
+        rel.source.label in {"module_surface", "class_surface", "function_surface", "method_surface"}
+        and rel.relation_type == "HAS_COMPLEXITY_SIGNAL"
+        and rel.target.label == "complexity_candidate"
+        for rel in snapshot.relations.values()
+    )
+    assert any(
+        rel.source.label == "complexity_candidate"
+        and rel.relation_type == "CANDIDATE_FOR_SIMPLIFICATION"
+        for rel in snapshot.relations.values()
+    )
+
+
 def test_sync_statements_include_management_metadata() -> None:
     _, snapshot = _snapshot()
     project_node = snapshot.nodes[next(key for key in snapshot.nodes if key.label == "project" and key.name == "BioETL")]
@@ -355,6 +376,7 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "duplication_cluster",
         "retirement_candidate",
         "development_cycle_surface",
+        "complexity_candidate",
         "port_surface",
         "adapter_surface",
         "adapter_impl_surface",

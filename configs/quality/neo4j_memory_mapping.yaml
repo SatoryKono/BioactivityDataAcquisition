@@ -107,6 +107,33 @@ retirement_analysis:
     - "remove after"
     - "migration shim"
 
+complexity_analysis:
+  enabled: true
+  families:
+    - "normalization_profiles"
+    - "adapter_layer"
+    - "composite_layer"
+  complexity_score_threshold: 4
+  removable_score_threshold: 7
+  blocker_anchor_limit: 3
+  indirection_markers:
+    - "helper"
+    - "helpers"
+    - "mixin"
+    - "policy"
+    - "codec"
+    - "compat"
+    - "legacy"
+    - "wrapper"
+    - "shim"
+  stateful_markers:
+    - "checkpoint"
+    - "resume"
+    - "state"
+    - "fsm"
+    - "transition"
+    - "runner"
+
 pipeline_operational:
   runtime_paths:
     - "uv run python -m bioetl run --pipeline"

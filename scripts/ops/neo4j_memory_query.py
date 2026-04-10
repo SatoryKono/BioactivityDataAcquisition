@@ -106,6 +106,21 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "development_cycle_surface",
         "title": "Current-cycle code surfaces",
     },
+    "overengineered-candidates": {
+        "mode": "overengineered_candidates",
+        "target_label": "complexity_candidate",
+        "title": "Overengineered candidates",
+    },
+    "removable-complexity": {
+        "mode": "removable_complexity",
+        "target_label": "complexity_candidate",
+        "title": "Removable complexity candidates",
+    },
+    "simplification-blockers": {
+        "mode": "simplification_blockers",
+        "target_label": "complexity_candidate",
+        "title": "Simplification blockers",
+    },
 }
 
 
@@ -287,6 +302,81 @@ def _current_cycle_code_statement() -> str:
     )
 
 
+def _overengineered_candidates_statement() -> str:
+    return (
+        "MATCH (candidate:complexity_candidate) "
+        "WHERE $name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name "
+        "OPTIONAL MATCH (candidate)-[:CANDIDATE_FOR_SIMPLIFICATION]->(target) "
+        "OPTIONAL MATCH (candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle) "
+        "RETURN candidate.name AS candidate_name, "
+        "candidate.family_name AS family_name, "
+        "candidate.target_label AS target_label, "
+        "candidate.target_name AS target_name, "
+        "candidate.classification AS classification, "
+        "candidate.complexity_score AS complexity_score, "
+        "candidate.simplification_score AS simplification_score, "
+        "candidate.removable_score AS removable_score, "
+        "candidate.branch_count AS branch_count, "
+        "candidate.nesting_depth AS nesting_depth, "
+        "candidate.helper_call_count AS helper_call_count, "
+        "candidate.indirection_markers AS indirection_markers, "
+        "candidate.stateful_markers AS stateful_markers, "
+        "candidate.runtime_anchor_count AS runtime_anchor_count, "
+        "candidate.config_anchor_count AS config_anchor_count, "
+        "candidate.doc_anchor_count AS doc_anchor_count, "
+        "candidate.test_anchor_count AS test_anchor_count, "
+        "cycle.name AS blocked_by_cycle, "
+        "labels(target) AS target_labels "
+        "ORDER BY candidate.simplification_score DESC, candidate.removable_score DESC, candidate.target_name ASC"
+    )
+
+
+def _removable_complexity_statement() -> str:
+    return (
+        "MATCH (candidate:complexity_candidate) "
+        "WHERE ($name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name) "
+        "AND candidate.classification = 'removable_complexity' "
+        "OPTIONAL MATCH (candidate)-[:CANDIDATE_FOR_REMOVAL]->(target) "
+        "RETURN candidate.name AS candidate_name, "
+        "candidate.family_name AS family_name, "
+        "candidate.target_label AS target_label, "
+        "candidate.target_name AS target_name, "
+        "candidate.removable_score AS removable_score, "
+        "candidate.removal_confidence AS removal_confidence, "
+        "candidate.deprecation_markers AS deprecation_markers, "
+        "candidate.runtime_anchor_count AS runtime_anchor_count, "
+        "candidate.config_anchor_count AS config_anchor_count, "
+        "candidate.doc_anchor_count AS doc_anchor_count, "
+        "candidate.test_anchor_count AS test_anchor_count, "
+        "labels(target) AS target_labels "
+        "ORDER BY candidate.removable_score DESC, candidate.target_name ASC"
+    )
+
+
+def _simplification_blockers_statement() -> str:
+    return (
+        "MATCH (candidate:complexity_candidate) "
+        "WHERE $name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name "
+        "OPTIONAL MATCH (candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle) "
+        "OPTIONAL MATCH (candidate)-[rel:JUSTIFIED_BY_RUNTIME|BLOCKED_BY_VARIANCE]->(blocker) "
+        "RETURN candidate.name AS candidate_name, "
+        "candidate.family_name AS family_name, "
+        "candidate.target_label AS target_label, "
+        "candidate.target_name AS target_name, "
+        "candidate.classification AS classification, "
+        "candidate.runtime_anchor_count AS runtime_anchor_count, "
+        "candidate.config_anchor_count AS config_anchor_count, "
+        "candidate.doc_anchor_count AS doc_anchor_count, "
+        "candidate.test_anchor_count AS test_anchor_count, "
+        "collect(DISTINCT cycle.name) AS cycle_blockers, "
+        "collect(DISTINCT CASE "
+        "  WHEN blocker.name IS NULL THEN NULL "
+        "  ELSE {name: blocker.name, labels: labels(blocker), relation: type(rel)} "
+        "END) AS blockers "
+        "ORDER BY candidate.target_name ASC"
+    )
+
+
 def _run_query(
     root: Path,
     profile: str,
@@ -311,6 +401,12 @@ def _run_query(
         statement = _dead_code_candidates_statement()
     elif profile_config["mode"] == "current_cycle_code":
         statement = _current_cycle_code_statement()
+    elif profile_config["mode"] == "overengineered_candidates":
+        statement = _overengineered_candidates_statement()
+    elif profile_config["mode"] == "removable_complexity":
+        statement = _removable_complexity_statement()
+    elif profile_config["mode"] == "simplification_blockers":
+        statement = _simplification_blockers_statement()
     else:
         statement = _ownership_statement()
     return client.query(
@@ -330,6 +426,9 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             "promotion_candidates": "no promotion candidates found",
             "dead_code_candidates": "no dead code candidates found",
             "current_cycle_code": "no current-cycle code surfaces found",
+            "overengineered_candidates": "no overengineered candidates found",
+            "removable_complexity": "no removable complexity candidates found",
+            "simplification_blockers": "no simplification blockers found",
         }[profile_config["mode"]]
         return f"{title}: {empty_suffix} for `{name}`."
 
@@ -493,6 +592,88 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             )
         if len(lines) == 1:
             lines.append("- no current-cycle code surfaces found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "overengineered_candidates":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            target_name = str(row.get("target_name") or "")
+            if not target_name:
+                continue
+            blocked_by_cycle = str(row.get("blocked_by_cycle") or "")
+            indirection_markers = row.get("indirection_markers")
+            stateful_markers = row.get("stateful_markers")
+            indirection_str = ",".join(str(marker) for marker in indirection_markers) if isinstance(indirection_markers, list) else ""
+            stateful_str = ",".join(str(marker) for marker in stateful_markers) if isinstance(stateful_markers, list) else ""
+            blocked_suffix = f" | blocked_by={blocked_by_cycle}" if blocked_by_cycle else ""
+            lines.append(
+                f"- target={target_name} | label={str(row.get('target_label') or '')} | family={str(row.get('family_name') or '')} "
+                f"| classification={str(row.get('classification') or '')} | complexity_score={str(row.get('complexity_score') or '')} "
+                f"| simplification_score={str(row.get('simplification_score') or '')} | removable_score={str(row.get('removable_score') or '')} "
+                f"| branches={str(row.get('branch_count') or '')} | nesting={str(row.get('nesting_depth') or '')} "
+                f"| helper_calls={str(row.get('helper_call_count') or '')}{blocked_suffix}"
+            )
+            if indirection_str:
+                lines.append(f"  indirection_markers={indirection_str}")
+            if stateful_str:
+                lines.append(f"  stateful_markers={stateful_str}")
+        if len(lines) == 1:
+            lines.append("- no overengineered candidates found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "removable_complexity":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            target_name = str(row.get("target_name") or "")
+            if not target_name:
+                continue
+            deprecation_markers = row.get("deprecation_markers")
+            marker_str = ",".join(str(marker) for marker in deprecation_markers) if isinstance(deprecation_markers, list) else ""
+            marker_suffix = f" | deprecation_markers={marker_str}" if marker_str else ""
+            lines.append(
+                f"- target={target_name} | label={str(row.get('target_label') or '')} | family={str(row.get('family_name') or '')} "
+                f"| removable_score={str(row.get('removable_score') or '')} | removal_confidence={str(row.get('removal_confidence') or '')} "
+                f"| runtime={str(row.get('runtime_anchor_count') or '')} | config={str(row.get('config_anchor_count') or '')} "
+                f"| docs={str(row.get('doc_anchor_count') or '')} | tests={str(row.get('test_anchor_count') or '')}{marker_suffix}"
+            )
+        if len(lines) == 1:
+            lines.append("- no removable complexity candidates found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "simplification_blockers":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            target_name = str(row.get("target_name") or "")
+            if not target_name:
+                continue
+            lines.append(
+                f"- target={target_name} | label={str(row.get('target_label') or '')} | family={str(row.get('family_name') or '')} "
+                f"| classification={str(row.get('classification') or '')} | runtime={str(row.get('runtime_anchor_count') or '')} "
+                f"| config={str(row.get('config_anchor_count') or '')} | docs={str(row.get('doc_anchor_count') or '')} "
+                f"| tests={str(row.get('test_anchor_count') or '')}"
+            )
+            cycle_blockers = row.get("cycle_blockers")
+            if isinstance(cycle_blockers, list):
+                for blocker in sorted({str(item) for item in cycle_blockers if item}):
+                    lines.append(f"  cycle_blocker={blocker}")
+            blockers = row.get("blockers")
+            if isinstance(blockers, list):
+                normalized: set[str] = set()
+                for blocker in blockers:
+                    if not isinstance(blocker, dict):
+                        continue
+                    blocker_name = str(blocker.get("name") or "")
+                    if not blocker_name:
+                        continue
+                    relation_name = str(blocker.get("relation") or "")
+                    labels = blocker.get("labels")
+                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                    normalized.add(
+                        f"  blocker={blocker_name} | relation={relation_name}" + (f" | labels={label_str}" if label_str else "")
+                    )
+                lines.extend(sorted(normalized))
+        if len(lines) == 1:
+            lines.append("- no simplification blockers found")
         return "\n".join(lines)
 
     lines = [f"{title}: `{name}`"]

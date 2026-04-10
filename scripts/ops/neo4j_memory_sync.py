@@ -49,6 +49,7 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "duplication_cluster",
     "retirement_candidate",
     "development_cycle_surface",
+    "complexity_candidate",
     "port_surface",
     "adapter_surface",
     "adapter_impl_surface",
@@ -721,6 +722,18 @@ class RetirementAnalysisConfig:
     deprecation_markers: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class ComplexityAnalysisConfig:
+    enabled: bool
+    family_names: tuple[str, ...]
+    complexity_score_threshold: int
+    removable_score_threshold: int
+    indirection_markers: tuple[str, ...]
+    stateful_markers: tuple[str, ...]
+    deprecation_markers: tuple[str, ...]
+    blocker_anchor_limit: int
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Build and optionally sync a deterministic BioETL graph into Neo4j.",
@@ -929,6 +942,50 @@ def _retirement_analysis_config(
     )
 
 
+def _complexity_analysis_config(
+    memory_mapping: dict[str, object],
+    duplication_config: dict[str, object],
+    retirement_config: RetirementAnalysisConfig,
+) -> ComplexityAnalysisConfig:
+    payload = memory_mapping.get("complexity_analysis", {})
+    if not isinstance(payload, dict):
+        payload = {}
+
+    duplication_families = tuple(
+        family.name
+        for family in duplication_config.get("families", ())
+        if isinstance(family, DuplicateFamilyConfig)
+    )
+    configured_families = tuple(
+        family_name
+        for family_name in _as_string_list(payload.get("families"))
+        if family_name in duplication_families
+    )
+
+    return ComplexityAnalysisConfig(
+        enabled=bool(payload.get("enabled", True)),
+        family_names=configured_families or retirement_config.family_names or duplication_families,
+        complexity_score_threshold=int(payload.get("complexity_score_threshold", 4) or 4),
+        removable_score_threshold=int(payload.get("removable_score_threshold", 7) or 7),
+        indirection_markers=tuple(
+            marker.casefold()
+            for marker in (
+                _as_string_list(payload.get("indirection_markers"))
+                or ["helper", "helpers", "mixin", "policy", "codec", "compat", "legacy", "wrapper", "shim"]
+            )
+        ),
+        stateful_markers=tuple(
+            marker.casefold()
+            for marker in (
+                _as_string_list(payload.get("stateful_markers"))
+                or ["checkpoint", "resume", "state", "fsm", "transition", "runner"]
+            )
+        ),
+        deprecation_markers=retirement_config.deprecation_markers,
+        blocker_anchor_limit=int(payload.get("blocker_anchor_limit", 3) or 3),
+    )
+
+
 def _as_string_list(value: object) -> list[str]:
     if not isinstance(value, (list, tuple)):
         return []
@@ -1128,6 +1185,58 @@ def _normalized_callable_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> s
 
 def _callable_ast_node_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
     return sum(1 for _ in ast.walk(node))
+
+
+_CONTROL_FLOW_NODES = (
+    ast.If,
+    ast.For,
+    ast.AsyncFor,
+    ast.While,
+    ast.Try,
+    ast.Match,
+    ast.IfExp,
+    ast.With,
+    ast.AsyncWith,
+)
+
+
+def _callable_branch_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
+    count = 0
+    for child in ast.walk(node):
+        if isinstance(child, _CONTROL_FLOW_NODES):
+            count += 1
+        elif isinstance(child, ast.BoolOp):
+            count += max(0, len(child.values) - 1)
+        elif isinstance(child, ast.comprehension):
+            count += len(child.ifs)
+    return count
+
+
+def _callable_max_nesting_depth(node: ast.AST) -> int:
+    def visit(current: ast.AST, depth: int) -> int:
+        max_depth = depth
+        for child in ast.iter_child_nodes(current):
+            next_depth = depth + 1 if isinstance(child, _CONTROL_FLOW_NODES) else depth
+            max_depth = max(max_depth, visit(child, next_depth))
+        return max_depth
+
+    return visit(node, 0)
+
+
+def _callable_call_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
+    return sum(1 for child in ast.walk(node) if isinstance(child, ast.Call))
+
+
+def _callable_helper_call_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
+    tokens = ("_", "helper", "policy", "codec", "mixin", "fsm", "compat")
+    count = 0
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        func_name = _base_name(child.func).casefold()
+        if func_name and any(token in func_name for token in tokens):
+            count += 1
+    return count
 
 
 def _semantic_tags(relative_path: str, symbol_name: str) -> tuple[str, ...]:
@@ -1571,6 +1680,7 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_impact_analysis_surfaces(snapshot, root, project, today)
     _add_file_structure_surfaces(snapshot, root, project, today)
     _add_retirement_analysis_surfaces(snapshot, root, project, today, _load_memory_mapping(root))
+    _add_complexity_analysis_surfaces(snapshot, root, project, today, _load_memory_mapping(root))
     return snapshot
 
 
@@ -2756,6 +2866,10 @@ def _extract_code_duplication_surfaces(
                     package_family=family.package_family,
                     class_name=node.name,
                     base_names=sorted(filter(None, (_base_name(base) for base in node.bases))),
+                    method_count=sum(
+                        1 for child in node.body if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    ),
+                    is_mixin=node.name.endswith("Mixin"),
                     semantic_tags=list(_semantic_tags(relative_path, node.name)),
                     last_verified=today,
                     ingest_wave="repo_sync_v1",
@@ -2794,6 +2908,10 @@ def _extract_code_duplication_surfaces(
                         signature_hash=_signature_hash(child),
                         ast_shape_hash=_normalized_callable_hash(child),
                         ast_node_count=_callable_ast_node_count(child),
+                        branch_count=_callable_branch_count(child),
+                        nesting_depth=_callable_max_nesting_depth(child),
+                        call_count=_callable_call_count(child),
+                        helper_call_count=_callable_helper_call_count(child),
                         semantic_tags=list(_semantic_tags(relative_path, child.name)),
                         last_verified=today,
                         ingest_wave="repo_sync_v1",
@@ -2826,6 +2944,10 @@ def _extract_code_duplication_surfaces(
                     signature_hash=_signature_hash(node),
                     ast_shape_hash=_normalized_callable_hash(node),
                     ast_node_count=_callable_ast_node_count(node),
+                    branch_count=_callable_branch_count(node),
+                    nesting_depth=_callable_max_nesting_depth(node),
+                    call_count=_callable_call_count(node),
+                    helper_call_count=_callable_helper_call_count(node),
                     semantic_tags=list(_semantic_tags(relative_path, node.name)),
                     last_verified=today,
                     ingest_wave="repo_sync_v1",
@@ -3150,6 +3272,334 @@ def _add_retirement_analysis_surfaces(
         snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="retirement_analysis")
         if development_cycle is not None:
             snapshot.add_relation(candidate, "BLOCKED_FROM_DELETION_BY", development_cycle, provenance="retirement_analysis")
+
+
+def _add_complexity_analysis_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    memory_mapping: dict[str, object],
+) -> None:
+    duplication_config = _duplication_analysis_config(memory_mapping)
+    retirement_config = _retirement_analysis_config(memory_mapping, duplication_config)
+    config = _complexity_analysis_config(memory_mapping, duplication_config, retirement_config)
+    if not config.enabled or not config.family_names:
+        return
+
+    analysis_labels = {"module_surface", "class_surface", "function_surface", "method_surface"}
+    runtime_labels = {"pipeline_surface", "execution_path", "alert_surface", "adapter_surface", "adapter_impl_surface"}
+    config_labels = {"entity_config", "composite_config", "provider_surface", "contract_surface", "port_surface"}
+    doc_labels = {"policy_surface", "doc_source_surface", "doc_artifact", "dashboard_surface", "quality_gate"}
+    test_labels = {"test_surface", "test_artifact"}
+    ignored_relation_types = {
+        "DECLARES",
+        "OVERRIDES",
+        "SAME_SHAPE_AS",
+        "CONTAINS",
+        "BACKS",
+        "HOUSES",
+        "CANDIDATE_FOR_REMOVAL",
+        "OWNED_BY_CYCLE",
+        "BLOCKED_FROM_DELETION_BY",
+        "HAS_COMPLEXITY_SIGNAL",
+        "CANDIDATE_FOR_SIMPLIFICATION",
+        "JUSTIFIED_BY_RUNTIME",
+        "BLOCKED_BY_VARIANCE",
+    }
+
+    incoming: dict[NodeKey, list[GraphRelation]] = {}
+    outgoing: dict[NodeKey, list[GraphRelation]] = {}
+    for relation in snapshot.relations.values():
+        incoming.setdefault(relation.target, []).append(relation)
+        outgoing.setdefault(relation.source, []).append(relation)
+
+    text_cache: dict[str, str] = {}
+    module_ast_cache: dict[str, ast.AST | None] = {}
+
+    def read_source_text(relative_path: str) -> str:
+        if relative_path not in text_cache:
+            path = root / relative_path
+            try:
+                text_cache[relative_path] = _read_text(path).casefold()
+            except OSError:
+                text_cache[relative_path] = ""
+        return text_cache[relative_path]
+
+    def parse_module_ast(relative_path: str) -> ast.AST | None:
+        if relative_path not in module_ast_cache:
+            module_ast_cache[relative_path] = _parse_python_ast(root / relative_path)
+        return module_ast_cache[relative_path]
+
+    def collect_anchor_nodes(surface_key: NodeKey, module_key: NodeKey) -> dict[str, list[NodeKey]]:
+        buckets: dict[str, set[NodeKey]] = {
+            "runtime": set(),
+            "config": set(),
+            "docs": set(),
+            "tests": set(),
+        }
+        package_name: str | None = None
+        module_node = snapshot.nodes.get(module_key)
+        if module_node is not None:
+            package_raw = module_node.properties.get("family_name")
+            if isinstance(package_raw, str) and package_raw:
+                package_name = package_raw
+
+        keys_to_scan = {surface_key, module_key}
+        if package_name is not None:
+            keys_to_scan.add(NodeKey("package_family", package_name))
+
+        for key in keys_to_scan:
+            for relation in [*incoming.get(key, ()), *outgoing.get(key, ())]:
+                if relation.relation_type in ignored_relation_types:
+                    continue
+                other = relation.source if relation.target == key else relation.target
+                if other.label in runtime_labels:
+                    buckets["runtime"].add(other)
+                elif other.label in config_labels:
+                    buckets["config"].add(other)
+                elif other.label in doc_labels:
+                    buckets["docs"].add(other)
+                elif other.label in test_labels:
+                    buckets["tests"].add(other)
+        return {
+            name: sorted(values, key=lambda item: (item.label, item.name))
+            for name, values in buckets.items()
+        }
+
+    def resolve_ast_surface(node: GraphNode, tree: ast.AST) -> ast.AST | None:
+        source_path = str(node.properties.get("source_path") or "")
+        if node.key.label == "module_surface":
+            return tree if isinstance(tree, ast.Module) else None
+        dotted_path = _module_dotted_name(source_path)
+        if node.key.label == "class_surface":
+            class_name = str(node.properties.get("class_name") or node.key.name.rsplit(".", 1)[-1])
+            for child in getattr(tree, "body", ()):
+                if isinstance(child, ast.ClassDef) and child.name == class_name:
+                    return child
+            return None
+        if node.key.label == "function_surface":
+            function_name = str(node.properties.get("callable_name") or node.key.name.rsplit(".", 1)[-1])
+            for child in getattr(tree, "body", ()):
+                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)) and child.name == function_name:
+                    return child
+            return None
+        if node.key.label == "method_surface":
+            class_name = str(node.properties.get("parent_class") or "")
+            method_name = str(node.properties.get("callable_name") or node.key.name.rsplit(".", 1)[-1])
+            for child in getattr(tree, "body", ()):
+                if not isinstance(child, ast.ClassDef) or child.name != class_name:
+                    continue
+                for method in child.body:
+                    if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef)) and method.name == method_name:
+                        return method
+            return None
+        return None
+
+    def complexity_marker_buckets(relative_path: str, symbol_name: str, source_text: str) -> tuple[list[str], list[str], list[str]]:
+        normalized = f"{relative_path} {symbol_name}".casefold()
+        indirection = sorted({marker for marker in config.indirection_markers if marker in normalized or marker in source_text})
+        stateful = sorted({marker for marker in config.stateful_markers if marker in normalized or marker in source_text})
+        deprecation = sorted({marker for marker in config.deprecation_markers if marker in normalized or marker in source_text})
+        return indirection, stateful, deprecation
+
+    for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
+        if node.key.label not in analysis_labels:
+            continue
+        source_path = node.properties.get("source_path")
+        if not isinstance(source_path, str) or not source_path.endswith(".py"):
+            continue
+        family = _family_for_path(source_path, duplication_config)
+        if family is None or family.name not in config.family_names:
+            continue
+
+        module_key = node.key if node.key.label == "module_surface" else NodeKey("module_surface", source_path)
+        if module_key not in snapshot.nodes:
+            continue
+
+        tree = parse_module_ast(source_path)
+        if tree is None:
+            continue
+        ast_surface = resolve_ast_surface(node, tree)
+        if ast_surface is None:
+            continue
+
+        source_text = read_source_text(source_path)
+        anchor_nodes = collect_anchor_nodes(node.key, module_key)
+        runtime_anchors = anchor_nodes["runtime"]
+        config_anchors = anchor_nodes["config"]
+        doc_anchors = anchor_nodes["docs"]
+        test_anchors = anchor_nodes["tests"]
+        runtime_count = len(runtime_anchors)
+        config_count = len(config_anchors)
+        doc_count = len(doc_anchors)
+        test_count = len(test_anchors)
+
+        symbol_name = node.key.name.removeprefix(f"{_module_dotted_name(source_path)}.")
+        indirection_markers, stateful_markers, deprecation_markers = complexity_marker_buckets(
+            source_path,
+            symbol_name,
+            source_text,
+        )
+
+        branch_count = 0
+        nesting_depth = 0
+        call_count = 0
+        helper_call_count = 0
+        abstraction_fanout = 0
+        api_surface_to_logic_ratio = 0.0
+
+        if node.key.label in {"function_surface", "method_surface"} and isinstance(
+            ast_surface, (ast.FunctionDef, ast.AsyncFunctionDef)
+        ):
+            branch_count = _callable_branch_count(ast_surface)
+            nesting_depth = _callable_max_nesting_depth(ast_surface)
+            call_count = _callable_call_count(ast_surface)
+            helper_call_count = _callable_helper_call_count(ast_surface)
+            abstraction_fanout = max(1, call_count)
+            api_surface_to_logic_ratio = round(call_count / max(1, branch_count + nesting_depth), 2)
+        elif node.key.label == "class_surface" and isinstance(ast_surface, ast.ClassDef):
+            methods = [child for child in ast_surface.body if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))]
+            abstraction_fanout = len(methods)
+            branch_count = sum(_callable_branch_count(method) for method in methods)
+            nesting_depth = max((_callable_max_nesting_depth(method) for method in methods), default=0)
+            call_count = sum(_callable_call_count(method) for method in methods)
+            helper_call_count = sum(_callable_helper_call_count(method) for method in methods)
+            api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
+        elif node.key.label == "module_surface" and isinstance(ast_surface, ast.Module):
+            functions = [child for child in ast_surface.body if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))]
+            classes = [child for child in ast_surface.body if isinstance(child, ast.ClassDef)]
+            abstraction_fanout = len(functions) + len(classes)
+            branch_count = sum(_callable_branch_count(function) for function in functions)
+            branch_count += sum(
+                _callable_branch_count(method)
+                for class_node in classes
+                for method in class_node.body
+                if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
+            )
+            nesting_depth = max(
+                (
+                    _callable_max_nesting_depth(function)
+                    for function in [
+                        *functions,
+                        *[
+                            method
+                            for class_node in classes
+                            for method in class_node.body
+                            if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
+                        ],
+                    ]
+                ),
+                default=0,
+            )
+            call_count = sum(_callable_call_count(function) for function in functions)
+            call_count += sum(
+                _callable_call_count(method)
+                for class_node in classes
+                for method in class_node.body
+                if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
+            )
+            helper_call_count = sum(_callable_helper_call_count(function) for function in functions)
+            helper_call_count += sum(
+                _callable_helper_call_count(method)
+                for class_node in classes
+                for method in class_node.body
+                if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
+            )
+            api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
+
+        complexity_score = 0
+        complexity_score += 2 if branch_count >= 6 else 1 if branch_count >= 3 else 0
+        complexity_score += 2 if nesting_depth >= 4 else 1 if nesting_depth >= 3 else 0
+        complexity_score += 2 if helper_call_count >= 4 else 1 if helper_call_count >= 2 else 0
+        complexity_score += 2 if len(indirection_markers) >= 2 else 1 if indirection_markers else 0
+        complexity_score += 2 if len(stateful_markers) >= 2 else 1 if stateful_markers else 0
+        complexity_score += 2 if abstraction_fanout >= 6 else 1 if abstraction_fanout >= 3 else 0
+
+        simplification_score = complexity_score
+        removable_score = complexity_score
+        if runtime_count == 0:
+            removable_score += 2
+        if config_count == 0:
+            removable_score += 2
+        if doc_count == 0:
+            removable_score += 1
+        if test_count == 0:
+            removable_score += 1
+        if deprecation_markers:
+            removable_score += 2
+
+        blocked_cycles = sorted(
+            {
+                relation.target
+                for relation in outgoing.get(node.key, ())
+                if relation.relation_type == "OWNED_BY_CYCLE" and relation.target.label == "development_cycle_surface"
+            },
+            key=lambda item: item.name,
+        )
+        if blocked_cycles:
+            removable_score -= 3
+
+        if complexity_score < config.complexity_score_threshold and removable_score < config.removable_score_threshold:
+            continue
+
+        classification = "overengineered_active"
+        removal_confidence = "low"
+        if removable_score >= config.removable_score_threshold and not blocked_cycles:
+            classification = "removable_complexity"
+            removal_confidence = "high" if removable_score >= config.removable_score_threshold + 2 else "medium"
+        elif runtime_count == 0 and config_count == 0 and doc_count == 0:
+            classification = "overengineered_stale"
+            removal_confidence = "medium"
+
+        candidate = snapshot.add_node(
+            "complexity_candidate",
+            f"{node.key.label}:{node.key.name}",
+            summary=f"Complexity analysis candidate for `{node.key.name}` in `{family.name}`.",
+            source_path=source_path,
+            source_kind="complexity_candidate",
+            family_name=family.name,
+            target_label=node.key.label,
+            target_name=node.key.name,
+            classification=classification,
+            complexity_score=complexity_score,
+            simplification_score=simplification_score,
+            removable_score=removable_score,
+            simplification_confidence="high" if simplification_score >= config.complexity_score_threshold + 2 else "medium",
+            removal_confidence=removal_confidence,
+            branch_count=branch_count,
+            nesting_depth=nesting_depth,
+            call_count=call_count,
+            helper_call_count=helper_call_count,
+            abstraction_fanout=abstraction_fanout,
+            api_surface_to_logic_ratio=api_surface_to_logic_ratio,
+            runtime_anchor_count=runtime_count,
+            config_anchor_count=config_count,
+            doc_anchor_count=doc_count,
+            test_anchor_count=test_count,
+            indirection_markers=indirection_markers,
+            stateful_markers=stateful_markers,
+            deprecation_markers=deprecation_markers,
+            blocked_by_cycle=bool(blocked_cycles),
+            runtime_anchors=[anchor.name for anchor in runtime_anchors[: config.blocker_anchor_limit]],
+            config_anchors=[anchor.name for anchor in config_anchors[: config.blocker_anchor_limit]],
+            doc_anchors=[anchor.name for anchor in doc_anchors[: config.blocker_anchor_limit]],
+            test_anchors=[anchor.name for anchor in test_anchors[: config.blocker_anchor_limit]],
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="medium",
+        )
+        snapshot.add_relation(project, "CONTAINS", candidate, provenance="complexity_analysis")
+        snapshot.add_relation(node.key, "HAS_COMPLEXITY_SIGNAL", candidate, provenance="complexity_analysis")
+        snapshot.add_relation(candidate, "CANDIDATE_FOR_SIMPLIFICATION", node.key, provenance="complexity_analysis")
+        if classification == "removable_complexity":
+            snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="complexity_analysis")
+        for cycle in blocked_cycles:
+            snapshot.add_relation(candidate, "BLOCKED_FROM_DELETION_BY", cycle, provenance="complexity_analysis")
+        for anchor in runtime_anchors[: config.blocker_anchor_limit]:
+            snapshot.add_relation(candidate, "JUSTIFIED_BY_RUNTIME", anchor, provenance="complexity_analysis")
+        for anchor in [*config_anchors[: config.blocker_anchor_limit], *doc_anchors[: config.blocker_anchor_limit]]:
+            snapshot.add_relation(candidate, "BLOCKED_BY_VARIANCE", anchor, provenance="complexity_analysis")
 
 
 def _add_pipeline_surfaces(
@@ -3840,6 +4290,7 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "function_surface",
         "method_surface",
         "duplication_cluster",
+        "complexity_candidate",
         "port_surface",
         "adapter_surface",
         "adapter_impl_surface",
@@ -3863,6 +4314,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "SAME_SHAPE_AS",
         "CAN_PROMOTE_TO",
         "COVERED_BY_TEST",
+        "HAS_COMPLEXITY_SIGNAL",
+        "CANDIDATE_FOR_SIMPLIFICATION",
     )
     for label in required_labels:
         if int(stats["labels"].get(label, 0)) <= 0:
@@ -3967,6 +4420,20 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         for source_label, _, relation_type, _ in relation_keys
     ):
         issues.append("missing callable duplication links")
+
+    if not any(
+        source_label in {"module_surface", "class_surface", "function_surface", "method_surface"}
+        and relation_type == "HAS_COMPLEXITY_SIGNAL"
+        and target_label == "complexity_candidate"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing code surface -> HAS_COMPLEXITY_SIGNAL -> complexity_candidate links")
+
+    if not any(
+        source_label == "complexity_candidate" and relation_type == "CANDIDATE_FOR_SIMPLIFICATION"
+        for source_label, _, relation_type, _ in relation_keys
+    ):
+        issues.append("missing complexity simplification candidates")
 
     if not any(
         source_label == "contract_surface" and relation_type == "DEPENDS_ON" and target_label == "module_surface"
