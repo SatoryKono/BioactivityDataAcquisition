@@ -22,6 +22,9 @@ from threading import Lock
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError
+from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
+    normalize_adapter_endpoint_label,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
@@ -102,7 +105,8 @@ class AdapterMetricsRecorder:
             raise
         finally:
             duration = time.perf_counter() - start
-            labels = {"provider": self.provider, "endpoint": endpoint}
+            normalized_endpoint = normalize_adapter_endpoint_label(endpoint)
+            labels = {"provider": self.provider, "endpoint": normalized_endpoint}
             if self.metrics is not None:
                 self.metrics.observe_histogram(
                     "adapter_request_duration_seconds",
@@ -133,10 +137,11 @@ class AdapterMetricsRecorder:
         """
         if self.metrics is None:
             return
+        normalized_endpoint = normalize_adapter_endpoint_label(endpoint)
         self.metrics.observe_histogram(
             "adapter_batch_size",
             float(size),
-            {"provider": self.provider, "endpoint": endpoint},
+            {"provider": self.provider, "endpoint": normalized_endpoint},
         )
 
     def record_dropped_duplicates(self, entity_type: str, count: int = 1) -> None:
@@ -214,8 +219,9 @@ class AdapterMetricsRecorder:
             endpoint: API endpoint being tracked (e.g., "/activity").
             duration_seconds: Request duration in seconds to add to the rolling window.
         """
+        normalized_endpoint = normalize_adapter_endpoint_label(endpoint)
         with self._window_lock:
-            samples = self._request_duration_windows[endpoint]
+            samples = self._request_duration_windows[normalized_endpoint]
             samples.append(duration_seconds)
             sorted_samples = sorted(samples)
 
@@ -226,5 +232,5 @@ class AdapterMetricsRecorder:
         self.metrics.set_gauge(
             "adapter_request_p95_seconds",
             p95_value,
-            {"provider": self.provider, "endpoint": endpoint},
+            {"provider": self.provider, "endpoint": normalized_endpoint},
         )

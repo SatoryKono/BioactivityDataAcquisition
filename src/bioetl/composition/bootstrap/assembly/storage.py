@@ -13,46 +13,41 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.composition.bootstrap.cli.noop import create_noop_observability_bundle
 from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.factories.storage.resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
-)
-from bioetl.domain.ports.noop import (
-    NoOpMetrics,
-    NoOpTracing,
 )
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import Settings, get_settings
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort, MetricsPort
+
 __all__ = [
     "bootstrap_storage_adapter",
 ]
-
-
-def _create_noop_runtime() -> tuple[NoOpLogger, NoOpMetrics, NoOpTracing]:
-    """Create the no-op observability collaborators used by bootstrap wiring."""
-    return NoOpLogger(), NoOpMetrics(), NoOpTracing()
 
 
 def _create_composite_metadata_services(
     *,
     settings: Settings,
     output_dir: Path,
-    logger: NoOpLogger,
-    metrics: NoOpMetrics,
+    logger: LoggerPort,
+    metrics: MetricsPort,
 ) -> tuple[
     MetadataWriter,
     FileLineageStore,
@@ -123,7 +118,7 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
         StorageAdapter configured for the current environment.
     """
     settings = get_settings()
-    noop_logger, noop_metrics, noop_tracing = _create_noop_runtime()
+    noop_logger, noop_metrics, noop_tracing = create_noop_observability_bundle()
 
     # ADR-025: Use data/output/ hierarchy for consistency with pipeline configs
     output_dir = Path(settings.data_dir) / "output"

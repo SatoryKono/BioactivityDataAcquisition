@@ -19,11 +19,7 @@ from bioetl.domain.ports import (
     PiiHasherPort,
     TracingPort,
 )
-from bioetl.domain.ports.noop import (
-    NoOpMetrics,
-    NoOpPiiHasher,
-    NoOpTracing,
-)
+from bioetl.domain.ports.noop import NoOpPiiHasher
 from bioetl.domain.services import DataNormalizationService, IdentityService
 
 __all__ = ["build_transformer_dependencies"]

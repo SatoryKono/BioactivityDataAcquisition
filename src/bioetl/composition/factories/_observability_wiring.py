@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition.observability_resolution import resolve_metrics_port
+
 from .datasource.data_source_factory import DataSourceCreatorProtocol
 from .services.factory import BaseServicesFactory
 
@@ -62,7 +64,6 @@ def _create_cached_bronze_data_source(
     cached_bronze: CachedBronzeContext,
 ) -> DataSourcePort:
     """Create CachedBronzeDataSource for reading from Bronze cache."""
-    from bioetl.domain.ports.noop import NoOpMetrics
     from bioetl.infrastructure.adapters import CachedBronzeDataSource
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
@@ -77,7 +78,7 @@ def _create_cached_bronze_data_source(
     bronze_reader = BronzeWriter(
         base_path=bronze_path,
         logger=logger,
-        metrics=NoOpMetrics(),
+        metrics=resolve_metrics_port(metrics=None),
         flat_structure=True,
     )
     return CachedBronzeDataSource(

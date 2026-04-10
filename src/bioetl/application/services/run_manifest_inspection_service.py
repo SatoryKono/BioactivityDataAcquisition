@@ -202,6 +202,9 @@ class RunManifestInspectionService:
                 for artifact in manifest.planned_artifacts
             ],
             "published_artifacts": [],
+            "occurrence_only_diagnostics": diagnostics.get(
+                "occurrence_only_diagnostics", []
+            ),
         }
 
     @staticmethod
