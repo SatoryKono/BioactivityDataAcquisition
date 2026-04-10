@@ -1291,6 +1291,7 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_test_graph(snapshot, root, project, today)
     _add_policy_surfaces(snapshot, root, project, today)
     _add_impact_analysis_surfaces(snapshot, root, project, today)
+    _add_file_structure_surfaces(snapshot, root, project, today)
     return snapshot
 
 
@@ -3065,6 +3066,9 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     stats = snapshot.stats()
     issues: list[str] = []
     required_labels = (
+        "repo_zone",
+        "directory_surface",
+        "file_surface",
         "port_surface",
         "adapter_surface",
         "adapter_impl_surface",
@@ -3076,6 +3080,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "dashboard_surface",
     )
     required_relation_types = (
+        "BACKS",
+        "HOUSES",
         "DEPENDS_ON",
         "GOVERNS",
         "RUNS_VIA",
@@ -3115,6 +3121,30 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         (rel.source.label, rel.source.name, rel.relation_type, rel.target.label)
         for rel in snapshot.relations.values()
     }
+    if not any(
+        source_label == "project" and relation_type == "HAS_REPO_ZONE" and target_label == "repo_zone"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing project -> HAS_REPO_ZONE -> repo_zone links")
+
+    if not any(
+        source_label == "directory_surface" and relation_type == "CONTAINS" and target_label == "file_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing directory_surface -> CONTAINS -> file_surface links")
+
+    if not any(
+        source_label == "file_surface" and relation_type == "BACKS" and target_label == "module_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing file_surface -> BACKS -> module_surface links")
+
+    if not any(
+        source_label == "directory_surface" and relation_type == "HOUSES" and target_label == "package_family"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing directory_surface -> HOUSES -> package_family links")
+
     if not any(
         source_label == "contract_surface" and relation_type == "DEPENDS_ON" and target_label == "module_surface"
         for source_label, _, relation_type, target_label in relation_keys
@@ -3183,6 +3213,27 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     ]
     if ignored_paths:
         issues.append(f"ignored runtime paths leaked into snapshot: {sorted(set(ignored_paths))[:5]}")
+
+    excluded_file_structure_paths = [
+        node.key.name
+        for node in snapshot.nodes.values()
+        if node.key.label in {"directory_surface", "file_surface"}
+        and (
+            node.key.name.startswith("docs/99-archive")
+            or node.key.name.startswith("docs/exports")
+            or node.key.name.startswith("docs/reports/generated")
+            or node.key.name.startswith("docs/02-architecture/generated")
+            or node.key.name.startswith("docs/02-architecture/diagrams/bundles")
+            or node.key.name.startswith("scripts/archive")
+            or "/png" in node.key.name
+            or "/svg" in node.key.name
+        )
+    ]
+    if excluded_file_structure_paths:
+        issues.append(
+            "excluded file-structure paths leaked into snapshot: "
+            + ", ".join(sorted(set(excluded_file_structure_paths))[:10])
+        )
 
     orphan_nodes = snapshot_orphans(snapshot)
     if orphan_nodes:
