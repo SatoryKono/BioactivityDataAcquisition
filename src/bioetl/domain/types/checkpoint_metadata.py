@@ -9,6 +9,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import cast
 
+from bioetl.domain.normalization import (
+    compute_runtime_anchor_fingerprint,
+    normalize_runtime_anchor_payload,
+)
 from bioetl.domain.types import JsonDict
 
 
@@ -24,7 +28,7 @@ class CheckpointMetadata:
         pipeline_version: Version of the pipeline configuration.
         effective_config_hash: Canonical effective-config hash for execution identity.
         effective_config_artifact_id: Effective-config artifact reference for provenance.
-        execution_fingerprint: Stable execution identity fingerprint.
+        execution_fingerprint: Full manifest-derived execution identity fingerprint.
         manifest_id: Persisted run-manifest identifier for resume identity checks.
         contract_ref: Canonical contract reference for checkpoint compatibility.
         contract_version: Canonical contract version for checkpoint compatibility.
@@ -146,6 +150,38 @@ class CheckpointMetadata:
             input_snapshot_ids=_coerce_snapshot_ids(data.get("input_snapshot_ids")),
             run_context=data.get("run_context"),
         )
+
+    def runtime_anchor_payload(self) -> JsonDict:
+        """Return the normalized runtime-anchor compatibility payload.
+
+        This payload is intentionally narrower than the full manifest execution
+        fingerprint contract and only contains resume-critical control-plane
+        anchors that remain meaningful when no persisted manifest fingerprint is
+        available.
+        """
+
+        normalized_payload = normalize_runtime_anchor_payload(
+            {
+                "manifest_id": self.manifest_id,
+                "effective_config_hash": self.effective_config_hash,
+                "contract_ref": self.contract_ref,
+                "contract_version": self.contract_version,
+                "effective_config_artifact_id": self.effective_config_artifact_id,
+            }
+        )
+        return {
+            key: value
+            for key, value in normalized_payload.items()
+            if value is not None
+        }
+
+    def runtime_anchor_fingerprint(self) -> str | None:
+        """Return the deterministic runtime-anchor compatibility fingerprint."""
+
+        payload = self.runtime_anchor_payload()
+        if not payload:
+            return None
+        return compute_runtime_anchor_fingerprint(payload)
 
 
 def _extract_manifest_id_from_run_context(data: JsonDict) -> str | None:

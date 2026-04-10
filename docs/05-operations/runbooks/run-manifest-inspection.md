@@ -93,6 +93,8 @@ Interpretation:
 
 - differences are computed over top-level manifest fields using canonical JSON comparison;
 - differences in `resolved_config`, `runtime_config`, `code_provenance`, `source_refs`, or `planned_artifacts` mean the runs are not reproducibly identical.
+- `execution_fingerprint` is the full normalized `RunManifest` identity contract.
+- checkpoint compatibility may also use a narrower runtime-anchor contract when a persisted manifest fingerprint is unavailable, but that contract is intentionally smaller and must not be read as a substitute for full manifest identity.
 
 ### 4. Inspect storage layout directly when needed
 
@@ -203,7 +205,9 @@ Focus on:
 - `artifact_refs`, `lineage_fragment_ids`, `missing_artifact_links`;
 - `dq_rule_ids`, `dq_dispositions`, `dq_report_paths`, `dq_violation_kinds`;
 - `cross_validation_rule_ids`, `cross_validation_config_paths`, `cross_validation_signal_present`;
-- `effective_config_hash`, `contract_ref`, `contract_version`, `dq_policy_ref`, `rule_bundle_version`, `effective_config_artifact_id`, `dq_contract_compatibility_hash`;
+- `execution_fingerprint` as the full manifest-identity anchor;
+- `effective_config_hash`, `contract_ref`, `contract_version`, and `effective_config_artifact_id` as runtime-anchor compatibility fields;
+- `dq_policy_ref`, `rule_bundle_version`, and `dq_contract_compatibility_hash` as adjacent DQ/control-plane anchors that are related but not interchangeable with manifest identity;
 - `correlation_anchor_gaps`, `alert_signals`, `next_steps`.
 
 Interpretation examples:

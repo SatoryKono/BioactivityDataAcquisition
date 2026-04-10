@@ -10,6 +10,7 @@ from bioetl.domain._observability_contract_core import (
     missing_observability_fields,
     normalize_observability_context,
     normalize_observability_metric_labels,
+    normalize_observability_pipeline_label,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "missing_observability_fields",
     "normalize_observability_context",
     "normalize_observability_metric_labels",
+    "normalize_observability_pipeline_label",
 ]

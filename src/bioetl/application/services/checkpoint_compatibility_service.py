@@ -123,6 +123,10 @@ def _validate_execution_identity_compatibility(
 ) -> tuple[bool, list[str]]:
     messages: list[str] = []
     execution_identity_compatible = True
+    current_runtime_anchor_fingerprint = current_metadata.runtime_anchor_fingerprint()
+    checkpoint_runtime_anchor_fingerprint = (
+        checkpoint_metadata.runtime_anchor_fingerprint()
+    )
     if (
         current_metadata.execution_fingerprint
         and checkpoint_metadata.execution_fingerprint
@@ -138,6 +142,17 @@ def _validate_execution_identity_compatibility(
                 f"checkpoint={checkpoint_metadata.execution_fingerprint}"
             )
         return execution_identity_compatible, messages
+    if (
+        current_runtime_anchor_fingerprint
+        and checkpoint_runtime_anchor_fingerprint
+        and current_runtime_anchor_fingerprint != checkpoint_runtime_anchor_fingerprint
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Runtime anchor fingerprint mismatch: "
+            f"current={current_runtime_anchor_fingerprint}, "
+            f"checkpoint={checkpoint_runtime_anchor_fingerprint}"
+        )
     if (
         current_metadata.effective_config_hash
         and checkpoint_metadata.effective_config_hash
@@ -187,7 +202,8 @@ def _validate_execution_identity_compatibility(
         if checkpoint_metadata.exact_replay is not True:
             execution_identity_compatible = False
             messages.append(
-                "Exact replay mismatch: current run requires exact replay but checkpoint was not captured in exact replay mode"
+                "Exact replay mismatch: current run requires exact replay but "
+                "checkpoint was not captured in exact replay mode"
             )
         elif not checkpoint_metadata.input_snapshot_ids:
             execution_identity_compatible = False

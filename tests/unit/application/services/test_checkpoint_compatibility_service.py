@@ -193,6 +193,9 @@ class TestCheckpointCompatibilityService:
 
         assert result.compatible is False
         assert result.execution_identity_compatible is False
+        assert any(
+            "Runtime anchor fingerprint mismatch" in msg for msg in result.messages
+        )
         assert any("Effective config hash mismatch" in msg for msg in result.messages)
 
     def test_validate_execution_fingerprint_mismatch(self) -> None:

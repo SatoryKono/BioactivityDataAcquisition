@@ -23,6 +23,10 @@ from bioetl.domain.normalization.dates import (
     parse_date_field,
     validate_publication_year,
 )
+from bioetl.domain.normalization.fingerprints import (
+    compute_manifest_execution_fingerprint,
+    compute_runtime_anchor_fingerprint,
+)
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
     normalize_pmc_id,
@@ -42,6 +46,8 @@ from bioetl.domain.normalization.text import (
 
 __all__ = [
     "canonicalize_json_string",
+    "compute_manifest_execution_fingerprint",
+    "compute_runtime_anchor_fingerprint",
     "extract_first_item",
     "extract_first_string",
     "format_date_parts",

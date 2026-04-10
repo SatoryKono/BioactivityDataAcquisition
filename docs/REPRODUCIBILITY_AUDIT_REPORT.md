@@ -16,6 +16,7 @@
    - Сохранение состояния с manifest_id, effective_config_hash, contract_ref/version
    - Механизм resume с валидацией совместимости
    - Atomic сохранение/удаление чекпоинтов
+   - Resume identity опирается на более узкие runtime anchors, которые не должны смешиваться с полным manifest `execution_fingerprint`
 
 3. **Content hashing** (`src/bioetl/domain/constants.py`)
    - Исключение META_FIELDS из хэширования
@@ -40,7 +41,7 @@
 
 3. **Проблемы control-plane**:
    - Расхождение между manifest_id и checkpoint identity
-   - Неполная валидация при resume (отсутствие проверки git_commit)
+   - Историческая двусмысленность между полным `execution_fingerprint` и более узкими runtime anchors
    - Нет строгой привязки run_id ↔ manifest_id ↔ artifacts
 
 4. **Проблемы lineage**:
@@ -73,8 +74,8 @@
    - `src/bioetl/application/core/batch_executor.py` - нестабильная сортировка
 
 2. **Неполная валидация при checkpoint resume**
-   - Отсутствует проверка git_commit совместимости
-   - Нет валидации полного execution_fingerprint
+   - Нужно явно различать полный manifest `execution_fingerprint` и runtime-anchor compatibility contract
+   - Не все execution-context anchors сравниваются одинаково строго
    - Файл: `src/bioetl/application/services/checkpoint_compatibility_service.py`
 
 3. **Расхождение идентичностей**
@@ -140,11 +141,11 @@
    - DoD: Все timestamp зависят только от run context
 
 2. **Добавить полную валидацию checkpoint compatibility**
-   - Проблема: Отсутствует проверка git_commit и полного execution_fingerprint
+   - Проблема: Полный manifest `execution_fingerprint` и runtime-anchor compatibility contract должны валидироваться как разные, явно названные контракты
    - Влияние: Возможен resume с несовместимой версией кода
    - Файлы: `src/bioetl/application/services/checkpoint_compatibility_service.py`
-   - Фикс: Добавить валидацию всех runtime anchors
-   - DoD: Checkpoint resume валидирует полный execution context
+   - Фикс: централизовать fingerprint contracts и явно различать manifest identity vs runtime-anchor compatibility
+   - DoD: Checkpoint resume валидирует либо полный manifest fingerprint, либо отдельный runtime-anchor contract, без смешения понятий
 
 ### P1 (Системные улучшения)
 1. **Улучшить идемпотентность merge операций**
@@ -165,7 +166,7 @@
    - Проблема: Недостаточная валидация execution context
    - Влияние: Возможен drift между оригинальным и replay запуском
    - Файлы: `src/bioetl/application/services/run_manifest_service.py`
-   - Фикс: Добавить полную валидацию execution_fingerprint
+   - Фикс: Добавить полную валидацию manifest fingerprint и связанных runtime anchors как двух явных контрактов
    - DoD: Replay детектирует любые изменения контекста
 
 ### P2 (Улучшения)
