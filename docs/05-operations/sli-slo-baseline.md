@@ -143,9 +143,11 @@ clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)
 ```
 
 Current implementation note: `bioetl_data_freshness_seconds` is written from
-the latest successful DQ/postrun freshness publication timestamp. The resulting
-lag is therefore an operational staleness proxy for the pipeline runtime, not a
-canonical upstream-ingestion anchor.
+the canonical ingestion anchor carried into postrun/DQ evaluation for the run
+(currently `PipelineContext.started_at`, which is also propagated as the record
+`_ingestion_ts` default across runtime writes). The resulting lag reflects
+runtime age from that ingestion anchor rather than a wall-clock freshness
+publication timestamp.
 
 ## Interpretation Rules
 
@@ -156,8 +158,9 @@ canonical upstream-ingestion anchor.
 - `degraded` provider health counts as completed but not fully healthy. Repeated
   degraded states still require investigation if they persist.
 - Freshness SLI/SLO review currently tracks the age of the latest successful
-  runtime freshness publication. For exact source-ingestion chronology, use
-  manifests, lineage, and audit artifacts rather than the gauge value alone.
+  run ingestion anchor. For exact source-ingestion chronology beyond the
+  current run boundary, use manifests, lineage, and audit artifacts together
+  with the gauge value.
 - For local-only stacks, temporary tracing disablement or maintenance windows
   should be annotated in the incident log rather than silently ignored.
 

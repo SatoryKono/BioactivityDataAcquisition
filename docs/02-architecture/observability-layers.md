@@ -92,10 +92,11 @@ Pipeline-specific metrics vocabulary is now owned in the application layer via
 an explicit facade/helper path. `MetricsPort` remains the generic transport
 contract for histogram/counter/gauge dispatch only.
 
-`DataQualityService` also publishes `bioetl_data_freshness_seconds` as the
-timestamp of the latest successful DQ/postrun freshness publication. Current
-dashboards and alerts derive operational lag as `time() - metric`; this is a
-runtime staleness proxy, not an immutable provider-ingestion anchor.
+`DataQualityService` also publishes `bioetl_data_freshness_seconds` from the
+ingestion anchor supplied by the application runtime (currently
+`PipelineContext.started_at`, mirrored into `_ingestion_ts` defaults during
+writes). Current dashboards and alerts derive operational lag as
+`time() - metric`.
 
 ## Infrastructure Layer
 

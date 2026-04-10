@@ -13,14 +13,8 @@ from bioetl.domain.normalization.identifiers import (
 from bioetl.domain.normalization.json import canonicalize_json_string
 from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_string
-<<<<<<< Updated upstream
-from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_title as _normalize_title
-||||||| Stash base
-=======
-from bioetl.domain.normalization.text import normalize_title as _normalize_title
->>>>>>> Stashed changes
-from bioetl.domain.value_objects import SMILES
+from bioetl.domain.value_objects.chemical import SMILES
 
 __all__ = [
     "normalize_profile_abstract",
@@ -111,7 +105,9 @@ def normalize_profile_float(value: object) -> object:
         return None
     if isinstance(coerced, str):
         return coerced
-    return round(coerced, 10) if math.isfinite(coerced) else None
+    if isinstance(coerced, float):
+        return round(coerced, 10) if math.isfinite(coerced) else None
+    return value
 
 
 def _coerce_profile_float(value: object) -> float | str | None | object:
