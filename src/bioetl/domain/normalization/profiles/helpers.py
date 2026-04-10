@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 
+from bioetl.domain.normalization.dates import normalize_partial_date
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
     normalize_pmc_id,
@@ -11,9 +12,13 @@ from bioetl.domain.normalization.identifiers import (
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
 from bioetl.domain.normalization.text import normalize_string
+from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
+from bioetl.domain.normalization.text import normalize_title as _normalize_title
 from bioetl.domain.value_objects import SMILES
 
 __all__ = [
+    "normalize_profile_abstract",
+    "normalize_profile_date",
     "normalize_profile_doi",
     "normalize_profile_float",
     "normalize_profile_int",
@@ -22,6 +27,7 @@ __all__ = [
     "normalize_profile_pmid",
     "normalize_profile_smiles",
     "normalize_profile_text",
+    "normalize_profile_title",
 ]
 
 _UNHANDLED = object()
@@ -46,6 +52,27 @@ def normalize_profile_json_string(value: object) -> object:
     except ValueError:
         return normalized
     return canonical if canonical is not None else normalized
+
+
+def normalize_profile_title(value: object) -> object:
+    """Normalize one title-like profile field."""
+    if not isinstance(value, str):
+        return value
+    return _normalize_title(value)
+
+
+def normalize_profile_abstract(value: object) -> object:
+    """Normalize one abstract-like profile field."""
+    if not isinstance(value, str):
+        return value
+    return _normalize_abstract(value)
+
+
+def normalize_profile_date(value: object) -> object:
+    """Normalize one date-like profile field to canonical partial-date semantics."""
+    if not isinstance(value, str):
+        return value
+    return normalize_partial_date(value)
 
 
 def normalize_profile_int(value: object) -> object:

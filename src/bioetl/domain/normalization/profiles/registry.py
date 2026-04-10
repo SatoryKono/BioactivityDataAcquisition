@@ -8,6 +8,15 @@ from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_activity import (
     CHEMBL_ACTIVITY_PROFILE,
 )
+from bioetl.domain.normalization.profiles.crossref_publication import (
+    CROSSREF_PUBLICATION_PROFILE,
+)
+from bioetl.domain.normalization.profiles.pubchem_compound import (
+    PUBCHEM_COMPOUND_PROFILE,
+)
+from bioetl.domain.normalization.profiles.pubmed_publication import (
+    PUBMED_PUBLICATION_PROFILE,
+)
 
 __all__ = [
     "NORMALIZATION_PROFILE_REGISTRY",
@@ -33,6 +42,9 @@ def build_normalization_profile_registry() -> Mapping[tuple[str, str], Normaliza
     """Return the immutable registry of shipped normalization profiles."""
     return {
         ("chembl", "activity"): CHEMBL_ACTIVITY_PROFILE,
+        ("crossref", "publication"): CROSSREF_PUBLICATION_PROFILE,
+        ("pubchem", "compound"): PUBCHEM_COMPOUND_PROFILE,
+        ("pubmed", "publication"): PUBMED_PUBLICATION_PROFILE,
     }
 
 

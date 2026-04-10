@@ -25,6 +25,22 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
 __all__ = ["COUNTERS", "GAUGES", "HISTOGRAMS", "PrometheusMetrics"]
 
 
+def _require_registered_metric(
+    *,
+    name: str,
+    registry: dict[str, object],
+    metric_kind: str,
+) -> object:
+    """Return a registered metric or fail loudly on contract drift."""
+    metric = registry.get(name)
+    if metric is None:
+        raise ValueError(
+            f"Unknown Prometheus {metric_kind} metric: {name}. "
+            f"Register it before emitting runtime observability signals."
+        )
+    return metric
+
+
 class PrometheusMetrics(MetricsPort):
     """Prometheus implementation of MetricsPort.
 
@@ -62,8 +78,12 @@ class PrometheusMetrics(MetricsPort):
             _labels=_labels,
             tags=tags,
         )
-        if name in HISTOGRAMS:
-            HISTOGRAMS[name].labels(**resolved_labels).observe(value)
+        histogram = _require_registered_metric(
+            name=name,
+            registry=HISTOGRAMS,
+            metric_kind="histogram",
+        )
+        histogram.labels(**resolved_labels).observe(value)
 
     def increment_counter(
         self,
@@ -88,10 +108,14 @@ class PrometheusMetrics(MetricsPort):
             _labels=_labels,
             tags=tags,
         )
-        if name in COUNTERS:
-            COUNTERS[name].labels(
-                **normalize_metric_dispatch_labels(name, resolved_labels)
-            ).inc(value)
+        counter = _require_registered_metric(
+            name=name,
+            registry=COUNTERS,
+            metric_kind="counter",
+        )
+        counter.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).inc(
+            value
+        )
 
     def set_gauge(
         self,
@@ -116,8 +140,12 @@ class PrometheusMetrics(MetricsPort):
             _labels=_labels,
             tags=tags,
         )
-        if name in GAUGES:
-            GAUGES[name].labels(**resolved_labels).set(value)
+        gauge = _require_registered_metric(
+            name=name,
+            registry=GAUGES,
+            metric_kind="gauge",
+        )
+        gauge.labels(**resolved_labels).set(value)
 
     def inc_quarantine_records(
         self, pipeline: str, reason: str, count: int = 1

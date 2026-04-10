@@ -272,7 +272,11 @@ def build_gold_lineage_fragment(
     input_data: GoldMetadataInput,
 ) -> LineageGraphFragment:
     """Build canonical Gold lineage fragment from metadata input."""
-    created_at = fragment_timestamp(input_data.completed_at, input_data.started_at)
+    created_at = fragment_timestamp(
+        input_data.completed_at,
+        input_data.started_at,
+        run_context.started_at,
+    )
 
     # Build nodes
     nodes, composite_source_edges = _build_gold_nodes(

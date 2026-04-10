@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization.profiles.helpers import (
+    normalize_profile_abstract,
+    normalize_profile_date,
     normalize_profile_doi,
     normalize_profile_float,
     normalize_profile_int,
@@ -11,6 +13,7 @@ from bioetl.domain.normalization.profiles.helpers import (
     normalize_profile_pmid,
     normalize_profile_smiles,
     normalize_profile_text,
+    normalize_profile_title,
 )
 
 
@@ -21,6 +24,15 @@ def test_normalize_profile_text_trims_blank_to_none() -> None:
 
 def test_normalize_profile_json_string_canonicalizes_order() -> None:
     assert normalize_profile_json_string(' { "b": 2, "a": 1 } ') == '{"a":1,"b":2}'
+
+
+def test_normalize_profile_title_and_abstract_clean_html_and_whitespace() -> None:
+    assert normalize_profile_title("  Example <b>Title</b>  ") == "Example Title"
+    assert normalize_profile_abstract(" Hello&nbsp;<i>world</i> ") == "Hello world"
+
+
+def test_normalize_profile_date_canonicalizes_partial_dates() -> None:
+    assert normalize_profile_date(" 2024-02 ") == "2024-02-29"
 
 
 def test_normalize_profile_int_preserves_invalid_text() -> None:

@@ -48,13 +48,13 @@ class TestPrometheusMetrics:
             ].labels().observe.assert_called_once_with(123.45)
 
     def test_observe_histogram_unknown_metric(self, prometheus_metrics):
-        """Test observe_histogram with unknown metric name does nothing."""
-        # Should not raise, just ignore
-        prometheus_metrics.observe_histogram(
-            name="unknown_metric",
-            value=100.0,
-            labels={"label": "value"},
-        )
+        """Unknown histogram names must fail loudly."""
+        with pytest.raises(ValueError, match="Unknown Prometheus histogram metric"):
+            prometheus_metrics.observe_histogram(
+                name="unknown_metric",
+                value=100.0,
+                labels={"label": "value"},
+            )
 
     def test_increment_counter_valid_metric(self, prometheus_metrics):
         """Test increment_counter with a valid metric name."""
@@ -76,13 +76,13 @@ class TestPrometheusMetrics:
             )
 
     def test_increment_counter_unknown_metric(self, prometheus_metrics):
-        """Test increment_counter with unknown metric name does nothing."""
-        # Should not raise, just ignore
-        prometheus_metrics.increment_counter(
-            name="unknown_counter",
-            value=50,
-            labels={"label": "value"},
-        )
+        """Unknown counter names must fail loudly."""
+        with pytest.raises(ValueError, match="Unknown Prometheus counter metric"):
+            prometheus_metrics.increment_counter(
+                name="unknown_counter",
+                value=50,
+                labels={"label": "value"},
+            )
 
 
 @pytest.mark.unit
@@ -120,13 +120,13 @@ class TestPrometheusMetricsGauge:
             GAUGES["circuit_breaker_state"].labels().set.assert_called_once_with(1.0)
 
     def test_set_gauge_unknown_metric(self, prometheus_metrics):
-        """Test set_gauge with unknown metric name does nothing."""
-        # Should not raise, just ignore
-        prometheus_metrics.set_gauge(
-            name="unknown_gauge",
-            value=42.0,
-            labels={"label": "value"},
-        )
+        """Unknown gauge names must fail loudly."""
+        with pytest.raises(ValueError, match="Unknown Prometheus gauge metric"):
+            prometheus_metrics.set_gauge(
+                name="unknown_gauge",
+                value=42.0,
+                labels={"label": "value"},
+            )
 
 
 @pytest.mark.unit
