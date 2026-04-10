@@ -19,6 +19,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
@@ -68,6 +69,7 @@ class DataQualityService:
         self._metrics = metrics
         self._pipeline_name = pipeline_name
         self._entity_type = entity_type
+        self._pipeline_metrics = PipelineMetricsRecorder(metrics, pipeline_name)
 
     def evaluate(
         self,
@@ -146,12 +148,10 @@ class DataQualityService:
                 threshold=self._config.hard_fail_threshold,
                 pipeline=self._pipeline_name,
             )
-            if self._metrics:
-                self._metrics.inc_dq_validation_failures(
-                    pipeline=self._pipeline_name,
-                    stage="threshold",
-                    severity="hard_fail",
-                )
+            self._pipeline_metrics.record_dq_validation_failures(
+                stage="threshold",
+                severity="hard_fail",
+            )
             raise DataQualityThresholdError(
                 error_rate=error_rate,
                 threshold=self._config.hard_fail_threshold,
@@ -188,11 +188,10 @@ class DataQualityService:
                 1,
                 {"pipeline": self._pipeline_name},
             )
-            self._metrics.inc_dq_validation_failures(
-                pipeline=self._pipeline_name,
-                stage="threshold",
-                severity="soft_fail",
-            )
+        self._pipeline_metrics.record_dq_validation_failures(
+            stage="threshold",
+            severity="soft_fail",
+        )
 
     def _run_anomaly_detection(
         self,

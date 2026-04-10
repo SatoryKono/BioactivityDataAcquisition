@@ -79,9 +79,6 @@ def is_metrics_port_like(candidate: object) -> bool:
         "observe_histogram",
         "increment_counter",
         "set_gauge",
-        "inc_quarantine_records",
-        "inc_silver_filter_rejections",
-        "inc_dq_validation_failures",
         "close",
     )
     return all(

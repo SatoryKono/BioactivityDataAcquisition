@@ -66,10 +66,13 @@ class TestQuarantineManagerBulkWrites:
         assert requests[0]["metadata"]["classification"] == "filter_rejection"
         assert requests[0]["metadata"]["quarantine_category"] == "silver_filter"
         assert "quasi_quarantine" not in requests[0]["metadata"]
-        metrics.inc_quarantine_records.assert_called_once_with(
-            pipeline="chembl_activity",
-            reason="FILTERED_OUT_SILVER",
-            count=2,
+        metrics.increment_counter.assert_any_call(
+            "quarantine_records_total",
+            2,
+            {
+                "pipeline": "chembl_activity",
+                "reason": "FILTERED_OUT_SILVER",
+            },
         )
 
     @pytest.mark.asyncio
@@ -145,15 +148,21 @@ class TestQuarantineManagerBulkWrites:
         quarantine_port.write_many.assert_awaited_once()
         requests = quarantine_port.write_many.await_args.args[0]
         assert requests[0]["run_id"] == run_id
-        metrics.inc_quarantine_records.assert_any_call(
-            pipeline="chembl_activity",
-            reason=ErrorType.INVALID_DATA.value,
-            count=2,
+        metrics.increment_counter.assert_any_call(
+            "quarantine_records_total",
+            2,
+            {
+                "pipeline": "chembl_activity",
+                "reason": ErrorType.INVALID_DATA.value,
+            },
         )
-        metrics.inc_quarantine_records.assert_any_call(
-            pipeline="chembl_activity",
-            reason=ErrorType.MISSING_REQUIRED_FIELD.value,
-            count=1,
+        metrics.increment_counter.assert_any_call(
+            "quarantine_records_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "reason": ErrorType.MISSING_REQUIRED_FIELD.value,
+            },
         )
 
     @pytest.mark.asyncio

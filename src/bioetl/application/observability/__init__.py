@@ -18,6 +18,7 @@ Unified Observability Pattern:
 from __future__ import annotations
 
 from bioetl.application.observability.observer import LifecyclePhase, PipelineObserver
+from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.application.observability.span_helpers import (
     traced_async_operation,
     traced_operation,
@@ -26,6 +27,7 @@ from bioetl.application.observability.span_helpers import (
 __all__ = [
     "LifecyclePhase",
     "PipelineObserver",
+    "PipelineMetricsRecorder",
     "traced_async_operation",
     "traced_operation",
 ]

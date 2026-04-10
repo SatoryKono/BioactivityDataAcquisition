@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Protocol, cast
 
+from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.application.composite.runner_pkg.runner_constants import (
     DQ_REPORT_NON_FATAL_ERRORS,
     QUARANTINE_WRITE_NON_FATAL_ERRORS,
@@ -146,12 +147,10 @@ class CompositeRunnerObservabilityMixin:
             composite=self._config.name,
             quarantine_count=written,
         )
-        if self._metrics:
-            self._metrics.inc_quarantine_records(
-                pipeline=pipeline_name,
-                reason="cross_validation",
-                count=written,
-            )
+        PipelineMetricsRecorder(self._metrics, pipeline_name).record_quarantine_records(
+            reason="cross_validation",
+            count=written,
+        )
 
 
 __all__ = ["CompositeRunnerObservabilityMixin"]
