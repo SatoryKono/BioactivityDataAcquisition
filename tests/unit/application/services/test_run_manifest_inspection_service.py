@@ -616,7 +616,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
     assert result.diagnostics["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
         "contract_ref": 0,
-        "data_contract_version": 0,
+        "contract_version": 0,
         "composite_run_id": 0,
     }
     assert result.diagnostics["dq_report_paths"] == [
@@ -717,7 +717,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
     assert result.diagnostics["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
         "contract_ref": 0,
-        "data_contract_version": 0,
+        "contract_version": 0,
         "composite_run_id": 0,
     }
 

@@ -222,10 +222,10 @@ not the same thing as the full manifest `execution_fingerprint`.
 When `details` is present, runtime enriches it with `_diagnostic` metadata. The
 anchor payload includes:
 
-- stable envelope: `contract_version`, `event_type`, `event_family`,
+- stable envelope: `diagnostic_contract_version`, `event_type`, `event_family`,
   `manifest_id`, `run_id`, `status`;
 - runtime correlation anchors when available: `pipeline`, `provider`, `entity`,
-  `run_type`, `effective_config_hash`, `contract_ref`, `data_contract_version`,
+  `run_type`, `effective_config_hash`, `contract_ref`, `contract_version`,
   `dq_policy_ref`, `rule_bundle_version`, `dq_contract_compatibility_hash`,
   `effective_config_artifact_id`, `composite_run_id`;
 - event-specific linkage: `stage`, `dataset_ref`, `lineage_fragment_id`,

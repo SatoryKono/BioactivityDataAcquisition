@@ -206,7 +206,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     assert summary["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
         "contract_ref": 0,
-        "data_contract_version": 0,
+        "contract_version": 0,
         "composite_run_id": 0,
     }
     assert summary["cross_validation_signal_present"] is False
@@ -225,3 +225,28 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     else:
         assert alert_signals[signal_key] is True
         assert "No alert signals detected" not in summary["next_steps"]
+
+
+def test_build_diagnostics_summary_accepts_legacy_data_contract_version_alias() -> None:
+    manifest = _make_manifest()
+    entry = RunLedgerEntry(
+        entry_id="entry-legacy-alias",
+        manifest_id=manifest.manifest_id,
+        run_id=manifest.run_id,
+        event_type="run_finished",
+        event_family="pipeline.lifecycle",
+        occurred_at=datetime.now(UTC),
+        status="success",
+        details={
+            "_diagnostic": {
+                "diagnostic_contract_version": "v1",
+                "effective_config_hash": "deadbeef",
+                "contract_ref": "chembl.activity",
+                "data_contract_version": "1.2.0",
+            }
+        },
+    )
+
+    summary = build_diagnostics_summary(manifest, (entry,))
+
+    assert summary["correlation_anchor_gaps"]["contract_version"] == 0

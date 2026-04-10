@@ -4335,7 +4335,8 @@ def sync_snapshot(
                 if deleted == 0:
                     break
     _execute_grouped_statements(client, core_node_groups, batch_size, "core node")
-    _execute_grouped_statements(client, analysis_node_groups, max(1, min(batch_size, 10)), "analysis node")
+    analysis_node_batch_size = 1 if "complexity_candidate" in analysis_node_groups else max(1, min(batch_size, 10))
+    _execute_grouped_statements(client, analysis_node_groups, analysis_node_batch_size, "analysis node")
     if prune_stale and relation_groups:
         relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
         client.execute([_reset_managed_relations_statement(relation_types)])
@@ -4343,7 +4344,7 @@ def sync_snapshot(
     _execute_grouped_statements(
         client,
         analysis_relation_groups,
-        max(1, min(batch_size, 10)),
+        max(1, min(batch_size, 5)),
         "analysis relation",
     )
     _retry_critical_analysis_groups(client, analysis_node_groups, analysis_relation_groups, batch_size)
@@ -4379,14 +4380,41 @@ def _execute_grouped_statements(
 ) -> None:
     for group_name in sorted(grouped_statements):
         statements = grouped_statements[group_name]
-        for batch_index, batch in enumerate(_batched(statements, batch_size), start=1):
+        grouped_batches = _batched(statements, batch_size)
+        for batch_index, batch in enumerate(grouped_batches, start=1):
             try:
                 client.execute(batch)
             except Exception as exc:  # pragma: no cover - depends on live backend state
+                if len(batch) > 1:
+                    for statement_index, statement in enumerate(batch, start=1):
+                        try:
+                            client.execute([statement])
+                        except Exception as statement_exc:  # pragma: no cover - live backend dependent
+                            parameters = statement.get("parameters", {})
+                            node_name = parameters.get("name")
+                            source_name = parameters.get("source_name")
+                            target_name = parameters.get("target_name")
+                            context = (
+                                f"name={node_name!r}" if node_name is not None else
+                                f"source={source_name!r}, target={target_name!r}"
+                            )
+                            raise RuntimeError(
+                                f"Neo4j sync failed while applying {kind} group `{group_name}` "
+                                f"(batch {batch_index}/{len(grouped_batches)}, "
+                                f"statement {statement_index}/{len(batch)}, {context})"
+                            ) from statement_exc
+                    continue
+                parameters = batch[0].get("parameters", {})
+                node_name = parameters.get("name")
+                source_name = parameters.get("source_name")
+                target_name = parameters.get("target_name")
+                context = (
+                    f"name={node_name!r}" if node_name is not None else
+                    f"source={source_name!r}, target={target_name!r}"
+                )
                 raise RuntimeError(
                     f"Neo4j sync failed while applying {kind} group `{group_name}` "
-                    f"(batch {batch_index}/{len(_batched(statements, batch_size))}, "
-                    f"{len(batch)} statements)"
+                    f"(batch {batch_index}/{len(grouped_batches)}, 1 statement, {context})"
                 ) from exc
 
 
@@ -4993,13 +5021,44 @@ def build_audit_report(
     }
 
 
+def _critical_analysis_audit_issues(report: dict[str, JsonValue]) -> list[str]:
+    issues: list[str] = []
+    diff = report.get("diff", {})
+    label_rows = diff.get("labels", []) if isinstance(diff, dict) else []
+    relation_rows = diff.get("relation_types", []) if isinstance(diff, dict) else []
+
+    for row in label_rows:
+        if not isinstance(row, dict):
+            continue
+        name = row.get("name")
+        delta = row.get("delta")
+        if name in CRITICAL_ANALYSIS_NODE_LABELS and delta:
+            issues.append(
+                f"label `{name}` expected {row.get('snapshot')}, live managed {row.get('live_managed')}"
+            )
+    for row in relation_rows:
+        if not isinstance(row, dict):
+            continue
+        name = row.get("name")
+        delta = row.get("delta")
+        if name in CRITICAL_ANALYSIS_RELATION_TYPES and delta:
+            issues.append(
+                f"relation `{name}` expected {row.get('snapshot')}, live managed {row.get('live_managed')}"
+            )
+    return issues
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     if args.prune_stale and args.full_reset_managed_wave:
         parser.error("--prune-stale and --full-reset-managed-wave cannot be used together")
     root = args.root.resolve()
-    snapshot = build_snapshot(root)
+    snapshot = _filtered_snapshot(
+        build_snapshot(root),
+        only_labels=tuple(args.only_label),
+        only_analysis_layer=args.only_analysis_layer,
+    )
     stats = snapshot.stats()
     print(json.dumps(stats, indent=2))
     if args.export is not None:
@@ -5014,7 +5073,15 @@ def main(argv: list[str] | None = None) -> int:
             prune_stale=args.prune_stale,
             full_reset_managed_wave=args.full_reset_managed_wave,
             prune_legacy_unmanaged=args.prune_legacy_unmanaged,
+            only_labels=tuple(args.only_label),
+            only_analysis_layer=args.only_analysis_layer,
         )
+        post_apply_report = build_audit_report(snapshot, root, args.http_uri)
+        critical_issues = _critical_analysis_audit_issues(post_apply_report)
+        if critical_issues:
+            raise RuntimeError(
+                "Post-apply audit failed for critical analysis groups: " + "; ".join(critical_issues)
+            )
         print("Neo4j sync completed.")
     if args.report is not None:
         report = build_audit_report(snapshot, root, args.http_uri)
