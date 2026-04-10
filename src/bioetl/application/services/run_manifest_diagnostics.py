@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from typing import cast
 
 from bioetl.application.services._run_manifest_diagnostics_helpers import (
     extract_dq_details,
@@ -35,6 +36,10 @@ def _build_base_summary(
             code_provenance.dq_contract_compatibility_hash
         ),
         "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
+        "replay_capability": manifest.replay_capability.value,
+        "exact_replay_eligible": (
+            manifest.replay_capability.value == "exact_replay_supported"
+        ),
         "planned_artifacts": [
             {"layer": artifact.layer, "path": artifact.path}
             for artifact in manifest.planned_artifacts
@@ -169,6 +174,10 @@ def _build_final_summary(
         cross_validation_signal_present=cross_validation_signal_present,
     )
     next_steps = _build_next_steps(alert_signals)
+    planned_artifacts = cast(
+        list[dict[str, object]],
+        base_summary.get("planned_artifacts", []),
+    )
     identity_graph = {
         "run_id": str(manifest.run_id),
         "manifest_id": manifest.manifest_id,
@@ -176,7 +185,9 @@ def _build_final_summary(
         "effective_config_hash": base_summary.get("effective_config_hash"),
         "contract_ref": base_summary.get("contract_ref"),
         "contract_version": base_summary.get("contract_version"),
-        "planned_artifacts": list(base_summary.get("planned_artifacts", [])),
+        "replay_capability": base_summary.get("replay_capability"),
+        "exact_replay_eligible": base_summary.get("exact_replay_eligible"),
+        "planned_artifacts": planned_artifacts,
         "published_artifacts": artifact_refs,
     }
     if "replay_mode" in base_summary:
