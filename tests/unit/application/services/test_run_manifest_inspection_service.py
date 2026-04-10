@@ -195,6 +195,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         ],
         "planned_artifacts": [],
         "published_artifacts": [],
+        "occurrence_only_diagnostics": [],
     }
     assert result.diagnostics["identity_graph"]["manifest_id"] == "manifest-1"
     assert result.diagnostics["identity_graph"]["run_id"] == str(run_id)
@@ -251,6 +252,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         ],
         "planned_artifacts": [],
         "published_artifacts": [],
+        "occurrence_only_diagnostics": [],
     }
     assert result.diagnostics == {
         "manifest_id": "manifest-no-ledger",
@@ -287,6 +289,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "dq_contract_compatibility_hash": "compat-hash-1",
         "effective_config_artifact_id": "eca-123",
         "planned_artifacts": [],
+        "occurrence_only_diagnostics": [],
     }
 
 
@@ -939,6 +942,9 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
                 "disposition": "quarantine",
                 "violation_kind": "cross_validation_mismatch",
                 "config_path": "cross_validation",
+                "artifact_policy": "occurrence_only_diagnostic",
+                "replay_contract": "excluded_from_exact_replay",
+                "diagnostic_scope": "composite_cross_validation_quarantine",
                 "dq_report_path": "/tmp/reports/composite_cv.json",
             },
         )
@@ -959,7 +965,21 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
         "composite.cross_validation.quarantine"
     ]
     assert result.diagnostics["cross_validation_config_paths"] == ["cross_validation"]
+    assert (
+        result.diagnostics["cross_validation_quarantine_policy"]
+        == "occurrence_only_diagnostic"
+    )
+    assert (
+        result.diagnostics["cross_validation_quarantine_replay_contract"]
+        == "excluded_from_exact_replay"
+    )
+    assert result.diagnostics["occurrence_only_diagnostics"] == [
+        "composite_cross_validation_quarantine"
+    ]
     assert result.diagnostics["cross_validation_signal_present"] is True
+    assert result.identity_graph["occurrence_only_diagnostics"] == [
+        "composite_cross_validation_quarantine"
+    ]
     assert result.diagnostics["alert_signals"] == {
         "run_failed": True,
         "run_shutdown": False,

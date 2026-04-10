@@ -148,3 +148,18 @@ class MetricsServerPort(Protocol):
     def reset(self) -> None:
         """Reset all collected metric values to their initial state."""
         ...
+
+
+@runtime_checkable
+class MetricsPublisherPort(Protocol):
+    """Protocol for explicit metrics publication workflows."""
+
+    def push_to_gateway(
+        self,
+        *,
+        gateway: str,
+        run_label: str,
+        grouping_key: MetricLabels | None = None,
+    ) -> bool:
+        """Publish the current metrics snapshot to a gateway backend."""
+        ...

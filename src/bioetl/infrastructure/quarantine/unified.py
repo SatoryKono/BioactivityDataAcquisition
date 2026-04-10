@@ -147,6 +147,7 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
             "pipeline": record["pipeline"],
             "error_code": record["error_code"],
             "payload": payload_json,
+            "metadata": serialize_to_json(meta),
             "payload_hash": payload_hash,
             "payload_truncated": truncated,
             "bronze_batch_id": str(bronze_batch_id),

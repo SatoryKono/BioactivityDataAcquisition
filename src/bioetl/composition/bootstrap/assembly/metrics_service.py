@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.metrics_service import MetricsService
+from bioetl.infrastructure.observability.metrics_publisher_adapter import (
+    MetricsPublisherAdapter,
+)
 from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,
 )
@@ -25,4 +28,5 @@ def create_metrics_service(
     return MetricsService(
         logger=resolved_logger,
         _server=MetricsServerAdapter(logger=resolved_logger),
+        _publisher=MetricsPublisherAdapter(logger=resolved_logger),
     )

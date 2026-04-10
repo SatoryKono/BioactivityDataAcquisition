@@ -16,6 +16,9 @@ class DQDetailsSummary(TypedDict):
     violation_kinds: set[str]
     cross_validation_rule_ids: set[str]
     cross_validation_config_paths: set[str]
+    cross_validation_quarantine_policies: set[str]
+    cross_validation_replay_contracts: set[str]
+    occurrence_only_diagnostic_scopes: set[str]
     has_signal: bool
     has_cross_validation_signal: bool
 
@@ -97,6 +100,21 @@ def extract_dq_details(entry: RunLedgerEntry) -> DQDetailsSummary:
     cross_validation_rule_ids, cross_validation_config_paths = (
         extract_cross_validation_sets(rule_ids, config_paths)
     )
+    quarantine_policies = collect_dq_values(
+        details,
+        single_key="artifact_policy",
+        collection_keys=("artifact_policies",),
+    )
+    replay_contracts = collect_dq_values(
+        details,
+        single_key="replay_contract",
+        collection_keys=("replay_contracts",),
+    )
+    occurrence_only_diagnostic_scopes = collect_dq_values(
+        details,
+        single_key="diagnostic_scope",
+        collection_keys=("diagnostic_scopes",),
+    )
     has_cross_validation_signal = (
         bool(cross_validation_rule_ids)
         or "cross_validation_mismatch" in violation_kinds
@@ -115,6 +133,9 @@ def extract_dq_details(entry: RunLedgerEntry) -> DQDetailsSummary:
         "violation_kinds": violation_kinds,
         "cross_validation_rule_ids": cross_validation_rule_ids,
         "cross_validation_config_paths": cross_validation_config_paths,
+        "cross_validation_quarantine_policies": quarantine_policies,
+        "cross_validation_replay_contracts": replay_contracts,
+        "occurrence_only_diagnostic_scopes": occurrence_only_diagnostic_scopes,
         "has_signal": has_signal,
         "has_cross_validation_signal": has_cross_validation_signal,
     }

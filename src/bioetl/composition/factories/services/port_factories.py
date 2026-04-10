@@ -7,16 +7,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from bioetl.composition.observability_resolution import resolve_metrics_port
 from bioetl.domain.ports import (
     CheckpointPort,
     LockPort,
     MetricsPort,
     QuarantinePort,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 
 if TYPE_CHECKING:
@@ -61,7 +60,7 @@ def create_quarantine(settings: Settings) -> QuarantinePort:
 
 def create_metrics(settings: Settings) -> MetricsPort:
     """Create metrics port based on settings."""
-    metrics: object = PrometheusMetrics() if settings.metrics_enabled else NoOpMetrics()
+    metrics: object = resolve_metrics_port(metrics=None, settings=settings)
 
     if isinstance(metrics, MetricsPort):
         assert isinstance(metrics, MetricsPort), (

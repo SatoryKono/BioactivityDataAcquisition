@@ -35,6 +35,8 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
     composite_run_id: str | None
     start_time: float | None
     span: Span | None
+    _completed_stage_count: int
+    _terminal_records_processed: int
     _metrics: MetricsPort
     _tracer: TracingPort | None
 
@@ -171,17 +173,26 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
             )
             return
         if status == "shutdown":
-            self._emit_contract_event(
-                PipelineEvent.SHUTDOWN,
-                severity="warning",
-                **log_ctx,
-                error_type="pipeline_shutdown",
+            self.emit_domain_event(
+                PipelineShutdown(
+                    occurred_at=self._build_pipeline_result_timestamp(),
+                    run_id=self.run_id,
+                    pipeline_name=self.pipeline_name,
+                    records_processed=self._terminal_records_processed,
+                ),
+                phase=LifecyclePhase.CLEANUP,
             )
             return
-        self._emit_contract_event(
-            PipelineEvent.COMPLETE,
-            severity="info",
-            **log_ctx,
+        self.emit_domain_event(
+            PipelineCompleted(
+                occurred_at=self._build_pipeline_result_timestamp(),
+                run_id=self.run_id,
+                pipeline_name=self.pipeline_name,
+                records_processed=self._terminal_records_processed,
+                duration_seconds=duration,
+                stages_count=self._completed_stage_count,
+            ),
+            phase=LifecyclePhase.CLEANUP,
         )
 
     @staticmethod

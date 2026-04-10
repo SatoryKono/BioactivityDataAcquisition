@@ -153,6 +153,7 @@ def inspect_records(
     )  # Any: quarantine record has heterogeneous values
     for record in records:
         record["payload"] = deserialize_from_json(record["payload"])
+        record["metadata"] = deserialize_from_json(record.get("metadata", "{}"))
         record["error_details"] = deserialize_from_json(record["error_details"])
 
     return records
@@ -261,6 +262,7 @@ def replay_records(
 
     for record in filtered_table.to_pylist():
         record["payload"] = deserialize_from_json(record["payload"])
+        record["metadata"] = deserialize_from_json(record.get("metadata", "{}"))
         record["error_details"] = deserialize_from_json(record["error_details"])
         yield record
 

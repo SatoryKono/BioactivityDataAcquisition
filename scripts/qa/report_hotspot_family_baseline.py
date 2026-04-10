@@ -167,7 +167,11 @@ def main() -> int:
         if json_ok and md_ok:
             print("[ok] hotspot-family baseline artifacts are up to date")
             return 0
-        print("[hint] run: python -m scripts.qa report-family-baseline --update")
+        hint = "python -m scripts.qa report-family-baseline"
+        if args.active_only:
+            hint += " --active-only"
+        hint += " --update"
+        print(f"[hint] run: {hint}")
         return 1
 
     _write_text(args.json_output, json_text)

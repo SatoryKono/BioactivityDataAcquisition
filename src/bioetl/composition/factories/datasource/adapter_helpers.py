@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.composition.observability_resolution import resolve_metrics_port
 from bioetl.domain.ports import (
     ErrorHandlerPort,
     LoggerPort,
     MetricsPort,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
@@ -125,7 +125,7 @@ class AdapterHelpersFactory:
             AdapterHelperServices bundle with error handler, metrics, request
             collector, and fallback fetch service.
         """
-        metrics_port = metrics if metrics is not None else NoOpMetrics()
+        metrics_port = resolve_metrics_port(metrics=metrics)
         adapter_metrics = AdapterMetricsRecorder(metrics_port, provider)
         request_collector = APIRequestCollector()
         error_handler = ErrorService(logger=logger, metrics=metrics_port)
@@ -158,7 +158,7 @@ class AdapterHelpersFactory:
             collector for sync-backed adapters.
         """
         del provider
-        metrics_port = metrics if metrics is not None else NoOpMetrics()
+        metrics_port = resolve_metrics_port(metrics=metrics)
         request_collector = APIRequestCollector()
         error_handler = ErrorService(logger=logger, metrics=metrics_port)
         return SyncAdapterHelperServices(

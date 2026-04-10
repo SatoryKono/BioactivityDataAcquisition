@@ -19,14 +19,14 @@ def get_neo4j_uri() -> str:
     
     Returns:
         - bolt://localhost:7688 if LIVE_AUDIT_MODE env var is set (audit instance)
-        - bolt://host.docker.internal:7687 otherwise (MCP instance for Codex)
+        - bolt://localhost:7687 otherwise (MCP instance)
     """
     if os.getenv('LIVE_AUDIT_MODE'):
         # Audit instance: higher memory (1024m), port 7688
         return 'bolt://localhost:7688'
     else:
         # MCP instance: standard port 7687
-        return 'bolt://host.docker.internal:7687'
+        return 'bolt://localhost:7687'
 
 
 def get_neo4j_auth() -> Tuple[str, str]:

@@ -206,6 +206,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
                 "artifact_path": "data/output/silver/chembl/activity",
             }
         ],
+        "occurrence_only_diagnostics": [],
     }
     assert summary["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
@@ -214,6 +215,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "composite_run_id": 0,
     }
     assert summary["cross_validation_signal_present"] is False
+    assert summary["occurrence_only_diagnostics"] == []
     alert_signals = summary["alert_signals"]
     assert isinstance(alert_signals, dict)
     assert alert_signals["artifact_linkage_gap"] is False

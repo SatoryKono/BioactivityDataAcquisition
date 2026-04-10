@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.runtime_wiring_api import PipelineService
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.composition.observability_resolution import (
+    resolve_tracing_port as _resolve_tracing_port,
+)
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
     create_lock,
@@ -48,11 +51,7 @@ class CommonServicePorts:
 
 def resolve_tracer(tracer: TracingPort | None) -> TracingPort:
     """Return the provided tracer or a NoOpTracing fallback."""
-    if tracer is None:
-        from bioetl.domain.ports.noop import NoOpTracing
-
-        return NoOpTracing()
-    return tracer
+    return _resolve_tracing_port(tracer=tracer)
 
 
 def build_common_service_ports(

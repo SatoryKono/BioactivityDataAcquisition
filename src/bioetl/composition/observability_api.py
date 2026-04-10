@@ -7,6 +7,7 @@ helpers that need composition-owned dependency assembly.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from uuid import uuid4
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import MetricsServerError
@@ -93,10 +94,8 @@ def push_metrics_to_gateway(
     logger: LoggerPort | None = None,
 ) -> bool:
     """Push metrics through the canonical composition-owned observability seam."""
+    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
     from bioetl.infrastructure.config import get_settings
-    from bioetl.infrastructure.observability.server import (
-        push_metrics_to_gateway as _push,
-    )
 
     settings = get_settings()
     gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
@@ -105,14 +104,18 @@ def push_metrics_to_gateway(
         grouping_key["pipeline"] = pipeline_name
     if run_type:
         grouping_key["run_type"] = run_type
-    return bool(
-        _push(
-            gateway=gateway,
-            run_label=run_label,
-            grouping_key=grouping_key,
-            logger=logger,
-        )
+    metrics_service = get_metrics_service()
+    metrics_service.logger = logger or bootstrap_logger_port(
+        pipeline=pipeline_name or "metrics_publication",
+        run_id=uuid4(),
+        log_level="INFO",
     )
+    result = metrics_service.push_to_gateway(
+        gateway=gateway,
+        run_label=run_label,
+        grouping_key=grouping_key,
+    )
+    return bool(result.success)
 
 
 def get_audit_service() -> AuditInspectionService:

@@ -85,6 +85,9 @@ def _process_ledger_entries(
     dq_violation_kinds: set[str] = set()
     cross_validation_rule_ids: set[str] = set()
     cross_validation_config_paths: set[str] = set()
+    cross_validation_quarantine_policies: set[str] = set()
+    cross_validation_replay_contracts: set[str] = set()
+    occurrence_only_diagnostic_scopes: set[str] = set()
     dq_signal_present = False
     cross_validation_signal_present = False
     missing_link_count = 0
@@ -117,6 +120,15 @@ def _process_ledger_entries(
         cross_validation_config_paths.update(
             dq_details["cross_validation_config_paths"]
         )
+        cross_validation_quarantine_policies.update(
+            dq_details["cross_validation_quarantine_policies"]
+        )
+        cross_validation_replay_contracts.update(
+            dq_details["cross_validation_replay_contracts"]
+        )
+        occurrence_only_diagnostic_scopes.update(
+            dq_details["occurrence_only_diagnostic_scopes"]
+        )
         dq_signal_present = dq_signal_present or dq_details["has_signal"]
         cross_validation_signal_present = (
             cross_validation_signal_present or dq_details["has_cross_validation_signal"]
@@ -137,6 +149,9 @@ def _process_ledger_entries(
         dq_violation_kinds,
         cross_validation_rule_ids,
         cross_validation_config_paths,
+        cross_validation_quarantine_policies,
+        cross_validation_replay_contracts,
+        occurrence_only_diagnostic_scopes,
         dq_signal_present,
         cross_validation_signal_present,
         missing_link_count,
@@ -158,6 +173,9 @@ def _build_final_summary(
     dq_violation_kinds: set[str],
     cross_validation_rule_ids: set[str],
     cross_validation_config_paths: set[str],
+    cross_validation_quarantine_policies: set[str],
+    cross_validation_replay_contracts: set[str],
+    occurrence_only_diagnostic_scopes: set[str],
     dq_signal_present: bool,
     cross_validation_signal_present: bool,
     missing_link_count: int,
@@ -189,6 +207,7 @@ def _build_final_summary(
         "exact_replay_eligible": base_summary.get("exact_replay_eligible"),
         "planned_artifacts": planned_artifacts,
         "published_artifacts": artifact_refs,
+        "occurrence_only_diagnostics": sorted(occurrence_only_diagnostic_scopes),
     }
     if "replay_mode" in base_summary:
         identity_graph["replay_mode"] = base_summary["replay_mode"]
@@ -214,6 +233,13 @@ def _build_final_summary(
             "dq_violation_kinds": sorted(dq_violation_kinds),
             "cross_validation_rule_ids": sorted(cross_validation_rule_ids),
             "cross_validation_config_paths": sorted(cross_validation_config_paths),
+            "cross_validation_quarantine_policy": _resolve_policy_value(
+                cross_validation_quarantine_policies
+            ),
+            "cross_validation_quarantine_replay_contract": _resolve_policy_value(
+                cross_validation_replay_contracts
+            ),
+            "occurrence_only_diagnostics": sorted(occurrence_only_diagnostic_scopes),
             "cross_validation_signal_present": cross_validation_signal_present,
             "correlation_anchor_gaps": correlation_anchor_gaps,
             "identity_graph_complete": (
@@ -282,6 +308,9 @@ def build_diagnostics_summary(
         dq_violation_kinds,
         cross_validation_rule_ids,
         cross_validation_config_paths,
+        cross_validation_quarantine_policies,
+        cross_validation_replay_contracts,
+        occurrence_only_diagnostic_scopes,
         dq_signal_present,
         cross_validation_signal_present,
         missing_link_count,
@@ -302,6 +331,9 @@ def build_diagnostics_summary(
         dq_violation_kinds,
         cross_validation_rule_ids,
         cross_validation_config_paths,
+        cross_validation_quarantine_policies,
+        cross_validation_replay_contracts,
+        occurrence_only_diagnostic_scopes,
         dq_signal_present,
         cross_validation_signal_present,
         missing_link_count,
@@ -336,6 +368,15 @@ def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
         if detail_value is not None:
             artifact_ref[detail_key] = detail_value
     return artifact_ref
+
+
+def _resolve_policy_value(values: set[str]) -> str | None:
+    """Return one canonical policy value or an explicit mixed-policy marker."""
+    if not values:
+        return None
+    if len(values) == 1:
+        return next(iter(values))
+    return "mixed"
 
 
 def _build_alert_signals(

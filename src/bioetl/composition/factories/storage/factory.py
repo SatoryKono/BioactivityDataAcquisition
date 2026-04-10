@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
-from bioetl.domain.ports.noop import NoOpTracing
+from bioetl.composition.observability_resolution import resolve_tracing_port
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -90,7 +90,7 @@ class StorageFactory:
             silver_path=str(ctx.silver_path),
             gold_path=str(ctx.gold_path),
         )
-        resolved_tracing = tracing if tracing is not None else NoOpTracing()
+        resolved_tracing = resolve_tracing_port(tracer=tracing, settings=settings)
         adapter = create_storage_adapter(
             ctx=ctx,
             bronze_writer_cls=BronzeWriter,

@@ -246,6 +246,8 @@ class PipelineRunner:
                 self._record_terminal_shutdown()
                 shutdown_recorded = True
                 raise
+            finally:
+                self._observer.capture_execution_metrics(self.execution_metrics)
         return shutdown_recorded
 
     def _record_terminal_shutdown(self) -> None:

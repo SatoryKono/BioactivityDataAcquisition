@@ -39,6 +39,12 @@ class _RunnerHarness(CompositeRunnerObservabilityMixin):
         self._dq_report_service = None
         self._quarantine_port = None
         self._metrics = None
+        self._run_ledger_service = None
+
+    def _record_with_ledger_service(self, recorder) -> None:
+        if self._run_ledger_service is None:
+            return
+        recorder(self._run_ledger_service)
 
 
 @pytest.mark.unit
@@ -136,6 +142,7 @@ async def test_write_cv_quarantine_writes_records_and_emits_metric() -> None:
     runner._quarantine_port = MagicMock()
     runner._quarantine_port.write = AsyncMock(return_value=None)
     runner._metrics = MagicMock()
+    runner._run_ledger_service = MagicMock()
     payloads = (
         {"record_id": "a", "reason": "mismatch"},
         {"record_id": "b", "reason": "mismatch"},
@@ -144,8 +151,29 @@ async def test_write_cv_quarantine_writes_records_and_emits_metric() -> None:
     await runner._write_cv_quarantine(MergeResult(quarantine_payloads=payloads))
 
     assert runner._quarantine_port.write.await_count == 2
-    assert runner._quarantine_port.write.await_args_list[0].kwargs["ingestion_ts"] == (
-        runner._started_at
+    first_write_kwargs = runner._quarantine_port.write.await_args_list[0].kwargs
+    assert first_write_kwargs["ingestion_ts"] == runner._started_at
+    assert first_write_kwargs["metadata"] == {
+        "artifact_policy": "occurrence_only_diagnostic",
+        "replay_contract": "excluded_from_exact_replay",
+        "diagnostic_scope": "composite_cross_validation_quarantine",
+        "violation_kind": "cross_validation_mismatch",
+        "semantic_artifact": False,
+    }
+    runner._run_ledger_service.record_dq_policy_applied.assert_called_once_with(
+        stage="cross_validation",
+        status="quarantined",
+        rule_id="composite.cross_validation.quarantine",
+        disposition="quarantine",
+        details={
+            "config_path": "cross_validation",
+            "quarantine_record_count": 2,
+            "artifact_policy": "occurrence_only_diagnostic",
+            "replay_contract": "excluded_from_exact_replay",
+            "diagnostic_scope": "composite_cross_validation_quarantine",
+            "violation_kind": "cross_validation_mismatch",
+            "semantic_artifact": False,
+        },
     )
     runner._logger.info.assert_called_once()
     runner._metrics.increment_counter.assert_called_once_with(
@@ -171,6 +199,7 @@ async def test_write_cv_quarantine_handles_non_fatal_and_bioetl_errors() -> None
         ]
     )
     runner._metrics = MagicMock()
+    runner._run_ledger_service = MagicMock()
     payloads = (
         {"record_id": "a", "reason": "mismatch"},
         {"record_id": "b", "reason": "mismatch"},
@@ -184,6 +213,21 @@ async def test_write_cv_quarantine_handles_non_fatal_and_bioetl_errors() -> None
     warning_kwargs = [call.kwargs for call in runner._logger.warning.call_args_list]
     assert any(
         item.get("reason_code") == "unexpected_bioetl_error" for item in warning_kwargs
+    )
+    runner._run_ledger_service.record_dq_policy_applied.assert_called_once_with(
+        stage="cross_validation",
+        status="quarantined",
+        rule_id="composite.cross_validation.quarantine",
+        disposition="quarantine",
+        details={
+            "config_path": "cross_validation",
+            "quarantine_record_count": 1,
+            "artifact_policy": "occurrence_only_diagnostic",
+            "replay_contract": "excluded_from_exact_replay",
+            "diagnostic_scope": "composite_cross_validation_quarantine",
+            "violation_kind": "cross_validation_mismatch",
+            "semantic_artifact": False,
+        },
     )
     runner._metrics.increment_counter.assert_called_once_with(
         "quarantine_records_total",

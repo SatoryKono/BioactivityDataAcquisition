@@ -197,6 +197,12 @@ DQ_BASELINE_UPDATED = Counter(
     ["pipeline", "metric"],
 )
 
+DQ_MONITOR_DISABLED_TOTAL = Counter(
+    "bioetl_dq_monitor_disabled_total",
+    "Total DQ evaluations executed without an anomaly monitor configured",
+    ["pipeline", "entity"],
+)
+
 DQ_BASELINE_SAMPLES = Gauge(
     "bioetl_dq_baseline_samples",
     "Current number of samples in DQ baseline",

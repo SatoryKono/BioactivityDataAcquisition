@@ -128,6 +128,13 @@ def _prepare_gold_merged_table(
     module = _load_gold_writer_module()
     arrow_table = module.coerce_null_types_for_delta(pa.Table.from_pylist(records))
     arrow_table = drop_nondeterministic_persisted_fields(arrow_table)
+    if "_ingestion_ts" in arrow_table.column_names:
+        persisted_columns = [
+            column_name
+            for column_name in arrow_table.column_names
+            if column_name != "_ingestion_ts"
+        ]
+        arrow_table = arrow_table.select(persisted_columns)
     if not preserve_column_order:
         ordered_columns = canonical_column_order(list(arrow_table.column_names))
         arrow_table = arrow_table.select(ordered_columns)

@@ -131,6 +131,7 @@ class DataQualityService:
 
         # Run anomaly detection if monitor available
         if self._dq_monitor is None:
+            self._emit_dq_monitor_disabled_signal()
             return DQResult(
                 error_rate=error_rate,
                 status=status,
@@ -351,6 +352,22 @@ class DataQualityService:
                 1,
                 {"pipeline": self._pipeline_name, "metric": metric_name},
             )
+
+    def _emit_dq_monitor_disabled_signal(self) -> None:
+        """Emit an explicit signal when anomaly detection is unavailable."""
+        self._logger.warning(
+            "dq_monitor_disabled",
+            pipeline=self._pipeline_name,
+            entity=self._entity_type,
+            reason="dq_monitor_not_configured",
+        )
+        if self._metrics is None:
+            return
+        self._metrics.increment_counter(
+            "dq_monitor_disabled_total",
+            1,
+            {"pipeline": self._pipeline_name, "entity": self._entity_type},
+        )
 
 
 __all__ = ["DataQualityService"]

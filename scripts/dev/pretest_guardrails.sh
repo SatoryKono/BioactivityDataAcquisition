@@ -348,7 +348,9 @@ run_auto_fix() {
     run_step inventory-sync \
         "$PYTHON_BIN" -m scripts.repo sync-inventory --write
     run_step hotspot-family-baseline-sync \
-        "$PYTHON_BIN" -m scripts.qa report-family-baseline --update
+        "$PYTHON_BIN" -m scripts.qa report-family-baseline \
+        --active-only \
+        --update
 }
 
 run_repo_checks() {

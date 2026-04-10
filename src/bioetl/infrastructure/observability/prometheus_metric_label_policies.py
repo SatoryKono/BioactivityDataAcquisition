@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from bioetl.domain.observability_contract import normalize_observability_metric_labels
 from bioetl.domain.ports import MetricLabels
 
@@ -145,6 +147,15 @@ _ALLOWED_STRUCTURAL_COMPARISON_LABELS = frozenset(
     }
 )
 
+_DYNAMIC_ENDPOINT_SEGMENT_PATTERNS = (
+    re.compile(r"^[0-9]+$"),
+    re.compile(
+        r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        re.IGNORECASE,
+    ),
+    re.compile(r"^[0-9a-f]{16,}$", re.IGNORECASE),
+)
+
 
 def normalize_metric_dispatch_labels(
     name: str,
@@ -198,6 +209,22 @@ def normalize_metric_dispatch_labels(
     return labels
 
 
+def normalize_adapter_endpoint_label(endpoint: str) -> str:
+    """Normalize adapter endpoint labels to bounded route-template form."""
+    stripped = endpoint.strip()
+    if not stripped:
+        return "/unknown"
+    path = stripped.split("?", 1)[0]
+    normalized_segments: list[str] = []
+    for segment in path.split("/"):
+        if not segment:
+            continue
+        normalized_segments.append(_normalize_endpoint_segment(segment))
+    if not normalized_segments:
+        return "/"
+    return "/" + "/".join(normalized_segments)
+
+
 def normalize_quarantine_reason(reason: str) -> str:
     """Normalize quarantine reason to a bounded label set."""
     return _normalize_bounded_label(reason, _ALLOWED_REASON_LABELS)
@@ -245,6 +272,18 @@ def normalize_structural_comparison(comparison: str) -> str:
         comparison,
         _ALLOWED_STRUCTURAL_COMPARISON_LABELS,
     )
+
+
+def _normalize_endpoint_segment(segment: str) -> str:
+    """Collapse likely dynamic path segments into a stable placeholder."""
+    if "{" in segment and "}" in segment:
+        return segment
+    lowered = segment.lower()
+    if lowered.startswith("10."):
+        return "{id}"
+    if any(pattern.match(lowered) for pattern in _DYNAMIC_ENDPOINT_SEGMENT_PATTERNS):
+        return "{id}"
+    return segment
 
 
 def _normalize_bounded_label(value: str, allowed_values: frozenset[str]) -> str:

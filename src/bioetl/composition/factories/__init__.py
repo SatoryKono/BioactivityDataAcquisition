@@ -19,6 +19,8 @@ Consolidated modules (v5.2):
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 # Data source factory and registry
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
@@ -28,14 +30,6 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 
 # DQ services factory
 from bioetl.composition.factories.dq.factory import DQServicesFactory
-
-# Pipeline factory and runner assembly
-from bioetl.composition.factories.pipeline import (
-    GenericPipelineFactory,
-    assemble_runner,
-    build_pipeline_services,
-    create_pipeline_factory,
-)
 
 # Services factory (DI for PipelineRunner)
 from bioetl.composition.factories.services.factory import (
@@ -75,14 +69,36 @@ _PIPELINE_FACTORY_EXPORTS = frozenset(
 # DataSourceCreatorProtocol directly.
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
+if TYPE_CHECKING:
+    from bioetl.composition.factories.pipeline import (
+        GenericPipelineFactory,
+        assemble_runner,
+        build_pipeline_services,
+        create_pipeline_factory,
+    )
+
+
+_PIPELINE_EXPORTS = frozenset(
+    {
+        "GenericPipelineFactory",
+        "assemble_runner",
+        "build_pipeline_services",
+        "create_pipeline_factory",
+    }
+)
+
 
 def __getattr__(name: str) -> object:
-    """Lazily expose heavy pipeline factory singletons to avoid import cycles."""
-    if name not in _PIPELINE_FACTORY_EXPORTS:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    from bioetl.composition.factories.pipeline import registry as _registry
+    """Lazily expose heavy pipeline exports to avoid import cycles."""
+    if name in _PIPELINE_EXPORTS:
+        from bioetl.composition.factories import pipeline as _pipeline
 
-    return getattr(_registry, name)
+        return getattr(_pipeline, name)
+    if name in _PIPELINE_FACTORY_EXPORTS:
+        from bioetl.composition.factories.pipeline import registry as _registry
+
+        return getattr(_registry, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 __all__ = [

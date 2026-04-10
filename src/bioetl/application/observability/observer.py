@@ -189,6 +189,9 @@ class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
             **extra,
         )
 
+        if success:
+            self._completed_stage_count += 1
+
         # Record phase duration metric
         self._metrics.observe_histogram(
             "bioetl_phase_duration_seconds",
@@ -366,3 +369,18 @@ class PipelineObserver(
         self._tracer = tracer
         self.start_time: float | None = None
         self.span: Span | None = None
+        self._completed_stage_count = 0
+        self._terminal_records_processed = 0
+
+    def capture_execution_metrics(
+        self,
+        metrics_snapshot: dict[str, int],
+    ) -> None:
+        """Capture final execution metrics for terminal domain-event emission."""
+        self._terminal_records_processed = max(
+            0,
+            metrics_snapshot.get("records_gold", 0),
+            metrics_snapshot.get("records_silver", 0),
+            metrics_snapshot.get("records_bronze", 0),
+            metrics_snapshot.get("records_fetched", 0),
+        )
