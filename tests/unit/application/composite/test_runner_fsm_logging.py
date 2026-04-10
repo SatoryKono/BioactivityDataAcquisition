@@ -116,7 +116,7 @@ def mock_coordinator() -> AsyncMock:
 def mock_merger() -> AsyncMock:
     """Create a mock MergeService."""
     merger = AsyncMock()
-    merger.merge = AsyncMock(
+    merge_call = AsyncMock(
         return_value=MergeResult(
             records_merged=2,
             records_from_seed=2,
@@ -125,6 +125,8 @@ def mock_merger() -> AsyncMock:
             sources_used=("seed", "crossref"),
         )
     )
+    merger.merge = merge_call
+    merger.execute_request = merge_call
     return merger
 
 
@@ -502,7 +504,9 @@ class TestFSMFailureLogging:
     ) -> None:
         """Test FSM transition to FAILED is logged when merge fails."""
         mock_merger = AsyncMock()
-        mock_merger.merge.side_effect = RuntimeError("Merge failed: disk full")
+        merge_call = AsyncMock(side_effect=RuntimeError("Merge failed: disk full"))
+        mock_merger.merge = merge_call
+        mock_merger.execute_request = merge_call
 
         deps = CompositeRunnerDependencies(
             seed_runner_factory=mock_seed_runner_factory,
