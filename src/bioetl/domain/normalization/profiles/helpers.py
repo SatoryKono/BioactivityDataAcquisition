@@ -13,13 +13,7 @@ from bioetl.domain.normalization.identifiers import (
 from bioetl.domain.normalization.json import canonicalize_json_string
 from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_string
-<<<<<<< Updated upstream
-from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_title as _normalize_title
-||||||| Stash base
-=======
-from bioetl.domain.normalization.text import normalize_title as _normalize_title
->>>>>>> Stashed changes
 from bioetl.domain.value_objects import SMILES
 
 __all__ = [
