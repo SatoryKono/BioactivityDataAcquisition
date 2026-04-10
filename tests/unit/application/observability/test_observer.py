@@ -24,6 +24,10 @@ from bioetl.domain.observability_contract import (
     ObservabilityContractPayload,
     missing_observability_fields,
 )
+from bioetl.domain.runtime_observability_publication_contract import (
+    CANONICAL_DOMAIN_EVENT_EMITTER,
+    CANONICAL_LIFECYCLE_EMITTER,
+)
 from bioetl.domain.types import RunType
 
 
@@ -251,6 +255,11 @@ def test_observer_graceful_shutdown(metrics_mock, logger_mock, tracer_mock, run_
         "pipeline": "test_pipeline",
         "run_type": "incremental",
     }
+
+
+def test_observer_exposes_canonical_runtime_publication_contract() -> None:
+    assert PipelineObserver.CANONICAL_LIFECYCLE_EMITTER == CANONICAL_LIFECYCLE_EMITTER
+    assert PipelineObserver.CANONICAL_DOMAIN_EVENT_EMITTER == CANONICAL_DOMAIN_EVENT_EMITTER
 
 
 def test_observer_handles_close_error(metrics_mock, logger_mock, tracer_mock, run_id):
