@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.checkpoint_compatibility_runtime import (
+    check_execution_identity_compatibility,
+)
 from bioetl.domain.types.checkpoint_metadata import (
     CheckpointCompatibilityResult,
     CheckpointMetadata,
@@ -123,18 +126,25 @@ def _validate_execution_identity_compatibility(
 ) -> tuple[bool, list[str]]:
     messages: list[str] = []
     execution_identity_compatible = True
-    current_runtime_anchor_fingerprint = current_metadata.runtime_anchor_fingerprint()
-    checkpoint_runtime_anchor_fingerprint = (
-        checkpoint_metadata.runtime_anchor_fingerprint()
+    execution_identity_result = check_execution_identity_compatibility(
+        current_execution_fingerprint=current_metadata.execution_fingerprint,
+        checkpoint_execution_fingerprint=checkpoint_metadata.execution_fingerprint,
+        current_manifest_id=current_metadata.manifest_id,
+        checkpoint_manifest_id=checkpoint_metadata.manifest_id,
+        current_contract_ref=current_metadata.contract_ref,
+        checkpoint_contract_ref=checkpoint_metadata.contract_ref,
+        current_contract_version=current_metadata.contract_version,
+        checkpoint_contract_version=checkpoint_metadata.contract_version,
+        current_effective_config_hash=current_metadata.effective_config_hash,
+        checkpoint_effective_config_hash=checkpoint_metadata.effective_config_hash,
+        current_effective_config_artifact_id=current_metadata.effective_config_artifact_id,
+        checkpoint_effective_config_artifact_id=checkpoint_metadata.effective_config_artifact_id,
     )
     if (
         current_metadata.execution_fingerprint
         and checkpoint_metadata.execution_fingerprint
     ):
-        if (
-            current_metadata.execution_fingerprint
-            != checkpoint_metadata.execution_fingerprint
-        ):
+        if not bool(execution_identity_result["compatible"]):
             execution_identity_compatible = False
             messages.append(
                 "Execution fingerprint mismatch: "
@@ -142,16 +152,12 @@ def _validate_execution_identity_compatibility(
                 f"checkpoint={checkpoint_metadata.execution_fingerprint}"
             )
         return execution_identity_compatible, messages
-    if (
-        current_runtime_anchor_fingerprint
-        and checkpoint_runtime_anchor_fingerprint
-        and current_runtime_anchor_fingerprint != checkpoint_runtime_anchor_fingerprint
-    ):
+    if execution_identity_result["reason"] == "runtime_anchor_fingerprint_mismatch":
         execution_identity_compatible = False
         messages.append(
             "Runtime anchor fingerprint mismatch: "
-            f"current={current_runtime_anchor_fingerprint}, "
-            f"checkpoint={checkpoint_runtime_anchor_fingerprint}"
+            f"current={current_metadata.runtime_anchor_fingerprint()}, "
+            f"checkpoint={checkpoint_metadata.runtime_anchor_fingerprint()}"
         )
     if (
         current_metadata.effective_config_hash

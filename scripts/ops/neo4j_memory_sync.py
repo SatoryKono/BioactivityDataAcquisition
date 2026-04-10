@@ -4829,74 +4829,88 @@ def _build_diff_entries(snapshot_counts: dict[str, int], live_counts: dict[str, 
 
 
 def _live_repo_label_rows(client: Neo4jHttpClient, managed_labels: list[str]) -> list[dict[str, JsonValue]]:
-    return client.query(
-        (
-            "MATCH (n) "
-            "UNWIND labels(n) AS label "
-            "WITH label, n "
-            "WHERE label IN $managed_labels "
-            "RETURN label, "
-            "count(n) AS total, "
-            "sum(CASE WHEN coalesce(n.managed_by, '') = $managed_by THEN 1 ELSE 0 END) AS managed, "
-            "sum(CASE WHEN coalesce(n.managed_by, '') = '' THEN 1 ELSE 0 END) AS unmanaged "
-            "ORDER BY label"
-        ),
-        {
-            "managed_labels": managed_labels,
-            "managed_by": DEFAULT_MANAGED_BY,
-        },
-    )
+    rows: list[dict[str, JsonValue]] = []
+    for label in managed_labels:
+        result = client.query(
+            (
+                f"MATCH (n:`{label}`) "
+                "RETURN $label AS label, "
+                "count(n) AS total, "
+                "sum(CASE WHEN coalesce(n.managed_by, '') = $managed_by THEN 1 ELSE 0 END) AS managed, "
+                "sum(CASE WHEN coalesce(n.managed_by, '') = '' THEN 1 ELSE 0 END) AS unmanaged"
+            ),
+            {
+                "label": label,
+                "managed_by": DEFAULT_MANAGED_BY,
+            },
+        )
+        if result:
+            rows.extend(result)
+    return rows
 
 
-def _live_managed_relation_rows(client: Neo4jHttpClient) -> list[dict[str, JsonValue]]:
-    return client.query(
-        (
-            "MATCH ()-[r]->() "
-            "WHERE coalesce(r.managed_by, '') = $managed_by "
-            "AND coalesce(r.ingest_wave, '') = $ingest_wave "
-            "RETURN type(r) AS relation_type, count(r) AS total "
-            "ORDER BY relation_type"
-        ),
-        {
-            "managed_by": DEFAULT_MANAGED_BY,
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-        },
-    )
+def _live_managed_relation_rows(
+    client: Neo4jHttpClient,
+    relation_types: list[str],
+) -> list[dict[str, JsonValue]]:
+    rows: list[dict[str, JsonValue]] = []
+    for relation_type in relation_types:
+        result = client.query(
+            (
+                f"MATCH ()-[r:`{relation_type}`]->() "
+                "WHERE coalesce(r.managed_by, '') = $managed_by "
+                "AND coalesce(r.ingest_wave, '') = $ingest_wave "
+                "RETURN $relation_type AS relation_type, count(r) AS total"
+            ),
+            {
+                "relation_type": relation_type,
+                "managed_by": DEFAULT_MANAGED_BY,
+                "ingest_wave": DEFAULT_INGEST_WAVE,
+            },
+        )
+        if result:
+            rows.extend(result)
+    return rows
 
 
-def _live_orphan_rows(client: Neo4jHttpClient) -> list[dict[str, JsonValue]]:
-    return client.query(
-        (
-            "MATCH (n) "
-            "WHERE coalesce(n.managed_by, '') = $managed_by "
-            "AND coalesce(n.ingest_wave, '') = $ingest_wave "
-            "AND NOT (n)--() "
-            "UNWIND labels(n) AS label "
-            "RETURN label, count(n) AS count, collect(n.name)[0..10] AS samples "
-            "ORDER BY count DESC, label"
-        ),
-        {
-            "managed_by": DEFAULT_MANAGED_BY,
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-        },
-    )
+def _live_orphan_rows(client: Neo4jHttpClient, managed_labels: list[str]) -> list[dict[str, JsonValue]]:
+    rows: list[dict[str, JsonValue]] = []
+    for label in managed_labels:
+        result = client.query(
+            (
+                f"MATCH (n:`{label}`) "
+                "WHERE coalesce(n.managed_by, '') = $managed_by "
+                "AND coalesce(n.ingest_wave, '') = $ingest_wave "
+                "AND NOT (n)--() "
+                "RETURN $label AS label, count(n) AS count, collect(n.name)[0..10] AS samples"
+            ),
+            {
+                "label": label,
+                "managed_by": DEFAULT_MANAGED_BY,
+                "ingest_wave": DEFAULT_INGEST_WAVE,
+            },
+        )
+        if result and int(result[0].get("count", 0)):
+            rows.extend(result)
+    return rows
 
 
 def _live_unmanaged_repo_rows(client: Neo4jHttpClient, managed_labels: list[str]) -> list[dict[str, JsonValue]]:
-    return client.query(
-        (
-            "MATCH (n) "
-            "UNWIND labels(n) AS label "
-            "WITH label, n "
-            "WHERE label IN $managed_labels "
-            "AND coalesce(n.managed_by, '') = '' "
-            "RETURN label, count(n) AS count, collect(n.name)[0..10] AS samples "
-            "ORDER BY count DESC, label"
-        ),
-        {
-            "managed_labels": managed_labels,
-        },
-    )
+    rows: list[dict[str, JsonValue]] = []
+    for label in managed_labels:
+        result = client.query(
+            (
+                f"MATCH (n:`{label}`) "
+                "WHERE coalesce(n.managed_by, '') = '' "
+                "RETURN $label AS label, count(n) AS count, collect(n.name)[0..10] AS samples"
+            ),
+            {
+                "label": label,
+            },
+        )
+        if result and int(result[0].get("count", 0)):
+            rows.extend(result)
+    return rows
 
 
 def _live_scalar(client: Neo4jHttpClient, statement: str, parameters: dict[str, JsonValue]) -> int:
@@ -4915,10 +4929,11 @@ def build_audit_report(
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
     managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
+    snapshot_relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
     snapshot_stats = snapshot.stats()
     live_label_rows = _live_repo_label_rows(client, managed_labels)
-    live_relation_rows = _live_managed_relation_rows(client)
-    orphan_rows = _live_orphan_rows(client)
+    live_relation_rows = _live_managed_relation_rows(client, snapshot_relation_types)
+    orphan_rows = _live_orphan_rows(client, managed_labels)
     unmanaged_rows = _live_unmanaged_repo_rows(client, managed_labels)
 
     live_managed_label_counts = {

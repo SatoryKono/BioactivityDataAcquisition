@@ -15,7 +15,7 @@ from bioetl.interfaces import observability
 
 # This module tests the observability interface.
 # MetricsServerError is now defined in domain.exceptions and re-exported by all layers.
-# interfaces.observability exposes start_metrics_server via composition entrypoints.
+# interfaces.observability is a compatibility facade over composition.observability_api.
 
 
 # Mock `_SERVER_STARTED` to isolate state among test cases.
@@ -135,7 +135,7 @@ def test_interface_exposes_metrics_server_error():
 def test_get_metrics_service_delegates_to_composition_services_api() -> None:
     expected = mock.Mock()
     with mock.patch(
-        "bioetl.composition.services_api.get_metrics_service",
+        "bioetl.composition.observability_api.get_metrics_service",
         return_value=expected,
     ) as mock_impl:
         result = observability.get_metrics_service()
@@ -147,7 +147,7 @@ def test_get_metrics_service_delegates_to_composition_services_api() -> None:
 def test_get_health_service_delegates_to_composition_services_api() -> None:
     expected = mock.Mock()
     with mock.patch(
-        "bioetl.composition.services_api.get_health_service",
+        "bioetl.composition.observability_api.get_health_service",
         return_value=expected,
     ) as mock_impl:
         result = observability.get_health_service()
@@ -159,7 +159,7 @@ def test_get_health_service_delegates_to_composition_services_api() -> None:
 def test_get_quarantine_service_delegates_to_composition_services_api() -> None:
     expected = mock.Mock()
     with mock.patch(
-        "bioetl.composition.services_api.get_quarantine_service",
+        "bioetl.composition.observability_api.get_quarantine_service",
         return_value=expected,
     ) as mock_impl:
         result = observability.get_quarantine_service()
@@ -171,7 +171,7 @@ def test_get_quarantine_service_delegates_to_composition_services_api() -> None:
 def test_get_run_manifest_service_delegates_to_composition_services_api() -> None:
     expected = mock.Mock()
     with mock.patch(
-        "bioetl.composition.services_api.get_run_manifest_service",
+        "bioetl.composition.observability_api.get_run_manifest_service",
         return_value=expected,
     ) as mock_impl:
         result = observability.get_run_manifest_service()
@@ -183,7 +183,7 @@ def test_get_run_manifest_service_delegates_to_composition_services_api() -> Non
 def test_get_lineage_service_delegates_to_composition_services_api() -> None:
     expected = mock.Mock()
     with mock.patch(
-        "bioetl.composition.services_api.get_lineage_service",
+        "bioetl.composition.observability_api.get_lineage_service",
         return_value=expected,
     ) as mock_impl:
         result = observability.get_lineage_service()
@@ -193,48 +193,13 @@ def test_get_lineage_service_delegates_to_composition_services_api() -> None:
 
 
 def test_get_observability_diagnostics_bundle_builds_unified_bundle() -> None:
-    health_service = mock.Mock()
-    metrics_service = mock.Mock()
-    quarantine_service = mock.Mock()
-    run_manifest_service = mock.Mock()
-    lineage_service = mock.Mock()
+    expected = mock.Mock()
 
-    with (
-        mock.patch.object(
-            observability,
-            "get_health_service",
-            return_value=health_service,
-        ) as mock_health,
-        mock.patch.object(
-            observability,
-            "get_metrics_service",
-            return_value=metrics_service,
-        ) as mock_metrics,
-        mock.patch.object(
-            observability,
-            "get_quarantine_service",
-            return_value=quarantine_service,
-        ) as mock_quarantine,
-        mock.patch.object(
-            observability,
-            "get_run_manifest_service",
-            return_value=run_manifest_service,
-        ) as mock_manifest,
-        mock.patch.object(
-            observability,
-            "get_lineage_service",
-            return_value=lineage_service,
-        ) as mock_lineage,
-    ):
+    with mock.patch(
+        "bioetl.composition.observability_api.get_observability_diagnostics_bundle",
+        return_value=expected,
+    ) as mock_impl:
         bundle = observability.get_observability_diagnostics_bundle()
 
-    assert bundle.health_service is health_service
-    assert bundle.metrics_service is metrics_service
-    assert bundle.quarantine_service is quarantine_service
-    assert bundle.run_manifest_service is run_manifest_service
-    assert bundle.lineage_service is lineage_service
-    mock_health.assert_called_once_with()
-    mock_metrics.assert_called_once_with()
-    mock_quarantine.assert_called_once_with()
-    mock_manifest.assert_called_once_with()
-    mock_lineage.assert_called_once_with()
+    assert bundle is expected
+    mock_impl.assert_called_once_with()
