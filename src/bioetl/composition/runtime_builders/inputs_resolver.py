@@ -163,6 +163,11 @@ def assemble_runtime_config(
         query=ctx.query,
         dry_run=ctx.dry_run,
         exact_replay=getattr(ctx, "exact_replay", False),
+        replay_anchor_date=(
+            ctx.cached_bronze.bronze_date
+            if getattr(ctx, "exact_replay", False)
+            else None
+        ),
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
         skip_gold=skip_gold,
@@ -212,9 +217,12 @@ def validate_pk_contract(config: PipelineYamlConfig) -> None:
 
 def resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe"]:
     """Resolve runtime health check mode from settings."""
-    return _resolve_health_check_mode_policy(
+    return cast(
+        Literal["strict", "probe"],
+        _resolve_health_check_mode_policy(
         settings=settings,
         default_health_check_mode=_DEFAULT_HEALTH_CHECK_MODE,
+        ),
     )
 
 

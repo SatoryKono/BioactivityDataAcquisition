@@ -14,6 +14,7 @@ __all__ = ["BasePipeline"]
 
 
 from abc import ABC
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Self
 
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
@@ -25,6 +26,16 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
+
+
+def _resolve_replay_timestamp_anchor(runtime: RuntimeConfig) -> datetime | None:
+    """Resolve one deterministic timestamp anchor for exact replay side effects."""
+    if not runtime.exact_replay:
+        return None
+    if runtime.replay_anchor_date is None:
+        return datetime(1970, 1, 1, tzinfo=UTC)
+    replay_date = date.fromisoformat(runtime.replay_anchor_date)
+    return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
 
 
 class BasePipeline(ABC):  # noqa: B024
@@ -110,11 +121,13 @@ class BasePipeline(ABC):  # noqa: B024
             run_id=str(self._run_id),
             pipeline=config.pipeline_name,
         )
+        replay_timestamp_anchor = _resolve_replay_timestamp_anchor(runtime)
         # Use factory method to ensure started_at is set (single source of time)
         self._context = PipelineContext.create(
             run_id=self._run_id,
             run_type=runtime.run_type,
             logger=self._logger,
+            replay_timestamp_anchor=replay_timestamp_anchor,
         )
         self._shutdown_signal = shutdown_signal
 
