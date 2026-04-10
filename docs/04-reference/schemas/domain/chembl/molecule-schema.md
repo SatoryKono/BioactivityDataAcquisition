@@ -169,18 +169,20 @@ standard operational path for new deployments.
 
 ______________________________________________________________________
 
-## Meta-Fields (RULES.md §2.4)
+## System Fields (Persisted-Row Contract)
 
-| Field              | Type        | Nullable | Purpose                               | Included in Content Hash |
-| ------------------ | ----------- | -------- | ------------------------------------- | ------------------------ |
-| `entity_id`        | `str`       | No       | Business key (= molecule_id)          | Yes                      |
-| `content_hash`     | `str`       | No       | SHA256 for SCD Type 2                 | —                        |
-| `_run_id`          | `UUID`      | No       | Pipeline run correlation ID           | No                       |
-| `_run_type`        | `Enum`      | No       | incremental/backfill/rebuild          | No                       |
-| `_source_batch_id` | `UUID`      | Yes      | Lineage reference in metadata sidecar | No                       |
-| `_ingestion_ts`    | `Timestamp` | No       | Ingestion time (UTC)                  | No                       |
-| `_dq_warn`         | `bool`      | No       | DQ warning flag                       | No                       |
-| `_index`           | `int`       | No       | Record index in batch                 | No                       |
+| Field          | Type   | Nullable | Purpose                      | Included in Content Hash |
+| -------------- | ------ | -------- | ---------------------------- | ------------------------ |
+| `entity_id`    | `str`  | No       | Business key (= molecule_id) | Yes                      |
+| `content_hash` | `str`  | No       | SHA256 for SCD Type 2        | —                        |
+| `_dq_warn`     | `bool` | No       | DQ warning flag              | No                       |
+| `_index`       | `int`  | No       | Record index in batch        | No                       |
+
+Occurrence-scoped provenance (`_run_id`, `_run_type`, `_source_batch_id`,
+`_ingestion_ts`) is not part of the physical Silver/Gold row contract for
+current ChEMBL molecule publication. These anchors are emitted through sidecar
+metadata, lineage fragments, run manifest, run ledger, and related audit
+artifacts.
 
 ______________________________________________________________________
 
@@ -295,9 +297,6 @@ ______________________________________________________________________
   "entity_id": "CHEMBL25",
   "molecule_id": "CHEMBL25",
   "content_hash": "sha256:abc123...",
-  "_run_id": "550e8400-e29b-41d4-a716-446655440000",
-  "_run_type": "incremental",
-  "_ingestion_ts": "2024-01-15T10:30:00Z",
   "_dq_warn": false,
   "_index": 0,
 

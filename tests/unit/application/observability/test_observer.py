@@ -85,6 +85,7 @@ def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
     )
 
     with observer:
+        observer.capture_execution_metrics({"records_gold": 42})
         pass  # Successful execution
 
     # Verify metrics
@@ -105,6 +106,11 @@ def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
 
     # Verify logs: start and finish
     assert logger_mock.info.call_count == 2
+    terminal_call = next(
+        call for call in logger_mock.info.call_args_list if call.args[0] == "pipeline_finished"
+    )
+    assert terminal_call.kwargs["records_processed"] == 42
+    assert terminal_call.kwargs["stages_count"] == 0
 
 
 def test_pipeline_observer_failure(metrics_mock, logger_mock, run_id):
@@ -140,6 +146,7 @@ def test_pipeline_observer_shutdown(metrics_mock, logger_mock, run_id):
     )
 
     with pytest.raises(PipelineShutdownError), observer:
+        observer.capture_execution_metrics({"records_silver": 7})
         raise PipelineShutdownError()
 
     # Verify metrics show shutdown status
@@ -149,6 +156,7 @@ def test_pipeline_observer_shutdown(metrics_mock, logger_mock, run_id):
 
     # Verify warning was logged
     logger_mock.warning.assert_called_once()
+    assert logger_mock.warning.call_args.kwargs["records_processed"] == 7
 
 
 # ==================== O4: New Observer Tests ====================

@@ -161,6 +161,32 @@ Compatibility wrappers may exist for older builder entrypoints, but they must
 delegate back to the canonical bootstrap path rather than reimplementing
 assembly logic.
 
+Composition also owns the sanctioned fallback-resolution helpers for
+observability ports:
+
+- `bioetl.composition.observability_resolution.resolve_metrics_port`
+- `bioetl.composition.observability_resolution.resolve_tracing_port`
+
+Null-object fallback selection (`NoOpMetrics`, `NoOpTracing`) must happen in
+these composition-owned seams rather than in application or infrastructure
+runtime code.
+
+Metrics server lifecycle and Pushgateway-style publication are exposed through
+the composition-owned `MetricsService` path. Public call sites should use
+`bioetl.composition.observability_api` rather than importing infra publication
+helpers directly.
+
+Terminal typed Domain Events now publish through the canonical observer route
+for ordinary pipeline outcomes:
+
+- `PipelineFailed`
+- `PipelineShutdown`
+- `PipelineCompleted`
+
+These events are mapped by `bioetl.domain.observability_event_mapping` and are
+emitted via `PipelineObserver.emit_domain_event(...)` as part of ordinary run
+teardown, not as a replacement for the lifecycle log/metric emitter.
+
 ## Interaction Diagram
 
 ```mermaid

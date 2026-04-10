@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 
@@ -208,7 +208,9 @@ class TestDataQualityServiceThresholds:
 
         assert result.status == DQEvaluationStatus.WARNING
         assert result.error_rate == pytest.approx(0.10)
-        mock_logger.warning.assert_called_once()
+        warning_events = [call.args[0] for call in mock_logger.warning.call_args_list]
+        assert "DQ soft threshold exceeded" in warning_events
+        assert "dq_monitor_disabled" in warning_events
         mock_metrics.increment_counter.assert_any_call(
             "dq_soft_threshold_exceeded",
             1,
@@ -248,7 +250,9 @@ class TestDataQualityServiceThresholds:
         result = service.evaluate(metrics)
 
         assert result.status == DQEvaluationStatus.WARNING
-        mock_logger.warning.assert_called_once()
+        warning_events = [call.args[0] for call in mock_logger.warning.call_args_list]
+        assert "DQ soft threshold exceeded" in warning_events
+        assert "dq_monitor_disabled" in warning_events
         soft_threshold_calls = [
             call
             for call in mock_metrics.increment_counter.call_args_list
@@ -286,9 +290,21 @@ class TestDataQualityServiceThresholds:
 
         assert result.status == DQEvaluationStatus.PASSED
         assert result.error_rate == pytest.approx(0.03)
-        mock_logger.warning.assert_not_called()
+        mock_logger.warning.assert_called_once_with(
+            "dq_monitor_disabled",
+            pipeline="test_pipeline",
+            entity="test_entity",
+            reason="dq_monitor_not_configured",
+        )
         mock_logger.error.assert_not_called()
-        mock_metrics.increment_counter.assert_not_called()
+        increment_counter_calls = mock_metrics.increment_counter.call_args_list
+        assert increment_counter_calls == [
+            call(
+                "dq_monitor_disabled_total",
+                1,
+                {"pipeline": "test_pipeline", "entity": "test_entity"},
+            )
+        ]
 
 
 @pytest.mark.unit
@@ -320,6 +336,17 @@ class TestDataQualityServiceGracefulDegradation:
         assert result.has_critical is False
         assert result.check_duration_ms == pytest.approx(0.0)
         assert result.anomalies == ()
+        mock_logger.warning.assert_called_once_with(
+            "dq_monitor_disabled",
+            pipeline="test_pipeline",
+            entity="test_entity",
+            reason="dq_monitor_not_configured",
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "dq_monitor_disabled_total",
+            1,
+            {"pipeline": "test_pipeline", "entity": "test_entity"},
+        )
 
     @pytest.mark.asyncio
     async def test_no_metrics_port_still_logs_warning(self, mock_logger, dq_config):
@@ -341,7 +368,9 @@ class TestDataQualityServiceGracefulDegradation:
         result = service.evaluate(metrics)
 
         assert result.status == DQEvaluationStatus.WARNING
-        mock_logger.warning.assert_called_once()
+        warning_events = [call.args[0] for call in mock_logger.warning.call_args_list]
+        assert "DQ soft threshold exceeded" in warning_events
+        assert "dq_monitor_disabled" in warning_events
 
 
 @pytest.mark.unit

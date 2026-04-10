@@ -14,6 +14,9 @@ __all__ = [
 ]
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.runner_pkg.runner_stage_start_flow import (
+    start_composite_phase,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_support_types import (
     _CompositeRunnerStageSupportHostProtocol,
 )
@@ -86,20 +89,15 @@ async def start_seed_phase(
     state: CompositeCheckpointState,
 ) -> CompositeCheckpointState:
     """Transition checkpoint/FSM to SEED_RUNNING and persist checkpoint."""
-    running_state = transition_state_with_fsm_log(
+    return await start_composite_phase(
         host,
         state,
-        CompositePipelineState.SEED_RUNNING,
+        to_state=CompositePipelineState.SEED_RUNNING,
         stage="seed_start",
+        checkpoint_operation="seed_running",
+        phase_name="seed",
+        on_started=host._record_seed_stage_started,
     )
-    await host._call_save_checkpoint_safe(running_state, "seed_running")
-    host._record_seed_stage_started()
-    host._logger.info(
-        PipelineEvent.phase_started("seed"),
-        composite=host._config.name,
-        run_id=host._run_id_str,
-    )
-    return running_state
 
 
 async def complete_seed_phase(

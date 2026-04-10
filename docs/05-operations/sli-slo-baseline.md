@@ -158,6 +158,8 @@ not as authoritative source-publication freshness.
   window, treat the SLI as informational rather than enforceable.
 - `degraded` provider health counts as completed but not fully healthy. Repeated
   degraded states still require investigation if they persist.
+- If `bioetl_dq_monitor_disabled_total` increments for an active pipeline, treat
+  anomaly-based DQ signals as degraded coverage until the DQ monitor is restored.
 - Freshness SLI/SLO review currently tracks the age of the latest successful
   run ingestion anchor. For exact source-ingestion chronology beyond the
   current run boundary, use manifests, lineage, and audit artifacts together

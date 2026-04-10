@@ -85,7 +85,11 @@ def _rule_for_field(field_name: str) -> FieldRule:
     include_in_hash = field_name not in META_FIELDS
     normalizer, notes = _rule_components(field_name)
     if field_name in META_FIELDS:
-        notes = "System/meta field retained for storage but excluded from content_hash."
+        notes = (
+            "System/meta field is tracked by the normalization inventory and "
+            "excluded from content_hash; persisted-row publication is defined "
+            "separately by the Silver/Gold storage contract."
+        )
     return FieldRule(
         field_name=field_name,
         normalizer=normalizer,

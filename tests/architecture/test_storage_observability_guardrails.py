@@ -15,6 +15,11 @@ FORBIDDEN_TRACING_DEFAULT_PATHS = (
     Path("src/bioetl/composition/factories/storage/_bronze.py"),
     Path("src/bioetl/composition/factories/storage/_silver.py"),
     Path("src/bioetl/composition/factories/storage/_gold.py"),
+    Path("src/bioetl/composition/factories/services/common_service_wiring.py"),
+    Path("src/bioetl/composition/factories/storage/factory.py"),
+    Path("src/bioetl/composition/factories/transformer_dependencies.py"),
+    Path("src/bioetl/composition/factories/pipeline/transformer_dependencies.py"),
+    Path("src/bioetl/composition/runtime_builders/observability_builder.py"),
 )
 ADAPTERS_ROOT = Path("src/bioetl/infrastructure/adapters")
 FORBIDDEN_ADAPTER_NOOP_PATHS = (
@@ -23,6 +28,11 @@ FORBIDDEN_ADAPTER_NOOP_PATHS = (
     Path("src/bioetl/infrastructure/adapters/sync_base.py"),
     Path("src/bioetl/infrastructure/adapters/error_handling.py"),
     Path("src/bioetl/infrastructure/adapters/_health_check_observability.py"),
+)
+FORBIDDEN_COMPOSITION_NOOP_METRICS_PATHS = (
+    Path("src/bioetl/composition/factories/datasource/adapter_helpers.py"),
+    Path("src/bioetl/composition/factories/_observability_wiring.py"),
+    Path("src/bioetl/composition/factories/services/port_factories.py"),
 )
 FORBIDDEN_ENDPOINT_IDENTIFIERS = {
     "record_id",
@@ -67,6 +77,17 @@ def test_infra_adapters_do_not_construct_noop_observability_defaults() -> None:
         assert "NoOpMetrics" not in calls and "NoOpTracing" not in calls, (
             f"{path} must not construct NoOpMetrics/NoOpTracing. "
             "Resolve null-object observability in composition-owned wiring."
+        )
+
+
+def test_composition_factories_delegate_noop_metrics_resolution() -> None:
+    """Composition factory seams must use centralized observability resolution helpers."""
+    for path in FORBIDDEN_COMPOSITION_NOOP_METRICS_PATHS:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        calls = _iter_called_names(tree)
+        assert "NoOpMetrics" not in calls and "NoOpTracing" not in calls, (
+            f"{path} must delegate NoOp observability resolution to the shared "
+            "composition helper instead of constructing null objects inline."
         )
 
 

@@ -162,7 +162,9 @@ def _fallback_contract(
         return (
             FALLBACK_TECHNICAL_PASSTHROUGH,
             "passthrough",
-            "Technical field is passed through unchanged when no explicit profile rule is defined.",
+            "Technical field appears in the normalization inventory only; "
+            "persisted-row publication is governed separately by the "
+            "Silver/Gold storage contract.",
         )
     if field_name in rule_set.title_fields:
         return (
@@ -432,6 +434,10 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         "# Pipeline Normalization Field Matrix",
         "",
         "Generated from active pipeline configs, Silver schemas, and current normalization code paths.",
+        "",
+        "This matrix is a normalization inventory, not a persisted-row publication contract.",
+        "Occurrence-scoped provenance fields may appear here because normalization or config policy still references them,",
+        "but canonical Silver/Gold row contracts are defined by provider references and Gold contract exports.",
         "",
         "| " + " | ".join(headers) + " |",
         "| " + " | ".join("---" for _ in headers) + " |",

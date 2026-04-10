@@ -112,6 +112,9 @@ entity_id = f"crossref:{normalized_doi}"
 
 - Исключаются occurrence-scoped provenance anchors (`_run_id`, `_run_type`,
   `_source_batch_id`, `_ingestion_ts` и др.)
+- Эти anchors могут фигурировать в config/hash-policy inventories, но не входят
+  в persisted Silver/Gold row contract и публикуются через sidecar/control-plane
+  artifacts
 - None-значения исключаются из хэша
 
 ----------------------------------------------------------------------
