@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-09'
+Last verified: '2026-04-10'
 ---
 
 # Observability Layers Architecture
@@ -32,6 +32,7 @@ The domain layer defines the observability contracts:
 - `MetricsPort`
 - `TracingPort`
 - `DQMonitorPort`
+- `AuditPort`
 
 The domain layer also owns typed DQ anomaly value objects used across the port
 boundary:
@@ -87,6 +88,11 @@ identifiers into metric labels.
 `DataQualityService` consumes typed `DQAnomaly` objects from `DQMonitorPort`
 rather than infrastructure-specific anomaly payloads.
 
+`DataQualityService` also publishes `bioetl_data_freshness_seconds` as the
+timestamp of the latest successful DQ/postrun freshness publication. Current
+dashboards and alerts derive operational lag as `time() - metric`; this is a
+runtime staleness proxy, not an immutable provider-ingestion anchor.
+
 ## Infrastructure Layer
 
 The infrastructure layer provides concrete adapters for the domain ports.
@@ -103,8 +109,8 @@ The infrastructure layer provides concrete adapters for the domain ports.
 
 - `PrometheusMetrics` implements `MetricsPort`
 - metric export names are defined centrally in
-  `src/bioetl/infrastructure/observability/metrics_export_names.py`
-- the current exported catalog size is **85 metrics**
+  `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`
+- the current exported catalog size is **86 metrics**
 - provider health-check latency is standardized on seconds-based metric families
   (`bioetl_health_check_latency_seconds`,
   `bioetl_health_check_mode_latency_seconds`)
@@ -126,6 +132,13 @@ quarantine actions:
 
 These metrics are intended for operational diagnosis of inspect/replay/purge and
 related workflows, not for per-record drill-down.
+
+### Audit traceability
+
+- `AuditPort` is part of the observability/traceability contract surface
+- Bronze/Silver/Gold runtime wiring injects audit adapters from composition
+- file-backed audit persistence is an infrastructure concern hidden behind the
+  port boundary
 
 ## Composition Layer
 
