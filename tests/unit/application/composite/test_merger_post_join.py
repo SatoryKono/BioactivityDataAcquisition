@@ -80,6 +80,7 @@ class TestFinalizeMergedDataframe:
             enrichment_results=enrichment_results,
             effective_seed_pipeline="seed_pub",
             run_id="run-1",
+            metadata_timestamp=None,
             sources_used=["seed"],
             dependency_results=None,
             enricher_dfs={"e1": pl.DataFrame()},
@@ -109,6 +110,7 @@ class TestFinalizePostJoinContext:
             enrichment_results=enrichment_results,
             effective_seed_pipeline="seed_pub",
             run_id="run-1",
+            metadata_timestamp=None,
             sources_used=["seed"],
             dependency_results=None,
             enricher_dfs={},
@@ -129,6 +131,7 @@ class TestPersistAndBuildResult:
         host._build_merge_result.return_value = MagicMock(records_merged=1)
         df = pl.DataFrame({"doi": ["10.1/a"]})
         enrichers = [_enricher_config("e1")]
+        metadata_timestamp = datetime(2026, 4, 10, tzinfo=UTC)
 
         result = await persist_and_build_result(
             host,
@@ -140,11 +143,15 @@ class TestPersistAndBuildResult:
             sources_used=["seed"],
             cv_stats=None,
             quarantine_payloads=[],
+            metadata_timestamp=metadata_timestamp,
             run_id="run-1",
             started_at=datetime.now(tz=UTC),
         )
 
         host._write_outputs.assert_awaited_once()
+        assert host._write_outputs.await_args.kwargs["metadata_timestamp"] == (
+            metadata_timestamp
+        )
         host._build_merge_result.assert_called_once()
         assert result.records_merged == 1
 
@@ -165,6 +172,7 @@ class TestPersistAndBuildResult:
             sources_used=[],
             cv_stats=None,
             quarantine_payloads=[],
+            metadata_timestamp=None,
             run_id="run-1",
             started_at=started_at,
         )

@@ -121,10 +121,12 @@ class TestStoragePortProtocol:
                 records: list[dict[str, Any]],
                 primary_keys: list[str] | None = None,
                 *,
+                completed_at: datetime | None = None,
                 run_id: str | None = None,
                 sources_used: list[str] | None = None,
                 preserve_column_order: bool = False,
             ) -> None:
+                del completed_at
                 pass
 
             async def aclose(self) -> None:
