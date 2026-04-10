@@ -26,8 +26,16 @@ from __future__ import annotations
 from importlib import import_module
 
 _LAZY_EXPORT_MODULES: dict[str, str] = {
+    "AuditInspectionResult": "bioetl.application.services.audit_inspection_service",
+    "AuditInspectionService": "bioetl.application.services.audit_inspection_service",
+    "AuditRunWorkflowResult": (
+        "bioetl.application.services.observability_workflow_service"
+    ),
     "BronzeCleanupResult": "bioetl.application.services.bronze_cleanup_service",
     "BronzeCleanupService": "bioetl.application.services.bronze_cleanup_service",
+    "CheckpointAuditWorkflowResult": (
+        "bioetl.application.services.observability_workflow_service"
+    ),
     "CheckpointService": "bioetl.application.services.checkpoint_service",
     "ColumnInfo": "bioetl.application.services.export_service",
     "ConfigService": "bioetl.application.services.config_service",
@@ -57,6 +65,9 @@ _LAZY_EXPORT_MODULES: dict[str, str] = {
     ),
     "LineageTraceResult": "bioetl.application.services.lineage_inspection_service",
     "MetricsService": "bioetl.application.services.metrics_service",
+    "ObservabilityWorkflowService": (
+        "bioetl.application.services.observability_workflow_service"
+    ),
     "PipelineNotFoundError": "bioetl.application.services.pipeline_runner_service",
     "PipelineRunLifecycleService": (
         "bioetl.application.services.pipeline_run_lifecycle_service"
@@ -86,8 +97,12 @@ _LAZY_EXPORT_MODULES: dict[str, str] = {
 }
 
 __all__ = [
+    "AuditInspectionResult",
+    "AuditInspectionService",
+    "AuditRunWorkflowResult",
     "BronzeCleanupResult",
     "BronzeCleanupService",
+    "CheckpointAuditWorkflowResult",
     "CheckpointService",
     "ColumnInfo",
     "ConfigService",
@@ -105,6 +120,7 @@ __all__ = [
     "LineageRunExplanationResult",
     "LineageTraceResult",
     "MetricsService",
+    "ObservabilityWorkflowService",
     "PipelineNotFoundError",
     "PipelineRunLifecycleService",
     "PipelineRunResult",

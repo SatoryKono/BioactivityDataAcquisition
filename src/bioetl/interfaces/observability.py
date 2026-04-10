@@ -16,12 +16,18 @@ from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort
 
 if TYPE_CHECKING:
+    from bioetl.application.services.audit_inspection_service import (
+        AuditInspectionService,
+    )
     from bioetl.application.services.checkpoint_service import CheckpointService
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.lineage_inspection_service import (
         LineageInspectionService,
     )
     from bioetl.application.services.metrics_service import MetricsService
+    from bioetl.application.services.observability_workflow_service import (
+        ObservabilityWorkflowService,
+    )
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.application.services.run_manifest_inspection_service import (
         RunManifestInspectionService,
@@ -29,11 +35,13 @@ if TYPE_CHECKING:
 
 __all__ = [
     "MetricsServerError",
+    "get_audit_service",
     "get_checkpoint_service",
     "get_health_service",
     "get_lineage_service",
     "get_metrics_service",
     "get_observability_diagnostics_bundle",
+    "get_observability_workflow_service",
     "get_quarantine_service",
     "get_run_manifest_service",
     "start_metrics_server",
@@ -62,6 +70,13 @@ def start_metrics_server(
     )
 
 
+def get_audit_service() -> AuditInspectionService:
+    """Load the audit diagnostics service through the canonical composition API."""
+    from bioetl.composition.observability_api import get_audit_service as _impl
+
+    return _impl()
+
+
 def get_checkpoint_service() -> CheckpointService:
     """Load the checkpoint diagnostics service through the canonical composition API."""
     from bioetl.composition.observability_api import get_checkpoint_service as _impl
@@ -72,6 +87,15 @@ def get_checkpoint_service() -> CheckpointService:
 def get_metrics_service() -> MetricsService:
     """Load the metrics diagnostics service through the canonical composition API."""
     from bioetl.composition.observability_api import get_metrics_service as _impl
+
+    return _impl()
+
+
+def get_observability_workflow_service() -> ObservabilityWorkflowService:
+    """Load workflow-level observability helpers through the composition API."""
+    from bioetl.composition.observability_api import (
+        get_observability_workflow_service as _impl,
+    )
 
     return _impl()
 
