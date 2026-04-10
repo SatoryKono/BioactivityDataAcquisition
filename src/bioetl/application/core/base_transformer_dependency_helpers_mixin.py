@@ -5,6 +5,7 @@ from __future__ import annotations
 import dataclasses
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
+from bioetl.domain.constants import TRANSIENT_RUNTIME_PROVENANCE_SOURCE_FIELDS
 from bioetl.domain.ports import ContractPolicyPort
 from bioetl.domain.services import IdentityService
 from bioetl.domain.types import ContentHash, EntityID, GoldRecord
@@ -125,8 +126,13 @@ class _BaseTransformerDependencyHelpersMixin:
             raise TypeError(f"Expected dataclass entity, got {type(entity).__name__}")
 
         silver_record = dataclasses.asdict(entity)
+        for field_name in TRANSIENT_RUNTIME_PROVENANCE_SOURCE_FIELDS:
+            silver_record.pop(field_name, None)
         rename_map = owner._contract_policy.rename_map
         for source_key, target_key in rename_map.items():
+            if source_key in TRANSIENT_RUNTIME_PROVENANCE_SOURCE_FIELDS:
+                silver_record.pop(target_key, None)
+                continue
             if source_key in silver_record and target_key not in silver_record:
                 value = silver_record.pop(source_key)
                 silver_record[target_key] = owner._normalize_lineage_value(
