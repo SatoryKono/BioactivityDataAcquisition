@@ -4131,6 +4131,11 @@ def _add_pipeline_operational_edges(
 class Neo4jHttpClient:
     def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
         self._endpoint = f"{base_uri}/db/{database}/tx/commit"
+        parsed = parse.urlparse(base_uri)
+        self._fallback_endpoint: str | None = None
+        if parsed.hostname == "host.docker.internal":
+            fallback_base = parsed._replace(netloc=f"localhost:{parsed.port or 7474}").geturl().rstrip("/")
+            self._fallback_endpoint = f"{fallback_base}/db/{database}/tx/commit"
         auth_token = base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
         self._headers = {
             "Authorization": f"Basic {auth_token}",
@@ -4140,15 +4145,19 @@ class Neo4jHttpClient:
 
     def execute(self, statements: list[dict[str, JsonValue]]) -> dict[str, object]:
         payload = json.dumps({"statements": statements}).encode("utf-8")
-        req = request.Request(self._endpoint, data=payload, headers=self._headers, method="POST")
         last_exc: Exception | None = None
         for attempt in range(3):
+            req = request.Request(self._endpoint, data=payload, headers=self._headers, method="POST")
             try:
                 with request.urlopen(req, timeout=60) as response:
                     raw = response.read().decode("utf-8")
                 break
             except (error.URLError, TimeoutError, ConnectionResetError, http.client.RemoteDisconnected) as exc:  # pragma: no cover - network errors vary per environment
                 last_exc = exc
+                if self._fallback_endpoint and self._endpoint != self._fallback_endpoint:
+                    self._endpoint = self._fallback_endpoint
+                    self._fallback_endpoint = None
+                    continue
                 if attempt == 2:
                     raise RuntimeError(f"Failed to reach Neo4j HTTP endpoint {self._endpoint}: {exc}") from exc
                 time.sleep(0.5 * (attempt + 1))

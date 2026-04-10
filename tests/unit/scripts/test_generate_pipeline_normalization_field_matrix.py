@@ -6,6 +6,7 @@ from pathlib import Path
 
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
     CSV_NAME,
+    DEFAULT_OUT_DIR,
     MD_NAME,
     build_artifacts,
     build_field_matrix_rows,
@@ -54,15 +55,32 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     assert chembl_molecule_smiles["normalization_source"] == "profile"
     assert chembl_molecule_smiles["normalizer"] == "_normalize_canonical_smiles"
 
+    chembl_assay_title = _row(rows, "chembl_assay", "assay_pref_name")
+    assert chembl_assay_title["normalization_source"] == "profile"
+    assert chembl_assay_title["normalizer"] == "normalize_profile_title"
+
+    chembl_publication_title = _row(rows, "chembl_publication", "title")
+    assert chembl_publication_title["normalization_source"] == "profile"
+    assert chembl_publication_title["normalizer"] == "normalize_profile_title"
+
+    chembl_target_name = _row(rows, "chembl_target", "pref_name")
+    assert chembl_target_name["normalization_source"] == "profile"
+    assert chembl_target_name["normalizer"] == "normalize_profile_title"
+
+    uniprot_idmapping_name = _row(rows, "uniprot_idmapping", "protein_name")
+    assert uniprot_idmapping_name["normalization_source"] == "profile"
+    assert uniprot_idmapping_name["normalizer"] == "normalize_profile_title"
+
     uniprot_protein_name = _row(rows, "uniprot_protein", "protein_name")
     assert uniprot_protein_name["normalization_source"] == "profile"
     assert uniprot_protein_name["normalizer"] == "normalize_profile_title"
 
-    chembl_assay_run_id = _row(rows, "chembl_assay", "_run_id")
+    chembl_assay_parameters_run_id = _row(rows, "chembl_assay_parameters", "_run_id")
     assert (
-        chembl_assay_run_id["normalization_source"] == "fallback_technical_passthrough"
+        chembl_assay_parameters_run_id["normalization_source"]
+        == "fallback_technical_passthrough"
     )
-    assert chembl_assay_run_id["normalizer"] == "passthrough"
+    assert chembl_assay_parameters_run_id["normalizer"] == "passthrough"
 
 
 def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields() -> None:
@@ -108,3 +126,7 @@ def test_check_artifacts_returns_zero_for_fresh_outputs(tmp_path: Path) -> None:
     write_artifacts(out_dir)
 
     assert check_artifacts(out_dir) == 0
+
+
+def test_committed_artifacts_match_generator_output() -> None:
+    assert check_artifacts(DEFAULT_OUT_DIR.resolve()) == 0
