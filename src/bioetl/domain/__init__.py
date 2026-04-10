@@ -46,6 +46,18 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "bioetl.domain.observability_contract",
         "observability_contract",
     ),
+    "runtime_observability_publication_contract": (
+        "bioetl.domain.runtime_observability_publication_contract",
+        "runtime_observability_publication_contract",
+    ),
+    "get_runtime_observability_publication_contract": (
+        "bioetl.domain.runtime_observability_publication_contract",
+        "get_runtime_observability_publication_contract",
+    ),
+    "is_canonical_runtime_observability_emitter": (
+        "bioetl.domain.runtime_observability_publication_contract",
+        "is_canonical_runtime_observability_emitter",
+    ),
     "map_domain_event_to_observability_event": (
         "bioetl.domain.observability_event_mapping",
         "map_domain_event_to_observability_event",
@@ -64,9 +76,12 @@ __all__ = [
     "context_cached_bronze",
     "context_filtering",
     "get_version",
+    "get_runtime_observability_publication_contract",
+    "is_canonical_runtime_observability_emitter",
     "lineage",
     "map_domain_event_to_observability_event",
     "observability_contract",
+    "runtime_observability_publication_contract",
     "types_config_validation",
     # Data contracts (subpackage)
     "contracts",
@@ -91,6 +106,7 @@ def __getattr__(name: str) -> object:
         "context_filtering",
         "lineage",
         "observability_contract",
+        "runtime_observability_publication_contract",
         "types_config_validation",
     }:
         value = _import_module(module_name)
