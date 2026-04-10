@@ -21,6 +21,9 @@ from bioetl.infrastructure.storage.gold.io_delta_runtime import (
 from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
 )
+from bioetl.infrastructure.storage.delta.schema_ops import (
+    drop_nondeterministic_persisted_fields,
+)
 
 T = TypeVar("T")
 
@@ -57,10 +60,11 @@ class _GoldWriterExecutorArrowMixin:
         )
 
         converter = ArrowDataConverter(logger=self.logger)
-        return converter.convert_records_to_arrow(
+        arrow_table = converter.convert_records_to_arrow(
             records,
             column_order=column_order,
         )
+        return drop_nondeterministic_persisted_fields(arrow_table)
 
 
 class _GoldWriterSimpleDeltaMixin(_GoldWriterExecutorArrowMixin):

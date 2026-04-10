@@ -30,8 +30,6 @@ def _build_gold_audit_entry(
     host: _GoldMetadataAuditHostProtocol,
     request: _GoldAuditWriteRequest,
 ) -> AuditEntry:
-    from uuid import uuid4
-
     if request.ingestion_ts is not None:
         timestamp = request.ingestion_ts
     else:
@@ -50,7 +48,7 @@ def _build_gold_audit_entry(
             table=request.table_name,
             mode=request.mode.value,
         )
-        audit_run_id = RunID(uuid4())
+        raise ValueError("run_id is required for audit logging")
 
     operation_map = {
         GoldWriteMode.OVERWRITE: AuditOperation.OVERWRITE,

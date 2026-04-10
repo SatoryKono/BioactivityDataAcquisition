@@ -308,3 +308,30 @@ async def test_write_gold_merged_sorts_by_primary_keys(gold_writer):
         written_list = written_data.to_pylist()
         ids = [r["id"] for r in written_list]
         assert ids == ["1", "2", "3"]
+
+
+async def test_write_gold_merged_strips_runtime_occurrence_fields(gold_writer):
+    """Merged Gold overwrite should not persist run-scoped provenance columns."""
+    records = [
+        {
+            "id": "1",
+            "value": 10,
+            "_composite_run_id": "run-1",
+            "_lineage_created_at": "2024-01-01T00:00:00Z",
+            "_ingestion_ts": "2024-01-01T00:00:00Z",
+        }
+    ]
+
+    with patch(
+        "bioetl.infrastructure.storage.gold_writer.write_deltalake"
+    ) as mock_write:
+        await gold_writer.write_gold_merged(
+            table_name="test_runtime_contract",
+            records=records,
+            primary_keys=["id"],
+        )
+
+        written_data = mock_write.call_args[0][1]
+        written_list = written_data.to_pylist()
+
+        assert list(written_list[0].keys()) == ["id", "value"]

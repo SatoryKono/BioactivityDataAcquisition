@@ -1254,6 +1254,44 @@ class TestLineageFragments:
             edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges
         )
 
+    def test_bronze_fragment_id_is_stable_across_run_ids(self) -> None:
+        """Bronze fragment identity must not depend on run_id."""
+        batch_id = BatchID(uuid4())
+        input_data = BronzeMetadataInput(
+            batch_id=batch_id,
+            record_count=50,
+            compressed_size=1024,
+            output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+            source_metadata=SourceMetadata(
+                type="api",
+                url="https://www.ebi.ac.uk/chembl/api/data/activity",
+                query_string="assay_type=B",
+                api_version="v33",
+            ),
+        )
+        fragment_first = MetadataCoordinator(
+            RunContext.create(
+                run_id=RunID(uuid4()),
+                run_type=RunType.INCREMENTAL,
+                started_at=datetime.now(UTC),
+                provider="chembl",
+                entity="activity",
+            )
+        ).build_bronze_lineage_fragment(input_data)
+        fragment_second = MetadataCoordinator(
+            RunContext.create(
+                run_id=RunID(uuid4()),
+                run_type=RunType.INCREMENTAL,
+                started_at=datetime.now(UTC),
+                provider="chembl",
+                entity="activity",
+            )
+        ).build_bronze_lineage_fragment(input_data)
+
+        assert fragment_first.fragment_id == fragment_second.fragment_id
+
     def test_silver_fragment_uses_bronze_refs_and_transform_chain(self) -> None:
         context = RunContext.create(
             run_id=RunID(uuid4()),
@@ -1307,6 +1345,50 @@ class TestLineageFragments:
             and edge.target.node_type == LineageNodeType.TRANSFORM
             for edge in fragment.edges
         )
+
+    def test_silver_fragment_id_is_stable_across_run_ids(self) -> None:
+        """Silver fragment identity must not depend on run_id."""
+        bronze_ref = BronzeWriteResult(
+            batch_id=BatchID(uuid4()),
+            relative_path="chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            absolute_path="/data/output/bronze/chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            record_count=25,
+            compressed_size=100,
+            uncompressed_size=300,
+            checksum_blake2="abc123",
+        )
+        input_data = SilverMetadataInput(
+            table_path="/data/output/silver/chembl/activity",
+            records=[{"id": 1, "_source_batch_id": str(bronze_ref.batch_id)}],
+            primary_keys=["id"],
+            mode=SilverWriteMode.MERGE,
+            bronze_refs=[bronze_ref],
+            version_after=7,
+        )
+        fragment_first = MetadataCoordinator(
+            RunContext.create(
+                run_id=RunID(uuid4()),
+                run_type=RunType.INCREMENTAL,
+                started_at=datetime.now(UTC),
+                provider="chembl",
+                entity="activity",
+                transform_version="2.1.0",
+                transform_steps=("normalize", "validate"),
+            )
+        ).build_silver_lineage_fragment(input_data)
+        fragment_second = MetadataCoordinator(
+            RunContext.create(
+                run_id=RunID(uuid4()),
+                run_type=RunType.INCREMENTAL,
+                started_at=datetime.now(UTC),
+                provider="chembl",
+                entity="activity",
+                transform_version="2.1.0",
+                transform_steps=("normalize", "validate"),
+            )
+        ).build_silver_lineage_fragment(input_data)
+
+        assert fragment_first.fragment_id == fragment_second.fragment_id
 
     def test_silver_fragment_exposes_composite_source_and_cv_summary(self) -> None:
         context = RunContext.create(
@@ -1420,6 +1502,47 @@ class TestLineageFragments:
         assert any(
             edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges
         )
+
+    def test_gold_fragment_id_is_stable_across_run_ids(self) -> None:
+        """Gold fragment identity must not depend on run_id."""
+        input_data = GoldMetadataInput(
+            table_path="/data/output/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.OVERWRITE,
+            silver_refs=[
+                SilverRef(
+                    table_name="chembl.activity",
+                    table_path="/data/output/silver/chembl/activity",
+                    delta_version=9,
+                )
+            ],
+            gold_schema=self._FakeGoldSchema,
+        )
+        fragment_first = MetadataCoordinator(
+            RunContext.create(
+                run_id=RunID(uuid4()),
+                run_type=RunType.REBUILD,
+                started_at=datetime.now(UTC),
+                provider="chembl",
+                entity="activity",
+                transform_version="3.0.0",
+                transform_steps=("merge", "rank"),
+            )
+        ).build_gold_lineage_fragment(input_data)
+        fragment_second = MetadataCoordinator(
+            RunContext.create(
+                run_id=RunID(uuid4()),
+                run_type=RunType.REBUILD,
+                started_at=datetime.now(UTC),
+                provider="chembl",
+                entity="activity",
+                transform_version="3.0.0",
+                transform_steps=("merge", "rank"),
+            )
+        ).build_gold_lineage_fragment(input_data)
+
+        assert fragment_first.fragment_id == fragment_second.fragment_id
 
     def test_gold_fragment_exposes_composite_source_and_cv_summary(self) -> None:
         context = RunContext.create(

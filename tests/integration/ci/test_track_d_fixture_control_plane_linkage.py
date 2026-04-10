@@ -175,7 +175,7 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
     )
     assert (
         code_provenance_first["effective_config_artifact_id"]
-        != code_provenance_second["effective_config_artifact_id"]
+        == code_provenance_second["effective_config_artifact_id"]
     )
 
     runtime_adjustments_first = effective_first.get("runtime_overrides", {}).get(

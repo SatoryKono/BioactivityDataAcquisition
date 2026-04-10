@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Literal, Protocol
 
 import pyarrow as pa
 
+from bioetl.domain.constants import NONDETERMINISTIC_PERSISTED_FIELDS
 from bioetl.domain.exceptions import SchemaEvolutionError
 
 if TYPE_CHECKING:
@@ -60,7 +61,11 @@ def _diff_schema_fields(
     if existing_schema is None or not records:
         return None
 
-    incoming_fields = set(records[0].keys())
+    incoming_fields = {
+        field_name
+        for field_name in records[0].keys()
+        if field_name not in NONDETERMINISTIC_PERSISTED_FIELDS
+    }
     existing_fields = set(existing_schema.names)
     return incoming_fields - existing_fields, existing_fields - incoming_fields
 

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.services.metadata_lineage_nodes import (
     bronze_batch_node_from_input,
-    build_fragment_id,
+    build_semantic_fragment_id,
     dedupe_nodes,
     fragment_timestamp,
     manifest_edges,
@@ -97,11 +97,14 @@ def build_bronze_lineage_fragment(
             created_at=created_at,
         )
     )
+    deduped_nodes = dedupe_nodes(nodes)
     return LineageGraphFragment(
-        fragment_id=build_fragment_id(
-            "bronze", run_context.run_id, input_data.batch_id
+        fragment_id=build_semantic_fragment_id(
+            "bronze",
+            nodes=deduped_nodes,
+            edges=edges,
         ),
-        nodes=dedupe_nodes(nodes),
+        nodes=deduped_nodes,
         edges=tuple(edges),
         run_id=str(run_context.run_id),
         manifest_id=run_context.manifest_id,
