@@ -142,6 +142,10 @@ class TestPrepareBronzeMetadataWrite:
     ) -> None:
         host = _Host(tmp_path)
         host._flat_structure = True
+        host._metadata_coordinator = _BundleCoordinator(
+            metadata=MagicMock(),
+            fragment=MagicMock(),
+        )
 
         prepared = prepare_bronze_metadata_write(
             host,
