@@ -82,6 +82,11 @@ profiles в BioETL.
   `python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity`,
   `python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed`,
   `python -m scripts.ops query-neo4j-memory neighbors-contract chembl.activity`.
+  Для поиска повторяющейся логики и кандидатов на вынос используй:
+  `python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608`,
+  `python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer`,
+  `python -m scripts.ops query-neo4j-memory promotion-candidates composite_layer`,
+  `python -m scripts.ops query-neo4j-memory promotion-candidates all`.
 
 ## Relationship To Other AI Surfaces
 

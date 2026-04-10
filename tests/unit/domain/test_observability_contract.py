@@ -8,6 +8,7 @@ from bioetl.domain.observability_contract import (
     is_observability_contract_valid,
     missing_observability_fields,
     normalize_observability_metric_labels,
+    normalize_observability_pipeline_label,
 )
 
 
@@ -150,3 +151,41 @@ def test_build_payload_enriches_event_family_and_correlation_defaults() -> None:
     assert payload.context["contract_ref"] == "gold.activity"
     assert payload.context["contract_version"] == "1.0.0"
     assert "manifest_id" not in payload.metric_labels
+
+
+def test_normalize_observability_pipeline_label_extracts_table_name_from_path() -> None:
+    assert (
+        normalize_observability_pipeline_label(
+            "/tmp/bioetl/silver/chembl_activity__v1_2_3"
+        )
+        == "chembl_activity"
+    )
+
+
+def test_normalize_observability_pipeline_label_rejects_uuid_like_values() -> None:
+    assert (
+        normalize_observability_pipeline_label(
+            "123e4567-e89b-12d3-a456-426614174000"
+        )
+        == "unknown"
+    )
+
+
+def test_metric_labels_normalization_collapses_path_like_pipeline_values() -> None:
+    labels = normalize_observability_metric_labels(
+        {
+            "event": "silver_merge_retry",
+            "provider": "storage",
+            "pipeline": r"C:\\bioetl\\silver\\chembl_activity__v1_2_3",
+            "severity": "warning",
+            "error_type": "timeout",
+        }
+    )
+
+    assert labels == {
+        "event": "silver_merge_retry",
+        "provider": "storage",
+        "pipeline": "chembl_activity",
+        "severity": "warning",
+        "error_type": "timeout",
+    }

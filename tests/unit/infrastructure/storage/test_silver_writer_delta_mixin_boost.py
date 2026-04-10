@@ -578,6 +578,7 @@ class TestEmitMergeRetryTelemetry:
         assert call_args[0][0] == "observability_events_total"
         labels = call_args[0][2]
         assert labels["event"] == "silver_merge_retry"
+        assert labels["pipeline"] == "table"
         assert labels["error_type"] == "commit_conflict"
 
     def test_emit_retry_telemetry_without_metrics(self) -> None:
@@ -614,6 +615,7 @@ class TestEmitMergeFinalTelemetry:
         metrics.increment_counter.assert_called_once()
         labels = metrics.increment_counter.call_args[0][2]
         assert labels["event"] == "silver_merge_final"
+        assert labels["pipeline"] == "table"
         assert labels["error_type"] == "commit_conflict_retries_exhausted"
 
     def test_emit_final_telemetry_without_metrics(self) -> None:
