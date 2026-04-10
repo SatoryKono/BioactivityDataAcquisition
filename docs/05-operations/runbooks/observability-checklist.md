@@ -1,5 +1,5 @@
 ---
-Version: 1.1.0
+Version: 1.1.1
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P2
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-02'
+Last verified: '2026-04-09'
 ---
 
 # Observability Checklist
@@ -43,6 +43,7 @@ For observability design rules, metric naming policy, and adapter implementation
 requirements, use:
 
 - [Monitoring Guide](../01-monitoring-guide.md)
+- [SLI/SLO Baseline](../sli-slo-baseline.md)
 - [RULES.md](../../00-project/RULES.md)
 - [ADR-017](../../02-architecture/decisions/ADR-017-observability-architecture.md)
 
