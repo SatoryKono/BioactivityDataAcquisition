@@ -159,6 +159,11 @@ Last verified: '2026-04-09'
     python -m scripts.ops query-neo4j-memory normalization-pipeline chembl_activity
     python -m scripts.ops query-neo4j-memory fallback-pipelines all
     ```
+    The normalization-only path now emits per-batch progress JSON to stderr and
+    returns batch/timing telemetry in its final summary. When a live refresh
+    stalls, capture the last emitted batch to see which pipeline span was in
+    flight and whether the time is being spent in evidence build or Neo4j
+    roundtrips.
 
 ## Memory Configuration Profiles
 

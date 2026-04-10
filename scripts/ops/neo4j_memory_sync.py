@@ -4097,18 +4097,111 @@ RETURN $pipeline_name AS pipeline_name
     return statements
 
 
+def _normalization_batch_pipeline_span(
+    batch: list[dict[str, JsonValue]],
+) -> tuple[str | None, str | None]:
+    pipeline_names = [
+        str(pipeline_name)
+        for statement in batch
+        for pipeline_name in [statement.get("parameters", {}).get("pipeline_name")]
+        if isinstance(pipeline_name, str) and pipeline_name
+    ]
+    if not pipeline_names:
+        return None, None
+    return pipeline_names[0], pipeline_names[-1]
+
+
+def _emit_normalization_apply_progress(
+    *,
+    event: str,
+    batch_index: int,
+    batch_count: int,
+    statement_count: int,
+    pipeline_start: str | None,
+    pipeline_end: str | None,
+    elapsed_seconds: float | None = None,
+) -> None:
+    payload: dict[str, JsonValue] = {
+        "event": event,
+        "sync_scope": "normalization_evidence_only",
+        "batch_index": batch_index,
+        "batch_count": batch_count,
+        "statement_count": statement_count,
+        "pipeline_start": pipeline_start,
+        "pipeline_end": pipeline_end,
+        "timestamp": datetime.now(tz=UTC).isoformat(),
+    }
+    if elapsed_seconds is not None:
+        payload["elapsed_seconds"] = round(elapsed_seconds, 3)
+    sys.stderr.write(json.dumps(payload) + "\n")
+    sys.stderr.flush()
+
+
 def apply_normalization_evidence_only(
     root: Path,
     http_uri: str | None,
     batch_size: int = DEFAULT_BATCH_SIZE,
 ) -> dict[str, JsonValue]:
+    started_at = datetime.now(tz=UTC).isoformat()
+    overall_started = time.perf_counter()
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
+    evidence_started = time.perf_counter()
     statements = _normalization_evidence_statements()
-    for index in range(0, len(statements), batch_size):
-        client.execute(statements[index : index + batch_size])
+    evidence_build_seconds = time.perf_counter() - evidence_started
+    batches = _batched(statements, batch_size)
+    batch_summaries: list[dict[str, JsonValue]] = []
+    completed_statement_count = 0
+
+    for batch_index, batch in enumerate(batches, start=1):
+        pipeline_start, pipeline_end = _normalization_batch_pipeline_span(batch)
+        _emit_normalization_apply_progress(
+            event="batch_start",
+            batch_index=batch_index,
+            batch_count=len(batches),
+            statement_count=len(batch),
+            pipeline_start=pipeline_start,
+            pipeline_end=pipeline_end,
+        )
+        batch_started = time.perf_counter()
+        client.execute(
+            batch,
+            context=(
+                "normalization evidence batch "
+                f"{batch_index}/{len(batches)} "
+                f"pipelines {pipeline_start or '?'}..{pipeline_end or '?'}"
+            ),
+        )
+        batch_elapsed = time.perf_counter() - batch_started
+        completed_statement_count += len(batch)
+        batch_summary: dict[str, JsonValue] = {
+            "batch_index": batch_index,
+            "statement_count": len(batch),
+            "pipeline_start": pipeline_start,
+            "pipeline_end": pipeline_end,
+            "elapsed_seconds": round(batch_elapsed, 3),
+        }
+        batch_summaries.append(batch_summary)
+        _emit_normalization_apply_progress(
+            event="batch_complete",
+            batch_index=batch_index,
+            batch_count=len(batches),
+            statement_count=len(batch),
+            pipeline_start=pipeline_start,
+            pipeline_end=pipeline_end,
+            elapsed_seconds=batch_elapsed,
+        )
+
+    total_seconds = time.perf_counter() - overall_started
     return {
+        "started_at": started_at,
         "pipeline_count": len(statements),
+        "batch_count": len(batches),
+        "batch_size": batch_size,
+        "completed_statement_count": completed_statement_count,
+        "evidence_build_seconds": round(evidence_build_seconds, 3),
+        "total_seconds": round(total_seconds, 3),
+        "batches": batch_summaries,
         "updated_at": datetime.now(tz=UTC).isoformat(),
     }
 
@@ -4430,7 +4523,12 @@ class Neo4jHttpClient:
             "Accept": "application/json",
         }
 
-    def execute(self, statements: list[dict[str, JsonValue]]) -> dict[str, object]:
+    def execute(
+        self,
+        statements: list[dict[str, JsonValue]],
+        *,
+        context: str | None = None,
+    ) -> dict[str, object]:
         payload = json.dumps({"statements": statements}).encode("utf-8")
         last_exc: Exception | None = None
         for attempt in range(12):
@@ -4439,6 +4537,23 @@ class Neo4jHttpClient:
                 with request.urlopen(req, timeout=60) as response:
                     raw = response.read().decode("utf-8")
                 break
+            except error.HTTPError as exc:  # pragma: no cover - live backend dependent
+                body_text = exc.read().decode("utf-8", errors="replace")
+                if exc.code in {429, 502, 503, 504}:
+                    last_exc = RuntimeError(
+                        self._format_transport_error(exc, context=context, body_text=body_text)
+                    )
+                    if self._fallback_endpoint and self._endpoint != self._fallback_endpoint:
+                        self._endpoint = self._fallback_endpoint
+                        self._fallback_endpoint = None
+                        continue
+                    if attempt == 11:
+                        raise last_exc from exc
+                    time.sleep(min(3.0, 0.5 * (attempt + 1)))
+                    continue
+                raise RuntimeError(
+                    self._format_query_error(exc, context=context, body_text=body_text)
+                ) from exc
             except (
                 error.URLError,
                 TimeoutError,
@@ -4452,24 +4567,32 @@ class Neo4jHttpClient:
                     self._fallback_endpoint = None
                     continue
                 if attempt == 11:
-                    raise RuntimeError(f"Failed to reach Neo4j HTTP endpoint {self._endpoint}: {exc}") from exc
+                    raise RuntimeError(self._format_transport_error(exc, context=context)) from exc
                 time.sleep(min(3.0, 0.5 * (attempt + 1)))
         else:  # pragma: no cover - loop always breaks or raises
-            raise RuntimeError(f"Failed to reach Neo4j HTTP endpoint {self._endpoint}: {last_exc}")
+            raise RuntimeError(self._format_transport_error(last_exc, context=context))
         body = json.loads(raw)
         errors = body.get("errors", [])
         if errors:
-            raise RuntimeError(f"Neo4j returned errors: {errors}")
+            prefix = self._context_prefix(context)
+            raise RuntimeError(f"{prefix}Neo4j query/runtime error: {errors}")
         return body
 
-    def query(self, statement: str, parameters: dict[str, JsonValue] | None = None) -> list[dict[str, JsonValue]]:
+    def query(
+        self,
+        statement: str,
+        parameters: dict[str, JsonValue] | None = None,
+        *,
+        context: str | None = None,
+    ) -> list[dict[str, JsonValue]]:
         body = self.execute(
             [
                 {
                     "statement": statement,
                     "parameters": parameters or {},
                 }
-            ]
+            ],
+            context=context,
         )
         results = body.get("results", [])
         if not results:
@@ -4485,6 +4608,41 @@ class Neo4jHttpClient:
             }
             rows.append(row)
         return rows
+
+    @staticmethod
+    def _context_prefix(context: str | None) -> str:
+        return f"Neo4j {context} failed: " if context else ""
+
+    def _format_transport_error(
+        self,
+        exc: Exception | None,
+        *,
+        context: str | None,
+        body_text: str | None = None,
+    ) -> str:
+        prefix = self._context_prefix(context)
+        detail = f"{exc}"
+        if body_text:
+            detail = f"{detail}; response={body_text[:500]}"
+        return f"{prefix}transport error reaching HTTP endpoint {self._endpoint}: {detail}"
+
+    def _format_query_error(
+        self,
+        exc: error.HTTPError,
+        *,
+        context: str | None,
+        body_text: str,
+    ) -> str:
+        prefix = self._context_prefix(context)
+        detail: object = body_text[:500]
+        try:
+            payload = json.loads(body_text)
+        except json.JSONDecodeError:
+            payload = detail
+        else:
+            if isinstance(payload, dict) and isinstance(payload.get("errors"), list):
+                detail = payload["errors"]
+        return f"{prefix}query/runtime error (HTTP {exc.code}): {detail}"
 
 
 def _sync_run_id() -> str:
@@ -4750,23 +4908,87 @@ def _execute_grouped_statements(
 
 
 def _live_managed_node_count(client: Neo4jHttpClient, label: str) -> int:
-    rows = client.query(
-        f"MATCH (n:`{label}`) "
-        "WHERE n.managed_by = $managed_by "
-        "RETURN count(n) AS count",
-        {"managed_by": DEFAULT_MANAGED_BY},
-    )
-    return int(rows[0]["count"]) if rows else 0
+    return _live_managed_node_counts(
+        client,
+        (label,),
+        context=f"managed node count for label `{label}`",
+    ).get(label, 0)
 
 
 def _live_managed_relation_count(client: Neo4jHttpClient, relation_type: str) -> int:
+    return _live_managed_relation_counts(
+        client,
+        (relation_type,),
+        context=f"managed relation count for type `{relation_type}`",
+    ).get(relation_type, 0)
+
+
+def _live_managed_node_counts(
+    client: Neo4jHttpClient,
+    labels: tuple[str, ...],
+    *,
+    context: str,
+) -> dict[str, int]:
+    if not labels:
+        return {}
     rows = client.query(
-        f"MATCH ()-[r:`{relation_type}`]->() "
-        "WHERE r.managed_by = $managed_by "
-        "RETURN count(r) AS count",
-        {"managed_by": DEFAULT_MANAGED_BY},
+        (
+            "UNWIND $labels AS label "
+            "OPTIONAL MATCH (n) "
+            "WHERE label IN labels(n) "
+            "AND coalesce(n.managed_by, '') = $managed_by "
+            "AND coalesce(n.ingest_wave, '') = $ingest_wave "
+            "RETURN label, count(n) AS count "
+            "ORDER BY label"
+        ),
+        {
+            "labels": list(labels),
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+        },
+        context=context,
     )
-    return int(rows[0]["count"]) if rows else 0
+    counts = {label: 0 for label in labels}
+    for row in rows:
+        label = row.get("label")
+        count = row.get("count")
+        if isinstance(label, str) and isinstance(count, (int, float)):
+            counts[label] = int(count)
+    return counts
+
+
+def _live_managed_relation_counts(
+    client: Neo4jHttpClient,
+    relation_types: tuple[str, ...],
+    *,
+    context: str,
+) -> dict[str, int]:
+    if not relation_types:
+        return {}
+    rows = client.query(
+        (
+            "UNWIND $relation_types AS relation_type "
+            "OPTIONAL MATCH ()-[r]->() "
+            "WHERE type(r) = relation_type "
+            "AND coalesce(r.managed_by, '') = $managed_by "
+            "AND coalesce(r.ingest_wave, '') = $ingest_wave "
+            "RETURN relation_type, count(r) AS count "
+            "ORDER BY relation_type"
+        ),
+        {
+            "relation_types": list(relation_types),
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+        },
+        context=context,
+    )
+    counts = {relation_type: 0 for relation_type in relation_types}
+    for row in rows:
+        relation_type = row.get("relation_type")
+        count = row.get("count")
+        if isinstance(relation_type, str) and isinstance(count, (int, float)):
+            counts[relation_type] = int(count)
+    return counts
 
 
 def _retry_critical_analysis_groups(
@@ -4780,11 +5002,21 @@ def _retry_critical_analysis_groups(
     active_relation_types = [
         relation_type for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES if relation_type in relation_groups
     ]
+    live_node_counts = _live_managed_node_counts(
+        client,
+        tuple(active_node_labels),
+        context="post-apply critical node verification",
+    )
+    live_relation_counts = _live_managed_relation_counts(
+        client,
+        tuple(active_relation_types),
+        context="post-apply critical relation verification",
+    )
 
     missing_node_labels = [
         label
         for label in active_node_labels
-        if _live_managed_node_count(client, label) != len(node_groups[label])
+        if live_node_counts.get(label, 0) != len(node_groups[label])
     ]
     if missing_node_labels:
         _execute_grouped_statements(
@@ -4793,11 +5025,16 @@ def _retry_critical_analysis_groups(
             retry_batch_size,
             "critical node retry",
         )
+        live_node_counts = _live_managed_node_counts(
+            client,
+            tuple(active_node_labels),
+            context="post-retry critical node verification",
+        )
 
     missing_relation_types = [
         relation_type
         for relation_type in active_relation_types
-        if _live_managed_relation_count(client, relation_type) != len(relation_groups[relation_type])
+        if live_relation_counts.get(relation_type, 0) != len(relation_groups[relation_type])
     ]
     if missing_relation_types:
         _execute_grouped_statements(
@@ -4806,17 +5043,22 @@ def _retry_critical_analysis_groups(
             retry_batch_size,
             "critical relation retry",
         )
+        live_relation_counts = _live_managed_relation_counts(
+            client,
+            tuple(active_relation_types),
+            context="post-retry critical relation verification",
+        )
 
     missing_after_retry: list[str] = []
     for label in active_node_labels:
-        live_count = _live_managed_node_count(client, label)
+        live_count = live_node_counts.get(label, 0)
         expected = len(node_groups[label])
         if live_count != expected:
             missing_after_retry.append(
                 f"label `{label}` expected {expected}, live managed {live_count}"
             )
     for relation_type in active_relation_types:
-        live_count = _live_managed_relation_count(client, relation_type)
+        live_count = live_relation_counts.get(relation_type, 0)
         expected = len(relation_groups[relation_type])
         if live_count != expected:
             missing_after_retry.append(
@@ -4865,14 +5107,24 @@ def _verify_expected_group_counts(
     strict_analysis: bool,
 ) -> None:
     mismatches: list[str] = []
+    live_node_counts = _live_managed_node_counts(
+        client,
+        tuple(sorted(node_groups)),
+        context="post-apply node group verification",
+    )
+    live_relation_counts = _live_managed_relation_counts(
+        client,
+        tuple(sorted(relation_groups)),
+        context="post-apply relation group verification",
+    )
     for label, statements in sorted(node_groups.items()):
         expected = len(statements)
-        live_count = _live_managed_node_count(client, label)
+        live_count = live_node_counts.get(label, 0)
         if live_count != expected:
             mismatches.append(f"label `{label}` expected {expected}, live managed {live_count}")
     for relation_type, statements in sorted(relation_groups.items()):
         expected = len(statements)
-        live_count = _live_managed_relation_count(client, relation_type)
+        live_count = live_relation_counts.get(relation_type, 0)
         if live_count != expected:
             mismatches.append(f"relation `{relation_type}` expected {expected}, live managed {live_count}")
 
@@ -5397,13 +5649,16 @@ def build_fast_analysis_audit_report(
         relation_type: int(snapshot_stats["relation_types"].get(relation_type, 0))
         for relation_type in active_relation_types
     }
-    live_managed_label_counts = {
-        label: _live_managed_node_count(client, label) for label in active_labels
-    }
-    live_managed_relation_counts = {
-        relation_type: _live_managed_relation_count(client, relation_type)
-        for relation_type in active_relation_types
-    }
+    live_managed_label_counts = _live_managed_node_counts(
+        client,
+        active_labels,
+        context="fast audit label summary",
+    )
+    live_managed_relation_counts = _live_managed_relation_counts(
+        client,
+        active_relation_types,
+        context="fast audit relation summary",
+    )
 
     return {
         "generated_at": _sync_run_id(),
