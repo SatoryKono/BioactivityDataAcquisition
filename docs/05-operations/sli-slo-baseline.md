@@ -6,7 +6,7 @@ Owner: BioETL Team
 Reviewers:
 - BioETL Team
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-09'
+Last verified: '2026-04-10'
 ---
 
 # SLI / SLO Baseline
@@ -142,6 +142,11 @@ clamp_min(
 clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)
 ```
 
+Current implementation note: `bioetl_data_freshness_seconds` is written from
+the latest successful DQ/postrun freshness publication timestamp. The resulting
+lag is therefore an operational staleness proxy for the pipeline runtime, not a
+canonical upstream-ingestion anchor.
+
 ## Interpretation Rules
 
 - If an alert threshold is stricter than the SLO review target, follow the
@@ -150,6 +155,9 @@ clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)
   window, treat the SLI as informational rather than enforceable.
 - `degraded` provider health counts as completed but not fully healthy. Repeated
   degraded states still require investigation if they persist.
+- Freshness SLI/SLO review currently tracks the age of the latest successful
+  runtime freshness publication. For exact source-ingestion chronology, use
+  manifests, lineage, and audit artifacts rather than the gauge value alone.
 - For local-only stacks, temporary tracing disablement or maintenance windows
   should be annotated in the incident log rather than silently ignored.
 
