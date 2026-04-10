@@ -1042,6 +1042,9 @@ class TestGoldWriterAudit:
         self, gold_writer, valid_records, strict_schema, fixed_ingestion_ts
     ):
         """Test _post_write_gold consumes a named post-write context."""
+        from uuid import uuid4
+
+        from bioetl.domain.types import RunID
         from bioetl.infrastructure.storage.gold_writer import (
             GoldWriteMode,
             _GoldWritePostwriteContext,
@@ -1059,7 +1062,7 @@ class TestGoldWriterAudit:
             ),
             records=valid_records,
             ingestion_ts=fixed_ingestion_ts,
-            run_id=None,
+            run_id=RunID(uuid4()),
             scd_config=None,
             silver_refs=None,
             schema=strict_schema,
@@ -1075,7 +1078,7 @@ class TestGoldWriterAudit:
             mode=GoldWriteMode.APPEND,
             scd_config=None,
             ingestion_ts=fixed_ingestion_ts,
-            run_id=None,
+            run_id=context.run_id,
             silver_refs=None,
             gold_schema=strict_schema,
         )

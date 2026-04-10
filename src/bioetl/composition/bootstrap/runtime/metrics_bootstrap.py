@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.metrics_service import MetricsService
 from bioetl.composition.bootstrap.assembly.metrics_service import (
     create_metrics_service,
 )
@@ -13,7 +14,6 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.observability import PrometheusMetrics
 
 if TYPE_CHECKING:
-    from bioetl.application.services.metrics_service import MetricsService
     from bioetl.infrastructure.config import Settings
 
 MetricsFactory = Callable[[], MetricsPort]
