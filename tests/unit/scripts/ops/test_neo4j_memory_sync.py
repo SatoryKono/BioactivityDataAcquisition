@@ -57,6 +57,18 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         "module_surface",
         "src/bioetl/domain/config/pipeline.py",
     ) in node_keys
+    assert (
+        "class_surface",
+        "src.bioetl.infrastructure.adapters.base.BaseHttpAdapter",
+    ) in node_keys
+    assert (
+        "function_surface",
+        "src.bioetl.domain.normalization.profiles.chembl_activity._normalize_text",
+    ) in node_keys
+    assert (
+        "method_surface",
+        "src.bioetl.application.composite.merger.MergeService.merge",
+    ) in node_keys
     assert ("provider_surface", "chembl") in node_keys
     assert ("entity_config", "chembl_activity") in node_keys
     assert ("composite_config", "composite_activity") in node_keys
@@ -89,6 +101,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("execution_path", "uv run python -m scripts.schema validate-configs") in node_keys
     assert ("execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json") in node_keys
     assert ("quality_gate", "diagram quality gates") in node_keys
+    assert any(label == "duplication_cluster" for label, _ in node_keys)
     assert (
         "test_artifact",
         "tests/unit/scripts/ops/test_neo4j_memory_sync.py",
@@ -137,6 +150,9 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("directory_surface", "configs/contracts", "HOUSES", "contract_surface", "chembl.activity"),
     ("directory_surface", "configs/contracts/chembl", "HOUSES", "contract_surface", "chembl.activity"),
     ("directory_surface", "configs/quality", "HOUSES", "policy_surface", "integration and VCR execution policy"),
+    ("module_surface", "src/bioetl/infrastructure/adapters/base.py", "DECLARES", "class_surface", "src.bioetl.infrastructure.adapters.base.BaseHttpAdapter"),
+    ("module_surface", "src/bioetl/domain/normalization/profiles/chembl_activity.py", "DECLARES", "function_surface", "src.bioetl.domain.normalization.profiles.chembl_activity._normalize_text"),
+    ("class_surface", "src.bioetl.application.composite.merger.MergeService", "DECLARES", "method_surface", "src.bioetl.application.composite.merger.MergeService.merge"),
     ("project", "BioETL", "HAS_PORT", "port_surface", "bioetl.domain.ports"),
     ("project", "BioETL", "HAS_ADAPTER", "adapter_surface", "bioetl.infrastructure.adapters.chembl"),
     ("project", "BioETL", "HAS_PIPELINE", "pipeline_surface", "chembl_activity"),
@@ -240,6 +256,34 @@ def test_snapshot_contains_expected_relations() -> None:
     _assert_relation_absence(relation_keys, FORBIDDEN_RELATION_KEYS)
 
 
+def test_snapshot_contains_duplication_clusters_with_promotion_targets() -> None:
+    _, snapshot = _snapshot()
+
+    duplication_clusters = [
+        node for node in snapshot.nodes.values() if node.key.label == "duplication_cluster"
+    ]
+    assert duplication_clusters
+
+    cluster_relations = {
+        (rel.source.label, rel.relation_type, rel.target.label)
+        for rel in snapshot.relations.values()
+        if rel.source.label == "duplication_cluster"
+    }
+    assert ("duplication_cluster", "CONTAINS", "method_surface") in cluster_relations or (
+        "duplication_cluster",
+        "CONTAINS",
+        "function_surface",
+    ) in cluster_relations
+    assert any(
+        rel.source.label == "duplication_cluster" and rel.relation_type == "CAN_PROMOTE_TO"
+        for rel in snapshot.relations.values()
+    )
+    assert any(
+        rel.relation_type == "COVERED_BY_TEST" and rel.source.label == "duplication_cluster"
+        for rel in snapshot.relations.values()
+    )
+
+
 def test_sync_statements_include_management_metadata() -> None:
     _, snapshot = _snapshot()
     project_node = snapshot.nodes[next(key for key in snapshot.nodes if key.label == "project" and key.name == "BioETL")]
@@ -303,6 +347,10 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "layer_family",
         "package_family",
         "module_surface",
+        "class_surface",
+        "function_surface",
+        "method_surface",
+        "duplication_cluster",
         "port_surface",
         "adapter_surface",
         "adapter_impl_surface",
