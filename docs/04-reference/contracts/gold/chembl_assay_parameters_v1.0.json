@@ -120,29 +120,6 @@
       "nullable": false,
       "description": ""
     },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
     "_index": {
       "type": "integer",
       "nullable": false,
@@ -153,9 +130,6 @@
     "_dq_error",
     "_dq_warn",
     "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
     "assay_id",
     "assay_param_id",
     "content_hash",

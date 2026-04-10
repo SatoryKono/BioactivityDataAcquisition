@@ -72,10 +72,6 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
     dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
     dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
-    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
-    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
-    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
-    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:

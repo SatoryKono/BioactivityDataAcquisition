@@ -18,18 +18,15 @@ CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
 def _required_composite_columns() -> set[str]:
     # Note: content_hash is excluded from Gold layer by FieldGroupRegistry
     # (SYSTEM_METADATA group, include_in_gold=False). It lives in Silver only.
+    # Occurrence-scoped provenance fields also live in sidecars/control-plane,
+    # not in persisted Gold rows.
     return {
         "entity_id",
         "_dq_warn",
         "_dq_error",
-        "_run_id",
-        "_run_type",
-        "_ingestion_ts",
         "_index",
-        "_composite_run_id",
         "_source_providers",
         "_enrichment_status",
-        "_lineage_created_at",
     }
 
 
@@ -43,7 +40,7 @@ class TestCompositeGoldSchemaContract:
         [CompositePublicationGoldSchema, CompositeMoleculeGoldSchema],
     )
     def test_schema_has_required_columns(self, schema_cls: type) -> None:
-        """Composite DataFrameModel contains mandatory lineage and DQ fields."""
+        """Composite DataFrameModel contains mandatory persisted DQ/lineage fields."""
         schema = schema_cls.to_schema()
         columns = set(schema.columns.keys())
         missing = _required_composite_columns() - columns
@@ -82,7 +79,7 @@ class TestCompositeGoldJsonContracts:
         filename: str,
         entity_description: str,
     ) -> None:
-        """Published JSON contract contains expected required fields and descriptions."""
+        """Published JSON contract contains expected persisted fields and descriptions."""
         path = CONTRACTS_DIR / filename
         assert path.exists(), f"Missing contract file: {path}"
 

@@ -16,6 +16,9 @@ from bioetl.infrastructure.storage.lineage_persistence import (
     persist_lineage_fragment_if_present,
     resolve_metadata_and_lineage_fragment,
 )
+from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
+    make_produced_artifact_fragment,
+)
 
 
 class _CoordinatorWithBundle:
@@ -45,9 +48,10 @@ class _MetadataStub:
 @pytest.mark.unit
 def test_resolve_metadata_and_lineage_fragment_prefers_bundle_method() -> None:
     metadata = _MetadataStub()
-    fragment = LineageGraphFragment(
+    fragment = make_produced_artifact_fragment(
         fragment_id="silver:fragment-1",
-        created_at=datetime.now(UTC),
+        layer="silver",
+        logical_name="test.dataset",
     )
     coordinator = _CoordinatorWithBundle(metadata=metadata, fragment=fragment)
 
@@ -67,9 +71,10 @@ def test_resolve_metadata_and_lineage_fragment_prefers_bundle_method() -> None:
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_persist_lineage_fragment_if_present_calls_store() -> None:
-    fragment = LineageGraphFragment(
+    fragment = make_produced_artifact_fragment(
         fragment_id="gold:fragment-1",
-        created_at=datetime.now(UTC),
+        layer="gold",
+        logical_name="test.dataset",
     )
     store = MagicMock()
 
@@ -84,9 +89,10 @@ async def test_persist_lineage_fragment_if_present_calls_store() -> None:
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_persist_lineage_fragment_if_present_emits_metric() -> None:
-    fragment = LineageGraphFragment(
+    fragment = make_produced_artifact_fragment(
         fragment_id="silver:fragment-1",
-        created_at=datetime.now(UTC),
+        layer="silver",
+        logical_name="test.dataset",
     )
     store = MagicMock()
     metrics = MagicMock()
