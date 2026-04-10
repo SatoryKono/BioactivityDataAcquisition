@@ -7,11 +7,13 @@ import argparse
 import ast
 import base64
 import hashlib
+import http.client
 import json
 import os
 import re
 import subprocess
 import sys
+import time
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timezone
 from pathlib import Path
@@ -4139,11 +4141,19 @@ class Neo4jHttpClient:
     def execute(self, statements: list[dict[str, JsonValue]]) -> dict[str, object]:
         payload = json.dumps({"statements": statements}).encode("utf-8")
         req = request.Request(self._endpoint, data=payload, headers=self._headers, method="POST")
-        try:
-            with request.urlopen(req, timeout=30) as response:
-                raw = response.read().decode("utf-8")
-        except error.URLError as exc:  # pragma: no cover - network errors vary per environment
-            raise RuntimeError(f"Failed to reach Neo4j HTTP endpoint {self._endpoint}: {exc}") from exc
+        last_exc: Exception | None = None
+        for attempt in range(3):
+            try:
+                with request.urlopen(req, timeout=60) as response:
+                    raw = response.read().decode("utf-8")
+                break
+            except (error.URLError, TimeoutError, ConnectionResetError, http.client.RemoteDisconnected) as exc:  # pragma: no cover - network errors vary per environment
+                last_exc = exc
+                if attempt == 2:
+                    raise RuntimeError(f"Failed to reach Neo4j HTTP endpoint {self._endpoint}: {exc}") from exc
+                time.sleep(0.5 * (attempt + 1))
+        else:  # pragma: no cover - loop always breaks or raises
+            raise RuntimeError(f"Failed to reach Neo4j HTTP endpoint {self._endpoint}: {last_exc}")
         body = json.loads(raw)
         errors = body.get("errors", [])
         if errors:
@@ -4831,21 +4841,29 @@ def _build_diff_entries(snapshot_counts: dict[str, int], live_counts: dict[str, 
 def _live_repo_label_rows(client: Neo4jHttpClient, managed_labels: list[str]) -> list[dict[str, JsonValue]]:
     rows: list[dict[str, JsonValue]] = []
     for label in managed_labels:
-        result = client.query(
-            (
-                f"MATCH (n:`{label}`) "
-                "RETURN $label AS label, "
-                "count(n) AS total, "
-                "sum(CASE WHEN coalesce(n.managed_by, '') = $managed_by THEN 1 ELSE 0 END) AS managed, "
-                "sum(CASE WHEN coalesce(n.managed_by, '') = '' THEN 1 ELSE 0 END) AS unmanaged"
-            ),
+        total = _live_scalar(
+            client,
+            f"MATCH (n:`{label}`) RETURN count(n) AS value",
+            {},
+        )
+        managed = _live_scalar(
+            client,
+            f"MATCH (n:`{label}`) WHERE coalesce(n.managed_by, '') = $managed_by RETURN count(n) AS value",
+            {"managed_by": DEFAULT_MANAGED_BY},
+        )
+        unmanaged = _live_scalar(
+            client,
+            f"MATCH (n:`{label}`) WHERE coalesce(n.managed_by, '') = '' RETURN count(n) AS value",
+            {},
+        )
+        rows.append(
             {
                 "label": label,
-                "managed_by": DEFAULT_MANAGED_BY,
-            },
+                "total": total,
+                "managed": managed,
+                "unmanaged": unmanaged,
+            }
         )
-        if result:
-            rows.extend(result)
     return rows
 
 
