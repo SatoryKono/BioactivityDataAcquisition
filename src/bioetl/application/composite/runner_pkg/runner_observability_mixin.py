@@ -133,7 +133,14 @@ class CompositeRunnerObservabilityMixin:
 
         from bioetl.domain.types import BatchID
 
-        now = datetime.now(tz=UTC)
+        cached_bronze_date = cast(
+            str | None,
+            getattr(self._runtime, "cached_bronze_date", None),
+        )
+        quarantine_timestamp = _resolve_composite_dq_timestamp(
+            cached_bronze_date=cached_bronze_date,
+            started_at=self._started_at,
+        )
         pipeline_name = f"composite:{self._config.name}"
         written = 0
 
@@ -145,7 +152,7 @@ class CompositeRunnerObservabilityMixin:
                     payload=dict(payload),
                     bronze_batch_id=cast(BatchID, self._run_id),
                     run_id=self._run_id,
-                    ingestion_ts=now,
+                    ingestion_ts=quarantine_timestamp,
                 )
                 written += 1
             except QUARANTINE_WRITE_NON_FATAL_ERRORS as error:
