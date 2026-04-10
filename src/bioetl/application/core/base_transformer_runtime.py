@@ -172,7 +172,7 @@ def create_entity(
         content_hash=ContentHash(content_hash),
         run_id=context.run_id,
         run_type=context.run_type,
-        source_batch_id=None,
+        source_batch_id=context.source_batch_id,
         ingestion_ts=context.started_at,
         _index=index,
         **business_data,

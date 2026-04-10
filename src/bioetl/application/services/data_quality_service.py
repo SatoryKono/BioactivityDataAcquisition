@@ -52,6 +52,7 @@ class DataQualityService:
         metrics: MetricsPort | None,
         pipeline_name: str,
         entity_type: str,
+        pipeline_metrics: PipelineMetricsRecorder | None = None,
     ) -> None:
         """Initialize DataQualityService.
 
@@ -62,6 +63,7 @@ class DataQualityService:
             metrics: Optional metrics port for observability.
             pipeline_name: Pipeline name for metric labels.
             entity_type: Entity type for metric labels.
+            pipeline_metrics: Optional prebuilt pipeline-scoped metrics recorder.
         """
         self._dq_monitor = dq_monitor
         self._config = config
@@ -69,7 +71,13 @@ class DataQualityService:
         self._metrics = metrics
         self._pipeline_name = pipeline_name
         self._entity_type = entity_type
-        self._pipeline_metrics = PipelineMetricsRecorder(metrics, pipeline_name)
+        resolved_pipeline_metrics = pipeline_metrics
+        if resolved_pipeline_metrics is None:
+            resolved_pipeline_metrics = PipelineMetricsRecorder(
+                metrics,
+                pipeline_name,
+            )
+        self._pipeline_metrics = resolved_pipeline_metrics
 
     def evaluate(
         self,

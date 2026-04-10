@@ -43,10 +43,13 @@ from bioetl.domain.normalization.profiles.uniprot_protein import (
 )
 
 __all__ = [
+    "NORMALIZATION_PROFILE_MODULE_PATHS",
     "NORMALIZATION_PROFILE_REGISTRY",
+    "build_normalization_profile_module_paths",
     "build_normalization_profile_registry",
     "normalize_normalization_profile_coordinates",
     "resolve_normalization_profile",
+    "resolve_normalization_profile_module_path",
 ]
 
 
@@ -80,7 +83,35 @@ def build_normalization_profile_registry() -> Mapping[tuple[str, str], Normaliza
     }
 
 
+def build_normalization_profile_module_paths() -> Mapping[tuple[str, str], str]:
+    """Return canonical source-module paths for shipped normalization profiles."""
+    return {
+        ("chembl", "activity"): "src/bioetl/domain/normalization/profiles/chembl_activity.py",
+        ("chembl", "assay"): "src/bioetl/domain/normalization/profiles/chembl_assay.py",
+        ("chembl", "molecule"): "src/bioetl/domain/normalization/profiles/chembl_molecule.py",
+        ("chembl", "publication"): "src/bioetl/domain/normalization/profiles/chembl_publication.py",
+        ("chembl", "target"): "src/bioetl/domain/normalization/profiles/chembl_target.py",
+        (
+            "crossref",
+            "publication",
+        ): "src/bioetl/domain/normalization/profiles/crossref_publication.py",
+        (
+            "openalex",
+            "publication",
+        ): "src/bioetl/domain/normalization/profiles/openalex_publication.py",
+        ("pubchem", "compound"): "src/bioetl/domain/normalization/profiles/pubchem_compound.py",
+        ("pubmed", "publication"): "src/bioetl/domain/normalization/profiles/pubmed_publication.py",
+        (
+            "semanticscholar",
+            "publication",
+        ): "src/bioetl/domain/normalization/profiles/semanticscholar_publication.py",
+        ("uniprot", "idmapping"): "src/bioetl/domain/normalization/profiles/uniprot_idmapping.py",
+        ("uniprot", "protein"): "src/bioetl/domain/normalization/profiles/uniprot_protein.py",
+    }
+
+
 NORMALIZATION_PROFILE_REGISTRY = build_normalization_profile_registry()
+NORMALIZATION_PROFILE_MODULE_PATHS = build_normalization_profile_module_paths()
 
 
 def resolve_normalization_profile(
@@ -92,3 +123,14 @@ def resolve_normalization_profile(
     if coordinates is None:
         return None
     return NORMALIZATION_PROFILE_REGISTRY.get(coordinates)
+
+
+def resolve_normalization_profile_module_path(
+    provider: str,
+    entity_type: str | None,
+) -> str | None:
+    """Resolve one shipped normalization profile source-module path by provider/entity."""
+    coordinates = normalize_normalization_profile_coordinates(provider, entity_type)
+    if coordinates is None:
+        return None
+    return NORMALIZATION_PROFILE_MODULE_PATHS.get(coordinates)

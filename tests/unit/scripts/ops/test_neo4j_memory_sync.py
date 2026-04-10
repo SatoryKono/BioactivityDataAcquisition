@@ -10,6 +10,7 @@ from scripts.ops.neo4j_memory_sync import (
     DEFAULT_LEGACY_PRUNE_LABELS,
     DEFAULT_MANAGED_BY,
     _delete_managed_wave_nodes_statement,
+    NodeKey,
     build_snapshot,
     derive_http_uri,
     _node_statement,
@@ -78,6 +79,8 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("dashboard_surface", "bioetl-overview-v2") in node_keys
     assert ("doc_source_surface", "architecture diagrams hub") in node_keys
     assert ("doc_source_surface", "diagram governance workflow") in node_keys
+    assert ("doc_source_surface", "normalization plan") in node_keys
+    assert ("doc_source_surface", "pipeline normalization matrix") in node_keys
     assert ("policy_surface", "integration and VCR execution policy") in node_keys
     assert ("policy_surface", "diagram governance policy") in node_keys
     assert ("script_surface", "scripts/dev/run_pytest.sh") in node_keys
@@ -85,6 +88,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("script_surface", "scripts/docs/__main__.py") in node_keys
     assert ("script_surface", "scripts/schema/__main__.py") in node_keys
     assert ("script_surface", "scripts/ops/__main__.py") in node_keys
+    assert ("script_surface", "scripts/qa/__main__.py") in node_keys
     assert ("port_surface", "bioetl.domain.ports") in node_keys
     assert (
         "port_surface",
@@ -102,7 +106,15 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("execution_path", "uv run python -m scripts.diagrams lint") in node_keys
     assert ("execution_path", "uv run python -m scripts.docs verify") in node_keys
     assert ("execution_path", "uv run python -m scripts.schema validate-configs") in node_keys
+    assert (
+        "execution_path",
+        "uv run python -m scripts.docs generate-pipeline-normalization-matrix --check",
+    ) in node_keys
     assert ("execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json") in node_keys
+    assert (
+        "execution_path",
+        "python -m scripts.qa report-normalization-fallback-inventory --limit 20",
+    ) in node_keys
     assert ("quality_gate", "diagram quality gates") in node_keys
     assert any(label == "duplication_cluster" for label, _ in node_keys)
     assert (
@@ -257,6 +269,41 @@ def test_snapshot_contains_expected_relations() -> None:
 
     _assert_relation_membership(relation_keys, EXPECTED_RELATION_KEYS)
     _assert_relation_absence(relation_keys, FORBIDDEN_RELATION_KEYS)
+
+
+def test_snapshot_enriches_current_normalization_topology() -> None:
+    _, snapshot = _snapshot()
+
+    chembl_activity = snapshot.nodes[NodeKey("pipeline_surface", "chembl_activity")]
+    assert chembl_activity.properties["normalization_profile_registered"] is True
+    assert (
+        chembl_activity.properties["normalization_profile_module_path"]
+        == "src/bioetl/domain/normalization/profiles/chembl_activity.py"
+    )
+    assert int(chembl_activity.properties["profile_field_count"]) > 0
+
+    assay_parameters = snapshot.nodes[NodeKey("pipeline_surface", "chembl_assay_parameters")]
+    assert assay_parameters.properties["normalization_profile_registered"] is False
+    assert int(assay_parameters.properties["fallback_business_field_count"]) > 0
+    assert int(assay_parameters.properties["fallback_field_count"]) >= int(
+        assay_parameters.properties["fallback_business_field_count"]
+    )
+
+    relation_keys = _relation_keys(snapshot)
+    assert (
+        "pipeline_surface",
+        "crossref_publication",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/normalization/profiles/crossref_publication.py",
+    ) in relation_keys
+    assert (
+        "entity_config",
+        "crossref_publication",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/normalization/profiles/crossref_publication.py",
+    ) in relation_keys
 
 
 def test_snapshot_contains_duplication_clusters_with_promotion_targets() -> None:

@@ -38,7 +38,7 @@ def bind_record_context(
     raw_record: BronzeRecord,
 ) -> PipelineContext:
     """Create a per-record logger context for transformation."""
-    return context.bind_logger(
+    return context.with_source_batch_id(batch_id).bind_logger(
         batch_id=str(batch_id),
         entity_id=raw_record.get("activity_id"),
     )

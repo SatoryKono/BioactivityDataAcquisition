@@ -17,10 +17,13 @@ from bioetl.domain.normalization.profiles import (
     UNIPROT_PROTEIN_PROFILE,
 )
 from bioetl.domain.normalization.profiles.registry import (
+    NORMALIZATION_PROFILE_MODULE_PATHS,
     NORMALIZATION_PROFILE_REGISTRY,
+    build_normalization_profile_module_paths,
     build_normalization_profile_registry,
     normalize_normalization_profile_coordinates,
     resolve_normalization_profile,
+    resolve_normalization_profile_module_path,
 )
 
 
@@ -50,6 +53,25 @@ def test_registry_contains_canonical_chembl_activity_profile() -> None:
 
 def test_build_registry_matches_exported_registry() -> None:
     assert build_normalization_profile_registry() == NORMALIZATION_PROFILE_REGISTRY
+
+
+def test_build_module_paths_match_exported_mapping() -> None:
+    assert build_normalization_profile_module_paths() == NORMALIZATION_PROFILE_MODULE_PATHS
+
+
+def test_registry_exports_canonical_profile_module_paths() -> None:
+    assert (
+        NORMALIZATION_PROFILE_MODULE_PATHS[("chembl", "activity")]
+        == "src/bioetl/domain/normalization/profiles/chembl_activity.py"
+    )
+    assert (
+        NORMALIZATION_PROFILE_MODULE_PATHS[("crossref", "publication")]
+        == "src/bioetl/domain/normalization/profiles/crossref_publication.py"
+    )
+    assert (
+        NORMALIZATION_PROFILE_MODULE_PATHS[("uniprot", "protein")]
+        == "src/bioetl/domain/normalization/profiles/uniprot_protein.py"
+    )
 
 
 def test_registry_contains_additional_publication_and_compound_profiles() -> None:
@@ -103,3 +125,15 @@ def test_resolve_profile_uses_registry_coordinates() -> None:
     assert resolve_normalization_profile(" UniProt ", " IdMapping ") is UNIPROT_IDMAPPING_PROFILE
     assert resolve_normalization_profile(" UniProt ", " Protein ") is UNIPROT_PROTEIN_PROFILE
     assert resolve_normalization_profile("chembl", None) is None
+
+
+def test_resolve_profile_module_path_uses_registry_coordinates() -> None:
+    assert (
+        resolve_normalization_profile_module_path(" ChEMBL ", " Activity ")
+        == "src/bioetl/domain/normalization/profiles/chembl_activity.py"
+    )
+    assert (
+        resolve_normalization_profile_module_path(" SemanticScholar ", " Publication ")
+        == "src/bioetl/domain/normalization/profiles/semanticscholar_publication.py"
+    )
+    assert resolve_normalization_profile_module_path("chembl", None) is None

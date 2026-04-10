@@ -29,6 +29,8 @@ T = TypeVar("T")
 BIOETL_METRIC_PATTERN = re.compile(r"\bbioetl_[a-zA-Z0-9_:]+")
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
+if str(DEFAULT_ROOT) not in sys.path:
+    sys.path.insert(0, str(DEFAULT_ROOT))
 DEFAULT_BATCH_SIZE = 20
 DEFAULT_INGEST_WAVE = "repo_sync_v1"
 DEFAULT_MANAGED_BY = "neo4j_memory_sync"
@@ -169,6 +171,16 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
         "name": "testing guide",
         "path": "docs/03-guides/testing.md",
         "summary": "Published testing strategy guide.",
+    },
+    {
+        "name": "normalization plan",
+        "path": "docs/05-engineering/normalization_plan_P0_P6.md",
+        "summary": "Canonical normalization architecture, evidence governance, and rollout plan.",
+    },
+    {
+        "name": "pipeline normalization matrix",
+        "path": "docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md",
+        "summary": "Generated field-level normalization evidence for entity and composite pipelines.",
     },
     {
         "name": "dashboard extension guide",
@@ -556,6 +568,29 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
                 "platform": "ci_uv",
                 "summary": "Canonical docs link/spec/config verification path.",
                 "gate": "docs verification",
+            },
+            {
+                "name": "uv run python -m scripts.docs generate-pipeline-normalization-matrix --check",
+                "platform": "ci_uv",
+                "summary": "Canonical drift check for the published pipeline normalization matrix artifact.",
+            },
+        ),
+    },
+    {
+        "readme_path": "scripts/qa/README.md",
+        "readme_summary": "QA tooling catalog covering architecture checks, debt telemetry, and normalization inventory reporting.",
+        "entrypoint_path": "scripts/qa/__main__.py",
+        "entrypoint_summary": "Unified Python entrypoint for QA checks and normalization inventory reporting workflows.",
+        "execution_paths": (
+            {
+                "name": "python -m scripts.qa",
+                "platform": "cross_platform",
+                "summary": "Unified local entrypoint for QA tooling commands.",
+            },
+            {
+                "name": "python -m scripts.qa report-normalization-fallback-inventory --limit 20",
+                "platform": "cross_platform",
+                "summary": "Canonical report-only inventory path for current fallback normalization debt.",
             },
         ),
     },
@@ -1295,17 +1330,17 @@ def _signature_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
 
 
 class _ShapeNormalizer(ast.NodeTransformer):
-    def visit_arg(self, node: ast.arg) -> ast.arg:  # noqa: N802
+    def visit_arg(self, node: ast.arg) -> ast.arg:
         return ast.copy_location(ast.arg(arg="ARG", annotation=None, type_comment=None), node)
 
-    def visit_Name(self, node: ast.Name) -> ast.AST:  # noqa: N802
+    def visit_Name(self, node: ast.Name) -> ast.AST:
         return ast.copy_location(ast.Name(id="VAR", ctx=node.ctx), node)
 
-    def visit_Attribute(self, node: ast.Attribute) -> ast.AST:  # noqa: N802
+    def visit_Attribute(self, node: ast.Attribute) -> ast.AST:
         value = self.visit(node.value)
         return ast.copy_location(ast.Attribute(value=value, attr="ATTR", ctx=node.ctx), node)
 
-    def visit_Constant(self, node: ast.Constant) -> ast.AST:  # noqa: N802
+    def visit_Constant(self, node: ast.Constant) -> ast.AST:
         value = node.value
         if value is None or isinstance(value, bool):
             return node
@@ -2382,6 +2417,7 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
     contract_nodes = _add_contract_surfaces(snapshot, root, project, today, memory_mapping)
     pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
     _add_pipeline_normalization_edges(snapshot, pipeline_nodes, memory_mapping)
+    _add_pipeline_normalization_evidence(snapshot, pipeline_nodes)
     _add_pipeline_test_edges(snapshot, root, pipeline_nodes, memory_mapping)
     _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes, contract_nodes, memory_mapping)
     _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
@@ -3900,6 +3936,130 @@ def _add_pipeline_normalization_edges(
                 snapshot.add_relation(entity_key, entity_relation_type, module_key, provenance="impact_normalization")
 
 
+def _build_normalization_pipeline_evidence() -> dict[str, dict[str, JsonValue]]:
+    from bioetl.domain.normalization.profiles.registry import (
+        NORMALIZATION_PROFILE_REGISTRY,
+        resolve_normalization_profile_module_path,
+    )
+    from scripts.docs.generate_pipeline_normalization_field_matrix import (
+        FALLBACK_BUSINESS,
+        FALLBACK_TECHNICAL_PASSTHROUGH,
+        build_field_matrix_rows,
+    )
+
+    evidence: dict[str, dict[str, JsonValue]] = {}
+    for row in build_field_matrix_rows():
+        pipeline_name = str(row.get("pipeline_name", "")).strip()
+        pipeline_kind = str(row.get("pipeline_kind", "")).strip()
+        if not pipeline_name or pipeline_kind != "entity":
+            continue
+        payload = evidence.setdefault(
+            pipeline_name,
+            {
+                "profile_field_count": 0,
+                "fallback_field_count": 0,
+                "fallback_business_field_count": 0,
+                "fallback_technical_passthrough_field_count": 0,
+            },
+        )
+        source = str(row.get("normalization_source", "")).strip()
+        if source == "profile":
+            payload["profile_field_count"] = int(payload["profile_field_count"]) + 1
+            continue
+        payload["fallback_field_count"] = int(payload["fallback_field_count"]) + 1
+        if source == FALLBACK_BUSINESS:
+            payload["fallback_business_field_count"] = (
+                int(payload["fallback_business_field_count"]) + 1
+            )
+        elif source == FALLBACK_TECHNICAL_PASSTHROUGH:
+            payload["fallback_technical_passthrough_field_count"] = (
+                int(payload["fallback_technical_passthrough_field_count"]) + 1
+            )
+
+    for provider, entity in NORMALIZATION_PROFILE_REGISTRY:
+        pipeline_name = f"{provider}_{entity}"
+        payload = evidence.setdefault(
+            pipeline_name,
+            {
+                "profile_field_count": 0,
+                "fallback_field_count": 0,
+                "fallback_business_field_count": 0,
+                "fallback_technical_passthrough_field_count": 0,
+            },
+        )
+        payload["normalization_profile_registered"] = True
+        module_path = resolve_normalization_profile_module_path(provider, entity)
+        if module_path is not None:
+            payload["normalization_profile_module_path"] = module_path
+
+    for payload in evidence.values():
+        payload.setdefault("normalization_profile_registered", False)
+
+    return evidence
+
+
+def _add_pipeline_normalization_evidence(
+    snapshot: GraphSnapshot,
+    pipeline_nodes: dict[str, NodeKey],
+) -> None:
+    evidence_by_pipeline = _build_normalization_pipeline_evidence()
+
+    for pipeline_name, evidence in evidence_by_pipeline.items():
+        pipeline_key = pipeline_nodes.get(pipeline_name)
+        if pipeline_key is None:
+            continue
+
+        module_path = evidence.get("normalization_profile_module_path")
+        pipeline = snapshot.add_node(
+            "pipeline_surface",
+            pipeline_name,
+            normalization_profile_registered=bool(
+                evidence.get("normalization_profile_registered", False)
+            ),
+            normalization_profile_module_path=(
+                str(module_path) if isinstance(module_path, str) and module_path else None
+            ),
+            profile_field_count=int(evidence.get("profile_field_count", 0)),
+            fallback_field_count=int(evidence.get("fallback_field_count", 0)),
+            fallback_business_field_count=int(
+                evidence.get("fallback_business_field_count", 0)
+            ),
+            fallback_technical_passthrough_field_count=int(
+                evidence.get("fallback_technical_passthrough_field_count", 0)
+            ),
+        )
+
+        entity_key = NodeKey("entity_config", pipeline_name)
+        if entity_key in snapshot.nodes:
+            snapshot.add_node(
+                "entity_config",
+                pipeline_name,
+                normalization_profile_registered=bool(
+                    evidence.get("normalization_profile_registered", False)
+                ),
+                normalization_profile_module_path=(
+                    str(module_path) if isinstance(module_path, str) and module_path else None
+                ),
+                profile_field_count=int(evidence.get("profile_field_count", 0)),
+                fallback_field_count=int(evidence.get("fallback_field_count", 0)),
+                fallback_business_field_count=int(
+                    evidence.get("fallback_business_field_count", 0)
+                ),
+                fallback_technical_passthrough_field_count=int(
+                    evidence.get("fallback_technical_passthrough_field_count", 0)
+                ),
+            )
+
+        if not isinstance(module_path, str) or not module_path:
+            continue
+        module_key = NodeKey("module_surface", module_path)
+        if module_key not in snapshot.nodes:
+            continue
+        snapshot.add_relation(pipeline, "DEPENDS_ON", module_key, provenance="normalization_registry")
+        if entity_key in snapshot.nodes:
+            snapshot.add_relation(entity_key, "DEPENDS_ON", module_key, provenance="normalization_registry")
+
+
 def _add_pipeline_test_edges(
     snapshot: GraphSnapshot,
     root: Path,
@@ -4220,7 +4380,7 @@ class Neo4jHttpClient:
     def execute(self, statements: list[dict[str, JsonValue]]) -> dict[str, object]:
         payload = json.dumps({"statements": statements}).encode("utf-8")
         last_exc: Exception | None = None
-        for attempt in range(3):
+        for attempt in range(12):
             req = request.Request(self._endpoint, data=payload, headers=self._headers, method="POST")
             try:
                 with request.urlopen(req, timeout=60) as response:
@@ -4238,9 +4398,9 @@ class Neo4jHttpClient:
                     self._endpoint = self._fallback_endpoint
                     self._fallback_endpoint = None
                     continue
-                if attempt == 2:
+                if attempt == 11:
                     raise RuntimeError(f"Failed to reach Neo4j HTTP endpoint {self._endpoint}: {exc}") from exc
-                time.sleep(0.5 * (attempt + 1))
+                time.sleep(min(3.0, 0.5 * (attempt + 1)))
         else:  # pragma: no cover - loop always breaks or raises
             raise RuntimeError(f"Failed to reach Neo4j HTTP endpoint {self._endpoint}: {last_exc}")
         body = json.loads(raw)
@@ -4395,6 +4555,33 @@ def _prune_legacy_unmanaged_nodes_statement(managed_labels: list[str]) -> dict[s
     }
 
 
+def _without_development_cycle_live_sync(snapshot: GraphSnapshot) -> GraphSnapshot:
+    filtered = GraphSnapshot()
+    skipped_label = "development_cycle_surface"
+    skipped_relation_types = {"OWNED_BY_CYCLE", "BLOCKED_FROM_DELETION_BY"}
+
+    for node in snapshot.nodes.values():
+        if node.key.label == skipped_label:
+            continue
+        filtered.add_node(node.key.label, node.key.name, **node.properties)
+
+    for relation in snapshot.relations.values():
+        if relation.relation_type in skipped_relation_types:
+            continue
+        if relation.source.label == skipped_label or relation.target.label == skipped_label:
+            continue
+        if relation.source not in filtered.nodes or relation.target not in filtered.nodes:
+            continue
+        filtered.add_relation(
+            relation.source,
+            relation.relation_type,
+            relation.target,
+            **relation.properties,
+        )
+
+    return filtered
+
+
 def sync_snapshot(
     snapshot: GraphSnapshot,
     root: Path,
@@ -4418,6 +4605,10 @@ def sync_snapshot(
         only_retirement_layer=only_retirement_layer,
         only_complexity_layer=only_complexity_layer,
     )
+    # Workaround: development_cycle_surface consistently destabilizes the live
+    # Neo4j container on Windows-host HTTP sync. Keep it in snapshot/export
+    # flows, but exclude it from live writes until the backend issue is root-caused.
+    snapshot = _without_development_cycle_live_sync(snapshot)
     managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
     node_groups: dict[str, list[dict[str, JsonValue]]] = {}
     for node in snapshot.nodes.values():
@@ -4442,26 +4633,37 @@ def sync_snapshot(
                 if deleted == 0:
                     break
     _execute_grouped_statements(client, core_node_groups, batch_size, "core node")
-    analysis_node_batch_size = 1 if "complexity_candidate" in analysis_node_groups else max(1, min(batch_size, 10))
+    if "complexity_candidate" in analysis_node_groups or "development_cycle_surface" in analysis_node_groups:
+        analysis_node_batch_size = 1
+    elif "retirement_candidate" in analysis_node_groups:
+        analysis_node_batch_size = max(1, min(batch_size, 5))
+    else:
+        analysis_node_batch_size = max(1, min(batch_size, 10))
     _execute_grouped_statements(client, analysis_node_groups, analysis_node_batch_size, "analysis node")
     if prune_stale and relation_groups:
         relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
         client.execute([_reset_managed_relations_statement(relation_types)])
     _execute_grouped_statements(client, core_relation_groups, batch_size, "core relation")
+    analysis_relation_batch_size = (
+        max(1, min(batch_size, 3))
+        if "CANDIDATE_FOR_REMOVAL" in analysis_relation_groups
+        else max(1, min(batch_size, 5))
+    )
     _execute_grouped_statements(
         client,
         analysis_relation_groups,
-        max(1, min(batch_size, 5)),
+        analysis_relation_batch_size,
         "analysis relation",
     )
     _retry_critical_analysis_groups(client, analysis_node_groups, analysis_relation_groups, batch_size)
+    targeted_mode = only_analysis_layer or only_retirement_layer or only_complexity_layer or bool(only_labels)
     _verify_expected_group_counts(
         client,
-        analysis_node_groups if only_analysis_layer or only_labels else {},
-        analysis_relation_groups if only_analysis_layer or only_labels else {},
-        strict_analysis=not (only_analysis_layer or only_labels),
+        analysis_node_groups if targeted_mode else {},
+        analysis_relation_groups if targeted_mode else {},
+        strict_analysis=not targeted_mode,
     )
-    if only_analysis_layer or only_labels:
+    if targeted_mode:
         _verify_expected_group_counts(
             client,
             node_groups,
@@ -4552,11 +4754,15 @@ def _retry_critical_analysis_groups(
     batch_size: int,
 ) -> None:
     retry_batch_size = max(1, min(batch_size, 5))
+    active_node_labels = [label for label in CRITICAL_ANALYSIS_NODE_LABELS if label in node_groups]
+    active_relation_types = [
+        relation_type for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES if relation_type in relation_groups
+    ]
 
     missing_node_labels = [
         label
-        for label in CRITICAL_ANALYSIS_NODE_LABELS
-        if label in node_groups and _live_managed_node_count(client, label) != len(node_groups[label])
+        for label in active_node_labels
+        if _live_managed_node_count(client, label) != len(node_groups[label])
     ]
     if missing_node_labels:
         _execute_grouped_statements(
@@ -4568,9 +4774,8 @@ def _retry_critical_analysis_groups(
 
     missing_relation_types = [
         relation_type
-        for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
-        if relation_type in relation_groups
-        and _live_managed_relation_count(client, relation_type) != len(relation_groups[relation_type])
+        for relation_type in active_relation_types
+        if _live_managed_relation_count(client, relation_type) != len(relation_groups[relation_type])
     ]
     if missing_relation_types:
         _execute_grouped_statements(
@@ -4581,18 +4786,14 @@ def _retry_critical_analysis_groups(
         )
 
     missing_after_retry: list[str] = []
-    for label in CRITICAL_ANALYSIS_NODE_LABELS:
-        if label not in node_groups:
-            continue
+    for label in active_node_labels:
         live_count = _live_managed_node_count(client, label)
         expected = len(node_groups[label])
         if live_count != expected:
             missing_after_retry.append(
                 f"label `{label}` expected {expected}, live managed {live_count}"
             )
-    for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES:
-        if relation_type not in relation_groups:
-            continue
+    for relation_type in active_relation_types:
         live_count = _live_managed_relation_count(client, relation_type)
         expected = len(relation_groups[relation_type])
         if live_count != expected:
@@ -4654,10 +4855,11 @@ def _verify_expected_group_counts(
             mismatches.append(f"relation `{relation_type}` expected {expected}, live managed {live_count}")
 
     if strict_analysis:
+        active_tokens = tuple(node_groups) + tuple(relation_groups)
         critical_mismatches = [
             mismatch
             for mismatch in mismatches
-            if any(token in mismatch for token in (*CRITICAL_ANALYSIS_NODE_LABELS, *CRITICAL_ANALYSIS_RELATION_TYPES))
+            if any(token in mismatch for token in active_tokens)
         ]
         if critical_mismatches:
             raise RuntimeError(

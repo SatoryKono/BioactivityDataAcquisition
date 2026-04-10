@@ -65,6 +65,7 @@ class QuarantineManagerService:
         quarantine_port: QuarantinePort,
         pipeline_name: str,
         metrics: MetricsPort | None = None,
+        pipeline_metrics: PipelineMetricsRecorder | None = None,
     ) -> None:
         """Initialize QuarantineManager with explicit dependencies.
 
@@ -73,12 +74,19 @@ class QuarantineManagerService:
             pipeline_name: Name of the pipeline for identification.
             metrics: Optional metrics port for incrementing quarantine record
                 counters per pipeline and error reason.
+            pipeline_metrics: Optional prebuilt pipeline-scoped metrics recorder.
 
         """
         self._quarantine = quarantine_port
         self._pipeline_name = pipeline_name
         self._metrics = metrics
-        self._pipeline_metrics = PipelineMetricsRecorder(metrics, pipeline_name)
+        resolved_pipeline_metrics = pipeline_metrics
+        if resolved_pipeline_metrics is None:
+            resolved_pipeline_metrics = PipelineMetricsRecorder(
+                metrics,
+                pipeline_name,
+            )
+        self._pipeline_metrics = resolved_pipeline_metrics
 
     def _track_quarantine_metrics(self, error_type: ErrorType, count: int) -> None:
         """Emit quarantine metrics through both legacy and current metric APIs."""

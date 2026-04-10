@@ -9,12 +9,20 @@ from pathlib import Path
 from typing import Final, TypedDict
 
 try:
-    from scripts.ops.neo4j_memory_sync import JsonValue, Neo4jHttpClient, resolve_neo4j_connection
+    from scripts.ops.neo4j_memory_sync import (
+        JsonValue,
+        Neo4jHttpClient,
+        resolve_neo4j_connection,
+    )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution path
     import sys
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-    from scripts.ops.neo4j_memory_sync import JsonValue, Neo4jHttpClient, resolve_neo4j_connection
+    from scripts.ops.neo4j_memory_sync import (
+        JsonValue,
+        Neo4jHttpClient,
+        resolve_neo4j_connection,
+    )
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -85,6 +93,16 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "mode": "neighbors",
         "target_label": "alert_surface",
         "title": "Alert semantic neighborhood",
+    },
+    "normalization-pipeline": {
+        "mode": "normalization_pipeline",
+        "target_label": "pipeline_surface",
+        "title": "Pipeline normalization evidence",
+    },
+    "fallback-pipelines": {
+        "mode": "fallback_pipelines",
+        "target_label": "pipeline_surface",
+        "title": "Fallback-heavy pipelines",
     },
     "duplication-cluster": {
         "mode": "duplication_cluster",
@@ -231,6 +249,44 @@ def _duplication_cluster_statement() -> str:
         "  ELSE {name: member.name, labels: labels(member)} "
         "END) AS members, "
         "collect(DISTINCT test.name) AS tests"
+    )
+
+
+def _normalization_pipeline_statement() -> str:
+    return (
+        "MATCH (pipeline:pipeline_surface {name: $name}) "
+        "WHERE pipeline.pipeline_kind = 'entity' "
+        "OPTIONAL MATCH (pipeline)-[rel:DEPENDS_ON]->(module:module_surface) "
+        "WHERE coalesce(rel.provenance, '') IN ['impact_normalization', 'normalization_registry'] "
+        "RETURN pipeline.name AS pipeline_name, "
+        "pipeline.provider AS provider, "
+        "pipeline.entity AS entity, "
+        "pipeline.normalization_profile_registered AS normalization_profile_registered, "
+        "pipeline.normalization_profile_module_path AS normalization_profile_module_path, "
+        "pipeline.profile_field_count AS profile_field_count, "
+        "pipeline.fallback_field_count AS fallback_field_count, "
+        "pipeline.fallback_business_field_count AS fallback_business_field_count, "
+        "pipeline.fallback_technical_passthrough_field_count AS fallback_technical_passthrough_field_count, "
+        "collect(DISTINCT module.name) AS normalization_modules"
+    )
+
+
+def _fallback_pipelines_statement() -> str:
+    return (
+        "MATCH (pipeline:pipeline_surface) "
+        "WHERE pipeline.pipeline_kind = 'entity' "
+        "AND coalesce(pipeline.fallback_business_field_count, 0) > 0 "
+        "AND ($name = 'all' OR pipeline.name = $name) "
+        "RETURN pipeline.name AS pipeline_name, "
+        "pipeline.provider AS provider, "
+        "pipeline.entity AS entity, "
+        "pipeline.normalization_profile_registered AS normalization_profile_registered, "
+        "pipeline.profile_field_count AS profile_field_count, "
+        "pipeline.fallback_field_count AS fallback_field_count, "
+        "pipeline.fallback_business_field_count AS fallback_business_field_count, "
+        "pipeline.fallback_technical_passthrough_field_count AS fallback_technical_passthrough_field_count "
+        "ORDER BY pipeline.fallback_business_field_count DESC, pipeline.fallback_field_count DESC, pipeline.name ASC "
+        "LIMIT 25"
     )
 
 
@@ -396,6 +452,10 @@ def _run_query(
     if profile_config["mode"] == "neighbors":
         params["relation_types"] = list(DEFAULT_NEIGHBOR_RELATION_TYPES)
         statement = _neighbors_statement()
+    elif profile_config["mode"] == "normalization_pipeline":
+        statement = _normalization_pipeline_statement()
+    elif profile_config["mode"] == "fallback_pipelines":
+        statement = _fallback_pipelines_statement()
     elif profile_config["mode"] == "duplication_cluster":
         statement = _duplication_cluster_statement()
     elif profile_config["mode"] == "promotion_candidates":
@@ -426,6 +486,8 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             "owner": "no ownership path found",
             "neighbors": "no semantic neighbors found",
             "duplication_cluster": "no duplication cluster found",
+            "normalization_pipeline": "no pipeline normalization evidence found",
+            "fallback_pipelines": "no fallback-heavy pipelines found",
             "promotion_candidates": "no promotion candidates found",
             "dead_code_candidates": "no dead code candidates found",
             "current_cycle_code": "no current-cycle code surfaces found",
@@ -501,12 +563,48 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
         if isinstance(tests, list):
             normalized_tests = sorted(
                 {
-                    f"- covered_by_test={str(test_name)}"
+                    f"- covered_by_test={test_name!s}"
                     for test_name in tests
                     if test_name is not None and str(test_name)
                 }
             )
             lines.extend(normalized_tests)
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "normalization_pipeline":
+        row = rows[0]
+        lines = [f"{title}: `{name}`"]
+        lines.append(
+            "- "
+            f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
+            f"profile_fields={int(row.get('profile_field_count') or 0)} | "
+            f"fallback_fields={int(row.get('fallback_field_count') or 0)} | "
+            f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
+            f"fallback_technical={int(row.get('fallback_technical_passthrough_field_count') or 0)}"
+        )
+        module_path = str(row.get("normalization_profile_module_path") or "")
+        if module_path:
+            lines.append(f"- profile_module={module_path}")
+        modules = row.get("normalization_modules")
+        if isinstance(modules, list):
+            for module in sorted({str(item) for item in modules if str(item)}):
+                lines.append(f"- normalization_module={module}")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "fallback_pipelines":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            pipeline_name = str(row.get("pipeline_name") or "")
+            if not pipeline_name:
+                continue
+            lines.append(
+                "- "
+                f"pipeline={pipeline_name} | "
+                f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
+                f"fallback_total={int(row.get('fallback_field_count') or 0)} | "
+                f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
+                f"profile_fields={int(row.get('profile_field_count') or 0)}"
+            )
         return "\n".join(lines)
 
     if profile_config["mode"] == "promotion_candidates":
@@ -610,11 +708,11 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             stateful_str = ",".join(str(marker) for marker in stateful_markers) if isinstance(stateful_markers, list) else ""
             blocked_suffix = f" | blocked_by={blocked_by_cycle}" if blocked_by_cycle else ""
             lines.append(
-                f"- target={target_name} | label={str(row.get('target_label') or '')} | family={str(row.get('family_name') or '')} "
-                f"| classification={str(row.get('classification') or '')} | complexity_score={str(row.get('complexity_score') or '')} "
-                f"| simplification_score={str(row.get('simplification_score') or '')} | removable_score={str(row.get('removable_score') or '')} "
-                f"| branches={str(row.get('branch_count') or '')} | nesting={str(row.get('nesting_depth') or '')} "
-                f"| helper_calls={str(row.get('helper_call_count') or '')}{blocked_suffix}"
+                f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
+                f"| classification={row.get('classification') or ''!s} | complexity_score={row.get('complexity_score') or ''!s} "
+                f"| simplification_score={row.get('simplification_score') or ''!s} | removable_score={row.get('removable_score') or ''!s} "
+                f"| branches={row.get('branch_count') or ''!s} | nesting={row.get('nesting_depth') or ''!s} "
+                f"| helper_calls={row.get('helper_call_count') or ''!s}{blocked_suffix}"
             )
             if indirection_str:
                 lines.append(f"  indirection_markers={indirection_str}")
@@ -634,10 +732,10 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             marker_str = ",".join(str(marker) for marker in deprecation_markers) if isinstance(deprecation_markers, list) else ""
             marker_suffix = f" | deprecation_markers={marker_str}" if marker_str else ""
             lines.append(
-                f"- target={target_name} | label={str(row.get('target_label') or '')} | family={str(row.get('family_name') or '')} "
-                f"| removable_score={str(row.get('removable_score') or '')} | removal_confidence={str(row.get('removal_confidence') or '')} "
-                f"| runtime={str(row.get('runtime_anchor_count') or '')} | config={str(row.get('config_anchor_count') or '')} "
-                f"| docs={str(row.get('doc_anchor_count') or '')} | tests={str(row.get('test_anchor_count') or '')}{marker_suffix}"
+                f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
+                f"| removable_score={row.get('removable_score') or ''!s} | removal_confidence={row.get('removal_confidence') or ''!s} "
+                f"| runtime={row.get('runtime_anchor_count') or ''!s} | config={row.get('config_anchor_count') or ''!s} "
+                f"| docs={row.get('doc_anchor_count') or ''!s} | tests={row.get('test_anchor_count') or ''!s}{marker_suffix}"
             )
         if len(lines) == 1:
             lines.append("- no removable complexity candidates found")
@@ -650,10 +748,10 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             if not target_name:
                 continue
             lines.append(
-                f"- target={target_name} | label={str(row.get('target_label') or '')} | family={str(row.get('family_name') or '')} "
-                f"| classification={str(row.get('classification') or '')} | runtime={str(row.get('runtime_anchor_count') or '')} "
-                f"| config={str(row.get('config_anchor_count') or '')} | docs={str(row.get('doc_anchor_count') or '')} "
-                f"| tests={str(row.get('test_anchor_count') or '')}"
+                f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
+                f"| classification={row.get('classification') or ''!s} | runtime={row.get('runtime_anchor_count') or ''!s} "
+                f"| config={row.get('config_anchor_count') or ''!s} | docs={row.get('doc_anchor_count') or ''!s} "
+                f"| tests={row.get('test_anchor_count') or ''!s}"
             )
             cycle_blockers = row.get("cycle_blockers")
             if isinstance(cycle_blockers, list):

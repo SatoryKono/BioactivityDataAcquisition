@@ -76,6 +76,11 @@ def _build_payload(rows: list[dict[str, str]]) -> dict[str, object]:
     }
 
 
+def build_fallback_inventory_payload() -> dict[str, object]:
+    """Return the current fallback normalization inventory payload."""
+    return _build_payload(_fallback_rows())
+
+
 def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
     fallback_field_count = int(payload["fallback_field_count"])
     pipelines = payload["pipelines"]
@@ -164,8 +169,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
 
-    rows = _fallback_rows()
-    payload = _build_payload(rows)
+    payload = build_fallback_inventory_payload()
     markdown = _render_markdown(payload, limit=args.limit)
 
     if args.json_out is not None:
