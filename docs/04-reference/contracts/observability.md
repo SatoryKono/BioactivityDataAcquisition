@@ -7,17 +7,17 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-09'
+  Last verified: '2026-04-10'
 
 ______________________________________________________________________
 
 # BioETL Observability Specification (DD)
 
-Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-09**.
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-10**.
 
 - Статус: `active`
-- Версия: `3.4.0`
-- Scope: `logs + metrics + tracing + correlation + provider health + control plane + traceability`
+- Версия: `3.5.0`
+- Scope: `logs + metrics + tracing + correlation + provider health + control plane + audit + traceability`
 - Source of truth: код в `src/bioetl/**/observability*`, `src/bioetl/application/observability/*`, `src/bioetl/infrastructure/adapters/http/*`
 
 ## 1. Verification Evidence
@@ -99,12 +99,16 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
   `list[DQAnomaly]`
 - Postrun observability должна использовать structured spans/events для
   compaction, DQ evaluation, DQ report generation, vacuum и final metadata
+- `AuditPort` остаётся отдельным traceability/observability port и
+  инжектируется в Bronze/Silver/Gold runtime wiring из composition layer
 
 ## 3. Runtime Metrics Contract
 
-Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py` и экспортируется через `metrics_definitions.py`.
+Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py`
+и собирается через `prometheus_metric_registries.py`.
 
-Текущий размер каталога: **85** метрик (`metrics_export_names.py`).
+Текущий размер каталога: **86** метрик
+(`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`).
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
 
@@ -129,7 +133,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 | `bioetl_provider_health_status`                | Gauge     | `provider`                               | см. mapping ниже                                                                   |
 | `bioetl_circuit_breaker_state`                 | Gauge     | `adapter`                                | 0/1/2 mapping                                                                      |
 | `bioetl_dq_validation_score`                   | Gauge     | `pipeline,entity`                        | 0..1                                                                               |
-| `bioetl_data_freshness_seconds`                | Gauge     | `pipeline,entity`                        | unix timestamp последнего успешного ingestion; age считается как `time() - metric` |
+| `bioetl_data_freshness_seconds`                | Gauge     | `pipeline,entity`                        | unix timestamp последней успешной DQ/postrun freshness publication; age считается как `time() - metric` |
 | `bioetl_quarantine_operator_operations_total`  | Counter   | `operation,status`                       | bounded operator actions for inspect/replay/purge/update workflows                 |
 | `bioetl_quarantine_operator_duration_seconds`  | Histogram | `operation,status`                       | latency of quarantine operator workflows                                           |
 
@@ -232,6 +236,11 @@ alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/ob
 signal rather than a shipped Prometheus alert baseline. It tracks bounded
 composite arbitration activity (`decision_type`, `selected_source`) but does
 not, by itself, indicate an incident condition.
+
+`bioetl_data_freshness_seconds` currently reflects runtime freshness publication
+time, not an immutable upstream ingestion anchor. Alerts and SLO review should
+treat it as an operational staleness proxy until anchor-derived freshness is
+introduced in runtime code.
 
 ## 7. Error Taxonomy (domain canonical)
 
