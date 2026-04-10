@@ -245,15 +245,15 @@ class TestPrometheusMetricsClose:
 
 
 @pytest.mark.unit
-class TestPrometheusCustomCounters:
-    """Tests for convenience counter methods with bounded labels."""
+class TestPrometheusCounterLabelNormalization:
+    """Tests for bounded-label normalization via generic dispatch."""
 
-    def test_inc_quarantine_records_bounded_reason(self, prometheus_metrics):
+    def test_quarantine_records_total_normalizes_reason(self, prometheus_metrics):
         with patch.dict(COUNTERS, {"quarantine_records_total": MagicMock()}):
-            prometheus_metrics.inc_quarantine_records(
-                pipeline="chembl_activity",
-                reason="Unbounded Random Reason",
-                count=2,
+            prometheus_metrics.increment_counter(
+                "quarantine_records_total",
+                2,
+                {"pipeline": "chembl_activity", "reason": "Unbounded Random Reason"},
             )
 
             COUNTERS["quarantine_records_total"].labels.assert_called_once_with(
@@ -262,12 +262,16 @@ class TestPrometheusCustomCounters:
             )
             COUNTERS["quarantine_records_total"].labels().inc.assert_called_once_with(2)
 
-    def test_inc_dq_validation_failures_bounded_labels(self, prometheus_metrics):
+    def test_dq_validation_failures_total_normalizes_labels(self, prometheus_metrics):
         with patch.dict(COUNTERS, {"dq_validation_failures_total": MagicMock()}):
-            prometheus_metrics.inc_dq_validation_failures(
-                pipeline="chembl_activity",
-                stage="Threshold",
-                severity="SOFT-FAIL",
+            prometheus_metrics.increment_counter(
+                "dq_validation_failures_total",
+                1,
+                {
+                    "pipeline": "chembl_activity",
+                    "stage": "Threshold",
+                    "severity": "SOFT-FAIL",
+                },
             )
 
             COUNTERS["dq_validation_failures_total"].labels.assert_called_once_with(
@@ -279,15 +283,18 @@ class TestPrometheusCustomCounters:
                 "dq_validation_failures_total"
             ].labels().inc.assert_called_once_with(1)
 
-    def test_inc_silver_filter_rejections_bounded_labels(self, prometheus_metrics):
+    def test_silver_filter_rejections_total_normalizes_labels(self, prometheus_metrics):
         with patch.dict(COUNTERS, {"silver_filter_rejections_total": MagicMock()}):
-            prometheus_metrics.inc_silver_filter_rejections(
-                pipeline="chembl_activity",
-                run_type="incremental",
-                reason_code="Unbounded Random Reason",
-                rule_type="structural-policy",
-                field="totally_unknown_field",
-                count=3,
+            prometheus_metrics.increment_counter(
+                "silver_filter_rejections_total",
+                3,
+                {
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "reason_code": "Unbounded Random Reason",
+                    "rule_type": "structural-policy",
+                    "field": "totally_unknown_field",
+                },
             )
 
             COUNTERS["silver_filter_rejections_total"].labels.assert_called_once_with(

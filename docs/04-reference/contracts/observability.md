@@ -95,6 +95,9 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
   pipeline runs
 - Lifecycle phase emissions используют low-cardinality `phase` labels и не
   подменяются ad-hoc logging-only path
+- `MetricsPort` остаётся transport-level observability port; pipeline-specific
+  helper semantics должны жить в application-level facade/helper, а не в самом
+  generic port contract
 - `DQMonitorPort.check_quality()` возвращает typed domain anomalies:
   `list[DQAnomaly]`
 - Postrun observability должна использовать structured spans/events для

@@ -126,10 +126,13 @@ async def test_write_cv_quarantine_writes_records_and_emits_metric() -> None:
 
     assert runner._quarantine_port.write.await_count == 2
     runner._logger.info.assert_called_once()
-    runner._metrics.inc_quarantine_records.assert_called_once_with(
-        pipeline="composite:publication",
-        reason="cross_validation",
-        count=2,
+    runner._metrics.increment_counter.assert_called_once_with(
+        "quarantine_records_total",
+        2,
+        {
+            "pipeline": "composite:publication",
+            "reason": "cross_validation",
+        },
     )
 
 
@@ -160,8 +163,11 @@ async def test_write_cv_quarantine_handles_non_fatal_and_bioetl_errors() -> None
     assert any(
         item.get("reason_code") == "unexpected_bioetl_error" for item in warning_kwargs
     )
-    runner._metrics.inc_quarantine_records.assert_called_once_with(
-        pipeline="composite:publication",
-        reason="cross_validation",
-        count=1,
+    runner._metrics.increment_counter.assert_called_once_with(
+        "quarantine_records_total",
+        1,
+        {
+            "pipeline": "composite:publication",
+            "reason": "cross_validation",
+        },
     )

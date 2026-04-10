@@ -8,6 +8,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import NamedTuple
 
+from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.ports import MetricsPort, QuarantinePort, QuarantineWriteRequest
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict, RunID
 
@@ -77,6 +78,7 @@ class QuarantineManagerService:
         self._quarantine = quarantine_port
         self._pipeline_name = pipeline_name
         self._metrics = metrics
+        self._pipeline_metrics = PipelineMetricsRecorder(metrics, pipeline_name)
 
     def _track_quarantine_metrics(self, error_type: ErrorType, count: int) -> None:
         """Emit quarantine metrics through both legacy and current metric APIs."""
@@ -94,8 +96,7 @@ class QuarantineManagerService:
             count,
             {"pipeline": self._pipeline_name, "error_type": error_type.value},
         )
-        self._metrics.inc_quarantine_records(
-            pipeline=self._pipeline_name,
+        self._pipeline_metrics.record_quarantine_records(
             reason=error_type.value,
             count=count,
         )
@@ -219,8 +220,7 @@ class QuarantineManagerService:
             ingestion_ts=ingestion_ts,
         )
         if self._metrics:
-            self._metrics.inc_quarantine_records(
-                pipeline=self._pipeline_name,
+            self._pipeline_metrics.record_quarantine_records(
                 reason=error_code,
             )
 
@@ -254,8 +254,7 @@ class QuarantineManagerService:
         ]
         await self._quarantine.write_many(write_requests)
         if self._metrics:
-            self._metrics.inc_quarantine_records(
-                pipeline=self._pipeline_name,
+            self._pipeline_metrics.record_quarantine_records(
                 reason=error_code,
                 count=len(records),
             )
