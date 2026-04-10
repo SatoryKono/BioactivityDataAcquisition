@@ -119,8 +119,8 @@ def emit_health_check_observability(
 ) -> None:
     """Emit health-check latency, gauge, and outcome counters."""
     metrics.observe_histogram(
-        "health_check_latency_ms",
-        result.latency_ms,
+        "health_check_latency_seconds",
+        result.latency_ms / 1000.0,
         labels={"provider": result.provider},
     )
     metrics.set_gauge(

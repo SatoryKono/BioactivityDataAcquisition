@@ -332,6 +332,28 @@ class TestHealthCheckObservabilityCounters:
 
         assert failure_call is not None
 
+    def test_emit_health_check_observability_uses_seconds_histogram(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """Health-check latency must use the canonical seconds metric family."""
+        emit_health_check_observability(
+            metrics=mock_metrics,
+            result=HealthCheckResult(
+                status=HealthStatus.HEALTHY,
+                latency_ms=45.5,
+                provider="chembl",
+                endpoint="/health",
+            ),
+        )
+
+        mock_metrics.observe_histogram.assert_called_with(
+            "health_check_latency_seconds",
+            0.0455,
+            labels={"provider": "chembl"},
+        )
+        observed_metric_names = [call.args[0] for call in mock_metrics.observe_histogram.call_args_list]
+        assert "health_check_latency_ms" not in observed_metric_names
+
 
 class TestProviderHealthMonitorAdaptiveParams:
     """Tests for adaptive timeout/batch_size parameters."""
@@ -586,8 +608,8 @@ class TestProviderHealthMonitorUpdateFromResult:
 
         # Should have called observe_histogram for latency
         mock_metrics.observe_histogram.assert_called_with(
-            "health_check_latency_ms",
-            45.5,
+            "health_check_latency_seconds",
+            0.0455,
             labels={"provider": "chembl"},
         )
 

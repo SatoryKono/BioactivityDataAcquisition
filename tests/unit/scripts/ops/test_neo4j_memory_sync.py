@@ -37,6 +37,20 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     node_keys = {(key.label, key.name) for key in snapshot.nodes}
 
     assert ("project", "BioETL") in node_keys
+    assert ("repo_zone", "src") in node_keys
+    assert ("repo_zone", "docs") in node_keys
+    assert ("directory_surface", "src/bioetl/application/core") in node_keys
+    assert ("directory_surface", "configs/entities/chembl") in node_keys
+    assert ("directory_surface", "tests/architecture") in node_keys
+    assert ("directory_surface", "docs/02-architecture/diagrams") in node_keys
+    assert ("directory_surface", "scripts/ops") in node_keys
+    assert ("directory_surface", "grafana/dashboards") in node_keys
+    assert ("file_surface", "src/bioetl/application/core/record_normalization_processor.py") in node_keys
+    assert ("file_surface", "configs/entities/chembl/activity.yaml") in node_keys
+    assert ("file_surface", "docs/02-architecture/diagrams/README.md") in node_keys
+    assert ("file_surface", "scripts/ops/__main__.py") in node_keys
+    assert ("file_surface", "tests/architecture/test_diagram_quality_gates.py") in node_keys
+    assert ("file_surface", "grafana/dashboards/bioetl-runtime.json") in node_keys
     assert ("layer_family", "domain") in node_keys
     assert ("package_family", "domain/ports") in node_keys
     assert (
@@ -82,6 +96,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("package_family", "composition/__pycache__") not in node_keys
     assert ("package_family", "infrastructure/__pycache__") not in node_keys
     assert ("package_family", "interfaces/__pycache__") not in node_keys
+    assert ("directory_surface", "docs/99-archive") not in node_keys
+    assert ("directory_surface", "docs/reports/generated") not in node_keys
+    assert ("directory_surface", "scripts/archive") not in node_keys
+    assert ("directory_surface", "docs/02-architecture/diagrams/views/svg") not in node_keys
     assert ("package_family", "composition/control_plane_api.py") not in node_keys
     assert ("package_family", "interfaces/test_cli_checkpoint_list.py") not in node_keys
 
@@ -89,6 +107,22 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
 RelationKey = tuple[str, str, str, str, str]
 
 EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
+    ("project", "BioETL", "HAS_REPO_ZONE", "repo_zone", "src"),
+    ("repo_zone", "src", "CONTAINS", "directory_surface", "src"),
+    ("directory_surface", "src/bioetl/domain", "HOUSES", "layer_family", "domain"),
+    ("directory_surface", "src/bioetl/domain/config", "HOUSES", "package_family", "domain/config"),
+    ("directory_surface", "src/bioetl/application/core", "CONTAINS", "file_surface", "src/bioetl/application/core/record_normalization_processor.py"),
+    ("file_surface", "src/bioetl/application/core/record_normalization_processor.py", "BACKS", "module_surface", "src/bioetl/application/core/record_normalization_processor.py"),
+    ("directory_surface", "configs/entities/chembl", "CONTAINS", "file_surface", "configs/entities/chembl/activity.yaml"),
+    ("file_surface", "configs/entities/chembl/activity.yaml", "BACKS", "entity_config", "chembl_activity"),
+    ("directory_surface", "docs/02-architecture/diagrams", "CONTAINS", "file_surface", "docs/02-architecture/diagrams/README.md"),
+    ("file_surface", "docs/02-architecture/diagrams/README.md", "BACKS", "doc_artifact", "docs/02-architecture/diagrams/README.md"),
+    ("directory_surface", "scripts/ops", "CONTAINS", "file_surface", "scripts/ops/__main__.py"),
+    ("file_surface", "scripts/ops/__main__.py", "BACKS", "script_surface", "scripts/ops/__main__.py"),
+    ("directory_surface", "tests/architecture", "CONTAINS", "file_surface", "tests/architecture/test_diagram_quality_gates.py"),
+    ("file_surface", "tests/architecture/test_diagram_quality_gates.py", "BACKS", "test_artifact", "tests/architecture/test_diagram_quality_gates.py"),
+    ("directory_surface", "grafana/dashboards", "CONTAINS", "file_surface", "grafana/dashboards/bioetl-runtime.json"),
+    ("file_surface", "grafana/dashboards/bioetl-runtime.json", "BACKS", "dashboard_surface", "bioetl-runtime"),
     ("project", "BioETL", "HAS_PORT", "port_surface", "bioetl.domain.ports"),
     ("project", "BioETL", "HAS_ADAPTER", "adapter_surface", "bioetl.infrastructure.adapters.chembl"),
     ("project", "BioETL", "HAS_PIPELINE", "pipeline_surface", "chembl_activity"),
@@ -155,6 +189,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
 )
 
 FORBIDDEN_RELATION_KEYS: tuple[RelationKey, ...] = (
+    ("repo_zone", "docs", "CONTAINS", "directory_surface", "docs/99-archive"),
     ("pipeline_surface", "composite_activity", "OBSERVED_BY", "dashboard_surface", "bioetl-silver-reject-explorer"),
     ("alert_surface", "BioETLDQSoftThresholdExceeded", "DEPENDS_ON", "pipeline_surface", "composite_activity"),
     ("test_artifact", "tests/unit/scripts/ops/test_neo4j_memory_sync.py", "TESTS_LAYER", "layer_family", "scripts"),
@@ -243,6 +278,9 @@ def test_prune_statements_target_repo_sync_subgraph() -> None:
 def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
     expected_labels = {
         "project",
+        "repo_zone",
+        "directory_surface",
+        "file_surface",
         "doc_source_surface",
         "doc_artifact",
         "decision",

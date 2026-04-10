@@ -1,5 +1,38 @@
 version: "1.0.0"
 
+file_structure:
+  repo_zones:
+    src:
+      - "src"
+    configs:
+      - "configs"
+    tests:
+      - "tests"
+    docs:
+      - "docs"
+    scripts:
+      - "scripts"
+    grafana:
+      - "grafana"
+  excluded_dir_names:
+    - "__pycache__"
+  excluded_prefixes:
+    - "docs/99-archive"
+    - "docs/exports"
+    - "docs/reports/generated"
+    - "docs/02-architecture/generated"
+    - "docs/02-architecture/diagrams/bundles"
+    - "docs/02-architecture/diagrams/architecture/png"
+    - "docs/02-architecture/diagrams/architecture/svg"
+    - "docs/02-architecture/diagrams/class-diagrams/png"
+    - "docs/02-architecture/diagrams/class-diagrams/svg"
+    - "docs/02-architecture/diagrams/foundation/png"
+    - "docs/02-architecture/diagrams/foundation/svg"
+    - "docs/02-architecture/diagrams/views/png"
+    - "docs/02-architecture/diagrams/views/svg"
+    - "docs/02-architecture/diagrams/descriptions/legacy"
+    - "scripts/archive"
+
 adapters:
   fine_grained_enabled: true
 
