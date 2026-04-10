@@ -23,10 +23,23 @@ def test_runtime_metrics_bootstrap_uses_metrics_service_not_raw_infra_starter() 
     """Runtime bootstrap must use the composition-owned metrics service path."""
     source = METRICS_BOOTSTRAP_PATH.read_text(encoding="utf-8")
     tree = ast.parse(source)
+    forbidden_imports = set()
+    forbidden_calls = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                if alias.name == "start_metrics_server":
+                    forbidden_imports.add(alias.name)
+        if isinstance(node, ast.Call):
+            func = node.func
+            if isinstance(func, ast.Name) and func.id == "start_metrics_server":
+                forbidden_calls.add(func.id)
+            elif isinstance(func, ast.Attribute) and func.attr == "start_metrics_server":
+                forbidden_calls.add(func.attr)
 
-    assert "start_metrics_server" not in source, (
+    assert not forbidden_imports and not forbidden_calls, (
         "metrics_bootstrap.py must not call or import raw infrastructure "
-        "start_metrics_server; use bootstrap_metrics_service instead."
+        "start_metrics_server; use create_metrics_service instead."
     )
 
     function_node = _get_function_def(tree, "maybe_start_metrics_server")
@@ -35,7 +48,7 @@ def test_runtime_metrics_bootstrap_uses_metrics_service_not_raw_infra_starter() 
         for inner in ast.walk(function_node)
         if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Name)
     }
-    assert "bootstrap_metrics_service" in called_names or "service_factory" in source, (
+    assert "create_metrics_service" in called_names or "service_factory" in source, (
         "maybe_start_metrics_server must resolve a composition-owned metrics "
         "service and call its start() method."
     )

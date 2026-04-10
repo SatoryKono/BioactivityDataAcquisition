@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
+from bioetl.composition.bootstrap.assembly.metrics_service import (
+    create_metrics_service,
+)
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.observability import PrometheusMetrics
@@ -53,7 +55,7 @@ def maybe_start_metrics_server(
     Args:
         settings: Application settings providing metrics port, address, and flags.
         metrics_service_factory: Optional composition-owned service bootstrapper;
-            uses the default ``bootstrap_metrics_service`` when None.
+            uses the default shared ``create_metrics_service`` when None.
 
     Returns:
         True if the metrics server was started, False otherwise.
@@ -65,7 +67,7 @@ def maybe_start_metrics_server(
         return False
 
     obs = settings.observability
-    service_factory = metrics_service_factory or bootstrap_metrics_service
+    service_factory = metrics_service_factory or create_metrics_service
     service = service_factory()
     result = service.start(
         port=settings.metrics_port,

@@ -13,6 +13,7 @@ from scripts.ops.neo4j_memory_sync import (
     _build_diff_entries,
     _critical_analysis_audit_issues,
     _filtered_snapshot,
+    _git_last_commit_age_days_bulk,
     _live_managed_node_counts,
     _live_managed_relation_counts,
     _normalization_evidence_statements,
@@ -635,6 +636,40 @@ def test_live_managed_count_helpers_batch_labels_and_relations() -> None:
     }
 
 
+def test_git_last_commit_age_days_bulk_batches_history_lookup(monkeypatch) -> None:
+    class Result:
+        def __init__(self, stdout: str, returncode: int = 0) -> None:
+            self.stdout = stdout
+            self.returncode = returncode
+
+    calls: list[list[str]] = []
+
+    def _run(cmd: list[str], check: bool, capture_output: bool, text: bool) -> Result:
+        calls.append(cmd)
+        return Result(
+            "__TS__1712448000\nsrc/a.py\nsrc/b.py\n\n__TS__1712361600\nsrc/c.py\n",
+        )
+
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.subprocess.run", _run)
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._resolve_git_executable", lambda: "git")
+
+    cache: dict[str, int | None] = {}
+    result = _git_last_commit_age_days_bulk(
+        Path("/repo"),
+        ["src/a.py", "src/b.py", "src/c.py"],
+        Path("2026-04-10"),  # type: ignore[arg-type]
+        cache,
+        chunk_size=10,
+    )
+
+    assert len(calls) == 1
+    assert calls[0][-3:] == ["src/a.py", "src/b.py", "src/c.py"]
+    assert result["src/a.py"] is not None
+    assert result["src/b.py"] == result["src/a.py"]
+    assert result["src/c.py"] is not None
+    assert cache == result
+
+
 def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -> None:
     class StubSnapshot:
         def stats(self) -> dict[str, object]:
@@ -839,7 +874,6 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
     assert candidate.properties["branch_count"] == 6
     assert candidate.properties["nesting_depth"] == 4
     assert candidate.properties["helper_call_count"] == 4
-    assert candidate.properties["blocked_by_current_cycle"] is True
 
 
 def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) -> None:

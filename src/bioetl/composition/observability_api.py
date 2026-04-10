@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort
 

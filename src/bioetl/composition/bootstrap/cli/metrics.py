@@ -13,9 +13,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.metrics_service import MetricsService
-from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.infrastructure.observability.metrics_server_adapter import (
-    MetricsServerAdapter,
+from bioetl.composition.bootstrap.assembly.metrics_service import (
+    create_metrics_service,
 )
 
 if TYPE_CHECKING:
@@ -41,10 +40,4 @@ def bootstrap_metrics_service(
         >>> result = service.start(port=8000)
         >>> # result.success is True if server started
     """
-    resolved_logger = logger if logger is not None else create_noop_logger()
-    server = MetricsServerAdapter(logger=resolved_logger)
-
-    return MetricsService(
-        logger=resolved_logger,
-        _server=server,
-    )
+    return create_metrics_service(logger=logger)

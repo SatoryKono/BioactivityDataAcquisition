@@ -1233,6 +1233,68 @@ def _git_last_commit_age_days(
     return age
 
 
+def _git_last_commit_age_days_bulk(
+    root: Path,
+    relative_paths: list[str],
+    today: date,
+    cache: dict[str, int | None],
+    *,
+    chunk_size: int = 128,
+) -> dict[str, int | None]:
+    unique_paths = [path for path in dict.fromkeys(relative_paths) if path]
+    if not unique_paths:
+        return {}
+
+    git_executable = _resolve_git_executable()
+    resolved: dict[str, int | None] = {}
+    for path in unique_paths:
+        if path in cache:
+            resolved[path] = cache[path]
+
+    pending_paths = [path for path in unique_paths if path not in resolved]
+    for start_index in range(0, len(pending_paths), chunk_size):
+        chunk = pending_paths[start_index : start_index + chunk_size]
+        if not chunk:
+            continue
+        result = subprocess.run(
+            [
+                git_executable,
+                "-C",
+                str(root),
+                "log",
+                "--format=__TS__%ct",
+                "--name-only",
+                "--",
+                *chunk,
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        chunk_results = {path: None for path in chunk}
+        if result.returncode == 0:
+            current_timestamp: int | None = None
+            unresolved = set(chunk)
+            for raw_line in result.stdout.splitlines():
+                line = raw_line.strip()
+                if not line:
+                    continue
+                if line.startswith("__TS__"):
+                    timestamp = line.removeprefix("__TS__")
+                    current_timestamp = int(timestamp) if timestamp.isdigit() else None
+                    continue
+                if current_timestamp is None or line not in unresolved:
+                    continue
+                committed_at = datetime.fromtimestamp(current_timestamp, tz=UTC).date()
+                chunk_results[line] = max(0, (today - committed_at).days)
+                unresolved.remove(line)
+                if not unresolved:
+                    break
+        cache.update(chunk_results)
+        resolved.update(chunk_results)
+    return {path: resolved.get(path) for path in unique_paths}
+
+
 def _resolve_git_executable() -> str:
     git_path = shutil.which("git")
     if git_path:
@@ -3292,6 +3354,7 @@ def _add_retirement_analysis_surfaces(
     today_date = date.fromisoformat(today)
     text_cache: dict[str, str] = {}
     age_cache: dict[str, int | None] = {}
+    family_cache: dict[str, DuplicateFamilyConfig | None] = {}
 
     def read_source_text(relative_path: str) -> str:
         if relative_path not in text_cache:
@@ -3301,6 +3364,11 @@ def _add_retirement_analysis_surfaces(
             except OSError:
                 text_cache[relative_path] = ""
         return text_cache[relative_path]
+
+    def family_for_source_path(relative_path: str) -> DuplicateFamilyConfig | None:
+        if relative_path not in family_cache:
+            family_cache[relative_path] = _family_for_path(relative_path, duplication_config)
+        return family_cache[relative_path]
 
     def collect_anchor_names(
         surface_key: NodeKey,
@@ -3338,20 +3406,29 @@ def _add_retirement_analysis_surfaces(
                     buckets["tests"].add(other.name)
         return buckets
 
+    candidate_nodes: list[tuple[GraphNode, str, DuplicateFamilyConfig, NodeKey]] = []
     for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
         if node.key.label not in analysis_labels:
             continue
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str) or not source_path.endswith(".py"):
             continue
-        family = _family_for_path(source_path, duplication_config)
+        family = family_for_source_path(source_path)
         if family is None or family.name not in config.family_names:
             continue
-
         module_key = node.key if node.key.label == "module_surface" else NodeKey("module_surface", source_path)
         if module_key not in snapshot.nodes:
             continue
+        candidate_nodes.append((node, source_path, family, module_key))
 
+    _git_last_commit_age_days_bulk(
+        root,
+        [source_path for _, source_path, _, _ in candidate_nodes],
+        today_date,
+        age_cache,
+    )
+
+    for node, source_path, family, module_key in candidate_nodes:
         anchor_names = collect_anchor_names(node.key, module_key)
         runtime_count = len(anchor_names["runtime"])
         config_count = len(anchor_names["config"])
@@ -3362,7 +3439,7 @@ def _add_retirement_analysis_surfaces(
         source_text = read_source_text(source_path)
         wip_markers = sorted({marker for marker in config.wip_markers if marker in source_text})
         deprecation_markers = sorted({marker for marker in config.deprecation_markers if marker in source_text})
-        recent_age_days = _git_last_commit_age_days(root, source_path, today_date, age_cache)
+        recent_age_days = age_cache.get(source_path)
 
         cycle_score = 0
         if recent_age_days is not None and recent_age_days <= config.current_cycle_age_days:

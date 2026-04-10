@@ -115,10 +115,9 @@ class CheckpointMetadata:
             ("run_context", self.run_context),
         )
         for key, value in optional_values:
-            if value is None or value == "" or value == () or value == [] or value == {}:
+            if _is_empty_checkpoint_metadata_value(value):
                 continue
-            else:
-                result[key] = value
+            result[key] = value
         return result
 
     @staticmethod
@@ -209,6 +208,15 @@ def _coerce_snapshot_ids(value: object | None) -> tuple[str, ...]:
         seen.add(text)
         normalized.append(text)
     return tuple(normalized)
+
+
+def _is_empty_checkpoint_metadata_value(value: object | None) -> bool:
+    """Return whether optional checkpoint metadata should be omitted from serialization."""
+    if value is None or value == "":
+        return True
+    if isinstance(value, (tuple, list, dict)):
+        return len(value) == 0
+    return False
 
 
 @dataclass(frozen=True, slots=True)
