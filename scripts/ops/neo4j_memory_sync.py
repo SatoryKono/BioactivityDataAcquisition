@@ -37,13 +37,10 @@ DEFAULT_MANAGED_BY = "neo4j_memory_sync"
 DEFAULT_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
 CRITICAL_ANALYSIS_NODE_LABELS: tuple[str, ...] = (
     "retirement_candidate",
-    "development_cycle_surface",
     "complexity_candidate",
 )
 CRITICAL_ANALYSIS_RELATION_TYPES: tuple[str, ...] = (
     "CANDIDATE_FOR_REMOVAL",
-    "OWNED_BY_CYCLE",
-    "BLOCKED_FROM_DELETION_BY",
     "HAS_COMPLEXITY_SIGNAL",
     "CANDIDATE_FOR_SIMPLIFICATION",
     "JUSTIFIED_BY_RUNTIME",
@@ -51,27 +48,17 @@ CRITICAL_ANALYSIS_RELATION_TYPES: tuple[str, ...] = (
 )
 ANALYSIS_NODE_LABELS: tuple[str, ...] = (
     "retirement_candidate",
-    "development_cycle_surface",
     "complexity_candidate",
 )
 ANALYSIS_RELATION_TYPES: tuple[str, ...] = (
     "CANDIDATE_FOR_REMOVAL",
-    "OWNED_BY_CYCLE",
-    "BLOCKED_FROM_DELETION_BY",
     "HAS_COMPLEXITY_SIGNAL",
     "CANDIDATE_FOR_SIMPLIFICATION",
     "JUSTIFIED_BY_RUNTIME",
     "BLOCKED_BY_VARIANCE",
 )
-RETIREMENT_NODE_LABELS: tuple[str, ...] = (
-    "retirement_candidate",
-    "development_cycle_surface",
-)
-RETIREMENT_RELATION_TYPES: tuple[str, ...] = (
-    "CANDIDATE_FOR_REMOVAL",
-    "OWNED_BY_CYCLE",
-    "BLOCKED_FROM_DELETION_BY",
-)
+RETIREMENT_NODE_LABELS: tuple[str, ...] = ("retirement_candidate",)
+RETIREMENT_RELATION_TYPES: tuple[str, ...] = ("CANDIDATE_FOR_REMOVAL",)
 COMPLEXITY_NODE_LABELS: tuple[str, ...] = ("complexity_candidate",)
 COMPLEXITY_RELATION_TYPES: tuple[str, ...] = (
     "HAS_COMPLEXITY_SIGNAL",
