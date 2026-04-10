@@ -19,7 +19,8 @@ across:
 - `RunLedger`
 - runtime anchors used by checkpoint / resume compatibility
 - record-level normalization and `content_hash`
-- `ChemBL Activity` normalization profiles and generated field-matrix artifacts
+- shipped normalization profiles and generated field-matrix artifacts
+- composite join-key normalization policies and adapters
 
 It is the source of requirements for `P0`-`P6` and the matching test program
 `T1`-`T3`.
@@ -110,8 +111,10 @@ UUID-like values normalize through canonical string conversion.
 | Ledger persist payload | [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_ledger_service.py) | Calls `normalize_run_ledger_payload()` before append |
 | Record-level normalization | [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py) | Uses `NormalizationProfile` when available, otherwise falls back to legacy heuristics |
 | Profile framework | [base.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/base.py) | Defines `FieldRule` and `NormalizationProfile` with `include_in_hash` and `set_like` |
-| ChemBL Activity profile | [chembl_activity.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/chembl_activity.py) | Field-by-field profile covers the shipped schema and asserts exact coverage |
-| Matrix generation | [generate_chembl_activity_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_chembl_activity_field_matrix.py) | Deterministically emits CSV and MD from schema + profile; DOCX/PDF optional |
+| Shipped profile registry | [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) | Registers shipped profiles for `chembl.activity`, `crossref.publication`, `pubchem.compound`, and `pubmed.publication` |
+| Join-key domain policies | [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) | Pure scalar join-key policies for canonical trim/casing behavior |
+| Join-key application adapters | [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py) | Applies canonical join-key policies to composite runtime/config and DataFrame-oriented flows |
+| Matrix generation | [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams |
 
 ## Hash Boundaries
 
@@ -192,12 +195,14 @@ The field matrix must be generated from code, not from spreadsheets.
 
 Current deterministic generator on `main`:
 
-- [generate_chembl_activity_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_chembl_activity_field_matrix.py)
+- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py)
 
 Current inputs:
 
-- `CHEMBL_ACTIVITY_SCHEMA`
-- `CHEMBL_ACTIVITY_PROFILE`
+- silver schema registry for shipped entity pipelines
+- canonical profile registry in [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py)
+- canonical fallback field families from [normalization_fallbacks.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/normalization_fallbacks.py)
+- composite join-key policy seams from [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py)
 
 Current deterministic outputs:
 
@@ -205,9 +210,8 @@ Current deterministic outputs:
 - MD: shipped
 - DOCX/PDF: optional best-effort exports
 
-If a future rename introduces
-`scripts/docs/generate_chembl_activity_matrix_artifacts.py`, it must preserve
-the same deterministic contract and must not create a second source of truth.
+The generated artifact family is multi-pipeline and must not regress to a
+ChemBL-only source of truth.
 
 ## P0 - Update and Publish the Plan
 
@@ -342,25 +346,32 @@ Replace heuristic drift with explicit field contracts.
 
 - profile contracts fully describe normalization semantics for a covered schema
 
-## P3 - ChemBL Activity Profile
+## P3 - Shipped Profile Registry
 
 ### Goal
 
-Use one explicit profile as the canonical contract for `ChemBL Activity`.
+Use explicit profiles as canonical contracts for covered pipeline schemas.
 
 ### Current state on `main`
 
-- [chembl_activity.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/chembl_activity.py) already ships a complete profile and asserts exact schema coverage
+- [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) already ships a canonical registry
+- shipped profiles currently include:
+  - `chembl.activity`
+  - `crossref.publication`
+  - `pubchem.compound`
+  - `pubmed.publication`
 
 ### Requirements
 
-- all schema fields covered
-- each field has normalization behavior and hash participation policy
+- each covered schema field is described explicitly
+- each profile field declares normalization behavior and hash participation
+- profile lookup coordinates are canonicalized by provider/entity pair
 
 ### Acceptance
 
-- profile covers all shipped schema fields exactly
-- no ChemBL Activity field depends on undocumented normalization heuristics
+- shipped profiles resolve only through the canonical registry
+- each shipped profile covers its target schema exactly
+- covered fields do not depend on undocumented fallback heuristics
 
 ## P4 - Profile-Driven RecordNormalizationProcessor
 
@@ -382,6 +393,30 @@ Make record-level normalization profile-aware while keeping backward compatibili
 
 - profile-driven paths are active
 - fallback remains backward-compatible for uncovered entities
+
+## P4 - Composite Join-Key Normalization
+
+### Goal
+
+Keep composite join-key normalization deterministic without violating domain
+purity or import boundaries.
+
+### Current state on `main`
+
+- [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) already ships pure scalar normalization policies
+- [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py) already applies those policies in application/composite flows
+
+### Requirements
+
+- pure scalar join-key policies stay in the domain layer
+- DataFrame/runtime/config traversal stays in application/composite
+- canonical trim/casing semantics for join-key text remain shared across composite runtime paths
+
+### Acceptance
+
+- domain join-key helpers remain dependency-free
+- application adapters reuse the canonical domain policies rather than redefining them locally
+- join-key behavior is documented as part of the normalization architecture
 
 ## P4 - Stabilize Set-Like Lists
 
@@ -407,11 +442,12 @@ Avoid hash drift from order-only changes in semantically unordered collections.
 
 ### Goal
 
-Remove spreadsheet-like drift by generating the matrix from schema + profile.
+Remove spreadsheet-like drift by generating the matrix from schemas, shipped
+profiles, fallback seams, and composite join-key policies.
 
 ### Current state on `main`
 
-- [generate_chembl_activity_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_chembl_activity_field_matrix.py) already generates deterministic artifacts
+- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts
 
 ### Requirements
 
@@ -419,6 +455,7 @@ Remove spreadsheet-like drift by generating the matrix from schema + profile.
 - MD is first-class published artifact
 - DOCX/PDF remain optional
 - output order is deterministic
+- the artifact reflects shipped profile coverage, fallback coverage, and join-key normalization seams
 
 ### Acceptance
 
@@ -502,7 +539,7 @@ Prove generated documentation is reproducible.
 ```bash
 rg -n '^## P[0-6]\b|^## T[1-3]\b' docs/05-engineering/normalization_plan_P0_P6.md
 python3 -m scripts.docs verify --skip-build
-python3 scripts/docs/generate_chembl_activity_field_matrix.py --check
+python3 -m scripts.docs generate-pipeline-normalization-matrix --check
 ```
 
 ## Related Documents
