@@ -1,10 +1,114 @@
-"""Targeted tests for checkpoint CLI module boundary behavior."""
+"""Unit tests for checkpoint CLI commands."""
 
 from __future__ import annotations
 
+import json
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+from click.testing import CliRunner
+
+from bioetl.interfaces.cli.main import cli
+
+
+class _FakeInspectionResult:
+    def __init__(self, payload: dict[str, object]) -> None:
+        self._payload = payload
+
+    def to_dict(self) -> dict[str, object]:
+        return self._payload
+
+
+class _FakeWorkflowService:
+    def __init__(self) -> None:
+        self.audit_run_calls: list[tuple[str, int]] = []
+        self.checkpoint_calls: list[tuple[str, str | None, int]] = []
+
+    async def inspect_audit_run(
+        self,
+        run_id: str,
+        *,
+        limit: int = 100,
+    ) -> _FakeInspectionResult:
+        self.audit_run_calls.append((run_id, limit))
+        return _FakeInspectionResult(
+            {
+                "run_id": run_id,
+                "audit": {
+                    "query": {"run_id": run_id, "limit": limit},
+                    "entries": [
+                        {
+                            "timestamp": "2026-04-10T10:00:00+00:00",
+                            "layer": "silver",
+                            "table_name": "chembl.activity",
+                            "operation": "merge",
+                            "records_count": 42,
+                        }
+                    ],
+                },
+                "run_manifest": {
+                    "manifest": {
+                        "manifest_id": "manifest-1",
+                        "pipeline_name": "chembl_activity",
+                        "replay_capability": "exact_replay_supported",
+                    }
+                },
+            }
+        )
+
+    async def inspect_checkpoint_workflow(
+        self,
+        pipeline_name: str,
+        *,
+        run_id: str | None = None,
+        audit_limit: int = 100,
+    ) -> _FakeInspectionResult:
+        self.checkpoint_calls.append((pipeline_name, run_id, audit_limit))
+        return _FakeInspectionResult(
+            {
+                "pipeline_name": pipeline_name,
+                "checkpoint": {
+                    "pipeline_name": pipeline_name,
+                    "run_id": run_id or "00000000-0000-0000-0000-000000000123",
+                    "metadata": {"records_processed": 100},
+                },
+                "audit": {
+                    "query": {"pipeline_name": pipeline_name, "limit": audit_limit},
+                    "entries": [
+                        {
+                            "timestamp": "2026-04-10T11:00:00+00:00",
+                            "layer": "gold",
+                            "table_name": "chembl.activity_summary",
+                            "operation": "overwrite",
+                            "records_count": 5,
+                        }
+                    ],
+                },
+                "run_manifest": {
+                    "manifest": {
+                        "manifest_id": "manifest-2",
+                        "run_id": run_id or "00000000-0000-0000-0000-000000000123",
+                    }
+                },
+            }
+        )
+
+
+@pytest.fixture
+def cli_runner() -> CliRunner:
+    return CliRunner()
+
+
+def _patch_workflow_service(monkeypatch: Any, service: object) -> None:
+    import bioetl.interfaces.cli.commands.checkpoint as checkpoint_module
+
+    monkeypatch.setattr(
+        checkpoint_module,
+        "get_observability_workflow_service",
+        lambda: service,
+        raising=True,
+    )
 
 
 @pytest.mark.unit
@@ -22,3 +126,89 @@ def test_get_checkpoint_manager_delegates_to_resources_api() -> None:
 
     assert result is manager
     mock_get_checkpoint_manager.assert_called_once_with("chembl_activity")
+
+
+@pytest.mark.unit
+def test_get_observability_workflow_service_delegates_to_interfaces_api() -> None:
+    """Checkpoint command module should lazily delegate workflow resolution."""
+    import bioetl.interfaces.cli.commands.checkpoint as checkpoint_module
+
+    workflow = MagicMock()
+
+    with patch(
+        "bioetl.interfaces.observability.get_observability_workflow_service",
+        return_value=workflow,
+    ) as mock_get_workflow_service:
+        result = checkpoint_module.get_observability_workflow_service()
+
+    assert result is workflow
+    mock_get_workflow_service.assert_called_once_with()
+
+
+@pytest.mark.unit
+class TestCheckpointCommands:
+    def test_checkpoint_help_shows_subcommands(self, cli_runner: CliRunner) -> None:
+        result = cli_runner.invoke(cli, ["checkpoint", "--help"])
+
+        assert result.exit_code == 0
+        assert "list" in result.output
+        assert "inspect" in result.output
+        assert "audit-run" in result.output
+
+    def test_checkpoint_inspect_json_outputs_workflow_payload(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        service = _FakeWorkflowService()
+        _patch_workflow_service(monkeypatch, service)
+
+        result = cli_runner.invoke(
+            cli,
+            [
+                "checkpoint",
+                "inspect",
+                "--pipeline",
+                "chembl_activity",
+                "--run-id",
+                "00000000-0000-0000-0000-000000000123",
+                "--audit-limit",
+                "25",
+                "--format",
+                "json",
+            ],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.output)
+        assert payload["pipeline_name"] == "chembl_activity"
+        assert payload["checkpoint"]["run_id"] == "00000000-0000-0000-0000-000000000123"
+        assert service.checkpoint_calls == [
+            ("chembl_activity", "00000000-0000-0000-0000-000000000123", 25)
+        ]
+
+    def test_checkpoint_audit_run_text_outputs_human_readable_summary(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        service = _FakeWorkflowService()
+        _patch_workflow_service(monkeypatch, service)
+
+        result = cli_runner.invoke(
+            cli,
+            [
+                "checkpoint",
+                "audit-run",
+                "--run-id",
+                "00000000-0000-0000-0000-000000000001",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert "Audit Run Diagnostics" in result.output
+        assert "manifest_id: manifest-1" in result.output
+        assert "silver/chembl.activity merge" in result.output
+        assert service.audit_run_calls == [
+            ("00000000-0000-0000-0000-000000000001", 100)
+        ]
