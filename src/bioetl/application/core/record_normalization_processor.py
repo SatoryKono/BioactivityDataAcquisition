@@ -12,10 +12,6 @@ from bioetl.application.core.config import (
 from bioetl.application.core.normalization_fallbacks import (
     UNHANDLED_FALLBACK_NORMALIZATION,
     canonicalize_json_like_string,
-    is_date_field,
-    is_doi_field,
-    is_pmid_field,
-    is_smiles_field,
     normalize_named_text_field,
     normalize_special_fallback_field,
 )
