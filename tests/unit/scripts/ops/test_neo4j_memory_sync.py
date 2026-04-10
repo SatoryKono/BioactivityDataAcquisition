@@ -74,7 +74,6 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         "src.bioetl.application.composite.merger.MergeService.merge",
     ) in node_keys
     assert any(label == "retirement_candidate" for label, _ in node_keys)
-    assert any(label == "development_cycle_surface" for label, _ in node_keys)
     assert any(label == "complexity_candidate" for label, _ in node_keys)
     assert ("provider_surface", "chembl") in node_keys
     assert ("entity_config", "chembl_activity") in node_keys
@@ -133,6 +132,11 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("directory_surface", "docs/02-architecture/diagrams/views/svg") not in node_keys
     assert ("package_family", "composition/control_plane_api.py") not in node_keys
     assert ("package_family", "interfaces/test_cli_checkpoint_list.py") not in node_keys
+    assert any(
+        node.properties.get("current_cycle_status") == "current_cycle"
+        for node in snapshot.nodes.values()
+        if node.key.label in {"module_surface", "class_surface", "function_surface", "method_surface"}
+    )
 
 
 RelationKey = tuple[str, str, str, str, str]
@@ -476,7 +480,6 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "method_surface",
         "duplication_cluster",
         "retirement_candidate",
-        "development_cycle_surface",
         "complexity_candidate",
         "port_surface",
         "adapter_surface",

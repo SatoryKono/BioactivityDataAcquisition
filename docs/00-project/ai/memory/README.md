@@ -64,8 +64,8 @@ profiles в BioETL.
   `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:
   этот режим сначала удаляет весь repo-managed subgraph текущей волны, а потом
   пересобирает его из текущего состояния репозитория.
-  Current-cycle semantics больше не хранятся отдельным label
-  `development_cycle_surface`: они проецируются как properties на
+  Current-cycle semantics больше не хранятся отдельным legacy label
+  `development_cycle_surface`: теперь они проецируются как properties на
   `module_surface` / `class_surface` / `function_surface` / `method_surface`
   и на candidate nodes, чтобы deterministic live sync не зависел от отдельного
   проблемного analysis label.
