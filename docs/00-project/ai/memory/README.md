@@ -92,6 +92,11 @@ profiles в BioETL.
   `python -m scripts.ops query-neo4j-memory dead-code-candidates all`,
   `python -m scripts.ops query-neo4j-memory current-cycle-code adapter_layer`,
   `python -m scripts.ops query-neo4j-memory current-cycle-code all`.
+  Для поиска переусложненной логики и removable complexity используй:
+  `python -m scripts.ops query-neo4j-memory overengineered-candidates composite_layer`,
+  `python -m scripts.ops query-neo4j-memory removable-complexity composite_layer`,
+  `python -m scripts.ops query-neo4j-memory simplification-blockers adapter_layer`,
+  `python -m scripts.ops query-neo4j-memory overengineered-candidates all`.
 
 ## Relationship To Other AI Surfaces
 

@@ -125,6 +125,9 @@ Last verified: '2026-04-09'
     python -m scripts.ops query-neo4j-memory promotion-candidates all
     python -m scripts.ops query-neo4j-memory dead-code-candidates adapter_layer
     python -m scripts.ops query-neo4j-memory current-cycle-code adapter_layer
+    python -m scripts.ops query-neo4j-memory overengineered-candidates composite_layer
+    python -m scripts.ops query-neo4j-memory removable-complexity composite_layer
+    python -m scripts.ops query-neo4j-memory simplification-blockers adapter_layer
     ```
 
 ## Memory Configuration Profiles
