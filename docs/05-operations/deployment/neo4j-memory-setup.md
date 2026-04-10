@@ -155,6 +155,7 @@ Last verified: '2026-04-09'
     stale topology snapshot:
     ```bash
     python -m scripts.ops sync-neo4j-memory --apply
+    python -m scripts.ops sync-neo4j-memory --apply-normalization-evidence-only
     python -m scripts.ops query-neo4j-memory normalization-pipeline chembl_activity
     python -m scripts.ops query-neo4j-memory fallback-pipelines all
     ```
