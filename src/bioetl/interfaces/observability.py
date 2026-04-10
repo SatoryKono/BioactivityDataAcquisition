@@ -84,19 +84,24 @@ def get_checkpoint_service() -> CheckpointService:
     return _impl()
 
 
-def get_metrics_service() -> MetricsService:
-    """Load the metrics diagnostics service through the canonical composition API."""
-    from bioetl.composition.observability_api import get_metrics_service as _impl
+def get_audit_service() -> AuditInspectionService:
+    """Load the audit diagnostics service through the canonical composition API."""
+    from bioetl.composition.observability_api import get_audit_service as _impl
 
     return _impl()
 
 
+def get_metrics_service() -> MetricsService:
+    """Load the metrics diagnostics service through the canonical composition API."""
+    from bioetl.composition.observability_api import get_metrics_service as _impl
+
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
-    """Load workflow-level observability helpers through the composition API."""
+    """Load the observability workflow service through the canonical composition API."""
     from bioetl.composition.observability_api import (
         get_observability_workflow_service as _impl,
     )
 
+    return _impl()
     return _impl()
 
 

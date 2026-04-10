@@ -29,18 +29,19 @@ from bioetl.application.services.metadata_coordinator import (
 )
 from bioetl.application.services.metrics_service import MetricsService
 from bioetl.application.services.observability_workflow_service import (
-    ObservabilityWorkflowService,
+    ObservabilityWorkflowService as ObservabilityWorkflowService,
 )
-from bioetl.application.services.pipeline_runner_service import PipelineRunnerService
-from bioetl.application.services.quarantine_service import QuarantineService
-from bioetl.application.services.run_manifest_inspection_service import (
-    RunManifestInspectionService,
+from bioetl.application.services.pipeline_runner_service import (
+    PipelineRunResult as PipelineRunResult,
 )
-from bioetl.application.services.vacuum_service import VacuumService
-from bioetl.composition.bootstrap.assembly import bootstrap_quarantine_port
-from bioetl.composition.bootstrap.cli.adr import bootstrap_adr_service
-from bioetl.composition.bootstrap.cli.checkpoint import (
+from bioetl.application.services.pipeline_runner_service import RunOptions as RunOptions
+from bioetl.application.services.pipeline_runner_service import RunResult as RunResult
+from bioetl.composition.bootstrap import (
+    HealthServerDependencies,
+    bootstrap_adr_service,
     bootstrap_audit_inspection_service,
+    bootstrap_bronze_cleanup_service,
+)
     bootstrap_checkpoint_service,
     bootstrap_observability_workflow_service,
     bootstrap_quarantine_service,
@@ -50,11 +51,13 @@ from bioetl.composition.bootstrap.cli.health import (
     HealthServerDependencies,
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
-)
-from bioetl.composition.bootstrap.cli.lineage import bootstrap_lineage_service
-from bioetl.composition.bootstrap.cli.lock import bootstrap_lock_service
-from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
-from bioetl.composition.bootstrap.cli.run_manifest import (
+    bootstrap_lineage_service,
+    bootstrap_lock_service,
+    bootstrap_metrics_service,
+    bootstrap_observability_workflow_service,
+    bootstrap_pipeline_runner_service,
+    bootstrap_quarantine_port,
+    bootstrap_quarantine_service,
     bootstrap_run_manifest_service,
 )
 from bioetl.composition.bootstrap.cli.storage import (
@@ -121,8 +124,6 @@ def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_registrations()
     return bootstrap_audit_inspection_service()
-
-
 def get_quarantine_service() -> QuarantineService:
     """Get a quarantine service for administrative operations.
 
@@ -328,6 +329,12 @@ def get_metrics_service() -> MetricsService:
     """
     _ensure_registrations()
     return bootstrap_metrics_service()
+
+
+def get_observability_workflow_service() -> ObservabilityWorkflowService:
+    """Get the canonical audit/checkpoint observability workflow service."""
+    _ensure_registrations()
+    return bootstrap_observability_workflow_service()
 
 
 def get_adr_service() -> AdrServicePort:

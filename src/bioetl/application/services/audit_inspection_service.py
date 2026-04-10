@@ -1,5 +1,4 @@
 """Application service for inspecting persisted audit entries."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -17,13 +16,11 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class AuditInspectionResult:
-    """Resolved audit query payload for CLI or observability workflows."""
 
     query: dict[str, object] = field(default_factory=dict)
-    entries: tuple[AuditEntry, ...] = ()
+    entries: tuple[AuditEntry, ...] = field(default_factory=tuple)
 
     def to_dict(self) -> dict[str, object]:
-        """Return a JSON/YAML-safe payload for interface-layer rendering."""
         return {
             "query": self.query,
             "entries": [entry.to_dict() for entry in self.entries],
@@ -32,7 +29,6 @@ class AuditInspectionResult:
 
 @dataclass(slots=True)
 class AuditInspectionService:
-    """Resolve audit log queries through the injected audit port."""
 
     audit_port: AuditPort
 
@@ -40,7 +36,6 @@ class AuditInspectionService:
         self,
         *,
         run_id: str | None = None,
-        layer: AuditLayer | str | None = None,
         table_name: str | None = None,
         start_time: datetime | None = None,
         end_time: datetime | None = None,
@@ -68,7 +63,6 @@ class AuditInspectionService:
                 "end_time": end_time.isoformat() if end_time else None,
                 "limit": limit,
             },
-            entries=entries,
         )
 
     async def inspect_run(
@@ -84,7 +78,6 @@ class AuditInspectionService:
         self,
         table_name: str,
         *,
-        layer: AuditLayer | str | None = None,
         limit: int = 100,
     ) -> AuditInspectionResult:
         """Return recent audit entries for one table/path target."""
@@ -95,16 +88,16 @@ class AuditInspectionService:
         )
 
     async def aclose(self) -> None:
-        """Release audit resources through the wrapped port."""
         await self.audit_port.aclose()
 
     @staticmethod
-    def _parse_run_id(run_id: str) -> RunID:
-        """Parse a UUID-like run identifier for AuditPort filtering."""
+    def _parse_run_id(run_id: str | None) -> RunID | None:
+        """Parse a UUID string into a RunID when provided."""
+        if run_id is None:
+            return None
         try:
             return RunID(UUID(run_id))
         except (TypeError, ValueError) as exc:
-            raise ValueError(f"Invalid run_id for audit inspection: {run_id}") from exc
 
     @staticmethod
     def _resolve_layer(layer: AuditLayer | str | None) -> AuditLayer | None:
@@ -114,4 +107,3 @@ class AuditInspectionService:
         try:
             return AuditLayer(layer.lower())
         except ValueError as exc:
-            raise ValueError(f"Invalid audit layer for inspection: {layer}") from exc
