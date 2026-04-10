@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 """Normalization profile for the CrossRef Publication Silver schema."""
 
 from __future__ import annotations
@@ -116,61 +115,3 @@ CROSSREF_PUBLICATION_PROFILE = build_standard_profile(
 )
 
 CROSSREF_PUBLICATION_PROFILE.assert_covers_schema(CROSSREF_PUBLICATION_SCHEMA_FIELDS)
-||||||| Stash base
-=======
-"""Normalization profile for the CrossRef Publication Silver schema."""
-
-from __future__ import annotations
-
-from bioetl.infrastructure.schemas.silver_publications import (
-    CROSSREF_PUBLICATION_SCHEMA,
-)
-
-from ._standard_profile_builder import build_standard_profile
-from .helpers import (
-    normalize_profile_doi,
-    normalize_profile_pmc_id,
-    normalize_profile_pmid,
-)
-
-__all__ = [
-    "CROSSREF_PUBLICATION_PROFILE",
-    "CROSSREF_PUBLICATION_SCHEMA_FIELDS",
-]
-
-CROSSREF_PUBLICATION_SCHEMA_FIELDS = tuple(CROSSREF_PUBLICATION_SCHEMA.names)
-
-_META_FIELDS = frozenset(
-    field_name for field_name in CROSSREF_PUBLICATION_SCHEMA_FIELDS if field_name.startswith("_")
-) | {"content_hash", "entity_id"}
-
-_SPECIAL_RULES = {
-    "doi": (
-        normalize_profile_doi,
-        "Normalize DOI to canonical registry form before hashing.",
-    ),
-    "pmid": (
-        normalize_profile_pmid,
-        "Normalize PMID to digits-only canonical string.",
-    ),
-    "pmc_id": (
-        normalize_profile_pmc_id,
-        "Normalize PMC identifier to canonical PMC-prefixed string.",
-    ),
-}
-
-CROSSREF_PUBLICATION_PROFILE = build_standard_profile(
-    profile_name="crossref.publication",
-    description="Canonical normalization profile for the CrossRef Publication Silver schema.",
-    schema_fields=CROSSREF_PUBLICATION_SCHEMA_FIELDS,
-    meta_fields=_META_FIELDS,
-    title_fields={"title"},
-    abstract_fields={"abstract"},
-    date_fields={"publication_date", "published", "published_online", "published_print"},
-    int_fields={"citations_made", "citations_received", "publication_year"},
-    set_like_fields={"subject_keywords"},
-    special_rules=_SPECIAL_RULES,
-)
-
-CROSSREF_PUBLICATION_PROFILE.assert_covers_schema(CROSSREF_PUBLICATION_SCHEMA_FIELDS)
->>>>>>> Stashed changes

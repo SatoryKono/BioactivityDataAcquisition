@@ -155,9 +155,10 @@ Pushgateway publication на завершении run. Это позволяет
 - **Worst-Entity DQ Score**: быстрый worst-case сигнал по сущностям в выбранном pipeline scope.
 - **Quarantine / Soft Threshold / Validation Failures**: контроль деградаций по окнам времени.
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. Текущий
-  freshness gauge отражает время последней успешной DQ/postrun freshness
-  publication; lag интерпретируется как `time() - bioetl_data_freshness_seconds`
-  и служит runtime staleness proxy, а не immutable ingestion anchor.
+  freshness gauge отражает ingestion anchor текущего успешного запуска
+  (сейчас это `PipelineContext.started_at`, который также прокидывается в
+  `_ingestion_ts` runtime writes); lag интерпретируется как
+  `time() - bioetl_data_freshness_seconds`.
 - **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
   и data links у `Data Flow in Range: Bronze -> Silver -> Gold` переводят расследование
   DQ incidents и freshness lag в Grafana Explore с тем же временным окном.

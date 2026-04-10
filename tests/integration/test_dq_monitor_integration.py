@@ -419,10 +419,17 @@ class TestDataQualityServiceMetricsEmission:
             entity_type="test_entity",
         )
 
-        service.evaluate({"error_rate": 0.02, "record_count": 250.0})
+        service.evaluate(
+            {
+                "error_rate": 0.02,
+                "record_count": 250.0,
+                "freshness_anchor_timestamp": 1_700_000_123.0,
+            }
+        )
 
         score_calls = recording_metrics.get_gauge_calls("dq_validation_score")
         count_calls = recording_metrics.get_gauge_calls("dq_validation_record_count")
+        freshness_calls = recording_metrics.get_gauge_calls("data_freshness_seconds")
 
         assert score_calls == [
             (
@@ -435,6 +442,13 @@ class TestDataQualityServiceMetricsEmission:
             (
                 "dq_validation_record_count",
                 250.0,
+                {"pipeline": "test_integration_pipeline", "entity": "test_entity"},
+            )
+        ]
+        assert freshness_calls == [
+            (
+                "data_freshness_seconds",
+                1_700_000_123.0,
                 {"pipeline": "test_integration_pipeline", "entity": "test_entity"},
             )
         ]
