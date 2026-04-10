@@ -86,6 +86,16 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "alert_surface",
         "title": "Alert semantic neighborhood",
     },
+    "duplication-cluster": {
+        "mode": "duplication_cluster",
+        "target_label": "duplication_cluster",
+        "title": "Duplication cluster",
+    },
+    "promotion-candidates": {
+        "mode": "promotion_candidates",
+        "target_label": "duplication_cluster",
+        "title": "Promotion candidates",
+    },
 }
 
 
@@ -100,7 +110,11 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "name",
-        help="Exact surface name, for example `chembl.activity` or `BioETLPipelineRunFailed`.",
+        help=(
+            "Exact surface name, duplication cluster name, or family name. "
+            "Examples: `chembl.activity`, `BioETLPipelineRunFailed`, "
+            "`adapter_layer`, `composite_layer:method_surface:d1c4b44398a1`."
+        ),
     )
     parser.add_argument(
         "--root",
@@ -174,6 +188,47 @@ def _neighbors_statement() -> str:
     )
 
 
+def _duplication_cluster_statement() -> str:
+    return (
+        "MATCH (cluster:duplication_cluster {name: $name}) "
+        "OPTIONAL MATCH (cluster)-[:CAN_PROMOTE_TO]->(target) "
+        "OPTIONAL MATCH (cluster)-[:CONTAINS]->(member) "
+        "OPTIONAL MATCH (cluster)-[:COVERED_BY_TEST]->(test) "
+        "RETURN cluster.name AS cluster_name, "
+        "cluster.family_name AS family_name, "
+        "cluster.surface_kind AS surface_kind, "
+        "cluster.duplicate_count AS duplicate_count, "
+        "cluster.promotion_score AS promotion_score, "
+        "target.name AS promotion_target, "
+        "labels(target) AS promotion_target_labels, "
+        "collect(DISTINCT CASE "
+        "  WHEN member.name IS NULL THEN NULL "
+        "  ELSE {name: member.name, labels: labels(member)} "
+        "END) AS members, "
+        "collect(DISTINCT test.name) AS tests"
+    )
+
+
+def _promotion_candidates_statement() -> str:
+    return (
+        "MATCH (cluster:duplication_cluster) "
+        "WHERE $name = 'all' OR cluster.family_name = $name "
+        "OPTIONAL MATCH (cluster)-[:CAN_PROMOTE_TO]->(target) "
+        "OPTIONAL MATCH (cluster)-[:CONTAINS]->(member) "
+        "OPTIONAL MATCH (cluster)-[:COVERED_BY_TEST]->(test) "
+        "RETURN cluster.name AS cluster_name, "
+        "cluster.family_name AS family_name, "
+        "cluster.surface_kind AS surface_kind, "
+        "cluster.duplicate_count AS duplicate_count, "
+        "cluster.promotion_score AS promotion_score, "
+        "target.name AS promotion_target, "
+        "labels(target) AS promotion_target_labels, "
+        "count(DISTINCT member) AS member_count, "
+        "count(DISTINCT test) AS test_count "
+        "ORDER BY cluster.promotion_score DESC, cluster.duplicate_count DESC, cluster.name ASC"
+    )
+
+
 def _run_query(
     root: Path,
     profile: str,
@@ -190,6 +245,10 @@ def _run_query(
     if profile_config["mode"] == "neighbors":
         params["relation_types"] = list(DEFAULT_NEIGHBOR_RELATION_TYPES)
         statement = _neighbors_statement()
+    elif profile_config["mode"] == "duplication_cluster":
+        statement = _duplication_cluster_statement()
+    elif profile_config["mode"] == "promotion_candidates":
+        statement = _promotion_candidates_statement()
     else:
         statement = _ownership_statement()
     return client.query(
@@ -202,7 +261,12 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
     profile_config = QUERY_PROFILES[profile]
     title = profile_config["title"]
     if not rows:
-        empty_suffix = "no ownership path found" if profile_config["mode"] == "owner" else "no semantic neighbors found"
+        empty_suffix = {
+            "owner": "no ownership path found",
+            "neighbors": "no semantic neighbors found",
+            "duplication_cluster": "no duplication cluster found",
+            "promotion_candidates": "no promotion candidates found",
+        }[profile_config["mode"]]
         return f"{title}: {empty_suffix} for `{name}`."
 
     if profile_config["mode"] == "neighbors":
@@ -229,6 +293,78 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             )
         if len(lines) == 1:
             lines.append("- no semantic edges found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "duplication_cluster":
+        row = rows[0]
+        family_name = str(row.get("family_name") or "")
+        surface_kind = str(row.get("surface_kind") or "")
+        duplicate_count = str(row.get("duplicate_count") or "")
+        promotion_score = str(row.get("promotion_score") or "")
+        promotion_target = str(row.get("promotion_target") or "")
+        target_labels = row.get("promotion_target_labels")
+        members = row.get("members")
+        tests = row.get("tests")
+        lines = [f"{title}: `{name}`"]
+        lines.append(
+            f"- family={family_name} | surface_kind={surface_kind} | duplicates={duplicate_count} | promotion_score={promotion_score}"
+        )
+        if promotion_target:
+            if isinstance(target_labels, list):
+                label_str = ",".join(str(label) for label in target_labels)
+            else:
+                label_str = ""
+            label_suffix = f" | labels={label_str}" if label_str else ""
+            lines.append(f"- promotion_target={promotion_target}{label_suffix}")
+        if isinstance(members, list):
+            normalized_members = []
+            for member in members:
+                if not isinstance(member, dict):
+                    continue
+                member_name = str(member.get("name") or "")
+                if not member_name:
+                    continue
+                labels = member.get("labels")
+                if isinstance(labels, list):
+                    label_str = ",".join(str(label) for label in labels)
+                else:
+                    label_str = ""
+                label_suffix = f" | labels={label_str}" if label_str else ""
+                normalized_members.append(f"- member={member_name}{label_suffix}")
+            lines.extend(sorted(normalized_members))
+        if isinstance(tests, list):
+            normalized_tests = sorted(
+                {
+                    f"- covered_by_test={str(test_name)}"
+                    for test_name in tests
+                    if test_name is not None and str(test_name)
+                }
+            )
+            lines.extend(normalized_tests)
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "promotion_candidates":
+        lines = [f"{title}: `{name}`"]
+        seen: set[str] = set()
+        for row in rows:
+            cluster_name = str(row.get("cluster_name") or "")
+            if not cluster_name or cluster_name in seen:
+                continue
+            seen.add(cluster_name)
+            family_name = str(row.get("family_name") or "")
+            surface_kind = str(row.get("surface_kind") or "")
+            duplicate_count = str(row.get("duplicate_count") or "")
+            promotion_score = str(row.get("promotion_score") or "")
+            promotion_target = str(row.get("promotion_target") or "")
+            member_count = str(row.get("member_count") or "")
+            test_count = str(row.get("test_count") or "")
+            lines.append(
+                f"- cluster={cluster_name} | family={family_name} | surface_kind={surface_kind} | "
+                f"duplicates={duplicate_count} | members={member_count} | tests={test_count} | "
+                f"promotion_score={promotion_score} | target={promotion_target}"
+            )
+        if len(lines) == 1:
+            lines.append("- no promotion candidates found")
         return "\n".join(lines)
 
     lines = [f"{title}: `{name}`"]

@@ -327,6 +327,30 @@ class TestObservabilityMetricContract:
                 error_type="none",
             )
 
+    def test_observability_counter_normalizes_path_like_pipeline_labels(
+        self, prometheus_metrics
+    ) -> None:
+        with patch.dict(COUNTERS, {"observability_events_total": MagicMock()}):
+            prometheus_metrics.increment_counter(
+                name="observability_events_total",
+                value=1,
+                labels={
+                    "event": "silver_merge_retry",
+                    "provider": "storage",
+                    "pipeline": "/tmp/bioetl/silver/chembl_activity__v1_2_3",
+                    "severity": "warning",
+                    "error_type": "commit_conflict",
+                },
+            )
+
+            COUNTERS["observability_events_total"].labels.assert_called_once_with(
+                event="silver_merge_retry",
+                provider="storage",
+                pipeline="chembl_activity",
+                severity="warning",
+                error_type="commit_conflict",
+            )
+
 
 @pytest.mark.unit
 class TestMetricLabelAliasCompatibility:

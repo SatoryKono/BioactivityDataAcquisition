@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from bioetl.application.services.checkpoint_compatibility_runtime import (
+    check_execution_identity_compatibility,
     build_identity_details,
     check_config_compatibility,
     check_phase_compatibility,
@@ -46,6 +47,11 @@ class CheckpointIdentityRecord:
     checkpoint_schema_version: str
     source_freshness_markers: dict[str, object] | None = None
     composite_run_identity: str | None = None
+    execution_fingerprint: str | None = None
+    manifest_id: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    effective_config_artifact_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -89,6 +95,20 @@ class CheckpointCompatibilityV2Service:
             current_hash=current_identity.effective_config_hash,
             checkpoint_hash=checkpoint_identity.effective_config_hash,
         )
+        execution_identity_compatibility = check_execution_identity_compatibility(
+            current_execution_fingerprint=current_identity.execution_fingerprint,
+            checkpoint_execution_fingerprint=checkpoint_identity.execution_fingerprint,
+            current_manifest_id=current_identity.manifest_id,
+            checkpoint_manifest_id=checkpoint_identity.manifest_id,
+            current_contract_ref=current_identity.contract_ref,
+            checkpoint_contract_ref=checkpoint_identity.contract_ref,
+            current_contract_version=current_identity.contract_version,
+            checkpoint_contract_version=checkpoint_identity.contract_version,
+            current_effective_config_hash=current_identity.effective_config_hash,
+            checkpoint_effective_config_hash=checkpoint_identity.effective_config_hash,
+            current_effective_config_artifact_id=current_identity.effective_config_artifact_id,
+            checkpoint_effective_config_artifact_id=checkpoint_identity.effective_config_artifact_id,
+        )
         schema_compatibility = check_schema_compatibility(
             current_version=current_identity.checkpoint_schema_version,
             checkpoint_version=checkpoint_identity.checkpoint_schema_version,
@@ -99,6 +119,7 @@ class CheckpointCompatibilityV2Service:
                 mode=self.config.mode.value,
                 phase_result=phase_compatibility,
                 config_result=config_compatibility,
+                execution_identity_result=execution_identity_compatibility,
                 schema_result=schema_compatibility,
                 validation_report=validation_report,
             )
@@ -116,12 +137,22 @@ class CheckpointCompatibilityV2Service:
             execution_phase=current_identity.execution_phase,
             checkpoint_schema_version=current_identity.checkpoint_schema_version,
             composite_run_identity=current_identity.composite_run_identity,
+            execution_fingerprint=current_identity.execution_fingerprint,
+            manifest_id=current_identity.manifest_id,
+            contract_ref=current_identity.contract_ref,
+            contract_version=current_identity.contract_version,
+            effective_config_artifact_id=current_identity.effective_config_artifact_id,
         )
         checkpoint_identity_details = build_identity_details(
             effective_config_hash=checkpoint_identity.effective_config_hash,
             execution_phase=checkpoint_identity.execution_phase,
             checkpoint_schema_version=checkpoint_identity.checkpoint_schema_version,
             composite_run_identity=checkpoint_identity.composite_run_identity,
+            execution_fingerprint=checkpoint_identity.execution_fingerprint,
+            manifest_id=checkpoint_identity.manifest_id,
+            contract_ref=checkpoint_identity.contract_ref,
+            contract_version=checkpoint_identity.contract_version,
+            effective_config_artifact_id=checkpoint_identity.effective_config_artifact_id,
         )
 
         return CheckpointCompatibilityResult(
@@ -134,6 +165,7 @@ class CheckpointCompatibilityV2Service:
             details=generate_details(
                 phase_result=phase_compatibility,
                 config_result=config_compatibility,
+                execution_identity_result=execution_identity_compatibility,
                 schema_result=schema_compatibility,
                 current_identity_details=current_identity_details,
                 checkpoint_identity_details=checkpoint_identity_details,
