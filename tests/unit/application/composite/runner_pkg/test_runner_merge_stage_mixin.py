@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
@@ -208,9 +209,22 @@ def test_prepare_merge_request_when_called_then_binds_seed_and_inputs() -> None:
     assert request.seed_table == "silver/seed"
     assert request.seed_pipeline == "seed_pipeline"
     assert request.run_id == "run-merge-test"
+    assert request.metadata_timestamp is None
     assert request.enrichment_results is enrichment_results
     assert request.enrichers[0].pipeline == "enricher_a"
     assert request.dependencies == []
+
+
+@pytest.mark.unit
+def test_prepare_merge_request_when_cached_bronze_date_present_then_uses_deterministic_timestamp() -> (
+    None
+):
+    harness = _MergeHarness()
+    harness._runtime.cached_bronze_date = "2026-04-10"
+
+    request = harness._prepare_merge_request({}, {})
+
+    assert request.metadata_timestamp == datetime(2026, 4, 10, 0, 0, 0, tzinfo=UTC)
 
 
 # ---------------------------------------------------------------------------

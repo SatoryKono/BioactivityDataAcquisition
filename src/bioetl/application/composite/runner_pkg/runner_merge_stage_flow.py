@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, date, datetime
+
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
 )
@@ -37,6 +39,17 @@ __all__ = [
     "execute_started_merge_phase",
     "run_prepared_merge_request",
 ]
+
+
+def _resolve_merge_metadata_timestamp(
+    host: _CompositeRunnerMergeStageHostProtocol,
+) -> datetime | None:
+    """Return a deterministic metadata timestamp for replay-backed composite runs."""
+    cached_bronze_date = getattr(host._runtime, "cached_bronze_date", None)
+    if cached_bronze_date is None:
+        return None
+    replay_date = date.fromisoformat(str(cached_bronze_date))
+    return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
 
 
 def build_merge_inputs(
@@ -78,6 +91,7 @@ def build_merge_request(
         enrichers=prepared_inputs.enrichers,
         enrichment_results=enrichment_results,
         run_id=host._run_id_str,
+        metadata_timestamp=_resolve_merge_metadata_timestamp(host),
         dependencies=prepared_inputs.dependencies,
         dependency_results=dependency_results,
     )

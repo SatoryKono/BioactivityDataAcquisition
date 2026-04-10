@@ -138,6 +138,8 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "rule_bundle_version": "2026.03",
         "dq_contract_compatibility_hash": "compat-hash-1",
         "effective_config_artifact_id": "eca-123",
+        "replay_capability": "rebuild_only",
+        "exact_replay_eligible": False,
         "planned_artifacts": [],
     }
 
@@ -192,6 +194,8 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "effective_config_hash": "deadbeef",
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
+        "replay_capability": "rebuild_only",
+        "exact_replay_eligible": False,
         "planned_artifacts": [],
         "published_artifacts": [
             {

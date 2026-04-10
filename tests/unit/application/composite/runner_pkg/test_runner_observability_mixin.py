@@ -166,6 +166,10 @@ async def test_write_cv_quarantine_when_payloads_written_then_logs_and_emits_met
     await harness._write_cv_quarantine(MergeResult(quarantine_payloads=payloads))
 
     assert harness._quarantine_port.write.await_count == 2
+    assert (
+        harness._quarantine_port.write.await_args_list[0].kwargs["ingestion_ts"]
+        == harness._started_at
+    )
     harness._logger.info.assert_called_once()
     harness._metrics.increment_counter.assert_called_once_with(
         "quarantine_records_total",
@@ -210,4 +214,29 @@ async def test_write_cv_quarantine_when_no_metrics_port_then_skips_metric_call()
     # Must not raise even without metrics
     await harness._write_cv_quarantine(MergeResult(quarantine_payloads=({"id": "x"},)))
 
+    assert (
+        harness._quarantine_port.write.await_args.kwargs["ingestion_ts"]
+        == harness._started_at
+    )
     harness._logger.info.assert_called_once()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_cv_quarantine_prefers_cached_bronze_date_for_timestamp() -> None:
+    harness = _ObservabilityHarness()
+    harness._runtime.cached_bronze_date = "2026-04-10"
+    harness._quarantine_port = MagicMock()
+    harness._quarantine_port.write = AsyncMock(return_value=None)
+
+    await harness._write_cv_quarantine(MergeResult(quarantine_payloads=({"id": "x"},)))
+
+    assert harness._quarantine_port.write.await_args.kwargs["ingestion_ts"] == datetime(
+        2026,
+        4,
+        10,
+        0,
+        0,
+        0,
+        tzinfo=UTC,
+    )

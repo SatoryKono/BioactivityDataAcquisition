@@ -5,9 +5,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from typing import cast
 from uuid import uuid4
 
 from bioetl.domain.control_plane import (
+    ReplayCapability,
     RunArtifactRef,
     RunCodeProvenance,
     RunInputSnapshotRef,
@@ -61,6 +63,7 @@ class RunManifestCreateSpec:
     rule_bundle_version: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
+    replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY
 
 
 @dataclass(slots=True)
@@ -200,7 +203,10 @@ class RunManifestService:
         fingerprint: str,
     ) -> RunManifest:
         """Build the final typed manifest from normalized primitive payload."""
-        code_provenance_payload = dict(normalized_payload["code_provenance"])
+        code_provenance_payload = cast(
+            dict[str, object],
+            normalized_payload["code_provenance"],
+        )
         return RunManifest(
             manifest_id=self._manifest_id_factory(),
             execution_fingerprint=fingerprint,
@@ -211,15 +217,25 @@ class RunManifestService:
             pipeline_name=request.pipeline_name,
             provider=request.provider,
             entity=request.entity,
-            launch_context=dict(normalized_payload["launch_context"]),
-            runtime_config=dict(normalized_payload["runtime_config"]),
-            resolved_config=dict(normalized_payload["resolved_config"]),
+            launch_context=cast(
+                dict[str, object],
+                normalized_payload["launch_context"],
+            ),
+            runtime_config=cast(
+                dict[str, object],
+                normalized_payload["runtime_config"],
+            ),
+            resolved_config=cast(
+                dict[str, object],
+                normalized_payload["resolved_config"],
+            ),
             code_provenance=self._hydrate_code_provenance(code_provenance_payload),
+            replay_capability=request.replay_capability,
             source_refs=self._hydrate_source_refs(
-                list(normalized_payload.get("source_refs", []))
+                cast(list[object], normalized_payload.get("source_refs", []))
             ),
             planned_artifacts=self._hydrate_planned_artifacts(
-                list(normalized_payload.get("planned_artifacts", []))
+                cast(list[object], normalized_payload.get("planned_artifacts", []))
             ),
         )
 
@@ -286,6 +302,7 @@ class RunManifestService:
             "launch_context": request.launch_context,
             "runtime_config": request.runtime_config,
             "resolved_config": request.resolved_config,
+            "replay_capability": request.replay_capability.value,
             "code_provenance": {
                 "pipeline_version": code_provenance.pipeline_version,
                 "git_commit": code_provenance.git_commit,
@@ -327,7 +344,7 @@ class RunManifestService:
 
     def _compute_execution_fingerprint(self, *, payload: dict[str, object]) -> str:
         """Compute the canonical manifest execution fingerprint contract."""
-        return compute_manifest_execution_fingerprint(payload)
+        return cast(str, compute_manifest_execution_fingerprint(payload))
 
 
 RunManifestCreateRequest = RunManifestCreateSpec

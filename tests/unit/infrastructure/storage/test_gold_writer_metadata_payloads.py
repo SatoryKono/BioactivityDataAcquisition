@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -56,6 +57,7 @@ class TestBuildGoldMergedMetadataInput:
             table_path="gold/publication",
             table_name="composite.publication",
             records=[{"_lineage_created_at": "2025-01-15T10:00:00", "id": 1}],
+            completed_at=None,
             schema=None,
             transform_version="2.0.0",
             transform_steps=("normalize", "enrich"),
@@ -73,6 +75,7 @@ class TestBuildGoldMergedMetadataInput:
             table_path="gold/publication",
             table_name="composite.publication",
             records=[{"id": 1}],
+            completed_at=None,
             schema=mock_schema,
             transform_version="1.0.0",
             transform_steps=(),
@@ -89,6 +92,7 @@ class TestBuildGoldMergedMetadataInput:
                 {"_ingestion_ts": "2025-06-01T08:00:00", "id": 1},
                 {"_lineage_created_at": "2025-05-01T08:00:00+00:00", "id": 2},
             ],
+            completed_at=None,
             schema=None,
             transform_version=None,
             transform_steps=(),
@@ -96,6 +100,20 @@ class TestBuildGoldMergedMetadataInput:
 
         assert result.completed_at is not None
         assert result.completed_at.month == 5
+
+    def test_prefers_explicit_completed_at_over_record_timestamp(self) -> None:
+        result = build_gold_merged_metadata_input(
+            table_path="gold/publication",
+            table_name="composite.publication",
+            records=[{"_lineage_created_at": "2025-05-01T08:00:00+00:00", "id": 2}],
+            completed_at=datetime(2025, 4, 1, 0, 0, 0),
+            schema=None,
+            transform_version=None,
+            transform_steps=(),
+        )
+
+        assert result.completed_at is not None
+        assert result.completed_at.month == 4
 
 
 @pytest.mark.unit

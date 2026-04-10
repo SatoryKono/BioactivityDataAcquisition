@@ -25,6 +25,7 @@ class MergeMetricsRecorderMixin:
         df: pl.DataFrame,
         enrichment_results: dict[str, EnrichmentResult],
         run_id: str,
+        metadata_timestamp: datetime | None,
         sources_used: list[str],
         dependency_results: dict[str, DependencyResult] | None = None,
     ) -> pl.DataFrame:
@@ -51,12 +52,18 @@ class MergeMetricsRecorderMixin:
         for name, enrich_result in enrichment_results.items():
             status_dict[name] = enrich_result.status.value
 
+        lineage_created_at = (
+            metadata_timestamp.astimezone(UTC).isoformat()
+            if metadata_timestamp is not None
+            else datetime.now(tz=UTC).isoformat()
+        )
+
         return df.with_columns(
             [
                 pl.lit(run_id).alias("_composite_run_id"),
                 pl.lit(json.dumps(sources_used)).alias("_source_providers"),
                 pl.lit(json.dumps(status_dict)).alias("_enrichment_status"),
-                pl.lit(datetime.now(tz=UTC).isoformat()).alias("_lineage_created_at"),
+                pl.lit(lineage_created_at).alias("_lineage_created_at"),
             ]
         )
 

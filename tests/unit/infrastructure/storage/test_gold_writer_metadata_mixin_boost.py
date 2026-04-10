@@ -455,6 +455,7 @@ class TestWriteGoldMergedMetadata:
             table_path="gold/composite/publication",
             table_name="composite.publication",
             records=[{"id": 1}],
+            completed_at=None,
             schema=None,
             transform_version="1.0.0",
             transform_steps=("step1", "step2"),
