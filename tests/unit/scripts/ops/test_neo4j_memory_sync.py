@@ -5,7 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 
 from scripts.ops.neo4j_memory_sync import (
+    _build_normalization_pipeline_evidence,
     _build_diff_entries,
+    _normalization_evidence_statements,
+    apply_normalization_evidence_only,
     DEFAULT_INGEST_WAVE,
     DEFAULT_LEGACY_PRUNE_LABELS,
     DEFAULT_MANAGED_BY,
@@ -256,6 +259,57 @@ def _relation_keys(snapshot: object) -> set[RelationKey]:
 def _assert_relation_membership(relation_keys: set[RelationKey], expected: tuple[RelationKey, ...]) -> None:
     for relation_key in expected:
         assert relation_key in relation_keys
+
+
+def test_normalization_evidence_statements_cover_registry_and_fallback_metrics() -> None:
+    statements = _normalization_evidence_statements()
+    chembl_activity = next(
+        item for item in statements if item["parameters"]["pipeline_name"] == "chembl_activity"
+    )
+    assay_parameters = next(
+        item for item in statements if item["parameters"]["pipeline_name"] == "chembl_assay_parameters"
+    )
+
+    chembl_params = chembl_activity["parameters"]
+    assert chembl_params["normalization_profile_registered"] is True
+    assert chembl_params["normalization_profile_module_path"] == (
+        "src/bioetl/domain/normalization/profiles/chembl_activity.py"
+    )
+    assert chembl_params["profile_field_count"] > 0
+
+    assay_params = assay_parameters["parameters"]
+    assert assay_params["normalization_profile_registered"] is False
+    assert assay_params["fallback_business_field_count"] > 0
+    assert assay_params["fallback_field_count"] >= assay_params["fallback_business_field_count"]
+
+
+def test_apply_normalization_evidence_only_executes_batched_statements(monkeypatch) -> None:
+    executed_batches: list[list[dict[str, object]]] = []
+
+    class StubClient:
+        def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
+            self.base_uri = base_uri
+            self.username = username
+            self.password = password
+            self.database = database
+
+        def execute(self, statements: list[dict[str, object]]) -> dict[str, object]:
+            executed_batches.append(statements)
+            return {"results": [], "errors": []}
+
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.Neo4jHttpClient", StubClient)
+    root = Path(__file__).resolve().parents[4]
+
+    summary = apply_normalization_evidence_only(
+        root,
+        "http://host.docker.internal:7474",
+        batch_size=7,
+    )
+
+    evidence = _build_normalization_pipeline_evidence()
+    assert summary["pipeline_count"] == len(evidence)
+    assert executed_batches
+    assert sum(len(batch) for batch in executed_batches) == len(evidence)
 
 
 def _assert_relation_absence(relation_keys: set[RelationKey], forbidden: tuple[RelationKey, ...]) -> None:
