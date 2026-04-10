@@ -42,7 +42,8 @@ class _CoordinatorWithBundle:
 
 class _MetadataStub:
     def __init__(self) -> None:
-        self.output = SimpleNamespace(lineage_fragment_id=None)
+        self.runtime = SimpleNamespace(run_id="run-123", manifest_id=None)
+        self.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
 
 
 @pytest.mark.unit

@@ -44,7 +44,7 @@ class TestMaybeStartMetricsServer:
     """Tests for maybe_start_metrics_server runtime entrypoint."""
 
     @patch(
-        "bioetl.composition.bootstrap.runtime.metrics_bootstrap.bootstrap_metrics_service"
+        "bioetl.composition.bootstrap.runtime.metrics_bootstrap.create_metrics_service"
     )
     def test_passes_config_params(
         self,
@@ -78,7 +78,7 @@ class TestMaybeStartMetricsServer:
         )
 
     @patch(
-        "bioetl.composition.bootstrap.runtime.metrics_bootstrap.bootstrap_metrics_service"
+        "bioetl.composition.bootstrap.runtime.metrics_bootstrap.create_metrics_service"
     )
     def test_fail_fast_true_raises_error(
         self,
@@ -110,7 +110,7 @@ class TestMaybeStartMetricsServer:
         assert exc_info.value.reason == "port_in_use"
 
     @patch(
-        "bioetl.composition.bootstrap.runtime.metrics_bootstrap.bootstrap_metrics_service"
+        "bioetl.composition.bootstrap.runtime.metrics_bootstrap.create_metrics_service"
     )
     def test_fail_fast_false_propagates_error(
         self,
