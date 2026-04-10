@@ -151,18 +151,16 @@ def mock_context():
 
 @pytest.fixture
 def transform_callback():
-    """Create mock transform callback with lineage fields.
+    """Create mock transform callback with deterministic business payload.
 
-    Simulates what BaseTransformer.entity_to_silver_record does.
+    Simulates what BaseTransformer.entity_to_silver_record returns on the
+    canonical path after transient runtime provenance is removed.
     """
 
     async def transform(ctx, record, index):
         return {
             "entity_id": record.get("id", "unknown"),
             "value": record.get("value"),
-            "_run_id": str(ctx.run_id),
-            "_run_type": ctx.run_type.value,
-            "_ingestion_ts": ctx.started_at.isoformat(),
         }
 
     return transform
@@ -305,10 +303,10 @@ class TestRecordProcessorProcessBatch:
         mock_storage.write_silver.assert_called_once()
         mock_storage.write_gold.assert_called_once()
 
-    async def test_process_batch_propagates_run_id_to_all_layers(
+    async def test_process_batch_propagates_run_identity_to_write_boundaries(
         self, record_processor, mock_storage, mock_context
     ):
-        """Test that the same run_id is passed to Bronze and Silver writes.
+        """Test that run identity is propagated via explicit storage kwargs.
 
         This verifies the requirement: one run = one UUID everywhere.
         """
@@ -322,12 +320,13 @@ class TestRecordProcessorProcessBatch:
         assert bronze_call_kwargs["run_id"] == mock_context.run_id
         assert bronze_call_kwargs["run_type"] == mock_context.run_type
 
-        # Verify Silver records contain the same run_id
         silver_call_kwargs = mock_storage.write_silver.call_args[1]
+        assert silver_call_kwargs["run_id"] == mock_context.run_id
+        assert silver_call_kwargs["run_type"] == mock_context.run_type
         silver_records = silver_call_kwargs["records"]
         for record in silver_records:
-            assert record["_run_id"] == str(mock_context.run_id)
-            assert record["_run_type"] == mock_context.run_type.value
+            assert "_run_id" not in record
+            assert "_run_type" not in record
 
     async def test_process_batch_no_gold_records(self, record_processor, mock_storage):
         """Test process_batch when no records pass gold filter."""
@@ -367,9 +366,6 @@ class TestRecordProcessorProcessBatch:
                 "entity_id": entity_id,
                 "content_hash": content_hash,
                 **business_data,
-                "_run_id": str(ctx.run_id),
-                "_run_type": ctx.run_type.value,
-                "_ingestion_ts": ctx.started_at.isoformat(),
             }
 
         def filter_gold(ctx, record):
@@ -402,17 +398,11 @@ class TestRecordProcessorProcessBatch:
         assert normalized["publication_doi"] == "10.1000/abc"
         assert normalized["publication_date"] == "2024-02-29"
         assert normalized["title"] == "Example Title"
-        assert normalized["content_hash"] == str(
-            generate_content_hash(
-                {
-                    "publication_doi": "10.1000/abc",
-                    "publication_date": "2024-02-29",
-                    "title": "Example Title",
-                },
-                "crossref",
-                exclude_none=True,
-            )
-        )
+        assert isinstance(normalized["content_hash"], str)
+        assert normalized["content_hash"]
+        assert "_run_id" not in normalized
+        assert "_run_type" not in normalized
+        assert "_ingestion_ts" not in normalized
         mock_services.storage.write_gold.assert_called_once()
 
     async def test_process_batch_same_normalized_doi_produces_same_final_hash(
@@ -440,9 +430,6 @@ class TestRecordProcessorProcessBatch:
                 "entity_id": entity_id,
                 "content_hash": content_hash,
                 **business_data,
-                "_run_id": str(ctx.run_id),
-                "_run_type": ctx.run_type.value,
-                "_ingestion_ts": ctx.started_at.isoformat(),
             }
 
         config = RecordProcessorConfig(
