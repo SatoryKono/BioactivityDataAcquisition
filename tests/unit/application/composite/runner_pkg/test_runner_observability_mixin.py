@@ -8,6 +8,7 @@ path not covered elsewhere.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
@@ -44,6 +45,8 @@ class _ObservabilityHarness(CompositeRunnerObservabilityMixin):
         self._logger = MagicMock()
         self._run_id_str = "run-obs-test"
         self._run_id = uuid4()
+        self._runtime = SimpleNamespace(cached_bronze_date=None)
+        self._started_at = datetime(2026, 4, 9, 12, 30, 0, tzinfo=UTC)
         self._dq_report_service = None
         self._quarantine_port = None
         self._metrics = None
@@ -80,6 +83,8 @@ async def test_generate_dq_reports_when_service_present_then_generates_and_logs(
     await harness._generate_dq_reports(merge_result)
 
     harness._dq_report_service.generate_reports.assert_awaited_once()
+    context = harness._dq_report_service.generate_reports.await_args.args[0]
+    assert context.timestamp == harness._started_at
     harness._logger.info.assert_called_once()
     info_args = harness._logger.info.call_args.args[0]
     assert "generated" in info_args

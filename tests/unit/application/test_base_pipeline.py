@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -259,3 +260,51 @@ async def test_base_pipeline_uses_injected_shutdown_signal():
     )
 
     assert pipeline.shutdown_signal is injected_signal
+
+
+async def test_exact_replay_pipeline_context_uses_deterministic_replay_anchor() -> None:
+    """Exact replay should bind a stable DQ/report timestamp anchor into context."""
+    config = PipelineConfig(
+        pipeline_name="test_pipeline",
+        provider="test_provider",
+        entity_type="test_entity",
+        table=TableConfig(
+            primary_keys=["id"],
+            silver_table="test_provider.test_entity",
+        ),
+    )
+    runtime = RuntimeConfig(
+        run_type=RunType.INCREMENTAL,
+        exact_replay=True,
+        replay_anchor_date="2026-04-10",
+    )
+    mock_logger = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+    services = PipelineService(
+        data_source=AsyncMock(),
+        storage=AsyncMock(),
+        lock=AsyncMock(),
+        checkpoint=AsyncMock(),
+        quarantine=AsyncMock(),
+        metrics=MagicMock(),
+        tracing=MagicMock(),
+        logger=mock_logger,
+    )
+
+    pipeline = ConcretePipeline(
+        config,
+        runtime,
+        services,
+        uuid4(),
+        shutdown_signal=ShutdownSignal(),
+    )
+
+    assert pipeline.context.replay_timestamp_anchor == datetime(
+        2026,
+        4,
+        10,
+        0,
+        0,
+        0,
+        tzinfo=UTC,
+    )

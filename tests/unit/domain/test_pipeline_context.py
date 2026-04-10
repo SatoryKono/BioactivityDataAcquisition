@@ -48,6 +48,7 @@ class TestPipelineContext:
         assert context.run_id == run_id
         assert context.run_type == RunType.INCREMENTAL
         assert context.logger is not None
+        assert context.replay_timestamp_anchor is None
 
     def test_context_is_frozen(self, context: PipelineContext) -> None:
         """Context should be immutable (frozen dataclass)."""
@@ -139,6 +140,21 @@ class TestPipelineContextStartedAt:
 
         assert ctx.started_at == explicit_time
 
+    def test_context_create_factory_explicit_replay_anchor(self) -> None:
+        """create() should preserve an explicit deterministic replay timestamp."""
+        run_id = uuid4()
+        logger = MagicMock()
+        replay_anchor = datetime(2025, 6, 1, 0, 0, 0, tzinfo=UTC)
+
+        ctx = PipelineContext.create(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            replay_timestamp_anchor=replay_anchor,
+        )
+
+        assert ctx.replay_timestamp_anchor == replay_anchor
+
     def test_context_create_factory_auto_timestamp(self) -> None:
         """create() factory should auto-generate started_at when not provided."""
         run_id = uuid4()
@@ -185,6 +201,24 @@ class TestPipelineContextStartedAt:
         new_ctx = ctx.bind_logger(entity="test")
 
         assert new_ctx.started_at == explicit_time
+
+    def test_bind_logger_preserves_replay_timestamp_anchor(self) -> None:
+        """bind_logger must not lose deterministic replay anchors."""
+        run_id = uuid4()
+        logger = MagicMock()
+        logger.bind.return_value = MagicMock()
+        replay_anchor = datetime(2025, 3, 20, 0, 0, 0, tzinfo=UTC)
+
+        ctx = PipelineContext(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            replay_timestamp_anchor=replay_anchor,
+        )
+
+        new_ctx = ctx.bind_logger(entity="test")
+
+        assert new_ctx.replay_timestamp_anchor == replay_anchor
 
 
 class TestPipelineContextEquality:

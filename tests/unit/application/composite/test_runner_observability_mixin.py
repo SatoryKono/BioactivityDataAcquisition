@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
@@ -33,6 +34,8 @@ class _RunnerHarness(CompositeRunnerObservabilityMixin):
         self._logger = MagicMock()
         self._run_id_str = "run-test-1"
         self._run_id = uuid4()
+        self._runtime = SimpleNamespace(cached_bronze_date=None)
+        self._started_at = datetime(2026, 4, 9, 12, 30, 0, tzinfo=UTC)
         self._dq_report_service = None
         self._quarantine_port = None
         self._metrics = None
@@ -60,7 +63,23 @@ async def test_generate_dq_reports_success_logs_info_and_calls_service() -> None
     await runner._generate_dq_reports(merge_result)
 
     runner._dq_report_service.generate_reports.assert_awaited_once()
+    context = runner._dq_report_service.generate_reports.await_args.args[0]
+    assert context.timestamp == runner._started_at
     runner._logger.info.assert_called_once()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generate_dq_reports_prefers_cached_bronze_date_for_timestamp() -> None:
+    runner = _RunnerHarness()
+    runner._runtime.cached_bronze_date = "2026-04-10"
+    runner._dq_report_service = MagicMock()
+    runner._dq_report_service.generate_reports = AsyncMock(return_value=None)
+
+    await runner._generate_dq_reports(MergeResult(records_from_seed=7))
+
+    context = runner._dq_report_service.generate_reports.await_args.args[0]
+    assert context.timestamp == datetime(2026, 4, 10, 0, 0, 0, tzinfo=UTC)
 
 
 @pytest.mark.unit

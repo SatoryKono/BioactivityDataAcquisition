@@ -95,6 +95,7 @@ class PipelineContext:
     run_type: RunType
     logger: LoggerPort
     started_at: datetime = field(default_factory=_now_utc)
+    replay_timestamp_anchor: datetime | None = None
 
     @classmethod
     def create(
@@ -103,6 +104,7 @@ class PipelineContext:
         run_type: RunType,
         logger: LoggerPort,
         started_at: datetime | None = None,
+        replay_timestamp_anchor: datetime | None = None,
     ) -> PipelineContext:
         """Create a new PipelineContext with optional automatic timestamp.
 
@@ -111,6 +113,8 @@ class PipelineContext:
             run_type: Type of run (incremental, backfill, rebuild).
             logger: Structured logger port for pipeline-level logging.
             started_at: Optional UTC start timestamp. Defaults to the current UTC time.
+            replay_timestamp_anchor: Optional deterministic timestamp used for
+                replay-facing artifacts that must not drift between exact replays.
 
         Returns:
             New PipelineContext instance with all fields set.
@@ -120,6 +124,7 @@ class PipelineContext:
             run_type=run_type,
             logger=logger,
             started_at=started_at or datetime.now(UTC),
+            replay_timestamp_anchor=replay_timestamp_anchor,
         )
 
     def bind_logger(
@@ -140,6 +145,7 @@ class PipelineContext:
             run_type=self.run_type,
             logger=new_logger,
             started_at=self.started_at,
+            replay_timestamp_anchor=self.replay_timestamp_anchor,
         )
 
 
@@ -185,17 +191,18 @@ class PipelineRunContext:
     @property
     def has_input_filter(self) -> bool:
         """Check if input filtering is enabled."""
-        return self.input_filter.enabled
+        return bool(self.input_filter.enabled)
 
     @property
     def has_cached_bronze(self) -> bool:
         """Check if cached Bronze mode is enabled."""
-        return self.cached_bronze.enabled
+        return bool(self.cached_bronze.enabled)
 
     @property
     def vacuum_enabled_override(self) -> bool | None:
         """Return the explicit vacuum override, if one was provided."""
-        return self.vacuum.enabled
+        enabled = self.vacuum.enabled
+        return None if enabled is None else bool(enabled)
 
     def log_correlation_fields(self) -> dict[str, str]:
         """Return the mandatory bound logging fields for one pipeline run.

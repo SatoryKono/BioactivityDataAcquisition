@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 import sys
@@ -64,7 +65,11 @@ class _BatchExecutorDQHarness(_BatchExecutorDQMixin):
             dq_report_service=object(),
             metrics=_MetricsStub(),
         )
-        self._context = SimpleNamespace(run_id="run-1")  # type: ignore[assignment]
+        self._context = SimpleNamespace(  # type: ignore[assignment]
+            run_id="run-1",
+            started_at=datetime(2026, 4, 9, 12, 30, 0, tzinfo=UTC),
+            replay_timestamp_anchor=None,
+        )
         self._config = SimpleNamespace(  # type: ignore[assignment]
             dq_config=_DQConfig(
                 soft_fail_threshold=0.11,
@@ -226,6 +231,30 @@ def test_get_dq_context_builds_context_with_resolved_rules() -> None:
     assert context.silver_key_nullability_rules == [
         {"field": "entity_id", "key_type": "primary", "nullable": False}
     ]
+    assert context.timestamp == harness._context.started_at
+    assert context.bronze_date_str == "2026-04-09"
+
+
+def test_get_dq_context_prefers_replay_timestamp_anchor_for_exact_replay() -> None:
+    harness = _BatchExecutorDQHarness()
+    harness._context.replay_timestamp_anchor = datetime(
+        2026,
+        4,
+        10,
+        0,
+        0,
+        0,
+        tzinfo=UTC,
+    )
+    harness._build_dataframe_from_records = (  # type: ignore[method-assign]
+        lambda records, stage="other": {"rows": len(records)}
+    )
+
+    context = harness.get_dq_context()
+
+    assert context is not None
+    assert context.timestamp == harness._context.replay_timestamp_anchor
+    assert context.bronze_date_str == "2026-04-10"
 
 
 def test_reservoir_add_respects_max_sample_size(
