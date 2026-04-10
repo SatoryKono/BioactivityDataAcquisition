@@ -25,6 +25,8 @@ class TestRuntimeConfig:
         assert config.lock_ttl == 90
         assert config.query is None
         assert config.dry_run is False
+        assert config.exact_replay is False
+        assert config.replay_anchor_date is None
         assert config.vacuum_after_run is False
         assert config.vacuum_retention_days == 7
         assert config.strict_validation is False
@@ -43,6 +45,8 @@ class TestRuntimeConfig:
             lock_ttl=180,
             query="test_query",
             dry_run=True,
+            exact_replay=True,
+            replay_anchor_date="2026-04-10",
             vacuum_after_run=True,
             vacuum_retention_days=14,
             strict_validation=True,
@@ -59,6 +63,8 @@ class TestRuntimeConfig:
         assert config.lock_ttl == 180
         assert config.query == "test_query"
         assert config.dry_run is True
+        assert config.exact_replay is True
+        assert config.replay_anchor_date == "2026-04-10"
         assert config.vacuum_after_run is True
         assert config.vacuum_retention_days == 14
         assert config.strict_validation is True
@@ -159,4 +165,13 @@ class TestRuntimeConfig:
             RuntimeConfig(
                 run_type=RunType.INCREMENTAL,
                 health_check_mode="unsupported",  # type: ignore[arg-type]
+            )
+
+    def test_invalid_replay_anchor_date_raises(self) -> None:
+        """Replay anchors must use canonical ISO date form."""
+        with pytest.raises(ValueError, match="replay_anchor_date must be an ISO date"):
+            RuntimeConfig(
+                run_type=RunType.INCREMENTAL,
+                exact_replay=True,
+                replay_anchor_date="2026/04/10",
             )

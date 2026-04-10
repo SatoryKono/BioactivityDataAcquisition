@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Protocol, cast
 
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
@@ -23,9 +23,25 @@ class _CompositeRunnerObservabilityHostProtocol(Protocol):
     _logger: LoggerPort
     _run_id_str: str
     _run_id: RunID
+    _runtime: object
+    _started_at: datetime | None
     _dq_report_service: DQReportService | None
     _quarantine_port: QuarantinePort | None
     _metrics: MetricsPort | None
+
+
+def _resolve_composite_dq_timestamp(
+    *,
+    cached_bronze_date: str | None,
+    started_at: datetime | None,
+) -> datetime:
+    """Resolve a deterministic timestamp for composite DQ side effects."""
+    if cached_bronze_date is not None:
+        replay_date = date.fromisoformat(cached_bronze_date)
+        return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
+    if started_at is not None:
+        return started_at
+    return datetime(1970, 1, 1, tzinfo=UTC)
 
 
 class CompositeRunnerObservabilityMixin:
@@ -60,10 +76,18 @@ class CompositeRunnerObservabilityMixin:
         try:
             from bioetl.application.services.dq_report_service import DQReportContext
 
+            cached_bronze_date = cast(
+                str | None,
+                getattr(self._runtime, "cached_bronze_date", None),
+            )
+            dq_timestamp = _resolve_composite_dq_timestamp(
+                cached_bronze_date=cached_bronze_date,
+                started_at=self._started_at,
+            )
             context = DQReportContext(
                 run_id=self._run_id_str,
                 pipeline_name=f"composite_{self._config.name}",
-                timestamp=datetime.now(tz=UTC),
+                timestamp=dq_timestamp,
                 provider="composite",
                 entity=self._config.name,
                 silver_target_table=self._config.merge.output_silver_path,
