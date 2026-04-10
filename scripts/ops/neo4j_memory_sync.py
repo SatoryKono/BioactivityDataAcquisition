@@ -4194,17 +4194,20 @@ def _prune_stale_nodes_statement(sync_run: str) -> dict[str, JsonValue]:
     }
 
 
-def _delete_managed_wave_nodes_statement() -> dict[str, JsonValue]:
+def _delete_managed_wave_nodes_statement(label: str, limit: int) -> dict[str, JsonValue]:
     return {
         "statement": (
-            "MATCH (n) "
+            f"MATCH (n:`{label}`) "
             "WHERE n.ingest_wave = $ingest_wave "
             "AND coalesce(n.managed_by, $managed_by) = $managed_by "
-            "DETACH DELETE n"
+            "WITH n LIMIT $limit "
+            "DETACH DELETE n "
+            "RETURN count(*) AS deleted"
         ),
         "parameters": {
             "ingest_wave": DEFAULT_INGEST_WAVE,
             "managed_by": DEFAULT_MANAGED_BY,
+            "limit": limit,
         },
     }
 
@@ -4235,6 +4238,7 @@ def sync_snapshot(
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
     sync_run = _sync_run_id()
+    managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
     node_groups: dict[str, list[dict[str, JsonValue]]] = {}
     for node in snapshot.nodes.values():
         node_groups.setdefault(node.key.label, []).append(_node_statement(node, sync_run))
@@ -4242,7 +4246,17 @@ def sync_snapshot(
     for relation in snapshot.relations.values():
         relation_groups.setdefault(relation.relation_type, []).append(_relation_statement(relation, sync_run))
     if full_reset_managed_wave:
-        client.execute([_delete_managed_wave_nodes_statement()])
+        delete_batch_size = max(1, min(batch_size, 50))
+        for label in managed_labels:
+            while True:
+                delete_statement = _delete_managed_wave_nodes_statement(label, delete_batch_size)
+                rows = client.query(
+                    delete_statement["statement"],
+                    delete_statement["parameters"],
+                )
+                deleted = int(rows[0]["deleted"]) if rows else 0
+                if deleted == 0:
+                    break
     _execute_grouped_statements(client, node_groups, batch_size, "node")
     if prune_stale and relation_groups:
         relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
@@ -4252,7 +4266,6 @@ def sync_snapshot(
         client.execute([_prune_stale_relations_statement(sync_run)])
         client.execute([_prune_stale_nodes_statement(sync_run)])
     if prune_legacy_unmanaged:
-        managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
         client.execute([_prune_legacy_unmanaged_nodes_statement(managed_labels)])
 
 
