@@ -42,16 +42,39 @@ class TestDeduplicateByPrimaryKeysImpl:
     """Tests for batch-level record deduplication."""
 
     def test_deduplicates_by_keys(self) -> None:
-        """Should keep last occurrence for duplicate primary keys."""
+        """Should keep a deterministic winner for duplicate primary keys."""
         records = [
-            {"id": 1, "name": "first"},
+            {"id": 1, "name": "second", "content_hash": "z-hash"},
             {"id": 2, "name": "only"},
-            {"id": 1, "name": "second"},
+            {"id": 1, "name": "first", "content_hash": "a-hash"},
         ]
         result = _deduplicate_by_primary_keys_impl(records, ["id"])
         assert len(result) == 2
         id_to_name = {r["id"]: r["name"] for r in result}
-        assert id_to_name[1] == "second"  # last wins
+        assert id_to_name[1] == "first"
+
+    def test_deduplication_is_order_insensitive(self) -> None:
+        """Reordering the input batch should not change the selected winner."""
+        forward = [
+            {"id": 1, "name": "winner", "content_hash": "a-hash"},
+            {"id": 1, "name": "loser", "content_hash": "z-hash"},
+        ]
+        reverse = list(reversed(forward))
+
+        forward_result = _deduplicate_by_primary_keys_impl(forward, ["id"])
+        reverse_result = _deduplicate_by_primary_keys_impl(reverse, ["id"])
+
+        assert len(forward_result) == 1
+        assert len(reverse_result) == 1
+        assert forward_result[0]["name"] == "winner"
+        assert reverse_result[0]["name"] == "winner"
+
+    def test_exact_duplicates_collapse_to_one_row(self) -> None:
+        """Exact duplicates should collapse by business key and content identity."""
+        record = {"id": 1, "name": "same", "content_hash": "a-hash"}
+        result = _deduplicate_by_primary_keys_impl([record, dict(record)], ["id"])
+
+        assert result == [record]
 
     def test_empty_primary_keys_returns_original(self) -> None:
         """Should return records unchanged when no primary keys."""
