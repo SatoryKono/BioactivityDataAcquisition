@@ -18,6 +18,12 @@ from bioetl.domain.normalization.profiles.registry import (
 
 def test_registry_contains_canonical_chembl_activity_profile() -> None:
     assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "activity")] is CHEMBL_ACTIVITY_PROFILE
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("crossref", "publication")]
+        is CROSSREF_PUBLICATION_PROFILE
+    )
+    assert NORMALIZATION_PROFILE_REGISTRY[("pubmed", "publication")] is PUBMED_PUBLICATION_PROFILE
+    assert NORMALIZATION_PROFILE_REGISTRY[("pubchem", "compound")] is PUBCHEM_COMPOUND_PROFILE
 
 
 def test_build_registry_matches_exported_registry() -> None:

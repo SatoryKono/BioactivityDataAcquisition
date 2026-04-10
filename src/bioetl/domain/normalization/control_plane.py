@@ -21,7 +21,9 @@ __all__ = [
     "normalize_contract_ref",
     "normalize_contract_version",
     "normalize_control_plane_datetime",
+    "normalize_control_plane_opaque_hash_ref",
     "normalize_control_plane_sha256",
+    "normalize_control_plane_strict_sha256",
     "normalize_control_plane_uuid",
     "normalize_run_ledger_payload",
     "normalize_run_manifest_spec",
@@ -57,8 +59,8 @@ def _normalize_optional_text(value: object | None) -> str | None:
     return text or None
 
 
-def normalize_control_plane_sha256(value: str | None) -> str | None:
-    """Normalize an optional hash-like value without enforcing policy strictness."""
+def normalize_control_plane_opaque_hash_ref(value: object | None) -> str | None:
+    """Normalize an optional opaque hash-like reference without strict validation."""
     normalized = _normalize_optional_text(value)
     if normalized is None:
         return None
@@ -66,17 +68,30 @@ def normalize_control_plane_sha256(value: str | None) -> str | None:
     return normalized or None
 
 
-def normalize_runtime_anchor_effective_config_hash(value: object | None) -> str | None:
-    """Return canonical runtime-anchor effective_config_hash or fail closed."""
+def normalize_control_plane_sha256(value: str | None) -> str | None:
+    """Backward-compatible alias for opaque control-plane hash-like normalization."""
+    return normalize_control_plane_opaque_hash_ref(value)
+
+
+def normalize_control_plane_strict_sha256(value: object | None) -> str | None:
+    """Return canonical lowercase 64-char SHA256 hex or fail closed."""
     normalized = _normalize_optional_text(value)
     if normalized is None:
         return None
     normalized = _strip_optional_sha256_prefix(normalized).lower()
     if not _SHA256_HEX_PATTERN.fullmatch(normalized):
+        raise ValueError("Invalid SHA256 format: expected lowercase 64-char SHA256 hex")
+    return normalized
+
+
+def normalize_runtime_anchor_effective_config_hash(value: object | None) -> str | None:
+    """Return canonical runtime-anchor effective_config_hash or fail closed."""
+    try:
+        return normalize_control_plane_strict_sha256(value)
+    except ValueError as exc:
         raise ValueError(
             "Invalid effective_config_hash format: expected lowercase 64-char SHA256 hex"
-        )
-    return normalized
+        ) from exc
 
 
 def normalize_contract_ref(value: object | None) -> str | None:
@@ -142,7 +157,7 @@ def _pad_contract_version_parts(parts: list[str]) -> list[str]:
 
 def _normalize_runtime_anchor_hash(value: object | None) -> str | None:
     """Normalize hash-like runtime anchor fields into canonical lowercase text."""
-    return normalize_control_plane_sha256(None if value is None else str(value))
+    return normalize_control_plane_opaque_hash_ref(value)
 
 
 def _normalize_runtime_anchor_value(key: str, value: object | None) -> str | None:
@@ -196,7 +211,7 @@ def _normalize_manifest_hash_fields(normalized: dict[str, object]) -> None:
         value = normalized.get(field_name)
         if value is None:
             continue
-        normalized[field_name] = normalize_control_plane_sha256(str(value))
+        normalized[field_name] = normalize_control_plane_opaque_hash_ref(value)
 
 
 def _apply_manifest_field_normalizer(

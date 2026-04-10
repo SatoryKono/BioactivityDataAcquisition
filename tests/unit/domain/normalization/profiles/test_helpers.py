@@ -55,3 +55,12 @@ def test_normalize_profile_identifier_helpers() -> None:
 def test_normalize_profile_smiles_returns_canonical_text_or_none() -> None:
     assert normalize_profile_smiles(None, is_canonical=True) is None
     assert normalize_profile_smiles("C", is_canonical=True) == "C"
+
+
+def test_normalize_profile_title_and_abstract_use_canonical_text_rules() -> None:
+    assert normalize_profile_title("  Example   Title ") == "Example Title"
+    assert normalize_profile_abstract("  Example   abstract  ") == "Example abstract"
+
+
+def test_normalize_profile_date_uses_partial_date_normalization() -> None:
+    assert normalize_profile_date(" 2024-01-02 ") == "2024-01-02"

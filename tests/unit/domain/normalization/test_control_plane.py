@@ -8,6 +8,8 @@ from uuid import UUID
 import pytest
 
 from bioetl.domain.normalization.control_plane import (
+    normalize_control_plane_opaque_hash_ref,
+    normalize_control_plane_strict_sha256,
     normalize_runtime_anchor_payload,
     normalize_run_ledger_payload,
     normalize_run_manifest_spec,
@@ -155,6 +157,20 @@ def test_normalize_runtime_anchor_payload_coerces_canonical_contract_fields() ->
         "manifest_id": "manifest-123",
         "composite_run_identity": "run-42",
     }
+
+
+def test_normalize_control_plane_opaque_hash_ref_keeps_legacy_non_strict_values() -> None:
+    assert normalize_control_plane_opaque_hash_ref(" SHA256:FACE ") == "sha256:face"
+    assert normalize_control_plane_opaque_hash_ref(" compat-hash-123 ") == "compat-hash-123"
+
+
+def test_normalize_control_plane_strict_sha256_requires_lowercase_hex_payload() -> None:
+    assert normalize_control_plane_strict_sha256(
+        " SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "
+    ) == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+    with pytest.raises(ValueError, match="Invalid SHA256 format"):
+        normalize_control_plane_strict_sha256("sha256:not-hex")
 
 
 @pytest.mark.parametrize(

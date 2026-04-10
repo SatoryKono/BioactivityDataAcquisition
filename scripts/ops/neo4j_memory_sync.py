@@ -26,7 +26,7 @@ T = TypeVar("T")
 BIOETL_METRIC_PATTERN = re.compile(r"\bbioetl_[a-zA-Z0-9_:]+")
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_BATCH_SIZE = 100
+DEFAULT_BATCH_SIZE = 20
 DEFAULT_INGEST_WAVE = "repo_sync_v1"
 DEFAULT_MANAGED_BY = "neo4j_memory_sync"
 DEFAULT_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
@@ -4235,17 +4235,19 @@ def sync_snapshot(
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
     sync_run = _sync_run_id()
-    node_statements = [_node_statement(node, sync_run) for node in snapshot.nodes.values()]
-    relation_statements = [_relation_statement(relation, sync_run) for relation in snapshot.relations.values()]
+    node_groups: dict[str, list[dict[str, JsonValue]]] = {}
+    for node in snapshot.nodes.values():
+        node_groups.setdefault(node.key.label, []).append(_node_statement(node, sync_run))
+    relation_groups: dict[str, list[dict[str, JsonValue]]] = {}
+    for relation in snapshot.relations.values():
+        relation_groups.setdefault(relation.relation_type, []).append(_relation_statement(relation, sync_run))
     if full_reset_managed_wave:
         client.execute([_delete_managed_wave_nodes_statement()])
-    for statements in _batched(node_statements, batch_size):
-        client.execute(statements)
-    if prune_stale and relation_statements:
+    _execute_grouped_statements(client, node_groups, batch_size, "node")
+    if prune_stale and relation_groups:
         relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
         client.execute([_reset_managed_relations_statement(relation_types)])
-    for statements in _batched(relation_statements, batch_size):
-        client.execute(statements)
+    _execute_grouped_statements(client, relation_groups, batch_size, "relation")
     if prune_stale:
         client.execute([_prune_stale_relations_statement(sync_run)])
         client.execute([_prune_stale_nodes_statement(sync_run)])
@@ -4256,6 +4258,25 @@ def sync_snapshot(
 
 def _batched(items: list[T], size: int) -> list[list[T]]:
     return [items[index : index + size] for index in range(0, len(items), size)]
+
+
+def _execute_grouped_statements(
+    client: Neo4jHttpClient,
+    grouped_statements: dict[str, list[dict[str, JsonValue]]],
+    batch_size: int,
+    kind: str,
+) -> None:
+    for group_name in sorted(grouped_statements):
+        statements = grouped_statements[group_name]
+        for batch_index, batch in enumerate(_batched(statements, batch_size), start=1):
+            try:
+                client.execute(batch)
+            except Exception as exc:  # pragma: no cover - depends on live backend state
+                raise RuntimeError(
+                    f"Neo4j sync failed while applying {kind} group `{group_name}` "
+                    f"(batch {batch_index}/{len(_batched(statements, batch_size))}, "
+                    f"{len(batch)} statements)"
+                ) from exc
 
 
 def _write_export(path: Path, snapshot: GraphSnapshot) -> None:

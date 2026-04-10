@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-10T00:18:24.808813+00:00",
+  "generated_at": "2026-04-10T08:04:37.778435+00:00",
   "summary": {
-    "total_scripts": 287,
+    "total_scripts": 288,
     "status_counts": {
-      "active": 236,
+      "active": 237,
       "legacy": 29,
       "orphan": 21,
       "unknown": 1
@@ -13,8 +13,8 @@
       "agents": 10,
       "build": 31,
       "ci": 48,
-      "docs": 115,
-      "scripts": 245,
+      "docs": 116,
+      "scripts": 246,
       "skills": 9,
       "tests": 92
     }
@@ -179,13 +179,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 80,
+          "line": 69,
           "source_group": "docs",
           "text": "`python -m scripts.ci neo4j-memory`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 85,
+          "line": 74,
           "source_group": "docs",
           "text": "`python -m scripts.ci neo4j-memory-live`."
         },
@@ -4318,8 +4318,32 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
+          "line": 114,
+          "source_group": "docs",
+          "text": "| Matrix generation | [generate_chembl_activity_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_chembl_activity_field_matrix.py) | Deterministically emit"
+        },
+        {
+          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
+          "line": 195,
+          "source_group": "docs",
+          "text": "- [generate_chembl_activity_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_chembl_activity_field_matrix.py)"
+        },
+        {
+          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
+          "line": 414,
+          "source_group": "docs",
+          "text": "- [generate_chembl_activity_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_chembl_activity_field_matrix.py) already generates deterministic artifacts"
+        },
+        {
+          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
+          "line": 505,
+          "source_group": "docs",
+          "text": "python3 scripts/docs/generate_chembl_activity_field_matrix.py --check"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 22,
@@ -4547,7 +4571,7 @@
         },
         {
           "path": "scripts/ops/neo4j_memory_sync.py",
-          "line": 409,
+          "line": 447,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
         }
@@ -4680,7 +4704,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 61,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -4690,45 +4714,45 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 64,
+          "line": 53,
           "source_group": "docs",
           "text": "Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 67,
+          "line": 56,
           "source_group": "docs",
           "text": "Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 71,
+          "line": 60,
           "source_group": "docs",
           "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 76,
+          "line": 65,
           "source_group": "docs",
           "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:"
         },
         {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 151,
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 76,
           "source_group": "docs",
-          "text": "| `scripts.ops`         | `uv run python -m scripts.ops`         | Ops: salt rotation, Grafana, deploy        |"
+          "text": "`python -m scripts.ops query-neo4j-memory <profile> <name>`, например:"
         },
         {
-          "path": "docs/05-operations/deployment/neo4j-memory-setup.md",
-          "line": 50,
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 77,
           "source_group": "docs",
-          "text": "python -m scripts.ops sync-neo4j-memory --apply"
+          "text": "`python -m scripts.ops query-neo4j-memory owner-contract chembl.activity`,"
         },
         {
-          "path": "docs/05-operations/deployment/neo4j-memory-setup.md",
-          "line": 79,
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 78,
           "source_group": "docs",
-          "text": "python -m scripts.ops sync-neo4j-memory --apply --prune-stale"
+          "text": "`python -m scripts.ops query-neo4j-memory owner-pipeline chembl_activity`,"
         }
       ]
     },
@@ -4765,7 +4789,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"check-skills\": \"check_ai_skills_layout.sh\","
         }
@@ -4804,7 +4828,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"check-mcp\": \"check_mcp.sh\","
         }
@@ -4963,7 +4987,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 43,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"close-ge-spike\": \"close_great_expectations_spike_issue.sh\","
         },
@@ -4999,7 +5023,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"close-schema-drift\": \"close_pandera_schema_drift_issue.sh\","
         },
@@ -5328,7 +5352,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"delete-branches\": \"delete-stale-branches.sh\","
         }
@@ -5379,7 +5403,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"deploy\": \"deploy-bioetl.sh\","
         }
@@ -5451,7 +5475,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"fix-grafana\": \"fix_grafana_dashboards.py\","
         }
@@ -6102,6 +6126,21 @@
       "references": []
     },
     {
+      "path": "scripts/ops/neo4j_memory_query.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "\"query-neo4j-memory\": \"neo4j_memory_query.py\","
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/neo4j_memory_sync.py",
       "type": "py",
       "status": "active",
@@ -6110,7 +6149,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"sync-neo4j-memory\": \"neo4j_memory_sync.py\","
         }
@@ -6243,7 +6282,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"salt_rotate.py\","
         }
@@ -6278,7 +6317,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"setup_agents.sh\","
         },
@@ -6401,7 +6440,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 47,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"setup-skills\": \"setup_skills.sh\","
         },
@@ -6694,7 +6733,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"triage-issues\": \"triage_cleanup_issue_wave.sh\","
         }
@@ -6709,7 +6748,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"update-issue\": \"update_github_issue.sh\","
         },

@@ -24,6 +24,7 @@ Commands:
     report-hotspots      Generate hotspot degradation report
     report-duplication-baseline  Generate report-only duplication baseline
     report-function-length-inventory Generate report-only near-threshold function length inventory
+    report-normalization-fallback-inventory Generate report-only fallback normalization inventory
     analyze-duplicate-functions Analyze duplicate function names across selected code areas
     calibrate-hotspots   Calibrate hotspot budgets
 """
@@ -53,6 +54,7 @@ COMMANDS: dict[str, str] = {
     "report-hotspots": "generate_hotspot_degradation_report.py",
     "report-duplication-baseline": "report_duplication_baseline.py",
     "report-function-length-inventory": "report_function_length_inventory.py",
+    "report-normalization-fallback-inventory": "report_normalization_fallback_inventory.py",
     "analyze-duplicate-functions": "analyze_duplicate_functions.py",
     "calibrate-hotspots": "calibrate_hotspot_budgets.py",
 }

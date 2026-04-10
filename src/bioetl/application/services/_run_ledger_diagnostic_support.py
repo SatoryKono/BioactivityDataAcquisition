@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.domain.normalization import (
     normalize_contract_ref,
     normalize_contract_version,
-    normalize_control_plane_sha256,
+    normalize_control_plane_opaque_hash_ref,
 )
 
 if TYPE_CHECKING:
@@ -63,7 +63,7 @@ def sync_manifest_runtime_defaults(
     host.run_type = _coalesce_missing(host.run_type, manifest.run_type.value)
     host.effective_config_hash = _coalesce_missing(
         host.effective_config_hash,
-        normalize_control_plane_sha256(code_provenance.config_hash),
+        normalize_control_plane_opaque_hash_ref(code_provenance.config_hash),
     )
 
 
@@ -136,7 +136,7 @@ def build_run_ledger_diagnostic_details(
         "manifest_id": manifest_id,
         "run_id": str(run_id),
     }
-    effective_config_hash = normalize_control_plane_sha256(effective_config_hash)
+    effective_config_hash = normalize_control_plane_opaque_hash_ref(effective_config_hash)
     contract_ref = normalize_contract_ref(contract_ref)
     contract_version = normalize_contract_version(contract_version)
     _apply_optional_diagnostic_anchor(diagnostic, "pipeline", pipeline_name)

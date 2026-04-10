@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 """Shared builders for standard profile modules."""
 
 from __future__ import annotations
@@ -165,3 +166,123 @@ def _rule_components(
         normalize_profile_json_string,
         "Trim string values and canonicalize JSON-like string payloads when present.",
     )
+||||||| Stash base
+=======
+"""Shared builders for standard normalization profiles."""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Collection, Mapping
+
+from bioetl.domain.normalization.profiles.base import FieldRule, NormalizationProfile
+from bioetl.domain.normalization.profiles.helpers import (
+    normalize_profile_abstract,
+    normalize_profile_date,
+    normalize_profile_float,
+    normalize_profile_int,
+    normalize_profile_json_string,
+    normalize_profile_text,
+    normalize_profile_title,
+)
+
+__all__ = ["build_standard_profile"]
+
+
+def _build_default_rule_components(
+    *,
+    field_name: str,
+    title_fields: frozenset[str],
+    abstract_fields: frozenset[str],
+    date_fields: frozenset[str],
+    int_fields: frozenset[str],
+    float_fields: frozenset[str],
+    set_like_fields: frozenset[str],
+) -> tuple[Callable[[object], object], str]:
+    if field_name in title_fields:
+        return normalize_profile_title, "Normalize title text to canonical textual form."
+    if field_name in abstract_fields:
+        return (
+            normalize_profile_abstract,
+            "Normalize abstract text through canonical whitespace and entity cleanup.",
+        )
+    if field_name in date_fields:
+        return (
+            normalize_profile_date,
+            "Canonicalize partial-date text to stable date semantics.",
+        )
+    if field_name in int_fields:
+        return (
+            normalize_profile_int,
+            "Coerce stable integer semantics for deterministic hashing.",
+        )
+    if field_name in float_fields:
+        return (
+            normalize_profile_float,
+            "Coerce stable float semantics and remove NaN/Inf noise.",
+        )
+    if field_name in set_like_fields:
+        return (
+            normalize_profile_json_string,
+            "Canonicalize JSON-like arrays/maps and treat array order as set-like for hashing.",
+        )
+    return normalize_profile_text, "Default textual normalization."
+
+
+def build_standard_profile(
+    *,
+    profile_name: str,
+    description: str,
+    schema_fields: Collection[str],
+    meta_fields: Collection[str],
+    title_fields: Collection[str] = (),
+    abstract_fields: Collection[str] = (),
+    date_fields: Collection[str] = (),
+    int_fields: Collection[str] = (),
+    float_fields: Collection[str] = (),
+    set_like_fields: Collection[str] = (),
+    special_rules: Mapping[str, tuple[Callable[[object], object], str]] = (),
+) -> NormalizationProfile:
+    """Build one field-complete normalization profile from common field families."""
+    normalized_schema_fields = tuple(schema_fields)
+    normalized_meta_fields = frozenset(meta_fields)
+    normalized_title_fields = frozenset(title_fields)
+    normalized_abstract_fields = frozenset(abstract_fields)
+    normalized_date_fields = frozenset(date_fields)
+    normalized_int_fields = frozenset(int_fields)
+    normalized_float_fields = frozenset(float_fields)
+    normalized_set_like_fields = frozenset(set_like_fields)
+    normalized_special_rules = dict(special_rules)
+
+    def _build_rule(field_name: str) -> FieldRule:
+        normalizer, notes = normalized_special_rules.get(
+            field_name,
+            _build_default_rule_components(
+                field_name=field_name,
+                title_fields=normalized_title_fields,
+                abstract_fields=normalized_abstract_fields,
+                date_fields=normalized_date_fields,
+                int_fields=normalized_int_fields,
+                float_fields=normalized_float_fields,
+                set_like_fields=normalized_set_like_fields,
+            ),
+        )
+        if field_name in normalized_meta_fields:
+            notes = "System/meta field retained for storage but excluded from content_hash."
+        return FieldRule(
+            field_name=field_name,
+            normalizer=normalizer,
+            include_in_hash=field_name not in normalized_meta_fields,
+            set_like=field_name in normalized_set_like_fields,
+            notes=notes,
+        )
+
+    return NormalizationProfile(
+        profile_name=profile_name,
+        description=description,
+        meta_fields=normalized_meta_fields,
+        field_rules={
+            field_name: _build_rule(field_name)
+            for field_name in normalized_schema_fields
+        },
+    )
+>>>>>>> Stashed changes
