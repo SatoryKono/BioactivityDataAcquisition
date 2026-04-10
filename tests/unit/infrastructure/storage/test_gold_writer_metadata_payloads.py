@@ -159,10 +159,10 @@ class TestBuildGoldMetadataPayload:
         coordinator.create_gold_metadata.assert_called_once()
 
     def test_uses_fallback_when_no_coordinator(self) -> None:
-        with patch(
-            "bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder.build_fallback_metadata",
-            return_value=MagicMock(),
-        ) as mock_fallback:
+        with pytest.raises(
+            RuntimeError,
+            match="MetadataCoordinator is required for build_gold_metadata_payload",
+        ):
             build_gold_metadata_payload(
                 coordinator=None,
                 table_path="gold/t",
@@ -177,5 +177,3 @@ class TestBuildGoldMetadataPayload:
                 transform_version="1.0.0",
                 transform_steps=("normalize",),
             )
-
-        mock_fallback.assert_called_once()

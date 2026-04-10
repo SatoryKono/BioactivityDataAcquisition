@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.models.metadata import GoldMetadata
@@ -95,7 +95,7 @@ def build_gold_merged_metadata_input(
 
 def _extract_completed_at(records: list[GoldRecord]) -> datetime | None:
     """Extract canonical merged-write completion timestamp from record metadata."""
-    return _resolve_records_metadata_timestamp(records)
+    return cast(datetime | None, _resolve_records_metadata_timestamp(records))
 
 
 def build_gold_metadata_payload(
@@ -113,28 +113,20 @@ def build_gold_metadata_payload(
     transform_version: str | None,
     transform_steps: tuple[str, ...],
 ) -> GoldMetadata:
-    """Build standard Gold metadata via coordinator when present, else fallback."""
-    if coordinator is not None:
-        return build_gold_metadata_via_coordinator(
-            coordinator=coordinator,
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            mode=mode,
-            scd_config=scd_config,
-            completed_at=ingestion_ts,
-            silver_refs=silver_refs,
-            gold_schema=gold_schema,
-            transform_version=transform_version,
-            transform_steps=transform_steps,
+    """Build standard Gold metadata via the coordinator contract only."""
+    if coordinator is None:
+        raise RuntimeError(
+            "MetadataCoordinator is required for build_gold_metadata_payload: "
+            f"table_name={table_name}, table_path={table_path}"
         )
-    return build_gold_metadata_via_fallback(
+    return build_gold_metadata_via_coordinator(
+        coordinator=coordinator,
+        table_path=table_path,
         table_name=table_name,
         records=records,
         mode=mode,
         scd_config=scd_config,
-        ingestion_ts=ingestion_ts,
-        run_id=run_id,
+        completed_at=ingestion_ts,
         silver_refs=silver_refs,
         gold_schema=gold_schema,
         transform_version=transform_version,
@@ -186,7 +178,7 @@ def build_gold_metadata_via_fallback(
     transform_version: str | None,
     transform_steps: tuple[str, ...],
 ) -> GoldMetadata:
-    """Create Gold metadata via the fallback metadata builder."""
+    """Create Gold metadata via the legacy fallback metadata builder."""
     from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
 
     builder = GoldMetadataBuilder(
