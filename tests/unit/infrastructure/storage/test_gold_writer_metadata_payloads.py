@@ -119,11 +119,13 @@ class TestBuildGoldMergedMetadataInput:
 class TestBuildGoldMetadataPayload:
     """Tests for the standard Gold metadata payload routing helper."""
 
-    def test_uses_coordinator_when_present(self) -> None:
+    def test_uses_bundle_coordinator_when_present(self) -> None:
         coordinator = MagicMock()
-        coordinator.create_gold_metadata = MagicMock(return_value=MagicMock())
+        metadata = MagicMock()
+        bundle = MagicMock(metadata=metadata, lineage_fragment=MagicMock())
+        coordinator.create_gold_metadata_bundle = MagicMock(return_value=bundle)
 
-        build_gold_metadata_payload(
+        result = build_gold_metadata_payload(
             coordinator=coordinator,
             table_path="gold/t",
             table_name="chembl.activity",
@@ -138,15 +140,39 @@ class TestBuildGoldMetadataPayload:
             transform_steps=("normalize",),
         )
 
-        coordinator.create_gold_metadata.assert_called_once()
+        assert result is metadata
+        coordinator.create_gold_metadata_bundle.assert_called_once()
 
-    def test_uses_fallback_when_no_coordinator(self) -> None:
+    def test_raises_when_no_coordinator(self) -> None:
         with pytest.raises(
             RuntimeError,
             match="MetadataCoordinator is required for build_gold_metadata_payload",
         ):
             build_gold_metadata_payload(
                 coordinator=None,
+                table_path="gold/t",
+                table_name="chembl.activity",
+                records=[{"id": 1}],
+                mode=GoldWriteMode.OVERWRITE,
+                scd_config=None,
+                ingestion_ts=None,
+                run_id=None,
+                silver_refs=None,
+                gold_schema=None,
+                transform_version="1.0.0",
+                transform_steps=("normalize",),
+            )
+
+    def test_raises_when_bundle_factory_missing(self) -> None:
+        coordinator = MagicMock(spec=["create_gold_metadata"])
+        coordinator.create_gold_metadata = MagicMock(return_value=MagicMock())
+
+        with pytest.raises(
+            RuntimeError,
+            match="create_gold_metadata_bundle is required for build_gold_metadata_payload",
+        ):
+            build_gold_metadata_payload(
+                coordinator=coordinator,
                 table_path="gold/t",
                 table_name="chembl.activity",
                 records=[{"id": 1}],

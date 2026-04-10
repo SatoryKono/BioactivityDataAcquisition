@@ -29,11 +29,22 @@ def reset_server_started():
 
 def test_start_metrics_server_success():
     """Verify metrics_server starts successfully via interface."""
+    metrics_service = mock.Mock()
+    metrics_service.start.return_value = mock.Mock(success=True)
+
     with mock.patch(
-        "bioetl.infrastructure.observability.server.start_http_server"
-    ) as mock_start:
+        "bioetl.composition.observability_api.get_metrics_service",
+        return_value=metrics_service,
+    ):
         observability.start_metrics_server()
-        mock_start.assert_called_once()
+
+    metrics_service.start.assert_called_once_with(
+        port=8000,
+        addr="0.0.0.0",
+        fail_fast=False,
+        retry_count=3,
+        retry_delay=1.0,
+    )
 
 
 def test_start_metrics_server_failure():
@@ -42,9 +53,12 @@ def test_start_metrics_server_failure():
     The server is designed to catch exceptions and return False (fail_fast=False by default)
     rather than raising exceptions, to allow pipelines to continue without metrics.
     """
+    metrics_service = mock.Mock()
+    metrics_service.start.return_value = mock.Mock(success=False)
+
     with mock.patch(
-        "bioetl.infrastructure.observability.server.start_http_server",
-        side_effect=RuntimeError("Failed"),
+        "bioetl.composition.observability_api.get_metrics_service",
+        return_value=metrics_service,
     ):
         # Interface should catch exceptions and return False for graceful degradation
         result = observability.start_metrics_server(port=8000, fail_fast=False)
@@ -53,9 +67,15 @@ def test_start_metrics_server_failure():
 
 def test_start_metrics_server_fail_fast_propagation():
     """Verify that fail_fast=True propagates MetricsServerError via interface."""
+    metrics_service = mock.Mock()
+    metrics_service.start.side_effect = domain_exceptions.MetricsServerError(
+        port=8000,
+        reason="Failed",
+    )
+
     with mock.patch(
-        "bioetl.infrastructure.observability.server.start_http_server",
-        side_effect=RuntimeError("Failed"),
+        "bioetl.composition.observability_api.get_metrics_service",
+        return_value=metrics_service,
     ):
         with pytest.raises(domain_exceptions.MetricsServerError):
             observability.start_metrics_server(port=8000, fail_fast=True)

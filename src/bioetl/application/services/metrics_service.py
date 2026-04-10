@@ -70,6 +70,7 @@ class StartResult:
 
     success: bool
     port: int
+    addr: str = "0.0.0.0"
     already_running: bool = False
     error: str | None = None
 
@@ -101,7 +102,11 @@ class MetricsService:
     _started_at: datetime | None = field(default=None, repr=False)
 
     def _handle_start_error(
-        self, port: int, e: Exception, fail_fast: bool
+        self,
+        port: int,
+        addr: str,
+        e: Exception,
+        fail_fast: bool,
     ) -> StartResult:
         """Handle error during server start.
 
@@ -118,6 +123,7 @@ class MetricsService:
         self.logger.error(
             "Metrics server error",
             port=port,
+            addr=addr,
             error=error_msg,
             error_type=type(e).__name__,
         )
@@ -125,11 +131,12 @@ class MetricsService:
             raise MetricsServerError(
                 port=port, reason=error_msg, original_error=e
             ) from e
-        return StartResult(success=False, port=port, error=error_msg)
+        return StartResult(success=False, port=port, addr=addr, error=error_msg)
 
     def start(
         self,
         port: int = 8000,
+        addr: str = "0.0.0.0",
         *,
         fail_fast: bool = False,
         retry_count: int = 3,
@@ -151,17 +158,26 @@ class MetricsService:
         Raises:
             MetricsServerError: If fail_fast=True and server cannot start.
         """
-        self.logger.debug("Starting metrics server", port=port, fail_fast=fail_fast)
+        self.logger.debug(
+            "Starting metrics server",
+            port=port,
+            addr=addr,
+            fail_fast=fail_fast,
+        )
 
         if self._server.is_running():
             self.logger.debug("Metrics server already running")
             return StartResult(
-                success=True, port=self._port or port, already_running=True
+                success=True,
+                port=self._port or port,
+                addr=addr,
+                already_running=True,
             )
 
         try:
             success = self._server.start(
                 port=port,
+                addr=addr,
                 fail_fast=fail_fast,
                 retry_count=retry_count,
                 retry_delay=retry_delay,
@@ -169,13 +185,18 @@ class MetricsService:
             if success:
                 object.__setattr__(self, "_port", port)
                 object.__setattr__(self, "_started_at", datetime.now(tz=UTC))
-                self.logger.info("Metrics server started", port=port)
-                return StartResult(success=True, port=port)
+                self.logger.info("Metrics server started", port=port, addr=addr)
+                return StartResult(success=True, port=port, addr=addr)
 
-            self.logger.warning("Metrics server failed to start", port=port)
-            return StartResult(success=False, port=port, error="Failed to bind port")
+            self.logger.warning("Metrics server failed to start", port=port, addr=addr)
+            return StartResult(
+                success=False,
+                port=port,
+                addr=addr,
+                error="Failed to bind port",
+            )
         except _METRICS_START_ERRORS as e:
-            return self._handle_start_error(port, e, fail_fast)
+            return self._handle_start_error(port, addr, e, fail_fast)
 
     def get_status(self) -> MetricsServerStatus:
         """Get the current status of the metrics server.

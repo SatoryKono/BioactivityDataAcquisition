@@ -23,8 +23,8 @@ from bioetl.infrastructure.observability.anomaly import DataQualityMonitorServic
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 from .dq_bootstrap import bootstrap_dq_monitor_port as _bootstrap_dq_monitor_port_impl
-from .logger_bootstrap import bootstrap_logger_port as _bootstrap_logger_port_impl
 from .metrics_bootstrap import bootstrap_metrics_port as _bootstrap_metrics_port_impl
+from .logger_bootstrap import bootstrap_logger_port as _bootstrap_logger_port_impl
 from .metrics_bootstrap import (
     maybe_start_metrics_server as _maybe_start_metrics_server_impl,
 )
@@ -161,7 +161,6 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
     """
     return _maybe_start_metrics_server_impl(
         settings=settings,
-        start_server=start_metrics_server,
     )
 
 

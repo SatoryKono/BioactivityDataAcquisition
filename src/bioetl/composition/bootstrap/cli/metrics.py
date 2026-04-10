@@ -10,16 +10,24 @@ Note:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bioetl.application.services.metrics_service import MetricsService
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,
 )
 
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
+
 __all__ = ["bootstrap_metrics_service"]
 
 
-def bootstrap_metrics_service() -> MetricsService:
+def bootstrap_metrics_service(
+    *,
+    logger: LoggerPort | None = None,
+) -> MetricsService:
     """Bootstrap metrics service for administrative operations.
 
     Creates a MetricsService with infrastructure dependencies injected.
@@ -33,10 +41,10 @@ def bootstrap_metrics_service() -> MetricsService:
         >>> result = service.start(port=8000)
         >>> # result.success is True if server started
     """
-    logger = create_noop_logger()
-    server = MetricsServerAdapter(logger=logger)
+    resolved_logger = logger if logger is not None else create_noop_logger()
+    server = MetricsServerAdapter(logger=resolved_logger)
 
     return MetricsService(
-        logger=logger,
+        logger=resolved_logger,
         _server=server,
     )

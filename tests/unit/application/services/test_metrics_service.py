@@ -51,6 +51,7 @@ class TestMetricsServerPort:
             def start(
                 self,
                 port: int,
+                addr: str = "0.0.0.0",
                 *,
                 fail_fast: bool = False,
                 retry_count: int = 3,
@@ -100,6 +101,7 @@ class TestStartResult:
         result = StartResult(success=True, port=8000)
         assert result.success is True
         assert result.port == 8000
+        assert result.addr == "0.0.0.0"
         assert result.already_running is False
         assert result.error is None
 
@@ -147,7 +149,11 @@ class TestMetricsService:
         assert result.port == 8000
         assert result.already_running is False
         mock_server.start.assert_called_once_with(
-            port=8000, fail_fast=False, retry_count=3, retry_delay=1.0
+            port=8000,
+            addr="0.0.0.0",
+            fail_fast=False,
+            retry_count=3,
+            retry_delay=1.0,
         )
 
     def test_start_already_running(
@@ -203,9 +209,28 @@ class TestMetricsService:
         result = service.start(port=8080, retry_count=5, retry_delay=2.0)
 
         mock_server.start.assert_called_once_with(
-            port=8080, fail_fast=False, retry_count=5, retry_delay=2.0
+            port=8080,
+            addr="0.0.0.0",
+            fail_fast=False,
+            retry_count=5,
+            retry_delay=2.0,
         )
         assert result.port == 8080
+
+    def test_start_custom_addr(
+        self, service: MetricsService, mock_server: MagicMock
+    ) -> None:
+        """Test start passes bind address through to the port."""
+        result = service.start(port=9090, addr="127.0.0.1")
+
+        mock_server.start.assert_called_once_with(
+            port=9090,
+            addr="127.0.0.1",
+            fail_fast=False,
+            retry_count=3,
+            retry_delay=1.0,
+        )
+        assert result.addr == "127.0.0.1"
 
     def test_get_status_running(
         self, service: MetricsService, mock_server: MagicMock
@@ -282,10 +307,16 @@ class TestMetricsServiceEdgeCases:
         service = MetricsService(logger=mock_logger, _server=mock_server)
 
         exception = RuntimeError("Test error")
-        result = service._handle_start_error(port=8000, e=exception, fail_fast=False)
+        result = service._handle_start_error(
+            port=8000,
+            addr="127.0.0.1",
+            e=exception,
+            fail_fast=False,
+        )
 
         assert result.success is False
         assert result.error == "Test error"
+        assert result.addr == "127.0.0.1"
         mock_logger.error.assert_called_once()
 
     def test_handle_start_error_fail_fast(self, mock_logger: MagicMock) -> None:
@@ -297,7 +328,12 @@ class TestMetricsServiceEdgeCases:
 
         exception = ValueError("Test error")
         with pytest.raises(MetricsServerError) as exc_info:
-            service._handle_start_error(port=8000, e=exception, fail_fast=True)
+            service._handle_start_error(
+                port=8000,
+                addr="127.0.0.1",
+                e=exception,
+                fail_fast=True,
+            )
 
         assert exc_info.value.port == 8000
         assert exc_info.value.original_error is exception
@@ -313,7 +349,11 @@ class TestMetricsServiceEdgeCases:
 
         assert result.port == 8000
         mock_server.start.assert_called_with(
-            port=8000, fail_fast=False, retry_count=3, retry_delay=1.0
+            port=8000,
+            addr="0.0.0.0",
+            fail_fast=False,
+            retry_count=3,
+            retry_delay=1.0,
         )
 
     def test_start_failure_logs_warning(self, mock_logger: MagicMock) -> None:

@@ -121,6 +121,7 @@ class MetricsServerPort(Protocol):
     def start(
         self,
         port: int,
+        addr: str = "0.0.0.0",
         *,
         fail_fast: bool = False,
         retry_count: int = 3,
@@ -130,6 +131,7 @@ class MetricsServerPort(Protocol):
 
         Args:
             port: TCP port to bind the server to.
+            addr: Bind address for the HTTP server. Defaults to ``0.0.0.0``.
             fail_fast: If True, raise immediately on bind failure instead of retrying.
             retry_count: Number of times to retry on transient bind errors. Defaults to 3.
             retry_delay: Seconds to wait between retries. Defaults to 1.0.

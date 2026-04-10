@@ -47,6 +47,7 @@ class MetricsServerAdapter:
     def start(
         self,
         port: int = 8000,
+        addr: str = "0.0.0.0",
         *,
         fail_fast: bool = False,
         retry_count: int = 3,
@@ -65,6 +66,7 @@ class MetricsServerAdapter:
         """
         return start_metrics_server(
             port=port,
+            addr=addr,
             fail_fast=fail_fast,
             retry_count=retry_count,
             retry_delay=retry_delay,

@@ -7,6 +7,49 @@ from unittest import mock
 from bioetl.composition import observability_api
 
 
+def test_start_metrics_server_uses_metrics_service_start() -> None:
+    metrics_service = mock.Mock()
+    metrics_service.start.return_value = mock.Mock(success=True)
+
+    with mock.patch.object(
+        observability_api,
+        "get_metrics_service",
+        return_value=metrics_service,
+    ) as mock_get_service:
+        result = observability_api.start_metrics_server(
+            port=9100,
+            addr="127.0.0.1",
+            fail_fast=True,
+            retry_count=5,
+            retry_delay=0.5,
+        )
+
+    assert result is True
+    mock_get_service.assert_called_once_with()
+    metrics_service.start.assert_called_once_with(
+        port=9100,
+        addr="127.0.0.1",
+        fail_fast=True,
+        retry_count=5,
+        retry_delay=0.5,
+    )
+
+
+def test_start_metrics_server_overrides_logger_when_provided() -> None:
+    metrics_service = mock.Mock()
+    metrics_service.start.return_value = mock.Mock(success=True)
+    logger = mock.Mock()
+
+    with mock.patch.object(
+        observability_api,
+        "get_metrics_service",
+        return_value=metrics_service,
+    ):
+        observability_api.start_metrics_server(logger=logger)
+
+    assert metrics_service.logger is logger
+
+
 def test_get_metrics_service_delegates_to_services_api() -> None:
     expected = mock.Mock()
     fake_services_api = ModuleType("bioetl.composition.services_api")
