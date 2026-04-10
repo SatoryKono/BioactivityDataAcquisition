@@ -231,6 +231,8 @@ Governance rules:
 - the canonical plan must describe the currently shipped profile registry
 - the published matrix must be reproducible from code
 - fallback inventory must classify business debt separately from technical passthrough
+- the headline normalization KPI is `explicit_profile_coverage_pct`, defined as
+  `explicit_profile_field_count / shipped_entity_field_count * 100`
 - join-key policies must remain part of the same normalization evidence story as entity profiles
 - drift between plan, registry, matrix, and fallback inventory is a governance defect
 
@@ -485,6 +487,9 @@ profiles, fallback seams, and composite join-key policies.
 - DOCX/PDF remain optional
 - output order is deterministic
 - the artifact reflects shipped profile coverage, fallback coverage, and join-key normalization seams
+- the published matrix should surface the headline KPI
+  `explicit_profile_coverage_pct` so maintainers can track explicit profile
+  adoption over time without recomputing ad hoc totals
 
 ### Acceptance
 

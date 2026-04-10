@@ -74,6 +74,7 @@ CSV_COLUMNS = (
 
 FALLBACK_BUSINESS = "fallback_business"
 FALLBACK_TECHNICAL_PASSTHROUGH = "fallback_technical_passthrough"
+EXPLICIT_PROFILE_COVERAGE_KPI = "explicit_profile_coverage_pct"
 
 ENTITY_SILVER_SCHEMA_REGISTRY: dict[str, Any] = {
     "chembl_activity": CHEMBL_ACTIVITY_SCHEMA,
@@ -416,6 +417,30 @@ def build_field_matrix_rows() -> list[dict[str, str]]:
     return rows
 
 
+def build_entity_profile_coverage_kpi(
+    rows: list[dict[str, str]] | None = None,
+) -> dict[str, object]:
+    entity_rows = [
+        row for row in (build_field_matrix_rows() if rows is None else rows)
+        if row["pipeline_kind"] == "entity"
+    ]
+    entity_field_count = len(entity_rows)
+    explicit_profile_field_count = sum(
+        1 for row in entity_rows if row["normalization_source"] == "profile"
+    )
+    value_pct = round(
+        (explicit_profile_field_count * 100 / entity_field_count) if entity_field_count else 0.0,
+        2,
+    )
+    return {
+        "name": EXPLICIT_PROFILE_COVERAGE_KPI,
+        "description": "Percent of shipped entity fields covered by explicit normalization profiles.",
+        "numerator": explicit_profile_field_count,
+        "denominator": entity_field_count,
+        "value_pct": value_pct,
+    }
+
+
 def render_csv(rows: list[dict[str, str]]) -> str:
     output = io.StringIO()
     writer = csv.DictWriter(
@@ -430,6 +455,7 @@ def render_csv(rows: list[dict[str, str]]) -> str:
 
 def render_markdown(rows: list[dict[str, str]]) -> str:
     headers = list(CSV_COLUMNS)
+    coverage_kpi = build_entity_profile_coverage_kpi(rows)
     lines = [
         "# Pipeline Normalization Field Matrix",
         "",
@@ -438,6 +464,11 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         "This matrix is a normalization inventory, not a persisted-row publication contract.",
         "Occurrence-scoped provenance fields may appear here because normalization or config policy still references them,",
         "but canonical Silver/Gold row contracts are defined by provider references and Gold contract exports.",
+        "",
+        "## Headline KPI",
+        "",
+        f"- {coverage_kpi['name']}: `{coverage_kpi['value_pct']:.2f}%`",
+        f"- explicit_profile_field_count: `{coverage_kpi['numerator']}` / `{coverage_kpi['denominator']}` shipped entity fields",
         "",
         "| " + " | ".join(headers) + " |",
         "| " + " | ".join("---" for _ in headers) + " |",
@@ -459,11 +490,14 @@ def build_artifacts() -> dict[str, str]:
 def write_artifacts(out_dir: Path) -> dict[str, object]:
     out_dir.mkdir(parents=True, exist_ok=True)
     artifacts = build_artifacts()
+    rows = build_field_matrix_rows()
+    coverage_kpi = build_entity_profile_coverage_kpi(rows)
     for name, payload in artifacts.items():
         (out_dir / name).write_text(payload, encoding="utf-8")
     return {
         "out_dir": str(out_dir),
-        "rows": len(build_field_matrix_rows()),
+        "rows": len(rows),
+        "coverage_kpi": coverage_kpi,
     }
 
 

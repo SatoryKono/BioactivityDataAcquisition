@@ -51,11 +51,15 @@ META_FIELDS: frozenset[str] = frozenset(
     }
 )
 
-# Persisted Delta rows must not carry occurrence-scoped composite runtime
-# provenance. These anchors travel separately via explicit write kwargs,
-# sidecars, lineage fragments, run manifests, and audit artifacts.
+# Persisted Delta rows must not carry occurrence-scoped runtime provenance.
+# These anchors travel separately via explicit write kwargs, sidecars,
+# lineage fragments, run manifests, and audit artifacts.
 NONDETERMINISTIC_PERSISTED_FIELDS: frozenset[str] = frozenset(
     {
+        "_ingestion_ts",
+        "_run_id",
+        "_run_type",
+        "_source_batch_id",
         "_composite_run_id",
         "_lineage_created_at",
     }
