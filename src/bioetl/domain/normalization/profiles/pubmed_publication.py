@@ -30,18 +30,21 @@ _META_FIELDS = frozenset(
         "_dq_warn",
     }
 )
-PUBMED_PUBLICATION_PROFILE = build_standard_profile(
-    profile_name="pubmed.publication",
-    description="Canonical normalization profile for the PubMed Publication Silver schema.",
-    schema_fields=PUBMED_PUBLICATION_SCHEMA_FIELDS,
-    meta_fields=_META_FIELDS,
-    title_fields={"title"},
-    abstract_fields={"abstract"},
-    doi_fields={"doi"},
-    pmid_fields={"pmid"},
-    pmc_id_fields={"pmc_id"},
-    date_fields={"date_completed", "date_revised", "pub_date", "publication_date"},
-    int_fields={
+_TITLE_FIELDS = frozenset({"title"})
+_ABSTRACT_FIELDS = frozenset({"abstract"})
+_DOI_FIELDS = frozenset({"doi"})
+_PMID_FIELDS = frozenset({"pmid"})
+_PMC_ID_FIELDS = frozenset({"pmc_id"})
+_DATE_FIELDS = frozenset(
+    {
+        "date_completed",
+        "date_revised",
+        "pub_date",
+        "publication_date",
+    }
+)
+_INT_FIELDS = frozenset(
+    {
         "author_count",
         "chemical_count",
         "citations_made",
@@ -51,8 +54,23 @@ PUBMED_PUBLICATION_PROFILE = build_standard_profile(
         "pub_day",
         "pub_month",
         "publication_year",
-    },
-    set_like_fields={"publication_types", "subject_keywords", "subject_mesh"},
+    }
+)
+_SET_LIKE_FIELDS = frozenset({"publication_types", "subject_keywords", "subject_mesh"})
+
+PUBMED_PUBLICATION_PROFILE = build_standard_profile(
+    profile_name="pubmed.publication",
+    description="Canonical field-level normalization policy for the PubMed Publication Silver schema.",
+    schema_fields=PUBMED_PUBLICATION_SCHEMA_FIELDS,
+    meta_fields=_META_FIELDS,
+    title_fields=_TITLE_FIELDS,
+    abstract_fields=_ABSTRACT_FIELDS,
+    doi_fields=_DOI_FIELDS,
+    pmid_fields=_PMID_FIELDS,
+    pmc_id_fields=_PMC_ID_FIELDS,
+    date_fields=_DATE_FIELDS,
+    int_fields=_INT_FIELDS,
+    set_like_fields=_SET_LIKE_FIELDS,
 )
 
 PUBMED_PUBLICATION_PROFILE.assert_covers_schema(PUBMED_PUBLICATION_SCHEMA_FIELDS)

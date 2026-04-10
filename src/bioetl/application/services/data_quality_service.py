@@ -100,10 +100,16 @@ class DataQualityService:
             record_count = max(metrics.get("record_count", 0.0), 0.0)
             self._metrics.set_gauge("dq_validation_score", 1.0 - error_rate, labels)
             self._metrics.set_gauge("dq_validation_record_count", record_count, labels)
-            # Store last-successful-ingestion timestamp in seconds.
-            # Dashboards and alerts derive lag via:
-            #   time() - bioetl_data_freshness_seconds
-            self._metrics.set_gauge("data_freshness_seconds", time.time(), labels)
+            freshness_anchor = self._resolve_freshness_anchor_timestamp(metrics)
+            if freshness_anchor is not None:
+                # Store the canonical ingestion/publication anchor timestamp in
+                # seconds. Dashboards and alerts derive lag via:
+                #   time() - bioetl_data_freshness_seconds
+                self._metrics.set_gauge(
+                    "data_freshness_seconds",
+                    freshness_anchor,
+                    labels,
+                )
 
         # Check hard threshold first - raises if exceeded
         self._check_hard_threshold(error_rate)
@@ -126,6 +132,16 @@ class DataQualityService:
             )
 
         return self._run_anomaly_detection(metrics, error_rate, status)
+
+    @staticmethod
+    def _resolve_freshness_anchor_timestamp(
+        metrics: dict[str, float],
+    ) -> float | None:
+        """Resolve the canonical freshness anchor from evaluation metrics."""
+        anchor = metrics.get("freshness_anchor_timestamp")
+        if anchor is None or anchor <= 0:
+            return None
+        return anchor
 
     def _check_hard_threshold(self, error_rate: float) -> None:
         """Check if error rate exceeds hard threshold.

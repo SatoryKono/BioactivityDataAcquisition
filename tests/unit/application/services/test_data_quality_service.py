@@ -201,6 +201,7 @@ class TestDataQualityServiceThresholds:
         metrics = {
             "record_count": 100.0,
             "error_rate": 0.10,
+            "freshness_anchor_timestamp": 1_700_000_000.0,
         }
 
         result = service.evaluate(metrics)
@@ -241,6 +242,7 @@ class TestDataQualityServiceThresholds:
         metrics = {
             "record_count": 100.0,
             "error_rate": 0.05,
+            "freshness_anchor_timestamp": 1_700_000_000.0,
         }
 
         result = service.evaluate(metrics)
@@ -611,6 +613,58 @@ class TestDQResult:
         assert result.anomalies == ()
         assert result.has_critical is False
         assert result.check_duration_ms == pytest.approx(123.45)
+
+
+@pytest.mark.unit
+class TestDataQualityServiceFreshnessGauge:
+    """Tests for anchor-derived freshness gauge publication."""
+
+    def test_emits_freshness_gauge_from_anchor(
+        self, mock_logger, mock_metrics, dq_config
+    ) -> None:
+        service = DataQualityService(
+            dq_monitor=None,
+            config=dq_config,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+            entity_type="test_entity",
+        )
+
+        service.evaluate(
+            {
+                "record_count": 10.0,
+                "error_rate": 0.0,
+                "freshness_anchor_timestamp": 1_700_000_123.0,
+            }
+        )
+
+        mock_metrics.set_gauge.assert_any_call(
+            "data_freshness_seconds",
+            1_700_000_123.0,
+            {"pipeline": "test_pipeline", "entity": "test_entity"},
+        )
+
+    def test_skips_freshness_gauge_without_anchor(
+        self, mock_logger, mock_metrics, dq_config
+    ) -> None:
+        service = DataQualityService(
+            dq_monitor=None,
+            config=dq_config,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+            entity_type="test_entity",
+        )
+
+        service.evaluate({"record_count": 10.0, "error_rate": 0.0})
+
+        freshness_calls = [
+            call
+            for call in mock_metrics.set_gauge.call_args_list
+            if call.args and call.args[0] == "data_freshness_seconds"
+        ]
+        assert not freshness_calls
 
     def test_dq_result_list_to_tuple_conversion(self):
         """Test that DQResult converts list anomalies to tuple."""

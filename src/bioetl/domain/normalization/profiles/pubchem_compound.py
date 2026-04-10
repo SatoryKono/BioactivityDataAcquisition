@@ -60,22 +60,25 @@ def _normalize_canonical_smiles(value: object) -> object:
 def _normalize_isomeric_smiles(value: object) -> object:
     return normalize_profile_smiles(value, is_canonical=False)
 
+
+_SPECIAL_RULES = {
+    "canonical_smiles": (
+        _normalize_canonical_smiles,
+        "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
+    ),
+    "isomeric_smiles": (
+        _normalize_isomeric_smiles,
+        "Normalize isomeric SMILES via the domain SMILES Value Object; invalid values collapse to None.",
+    ),
+}
+
 PUBCHEM_COMPOUND_PROFILE = build_standard_profile(
     profile_name="pubchem.compound",
-    description="Canonical normalization profile for the PubChem Compound Silver schema.",
+    description="Canonical field-level normalization policy for the PubChem Compound Silver schema.",
     schema_fields=PUBCHEM_COMPOUND_SCHEMA_FIELDS,
     meta_fields=_META_FIELDS,
     float_fields=_FLOAT_FIELDS,
-    special_rules={
-        "canonical_smiles": (
-            _normalize_canonical_smiles,
-            "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
-        ),
-        "isomeric_smiles": (
-            _normalize_isomeric_smiles,
-            "Normalize isomeric SMILES via the domain SMILES Value Object; invalid values collapse to None.",
-        ),
-    },
+    special_rules=_SPECIAL_RULES,
 )
 
 PUBCHEM_COMPOUND_PROFILE.assert_covers_schema(PUBCHEM_COMPOUND_SCHEMA_FIELDS)

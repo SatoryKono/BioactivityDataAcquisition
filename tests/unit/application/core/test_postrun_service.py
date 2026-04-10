@@ -291,6 +291,9 @@ class TestPostrunServiceDQChecks:
         assert metrics_dict["error_rate"] == pytest.approx(0.05)
         assert metrics_dict["silver_yield"] == pytest.approx(0.95)
         assert metrics_dict["gold_yield"] == pytest.approx(0.90)
+        assert metrics_dict["freshness_anchor_timestamp"] == pytest.approx(
+            postrun_service._context.started_at.timestamp()
+        )
 
 
 @pytest.mark.unit

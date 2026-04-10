@@ -324,6 +324,7 @@ class PostrunService:
             "error_rate": executor.records_quarantined / total_records,
             "silver_yield": executor.records_silver / total_records,
             "gold_yield": executor.records_gold / total_records,
+            "freshness_anchor_timestamp": self._context.started_at.timestamp(),
         }
 
 
