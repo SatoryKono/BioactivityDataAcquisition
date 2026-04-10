@@ -88,6 +88,10 @@ identifiers into metric labels.
 `DataQualityService` consumes typed `DQAnomaly` objects from `DQMonitorPort`
 rather than infrastructure-specific anomaly payloads.
 
+Pipeline-specific metrics vocabulary is now owned in the application layer via
+an explicit facade/helper path. `MetricsPort` remains the generic transport
+contract for histogram/counter/gauge dispatch only.
+
 `DataQualityService` also publishes `bioetl_data_freshness_seconds` as the
 timestamp of the latest successful DQ/postrun freshness publication. Current
 dashboards and alerts derive operational lag as `time() - metric`; this is a

@@ -162,10 +162,13 @@ async def test_write_cv_quarantine_when_payloads_written_then_logs_and_emits_met
 
     assert harness._quarantine_port.write.await_count == 2
     harness._logger.info.assert_called_once()
-    harness._metrics.inc_quarantine_records.assert_called_once_with(
-        pipeline="composite:test_composite",
-        reason="cross_validation",
-        count=2,
+    harness._metrics.increment_counter.assert_called_once_with(
+        "quarantine_records_total",
+        2,
+        {
+            "pipeline": "composite:test_composite",
+            "reason": "cross_validation",
+        },
     )
 
 
@@ -186,7 +189,7 @@ async def test_write_cv_quarantine_when_all_writes_fail_then_no_metric_emitted()
     )
 
     assert harness._logger.warning.call_count == 2
-    harness._metrics.inc_quarantine_records.assert_not_called()
+    harness._metrics.increment_counter.assert_not_called()
 
 
 @pytest.mark.unit

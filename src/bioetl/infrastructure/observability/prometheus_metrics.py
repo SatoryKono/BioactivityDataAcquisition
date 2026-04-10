@@ -6,15 +6,12 @@ Prometheus client library.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from typing import Protocol, TypeVar
+
 from bioetl.domain.ports import MetricLabels, MetricsPort, resolve_metric_labels
 from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
-    normalize_dq_severity,
-    normalize_dq_stage,
     normalize_metric_dispatch_labels,
-    normalize_quarantine_reason,
-    normalize_silver_filter_field,
-    normalize_silver_filter_reason_code,
-    normalize_silver_filter_rule_type,
 )
 from bioetl.infrastructure.observability.prometheus_metric_registries import (
     COUNTERS,
@@ -25,12 +22,39 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
 __all__ = ["COUNTERS", "GAUGES", "HISTOGRAMS", "PrometheusMetrics"]
 
 
+class _HistogramObserver(Protocol):
+    def observe(self, amount: float) -> None: ...
+
+
+class _CounterObserver(Protocol):
+    def inc(self, amount: float = 1) -> None: ...
+
+
+class _GaugeObserver(Protocol):
+    def set(self, value: float) -> None: ...
+
+
+class _HistogramMetric(Protocol):
+    def labels(self, **labels: str) -> _HistogramObserver: ...
+
+
+class _CounterMetric(Protocol):
+    def labels(self, **labels: str) -> _CounterObserver: ...
+
+
+class _GaugeMetric(Protocol):
+    def labels(self, **labels: str) -> _GaugeObserver: ...
+
+
+_MetricT = TypeVar("_MetricT")
+
+
 def _require_registered_metric(
     *,
     name: str,
-    registry: dict[str, object],
+    registry: Mapping[str, _MetricT],
     metric_kind: str,
-) -> object:
+) -> _MetricT:
     """Return a registered metric or fail loudly on contract drift."""
     metric = registry.get(name)
     if metric is None:
@@ -78,7 +102,7 @@ class PrometheusMetrics(MetricsPort):
             _labels=_labels,
             tags=tags,
         )
-        histogram = _require_registered_metric(
+        histogram: _HistogramMetric = _require_registered_metric(
             name=name,
             registry=HISTOGRAMS,
             metric_kind="histogram",
@@ -108,7 +132,7 @@ class PrometheusMetrics(MetricsPort):
             _labels=_labels,
             tags=tags,
         )
-        counter = _require_registered_metric(
+        counter: _CounterMetric = _require_registered_metric(
             name=name,
             registry=COUNTERS,
             metric_kind="counter",
@@ -140,78 +164,12 @@ class PrometheusMetrics(MetricsPort):
             _labels=_labels,
             tags=tags,
         )
-        gauge = _require_registered_metric(
+        gauge: _GaugeMetric = _require_registered_metric(
             name=name,
             registry=GAUGES,
             metric_kind="gauge",
         )
         gauge.labels(**resolved_labels).set(value)
-
-    def inc_quarantine_records(
-        self, pipeline: str, reason: str, count: int = 1
-    ) -> None:
-        """Increment quarantine record counter with normalized reason label.
-
-        Args:
-            pipeline: Pipeline.
-            reason: Reason description.
-            count: Count.
-        """
-        bounded_reason = normalize_quarantine_reason(reason)
-        self.increment_counter(
-            "quarantine_records_total",
-            count,
-            {"pipeline": pipeline, "reason": bounded_reason},
-        )
-
-    def inc_dq_validation_failures(
-        self,
-        pipeline: str,
-        stage: str,
-        severity: str,
-        count: int = 1,
-    ) -> None:
-        """Increment DQ validation failure counter with normalized labels.
-
-        Args:
-            pipeline: Pipeline.
-            stage: Stage.
-            severity: Severity.
-            count: Count.
-        """
-        bounded_stage = normalize_dq_stage(stage)
-        bounded_severity = normalize_dq_severity(severity)
-        self.increment_counter(
-            "dq_validation_failures_total",
-            count,
-            {
-                "pipeline": pipeline,
-                "stage": bounded_stage,
-                "severity": bounded_severity,
-            },
-        )
-
-    def inc_silver_filter_rejections(
-        self,
-        pipeline: str,
-        run_type: str,
-        reason_code: str | None = None,
-        rule_type: str | None = None,
-        field: str | None = None,
-        count: int = 1,
-    ) -> None:
-        """Increment bounded Silver filter rejection breakdown counters."""
-        self.increment_counter(
-            "silver_filter_rejections_total",
-            count,
-            {
-                "pipeline": pipeline,
-                "run_type": run_type,
-                "reason_code": normalize_silver_filter_reason_code(reason_code),
-                "rule_type": normalize_silver_filter_rule_type(rule_type),
-                "field": normalize_silver_filter_field(field),
-            },
-        )
 
     def close(self) -> None:
         """Mark the metrics adapter as closed (idempotent)."""
