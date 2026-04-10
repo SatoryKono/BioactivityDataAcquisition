@@ -20,7 +20,7 @@ from typing import Any
 from bioetl.domain.context_cached_bronze import CachedBronzeContext
 from bioetl.domain.context_filtering import InputFilterContext, VacuumSettings
 from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import ExecutionContext, RunID, RunType
+from bioetl.domain.types import BatchID, ExecutionContext, RunID, RunType
 from bioetl.domain.types.contract_identity import (
     ContractIdentity,
     DQContractCompatibility,
@@ -95,6 +95,7 @@ class PipelineContext:
     run_type: RunType
     logger: LoggerPort
     started_at: datetime = field(default_factory=_now_utc)
+    source_batch_id: BatchID | None = None
     replay_timestamp_anchor: datetime | None = None
 
     @classmethod
@@ -104,6 +105,7 @@ class PipelineContext:
         run_type: RunType,
         logger: LoggerPort,
         started_at: datetime | None = None,
+        source_batch_id: BatchID | None = None,
         replay_timestamp_anchor: datetime | None = None,
     ) -> PipelineContext:
         """Create a new PipelineContext with optional automatic timestamp.
@@ -124,6 +126,7 @@ class PipelineContext:
             run_type=run_type,
             logger=logger,
             started_at=started_at or datetime.now(UTC),
+            source_batch_id=source_batch_id,
             replay_timestamp_anchor=replay_timestamp_anchor,
         )
 
@@ -145,6 +148,18 @@ class PipelineContext:
             run_type=self.run_type,
             logger=new_logger,
             started_at=self.started_at,
+            source_batch_id=self.source_batch_id,
+            replay_timestamp_anchor=self.replay_timestamp_anchor,
+        )
+
+    def with_source_batch_id(self, source_batch_id: BatchID | None) -> PipelineContext:
+        """Return a new context with batch lineage set for the active transform path."""
+        return PipelineContext(
+            run_id=self.run_id,
+            run_type=self.run_type,
+            logger=self.logger,
+            started_at=self.started_at,
+            source_batch_id=source_batch_id,
             replay_timestamp_anchor=self.replay_timestamp_anchor,
         )
 

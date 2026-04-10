@@ -15,7 +15,7 @@ from bioetl.domain.context import (
     PipelineRunContext,
     VacuumSettings,
 )
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import BatchID, RunID, RunType
 
 
 class TestPipelineContext:
@@ -219,6 +219,40 @@ class TestPipelineContextStartedAt:
         new_ctx = ctx.bind_logger(entity="test")
 
         assert new_ctx.replay_timestamp_anchor == replay_anchor
+
+    def test_with_source_batch_id_sets_batch_lineage(self) -> None:
+        """with_source_batch_id should return a copy with batch lineage attached."""
+        run_id = uuid4()
+        logger = MagicMock()
+        ctx = PipelineContext(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+        )
+        batch_id = BatchID(uuid4())
+
+        new_ctx = ctx.with_source_batch_id(batch_id)
+
+        assert new_ctx is not ctx
+        assert new_ctx.source_batch_id == batch_id
+        assert ctx.source_batch_id is None
+
+    def test_bind_logger_preserves_source_batch_id(self) -> None:
+        """bind_logger should not drop active batch lineage."""
+        run_id = uuid4()
+        logger = MagicMock()
+        logger.bind.return_value = MagicMock()
+        batch_id = BatchID(uuid4())
+        ctx = PipelineContext(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            source_batch_id=batch_id,
+        )
+
+        new_ctx = ctx.bind_logger(entity="test")
+
+        assert new_ctx.source_batch_id == batch_id
 
 
 class TestPipelineContextEquality:

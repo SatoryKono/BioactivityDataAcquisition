@@ -38,6 +38,7 @@ class BatchMetricsRecorderService:
         metrics: MetricsPort | None,
         pipeline_label: str,
         run_type_label: str,
+        pipeline_metrics: PipelineMetricsRecorder | None = None,
     ) -> None:
         """Initialize batch metrics recorder.
 
@@ -45,12 +46,19 @@ class BatchMetricsRecorderService:
             metrics: Metrics port instance.
             pipeline_label: Label identifying the pipeline (e.g., 'chembl_activity').
             run_type_label: Label for the run type (e.g., 'incremental', 'rebuild').
+            pipeline_metrics: Optional prebuilt pipeline-scoped metrics recorder.
 
         """
         self._metrics = metrics
         self._pipeline_label = pipeline_label
         self._run_type_label = run_type_label
-        self._pipeline_metrics = PipelineMetricsRecorder(metrics, pipeline_label)
+        resolved_pipeline_metrics = pipeline_metrics
+        if resolved_pipeline_metrics is None:
+            resolved_pipeline_metrics = PipelineMetricsRecorder(
+                metrics,
+                pipeline_label,
+            )
+        self._pipeline_metrics = resolved_pipeline_metrics
 
     def track_batch_size(self, stage: str, size: int) -> None:
         """Record the size of a batch at a specific stage.

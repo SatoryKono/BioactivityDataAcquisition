@@ -223,6 +223,45 @@ class TestBatchTransformerTransform:
 
         assert saw_background_progress is True
 
+    async def test_transform_batch_binds_source_batch_id_into_record_context(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ) -> None:
+        """Per-record transform context should carry the active batch identifier."""
+
+        async def transform(ctx, record, index):
+            return {
+                "entity_id": record.get("id", "unknown"),
+                "_source_batch_id": str(ctx.source_batch_id),
+            }
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test",
+                provider="test",
+                entity_type="test",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+        batch_id = BatchID(uuid4())
+
+        result = await transformer.transform_batch([{"id": "1", "value": 1}], batch_id)
+
+        assert result.silver_records[0]["_source_batch_id"] == str(batch_id)
+
     async def test_transform_batch_quarantines_dq_errors(
         self,
         mock_context,

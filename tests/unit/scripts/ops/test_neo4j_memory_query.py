@@ -3,6 +3,8 @@ from __future__ import annotations
 from scripts.ops.neo4j_memory_query import (
     _current_cycle_code_statement,
     _dead_code_candidates_statement,
+    _fallback_pipelines_statement,
+    _normalization_pipeline_statement,
     _overengineered_candidates_statement,
     _removable_complexity_statement,
     _simplification_blockers_statement,
@@ -23,6 +25,8 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["owner-alert"]["target_label"] == "alert_surface"
     assert QUERY_PROFILES["neighbors-pipeline"]["mode"] == "neighbors"
     assert QUERY_PROFILES["neighbors-alert"]["target_label"] == "alert_surface"
+    assert QUERY_PROFILES["normalization-pipeline"]["mode"] == "normalization_pipeline"
+    assert QUERY_PROFILES["fallback-pipelines"]["mode"] == "fallback_pipelines"
     assert QUERY_PROFILES["duplication-cluster"]["target_label"] == "duplication_cluster"
     assert QUERY_PROFILES["promotion-candidates"]["mode"] == "promotion_candidates"
     assert QUERY_PROFILES["dead-code-candidates"]["target_label"] == "retirement_candidate"
@@ -59,6 +63,23 @@ def test_duplication_cluster_statement_uses_cluster_targets_members_and_tests() 
     assert "(cluster)-[:CONTAINS]->(member)" in statement
     assert "(cluster)-[:COVERED_BY_TEST]->(test)" in statement
     assert "collect(DISTINCT" in statement
+
+
+def test_normalization_pipeline_statement_surfaces_profile_and_fallback_metrics() -> None:
+    statement = _normalization_pipeline_statement()
+
+    assert "MATCH (pipeline:pipeline_surface {name: $name})" in statement
+    assert "pipeline.normalization_profile_registered AS normalization_profile_registered" in statement
+    assert "pipeline.fallback_business_field_count AS fallback_business_field_count" in statement
+    assert "collect(DISTINCT module.name) AS normalization_modules" in statement
+
+
+def test_fallback_pipelines_statement_orders_by_fallback_business_count() -> None:
+    statement = _fallback_pipelines_statement()
+
+    assert "coalesce(pipeline.fallback_business_field_count, 0) > 0" in statement
+    assert "$name = 'all' OR pipeline.name = $name" in statement
+    assert "ORDER BY pipeline.fallback_business_field_count DESC" in statement
 
 
 def test_promotion_candidates_statement_filters_by_family_and_orders_by_score() -> None:
@@ -189,6 +210,52 @@ def test_format_rows_renders_duplication_cluster_summary() -> None:
     assert "promotion_target=src/bioetl/infrastructure/adapters/base.py | labels=module_surface" in formatted
     assert "member=src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count | labels=method_surface" in formatted
     assert "covered_by_test=tests/unit/infrastructure/adapters/test_pubmed_health.py" in formatted
+
+
+def test_format_rows_renders_pipeline_normalization_evidence() -> None:
+    formatted = _format_rows(
+        "normalization-pipeline",
+        "chembl_activity",
+        [
+            {
+                "pipeline_name": "chembl_activity",
+                "normalization_profile_registered": True,
+                "normalization_profile_module_path": "src/bioetl/domain/normalization/profiles/chembl_activity.py",
+                "profile_field_count": 12,
+                "fallback_field_count": 1,
+                "fallback_business_field_count": 1,
+                "fallback_technical_passthrough_field_count": 0,
+                "normalization_modules": [
+                    "src/bioetl/application/core/record_normalization_processor.py",
+                    "src/bioetl/domain/normalization/profiles/chembl_activity.py",
+                ],
+            }
+        ],
+    )
+
+    assert "Pipeline normalization evidence: `chembl_activity`" in formatted
+    assert "profile_registered=True | profile_fields=12 | fallback_fields=1 | fallback_business=1 | fallback_technical=0" in formatted
+    assert "profile_module=src/bioetl/domain/normalization/profiles/chembl_activity.py" in formatted
+    assert "normalization_module=src/bioetl/domain/normalization/profiles/chembl_activity.py" in formatted
+
+
+def test_format_rows_renders_fallback_pipeline_summary() -> None:
+    formatted = _format_rows(
+        "fallback-pipelines",
+        "all",
+        [
+            {
+                "pipeline_name": "chembl_assay_parameters",
+                "normalization_profile_registered": False,
+                "profile_field_count": 0,
+                "fallback_field_count": 22,
+                "fallback_business_field_count": 22,
+            }
+        ],
+    )
+
+    assert "Fallback-heavy pipelines: `all`" in formatted
+    assert "pipeline=chembl_assay_parameters | fallback_business=22 | fallback_total=22 | profile_registered=False | profile_fields=0" in formatted
 
 
 def test_format_rows_renders_promotion_candidates_summary() -> None:

@@ -29,7 +29,7 @@ from bioetl.application.core.base_transformer.structural_policy import (
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-from bioetl.domain.types import RunType
+from bioetl.domain.types import BatchID, RunType
 from tests.helpers.transformer_dependencies import (
     build_test_transformer_dependencies,
 )
@@ -268,6 +268,24 @@ class TestCreateEntity:
                 activity_id="",  # Invalid: empty activity_id
                 molecule_id="CHEMBL25",
             )
+
+    def test_uses_source_batch_id_from_context(
+        self, transformer: ConcreteTransformer, mock_context: PipelineContext
+    ) -> None:
+        """Entity lineage should inherit the active batch identifier from context."""
+        batch_id = BatchID(uuid4())
+
+        entity = transformer._create_entity(
+            Bioactivity,
+            mock_context.with_source_batch_id(batch_id),
+            entity_id="test:activity:124",
+            content_hash="def456",
+            index=1,
+            activity_id="124",
+            molecule_id="CHEMBL26",
+        )
+
+        assert entity.source_batch_id == batch_id
 
 
 @pytest.mark.unit

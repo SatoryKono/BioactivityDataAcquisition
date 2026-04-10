@@ -131,6 +131,21 @@ Last verified: '2026-04-09'
     python -m scripts.ops query-neo4j-memory overengineered-candidates composite_layer
     python -m scripts.ops query-neo4j-memory removable-complexity composite_layer
     python -m scripts.ops query-neo4j-memory simplification-blockers adapter_layer
+    python -m scripts.ops query-neo4j-memory normalization-pipeline chembl_activity
+    python -m scripts.ops query-neo4j-memory fallback-pipelines all
+    ```
+
+15. Normalization topology is now refreshed from current shipped evidence during
+    deterministic sync. The sync derives current profile coverage from
+    `NORMALIZATION_PROFILE_REGISTRY`, pulls current fallback debt from the
+    generated normalization matrix/inventory pipeline, and projects that data
+    onto `pipeline_surface` / `entity_config` nodes. Rebuild the graph after
+    normalization changes so future audits query current evidence instead of a
+    stale topology snapshot:
+    ```bash
+    python -m scripts.ops sync-neo4j-memory --apply
+    python -m scripts.ops query-neo4j-memory normalization-pipeline chembl_activity
+    python -m scripts.ops query-neo4j-memory fallback-pipelines all
     ```
 
 ## Memory Configuration Profiles
