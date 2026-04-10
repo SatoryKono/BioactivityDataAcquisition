@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+from datetime import date
 from urllib import error
 
 from pathlib import Path
@@ -657,7 +658,7 @@ def test_git_last_commit_age_days_bulk_batches_history_lookup(monkeypatch) -> No
     result = _git_last_commit_age_days_bulk(
         Path("/repo"),
         ["src/a.py", "src/b.py", "src/c.py"],
-        Path("2026-04-10"),  # type: ignore[arg-type]
+        date(2026, 4, 10),
         cache,
         chunk_size=10,
     )
