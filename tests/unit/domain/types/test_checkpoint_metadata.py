@@ -173,6 +173,30 @@ class TestCheckpointMetadata:
         assert metadata1 == metadata2
         assert metadata1 != metadata3
 
+    def test_runtime_anchor_payload_fails_closed_on_malformed_contract_ref(self) -> None:
+        """Malformed runtime-anchor contract refs should fail during normalization."""
+        metadata = CheckpointMetadata(
+            records_processed=100,
+            contract_ref="ChemBL Activity/Bad",
+            contract_version="1.0.0",
+            effective_config_hash="a" * 64,
+        )
+
+        with pytest.raises(ValueError, match="Invalid contract_ref format"):
+            metadata.runtime_anchor_payload()
+
+    def test_runtime_anchor_payload_fails_closed_on_malformed_effective_hash(self) -> None:
+        """Malformed effective_config_hash values should fail during runtime-anchor normalization."""
+        metadata = CheckpointMetadata(
+            records_processed=100,
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            effective_config_hash="sha256:not-hex",
+        )
+
+        with pytest.raises(ValueError, match="Invalid effective_config_hash format"):
+            metadata.runtime_anchor_fingerprint()
+
 
 class TestCheckpointCompatibilityResult:
     """Test CheckpointCompatibilityResult domain type."""

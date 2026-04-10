@@ -55,9 +55,49 @@ def test_manifest_execution_fingerprint_is_deterministic_for_equivalent_payloads
     ) == compute_manifest_execution_fingerprint(normalize_run_manifest_spec(reordered))
 
 
+def test_manifest_execution_fingerprint_matches_golden_value() -> None:
+    payload = {
+        "schema_version": "1.0",
+        "run_type": "incremental",
+        "pipeline_name": "chembl_activity",
+        "provider": "chembl",
+        "entity": "activity",
+        "launch_context": {"resume": False, "limit": 100},
+        "runtime_config": {"limit": 100, "run_type": "incremental"},
+        "resolved_config": {"entity_type": "activity", "provider": "chembl"},
+        "code_provenance": {
+            "git_commit": "abc1234",
+            "config_hash": "DEADBEEF",
+            "contract_ref": " ChemBL.Activity ",
+            "contract_version": " v2 ",
+        },
+        "source_refs": [
+            {
+                "query": "assay_type=B",
+                "pipeline_name": "chembl_activity",
+                "entity": "activity",
+                "provider": "chembl",
+                "input_snapshots": [
+                    {"snapshot_id": "b-2", "content_hash": "hash-b-2"},
+                    {"snapshot_id": "b-1", "content_hash": "hash-b-1"},
+                ],
+            }
+        ],
+        "planned_artifacts": [
+            {"path": "data/output/gold/chembl/activity", "layer": "gold"},
+            {"layer": "bronze", "path": "data/output/bronze/chembl/activity"},
+        ],
+    }
+
+    assert (
+        compute_manifest_execution_fingerprint(normalize_run_manifest_spec(payload))
+        == "608f808f7b3842c09f42505853ee92ba113ff9ef29851d2a481714247a8ca08d"
+    )
+
+
 def test_runtime_anchor_fingerprint_is_deterministic_for_equivalent_payloads() -> None:
     payload = {
-        "effective_config_hash": " SHA256:ABCDEF ",
+        "effective_config_hash": " SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
         "contract_ref": " ChemBL.Activity ",
         "contract_version": " v2 ",
         "manifest_id": " manifest-123 ",
@@ -70,7 +110,7 @@ def test_runtime_anchor_fingerprint_is_deterministic_for_equivalent_payloads() -
         "dq_contract_compatibility_hash": "deadbeef",
         "contract_version": "2.0.0",
         "contract_ref": "chembl.activity",
-        "effective_config_hash": "sha256:abcdef",
+        "effective_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
     assert compute_runtime_anchor_fingerprint(

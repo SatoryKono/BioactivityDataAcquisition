@@ -15,6 +15,7 @@ from bioetl.domain.normalization.control_plane import (
     normalize_control_plane_uuid,
     normalize_run_ledger_payload,
     normalize_run_manifest_spec,
+    normalize_runtime_anchor_effective_config_hash,
     normalize_runtime_anchor_payload,
 )
 from bioetl.domain.normalization.dates import (
@@ -62,6 +63,7 @@ __all__ = [
     "normalize_pmid",
     "normalize_run_ledger_payload",
     "normalize_run_manifest_spec",
+    "normalize_runtime_anchor_effective_config_hash",
     "normalize_runtime_anchor_payload",
     "normalize_string",
     "normalize_to_string",

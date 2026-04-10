@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Mapping, Sequence
 
 from bioetl.domain.normalization._control_plane_primitives import (
@@ -24,6 +25,7 @@ __all__ = [
     "normalize_control_plane_uuid",
     "normalize_run_ledger_payload",
     "normalize_run_manifest_spec",
+    "normalize_runtime_anchor_effective_config_hash",
     "normalize_runtime_anchor_payload",
 ]
 
@@ -44,6 +46,8 @@ _RUNTIME_ANCHOR_SHA256_FIELDS = frozenset(
     }
 )
 _SEMVER_PARTS = 3
+_CONTRACT_REF_PATTERN = re.compile(r"^[a-z0-9]+(?:[._-][a-z0-9]+)*$")
+_SHA256_HEX_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
 def _normalize_optional_text(value: object | None) -> str | None:
@@ -62,12 +66,30 @@ def normalize_control_plane_sha256(value: str | None) -> str | None:
     return normalized or None
 
 
+def normalize_runtime_anchor_effective_config_hash(value: object | None) -> str | None:
+    """Return canonical runtime-anchor effective_config_hash or fail closed."""
+    normalized = _normalize_optional_text(value)
+    if normalized is None:
+        return None
+    normalized = _strip_optional_sha256_prefix(normalized).lower()
+    if not _SHA256_HEX_PATTERN.fullmatch(normalized):
+        raise ValueError(
+            "Invalid effective_config_hash format: expected lowercase 64-char SHA256 hex"
+        )
+    return normalized
+
+
 def normalize_contract_ref(value: object | None) -> str | None:
     """Return canonical contract reference text for runtime/checkpoint anchors."""
     normalized = _normalize_optional_text(value)
     if normalized is None:
         return None
-    return normalized.lower()
+    normalized = normalized.lower()
+    if not _CONTRACT_REF_PATTERN.fullmatch(normalized):
+        raise ValueError(
+            f"Invalid contract_ref format: {normalized!r} (expected lowercase dotted identifier)"
+        )
+    return normalized
 
 
 def normalize_contract_version(value: object | None) -> str | None:
@@ -125,6 +147,8 @@ def _normalize_runtime_anchor_hash(value: object | None) -> str | None:
 
 def _normalize_runtime_anchor_value(key: str, value: object | None) -> str | None:
     """Normalize one runtime anchor field according to its canonical contract."""
+    if key == "effective_config_hash":
+        return normalize_runtime_anchor_effective_config_hash(value)
     if key in _RUNTIME_ANCHOR_SHA256_FIELDS:
         return _normalize_runtime_anchor_hash(value)
     if key == "contract_ref":
@@ -132,6 +156,13 @@ def _normalize_runtime_anchor_value(key: str, value: object | None) -> str | Non
     if key == "contract_version":
         return normalize_contract_version(value)
     return _normalize_optional_text(value)
+
+
+def _strip_optional_sha256_prefix(value: str) -> str:
+    """Remove an optional sha256: prefix before strict hash validation."""
+    if value.lower().startswith("sha256:"):
+        return value.split(":", 1)[1]
+    return value
 
 
 def _normalize_manifest_code_provenance(

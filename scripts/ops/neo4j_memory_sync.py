@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timezone
@@ -46,6 +47,8 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "function_surface",
     "method_surface",
     "duplication_cluster",
+    "retirement_candidate",
+    "development_cycle_surface",
     "port_surface",
     "adapter_surface",
     "adapter_impl_surface",
@@ -707,6 +710,17 @@ class ClassDescriptor:
     method_names: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class RetirementAnalysisConfig:
+    enabled: bool
+    family_names: tuple[str, ...]
+    current_cycle_age_days: int
+    stale_age_days: int
+    dead_score_threshold: int
+    wip_markers: tuple[str, ...]
+    deprecation_markers: tuple[str, ...]
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Build and optionally sync a deterministic BioETL graph into Neo4j.",
@@ -873,6 +887,48 @@ def _duplication_analysis_config(memory_mapping: dict[str, object]) -> dict[str,
     }
 
 
+def _retirement_analysis_config(
+    memory_mapping: dict[str, object],
+    duplication_config: dict[str, object],
+) -> RetirementAnalysisConfig:
+    payload = memory_mapping.get("retirement_analysis", {})
+    if not isinstance(payload, dict):
+        payload = {}
+
+    duplication_families = tuple(
+        family.name
+        for family in duplication_config.get("families", ())
+        if isinstance(family, DuplicateFamilyConfig)
+    )
+    configured_families = tuple(
+        family_name
+        for family_name in _as_string_list(payload.get("families"))
+        if family_name in duplication_families
+    )
+
+    return RetirementAnalysisConfig(
+        enabled=bool(payload.get("enabled", True)),
+        family_names=configured_families or duplication_families,
+        current_cycle_age_days=int(payload.get("current_cycle_age_days", 45) or 45),
+        stale_age_days=int(payload.get("stale_age_days", 180) or 180),
+        dead_score_threshold=int(payload.get("dead_score_threshold", 6) or 6),
+        wip_markers=tuple(
+            marker.casefold()
+            for marker in (
+                _as_string_list(payload.get("wip_markers"))
+                or ["todo", "wip", "follow-up", "phase 2", "spike", "temporary"]
+            )
+        ),
+        deprecation_markers=tuple(
+            marker.casefold()
+            for marker in (
+                _as_string_list(payload.get("deprecation_markers"))
+                or ["deprecated", "legacy", "obsolete", "compat", "remove after", "migration shim"]
+            )
+        ),
+    )
+
+
 def _as_string_list(value: object) -> list[str]:
     if not isinstance(value, (list, tuple)):
         return []
@@ -935,6 +991,30 @@ def _resolve_repo_path(root: Path, base_path: Path, raw_path: str) -> Path | Non
     if candidate.exists():
         return candidate
     return None
+
+
+def _git_last_commit_age_days(
+    root: Path,
+    relative_path: str,
+    today: date,
+    cache: dict[str, int | None],
+) -> int | None:
+    if relative_path in cache:
+        return cache[relative_path]
+    result = subprocess.run(
+        ["git", "-C", str(root), "log", "-1", "--format=%ct", "--", relative_path],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    timestamp = result.stdout.strip()
+    if result.returncode != 0 or not timestamp.isdigit():
+        cache[relative_path] = None
+        return None
+    committed_at = datetime.fromtimestamp(int(timestamp), tz=UTC).date()
+    age = max(0, (today - committed_at).days)
+    cache[relative_path] = age
+    return age
 
 
 def _path_contains_any_token(path: Path, tokens: list[str]) -> bool:
@@ -1490,6 +1570,7 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_policy_surfaces(snapshot, root, project, today)
     _add_impact_analysis_surfaces(snapshot, root, project, today)
     _add_file_structure_surfaces(snapshot, root, project, today)
+    _add_retirement_analysis_surfaces(snapshot, root, project, today, _load_memory_mapping(root))
     return snapshot
 
 
@@ -2874,6 +2955,201 @@ def _extract_code_duplication_surfaces(
             if relation.relation_type != "TESTS_PACKAGE_FAMILY" or relation.target != package_family:
                 continue
             snapshot.add_relation(cluster, "COVERED_BY_TEST", relation.source, provenance="code_duplication")
+
+
+def _add_retirement_analysis_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    memory_mapping: dict[str, object],
+) -> None:
+    duplication_config = _duplication_analysis_config(memory_mapping)
+    config = _retirement_analysis_config(memory_mapping, duplication_config)
+    if not config.enabled or not config.family_names:
+        return
+
+    analysis_labels = {"module_surface", "class_surface", "function_surface", "method_surface"}
+    runtime_labels = {"pipeline_surface", "execution_path", "alert_surface", "adapter_surface", "adapter_impl_surface"}
+    config_labels = {"entity_config", "composite_config", "provider_surface", "contract_surface", "port_surface"}
+    doc_labels = {"policy_surface", "doc_source_surface", "doc_artifact", "dashboard_surface", "quality_gate"}
+    test_labels = {"test_surface", "test_artifact"}
+    ignored_relation_types = {
+        "DECLARES",
+        "OVERRIDES",
+        "SAME_SHAPE_AS",
+        "CONTAINS",
+        "BACKS",
+        "HOUSES",
+        "CANDIDATE_FOR_REMOVAL",
+        "OWNED_BY_CYCLE",
+        "BLOCKED_FROM_DELETION_BY",
+    }
+
+    incoming: dict[NodeKey, list[GraphRelation]] = {}
+    outgoing: dict[NodeKey, list[GraphRelation]] = {}
+    for relation in snapshot.relations.values():
+        incoming.setdefault(relation.target, []).append(relation)
+        outgoing.setdefault(relation.source, []).append(relation)
+
+    today_date = date.fromisoformat(today)
+    text_cache: dict[str, str] = {}
+    age_cache: dict[str, int | None] = {}
+
+    def read_source_text(relative_path: str) -> str:
+        if relative_path not in text_cache:
+            path = root / relative_path
+            try:
+                text_cache[relative_path] = _read_text(path).casefold()
+            except OSError:
+                text_cache[relative_path] = ""
+        return text_cache[relative_path]
+
+    def collect_anchor_names(
+        surface_key: NodeKey,
+        module_key: NodeKey,
+    ) -> dict[str, set[str]]:
+        buckets = {
+            "runtime": set(),
+            "config": set(),
+            "docs": set(),
+            "tests": set(),
+        }
+        package_name: str | None = None
+        module_node = snapshot.nodes.get(module_key)
+        if module_node is not None:
+            package_raw = module_node.properties.get("family_name")
+            if isinstance(package_raw, str) and package_raw:
+                package_name = package_raw
+
+        keys_to_scan = {surface_key, module_key}
+        if package_name is not None:
+            keys_to_scan.add(NodeKey("package_family", package_name))
+
+        for key in keys_to_scan:
+            for relation in [*incoming.get(key, ()), *outgoing.get(key, ())]:
+                if relation.relation_type in ignored_relation_types:
+                    continue
+                other = relation.source if relation.target == key else relation.target
+                if other.label in runtime_labels:
+                    buckets["runtime"].add(other.name)
+                elif other.label in config_labels:
+                    buckets["config"].add(other.name)
+                elif other.label in doc_labels:
+                    buckets["docs"].add(other.name)
+                elif other.label in test_labels:
+                    buckets["tests"].add(other.name)
+        return buckets
+
+    for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
+        if node.key.label not in analysis_labels:
+            continue
+        source_path = node.properties.get("source_path")
+        if not isinstance(source_path, str) or not source_path.endswith(".py"):
+            continue
+        family = _family_for_path(source_path, duplication_config)
+        if family is None or family.name not in config.family_names:
+            continue
+
+        module_key = node.key if node.key.label == "module_surface" else NodeKey("module_surface", source_path)
+        if module_key not in snapshot.nodes:
+            continue
+
+        anchor_names = collect_anchor_names(node.key, module_key)
+        runtime_count = len(anchor_names["runtime"])
+        config_count = len(anchor_names["config"])
+        doc_count = len(anchor_names["docs"])
+        test_count = len(anchor_names["tests"])
+        only_test_referenced = test_count > 0 and runtime_count == 0 and config_count == 0 and doc_count == 0
+
+        source_text = read_source_text(source_path)
+        wip_markers = sorted({marker for marker in config.wip_markers if marker in source_text})
+        deprecation_markers = sorted({marker for marker in config.deprecation_markers if marker in source_text})
+        recent_age_days = _git_last_commit_age_days(root, source_path, today_date, age_cache)
+
+        cycle_score = 0
+        if recent_age_days is not None and recent_age_days <= config.current_cycle_age_days:
+            cycle_score += 2
+        if wip_markers:
+            cycle_score += 3
+        if doc_count > 0 and runtime_count == 0:
+            cycle_score += 1
+
+        deletion_score = 0
+        if runtime_count == 0:
+            deletion_score += 3
+        if config_count == 0:
+            deletion_score += 2
+        if doc_count == 0:
+            deletion_score += 1
+        if only_test_referenced:
+            deletion_score += 2
+        if deprecation_markers:
+            deletion_score += 2
+        if recent_age_days is not None and recent_age_days >= config.stale_age_days:
+            deletion_score += 2
+        deletion_score -= cycle_score
+
+        development_cycle: NodeKey | None = None
+        if cycle_score >= 3:
+            development_cycle = snapshot.add_node(
+                "development_cycle_surface",
+                f"{node.key.label}:{node.key.name}",
+                summary=f"Current-cycle code surface `{node.key.name}` in `{family.name}`.",
+                source_path=source_path,
+                source_kind="development_cycle_surface",
+                family_name=family.name,
+                target_label=node.key.label,
+                target_name=node.key.name,
+                cycle_status="current_cycle",
+                cycle_score=cycle_score,
+                recent_age_days=recent_age_days,
+                wip_markers=wip_markers,
+                runtime_anchor_count=runtime_count,
+                config_anchor_count=config_count,
+                doc_anchor_count=doc_count,
+                test_anchor_count=test_count,
+                last_verified=today,
+                ingest_wave="repo_sync_v1",
+                confidence="medium",
+            )
+            snapshot.add_relation(project, "CONTAINS", development_cycle, provenance="retirement_analysis")
+            snapshot.add_relation(node.key, "OWNED_BY_CYCLE", development_cycle, provenance="retirement_analysis")
+
+        if deletion_score < config.dead_score_threshold:
+            continue
+
+        confidence = "high" if deletion_score >= config.dead_score_threshold + 2 else "medium"
+        candidate = snapshot.add_node(
+            "retirement_candidate",
+            f"{node.key.label}:{node.key.name}",
+            summary=f"Potential dead/stale code candidate `{node.key.name}` in `{family.name}`.",
+            source_path=source_path,
+            source_kind="retirement_candidate",
+            family_name=family.name,
+            target_label=node.key.label,
+            target_name=node.key.name,
+            deletion_score=deletion_score,
+            deletion_confidence=confidence,
+            recent_age_days=recent_age_days,
+            only_test_referenced=only_test_referenced,
+            deprecation_markers=deprecation_markers,
+            runtime_anchor_count=runtime_count,
+            config_anchor_count=config_count,
+            doc_anchor_count=doc_count,
+            test_anchor_count=test_count,
+            runtime_anchors=sorted(anchor_names["runtime"]),
+            config_anchors=sorted(anchor_names["config"]),
+            doc_anchors=sorted(anchor_names["docs"]),
+            test_anchors=sorted(anchor_names["tests"]),
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence=confidence,
+        )
+        snapshot.add_relation(project, "CONTAINS", candidate, provenance="retirement_analysis")
+        snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="retirement_analysis")
+        if development_cycle is not None:
+            snapshot.add_relation(candidate, "BLOCKED_FROM_DELETION_BY", development_cycle, provenance="retirement_analysis")
 
 
 def _add_pipeline_surfaces(

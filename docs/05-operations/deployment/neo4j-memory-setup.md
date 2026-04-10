@@ -123,6 +123,8 @@ Last verified: '2026-04-09'
     python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608
     python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer
     python -m scripts.ops query-neo4j-memory promotion-candidates all
+    python -m scripts.ops query-neo4j-memory dead-code-candidates adapter_layer
+    python -m scripts.ops query-neo4j-memory current-cycle-code adapter_layer
     ```
 
 ## Memory Configuration Profiles

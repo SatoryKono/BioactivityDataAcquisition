@@ -78,6 +78,14 @@ def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
     ).read_text(encoding="utf-8")
 
 
+def test_build_artifacts_is_byte_for_byte_stable_across_repeated_calls() -> None:
+    first = build_artifacts()
+    second = build_artifacts()
+
+    assert first[CSV_NAME].encode("utf-8") == second[CSV_NAME].encode("utf-8")
+    assert first[MD_NAME].encode("utf-8") == second[MD_NAME].encode("utf-8")
+
+
 def test_check_artifacts_detects_drift(tmp_path: Path) -> None:
     out_dir = tmp_path / "matrix"
     payloads = build_artifacts()
@@ -106,3 +114,17 @@ def test_write_artifacts_preserves_csv_and_md_when_optional_exports_requested(
     assert (out_dir / CSV_NAME).exists()
     assert (out_dir / MD_NAME).exists()
     assert isinstance(result["warnings"], list)
+
+
+def test_write_artifacts_produces_byte_identical_csv_on_repeated_generation(
+    tmp_path: Path,
+) -> None:
+    out_dir = tmp_path / "matrix"
+
+    write_artifacts(out_dir, with_docx=False, with_pdf=False)
+    first_csv = (out_dir / CSV_NAME).read_bytes()
+
+    write_artifacts(out_dir, with_docx=False, with_pdf=False)
+    second_csv = (out_dir / CSV_NAME).read_bytes()
+
+    assert first_csv == second_csv

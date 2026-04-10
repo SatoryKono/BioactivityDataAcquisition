@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID
 
+import pytest
+
 from bioetl.domain.normalization.control_plane import (
     normalize_runtime_anchor_payload,
     normalize_run_ledger_payload,
@@ -135,7 +137,7 @@ def test_normalize_runtime_anchor_payload_coerces_canonical_contract_fields() ->
             "config_hash": " SHA256:FACE ",
             "dq_contract_compatibility_hash": " DEADBEEF ",
             "contract_schema_hash": " ABC123 ",
-            "effective_config_hash": " SHA256:ABCDEF ",
+            "effective_config_hash": " SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
             "contract_ref": " ChemBL.Activity ",
             "contract_version": " v2 ",
             "manifest_id": " manifest-123 ",
@@ -147,9 +149,46 @@ def test_normalize_runtime_anchor_payload_coerces_canonical_contract_fields() ->
         "config_hash": "sha256:face",
         "dq_contract_compatibility_hash": "deadbeef",
         "contract_schema_hash": "abc123",
-        "effective_config_hash": "sha256:abcdef",
+        "effective_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "contract_ref": "chembl.activity",
         "contract_version": "2.0.0",
         "manifest_id": "manifest-123",
         "composite_run_identity": "run-42",
     }
+
+
+@pytest.mark.parametrize(
+    ("payload", "expected_message"),
+    [
+        (
+            {
+                "contract_ref": "ChemBL Activity/Bad",
+                "contract_version": "1.0.0",
+                "effective_config_hash": "a" * 64,
+            },
+            "Invalid contract_ref format",
+        ),
+        (
+            {
+                "contract_ref": "chembl.activity",
+                "contract_version": "1.0.beta",
+                "effective_config_hash": "a" * 64,
+            },
+            "Invalid contract_version format",
+        ),
+        (
+            {
+                "contract_ref": "chembl.activity",
+                "contract_version": "1.0.0",
+                "effective_config_hash": "sha256:not-hex",
+            },
+            "Invalid effective_config_hash format",
+        ),
+    ],
+)
+def test_normalize_runtime_anchor_payload_fails_closed_on_malformed_anchors(
+    payload: dict[str, str],
+    expected_message: str,
+) -> None:
+    with pytest.raises(ValueError, match=expected_message):
+        normalize_runtime_anchor_payload(payload)
