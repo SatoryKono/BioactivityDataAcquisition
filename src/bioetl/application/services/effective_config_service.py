@@ -5,7 +5,6 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
-import uuid
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from typing import cast
@@ -131,6 +130,27 @@ def _compute_source_fingerprint(source_refs: list[ConfigSourceRef]) -> str:
     return _stable_hash(normalized)
 
 
+def _build_effective_config_artifact_id(
+    *,
+    pipeline_name: str,
+    pipeline_kind: str,
+    resolved_config_hash: str,
+    effective_config_hash: str,
+    source_fingerprint: str,
+    dq_contract_compatibility_hash: str,
+) -> str:
+    """Build one deterministic semantic artifact identifier."""
+    semantic_payload = {
+        "pipeline_name": pipeline_name,
+        "pipeline_kind": pipeline_kind,
+        "resolved_config_hash": resolved_config_hash,
+        "effective_config_hash": effective_config_hash,
+        "source_fingerprint": source_fingerprint,
+        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+    }
+    return f"effective-config-{_stable_hash(semantic_payload)[:16]}"
+
+
 def _build_resolved_config_snapshot(
     *,
     pipeline_kind: str,
@@ -213,9 +233,6 @@ class EffectiveConfigService:
         artifact_id: str | None = None,
     ) -> EffectiveConfigArtifact:
         """Create a reproducible effective-config artifact from resolved inputs."""
-        if artifact_id is None:
-            artifact_id = f"config_{uuid.uuid4().hex[:8]}"
-
         resolved_policy = _resolve_resolution_policy(resolution_policy)
         resolved_snapshot = _build_resolved_config_snapshot(
             pipeline_kind=pipeline_kind,
@@ -230,8 +247,28 @@ class EffectiveConfigService:
         dq_policy_refs, dq_policy_snapshots, dq_rule_bundle_versions = (
             _build_dq_components(dq_config)
         )
+        dq_contract_compatibility_hash = (
+            "no_dq_policies"
+            if not dq_policy_refs
+            else ":".join(
+                sorted(
+                    ref.policy_hash
+                    for ref in dq_policy_refs
+                    if ref.policy_hash is not None and ref.policy_hash
+                )
+            )
+            or "no_dq_policy_hashes"
+        )
+        resolved_artifact_id = artifact_id or _build_effective_config_artifact_id(
+            pipeline_name=pipeline_name,
+            pipeline_kind=pipeline_kind,
+            resolved_config_hash=resolved_snapshot.config_hash,
+            effective_config_hash=effective_snapshot.effective_hash,
+            source_fingerprint=_compute_source_fingerprint(source_refs),
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        )
         return EffectiveConfigArtifact(
-            artifact_id=artifact_id,
+            artifact_id=resolved_artifact_id,
             pipeline_name=pipeline_name,
             pipeline_kind=pipeline_kind,
             source_refs=source_refs,
@@ -245,6 +282,7 @@ class EffectiveConfigService:
             contract_refs=_extract_contract_refs(dq_config),
             dq_policy_refs=dq_policy_refs,
             dq_rule_bundle_versions=dq_rule_bundle_versions,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             dq_policy_snapshots=dq_policy_snapshots,
         )
 
@@ -269,7 +307,7 @@ class EffectiveConfigService:
         artifact2: EffectiveConfigArtifact,
     ) -> bool:
         """Compare artifacts by their DQ compatibility hash."""
-        return (
+        return bool(
             artifact1.dq_contract_compatibility_hash
             == artifact2.dq_contract_compatibility_hash
         )

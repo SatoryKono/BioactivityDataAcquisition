@@ -147,7 +147,6 @@ def create_and_persist_effective_config_artifact(
         source_refs=_build_effective_config_source_refs(
             provider=provider, entity=entity
         ),
-        artifact_id=f"effective-config-{ctx.run_id}",
     )
     serialized_payload = service.serialize_artifact(artifact)
     loaded_payload = json.loads(serialized_payload)

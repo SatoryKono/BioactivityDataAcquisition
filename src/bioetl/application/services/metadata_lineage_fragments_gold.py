@@ -9,7 +9,7 @@ from bioetl.application.services.metadata_lineage_composite import (
     _build_dataset_composite_lineage_components,
 )
 from bioetl.application.services.metadata_lineage_nodes import (
-    build_fragment_id,
+    build_semantic_fragment_id,
     dedupe_nodes,
     fragment_timestamp,
     gold_dataset_node,
@@ -284,14 +284,14 @@ def build_gold_lineage_fragment(
         run_context, input_data, nodes, created_at, composite_source_edges
     )
 
+    deduped_nodes = dedupe_nodes(nodes)
     return LineageGraphFragment(
-        fragment_id=build_fragment_id(
+        fragment_id=build_semantic_fragment_id(
             "gold",
-            run_context.run_id,
-            input_data.table_name,
-            input_data.table_path,
+            nodes=deduped_nodes,
+            edges=edges,
         ),
-        nodes=dedupe_nodes(nodes),
+        nodes=deduped_nodes,
         edges=tuple(edges),
         run_id=str(run_context.run_id),
         manifest_id=run_context.manifest_id,
