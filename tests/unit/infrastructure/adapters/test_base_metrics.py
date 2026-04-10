@@ -166,6 +166,22 @@ class TestAdapterMetrics:
         assert call_args[0][2] == {"provider": "chembl", "endpoint": "/activity"}
         assert call_args[0][1] >= 0.0
 
+    def test_measure_request_normalizes_dynamic_endpoint_segments(self):
+        """Dynamic path segments must collapse to bounded placeholders."""
+        mock_metrics = MagicMock()
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="crossref"
+        )
+
+        with adapter_metrics.measure_request("/works/123456789"):
+            pass
+
+        histogram_call = mock_metrics.observe_histogram.call_args
+        assert histogram_call[0][2] == {
+            "provider": "crossref",
+            "endpoint": "/works/{id}",
+        }
+
     def test_record_fallback_outcome_records_counters_and_hit_rate(self):
         """Fallback attempts/hits and hit-rate should be emitted consistently."""
         mock_metrics = MagicMock()

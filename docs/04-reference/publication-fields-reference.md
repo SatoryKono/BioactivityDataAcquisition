@@ -36,6 +36,9 @@ Last verified: '2026-03-29'
 - Occurrence-scoped lineage anchors such as `_run_id`, `_run_type`,
   `_source_batch_id`, and `_ingestion_ts` are published via sidecar/control-plane
   artifacts rather than persisted Silver/Gold rows.
+- Config- and normalization-matrix artifacts may still mention those anchors in
+  hash-policy or normalization contexts; such inventories are not themselves
+  the persisted-row contract.
 
 ## Why This Page Was Demoted
 

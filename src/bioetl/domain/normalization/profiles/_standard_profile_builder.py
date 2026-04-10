@@ -107,7 +107,11 @@ def _build_field_rule(
         special_rules=special_rules,
     )
     if field_name in meta_fields:
-        notes = "System/meta field retained for storage but excluded from content_hash."
+        notes = (
+            "System/meta field is tracked by the normalization inventory and "
+            "excluded from content_hash; persisted-row publication is defined "
+            "separately by the Silver/Gold storage contract."
+        )
     return FieldRule(
         field_name=field_name,
         normalizer=normalizer,

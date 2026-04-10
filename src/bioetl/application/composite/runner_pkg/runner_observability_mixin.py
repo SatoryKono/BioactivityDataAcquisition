@@ -73,6 +73,31 @@ def _build_composite_cv_quarantine_metadata() -> dict[str, object]:
     }
 
 
+def _record_cv_quarantine_policy_if_supported(
+    host: _CompositeRunnerObservabilityHostProtocol,
+    *,
+    written: int,
+    quarantine_metadata: dict[str, object],
+) -> None:
+    """Emit one control-plane policy event when the host exposes ledger wiring."""
+    recorder = getattr(host, "_record_with_ledger_service", None)
+    if not callable(recorder):
+        return
+    recorder(
+        lambda ledger_service: ledger_service.record_dq_policy_applied(
+            stage="cross_validation",
+            status="quarantined",
+            rule_id=_COMPOSITE_CV_QUARANTINE_RULE_ID,
+            disposition="quarantine",
+            details={
+                "config_path": "cross_validation",
+                "quarantine_record_count": written,
+                **quarantine_metadata,
+            },
+        )
+    )
+
+
 class CompositeRunnerObservabilityMixin:
     """Mixin with optional DQ reporting and quarantine side effects."""
 
@@ -205,18 +230,10 @@ class CompositeRunnerObservabilityMixin:
 
         if written <= 0:
             return
-        self._record_with_ledger_service(
-            lambda ledger_service: ledger_service.record_dq_policy_applied(
-                stage="cross_validation",
-                status="quarantined",
-                rule_id=_COMPOSITE_CV_QUARANTINE_RULE_ID,
-                disposition="quarantine",
-                details={
-                    "config_path": "cross_validation",
-                    "quarantine_record_count": written,
-                    **quarantine_metadata,
-                },
-            )
+        _record_cv_quarantine_policy_if_supported(
+            self,
+            written=written,
+            quarantine_metadata=quarantine_metadata,
         )
         self._logger.info(
             "Cross-validation quarantine records written",

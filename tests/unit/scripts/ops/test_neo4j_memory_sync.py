@@ -13,10 +13,12 @@ from scripts.ops.neo4j_memory_sync import (
     _build_normalization_pipeline_evidence,
     _build_diff_entries,
     _critical_analysis_audit_issues,
+    _ensure_targeted_apply_prerequisites,
     _filtered_snapshot,
     _git_last_commit_age_days_bulk,
     _live_managed_node_counts,
     _live_managed_relation_counts,
+    main,
     _normalization_evidence_statements,
     apply_normalization_evidence_only,
     build_audit_report,
@@ -37,7 +39,9 @@ from scripts.ops.neo4j_memory_sync import (
     resolve_neo4j_connection,
     _relation_statement,
     _reset_managed_relations_statement,
+    _verify_expected_group_counts,
     snapshot_invariant_issues,
+    _targeted_apply_required_anchor_labels,
 )
 
 
@@ -86,6 +90,30 @@ def test_resolve_neo4j_connection_prefers_host_docker_internal_for_wsl_audit_mod
     http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
 
     assert http_uri == "http://host.docker.internal:7475"
+    assert username == "neo4j"
+    assert password == "audit_secure_password"
+    assert database == "neo4j"
+
+
+def test_resolve_neo4j_connection_does_not_leak_default_mcp_credentials_into_audit_mode(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("LIVE_AUDIT_MODE", "1")
+    monkeypatch.setenv("NEO4J_USERNAME", "neo4j")
+    monkeypatch.setenv("NEO4J_PASSWORD", "bioetl_secure_password")
+    monkeypatch.setenv("NEO4J_AUTH", "neo4j/bioetl_secure_password")
+    monkeypatch.delenv("NEO4J_AUDIT_USERNAME", raising=False)
+    monkeypatch.delenv("NEO4J_AUDIT_PASSWORD", raising=False)
+    monkeypatch.delenv("NEO4J_AUDIT_AUTH", raising=False)
+    monkeypatch.delenv("NEO4J_AUDIT_URI", raising=False)
+    monkeypatch.delenv("NEO4J_AUDIT_HTTP_URI", raising=False)
+    monkeypatch.delenv("WSL_INTEROP", raising=False)
+    monkeypatch.delenv("WSL_DISTRO_NAME", raising=False)
+
+    http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
+
+    assert http_uri == "http://localhost:7475"
     assert username == "neo4j"
     assert password == "audit_secure_password"
     assert database == "neo4j"
@@ -632,6 +660,59 @@ def test_development_cycle_surface_filter_is_now_a_clean_noop() -> None:
     assert stats["relation_types"] == {}
 
 
+def test_targeted_apply_required_anchor_labels_identifies_missing_base_labels() -> None:
+    snapshot = GraphSnapshot()
+    project = snapshot.add_node("project", "BioETL")
+    class_surface = snapshot.add_node("class_surface", "pkg.Example")
+    complexity_candidate = snapshot.add_node("complexity_candidate", "class_surface:pkg.Example")
+    snapshot.add_relation(project, "CONTAINS", complexity_candidate)
+    snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
+    snapshot.add_relation(complexity_candidate, "CANDIDATE_FOR_SIMPLIFICATION", class_surface)
+
+    filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
+
+    assert _targeted_apply_required_anchor_labels(filtered) == ("class_surface",)
+
+
+def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_graph_is_empty() -> None:
+    snapshot = GraphSnapshot()
+    project = snapshot.add_node("project", "BioETL")
+    class_surface = snapshot.add_node("class_surface", "pkg.Example")
+    complexity_candidate = snapshot.add_node("complexity_candidate", "class_surface:pkg.Example")
+    snapshot.add_relation(project, "CONTAINS", complexity_candidate)
+    snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
+    filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
+
+    class StubClient:
+        def query(
+            self,
+            statement: str,
+            parameters: dict[str, object] | None = None,
+            *,
+            context: str | None = None,
+        ) -> list[dict[str, object]]:
+            assert context == "complexity-layer targeted sync prerequisite anchor check"
+            assert parameters is not None
+            return [
+                {"label": label, "count": 0}
+                for label in parameters["labels"]
+            ]
+
+    try:
+        _ensure_targeted_apply_prerequisites(
+            StubClient(),  # type: ignore[arg-type]
+            filtered,
+            mode_description="complexity-layer targeted sync",
+        )
+    except RuntimeError as exc:
+        message = str(exc)
+    else:
+        raise AssertionError("Expected prerequisite failure for empty anchor graph")
+
+    assert "Run a base sync first" in message
+    assert "`class_surface`" in message
+
+
 def test_live_managed_count_helpers_batch_labels_and_relations() -> None:
     class StubClient:
         def query(
@@ -837,6 +918,79 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
     assert report["live"]["managed_node_total"] == 6
     assert report["live"]["unmanaged_repo_node_total"] == 1
     assert report["live"]["managed_relation_total"] == 4
+
+
+def test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks() -> None:
+    relation_groups = {
+        "CANDIDATE_FOR_REMOVAL": [
+            {"statement": "RETURN 1", "parameters": {}},
+            {"statement": "RETURN 1", "parameters": {}},
+        ]
+    }
+    seen_params: list[dict[str, object]] = []
+
+    class StubClient:
+        def query(
+            self,
+            statement: str,
+            parameters: dict[str, object] | None = None,
+            *,
+            context: str | None = None,
+        ) -> list[dict[str, object]]:
+            assert parameters is not None
+            seen_params.append(parameters)
+            if context == "post-apply node group verification":
+                return []
+            if context == "post-apply relation group verification":
+                assert "coalesce(r.sync_run, '') = $sync_run" in statement
+                assert parameters["sync_run"] == "run-123"
+                return [{"relation_type": "CANDIDATE_FOR_REMOVAL", "count": 2}]
+            raise AssertionError(f"Unexpected query context: {context}")
+
+    _verify_expected_group_counts(
+        StubClient(),  # type: ignore[arg-type]
+        {},
+        relation_groups,
+        strict_analysis=False,
+        sync_run="run-123",
+    )
+
+    assert any(params.get("sync_run") == "run-123" for params in seen_params)
+
+
+def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(monkeypatch, tmp_path: Path) -> None:
+    snapshot = GraphSnapshot()
+    snapshot.add_node("retirement_candidate", "retire-me.py")
+    called: dict[str, int] = {"sync_snapshot": 0, "build_fast_analysis_audit_report": 0}
+
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.build_snapshot", lambda root: snapshot)
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._filtered_snapshot", lambda current, **kwargs: current)
+
+    def _sync_snapshot(*args, **kwargs) -> None:
+        called["sync_snapshot"] += 1
+
+    def _build_fast_analysis_audit_report(*args, **kwargs) -> dict[str, object]:
+        called["build_fast_analysis_audit_report"] += 1
+        return {}
+
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.sync_snapshot", _sync_snapshot)
+    monkeypatch.setattr(
+        "scripts.ops.neo4j_memory_sync.build_fast_analysis_audit_report",
+        _build_fast_analysis_audit_report,
+    )
+
+    exit_code = main(
+        [
+            "--root",
+            str(tmp_path),
+            "--apply",
+            "--only-retirement-layer",
+        ]
+    )
+
+    assert exit_code == 0
+    assert called["sync_snapshot"] == 1
+    assert called["build_fast_analysis_audit_report"] == 0
 
 
 def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing(monkeypatch) -> None:

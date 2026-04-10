@@ -19,8 +19,6 @@ Consolidated modules (v5.2):
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 # Data source factory and registry
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
@@ -68,15 +66,6 @@ _PIPELINE_FACTORY_EXPORTS = frozenset(
 # Compatibility alias retained for legacy imports; new code should use
 # DataSourceCreatorProtocol directly.
 DataSourceCreatorPort = DataSourceCreatorProtocol
-
-if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline import (
-        GenericPipelineFactory,
-        assemble_runner,
-        build_pipeline_services,
-        create_pipeline_factory,
-    )
-
 
 _PIPELINE_EXPORTS = frozenset(
     {

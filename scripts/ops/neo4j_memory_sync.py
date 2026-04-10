@@ -1889,17 +1889,16 @@ def resolve_neo4j_connection(root: Path, explicit_http_uri: str | None) -> tuple
     default_host = _default_neo4j_host(env)
 
     if audit_mode:
-        bolt_uri = env.get("NEO4J_AUDIT_URI") or env.get("NEO4J_URI") or f"bolt://{default_host}:7688"
-        username = env.get("NEO4J_AUDIT_USERNAME") or env.get("NEO4J_USERNAME") or env.get("NEO4J_AUTH_USERNAME")
-        password = env.get("NEO4J_AUDIT_PASSWORD") or env.get("NEO4J_PASSWORD") or env.get("NEO4J_AUTH_PASSWORD")
+        bolt_uri = env.get("NEO4J_AUDIT_URI") or f"bolt://{default_host}:7688"
+        username = env.get("NEO4J_AUDIT_USERNAME")
+        password = env.get("NEO4J_AUDIT_PASSWORD")
         database = env.get("NEO4J_AUDIT_DATABASE") or env.get("NEO4J_DATABASE") or "neo4j"
-        auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUDIT_AUTH") or env.get("NEO4J_AUTH"))
+        auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUDIT_AUTH"))
         username = username or auth_username or "neo4j"
         password = password or auth_password or "audit_secure_password"
         http_uri = (
             explicit_http_uri
             or env.get("NEO4J_AUDIT_HTTP_URI")
-            or env.get("NEO4J_HTTP_URI")
             or f"http://{default_host}:7475"
         )
     else:
@@ -4931,6 +4930,20 @@ def sync_snapshot(
         only_retirement_layer=only_retirement_layer,
         only_complexity_layer=only_complexity_layer,
     )
+    targeted_mode = only_analysis_layer or only_retirement_layer or only_complexity_layer or bool(only_labels)
+    if targeted_mode:
+        mode_description = "targeted sync"
+        if only_complexity_layer:
+            mode_description = "complexity-layer targeted sync"
+        elif only_retirement_layer:
+            mode_description = "retirement-layer targeted sync"
+        elif only_analysis_layer:
+            mode_description = "analysis-layer targeted sync"
+        _ensure_targeted_apply_prerequisites(
+            client,
+            snapshot,
+            mode_description=mode_description,
+        )
     managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
     node_groups: dict[str, list[dict[str, JsonValue]]] = {}
     for node in snapshot.nodes.values():
@@ -4977,13 +4990,20 @@ def sync_snapshot(
         analysis_relation_batch_size,
         "analysis relation",
     )
-    _retry_critical_analysis_groups(client, analysis_node_groups, analysis_relation_groups, batch_size)
-    targeted_mode = only_analysis_layer or only_retirement_layer or only_complexity_layer or bool(only_labels)
+    verification_sync_run = sync_run if targeted_mode else None
+    _retry_critical_analysis_groups(
+        client,
+        analysis_node_groups,
+        analysis_relation_groups,
+        batch_size,
+        sync_run=verification_sync_run,
+    )
     _verify_expected_group_counts(
         client,
         analysis_node_groups if targeted_mode else {},
         analysis_relation_groups if targeted_mode else {},
         strict_analysis=not targeted_mode,
+        sync_run=verification_sync_run,
     )
     if targeted_mode:
         _verify_expected_group_counts(
@@ -4991,6 +5011,7 @@ def sync_snapshot(
             node_groups,
             relation_groups,
             strict_analysis=False,
+            sync_run=verification_sync_run,
         )
     if prune_stale:
         client.execute([_prune_stale_relations_statement(sync_run)])
@@ -5070,9 +5091,11 @@ def _live_managed_node_counts(
     labels: tuple[str, ...],
     *,
     context: str,
+    sync_run: str | None = None,
 ) -> dict[str, int]:
     if not labels:
         return {}
+    sync_run_clause = "AND coalesce(n.sync_run, '') = $sync_run " if sync_run else ""
     rows = client.query(
         (
             "UNWIND $labels AS label "
@@ -5080,6 +5103,7 @@ def _live_managed_node_counts(
             "WHERE label IN labels(n) "
             "AND coalesce(n.managed_by, '') = $managed_by "
             "AND coalesce(n.ingest_wave, '') = $ingest_wave "
+            f"{sync_run_clause}"
             "RETURN label, count(n) AS count "
             "ORDER BY label"
         ),
@@ -5087,6 +5111,7 @@ def _live_managed_node_counts(
             "labels": list(labels),
             "managed_by": DEFAULT_MANAGED_BY,
             "ingest_wave": DEFAULT_INGEST_WAVE,
+            "sync_run": sync_run or "",
         },
         context=context,
     )
@@ -5104,9 +5129,11 @@ def _live_managed_relation_counts(
     relation_types: tuple[str, ...],
     *,
     context: str,
+    sync_run: str | None = None,
 ) -> dict[str, int]:
     if not relation_types:
         return {}
+    sync_run_clause = "AND coalesce(r.sync_run, '') = $sync_run " if sync_run else ""
     rows = client.query(
         (
             "UNWIND $relation_types AS relation_type "
@@ -5114,6 +5141,7 @@ def _live_managed_relation_counts(
             "WHERE type(r) = relation_type "
             "AND coalesce(r.managed_by, '') = $managed_by "
             "AND coalesce(r.ingest_wave, '') = $ingest_wave "
+            f"{sync_run_clause}"
             "RETURN relation_type, count(r) AS count "
             "ORDER BY relation_type"
         ),
@@ -5121,6 +5149,7 @@ def _live_managed_relation_counts(
             "relation_types": list(relation_types),
             "managed_by": DEFAULT_MANAGED_BY,
             "ingest_wave": DEFAULT_INGEST_WAVE,
+            "sync_run": sync_run or "",
         },
         context=context,
     )
@@ -5133,11 +5162,51 @@ def _live_managed_relation_counts(
     return counts
 
 
+def _targeted_apply_required_anchor_labels(snapshot: GraphSnapshot) -> tuple[str, ...]:
+    present_labels = {node.key.label for node in snapshot.nodes.values()}
+    required_labels = {
+        relation.source.label
+        for relation in snapshot.relations.values()
+        if relation.source.label not in present_labels
+    }
+    required_labels |= {
+        relation.target.label
+        for relation in snapshot.relations.values()
+        if relation.target.label not in present_labels
+    }
+    return tuple(sorted(required_labels))
+
+
+def _ensure_targeted_apply_prerequisites(
+    client: Neo4jHttpClient,
+    snapshot: GraphSnapshot,
+    *,
+    mode_description: str,
+) -> None:
+    required_anchor_labels = _targeted_apply_required_anchor_labels(snapshot)
+    if not required_anchor_labels:
+        return
+    live_anchor_counts = _live_managed_node_counts(
+        client,
+        required_anchor_labels,
+        context=f"{mode_description} prerequisite anchor check",
+    )
+    missing_labels = [label for label in required_anchor_labels if live_anchor_counts.get(label, 0) == 0]
+    if missing_labels:
+        missing_summary = ", ".join(f"`{label}`" for label in missing_labels)
+        raise RuntimeError(
+            f"{mode_description} requires pre-existing managed anchor labels in the live graph, "
+            f"but these labels are missing or empty: {missing_summary}. "
+            "Run a base sync first (for example `python -m scripts.ops sync-neo4j-memory --apply`)."
+        )
+
+
 def _retry_critical_analysis_groups(
     client: Neo4jHttpClient,
     node_groups: dict[str, list[dict[str, JsonValue]]],
     relation_groups: dict[str, list[dict[str, JsonValue]]],
     batch_size: int,
+    sync_run: str | None = None,
 ) -> None:
     retry_batch_size = max(1, min(batch_size, 5))
     active_node_labels = [label for label in CRITICAL_ANALYSIS_NODE_LABELS if label in node_groups]
@@ -5148,11 +5217,13 @@ def _retry_critical_analysis_groups(
         client,
         tuple(active_node_labels),
         context="post-apply critical node verification",
+        sync_run=sync_run,
     )
     live_relation_counts = _live_managed_relation_counts(
         client,
         tuple(active_relation_types),
         context="post-apply critical relation verification",
+        sync_run=sync_run,
     )
 
     missing_node_labels = [
@@ -5171,6 +5242,7 @@ def _retry_critical_analysis_groups(
             client,
             tuple(active_node_labels),
             context="post-retry critical node verification",
+            sync_run=sync_run,
         )
 
     missing_relation_types = [
@@ -5189,6 +5261,7 @@ def _retry_critical_analysis_groups(
             client,
             tuple(active_relation_types),
             context="post-retry critical relation verification",
+            sync_run=sync_run,
         )
 
     missing_after_retry: list[str] = []
@@ -5247,17 +5320,20 @@ def _verify_expected_group_counts(
     relation_groups: dict[str, list[dict[str, JsonValue]]],
     *,
     strict_analysis: bool,
+    sync_run: str | None = None,
 ) -> None:
     mismatches: list[str] = []
     live_node_counts = _live_managed_node_counts(
         client,
         tuple(sorted(node_groups)),
         context="post-apply node group verification",
+        sync_run=sync_run,
     )
     live_relation_counts = _live_managed_relation_counts(
         client,
         tuple(sorted(relation_groups)),
         context="post-apply relation group verification",
+        sync_run=sync_run,
     )
     for label, statements in sorted(node_groups.items()):
         expected = len(statements)
@@ -5909,12 +5985,19 @@ def main(argv: list[str] | None = None) -> int:
             only_retirement_layer=args.only_retirement_layer,
             only_complexity_layer=args.only_complexity_layer,
         )
-        post_apply_report = build_fast_analysis_audit_report(snapshot, root, args.http_uri)
-        critical_issues = _critical_analysis_audit_issues(post_apply_report)
-        if critical_issues:
-            raise RuntimeError(
-                "Post-apply audit failed for critical analysis groups: " + "; ".join(critical_issues)
-            )
+        targeted_mode = (
+            args.only_analysis_layer
+            or args.only_retirement_layer
+            or args.only_complexity_layer
+            or bool(args.only_label)
+        )
+        if not targeted_mode:
+            post_apply_report = build_fast_analysis_audit_report(snapshot, root, args.http_uri)
+            critical_issues = _critical_analysis_audit_issues(post_apply_report)
+            if critical_issues:
+                raise RuntimeError(
+                    "Post-apply audit failed for critical analysis groups: " + "; ".join(critical_issues)
+                )
         print("Neo4j sync completed.")
     if args.report is not None:
         report = (

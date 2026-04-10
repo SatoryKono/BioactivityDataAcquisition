@@ -9,6 +9,12 @@ __all__ = [
 ]
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
+    build_dependency_stage_details,
+)
+from bioetl.application.composite.runner_pkg.runner_stage_start_flow import (
+    start_composite_phase,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_types import (
     _CompositeRunnerStageHostProtocol,
 )
@@ -24,23 +30,20 @@ async def start_dependencies_phase(
     dependency_pipeline_names: list[str],
 ) -> CompositeCheckpointState:
     """Transition to DEPENDENCIES_RUNNING, persist checkpoint, and emit log."""
-    next_state = host._transition_state_with_fsm_log(
+    stage_details = build_dependency_stage_details(dependency_pipeline_names)
+    return await start_composite_phase(
+        host,
         state,
-        CompositePipelineState.DEPENDENCIES_RUNNING,
+        to_state=CompositePipelineState.DEPENDENCIES_RUNNING,
         stage="dependencies_start",
-        dependencies=dependency_pipeline_names,
-        count=len(dependency_pipeline_names),
+        checkpoint_operation="dependencies_running",
+        phase_name="dependencies",
+        transition_details=stage_details,
+        log_details=stage_details,
+        on_started=lambda: host._record_dependencies_stage_started(
+            dependency_pipeline_names
+        ),
     )
-    await host._call_save_checkpoint_safe(next_state, "dependencies_running")
-    host._record_dependencies_stage_started(dependency_pipeline_names)
-    host._logger.info(
-        PipelineEvent.phase_started("dependencies"),
-        composite=host._config.name,
-        run_id=host._run_id_str,
-        dependencies=dependency_pipeline_names,
-        count=len(dependency_pipeline_names),
-    )
-    return next_state
 
 
 async def complete_dependencies_phase(

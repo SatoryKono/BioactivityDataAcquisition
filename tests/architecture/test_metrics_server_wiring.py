@@ -86,6 +86,37 @@ def test_observability_api_start_metrics_server_delegates_via_metrics_service() 
     )
 
 
+def test_observability_api_push_metrics_delegates_via_metrics_service() -> None:
+    """Public observability API must route Pushgateway publication through MetricsService."""
+    source = OBSERVABILITY_API_PATH.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    function_node = _get_function_def(tree, "push_metrics_to_gateway")
+
+    called_names = {
+        inner.func.id
+        for inner in ast.walk(function_node)
+        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Name)
+    }
+    called_attrs = {
+        inner.func.attr
+        for inner in ast.walk(function_node)
+        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Attribute)
+    }
+
+    assert "get_metrics_service" in called_names, (
+        "composition.observability_api.push_metrics_to_gateway must obtain the "
+        "canonical metrics service via get_metrics_service()."
+    )
+    assert "push_to_gateway" in called_attrs, (
+        "composition.observability_api.push_metrics_to_gateway must delegate to "
+        "MetricsService.push_to_gateway()."
+    )
+    assert "infrastructure.observability.server" not in source, (
+        "composition.observability_api.push_metrics_to_gateway must not import "
+        "Pushgateway helpers from infrastructure directly."
+    )
+
+
 def test_runtime_observability_modules_do_not_reexport_raw_start_metrics_server() -> None:
     """Legacy raw start_metrics_server exports must stay out of runtime bootstrap surface."""
     for path in (RUNTIME_OBSERVABILITY_PATH, RUNTIME_INIT_PATH):

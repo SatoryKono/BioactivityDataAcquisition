@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import datetime
 
 import polars as pl
 
@@ -29,22 +29,26 @@ class MergeMetricsRecorderMixin:
         sources_used: list[str],
         dependency_results: dict[str, DependencyResult] | None = None,
     ) -> pl.DataFrame:
-        """Add lineage metadata columns to DataFrame.
+        """Add composite semantic metadata columns to DataFrame.
 
         Args:
             df: Merged DataFrame to annotate with lineage columns.
             enrichment_results: Map of enricher pipeline name to its execution result.
-            run_id: Composite run identifier written to ``_composite_run_id``.
+            run_id: Composite run identifier routed via explicit write kwargs.
+            metadata_timestamp: Deterministic metadata timestamp routed via sidecars.
             sources_used: List of pipeline names that contributed data to the merge.
             dependency_results: Optional map of dependency pipeline name to its result,
                 included in enrichment status when provided.
 
         Returns:
-            DataFrame with ``_composite_run_id``, ``_source_providers``,
-            ``_enrichment_status``, and ``_lineage_created_at`` columns appended.
+            DataFrame with ``_source_providers`` and ``_enrichment_status`` columns
+            appended. Occurrence-scoped runtime anchors are kept out of canonical
+            row payloads and travel separately via explicit write kwargs,
+            sidecar metadata, lineage fragments, and control-plane artifacts.
         """
         import polars as pl
 
+        _ = (run_id, metadata_timestamp)
         status_dict: dict[str, str] = {}
         if dependency_results:
             for name, dep_result in dependency_results.items():
@@ -52,18 +56,10 @@ class MergeMetricsRecorderMixin:
         for name, enrich_result in enrichment_results.items():
             status_dict[name] = enrich_result.status.value
 
-        lineage_created_at = (
-            metadata_timestamp.astimezone(UTC).isoformat()
-            if metadata_timestamp is not None
-            else datetime.now(tz=UTC).isoformat()
-        )
-
         return df.with_columns(
             [
-                pl.lit(run_id).alias("_composite_run_id"),
                 pl.lit(json.dumps(sources_used)).alias("_source_providers"),
                 pl.lit(json.dumps(status_dict)).alias("_enrichment_status"),
-                pl.lit(lineage_created_at).alias("_lineage_created_at"),
             ]
         )
 

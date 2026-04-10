@@ -12,9 +12,11 @@ import pytest
 
 from bioetl.application.services.metrics_service import (
     MetricsServerError,
+    MetricsPublisherPort,
     MetricsServerPort,
     MetricsServerStatus,
     MetricsService,
+    PushResult,
     StartResult,
 )
 
@@ -258,6 +260,52 @@ class TestMetricsService:
         assert status.running is False
         assert status.port is None
         assert status.started_at is None
+
+    def test_push_to_gateway_success(
+        self, mock_logger: MagicMock, mock_server: MagicMock
+    ) -> None:
+        """Metrics publication should delegate to the injected publisher port."""
+        mock_publisher = MagicMock(spec=MetricsPublisherPort)
+        mock_publisher.push_to_gateway.return_value = True
+        service = MetricsService(
+            logger=mock_logger,
+            _server=mock_server,
+            _publisher=mock_publisher,
+        )
+
+        result = service.push_to_gateway(
+            gateway="localhost:9091",
+            run_label="bioetl",
+            grouping_key={"pipeline": "chembl_activity"},
+        )
+
+        assert result == PushResult(
+            success=True,
+            gateway="localhost:9091",
+            run_label="bioetl",
+            grouping_key={"pipeline": "chembl_activity"},
+        )
+        mock_publisher.push_to_gateway.assert_called_once_with(
+            gateway="localhost:9091",
+            run_label="bioetl",
+            grouping_key={"pipeline": "chembl_activity"},
+        )
+
+    def test_push_to_gateway_logs_failure_without_publisher(
+        self, mock_logger: MagicMock, mock_server: MagicMock
+    ) -> None:
+        """Unconfigured publisher must fail explicitly instead of silently succeeding."""
+        service = MetricsService(logger=mock_logger, _server=mock_server)
+
+        result = service.push_to_gateway(
+            gateway="localhost:9091",
+            run_label="bioetl",
+            grouping_key={"pipeline": "chembl_activity"},
+        )
+
+        assert result.success is False
+        assert result.error == "Metrics publisher is not configured"
+        mock_logger.warning.assert_called()
 
     def test_is_running(self, service: MetricsService, mock_server: MagicMock) -> None:
         """Test is_running method."""

@@ -9,15 +9,6 @@ Canonical import paths::
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline.assembler import (
-        GenericPipelineFactory,
-        assemble_runner,
-        create_pipeline_factory,
-    )
-    from bioetl.composition.factories.services.bundle import build_pipeline_services
 
 
 def __getattr__(name: str) -> object:

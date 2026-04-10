@@ -82,7 +82,7 @@ def _create_composite_metadata_services(
 def _create_csv_exporters(
     *,
     output_dir: Path,
-    logger: NoOpLogger,
+    logger: LoggerPort,
     enable_csv_export: bool,
 ) -> tuple[CsvExporter | None, CsvExporter | None]:
     """Create optional CSV exporters for silver and gold layers."""

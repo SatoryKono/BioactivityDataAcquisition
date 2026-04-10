@@ -9,6 +9,12 @@ from bioetl.application.composite.runner_pkg.runner_helpers import (
     add_not_run_results,
     log_enrichment_summary,
 )
+from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
+    build_enrichment_stage_details,
+)
+from bioetl.application.composite.runner_pkg.runner_stage_start_flow import (
+    start_composite_phase,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_enrichment_types import (
     _CompositeRunnerStageEnrichmentHostProtocol,
     _PreparedEnrichmentRunContext,
@@ -39,23 +45,20 @@ class _CompositeRunnerStageEnrichmentMixin:
         context: _PreparedEnrichmentRunContext,
     ) -> CompositeCheckpointState:
         """Transition FSM to ENRICHING, persist checkpoint, log phase start."""
-        state = self._transition_state_with_fsm_log(
+        stage_details = build_enrichment_stage_details(context.enricher_names)
+        return await start_composite_phase(
+            self,
             state,
-            CompositePipelineState.ENRICHING,
+            to_state=CompositePipelineState.ENRICHING,
             stage="enrichment_start",
-            enrichers=context.enricher_names,
-            count=len(context.enrichers_to_run),
+            checkpoint_operation="enrichment_running",
+            phase_name="enrichment",
+            transition_details=stage_details,
+            log_details=stage_details,
+            on_started=lambda: self._record_enrichment_stage_started(
+                context.enricher_names
+            ),
         )
-        await self._call_save_checkpoint_safe(state, "enrichment_running")
-        self._record_enrichment_stage_started(context.enricher_names)
-        self._logger.info(
-            PipelineEvent.phase_started("enrichment"),
-            composite=self._config.name,
-            run_id=self._run_id_str,
-            enrichers=context.enricher_names,
-            count=len(context.enrichers_to_run),
-        )
-        return state
 
     async def _run_enrichers_and_update_state(
         self: _CompositeRunnerStageEnrichmentHostProtocol,
