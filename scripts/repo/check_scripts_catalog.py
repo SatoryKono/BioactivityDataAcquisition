@@ -14,6 +14,7 @@ import argparse
 import json
 import re
 import sys
+import time
 from pathlib import Path
 from typing import Final
 
@@ -158,8 +159,14 @@ def _check_lifecycle_coverage(
         violations.append(f"registry not found: {registry_rel}")
         return
 
-    manifest_payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    registry_payload = json.loads(registry_path.read_text(encoding="utf-8"))
+    manifest_payload = _load_json_object_with_retry(manifest_path)
+    registry_payload = _load_json_object_with_retry(registry_path)
+    if manifest_payload is None:
+        violations.append(f"manifest JSON is invalid: {manifest_rel}")
+        return
+    if registry_payload is None:
+        violations.append(f"registry JSON is invalid: {registry_rel}")
+        return
     scripts = manifest_payload.get("scripts", [])
     entries = _as_dict(registry_payload.get("entries"))
     if not isinstance(scripts, list):
@@ -240,6 +247,27 @@ def _check_lifecycle_coverage(
                 violations.append(
                     f"stale lifecycle entry not found in manifest: {path}"
                 )
+
+
+def _load_json_object_with_retry(
+    path: Path,
+    *,
+    attempts: int = 3,
+    delay_seconds: float = 0.05,
+) -> dict[str, object] | None:
+    """Load a JSON object, retrying briefly for concurrent writers."""
+
+    for index in range(attempts):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            if index < attempts - 1:
+                time.sleep(delay_seconds)
+            continue
+        if isinstance(payload, dict):
+            return payload
+        return None
+    return None
 
 
 def main(argv: list[str] | None = None) -> int:

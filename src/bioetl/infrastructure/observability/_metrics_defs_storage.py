@@ -5,9 +5,11 @@ from __future__ import annotations
 from prometheus_client import Counter, Histogram
 
 __all__ = [
+    "BRONZE_WRITE_ATTEMPTS_TOTAL",
     "BRONZE_BYTES_WRITTEN_TOTAL",
     "BRONZE_RECORDS_WRITTEN_TOTAL",
     "BRONZE_WRITE_DURATION_SECONDS",
+    "BRONZE_WRITE_TOTAL_DURATION_SECONDS",
     "POLICY_VIOLATIONS_TOTAL",
     "SILVER_VALIDATION_FAILURES_TOTAL",
 ]
@@ -25,10 +27,23 @@ BRONZE_RECORDS_WRITTEN_TOTAL = Counter(
     ["provider", "entity"],
 )
 
+BRONZE_WRITE_ATTEMPTS_TOTAL = Counter(
+    "bioetl_bronze_write_attempts_total",
+    "Total Bronze write attempts",
+    ["provider", "entity"],
+)
+
 BRONZE_BYTES_WRITTEN_TOTAL = Counter(
     "bioetl_bronze_bytes_written_total",
     "Total bytes written to bronze layer (compressed)",
     ["provider", "entity"],
+)
+
+BRONZE_WRITE_TOTAL_DURATION_SECONDS = Histogram(
+    "bioetl_bronze_write_total_duration_seconds",
+    "Total Bronze write duration, including side effects and metadata writes",
+    ["provider", "entity"],
+    buckets=[0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0],
 )
 
 POLICY_VIOLATIONS_TOTAL = Counter(

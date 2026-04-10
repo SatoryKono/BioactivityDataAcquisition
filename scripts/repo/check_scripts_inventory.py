@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import time
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -564,11 +565,28 @@ def _stable_manifest(data: dict[str, object]) -> dict[str, object]:
 
 
 def _write_manifest(path: Path, payload: dict[str, object]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    _write_text_atomic(
+        path,
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
     )
+
+
+def _write_text_atomic(path: Path, content: str) -> None:
+    """Write text atomically to avoid readers observing partial files."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.parent / (
+        f".{path.name}.tmp.{os.getpid()}.{time.time_ns()}"
+    )
+    try:
+        with temp_path.open("w", encoding="utf-8") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_path, path)
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
 
 
 def _check(manifest_path: Path, actual: dict[str, object]) -> int:
@@ -634,8 +652,7 @@ def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
             )
         lines.append("")
 
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    _write_text_atomic(path, "\n".join(lines).rstrip() + "\n")
 
 
 def _load_json(path: Path) -> dict[str, object]:

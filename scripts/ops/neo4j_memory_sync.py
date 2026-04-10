@@ -11,6 +11,7 @@ import http.client
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -819,6 +820,14 @@ def _parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--report-fast",
+        action="store_true",
+        help=(
+            "Use a reduced audit scope focused on critical analysis labels and relation types. "
+            "This is faster and more stable on large live graphs."
+        ),
+    )
+    parser.add_argument(
         "--http-uri",
         type=str,
         help="Explicit Neo4j HTTP endpoint, e.g. http://localhost:7474.",
@@ -1131,7 +1140,7 @@ def _git_last_commit_age_days(
     if relative_path in cache:
         return cache[relative_path]
     result = subprocess.run(
-        ["git", "-C", str(root), "log", "-1", "--format=%ct", "--", relative_path],
+        [_resolve_git_executable(), "-C", str(root), "log", "-1", "--format=%ct", "--", relative_path],
         check=False,
         capture_output=True,
         text=True,
@@ -1144,6 +1153,22 @@ def _git_last_commit_age_days(
     age = max(0, (today - committed_at).days)
     cache[relative_path] = age
     return age
+
+
+def _resolve_git_executable() -> str:
+    git_path = shutil.which("git")
+    if git_path:
+        return git_path
+    windows_candidates = (
+        "/mnt/c/Program Files/Git/cmd/git.exe",
+        "/mnt/c/Program Files/Git/bin/git.exe",
+        r"C:\Program Files\Git\cmd\git.exe",
+        r"C:\Program Files\Git\bin\git.exe",
+    )
+    for candidate in windows_candidates:
+        if Path(candidate).exists():
+            return candidate
+    return "git"
 
 
 def _path_contains_any_token(path: Path, tokens: list[str]) -> bool:
@@ -4152,7 +4177,13 @@ class Neo4jHttpClient:
                 with request.urlopen(req, timeout=60) as response:
                     raw = response.read().decode("utf-8")
                 break
-            except (error.URLError, TimeoutError, ConnectionResetError, http.client.RemoteDisconnected) as exc:  # pragma: no cover - network errors vary per environment
+            except (
+                error.URLError,
+                TimeoutError,
+                ConnectionResetError,
+                ConnectionAbortedError,
+                http.client.RemoteDisconnected,
+            ) as exc:  # pragma: no cover - network errors vary per environment
                 last_exc = exc
                 if self._fallback_endpoint and self._endpoint != self._fallback_endpoint:
                     self._endpoint = self._fallback_endpoint
@@ -5063,6 +5094,63 @@ def build_audit_report(
     }
 
 
+def build_fast_analysis_audit_report(
+    snapshot: GraphSnapshot,
+    root: Path,
+    http_uri: str | None,
+) -> dict[str, JsonValue]:
+    base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
+    client = Neo4jHttpClient(base_uri, username, password, database)
+    snapshot_stats = snapshot.stats()
+
+    snapshot_label_counts = {
+        label: int(snapshot_stats["labels"].get(label, 0)) for label in CRITICAL_ANALYSIS_NODE_LABELS
+    }
+    snapshot_relation_counts = {
+        relation_type: int(snapshot_stats["relation_types"].get(relation_type, 0))
+        for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
+    }
+    live_managed_label_counts = {
+        label: _live_managed_node_count(client, label) for label in CRITICAL_ANALYSIS_NODE_LABELS
+    }
+    live_managed_relation_counts = {
+        relation_type: _live_managed_relation_count(client, relation_type)
+        for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
+    }
+
+    return {
+        "generated_at": _sync_run_id(),
+        "managed_by": DEFAULT_MANAGED_BY,
+        "ingest_wave": DEFAULT_INGEST_WAVE,
+        "snapshot": {
+            "node_count": sum(snapshot_label_counts.values()),
+            "relation_count": sum(snapshot_relation_counts.values()),
+            "labels": snapshot_label_counts,
+            "relation_types": snapshot_relation_counts,
+        },
+        "managed_labels": list(CRITICAL_ANALYSIS_NODE_LABELS),
+        "live": {
+            "managed_node_total": sum(live_managed_label_counts.values()),
+            "managed_relation_total": sum(live_managed_relation_counts.values()),
+            "unmanaged_repo_node_total": 0,
+            "label_summary": [
+                {"label": label, "managed": live_managed_label_counts[label], "count": live_managed_label_counts[label], "unmanaged": 0}
+                for label in CRITICAL_ANALYSIS_NODE_LABELS
+            ],
+            "managed_relation_summary": [
+                {"relation_type": relation_type, "total": live_managed_relation_counts[relation_type]}
+                for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
+            ],
+            "orphan_summary": {"total": 0, "by_label": []},
+            "unmanaged_summary": {"total": 0, "by_label": []},
+        },
+        "diff": {
+            "labels": _build_diff_entries(snapshot_label_counts, live_managed_label_counts),
+            "relation_types": _build_diff_entries(snapshot_relation_counts, live_managed_relation_counts),
+        },
+    }
+
+
 def _critical_analysis_audit_issues(report: dict[str, JsonValue]) -> list[str]:
     issues: list[str] = []
     diff = report.get("diff", {})
@@ -5118,7 +5206,7 @@ def main(argv: list[str] | None = None) -> int:
             only_labels=tuple(args.only_label),
             only_analysis_layer=args.only_analysis_layer,
         )
-        post_apply_report = build_audit_report(snapshot, root, args.http_uri)
+        post_apply_report = build_fast_analysis_audit_report(snapshot, root, args.http_uri)
         critical_issues = _critical_analysis_audit_issues(post_apply_report)
         if critical_issues:
             raise RuntimeError(
@@ -5126,7 +5214,11 @@ def main(argv: list[str] | None = None) -> int:
             )
         print("Neo4j sync completed.")
     if args.report is not None:
-        report = build_audit_report(snapshot, root, args.http_uri)
+        report = (
+            build_fast_analysis_audit_report(snapshot, root, args.http_uri)
+            if args.report_fast
+            else build_audit_report(snapshot, root, args.http_uri)
+        )
         _write_json(args.report, report)
         print(f"Exported audit report to {args.report}")
     return 0

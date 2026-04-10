@@ -111,10 +111,11 @@ UUID-like values normalize through canonical string conversion.
 | Ledger persist payload | [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_ledger_service.py) | Calls `normalize_run_ledger_payload()` before append |
 | Record-level normalization | [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py) | Uses `NormalizationProfile` when available, otherwise falls back to legacy heuristics |
 | Profile framework | [base.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/base.py) | Defines `FieldRule` and `NormalizationProfile` with `include_in_hash` and `set_like` |
-| Shipped profile registry | [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) | Registers shipped profiles for `chembl.activity`, `crossref.publication`, `pubchem.compound`, and `pubmed.publication` |
+| Shipped profile registry | [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) | Registers shipped profiles for `chembl.activity`, `chembl.assay`, `chembl.molecule`, `chembl.publication`, `chembl.target`, `crossref.publication`, `openalex.publication`, `pubchem.compound`, `pubmed.publication`, `semanticscholar.publication`, `uniprot.idmapping`, and `uniprot.protein` |
 | Join-key domain policies | [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) | Pure scalar join-key policies for canonical trim/casing behavior |
 | Join-key application adapters | [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py) | Applies canonical join-key policies to composite runtime/config and DataFrame-oriented flows |
 | Matrix generation | [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams |
+| Fallback inventory | [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_technical_passthrough` debt from the published matrix for governance and ratchets |
 
 ## Hash Boundaries
 
@@ -212,6 +213,26 @@ Current deterministic outputs:
 
 The generated artifact family is multi-pipeline and must not regress to a
 ChemBL-only source of truth.
+
+## Generated Evidence Governance
+
+Normalization evidence is a governed artifact bundle, not a loose collection of
+docs.
+
+Current evidence bundle on `main`:
+
+- canonical plan: [normalization_plan_P0_P6.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/05-engineering/normalization_plan_P0_P6.md)
+- shipped multi-pipeline matrix: [pipeline_normalization_field_matrix.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
+- fallback inventory report: [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/qa/report_normalization_fallback_inventory.py)
+- join-key policy seams: [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py)
+
+Governance rules:
+
+- the canonical plan must describe the currently shipped profile registry
+- the published matrix must be reproducible from code
+- fallback inventory must classify business debt separately from technical passthrough
+- join-key policies must remain part of the same normalization evidence story as entity profiles
+- drift between plan, registry, matrix, and fallback inventory is a governance defect
 
 ## P0 - Update and Publish the Plan
 
@@ -357,9 +378,17 @@ Use explicit profiles as canonical contracts for covered pipeline schemas.
 - [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) already ships a canonical registry
 - shipped profiles currently include:
   - `chembl.activity`
+  - `chembl.assay`
+  - `chembl.molecule`
+  - `chembl.publication`
+  - `chembl.target`
   - `crossref.publication`
+  - `openalex.publication`
   - `pubchem.compound`
   - `pubmed.publication`
+  - `semanticscholar.publication`
+  - `uniprot.idmapping`
+  - `uniprot.protein`
 
 ### Requirements
 

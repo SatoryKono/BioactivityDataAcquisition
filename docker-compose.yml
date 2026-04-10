@@ -48,6 +48,7 @@ services:
   neo4j:
     image: neo4j:${NEO4J_VERSION:-5.15-community}
     container_name: bioetl-neo4j
+    command: ["neo4j", "console"]
     restart: unless-stopped
     ports:
       - "${NEO4J_HTTP_PORT:-7474}:7474"

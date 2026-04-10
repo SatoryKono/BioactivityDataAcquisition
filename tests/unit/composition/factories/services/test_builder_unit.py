@@ -49,6 +49,24 @@ class TestServicesBuilderCreateCheckpointManager:
         assert call_kwargs["loading_strategy"] is strategy
 
     @patch("bioetl.composition.factories.services.builder.create_checkpoint_manager")
+    def test_passes_metrics(self, mock_create: MagicMock) -> None:
+        """metrics kwarg is forwarded."""
+        mock_create.return_value = MagicMock()
+        metrics = MagicMock()
+
+        ServicesBuilder.create_checkpoint_manager(
+            checkpoint_port=MagicMock(),
+            logger=MagicMock(),
+            pipeline_name="p",
+            run_id="r",
+            resume=True,
+            metrics=metrics,
+        )
+
+        call_kwargs = mock_create.call_args[1]
+        assert call_kwargs["metrics"] is metrics
+
+    @patch("bioetl.composition.factories.services.builder.create_checkpoint_manager")
     def test_passes_compatibility_kwargs(self, mock_create: MagicMock) -> None:
         """Compatibility kwargs are forwarded to module function."""
         mock_create.return_value = MagicMock()
