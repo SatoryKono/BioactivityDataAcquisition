@@ -308,7 +308,9 @@ Delta merge by content-hash — критическая операция для i
 
    - Calculate content-hash: `sha256(provider + canonical-json(record))`
    - Normalize data (NaN→null, round floats, ISO dates)
-   - Add metadata (`_run_id`, `_ingestion_ts`, etc.)
+   - Attach persisted semantic system fields (`entity_id`, `content_hash`,
+     `_source`, `_index`) and publish occurrence-scoped provenance separately
+     via sidecar/control-plane artifacts
 
 1. **Table Check**
 

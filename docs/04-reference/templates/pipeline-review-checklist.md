@@ -67,9 +67,10 @@ ______________________________________________________________________
 
 ## 5. Metadata & Lineage (RULES.md §2.3, §2.4)
 
-- [ ] Records include `_run_id` (UUID)
-- [ ] Records include `_run_type` (`incremental` | `backfill` | `rebuild`)
-- [ ] Records include `_source_batch_id` (lineage reference in metadata sidecar)
+- [ ] Silver/Gold persisted rows do **not** include occurrence-scoped provenance
+      such as `_run_id`, `_run_type`, `_source_batch_id`, or `_ingestion_ts`
+- [ ] Occurrence-scoped provenance is published through metadata sidecars,
+      lineage fragments, audit, run manifest, and run ledger
 - [ ] Lineage recorded in metadata sidecar (`*_metadata.yaml`)
 - [ ] Full Bronze paths NOT stored in each record
 
@@ -82,7 +83,7 @@ ______________________________________________________________________
   - [ ] Floats → round(10)
   - [ ] Dates → YYYY-MM-DD
   - [ ] Strings → strip()
-- [ ] Meta-fields excluded from hash (`_ingestion_ts`, `_run_id`, etc.)
+- [ ] Occurrence-scoped provenance and DQ meta-fields excluded from semantic hash
 
 ## 7. Error Handling (RULES.md §3.1)
 

@@ -23,10 +23,7 @@ schema:
       fields:
         - entity_id
         - content_hash
-        - _run_id
-        - _run_type
-        - _source_batch_id
-        - _ingestion_ts
+        - _source
         - _index
     - name: business
       fields:
@@ -41,7 +38,7 @@ schema:
     alias_policy: preserve
   gold:
     include_groups: [system, business]
-    exclude_fields: [_dq_*, _source_batch_id, _index]
+    exclude_fields: [_dq_*, _index]
     alias_policy: canonical
 
 quality:
@@ -73,15 +70,9 @@ contracts:
   merge_keys:
     - {{primary_key}}
   rename_map:
-    run_id: _run_id
-    run_type: _run_type
-    source_batch_id: _source_batch_id
-    ingestion_ts: _ingestion_ts
     source: _source
   hash_include: []
   hash_exclude:
-    - _ingestion_ts
-    - _run_id
-    - _run_type
     - _dq_error
     - _dq_warn
+    - _index

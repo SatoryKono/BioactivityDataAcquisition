@@ -47,14 +47,14 @@ pipeline:
 schema:
     column_groups:
         - name: system
-          fields: [entity_id, content_hash, _run_id, _run_type, _source_batch_id, _ingestion_ts, _index]
+          fields: [entity_id, content_hash, _source, _index]
         - name: business
           fields: [activity_id, molecule_id, target_id, assay_id, standard_type, standard_value, standard_units]
     silver:
         include_groups: [system, business, dq]
     gold:
         include_groups: [system, business]
-        exclude_fields: [_dq_*, _source_batch_id, _index]
+        exclude_fields: [_dq_*, _index]
         alias_policy: canonical
 
 quality:
@@ -192,16 +192,19 @@ quality:
 
 > **Примечание**: Поля `action_type_*` извлекаются из вложенного словаря API с помощью `flatten_nested_dict()`. Если запись не содержит информации о типе действия, все поля будут `None`.
 
-#### Системные поля (добавляются при обработке)
+#### Системные поля persisted-row contract
 
 | Поле               | Тип   | Описание                             |
 | ------------------ | ----- | ------------------------------------ |
 | `entity_id`        | `str` | `chembl:{activity_id}`               |
 | `content_hash`     | `str` | SHA256-хеш содержимого               |
-| `_run_id`          | `str` | UUID запуска пайплайна               |
-| `_run_type`        | `str` | `incremental`, `backfill`, `rebuild` |
-| `_source_batch_id` | `str` | UUID батча                           |
-| `_ingestion_ts`    | `str` | Timestamp загрузки (ISO8601)         |
+| `_source`          | `str` | Канонический provider/source anchor  |
+| `_index`           | `int` | Порядковый индекс записи в батче     |
+
+Occurrence-scoped provenance (`_run_id`, `_run_type`, `_source_batch_id`,
+`_ingestion_ts`) не входит в физический Silver/Gold row contract и
+публикуется через sidecar metadata, lineage fragments, run manifest, run
+ledger и audit artifacts.
 
 ----------------------------------------------------------------------
 
@@ -375,9 +378,8 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("standard_value", pa.float64()),
         pa.field("standard_units", pa.string()),
         pa.field("pchembl_value", pa.float64()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_source", pa.string()),
+        pa.field("_index", pa.int64()),
         # ... всего 62 поля (включая action_type*)
     ]
 )
