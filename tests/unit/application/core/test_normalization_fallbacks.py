@@ -42,7 +42,14 @@ def test_named_text_fallback_normalizers_use_rule_buckets() -> None:
 
 def test_special_fallback_normalizers_delegate_to_canonical_helpers() -> None:
     rules = NormalizationRulesPolicy()
-    assert normalize_special_fallback_field("publication_doi", " https://doi.org/10.1000/ABC ", rule_set=rules) == "10.1000/abc"
+    assert (
+        normalize_special_fallback_field(
+            "publication_doi",
+            " https://doi.org/10.1000/ABC ",
+            rule_set=rules,
+        )
+        == "10.1000/abc"
+    )
     assert normalize_special_fallback_field("publication_pmid", " PMID:12345 ", rule_set=rules) == "12345"
     assert normalize_special_fallback_field("publication_date", "2024-02", rule_set=rules) == "2024-02-29"
     assert normalize_special_fallback_field("canonical_smiles", "C", rule_set=rules) == "C"
