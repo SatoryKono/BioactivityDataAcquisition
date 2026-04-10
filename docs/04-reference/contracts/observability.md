@@ -93,6 +93,10 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 
 - `PipelineObserver` является каноническим lifecycle emitter для ordinary
   pipeline runs
+- typed aggregate Domain Events из `bioetl.domain.aggregates.events` имеют
+  explicit canonical projection в runtime observability vocabulary через
+  `bioetl.domain.observability_event_mapping` и могут эмититься через
+  `PipelineObserver.emit_domain_event(...)` без введения отдельного event bus
 - Lifecycle phase emissions используют low-cardinality `phase` labels и не
   подменяются ad-hoc logging-only path
 - `MetricsPort` остаётся transport-level observability port; pipeline-specific

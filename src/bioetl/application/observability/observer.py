@@ -34,6 +34,7 @@ from bioetl.domain.observability_contract import (
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
+    from bioetl.domain.aggregates.events import DomainEvent
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID, RunType
 
@@ -62,6 +63,47 @@ class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
     span: Span | None
     pipeline_name: str
     _metrics: MetricsPort
+
+    @staticmethod
+    def _resolve_domain_event_phase(
+        phase_hint: str | None,
+        *,
+        fallback: LifecyclePhase | None,
+    ) -> LifecyclePhase:
+        """Resolve domain-event phase hints into canonical lifecycle phases."""
+        if fallback is not None:
+            return fallback
+        if phase_hint is not None:
+            try:
+                return LifecyclePhase(phase_hint)
+            except ValueError:
+                pass
+        return LifecyclePhase.EXECUTION
+
+    def emit_domain_event(
+        self,
+        event: DomainEvent,
+        *,
+        phase: LifecyclePhase | None = None,
+    ) -> None:
+        """Emit one typed domain event through the runtime observability contract."""
+        from bioetl.domain.observability_event_mapping import (
+            map_domain_event_to_observability_event,
+        )
+
+        envelope = map_domain_event_to_observability_event(event)
+        resolved_phase = self._resolve_domain_event_phase(
+            envelope.phase_hint,
+            fallback=phase,
+        )
+        self.emit_event(
+            envelope.event_name,
+            resolved_phase,
+            level=envelope.severity,
+            event_family=envelope.event_family,
+            occurred_at=event.occurred_at.isoformat(),
+            **envelope.context,
+        )
 
     def emit_event(
         self,
