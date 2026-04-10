@@ -1,0 +1,45 @@
+"""Tests for shared normalization profile helpers."""
+
+from __future__ import annotations
+
+from bioetl.domain.normalization.profiles.helpers import (
+    normalize_profile_doi,
+    normalize_profile_float,
+    normalize_profile_int,
+    normalize_profile_json_string,
+    normalize_profile_pmc_id,
+    normalize_profile_pmid,
+    normalize_profile_smiles,
+    normalize_profile_text,
+)
+
+
+def test_normalize_profile_text_trims_blank_to_none() -> None:
+    assert normalize_profile_text("  x  ") == "x"
+    assert normalize_profile_text("   ") is None
+
+
+def test_normalize_profile_json_string_canonicalizes_order() -> None:
+    assert normalize_profile_json_string(' { "b": 2, "a": 1 } ') == '{"a":1,"b":2}'
+
+
+def test_normalize_profile_int_preserves_invalid_text() -> None:
+    assert normalize_profile_int(" 42 ") == 42
+    assert normalize_profile_int("abc") == "abc"
+
+
+def test_normalize_profile_float_rounds_and_preserves_unhandled_object() -> None:
+    marker = object()
+    assert normalize_profile_float("1.234567890123") == 1.2345678901
+    assert normalize_profile_float(marker) is marker
+
+
+def test_normalize_profile_identifier_helpers() -> None:
+    assert normalize_profile_doi(" https://doi.org/10.1000/XYZ ") == "10.1000/xyz"
+    assert normalize_profile_pmid(" PMID:12345 ") == "12345"
+    assert normalize_profile_pmc_id(" pmc12345 ") == "PMC12345"
+
+
+def test_normalize_profile_smiles_returns_canonical_text_or_none() -> None:
+    assert normalize_profile_smiles(None, is_canonical=True) is None
+    assert normalize_profile_smiles("C", is_canonical=True) == "C"

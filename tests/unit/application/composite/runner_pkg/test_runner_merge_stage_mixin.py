@@ -73,12 +73,14 @@ class _MergeHarness(CompositeRunnerMergeStageMixin):
         self._run_id_str = "run-merge-test"
         self._fsm = MagicMock()
         self._merger = MagicMock()
-        self._merger.merge = AsyncMock(
+        merge_call = AsyncMock(
             return_value=MergeResult(
                 records_merged=10,
                 records_from_seed=10,
             )
         )
+        self._merger.merge = merge_call
+        self._merger.execute_request = merge_call
         self._checkpoint_manager = AsyncMock()
         self._checkpoint_manager.delete = AsyncMock()
 
@@ -346,7 +348,9 @@ async def test_execute_merge_stage_when_merge_succeeds_then_returns_merge_result
 async def test_execute_merge_stage_when_merger_raises_then_propagates_error() -> None:
     harness = _MergeHarness()
     harness._runtime.dry_run = False
-    harness._merger.merge = AsyncMock(side_effect=RuntimeError("merge failure"))
+    failing_merge = AsyncMock(side_effect=RuntimeError("merge failure"))
+    harness._merger.merge = failing_merge
+    harness._merger.execute_request = failing_merge
     state = _make_state(CompositePipelineState.ENRICHMENT_COMPLETED)
 
     with pytest.raises(RuntimeError, match="merge failure"):

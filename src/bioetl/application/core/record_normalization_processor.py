@@ -9,71 +9,37 @@ from bioetl.application.core.config import (
     ContentHashPolicyByVersion,
     ContentHashVersionPolicy,
 )
+from bioetl.application.core.normalization_fallbacks import (
+    UNHANDLED_FALLBACK_NORMALIZATION,
+    canonicalize_json_like_string,
+    is_date_field,
+    is_doi_field,
+    is_pmid_field,
+    is_smiles_field,
+    normalize_named_text_field,
+    normalize_special_fallback_field,
+)
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.domain.normalization.dates import normalize_partial_date
-from bioetl.domain.normalization.identifiers import normalize_doi, normalize_pmid
-from bioetl.domain.normalization.json import (
-    canonicalize_json_string,
-    serialize_json_canonical,
-)
+from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.normalization.profiles import (
     FieldRule,
     NormalizationProfile,
     resolve_normalization_profile,
 )
+from bioetl.domain.normalization.profiles.helpers import (
+    normalize_profile_smiles,
+)
 from bioetl.domain.normalization.text import (
-    normalize_abstract,
-    normalize_oa_status,
     normalize_string,
-    normalize_title,
 )
 from bioetl.domain.transformations import generate_content_hash
-from bioetl.domain.value_objects import SMILES
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import JsonDict
 
 __all__ = ["RecordNormalizationProcessor"]
-
-
-_JSON_START_TOKENS = ("{", "[")
-_JSON_END_TOKENS = ("}", "]")
-_PMID_SUFFIXES = ("_pmid",)
-_DOI_SUFFIXES = ("_doi",)
-_UNHANDLED = object()
-
-
-def _is_json_like_string(value: str) -> bool:
-    stripped = value.strip()
-    if len(stripped) < 2:
-        return False
-    return stripped.startswith(_JSON_START_TOKENS) and stripped.endswith(
-        _JSON_END_TOKENS
-    )
-
-
-def _is_doi_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> bool:
-    return field_name in rule_set.doi_fields or field_name.endswith(_DOI_SUFFIXES)
-
-
-def _is_pmid_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> bool:
-    return field_name in rule_set.pmid_fields or field_name.endswith(_PMID_SUFFIXES)
-
-
-def _is_date_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> bool:
-    if field_name.endswith("_ts"):
-        return False
-    return (
-        field_name in rule_set.date_fields
-        or field_name.endswith("_date")
-        or field_name.startswith("date_")
-    )
-
-
-def _is_smiles_field(field_name: str) -> bool:
-    return field_name == "smiles" or field_name.endswith("_smiles")
 
 
 @dataclass(frozen=True, slots=True)
@@ -286,7 +252,7 @@ class RecordNormalizationProcessor:
         if profile_rule is not None:
             return self._normalize_profile_field_value(profile_rule, value)
         normalized_special = self._normalize_special_field(field_name, value)
-        if normalized_special is not _UNHANDLED:
+        if normalized_special is not UNHANDLED_FALLBACK_NORMALIZATION:
             return normalized_special
         if field_name == "issn" and isinstance(value, list):
             return list(value)
@@ -297,19 +263,11 @@ class RecordNormalizationProcessor:
         return self._normalize_string_field(field_name, value)
 
     def _normalize_special_field(self, field_name: str, value: object) -> object:
-        if value is None:
-            return None
-        if _is_smiles_field(field_name):
-            return self._normalize_smiles_field(field_name, value)
-        if _is_doi_field(field_name, rule_set=self.rule_set):
-            return normalize_doi(value) if isinstance(value, str) else value
-        if _is_pmid_field(field_name, rule_set=self.rule_set):
-            if isinstance(value, bool):
-                return None
-            return normalize_pmid(value) if isinstance(value, str | int) else value
-        if _is_date_field(field_name, rule_set=self.rule_set):
-            return normalize_partial_date(value) if isinstance(value, str) else value
-        return _UNHANDLED
+        return normalize_special_fallback_field(
+            field_name,
+            value,
+            rule_set=self.rule_set,
+        )
 
     def _normalize_string_field(self, field_name: str, value: str) -> str | None:
         normalized_text = self._normalize_named_text_field(field_name, value)
@@ -337,32 +295,18 @@ class RecordNormalizationProcessor:
         field_name: str,
         value: str,
     ) -> str | None:
-        if field_name in self.rule_set.title_fields:
-            normalized_title: str | None = normalize_title(value)
-            return normalized_title
-        if field_name in self.rule_set.abstract_fields:
-            normalized_abstract: str | None = normalize_abstract(value)
-            return normalized_abstract
-        if field_name in self.rule_set.oa_status_fields:
-            normalized_oa_status: str | None = normalize_oa_status(value)
-            return normalized_oa_status
-        return None
+        return normalize_named_text_field(
+            field_name,
+            value,
+            rule_set=self.rule_set,
+        )
 
     def _canonicalize_json_like_string(self, value: str) -> str:
-        if not _is_json_like_string(value):
-            return value
-        try:
-            canonical_json = canonicalize_json_string(value)
-        except ValueError:
-            return value
-        return canonical_json if canonical_json is not None else value
+        return canonicalize_json_like_string(value)
 
     def _normalize_smiles_field(self, field_name: str, value: object) -> str | None:
-        if not isinstance(value, str):
-            return None
-        normalized = SMILES.from_raw(
+        normalized = normalize_profile_smiles(
             value,
             is_canonical=(field_name == "canonical_smiles"),
-            mode="soft",
         )
-        return str(normalized) if normalized is not None else None
+        return normalized if isinstance(normalized, str) or normalized is None else None

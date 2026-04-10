@@ -7,23 +7,20 @@ from bioetl.domain.normalization.profiles.chembl_activity import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
+from bioetl.domain.normalization.profiles.registry import (
+    NORMALIZATION_PROFILE_REGISTRY,
+    build_normalization_profile_registry,
+    normalize_normalization_profile_coordinates,
+    resolve_normalization_profile,
+)
 
 __all__ = [
     "CHEMBL_ACTIVITY_PROFILE",
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
+    "NORMALIZATION_PROFILE_REGISTRY",
     "FieldRule",
     "NormalizationProfile",
+    "build_normalization_profile_registry",
+    "normalize_normalization_profile_coordinates",
     "resolve_normalization_profile",
 ]
-
-
-def resolve_normalization_profile(
-    provider: str,
-    entity_type: str | None,
-) -> NormalizationProfile | None:
-    """Resolve one shipped normalization profile by provider/entity."""
-    normalized_provider = provider.strip().lower()
-    normalized_entity = None if entity_type is None else entity_type.strip().lower()
-    if normalized_provider == "chembl" and normalized_entity == "activity":
-        return CHEMBL_ACTIVITY_PROFILE
-    return None
