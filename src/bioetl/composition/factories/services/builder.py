@@ -47,6 +47,7 @@ if TYPE_CHECKING:
         GoldValidatorPort,
         LoggerPort,
         MemoryMonitorPort,
+        MetricsPort,
         TracingPort,
     )
     from bioetl.domain.types import (
@@ -104,6 +105,7 @@ class ServicesBuilder:
         resume: bool,
         *,
         loading_strategy: LoadingStrategy | None = None,
+        metrics: MetricsPort | None = None,
         checkpoint_compatibility_service: object | None = None,
         current_metadata: CheckpointMetadata | None = None,
         compatibility_policy: Literal[
@@ -118,6 +120,7 @@ class ServicesBuilder:
             run_id=run_id,
             resume=resume,
             loading_strategy=loading_strategy,
+            metrics=metrics,
             checkpoint_compatibility_service=checkpoint_compatibility_service,
             current_metadata=current_metadata,
             compatibility_policy=compatibility_policy,

@@ -4,6 +4,7 @@ services:
   neo4j:
     image: neo4j:5.13-community
     container_name: bioetl-neo4j
+    command: ["neo4j", "console"]
     ports:
       - "7474:7474"
       - "7687:7687"

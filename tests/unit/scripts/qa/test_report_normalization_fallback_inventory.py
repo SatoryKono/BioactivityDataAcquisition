@@ -150,3 +150,11 @@ def test_main_writes_deterministic_artifacts(tmp_path) -> None:
     assert json_out.read_text(encoding="utf-8") == first_json
     assert markdown_out.read_text(encoding="utf-8") == first_md
     assert json.loads(first_json)["mode"] == "report-only"
+
+
+def test_main_returns_non_zero_when_fallback_business_budget_is_exceeded() -> None:
+    assert main(["--max-fallback-business-fields", "0"]) == 1
+
+
+def test_main_accepts_current_fallback_business_budget() -> None:
+    assert main(["--max-fallback-business-fields", "73"]) == 0

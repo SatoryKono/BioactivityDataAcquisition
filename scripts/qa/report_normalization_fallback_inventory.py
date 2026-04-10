@@ -148,6 +148,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional path for Markdown output",
     )
+    parser.add_argument(
+        "--max-fallback-business-fields",
+        type=int,
+        default=None,
+        help=(
+            "Optional ratchet threshold. Exit non-zero when "
+            "fallback_business_field_count exceeds this value."
+        ),
+    )
     return parser
 
 
@@ -165,6 +174,18 @@ def main(argv: list[str] | None = None) -> int:
         _write_text(args.markdown_out, markdown + "\n")
 
     print(markdown)
+    if args.max_fallback_business_fields is not None:
+        actual = int(payload["fallback_business_field_count"])
+        budget = args.max_fallback_business_fields
+        if actual > budget:
+            print(
+                (
+                    "fallback_business_field_count exceeds ratchet budget: "
+                    f"{actual} > {budget}"
+                ),
+                file=sys.stderr,
+            )
+            return 1
     return 0
 
 
