@@ -43,6 +43,9 @@ def _derive_dataset_ref(
     metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
 ) -> str | None:
     """Return canonical dataset ref when the sidecar represents a dataset artifact."""
+    artifact_id = str(getattr(metadata.output, "artifact_id", "") or "").strip()
+    if artifact_id.startswith(("bronze_batch:", "silver:", "gold:")):
+        return artifact_id
     layer = str(getattr(metadata, "layer", ""))
     if layer == "silver":
         output_ext = getattr(metadata, "output_ext", None)
@@ -53,7 +56,7 @@ def _derive_dataset_ref(
             provider=metadata.pipeline.provider,
             entity=metadata.pipeline.entity,
         )
-        return dataset_ref.node_id
+        return str(dataset_ref.node_id)
     if layer == "gold":
         dataset_ref = DatasetRef(
             layer="gold",
@@ -61,7 +64,7 @@ def _derive_dataset_ref(
             provider=metadata.pipeline.provider,
             entity=metadata.pipeline.entity,
         )
-        return dataset_ref.node_id
+        return str(dataset_ref.node_id)
     return None
 
 

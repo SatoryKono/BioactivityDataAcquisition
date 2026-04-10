@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
 from platform import node as hostname
 from platform import python_version
 from typing import TYPE_CHECKING
 
 from bioetl import __version__ as BIOETL_VERSION
+from bioetl.domain.lineage import DatasetRef
 from bioetl.domain.services.composite_metadata_helpers import (
     summarize_composite_cv_dq,
 )
@@ -54,6 +56,85 @@ def _parse_table_name(table_name: str) -> tuple[str, str]:
         parts = table_name.split("_", 1)
         return parts[0], parts[1] if len(parts) > 1 else parts[0]
     return "unknown", table_name if table_name else "unknown"
+
+
+def _normalize_metadata_timestamp(value: datetime) -> datetime:
+    """Return a stable UTC-aware metadata timestamp."""
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+def _parse_record_timestamp(value: object) -> datetime | None:
+    """Parse one record-level timestamp candidate."""
+    if isinstance(value, datetime):
+        return _normalize_metadata_timestamp(value)
+    if isinstance(value, str):
+        try:
+            return _normalize_metadata_timestamp(datetime.fromisoformat(value))
+        except ValueError:
+            return None
+    return None
+
+
+def _resolve_records_metadata_timestamp(
+    records: Sequence[Mapping[str, object]],
+) -> datetime | None:
+    """Resolve a deterministic timestamp anchor from persisted record metadata."""
+    candidates: list[datetime] = []
+    for record in records:
+        for field_name in ("_lineage_created_at", "_ingestion_ts"):
+            parsed = _parse_record_timestamp(record.get(field_name))
+            if parsed is not None:
+                candidates.append(parsed)
+    if not candidates:
+        return None
+    return min(candidates)
+
+
+def _resolve_metadata_timestamp(
+    *,
+    explicit: datetime | None,
+    records: Sequence[Mapping[str, object]],
+    fallback: datetime | None = None,
+) -> datetime:
+    """Resolve one deterministic timestamp for metadata sidecars."""
+    if explicit is not None:
+        return _normalize_metadata_timestamp(explicit)
+    record_timestamp = _resolve_records_metadata_timestamp(records)
+    if record_timestamp is not None:
+        return record_timestamp
+    if fallback is not None:
+        return _normalize_metadata_timestamp(fallback)
+    raise ValueError(
+        "Deterministic metadata timestamp requires explicit time or record-level "
+        "_lineage_created_at/_ingestion_ts anchors"
+    )
+
+
+def _build_silver_artifact_id(table_name: str, version_after: int | None) -> str:
+    """Build canonical Silver artifact id."""
+    provider_name, entity_name = _parse_table_name(table_name)
+    dataset = DatasetRef(
+        layer="silver",
+        logical_name=f"{provider_name}.{entity_name}",
+        version=version_after,
+        provider=provider_name,
+        entity=entity_name,
+    )
+    return str(dataset.node_id)
+
+
+def _build_gold_artifact_id(table_name: str) -> str:
+    """Build canonical Gold artifact id."""
+    provider_name, entity_name = _parse_table_name(table_name)
+    dataset = DatasetRef(
+        layer="gold",
+        logical_name=table_name,
+        provider=provider_name,
+        entity=entity_name,
+    )
+    return str(dataset.node_id)
 
 
 class _MetadataBuilderBase:
@@ -151,4 +232,11 @@ class _MetadataBuilderBase:
         )
 
 
-__all__ = ["_MetadataBuilderBase", "_parse_table_name"]
+__all__ = [
+    "_MetadataBuilderBase",
+    "_build_gold_artifact_id",
+    "_build_silver_artifact_id",
+    "_parse_table_name",
+    "_resolve_metadata_timestamp",
+    "_resolve_records_metadata_timestamp",
+]
