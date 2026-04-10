@@ -81,6 +81,12 @@ Last verified: '2026-04-09'
    ```
    The report includes snapshot stats, live managed/unmanaged summaries,
    orphan counts, and label/relation diffs against the current managed wave.
+   On Windows-host HTTP sync, prefer the lighter health-check mode:
+   ```bash
+   python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json
+   ```
+   This focuses on critical analysis labels/relations and is less likely to hit
+   transport instability on large live-count scans.
 
 10. When you need a full rebuild of the current managed repo graph wave, use:
    ```bash
@@ -98,6 +104,9 @@ Last verified: '2026-04-09'
     This mode keeps unrelated labels such as `MemoryEntity` intact, but it
     deletes unmanaged legacy nodes for the repo-derived label families now owned
     by deterministic sync.
+    Current workaround: `development_cycle_surface` remains snapshot/export-only
+    in Windows-host live sync, because writing that label reproducibly
+    destabilizes the local Neo4j container backend.
 
 12. To gate ontology drift in CI or locally without a live Neo4j backend, run:
     ```bash
