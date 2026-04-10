@@ -110,7 +110,8 @@ entity_id = f"crossref:{normalized_doi}"
 
 Вычисляется по бизнес-полям публикации для дедупликации:
 
-- Исключаются lineage поля (`_run_id`, `_ingestion_ts`, etc.)
+- Исключаются occurrence-scoped provenance anchors (`_run_id`, `_run_type`,
+  `_source_batch_id`, `_ingestion_ts` и др.)
 - None-значения исключаются из хэша
 
 ----------------------------------------------------------------------
@@ -283,12 +284,13 @@ gold_filters:
   "citations_received": 1500,
   "publication_type": "PUBLICATION",
   "source": "crossref",
-  "_run_id": "...",
-  "_run_type": "incremental",
-  "_ingestion_ts": "2025-01-05T12:00:00Z",
   "content_hash": "sha256:..."
 }
 ```
+
+Occurrence-scoped provenance anchors публикуются через sidecar metadata,
+lineage fragments, run manifest и run ledger, а не через persisted Silver/Gold
+rows.
 
 ----------------------------------------------------------------------
 

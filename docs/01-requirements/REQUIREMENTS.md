@@ -193,8 +193,8 @@ ______________________________________________________________________
 #### REQ-LINEAGE-001
 
 - **Уровень**: MUST
-- **Описание**: Silver записи содержат `_source_batch_id` (FK)
-- **Проверка**: Проверить наличие поля `_source_batch_id` в Silver схеме
+- **Описание**: Publication metadata / lineage artifacts содержат canonical Bronze lineage anchor (`_source_batch_id` или formal Bronze artifact ref)
+- **Проверка**: Проверить наличие lineage anchor в sidecar metadata / lineage publication contract
 
 #### REQ-LINEAGE-002
 
@@ -213,8 +213,8 @@ ______________________________________________________________________
 #### REQ-BACKFILL-001
 
 - **Уровень**: MUST
-- **Описание**: Все записи содержат `_run_id` (UUID) и `_run_type` (`incremental` | `backfill` | `rebuild`)
-- **Проверка**: Проверить наличие обязательных мета-полей в схеме
+- **Описание**: Каждый run публикует `run_id` (UUID) и `run_type` (`incremental` | `backfill` | `rebuild`) в control-plane / lineage artifacts
+- **Проверка**: Проверить наличие runtime provenance anchors в run manifest, run ledger, sidecar metadata или audit contract
 
 #### REQ-BACKFILL-002
 
@@ -399,7 +399,7 @@ ______________________________________________________________________
 #### REQ-ID-007
 
 - **Уровень**: MUST
-- **Описание**: Мета-поля (`_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`) исключаются из хэша
+- **Описание**: Occurrence-scoped meta-поля (`_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_dq_*`) исключаются из семантического хэша
 - **Проверка**: Unit-тест — мета-поля не влияют на хэш
 
 #### REQ-ID-008
