@@ -130,3 +130,111 @@ def test_interface_exposes_metrics_server_error():
         composition_observability.MetricsServerError
         is domain_exceptions.MetricsServerError
     )
+
+
+def test_get_metrics_service_delegates_to_composition_services_api() -> None:
+    expected = mock.Mock()
+    with mock.patch(
+        "bioetl.composition.services_api.get_metrics_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = observability.get_metrics_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
+def test_get_health_service_delegates_to_composition_services_api() -> None:
+    expected = mock.Mock()
+    with mock.patch(
+        "bioetl.composition.services_api.get_health_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = observability.get_health_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
+def test_get_quarantine_service_delegates_to_composition_services_api() -> None:
+    expected = mock.Mock()
+    with mock.patch(
+        "bioetl.composition.services_api.get_quarantine_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = observability.get_quarantine_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
+def test_get_run_manifest_service_delegates_to_composition_services_api() -> None:
+    expected = mock.Mock()
+    with mock.patch(
+        "bioetl.composition.services_api.get_run_manifest_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = observability.get_run_manifest_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
+def test_get_lineage_service_delegates_to_composition_services_api() -> None:
+    expected = mock.Mock()
+    with mock.patch(
+        "bioetl.composition.services_api.get_lineage_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = observability.get_lineage_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
+def test_get_observability_diagnostics_bundle_builds_unified_bundle() -> None:
+    health_service = mock.Mock()
+    metrics_service = mock.Mock()
+    quarantine_service = mock.Mock()
+    run_manifest_service = mock.Mock()
+    lineage_service = mock.Mock()
+
+    with (
+        mock.patch.object(
+            observability,
+            "get_health_service",
+            return_value=health_service,
+        ) as mock_health,
+        mock.patch.object(
+            observability,
+            "get_metrics_service",
+            return_value=metrics_service,
+        ) as mock_metrics,
+        mock.patch.object(
+            observability,
+            "get_quarantine_service",
+            return_value=quarantine_service,
+        ) as mock_quarantine,
+        mock.patch.object(
+            observability,
+            "get_run_manifest_service",
+            return_value=run_manifest_service,
+        ) as mock_manifest,
+        mock.patch.object(
+            observability,
+            "get_lineage_service",
+            return_value=lineage_service,
+        ) as mock_lineage,
+    ):
+        bundle = observability.get_observability_diagnostics_bundle()
+
+    assert bundle.health_service is health_service
+    assert bundle.metrics_service is metrics_service
+    assert bundle.quarantine_service is quarantine_service
+    assert bundle.run_manifest_service is run_manifest_service
+    assert bundle.lineage_service is lineage_service
+    mock_health.assert_called_once_with()
+    mock_metrics.assert_called_once_with()
+    mock_quarantine.assert_called_once_with()
+    mock_manifest.assert_called_once_with()
+    mock_lineage.assert_called_once_with()

@@ -192,6 +192,22 @@ alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/ob
 - При отключённом tracing или отсутствии активного span лог-схема деградирует
   безопасно: поля `trace_id`/`span_id` просто не добавляются
 
+## 4.1 Operator-facing diagnostics surface
+
+Operator diagnostics не ограничиваются только `health` и metrics server.
+Публикуемый interface seam `bioetl.interfaces.observability` теперь
+экспортирует единый diagnostics bundle поверх composition entrypoints:
+
+- `get_health_service()`
+- `get_metrics_service()`
+- `get_quarantine_service()`
+- `get_run_manifest_service()`
+- `get_lineage_service()`
+- `get_observability_diagnostics_bundle()`
+
+Это keeps-one-place discovery contract для interface-layer consumers, при этом
+реальное создание зависимостей остаётся в composition layer.
+
 ## 5. Provider Rate-Limit Baseline (as configured)
 
 Значения ниже берутся из `configs/providers/*.yaml` и отражают **текущую конфигурацию репозитория**, не внешние SLA провайдеров.
