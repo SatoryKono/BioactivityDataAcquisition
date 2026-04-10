@@ -25,8 +25,10 @@ from __future__ import annotations
 
 from bioetl.composition.bootstrap.cli.adr import bootstrap_adr_service
 from bioetl.composition.bootstrap.cli.checkpoint import (
+    bootstrap_audit_inspection_service,
     bootstrap_checkpoint_manager,
     bootstrap_checkpoint_service,
+    bootstrap_observability_workflow_service,
     bootstrap_quarantine_manager,
     bootstrap_quarantine_service,
 )
@@ -60,6 +62,7 @@ from bioetl.composition.bootstrap.cli.storage import (
 __all__ = [
     "HealthServerDependencies",
     "bootstrap_adr_service",
+    "bootstrap_audit_inspection_service",
     "bootstrap_bronze_cleanup_service",
     "bootstrap_checkpoint_manager",
     "bootstrap_checkpoint_service",
@@ -73,6 +76,7 @@ __all__ = [
     "bootstrap_lineage_service",
     "bootstrap_lock_service",
     "bootstrap_metrics_service",
+    "bootstrap_observability_workflow_service",
     "bootstrap_quarantine_manager",
     "bootstrap_quarantine_service",
     "bootstrap_run_manifest_service",

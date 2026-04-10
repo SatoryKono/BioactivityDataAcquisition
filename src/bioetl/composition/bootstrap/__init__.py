@@ -27,6 +27,7 @@ from typing import Any
 __all__ = [
     "HealthServerDependencies",
     "bootstrap_adr_service",
+    "bootstrap_audit_inspection_service",
     "bootstrap_bronze_cleanup_service",
     "bootstrap_checkpoint_manager",
     "bootstrap_checkpoint_service",
@@ -44,6 +45,7 @@ __all__ = [
     "bootstrap_logger_port",
     "bootstrap_metrics_port",
     "bootstrap_metrics_service",
+    "bootstrap_observability_workflow_service",
     "bootstrap_pipeline_runner",
     "bootstrap_pipeline_runner_service",
     "bootstrap_quarantine_manager",
@@ -59,6 +61,7 @@ __all__ = [
 _PUBLIC_EXPORTS: dict[str, str] = {
     "HealthServerDependencies": "bioetl.composition.bootstrap.cli",
     "bootstrap_adr_service": "bioetl.composition.bootstrap.cli",
+    "bootstrap_audit_inspection_service": "bioetl.composition.bootstrap.cli",
     "bootstrap_bronze_cleanup_service": "bioetl.composition.bootstrap.cli",
     "bootstrap_checkpoint_manager": "bioetl.composition.bootstrap.cli",
     "bootstrap_checkpoint_service": "bioetl.composition.bootstrap.cli",
@@ -76,6 +79,7 @@ _PUBLIC_EXPORTS: dict[str, str] = {
     "bootstrap_logger_port": "bioetl.composition.bootstrap.runtime",
     "bootstrap_metrics_port": "bioetl.composition.bootstrap.runtime",
     "bootstrap_metrics_service": "bioetl.composition.bootstrap.cli",
+    "bootstrap_observability_workflow_service": "bioetl.composition.bootstrap.cli",
     "bootstrap_pipeline_runner": "bioetl.composition.bootstrap.runtime",
     "bootstrap_pipeline_runner_service": "bioetl.composition.bootstrap.runtime",
     "bootstrap_quarantine_manager": "bioetl.composition.bootstrap.cli",

@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.composition._services import (
     cleanup_bronze,
     get_adr_service,
+    get_audit_service,
     get_bronze_cleanup_service,
     get_checkpoint_service,
     get_config_service,
@@ -15,6 +16,7 @@ from bioetl.composition._services import (
     get_lineage_service,
     get_lock_service,
     get_metrics_service,
+    get_observability_workflow_service,
     get_pipeline_runner_service,
     get_quarantine_port,
     get_quarantine_service,
@@ -26,6 +28,7 @@ from bioetl.composition._services import (
 __all__ = [
     "cleanup_bronze",
     "get_adr_service",
+    "get_audit_service",
     "get_bronze_cleanup_service",
     "get_checkpoint_service",
     "get_config_service",
@@ -36,6 +39,7 @@ __all__ = [
     "get_lineage_service",
     "get_lock_service",
     "get_metrics_service",
+    "get_observability_workflow_service",
     "get_pipeline_runner_service",
     "get_quarantine_port",
     "get_quarantine_service",
