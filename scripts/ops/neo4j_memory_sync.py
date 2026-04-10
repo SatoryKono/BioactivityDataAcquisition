@@ -4304,10 +4304,13 @@ def sync_snapshot(
     prune_stale: bool = False,
     full_reset_managed_wave: bool = False,
     prune_legacy_unmanaged: bool = False,
+    only_labels: tuple[str, ...] = (),
+    only_analysis_layer: bool = False,
 ) -> None:
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
     sync_run = _sync_run_id()
+    snapshot = _filtered_snapshot(snapshot, only_labels=only_labels, only_analysis_layer=only_analysis_layer)
     managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
     node_groups: dict[str, list[dict[str, JsonValue]]] = {}
     for node in snapshot.nodes.values():
@@ -4315,6 +4318,10 @@ def sync_snapshot(
     relation_groups: dict[str, list[dict[str, JsonValue]]] = {}
     for relation in snapshot.relations.values():
         relation_groups.setdefault(relation.relation_type, []).append(_relation_statement(relation, sync_run))
+    core_node_groups, analysis_node_groups, core_relation_groups, analysis_relation_groups = _partition_groups(
+        node_groups,
+        relation_groups,
+    )
     if full_reset_managed_wave:
         delete_batch_size = max(1, min(batch_size, 50))
         for label in managed_labels:
@@ -4327,12 +4334,32 @@ def sync_snapshot(
                 deleted = int(rows[0]["deleted"]) if rows else 0
                 if deleted == 0:
                     break
-    _execute_grouped_statements(client, node_groups, batch_size, "node")
+    _execute_grouped_statements(client, core_node_groups, batch_size, "core node")
+    _execute_grouped_statements(client, analysis_node_groups, max(1, min(batch_size, 10)), "analysis node")
     if prune_stale and relation_groups:
         relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
         client.execute([_reset_managed_relations_statement(relation_types)])
-    _execute_grouped_statements(client, relation_groups, batch_size, "relation")
-    _retry_critical_analysis_groups(client, node_groups, relation_groups, batch_size)
+    _execute_grouped_statements(client, core_relation_groups, batch_size, "core relation")
+    _execute_grouped_statements(
+        client,
+        analysis_relation_groups,
+        max(1, min(batch_size, 10)),
+        "analysis relation",
+    )
+    _retry_critical_analysis_groups(client, analysis_node_groups, analysis_relation_groups, batch_size)
+    _verify_expected_group_counts(
+        client,
+        analysis_node_groups if only_analysis_layer or only_labels else {},
+        analysis_relation_groups if only_analysis_layer or only_labels else {},
+        strict_analysis=not (only_analysis_layer or only_labels),
+    )
+    if only_analysis_layer or only_labels:
+        _verify_expected_group_counts(
+            client,
+            node_groups,
+            relation_groups,
+            strict_analysis=False,
+        )
     if prune_stale:
         client.execute([_prune_stale_relations_statement(sync_run)])
         client.execute([_prune_stale_nodes_statement(sync_run)])
@@ -4441,6 +4468,70 @@ def _retry_critical_analysis_groups(
         raise RuntimeError(
             "Post-apply verification failed for critical analysis groups: "
             + "; ".join(missing_after_retry)
+        )
+
+
+def _partition_groups(
+    node_groups: dict[str, list[dict[str, JsonValue]]],
+    relation_groups: dict[str, list[dict[str, JsonValue]]],
+) -> tuple[
+    dict[str, list[dict[str, JsonValue]]],
+    dict[str, list[dict[str, JsonValue]]],
+    dict[str, list[dict[str, JsonValue]]],
+    dict[str, list[dict[str, JsonValue]]],
+]:
+    analysis_node_groups = {
+        label: statements for label, statements in node_groups.items() if label in ANALYSIS_NODE_LABELS
+    }
+    core_node_groups = {
+        label: statements for label, statements in node_groups.items() if label not in ANALYSIS_NODE_LABELS
+    }
+    analysis_relation_groups = {
+        relation_type: statements
+        for relation_type, statements in relation_groups.items()
+        if relation_type in ANALYSIS_RELATION_TYPES
+    }
+    core_relation_groups = {
+        relation_type: statements
+        for relation_type, statements in relation_groups.items()
+        if relation_type not in ANALYSIS_RELATION_TYPES
+    }
+    return core_node_groups, analysis_node_groups, core_relation_groups, analysis_relation_groups
+
+
+def _verify_expected_group_counts(
+    client: Neo4jHttpClient,
+    node_groups: dict[str, list[dict[str, JsonValue]]],
+    relation_groups: dict[str, list[dict[str, JsonValue]]],
+    *,
+    strict_analysis: bool,
+) -> None:
+    mismatches: list[str] = []
+    for label, statements in sorted(node_groups.items()):
+        expected = len(statements)
+        live_count = _live_managed_node_count(client, label)
+        if live_count != expected:
+            mismatches.append(f"label `{label}` expected {expected}, live managed {live_count}")
+    for relation_type, statements in sorted(relation_groups.items()):
+        expected = len(statements)
+        live_count = _live_managed_relation_count(client, relation_type)
+        if live_count != expected:
+            mismatches.append(f"relation `{relation_type}` expected {expected}, live managed {live_count}")
+
+    if strict_analysis:
+        critical_mismatches = [
+            mismatch
+            for mismatch in mismatches
+            if any(token in mismatch for token in (*CRITICAL_ANALYSIS_NODE_LABELS, *CRITICAL_ANALYSIS_RELATION_TYPES))
+        ]
+        if critical_mismatches:
+            raise RuntimeError(
+                "Post-apply verification failed for critical analysis groups: "
+                + "; ".join(critical_mismatches)
+            )
+    elif mismatches:
+        raise RuntimeError(
+            "Post-apply verification failed for targeted sync groups: " + "; ".join(mismatches)
         )
 
 
