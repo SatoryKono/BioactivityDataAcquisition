@@ -64,7 +64,7 @@ Gold-слой содержит **бизнес-готовые данные** с:
 | **Strict Validation** | Все поля валидируются перед записью (REQ-DATA-009) |
 | **Business Filters**  | Только качественные данные проходят в Gold         |
 | **Idempotency**       | Повторный запуск даёт идентичный результат         |
-| **Traceability**      | Каждая запись содержит `_run_id`, `content_hash`   |
+| **Traceability**      | Каждая запись содержит `entity_id`, `content_hash`; occurrence-scoped provenance публикуется в sidecar/control-plane |
 
 Текущее уточнение по traceability:
 
@@ -652,12 +652,10 @@ Composite-схемы объединяют данные из нескольких
 
 Поля, специфичные для composite-слоя (хранятся с алиасом `_*`):
 
-| Поле (alias)          | Тип | Nullable | Описание                                     |
-| --------------------- | --- | -------- | -------------------------------------------- |
-| `_composite_run_id`   | str | No       | ID запуска composite-пайплайна               |
-| `_source_providers`   | str | No       | Провайдеры-источники (JSON-список)           |
-| `_enrichment_status`  | str | No       | Статус обогащения (enriched/partial/missing) |
-| `_lineage_created_at` | str | No       | Timestamp создания lineage-записи (ISO 8601) |
+| Поле (alias)         | Тип | Nullable | Описание                                     |
+| -------------------- | --- | -------- | -------------------------------------------- |
+| `_source_providers`  | str | No       | Провайдеры-источники (JSON-список)           |
+| `_enrichment_status` | str | No       | Статус обогащения (enriched/partial/missing) |
 
 #### composite_publication (дополнительные поля)
 
@@ -671,23 +669,21 @@ Composite-схемы объединяют данные из нескольких
 
 #### Примечание по composite-схемам
 
-Composite-схемы используют `strict=False` — бизнес-поля (например, `molecule_id`, `canonical_smiles`, `standard_value` для activity) берутся из соответствующих провайдерных схем и присутствуют в DataFrame, но не декларируются явно в composite-схеме. Валидируются только системные и lineage-поля.
+Composite-схемы используют `strict=False` — бизнес-поля (например, `molecule_id`, `canonical_smiles`, `standard_value` для activity) берутся из соответствующих провайдерных схем и присутствуют в DataFrame, но не декларируются явно в composite-схеме. Валидируются только persisted semantic/system поля. Occurrence-scoped lineage anchors (`run_id`, `composite_run_id`, wall-clock timestamps) публикуются через sidecar/control-plane artifacts, а не через физические Gold rows.
 
 ______________________________________________________________________
 
 ## Системные поля
 
-Провайдерные Gold-таблицы содержат следующие системные метаданные:
+Провайдерные Gold-таблицы содержат следующие persisted системные метаданные:
 
-| Поле               | Alias           | Тип | Nullable | Описание                                                                                               |
-| ------------------ | --------------- | --- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `entity_id`        | —               | str | No       | Глобальный уникальный ID                                                                               |
-| `content_hash`     | —               | str | No\*     | SHA256 хэш содержимого (обязателен для провайдерных схем; composite-схемы могут не декларировать явно) |
-| `_run_id`          | run_id          | str | No       | ID запуска пайплайна                                                                                   |
-| `_run_type`        | run_type        | str | No       | Тип запуска (incremental/backfill)                                                                     |
-| `_source_batch_id` | source_batch_id | str | Yes      | ID исходного batch                                                                                     |
-| `_ingestion_ts`    | ingestion_ts    | str | No       | Timestamp загрузки (ISO 8601)                                                                          |
-| `_index`           | index           | int | No       | Порядковый номер в batch                                                                               |
+| Поле           | Alias | Тип | Nullable | Описание                                                                                                |
+| -------------- | ----- | --- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `entity_id`    | —     | str | No       | Глобальный уникальный ID                                                                                |
+| `content_hash` | —     | str | No\*     | SHA256 хэш содержимого (обязателен для провайдерных схем; composite-схемы могут не декларировать явно) |
+| `_index`       | index | int | No       | Порядковый номер в batch                                                                                |
+
+Occurrence-scoped provenance (`run_id`, `run_type`, `source_batch_id`, `ingestion_ts`, `composite_run_id`, runtime lineage timestamps) не входит в persisted Gold row contract. Эти anchors публикуются в audit, sidecar metadata, lineage fragments, run manifest и run ledger.
 
 ### Content Hash
 
@@ -703,7 +699,7 @@ sha256(provider + canonical_json(record))
 - Floats → `round(val, 10)`
 - Dates → ISO `YYYY-MM-DD`
 - Strings → `strip()`
-- **Исключаются**: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`
+- **Исключаются**: occurrence-scoped provenance (`_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_composite_run_id`, `_lineage_created_at`) и DQ flags (`_dq_*`)
 
 ______________________________________________________________________
 

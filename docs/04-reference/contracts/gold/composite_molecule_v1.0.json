@@ -20,36 +20,8 @@
       "nullable": false,
       "description": "Hard data-quality error flag."
     },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
     "_index": {
       "type": "integer",
-      "nullable": false,
-      "description": ""
-    },
-    "_composite_run_id": {
-      "type": "string",
       "nullable": false,
       "description": ""
     },
@@ -62,23 +34,13 @@
       "type": "string",
       "nullable": false,
       "description": ""
-    },
-    "_lineage_created_at": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
     }
   },
   "required": [
-    "_composite_run_id",
     "_dq_error",
     "_dq_warn",
     "_enrichment_status",
     "_index",
-    "_ingestion_ts",
-    "_lineage_created_at",
-    "_run_id",
-    "_run_type",
     "_source_providers",
     "entity_id"
   ]

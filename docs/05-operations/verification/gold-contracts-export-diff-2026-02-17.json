@@ -7,9 +7,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_assay": {
@@ -17,9 +22,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_assay_parameters": {
@@ -27,9 +37,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_cell_line": {
@@ -37,9 +52,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_compound_record": {
@@ -47,9 +67,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_molecule": {
@@ -57,9 +82,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_protein_class": {
@@ -67,9 +97,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_publication": {
@@ -77,9 +112,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_publication_similarity": {
@@ -87,9 +127,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_publication_term": {
@@ -97,9 +142,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_subcellular_fraction": {
@@ -107,9 +157,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_target_component": {
@@ -117,9 +172,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_target": {
@@ -127,9 +187,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "chembl_tissue": {
@@ -137,9 +202,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "composite_activity": {
@@ -147,9 +217,16 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_composite_run_id",
+          "_ingestion_ts",
+          "_lineage_created_at",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "composite_assay": {
@@ -157,9 +234,16 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_composite_run_id",
+          "_ingestion_ts",
+          "_lineage_created_at",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "composite_molecule": {
@@ -167,9 +251,16 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_composite_run_id",
+          "_ingestion_ts",
+          "_lineage_created_at",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "composite_publication": {
@@ -177,9 +268,16 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_composite_run_id",
+          "_ingestion_ts",
+          "_lineage_created_at",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "composite_target": {
@@ -187,9 +285,16 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_composite_run_id",
+          "_ingestion_ts",
+          "_lineage_created_at",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "crossref_publication": {
@@ -197,9 +302,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "openalex_publication": {
@@ -207,9 +317,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "pubchem_compound": {
@@ -217,9 +332,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "pubmed_publication": {
@@ -227,9 +347,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "semanticscholar_publication": {
@@ -237,9 +362,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "uniprot_idmapping": {
@@ -247,9 +377,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     },
     "uniprot_protein": {
@@ -257,9 +392,14 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [],
+        "removed_properties": [
+          "_ingestion_ts",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id"
+        ],
         "changed_properties": [],
-        "required_changed": false
+        "required_changed": true
       }
     }
   }
