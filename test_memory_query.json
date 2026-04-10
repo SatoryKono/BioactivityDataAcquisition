@@ -1,0 +1,7 @@
+{
+  "statements": [
+    {
+      "statement": "MATCH (e:Entity)-[r:REMEMBERS]->(m:Memory) WHERE e.name = 'test_entity' RETURN e.name as entity, type(r) as relation, m.content as memory"
+    }
+  ]
+}
