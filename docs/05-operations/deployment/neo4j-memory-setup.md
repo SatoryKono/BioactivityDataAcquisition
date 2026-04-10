@@ -120,6 +120,9 @@ Last verified: '2026-04-09'
     python -m scripts.ops query-neo4j-memory owner-doc "architecture diagrams hub"
     python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity
     python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed
+    python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608
+    python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer
+    python -m scripts.ops query-neo4j-memory promotion-candidates all
     ```
 
 ## Memory Configuration Profiles

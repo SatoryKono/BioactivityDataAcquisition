@@ -206,6 +206,8 @@ def normalize_observability_pipeline_label(value: object) -> str:
     candidate = raw_value.strip()
     if _looks_like_path(candidate):
         candidate = _extract_path_basename(candidate)
+    if _looks_like_unbounded_identifier(candidate):
+        return "unknown"
     candidate = _sanitize_pipeline_label(candidate)
     if not candidate or _looks_like_unbounded_identifier(candidate):
         return "unknown"
