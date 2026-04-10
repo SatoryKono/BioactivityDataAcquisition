@@ -16,6 +16,7 @@ from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort
 
 if TYPE_CHECKING:
+    from bioetl.application.services.checkpoint_service import CheckpointService
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.lineage_inspection_service import (
         LineageInspectionService,
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "MetricsServerError",
+    "get_checkpoint_service",
     "get_health_service",
     "get_lineage_service",
     "get_metrics_service",
@@ -58,6 +60,13 @@ def start_metrics_server(
         retry_delay=retry_delay,
         logger=logger,
     )
+
+
+def get_checkpoint_service() -> CheckpointService:
+    """Load the checkpoint diagnostics service through the canonical composition API."""
+    from bioetl.composition.observability_api import get_checkpoint_service as _impl
+
+    return _impl()
 
 
 def get_metrics_service() -> MetricsService:

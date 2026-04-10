@@ -80,10 +80,12 @@ def _make_service(
     expected_contract_version: str | None = None,
     expected_manifest_id: str | None = None,
     run_ledger_port: MagicMock | None = None,
+    metrics: MagicMock | None = None,
 ) -> tuple[CompositeCheckpointService, MagicMock, MagicMock]:
     """Convenience factory — returns (service, storage_mock, logger_mock)."""
     s = storage if storage is not None else _make_storage()
     lg = logger if logger is not None else _make_logger()
+    mt = metrics if metrics is not None else MagicMock()
     svc = CompositeCheckpointService(
         composite_name=composite_name,
         run_id=run_id,
@@ -95,6 +97,7 @@ def _make_service(
         expected_contract_version=expected_contract_version,
         expected_manifest_id=expected_manifest_id,
         run_ledger_port=run_ledger_port,
+        metrics=mt,
     )
     return svc, s, lg
 
@@ -313,7 +316,8 @@ class TestLoadResume:
     @pytest.mark.asyncio
     async def test_resume_loads_existing_checkpoint(self) -> None:
         """load(resume=True) reads and returns the existing checkpoint."""
-        svc, storage, _ = _make_service(resume=True)
+        metrics = MagicMock()
+        svc, storage, _ = _make_service(resume=True, metrics=metrics)
         content = _serialized_state(state=CompositePipelineState.SEED_COMPLETED)
         storage.exists.return_value = True
         storage.read.return_value = content
@@ -322,6 +326,11 @@ class TestLoadResume:
 
         assert state.state == CompositePipelineState.SEED_COMPLETED
         assert state.seed_completed is True
+        metrics.increment_counter.assert_called_once_with(
+            "checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "loaded"},
+        )
 
     @pytest.mark.asyncio
     async def test_resume_preserves_replay_watermark(self) -> None:
@@ -349,13 +358,19 @@ class TestLoadResume:
     @pytest.mark.asyncio
     async def test_resume_returns_fresh_when_no_checkpoint_exists(self) -> None:
         """load(resume=True) returns fresh state when no file is found."""
-        svc, storage, _ = _make_service(resume=True)
+        metrics = MagicMock()
+        svc, storage, _ = _make_service(resume=True, metrics=metrics)
         storage.exists.return_value = False
         storage.list_glob.return_value = []
 
         state = await svc.load()
 
         assert state.state == CompositePipelineState.NOT_STARTED
+        metrics.increment_counter.assert_called_once_with(
+            "checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "missing"},
+        )
 
     @pytest.mark.asyncio
     async def test_resume_fallback_to_glob_when_exact_file_missing(self) -> None:
@@ -388,7 +403,8 @@ class TestLoadResume:
     @pytest.mark.asyncio
     async def test_resume_handles_corrupted_json_gracefully(self) -> None:
         """Corrupted JSON during resume falls back to fresh state without raising."""
-        svc, storage, _ = _make_service(resume=True)
+        metrics = MagicMock()
+        svc, storage, _ = _make_service(resume=True, metrics=metrics)
         storage.exists.return_value = True
         storage.read.return_value = "NOT VALID JSON {"
 
@@ -396,6 +412,11 @@ class TestLoadResume:
 
         # Graceful degradation: returns fresh NOT_STARTED state
         assert state.state == CompositePipelineState.NOT_STARTED
+        metrics.increment_counter.assert_called_once_with(
+            "checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "failed"},
+        )
 
     @pytest.mark.asyncio
     async def test_resume_handles_none_content_gracefully(self) -> None:

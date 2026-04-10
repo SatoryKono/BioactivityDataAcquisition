@@ -11,7 +11,12 @@ from bioetl.domain.control_plane.run_ledger import project_run_ledger_replay
 from bioetl.domain.exceptions import CheckpointConflictError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, RunLedgerPort
+    from bioetl.domain.ports import (
+        CompositeCheckpointPort,
+        LoggerPort,
+        MetricsPort,
+        RunLedgerPort,
+    )
 
 
 class CompositeCheckpointLoadService:
@@ -30,6 +35,7 @@ class CompositeCheckpointLoadService:
         checkpoint_filename: str,
         glob_pattern: str,
         run_ledger_port: RunLedgerPort | None = None,
+        metrics: MetricsPort | None = None,
     ) -> None:
         self._composite_name = composite_name
         self._run_id = run_id
@@ -41,6 +47,20 @@ class CompositeCheckpointLoadService:
         self._checkpoint_filename = checkpoint_filename
         self._glob_pattern = glob_pattern
         self._run_ledger_port = run_ledger_port
+        self._metrics = metrics
+
+    def _emit_checkpoint_load_status(self, status: str) -> None:
+        """Emit bounded composite checkpoint load outcome."""
+        if self._metrics is None:
+            return
+        self._metrics.increment_counter(
+            "checkpoint_load_events_total",
+            1,
+            {
+                "pipeline": self._composite_name,
+                "status": status,
+            },
+        )
 
     def load(self) -> CompositeCheckpointState:
         """Load resumable state when available, otherwise return a fresh state."""
@@ -64,6 +84,7 @@ class CompositeCheckpointLoadService:
             glob_pattern=self._glob_pattern,
         )
         if filename is None or not self._storage.exists(filename):
+            self._emit_checkpoint_load_status("missing")
             return None
 
         state = support.load_checkpoint_state(
@@ -71,16 +92,21 @@ class CompositeCheckpointLoadService:
             logger=self._logger,
             composite_name=self._composite_name,
             filename=filename,
+            metrics=self._metrics,
         )
         if state is None:
             return None
 
-        support.validate_resume_compatibility(
-            state=state,
-            anchors=self._expected_context,
-            logger=self._logger,
-            composite_name=self._composite_name,
-        )
+        try:
+            support.validate_resume_compatibility(
+                state=state,
+                anchors=self._expected_context,
+                logger=self._logger,
+                composite_name=self._composite_name,
+            )
+        except CheckpointConflictError:
+            self._emit_checkpoint_load_status("incompatible")
+            raise
         merged_state = support.merge_expected_anchors(state, self._expected_context)
         replayed_state = self._replay_checkpoint_suffix(merged_state)
         support.warn_if_checkpoint_stale(

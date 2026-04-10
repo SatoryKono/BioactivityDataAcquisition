@@ -19,6 +19,7 @@ def test_get_metrics_service_delegates_to_services_api() -> None:
 
 def test_get_observability_diagnostics_bundle_builds_bundle() -> None:
     health_service = mock.Mock()
+    checkpoint_service = mock.Mock()
     metrics_service = mock.Mock()
     quarantine_service = mock.Mock()
     run_manifest_service = mock.Mock()
@@ -30,6 +31,11 @@ def test_get_observability_diagnostics_bundle_builds_bundle() -> None:
             "get_health_service",
             return_value=health_service,
         ) as mock_health,
+        mock.patch.object(
+            observability_api,
+            "get_checkpoint_service",
+            return_value=checkpoint_service,
+        ) as mock_checkpoint,
         mock.patch.object(
             observability_api,
             "get_metrics_service",
@@ -54,11 +60,13 @@ def test_get_observability_diagnostics_bundle_builds_bundle() -> None:
         bundle = observability_api.get_observability_diagnostics_bundle()
 
     assert bundle.health_service is health_service
+    assert bundle.checkpoint_service is checkpoint_service
     assert bundle.metrics_service is metrics_service
     assert bundle.quarantine_service is quarantine_service
     assert bundle.run_manifest_service is run_manifest_service
     assert bundle.lineage_service is lineage_service
     mock_health.assert_called_once_with()
+    mock_checkpoint.assert_called_once_with()
     mock_metrics.assert_called_once_with()
     mock_quarantine.assert_called_once_with()
     mock_manifest.assert_called_once_with()

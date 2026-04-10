@@ -12,7 +12,7 @@ from bioetl.domain.exceptions import BioETLError, CheckpointConflictError, Stora
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort
+    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
 
 CHECKPOINT_READ_ERRORS = (
     json.JSONDecodeError,
@@ -283,6 +283,7 @@ def load_checkpoint_state(
     logger: LoggerPort,
     composite_name: str,
     filename: str,
+    metrics: MetricsPort | None = None,
 ) -> CompositeCheckpointState | None:
     """Load and parse one checkpoint state from storage if it exists."""
     try:
@@ -313,6 +314,15 @@ def load_checkpoint_state(
                 else None
             ),
         )
+        if metrics is not None:
+            metrics.increment_counter(
+                "checkpoint_load_events_total",
+                1,
+                {
+                    "pipeline": composite_name,
+                    "status": "loaded",
+                },
+            )
         return state
     except CHECKPOINT_READ_ERRORS as error:
         logger.warning(
@@ -322,6 +332,15 @@ def load_checkpoint_state(
             error_type=type(error).__name__,
             reason_code="checkpoint_load_failed",
         )
+        if metrics is not None:
+            metrics.increment_counter(
+                "checkpoint_load_events_total",
+                1,
+                {
+                    "pipeline": composite_name,
+                    "status": "failed",
+                },
+            )
     except BioETLError as error:
         logger.warning(
             "Failed to load checkpoint",
@@ -330,6 +349,15 @@ def load_checkpoint_state(
             error_type=type(error).__name__,
             reason_code="unexpected_bioetl_error",
         )
+        if metrics is not None:
+            metrics.increment_counter(
+                "checkpoint_load_events_total",
+                1,
+                {
+                    "pipeline": composite_name,
+                    "status": "failed",
+                },
+            )
     return None
 
 

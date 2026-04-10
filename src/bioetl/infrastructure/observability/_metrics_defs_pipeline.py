@@ -5,6 +5,7 @@ from __future__ import annotations
 from prometheus_client import Counter, Histogram
 
 __all__ = [
+    "CHECKPOINT_LOAD_EVENTS_TOTAL",
     "CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL",
     "COMPOSITE_SOURCE_SELECTION_TOTAL",
     "CONTROL_PLANE_LEDGER_APPENDS_TOTAL",
@@ -158,6 +159,12 @@ CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL = Counter(
     "bioetl_checkpoint_compatibility_events_total",
     "Total checkpoint compatibility outcomes observed during resume validation",
     ["pipeline", "disposition"],
+)
+
+CHECKPOINT_LOAD_EVENTS_TOTAL = Counter(
+    "bioetl_checkpoint_load_events_total",
+    "Total checkpoint load decisions observed during runtime and composite resume paths",
+    ["pipeline", "status"],
 )
 
 LINEAGE_FRAGMENTS_EMITTED_TOTAL = Counter(

@@ -156,6 +156,18 @@ def test_get_health_service_delegates_to_composition_services_api() -> None:
     mock_impl.assert_called_once_with()
 
 
+def test_get_checkpoint_service_delegates_to_composition_services_api() -> None:
+    expected = mock.Mock()
+    with mock.patch(
+        "bioetl.composition.observability_api.get_checkpoint_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = observability.get_checkpoint_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
 def test_get_quarantine_service_delegates_to_composition_services_api() -> None:
     expected = mock.Mock()
     with mock.patch(
