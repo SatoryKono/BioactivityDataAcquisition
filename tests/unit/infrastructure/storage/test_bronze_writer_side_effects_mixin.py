@@ -9,7 +9,13 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
-from bioetl.domain.lineage import LineageGraphFragment
+from bioetl.domain.lineage import (
+    LineageEdge,
+    LineageEdgeType,
+    LineageGraphFragment,
+    LineageNodeRef,
+    LineageNodeType,
+)
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.ports.metadata.coordinator import BronzeMetadataInput
 from bioetl.domain.types import BatchID, RunID, RunType
@@ -140,7 +146,31 @@ class TestBronzeWriterSideEffectsMixin:
 
         host = _Host(tmp_path)
         metadata = MagicMock()
-        fragment = LineageGraphFragment(fragment_id="bronze:fragment-1")
+        metadata.runtime.run_id = "run-1"
+        metadata.output.artifact_id = "bronze_batch:batch-1"
+        produced_node = LineageNodeRef(
+            node_type=LineageNodeType.BRONZE_BATCH,
+            node_id="bronze_batch:batch-1",
+            label="batch-1",
+        )
+        run_node = LineageNodeRef(
+            node_type=LineageNodeType.RUN,
+            node_id="run:run-1",
+            label="run-1",
+        )
+        fragment = LineageGraphFragment(
+            fragment_id="bronze:fragment-1",
+            nodes=(produced_node, run_node),
+            edges=(
+                LineageEdge(
+                    edge_type=LineageEdgeType.PRODUCED_BY,
+                    source=produced_node,
+                    target=run_node,
+                    run_id="run-1",
+                ),
+            ),
+            run_id="run-1",
+        )
         coordinator = _Coordinator()
         host._metadata_coordinator = coordinator
         host._lineage_store = MagicMock()
