@@ -274,29 +274,9 @@ def _validate_records(
     table_name: str,
     schema: pa.Schema,
 ) -> None:
-    """Validate records have required metadata fields."""
+    """Validate core Silver write payload shape before persistence."""
     if not records:
         raise ValueError("No records to write")
-
-    required_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
-    if missing_fields := required_fields - set(records[0].keys()):
-        raise ValueError(f"Records missing required metadata fields: {missing_fields}")
-
-    invalid_metadata: list[str] = []
-    for index, record in enumerate(records):
-        for field in required_fields:
-            value = record.get(field)
-            if value is None:
-                invalid_metadata.append(f"record[{index}].{field}=None")
-                continue
-            if isinstance(value, str) and not value.strip():
-                invalid_metadata.append(f"record[{index}].{field}=blank")
-
-    if invalid_metadata:
-        raise ValueError(
-            "Records contain invalid required metadata values: "
-            + ", ".join(invalid_metadata)
-        )
 
     keys = set(records[0].keys())
     optional_missing = [key for key in schema.names if key not in keys]

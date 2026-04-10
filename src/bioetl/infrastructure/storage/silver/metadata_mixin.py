@@ -24,7 +24,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -86,6 +86,11 @@ class SilverWriterMetadataMixin:
         table_name: str,
         records: list[BronzeRecord],
         mode: SilverWriteMode,
+        *,
+        run_id: RunID | None,
+        run_type: RunType | None,
+        source_batch_id: BatchID | None,
+        ingestion_ts: datetime | None,
     ) -> None:
         """Log audit entry for Silver write operation."""
         if self._audit is None:
@@ -96,6 +101,10 @@ class SilverWriterMetadataMixin:
                 table_name=table_name,
                 records=records,
                 mode=mode,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                ingestion_ts=ingestion_ts,
             ),
         )
         if audit_entry is None:
@@ -141,6 +150,7 @@ class SilverWriterMetadataMixin:
         dq_metrics: BatchDQMetrics | None = None,
         dq_report_path: str | None = None,
         partition_by: list[str] | None = None,
+        source_batch_ids: list[str] | None = None,
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
         version_after: int | None = None,
@@ -164,6 +174,7 @@ class SilverWriterMetadataMixin:
                 dq_metrics=dq_metrics,
                 dq_report_path=dq_report_path,
                 partition_by=partition_by,
+                source_batch_ids=source_batch_ids,
                 started_at=started_at,
                 completed_at=completed_at,
                 version_after=version_after,
@@ -225,11 +236,21 @@ class SilverWriterMetadataMixin:
         table_name: str,
         records: list[BronzeRecord],
         mode: SilverWriteMode,
+        run_id: RunID | None,
+        run_type: RunType | None,
+        source_batch_id: BatchID | None,
+        ingestion_ts: datetime | None,
     ) -> None:
         """Guard for audit logging — only calls _log_silver_audit if enabled."""
         if self._audit and records:
             await self._log_silver_audit(
-                table_name=table_name, records=records, mode=mode
+                table_name=table_name,
+                records=records,
+                mode=mode,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                ingestion_ts=ingestion_ts,
             )
 
     async def _finalize_silver_write_result(
@@ -242,6 +263,7 @@ class SilverWriterMetadataMixin:
         validated_mode: SilverWriteMode,
         bronze_refs: list[BronzeWriteResult] | None,
         partition_cols: list[str] | None,
+        source_batch_id: BatchID | None,
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None:
@@ -263,6 +285,9 @@ class SilverWriterMetadataMixin:
             bronze_refs=bronze_refs,
             dq_metrics=context.dq_metrics,
             partition_by=partition_cols,
+            source_batch_ids=(
+                [str(source_batch_id)] if source_batch_id is not None else None
+            ),
             started_at=started_at,
             completed_at=context.completed_at,
             version_after=context.version_after,

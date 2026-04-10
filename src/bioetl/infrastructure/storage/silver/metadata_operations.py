@@ -63,6 +63,7 @@ class _SilverMetadataWriteRequest:
     dq_metrics: BatchDQMetrics | None = None
     dq_report_path: str | None = None
     partition_by: list[str] | None = None
+    source_batch_ids: list[str] | None = None
     started_at: datetime | None = None
     completed_at: datetime | None = None
     version_after: int | None = None
@@ -226,6 +227,7 @@ async def _prepare_silver_metadata_write(
         transform_steps=host._transform_steps,
         dq_report_path=request.dq_report_path,
         partition_by=request.partition_by,
+        source_batch_ids=request.source_batch_ids,
         started_at=request.started_at,
         completed_at=request.completed_at,
     )

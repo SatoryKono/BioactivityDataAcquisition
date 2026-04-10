@@ -128,6 +128,10 @@ class TestStorageAdapter:
             on_schema_mismatch="error",
             bronze_refs=None,
             key_nullability_rules=None,
+            run_id=None,
+            run_type=None,
+            source_batch_id=None,
+            ingestion_ts=None,
         )
 
     async def test_write_gold_delegates(self, storage_adapter, mock_gold_writer):

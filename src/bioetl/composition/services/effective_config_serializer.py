@@ -52,8 +52,13 @@ class EffectiveConfigSerializer:
     """Serializer for EffectiveConfigArtifact with deterministic output."""
 
     def serialize_artifact(self, artifact: EffectiveConfigArtifact) -> str:
-        """Serialize one artifact to stable JSON text."""
+        """Serialize one persisted artifact envelope with semantic + occurrence data."""
         artifact_dict = self._artifact_to_dict(artifact)
+        return json.dumps(artifact_dict, sort_keys=True, separators=(",", ":"))
+
+    def serialize_semantic_artifact(self, artifact: EffectiveConfigArtifact) -> str:
+        """Serialize only the semantic effective-config payload deterministically."""
+        artifact_dict = self._semantic_artifact_to_dict(artifact)
         return json.dumps(artifact_dict, sort_keys=True, separators=(",", ":"))
 
     def compute_artifact_hashes(
@@ -103,6 +108,17 @@ class EffectiveConfigSerializer:
         return {
             "artifact_id": artifact.artifact_id,
             "schema_version": artifact.schema_version,
+            "semantic_artifact": self._semantic_artifact_to_dict(artifact),
+            "occurrence_envelope": self._occurrence_envelope_to_dict(artifact),
+        }
+
+    def _semantic_artifact_to_dict(
+        self,
+        artifact: EffectiveConfigArtifact,
+    ) -> JsonDict:
+        return {
+            "artifact_id": artifact.artifact_id,
+            "schema_version": artifact.schema_version,
             "pipeline_name": artifact.pipeline_name,
             "pipeline_kind": artifact.pipeline_kind,
             "source_refs": [
@@ -121,7 +137,6 @@ class EffectiveConfigSerializer:
             "resolved_config_hash": artifact.resolved_config_hash,
             "effective_config_hash": artifact.effective_config_hash,
             "source_fingerprint": artifact.source_fingerprint,
-            "created_at": artifact.created_at.isoformat(),
             "contract_refs": artifact.contract_refs,
             "dq_policy_refs": [
                 self._dq_policy_ref_to_dict(ref) for ref in artifact.dq_policy_refs
@@ -132,6 +147,18 @@ class EffectiveConfigSerializer:
                 self._dq_policy_snapshot_to_dict(snapshot)
                 for snapshot in artifact.dq_policy_snapshots
             ],
+        }
+
+    def _occurrence_envelope_to_dict(
+        self,
+        artifact: EffectiveConfigArtifact,
+    ) -> JsonDict:
+        return {
+            "created_at": artifact.created_at.isoformat(),
+            "resolved_config_timestamp": artifact.resolved_config.timestamp.isoformat(),
+            "effective_execution_timestamp": (
+                artifact.effective_execution_config.timestamp.isoformat()
+            ),
         }
 
     def _source_ref_to_dict(self, source_ref: ConfigSourceRef) -> JsonDict:
@@ -160,7 +187,6 @@ class EffectiveConfigSerializer:
             "config_type": config.config_type,
             "config_data": self._normalize_config_data(config.config_data),
             "config_hash": config.config_hash,
-            "timestamp": config.timestamp.isoformat(),
         }
 
     def _runtime_overrides_to_dict(
@@ -184,7 +210,6 @@ class EffectiveConfigSerializer:
         return {
             "config_data": self._normalize_config_data(config.config_data),
             "effective_hash": config.effective_hash,
-            "timestamp": config.timestamp.isoformat(),
         }
 
     def _dq_policy_ref_to_dict(self, policy_ref: DQPolicyRef) -> JsonDict:

@@ -64,8 +64,10 @@ class TestEffectiveConfigSerializer:
         # Verify it's valid JSON
         parsed = json.loads(json_str)
         assert parsed["artifact_id"] == "test_artifact"
-        assert parsed["pipeline_name"] == "test_pipeline"
-        assert parsed["pipeline_kind"] == "standard"
+        semantic = parsed["semantic_artifact"]
+        assert semantic["pipeline_name"] == "test_pipeline"
+        assert semantic["pipeline_kind"] == "standard"
+        assert "occurrence_envelope" in parsed
 
     def test_serialize_artifact_with_sources(self) -> None:
         """Test serialization with source references."""
@@ -112,10 +114,15 @@ class TestEffectiveConfigSerializer:
         parsed = json.loads(json_str)
 
         # Verify source refs
-        assert len(parsed["source_refs"]) == 2
-        assert parsed["source_refs"][0]["source_path"] == "configs/base/pipeline.yaml"
+        semantic = parsed["semantic_artifact"]
+        assert len(semantic["source_refs"]) == 2
         assert (
-            parsed["source_refs"][1]["source_path"] == "configs/providers/chembl.yaml"
+            semantic["source_refs"][0]["source_path"]
+            == "configs/base/pipeline.yaml"
+        )
+        assert (
+            semantic["source_refs"][1]["source_path"]
+            == "configs/providers/chembl.yaml"
         )
 
     def test_serialize_artifact_with_dq_policies(self) -> None:
@@ -169,12 +176,13 @@ class TestEffectiveConfigSerializer:
         parsed = json.loads(json_str)
 
         # Verify DQ policy refs
-        assert len(parsed["dq_policy_refs"]) == 1
-        assert parsed["dq_policy_refs"][0]["contract_ref"] == "chembl_molecule"
+        semantic = parsed["semantic_artifact"]
+        assert len(semantic["dq_policy_refs"]) == 1
+        assert semantic["dq_policy_refs"][0]["contract_ref"] == "chembl_molecule"
 
         # Verify DQ policy snapshots
-        assert len(parsed["dq_policy_snapshots"]) == 1
-        snapshot = parsed["dq_policy_snapshots"][0]
+        assert len(semantic["dq_policy_snapshots"]) == 1
+        snapshot = semantic["dq_policy_snapshots"][0]
         assert snapshot["contract_ref"] == "chembl_molecule"
         assert snapshot["default_disposition"] == "warn"
         assert len(snapshot["disposition_overrides"]) == 2
@@ -518,7 +526,66 @@ class TestEffectiveConfigSerializer:
         # Should be valid JSON
         parsed = json.loads(json_results[0])
         assert parsed["artifact_id"] == "test_artifact"
-        assert parsed["dq_policy_snapshots"][0]["default_disposition"] == "warn"
+        assert (
+            parsed["semantic_artifact"]["dq_policy_snapshots"][0][
+                "default_disposition"
+            ]
+            == "warn"
+        )
+
+    def test_semantic_serialization_ignores_occurrence_timestamps(self) -> None:
+        """Semantic serialization should stay stable across occurrence timestamps."""
+        artifact1 = EffectiveConfigArtifact(
+            artifact_id="test_artifact",
+            pipeline_name="test_pipeline",
+            pipeline_kind="standard",
+            source_refs=[],
+            resolution_policy=ConfigResolutionPolicy(),
+            resolved_config=ResolvedConfigSnapshot(
+                config_type="standard",
+                config_data={"pipeline": {"name": "test"}},
+                config_hash="resolved_hash",
+                timestamp=datetime(2024, 1, 1, 12, 0, 0),
+            ),
+            runtime_overrides=RuntimeOverrideSnapshot(),
+            effective_execution_config=EffectiveExecutionConfig(
+                config_data={"pipeline": {"name": "test"}},
+                effective_hash="effective_hash",
+                timestamp=datetime(2024, 1, 1, 12, 0, 0),
+            ),
+            resolved_config_hash="resolved_hash",
+            effective_config_hash="effective_hash",
+            source_fingerprint="source_fingerprint",
+            created_at=datetime(2024, 1, 1, 12, 0, 0),
+        )
+        artifact2 = EffectiveConfigArtifact(
+            artifact_id="test_artifact",
+            pipeline_name="test_pipeline",
+            pipeline_kind="standard",
+            source_refs=[],
+            resolution_policy=ConfigResolutionPolicy(),
+            resolved_config=ResolvedConfigSnapshot(
+                config_type="standard",
+                config_data={"pipeline": {"name": "test"}},
+                config_hash="resolved_hash",
+                timestamp=datetime(2025, 1, 1, 12, 0, 0),
+            ),
+            runtime_overrides=RuntimeOverrideSnapshot(),
+            effective_execution_config=EffectiveExecutionConfig(
+                config_data={"pipeline": {"name": "test"}},
+                effective_hash="effective_hash",
+                timestamp=datetime(2025, 1, 1, 12, 0, 0),
+            ),
+            resolved_config_hash="resolved_hash",
+            effective_config_hash="effective_hash",
+            source_fingerprint="source_fingerprint",
+            created_at=datetime(2025, 1, 1, 12, 0, 0),
+        )
+
+        assert (
+            self.serializer.serialize_semantic_artifact(artifact1)
+            == self.serializer.serialize_semantic_artifact(artifact2)
+        )
 
 
 class TestHashDeterminism:

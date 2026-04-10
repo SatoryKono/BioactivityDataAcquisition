@@ -80,8 +80,8 @@ class BatchWriterIOMixin:
 
         Args:
             records: Transformed records ready for Silver layer storage.
-            batch_id: Batch identifier injected as ``_source_batch_id`` on each record.
-            ingestion_ts: Ingestion timestamp (unused at write time, kept for API symmetry).
+            batch_id: Batch identifier forwarded as explicit write provenance.
+            ingestion_ts: Ingestion timestamp forwarded to storage/audit metadata.
             bronze_refs: Optional Bronze write results used for lineage linking.
 
         Returns:
@@ -91,22 +91,6 @@ class BatchWriterIOMixin:
         span = self._start_span("write_silver", "silver", len(records), batch_id)
 
         try:
-            batch_id_str = str(batch_id)
-            run_id = str(self._context.run_id)
-            run_type = str(
-                getattr(self._context.run_type, "value", self._context.run_type)
-            )
-            ingestion_ts_value = ingestion_ts.isoformat()
-            for record in records:
-                if not record.get("_source_batch_id"):
-                    record["_source_batch_id"] = batch_id_str
-                if not record.get("_run_id"):
-                    record["_run_id"] = run_id
-                if not record.get("_run_type"):
-                    record["_run_type"] = run_type
-                if not record.get("_ingestion_ts"):
-                    record["_ingestion_ts"] = ingestion_ts_value
-
             available_cols = (
                 list(self._silver_schema.names)
                 if self._silver_schema is not None
@@ -133,6 +117,10 @@ class BatchWriterIOMixin:
                     if self._config.dq_config is not None
                     else None
                 ),
+                run_id=self._context.run_id,
+                run_type=self._context.run_type,
+                source_batch_id=batch_id,
+                ingestion_ts=ingestion_ts,
             )
             self._end_span(span)
             persisted_silver_result: SilverWriteResult | None = silver_result
