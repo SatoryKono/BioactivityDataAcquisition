@@ -43,8 +43,8 @@ class TestSilverWriterAudit:
         )
 
     @pytest.mark.asyncio
-    async def test_log_silver_audit_skips_missing_run_id(self, noop_logger):
-        """Test _log_silver_audit skips when run_id is missing."""
+    async def test_log_silver_audit_missing_run_id_raises(self, noop_logger):
+        """Test _log_silver_audit fails closed when run_id is missing."""
         from datetime import UTC, datetime
         from uuid import uuid4
 
@@ -57,22 +57,23 @@ class TestSilverWriterAudit:
             base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
         )
 
-        await writer._log_silver_audit(
-            table_name="test.table",
-            records=[{"entity_id": "CHEMBL1"}],
-            mode=SilverWriteMode.MERGE,
-            run_id=None,
-            run_type=RunType.INCREMENTAL,
-            source_batch_id=BatchID(uuid4()),
-            ingestion_ts=datetime(2025, 1, 1, tzinfo=UTC),
-        )
+        with pytest.raises(ValueError, match="run_id is required"):
+            await writer._log_silver_audit(
+                table_name="test.table",
+                records=[{"entity_id": "CHEMBL1"}],
+                mode=SilverWriteMode.MERGE,
+                run_id=None,
+                run_type=RunType.INCREMENTAL,
+                source_batch_id=BatchID(uuid4()),
+                ingestion_ts=datetime(2025, 1, 1, tzinfo=UTC),
+            )
 
         mock_audit.log_write.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_log_silver_audit_with_valid_data(self, noop_logger):
         """Test _log_silver_audit logs correctly with valid data."""
-        from datetime import datetime
+        from datetime import UTC, datetime
         from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
@@ -94,7 +95,7 @@ class TestSilverWriterAudit:
             run_id=RunID(valid_uuid),
             run_type=RunType.INCREMENTAL,
             source_batch_id=BatchID(uuid4()),
-            ingestion_ts=datetime.fromisoformat("2025-01-01T12:00:00"),
+            ingestion_ts=datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC),
         )
 
         mock_audit.log_write.assert_called_once()
@@ -132,8 +133,8 @@ class TestSilverWriterAudit:
         mock_audit.log_write.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_log_silver_audit_fallback_timestamp(self, noop_logger):
-        """Test _log_silver_audit uses fallback when ingestion_ts is missing."""
+    async def test_log_silver_audit_missing_ingestion_ts_raises(self, noop_logger):
+        """Test _log_silver_audit fails closed when ingestion_ts is missing."""
         from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
@@ -148,17 +149,18 @@ class TestSilverWriterAudit:
         )
 
         valid_uuid = uuid4()
-        await writer._log_silver_audit(
-            table_name="test.table",
-            records=[{"entity_id": "CHEMBL1"}],
-            mode=SilverWriteMode.DELETE,
-            run_id=RunID(valid_uuid),
-            run_type=RunType.REBUILD,
-            source_batch_id=BatchID(uuid4()),
-            ingestion_ts=None,
-        )
+        with pytest.raises(ValueError, match="ingestion_ts is required"):
+            await writer._log_silver_audit(
+                table_name="test.table",
+                records=[{"entity_id": "CHEMBL1"}],
+                mode=SilverWriteMode.DELETE,
+                run_id=RunID(valid_uuid),
+                run_type=RunType.REBUILD,
+                source_batch_id=BatchID(uuid4()),
+                ingestion_ts=None,
+            )
 
-        mock_audit.log_write.assert_called_once()
+        mock_audit.log_write.assert_not_called()
 
 
 @pytest.mark.unit

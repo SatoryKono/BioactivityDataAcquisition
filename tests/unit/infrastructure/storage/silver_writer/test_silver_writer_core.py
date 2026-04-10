@@ -43,10 +43,7 @@ class TestSilverWriterInit:
     def test_runtime_helper_builds_defaults(self) -> None:
         """Runtime helper should resolve the standard SilverWriter defaults."""
         from bioetl.domain.medallion import WriteModePolicy
-        from bioetl.domain.ports.noop import (
-            NoOpMetadataWriter,
-            NoOpTracing,
-        )
+        from bioetl.domain.ports.noop import NoOpMetadataWriter
         from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
         from bioetl.infrastructure.storage.silver.runtime_helpers import (
             resolve_silver_writer_runtime,
@@ -74,7 +71,7 @@ class TestSilverWriterInit:
             merge_resilience_policy=None,
         )
 
-        assert isinstance(tracing, NoOpTracing)
+        assert tracing is None
         assert isinstance(write_policy, WriteModePolicy)
         assert isinstance(silver_validator, NoOpValidator)
         assert isinstance(metadata_writer, NoOpMetadataWriter)

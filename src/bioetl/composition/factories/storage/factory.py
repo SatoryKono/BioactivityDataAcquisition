@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -68,7 +69,8 @@ class StorageFactory:
             config: Pipeline YAML configuration with sink layer definitions.
             logger: LoggerPort for structured logging and export status events.
             metrics: MetricsPort for storage metrics collection.
-            tracing: Optional TracingPort; defaults to NoOpTracing if None.
+            tracing: Optional TracingPort. When omitted, composition resolves an
+                explicit NoOpTracing for the layer writers.
             metadata_coordinator: Optional coordinator for metadata side-effects;
                 defaults to None.
             silver_validator: Optional PyArrow schema validator for Silver records;
@@ -88,6 +90,7 @@ class StorageFactory:
             silver_path=str(ctx.silver_path),
             gold_path=str(ctx.gold_path),
         )
+        resolved_tracing = tracing if tracing is not None else NoOpTracing()
         adapter = create_storage_adapter(
             ctx=ctx,
             bronze_writer_cls=BronzeWriter,
@@ -97,7 +100,7 @@ class StorageFactory:
             config=config,
             logger=logger,
             metrics=metrics,
-            tracing=tracing,
+            tracing=resolved_tracing,
             metadata_coordinator=metadata_coordinator,
             silver_validator=silver_validator,
         )

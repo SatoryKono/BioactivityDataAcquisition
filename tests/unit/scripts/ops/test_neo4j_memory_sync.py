@@ -22,6 +22,7 @@ from scripts.ops.neo4j_memory_sync import (
     DEFAULT_LEGACY_PRUNE_LABELS,
     DEFAULT_MANAGED_BY,
     _delete_managed_wave_nodes_statement,
+    GraphSnapshot,
     NodeKey,
     build_snapshot,
     derive_http_uri,
@@ -565,7 +566,18 @@ def test_build_diff_entries_tracks_missing_and_extra_keys() -> None:
 
 
 def test_development_cycle_surface_filter_is_now_a_clean_noop() -> None:
-    _, snapshot = _snapshot()
+    snapshot = GraphSnapshot()
+    current_code = snapshot.add_node(
+        "module_surface",
+        "src/bioetl/application/composite/example.py",
+        current_cycle_status="current_cycle",
+    )
+    candidate = snapshot.add_node(
+        "retirement_candidate",
+        "src/bioetl/application/composite/example.py",
+        blocked_by_current_cycle=True,
+    )
+    snapshot.add_relation(current_code, "CANDIDATE_FOR_REMOVAL", candidate)
 
     filtered = _filtered_snapshot(snapshot, only_labels=("development_cycle_surface",))
     stats = filtered.stats()
@@ -686,22 +698,14 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
 
 
 def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
-    class StubSnapshot:
-        def stats(self) -> dict[str, object]:
-            return {
-                "node_count": 6,
-                "relation_count": 4,
-                "labels": {
-                    "retirement_candidate": 4,
-                    "complexity_candidate": 2,
-                },
-                "relation_types": {
-                    "CANDIDATE_FOR_REMOVAL": 3,
-                    "CANDIDATE_FOR_SIMPLIFICATION": 1,
-                },
-            }
-
-    snapshot = StubSnapshot()
+    snapshot = GraphSnapshot()
+    retirement_candidate = snapshot.add_node("retirement_candidate", "retire-me.py")
+    complexity_candidate = snapshot.add_node("complexity_candidate", "simplify-me.py")
+    snapshot.add_relation(
+        retirement_candidate,
+        "CANDIDATE_FOR_REMOVAL",
+        complexity_candidate,
+    )
     query_calls: list[str] = []
 
     class StubClient:
@@ -744,7 +748,7 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
     monkeypatch.setattr("scripts.ops.neo4j_memory_sync.Neo4jHttpClient", StubClient)
     root = Path(__file__).resolve().parents[4]
 
-    report = build_audit_report(snapshot, root, "http://localhost:7474")  # type: ignore[arg-type]
+    report = build_audit_report(snapshot, root, "http://localhost:7474")
 
     assert query_calls == [
         "full audit label summary",
