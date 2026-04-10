@@ -223,7 +223,6 @@ service getters:
 - `get_quarantine_service()`
 - `get_run_manifest_service()`
 - `get_lineage_service()`
-- `get_observability_workflow_service()`
 - `get_observability_diagnostics_bundle()`
 
 Это keeps-one-place discovery contract для public callers, при этом реальное
@@ -237,6 +236,12 @@ service getters:
 
 Эти helpers агрегируют audit entries, checkpoint inspection и best-effort
 run-manifest context, не перенося orchestration в CLI или interface layer.
+
+CLI surface должен оставаться thin adapter над этим seam. Канонические
+operator-facing команды:
+
+- `bioetl checkpoint audit-run --run-id ... [--limit ...] [--format text|json|yaml]`
+- `bioetl checkpoint inspect --pipeline ... [--run-id ...] [--audit-limit ...] [--format text|json|yaml]`
 ## 5. Provider Rate-Limit Baseline (as configured)
 
 Значения ниже берутся из `configs/providers/*.yaml` и отражают **текущую конфигурацию репозитория**, не внешние SLA провайдеров.

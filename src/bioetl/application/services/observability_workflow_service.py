@@ -1,4 +1,5 @@
 """Application workflows for operator-facing observability diagnostics."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -25,12 +26,14 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class AuditRunWorkflowResult:
+    """Combined audit and manifest context for a run."""
 
     run_id: str
     audit: AuditInspectionResult
     run_manifest: RunManifestInspectionResult | None = None
 
     def to_dict(self) -> dict[str, object]:
+        """Return a JSON-safe representation."""
         return {
             "run_id": self.run_id,
             "audit": self.audit.to_dict(),
@@ -42,6 +45,7 @@ class AuditRunWorkflowResult:
 
 @dataclass(frozen=True, slots=True)
 class CheckpointAuditWorkflowResult:
+    """Combined checkpoint, audit, and manifest context for a pipeline."""
 
     pipeline_name: str
     checkpoint: CheckpointInfo | None
@@ -49,6 +53,7 @@ class CheckpointAuditWorkflowResult:
     run_manifest: RunManifestInspectionResult | None = None
 
     def to_dict(self) -> dict[str, object]:
+        """Return a JSON-safe representation."""
         return {
             "pipeline_name": self.pipeline_name,
             "checkpoint": (
@@ -69,6 +74,7 @@ class CheckpointAuditWorkflowResult:
 
 @dataclass(slots=True)
 class ObservabilityWorkflowService:
+    """Coordinator for checkpoint, audit, and run-manifest diagnostics."""
 
     audit_service: AuditInspectionService
     checkpoint_service: CheckpointService
@@ -80,6 +86,7 @@ class ObservabilityWorkflowService:
         *,
         limit: int = 100,
     ) -> AuditRunWorkflowResult:
+        """Inspect audit history for a run and attach manifest context when present."""
         audit = await self.audit_service.inspect_run(run_id, limit=limit)
         run_manifest = self._resolve_run_manifest(run_id)
         return AuditRunWorkflowResult(
@@ -95,8 +102,11 @@ class ObservabilityWorkflowService:
         run_id: str | None = None,
         audit_limit: int = 100,
     ) -> CheckpointAuditWorkflowResult:
+        """Inspect checkpoint state and derive audit context from the effective run id."""
         checkpoint = await self.checkpoint_service.get_checkpoint(pipeline_name)
-        resolved_run_id = run_id or (checkpoint.run_id if checkpoint is not None else None)
+        resolved_run_id = run_id or (
+            checkpoint.run_id if checkpoint is not None else None
+        )
 
         if resolved_run_id is None:
             audit = AuditInspectionResult(
@@ -113,7 +123,6 @@ class ObservabilityWorkflowService:
                 audit=audit,
                 run_manifest=None,
             )
-            )
 
         audit = await self.audit_service.inspect_run(resolved_run_id, limit=audit_limit)
         run_manifest = self._resolve_run_manifest(resolved_run_id)
@@ -126,9 +135,12 @@ class ObservabilityWorkflowService:
 
     def _resolve_run_manifest(
         self,
+        run_id: str,
     ) -> RunManifestInspectionResult | None:
+        """Resolve manifest context when the optional service is wired."""
         if self.run_manifest_service is None:
             return None
         try:
+            return self.run_manifest_service.show(run_id)
         except ValueError:
             return None
