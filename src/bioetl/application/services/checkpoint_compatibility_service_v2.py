@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from enum import Enum
 
 from bioetl.application.services.checkpoint_compatibility_runtime import (
-    check_execution_identity_compatibility,
     build_identity_details,
     check_config_compatibility,
+    check_execution_identity_compatibility,
     check_phase_compatibility,
     check_schema_compatibility,
     determine_verdict_value,

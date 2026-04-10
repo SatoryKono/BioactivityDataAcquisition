@@ -160,7 +160,7 @@ provenance.
 | Field                   | Type       | Required | Notes                                            |
 | ----------------------- | ---------- | -------: | ------------------------------------------------ |
 | `manifest_id`           | `str`      |      yes | Stable identifier of the manifest record         |
-| `execution_fingerprint` | `str`      |      yes | Digest of reproducibility-significant fields     |
+| `execution_fingerprint` | `str`      |      yes | Digest of the full normalized `RunManifest` identity contract; narrower checkpoint/runtime anchors are validated separately and do not replace this field |
 | `schema_version`        | `str`      |      yes | Control-plane schema version                     |
 | `created_at`            | `datetime` |      yes | Manifest creation timestamp                      |
 | `run_id`                | `uuid`     |      yes | Execution run identifier                         |
@@ -189,6 +189,12 @@ provenance.
 - `rule_bundle_version`
 - `dq_contract_compatibility_hash`
 - `effective_config_artifact_id`
+
+Checkpoint / resume compatibility may additionally rely on a narrower
+runtime-anchor contract derived from a subset of control-plane fields such as
+`manifest_id`, `effective_config_hash`, `contract_ref`, `contract_version`, and
+`effective_config_artifact_id`. That runtime-anchor contract is intentionally
+not the same thing as the full manifest `execution_fingerprint`.
 
 ## Run Ledger Contract
 
