@@ -624,6 +624,52 @@ class TestGoldWriterSCD2:
 
         mock_table_instance.merge.assert_called_once()
 
+    @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
+    async def test_write_gold_scd2_uses_content_hash_guard_when_available(
+        self,
+        mock_delta_table,
+        gold_writer,
+        fixed_ingestion_ts,
+    ):
+        """SCD2 merge should only close current rows when content changes."""
+        mock_table_instance = MagicMock()
+        mock_delta_table.return_value = mock_table_instance
+        mock_merge = MagicMock()
+        mock_table_instance.merge.return_value = mock_merge
+        mock_merge.when_matched_update.return_value = mock_merge
+        mock_merge.when_not_matched_insert_all.return_value = mock_merge
+
+        schema = DataFrameSchema(
+            {
+                "entity_id": Column(str, nullable=False),
+                "value": Column(float, nullable=False),
+                "content_hash": Column(str, nullable=False),
+            },
+            strict=True,
+        )
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "value": 5.5,
+                "content_hash": "hash-a",
+            }
+        ]
+
+        await gold_writer.write_gold(
+            table_name="test.table",
+            records=records,
+            schema=schema,
+            mode="scd2",
+            scd_config={"business_key": "entity_id"},
+            ingestion_ts=fixed_ingestion_ts,
+        )
+
+        update_kwargs = mock_merge.when_matched_update.call_args.kwargs
+        assert "predicate" in update_kwargs
+        assert "source.content_hash <> target.content_hash" in str(
+            update_kwargs["predicate"]
+        )
+
 
 @pytest.mark.unit
 class TestGoldWriterSchemaValidation:
