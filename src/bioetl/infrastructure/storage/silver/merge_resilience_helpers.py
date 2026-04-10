@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
+from bioetl.domain.observability_contract import normalize_observability_pipeline_label
 from bioetl.domain.exceptions import DeltaTransactionError
 from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.silver.delta_helpers import (
@@ -240,6 +241,7 @@ def _emit_merge_retry_event(
     delay_seconds: float,
 ) -> None:
     """Emit retry telemetry for a merge attempt."""
+    pipeline_label = normalize_observability_pipeline_label(table_path)
     logger.warning(
         "silver_merge_retry",
         table_path=table_path,
@@ -255,7 +257,7 @@ def _emit_merge_retry_event(
             {
                 "event": "silver_merge_retry",
                 "provider": "storage",
-                "pipeline": table_path,
+                "pipeline": pipeline_label,
                 "severity": "warning",
                 "error_type": retry_type,
             },
@@ -270,6 +272,7 @@ def _emit_merge_final_event(
     final_reason: str,
 ) -> None:
     """Emit telemetry when merge retries are exhausted."""
+    pipeline_label = normalize_observability_pipeline_label(table_path)
     logger.error(
         "silver_merge_failed",
         table_path=table_path,
@@ -282,7 +285,7 @@ def _emit_merge_final_event(
             {
                 "event": "silver_merge_final",
                 "provider": "storage",
-                "pipeline": table_path,
+                "pipeline": pipeline_label,
                 "severity": "error",
                 "error_type": final_reason,
             },
