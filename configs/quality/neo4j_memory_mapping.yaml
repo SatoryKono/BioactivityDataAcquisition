@@ -83,6 +83,30 @@ duplication_analysis:
         - label: "package_family"
           name: "application/composite"
 
+retirement_analysis:
+  enabled: true
+  families:
+    - "normalization_profiles"
+    - "adapter_layer"
+    - "composite_layer"
+  current_cycle_age_days: 45
+  stale_age_days: 180
+  dead_score_threshold: 6
+  wip_markers:
+    - "todo"
+    - "wip"
+    - "follow-up"
+    - "phase 2"
+    - "spike"
+    - "temporary"
+  deprecation_markers:
+    - "deprecated"
+    - "legacy"
+    - "obsolete"
+    - "compat"
+    - "remove after"
+    - "migration shim"
+
 pipeline_operational:
   runtime_paths:
     - "uv run python -m bioetl run --pipeline"

@@ -69,6 +69,8 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         "method_surface",
         "src.bioetl.application.composite.merger.MergeService.merge",
     ) in node_keys
+    assert any(label == "retirement_candidate" for label, _ in node_keys)
+    assert any(label == "development_cycle_surface" for label, _ in node_keys)
     assert ("provider_surface", "chembl") in node_keys
     assert ("entity_config", "chembl_activity") in node_keys
     assert ("composite_config", "composite_activity") in node_keys
@@ -351,6 +353,8 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "function_surface",
         "method_surface",
         "duplication_cluster",
+        "retirement_candidate",
+        "development_cycle_surface",
         "port_surface",
         "adapter_surface",
         "adapter_impl_surface",

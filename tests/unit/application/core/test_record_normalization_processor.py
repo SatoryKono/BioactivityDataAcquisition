@@ -320,6 +320,40 @@ def test_chembl_activity_content_hash_ignores_meta_fields_and_equivalent_scalars
 
 
 @pytest.mark.unit
+def test_chembl_activity_content_hash_is_stable_for_equivalent_identifier_and_json_forms() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+    record_a = {
+        "entity_id": "chembl:1",
+        "content_hash": "stale-a",
+        "activity_id": "CHEMBL25",
+        "publication_doi": " HTTPS://doi.org/10.1000/ABC ",
+        "publication_pmid": "0012345",
+        "standard_value": "1.2300000000",
+        "activity_properties": '[{"kind":"a","rank":1},{"kind":"b","rank":2}]',
+    }
+    record_b = {
+        "entity_id": "chembl:9",
+        "content_hash": "stale-b",
+        "activity_id": "CHEMBL25",
+        "publication_doi": "10.1000/abc",
+        "publication_pmid": 12345,
+        "standard_value": 1.23,
+        "activity_properties": '[{"rank":2,"kind":"b"},{"rank":1,"kind":"a"}]',
+    }
+
+    normalized_a = processor.normalize_record(record_a)
+    normalized_b = processor.normalize_record(record_b)
+
+    assert normalized_a["publication_doi"] == "10.1000/abc"
+    assert normalized_b["publication_pmid"] == "12345"
+    assert normalized_a["activity_properties"] != normalized_b["activity_properties"]
+    assert normalized_a["content_hash"] == normalized_b["content_hash"]
+
+
+@pytest.mark.unit
 def test_chembl_activity_content_hash_treats_blank_identifier_fields_like_none() -> None:
     processor = RecordNormalizationProcessor(
         provider="chembl",

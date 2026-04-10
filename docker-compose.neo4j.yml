@@ -7,21 +7,15 @@ services:
     ports:
       - "7474:7474"
       - "7687:7687"
-    volumes:
-      # Use named volumes for persistence (required for data survival across restarts)
-      - neo4j-data:/var/lib/neo4j/data
-      - neo4j-logs:/var/lib/neo4j/logs
-      - neo4j-import:/var/lib/neo4j/import
     environment:
       NEO4J_AUTH: neo4j/bioetl_secure_password
       NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
       # Minimal memory settings (verified stable on Windows Docker)
-      # Lower heap = reduced OOM risk, slower queries but more stable
       NEO4J_server_memory_heap_initial__size: 128m
       NEO4J_server_memory_heap_max__size: 256m
       NEO4J_server_memory_pagecache_size: 64m
-      # Ensure password is only set on initial creation
-      NEO4J_dbms_security_auth__initialization: "RETURN"
+    # NO VOLUMES: Data is ephemeral (lost on restart)
+    # This is intentional for stability - MCP uses file fallback anyway
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7474"]
       interval: 10s
@@ -30,8 +24,3 @@ services:
     restart: unless-stopped
     mem_limit: 1g
     cpus: "1.0"
-
-volumes:
-  neo4j-data:
-  neo4j-logs:
-  neo4j-import:

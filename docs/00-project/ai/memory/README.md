@@ -87,6 +87,11 @@ profiles в BioETL.
   `python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer`,
   `python -m scripts.ops query-neo4j-memory promotion-candidates composite_layer`,
   `python -m scripts.ops query-neo4j-memory promotion-candidates all`.
+  Для поиска dead/stale code и отделения его от текущего цикла разработки используй:
+  `python -m scripts.ops query-neo4j-memory dead-code-candidates adapter_layer`,
+  `python -m scripts.ops query-neo4j-memory dead-code-candidates all`,
+  `python -m scripts.ops query-neo4j-memory current-cycle-code adapter_layer`,
+  `python -m scripts.ops query-neo4j-memory current-cycle-code all`.
 
 ## Relationship To Other AI Surfaces
 

@@ -96,6 +96,16 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "duplication_cluster",
         "title": "Promotion candidates",
     },
+    "dead-code-candidates": {
+        "mode": "dead_code_candidates",
+        "target_label": "retirement_candidate",
+        "title": "Dead code candidates",
+    },
+    "current-cycle-code": {
+        "mode": "current_cycle_code",
+        "target_label": "development_cycle_surface",
+        "title": "Current-cycle code surfaces",
+    },
 }
 
 
@@ -113,7 +123,7 @@ def _parser() -> argparse.ArgumentParser:
         help=(
             "Exact surface name, duplication cluster name, or family name. "
             "Examples: `chembl.activity`, `BioETLPipelineRunFailed`, "
-            "`adapter_layer`, `composite_layer:method_surface:d1c4b44398a1`."
+            "`adapter_layer`, `composite_layer:method_surface:d1c4b44398a1`, `all`."
         ),
     )
     parser.add_argument(
@@ -229,6 +239,54 @@ def _promotion_candidates_statement() -> str:
     )
 
 
+def _dead_code_candidates_statement() -> str:
+    return (
+        "MATCH (candidate:retirement_candidate) "
+        "WHERE $name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name "
+        "OPTIONAL MATCH (candidate)-[:CANDIDATE_FOR_REMOVAL]->(target) "
+        "OPTIONAL MATCH (candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle) "
+        "RETURN candidate.name AS candidate_name, "
+        "candidate.family_name AS family_name, "
+        "candidate.target_label AS target_label, "
+        "candidate.target_name AS target_name, "
+        "candidate.deletion_score AS deletion_score, "
+        "candidate.deletion_confidence AS deletion_confidence, "
+        "candidate.recent_age_days AS recent_age_days, "
+        "candidate.only_test_referenced AS only_test_referenced, "
+        "candidate.deprecation_markers AS deprecation_markers, "
+        "candidate.runtime_anchor_count AS runtime_anchor_count, "
+        "candidate.config_anchor_count AS config_anchor_count, "
+        "candidate.doc_anchor_count AS doc_anchor_count, "
+        "candidate.test_anchor_count AS test_anchor_count, "
+        "target.name AS removal_target, "
+        "labels(target) AS removal_target_labels, "
+        "cycle.name AS blocked_by_cycle "
+        "ORDER BY candidate.deletion_score DESC, candidate.target_name ASC"
+    )
+
+
+def _current_cycle_code_statement() -> str:
+    return (
+        "MATCH (cycle:development_cycle_surface) "
+        "WHERE $name = 'all' OR cycle.family_name = $name OR cycle.target_name = $name "
+        "OPTIONAL MATCH (target)-[:OWNED_BY_CYCLE]->(cycle) "
+        "RETURN cycle.name AS cycle_name, "
+        "cycle.family_name AS family_name, "
+        "cycle.target_label AS target_label, "
+        "cycle.target_name AS target_name, "
+        "cycle.cycle_status AS cycle_status, "
+        "cycle.cycle_score AS cycle_score, "
+        "cycle.recent_age_days AS recent_age_days, "
+        "cycle.wip_markers AS wip_markers, "
+        "cycle.runtime_anchor_count AS runtime_anchor_count, "
+        "cycle.config_anchor_count AS config_anchor_count, "
+        "cycle.doc_anchor_count AS doc_anchor_count, "
+        "cycle.test_anchor_count AS test_anchor_count, "
+        "labels(target) AS target_labels "
+        "ORDER BY cycle.cycle_score DESC, cycle.target_name ASC"
+    )
+
+
 def _run_query(
     root: Path,
     profile: str,
@@ -249,6 +307,10 @@ def _run_query(
         statement = _duplication_cluster_statement()
     elif profile_config["mode"] == "promotion_candidates":
         statement = _promotion_candidates_statement()
+    elif profile_config["mode"] == "dead_code_candidates":
+        statement = _dead_code_candidates_statement()
+    elif profile_config["mode"] == "current_cycle_code":
+        statement = _current_cycle_code_statement()
     else:
         statement = _ownership_statement()
     return client.query(
@@ -266,6 +328,8 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             "neighbors": "no semantic neighbors found",
             "duplication_cluster": "no duplication cluster found",
             "promotion_candidates": "no promotion candidates found",
+            "dead_code_candidates": "no dead code candidates found",
+            "current_cycle_code": "no current-cycle code surfaces found",
         }[profile_config["mode"]]
         return f"{title}: {empty_suffix} for `{name}`."
 
@@ -365,6 +429,70 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             )
         if len(lines) == 1:
             lines.append("- no promotion candidates found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "dead_code_candidates":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            target_name = str(row.get("target_name") or "")
+            if not target_name:
+                continue
+            family_name = str(row.get("family_name") or "")
+            target_label = str(row.get("target_label") or "")
+            deletion_score = str(row.get("deletion_score") or "")
+            deletion_confidence = str(row.get("deletion_confidence") or "")
+            recent_age_days = str(row.get("recent_age_days") or "")
+            only_test_referenced = str(row.get("only_test_referenced") or "")
+            runtime_anchor_count = str(row.get("runtime_anchor_count") or "")
+            config_anchor_count = str(row.get("config_anchor_count") or "")
+            doc_anchor_count = str(row.get("doc_anchor_count") or "")
+            test_anchor_count = str(row.get("test_anchor_count") or "")
+            blocked_by_cycle = str(row.get("blocked_by_cycle") or "")
+            deprecation_markers = row.get("deprecation_markers")
+            if isinstance(deprecation_markers, list):
+                marker_str = ",".join(str(marker) for marker in deprecation_markers)
+            else:
+                marker_str = ""
+            blocked_suffix = f" | blocked_by={blocked_by_cycle}" if blocked_by_cycle else ""
+            marker_suffix = f" | deprecation_markers={marker_str}" if marker_str else ""
+            lines.append(
+                f"- target={target_name} | label={target_label} | family={family_name} | deletion_score={deletion_score} "
+                f"| confidence={deletion_confidence} | recent_age_days={recent_age_days} | only_test_referenced={only_test_referenced} "
+                f"| runtime={runtime_anchor_count} | config={config_anchor_count} | docs={doc_anchor_count} | tests={test_anchor_count}"
+                f"{marker_suffix}{blocked_suffix}"
+            )
+        if len(lines) == 1:
+            lines.append("- no dead code candidates found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "current_cycle_code":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            target_name = str(row.get("target_name") or "")
+            if not target_name:
+                continue
+            family_name = str(row.get("family_name") or "")
+            target_label = str(row.get("target_label") or "")
+            cycle_status = str(row.get("cycle_status") or "")
+            cycle_score = str(row.get("cycle_score") or "")
+            recent_age_days = str(row.get("recent_age_days") or "")
+            runtime_anchor_count = str(row.get("runtime_anchor_count") or "")
+            config_anchor_count = str(row.get("config_anchor_count") or "")
+            doc_anchor_count = str(row.get("doc_anchor_count") or "")
+            test_anchor_count = str(row.get("test_anchor_count") or "")
+            wip_markers = row.get("wip_markers")
+            if isinstance(wip_markers, list):
+                marker_str = ",".join(str(marker) for marker in wip_markers)
+            else:
+                marker_str = ""
+            marker_suffix = f" | wip_markers={marker_str}" if marker_str else ""
+            lines.append(
+                f"- target={target_name} | label={target_label} | family={family_name} | cycle_status={cycle_status} "
+                f"| cycle_score={cycle_score} | recent_age_days={recent_age_days} | runtime={runtime_anchor_count} "
+                f"| config={config_anchor_count} | docs={doc_anchor_count} | tests={test_anchor_count}{marker_suffix}"
+            )
+        if len(lines) == 1:
+            lines.append("- no current-cycle code surfaces found")
         return "\n".join(lines)
 
     lines = [f"{title}: `{name}`"]

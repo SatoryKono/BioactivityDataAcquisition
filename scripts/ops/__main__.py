@@ -9,7 +9,7 @@ Commands:
     salt-rotate        Rotate PII hashing salt
     fix-grafana        Fix Grafana dashboard configurations
     sync-neo4j-memory  Build and optionally sync the deterministic Neo4j repo graph
-    query-neo4j-memory Query deterministic Neo4j memory ownership, neighbor, and promotion shortcuts
+    query-neo4j-memory Query deterministic Neo4j memory ownership, neighbor, promotion, and retirement shortcuts
     wsl-proxy          Start WSL proxy helper
     update-issue       Update a GitHub issue title/body/comment/state (shell)
     triage-issues      Triage cleanup/docs issue wave (shell)

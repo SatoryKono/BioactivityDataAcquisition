@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from scripts.ops.neo4j_memory_query import (
+    _current_cycle_code_statement,
+    _dead_code_candidates_statement,
     QUERY_PROFILES,
     _duplication_cluster_statement,
     _format_rows,
@@ -20,6 +22,8 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["neighbors-alert"]["target_label"] == "alert_surface"
     assert QUERY_PROFILES["duplication-cluster"]["target_label"] == "duplication_cluster"
     assert QUERY_PROFILES["promotion-candidates"]["mode"] == "promotion_candidates"
+    assert QUERY_PROFILES["dead-code-candidates"]["target_label"] == "retirement_candidate"
+    assert QUERY_PROFILES["current-cycle-code"]["mode"] == "current_cycle_code"
 
 
 def test_ownership_statement_uses_target_label_and_directory_houses_edges() -> None:
@@ -59,6 +63,25 @@ def test_promotion_candidates_statement_filters_by_family_and_orders_by_score() 
     assert "count(DISTINCT member) AS member_count" in statement
     assert "count(DISTINCT test) AS test_count" in statement
     assert "ORDER BY cluster.promotion_score DESC, cluster.duplicate_count DESC" in statement
+
+
+def test_dead_code_candidates_statement_filters_family_and_blockers() -> None:
+    statement = _dead_code_candidates_statement()
+
+    assert "MATCH (candidate:retirement_candidate)" in statement
+    assert "$name = 'all' OR candidate.family_name = $name OR candidate.target_name = $name" in statement
+    assert "(candidate)-[:CANDIDATE_FOR_REMOVAL]->(target)" in statement
+    assert "(candidate)-[:BLOCKED_FROM_DELETION_BY]->(cycle)" in statement
+    assert "ORDER BY candidate.deletion_score DESC" in statement
+
+
+def test_current_cycle_code_statement_filters_family_and_targets() -> None:
+    statement = _current_cycle_code_statement()
+
+    assert "MATCH (cycle:development_cycle_surface)" in statement
+    assert "$name = 'all' OR cycle.family_name = $name OR cycle.target_name = $name" in statement
+    assert "(target)-[:OWNED_BY_CYCLE]->(cycle)" in statement
+    assert "ORDER BY cycle.cycle_score DESC" in statement
 
 
 def test_format_rows_renders_operator_summary() -> None:
@@ -159,6 +182,64 @@ def test_format_rows_renders_promotion_candidates_summary() -> None:
     assert "target=src/bioetl/infrastructure/adapters/base.py" in formatted
 
 
+def test_format_rows_renders_dead_code_candidates_summary() -> None:
+    formatted = _format_rows(
+        "dead-code-candidates",
+        "adapter_layer",
+        [
+            {
+                "candidate_name": "module_surface:src/bioetl/infrastructure/adapters/pubchem/client.py",
+                "family_name": "adapter_layer",
+                "target_label": "module_surface",
+                "target_name": "src/bioetl/infrastructure/adapters/pubchem/client.py",
+                "deletion_score": 8,
+                "deletion_confidence": "high",
+                "recent_age_days": 420,
+                "only_test_referenced": True,
+                "deprecation_markers": ["deprecated", "legacy"],
+                "runtime_anchor_count": 0,
+                "config_anchor_count": 0,
+                "doc_anchor_count": 0,
+                "test_anchor_count": 3,
+                "blocked_by_cycle": "",
+            }
+        ],
+    )
+
+    assert "Dead code candidates: `adapter_layer`" in formatted
+    assert "target=src/bioetl/infrastructure/adapters/pubchem/client.py | label=module_surface | family=adapter_layer" in formatted
+    assert "deletion_score=8 | confidence=high | recent_age_days=420" in formatted
+    assert "deprecation_markers=deprecated,legacy" in formatted
+
+
+def test_format_rows_renders_current_cycle_code_summary() -> None:
+    formatted = _format_rows(
+        "current-cycle-code",
+        "adapter_layer",
+        [
+            {
+                "cycle_name": "module_surface:src/bioetl/infrastructure/adapters/common/new_runtime.py",
+                "family_name": "adapter_layer",
+                "target_label": "module_surface",
+                "target_name": "src/bioetl/infrastructure/adapters/common/new_runtime.py",
+                "cycle_status": "current_cycle",
+                "cycle_score": 5,
+                "recent_age_days": 3,
+                "wip_markers": ["todo", "temporary"],
+                "runtime_anchor_count": 0,
+                "config_anchor_count": 0,
+                "doc_anchor_count": 1,
+                "test_anchor_count": 1,
+            }
+        ],
+    )
+
+    assert "Current-cycle code surfaces: `adapter_layer`" in formatted
+    assert "target=src/bioetl/infrastructure/adapters/common/new_runtime.py | label=module_surface | family=adapter_layer" in formatted
+    assert "cycle_status=current_cycle | cycle_score=5 | recent_age_days=3" in formatted
+    assert "wip_markers=todo,temporary" in formatted
+
+
 def test_format_rows_handles_missing_results() -> None:
     formatted = _format_rows("owner-alert", "BioETLPipelineRunFailed", [])
 
@@ -181,3 +262,15 @@ def test_format_rows_handles_missing_promotion_candidates() -> None:
     formatted = _format_rows("promotion-candidates", "missing-family", [])
 
     assert formatted == "Promotion candidates: no promotion candidates found for `missing-family`."
+
+
+def test_format_rows_handles_missing_dead_code_candidates() -> None:
+    formatted = _format_rows("dead-code-candidates", "missing-family", [])
+
+    assert formatted == "Dead code candidates: no dead code candidates found for `missing-family`."
+
+
+def test_format_rows_handles_missing_current_cycle_code() -> None:
+    formatted = _format_rows("current-cycle-code", "missing-family", [])
+
+    assert formatted == "Current-cycle code surfaces: no current-cycle code surfaces found for `missing-family`."
