@@ -65,7 +65,13 @@ Last verified: '2026-04-09'
    `alert_surface -> OBSERVED_BY -> dashboard_surface` links derived from metric
    overlap and fallback tables. Shared/provider regression suites from
    `configs/quality/test_matrix.yaml` are also projected into direct
-   `pipeline_surface -> TESTED_BY` links.
+   `pipeline_surface -> TESTED_BY` links. The current graph also includes
+   `storage_surface` nodes for Bronze/Silver/Gold/composite/control-plane
+   artifacts, `runtime_evidence_surface` anchors for
+   `run_manifest` / `run_ledger` / `effective_config_artifact` / `lineage`,
+   `workflow_surface` / `workflow_job_surface` from `.github/workflows/*.yml`,
+   and docs-to-code `DESCRIBES` drift edges from published docs/policies to
+   repo code/config/workflow targets.
 
 8. When you intentionally want to remove stale repo-derived graph nodes from the
    current ingest wave, run the explicit prune mode:
@@ -182,6 +188,20 @@ Last verified: '2026-04-09'
     drifting into a late relation-count mismatch. After repeated targeted runs,
     prefer `--apply --prune-stale` over a plain `--apply` so stale managed rows
     from older `sync_run` values do not pollute the next base verification pass.
+
+17. For a quick local smoke after memory-surface extensions, verify at least
+    one path from each high-value coverage block:
+    ```bash
+    python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json
+    python -m scripts.ops query-neo4j-memory owner-pipeline chembl_activity
+    python -m scripts.ops query-neo4j-memory owner-contract chembl.activity
+    ```
+    Then inspect the exported audit JSON or Neo4j Browser for:
+    - `storage_surface` such as `silver/chembl/activity`
+    - `runtime_evidence_surface` such as `run_manifest`
+    - `workflow_surface` / `workflow_job_surface` such as `tests` and `tests::governance-preflight`
+    - `DESCRIBES` edges from `docs/04-reference/contracts/run-manifest-ledger.md`
+      to `src/bioetl/domain/control_plane/run_manifest.py`
 
 ## Memory Configuration Profiles
 

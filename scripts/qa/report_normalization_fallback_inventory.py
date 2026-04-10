@@ -15,6 +15,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root / "src"))
 
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
+    build_entity_profile_coverage_kpi,
     FALLBACK_BUSINESS,
     FALLBACK_TECHNICAL_PASSTHROUGH,
     build_field_matrix_rows,
@@ -39,12 +40,17 @@ def _fallback_rows() -> list[dict[str, str]]:
     )
 
 
-def _build_payload(rows: list[dict[str, str]]) -> dict[str, object]:
+def _build_payload(
+    rows: list[dict[str, str]],
+    *,
+    coverage_kpi: dict[str, object] | None = None,
+) -> dict[str, object]:
     per_pipeline = Counter(row["pipeline_name"] for row in rows)
     per_normalizer = Counter(row["normalizer"] for row in rows)
     per_source = Counter(row["normalization_source"] for row in rows)
     return {
         "mode": "report-only",
+        "coverage_kpi": coverage_kpi or {},
         "fallback_field_count": len(rows),
         "fallback_business_field_count": per_source[FALLBACK_BUSINESS],
         "fallback_technical_passthrough_field_count": per_source[
@@ -78,7 +84,14 @@ def _build_payload(rows: list[dict[str, str]]) -> dict[str, object]:
 
 def build_fallback_inventory_payload() -> dict[str, object]:
     """Return the current fallback normalization inventory payload."""
-    return _build_payload(_fallback_rows())
+    all_rows = build_field_matrix_rows()
+    fallback_rows = [
+        row for row in all_rows if row["normalization_source"] in FALLBACK_SOURCES
+    ]
+    return _build_payload(
+        fallback_rows,
+        coverage_kpi=build_entity_profile_coverage_kpi(all_rows),
+    )
 
 
 def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
@@ -91,6 +104,12 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
         "# Normalization Fallback Inventory",
         "",
         "- mode: report-only",
+        f"- {payload['coverage_kpi'].get('name', 'coverage_kpi')}: `{float(payload['coverage_kpi'].get('value_pct', 0.0)):.2f}%`",
+        (
+            "- explicit_profile_field_count: "
+            f"`{payload['coverage_kpi'].get('numerator', 0)}` / "
+            f"`{payload['coverage_kpi'].get('denominator', 0)}` shipped entity fields"
+        ),
         f"- fallback_field_count: `{fallback_field_count}`",
         f"- fallback_business_field_count: `{payload['fallback_business_field_count']}`",
         f"- fallback_technical_passthrough_field_count: `{payload['fallback_technical_passthrough_field_count']}`",

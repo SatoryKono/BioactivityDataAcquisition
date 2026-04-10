@@ -9,8 +9,10 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     DEFAULT_OUT_DIR,
     MD_NAME,
     build_artifacts,
+    build_entity_profile_coverage_kpi,
     build_field_matrix_rows,
     check_artifacts,
+    render_markdown,
     write_artifacts,
 )
 
@@ -93,6 +95,56 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
     standard_type = _row(rows, "composite_activity", "standard_type")
     assert standard_type["normalization_source"] == "upstream_inherited"
     assert standard_type["normalizer"] == "none"
+
+
+def test_build_entity_profile_coverage_kpi_summarizes_entity_rows() -> None:
+    kpi = build_entity_profile_coverage_kpi(
+        [
+            {"pipeline_kind": "entity", "normalization_source": "profile"},
+            {"pipeline_kind": "entity", "normalization_source": "profile"},
+            {"pipeline_kind": "entity", "normalization_source": "fallback_business"},
+            {"pipeline_kind": "composite", "normalization_source": "upstream_inherited"},
+        ]
+    )
+
+    assert kpi["name"] == "explicit_profile_coverage_pct"
+    assert kpi["numerator"] == 2
+    assert kpi["denominator"] == 3
+    assert kpi["value_pct"] == 66.67
+
+
+def test_render_markdown_mentions_headline_coverage_kpi() -> None:
+    markdown = render_markdown(
+        [
+            {
+                "pipeline_name": "chembl_activity",
+                "pipeline_kind": "entity",
+                "field_name": "publication_doi",
+                "field_type": "string",
+                "normalization_source": "profile",
+                "normalizer": "normalize_profile_doi",
+                "normalization_summary": "Normalize DOI.",
+                "include_in_content_hash": "true",
+                "set_like": "false",
+                "notes": "",
+            },
+            {
+                "pipeline_name": "chembl_assay_parameters",
+                "pipeline_kind": "entity",
+                "field_name": "_run_id",
+                "field_type": "string",
+                "normalization_source": "fallback_technical_passthrough",
+                "normalizer": "passthrough",
+                "normalization_summary": "Passthrough.",
+                "include_in_content_hash": "",
+                "set_like": "false",
+                "notes": "",
+            },
+        ]
+    )
+
+    assert "## Headline KPI" in markdown
+    assert "- explicit_profile_coverage_pct: `50.00%`" in markdown
 
 
 def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:

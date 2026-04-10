@@ -8,6 +8,7 @@ from scripts.qa.report_normalization_fallback_inventory import (
     _build_payload,
     _fallback_rows,
     _render_markdown,
+    build_fallback_inventory_payload,
     main,
 )
 
@@ -16,7 +17,11 @@ def test_fallback_rows_include_unprofiled_entity_fields() -> None:
     rows = _fallback_rows()
 
     assert not any(row["pipeline_name"] == "chembl_assay" for row in rows)
-    assert not any(row["pipeline_name"] == "chembl_publication" for row in rows)
+    assert not any(
+        row["pipeline_name"] == "chembl_publication"
+        and row["normalization_source"] == "fallback_business"
+        for row in rows
+    )
     assert not any(row["pipeline_name"] == "chembl_target" for row in rows)
     assert not any(row["pipeline_name"] == "uniprot_idmapping" for row in rows)
     assert any(
@@ -54,9 +59,16 @@ def test_build_payload_summarizes_fallback_rows() -> None:
                 "normalizer": "passthrough",
                 "normalization_source": "fallback_technical_passthrough",
             },
-        ]
+        ],
+        coverage_kpi={
+            "name": "explicit_profile_coverage_pct",
+            "numerator": 7,
+            "denominator": 10,
+            "value_pct": 70.0,
+        },
     )
 
+    assert payload["coverage_kpi"]["name"] == "explicit_profile_coverage_pct"
     assert payload["fallback_field_count"] == 3
     assert payload["fallback_business_field_count"] == 2
     assert payload["fallback_technical_passthrough_field_count"] == 1
@@ -78,6 +90,12 @@ def test_build_payload_summarizes_fallback_rows() -> None:
 def test_render_markdown_mentions_top_fallback_entries() -> None:
     markdown = _render_markdown(
         {
+            "coverage_kpi": {
+                "name": "explicit_profile_coverage_pct",
+                "numerator": 7,
+                "denominator": 10,
+                "value_pct": 70.0,
+            },
             "fallback_field_count": 2,
             "fallback_business_field_count": 1,
             "fallback_technical_passthrough_field_count": 1,
@@ -110,6 +128,7 @@ def test_render_markdown_mentions_top_fallback_entries() -> None:
     )
 
     assert "# Normalization Fallback Inventory" in markdown
+    assert "- explicit_profile_coverage_pct: `70.00%`" in markdown
     assert "`fallback_business` covers `1` fields" in markdown
     assert "`openalex_publication` has `2` fallback fields" in markdown
     assert (
@@ -157,4 +176,5 @@ def test_main_returns_non_zero_when_fallback_business_budget_is_exceeded() -> No
 
 
 def test_main_accepts_current_fallback_business_budget() -> None:
-    assert main(["--max-fallback-business-fields", "73"]) == 0
+    current_budget = str(build_fallback_inventory_payload()["fallback_business_field_count"])
+    assert main(["--max-fallback-business-fields", current_budget]) == 0

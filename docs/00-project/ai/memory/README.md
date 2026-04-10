@@ -48,6 +48,13 @@ profiles в BioETL.
   `configs/quality/neo4j_memory_mapping.yaml`, а pipeline-to-test ownership
   опирается на `configs/quality/test_matrix.yaml`, включая shared provider
   regression suites.
+  Поверх этого deterministic graph теперь включает ещё четыре coverage-блока:
+  `storage_surface` для Bronze/Silver/Gold/composite/control-plane artifact refs,
+  `runtime_evidence_surface` для `run_manifest` / `run_ledger` /
+  `effective_config_artifact` / `lineage`,
+  `workflow_surface` / `workflow_job_surface` для `.github/workflows/*.yml`,
+  и `DESCRIBES` drift edges из published docs/policies к code/config/workflow
+  targets.
   Tooling
   может синхронизировать его в локальный Neo4j backend без ручных prompt waves.
   Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
@@ -106,6 +113,29 @@ profiles в BioETL.
   `python -m scripts.ops query-neo4j-memory removable-complexity composite_layer`,
   `python -m scripts.ops query-neo4j-memory simplification-blockers adapter_layer`,
   `python -m scripts.ops query-neo4j-memory overengineered-candidates all`.
+
+## Additional Coverage Blocks
+
+- **Storage/data surfaces**:
+  `storage_surface`
+  — deterministic Bronze/Silver/Gold/composite/control-plane artifact refs,
+  включая `pipeline_surface -> WRITES_TO`, composite
+  `pipeline_surface -> DEPENDS_ON -> storage_surface`, и
+  `storage_surface -> PROMOTES_TO`.
+- **Control-plane runtime evidence**:
+  `runtime_evidence_surface`
+  — anchors для `run_manifest`, `run_ledger`, `effective_config_artifact`,
+  `lineage` с `BACKED_BY` links к modules, `DESCRIBED_IN` links к docs и
+  `WRITES_TO` links к control-plane storage artifacts.
+- **CI / workflow graph**:
+  `workflow_surface`, `workflow_job_surface`
+  — GitHub Actions workflows/jobs из `.github/workflows/*.yml`, включая
+  `DEPENDS_ON` job ordering, `RUNS_VIA` links к repo scripts/files и
+  `EXECUTES_GATE` edges к quality gates.
+- **Docs-to-code drift edges**:
+  `doc_source_surface` / `doc_artifact` / `policy_surface -> DESCRIBES -> targets`
+  — repo-path citations внутри docs теперь проецируются в graph, чтобы можно
+  было навигировать published guidance против current code/config/workflow surface.
 
 ## Relationship To Other AI Surfaces
 

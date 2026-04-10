@@ -18,7 +18,11 @@ from scripts.ops.neo4j_memory_sync import (
     _git_last_commit_age_days_bulk,
     _live_managed_node_counts,
     _live_managed_relation_counts,
+    _merge_storage_layer_config,
     _missing_managed_anchor_keys,
+    _normalize_docs_repo_reference,
+    _storage_ref_from_output_path,
+    _workflow_quality_gates,
     main,
     _normalization_evidence_statements,
     apply_normalization_evidence_only,
@@ -671,6 +675,56 @@ def test_build_diff_entries_tracks_missing_and_extra_keys() -> None:
             "delta": 0,
         },
     ]
+
+
+def test_storage_surface_helpers_merge_base_and_pipeline_overrides() -> None:
+    merged = _merge_storage_layer_config(
+        {
+            "silver": {
+                "format": "delta",
+                "mode": "merge",
+                "enabled": True,
+            }
+        },
+        {
+            "silver": {
+                "mode": "append",
+            }
+        },
+        "silver",
+    )
+
+    assert merged == {
+        "format": "delta",
+        "mode": "append",
+        "enabled": True,
+    }
+
+
+def test_storage_ref_from_output_path_normalizes_data_output_prefix() -> None:
+    assert _storage_ref_from_output_path("data/output/silver/composite/activity") == "silver/composite/activity"
+    assert _storage_ref_from_output_path("silver/chembl/activity") == "silver/chembl/activity"
+
+
+def test_workflow_quality_gates_detect_repo_gate_signals() -> None:
+    gates = _workflow_quality_gates(
+        "uv run python -m scripts.ci neo4j-memory\n"
+        "uv run python -m scripts.schema validate-configs\n"
+        "uv run pytest tests/smoke/\n"
+    )
+
+    assert gates == (
+        "pytest",
+        "config validation",
+        "deterministic neo4j memory ontology invariants",
+    )
+
+
+def test_normalize_docs_repo_reference_strips_globs_and_keeps_repo_paths() -> None:
+    assert _normalize_docs_repo_reference("src/bioetl/domain/control_plane/**") == "src/bioetl/domain/control_plane"
+    assert _normalize_docs_repo_reference("configs/providers/*.yaml") == "configs/providers"
+    assert _normalize_docs_repo_reference("README.md") == "README.md"
+    assert _normalize_docs_repo_reference("https://example.com/spec") is None
 
 
 def test_development_cycle_surface_filter_is_now_a_clean_noop() -> None:
