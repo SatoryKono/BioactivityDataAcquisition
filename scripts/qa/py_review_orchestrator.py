@@ -1060,6 +1060,23 @@ class ReviewOrchestrator:
         report += "|----------|--------|------|------|-----|-----|-------|\n"
 
         cat_stats: dict[str, dict[str, int]] = {}
+        categories = [
+            "Architecture",
+            "Anti-Patterns",
+            "DI Violations",
+            "Naming",
+            "Types",
+            "Testing",
+        ]
+        for cat in categories:
+            cat_stats[cat] = {
+                "total": 0,
+                "CRITICAL": 0,
+                "HIGH": 0,
+                "MEDIUM": 0,
+                "LOW": 0,
+            }
+
         for issue in result.issues:
             cat = issue.category
             if cat not in cat_stats:
@@ -1075,13 +1092,25 @@ class ReviewOrchestrator:
 
         _, cat_scores = self.calculate_score(result.issues)
 
-        for cat in cat_stats:
+        for cat in categories:
             stats = cat_stats[cat]
             report += (
                 f"| {cat} | {stats['total']} | {stats['CRITICAL']} | "
                 f"{stats['HIGH']} | {stats['MEDIUM']} | {stats['LOW']} | "
                 f"{cat_scores.get(cat, 10.0):.1f} |\n"
             )
+
+        total_issues = sum(s["total"] for s in cat_stats.values())
+        total_crit = sum(s["CRITICAL"] for s in cat_stats.values())
+        total_high = sum(s["HIGH"] for s in cat_stats.values())
+        total_med = sum(s["MEDIUM"] for s in cat_stats.values())
+        total_low = sum(s["LOW"] for s in cat_stats.values())
+
+        report += (
+            f"| **TOTAL** | **{total_issues}** | **{total_crit}** | "
+            f"**{total_high}** | **{total_med}** | **{total_low}** | "
+            f"**{score:.1f}** |\n"
+        )
 
         report += "\n## Critical Issues (MUST fix before merge)\n"
         for issue in [i for i in result.issues if i.severity == "CRITICAL"]:
@@ -1194,6 +1223,15 @@ class ReviewOrchestrator:
             )
 
         overall_status = self.get_status(final_score)
+
+        # Deduplicate issues for the final report
+        unique_issues = {}
+        for issue in all_issues:
+            key = (issue.file_path, issue.line, issue.rule_id)
+            if key not in unique_issues:
+                unique_issues[key] = issue
+
+        all_issues = list(unique_issues.values())
 
         crit_issues = [i for i in all_issues if i.severity == "CRITICAL"]
         high_issues = [i for i in all_issues if i.severity == "HIGH"]
