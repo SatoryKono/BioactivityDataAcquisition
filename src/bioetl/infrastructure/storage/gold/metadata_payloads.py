@@ -10,6 +10,9 @@ from bioetl.domain.models.metadata import GoldMetadata
 from bioetl.domain.ports import GoldMetadataInput, MetadataCoordinatorPort
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.lineage_persistence import (
+    resolve_metadata_and_lineage_fragment,
+)
 from bioetl.infrastructure.storage.metadata.builder_base import (
     _resolve_records_metadata_timestamp,
 )
@@ -148,18 +151,40 @@ def build_gold_metadata_via_coordinator(
     transform_version: str | None,
     transform_steps: tuple[str, ...],
 ) -> GoldMetadata:
-    """Create Gold metadata using the configured coordinator contract."""
-    return coordinator.create_gold_metadata(
-        build_gold_metadata_input(
+    """Create Gold metadata using the canonical bundle-aware coordinator seam."""
+    metadata_input = build_gold_metadata_input(
+        table_path=table_path,
+        table_name=table_name,
+        records=records,
+        mode=mode,
+        scd_config=scd_config,
+        completed_at=completed_at,
+        silver_refs=silver_refs,
+        gold_schema=gold_schema,
+        transform_version=transform_version,
+        transform_steps=transform_steps,
+    )
+    metadata, _lineage_fragment = resolve_metadata_and_lineage_fragment(
+        coordinator=coordinator,
+        bundle_factory_name="create_gold_metadata_bundle",
+        coordinator_factory_name=None,
+        input_data=metadata_input,
+        fallback_factory=lambda: _raise_missing_gold_metadata_bundle(
             table_path=table_path,
             table_name=table_name,
-            records=records,
-            mode=mode,
-            scd_config=scd_config,
-            completed_at=completed_at,
-            silver_refs=silver_refs,
-            gold_schema=gold_schema,
-            transform_version=transform_version,
-            transform_steps=transform_steps,
         )
+    )
+    return metadata
+
+
+def _raise_missing_gold_metadata_bundle(
+    *,
+    table_path: str,
+    table_name: str,
+) -> GoldMetadata:
+    """Fail closed when bundle-only Gold metadata construction is unavailable."""
+    raise RuntimeError(
+        "MetadataCoordinator with create_gold_metadata_bundle is required "
+        "for build_gold_metadata_payload: "
+        f"table_name={table_name}, table_path={table_path}"
     )

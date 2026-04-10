@@ -8,6 +8,7 @@ from urllib import error
 from pathlib import Path
 
 from scripts.ops.neo4j_memory_sync import (
+    _add_complexity_analysis_surfaces,
     _build_normalization_pipeline_evidence,
     _build_diff_entries,
     _critical_analysis_audit_issues,
@@ -759,6 +760,86 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
     assert report["live"]["managed_node_total"] == 6
     assert report["live"]["unmanaged_repo_node_total"] == 1
     assert report["live"]["managed_relation_total"] == 4
+
+
+def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing(monkeypatch) -> None:
+    snapshot = GraphSnapshot()
+    project = snapshot.add_node("project", "BioETL")
+    module = snapshot.add_node(
+        "module_surface",
+        "src/bioetl/application/composite/example.py",
+        family_name="application/composite",
+        current_cycle_status="current_cycle",
+        current_cycle_score=5,
+        current_cycle_wip_markers=["wip"],
+    )
+    class_surface = snapshot.add_node(
+        "class_surface",
+        "src.bioetl.application.composite.example.ExampleService",
+        source_path="src/bioetl/application/composite/example.py",
+    )
+    method_surface = snapshot.add_node(
+        "method_surface",
+        "src.bioetl.application.composite.example.ExampleService.merge",
+        source_path="src/bioetl/application/composite/example.py",
+        callable_name="merge",
+        branch_count=6,
+        nesting_depth=4,
+        call_count=5,
+        helper_call_count=4,
+    )
+    pipeline = snapshot.add_node("pipeline_surface", "example_pipeline")
+    snapshot.add_relation(module, "DECLARES", class_surface)
+    snapshot.add_relation(class_surface, "DECLARES", method_surface)
+    snapshot.add_relation(method_surface, "DEPENDS_ON", pipeline)
+
+    monkeypatch.setattr(
+        "scripts.ops.neo4j_memory_sync._read_text",
+        lambda path: "merge helper compat policy",
+    )
+
+    def _fail_parse(path: Path) -> None:
+        raise AssertionError(f"AST parsing should not be used for complexity aggregation: {path}")
+
+    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._parse_python_ast", _fail_parse)
+
+    _add_complexity_analysis_surfaces(
+        snapshot,
+        Path(__file__).resolve().parents[4],
+        project,
+        "2026-04-10",
+        {
+            "duplication_analysis": {
+                "enabled": True,
+                "families": {
+                    "application/composite": {
+                        "roots": ["src/bioetl/application/composite"],
+                        "package_family": "application/composite",
+                    }
+                },
+            },
+            "retirement_analysis": {
+                "enabled": True,
+                "families": ["application/composite"],
+            },
+            "complexity_analysis": {
+                "enabled": True,
+                "families": ["application/composite"],
+                "complexity_score_threshold": 3,
+                "removable_score_threshold": 20,
+            },
+        },
+    )
+
+    candidate_key = NodeKey(
+        "complexity_candidate",
+        "class_surface:src.bioetl.application.composite.example.ExampleService",
+    )
+    candidate = snapshot.nodes[candidate_key]
+    assert candidate.properties["branch_count"] == 6
+    assert candidate.properties["nesting_depth"] == 4
+    assert candidate.properties["helper_call_count"] == 4
+    assert candidate.properties["blocked_by_current_cycle"] is True
 
 
 def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) -> None:

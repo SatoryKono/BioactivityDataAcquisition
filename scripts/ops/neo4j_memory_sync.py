@@ -1834,6 +1834,7 @@ def derive_http_uri(neo4j_uri: str) -> str:
 def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     snapshot = GraphSnapshot()
     today = verified_at or date.today().isoformat()
+    memory_mapping = _load_memory_mapping(root)
     project = snapshot.add_node(
         "project",
         "BioETL",
@@ -1854,8 +1855,8 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_policy_surfaces(snapshot, root, project, today)
     _add_impact_analysis_surfaces(snapshot, root, project, today)
     _add_file_structure_surfaces(snapshot, root, project, today)
-    _add_retirement_analysis_surfaces(snapshot, root, project, today, _load_memory_mapping(root))
-    _add_complexity_analysis_surfaces(snapshot, root, project, today, _load_memory_mapping(root))
+    _add_retirement_analysis_surfaces(snapshot, root, project, today, memory_mapping)
+    _add_complexity_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     return snapshot
 
 
@@ -3450,6 +3451,7 @@ def _add_complexity_analysis_surfaces(
     config = _complexity_analysis_config(memory_mapping, duplication_config, retirement_config)
     if not config.enabled or not config.family_names:
         return
+    family_names = set(config.family_names)
 
     analysis_labels = {"module_surface", "class_surface", "function_surface", "method_surface"}
     runtime_labels = {"pipeline_surface", "execution_path", "alert_surface", "adapter_surface", "adapter_impl_surface"}
@@ -3472,12 +3474,15 @@ def _add_complexity_analysis_surfaces(
 
     incoming: dict[NodeKey, list[GraphRelation]] = {}
     outgoing: dict[NodeKey, list[GraphRelation]] = {}
+    declared_children: dict[NodeKey, list[NodeKey]] = {}
     for relation in snapshot.relations.values():
         incoming.setdefault(relation.target, []).append(relation)
         outgoing.setdefault(relation.source, []).append(relation)
+        if relation.relation_type == "DECLARES":
+            declared_children.setdefault(relation.source, []).append(relation.target)
 
     text_cache: dict[str, str] = {}
-    module_ast_cache: dict[str, ast.AST | None] = {}
+    family_cache: dict[str, DuplicateFamilyConfig | None] = {}
 
     def read_source_text(relative_path: str) -> str:
         if relative_path not in text_cache:
@@ -3488,10 +3493,10 @@ def _add_complexity_analysis_surfaces(
                 text_cache[relative_path] = ""
         return text_cache[relative_path]
 
-    def parse_module_ast(relative_path: str) -> ast.AST | None:
-        if relative_path not in module_ast_cache:
-            module_ast_cache[relative_path] = _parse_python_ast(root / relative_path)
-        return module_ast_cache[relative_path]
+    def family_for_source_path(relative_path: str) -> DuplicateFamilyConfig | None:
+        if relative_path not in family_cache:
+            family_cache[relative_path] = _family_for_path(relative_path, duplication_config)
+        return family_cache[relative_path]
 
     def collect_anchor_nodes(surface_key: NodeKey, module_key: NodeKey) -> dict[str, list[NodeKey]]:
         buckets: dict[str, set[NodeKey]] = {
@@ -3529,34 +3534,83 @@ def _add_complexity_analysis_surfaces(
             for name, values in buckets.items()
         }
 
-    def resolve_ast_surface(node: GraphNode, tree: ast.AST) -> ast.AST | None:
-        source_path = str(node.properties.get("source_path") or "")
-        if node.key.label == "module_surface":
-            return tree if isinstance(tree, ast.Module) else None
-        dotted_path = _module_dotted_name(source_path)
-        if node.key.label == "class_surface":
-            class_name = str(node.properties.get("class_name") or node.key.name.rsplit(".", 1)[-1])
-            for child in getattr(tree, "body", ()):
-                if isinstance(child, ast.ClassDef) and child.name == class_name:
-                    return child
-            return None
-        if node.key.label == "function_surface":
-            function_name = str(node.properties.get("callable_name") or node.key.name.rsplit(".", 1)[-1])
-            for child in getattr(tree, "body", ()):
-                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)) and child.name == function_name:
-                    return child
-            return None
-        if node.key.label == "method_surface":
-            class_name = str(node.properties.get("parent_class") or "")
-            method_name = str(node.properties.get("callable_name") or node.key.name.rsplit(".", 1)[-1])
-            for child in getattr(tree, "body", ()):
-                if not isinstance(child, ast.ClassDef) or child.name != class_name:
-                    continue
-                for method in child.body:
-                    if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef)) and method.name == method_name:
-                        return method
-            return None
-        return None
+    def int_property(node_key: NodeKey, property_name: str) -> int:
+        node = snapshot.nodes.get(node_key)
+        if node is None:
+            return 0
+        raw_value = node.properties.get(property_name)
+        return int(raw_value) if isinstance(raw_value, int | float) else 0
+
+    def aggregate_callable_metrics(node_key: NodeKey) -> tuple[int, int, int, int]:
+        return (
+            int_property(node_key, "branch_count"),
+            int_property(node_key, "nesting_depth"),
+            int_property(node_key, "call_count"),
+            int_property(node_key, "helper_call_count"),
+        )
+
+    def aggregate_declared_metrics(surface_key: NodeKey) -> tuple[int, int, int, int, int, float]:
+        if surface_key.label in {"function_surface", "method_surface"}:
+            branch_count, nesting_depth, call_count, helper_call_count = aggregate_callable_metrics(surface_key)
+            abstraction_fanout = max(1, call_count)
+            api_surface_to_logic_ratio = round(call_count / max(1, branch_count + nesting_depth), 2)
+            return (
+                branch_count,
+                nesting_depth,
+                call_count,
+                helper_call_count,
+                abstraction_fanout,
+                api_surface_to_logic_ratio,
+            )
+
+        if surface_key.label == "class_surface":
+            methods = [child for child in declared_children.get(surface_key, ()) if child.label == "method_surface"]
+            method_metrics = [aggregate_callable_metrics(method_key) for method_key in methods]
+            branch_count = sum(metric[0] for metric in method_metrics)
+            nesting_depth = max((metric[1] for metric in method_metrics), default=0)
+            call_count = sum(metric[2] for metric in method_metrics)
+            helper_call_count = sum(metric[3] for metric in method_metrics)
+            abstraction_fanout = len(methods)
+            api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
+            return (
+                branch_count,
+                nesting_depth,
+                call_count,
+                helper_call_count,
+                abstraction_fanout,
+                api_surface_to_logic_ratio,
+            )
+
+        if surface_key.label == "module_surface":
+            children = declared_children.get(surface_key, ())
+            functions = [child for child in children if child.label == "function_surface"]
+            classes = [child for child in children if child.label == "class_surface"]
+            methods = [
+                method_key
+                for class_key in classes
+                for method_key in declared_children.get(class_key, ())
+                if method_key.label == "method_surface"
+            ]
+            callable_metrics = [
+                *[aggregate_callable_metrics(function_key) for function_key in functions],
+                *[aggregate_callable_metrics(method_key) for method_key in methods],
+            ]
+            branch_count = sum(metric[0] for metric in callable_metrics)
+            nesting_depth = max((metric[1] for metric in callable_metrics), default=0)
+            call_count = sum(metric[2] for metric in callable_metrics)
+            helper_call_count = sum(metric[3] for metric in callable_metrics)
+            abstraction_fanout = len(functions) + len(classes)
+            api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
+            return (
+                branch_count,
+                nesting_depth,
+                call_count,
+                helper_call_count,
+                abstraction_fanout,
+                api_surface_to_logic_ratio,
+            )
+
+        return (0, 0, 0, 0, 0, 0.0)
 
     def complexity_marker_buckets(relative_path: str, symbol_name: str, source_text: str) -> tuple[list[str], list[str], list[str]]:
         normalized = f"{relative_path} {symbol_name}".casefold()
@@ -3571,19 +3625,12 @@ def _add_complexity_analysis_surfaces(
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str) or not source_path.endswith(".py"):
             continue
-        family = _family_for_path(source_path, duplication_config)
-        if family is None or family.name not in config.family_names:
+        family = family_for_source_path(source_path)
+        if family is None or family.name not in family_names:
             continue
 
         module_key = node.key if node.key.label == "module_surface" else NodeKey("module_surface", source_path)
         if module_key not in snapshot.nodes:
-            continue
-
-        tree = parse_module_ast(source_path)
-        if tree is None:
-            continue
-        ast_surface = resolve_ast_surface(node, tree)
-        if ast_surface is None:
             continue
 
         source_text = read_source_text(source_path)
@@ -3604,71 +3651,14 @@ def _add_complexity_analysis_surfaces(
             source_text,
         )
 
-        branch_count = 0
-        nesting_depth = 0
-        call_count = 0
-        helper_call_count = 0
-        abstraction_fanout = 0
-        api_surface_to_logic_ratio = 0.0
-
-        if node.key.label in {"function_surface", "method_surface"} and isinstance(
-            ast_surface, (ast.FunctionDef, ast.AsyncFunctionDef)
-        ):
-            branch_count = _callable_branch_count(ast_surface)
-            nesting_depth = _callable_max_nesting_depth(ast_surface)
-            call_count = _callable_call_count(ast_surface)
-            helper_call_count = _callable_helper_call_count(ast_surface)
-            abstraction_fanout = max(1, call_count)
-            api_surface_to_logic_ratio = round(call_count / max(1, branch_count + nesting_depth), 2)
-        elif node.key.label == "class_surface" and isinstance(ast_surface, ast.ClassDef):
-            methods = [child for child in ast_surface.body if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))]
-            abstraction_fanout = len(methods)
-            branch_count = sum(_callable_branch_count(method) for method in methods)
-            nesting_depth = max((_callable_max_nesting_depth(method) for method in methods), default=0)
-            call_count = sum(_callable_call_count(method) for method in methods)
-            helper_call_count = sum(_callable_helper_call_count(method) for method in methods)
-            api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
-        elif node.key.label == "module_surface" and isinstance(ast_surface, ast.Module):
-            functions = [child for child in ast_surface.body if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))]
-            classes = [child for child in ast_surface.body if isinstance(child, ast.ClassDef)]
-            abstraction_fanout = len(functions) + len(classes)
-            branch_count = sum(_callable_branch_count(function) for function in functions)
-            branch_count += sum(
-                _callable_branch_count(method)
-                for class_node in classes
-                for method in class_node.body
-                if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
-            )
-            nesting_depth = max(
-                (
-                    _callable_max_nesting_depth(function)
-                    for function in [
-                        *functions,
-                        *[
-                            method
-                            for class_node in classes
-                            for method in class_node.body
-                            if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
-                        ],
-                    ]
-                ),
-                default=0,
-            )
-            call_count = sum(_callable_call_count(function) for function in functions)
-            call_count += sum(
-                _callable_call_count(method)
-                for class_node in classes
-                for method in class_node.body
-                if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
-            )
-            helper_call_count = sum(_callable_helper_call_count(function) for function in functions)
-            helper_call_count += sum(
-                _callable_helper_call_count(method)
-                for class_node in classes
-                for method in class_node.body
-                if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
-            )
-            api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
+        (
+            branch_count,
+            nesting_depth,
+            call_count,
+            helper_call_count,
+            abstraction_fanout,
+            api_surface_to_logic_ratio,
+        ) = aggregate_declared_metrics(node.key)
 
         complexity_score = 0
         complexity_score += 2 if branch_count >= 6 else 1 if branch_count >= 3 else 0

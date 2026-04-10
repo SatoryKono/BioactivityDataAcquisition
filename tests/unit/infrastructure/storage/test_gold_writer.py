@@ -178,6 +178,43 @@ class TestGoldWriterPipelineHelpers:
             (("record_count", 2), {}),
         ]
 
+    @pytest.mark.asyncio
+    async def test_write_gold_uses_injected_tracer(
+        self, noop_logger, valid_records, strict_schema
+    ) -> None:
+        """Gold writer should open a span when tracing is injected."""
+        tracer = MagicMock()
+        span = MagicMock()
+        span_cm = MagicMock()
+        span_cm.__enter__.return_value = span
+        span_cm.__exit__.return_value = None
+        tracer.start_as_current_span.return_value = span_cm
+        tracing = MagicMock()
+        tracing.get_tracer.return_value = tracer
+
+        writer = _build_gold_writer(
+            base_path="/tmp/gold",
+            logger=noop_logger,
+            tracing=tracing,
+        )
+        writer._prepare_write_gold = AsyncMock(  # type: ignore[method-assign]
+            return_value=MagicMock()
+        )
+        writer._dispatch_write = AsyncMock()  # type: ignore[method-assign]
+        writer._post_write_gold = AsyncMock()  # type: ignore[method-assign]
+
+        await writer.write_gold(
+            table_name="test.table",
+            records=valid_records,
+            schema=strict_schema,
+            mode="append",
+        )
+
+        tracing.get_tracer.assert_called_once()
+        tracer.start_as_current_span.assert_called_once_with("write_gold")
+        span.set_attribute.assert_any_call("table_name", "test.table")
+        span.set_attribute.assert_any_call("mode", "append")
+
 
 @pytest.mark.unit
 class TestGoldWriterValidation:

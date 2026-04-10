@@ -5,15 +5,17 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.infrastructure.observability import PrometheusMetrics, start_metrics_server
+from bioetl.infrastructure.observability import PrometheusMetrics
 
 if TYPE_CHECKING:
+    from bioetl.application.services.metrics_service import MetricsService
     from bioetl.infrastructure.config import Settings
 
 MetricsFactory = Callable[[], MetricsPort]
-MetricsServerStarter = Callable[..., bool]
+MetricsServiceFactory = Callable[..., MetricsService]
 
 __all__ = [
     "bootstrap_metrics_port",
@@ -44,14 +46,14 @@ def bootstrap_metrics_port(
 
 def maybe_start_metrics_server(
     settings: Settings,
-    start_server: MetricsServerStarter | None = None,
+    metrics_service_factory: MetricsServiceFactory | None = None,
 ) -> bool:
     """Start metrics server if enabled in settings.
 
     Args:
         settings: Application settings providing metrics port, address, and flags.
-        start_server: Optional callable to start the metrics HTTP server; uses the
-            default infrastructure ``start_metrics_server`` when None.
+        metrics_service_factory: Optional composition-owned service bootstrapper;
+            uses the default ``bootstrap_metrics_service`` when None.
 
     Returns:
         True if the metrics server was started, False otherwise.
@@ -63,11 +65,13 @@ def maybe_start_metrics_server(
         return False
 
     obs = settings.observability
-    starter = start_server or start_metrics_server
-    return starter(
+    service_factory = metrics_service_factory or bootstrap_metrics_service
+    service = service_factory()
+    result = service.start(
         port=settings.metrics_port,
         addr=settings.metrics_addr,
         fail_fast=obs.metrics_fail_fast,
         retry_count=obs.metrics_retry_count,
         retry_delay=obs.metrics_retry_delay,
     )
+    return bool(result.success)

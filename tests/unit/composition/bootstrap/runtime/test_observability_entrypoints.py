@@ -43,10 +43,12 @@ class TestBootstrapLoggerPort:
 class TestMaybeStartMetricsServer:
     """Tests for maybe_start_metrics_server runtime entrypoint."""
 
-    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.metrics_bootstrap.bootstrap_metrics_service"
+    )
     def test_passes_config_params(
         self,
-        mock_start_server: MagicMock,
+        mock_bootstrap_metrics_service: MagicMock,
     ) -> None:
         """Runtime wrapper should pass settings through to server startup."""
         from bioetl.composition.bootstrap import maybe_start_metrics_server
@@ -60,12 +62,14 @@ class TestMaybeStartMetricsServer:
         settings.observability.metrics_retry_count = 5
         settings.observability.metrics_retry_delay = 2.0
 
-        mock_start_server.return_value = True
+        mock_service = MagicMock()
+        mock_service.start.return_value = MagicMock(success=True)
+        mock_bootstrap_metrics_service.return_value = mock_service
 
         result = maybe_start_metrics_server(settings)
 
         assert result is True
-        mock_start_server.assert_called_once_with(
+        mock_service.start.assert_called_once_with(
             port=9090,
             addr="0.0.0.0",
             fail_fast=False,
@@ -73,10 +77,12 @@ class TestMaybeStartMetricsServer:
             retry_delay=2.0,
         )
 
-    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.metrics_bootstrap.bootstrap_metrics_service"
+    )
     def test_fail_fast_true_raises_error(
         self,
-        mock_start_server: MagicMock,
+        mock_bootstrap_metrics_service: MagicMock,
     ) -> None:
         """Fail-fast mode should propagate MetricsServerError to callers."""
         from bioetl.composition.bootstrap import maybe_start_metrics_server
@@ -90,10 +96,12 @@ class TestMaybeStartMetricsServer:
         settings.observability.metrics_retry_count = 3
         settings.observability.metrics_retry_delay = 1.0
 
-        mock_start_server.side_effect = MetricsServerError(
+        mock_service = MagicMock()
+        mock_service.start.side_effect = MetricsServerError(
             port=8000,
             reason="port_in_use",
         )
+        mock_bootstrap_metrics_service.return_value = mock_service
 
         with pytest.raises(MetricsServerError) as exc_info:
             maybe_start_metrics_server(settings)
@@ -101,10 +109,12 @@ class TestMaybeStartMetricsServer:
         assert exc_info.value.port == 8000
         assert exc_info.value.reason == "port_in_use"
 
-    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.metrics_bootstrap.bootstrap_metrics_service"
+    )
     def test_fail_fast_false_propagates_error(
         self,
-        mock_start_server: MagicMock,
+        mock_bootstrap_metrics_service: MagicMock,
     ) -> None:
         """Unexpected startup errors should still bubble up to entrypoints."""
         from bioetl.composition.bootstrap import maybe_start_metrics_server
@@ -117,7 +127,9 @@ class TestMaybeStartMetricsServer:
         settings.observability.metrics_retry_count = 3
         settings.observability.metrics_retry_delay = 1.0
 
-        mock_start_server.side_effect = Exception("Random failure")
+        mock_service = MagicMock()
+        mock_service.start.side_effect = Exception("Random failure")
+        mock_bootstrap_metrics_service.return_value = mock_service
 
         with pytest.raises(Exception, match="Random failure"):
             maybe_start_metrics_server(settings)

@@ -101,40 +101,42 @@ class TestMaybeStartMetricsServer:
     def test_returns_false_when_metrics_disabled(self) -> None:
         """Should return False immediately when metrics_enabled is False."""
         settings = _make_settings(metrics_enabled=False)
-        mock_starter = MagicMock()
+        mock_service_factory = MagicMock()
 
         result = maybe_start_metrics_server(
-            settings=settings, start_server=mock_starter
+            settings=settings, metrics_service_factory=mock_service_factory
         )
 
         assert result is False
-        mock_starter.assert_not_called()
+        mock_service_factory.assert_not_called()
 
     def test_returns_false_when_server_disabled(self) -> None:
         """Should return False when metrics_enabled but metrics_server_enabled is False."""
         settings = _make_settings(metrics_enabled=True, metrics_server_enabled=False)
-        mock_starter = MagicMock()
+        mock_service_factory = MagicMock()
 
         result = maybe_start_metrics_server(
-            settings=settings, start_server=mock_starter
+            settings=settings, metrics_service_factory=mock_service_factory
         )
 
         assert result is False
-        mock_starter.assert_not_called()
+        mock_service_factory.assert_not_called()
 
     def test_returns_true_when_server_started(self) -> None:
         """Should return True when server starts successfully."""
         settings = _make_settings(metrics_enabled=True, metrics_server_enabled=True)
-        mock_starter = MagicMock(return_value=True)
+        mock_service = MagicMock()
+        mock_service.start.return_value = SimpleNamespace(success=True)
+        mock_service_factory = MagicMock(return_value=mock_service)
 
         result = maybe_start_metrics_server(
-            settings=settings, start_server=mock_starter
+            settings=settings, metrics_service_factory=mock_service_factory
         )
 
         assert result is True
 
-    def test_passes_correct_args_to_starter(self) -> None:
-        """Should pass port, addr, and observability flags to start_server."""
+    def test_passes_correct_args_to_metrics_service(self) -> None:
+        """Should pass port, addr, and observability flags to MetricsService.start."""
         settings = _make_settings(
             metrics_enabled=True,
             metrics_server_enabled=True,
@@ -144,11 +146,16 @@ class TestMaybeStartMetricsServer:
             metrics_port=9090,
             metrics_addr="127.0.0.1",
         )
-        mock_starter = MagicMock(return_value=True)
+        mock_service = MagicMock()
+        mock_service.start.return_value = SimpleNamespace(success=True)
+        mock_service_factory = MagicMock(return_value=mock_service)
 
-        maybe_start_metrics_server(settings=settings, start_server=mock_starter)
+        maybe_start_metrics_server(
+            settings=settings,
+            metrics_service_factory=mock_service_factory,
+        )
 
-        mock_starter.assert_called_once_with(
+        mock_service.start.assert_called_once_with(
             port=9090,
             addr="127.0.0.1",
             fail_fast=True,
@@ -156,10 +163,15 @@ class TestMaybeStartMetricsServer:
             retry_delay=2.5,
         )
 
-    def test_propagates_starter_exception(self) -> None:
-        """Should propagate exceptions from start_server to caller."""
+    def test_propagates_metrics_service_exception(self) -> None:
+        """Should propagate exceptions from MetricsService.start to caller."""
         settings = _make_settings(metrics_enabled=True, metrics_server_enabled=True)
-        mock_starter = MagicMock(side_effect=RuntimeError("bind failed"))
+        mock_service = MagicMock()
+        mock_service.start.side_effect = RuntimeError("bind failed")
+        mock_service_factory = MagicMock(return_value=mock_service)
 
         with pytest.raises(RuntimeError, match="bind failed"):
-            maybe_start_metrics_server(settings=settings, start_server=mock_starter)
+            maybe_start_metrics_server(
+                settings=settings,
+                metrics_service_factory=mock_service_factory,
+            )

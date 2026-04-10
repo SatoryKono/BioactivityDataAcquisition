@@ -6,7 +6,7 @@ import asyncio
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -214,6 +214,64 @@ class TestBronzeWriterNameValidation:
         writer._validate_records_iterator(iter([b"test"]))
         writer._validate_records_iterator(iter([]))
         writer._validate_records_iterator(x for x in [b"a", b"b"])
+
+
+@pytest.mark.unit
+class TestBronzeWriterTracing:
+    """Tests for Bronze write tracing boundaries."""
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_uses_injected_tracer(
+        self,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Bronze writer should open a span when tracing is injected."""
+        tracer = MagicMock()
+        span = MagicMock()
+        span_cm = MagicMock()
+        span_cm.__enter__.return_value = span
+        span_cm.__exit__.return_value = None
+        tracer.start_as_current_span.return_value = span_cm
+        tracing = MagicMock()
+        tracing.get_tracer.return_value = tracer
+
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            tracing=tracing,
+        )
+        writer._prepare_bronze_write = MagicMock()
+        writer._write_bronze_data_and_sidecar = AsyncMock(
+            return_value=MagicMock(
+                record_count=1,
+                uncompressed_size=10,
+                compressed_size=5,
+            )
+        )
+        writer._run_bronze_post_write_actions = AsyncMock()
+        writer._build_bronze_write_result = AsyncMock(return_value=MagicMock())
+
+        await writer.write_bronze(
+            records=iter([b'{"id": 1}\n']),
+            provider="chembl",
+            entity="activity",
+            date=datetime(2024, 1, 15, tzinfo=UTC),
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        tracing.get_tracer.assert_called_once()
+        tracer.start_as_current_span.assert_called_once_with("write_bronze")
+        span.set_attribute.assert_any_call("provider", "chembl")
+        span.set_attribute.assert_any_call("entity", "activity")
 
     def test_validate_records_iterator_none_raises(
         self, tmp_path: Path, noop_logger: NoOpLogger

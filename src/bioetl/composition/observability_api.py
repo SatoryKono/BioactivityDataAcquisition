@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
-
-from bioetl.composition.bootstrap.runtime.observability import start_metrics_server
+from bioetl.domain.exceptions import MetricsServerError
+from bioetl.domain.ports import LoggerPort
 
 if TYPE_CHECKING:
     from bioetl.application.services.audit_inspection_service import (
@@ -56,6 +56,31 @@ class ObservabilityDiagnosticsBundle:
     run_manifest_service: RunManifestInspectionService
     lineage_service: LineageInspectionService
     workflow_service: ObservabilityWorkflowService
+
+
+def start_metrics_server(
+    port: int = 8000,
+    addr: str = "0.0.0.0",
+    *,
+    fail_fast: bool = False,
+    retry_count: int = 3,
+    retry_delay: float = 1.0,
+    logger: LoggerPort | None = None,
+) -> bool:
+    """Start the metrics server through the canonical metrics service seam."""
+    metrics_service = get_metrics_service()
+    if logger is not None:
+        metrics_service.logger = logger
+    result = metrics_service.start(
+        port=port,
+        addr=addr,
+        fail_fast=fail_fast,
+        retry_count=retry_count,
+        retry_delay=retry_delay,
+    )
+    if fail_fast and not result.success and result.error is not None:
+        raise MetricsServerError(port=port, reason=result.error)
+    return bool(result.success)
 
 
 def get_audit_service() -> AuditInspectionService:
