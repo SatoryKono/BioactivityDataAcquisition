@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 
@@ -46,6 +47,38 @@ def build_fragment_id(prefix: str, *parts: object) -> str:
         "|".join(str(part) for part in parts if part is not None).encode("utf-8")
     ).hexdigest()[:12]
     return f"{prefix}:{digest}"
+
+
+def build_semantic_fragment_id(
+    prefix: str,
+    *,
+    nodes: list[LineageNodeRef] | tuple[LineageNodeRef, ...],
+    edges: list[LineageEdge] | tuple[LineageEdge, ...],
+) -> str:
+    """Build a fragment id from semantic topology only.
+
+    Run/manifest anchors are occurrence-scoped and must not influence the
+    semantic identity of a lineage fragment.
+    """
+    semantic_node_ids = sorted(
+        node.node_id
+        for node in nodes
+        if node.node_type not in {LineageNodeType.RUN, LineageNodeType.MANIFEST}
+    )
+    semantic_edge_ids = sorted(
+        ":".join(
+            [
+                edge.edge_type.value,
+                edge.source.node_id,
+                edge.target.node_id,
+                json.dumps(edge.attributes, sort_keys=True, separators=(",", ":")),
+            ]
+        )
+        for edge in edges
+        if edge.source.node_type not in {LineageNodeType.RUN, LineageNodeType.MANIFEST}
+        and edge.target.node_type not in {LineageNodeType.RUN, LineageNodeType.MANIFEST}
+    )
+    return build_fragment_id(prefix, *semantic_node_ids, *semantic_edge_ids)
 
 
 def dedupe_nodes(nodes: list[LineageNodeRef]) -> tuple[LineageNodeRef, ...]:
@@ -199,9 +232,21 @@ def source_request_node(
             "query_string": query_string,
         }
     )
+    input_snapshot_ids = attributes.get("input_snapshot_ids")
+    input_snapshot_hashes = attributes.get("input_snapshot_content_hashes")
     return LineageNodeRef(
         node_type=LineageNodeType.SOURCE_REQUEST,
-        node_id=f"source_request:{run_context.run_id}:{input_data.batch_id}",
+        node_id=build_fragment_id(
+            "source_request",
+            run_context.provider,
+            run_context.entity,
+            query_string,
+            source_metadata.url if source_metadata is not None else None,
+            source_metadata.file_path if source_metadata is not None else None,
+            source_metadata.api_version if source_metadata is not None else None,
+            input_snapshot_ids,
+            input_snapshot_hashes,
+        ),
         label=query_string or run_context.pipeline_name,
         attributes=attributes,
     )
@@ -404,8 +449,9 @@ def resolve_transform_metadata(
     transform_steps: tuple[str, ...] | list[str] | None,
 ) -> tuple[str, list[str]]:
     """Resolve transform metadata through the canonical shared helper."""
-    return _resolve_transform_metadata(
+    resolved = _resolve_transform_metadata(
         run_context=run_context,
         transform_version=transform_version,
         transform_steps=transform_steps,
     )
+    return str(resolved[0]), [str(step) for step in resolved[1]]

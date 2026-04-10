@@ -124,23 +124,24 @@ class TestLogGoldAudit:
         mixin.logger.warning.assert_called()
 
     @pytest.mark.asyncio
-    async def test_log_audit_missing_run_id_generates_uuid(self) -> None:
-        """Lines 255-260: missing run_id generates a new UUID."""
+    async def test_log_audit_missing_run_id_raises(self) -> None:
+        """Missing run_id must fail closed instead of generating a UUID."""
         audit = MagicMock()
         audit.log_write = AsyncMock()
         mixin = _ConcreteGoldMixin(audit=audit)
 
         ingestion_ts = datetime(2025, 1, 15, tzinfo=UTC)
 
-        await mixin._log_gold_audit(
-            table_name="chembl.activity",
-            records=[{"id": 1}],
-            mode=GoldWriteMode.APPEND,
-            ingestion_ts=ingestion_ts,
-            run_id=None,
-        )
+        with pytest.raises(ValueError, match="run_id is required"):
+            await mixin._log_gold_audit(
+                table_name="chembl.activity",
+                records=[{"id": 1}],
+                mode=GoldWriteMode.APPEND,
+                ingestion_ts=ingestion_ts,
+                run_id=None,
+            )
 
-        audit.log_write.assert_called_once()
+        audit.log_write.assert_not_called()
         mixin.logger.warning.assert_called()
 
     @pytest.mark.asyncio
