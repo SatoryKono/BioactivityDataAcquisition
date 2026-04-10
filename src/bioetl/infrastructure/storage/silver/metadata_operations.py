@@ -214,7 +214,6 @@ async def _prepare_silver_metadata_write(
         version_after=request.version_after,
     )
     coordinator = host._metadata_coordinator
-    assert coordinator is not None
     silver_input = SilverMetadataInput(
         table_path=request.table_path,
         records=request.records,
@@ -233,9 +232,12 @@ async def _prepare_silver_metadata_write(
     metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
         coordinator=coordinator,
         bundle_factory_name="create_silver_metadata_bundle",
-        coordinator_factory_name="create_silver_metadata",
+        coordinator_factory_name=None,
         input_data=silver_input,
-        fallback_factory=lambda: coordinator.create_silver_metadata(silver_input),
+        fallback_factory=lambda: _raise_missing_silver_metadata_bundle(
+            table_path=request.table_path,
+            table_name=request.table_name,
+        ),
     )
     return _PreparedSilverMetadataWriteOperation(
         request=request,
@@ -251,8 +253,6 @@ async def _prepare_silver_merged_metadata_write(
     request: _SilverMergedMetadataWriteRequest,
 ) -> _PreparedSilverMetadataWriteOperation:
     """Resolve provider/entity and build merged Silver metadata payload."""
-    from bioetl.infrastructure.storage.metadata_builder import SilverMetadataBuilder
-
     context = await _resolve_silver_metadata_context(
         host,
         table_path=request.table_path,
@@ -273,24 +273,14 @@ async def _prepare_silver_merged_metadata_write(
         transform_version=host._transform_version,
         transform_steps=host._transform_steps,
     )
-    builder = SilverMetadataBuilder(
-        transform_version=host._transform_version,
-        transform_steps=host._transform_steps,
-    )
     metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
         coordinator=host._metadata_coordinator,
         bundle_factory_name="create_silver_metadata_bundle",
-        coordinator_factory_name="create_silver_metadata",
+        coordinator_factory_name=None,
         input_data=silver_input,
-        fallback_factory=lambda: builder.build_merged_metadata(
+        fallback_factory=lambda: _raise_missing_silver_metadata_bundle(
             table_path=request.table_path,
             table_name=request.table_name,
-            records=request.records,
-            primary_keys=request.primary_keys,
-            run_id=request.run_id,
-            sources_used=request.sources_used,
-            version_after=context.version_after,
-            completed_at=merged_completed_at,
         ),
     )
     return _PreparedSilverMetadataWriteOperation(
@@ -332,6 +322,19 @@ async def _execute_silver_metadata_write(
     """Prepare and persist one Silver metadata write via the canonical lifecycle."""
     prepared = await prepare(host, request)
     await _execute_prepared_silver_metadata_write_operation(host, prepared)
+
+
+def _raise_missing_silver_metadata_bundle(
+    *,
+    table_path: str,
+    table_name: str,
+) -> SilverMetadata:
+    """Fail closed when canonical Silver metadata bundle construction is unavailable."""
+    raise RuntimeError(
+        "MetadataCoordinator with create_silver_metadata_bundle is required "
+        f"for Silver metadata publication: table_name={table_name}, "
+        f"table_path={table_path}"
+    )
 
 
 async def _prepare_silver_write_finalization_context(

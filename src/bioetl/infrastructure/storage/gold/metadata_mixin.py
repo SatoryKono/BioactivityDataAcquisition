@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.types import RunID
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.infrastructure.storage.gold.metadata_audit import (
     _build_gold_audit_entry,
     _GoldAuditWriteRequest,
@@ -105,6 +106,8 @@ class GoldWriterMetadataMixin:
     ) -> None:
         if not records:
             return
+        if isinstance(self._metadata_writer, NoOpMetadataWriter):
+            return
         prepared = _prepare_gold_metadata_write(
             self,
             _GoldMetadataWriteRequest(
@@ -146,6 +149,8 @@ class GoldWriterMetadataMixin:
         records: list[GoldRecord],
         schema: DataFrameSchema | None = None,
     ) -> None:
+        if isinstance(self._metadata_writer, NoOpMetadataWriter):
+            return
         prepared = _maybe_prepare_gold_merged_metadata_write(
             self,
             _GoldMergedMetadataWriteRequest(

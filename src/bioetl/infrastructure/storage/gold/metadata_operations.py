@@ -12,7 +12,6 @@ from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_merged_metadata_input,
     build_gold_metadata_input,
-    build_gold_metadata_payload,
 )
 from bioetl.infrastructure.storage.lineage_persistence import (
     emit_composite_source_selection_metrics,
@@ -146,21 +145,11 @@ def _prepare_gold_metadata_write(
     metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
         coordinator=host._metadata_coordinator,
         bundle_factory_name="create_gold_metadata_bundle",
-        coordinator_factory_name="create_gold_metadata",
+        coordinator_factory_name=None,
         input_data=gold_input,
-        fallback_factory=lambda: build_gold_metadata_payload(
-            coordinator=None,
+        fallback_factory=lambda: _raise_missing_gold_metadata_bundle(
             table_path=request.table_path,
             table_name=request.table_name,
-            records=request.records,
-            mode=request.mode,
-            scd_config=request.scd_config,
-            ingestion_ts=request.ingestion_ts,
-            run_id=request.run_id,
-            silver_refs=request.silver_refs,
-            gold_schema=request.gold_schema,
-            transform_version=host._transform_version,
-            transform_steps=host._transform_steps,
         ),
     )
     return _PreparedGoldMetadataWrite(
@@ -230,9 +219,12 @@ def _prepare_gold_merged_metadata_write(
     metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
         coordinator=coordinator,
         bundle_factory_name="create_gold_metadata_bundle",
-        coordinator_factory_name="create_gold_metadata",
+        coordinator_factory_name=None,
         input_data=gold_input,
-        fallback_factory=lambda: coordinator.create_gold_metadata(gold_input),
+        fallback_factory=lambda: _raise_missing_gold_metadata_bundle(
+            table_path=request.table_path,
+            table_name=request.table_name,
+        ),
     )
     return _PreparedGoldMetadataWrite(
         request=request,
@@ -247,14 +239,26 @@ def _maybe_prepare_gold_merged_metadata_write(
     host: _GoldMergedMetadataWriteHostProtocol,
     request: _GoldMergedMetadataWriteRequest,
 ) -> _PreparedGoldMetadataWrite | None:
-    """Skip merged metadata writes when records or coordinator are missing."""
+    """Skip only empty merged metadata writes; missing coordinator fails closed."""
     if not request.records:
         return None
     if host._metadata_coordinator is None:
-        host.logger.debug(
-            "gold_merged_metadata_skipped",
-            reason="MetadataCoordinator not configured",
-            table_path=request.table_path,
+        raise RuntimeError(
+            "MetadataCoordinator with create_gold_metadata_bundle is required "
+            f"for Gold metadata publication: table_name={request.table_name}, "
+            f"table_path={request.table_path}"
         )
-        return None
     return _prepare_gold_merged_metadata_write(host, request)
+
+
+def _raise_missing_gold_metadata_bundle(
+    *,
+    table_path: str,
+    table_name: str,
+) -> GoldMetadata:
+    """Fail closed when canonical Gold metadata bundle construction is unavailable."""
+    raise RuntimeError(
+        "MetadataCoordinator with create_gold_metadata_bundle is required "
+        f"for Gold metadata publication: table_name={table_name}, "
+        f"table_path={table_path}"
+    )

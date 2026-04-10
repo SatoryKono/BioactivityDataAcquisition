@@ -22,6 +22,7 @@ from bioetl.domain.ports import (
     MetadataWriterPort,
     MetricsPort,
 )
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -115,19 +116,18 @@ class SilverWriterMetadataMixin:
         records: list[BronzeRecord],
         table_path: str,
         event_name: str,
-        use_debug_log: bool = False,
     ) -> bool:
         """Return whether Silver metadata write should short-circuit before prepare."""
         if not records:
             return True
-        if self._metadata_coordinator is None:
-            log = self.logger.debug if use_debug_log else self.logger.warning
-            log(
-                event_name,
-                reason="MetadataCoordinator not configured",
-                table_path=table_path,
-            )
+        if isinstance(self._metadata_writer, NoOpMetadataWriter):
             return True
+        if self._metadata_coordinator is None:
+            raise RuntimeError(
+                "MetadataCoordinator with create_silver_metadata_bundle is required "
+                f"for Silver metadata publication: event={event_name}, "
+                f"table_path={table_path}"
+            )
         return False
 
     async def _write_silver_metadata(
@@ -185,7 +185,6 @@ class SilverWriterMetadataMixin:
             records=records,
             table_path=table_path,
             event_name="silver_merged_metadata_skipped",
-            use_debug_log=True,
         ):
             return
         await _execute_silver_metadata_write(

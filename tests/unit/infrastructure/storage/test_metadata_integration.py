@@ -15,6 +15,7 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
+from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
 from bioetl.domain.models.metadata import (
     DeltaMetrics,
     EnvironmentMetadata,
@@ -28,6 +29,9 @@ from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
+    make_produced_artifact_fragment,
+)
 
 
 class MockMetadataCoordinator:
@@ -35,12 +39,13 @@ class MockMetadataCoordinator:
 
     def create_silver_metadata(self, input_data: Any) -> SilverMetadata:
         """Create minimal SilverMetadata for testing."""
+        provider, entity = str(input_data.table_name).split(".", 1)
         runtime = RuntimeMetadata(
             run_id=input_data.records[0].get("_run_id", "test-run-id"),
             run_type=RunTypeEnum.INCREMENTAL,
             started_at_utc=datetime.now(UTC),
         )
-        pipeline = PipelineMetadata(name="test", provider="test", entity="test")
+        pipeline = PipelineMetadata(name="test", provider=provider, entity=entity)
         environment = EnvironmentMetadata(
             hostname="test", python_version="3.11", bioetl_version="1.0"
         )
@@ -63,12 +68,13 @@ class MockMetadataCoordinator:
         """Create minimal GoldMetadata for testing."""
         from bioetl.domain.models.metadata import BaseOutputMetadata, GoldOutputExt
 
+        provider, entity = str(input_data.table_name).split(".", 1)
         runtime = RuntimeMetadata(
             run_id="test-run-id",
             run_type=RunTypeEnum.INCREMENTAL,
             started_at_utc=datetime.now(UTC),
         )
-        pipeline = PipelineMetadata(name="test", provider="test", entity="test")
+        pipeline = PipelineMetadata(name="test", provider=provider, entity=entity)
         environment = EnvironmentMetadata(
             hostname="test", python_version="3.11", bioetl_version="1.0"
         )
@@ -82,6 +88,32 @@ class MockMetadataCoordinator:
             output=output,
             output_ext=output_ext,
             environment=environment,
+        )
+
+    def create_silver_metadata_bundle(
+        self, input_data: Any
+    ) -> MetadataLineageBundle[SilverMetadata]:
+        """Wrap Silver metadata in the canonical bundle contract."""
+        return MetadataLineageBundle(
+            metadata=self.create_silver_metadata(input_data),
+            lineage_fragment=make_produced_artifact_fragment(
+                fragment_id="silver:integration-fragment",
+                layer="silver",
+                logical_name="test.table",
+            ),
+        )
+
+    def create_gold_metadata_bundle(
+        self, input_data: Any
+    ) -> MetadataLineageBundle[GoldMetadata]:
+        """Wrap Gold metadata in the canonical bundle contract."""
+        return MetadataLineageBundle(
+            metadata=self.create_gold_metadata(input_data),
+            lineage_fragment=make_produced_artifact_fragment(
+                fragment_id="gold:integration-fragment",
+                layer="gold",
+                logical_name="test.gold_table",
+            ),
         )
 
 
@@ -260,7 +292,20 @@ def mock_metadata_coordinator_with_records(
     mock_silver_metadata.delta.rows_inserted = len(sample_records)
     mock_silver_metadata.delta.operation = "merge"
     mock_silver_metadata.delta.primary_key = ["id"]
+    mock_silver_metadata.output = MagicMock()
+    mock_silver_metadata.output.artifact_id = None
+    mock_silver_metadata.output.lineage_fragment_id = None
     mock.create_silver_metadata.return_value = mock_silver_metadata
+    mock.create_silver_metadata_bundle = MagicMock(
+        side_effect=lambda input_data: MetadataLineageBundle(
+            metadata=mock_silver_metadata,
+            lineage_fragment=make_produced_artifact_fragment(
+                fragment_id="silver:integration-mock-fragment",
+                layer="silver",
+                logical_name=getattr(input_data, "table_name", "test.table"),
+            ),
+        )
+    )
 
     # Create mock GoldMetadata
     mock_gold_metadata = MagicMock(spec=GoldMetadata)
@@ -270,6 +315,16 @@ def mock_metadata_coordinator_with_records(
     mock_gold_metadata.delta.rows_inserted = len(sample_records)
     mock_gold_metadata.delta.operation = "overwrite"
     mock.create_gold_metadata.return_value = mock_gold_metadata
+    mock.create_gold_metadata_bundle = MagicMock(
+        side_effect=lambda input_data: MetadataLineageBundle(
+            metadata=mock_gold_metadata,
+            lineage_fragment=make_produced_artifact_fragment(
+                fragment_id="gold:integration-mock-fragment",
+                layer="gold",
+                logical_name=getattr(input_data, "table_name", "test.gold_table"),
+            ),
+        )
+    )
 
     return mock
 
@@ -354,6 +409,7 @@ class TestGoldWriterMetadataIntegration:
         tmp_path: Path,
         mock_logger: MagicMock,
         mock_metadata_writer: MockMetadataWriter,
+        mock_metadata_coordinator: MockMetadataCoordinator,
     ) -> None:
         """Test that GoldWriter calls metadata writer after write."""
         import pandera.pandas as pa_pandera
@@ -370,6 +426,7 @@ class TestGoldWriterMetadataIntegration:
             base_path=tmp_path,
             logger=mock_logger,
             metadata_writer=mock_metadata_writer,
+            metadata_coordinator=mock_metadata_coordinator,
         )
 
         records = [
