@@ -22,6 +22,7 @@ from bioetl.domain.ports import (
     MetricsPort,
     TracingPort,
 )
+from bioetl.domain.ports.noop import _NoOpSpan
 from bioetl.domain.types import (
     GoldRecord,
     GoldSchemaPolicyByVersion,
@@ -346,8 +347,12 @@ class GoldWriter(
         silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
         """Validate and write Gold records, including SCD2 and dual-write flows."""
-        tracer = self._tracing.get_tracer(__name__)
-        with tracer.start_as_current_span("write_gold") as span:
+        span_context = (
+            self._tracing.get_tracer(__name__).start_as_current_span("write_gold")
+            if self._tracing is not None
+            else _NoOpSpan()
+        )
+        with span_context as span:
             normalized_scd_config = (
                 ScdConfig.from_mapping(scd_config, primary_keys=primary_keys)
                 if isinstance(scd_config, Mapping)

@@ -5,10 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports.noop import (
-    NoOpMetadataWriter,
-    NoOpTracing,
-)
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
@@ -47,7 +44,7 @@ def create_gold_writer(
         base_path: Root directory for Gold layer storage.
         config: Optional sink layer config providing save_metadata flag.
         logger: LoggerPort for structured logging.
-        tracing: Optional TracingPort; defaults to NoOpTracing if None.
+        tracing: TracingPort resolved by composition bootstrap.
         csv_exporter: Optional CSV exporter for parallel Gold CSV output.
         metadata_coordinator: Optional coordinator for metadata side-effects.
         transform_version: Transform version tag written to Gold metadata.
@@ -66,7 +63,11 @@ def create_gold_writer(
     metadata_writer = (
         MetadataWriter(logger=logger) if save_metadata else NoOpMetadataWriter()
     )
-    effective_tracing: TracingPort = tracing or NoOpTracing()
+    if tracing is None:
+        raise TypeError(
+            "GoldWriter requires explicit tracing injection. "
+            "Build NoOpTracing in composition when tracing is disabled."
+        )
     return writer_cls(
         base_path=base_path,
         logger=logger,
@@ -74,7 +75,7 @@ def create_gold_writer(
         transform_steps=transform_steps,
         runtime_services=GoldWriterRuntimeServices(
             csv_exporter=csv_exporter,
-            tracing=effective_tracing,
+            tracing=tracing,
             metrics=metrics,
             audit=audit,
             metadata_writer=metadata_writer,

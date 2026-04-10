@@ -57,7 +57,7 @@ def create_silver_writer(
         base_path: Root directory for Silver layer storage.
         config: Optional sink layer config providing save_metadata flag.
         logger: LoggerPort for structured logging.
-        tracing: Optional TracingPort; defaults to NoOpTracing if None.
+        tracing: TracingPort resolved by composition bootstrap.
         csv_exporter: Optional CSV exporter for parallel Silver CSV output.
         metadata_coordinator: Optional coordinator for metadata side-effects.
         transform_version: Transform version tag written to Silver metadata.
@@ -88,6 +88,11 @@ def create_silver_writer(
         if save_metadata
         else NoOpMetadataWriter()
     )
+    if tracing is None:
+        raise TypeError(
+            "SilverWriter requires explicit tracing injection. "
+            "Build NoOpTracing in composition when tracing is disabled."
+        )
     runtime_services = build_silver_writer_runtime_services(
         csv_exporter=csv_exporter,
         tracing=tracing,

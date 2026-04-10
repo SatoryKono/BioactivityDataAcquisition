@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage.bronze.metadata_operations import (
@@ -113,8 +114,10 @@ class BronzeWriterSideEffectsMixin:
         duration: float,
         source_metadata: SourceMetadata | None,
     ) -> None:
-        """Create and persist Bronze metadata via coordinator or fallback."""
+        """Create and persist Bronze metadata through the canonical coordinator path."""
         host = cast("_BronzeWriterSideEffectsHost", self)
+        if isinstance(host._metadata_writer, NoOpMetadataWriter):
+            return
         prepared = prepare_bronze_metadata_write(
             host,
             BronzeMetadataWriteRequest(

@@ -1,17 +1,9 @@
-"""Audit helpers for Silver writer metadata paths.
-
-Extracted from ``SilverWriterMetadataMixin`` to localise the audit axis:
-RunID parsing, timestamp normalization, operation mapping and AuditEntry
-construction are isolated here so that changes to audit handling do not
-ripple through the wider metadata / DQ / finalization pipeline.
-
-Mirrors the established pattern of ``gold/metadata_audit.py``.
-"""
+"""Audit helpers for Silver writer metadata paths."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Protocol
 
 from bioetl.domain.medallion import SilverWriteMode
@@ -49,23 +41,31 @@ class _SilverAuditHostProtocol(Protocol):
 def _build_silver_audit_entry(
     host: _SilverAuditHostProtocol,
     request: _SilverAuditWriteRequest,
-) -> AuditEntry | None:
+) -> AuditEntry:
     """Build an AuditEntry for a Silver write operation.
 
-    Returns ``None`` when no valid explicit ``run_id`` is available.
+    Silver audit is strict: ``run_id`` and ``ingestion_ts`` are required so the
+    medallion traceability contract matches Gold.
     """
+    if request.ingestion_ts is None:
+        host.logger.warning(
+            "audit_missing_ingestion_ts",
+            table=request.table_name,
+            mode=request.mode.value,
+        )
+        raise ValueError("ingestion_ts is required for audit logging")
+
     if request.run_id is None:
         host.logger.warning(
-            "audit_skipped_invalid_run_id",
+            "audit_missing_run_id",
             table=request.table_name,
-            run_id="",
+            mode=request.mode.value,
         )
-        return None
+        raise ValueError("run_id is required for audit logging")
 
-    timestamp = request.ingestion_ts or datetime.fromtimestamp(0, tz=UTC)
-
+    timestamp = request.ingestion_ts
     if timestamp.tzinfo is None:
-        timestamp = timestamp.replace(tzinfo=UTC)
+        raise ValueError("ingestion_ts must be timezone-aware")
 
     operation = _SILVER_AUDIT_OPERATION_MAP[request.mode]
 

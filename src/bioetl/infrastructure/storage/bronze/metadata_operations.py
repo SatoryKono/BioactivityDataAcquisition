@@ -67,24 +67,6 @@ class _BronzeMetadataWriteHostProtocol(Protocol):
     _flat_structure: bool
     base_path: Path
 
-    def _build_full_bronze_metadata(
-        self,
-        *,
-        run_id: RunID,
-        run_type: RunType,
-        provider: str,
-        entity: str,
-        batch_id: BatchID,
-        record_count: int,
-        compressed_size: int,
-        output_path: str,
-        started_at: datetime,
-        completed_at: datetime,
-        duration_seconds: float,
-        source_metadata: SourceMetadata | None,
-    ) -> BronzeMetadata: ...
-
-
 def prepare_bronze_metadata_write(
     host: _BronzeMetadataWriteHostProtocol,
     request: BronzeMetadataWriteRequest,
@@ -115,28 +97,13 @@ def prepare_bronze_metadata_write(
         flat_structure=host._flat_structure,
     )
 
-    if host._metadata_coordinator is None:
-        fallback_source_metadata = _build_bronze_source_metadata_with_live_snapshot(
-            source_metadata=request.source_metadata,
-            snapshot=live_snapshot,
-        )
-        metadata = host._build_full_bronze_metadata(
-            run_id=request.run_id,
-            run_type=request.run_type,
-            provider=request.provider,
-            entity=request.entity,
-            batch_id=request.batch_id,
-            record_count=request.record_count,
-            compressed_size=request.compressed_size,
-            output_path=request.relative_path,
-            started_at=request.ingestion_ts,
-            completed_at=completed_at,
-            duration_seconds=request.duration,
-            source_metadata=fallback_source_metadata,
-        )
-        return PreparedBronzeMetadataWrite(
-            metadata_base_path=metadata_base_path,
-            metadata=metadata,
+    coordinator = host._metadata_coordinator
+    if coordinator is None:
+        raise RuntimeError(
+            "MetadataCoordinator with create_bronze_metadata_bundle is required "
+            "for Bronze metadata publication: "
+            f"provider={request.provider}, entity={request.entity}, "
+            f"relative_path={request.relative_path}"
         )
 
     bronze_input = build_bronze_metadata_input(
@@ -147,18 +114,19 @@ def prepare_bronze_metadata_write(
             live_snapshot=live_snapshot,
         )
     )
-    create_bundle = _resolve_bronze_metadata_bundle_factory(host)
-    if callable(create_bundle):
-        bundle = create_bundle(bronze_input)
-        return PreparedBronzeMetadataWrite(
-            metadata_base_path=metadata_base_path,
-            metadata=bundle.metadata,
-            lineage_fragment=bundle.lineage_fragment,
+    create_bundle = _resolve_bronze_metadata_bundle_factory(coordinator)
+    if not callable(create_bundle):
+        raise RuntimeError(
+            "MetadataCoordinator with create_bronze_metadata_bundle is required "
+            "for Bronze metadata publication: "
+            f"provider={request.provider}, entity={request.entity}, "
+            f"relative_path={request.relative_path}"
         )
-    metadata = host._metadata_coordinator.create_bronze_metadata(bronze_input)
+    bundle = create_bundle(bronze_input)
     return PreparedBronzeMetadataWrite(
         metadata_base_path=metadata_base_path,
-        metadata=metadata,
+        metadata=bundle.metadata,
+        lineage_fragment=bundle.lineage_fragment,
     )
 
 
@@ -190,12 +158,9 @@ def _build_bronze_metadata_input_request(
 
 
 def _resolve_bronze_metadata_bundle_factory(
-    host: _BronzeMetadataWriteHostProtocol,
+    coordinator: MetadataCoordinatorPort,
 ) -> object:
     """Return bundle factory only when the coordinator exposes the override hook."""
-    coordinator = host._metadata_coordinator
-    if coordinator is None:
-        return None
     if "create_bronze_metadata_bundle" not in vars(coordinator) and getattr(
         type(coordinator),
         "create_bronze_metadata_bundle",

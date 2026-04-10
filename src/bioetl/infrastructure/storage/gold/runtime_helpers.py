@@ -5,10 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports.noop import (
-    NoOpMetadataWriter,
-    NoOpTracing,
-)
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -28,7 +25,7 @@ class GoldWriterRuntimeServices:
     """Grouped runtime collaborators for ``GoldWriter``."""
 
     csv_exporter: CsvExporter | None
-    tracing: TracingPort
+    tracing: TracingPort | None
     metrics: MetricsPort | None
     audit: AuditPort | None
     metadata_writer: MetadataWriterPort
@@ -51,7 +48,7 @@ def build_gold_writer_runtime_services(
     """Build grouped runtime collaborators while preserving default resolution."""
     return GoldWriterRuntimeServices(
         csv_exporter=csv_exporter,
-        tracing=tracing or NoOpTracing(),
+        tracing=tracing,
         metrics=metrics,
         audit=audit,
         metadata_writer=metadata_writer or NoOpMetadataWriter(),
