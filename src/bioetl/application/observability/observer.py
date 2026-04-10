@@ -30,6 +30,10 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.observability_contract import (
     build_observability_contract_payload as _build_observability_contract_payload,
 )
+from bioetl.domain.runtime_observability_publication_contract import (
+    CANONICAL_DOMAIN_EVENT_EMITTER,
+    CANONICAL_LIFECYCLE_EMITTER,
+)
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -59,6 +63,9 @@ class LifecyclePhase(StrEnum):
 
 class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
     """Structured lifecycle/domain event emission helpers."""
+
+    CANONICAL_LIFECYCLE_EMITTER = CANONICAL_LIFECYCLE_EMITTER
+    CANONICAL_DOMAIN_EVENT_EMITTER = CANONICAL_DOMAIN_EVENT_EMITTER
 
     span: Span | None
     pipeline_name: str
