@@ -466,6 +466,7 @@ class TestSilverWriterDQMetrics:
             validated_mode=SilverWriteMode.MERGE,
             bronze_refs=None,
             partition_cols=None,
+            source_batch_id=None,
             started_at=datetime(2026, 3, 11, 12, 0, tzinfo=UTC),
             start_perf=0.0,
         )

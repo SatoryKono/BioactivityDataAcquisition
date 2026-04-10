@@ -15,6 +15,7 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BronzeRecord
@@ -47,6 +48,10 @@ class _SilverWriteExecutionContext:
     column_order: list[str] | None
     bronze_refs: list[BronzeWriteResult] | None
     key_nullability_rules: list[KeyNullabilityRule] | None
+    run_id: RunID | None
+    run_type: RunType | None
+    source_batch_id: BatchID | None
+    ingestion_ts: datetime | None
     started_at: datetime
     start_perf: float
     span: Any  # Any: OpenTelemetry span interface is runtime-dependent
@@ -66,6 +71,10 @@ class _SilverWriteInvocation:
     column_order: list[str] | None
     bronze_refs: list[BronzeWriteResult] | None
     key_nullability_rules: list[KeyNullabilityRule] | None
+    run_id: RunID | None
+    run_type: RunType | None
+    source_batch_id: BatchID | None
+    ingestion_ts: datetime | None
 
 
 class _PreparedSilverWriteDispatcher(Protocol):
@@ -130,33 +139,21 @@ def _parse_table_identity(table_name: str) -> tuple[str | None, str | None]:
     return None, None
 
 
-def _extract_run_context(
-    records: list[BronzeRecord],
-) -> tuple[str | None, str | None]:
-    """Extract stable run metadata from the first Silver record when present."""
-    if not records:
-        return None, None
-
-    first_record = records[0]
-    pipeline_run_id = first_record.get("_run_id")
-    run_type = first_record.get("_run_type")
-
-    normalized_run_id = str(pipeline_run_id) if pipeline_run_id is not None else None
-    normalized_run_type = str(run_type) if run_type is not None else None
-    return normalized_run_id, normalized_run_type
-
-
 def set_silver_write_span_attributes(
     span: Any,  # Any: OpenTelemetry span type varies by backend
     *,
     table_name: str,
     mode: str,
     record_count: int,
-    records: list[BronzeRecord],
+    run_id: RunID | None,
+    run_type: RunType | None,
 ) -> None:
     """Populate core tracing attributes for a Silver write span."""
     provider, entity_type = _parse_table_identity(table_name)
-    pipeline_run_id, run_type = _extract_run_context(records)
+    pipeline_run_id = str(run_id) if run_id is not None else None
+    normalized_run_type = (
+        str(getattr(run_type, "value", run_type)) if run_type is not None else None
+    )
 
     span.set_attribute("table_name", table_name)
     span.set_attribute("mode", mode)
@@ -170,8 +167,8 @@ def set_silver_write_span_attributes(
         span.set_attribute("bioetl.entity_type", entity_type)
     if pipeline_run_id is not None:
         span.set_attribute("bioetl.pipeline_run_id", pipeline_run_id)
-    if run_type is not None:
-        span.set_attribute("bioetl.run_type", run_type)
+    if normalized_run_type is not None:
+        span.set_attribute("bioetl.run_type", normalized_run_type)
 
 
 def build_silver_write_execution_context(
@@ -192,6 +189,10 @@ def build_silver_write_execution_context(
         column_order=invocation.column_order,
         bronze_refs=invocation.bronze_refs,
         key_nullability_rules=invocation.key_nullability_rules,
+        run_id=invocation.run_id,
+        run_type=invocation.run_type,
+        source_batch_id=invocation.source_batch_id,
+        ingestion_ts=invocation.ingestion_ts,
         started_at=started_at,
         start_perf=start_perf,
         span=span,
@@ -280,7 +281,8 @@ async def execute_silver_write_with_tracing(
             table_name=invocation.table_name,
             mode=invocation.mode,
             record_count=len(invocation.records),
-            records=invocation.records,
+            run_id=invocation.run_id,
+            run_type=invocation.run_type,
         )
         ctx = build_silver_write_execution_context(
             invocation=invocation,

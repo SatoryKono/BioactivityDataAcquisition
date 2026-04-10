@@ -77,6 +77,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.ports import LineageStorePort, LoggerPort
+    from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
@@ -115,6 +116,10 @@ async def _write_single_target(
     column_order: list[str] | None,
     bronze_refs: list[BronzeWriteResult] | None,
     key_nullability_rules: list[KeyNullabilityRule] | None,
+    run_id: RunID | None,
+    run_type: RunType | None,
+    source_batch_id: BatchID | None,
+    ingestion_ts: datetime | None,
 ) -> SilverWriteResult | None:
     """Execute one physical Silver write target with tracing."""
     started_at, start_perf = datetime.now(UTC), time.perf_counter()
@@ -132,6 +137,10 @@ async def _write_single_target(
             column_order=column_order,
             bronze_refs=bronze_refs,
             key_nullability_rules=key_nullability_rules,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
         ),
         started_at=started_at,
         start_perf=start_perf,
@@ -152,6 +161,10 @@ async def _write_dual_targets(
     column_order: list[str] | None,
     bronze_refs: list[BronzeWriteResult] | None,
     key_nullability_rules: list[KeyNullabilityRule] | None,
+    run_id: RunID | None,
+    run_type: RunType | None,
+    source_batch_id: BatchID | None,
+    ingestion_ts: datetime | None,
 ) -> SilverWriteResult | None:
     """Write all versioned Silver targets and fail the logical write on any error."""
     assert writer._contract_rollout_policy is not None  # guarded by caller
@@ -181,6 +194,10 @@ async def _write_dual_targets(
                 column_order=column_order,
                 bronze_refs=bronze_refs,
                 key_nullability_rules=key_nullability_rules,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                ingestion_ts=ingestion_ts,
             )
         except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             writer.logger.error(
@@ -332,6 +349,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         column_order: list[str] | None,
         bronze_refs: list[BronzeWriteResult] | None,
         key_nullability_rules: list[KeyNullabilityRule] | None,
+        run_id: RunID | None,
+        run_type: RunType | None,
+        source_batch_id: BatchID | None,
+        ingestion_ts: datetime | None,
     ) -> SilverWriteResult | None:
         """Compatibility seam for direct test patching and dual-write orchestration."""
         return await _write_single_target(
@@ -346,6 +367,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             column_order=column_order,
             bronze_refs=bronze_refs,
             key_nullability_rules=key_nullability_rules,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
         )
 
     async def _write_dual_targets(
@@ -361,6 +386,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         column_order: list[str] | None,
         bronze_refs: list[BronzeWriteResult] | None,
         key_nullability_rules: list[KeyNullabilityRule] | None,
+        run_id: RunID | None,
+        run_type: RunType | None,
+        source_batch_id: BatchID | None,
+        ingestion_ts: datetime | None,
     ) -> SilverWriteResult | None:
         """Compatibility seam for direct test patching and dual-write orchestration."""
         return await _write_dual_targets(
@@ -375,6 +404,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             column_order=column_order,
             bronze_refs=bronze_refs,
             key_nullability_rules=key_nullability_rules,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
         )
 
     def _validate_silver_pandera(
@@ -415,6 +448,11 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
         key_nullability_rules: list[KeyNullabilityRule] | None = None,
+        *,
+        run_id: RunID | None = None,
+        run_type: RunType | None = None,
+        source_batch_id: BatchID | None = None,
+        ingestion_ts: datetime | None = None,
     ) -> SilverWriteResult | None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
@@ -434,6 +472,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 references in Silver metadata (ADR-014).
             key_nullability_rules: Optional per-key nullability overrides applied
                 before MERGE predicate evaluation.
+            run_id: Optional run identifier for tracing and audit correlation.
+            run_type: Optional run type for tracing and audit precedence.
+            source_batch_id: Optional Bronze batch identifier for lineage metadata.
+            ingestion_ts: Optional ingestion timestamp for Silver audit entries.
 
         Returns:
             SilverWriteResult with record count and write metadata, or None if
@@ -451,6 +493,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 column_order=column_order,
                 bronze_refs=bronze_refs,
                 key_nullability_rules=key_nullability_rules,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                ingestion_ts=ingestion_ts,
             )
 
         return await self._write_dual_targets(
@@ -464,6 +510,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             column_order=column_order,
             bronze_refs=bronze_refs,
             key_nullability_rules=key_nullability_rules,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
         )
 
     async def _execute_silver_write_pipeline(
