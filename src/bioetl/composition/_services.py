@@ -4,51 +4,70 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services import (
+from bioetl.application.services.pipeline_runner_service import (
     PipelineRunResult as PipelineRunResult,
 )
-from bioetl.application.services import RunOptions as RunOptions
-from bioetl.application.services import RunResult as RunResult
+from bioetl.application.services.pipeline_runner_service import RunOptions as RunOptions
+from bioetl.application.services.pipeline_runner_service import RunResult as RunResult
+from bioetl.application.services.admin_runtime_api import CheckpointManagerService
+from bioetl.application.services.audit_inspection_service import AuditInspectionService
+from bioetl.application.services.bronze_cleanup_service import (
+    BronzeCleanupResult,
+    BronzeCleanupService,
+)
+from bioetl.application.services.checkpoint_service import CheckpointService
+from bioetl.application.services.config_service import ConfigService
+from bioetl.application.services.contract_migration_service import (
+    ContractMigrationService,
+)
+from bioetl.application.services.export_service import ExportService
+from bioetl.application.services.health_service import HealthService
+from bioetl.application.services.lineage_inspection_service import (
+    LineageInspectionService,
+)
+from bioetl.application.services.lock_service import LockService
 from bioetl.application.services.metadata_coordinator import (
     MetadataCoordinator as MetadataCoordinator,
 )
-from bioetl.composition.bootstrap import (
-    HealthServerDependencies,
-    bootstrap_adr_service,
-    bootstrap_bronze_cleanup_service,
+from bioetl.application.services.metrics_service import MetricsService
+from bioetl.application.services.observability_workflow_service import (
+    ObservabilityWorkflowService,
+)
+from bioetl.application.services.pipeline_runner_service import PipelineRunnerService
+from bioetl.application.services.quarantine_service import QuarantineService
+from bioetl.application.services.run_manifest_inspection_service import (
+    RunManifestInspectionService,
+)
+from bioetl.application.services.vacuum_service import VacuumService
+from bioetl.composition.bootstrap.assembly import bootstrap_quarantine_port
+from bioetl.composition.bootstrap.cli.adr import bootstrap_adr_service
+from bioetl.composition.bootstrap.cli.checkpoint import (
+    bootstrap_audit_inspection_service,
     bootstrap_checkpoint_service,
-    bootstrap_config_service,
-    bootstrap_contract_migration_service,
-    bootstrap_export_service,
+    bootstrap_observability_workflow_service,
+    bootstrap_quarantine_service,
+)
+from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
+from bioetl.composition.bootstrap.cli.health import (
+    HealthServerDependencies,
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
-    bootstrap_lineage_service,
-    bootstrap_lock_service,
-    bootstrap_metrics_service,
-    bootstrap_pipeline_runner_service,
-    bootstrap_quarantine_port,
-    bootstrap_quarantine_service,
+)
+from bioetl.composition.bootstrap.cli.lineage import bootstrap_lineage_service
+from bioetl.composition.bootstrap.cli.lock import bootstrap_lock_service
+from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
+from bioetl.composition.bootstrap.cli.run_manifest import (
     bootstrap_run_manifest_service,
+)
+from bioetl.composition.bootstrap.cli.storage import (
+    bootstrap_bronze_cleanup_service,
+    bootstrap_contract_migration_service,
+    bootstrap_export_service,
     bootstrap_vacuum_service,
 )
+from bioetl.composition.bootstrap.runtime import bootstrap_pipeline_runner_service
 
 if TYPE_CHECKING:
-    from bioetl.application.services import (
-        BronzeCleanupResult,
-        BronzeCleanupService,
-        CheckpointService,
-        ConfigService,
-        ContractMigrationService,
-        ExportService,
-        HealthService,
-        LineageInspectionService,
-        MetricsService,
-        PipelineRunnerService,
-        QuarantineService,
-        RunManifestInspectionService,
-        VacuumService,
-    )
-    from bioetl.application.services.lock_service import LockService
     from bioetl.composition import PipelineRegistry
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
     from bioetl.domain.workflow import WorkflowConfig
@@ -57,6 +76,7 @@ if TYPE_CHECKING:
 __all__ = [
     "cleanup_bronze",
     "get_adr_service",
+    "get_audit_service",
     "get_bronze_cleanup_service",
     "get_checkpoint_service",
     "get_config_service",
@@ -67,6 +87,7 @@ __all__ = [
     "get_lineage_service",
     "get_lock_service",
     "get_metrics_service",
+    "get_observability_workflow_service",
     "get_pipeline_runner_service",
     "get_quarantine_port",
     "get_quarantine_service",
@@ -96,6 +117,12 @@ def get_checkpoint_service() -> CheckpointService:
     """
     _ensure_registrations()
     return bootstrap_checkpoint_service()
+
+
+def get_audit_service() -> AuditInspectionService:
+    """Get an audit inspection service for operator diagnostics operations."""
+    _ensure_registrations()
+    return bootstrap_audit_inspection_service()
 
 
 def get_quarantine_service() -> QuarantineService:
@@ -263,6 +290,12 @@ def get_health_service() -> HealthService:
     """
     _ensure_registrations()
     return bootstrap_health_service()
+
+
+def get_observability_workflow_service() -> ObservabilityWorkflowService:
+    """Get workflow-level observability diagnostics helpers."""
+    _ensure_registrations()
+    return bootstrap_observability_workflow_service()
 
 
 def get_health_server_dependencies() -> HealthServerDependencies:
