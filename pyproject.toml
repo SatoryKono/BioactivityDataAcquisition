@@ -127,7 +127,7 @@ dev = [
     "xenon>=0.9",
     "radon>=6.0",
     # Code duplication detection
-    "pylint>=3.0",
+    "pylint>=4.0.5",
     "detect-secrets>=1.4",
     # Dead code detection
     "vulture>=2.11",
