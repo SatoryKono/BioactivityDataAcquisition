@@ -132,7 +132,7 @@ dev = [
     # Dead code detection
     "vulture>=2.11",
     # Mutation testing
-    "mutmut>=2.5",
+    "mutmut>=3.5.0",
     # Auto-cleanup
     "autoflake>=2.3.1",
     "pre-commit>=4.5.1",
