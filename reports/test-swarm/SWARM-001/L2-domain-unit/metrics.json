@@ -1,0 +1,40 @@
+{
+  "agent_id": "L2-domain-unit",
+  "level": "L2",
+  "scope": "L2-domain-unit scope",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 5242,
+    "passed": 5242,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 93,
+    "median_duration_ms": 10,
+    "p95_duration_ms": 50
+  },
+  "metrics_after": {
+    "total_tests": 5242,
+    "passed": 5242,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 93,
+    "median_duration_ms": 10,
+    "p95_duration_ms": 50
+  },
+  "actions": {
+    "tests_fixed": 0,
+    "tests_added": 0,
+    "tests_optimized": 0,
+    "flaky_found": 1,
+    "flaky_fixed": 1,
+    "flaky_quarantined": 0
+  },
+  "top_failures": [],
+  "files_changed": [
+    "tests/unit/application/services/test_audit_inspection_service.py"
+  ],
+  "recommendations": [
+    "Optimize CI"
+  ]
+}
