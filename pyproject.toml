@@ -99,7 +99,7 @@ dev = [
     "mypy==1.19.1",
     "ruff>=0.4",
     "basedpyright>=1.0",
-    "pyrefly>=0.18",
+    "pyrefly>=0.60.2",
     "ty>=0.0.1",
     # Security tools (RULES.md - SAST)
     "pip-audit>=2.7",
