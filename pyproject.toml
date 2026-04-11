@@ -48,7 +48,7 @@ bioetl = "bioetl.interfaces.cli:main"
 
 [project.optional-dependencies]
 tracing = [
-    "opentelemetry-api>=1.20",
+    "opentelemetry-api>=1.41.0",
     "opentelemetry-sdk>=1.20",
     "opentelemetry-exporter-otlp>=1.20",
 ]
@@ -71,7 +71,7 @@ tests = [
     # Resource monitoring
     "psutil>=5.9",
     # Tracing stack for OpenTelemetry-backed tests
-    "opentelemetry-api>=1.20",
+    "opentelemetry-api>=1.41.0",
     "opentelemetry-sdk>=1.20",
     "opentelemetry-exporter-otlp>=1.20",
     # HTTP mocking (required by adapter tests)
@@ -114,7 +114,7 @@ dev = [
     # Docstring style checking
     "pydocstyle>=6.3",
     # Tracing stack for OpenTelemetry-backed tests
-    "opentelemetry-api>=1.20",
+    "opentelemetry-api>=1.41.0",
     "opentelemetry-sdk>=1.20",
     "opentelemetry-exporter-otlp>=1.20",
     # Architecture testing
