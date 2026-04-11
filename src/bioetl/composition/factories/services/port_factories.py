@@ -40,7 +40,7 @@ def create_lock() -> LockPort:
 def create_checkpoint(storage_ctx: object) -> CheckpointPort:
     """Create local filesystem checkpoint."""
     checkpoint = LocalCheckpointAdapter(
-        base_path=getattr(storage_ctx, "checkpoints_path")
+        base_path=storage_ctx.checkpoints_path
     )
     assert isinstance(checkpoint, CheckpointPort), (
         f"LocalCheckpointAdapter must implement CheckpointPort, got {type(checkpoint)}"
@@ -92,5 +92,5 @@ def _metrics_enabled(settings: object) -> bool:
     """Support both legacy flat settings and current nested observability config."""
     observability = getattr(settings, "observability", None)
     if observability is not None and hasattr(observability, "metrics_enabled"):
-        return bool(getattr(observability, "metrics_enabled"))
+        return bool(observability.metrics_enabled)
     return bool(getattr(settings, "metrics_enabled", False))

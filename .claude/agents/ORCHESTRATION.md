@@ -347,7 +347,7 @@ ______________________________________________________________________
 | `.claude/agents/py-*.md`                               | Спецификации субагентов для Claude Code CLI |
 | `.claude/rules/ai-selfreview-rules.md`                 | Правила автоматической самопроверки кода    |
 | `docs/00-project/RULES.md`                             | Архитектурные правила проекта               |
-| `docs/02-architecture/decisions/`                      | ADR-001..ADR-040                            |
+| `docs/02-architecture/decisions/`                      | ADR-001..ADR-050                            |
 | `docs/00-project/glossary.md`                          | Терминология                                |
 | `tests/architecture/`                                  | Автоматические проверки инвариантов         |
 | `docs/00-project/ai/agents/scripts/py-config-bot-1.py` | Автоматическая проверка конфигов            |
@@ -396,7 +396,7 @@ ______________________________________________________________________
 | **ChEMBL**        | ✅ Schema validation |          —           | ✅ Golden data, contracts |   ✅ Field reference   | ✅ Error repro |         —          |
 | **PubMed**        |          —           |   ✅ Coverage eval   |       ✅ Test data        |           —            |       —        |    ✅ Citations    |
 | **bioRxiv**       |          —           | ✅ Trends, research  |   ✅ Preprint test data   |           —            |       —        |     ✅ Context     |
-| **Open Targets**  | ✅ Target validation | ✅ Data availability |             —             | ✅ Join key validation |       —        |         —          |
+| **OpenAlex**  | ✅ Target validation | ✅ Data availability |             —             | ✅ Join key validation |       —        |         —          |
 | **Mermaid Chart** |   ✅ Arch diagrams   |          —           |             —             |           —            |       —        |  ✅ All diagrams   |
 | **BioRender**     |          —           |          —           |             —             |           —            |       —        | ✅ Scientific figs |
 

@@ -21,8 +21,8 @@ __all__ = [
     "build_dependency_stage_metrics",
     "build_enrichment_stage_details",
     "build_enrichment_stage_metrics",
-    "build_seed_stage_metrics",
     "build_merge_stage_metrics",
+    "build_seed_stage_metrics",
 ]
 
 

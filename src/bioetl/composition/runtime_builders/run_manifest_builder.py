@@ -31,10 +31,10 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_contract_identity as _resolve_contract_identity,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
-    resolve_replay_capability as _resolve_replay_capability,
+    resolve_provider_entity as _resolve_provider_entity,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
-    resolve_provider_entity as _resolve_provider_entity,
+    resolve_replay_capability as _resolve_replay_capability,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_run_context_values as _resolve_run_context_values,

@@ -7,8 +7,8 @@ helpers that need composition-owned dependency assembly.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from uuid import uuid4
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort

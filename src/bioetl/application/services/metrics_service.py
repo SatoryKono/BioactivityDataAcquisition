@@ -24,8 +24,8 @@ if TYPE_CHECKING:
 
 # Re-export for backward compatibility
 __all__ = [
-    "MetricsServerError",
     "MetricsPublisherPort",
+    "MetricsServerError",
     "MetricsServerPort",
     "MetricsServerStatus",
     "MetricsService",

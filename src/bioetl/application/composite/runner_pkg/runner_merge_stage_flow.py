@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from datetime import UTC, date, datetime
 
+from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
 )
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner_constants import (
     PIPELINE_EXECUTION_ERRORS,
 )

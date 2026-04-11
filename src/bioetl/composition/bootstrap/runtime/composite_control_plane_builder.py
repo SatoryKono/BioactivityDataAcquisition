@@ -26,6 +26,8 @@ from bioetl.composition.bootstrap.runtime.composite_support_service_bundles impo
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
     control_plane_root as _shared_control_plane_root,
+)
+from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _shared_to_serializable_mapping,
 )
 from bioetl.composition.services.versioning import compute_config_hash, get_git_commit

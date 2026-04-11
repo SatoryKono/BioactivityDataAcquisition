@@ -5,11 +5,11 @@ from __future__ import annotations
 from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.application.composite.runner_pkg.runner_constants import (
     DQ_REPORT_NON_FATAL_ERRORS,
     QUARANTINE_WRITE_NON_FATAL_ERRORS,
 )
+from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.application.services.dq_report_service import DQReportService
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.composite.result import MergeResult

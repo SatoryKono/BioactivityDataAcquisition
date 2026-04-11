@@ -23,7 +23,6 @@ from bioetl.composition.factories.services.pipeline_record_processor_builder imp
 if TYPE_CHECKING:
     import pyarrow as pa
 
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.application.core.runtime_wiring_api import (
         BasePipeline,
         BatchExecutor,
@@ -35,6 +34,7 @@ if TYPE_CHECKING:
         ShutdownSignal,
         TransformCallback,
     )
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier

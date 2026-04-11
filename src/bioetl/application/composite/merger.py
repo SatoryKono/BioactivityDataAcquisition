@@ -23,7 +23,6 @@ from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecord
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
     execute_merge_request,
-    execute_merge_workflow,
 )
 from bioetl.domain.composite.result import (
     DependencyResult,

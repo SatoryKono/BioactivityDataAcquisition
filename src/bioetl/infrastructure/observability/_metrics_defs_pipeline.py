@@ -5,8 +5,8 @@ from __future__ import annotations
 from prometheus_client import Counter, Histogram
 
 __all__ = [
-    "CHECKPOINT_LOAD_EVENTS_TOTAL",
     "CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL",
+    "CHECKPOINT_LOAD_EVENTS_TOTAL",
     "COMPOSITE_SOURCE_SELECTION_TOTAL",
     "CONTROL_PLANE_LEDGER_APPENDS_TOTAL",
     "CONTROL_PLANE_MANIFEST_WRITES_TOTAL",

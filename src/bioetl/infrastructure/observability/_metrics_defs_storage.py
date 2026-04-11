@@ -5,9 +5,9 @@ from __future__ import annotations
 from prometheus_client import Counter, Histogram
 
 __all__ = [
-    "BRONZE_WRITE_ATTEMPTS_TOTAL",
     "BRONZE_BYTES_WRITTEN_TOTAL",
     "BRONZE_RECORDS_WRITTEN_TOTAL",
+    "BRONZE_WRITE_ATTEMPTS_TOTAL",
     "BRONZE_WRITE_DURATION_SECONDS",
     "BRONZE_WRITE_TOTAL_DURATION_SECONDS",
     "POLICY_VIOLATIONS_TOTAL",

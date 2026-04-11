@@ -13,13 +13,13 @@ from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_merged_metadata_input,
     build_gold_metadata_input,
 )
-from bioetl.infrastructure.storage.metadata.builder_base import _parse_table_name
 from bioetl.infrastructure.storage.lineage_persistence import (
     emit_composite_source_selection_metrics,
     emit_lineage_refs_missing_metric,
     persist_lineage_fragment_if_present,
     resolve_metadata_and_lineage_fragment,
 )
+from bioetl.infrastructure.storage.metadata.builder_base import _parse_table_name
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema

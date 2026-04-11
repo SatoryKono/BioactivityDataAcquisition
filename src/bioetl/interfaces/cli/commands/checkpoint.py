@@ -14,8 +14,7 @@ import click
 from bioetl.interfaces.cli.commands._inspection_output import (
     emit_inspection_payload,
 )
-from bioetl.interfaces.cli.formatters import echo_checkpoint, echo_info
-from bioetl.interfaces.cli.formatters import echo_error
+from bioetl.interfaces.cli.formatters import echo_checkpoint, echo_error, echo_info
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (

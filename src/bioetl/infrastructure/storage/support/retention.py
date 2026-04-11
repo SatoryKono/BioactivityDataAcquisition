@@ -24,8 +24,8 @@ from typing import TYPE_CHECKING, Any, cast
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.transformations import canonical_json_dumps, normalize_for_hash
 from bioetl.domain.exceptions import TableNotFoundError
+from bioetl.domain.transformations import canonical_json_dumps, normalize_for_hash
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
