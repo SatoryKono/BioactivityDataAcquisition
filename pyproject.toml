@@ -134,7 +134,7 @@ dev = [
     # Mutation testing
     "mutmut>=2.5",
     # Auto-cleanup
-    "autoflake>=2.3.1",
+    "autoflake>=2.3.3",
     "pre-commit>=4.5.1",
 ]
 docs = [
