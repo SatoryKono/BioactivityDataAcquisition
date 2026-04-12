@@ -240,6 +240,11 @@ These events are mapped by `bioetl.domain.observability_event_mapping` and are
 emitted via `PipelineObserver.emit_domain_event(...)` as part of ordinary run
 teardown, not as a replacement for the lifecycle log/metric emitter.
 
+Terminal event timestamps are derived deterministically from
+`wall_start_time + monotonic_duration`. Missing `wall_start_time` is treated as
+an observer invariant violation rather than a reason to fall back to a fresh
+wall-clock timestamp.
+
 ## Interaction Diagram
 
 ```mermaid

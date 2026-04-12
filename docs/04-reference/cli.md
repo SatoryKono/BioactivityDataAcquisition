@@ -134,6 +134,13 @@ Supported resume modes:
 - composite resume uses checkpoint snapshot state as the base and then replays
   the ledger suffix strictly after `last_event_id`.
 
+Checkpoint load telemetry uses bounded statuses. In particular:
+
+- `observe_blocked_identity` means `observe` mode still rejected resume because
+  canonical execution identity mismatched.
+- `observe_loaded_degraded` means `observe` mode allowed resume only after a
+  non-identity compatibility warning.
+
 **Типы запуска:**
 
 | Тип           | Описание                                        | Очистка данных |
