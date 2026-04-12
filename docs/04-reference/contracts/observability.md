@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-10'
+  Last verified: '2026-04-12'
 
 ______________________________________________________________________
 
 # BioETL Observability Specification (DD)
 
-Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-10**.
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-12**.
 
 - Статус: `active`
 - Версия: `3.5.0`
@@ -50,6 +50,12 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 
 ## 2. Canonical Conventions
 
+Cross-links for canonical observability governance:
+
+- Architecture decision: [ADR-017](../../02-architecture/decisions/ADR-017-observability-architecture.md)
+- Layer responsibilities: [Observability Layers](../../02-architecture/observability-layers.md)
+- Operator validation path: [Observability Checklist](../../05-operations/runbooks/observability-checklist.md)
+
 ### 2.1 Metric naming
 
 - Prefix: `bioetl_`
@@ -74,7 +80,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 - `level`
 - время: фактически сейчас выводится `timestamp` (через `structlog.processors.TimeStamper(fmt="iso")`)
 
-Правило совместимости:
+Оставшиеся explicit compatibility behaviors:
 
 - Каноническое runtime-поле времени: `timestamp`
 - Переходный alias `ts` допустим только на уровне downstream-нормализации
@@ -327,7 +333,7 @@ not a separate postrun wall-clock publication timestamp.
 
 ## 8. Known Drifts and Required Follow-ups
 
-- На момент `2026-04-09` явных drift'ов внутри канонического observability
+- На момент `2026-04-12` явных drift'ов внутри канонического observability
   contract pack (`docs/02-architecture/observability-layers.md`,
   `docs/04-reference/contracts/observability.md`,
   `docs/05-operations/01-monitoring-guide.md`,

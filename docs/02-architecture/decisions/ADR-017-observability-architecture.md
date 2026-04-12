@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-04-12'
 
 ______________________________________________________________________
 
@@ -23,7 +23,20 @@ BioETL pipelines require comprehensive observability for debugging, performance 
 
 ## Decision
 
-We have implemented a **port-based observability architecture** with three formal Protocol definitions (`LoggerPort`, `MetricsPort`, `TracingPort`), Prometheus metrics with standardized labels, and NoOp implementations for testing.
+BioETL uses a **port-based observability architecture** with domain-owned
+contracts, application-owned emission semantics, infrastructure-owned adapters,
+and composition-owned runtime wiring.
+
+The canonical runtime contract is:
+
+- observability dependencies enter ordinary runs only through injected ports
+- metric names are `bioetl_*` and `snake_case`
+- structured logs use `timestamp`, `run_id`, `pipeline`, and `stage`
+- `PipelineObserver` is the sanctioned lifecycle emitter for ordinary pipeline
+  runs
+- composition owns the supported bootstrap and diagnostics assembly seams
+- compatibility layers may exist, but they must delegate back to canonical
+  runtime seams and be documented explicitly
 
 ### 1. Observability Ports as Formal Protocols
 
@@ -114,53 +127,46 @@ class TracingPort(Protocol):
 
 ### 2. Prometheus Metrics with Standardized Labels
 
-Metrics are exposed at `http://localhost:{BIOETL_METRICS_PORT}/metrics` (default: 8000).
+Metrics are exposed at
+`http://localhost:${BIOETL_METRICS_PORT:-8000}/metrics` when the metrics server
+is enabled.
 
-**Pipeline Metrics (prefix: `bioetl-`):**
+Canonical naming rules:
 
-| Metric                      | Type      | Labels                            | Description              |
-| --------------------------- | --------- | --------------------------------- | ------------------------ |
-| `pipeline-duration-seconds` | Histogram | pipeline, stage, status, run-type | Stage execution duration |
-| `records-processed-total`   | Counter   | pipeline, stage, run-type         | Processed record count   |
-| `errors-total`              | Counter   | pipeline, stage, error-code       | Error count by type      |
-| `batch-size-records`        | Histogram | pipeline, stage                   | Batch size distribution  |
+- prefix: `bioetl_`
+- case: `snake_case`
+- counters use suffix `_total`
+- duration families use `_seconds` or `_ms`
+- labels remain bounded and MUST NOT include `run_id`, filesystem paths,
+  manifest identifiers, or other high-cardinality runtime anchors
 
-**Circuit Breaker Metrics:**
+Representative runtime families:
 
-| Metric                          | Type    | Labels  | Description                   |
-| ------------------------------- | ------- | ------- | ----------------------------- |
-| `circuit-breaker-state`         | Gauge   | adapter | 0=Closed, 1=Half-Open, 2=Open |
-| `circuit-breaker-trips-total`   | Counter | adapter | Total OPEN transitions        |
-| `circuit-breaker-success-total` | Counter | adapter | Successful calls              |
-| `circuit-breaker-failure-total` | Counter | adapter | Failed calls                  |
+| Metric                                  | Type      | Labels                     | Description                            |
+| --------------------------------------- | --------- | -------------------------- | -------------------------------------- |
+| `bioetl_pipeline_duration_seconds`      | Histogram | pipeline, stage, status, run_type | Pipeline/stage duration           |
+| `bioetl_records_processed_total`        | Counter   | pipeline, stage, run_type  | Processed record count                 |
+| `bioetl_errors_total`                   | Counter   | pipeline, stage, error_code | Error taxonomy counts                |
+| `bioetl_circuit_breaker_state`          | Gauge     | adapter                    | 0=Closed, 1=Half-Open, 2=Open          |
+| `bioetl_dq_validation_score`            | Gauge     | pipeline, entity           | DQ score in `[0,1]`                    |
+| `bioetl_data_freshness_seconds`         | Gauge     | pipeline, entity           | Application-owned ingestion anchor     |
+| `bioetl_postrun_phase_events_total`     | Counter   | pipeline, phase, status    | Bounded postrun subphase outcomes      |
+| `bioetl_postrun_phase_duration_seconds` | Histogram | pipeline, phase, status    | Bounded postrun subphase durations     |
 
-**Data Quality Metrics:**
+Legacy `kebab-case` names such as `pipeline-duration-seconds` are not part of
+the current runtime contract.
 
-| Metric                         | Type    | Labels                     | Description           |
-| ------------------------------ | ------- | -------------------------- | --------------------- |
-| `dq-records-quarantined-total` | Counter | pipeline, error-code       | Quarantined records   |
-| `dq-anomaly-detected`          | Counter | pipeline, metric, severity | Anomaly detections    |
-| `dq-baseline-samples`          | Gauge   | pipeline, metric           | Baseline sample count |
+### 3. NoOp Implementations for Testing and Graceful Degradation
 
-**Maintenance Metrics:**
-
-| Metric                       | Type      | Labels       | Description            |
-| ---------------------------- | --------- | ------------ | ---------------------- |
-| `vacuum-duration-seconds`    | Histogram | table        | VACUUM operation time  |
-| `vacuum-files-removed-total` | Counter   | table, layer | Removed file count     |
-| `archive-duration-seconds`   | Histogram | table        | Archive operation time |
-
-### 3. NoOp Implementations for Testing
-
-Each port has a corresponding NoOp implementation. `NoOpMetrics` and `NoOpTracing`
-live in `domain/ports/noop.py` (no I/O dependencies), while `NoOpLogger` lives in
-`infrastructure/observability/noop_logger.py` (adapter-level fallback):
+`NoOpMetrics` and `NoOpTracing` live in `domain/ports/noop/` so they can be
+used without infrastructure dependencies. `NoOpLogger` remains an
+adapter-level fallback in infrastructure.
 
 | Port          | NoOp Implementation | Location                                          |
 | ------------- | ------------------- | ------------------------------------------------- |
 | `LoggerPort`  | `NoOpLogger`        | `infrastructure/observability/noop_logger.py`     |
-| `MetricsPort` | `NoOpMetrics`       | `domain/ports/noop.py`                            |
-| `TracingPort` | `NoOpTracing`       | `domain/ports/noop.py` (mirrors OTel API surface) |
+| `MetricsPort` | `NoOpMetrics`       | `domain/ports/noop/_metrics.py`                   |
+| `TracingPort` | `NoOpTracing`       | `domain/ports/noop/_tracing.py`                   |
 
 **Key Features of NoOp Implementations:**
 
@@ -183,14 +189,23 @@ Structured JSON logs with mandatory fields:
 
 | Field          | Required  | Example                        |
 | -------------- | --------- | ------------------------------ |
-| `ts`           | MUST      | `2025-12-26T10:00:00Z`         |
-| `level`        | MUST      | `INFO`, `ERROR`                |
-| `run-id`       | MUST      | UUID                           |
+| `timestamp`    | MUST      | `2026-04-12T13:02:47Z`         |
+| `level`        | MUST      | `info`, `warning`, `error`     |
+| `run_id`       | MUST      | UUID                           |
 | `pipeline`     | MUST      | `chembl_activity`              |
 | `stage`        | MUST      | `extract`, `transform`, `load` |
 | `dataset`      | SHOULD    | `chembl.activity`              |
-| `record-count` | SHOULD    | 1000                           |
-| `error-type`   | On errors | `SCHEMA-VIOLATION`             |
+| `record_count` | SHOULD    | 1000                           |
+| `error_type`   | On errors | `SCHEMA_VIOLATION`             |
+
+Compatibility notes:
+
+- `timestamp` is the canonical runtime field name
+- downstream normalization may still accept `ts` as an alias, but `ts` is not
+  the canonical emitted field name
+- `extra={...}` is accepted as compatibility input by `UnifiedLogger`, then
+  flattened into top-level structured fields with explicit kwargs taking
+  precedence
 
 ## Justification
 
@@ -215,9 +230,10 @@ Tests don't need to mock observability:
 Consistent labeling across all metrics:
 
 - `pipeline`: identifies the data pipeline
-- `stage`: extract/transform/load phase
+- `stage`: bounded runtime stage label
 - `run-type`: incremental/backfill/rebuild
-- Enables PromQL queries like: `sum(errors-total{pipeline="chembl_activity"}) by (error-code)`
+- Enables PromQL queries like:
+  `sum(bioetl_errors_total{pipeline="chembl_activity"}) by (error_code)`
 
 ### 4. Runtime Checkable Protocols
 
@@ -232,50 +248,69 @@ All ports use `@runtime-checkable`:
 ### Port Location
 
 ```
-src/bioetl/domain/ports/observability.py
-    LoggerPort
-    MetricsPort
-    TracingPort
-    DQMonitorPort
+src/bioetl/domain/ports/observability/
+    logging.py
+    metrics.py
+    tracing.py
+    dq_monitor.py
+src/bioetl/domain/ports/audit.py
 ```
 
 ### Adapter Location
 
 ```
-src/bioetl/domain/ports/
-    observability.py        # LoggerPort, MetricsPort, TracingPort, DQMonitorPort
-    noop.py                 # NoOpTracing, NoOpMetrics (no I/O, usable by all layers)
+src/bioetl/domain/ports/observability/
+    logging.py
+    metrics.py
+    tracing.py
+    dq_monitor.py
+src/bioetl/domain/ports/noop/
+    _metrics.py
+    _tracing.py
+src/bioetl/domain/ports/audit.py
 
 src/bioetl/infrastructure/observability/
-    logging.py              # StructlogLogger adapter
-    unified_logger.py       # UnifiedLogger (Log Schema enforcement)
-    logging_config.py       # Centralized structlog configuration
-    metrics.py              # Prometheus metric definitions
-    prometheus_metrics.py   # PrometheusMetrics adapter
-    tracing.py              # OpenTelemetryTracer (real OTel facade adapter)
-    noop_logger.py          # NoOpLogger (adapter-level fallback)
-    server.py               # Prometheus HTTP server
-    anomaly/                # DataQualityMonitor
+    unified_logger.py
+    logging_config.py
+    prometheus_metrics.py
+    prometheus_metric_registries.py
+    tracing.py
+    noop_logger.py
+    server.py
+    anomaly/monitor.py
+
+src/bioetl/composition/bootstrap/runtime/
+    logger_bootstrap.py
+    metrics_bootstrap.py
+    tracing_bootstrap.py
+    observability_bundle.py
+src/bioetl/composition/observability_api.py
 ```
 
 ### Dependency Injection
 
 ```python
-# composition/bootstrap/runtime/observability.py
-def bootstrap-metrics-port(settings: Settings) -> MetricsPort:
-    if not settings.observability.metrics-enabled:
-        return NoOpMetrics(warn-on-use=False)
-    return PrometheusMetrics()
+# composition/bootstrap/runtime/logger_bootstrap.py
+logger = bootstrap_logger_port(pipeline, run_id, log_level)
 
-def bootstrap-logger-port(
-    pipeline: str, run-id: UUID | None = None, log-level: str = "INFO",
-) -> LoggerPort:
-    return UnifiedLogger(pipeline=pipeline, run-id=run-id or uuid4(), log-level=log-level)
+# composition/bootstrap/runtime/metrics_bootstrap.py
+metrics = bootstrap_metrics_port(settings)
 
-def bootstrap-tracer-port(settings: Settings, service-name: str = "bioetl") -> TracingPort:
-    if settings.observability.tracing-enabled:
-        return OpenTelemetryTracer(service-name=service-name)
-    return NoOpTracing()
+# composition/bootstrap/runtime/tracing_bootstrap.py
+tracer = bootstrap_tracer_port(settings, service_name="bioetl")
+
+# composition/bootstrap/runtime/observability_bundle.py
+bundle = bootstrap_observability_bundle_impl(
+    pipeline=pipeline,
+    run_id=run_id,
+    settings=settings,
+    log_level=log_level,
+    logger_bootstrapper=bootstrap_logger_port,
+    tracer_bootstrapper=bootstrap_tracer_port,
+    metrics_bootstrapper=bootstrap_metrics_port,
+    dq_monitor_bootstrapper=bootstrap_dq_monitor,
+    preflight_validator=validate_observability_preflight_impl,
+)
 ```
 
 ### Usage in Pipeline
@@ -294,18 +329,47 @@ class PipelineRunner:
         self.tracing = tracing
 
     async def run-stage(self, stage: str) -> None:
-        self.logger.info("stage-started", stage=stage)
+        self.logger.info("stage_started", stage=stage)
         start = time.monotonic()
 
         # ... processing ...
 
         duration = time.monotonic() - start
-        self.metrics.observe-histogram(
-            "pipeline-duration-seconds",
+        self.metrics.observe_histogram(
+            "bioetl_pipeline_duration_seconds",
             duration,
             {"pipeline": self.name, "stage": stage, "status": "success"},
         )
 ```
+
+### 5. Runtime Publication Boundaries
+
+- `PipelineObserver` is the canonical lifecycle emitter for ordinary runs
+- `PreflightService` and `HealthAggregator` may build typed reports, but
+  runner-owned observer emission is the sanctioned runtime publication path for
+  preflight lifecycle signals
+- `DataQualityService` derives a canonical DQ timestamp from the same
+  application-owned freshness anchor published via
+  `bioetl_data_freshness_seconds`, and passes that timestamp into
+  `DQMonitorPort.check_quality(...)` and
+  `DQMonitorPort.update_baseline_from_metrics(...)`
+- `PostrunService` publishes nested spans plus bounded low-cardinality metrics
+  and logs for `dq_evaluation`, `dq_reports`, `compaction`, `vacuum`, and
+  `final_metadata`
+
+### 6. Public Seams and Compatibility Layers
+
+The canonical public seam for observability-related diagnostics and composition
+assembly is `bioetl.composition.observability_api`.
+
+Remaining compatibility layers are explicit:
+
+- `bioetl.interfaces.observability` remains a compatibility facade for
+  interface-layer consumers and delegates back to the composition API
+- `UnifiedLogger` accepts `extra={...}` compatibility input but emits flat
+  top-level structured fields
+- downstream log normalization may still accept `ts`, but runtime emission uses
+  `timestamp`
 
 ## Alternatives Considered
 
@@ -349,7 +413,7 @@ Rejected because:
 - **Easy testing**: NoOp implementations require zero setup
 - **Flexible backends**: Can swap Prometheus for CloudWatch, structlog for loguru
 - **Type safety**: `@runtime-checkable` validates implementations
-- **Consistent labels**: Standard aggregation patterns in dashboards
+- **Consistent labels**: Standard aggregation patterns in dashboards and alerts
 
 ### Negative
 
@@ -365,6 +429,9 @@ Rejected because:
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — logging integration
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement — enforces this architecture
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — NoOp pattern for tracing defined here
+- [Observability Layers](../observability-layers.md): current layer responsibilities
+- [Observability Specification](../../04-reference/contracts/observability.md): current runtime contract and metric catalog
+- [Observability Checklist](../../05-operations/runbooks/observability-checklist.md): operator validation and diagnostics path
 
 ## Compliance
 

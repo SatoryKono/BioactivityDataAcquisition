@@ -852,7 +852,7 @@ class TestFilteredDataSourceMetrics:
 
         calls = mock_metrics.increment_counter.call_args_list
         counter_names = [call.args[0] for call in calls]
-        assert "filter_combinations_loaded_total" in counter_names
+        assert "bioetl_filter_combinations_loaded_total" in counter_names
         assert counter_names.count("bioetl_filter_ids_loaded_total") == 2
 
 

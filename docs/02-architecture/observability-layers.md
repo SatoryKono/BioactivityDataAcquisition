@@ -1,11 +1,11 @@
 ---
-Version: 1.1.0
+Version: 1.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-10'
+Last verified: '2026-04-12'
 ---
 
 # Observability Layers Architecture
@@ -193,6 +193,15 @@ Metrics server lifecycle and Pushgateway-style publication are exposed through
 the composition-owned `MetricsService` path. Public call sites should use
 `bioetl.composition.observability_api` rather than importing infra publication
 helpers directly.
+
+Remaining explicit compatibility layers:
+
+- `bioetl.interfaces.observability` stays as an interface-layer facade over
+  `bioetl.composition.observability_api`
+- `UnifiedLogger` accepts `extra={...}` compatibility input, but runtime emits
+  flat top-level fields and canonical `timestamp`
+- downstream log normalization may still accept `ts`, but `ts` is not a
+  canonical emitted field name
 
 Terminal typed Domain Events now publish through the canonical observer route
 for ordinary pipeline outcomes:
