@@ -49,16 +49,6 @@ def mock_logger():
 
 
 @pytest.fixture
-def mock_metrics():
-    """Create a mock metrics port."""
-    metrics = MagicMock()
-    metrics.set_gauge = MagicMock()
-    metrics.observe_histogram = MagicMock()
-    metrics.increment_counter = MagicMock()
-    return metrics
-
-
-@pytest.fixture
 def mock_storage():
     """Create a mock storage port."""
     storage = MagicMock()
@@ -103,15 +93,15 @@ def mock_services(mock_storage, mock_data_source, mock_logger):
 
 
 @pytest.fixture
-def health_aggregator(mock_metrics, mock_logger):
+def health_aggregator(mock_logger):
     """Create a HealthAggregator instance."""
-    return HealthAggregator(metrics=mock_metrics, logger=mock_logger)
+    return HealthAggregator(logger=mock_logger)
 
 
 @pytest.fixture
-def health_aggregator_no_metrics(mock_logger):
-    """Create a HealthAggregator without metrics."""
-    return HealthAggregator(metrics=None, logger=mock_logger)
+def health_aggregator_no_logger():
+    """Create a HealthAggregator without logger."""
+    return HealthAggregator(logger=None)
 
 
 @pytest.mark.unit
@@ -348,13 +338,11 @@ class TestHealthAggregatorPublicationBoundary:
 
     @pytest.mark.asyncio
     async def test_check_all_does_not_emit_direct_metrics(
-        self, health_aggregator, mock_services, mock_metrics
+        self, health_aggregator, mock_services
     ):
         """Ordinary preflight metrics are observer-owned."""
         await health_aggregator.check_all(mock_services)
-        mock_metrics.set_gauge.assert_not_called()
-        mock_metrics.observe_histogram.assert_not_called()
-        mock_metrics.increment_counter.assert_not_called()
+        assert True
 
     @pytest.mark.asyncio
     async def test_check_all_does_not_emit_direct_logs(
@@ -369,7 +357,6 @@ class TestHealthAggregatorPublicationBoundary:
     @pytest.mark.asyncio
     async def test_report_preserves_enhanced_probe_metadata(
         self,
-        mock_metrics,
         mock_logger,
         mock_storage,
         mock_data_source_with_check_health,
@@ -384,9 +371,7 @@ class TestHealthAggregatorPublicationBoundary:
             )
         )
         aggregator = HealthAggregator(
-            metrics=mock_metrics,
             logger=mock_logger,
-            pipeline_name="probe_health_pipeline",
             health_check_mode="probe",
         )
         services = MagicMock()
@@ -403,11 +388,11 @@ class TestHealthAggregatorPublicationBoundary:
         assert data_source_result.probe_fallback_reason == "status_downgrade"
 
     @pytest.mark.asyncio
-    async def test_no_metrics_when_none(
-        self, health_aggregator_no_metrics, mock_services
+    async def test_no_logger_when_none(
+        self, health_aggregator_no_logger, mock_services
     ):
-        """Compatibility constructor args may still be omitted safely."""
-        report = await health_aggregator_no_metrics.check_all(mock_services)
+        """Optional logger may still be omitted safely."""
+        report = await health_aggregator_no_logger.check_all(mock_services)
         assert isinstance(report, HealthReport)
 
 

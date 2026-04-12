@@ -36,9 +36,7 @@ def _build_preflight_dependencies(
     """Build injected dependencies for PreflightService."""
     return {
         "health_aggregator": _HealthAggregator(
-            metrics=metrics,
             logger=logger,
-            pipeline_name=config.pipeline_name,
             health_check_mode=health_check_mode,
         ),
         "medallion_validator": _MedallionConfigValidator(

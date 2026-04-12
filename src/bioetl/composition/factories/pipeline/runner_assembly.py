@@ -139,9 +139,7 @@ def _build_preflight_service(
 ) -> PreflightService:
     pipeline = context.pipeline
     health_aggregator = HealthAggregator(
-        metrics=pipeline.services.metrics,
         logger=context.logger_port,
-        pipeline_name=pipeline.config.pipeline_name,
         health_check_mode=pipeline.runtime.health_check_mode,
     )
     medallion_validator = MedallionConfigValidator(
