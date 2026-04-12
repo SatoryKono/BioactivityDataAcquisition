@@ -180,6 +180,9 @@ aggregate counts.
 Intentional exclusions:
 
 - record-level quarantine explorer/detail lookups remain metric/log-only for now
+- filtered quarantine explorer helpers remain metric/log-only for now:
+  `list_filtered_records`, `get_filtered_record`, `get_filtered_stats`,
+  `get_filtered_filter_options`
 - CLI commands remain thin adapters and must not start infrastructure-specific tracing directly
 
 ### Audit traceability

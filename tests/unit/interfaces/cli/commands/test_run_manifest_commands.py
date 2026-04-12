@@ -228,6 +228,7 @@ class _FakeRunManifestService:
                     "run_shutdown": False,
                     "artifact_linkage_gap": False,
                     "lineage_gap": False,
+                    "immutable_input_snapshot_gap": False,
                     "strict_replay_boundary_gap": False,
                     "dq_signal_present": True,
                     "cross_validation_signal_present": True,

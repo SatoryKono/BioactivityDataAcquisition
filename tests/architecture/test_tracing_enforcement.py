@@ -424,3 +424,55 @@ class TestMandatorySpans:
             if not found and filename in ["runner.py", "batch_executor.py"]:
                 # These are critical - fail if not found
                 assert found, f"Critical file {filename} should have methods {methods}"
+
+
+class TestOperatorTracingPolicy:
+    """Freeze the bounded operator/admin tracing surface."""
+
+    def test_metrics_service_operator_workflows_remain_traced(self):
+        """MetricsService admin operations should keep application-owned spans."""
+        source = Path(
+            "src/bioetl/application/services/metrics_service.py"
+        ).read_text(encoding="utf-8")
+        assert "traced_operation" in source
+        for span_name in (
+            "metrics.start",
+            "metrics.get_status",
+            "metrics.push_to_gateway",
+        ):
+            assert span_name in source
+
+    def test_quarantine_service_selected_workflows_remain_traced(self):
+        """Bounded quarantine admin workflows should keep tracing coverage."""
+        source = Path(
+            "src/bioetl/application/services/quarantine_service.py"
+        ).read_text(encoding="utf-8")
+        assert "traced_async_operation" in source or "traced_operation" in source
+        for span_name in (
+            "quarantine.inspect",
+            "quarantine.stats",
+            "quarantine.replay",
+            "quarantine.mark_reprocessed",
+            "quarantine.purge",
+            "quarantine.update_status",
+        ):
+            assert span_name in source
+
+    def test_filtered_quarantine_explorer_helpers_remain_untraced(self):
+        """Filtered explorer/detail flows stay metric/log-only by policy."""
+        source = Path(
+            "src/bioetl/application/services/_quarantine_service_filtered_mixin.py"
+        ).read_text(encoding="utf-8")
+        assert "traced_async_operation" not in source
+        assert "traced_operation" not in source
+
+    def test_observability_workflow_service_keeps_narrow_traced_scope(self):
+        """Diagnostics workflows should stay limited to bounded aggregate helpers."""
+        source = Path(
+            "src/bioetl/application/services/observability_workflow_service.py"
+        ).read_text(encoding="utf-8")
+        for span_name in (
+            "diagnostics.inspect_audit_run",
+            "diagnostics.inspect_checkpoint_workflow",
+        ):
+            assert span_name in source
