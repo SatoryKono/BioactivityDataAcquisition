@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
@@ -14,6 +15,8 @@ from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
+from bioetl.infrastructure.errors import build_storage_error
+from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = ["FileRunManifestStore"]
 
@@ -54,22 +57,33 @@ class FileRunManifestStore(RunManifestPort):
         manifest_path = self.base_path / f"{manifest.manifest_id}.json"
         run_index_dir = self.base_path / "_by_run_id"
         run_index_path = run_index_dir / f"{manifest.run_id}.txt"
+        failed_path = manifest_path
         try:
             self.base_path.mkdir(parents=True, exist_ok=True)
             run_index_dir.mkdir(parents=True, exist_ok=True)
-            manifest_path.write_text(
+            atomic_write_text(
+                manifest_path,
                 json.dumps(manifest.to_dict(), indent=2, sort_keys=True),
-                encoding="utf-8",
             )
-            run_index_path.write_text(manifest.manifest_id, encoding="utf-8")
-        except (OSError, TypeError, ValueError):
+            failed_path = run_index_path
+            atomic_write_text(run_index_path, manifest.manifest_id)
+        except (OSError, TypeError, ValueError) as error:
+            if failed_path == run_index_path:
+                self._rollback_manifest_file(manifest_path)
             _emit_manifest_write_metric(
                 self.metrics,
                 pipeline=manifest.pipeline_name,
                 run_type=manifest.run_type.value,
                 status="failed",
             )
-            raise
+            raise build_storage_error(
+                message_prefix="Run manifest",
+                operation="save",
+                path=failed_path,
+                error=error,
+                manifest_id=manifest.manifest_id,
+                run_id=str(manifest.run_id),
+            ) from error
         _emit_manifest_write_metric(
             self.metrics,
             pipeline=manifest.pipeline_name,
@@ -104,11 +118,7 @@ class FileRunManifestStore(RunManifestPort):
         started_at = perf_counter()
         status = "success"
         try:
-            run_index_path = self.base_path / "_by_run_id" / f"{run_id}.txt"
-            if not run_index_path.exists():
-                status = "miss"
-                return None
-            manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+            manifest_id = self._load_manifest_id_for_run_id(run_id)
             if not manifest_id:
                 status = "miss"
                 return None
@@ -137,4 +147,23 @@ class FileRunManifestStore(RunManifestPort):
         payload = json.loads(manifest_path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
             raise ValueError("Manifest payload must be a JSON object")
-        return RunManifest.from_dict(payload)
+        manifest = RunManifest.from_dict(payload)
+        indexed_manifest_id = self._load_manifest_id_for_run_id(manifest.run_id)
+        if indexed_manifest_id != manifest.manifest_id:
+            return None
+        return manifest
+
+    def _load_manifest_id_for_run_id(self, run_id: RunID) -> str | None:
+        """Return the indexed manifest identifier for one run when present."""
+        run_index_path = self.base_path / "_by_run_id" / f"{run_id}.txt"
+        if not run_index_path.exists():
+            return None
+        manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+        return manifest_id or None
+
+    @staticmethod
+    def _rollback_manifest_file(manifest_path: Path) -> None:
+        """Remove a manifest file when a later consistency step fails."""
+        with suppress(OSError):
+            if manifest_path.exists():
+                manifest_path.unlink()
