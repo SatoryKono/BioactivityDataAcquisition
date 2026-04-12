@@ -97,6 +97,14 @@ bioetl run-manifest show <RUN-ID>
 дополнительно включён `run_ledger_enabled`, runtime пишет append-only историю
 lifecycle и artifact publication events, связанную через `manifest_id`.
 
+Минимальный static control-plane contract задаётся через
+`settings.pipeline.control_plane.required_persistence_profile`:
+
+- `degraded_observable` — достаточно manifest/ledger rollout по текущим флагам;
+- `replay_ready` — runtime требует `run_manifest_enabled=true`;
+- `forensic_grade` — runtime требует и `run_manifest_enabled=true`, и
+  `run_ledger_enabled=true`.
+
 Для inspection используются команды:
 
 ```bash
@@ -185,7 +193,9 @@ bioetl run --pipeline chembl_activity --resume
 Resume-совместимость checkpoint управляется через
 `settings.pipeline.control_plane.checkpoint_compatibility_policy`:
 
-- `observe` — продолжить resume даже при несовместимости, но записать warning.
+- `observe` — degraded operator mode: допускает только non-identity degraded
+  warnings, но canonical execution-identity mismatch всё равно блокирует
+  resume.
 - `soft_fail` (default) — заблокировать resume при несовместимости без падения процесса.
 - `hard_fail` — завершить запуск ошибкой при несовместимости checkpoint/runtime identity.
 

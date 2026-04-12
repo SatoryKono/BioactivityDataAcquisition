@@ -16,11 +16,14 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.span_helpers import traced_operation
 from bioetl.domain.exceptions import BioETLError, MetricsServerError
 from bioetl.domain.ports import MetricsPublisherPort, MetricsServerPort
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from opentelemetry.trace import Span
+
+    from bioetl.domain.ports import LoggerPort, TracingPort
 
 # Re-export for backward compatibility
 __all__ = [
@@ -110,10 +113,41 @@ class MetricsService:
     """
 
     logger: LoggerPort
+    tracer: TracingPort | None = None
     _server: MetricsServerPort
     _publisher: MetricsPublisherPort | None = field(default=None, repr=False)
     _port: int | None = field(default=None, repr=False)
     _started_at: datetime | None = field(default=None, repr=False)
+    TRACER_NAME = "bioetl.metrics_admin"
+
+    def _build_span_attributes(
+        self,
+        *,
+        operation: str,
+        **extra: object,
+    ) -> dict[str, object]:
+        """Build bounded tracing attributes for operator metrics workflows."""
+        return {
+            "bioetl.component": "metrics_service",
+            "bioetl.operation": operation,
+            **extra,
+        }
+
+    @staticmethod
+    def _set_result_attributes(
+        span: Span,
+        *,
+        success: bool,
+        error: str | None = None,
+        **extra: object,
+    ) -> None:
+        """Attach bounded result attributes to the active metrics span."""
+        span.set_attribute("bioetl.success", success)
+        for key, value in extra.items():
+            span.set_attribute(key, value)
+        if error is not None:
+            span.set_attribute("error", True)
+            span.set_attribute("bioetl.error", error)
 
     def _handle_start_error(
         self,
@@ -172,6 +206,52 @@ class MetricsService:
         Raises:
             MetricsServerError: If fail_fast=True and server cannot start.
         """
+        if self.tracer is None:
+            return self._start_impl(
+                port=port,
+                addr=addr,
+                fail_fast=fail_fast,
+                retry_count=retry_count,
+                retry_delay=retry_delay,
+            )
+        with traced_operation(
+            self.tracer,
+            "metrics.start",
+            self._build_span_attributes(
+                operation="start",
+                **{
+                    "bioetl.port": port,
+                    "bioetl.addr": addr,
+                    "bioetl.fail_fast": fail_fast,
+                },
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            result = self._start_impl(
+                port=port,
+                addr=addr,
+                fail_fast=fail_fast,
+                retry_count=retry_count,
+                retry_delay=retry_delay,
+            )
+            self._set_result_attributes(
+                span,
+                success=result.success,
+                error=result.error,
+                **{"bioetl.already_running": result.already_running},
+            )
+            return result
+
+    def _start_impl(
+        self,
+        *,
+        port: int,
+        addr: str,
+        fail_fast: bool,
+        retry_count: int,
+        retry_delay: float,
+    ) -> StartResult:
+        """Implement metrics server startup without tracing concerns."""
         self.logger.debug(
             "Starting metrics server",
             port=port,
@@ -223,12 +303,26 @@ class MetricsService:
             >>> if status.running:
             ...     logger.info("Server running", port=status.port)
         """
-        running = self._server.is_running()
-        return MetricsServerStatus(
-            running=running,
-            port=self._port if running else None,
-            started_at=self._started_at if running else None,
-        )
+        if self.tracer is None:
+            running = self._server.is_running()
+            return MetricsServerStatus(
+                running=running,
+                port=self._port if running else None,
+                started_at=self._started_at if running else None,
+            )
+        with traced_operation(
+            self.tracer,
+            "metrics.get_status",
+            self._build_span_attributes(operation="get_status"),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            running = self._server.is_running()
+            self._set_result_attributes(span, success=True, **{"bioetl.running": running})
+            return MetricsServerStatus(
+                running=running,
+                port=self._port if running else None,
+                started_at=self._started_at if running else None,
+            )
 
     def is_running(self) -> bool:
         """Check if the metrics server is currently running.
@@ -247,6 +341,40 @@ class MetricsService:
     ) -> PushResult:
         """Publish current metrics snapshot through the explicit publisher port."""
         labels = dict(grouping_key or {})
+        if self.tracer is None:
+            return self._push_to_gateway_impl(
+                gateway=gateway,
+                run_label=run_label,
+                labels=labels,
+            )
+        with traced_operation(
+            self.tracer,
+            "metrics.push_to_gateway",
+            self._build_span_attributes(
+                operation="push_to_gateway",
+                **{
+                    "bioetl.run_label": run_label,
+                    "bioetl.grouping_key_count": len(labels),
+                },
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            result = self._push_to_gateway_impl(
+                gateway=gateway,
+                run_label=run_label,
+                labels=labels,
+            )
+            self._set_result_attributes(span, success=result.success, error=result.error)
+            return result
+
+    def _push_to_gateway_impl(
+        self,
+        *,
+        gateway: str,
+        run_label: str,
+        labels: dict[str, str],
+    ) -> PushResult:
+        """Implement gateway publication without tracing concerns."""
         if self._publisher is None:
             error = "Metrics publisher is not configured"
             self.logger.warning(

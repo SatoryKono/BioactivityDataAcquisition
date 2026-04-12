@@ -271,6 +271,7 @@ ______________________________________________________________________
 
 - `settings.pipeline.control_plane.run_manifest_enabled`
 - `settings.pipeline.control_plane.run_ledger_enabled`
+- `settings.pipeline.control_plane.required_persistence_profile`
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy`
 
 Operational semantics:
@@ -279,6 +280,10 @@ Operational semantics:
 - если `run_manifest_enabled=true` и `run_ledger_enabled=false`, `show`
   вернёт manifest payload, но без ledger history;
 - `run_ledger_enabled=true` допустим только при `run_manifest_enabled=true`;
+- `required_persistence_profile=replay_ready` требует
+  `run_manifest_enabled=true`;
+- `required_persistence_profile=forensic_grade` требует и
+  `run_manifest_enabled=true`, и `run_ledger_enabled=true`;
 - `checkpoint_compatibility_policy` принимает значения `observe`, `soft_fail`,
   `hard_fail` и управляет resume-поведением при checkpoint identity mismatch.
 - `observe` не является strict reproducibility mode: canonical

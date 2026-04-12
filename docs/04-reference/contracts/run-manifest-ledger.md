@@ -78,6 +78,7 @@ The control-plane runtime is governed by the runtime object path
 
 | Setting                           |     Default | Effect                                                                                            |
 | --------------------------------- | ----------: | ------------------------------------------------------------------------------------------------- |
+| `required_persistence_profile`    | `degraded_observable` | Minimum control-plane persistence contract required for this runtime (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `run_manifest_enabled`            |      `true` | Create immutable manifest before runner assembly / execution starts                               |
 | `run_ledger_enabled`              |      `true` | Append lifecycle and inspection events keyed by `manifest_id`                                     |
 | `checkpoint_compatibility_policy` | `soft_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`) |
@@ -87,6 +88,8 @@ Current rollout semantics:
 1. `run_manifest_enabled=false` disables both manifest creation and ledger attachment for new runs because runtime assembly coerces the effective flag set to `(False, False)`.
 1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes.
 1. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
+1. `required_persistence_profile=replay_ready` requires `run_manifest_enabled=true`.
+1. `required_persistence_profile=forensic_grade` requires both `run_manifest_enabled=true` and `run_ledger_enabled=true`.
 1. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
    `observe` remains a degraded operator mode for non-identity signals, but canonical
    execution-identity mismatches still block resume; `soft_fail` blocks resume;

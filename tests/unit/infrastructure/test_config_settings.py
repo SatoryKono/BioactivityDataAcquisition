@@ -41,6 +41,10 @@ class TestPipelineSettings:
         assert settings.control_plane.run_manifest_enabled is True
         assert settings.control_plane.run_ledger_enabled is True
         assert settings.control_plane.checkpoint_compatibility_policy == "soft_fail"
+        assert (
+            settings.control_plane.required_persistence_profile
+            == "degraded_observable"
+        )
 
     def test_custom_values(self) -> None:
         """Test custom pipeline settings."""
@@ -62,6 +66,7 @@ class TestPipelineSettings:
                 "run_manifest_enabled": True,
                 "run_ledger_enabled": False,
                 "checkpoint_compatibility_policy": "observe",
+                "required_persistence_profile": "replay_ready",
             },
         )
 
@@ -80,6 +85,7 @@ class TestPipelineSettings:
         assert settings.control_plane.run_manifest_enabled is True
         assert settings.control_plane.run_ledger_enabled is False
         assert settings.control_plane.checkpoint_compatibility_policy == "observe"
+        assert settings.control_plane.required_persistence_profile == "replay_ready"
 
     def test_control_plane_validation_requires_manifest_for_ledger(self) -> None:
         """Ledger cannot be enabled when manifest creation is disabled."""
@@ -99,6 +105,28 @@ class TestPipelineSettings:
                     "run_manifest_enabled": True,
                     "run_ledger_enabled": True,
                     "checkpoint_compatibility_policy": "unsupported",
+                }
+            )
+
+    def test_control_plane_required_replay_ready_requires_manifest(self) -> None:
+        """Replay-ready profile cannot run without manifests."""
+        with pytest.raises(ValidationError):
+            PipelineSettings(
+                control_plane={
+                    "run_manifest_enabled": False,
+                    "run_ledger_enabled": False,
+                    "required_persistence_profile": "replay_ready",
+                }
+            )
+
+    def test_control_plane_required_forensic_grade_requires_ledger(self) -> None:
+        """Forensic-grade profile requires both manifest and ledger surfaces."""
+        with pytest.raises(ValidationError):
+            PipelineSettings(
+                control_plane={
+                    "run_manifest_enabled": True,
+                    "run_ledger_enabled": False,
+                    "required_persistence_profile": "forensic_grade",
                 }
             )
 

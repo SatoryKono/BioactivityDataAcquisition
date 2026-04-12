@@ -78,7 +78,7 @@ class SubcellularFractionDataSource(
             yield record
 
     @staticmethod
-    def _normalize_fraction(raw_fraction: Any) -> str | None:
+    def _normalize_fraction(raw_fraction: Any) -> str | None:  # Any: upstream assay payload may carry heterogeneous scalar/object values.
         return support.normalize_fraction(raw_fraction)
 
     @staticmethod
@@ -94,7 +94,7 @@ class SubcellularFractionDataSource(
 
     async def _fetch_target_filtered_records(
         self,
-        filterable: Any,
+        filterable: Any,  # Any: mixin provides a duck-typed filtered fetch surface rather than one concrete protocol.
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
@@ -112,7 +112,7 @@ class SubcellularFractionDataSource(
 
     async def _fetch_target_multi_filtered_records(
         self,
-        filterable: Any,
+        filterable: Any,  # Any: mixin accepts multiple runtime filterable adapters with the same fetch contract.
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:
@@ -135,7 +135,7 @@ class SubcellularFractionDataSource(
 
     def _yield_target_records_from_fallback_source_records(
         self,
-        source_records: AsyncIterator[Any],
+        source_records: AsyncIterator[Any],  # Any: fallback source stream forwards raw upstream records before normalization.
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:
         return self._fetch_filtered_fractions(source_records, limit)

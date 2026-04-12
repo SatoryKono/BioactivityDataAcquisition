@@ -248,6 +248,46 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
     ).exists()
 
 
+def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade_profile(
+    tmp_path: Path,
+) -> None:
+    config = cast(Any, _RichMockCompositeConfig())
+    runtime = CompositeRuntimeConfig(resume=True)
+    infra_context = cast(
+        Any,
+        SimpleNamespace(
+            run_id=_VALID_RUN_ID,
+            settings=SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=False,
+                        required_persistence_profile="forensic_grade",
+                    )
+                ),
+            ),
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            storage=MagicMock(),
+            lock=MagicMock(),
+        ),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="required persistence profile 'forensic_grade'",
+    ):
+        build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
+
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+
+
 def test_build_composite_control_plane_bundle_persists_manifest_created_when_ledger_enabled(
     tmp_path: Path,
 ) -> None:
