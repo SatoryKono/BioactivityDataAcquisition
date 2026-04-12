@@ -63,9 +63,8 @@ def normalize_for_snapshot(result: dict[str, Any] | None) -> dict[str, Any] | No
     Removes dynamic fields that change between runs:
     - entity_id (contains hash)
     - content_hash (contains hash)
-    Legacy runtime provenance placeholders remain supported if older test
-    fixtures inject them, but canonical transformer output no longer includes
-    these fields.
+    - runtime provenance/meta fields that are validated elsewhere and should
+      not cause snapshot churn
     """
     if result is None:
         return None
@@ -77,10 +76,12 @@ def normalize_for_snapshot(result: dict[str, Any] | None) -> dict[str, Any] | No
         normalized["entity_id"] = "<entity_id>"
     if "content_hash" in normalized:
         normalized["content_hash"] = "<content_hash>"
-    if "_run_id" in normalized:
-        normalized["_run_id"] = "<run_id>"
-    if "_ingestion_ts" in normalized:
-        normalized["_ingestion_ts"] = "<ingestion_ts>"
+
+    # Runtime provenance is asserted by dedicated contract tests, not snapshots.
+    normalized.pop("_run_id", None)
+    normalized.pop("_run_type", None)
+    normalized.pop("_source_batch_id", None)
+    normalized.pop("_ingestion_ts", None)
 
     return normalized
 

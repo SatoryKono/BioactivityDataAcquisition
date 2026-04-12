@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import Literal
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -45,7 +46,7 @@ class _UnhealthyEnhancedDataSource:
 
 def _build_preflight_service(
     *,
-    health_check_mode: str,
+    health_check_mode: Literal["strict", "probe"],
     metrics: MagicMock,
     logger: MagicMock,
     pipeline_name: str,
@@ -66,9 +67,7 @@ def _build_preflight_service(
         logger=logger,
     )
     health_aggregator = HealthAggregator(
-        metrics=metrics,
         logger=logger,
-        pipeline_name=pipeline_name,
         health_check_mode=health_check_mode,
     )
     medallion_validator = MedallionConfigValidator(

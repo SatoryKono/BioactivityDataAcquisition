@@ -25,7 +25,6 @@ if TYPE_CHECKING:
         HealthCheckResult,
         HealthMonitorPort,
         LoggerPort,
-        MetricsPort,
     )
 
 _HEALTH_CHECK_ERRORS = OPERATION_ERRORS
@@ -36,10 +35,8 @@ class HealthAggregator:
 
     def __init__(
         self,
-        metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
         health_monitor: HealthMonitorPort | None = None,
-        pipeline_name: str | None = None,
         health_check_mode: Literal["strict", "probe"] = "strict",
     ) -> None:
         if health_check_mode not in {"strict", "probe"}:
@@ -47,10 +44,6 @@ class HealthAggregator:
                 "health_check_mode must be 'strict' or 'probe', "
                 f"got {health_check_mode!r}"
             )
-        # Metrics/logging publication for ordinary runs is observer-owned.
-        # Keep these compatibility params in the constructor so composition and
-        # older tests can instantiate the helper without a broad signature churn.
-        _ = metrics, pipeline_name
         self._logger = logger
         self._health_monitor = health_monitor
         self._health_check_mode = health_check_mode
