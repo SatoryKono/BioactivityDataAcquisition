@@ -11,6 +11,7 @@ Requires: pip install syrupy
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -33,6 +34,9 @@ from bioetl.application.pipelines.chembl.target_transformer import TargetTransfo
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
+from bioetl.composition.bootstrap.runtime.classification_init import (
+    initialize_publication_type_classification,
+)
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import (
@@ -55,6 +59,13 @@ def mock_context() -> PipelineContext:
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
+
+
+@pytest.fixture(scope="module", autouse=True)
+def initialize_publication_classification() -> None:
+    """Bootstrap publication-type classification for publication transformers."""
+    repo_root = Path(__file__).resolve().parents[4]
+    initialize_publication_type_classification(repo_root / "configs")
 
 
 def normalize_for_snapshot(result: dict[str, Any] | None) -> dict[str, Any] | None:
