@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock
 from uuid import uuid4
 
+import pytest
+
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunCodeProvenance,
@@ -13,6 +15,7 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 
@@ -174,3 +177,80 @@ def test_file_store_emits_manifest_read_metric_on_get_failure(tmp_path) -> None:
         },
     )
     metrics.observe_histogram.assert_called_once()
+
+
+def test_file_store_rolls_back_manifest_when_run_index_write_fails(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    manifest = RunManifest(
+        manifest_id="manifest-rollback",
+        execution_fingerprint="fingerprint-rollback",
+        schema_version="1.0",
+        created_at=datetime.now(UTC),
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+    original_atomic_write_text = (
+        __import__(
+            "bioetl.infrastructure.control_plane.file_run_manifest_store",
+            fromlist=["atomic_write_text"],
+        ).atomic_write_text
+    )
+    call_count = {"value": 0}
+
+    def _fail_on_index_write(path, text, encoding="utf-8") -> None:
+        call_count["value"] += 1
+        if call_count["value"] == 1:
+            original_atomic_write_text(path, text, encoding=encoding)
+            return
+        raise OSError("run index write failed")
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.control_plane.file_run_manifest_store.atomic_write_text",
+        _fail_on_index_write,
+    )
+
+    with pytest.raises(StorageError) as exc_info:
+        store.save(manifest)
+
+    assert "Run manifest save failed" in str(exc_info.value)
+    assert store.get(manifest.manifest_id) is None
+    assert store.get_by_run_id(manifest.run_id) is None
+    assert not (store.base_path / f"{manifest.manifest_id}.json").exists()
+
+
+def test_file_store_hides_orphan_manifest_without_run_index(tmp_path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    run_id = RunID(uuid4())
+    manifest = RunManifest(
+        manifest_id="manifest-orphan",
+        execution_fingerprint="fingerprint-orphan",
+        schema_version="1.0",
+        created_at=datetime.now(UTC),
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+    store.base_path.mkdir(parents=True, exist_ok=True)
+    (store.base_path / f"{manifest.manifest_id}.json").write_text(
+        __import__("json").dumps(manifest.to_dict(), sort_keys=True),
+        encoding="utf-8",
+    )
+
+    assert store.get(manifest.manifest_id) is None
+    assert store.get_by_run_id(run_id) is None
