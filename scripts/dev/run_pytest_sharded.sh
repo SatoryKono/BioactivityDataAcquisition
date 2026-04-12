@@ -355,21 +355,20 @@ default_tmp_hypothesis_database_dir() {
 }
 
 normalize_coverage_dir_for_environment() {
-    if [[ "$COVERAGE_DIR" != "$DEFAULT_COVERAGE_DIR" ]]; then
-        return 0
-    fi
-
     if ! is_wsl_mounted_checkout; then
         return 0
     fi
 
-    COVERAGE_DIR="$(default_tmp_coverage_dir)"
-    echo \
-        "[run_pytest_sharded][info] Using temp coverage dir $COVERAGE_DIR for mounted WSL checkout $REPO_ROOT" \
-        >&2
+    if [[ "$COVERAGE_DIR" == "$DEFAULT_COVERAGE_DIR" ]]; then
+        COVERAGE_DIR="$(default_tmp_coverage_dir)"
+        echo \
+            "[run_pytest_sharded][info] Using temp coverage dir $COVERAGE_DIR for mounted WSL checkout $REPO_ROOT" \
+            >&2
+    fi
+
     DISABLE_COVERAGE=1
     echo \
-        "[run_pytest_sharded][info] Disabling pytest-cov for mounted WSL checkout to avoid coverage realpath timeouts under /mnt/*" \
+        "[run_pytest_sharded][info] Disabling pytest-cov for mounted WSL checkout to avoid coverage instability under /mnt/* (including sqlite lock/malformed shard data)" \
         >&2
 }
 
@@ -417,6 +416,8 @@ run_preflight_if_needed() {
 
 cleanup_coverage_dir() {
     if [[ "$KEEP_COVERAGE_FILES" == "1" ]]; then
+        mkdir -p "$COVERAGE_DIR"
+        rm -f "$COVERAGE_DIR"/.coverage "$COVERAGE_DIR"/.coverage.* 2>/dev/null || true
         return 0
     fi
     if rm -rf "$COVERAGE_DIR" 2>/dev/null; then
@@ -521,11 +522,13 @@ run_wave() {
                 export COVERAGE_FILE="$coverage_file"
                 export PYTHONUNBUFFERED=1
                 export BIOETL_PYTEST_LIVE_OUTPUT=1
+                export BIOETL_SKIP_PREFLIGHT="$SKIP_PREFLIGHT"
                 "${cmd[@]}" 2>&1 | tee "$log_file" | sed -u "s/^/[${shard}] /"
             ) &
         else
             (
                 export COVERAGE_FILE="$coverage_file"
+                export BIOETL_SKIP_PREFLIGHT="$SKIP_PREFLIGHT"
                 if [[ "$TAIL_LOGS" == "1" ]]; then
                     export PYTHONUNBUFFERED=1
                     export BIOETL_PYTEST_LIVE_OUTPUT=1
