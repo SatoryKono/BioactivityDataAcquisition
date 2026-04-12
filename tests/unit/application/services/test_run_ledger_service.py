@@ -396,6 +396,7 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
             "run_id": str(run_id),
             "status": "published",
             "stage": "silver",
+            "artifact_id": "silver:chembl.activity@7",
             "dataset_ref": "silver:chembl.activity@7",
             "lineage_fragment_id": "silver:fragment-1",
         },

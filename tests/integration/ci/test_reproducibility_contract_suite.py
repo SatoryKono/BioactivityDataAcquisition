@@ -272,7 +272,6 @@ def test_reproducibility_contract_silver_bundle_keeps_sidecar_and_fragment_ident
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
         started_at=started_at,
-        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
     )
@@ -307,7 +306,6 @@ def test_reproducibility_contract_gold_bundle_keeps_sidecar_and_fragment_identit
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
         started_at=started_at,
-        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
     )
@@ -346,7 +344,6 @@ def test_reproducibility_contract_supported_gold_trace_path_resolves_run_context
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
         started_at=started_at,
-        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
     )

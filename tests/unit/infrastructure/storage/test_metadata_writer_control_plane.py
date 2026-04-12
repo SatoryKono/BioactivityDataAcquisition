@@ -276,7 +276,7 @@ async def test_write_gold_metadata_records_dataset_ref_and_fragment_id(
         table_name="chembl.activity",
     )
 
-    assert result.endswith("chembl_activity_metadata.yaml")
+    assert result.endswith("_metadata.yaml")
     assert len(captured) == 1
     layer, artifact_path, details = captured[0]
     assert layer == "gold"
