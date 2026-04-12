@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.observability_resolution import resolve_tracing_port
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter

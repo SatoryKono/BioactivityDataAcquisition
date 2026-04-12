@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
-from bioetl.application.services.run_ledger_service import RunLedgerService
-from bioetl.application.services.run_manifest_service import (
+from bioetl.application.services.control_plane.run_ledger_service import RunLedgerService
+from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestCreateRequest,
     RunManifestService,
 )

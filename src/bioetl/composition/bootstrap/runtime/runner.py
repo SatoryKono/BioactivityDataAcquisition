@@ -10,10 +10,10 @@ from __future__ import annotations
 from uuid import uuid4
 
 from bioetl.application.services import PipelineRunnerService
-from bioetl.application.services.pipeline_run_context_service import (
+from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
 )
-from bioetl.application.services.pipeline_run_execution_service import (
+from bioetl.application.services.execution.pipeline_run_execution_service import (
     PipelineRunExecutionService,
 )
 from bioetl.composition import PipelineRegistry

@@ -25,7 +25,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointManagerService,
     )
-    from bioetl.application.services.run_ledger_service import RunLedgerService
+    from bioetl.application.services.control_plane.run_ledger_service import (
+        RunLedgerService,
+    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata

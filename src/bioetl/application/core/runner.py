@@ -55,7 +55,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.services.run_ledger_service import RunLedgerService
+    from bioetl.application.services.control_plane.run_ledger_service import (
+        RunLedgerService,
+    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort

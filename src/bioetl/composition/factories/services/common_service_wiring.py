@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.wiring.runtime import PipelineService
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.observability_resolution import (
     resolve_tracing_port as _resolve_tracing_port,
 )

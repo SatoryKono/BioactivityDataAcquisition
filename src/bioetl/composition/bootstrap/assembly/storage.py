@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.bootstrap.cli.noop import create_noop_observability_bundle
 from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.factories.storage.resilience import (

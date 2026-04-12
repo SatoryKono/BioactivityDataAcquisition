@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, NoReturn, Protocol
 
 import click
 
-from bioetl.application.services.pipeline_runner_models import (
+from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
@@ -29,10 +29,10 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
-    from bioetl.application.services.cli_run_orchestration_models import (
+    from bioetl.application.services.execution.cli_run_orchestration_models import (
         RunExecutionRequest,
     )
-    from bioetl.application.services.cli_run_orchestration_service import (
+    from bioetl.application.services.execution.cli_run_orchestration_service import (
         CliRunOrchestrationService,
     )
 

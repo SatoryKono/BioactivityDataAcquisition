@@ -19,6 +19,14 @@ directly from their defining submodules:
 - ``bioetl.application.services.shutdown_service``
 - ``bioetl.application.services.metrics_service``
 - ``bioetl.application.services.medallion_lifecycle``
+
+Canonical semantic seams:
+- ``bioetl.application.services.control_plane``
+- ``bioetl.application.services.lineage``
+- ``bioetl.application.services.execution``
+
+Legacy flat module paths remain as compatibility facades and should not be used
+for new imports.
 """
 
 from __future__ import annotations
@@ -57,41 +65,51 @@ _LAZY_EXPORT_MODULES: dict[str, str] = {
     "ExportService": "bioetl.application.services.export_service",
     "HealthService": "bioetl.application.services.health_service",
     "LineageFragmentInspectionResult": (
-        "bioetl.application.services.lineage_inspection_service"
+        "bioetl.application.services.lineage.lineage_inspection_service"
     ),
     "LineageInspectionService": (
-        "bioetl.application.services.lineage_inspection_service"
+        "bioetl.application.services.lineage.lineage_inspection_service"
     ),
-    "LineageNodeRelation": "bioetl.application.services.lineage_inspection_service",
+    "LineageNodeRelation": (
+        "bioetl.application.services.lineage.lineage_inspection_service"
+    ),
     "LineageRunExplanationResult": (
-        "bioetl.application.services.lineage_inspection_service"
+        "bioetl.application.services.lineage.lineage_inspection_service"
     ),
-    "LineageTraceResult": "bioetl.application.services.lineage_inspection_service",
+    "LineageTraceResult": (
+        "bioetl.application.services.lineage.lineage_inspection_service"
+    ),
     "MetricsService": "bioetl.application.services.metrics_service",
     "ObservabilityWorkflowService": (
         "bioetl.application.services.observability_workflow_service"
     ),
-    "PipelineNotFoundError": "bioetl.application.services.pipeline_runner_service",
-    "PipelineRunLifecycleService": (
-        "bioetl.application.services.pipeline_run_lifecycle_service"
+    "PipelineNotFoundError": (
+        "bioetl.application.services.execution.pipeline_runner_service"
     ),
-    "PipelineRunResult": "bioetl.application.services.pipeline_runner_service",
-    "PipelineRunnerService": "bioetl.application.services.pipeline_runner_service",
+    "PipelineRunLifecycleService": (
+        "bioetl.application.services.execution.pipeline_run_lifecycle_service"
+    ),
+    "PipelineRunResult": (
+        "bioetl.application.services.execution.pipeline_runner_service"
+    ),
+    "PipelineRunnerService": (
+        "bioetl.application.services.execution.pipeline_runner_service"
+    ),
     "QuarantineService": "bioetl.application.services.quarantine_service",
     "RunManifestDiffEntry": (
-        "bioetl.application.services.run_manifest_inspection_service"
+        "bioetl.application.services.control_plane.run_manifest_inspection_service"
     ),
     "RunManifestDiffResult": (
-        "bioetl.application.services.run_manifest_inspection_service"
+        "bioetl.application.services.control_plane.run_manifest_inspection_service"
     ),
     "RunManifestInspectionResult": (
-        "bioetl.application.services.run_manifest_inspection_service"
+        "bioetl.application.services.control_plane.run_manifest_inspection_service"
     ),
     "RunManifestInspectionService": (
-        "bioetl.application.services.run_manifest_inspection_service"
+        "bioetl.application.services.control_plane.run_manifest_inspection_service"
     ),
-    "RunOptions": "bioetl.application.services.pipeline_runner_service",
-    "RunResult": "bioetl.application.services.pipeline_runner_service",
+    "RunOptions": "bioetl.application.services.execution.pipeline_runner_service",
+    "RunResult": "bioetl.application.services.execution.pipeline_runner_service",
     "TableInfo": "bioetl.application.services.export_service",
     "TablePreview": "bioetl.application.services.export_service",
     "TableVacuumResult": "bioetl.application.services.vacuum_service",

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.wiring.factory import ShutdownSignal
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.pipeline.construction_types import (
     _SchemaBuilder,
 )

@@ -28,7 +28,9 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import (
         CompositeExecutionContext,
     )
-    from bioetl.application.services.run_ledger_service import RunLedgerService
+    from bioetl.application.services.control_plane.run_ledger_service import (
+        RunLedgerService,
+    )
 
 __all__ = ["CompositeRunnerControlPlaneMixin"]
 

@@ -33,7 +33,7 @@ from ._silver import create_silver_writer
 from .adapter import StorageAdapter
 
 if TYPE_CHECKING:
-    from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,

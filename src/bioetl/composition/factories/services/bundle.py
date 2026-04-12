@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )

@@ -29,7 +29,9 @@ if TYPE_CHECKING:
         CompositePreflightValidator,
     )
     from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.application.services.run_ledger_service import RunLedgerService
+    from bioetl.application.services.control_plane.run_ledger_service import (
+        RunLedgerService,
+    )
     from bioetl.domain.ports import (
         ExecutionMetricsRunnerPort,
         LockPort,

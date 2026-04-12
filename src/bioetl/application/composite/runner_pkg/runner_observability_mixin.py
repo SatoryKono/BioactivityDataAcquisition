@@ -20,7 +20,9 @@ from bioetl.domain.types import RunID
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.application.services.run_ledger_service import RunLedgerService
+    from bioetl.application.services.control_plane.run_ledger_service import (
+        RunLedgerService,
+    )
 
 
 _COMPOSITE_CV_QUARANTINE_ARTIFACT_POLICY = "occurrence_only_diagnostic"
