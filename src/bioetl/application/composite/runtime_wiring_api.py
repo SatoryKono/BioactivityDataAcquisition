@@ -52,6 +52,9 @@ from bioetl.application.composite.join_planner_helpers import (
     resolve_field_aliases_from_registry,
 )
 from bioetl.application.composite.key_extractor import KeyExtractorService
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidator,
@@ -86,6 +89,7 @@ __all__ = [
     "JoinPlannerService",
     "JoinPreparationCollaborators",
     "KeyExtractorService",
+    "CompositeLifecycleObserverService",
     "MergeCollaboratorGroup",
     "MergeService",
     "PipelineRunner",

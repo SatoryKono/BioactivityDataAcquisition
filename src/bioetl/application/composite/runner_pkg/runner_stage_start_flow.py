@@ -8,7 +8,9 @@ from typing import Protocol
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.events import PipelineEvent
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.domain.ports import LoggerPort
 
 __all__ = ["start_composite_phase"]
@@ -17,6 +19,7 @@ __all__ = ["start_composite_phase"]
 class _CompositePhaseStartHostProtocol(Protocol):
     _config: CompositeConfig
     _logger: LoggerPort
+    _observer: CompositeLifecycleObserverService
     _run_id_str: str
 
     def _transition_state_with_fsm_log(
@@ -58,10 +61,10 @@ async def start_composite_phase(
     await host._call_save_checkpoint_safe(next_state, checkpoint_operation)
     if on_started is not None:
         on_started()
-    host._logger.info(
-        PipelineEvent.phase_started(phase_name),
-        composite=host._config.name,
+    host._observer.emit_phase_started(
+        composite_name=host._config.name,
         run_id=host._run_id_str,
-        **dict(log_details or {}),
+        phase_name=phase_name,
+        details=dict(log_details or {}),
     )
     return next_state

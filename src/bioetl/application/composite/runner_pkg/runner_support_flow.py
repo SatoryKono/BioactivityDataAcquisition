@@ -14,7 +14,6 @@ __all__ = [
 from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
 )
-from bioetl.domain.events import PipelineEvent
 from bioetl.domain.normalization import (
     normalize_contract_ref,
     normalize_contract_version,
@@ -127,9 +126,11 @@ def run_preflight_validation(host: _CompositeRunnerSupportHostProtocol) -> None:
         )
         return
 
-    host._logger.info(
-        PipelineEvent.phase_started("preflight_validation"),
-        **host._build_correlation_log_context(
+    host._observer.emit_phase_started(
+        composite_name=host._config.name,
+        run_id=host._run_id_str,
+        phase_name="preflight_validation",
+        details=host._build_correlation_log_context(
             stage="preflight_validation",
             field_count=context.field_count,
         ),
@@ -141,9 +142,11 @@ def run_preflight_validation(host: _CompositeRunnerSupportHostProtocol) -> None:
     )
     context.validator.log_resolved_field_sources(result, host._config.name)
 
-    host._logger.info(
-        PipelineEvent.phase_completed("preflight_validation"),
-        **host._build_correlation_log_context(
+    host._observer.emit_phase_completed(
+        composite_name=host._config.name,
+        run_id=host._run_id_str,
+        phase_name="preflight_validation",
+        details=host._build_correlation_log_context(
             stage="preflight_validation",
             fields_validated=len(result.resolved_fields),
             warnings=len(result.warnings),

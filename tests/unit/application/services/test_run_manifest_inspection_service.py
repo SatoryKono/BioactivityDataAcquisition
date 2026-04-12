@@ -1190,6 +1190,7 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "strict_replay_boundary_gap": False,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": True,

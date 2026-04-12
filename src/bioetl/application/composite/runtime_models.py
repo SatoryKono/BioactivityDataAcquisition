@@ -18,6 +18,9 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.checkpoint import CompositeCheckpointManager
+    from bioetl.application.composite.lifecycle_observer_service import (
+        CompositeLifecycleObserverService,
+    )
     from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
     from bioetl.application.composite.dependency_coordinator import (
         DependencyCoordinatorService,
@@ -93,6 +96,7 @@ class CompositeRunnerDependencyGroup:
     dependency_coordinator: DependencyCoordinatorService | None = None
     quarantine_port: QuarantinePort | None = None
     metrics: MetricsPort | None = None
+    observer: CompositeLifecycleObserverService | None = None
     manifest_id: str | None = None
     run_ledger_service: RunLedgerService | None = None
 

@@ -7,6 +7,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 from uuid import UUID, uuid4
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.composite.state import CompositePipelineState
@@ -71,6 +74,7 @@ class _CompositeRunnerHostProtocol(Protocol):
     _preflight_validator: object
     _quarantine_port: object
     _metrics: object
+    _observer: object
     _fsm: object
     _manifest_id: str | None
     _run_ledger_service: object
@@ -115,6 +119,9 @@ def bind_runner_dependencies(host: object, deps: CompositeRunnerDependencies) ->
     runner_host._preflight_validator = deps.preflight_validator
     runner_host._quarantine_port = deps.quarantine_port
     runner_host._metrics = deps.metrics
+    runner_host._observer = deps.observer or CompositeLifecycleObserverService(
+        logger=deps.logger
+    )
     runner_host._fsm = deps.fsm_state_helper
     runner_host._manifest_id = deps.manifest_id
     runner_host._run_ledger_service = deps.run_ledger_service
