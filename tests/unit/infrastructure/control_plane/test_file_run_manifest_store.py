@@ -9,6 +9,7 @@ from uuid import uuid4
 
 import pytest
 
+import bioetl.infrastructure.control_plane.file_run_manifest_store as manifest_store_module
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunCodeProvenance,
@@ -200,18 +201,13 @@ def test_file_store_rolls_back_manifest_when_run_index_write_fails(
         resolved_config={},
         code_provenance=RunCodeProvenance(),
     )
-    original_atomic_write_text = (
-        __import__(
-            "bioetl.infrastructure.control_plane.file_run_manifest_store",
-            fromlist=["atomic_write_text"],
-        ).atomic_write_text
-    )
+    original_atomic_write_text = manifest_store_module.atomic_write_text
     call_count = {"value": 0}
 
     def _fail_on_index_write(path, text, encoding="utf-8") -> None:
         call_count["value"] += 1
         if call_count["value"] == 1:
-            original_atomic_write_text(path, text, encoding=encoding)
+            manifest_store_module.atomic_write_text(path, text, encoding=encoding)
             return
         raise OSError("run index write failed")
 
