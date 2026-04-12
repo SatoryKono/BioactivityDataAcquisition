@@ -63,6 +63,8 @@ duplication_analysis:
       roots:
         - "src/bioetl/domain/normalization/profiles"
       package_family: "domain/normalization"
+      excluded_paths:
+        - "src/bioetl/domain/normalization/profiles/registry.py"
       promotion_targets:
         - label: "module_surface"
           name: "src/bioetl/domain/normalization/profiles/base.py"

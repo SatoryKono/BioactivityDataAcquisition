@@ -50,7 +50,11 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
 
     pubchem_smiles = _row(rows, "pubchem_compound", "canonical_smiles")
     assert pubchem_smiles["normalization_source"] == "profile"
-    assert pubchem_smiles["normalizer"] == "_normalize_canonical_smiles"
+    assert pubchem_smiles["normalizer"] == "normalize_profile_canonical_smiles"
+
+    chembl_activity_smiles = _row(rows, "chembl_activity", "canonical_smiles")
+    assert chembl_activity_smiles["normalization_source"] == "profile"
+    assert chembl_activity_smiles["normalizer"] == "normalize_profile_canonical_smiles"
 
     openalex_title = _row(rows, "openalex_publication", "title")
     assert openalex_title["normalization_source"] == "profile"
@@ -62,7 +66,7 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
 
     chembl_molecule_smiles = _row(rows, "chembl_molecule", "canonical_smiles")
     assert chembl_molecule_smiles["normalization_source"] == "profile"
-    assert chembl_molecule_smiles["normalizer"] == "_normalize_canonical_smiles"
+    assert chembl_molecule_smiles["normalizer"] == "normalize_profile_canonical_smiles"
 
     chembl_assay_title = _row(rows, "chembl_assay", "assay_pref_name")
     assert chembl_assay_title["normalization_source"] == "profile"
