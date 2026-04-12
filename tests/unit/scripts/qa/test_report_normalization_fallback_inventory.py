@@ -57,6 +57,8 @@ def test_build_payload_summarizes_fallback_rows() -> None:
     assert payload["pipelines"][0] == {
         "pipeline_name": "openalex_publication",
         "fallback_field_count": 3,
+        "fallback_business_field_count": 2,
+        "fallback_technical_passthrough_field_count": 1,
     }
     assert payload["normalizers"][0] == {
         "normalizer": "normalize_doi",
@@ -91,7 +93,14 @@ def test_render_markdown_mentions_top_fallback_entries() -> None:
                     "field_count": 1,
                 },
             ],
-            "pipelines": [{"pipeline_name": "openalex_publication", "fallback_field_count": 2}],
+            "pipelines": [
+                {
+                    "pipeline_name": "openalex_publication",
+                    "fallback_field_count": 2,
+                    "fallback_business_field_count": 1,
+                    "fallback_technical_passthrough_field_count": 1,
+                }
+            ],
             "normalizers": [
                 {"normalizer": "normalize_title", "field_count": 1},
                 {"normalizer": "passthrough", "field_count": 1},
@@ -111,7 +120,10 @@ def test_render_markdown_mentions_top_fallback_entries() -> None:
     assert "# Normalization Fallback Inventory" in markdown
     assert "- explicit_profile_coverage_pct: `70.00%`" in markdown
     assert "`fallback_business` covers `1` fields" in markdown
-    assert "`openalex_publication` has `2` fallback fields" in markdown
+    assert (
+        "`openalex_publication` has `2` fallback fields "
+        "(`fallback_business=1`, `fallback_technical_passthrough=1`)"
+    ) in markdown
     assert (
         "`openalex_publication.title` -> `normalize_title` (`fallback_business`)"
         in markdown
