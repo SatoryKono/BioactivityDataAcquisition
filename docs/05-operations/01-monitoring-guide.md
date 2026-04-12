@@ -292,7 +292,8 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
 - **Control-plane сигналы стали красными**:
   1. Запустите `bioetl run-manifest show <run-id|manifest-id> --format json`.
   1. Проверьте `diagnostics.alert_signals`, `artifact_refs`,
-     `lineage_fragment_ids`, `missing_artifact_links`.
+     `artifact_refs[*].artifact_id`, `lineage_fragment_ids`,
+     `missing_artifact_links`.
   1. Если проблема связана с resume, откройте runbook
      `checkpoint-debugging.md`.
 

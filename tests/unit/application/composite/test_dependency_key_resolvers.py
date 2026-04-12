@@ -197,6 +197,34 @@ class TestChainedKeyResolver:
         assert result.to_dict(as_series=False) == {"doi": ["10.1/x", "10.1/x"]}
 
     @pytest.mark.asyncio
+    async def test_seed_resolver_normalizes_compound_join_key_families(self) -> None:
+        logger = MagicMock()
+        resolver = SeedKeyResolver(logger)
+        dep = _dep_config(join_keys=("doi", "title", "pmid", "uniprot_accession"))
+        seed_keys = pl.DataFrame(
+            {
+                "doi": [" 10.1/ABC "],
+                "title": ["  Mixed Case Title  "],
+                "pmid": [" PMID:12345 "],
+                "uniprot_accession": [" P12345 "],
+            }
+        )
+
+        result = await resolver.resolve(
+            dependency=dep,
+            seed_keys=seed_keys,
+            dep_config_lookup={},
+            delta_reader=None,
+        )
+
+        assert result.to_dict(as_series=False) == {
+            "doi": ["10.1/abc"],
+            "title": ["Mixed Case Title"],
+            "pmid": ["pmid:12345"],
+            "uniprot_accession": ["p12345"],
+        }
+
+    @pytest.mark.asyncio
     async def test_validates_join_key_exists(self) -> None:
         logger = MagicMock()
         resolver = ChainedKeyResolver(logger)

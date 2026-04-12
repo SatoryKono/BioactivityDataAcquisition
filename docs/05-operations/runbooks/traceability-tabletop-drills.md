@@ -59,7 +59,8 @@ Last verified: '2026-04-02'
 2. Operator runs:
 - `bioetl run-manifest show <run-id> --format json`
 3. Operator extracts:
-- `manifest_id`, `latest_status`, `latest_event_type`, `event_family_counts`, `artifact_refs`, `missing_artifact_links`.
+- `manifest_id`, `latest_status`, `latest_event_type`, `event_family_counts`,
+  `artifact_refs`, `artifact_refs[*].artifact_id`, `missing_artifact_links`.
 4. Operator classifies incident type:
 - control-plane, DQ, lineage, checkpoint, or composite degradation.
 5. Operator proposes decision:
@@ -80,7 +81,8 @@ Last verified: '2026-04-02'
 - `missing_artifact_links > 0`.
 - Expected decision: treat as traceability regression, block blind retry until
 - linkage diagnosis is complete.
-- Pass criteria: operator references both `artifact_refs` and
+- Pass criteria: operator references both `artifact_refs` /
+  `artifact_refs[*].artifact_id` and
 - `missing_artifact_links`.
 
 ### Scenario C: DQ-Driven Failure with Good Control Plane

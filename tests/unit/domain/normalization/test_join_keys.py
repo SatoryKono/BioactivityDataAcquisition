@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.join_keys import (
     JOIN_KEY_NORMALIZATION_POLICIES,
     get_join_key_normalization_policy,
@@ -19,9 +21,47 @@ def test_normalize_join_key_scalar_preserves_non_string_values() -> None:
     assert normalize_join_key_scalar(42, key="pmid") == 42
 
 
+@pytest.mark.parametrize(
+    ("key", "raw_value", "expected"),
+    (
+        ("doi", " 10.1000/ABC ", "10.1000/abc"),
+        ("pmid", " PMID:12345 ", "pmid:12345"),
+        ("pmc_id", " PMC123 ", "pmc123"),
+        ("uniprot_accession", " P12345 ", "p12345"),
+        ("title", "  Mixed Case Title  ", "Mixed Case Title"),
+        ("canonical_smiles", " C[C@H](O)C ", "C[C@H](O)C"),
+    ),
+)
+def test_normalize_join_key_text_covers_supported_mutating_families(
+    key: str,
+    raw_value: str,
+    expected: str,
+) -> None:
+    assert normalize_join_key_text(raw_value, key=key) == expected
+
+
 def test_stringify_join_key_value_normalizes_float_ints_and_strings() -> None:
     assert stringify_join_key_value(42.0, key="pmid") == "42"
     assert stringify_join_key_value(" PMC123 ", key="pmc_id") == "pmc123"
+
+
+def test_stringify_join_key_value_handles_none_empty_and_real_float_stably() -> None:
+    assert stringify_join_key_value(None, key="doi") == ""
+    assert stringify_join_key_value("", key="doi") == ""
+    assert stringify_join_key_value(42.5, key="pmid") == "42.5"
+
+
+def test_compound_join_key_components_normalize_to_equivalent_values() -> None:
+    tuple_a = (
+        stringify_join_key_value(" 10.1000/ABC ", key="doi"),
+        stringify_join_key_value("  Mixed Case Title  ", key="title"),
+    )
+    tuple_b = (
+        stringify_join_key_value("10.1000/abc", key="doi"),
+        stringify_join_key_value("Mixed Case Title", key="title"),
+    )
+
+    assert tuple_a == tuple_b == ("10.1000/abc", "Mixed Case Title")
 
 
 def test_join_key_policy_registry_exposes_known_keys() -> None:

@@ -224,7 +224,8 @@ Focus on:
   `persistence_profile.forensic_grade_missing_requirements`;
 - `dq_rule_ids`, `dq_dispositions`, `dq_report_paths`, `dq_violation_kinds`;
 - `cross_validation_rule_ids`, `cross_validation_config_paths`, `cross_validation_signal_present`;
-- `execution_fingerprint` as the full manifest-identity anchor;
+- `execution_fingerprint` as the canonical execution-identity fingerprint shared
+  across manifest, checkpoint, and runtime compatibility surfaces;
 - `effective_config_hash`, `contract_ref`, `contract_version`, and `effective_config_artifact_id` as runtime-anchor compatibility fields;
 - `dq_policy_ref`, `rule_bundle_version`, and `dq_contract_compatibility_hash` as adjacent DQ/control-plane anchors that are related but not interchangeable with manifest identity;
 - `correlation_anchor_gaps`, `alert_signals`, `next_steps`.

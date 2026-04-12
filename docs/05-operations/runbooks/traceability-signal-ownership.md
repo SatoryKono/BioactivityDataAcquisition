@@ -81,6 +81,8 @@ ______________________________________________________________________
 
 - `dataset_ref`
 
+- `artifact_id` (operator-facing alias of the published `dataset_ref`)
+
 - `lineage_fragment_id`
 
 - `effective_config_hash`
@@ -125,6 +127,8 @@ ______________________________________________________________________
 
 - `artifact_refs` summary
 
+- `artifact_refs[*].artifact_id` summary when present
+
 - `correlation_anchor_gaps` snapshot
 
 - `cross_validation_signal_present` (for composite/DQ incidents)
@@ -139,7 +143,8 @@ ______________________________________________________________________
 
 - control-plane integrity incident.
 
-- `artifact_refs` present but `missing_artifact_links > 0` -> treat as
+- `artifact_refs` / `artifact_refs[*].artifact_id` present but
+  `missing_artifact_links > 0` -> treat as
 
 - traceability regression (P1 for critical datasets).
 
