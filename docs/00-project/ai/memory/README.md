@@ -55,8 +55,14 @@ profiles в BioETL.
   `control_plane_artifact_surface` для artifact-level templates вокруг manifest /
   ledger / effective-config / lineage persistence paths,
   `workflow_surface` / `workflow_job_surface` для `.github/workflows/*.yml`,
-  и `DESCRIBES` drift edges из published docs/policies к code/config/workflow
-  targets.
+  `workflow_call_surface` / `workflow_matrix_variant_surface` /
+  `workflow_output_surface` для reusable workflows, matrix-variant execution и
+  produced outputs,
+  `cli_command_surface` / `cli_option_surface` для command/option graph и
+  side-effect semantics,
+  `doc_claim_surface` для claim-level documentation traceability,
+  и `DESCRIBES` / `ASSERTS_ABOUT` drift edges из published docs/policies к
+  code/config/workflow targets.
   Tooling
   может синхронизировать его в локальный Neo4j backend без ручных prompt waves.
   Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
@@ -126,7 +132,10 @@ profiles в BioETL.
   `python -m scripts.ops query-neo4j-memory schema-drift silver/chembl/assay`,
   `python -m scripts.ops query-neo4j-memory run-artifacts manifest-chain-smoke`,
   `python -m scripts.ops query-neo4j-memory runtime-state all`,
-  `python -m scripts.ops query-neo4j-memory runtime-locks all`.
+  `python -m scripts.ops query-neo4j-memory runtime-locks all`,
+  `python -m scripts.ops query-neo4j-memory workflow-execution all`,
+  `python -m scripts.ops query-neo4j-memory claim-trace all`,
+  `python -m scripts.ops query-neo4j-memory cli-semantics "bioetl run"`.
   Для поиска повторяющейся логики и кандидатов на вынос используй:
   `python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608`,
   `python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer`,
@@ -162,14 +171,23 @@ profiles в BioETL.
   lineage artifacts и sidecar indexes, связанные через
   `runtime_evidence_surface -> EMITS_ARTIFACT -> control_plane_artifact_surface -> MATERIALIZED_AS -> storage_surface`.
 - **CI / workflow graph**:
-  `workflow_surface`, `workflow_job_surface`
+  `workflow_surface`, `workflow_job_surface`, `workflow_call_surface`,
+  `workflow_matrix_variant_surface`, `workflow_output_surface`
   — GitHub Actions workflows/jobs из `.github/workflows/*.yml`, включая
-  `DEPENDS_ON` job ordering, `RUNS_VIA` links к repo scripts/files и
-  `EXECUTES_GATE` edges к quality gates.
+  `DEPENDS_ON` job ordering, `RUNS_VIA` links к repo scripts/files,
+  `EXECUTES_GATE` edges к quality gates, reusable workflow calls, matrix
+  variants и emitted outputs.
+- **CLI semantics graph**:
+  `cli_command_surface`, `cli_option_surface`
+  — deterministic command/option graph для `bioetl` и project entrypoints,
+  включая accepted options и heuristic `SIDE_EFFECTS_ON` links к pipelines /
+  quality gates.
 - **Docs-to-code drift edges**:
   `doc_source_surface` / `doc_artifact` / `policy_surface -> DESCRIBES -> targets`
   — repo-path citations внутри docs теперь проецируются в graph, чтобы можно
   было навигировать published guidance против current code/config/workflow surface.
+  Для high-signal assertions memory теперь также строит `doc_claim_surface`
+  и `ASSERTS_ABOUT` links к concrete repo targets.
 
 ## Relationship To Other AI Surfaces
 

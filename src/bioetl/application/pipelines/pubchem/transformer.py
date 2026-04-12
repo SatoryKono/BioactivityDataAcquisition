@@ -170,6 +170,7 @@ class PubChemCompoundTransformer(BaseTransformer):
         cid, business_data = prepared
         normalized_business_data = RecordNormalizationProcessor(
             provider=self.provider,
+            entity_type=self.entity_type,
         ).normalize_business_data(business_data)
         entity_id = self.compute_entity_id(
             source_id=str(cid), record={"molecule_id": cid}

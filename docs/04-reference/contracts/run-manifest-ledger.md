@@ -386,6 +386,9 @@ minimal identity contract:
 - `output.artifact_id` matches the produced artifact node exposed by the
   lineage fragment;
 - `output.lineage_fragment_id` matches the published lineage fragment id.
+- inspection diagnostics expose `artifact_refs[*].artifact_id` as the
+  operator-facing alias of the published `dataset_ref` so sidecar, ledger, and
+  inspection surfaces can be correlated without translation.
 
 Bundle assembly MUST fail closed on mismatched preexisting sidecar anchors
 instead of silently overwriting them with lineage-derived values.

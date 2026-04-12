@@ -241,6 +241,54 @@ class TestPostrunServiceRun:
         mock_lifecycle_service.finalize_run.assert_called_once()
 
     @pytest.mark.asyncio
+    async def test_run_emits_bounded_postrun_phase_metrics_and_logs(
+        self,
+        postrun_service,
+        mock_executor,
+        mock_metrics,
+        mock_logger,
+    ) -> None:
+        """Postrun subphases should publish bounded metrics/logs for operators."""
+        await postrun_service.run(mock_executor)
+
+        phase_counter_calls = [
+            call
+            for call in mock_metrics.increment_counter.call_args_list
+            if call.args[0] == "bioetl_postrun_phase_events_total"
+        ]
+        observed_status_by_phase = {
+            call.kwargs["labels"]["phase"]: call.kwargs["labels"]["status"]
+            for call in phase_counter_calls
+        }
+        assert observed_status_by_phase == {
+            "compaction": "success",
+            "dq_evaluation": "passed",
+            "dq_reports": "skipped",
+            "vacuum": "success",
+            "final_metadata": "success",
+        }
+
+        phase_histogram_calls = [
+            call
+            for call in mock_metrics.observe_histogram.call_args_list
+            if call.args[0] == "bioetl_postrun_phase_duration_seconds"
+        ]
+        assert len(phase_histogram_calls) == 5
+        assert {
+            call.kwargs["labels"]["phase"] for call in phase_histogram_calls
+        } == set(observed_status_by_phase)
+
+        phase_log_calls = [
+            call
+            for call in mock_logger.info.call_args_list
+            if call.args[0] == "postrun_phase_completed"
+        ]
+        assert len(phase_log_calls) == 5
+        assert {
+            call.kwargs["phase"]: call.kwargs["status"] for call in phase_log_calls
+        } == observed_status_by_phase
+
+    @pytest.mark.asyncio
     async def test_run_propagates_dq_error(
         self, postrun_service, mock_executor, mock_dq_service
     ):

@@ -58,10 +58,14 @@ class TestPostrunMetadataWriteService:
             metadata_version_resolver=metadata_version_resolver,
         )
 
-        await service.write_final_metadata_if_available(MagicMock(), dq_reports=None)
+        wrote_metadata = await service.write_final_metadata_if_available(
+            MagicMock(),
+            dq_reports=None,
+        )
 
         storage.get_table_path.assert_not_called()
         metadata_version_resolver.resolve_delta_version.assert_not_called()
+        assert wrote_metadata is False
 
     @pytest.mark.asyncio
     async def test_write_final_metadata_if_available_writes_silver_outputs(
@@ -93,9 +97,13 @@ class TestPostrunMetadataWriteService:
             return_value={"records_silver": 5, "source_batch_ids": ["batch-1"]}
         )
 
-        await service.write_final_metadata_if_available(executor, dq_reports=None)
+        wrote_metadata = await service.write_final_metadata_if_available(
+            executor,
+            dq_reports=None,
+        )
 
         metadata_coordinator.create_silver_metadata.assert_not_called()
         metadata_writer.finalize_silver_metadata.assert_awaited_once()
         metadata_writer.finalize_gold_metadata.assert_not_awaited()
         metadata_version_resolver.resolve_delta_version.assert_called_once()
+        assert wrote_metadata is True

@@ -35,7 +35,11 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import JsonDict
 
-__all__ = ["RecordNormalizationProcessor"]
+__all__ = ["NormalizationContractError", "RecordNormalizationProcessor"]
+
+
+class NormalizationContractError(ValueError):
+    """Raised when profile-backed runtime normalization would fall back implicitly."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +50,7 @@ class RecordNormalizationProcessor:
     entity_type: str | None = None
     profile: NormalizationProfile | None = None
     rule_set: NormalizationRulesPolicy = field(default_factory=NormalizationRulesPolicy)
+    allow_compatibility_fallback: bool = False
     content_hash_include_fields: frozenset[str] = frozenset()
     content_hash_exclude_fields: frozenset[str] = frozenset()
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None
@@ -247,6 +252,8 @@ class RecordNormalizationProcessor:
         profile_rule = self._profile_rule(field_name)
         if profile_rule is not None:
             return self._normalize_profile_field_value(profile_rule, value)
+        if self._should_forbid_fallback(field_name):
+            self._raise_profile_gap(field_name)
         normalized_special = self._normalize_special_field(field_name, value)
         if normalized_special is not UNHANDLED_FALLBACK_NORMALIZATION:
             return normalized_special
@@ -306,3 +313,20 @@ class RecordNormalizationProcessor:
             is_canonical=(field_name == "canonical_smiles"),
         )
         return normalized if isinstance(normalized, str) or normalized is None else None
+
+    def _should_forbid_fallback(self, field_name: str) -> bool:
+        return (
+            self.profile is not None
+            and not self.allow_compatibility_fallback
+            and not field_name.startswith("_")
+            and field_name not in self.rule_set.passthrough_fields
+        )
+
+    def _raise_profile_gap(self, field_name: str) -> None:
+        entity_label = self.entity_type or "<unknown>"
+        raise NormalizationContractError(
+            "profile-backed normalization cannot fall back implicitly for "
+            f"{self.provider}.{entity_label} field {field_name!r}; "
+            "add an explicit normalization profile rule or enable "
+            "allow_compatibility_fallback for bounded compatibility paths"
+        )

@@ -359,6 +359,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         {
             "event_type": "artifact_published",
             "stage": "silver",
+            "artifact_id": "silver:chembl.activity@1",
             "dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-1",
             "artifact_path": "data/output/silver/chembl/activity",

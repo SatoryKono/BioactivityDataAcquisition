@@ -80,6 +80,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         primary_id, business_data = resolved
         normalized_business_data = RecordNormalizationProcessor(
             provider=self.provider,
+            entity_type=self.entity_type,
         ).normalize_business_data(business_data)
         entity_id = _resolve_subcellular_fraction_entity_id(self, record, primary_id)
         content_hash = self.compute_content_hash(

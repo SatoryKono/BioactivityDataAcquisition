@@ -427,22 +427,26 @@ Use explicit profiles as canonical contracts for covered pipeline schemas.
 
 ### Goal
 
-Make record-level normalization profile-aware while keeping backward compatibility.
+Make record-level normalization profile-aware while keeping compatibility
+fallback explicit and bounded.
 
 ### Current state on `main`
 
-- [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py) already prefers a `NormalizationProfile` and falls back to legacy heuristics when no profile exists
+- [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py) prefers a `NormalizationProfile`
+- shipped profile-backed pipelines must fail loudly on unprofiled business fields by default
+- compatibility fallback remains available only through explicit opt-in for bounded non-shipped or transitional paths
 
 ### Requirements
 
-- if a profile exists, use it
-- otherwise keep fallback behavior
+- if a shipped profile exists, use it and reject implicit fallback for uncovered business fields
+- compatibility fallback must be enabled explicitly when transitional behavior is still required
+- if no profile exists, keep fallback behavior
 - hash semantics must be explainable by the active profile or explicit fallback policy
 
 ### Acceptance
 
-- profile-driven paths are active
-- fallback remains backward-compatible for uncovered entities
+- profile-driven shipped paths are active and fail on uncovered business fields
+- fallback remains backward-compatible for uncovered entities and explicit compatibility mode only
 
 ## P4 - Composite Join-Key Normalization
 

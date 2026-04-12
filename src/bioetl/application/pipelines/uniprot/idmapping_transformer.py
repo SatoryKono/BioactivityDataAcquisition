@@ -126,6 +126,7 @@ class IDMappingTransformer(BaseTransformer):
         target_id, business_data = self._build_mapping_business_data(record)
         normalized_business_data = RecordNormalizationProcessor(
             provider=self.provider,
+            entity_type=self.entity_type,
         ).normalize_business_data(business_data)
         entity_id = self.compute_entity_id(
             source_id=target_id, record={"target_id": target_id}

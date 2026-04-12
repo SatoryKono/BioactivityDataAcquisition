@@ -339,6 +339,98 @@ def test_reproducibility_contract_gold_bundle_keeps_sidecar_and_fragment_identit
     )
 
 
+def test_reproducibility_contract_supported_gold_trace_path_resolves_run_context() -> None:
+    started_at = datetime(2025, 1, 1, tzinfo=UTC)
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000411"))
+    context = RunContext.create(
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        started_at=started_at,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+    )
+    coordinator = MetadataCoordinator(context)
+    bundle = coordinator.create_gold_metadata_bundle(
+        GoldMetadataInput(
+            table_path="gold/chembl/activity",
+            table_name="chembl.activity",
+            mode=GoldWriteMode.OVERWRITE,
+            records=[{"activity_id": 1}],
+            silver_refs=[
+                SilverRef(
+                    table_name="chembl.activity",
+                    table_path="silver/chembl/activity",
+                    delta_version=4,
+                )
+            ],
+            started_at=started_at,
+            completed_at=started_at + timedelta(seconds=3),
+        )
+    )
+
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    manifest = _make_manifest(
+        manifest_id="manifest-gold-trace-1",
+        run_id=run_id,
+        execution_fingerprint="fp-gold-trace-1",
+    )
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-gold-trace-1",
+            manifest_id=manifest.manifest_id,
+            run_id=run_id,
+            event_type="artifact_published",
+            occurred_at=started_at + timedelta(seconds=4),
+            event_family="artifact",
+            status="success",
+            stage="gold",
+            dataset_ref=bundle.metadata.output.artifact_id,
+            lineage_fragment_id=bundle.metadata.output.lineage_fragment_id,
+            details={
+                "artifact_path": "gold/chembl/activity",
+                "metadata_path": "gold/chembl/activity/chembl_activity_metadata.yaml",
+                "artifact_kind": "metadata_sidecar",
+                "pipeline_name": "chembl_activity",
+                "provider": "chembl",
+                "entity": "activity",
+                "run_id": str(run_id),
+                "manifest_id": manifest.manifest_id,
+            },
+        )
+    )
+
+    result = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    ).show(manifest.manifest_id)
+
+    assert result.diagnostics["artifact_refs"] == [
+        {
+            "event_type": "artifact_published",
+            "stage": "gold",
+            "artifact_id": "gold:chembl.activity",
+            "dataset_ref": "gold:chembl.activity",
+            "lineage_fragment_id": bundle.metadata.output.lineage_fragment_id,
+            "artifact_path": "gold/chembl/activity",
+            "metadata_path": "gold/chembl/activity/chembl_activity_metadata.yaml",
+            "artifact_kind": "metadata_sidecar",
+            "pipeline_name": "chembl_activity",
+            "provider": "chembl",
+            "entity": "activity",
+            "run_id": str(run_id),
+            "manifest_id": manifest.manifest_id,
+        }
+    ]
+    assert result.diagnostics["lineage_fragment_ids"] == [
+        bundle.metadata.output.lineage_fragment_id
+    ]
+    assert result.manifest.run_id == run_id
+    assert result.manifest.manifest_id == "manifest-gold-trace-1"
+
+
 def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> None:
     forward = [
         {"id": "1", "value": "winner", "content_hash": "a-hash"},

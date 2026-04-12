@@ -132,7 +132,7 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py`
 и собирается через `prometheus_metric_registries.py`.
 
-Текущий размер каталога: **87** метрик
+Текущий размер каталога: **93** метрики
 (`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`).
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
@@ -162,6 +162,8 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 | `bioetl_data_freshness_seconds`                | Gauge     | `pipeline,entity`                        | unix timestamp ingestion anchor успешного запуска (сейчас `PipelineContext.started_at`); age считается как `time() - metric` |
 | `bioetl_quarantine_operator_operations_total`  | Counter   | `operation,status`                       | bounded operator actions for inspect/replay/purge/update workflows                 |
 | `bioetl_quarantine_operator_duration_seconds`  | Histogram | `operation,status`                       | latency of quarantine operator workflows                                           |
+| `bioetl_postrun_phase_events_total`            | Counter   | `pipeline,phase,status`                  | bounded postrun subphase outcomes for `dq_evaluation`, `dq_reports`, `compaction`, `vacuum`, `final_metadata` |
+| `bioetl_postrun_phase_duration_seconds`        | Histogram | `pipeline,phase,status`                  | bounded durations for the same postrun subphases                                   |
 
 DQ anomaly timing semantics:
 

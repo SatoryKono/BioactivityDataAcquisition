@@ -73,6 +73,7 @@ class UniProtProteinTransformer(BaseTransformer, UniProtBusinessDataMixin):
         business_data = self._build_business_data(record, accession, entry_name)
         normalized_business_data = RecordNormalizationProcessor(
             provider=self.provider,
+            entity_type=self.entity_type,
         ).normalize_business_data(business_data)
 
         entity_id = self.compute_entity_id(
