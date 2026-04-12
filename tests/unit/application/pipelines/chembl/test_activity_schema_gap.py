@@ -89,7 +89,9 @@ async def test_transform_populates_extended_fields(chembl_pipeline, context):
     assert result["assay_description"] == "Test Assay"
     assert result["publication_id"] == "CHEMBL123"
     assert result["publication_year"] == 2023
-    assert "_run_id" not in result
+    assert result["_run_id"] == str(context.run_id)
+    assert result["_run_type"] == context.run_type.value
+    assert "_ingestion_ts" in result
 
 
 @pytest.mark.asyncio

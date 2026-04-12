@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-12T11:54:04.252594+00:00",
+  "generated_at": "2026-04-12T12:10:25.250695+00:00",
   "summary": {
     "total_scripts": 292,
     "status_counts": {
@@ -7100,7 +7100,7 @@
       "agent_usage": [
         "py-architecture-debt-bot"
       ],
-      "reference_count": 86,
+      "reference_count": 87,
       "references": [
         {
           "path": ".codex/agents/py-architecture-debt-bot.md",

@@ -46,6 +46,9 @@ def _build_payload(
     coverage_kpi: dict[str, object] | None = None,
 ) -> dict[str, object]:
     per_pipeline = Counter(row["pipeline_name"] for row in rows)
+    per_pipeline_source = Counter(
+        (row["pipeline_name"], row["normalization_source"]) for row in rows
+    )
     per_normalizer = Counter(row["normalizer"] for row in rows)
     per_source = Counter(row["normalization_source"] for row in rows)
     return {
@@ -65,7 +68,16 @@ def _build_payload(
             )
         ],
         "pipelines": [
-            {"pipeline_name": pipeline_name, "fallback_field_count": count}
+            {
+                "pipeline_name": pipeline_name,
+                "fallback_field_count": count,
+                "fallback_business_field_count": per_pipeline_source[
+                    (pipeline_name, FALLBACK_BUSINESS)
+                ],
+                "fallback_technical_passthrough_field_count": per_pipeline_source[
+                    (pipeline_name, FALLBACK_TECHNICAL_PASSTHROUGH)
+                ],
+            }
             for pipeline_name, count in sorted(
                 per_pipeline.items(),
                 key=lambda item: (-item[1], item[0]),
@@ -130,7 +142,9 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
     lines.extend(["## Top Pipelines", ""])
     for item in list(pipelines)[:limit]:
         lines.append(
-            f"- `{item['pipeline_name']}` has `{item['fallback_field_count']}` fallback fields"
+            f"- `{item['pipeline_name']}` has `{item['fallback_field_count']}` fallback fields "
+            f"(`fallback_business={item['fallback_business_field_count']}`, "
+            f"`fallback_technical_passthrough={item['fallback_technical_passthrough_field_count']}`)"
         )
 
     lines.extend(["", "## Top Normalizers", ""])
