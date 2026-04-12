@@ -6,6 +6,7 @@ Coordinates high-level execution flow while delegating stage logic to mixins.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import time
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.lifecycle_observer_service import (
@@ -170,6 +171,7 @@ class CompositePipelineRunner(
         """Validate and log the start of one composite runner execution."""
         self._validate_config_consistency()
         self._run_preflight_validation()
+        self._start_time = time.monotonic()
         self._started_at = datetime.now(tz=UTC)
         self._observer.emit_run_started(
             composite_name=self._config.name,

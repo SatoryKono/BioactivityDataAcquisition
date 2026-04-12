@@ -13,6 +13,7 @@ from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import 
     build_cached_bronze_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
+    build_launch_context_snapshot,
     build_run_source_refs,
     resolve_replay_capability,
 )
@@ -131,4 +132,66 @@ def test_resolve_replay_capability_requires_persisted_snapshots_for_exact_replay
             resume_requested=False,
         )
         is ReplayCapability.EXACT_REPLAY_SUPPORTED
+    )
+
+
+@pytest.mark.unit
+def test_build_launch_context_snapshot_marks_ordinary_source_boundary() -> None:
+    ctx = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        resume=False,
+        dry_run=False,
+        limit=10,
+        query="assay_type=B",
+        start_offset=None,
+        log_level="INFO",
+        ignore_yaml_filter=False,
+        skip_gold=False,
+        exact_replay=True,
+        vacuum=None,
+        input_filter=None,
+        cached_bronze=SimpleNamespace(enabled=True),
+    )
+
+    launch_context = build_launch_context_snapshot(
+        ctx,
+        run_type_value="incremental",
+        execution_context_value="pipeline",
+    )
+
+    assert launch_context["execution_context"] == "pipeline"
+    assert (
+        launch_context["exact_replay_support_boundary"]
+        == "snapshot_backed_source_runs_only"
+    )
+
+
+@pytest.mark.unit
+def test_build_launch_context_snapshot_marks_composite_boundary_as_unsupported() -> None:
+    ctx = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        resume=False,
+        dry_run=False,
+        limit=10,
+        query=None,
+        start_offset=None,
+        log_level="INFO",
+        ignore_yaml_filter=False,
+        skip_gold=False,
+        exact_replay=False,
+        vacuum=None,
+        input_filter=None,
+        cached_bronze=None,
+    )
+
+    launch_context = build_launch_context_snapshot(
+        ctx,
+        run_type_value="incremental",
+        execution_context_value="composite",
+    )
+
+    assert launch_context["execution_context"] == "composite"
+    assert (
+        launch_context["exact_replay_support_boundary"]
+        == "composite_execution_unsupported"
     )

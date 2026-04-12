@@ -87,6 +87,11 @@ def build_launch_context_snapshot(
         "skip_gold": getattr(ctx, "skip_gold", False),
         "exact_replay": getattr(ctx, "exact_replay", False),
         "execution_context": execution_context_value,
+        "exact_replay_support_boundary": (
+            "snapshot_backed_source_runs_only"
+            if execution_context_value != "composite"
+            else "composite_execution_unsupported"
+        ),
         "vacuum": to_serializable_mapping(getattr(ctx, "vacuum", None)),
         "input_filter": to_serializable_mapping(getattr(ctx, "input_filter", None)),
         "cached_bronze": to_serializable_mapping(getattr(ctx, "cached_bronze", None)),

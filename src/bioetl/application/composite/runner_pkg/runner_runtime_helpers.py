@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+import time
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 from uuid import UUID, uuid4
 
@@ -80,6 +81,7 @@ class _CompositeRunnerHostProtocol(Protocol):
     _run_ledger_service: object
     _run_id_str: str
     _run_id: RunID
+    _start_time: float | None
     _started_at: object
     _original_run_id: object
     _finished: bool
@@ -133,6 +135,7 @@ def initialize_runner_runtime_state(host: object, run_id: str | None) -> None:
     run_id_str = run_id or str(uuid4())
     runner_host._run_id_str = run_id_str
     runner_host._run_id = cast(RunID, UUID(run_id_str))
+    runner_host._start_time = None
     runner_host._started_at = None
     runner_host._original_run_id = None
     runner_host._finished = False

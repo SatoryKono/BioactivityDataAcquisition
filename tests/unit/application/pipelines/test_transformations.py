@@ -12,6 +12,7 @@ from bioetl.application.pipelines.pubchem import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.uniprot import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
+from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
@@ -49,10 +50,16 @@ def mock_run_id() -> RunID:
     return uuid4()
 
 
+@pytest.fixture
+def mock_runtime() -> RuntimeConfig:
+    """Create a real runtime config compatible with BasePipeline."""
+    return RuntimeConfig(run_type=RunType.INCREMENTAL, resume=False)
+
+
 class TestPubChemCompoundPipeline:
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_success(
-        self, mock_context, mock_pipeline_base, mock_run_id
+        self, mock_context, mock_pipeline_base, mock_run_id, mock_runtime
     ):
         # Arrange
         config = MagicMock()
@@ -63,7 +70,7 @@ class TestPubChemCompoundPipeline:
         )
         pipeline = PubChemCompoundPipeline(
             config=config,
-            runtime=MagicMock(),
+            runtime=mock_runtime,
             services=MagicMock(),
             run_id=mock_run_id,
             shutdown_signal=ShutdownSignal(),
@@ -92,7 +99,7 @@ class TestPubChemCompoundPipeline:
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_no_molecule_id(
-        self, mock_context, mock_pipeline_base, mock_run_id
+        self, mock_context, mock_pipeline_base, mock_run_id, mock_runtime
     ):
         # Arrange
         transformer = instantiate_test_transformer(
@@ -101,7 +108,7 @@ class TestPubChemCompoundPipeline:
         )
         pipeline = PubChemCompoundPipeline(
             config=MagicMock(),
-            runtime=MagicMock(),
+            runtime=mock_runtime,
             services=MagicMock(),
             run_id=mock_run_id,
             shutdown_signal=ShutdownSignal(),
@@ -119,7 +126,7 @@ class TestPubChemCompoundPipeline:
 class TestUniProtProteinPipeline:
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_success(
-        self, mock_context, mock_pipeline_base, mock_run_id
+        self, mock_context, mock_pipeline_base, mock_run_id, mock_runtime
     ):
         # Arrange
         config = MagicMock()
@@ -130,7 +137,7 @@ class TestUniProtProteinPipeline:
         )
         pipeline = UniProtProteinPipeline(
             config=config,
-            runtime=MagicMock(),
+            runtime=mock_runtime,
             services=MagicMock(),
             run_id=mock_run_id,
             shutdown_signal=ShutdownSignal(),
@@ -163,7 +170,7 @@ class TestUniProtProteinPipeline:
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_no_accession(
-        self, mock_context, mock_pipeline_base, mock_run_id
+        self, mock_context, mock_pipeline_base, mock_run_id, mock_runtime
     ):
         # Arrange
         transformer = instantiate_test_transformer(
@@ -172,7 +179,7 @@ class TestUniProtProteinPipeline:
         )
         pipeline = UniProtProteinPipeline(
             config=MagicMock(),
-            runtime=MagicMock(),
+            runtime=mock_runtime,
             services=MagicMock(),
             run_id=mock_run_id,
             shutdown_signal=ShutdownSignal(),
