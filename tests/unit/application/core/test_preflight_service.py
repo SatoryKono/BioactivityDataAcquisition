@@ -160,45 +160,44 @@ class TestPreflightServiceValidation:
         assert len(report.results) == 2  # storage + data_source
 
     @pytest.mark.asyncio
-    async def test_validate_infrastructure_logs_start(
+    async def test_validate_infrastructure_does_not_log_service_local_start(
         self, preflight_service, mock_services, mock_logger
     ):
-        """Test validate_infrastructure logs start message."""
+        """Service-local start logging was retired in favor of observer publication."""
         await preflight_service.validate_infrastructure(mock_services)
 
         calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert any("Validating infrastructure health" in call for call in calls)
+        assert not any("Validating infrastructure health" in call for call in calls)
 
     @pytest.mark.asyncio
-    async def test_validate_infrastructure_logs_completion(
+    async def test_validate_infrastructure_does_not_log_service_local_completion(
         self, preflight_service, mock_services, mock_logger
     ):
-        """Test validate_infrastructure logs completion message."""
+        """Service-local completion logging was retired in favor of observer publication."""
         await preflight_service.validate_infrastructure(mock_services)
 
         calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert any("health check completed" in call for call in calls)
+        assert not any("health check completed" in call for call in calls)
 
     @pytest.mark.asyncio
-    async def test_validate_infrastructure_records_per_component_metrics(
+    async def test_validate_infrastructure_does_not_publish_observer_owned_component_metrics(
         self, preflight_service, mock_services, mock_metrics
     ):
-        """Test validate_infrastructure records per-component metrics."""
+        """Observer-owned component health metrics must not be emitted by the service."""
         await preflight_service.validate_infrastructure(mock_services)
 
-        # Should have set_gauge calls for each component
         gauge_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
             if call[0][0] == "bioetl_pipeline_health_check_passed"
         ]
-        assert len(gauge_calls) == 2  # storage + data_source
+        assert gauge_calls == []
 
     @pytest.mark.asyncio
-    async def test_validate_infrastructure_records_overall_validation_metric(
+    async def test_validate_infrastructure_does_not_publish_observer_owned_validation_metric(
         self, preflight_service, mock_services, mock_metrics
     ):
-        """Test validate_infrastructure records overall validation metric."""
+        """Observer-owned summary validation metrics must not be emitted by the service."""
         await preflight_service.validate_infrastructure(mock_services)
 
         gauge_calls = [
@@ -206,26 +205,22 @@ class TestPreflightServiceValidation:
             for call in mock_metrics.set_gauge.call_args_list
             if call[0][0] == "bioetl_infrastructure_validated"
         ]
-        assert len(gauge_calls) == 1
-        # Should be 1.0 for healthy
-        assert gauge_calls[0][0][1] == 1.0
-        assert gauge_calls[0][0][2] == {"pipeline": "test_preflight_pipeline"}
+        assert gauge_calls == []
 
     @pytest.mark.asyncio
-    async def test_validate_infrastructure_records_duration_metric(
+    async def test_validate_infrastructure_does_not_publish_observer_owned_duration_metric(
         self, preflight_service, mock_services, mock_metrics
     ):
-        """Test validate_infrastructure records duration histogram."""
+        """Observer-owned duration metrics must not be emitted by the service."""
         await preflight_service.validate_infrastructure(mock_services)
 
-        # Look for the overall duration metric (with pipeline label)
         histogram_calls = [
             call
             for call in mock_metrics.observe_histogram.call_args_list
             if call[0][0] == "bioetl_health_check_duration_seconds"
             and "pipeline" in call[0][2]  # Overall duration has pipeline label
         ]
-        assert len(histogram_calls) == 1
+        assert histogram_calls == []
 
     @pytest.mark.asyncio
     async def test_validate_infrastructure_raises_on_unhealthy(self, preflight_service):
@@ -265,6 +260,33 @@ class TestPreflightServiceValidation:
         # Should not raise - degraded is acceptable
         report = await preflight_service.validate_infrastructure(degraded_services)
         assert report.is_healthy
+
+    @pytest.mark.asyncio
+    async def test_validate_infrastructure_can_return_unhealthy_report_without_raising(
+        self, preflight_service
+    ) -> None:
+        """Runner path can request a report first and assert health after observer emission."""
+        unhealthy_services = MagicMock()
+        unhealthy_services.storage = MagicMock()
+        unhealthy_services.storage.health_check = AsyncMock(
+            return_value=HealthStatus.UNHEALTHY
+        )
+        unhealthy_services.data_source = MagicMock()
+        unhealthy_services.data_source.health_check = AsyncMock(
+            return_value=HealthStatus.HEALTHY
+        )
+        unhealthy_services.logger = MagicMock()
+
+        report = await preflight_service.validate_infrastructure(
+            unhealthy_services,
+            raise_on_unhealthy=False,
+        )
+
+        assert report.is_healthy is False
+        assert any(
+            result.component == "storage" and result.status == HealthStatus.UNHEALTHY
+            for result in report.results
+        )
 
     @pytest.mark.asyncio
     async def test_validate_infrastructure_probe_mode_does_not_block_on_data_source(
@@ -307,14 +329,14 @@ class TestPreflightServiceValidation:
 
 
 @pytest.mark.unit
-class TestPreflightServiceMetrics:
-    """Tests for PreflightService metric recording."""
+class TestPreflightServicePublicationBoundary:
+    """Tests for the preflight service publication boundary."""
 
     @pytest.mark.asyncio
     async def test_records_failed_validation_metric(
         self, pipeline_config, mock_context, mock_logger, mock_metrics
     ):
-        """Test records 0.0 for failed validation."""
+        """Failed validation summary metrics belong to the observer, not the service."""
         service = PreflightService(
             config=pipeline_config,
             context=mock_context,
@@ -337,15 +359,12 @@ class TestPreflightServiceMetrics:
         with pytest.raises(InfrastructureError):
             await service.validate_infrastructure(unhealthy_services)
 
-        # Check that bioetl_infrastructure_validated was set to 0.0
         gauge_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
             if call[0][0] == "bioetl_infrastructure_validated"
         ]
-        assert len(gauge_calls) == 1
-        assert gauge_calls[0][0][1] == 0.0
-        assert gauge_calls[0][0][2] == {"pipeline": "test_preflight_pipeline"}
+        assert gauge_calls == []
 
 
 @pytest.fixture
@@ -1033,10 +1052,10 @@ class TestValidatePreflight:
         assert report.medallion_policy_valid is False
 
     @pytest.mark.asyncio
-    async def test_validate_preflight_records_metrics(
+    async def test_validate_preflight_does_not_publish_service_local_metrics(
         self, preflight_service, mock_services, incremental_runtime, mock_metrics
     ):
-        """Test validate_preflight records metrics."""
+        """Preflight service returns reports but does not publish observer-owned metrics."""
         await preflight_service.validate_preflight(
             services=mock_services,
             runtime=incremental_runtime,
@@ -1047,14 +1066,12 @@ class TestValidatePreflight:
             gold_format="delta",
         )
 
-        # Check metrics were recorded
         gauge_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
             if call[0][0] == "bioetl_preflight_medallion_policy_valid"
         ]
-        assert len(gauge_calls) == 1
-        assert gauge_calls[0][0][1] == 1.0  # Valid
+        assert gauge_calls == []
 
     @pytest.mark.asyncio
     async def test_validate_preflight_includes_write_mode_errors(

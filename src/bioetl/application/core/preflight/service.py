@@ -10,13 +10,6 @@ from bioetl.application.core.preflight.health_aggregator import HealthAggregator
 from bioetl.application.core.preflight.medallion_validator import (
     MedallionConfigValidator,
 )
-from bioetl.application.core.preflight.preflight_reporting import (
-    log_preflight_completed,
-    log_preflight_started,
-    raise_if_strict_blocking,
-    record_health_check_metrics,
-    record_preflight_metrics,
-)
 from bioetl.domain.types import (
     ConfigValidationError,
     HealthReport,
@@ -55,43 +48,30 @@ class PreflightService:
         self._health_aggregator = health_aggregator
         self._medallion_validator = medallion_validator
 
-    async def validate_infrastructure(self, services: PipelineService) -> HealthReport:
+    async def validate_infrastructure(
+        self,
+        services: PipelineService,
+        *,
+        raise_on_unhealthy: bool = True,
+    ) -> HealthReport:
         """Validate storage and data source health.
 
         Args:
             services: Pipeline service container providing storage and data source ports.
+            raise_on_unhealthy: Whether to raise InfrastructureError when any
+                component in the resulting report is unhealthy.
 
         Returns:
             HealthReport with per-component status and overall health assessment.
         """
-        self._logger.info(
-            "Validating infrastructure health",
-            stage="health_check",
-        )
-
-        start_time = time.perf_counter()
         report = await self._health_aggregator.check_all(services)
-        duration = time.perf_counter() - start_time
-
-        self._record_health_check_metrics(report, duration)
-
-        self._logger.info(
-            "Infrastructure health check completed",
-            stage="health_check",
-            overall_status=report.overall_status.value,
-            is_healthy=report.is_healthy,
-            components_checked=len(report.results),
-            duration_seconds=round(duration, 4),
-        )
-
-        self._health_aggregator.assert_healthy(report)
+        if raise_on_unhealthy:
+            self.assert_infrastructure_healthy(report)
         return report
 
-    def _record_health_check_metrics(
-        self, report: HealthReport, duration: float
-    ) -> None:
-        """Record health-check metrics per observability contract."""
-        record_health_check_metrics(self, report, duration)
+    def assert_infrastructure_healthy(self, report: HealthReport) -> None:
+        """Raise InfrastructureError when the report contains unhealthy components."""
+        self._health_aggregator.assert_healthy(report)
 
     def validate_medallion_config(
         self,
@@ -162,9 +142,11 @@ class PreflightService:
         Returns:
             PreflightReport aggregating infrastructure health and config validation results.
         """
-        self._log_preflight_started(runtime)
-
-        health_report = await self.validate_infrastructure(services)
+        health_report = await self.validate_infrastructure(
+            services,
+            raise_on_unhealthy=False,
+        )
+        self.assert_infrastructure_healthy(health_report)
 
         config_errors = self.validate_medallion_config(
             runtime=runtime,
@@ -187,25 +169,9 @@ class PreflightService:
             checked_at=health_report.checked_at or datetime.now(tz=UTC),
         )
 
-        self._record_preflight_metrics(report)
-        self._log_preflight_completed(report, health_report.is_healthy)
         self._raise_if_strict_blocking(report, runtime)
 
         return report
-
-    def _record_preflight_metrics(self, report: PreflightReport) -> None:
-        """Record preflight validation metrics."""
-        record_preflight_metrics(self, report)
-
-    def _log_preflight_started(self, runtime: RuntimeConfig) -> None:
-        """Log preflight start event."""
-        log_preflight_started(self, strict_validation=runtime.strict_validation)
-
-    def _log_preflight_completed(
-        self, report: PreflightReport, is_healthy: bool
-    ) -> None:
-        """Log preflight completion event."""
-        log_preflight_completed(self, report, is_healthy=is_healthy)
 
     def _raise_if_strict_blocking(
         self,
@@ -213,7 +179,15 @@ class PreflightService:
         runtime: RuntimeConfig,
     ) -> None:
         """Raise strict-mode preflight error when startup should be blocked."""
-        raise_if_strict_blocking(report, strict_validation=runtime.strict_validation)
+        if not (report.should_block_startup and runtime.strict_validation):
+            return
+        error_messages = [
+            f"{error.field}: {error.actual} (expected: {error.expected})"
+            for error in report.config_errors
+        ]
+        raise ValueError(
+            "Preflight validation failed (strict mode): " + ", ".join(error_messages)
+        )
 
 
 __all__ = [

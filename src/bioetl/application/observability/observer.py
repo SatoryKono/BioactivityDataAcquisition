@@ -236,6 +236,38 @@ class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
             {"pipeline": self.pipeline_name, "component": component},
         )
 
+    def emit_health_check_summary(
+        self,
+        *,
+        validated: bool,
+        duration_seconds: float,
+        overall_status: str,
+        components_checked: int,
+        **extra: Any,  # Any: structlog-compatible context kwargs
+    ) -> None:
+        """Emit summary preflight health observability through the observer contract."""
+        self.emit_event(
+            PipelineEvent.HEALTH_CHECK_SUMMARY_RECORDED,
+            LifecyclePhase.PREFLIGHT,
+            level="info" if validated else "warning",
+            validated=validated,
+            overall_status=overall_status,
+            components_checked=components_checked,
+            duration_seconds=round(duration_seconds, 4),
+            **extra,
+        )
+
+        self._metrics.set_gauge(
+            "bioetl_infrastructure_validated",
+            1.0 if validated else 0.0,
+            {"pipeline": self.pipeline_name},
+        )
+        self._metrics.observe_histogram(
+            "bioetl_health_check_duration_seconds",
+            duration_seconds,
+            {"pipeline": self.pipeline_name},
+        )
+
     def emit_dq_anomaly(
         self,
         metric_name: str,

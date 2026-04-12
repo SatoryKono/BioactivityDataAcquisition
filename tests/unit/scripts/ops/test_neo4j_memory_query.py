@@ -127,7 +127,8 @@ def test_workflow_execution_statement_collects_calls_variants_and_outputs() -> N
     statement = _workflow_execution_statement()
 
     assert "MATCH (workflow:workflow_surface)" in statement
-    assert "(job)-[:CALLS_WORKFLOW]->(call:workflow_call_surface)" in statement
+    assert "[:CALLS_WORKFLOW]->(workflow_call:workflow_call_surface)" in statement
+    assert "[:CALLS_WORKFLOW]->(job_call:workflow_call_surface)" in statement
     assert "(job)-[:HAS_MATRIX_VARIANT]->(variant:workflow_matrix_variant_surface)" in statement
     assert "(workflow)-[:EMITS_OUTPUT]->(workflow_output:workflow_output_surface)" in statement
     assert "(job)-[:EMITS_OUTPUT]->(job_output:workflow_output_surface)" in statement
@@ -188,7 +189,7 @@ def test_claim_trace_statement_collects_claims_and_targets() -> None:
 
     assert "MATCH (doc)-[:ASSERTS]->(claim:doc_claim_surface)" in statement
     assert "(claim)-[:ASSERTS_ABOUT]->(target)" in statement
-    assert "claim.claim_text AS claim_text" in statement
+    assert "coalesce(claim.claim_text, '') AS claim_text" in statement
 
 
 def test_cli_semantics_statement_collects_options_and_side_effects() -> None:

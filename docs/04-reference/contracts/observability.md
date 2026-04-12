@@ -93,6 +93,10 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 
 - `PipelineObserver` является каноническим lifecycle emitter для ordinary
   pipeline runs
+- ordinary preflight runtime publication is observer-owned: application helpers
+  such as `PreflightService` and `HealthAggregator` may build typed reports, but
+  phase-adjacent logs/metrics for ordinary runs must be emitted from the runner
+  through `PipelineObserver`
 - typed aggregate Domain Events из `bioetl.domain.aggregates.events` имеют
   explicit canonical projection в runtime observability vocabulary через
   `bioetl.domain.observability_event_mapping` и могут эмититься через
@@ -104,6 +108,8 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 - direct logger-only publication не считается canonical path для lifecycle /
   typed domain events; structured logs/metrics/spans являются side effects
   canonical observer emission
+- helper-local preflight reporting modules are not a sanctioned runtime
+  publication path for ordinary pipeline runs
 - Lifecycle phase emissions используют low-cardinality `phase` labels и не
   подменяются ad-hoc logging-only path
 - `MetricsPort` остаётся transport-level observability port; pipeline-specific
@@ -111,6 +117,11 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
   generic port contract
 - `DQMonitorPort.check_quality()` возвращает typed domain anomalies:
   `list[DQAnomaly]`
+- канонический timestamp для `DQMonitorPort.check_quality(...)` и
+  `DQMonitorPort.update_baseline_from_metrics(...)` принадлежит application
+  layer и выводится из `freshness_anchor_timestamp` / ingestion anchor
+  текущего run; infrastructure adapter не должен silently invent отдельный
+  anomaly timestamp
 - Postrun observability должна использовать structured spans/events для
   compaction, DQ evaluation, DQ report generation, vacuum и final metadata
 - `AuditPort` остаётся отдельным traceability/observability port и
@@ -151,6 +162,16 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 | `bioetl_data_freshness_seconds`                | Gauge     | `pipeline,entity`                        | unix timestamp ingestion anchor успешного запуска (сейчас `PipelineContext.started_at`); age считается как `time() - metric` |
 | `bioetl_quarantine_operator_operations_total`  | Counter   | `operation,status`                       | bounded operator actions for inspect/replay/purge/update workflows                 |
 | `bioetl_quarantine_operator_duration_seconds`  | Histogram | `operation,status`                       | latency of quarantine operator workflows                                           |
+
+DQ anomaly timing semantics:
+
+- `DataQualityService` вычисляет canonical DQ timestamp из того же
+  application-owned freshness / ingestion anchor, который публикуется как
+  `bioetl_data_freshness_seconds`
+- этот timestamp MUST прокидываться в `DQMonitorPort.check_quality(...)` и
+  `DQMonitorPort.update_baseline_from_metrics(...)`
+- z-score / threshold anomaly timestamps therefore reflect the run anchor used
+  by the application runtime, not a monitor-local wall clock
 
 Guardrail для новых метрик control-plane/traceability:
 

@@ -235,19 +235,11 @@ def _normalize_execution_identity_value(
     value: object | None,
 ) -> str | None:
     """Normalize one canonical execution-identity field."""
-    if key == "effective_config_hash":
-        return normalize_runtime_anchor_effective_config_hash(value)
+    direct_normalizer = _EXECUTION_IDENTITY_FIELD_NORMALIZERS.get(key)
+    if direct_normalizer is not None:
+        return direct_normalizer(value)
     if key in _EXECUTION_IDENTITY_SHA256_FIELDS:
         return normalize_control_plane_opaque_hash_ref(value)
-    if key == "contract_ref":
-        return normalize_contract_ref(value)
-    if key == "contract_version":
-        return normalize_contract_version(value)
-    if key == "exact_replay":
-        return _normalize_optional_bool_token(value)
-    if key == "run_type":
-        normalized = _normalize_optional_text(value)
-        return None if normalized is None else normalized.lower()
     return _normalize_optional_text(value)
 
 
@@ -257,15 +249,33 @@ def _normalize_optional_bool_token(value: object | None) -> str | None:
         return None
     if isinstance(value, bool):
         return "true" if value else "false"
+    return _normalize_bool_text_token(value)
+
+
+def _normalize_optional_lower_text(value: object | None) -> str | None:
     normalized = _normalize_optional_text(value)
-    if normalized is None:
-        return None
-    lowered = normalized.lower()
-    if lowered in {"true", "false"}:
-        return lowered
+    return None if normalized is None else normalized.lower()
+
+
+def _normalize_bool_text_token(value: object | None) -> str | None:
+    normalized = _normalize_optional_lower_text(value)
+    if normalized is None or normalized in {"true", "false"}:
+        return normalized
     raise ValueError(
         "Invalid exact_replay format: expected a boolean or 'true'/'false' token"
     )
+
+
+_EXECUTION_IDENTITY_FIELD_NORMALIZERS: dict[
+    str,
+    Callable[[object | None], str | None],
+] = {
+    "effective_config_hash": normalize_runtime_anchor_effective_config_hash,
+    "contract_ref": normalize_contract_ref,
+    "contract_version": normalize_contract_version,
+    "exact_replay": _normalize_optional_bool_token,
+    "run_type": _normalize_optional_lower_text,
+}
 
 
 def _strip_optional_sha256_prefix(value: str) -> str:

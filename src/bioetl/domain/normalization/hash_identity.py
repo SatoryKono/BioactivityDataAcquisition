@@ -17,7 +17,6 @@ import math
 from collections.abc import Sequence
 from datetime import date, datetime
 from functools import singledispatch
-from typing import Any
 
 from bioetl.domain.constants import META_FIELDS
 from bioetl.domain.normalization.json import (
@@ -35,8 +34,8 @@ __all__ = [
 
 @singledispatch
 def _normalize_scalar(
-    value: Any,
-) -> Any:
+    value: object,
+) -> object:
     """Normalize one scalar value for the hash-identity contract."""
     return value
 
@@ -159,6 +158,22 @@ def _normalize_hash_collection(
     return _NO_NORMALIZED_COLLECTION
 
 
+def _normalize_hash_string_candidate(
+    value: object,
+    *,
+    sort_nested_sequences: bool,
+) -> object | None:
+    if not sort_nested_sequences or not isinstance(value, str):
+        return None
+    candidate = _maybe_deserialize_json_string(value)
+    if candidate is value:
+        return None
+    return normalize_hash_identity_value(
+        candidate,
+        sort_nested_sequences=True,
+    )
+
+
 def normalize_hash_identity_value(
     value: object,
     *,
@@ -178,15 +193,43 @@ def normalize_hash_identity_value(
     if collection is not _NO_NORMALIZED_COLLECTION:
         return collection
 
-    if sort_nested_sequences and isinstance(value, str):
-        candidate = _maybe_deserialize_json_string(value)
-        if candidate is not value:
-            return normalize_hash_identity_value(
-                candidate,
-                sort_nested_sequences=True,
-            )
+    normalized_string_candidate = _normalize_hash_string_candidate(
+        value,
+        sort_nested_sequences=sort_nested_sequences,
+    )
+    if normalized_string_candidate is not None:
+        return normalized_string_candidate
 
     return _normalize_scalar(value)
+
+
+def _should_include_hash_identity_field(
+    key: str,
+    value: object,
+    *,
+    exclude_none: bool,
+    include_fields: set[str] | None,
+    exclude_fields: set[str],
+) -> bool:
+    return not any(
+        (
+            exclude_none and value is None,
+            key.startswith("_"),
+            key in META_FIELDS,
+            key in exclude_fields,
+            include_fields is not None and key not in include_fields,
+        )
+    )
+
+
+def _should_sort_nested_hash_sequence(
+    key: str,
+    sort_nested_sequence_fields: set[str] | None,
+) -> bool:
+    return bool(
+        sort_nested_sequence_fields is not None
+        and key in sort_nested_sequence_fields
+    )
 
 
 def normalize_hash_identity_record(
@@ -202,17 +245,19 @@ def normalize_hash_identity_record(
     return {
         key: normalize_hash_identity_value(
             value,
-            sort_nested_sequences=bool(
-                sort_nested_sequence_fields is not None
-                and key in sort_nested_sequence_fields
+            sort_nested_sequences=_should_sort_nested_hash_sequence(
+                key,
+                sort_nested_sequence_fields,
             ),
         )
         for key, value in record.items()
-        if not (exclude_none and value is None)
-        if not key.startswith("_")
-        if key not in META_FIELDS
-        if key not in resolved_exclude_fields
-        if include_fields is None or key in include_fields
+        if _should_include_hash_identity_field(
+            key,
+            value,
+            exclude_none=exclude_none,
+            include_fields=include_fields,
+            exclude_fields=resolved_exclude_fields,
+        )
     }
 
 

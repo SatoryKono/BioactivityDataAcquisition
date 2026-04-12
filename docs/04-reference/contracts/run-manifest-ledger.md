@@ -365,6 +365,31 @@ The `diagnostics` block is built from
 published operator-facing summary for event counts, artifact linkage, DQ
 anchors, correlation-anchor gaps, replay capability, and suggested next steps.
 
+Current supported lineage MVP boundary for Bronze -> Silver -> Gold closure:
+
+- Bronze batch outputs for the representative `chembl.activity` family;
+- Silver dataset outputs with canonical artifact ids of the form
+  `silver:chembl.activity@<version>`;
+- Gold dataset outputs with canonical artifact ids of the form
+  `gold:chembl.activity`.
+
+This boundary is intentionally narrow. Other families may emit lineage signals,
+but they are not yet the explicitly supported end-to-end closure surface for
+operator-grade trace/debug guarantees.
+
+For the supported MVP surface, sidecar/lineage bundles MUST satisfy this
+minimal identity contract:
+
+- `runtime.run_id` matches the lineage fragment `run_id`;
+- `runtime.manifest_id` matches the lineage fragment `manifest_id` when both
+  are present;
+- `output.artifact_id` matches the produced artifact node exposed by the
+  lineage fragment;
+- `output.lineage_fragment_id` matches the published lineage fragment id.
+
+Bundle assembly MUST fail closed on mismatched preexisting sidecar anchors
+instead of silently overwriting them with lineage-derived values.
+
 Replay intent and replay proof are intentionally distinct in this inspection
 surface:
 
@@ -389,6 +414,12 @@ anchors derived from manifest source refs:
 These fields are derived operator-facing summaries used to line up run-manifest
 inspection with checkpoint compatibility diagnostics; they do not expand the
 persisted `RunManifest` storage schema.
+
+`execution_fingerprint` in this contract now means the canonical
+execution-identity fingerprint shared across manifest persistence, checkpoint
+metadata, and runtime compatibility checks. It is derived from normalized
+semantic execution anchors and intentionally excludes occurrence-only values
+such as `manifest_id`, ledger entry order, and diagnostic summaries.
 
 ## References
 

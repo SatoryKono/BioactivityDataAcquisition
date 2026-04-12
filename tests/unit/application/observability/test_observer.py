@@ -36,6 +36,7 @@ def metrics_mock():
     mock = MagicMock()
     mock.observe_histogram = MagicMock()
     mock.increment_counter = MagicMock()
+    mock.set_gauge = MagicMock()
     return mock
 
 
@@ -461,6 +462,46 @@ class TestObserverEmitEvent:
             tracer_mock.get_tracer.return_value.start_as_current_span.return_value
         )
         mock_span.set_attribute.assert_any_call("bioetl.test_event", True)
+
+
+def test_emit_health_check_summary_uses_observer_contract(
+    metrics_mock, logger_mock, run_id
+):
+    """Preflight summary metrics/logs must publish through the observer."""
+    observer = PipelineObserver(
+        pipeline_name="chembl_activity",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics_mock,
+        logger=logger_mock,
+    )
+
+    observer.emit_health_check_summary(
+        validated=False,
+        duration_seconds=0.25,
+        overall_status="unhealthy",
+        components_checked=2,
+        runner_stage="preflight",
+    )
+
+    logger_mock.warning.assert_called_once()
+    call_args = logger_mock.warning.call_args
+    assert call_args.args[0] == "health_check_summary_recorded"
+    assert call_args.kwargs["phase"] == "preflight"
+    assert call_args.kwargs["validated"] is False
+    assert call_args.kwargs["overall_status"] == "unhealthy"
+    assert call_args.kwargs["components_checked"] == 2
+
+    metrics_mock.set_gauge.assert_called_once_with(
+        "bioetl_infrastructure_validated",
+        0.0,
+        {"pipeline": "chembl_activity"},
+    )
+    metrics_mock.observe_histogram.assert_called_once_with(
+        "bioetl_health_check_duration_seconds",
+        0.25,
+        {"pipeline": "chembl_activity"},
+    )
 
 
 class TestObserverEmitPhase:

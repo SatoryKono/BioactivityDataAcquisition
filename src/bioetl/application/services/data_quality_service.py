@@ -16,6 +16,7 @@ Does NOT handle:
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 import time
 from typing import TYPE_CHECKING
 
@@ -101,6 +102,10 @@ class DataQualityService:
             DataQualityThresholdError: If error rate exceeds hard threshold.
         """
         error_rate = metrics.get("error_rate", 0.0)
+        freshness_anchor = self._resolve_freshness_anchor_timestamp(metrics)
+        canonical_dq_timestamp = self._resolve_canonical_dq_timestamp(
+            freshness_anchor
+        )
 
         # Emit validation score gauge (1.0 - error_rate)
         if self._metrics:
@@ -121,7 +126,6 @@ class DataQualityService:
                 record_count,
                 labels,
             )
-            freshness_anchor = self._resolve_freshness_anchor_timestamp(metrics)
             if freshness_anchor is not None:
                 # Store the canonical ingestion/publication anchor timestamp in
                 # seconds. Dashboards and alerts derive lag via:
@@ -153,7 +157,12 @@ class DataQualityService:
                 check_duration_ms=0.0,
             )
 
-        return self._run_anomaly_detection(metrics, error_rate, status)
+        return self._run_anomaly_detection(
+            metrics,
+            error_rate,
+            status,
+            canonical_dq_timestamp,
+        )
 
     @staticmethod
     def _resolve_freshness_anchor_timestamp(
@@ -164,6 +173,15 @@ class DataQualityService:
         if anchor is None or anchor <= 0:
             return None
         return anchor
+
+    @staticmethod
+    def _resolve_canonical_dq_timestamp(
+        freshness_anchor_timestamp: float | None,
+    ) -> datetime | None:
+        """Translate the application freshness anchor into a UTC DQ timestamp."""
+        if freshness_anchor_timestamp is None:
+            return None
+        return datetime.fromtimestamp(freshness_anchor_timestamp, UTC)
 
     def _check_hard_threshold(self, error_rate: float) -> None:
         """Check if error rate exceeds hard threshold.
@@ -236,6 +254,7 @@ class DataQualityService:
         metrics: dict[str, float],
         error_rate: float,
         status: DQEvaluationStatus,
+        canonical_dq_timestamp: datetime | None,
     ) -> DQResult:
         """Run anomaly detection, update baselines, and return results.
 
@@ -246,6 +265,8 @@ class DataQualityService:
             metrics: Metrics to check for anomalies.
             error_rate: Calculated error rate.
             status: Determined DQ status.
+            canonical_dq_timestamp: Application-owned timestamp used for anomaly
+                evaluation and baseline updates.
 
         Returns:
             DQResult with anomalies, critical flag, and check duration.
@@ -256,7 +277,7 @@ class DataQualityService:
         assert self._dq_monitor is not None
 
         start_time = time.monotonic()
-        anomalies = self._dq_monitor.check_quality(metrics)
+        anomalies = self._dq_monitor.check_quality(metrics, canonical_dq_timestamp)
         check_duration_ms = (time.monotonic() - start_time) * 1000
 
         self._record_check_duration(check_duration_ms)
@@ -264,7 +285,10 @@ class DataQualityService:
         has_critical = self._process_anomalies(anomalies)
 
         # Update baseline only if no critical anomalies
-        self._dq_monitor.update_baseline_from_metrics(metrics)
+        self._dq_monitor.update_baseline_from_metrics(
+            metrics,
+            canonical_dq_timestamp,
+        )
         self._update_baseline_metrics(metrics, has_critical)
 
         return DQResult(
