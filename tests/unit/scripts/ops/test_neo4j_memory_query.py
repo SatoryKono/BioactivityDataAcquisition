@@ -8,6 +8,7 @@ from scripts.ops.neo4j_memory_query import (
     _normalization_pipeline_statement,
     _overengineered_candidates_statement,
     _removable_complexity_statement,
+    _run_artifacts_statement,
     _simplification_blockers_statement,
     _storage_lineage_statement,
     _workflow_gates_statement,
@@ -36,9 +37,11 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["neighbors-runtime-evidence"]["target_label"] == "runtime_evidence_surface"
     assert QUERY_PROFILES["neighbors-workflow"]["target_label"] == "workflow_surface"
     assert QUERY_PROFILES["neighbors-workflow-job"]["target_label"] == "workflow_job_surface"
+    assert QUERY_PROFILES["neighbors-run-instance"]["target_label"] == "run_instance_surface"
     assert QUERY_PROFILES["docs-drift"]["mode"] == "docs_drift"
     assert QUERY_PROFILES["workflow-gates"]["mode"] == "workflow_gates"
     assert QUERY_PROFILES["storage-lineage"]["mode"] == "storage_lineage"
+    assert QUERY_PROFILES["run-artifacts"]["mode"] == "run_artifacts"
     assert QUERY_PROFILES["normalization-pipeline"]["mode"] == "normalization_pipeline"
     assert QUERY_PROFILES["fallback-pipelines"]["mode"] == "fallback_pipelines"
     assert QUERY_PROFILES["duplication-cluster"]["target_label"] == "duplication_cluster"
@@ -94,6 +97,19 @@ def test_storage_lineage_statement_collects_producers_and_promotions() -> None:
     assert "(storage)-[:PROMOTES_TO]->(downstream:storage_surface)" in statement
     assert "(upstream:storage_surface)-[:PROMOTES_TO]->(storage)" in statement
     assert "(storage)-[:DEFINED_BY]->(config)" in statement
+    assert "storage.storage_roles AS storage_roles" in statement
+    assert "storage.partition_by AS partition_by" in statement
+    assert "storage.versioning_mode AS versioning_mode" in statement
+
+
+def test_run_artifacts_statement_collects_artifacts_dependencies_and_support_links() -> None:
+    statement = _run_artifacts_statement()
+
+    assert "MATCH (run:run_instance_surface)" in statement
+    assert "$name = 'all' OR run.name = $name OR run.manifest_id = $name OR run.run_id = $name" in statement
+    assert "(run)-[:REFERENCES_ARTIFACT]->(artifact:control_plane_artifact_surface)" in statement
+    assert "(run)-[:DEPENDS_ON]->(dependency)" in statement
+    assert "(run)-[:DESCRIBED_IN]->(support)" in statement
 
 
 def test_duplication_cluster_statement_uses_cluster_targets_members_and_tests() -> None:
@@ -273,6 +289,15 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
                 "storage_name": "silver/chembl/activity",
                 "layer": "silver",
                 "storage_kind": "entity_layer_output",
+                "storage_roles": ["composite_seed_input", "entity_layer_output"],
+                "storage_format": "delta",
+                "config_version": "1.0.0",
+                "quality_version": "1.1.0",
+                "schema_present": True,
+                "partition_by": ["assay_type"],
+                "sort_by": ["entity_id", "activity_id"],
+                "versioning_mode": "scd2",
+                "version_column": "_version",
                 "producers": [
                     {"name": "chembl_activity", "labels": ["pipeline_surface"]},
                     {"name": "chembl_activity", "labels": ["entity_config"]},
@@ -285,11 +310,63 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
     )
 
     assert "Storage lineage path: `silver/chembl/activity`" in formatted
-    assert "storage=silver/chembl/activity | layer=silver | storage_kind=entity_layer_output" in formatted
+    assert (
+        "storage=silver/chembl/activity | layer=silver | storage_kind=entity_layer_output | format=delta "
+        "| roles=composite_seed_input,entity_layer_output | schema_present=True"
+    ) in formatted
+    assert "config_version=1.0.0 | quality_version=1.1.0 | partition_by=assay_type" in formatted
+    assert "sort_by=entity_id,activity_id | versioning_mode=scd2 | version_column=_version" in formatted
     assert "producer=chembl_activity | labels=pipeline_surface" in formatted
     assert "upstream=bronze/chembl/activity" in formatted
     assert "downstream=gold/chembl/activity" in formatted
     assert "defined_by=configs/entities/chembl/activity.yaml" in formatted
+
+
+def test_format_rows_renders_run_artifacts_summary() -> None:
+    formatted = _format_rows(
+        "run-artifacts",
+        "manifest-chain-smoke",
+        [
+            {
+                "run_instance_name": "manifest-chain-smoke",
+                "lifecycle_status": "success",
+                "manifest_id": "manifest-chain-smoke",
+                "run_id": "00000000-0000-0000-0000-000000000302",
+                "contract_ref": "run-manifest",
+                "contract_version": "1.0.0",
+                "effective_config_artifact_id": "effective_config_artifact::json",
+                "lineage_fragment_id": "lineage::fragment",
+                "artifacts": [
+                    {
+                        "name": "run_ledger::jsonl",
+                        "labels": ["control_plane_artifact_surface"],
+                        "artifact_family": "run_ledger",
+                    }
+                ],
+                "dependencies": [{"name": "chembl_activity", "labels": ["pipeline_surface"]}],
+                "support_links": [
+                    {
+                        "name": "tests/unit/application/services/test_run_manifest_inspection_service.py",
+                        "labels": ["test_artifact"],
+                    }
+                ],
+            }
+        ],
+    )
+
+    assert "Run instance artifact chain: `manifest-chain-smoke`" in formatted
+    assert (
+        "run_instance=manifest-chain-smoke | lifecycle_status=success | manifest_id=manifest-chain-smoke "
+        "| run_id=00000000-0000-0000-0000-000000000302"
+    ) in formatted
+    assert "contract_ref=run-manifest | contract_version=1.0.0" in formatted
+    assert "effective_config_artifact_id=effective_config_artifact::json | lineage_fragment_id=lineage::fragment" in formatted
+    assert "artifact=run_ledger::jsonl | labels=control_plane_artifact_surface | artifact_family=run_ledger" in formatted
+    assert "depends_on=chembl_activity | labels=pipeline_surface" in formatted
+    assert (
+        "support=tests/unit/application/services/test_run_manifest_inspection_service.py | labels=test_artifact"
+        in formatted
+    )
 
 
 def test_format_rows_renders_duplication_cluster_summary() -> None:
