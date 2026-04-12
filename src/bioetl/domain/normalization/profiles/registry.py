@@ -92,6 +92,18 @@ def normalize_normalization_profile_coordinates(
     return normalized_provider, normalized_entity
 
 
+def _resolve_normalization_profile_value[T](
+    mapping: Mapping[tuple[str, str], T],
+    provider: str,
+    entity_type: str | None,
+) -> T | None:
+    """Resolve one canonical registry value by provider/entity coordinates."""
+    coordinates = normalize_normalization_profile_coordinates(provider, entity_type)
+    if coordinates is None:
+        return None
+    return mapping.get(coordinates)
+
+
 def build_normalization_profile_registry() -> Mapping[tuple[str, str], NormalizationProfile]:
     """Return the immutable registry of shipped normalization profiles."""
     return {
@@ -185,10 +197,11 @@ def resolve_normalization_profile(
     entity_type: str | None,
 ) -> NormalizationProfile | None:
     """Resolve one shipped normalization profile by provider/entity."""
-    coordinates = normalize_normalization_profile_coordinates(provider, entity_type)
-    if coordinates is None:
-        return None
-    return NORMALIZATION_PROFILE_REGISTRY.get(coordinates)
+    return _resolve_normalization_profile_value(
+        NORMALIZATION_PROFILE_REGISTRY,
+        provider,
+        entity_type,
+    )
 
 
 def resolve_normalization_profile_module_path(
@@ -196,7 +209,8 @@ def resolve_normalization_profile_module_path(
     entity_type: str | None,
 ) -> str | None:
     """Resolve one shipped normalization profile source-module path by provider/entity."""
-    coordinates = normalize_normalization_profile_coordinates(provider, entity_type)
-    if coordinates is None:
-        return None
-    return NORMALIZATION_PROFILE_MODULE_PATHS.get(coordinates)
+    return _resolve_normalization_profile_value(
+        NORMALIZATION_PROFILE_MODULE_PATHS,
+        provider,
+        entity_type,
+    )

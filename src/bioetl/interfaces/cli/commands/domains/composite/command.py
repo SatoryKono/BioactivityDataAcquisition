@@ -154,6 +154,7 @@ def _echo_composite_startup(
     composite: str,
     dry_run: bool,
     resume: bool,
+    cached_bronze_enabled: bool,
     health_server: bool,
     health_port: int,
 ) -> None:
@@ -162,6 +163,7 @@ def _echo_composite_startup(
         composite=composite,
         dry_run=dry_run,
         resume=resume,
+        cached_bronze_enabled=cached_bronze_enabled,
         health_server=health_server,
         health_port=health_port,
         info_printer=echo_info,
@@ -328,6 +330,11 @@ def run_composite(
         composite=composite,
         dry_run=dry_run,
         resume=resume,
+        cached_bronze_enabled=(
+            runtime.use_cached_bronze
+            or runtime.cached_bronze_enrichers is True
+            or runtime.cached_bronze_dependencies
+        ),
         health_server=health_server,
         health_port=health_port,
     )

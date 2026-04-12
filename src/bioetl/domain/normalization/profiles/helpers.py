@@ -18,10 +18,12 @@ from bioetl.domain.value_objects import SMILES
 
 __all__ = [
     "normalize_profile_abstract",
+    "normalize_profile_canonical_smiles",
     "normalize_profile_date",
     "normalize_profile_doi",
     "normalize_profile_float",
     "normalize_profile_int",
+    "normalize_profile_isomeric_smiles",
     "normalize_profile_json_string",
     "normalize_profile_pmc_id",
     "normalize_profile_pmid",
@@ -198,3 +200,13 @@ def normalize_profile_smiles(value: object, *, is_canonical: bool) -> object:
         mode="soft",
     )
     return str(normalized) if normalized is not None else None
+
+
+def normalize_profile_canonical_smiles(value: object) -> object:
+    """Normalize one canonical-SMILES profile field."""
+    return normalize_profile_smiles(value, is_canonical=True)
+
+
+def normalize_profile_isomeric_smiles(value: object) -> object:
+    """Normalize one isomeric-SMILES profile field."""
+    return normalize_profile_smiles(value, is_canonical=False)

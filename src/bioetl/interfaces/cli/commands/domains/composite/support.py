@@ -45,6 +45,7 @@ def emit_composite_startup(
     composite: str,
     dry_run: bool,
     resume: bool,
+    cached_bronze_enabled: bool,
     health_server: bool,
     health_port: int,
     info_printer: Callable[[str], None] = echo_info,
@@ -57,6 +58,11 @@ def emit_composite_startup(
         warning_printer("Dry-run mode: no data will be written")
     if resume:
         info_printer("Resume mode: continuing from last checkpoint")
+    if cached_bronze_enabled:
+        warning_printer(
+            "Cached Bronze inputs on composite execution are outside the strict "
+            "exact-replay boundary; treat this run as rebuild/resume, not exact replay."
+        )
     health_info_printer(health_server, health_port)
 
 

@@ -137,3 +137,14 @@ def test_resolve_profile_module_path_uses_registry_coordinates() -> None:
         == "src/bioetl/domain/normalization/profiles/semanticscholar_publication.py"
     )
     assert resolve_normalization_profile_module_path("chembl", None) is None
+
+
+def test_profile_and_module_path_resolution_share_coordinate_normalization() -> None:
+    provider = " ChEMBL "
+    entity_type = " Molecule "
+
+    assert resolve_normalization_profile(provider, entity_type) is CHEMBL_MOLECULE_PROFILE
+    assert (
+        resolve_normalization_profile_module_path(provider, entity_type)
+        == "src/bioetl/domain/normalization/profiles/chembl_molecule.py"
+    )

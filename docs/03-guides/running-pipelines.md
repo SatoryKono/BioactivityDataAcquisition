@@ -643,7 +643,14 @@ bioetl run-all --source chembl --limit 100
 ```bash
 bioetl run-composite --composite publication
 bioetl run-composite --composite publication --seed-limit 100
+bioetl run-composite --composite publication --use-cached-bronze
 ```
+
+Если composite запуск использует cached Bronze (`--use-cached-bronze`,
+`--cached-bronze-enrichers`, `--cached-bronze-dependencies`), CLI теперь
+явно предупреждает, что такой execution context находится **вне strict
+exact-replay boundary**. Cached Bronze на composite path следует трактовать как
+rebuild/resume aid, а не как доказательство exact replay.
 
 ______________________________________________________________________
 
