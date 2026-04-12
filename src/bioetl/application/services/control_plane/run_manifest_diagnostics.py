@@ -751,49 +751,43 @@ def _build_alert_signals(
     }
 
 
+_ALERT_NEXT_STEPS_MAPPING = {
+    "run_failed": "Inspect failure classification and decide retry/quarantine/escalation.",
+    "artifact_linkage_gap": "Validate artifact publication metadata and repair dataset/lineage links.",
+    "lineage_gap": "Investigate lineage persistence for published artifacts before restart.",
+    "immutable_input_snapshot_gap": (
+        "Persist immutable cached Bronze input snapshots before treating this run as strict "
+        "exact-replay capable."
+    ),
+    "strict_replay_boundary_gap": (
+        "Treat this execution context as outside the strict exact-replay support boundary; "
+        "use rebuild/resume semantics instead of exact replay."
+    ),
+    "replay_ready_gap": (
+        "Review replay-ready persistence requirements before treating this run as "
+        "exact-replay capable."
+    ),
+    "forensic_grade_gap": (
+        "Review forensic-grade persistence requirements before using this run for full "
+        "trace/debug reconstruction."
+    ),
+    "dq_signal_present": (
+        "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or "
+        "escalation."
+    ),
+    "cross_validation_signal_present": (
+        "Review cross-validation mismatch outcomes and composite policy anchors before retry "
+        "or quarantine changes."
+    ),
+    "run_shutdown": "Confirm graceful shutdown reason and resume policy compatibility.",
+}
+
 def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
     """Return operator-oriented next steps based on active alert signals."""
-    steps: list[str] = []
-    if alert_signals.get("run_failed", False):
-        steps.append(
-            "Inspect failure classification and decide retry/quarantine/escalation."
-        )
-    if alert_signals.get("artifact_linkage_gap", False):
-        steps.append(
-            "Validate artifact publication metadata and repair dataset/lineage links."
-        )
-    if alert_signals.get("lineage_gap", False):
-        steps.append(
-            "Investigate lineage persistence for published artifacts before restart."
-        )
-    if alert_signals.get("immutable_input_snapshot_gap", False):
-        steps.append(
-            "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable."
-        )
-    if alert_signals.get("strict_replay_boundary_gap", False):
-        steps.append(
-            "Treat this execution context as outside the strict exact-replay support boundary; use rebuild/resume semantics instead of exact replay."
-        )
-    if alert_signals.get("replay_ready_gap", False):
-        steps.append(
-            "Review replay-ready persistence requirements before treating this run as exact-replay capable."
-        )
-    if alert_signals.get("forensic_grade_gap", False):
-        steps.append(
-            "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
-        )
-    if alert_signals.get("dq_signal_present", False):
-        steps.append(
-            "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation."
-        )
-    if alert_signals.get("cross_validation_signal_present", False):
-        steps.append(
-            "Review cross-validation mismatch outcomes and composite policy anchors before retry or quarantine changes."
-        )
-    if alert_signals.get("run_shutdown", False):
-        steps.append(
-            "Confirm graceful shutdown reason and resume policy compatibility."
-        )
+    steps = [
+        msg for key, msg in _ALERT_NEXT_STEPS_MAPPING.items()
+        if alert_signals.get(key, False)
+    ]
     if not steps:
         steps.append("No alert signals detected; continue routine monitoring.")
     return steps

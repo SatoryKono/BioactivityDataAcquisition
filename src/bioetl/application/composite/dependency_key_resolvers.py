@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import TypeVar
 
 import polars as pl
 
@@ -305,7 +306,9 @@ def create_chained_key_resolver(
     )
 
 
-def _create_key_resolver[TResolver: SeedKeyResolver | ChainedKeyResolver](
+TResolver = TypeVar("TResolver", bound="SeedKeyResolver | ChainedKeyResolver")
+
+def _create_key_resolver(
     resolver_type: type[TResolver],
     logger: LoggerPort,
     *,
