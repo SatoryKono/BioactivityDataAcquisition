@@ -147,6 +147,11 @@ class PipelineSettings(BaseSettings):
 
         model_config = SettingsConfigDict(frozen=True)
 
+        required_persistence_profile: Literal[
+            "degraded_observable", "replay_ready", "forensic_grade"
+        ] = Field(default="degraded_observable")
+        """Minimum persistence profile required for this deployment/runtime."""
+
         run_manifest_enabled: bool = Field(default=True)
         """When True, create immutable run manifests before execution starts."""
 
@@ -169,6 +174,25 @@ class PipelineSettings(BaseSettings):
                 raise ValueError(
                     "pipeline.control_plane.run_ledger_enabled requires "
                     "pipeline.control_plane.run_manifest_enabled"
+                )
+            if (
+                self.required_persistence_profile
+                in {"replay_ready", "forensic_grade"}
+                and not self.run_manifest_enabled
+            ):
+                raise ValueError(
+                    "pipeline.control_plane.required_persistence_profile="
+                    f"{self.required_persistence_profile} requires "
+                    "pipeline.control_plane.run_manifest_enabled"
+                )
+            if (
+                self.required_persistence_profile == "forensic_grade"
+                and not self.run_ledger_enabled
+            ):
+                raise ValueError(
+                    "pipeline.control_plane.required_persistence_profile="
+                    "forensic_grade requires "
+                    "pipeline.control_plane.run_ledger_enabled"
                 )
             return self
 

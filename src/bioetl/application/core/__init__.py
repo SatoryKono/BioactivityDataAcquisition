@@ -17,14 +17,12 @@ directly from their defining submodules:
 - ``bioetl.application.core.lifecycle.cleanup_service``     — CleanupService, CleanupResult
 - ``bioetl.application.core.lifecycle.lock_manager``        — LockCoordinator
 - ``bioetl.application.core.lifecycle.shutdown``            — ShutdownService, ShutdownSignal
-- ``bioetl.application.core.factory_wiring_api``            — composition-facing
-  pipeline-factory seam for internal DI assembly
-- ``bioetl.application.core.runtime_wiring_api``            — composition-facing
-  batch-runtime seam for internal DI assembly
-- ``bioetl.application.core.transformer_wiring_api``        — composition-facing
-  transformer seam for internal DI assembly
-- ``bioetl.application.core.pipeline_registry_wiring_api``  — composition-facing
-  pipeline-registry seam for internal DI assembly
+- ``bioetl.application.core.wiring``                        — composition-facing
+  wiring seams for internal DI assembly; flat ``*_wiring_api`` modules remain
+  only as compatibility facades
+- ``bioetl.application.core.data_sources``                  — specialized
+  data-source wrappers; flat ``*_data_source`` modules remain only as
+  compatibility facades
 
 Configuration consolidation (all in bioetl.domain.config):
 - PipelineConfig: Static pipeline configuration

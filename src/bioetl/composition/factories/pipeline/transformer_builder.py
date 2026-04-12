@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.transformer_wiring_api import build_structural_policy
+from bioetl.application.core.wiring.transformer import build_structural_policy
 from bioetl.composition.factories.pipeline.construction_types import (
     ContractPolicyLoader,
     EntityTypeExtractor,
@@ -17,7 +17,7 @@ from bioetl.domain.services import IdentityService
 from bioetl.infrastructure.config import load_pipeline_contract_policy
 
 if TYPE_CHECKING:
-    from bioetl.application.core.transformer_wiring_api import BaseTransformer
+    from bioetl.application.core.wiring.transformer import BaseTransformer
     from bioetl.domain.config import PipelineConfig
     from bioetl.domain.ports import ContractPolicyPort, MetricsPort, TracingPort
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig

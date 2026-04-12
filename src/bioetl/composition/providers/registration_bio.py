@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.idmapping_data_source import IDMappingDataSource
-from bioetl.application.core.publication_term_data_source import (
+from bioetl.application.core.data_sources.idmapping import IDMappingDataSource
+from bioetl.application.core.data_sources.publication_term import (
     PublicationTermDataSource,
 )
-from bioetl.application.core.subcellular_fraction_data_source import (
+from bioetl.application.core.data_sources.subcellular_fraction import (
     SubcellularFractionDataSource,
 )
 from bioetl.composition.factories.datasource.adapter_helpers import (

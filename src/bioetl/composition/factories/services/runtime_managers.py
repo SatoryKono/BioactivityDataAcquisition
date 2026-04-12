@@ -5,7 +5,7 @@ Extracted from pipeline_builder.py to keep it within LOC limits.
 
 from __future__ import annotations
 
-from bioetl.application.core.runtime_wiring_api import (
+from bioetl.application.core.wiring.runtime import (
     BasePipeline,
     BatchCheckpointRecoveryService,
     BatchExecutionLifecycleService,

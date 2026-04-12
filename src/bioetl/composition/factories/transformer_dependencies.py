@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.transformer_wiring_api import (
+from bioetl.application.core.wiring.transformer import (
     DefaultContractPolicy,
     NoOpStructuralPolicy,
     StructuralPolicyProtocol,

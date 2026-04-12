@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.runtime_wiring_api import (
+from bioetl.application.core.wiring.runtime import (
     BasePipeline,
     BatchProcessingComponents,
     BatchProcessingService,

@@ -29,7 +29,7 @@ import threading
 from types import MappingProxyType
 from typing import cast
 
-from bioetl.application.core.pipeline_registry_wiring_api import GenericPipeline
+from bioetl.application.core.wiring.registry import GenericPipeline
 from bioetl.composition import PipelineRegistry, get_default_registry
 from bioetl.composition.factories.pipeline.assembler import (
     GenericPipelineFactory,

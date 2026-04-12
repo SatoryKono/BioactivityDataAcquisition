@@ -6,7 +6,7 @@ from collections.abc import Awaitable, Callable, Iterable, Mapping
 from itertools import chain
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.runtime_wiring_api import (
+from bioetl.application.core.wiring.runtime import (
     BasePipeline,
     ContentHashPolicyByVersion,
     ContentHashVersionPolicy,

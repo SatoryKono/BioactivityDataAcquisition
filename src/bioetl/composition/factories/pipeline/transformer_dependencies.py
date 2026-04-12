@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Collection
 from typing import Protocol
 
-from bioetl.application.core.transformer_wiring_api import (
+from bioetl.application.core.wiring.transformer import (
     DefaultContractPolicy,
     NoOpStructuralPolicy,
     StructuralPolicyProtocol,
