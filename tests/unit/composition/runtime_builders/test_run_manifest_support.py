@@ -1,0 +1,134 @@
+"""Unit tests for run-manifest support helpers around replay boundaries."""
+
+from __future__ import annotations
+
+import os
+from datetime import UTC, datetime
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
+    build_cached_bronze_input_snapshot_refs,
+)
+from bioetl.composition.runtime_builders._run_manifest_support import (
+    build_run_source_refs,
+    resolve_replay_capability,
+)
+from bioetl.domain.control_plane import ReplayCapability
+
+
+@pytest.mark.unit
+def test_cached_bronze_snapshot_refs_keep_stable_identity_when_mtime_changes(
+    tmp_path: Path,
+) -> None:
+    bronze_root = tmp_path / "bronze"
+    bronze_day = bronze_root / "2026-04-12"
+    bronze_day.mkdir(parents=True)
+    batch_file = bronze_day / "batch_demo.jsonl.zst"
+    batch_file.write_bytes(b"stable-snapshot-bytes")
+
+    first = build_cached_bronze_input_snapshot_refs(
+        bronze_root=bronze_root,
+        bronze_date="2026-04-12",
+        pipeline_name="chembl_activity",
+    )
+    original_mtime = batch_file.stat().st_mtime
+    os.utime(batch_file, (original_mtime + 10, original_mtime + 10))
+    second = build_cached_bronze_input_snapshot_refs(
+        bronze_root=bronze_root,
+        bronze_date="2026-04-12",
+        pipeline_name="chembl_activity",
+    )
+
+    assert len(first) == 1
+    assert len(second) == 1
+    assert first[0].snapshot_id == second[0].snapshot_id
+    assert first[0].content_hash == second[0].content_hash
+    assert first[0].immutable_uri == second[0].immutable_uri
+    assert first[0].captured_at != second[0].captured_at
+    assert datetime.fromtimestamp(original_mtime, tz=UTC) == first[0].captured_at
+
+
+@pytest.mark.unit
+def test_cached_bronze_snapshot_refs_are_sorted_by_snapshot_identity(
+    tmp_path: Path,
+) -> None:
+    bronze_root = tmp_path / "bronze"
+    bronze_day = bronze_root / "2026-04-12"
+    bronze_day.mkdir(parents=True)
+    (bronze_day / "batch_b.jsonl.zst").write_bytes(b"batch-b")
+    (bronze_day / "batch_a.jsonl.zst").write_bytes(b"batch-a")
+
+    refs = build_cached_bronze_input_snapshot_refs(
+        bronze_root=bronze_root,
+        bronze_date="2026-04-12",
+        pipeline_name="chembl_activity",
+    )
+
+    snapshot_ids = [ref.snapshot_id for ref in refs]
+    assert snapshot_ids == sorted(snapshot_ids)
+
+
+@pytest.mark.unit
+def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots() -> None:
+    settings = SimpleNamespace(bronze_path=Path("/unused"))
+    ctx = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        query=None,
+        exact_replay=True,
+    )
+    cached_bronze = SimpleNamespace(
+        enabled=True,
+        bronze_path="/tmp/does-not-exist",
+        bronze_date="2026-04-12",
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="Cached Bronze execution requires at least one persisted batch file",
+    ):
+        build_run_source_refs(
+            ctx=ctx,
+            cached_bronze=cached_bronze,
+            settings=settings,
+            provider="chembl",
+            entity="activity",
+        )
+
+
+@pytest.mark.unit
+def test_resolve_replay_capability_requires_persisted_snapshots_for_exact_replay() -> None:
+    no_snapshot_refs = (
+        SimpleNamespace(provider="chembl", entity="activity", input_snapshots=()),
+    )
+    snapshot_refs = (
+        SimpleNamespace(
+            provider="chembl",
+            entity="activity",
+            input_snapshots=(SimpleNamespace(snapshot_id="snap-1"),),
+        ),
+    )
+
+    assert (
+        resolve_replay_capability(
+            source_refs=no_snapshot_refs,
+            resume_requested=False,
+        )
+        is ReplayCapability.REBUILD_ONLY
+    )
+    assert (
+        resolve_replay_capability(
+            source_refs=no_snapshot_refs,
+            resume_requested=True,
+        )
+        is ReplayCapability.RESUME_ONLY
+    )
+    assert (
+        resolve_replay_capability(
+            source_refs=snapshot_refs,
+            resume_requested=False,
+        )
+        is ReplayCapability.EXACT_REPLAY_SUPPORTED
+    )
