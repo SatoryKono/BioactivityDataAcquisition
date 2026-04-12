@@ -30,9 +30,15 @@ from bioetl.domain.normalization.dates import (
 )
 from bioetl.domain.normalization.fingerprints import (
     compute_execution_identity_fingerprint,
+    compute_degraded_runtime_anchor_fingerprint,
     compute_input_snapshot_identity_fingerprint,
     compute_manifest_execution_fingerprint,
     compute_runtime_anchor_fingerprint,
+)
+from bioetl.domain.normalization.hash_identity import (
+    normalize_hash_identity_record,
+    normalize_hash_identity_value,
+    serialize_hash_identity_canonical_json,
 )
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
@@ -64,6 +70,7 @@ __all__ = [
     "JoinKeyNormalizationPolicy",
     "build_execution_identity_payload",
     "canonicalize_json_string",
+    "compute_degraded_runtime_anchor_fingerprint",
     "compute_execution_identity_fingerprint",
     "compute_input_snapshot_identity_fingerprint",
     "compute_manifest_execution_fingerprint",
@@ -81,6 +88,8 @@ __all__ = [
     "normalize_control_plane_uuid",
     "normalize_doi",
     "normalize_execution_identity_payload",
+    "normalize_hash_identity_record",
+    "normalize_hash_identity_value",
     "normalize_join_key_scalar",
     "normalize_join_key_text",
     "normalize_partial_date",
@@ -96,6 +105,7 @@ __all__ = [
     "parse_date_field",
     "parse_page_range",
     "serialize_json_canonical",
+    "serialize_hash_identity_canonical_json",
     "stringify_join_key_value",
     "strip_doi_prefix",
     "strip_html_tags",

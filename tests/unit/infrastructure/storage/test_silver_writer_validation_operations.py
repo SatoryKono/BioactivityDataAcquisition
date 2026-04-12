@@ -9,7 +9,12 @@ import pytest
 
 from bioetl.domain.exceptions import PolicyViolationError, SchemaViolationError
 from bioetl.domain.medallion import SilverWriteMode, WriteMode, WriteModePolicy
+from bioetl.domain.normalization import (
+    normalize_hash_identity_record,
+    serialize_hash_identity_canonical_json,
+)
 from bioetl.infrastructure.storage.silver.validation_operations import (
+    _content_identity,
     _deduplicate_by_primary_keys_impl,
     _enforce_write_policy,
     _to_policy_write_mode_impl,
@@ -86,6 +91,19 @@ class TestDeduplicateByPrimaryKeysImpl:
         """Should return empty list for empty input."""
         result = _deduplicate_by_primary_keys_impl([], ["id"])
         assert result == []
+
+    def test_content_identity_fallback_uses_canonical_hash_identity_contract(self) -> None:
+        """Batch dedup fallback must reuse the canonical hash-identity seam."""
+        record = {
+            "id": 1,
+            "name": "  Alpha  ",
+            "measured_at": "2025-01-01",
+            "_run_id": "run-1",
+        }
+
+        assert _content_identity(record) == serialize_hash_identity_canonical_json(
+            normalize_hash_identity_record(record)
+        )
 
 
 @pytest.mark.unit

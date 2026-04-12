@@ -13,8 +13,11 @@ from bioetl.domain.exceptions import (
     PolicyViolationError,
     SchemaViolationError,
 )
-from bioetl.domain.transformations import canonical_json_dumps, normalize_for_hash
 from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode
+from bioetl.domain.normalization import (
+    normalize_hash_identity_record,
+    serialize_hash_identity_canonical_json,
+)
 from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _collect_key_violations as _collect_key_violations,
 )
@@ -73,7 +76,9 @@ def _content_identity(record: BronzeRecord) -> str:
     content_hash = record.get("content_hash")
     if content_hash is not None:
         return str(content_hash)
-    return str(canonical_json_dumps(normalize_for_hash(record)))
+    return str(
+        serialize_hash_identity_canonical_json(normalize_hash_identity_record(record))
+    )
 
 
 @dataclass(frozen=True, slots=True)

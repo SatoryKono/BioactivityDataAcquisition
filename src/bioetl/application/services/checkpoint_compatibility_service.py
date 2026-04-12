@@ -177,8 +177,8 @@ def _validate_execution_identity_compatibility(
         execution_identity_compatible = False
         messages.append(
             "Canonical checkpoint execution identity mismatch: "
-            f"current={current_metadata.runtime_anchor_fingerprint()}, "
-            f"checkpoint={checkpoint_metadata.runtime_anchor_fingerprint()}"
+            f"current={current_metadata.checkpoint_execution_identity_fingerprint()}, "
+            f"checkpoint={checkpoint_metadata.checkpoint_execution_identity_fingerprint()}"
         )
     elif (
         execution_identity_result["reason"]

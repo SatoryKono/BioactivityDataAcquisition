@@ -1,0 +1,223 @@
+"""Canonical hash-identity normalization for content hashes and dedup identity.
+
+This module defines the explicit domain-owned contract used by:
+- ``content_hash`` generation
+- content-aware dedup winner selection
+- canonical JSON bytes for hash identity material
+
+The semantics here are intentionally narrower than general domain
+normalization. In particular, ``datetime`` values collapse to ``date`` ISO
+strings to preserve the historical content-hash contract until a deliberate
+hash migration is approved.
+"""
+
+from __future__ import annotations
+
+import math
+from collections.abc import Sequence
+from datetime import date, datetime
+from functools import singledispatch
+from typing import Any
+
+from bioetl.domain.constants import META_FIELDS
+from bioetl.domain.normalization.json import (
+    deserialize_json_value,
+    serialize_json_canonical,
+)
+from bioetl.domain.types import JsonDict
+
+__all__ = [
+    "normalize_hash_identity_record",
+    "normalize_hash_identity_value",
+    "serialize_hash_identity_canonical_json",
+]
+
+
+@singledispatch
+def _normalize_scalar(
+    value: Any,
+) -> Any:
+    """Normalize one scalar value for the hash-identity contract."""
+    return value
+
+
+@_normalize_scalar.register(float)
+def _normalize_float(value: float) -> float | None:
+    """Normalize floats for deterministic hashing and dedup identity."""
+    if math.isnan(value) or math.isinf(value):
+        return None
+    return round(value, 10)
+
+
+@_normalize_scalar.register(datetime)
+def _normalize_datetime(value: datetime) -> str:
+    """Collapse datetimes to date ISO strings for the historical hash contract."""
+    return value.date().isoformat()
+
+
+@_normalize_scalar.register(date)
+def _normalize_date(value: date) -> str:
+    """Normalize dates to ISO strings."""
+    return value.isoformat()
+
+
+@_normalize_scalar.register(str)
+def _normalize_str(value: str) -> str:
+    """Strip strings before hashing."""
+    return value.strip()
+
+
+def _looks_like_serialized_json_container(value: str) -> bool:
+    stripped = value.strip()
+    if len(stripped) < 2:
+        return False
+    return (
+        (stripped.startswith("{") and stripped.endswith("}"))
+        or (stripped.startswith("[") and stripped.endswith("]"))
+    )
+
+
+def _maybe_deserialize_json_string(value: str) -> object:
+    if not _looks_like_serialized_json_container(value):
+        return value
+    stripped = value.strip()
+    try:
+        return deserialize_json_value(stripped)
+    except ValueError:
+        return value
+
+
+def _canonical_sort_key(value: object) -> str:
+    return serialize_json_canonical({"value": value})
+
+
+def _sort_normalized_sequence(values: list[object]) -> list[object]:
+    return sorted(values, key=_canonical_sort_key)
+
+
+def _normalize_hash_sequence(
+    values: list[object],
+    *,
+    sort_nested_sequences: bool,
+) -> list[object]:
+    normalized = [
+        normalize_hash_identity_value(
+            item,
+            sort_nested_sequences=sort_nested_sequences,
+        )
+        for item in values
+    ]
+    if sort_nested_sequences:
+        return _sort_normalized_sequence(normalized)
+    return normalized
+
+
+def _normalize_hash_set_like(
+    value: set[object] | frozenset[object],
+) -> list[object]:
+    normalized = _normalize_hash_sequence(
+        list(value),
+        sort_nested_sequences=False,
+    )
+    return _sort_normalized_sequence(normalized)
+
+
+def _normalize_hash_mapping(
+    value: JsonDict,
+    *,
+    sort_nested_sequences: bool,
+) -> JsonDict:
+    return {
+        key: normalize_hash_identity_value(
+            item,
+            sort_nested_sequences=sort_nested_sequences,
+        )
+        for key, item in value.items()
+    }
+
+
+_NO_NORMALIZED_COLLECTION = object()
+
+
+def _normalize_hash_collection(
+    value: object,
+    *,
+    sort_nested_sequences: bool,
+) -> object:
+    if isinstance(value, list):
+        return _normalize_hash_sequence(
+            value,
+            sort_nested_sequences=sort_nested_sequences,
+        )
+    if isinstance(value, tuple):
+        return _normalize_hash_sequence(
+            list(value),
+            sort_nested_sequences=sort_nested_sequences,
+        )
+    if isinstance(value, (set, frozenset)):
+        return _normalize_hash_set_like(value)
+    return _NO_NORMALIZED_COLLECTION
+
+
+def normalize_hash_identity_value(
+    value: object,
+    *,
+    sort_nested_sequences: bool,
+) -> object:
+    """Normalize one value for deterministic hash identity material."""
+    if isinstance(value, dict):
+        return _normalize_hash_mapping(
+            value,
+            sort_nested_sequences=sort_nested_sequences,
+        )
+
+    collection = _normalize_hash_collection(
+        value,
+        sort_nested_sequences=sort_nested_sequences,
+    )
+    if collection is not _NO_NORMALIZED_COLLECTION:
+        return collection
+
+    if sort_nested_sequences and isinstance(value, str):
+        candidate = _maybe_deserialize_json_string(value)
+        if candidate is not value:
+            return normalize_hash_identity_value(
+                candidate,
+                sort_nested_sequences=True,
+            )
+
+    return _normalize_scalar(value)
+
+
+def normalize_hash_identity_record(
+    record: JsonDict,
+    *,
+    exclude_none: bool = False,
+    include_fields: set[str] | None = None,
+    exclude_fields: set[str] | None = None,
+    sort_nested_sequence_fields: set[str] | None = None,
+) -> JsonDict:
+    """Normalize a record using the canonical hash-identity contract."""
+    resolved_exclude_fields = exclude_fields or set()
+    return {
+        key: normalize_hash_identity_value(
+            value,
+            sort_nested_sequences=bool(
+                sort_nested_sequence_fields is not None
+                and key in sort_nested_sequence_fields
+            ),
+        )
+        for key, value in record.items()
+        if not (exclude_none and value is None)
+        if not key.startswith("_")
+        if key not in META_FIELDS
+        if key not in resolved_exclude_fields
+        if include_fields is None or key in include_fields
+    }
+
+
+def serialize_hash_identity_canonical_json(
+    data: JsonDict | Sequence[object],
+) -> str:
+    """Serialize normalized hash-identity material to canonical JSON bytes."""
+    return serialize_json_canonical(data)

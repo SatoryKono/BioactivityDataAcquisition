@@ -36,7 +36,39 @@ def test_metrics_adapters_accept_canonical_and_legacy_labels(kind: str) -> None:
     metrics = _build_metrics_adapter(kind)
     assert isinstance(metrics, MetricsPort)
 
-    call_variants = (
+    histogram_variants = (
+        {"labels": {"provider": "chembl", "endpoint": "/molecule"}},
+        {"_labels": {"provider": "chembl", "endpoint": "/molecule"}},
+        {"tags": {"provider": "chembl", "endpoint": "/molecule"}},
+        {
+            "labels": {"provider": "canonical", "endpoint": "/molecule"},
+            "_labels": {"provider": "legacy_under", "endpoint": "/legacy"},
+            "tags": {"provider": "legacy_tags", "endpoint": "/legacy"},
+        },
+    )
+    counter_variants = (
+        {"labels": {"provider": "chembl", "endpoint": "/molecule", "status": "success"}},
+        {"_labels": {"provider": "chembl", "endpoint": "/molecule", "status": "success"}},
+        {"tags": {"provider": "chembl", "endpoint": "/molecule", "status": "success"}},
+        {
+            "labels": {
+                "provider": "canonical",
+                "endpoint": "/molecule",
+                "status": "success",
+            },
+            "_labels": {
+                "provider": "legacy_under",
+                "endpoint": "/legacy",
+                "status": "failure",
+            },
+            "tags": {
+                "provider": "legacy_tags",
+                "endpoint": "/legacy",
+                "status": "failure",
+            },
+        },
+    )
+    gauge_variants = (
         {"labels": {"provider": "chembl"}},
         {"_labels": {"provider": "chembl"}},
         {"tags": {"provider": "chembl"}},
@@ -47,10 +79,12 @@ def test_metrics_adapters_accept_canonical_and_legacy_labels(kind: str) -> None:
         },
     )
 
-    for kwargs in call_variants:
-        metrics.observe_histogram("unknown_histogram", 1.0, **kwargs)
-        metrics.increment_counter("unknown_counter", 1, **kwargs)
-        metrics.set_gauge("unknown_gauge", 1.0, **kwargs)
+    for kwargs in histogram_variants:
+        metrics.observe_histogram("bioetl_adapter_request_duration_seconds", 1.0, **kwargs)
+    for kwargs in counter_variants:
+        metrics.increment_counter("bioetl_adapter_requests_total", 1, **kwargs)
+    for kwargs in gauge_variants:
+        metrics.set_gauge("bioetl_provider_health_status", 1.0, **kwargs)
 
 
 @pytest.mark.unit

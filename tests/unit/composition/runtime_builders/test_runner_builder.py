@@ -551,6 +551,90 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
     assert fake_factory.kwargs is None
 
 
+def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_across_repeated_exact_replays(
+    tmp_path: Path,
+) -> None:
+    """Repeated exact replays over the same snapshots should keep one canonical identity."""
+    bronze_root = tmp_path / "bronze-cache"
+    bronze_day = bronze_root / "2026-01-01"
+    bronze_day.mkdir(parents=True)
+    (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
+    (bronze_day / "batch_2026-01-01_extra.jsonl.zst").write_bytes(
+        b"snapshot-bytes-2"
+    )
+
+    def _build_context() -> SimpleNamespace:
+        return SimpleNamespace(
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            log_level="INFO",
+            vacuum=None,
+            run_type="incremental",
+            resume=False,
+            limit=100,
+            query=None,
+            dry_run=False,
+            skip_gold=False,
+            start_offset=None,
+            exact_replay=True,
+            input_filter=SimpleNamespace(enabled=False),
+        )
+
+    def _build_runner_once() -> dict[str, object]:
+        fake_factory = _FakeFactory()
+        fake_registry = _FakeRegistry(factory=fake_factory)
+        runner_builder.build_pipeline_runner(
+            _build_context(),
+            registry=fake_registry,
+            ensure_providers_loaded_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=lambda: SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(heartbeat_interval=30),
+                test_mode=False,
+            ),
+            load_pipeline_config_fn=lambda _: SimpleNamespace(
+                provider="chembl",
+                entity_type="activity",
+                version="2.0.0",
+                maintenance={"retain_days": 7},
+                input_filter=SimpleNamespace(),
+                business_primary_keys=["activity_id"],
+                technical_primary_key="entity_id",
+            ),
+            build_observability_bundle_fn=lambda **_: _namespace_observability(
+                SimpleNamespace(info=lambda *_, **__: None),
+            ),
+            assemble_vacuum_settings_fn=lambda **_: "vacuum",
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental",
+                limit=100,
+                exact_replay=True,
+            ),
+            assemble_filter_config_fn=lambda **_: None,
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=True,
+                bronze_path=str(bronze_root),
+                bronze_date="2026-01-01",
+            ),
+        )
+        manifest_id = fake_factory.kwargs["manifest_id"]
+        manifest_path = (
+            tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
+        )
+        return json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    first_manifest = _build_runner_once()
+    second_manifest = _build_runner_once()
+
+    assert first_manifest["manifest_id"] != second_manifest["manifest_id"]
+    assert first_manifest["run_id"] != second_manifest["run_id"]
+    assert first_manifest["execution_fingerprint"] == second_manifest["execution_fingerprint"]
+    assert first_manifest["replay_capability"] == "exact_replay_supported"
+    assert second_manifest["replay_capability"] == "exact_replay_supported"
+    assert first_manifest["source_refs"] == second_manifest["source_refs"]
+
+
 def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enabled(
     tmp_path: Path,
 ) -> None:

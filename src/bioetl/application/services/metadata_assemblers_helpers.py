@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
+from bioetl.domain.lineage import DatasetRef
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
@@ -308,6 +309,25 @@ def _build_silver_lineage(
     )
 
 
+def _build_silver_artifact_id(
+    *,
+    run_context: RunContext,
+    input_data: SilverMetadataInput,
+) -> str:
+    """Build the canonical Silver dataset artifact identifier."""
+    dataset = DatasetRef(
+        layer="silver",
+        logical_name=f"{run_context.provider}.{run_context.entity}",
+        version=input_data.version_after,
+        provider=run_context.provider,
+        entity=run_context.entity,
+        path=input_data.table_path,
+        manifest_id=run_context.manifest_id,
+        run_id=str(run_context.run_id),
+    )
+    return str(dataset.node_id)
+
+
 def _build_gold_lineage(
     *,
     source_tables: dict[str, int],
@@ -320,6 +340,24 @@ def _build_gold_lineage(
         transform_version=transform_version,
         transform_steps=transform_steps,
     )
+
+
+def _build_gold_artifact_id(
+    *,
+    run_context: RunContext,
+    input_data: GoldMetadataInput,
+) -> str:
+    """Build the canonical Gold dataset artifact identifier."""
+    dataset = DatasetRef(
+        layer="gold",
+        logical_name=input_data.table_name,
+        provider=run_context.provider,
+        entity=run_context.entity,
+        path=input_data.table_path,
+        manifest_id=run_context.manifest_id,
+        run_id=str(run_context.run_id),
+    )
+    return str(dataset.node_id)
 
 
 def _resolve_gold_source_tables(input_data: GoldMetadataInput) -> dict[str, int]:
@@ -343,6 +381,7 @@ def _build_gold_scd(input_data: GoldMetadataInput) -> SCDMetadata | None:
 
 def _build_gold_output(
     *,
+    run_context: RunContext,
     input_data: GoldMetadataInput,
     record_count: int,
     composite_ext: CompositeOutputExt | None,
@@ -350,6 +389,10 @@ def _build_gold_output(
     """Build Gold base output metadata."""
     composite_run_id = composite_ext.composite_run_id if composite_ext else None
     return BaseOutputMetadata(
+        artifact_id=_build_gold_artifact_id(
+            run_context=run_context,
+            input_data=input_data,
+        ),
         record_count=record_count,
         total_bytes=input_data.total_bytes,
         write_started_at=input_data.started_at,

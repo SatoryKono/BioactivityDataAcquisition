@@ -167,6 +167,7 @@ class TestSilverMetadataService:
         assert result.lineage.transform_version == "ctx-1.0.0"
         assert result.delta.operation == "merge"
         assert result.delta.rows_inserted == 2
+        assert result.output.artifact_id == "silver:chembl.activity@4"
         assert result.output.record_count == 2
         assert result.output.total_bytes == 256
         assert result.output_ext.delta_version_before == 3
@@ -244,6 +245,7 @@ class TestGoldMetadataService:
         assert calls[0]["duration_seconds"] == 0.0
         assert result.lineage.source_tables == {"silver.activity": 9}
         assert result.dq_summary.total_records == 1
+        assert result.output.artifact_id == "gold:gold.activity"
         assert result.output.record_count == 1
         assert result.output.total_bytes == 512
         assert result.output_ext.partition_count == 2

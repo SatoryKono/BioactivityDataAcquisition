@@ -5,8 +5,8 @@ REQ-ID-001..008.
 
 Hashing contract:
 - Exclude ``META_FIELDS`` and any underscore-prefixed technical fields.
-- Normalize values recursively before hashing.
-- Serialize only through canonical JSON.
+- Normalize values recursively through the canonical hash-identity contract.
+- Serialize only through canonical hash-identity JSON.
 - The same ``provider + normalized payload`` MUST always produce the same hash.
 """
 
@@ -14,12 +14,14 @@ from __future__ import annotations
 
 import hashlib
 
+from bioetl.domain.normalization.hash_identity import (
+    normalize_hash_identity_record,
+    serialize_hash_identity_canonical_json,
+)
 from bioetl.domain.types import JsonDict
 
 from ..constants import META_FIELDS
-from ..serialization import serialize_to_canonical_json
 from ..types import ContentHash, EntityID
-from ._hashing_normalization import _normalize_value_for_hash
 
 # =============================================================================
 # Field inclusion helpers
@@ -76,18 +78,20 @@ def normalize_for_hash(
     Returns:
         Normalized dictionary with consistent value representations.
     """
-    return {
-        key: _normalize_value_for_hash(
-            value,
-            sort_nested_sequences=bool(
-                set_like_fields is not None and key in set_like_fields
-            ),
-        )
+    filtered = {
+        key: value
         for key, value in record.items()
         if _should_include_field(
             key, value, exclude_none, include_fields, exclude_fields
         )
     }
+    return normalize_hash_identity_record(
+        filtered,
+        exclude_none=exclude_none,
+        include_fields=include_fields,
+        exclude_fields=exclude_fields,
+        sort_nested_sequence_fields=set_like_fields,
+    )
 
 
 def canonical_json_dumps(obj: JsonDict) -> str:
@@ -102,7 +106,7 @@ def canonical_json_dumps(obj: JsonDict) -> str:
     Returns:
         Canonical JSON string with sorted keys and no extra whitespace.
     """
-    return serialize_to_canonical_json(obj)
+    return serialize_hash_identity_canonical_json(obj)
 
 
 def generate_content_hash(

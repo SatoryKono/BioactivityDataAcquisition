@@ -95,10 +95,25 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "workflow_job_surface",
         "title": "Workflow job ownership path",
     },
+    "owner-workflow-call": {
+        "mode": "owner",
+        "target_label": "workflow_call_surface",
+        "title": "Workflow call ownership path",
+    },
+    "owner-workflow-output": {
+        "mode": "owner",
+        "target_label": "workflow_output_surface",
+        "title": "Workflow output ownership path",
+    },
     "owner-cli-command": {
         "mode": "owner",
         "target_label": "cli_command_surface",
         "title": "CLI command ownership path",
+    },
+    "owner-cli-option": {
+        "mode": "owner",
+        "target_label": "cli_option_surface",
+        "title": "CLI option ownership path",
     },
     "owner-schema-field": {
         "mode": "owner",
@@ -187,6 +202,11 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "workflow_surface",
         "title": "Workflow actions, artifacts, and secrets",
     },
+    "workflow-execution": {
+        "mode": "workflow_execution",
+        "target_label": "workflow_surface",
+        "title": "Workflow execution semantics",
+    },
     "storage-lineage": {
         "mode": "storage_lineage",
         "target_label": "storage_surface",
@@ -216,6 +236,16 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "mode": "runtime_locks",
         "target_label": "runtime_state_surface",
         "title": "Runtime lock state",
+    },
+    "claim-trace": {
+        "mode": "claim_trace",
+        "target_label": "doc_claim_surface",
+        "title": "Claim-level documentation traceability",
+    },
+    "cli-semantics": {
+        "mode": "cli_semantics",
+        "target_label": "cli_command_surface",
+        "title": "CLI options and side-effect semantics",
     },
     "normalization-pipeline": {
         "mode": "normalization_pipeline",
@@ -616,6 +646,40 @@ def _workflow_artifacts_statement() -> str:
     )
 
 
+def _workflow_execution_statement() -> str:
+    return (
+        "MATCH (workflow:workflow_surface) "
+        "WHERE $name = 'all' OR workflow.name = $name "
+        "OPTIONAL MATCH (workflow)-[:CONTAINS]->(job:workflow_job_surface) "
+        "OPTIONAL MATCH (job)-[:CALLS_WORKFLOW]->(call:workflow_call_surface) "
+        "OPTIONAL MATCH (call)-[:DEPENDS_ON]->(target_workflow:workflow_surface) "
+        "OPTIONAL MATCH (job)-[:HAS_MATRIX_VARIANT]->(variant:workflow_matrix_variant_surface) "
+        "OPTIONAL MATCH (workflow)-[:EMITS_OUTPUT]->(workflow_output:workflow_output_surface) "
+        "OPTIONAL MATCH (job)-[:EMITS_OUTPUT]->(job_output:workflow_output_surface) "
+        "RETURN workflow.name AS workflow_name, "
+        "coalesce(workflow.concurrency_group, '') AS workflow_concurrency_group, "
+        "job.name AS job_name, "
+        "coalesce(job.concurrency_group, '') AS job_concurrency_group, "
+        "collect(DISTINCT CASE "
+        "  WHEN call.name IS NULL THEN NULL "
+        "  ELSE {name: call.name, target_workflow: coalesce(target_workflow.name, ''), reusable_kind: coalesce(call.reusable_kind, '')} "
+        "END) AS reusable_calls, "
+        "collect(DISTINCT CASE "
+        "  WHEN variant.name IS NULL THEN NULL "
+        "  ELSE {name: variant.name, variant_axes: coalesce(variant.variant_axes, {})} "
+        "END) AS matrix_variants, "
+        "collect(DISTINCT CASE "
+        "  WHEN workflow_output.name IS NULL THEN NULL "
+        "  ELSE {name: workflow_output.name, scope: coalesce(workflow_output.output_scope, ''), expression: coalesce(workflow_output.output_expression, '')} "
+        "END) AS workflow_outputs, "
+        "collect(DISTINCT CASE "
+        "  WHEN job_output.name IS NULL THEN NULL "
+        "  ELSE {name: job_output.name, scope: coalesce(job_output.output_scope, ''), expression: coalesce(job_output.output_expression, '')} "
+        "END) AS job_outputs "
+        "ORDER BY workflow.name ASC, job.name ASC"
+    )
+
+
 def _storage_lineage_statement() -> str:
     return (
         "MATCH (storage:storage_surface) "
@@ -759,6 +823,47 @@ def _runtime_state_statement(*, locks_only: bool = False) -> str:
     )
 
 
+def _claim_trace_statement() -> str:
+    return (
+        "MATCH (doc)-[:ASSERTS]->(claim:doc_claim_surface) "
+        "WHERE any(label IN labels(doc) WHERE label IN ['doc_source_surface', 'doc_artifact', 'policy_surface']) "
+        "AND ($name = 'all' OR claim.name = $name OR doc.name = $name OR coalesce(doc.source_path, '') = $name) "
+        "OPTIONAL MATCH (claim)-[:ASSERTS_ABOUT]->(target) "
+        "RETURN doc.name AS doc_name, "
+        "coalesce(doc.source_path, '') AS doc_source_path, "
+        "claim.name AS claim_name, "
+        "coalesce(claim.claim_text, '') AS claim_text, "
+        "coalesce(claim.modality, '') AS modality, "
+        "coalesce(claim.section_title, '') AS section_title, "
+        "coalesce(claim.section_anchor, '') AS section_anchor, "
+        "coalesce(claim.line_number, 0) AS line_number, "
+        "collect(DISTINCT CASE "
+        "  WHEN target.name IS NULL THEN NULL "
+        "  ELSE {name: target.name, labels: labels(target)} "
+        "END) AS targets "
+        "ORDER BY doc.name ASC, claim.line_number ASC"
+    )
+
+
+def _cli_semantics_statement() -> str:
+    return (
+        "MATCH (command:cli_command_surface) "
+        "WHERE $name = 'all' OR command.name = $name "
+        "OPTIONAL MATCH (command)-[:ACCEPTS_OPTION]->(option:cli_option_surface) "
+        "OPTIONAL MATCH (command)-[:SIDE_EFFECTS_ON]->(target) "
+        "OPTIONAL MATCH (command)-[:EXECUTES_GATE]->(gate:quality_gate) "
+        "RETURN command.name AS command_name, "
+        "coalesce(command.side_effect_class, '') AS side_effect_class, "
+        "collect(DISTINCT option.option_name) AS options, "
+        "collect(DISTINCT CASE "
+        "  WHEN target.name IS NULL THEN NULL "
+        "  ELSE {name: target.name, labels: labels(target)} "
+        "END) AS side_effect_targets, "
+        "collect(DISTINCT gate.name) AS gates "
+        "ORDER BY command.name ASC"
+    )
+
+
 def _run_query(
     root: Path,
     profile: str,
@@ -781,6 +886,8 @@ def _run_query(
         statement = _workflow_gates_statement()
     elif profile_config["mode"] == "workflow_artifacts":
         statement = _workflow_artifacts_statement()
+    elif profile_config["mode"] == "workflow_execution":
+        statement = _workflow_execution_statement()
     elif profile_config["mode"] == "storage_lineage":
         statement = _storage_lineage_statement()
     elif profile_config["mode"] == "field_lineage":
@@ -793,6 +900,10 @@ def _run_query(
         statement = _runtime_state_statement()
     elif profile_config["mode"] == "runtime_locks":
         statement = _runtime_state_statement(locks_only=True)
+    elif profile_config["mode"] == "claim_trace":
+        statement = _claim_trace_statement()
+    elif profile_config["mode"] == "cli_semantics":
+        statement = _cli_semantics_statement()
     elif profile_config["mode"] == "normalization_pipeline":
         statement = _normalization_pipeline_statement()
     elif profile_config["mode"] == "fallback_pipelines":
@@ -829,12 +940,15 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             "docs_drift": "no docs-to-code drift edges found",
             "workflow_gates": "no workflow gate coverage found",
             "workflow_artifacts": "no workflow action or artifact coverage found",
+            "workflow_execution": "no reusable workflow, matrix, or output coverage found",
             "storage_lineage": "no storage lineage found",
             "field_lineage": "no field lineage found",
             "schema_drift": "no schema drift evidence found",
             "run_artifacts": "no run instance artifact chain found",
             "runtime_state": "no runtime state found",
             "runtime_locks": "no runtime lock state found",
+            "claim_trace": "no claim-level traceability found",
+            "cli_semantics": "no CLI semantic coverage found",
             "duplication_cluster": "no duplication cluster found",
             "normalization_pipeline": "no pipeline normalization evidence found",
             "fallback_pipelines": "no fallback-heavy pipelines found",
@@ -974,6 +1088,68 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
                     lines.append(f"  secret={secret_name}")
         if len(lines) == 1:
             lines.append("- no workflow action or artifact coverage found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "workflow_execution":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            workflow_name = str(row.get("workflow_name") or "")
+            if not workflow_name:
+                continue
+            job_name = str(row.get("job_name") or "")
+            workflow_concurrency = str(row.get("workflow_concurrency_group") or "")
+            job_concurrency = str(row.get("job_concurrency_group") or "")
+            lines.append(
+                f"- workflow={workflow_name}"
+                + (f" | job={job_name}" if job_name else "")
+                + (f" | workflow_concurrency={workflow_concurrency}" if workflow_concurrency else "")
+                + (f" | job_concurrency={job_concurrency}" if job_concurrency else "")
+            )
+            for field_name, prefix in (
+                ("reusable_calls", "call"),
+                ("matrix_variants", "matrix"),
+                ("workflow_outputs", "workflow_output"),
+                ("job_outputs", "job_output"),
+            ):
+                values = row.get(field_name)
+                if not isinstance(values, list):
+                    continue
+                normalized: set[str] = set()
+                for value in values:
+                    if not isinstance(value, dict):
+                        continue
+                    item_name = str(value.get("name") or "")
+                    if not item_name:
+                        continue
+                    suffix_parts: list[str] = []
+                    if field_name == "reusable_calls":
+                        target_workflow = str(value.get("target_workflow") or "")
+                        reusable_kind = str(value.get("reusable_kind") or "")
+                        if target_workflow:
+                            suffix_parts.append(f"target_workflow={target_workflow}")
+                        if reusable_kind:
+                            suffix_parts.append(f"kind={reusable_kind}")
+                    elif field_name == "matrix_variants":
+                        variant_axes = value.get("variant_axes")
+                        if isinstance(variant_axes, dict):
+                            suffix_parts.append(
+                                "axes="
+                                + ",".join(
+                                    f"{key}={variant_axes[key]!s}" for key in sorted(variant_axes)
+                                )
+                            )
+                    else:
+                        output_scope = str(value.get("scope") or "")
+                        expression = str(value.get("expression") or "")
+                        if output_scope:
+                            suffix_parts.append(f"scope={output_scope}")
+                        if expression:
+                            suffix_parts.append(f"expression={expression}")
+                    suffix = f" | {' | '.join(suffix_parts)}" if suffix_parts else ""
+                    normalized.add(f"  {prefix}={item_name}{suffix}")
+                lines.extend(sorted(normalized))
+        if len(lines) == 1:
+            lines.append("- no reusable workflow, matrix, or output coverage found")
         return "\n".join(lines)
 
     if profile_config["mode"] == "storage_lineage":
@@ -1167,6 +1343,73 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
                 lines.extend(sorted(normalized))
         if len(lines) == 1:
             lines.append("- no runtime state found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "claim_trace":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            claim_name = str(row.get("claim_name") or "")
+            if not claim_name:
+                continue
+            lines.append(
+                f"- doc={row.get('doc_name') or ''!s} | claim={claim_name} | modality={row.get('modality') or ''!s} "
+                f"| section={row.get('section_title') or ''!s} | anchor={row.get('section_anchor') or ''!s} "
+                f"| line={row.get('line_number') or 0!s}"
+            )
+            claim_text = str(row.get("claim_text") or "")
+            if claim_text:
+                lines.append(f"  text={claim_text}")
+            targets = row.get("targets")
+            if isinstance(targets, list):
+                normalized_targets: set[str] = set()
+                for target in targets:
+                    if not isinstance(target, dict):
+                        continue
+                    target_name = str(target.get("name") or "")
+                    if not target_name:
+                        continue
+                    labels = target.get("labels")
+                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                    label_suffix = f" | labels={label_str}" if label_str else ""
+                    normalized_targets.add(f"  target={target_name}{label_suffix}")
+                lines.extend(sorted(normalized_targets))
+        if len(lines) == 1:
+            lines.append("- no claim-level traceability found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "cli_semantics":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            command_name = str(row.get("command_name") or "")
+            if not command_name:
+                continue
+            lines.append(
+                f"- command={command_name} | side_effect_class={row.get('side_effect_class') or ''!s}"
+            )
+            options = row.get("options")
+            if isinstance(options, list):
+                for option_name in sorted({str(item) for item in options if item}):
+                    lines.append(f"  option={option_name}")
+            gates = row.get("gates")
+            if isinstance(gates, list):
+                for gate_name in sorted({str(item) for item in gates if item}):
+                    lines.append(f"  gate={gate_name}")
+            targets = row.get("side_effect_targets")
+            if isinstance(targets, list):
+                normalized_targets: set[str] = set()
+                for target in targets:
+                    if not isinstance(target, dict):
+                        continue
+                    target_name = str(target.get("name") or "")
+                    if not target_name:
+                        continue
+                    labels = target.get("labels")
+                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                    label_suffix = f" | labels={label_str}" if label_str else ""
+                    normalized_targets.add(f"  side_effect_target={target_name}{label_suffix}")
+                lines.extend(sorted(normalized_targets))
+        if len(lines) == 1:
+            lines.append("- no CLI semantic coverage found")
         return "\n".join(lines)
 
     if profile_config["mode"] == "duplication_cluster":

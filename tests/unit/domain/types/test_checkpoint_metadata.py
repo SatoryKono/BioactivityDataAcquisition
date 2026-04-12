@@ -189,8 +189,10 @@ class TestCheckpointMetadata:
         assert metadata1 == metadata2
         assert metadata1 != metadata3
 
-    def test_runtime_anchor_payload_fails_closed_on_malformed_contract_ref(self) -> None:
-        """Malformed runtime-anchor contract refs should fail during normalization."""
+    def test_checkpoint_execution_identity_payload_fails_closed_on_malformed_contract_ref(
+        self,
+    ) -> None:
+        """Malformed contract refs should fail during checkpoint identity normalization."""
         metadata = CheckpointMetadata(
             records_processed=100,
             pipeline_name="chembl_activity",
@@ -202,10 +204,12 @@ class TestCheckpointMetadata:
         )
 
         with pytest.raises(ValueError, match="Invalid contract_ref format"):
-            metadata.runtime_anchor_payload()
+            metadata.checkpoint_execution_identity_payload()
 
-    def test_runtime_anchor_payload_fails_closed_on_malformed_effective_hash(self) -> None:
-        """Malformed effective_config_hash values should fail during runtime-anchor normalization."""
+    def test_checkpoint_execution_identity_payload_fails_closed_on_malformed_effective_hash(
+        self,
+    ) -> None:
+        """Malformed effective_config_hash values should fail during checkpoint identity normalization."""
         metadata = CheckpointMetadata(
             records_processed=100,
             pipeline_name="chembl_activity",
@@ -217,7 +221,7 @@ class TestCheckpointMetadata:
         )
 
         with pytest.raises(ValueError, match="Invalid effective_config_hash format"):
-            metadata.runtime_anchor_fingerprint()
+            metadata.checkpoint_execution_identity_fingerprint()
 
 
 class TestCheckpointCompatibilityResult:

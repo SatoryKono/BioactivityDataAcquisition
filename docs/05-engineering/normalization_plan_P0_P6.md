@@ -17,7 +17,8 @@ across:
 
 - `RunManifest`
 - `RunLedger`
-- runtime anchors used by checkpoint / resume compatibility
+- canonical execution identity used by manifest and checkpoint persistence
+- degraded runtime-anchor compatibility helpers used only for legacy resume paths
 - record-level normalization and `content_hash`
 - shipped normalization profiles and generated field-matrix artifacts
 - composite join-key normalization policies and adapters
@@ -66,7 +67,7 @@ Canonical serialization is the shared lexical contract before hashing.
 - use compact separators `(",", ":")`
 - do not allow unordered mapping traversal to affect bytes on disk
 
-Current main seam:
+Current main seams:
 
 - [json.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/json.py)
 - [serialization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/serialization.py)
@@ -91,8 +92,9 @@ Two distinct hash families exist and must not be conflated.
 - `execution_fingerprint`: lowercase 64-char hex
 - `content_hash`: lowercase 64-char hex
 
-Runtime anchor fields such as `effective_config_hash` are also hash-like and
-must compare in lowercase form; validation strictness is part of `P2`.
+Execution-identity and degraded runtime-anchor fields such as
+`effective_config_hash` are also hash-like and must compare in lowercase form;
+validation strictness is part of `P2`.
 
 ### UUID
 
@@ -106,7 +108,8 @@ UUID-like values normalize through canonical string conversion.
 
 | Concern | Current seam | Current behavior on `main` |
 | --- | --- | --- |
-| Control-plane domain normalization | [control_plane.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/control_plane.py) | Pure helpers for manifest specs, ledger payloads, UUIDs, datetimes, set-like collections, runtime anchors |
+| Control-plane domain normalization | [control_plane.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/control_plane.py) | Pure helpers for manifest specs, ledger payloads, UUIDs, datetimes, set-like collections, canonical execution identity, and degraded runtime anchors |
+| Hash-identity domain normalization | [hash_identity.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/hash_identity.py) | Pure helpers for `content_hash` and content-aware dedup identity, including the current date-only datetime contract |
 | Manifest fingerprint | [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_manifest_service.py) | Calls `normalize_run_manifest_spec()`, then canonical JSON, then SHA-256 |
 | Ledger persist payload | [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_ledger_service.py) | Calls `normalize_run_ledger_payload()` before append |
 | Record-level normalization | [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py) | Uses `NormalizationProfile` when available, otherwise falls back to legacy heuristics |
@@ -156,23 +159,34 @@ Current payload scope excludes:
 
 Important note:
 
-- `main` also has a narrower checkpoint/runtime-anchor fingerprint path outside this file.
-- That path must remain explicitly narrower or be converged deliberately under `P2`.
+- `main` also has a checkpoint-resident canonical execution-identity fallback used when a full persisted manifest fingerprint is unavailable.
+- `main` also retains an explicitly degraded runtime-anchor helper for legacy resume compatibility when neither full nor checkpoint-canonical identity is available.
+- Those two fallback surfaces must not be conflated.
 
 ### Where `content_hash` is computed
 
 Canonical record path:
 
+- [hash_identity.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/hash_identity.py)
 - [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py)
 - [hashing.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/transformations/hashing.py)
+- [retention.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/storage/support/retention.py)
+- [validation_operations.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/storage/silver/validation_operations.py)
 
 Current algorithm on `main`:
 
 1. normalize record through profile or fallback rules
 2. resolve include/exclude policy
 3. pass `set_like_fields` from the profile when present
-4. canonicalize record for hashing
-5. compute `sha256(provider + canonical_json(normalized_record)).hexdigest()`
+4. normalize hash identity through the explicit domain seam in `hash_identity.py`
+5. canonicalize record for hashing through the same hash-identity contract
+6. compute `sha256(provider + canonical_json(normalized_record)).hexdigest()`
+
+Hash-identity note:
+
+- `content_hash` and content-aware dedup now share one explicit contract.
+- This contract is intentionally distinct from control-plane datetime normalization.
+- `datetime` currently collapses to `date().isoformat()` inside hash identity to preserve historical `content_hash` stability until a deliberate migration is approved.
 
 Fields that currently participate in `content_hash`:
 
@@ -321,17 +335,21 @@ Persist a deterministic ledger payload for equivalent lifecycle events.
 - equivalent events serialize identically
 - key-order permutations do not change the stored JSON form
 
-## P2 - Normalize `contract_ref` and Checkpoint Anchors
+## P2 - Normalize `contract_ref`, Canonical Checkpoint Identity, and Degraded Anchors
 
 ### Goal
 
-Stabilize runtime anchors used for resume / compatibility checks.
+Stabilize checkpoint-resident execution identity and degraded runtime-anchor
+helpers used for resume / compatibility checks.
 
 ### Current state on `main`
 
 - `contract_ref` lowercases
 - `contract_version` canonicalizes to semver-like `X.Y.Z`
 - `effective_config_hash` lowercases
+- canonical checkpoint execution identity reuses the same normalized payload
+  family as manifest execution identity
+- degraded runtime anchors remain narrower and must stay explicitly named
 
 ### Required target behavior
 
@@ -342,7 +360,8 @@ Stabilize runtime anchors used for resume / compatibility checks.
 
 ### Acceptance
 
-- runtime anchors compare stably across runs
+- checkpoint execution identity compares stably across runs
+- degraded runtime anchors remain explicitly scoped to legacy fallback
 - malformed anchor values are rejected instead of drifting into persisted state
 
 ## P3 - Normalization Profile Framework

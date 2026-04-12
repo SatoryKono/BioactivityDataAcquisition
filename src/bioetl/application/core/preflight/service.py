@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.preflight.health_aggregator import HealthAggregator
 from bioetl.application.core.preflight.medallion_validator import (
@@ -115,13 +115,16 @@ class PreflightService:
         Returns:
             List of ConfigValidationError for any detected violations (empty if valid).
         """
-        return self._medallion_validator.validate_medallion_config(
-            runtime=runtime,
-            bronze_path=bronze_path,
-            silver_path=silver_path,
-            gold_path=gold_path,
-            silver_format=silver_format,
-            gold_format=gold_format,
+        return cast(
+            list[ConfigValidationError],
+            self._medallion_validator.validate_medallion_config(
+                runtime=runtime,
+                bronze_path=bronze_path,
+                silver_path=silver_path,
+                gold_path=gold_path,
+                silver_format=silver_format,
+                gold_format=gold_format,
+            ),
         )
 
     def validate_write_modes(self) -> list[ConfigValidationError]:
@@ -130,7 +133,10 @@ class PreflightService:
         Returns:
             List of ConfigValidationError for any invalid write mode combinations.
         """
-        return self._medallion_validator.validate_write_modes()
+        return cast(
+            list[ConfigValidationError],
+            self._medallion_validator.validate_write_modes(),
+        )
 
     async def validate_preflight(
         self,

@@ -115,7 +115,7 @@ async def test_strict_mode_blocks_on_data_source_health_exception() -> None:
     mode_status_calls = [
         call
         for call in metrics.set_gauge.call_args_list
-        if call[0][0] == "health_check_mode_status"
+        if call[0][0] == "bioetl_health_check_mode_status"
     ]
     assert mode_status_calls
     assert all(call[0][2]["mode"] == "strict" for call in mode_status_calls)
@@ -201,7 +201,7 @@ async def test_probe_mode_downgrades_unhealthy_status_with_deterministic_reason(
     mode_latency_calls = [
         call
         for call in metrics.observe_histogram.call_args_list
-        if call[0][0] == "health_check_mode_latency_seconds"
+            if call[0][0] == "bioetl_health_check_mode_latency_seconds"
     ]
     assert len(mode_latency_calls) == 1
     assert mode_latency_calls[0][0][2] == {

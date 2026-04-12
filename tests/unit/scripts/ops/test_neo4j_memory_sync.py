@@ -221,6 +221,9 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("schema_field_surface", "silver/composite/activity::compound_name") in node_keys
     assert ("workflow_surface", "tests") in node_keys
     assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
+    assert ("workflow_call_surface", "docs::setup-environment::./.github/workflows/reusable-setup") in node_keys
+    assert ("workflow_matrix_variant_surface", "diagram-nightly::render-shard[python-version=3.13, shard=0]") in node_keys
+    assert ("workflow_output_surface", "docs::job_output::setup-environment::venv-cache-key") in node_keys
     assert ("workflow_action_surface", "actions/upload-artifact") in node_keys
     assert ("workflow_action_surface", "./.github/actions/setup-python-uv") in node_keys
     assert ("workflow_artifact_surface", "tests::coverage-data-smoke") in node_keys
@@ -228,6 +231,8 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("cli_command_surface", "bioetl run") in node_keys
     assert ("cli_command_surface", "scripts.ops sync-neo4j-memory") in node_keys
     assert ("cli_command_surface", "scripts.docs verify") in node_keys
+    assert ("cli_option_surface", "bioetl run --pipeline") in node_keys
+    assert ("doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96") in node_keys
     assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
     assert ("execution_path", "uv run python -m scripts.diagrams lint") in node_keys
     assert ("execution_path", "uv run python -m scripts.docs verify") in node_keys
@@ -310,12 +315,23 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
 
     matrix_job = snapshot.nodes[NodeKey("workflow_job_surface", "tests::test-matrix")]
     assert matrix_job.properties["matrix_axes"] == ["python-version", "suite"]
+    assert matrix_job.properties["matrix_variant_count"] >= 2
 
     secret_job = snapshot.nodes[NodeKey("workflow_job_surface", "docker::docker-push")]
     assert "GITHUB_TOKEN" in secret_job.properties["secret_usage_hints"]
 
     cli_command = snapshot.nodes[NodeKey("cli_command_surface", "scripts.ops sync-neo4j-memory")]
     assert cli_command.properties["source_path"] == "scripts/ops/__main__.py"
+    assert cli_command.properties["side_effect_class"] == "mutating"
+
+    cli_option = snapshot.nodes[NodeKey("cli_option_surface", "bioetl run --pipeline")]
+    assert cli_option.properties["option_name"] == "--pipeline"
+
+    doc_claim = snapshot.nodes[
+        NodeKey("doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96")
+    ]
+    assert doc_claim.properties["modality"] == "required"
+    assert "activity_id is required" in doc_claim.properties["claim_text"]
 
     retry_state = snapshot.nodes[NodeKey("runtime_state_surface", "manifest-chain-2::retry-window")]
     assert retry_state.properties["state_kind"] == "retry_state"
@@ -334,7 +350,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     activity_field = snapshot.nodes[NodeKey("schema_field_surface", "silver/chembl/activity::activity_id")]
     assert activity_field.properties["required_in_quality"] is True
     assert activity_field.properties["contract_ref"] == "chembl.activity"
-    assert activity_field.properties["drift_classification"] == "silver_only"
+    assert activity_field.properties["drift_classification"] is None
 
     composite_field = snapshot.nodes[NodeKey("schema_field_surface", "silver/composite/activity::compound_name")]
     assert composite_field.properties["drift_classification"] == "inherited_field"
@@ -489,14 +505,21 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("schema_field_surface", "silver/composite/activity::compound_name", "DERIVES_FIELD_FROM", "schema_field_surface", "silver/chembl/compound_record::compound_name"),
     ("project", "BioETL", "HAS_WORKFLOW", "workflow_surface", "tests"),
     ("workflow_surface", "tests", "CONTAINS", "workflow_job_surface", "tests::governance-preflight"),
+    ("workflow_job_surface", "docs::setup-environment", "CALLS_WORKFLOW", "workflow_call_surface", "docs::setup-environment::./.github/workflows/reusable-setup"),
+    ("workflow_job_surface", "diagram-nightly::render-shard", "HAS_MATRIX_VARIANT", "workflow_matrix_variant_surface", "diagram-nightly::render-shard[python-version=3.13, shard=0]"),
+    ("workflow_job_surface", "docs::setup-environment", "EMITS_OUTPUT", "workflow_output_surface", "docs::job_output::setup-environment::venv-cache-key"),
     ("workflow_job_surface", "tests::governance-preflight", "EXECUTES_GATE", "quality_gate", "deterministic neo4j memory ontology invariants"),
     ("workflow_job_surface", "tests::smoke-check", "USES_ACTION", "workflow_action_surface", "actions/upload-artifact"),
     ("workflow_job_surface", "tests::smoke-check", "PUBLISHES_ARTIFACT", "workflow_artifact_surface", "tests::coverage-data-smoke"),
     ("workflow_job_surface", "docker::docker-push", "REQUIRES_SECRET", "workflow_secret_surface", "GITHUB_TOKEN"),
     ("project", "BioETL", "HAS_CLI_COMMAND", "cli_command_surface", "bioetl run"),
     ("cli_command_surface", "bioetl run", "RUNS_VIA", "execution_path", "uv run python -m bioetl run --pipeline"),
+    ("cli_command_surface", "bioetl run", "ACCEPTS_OPTION", "cli_option_surface", "bioetl run --pipeline"),
+    ("cli_command_surface", "bioetl run", "SIDE_EFFECTS_ON", "storage_surface", "silver/chembl/activity"),
     ("cli_command_surface", "scripts.ops sync-neo4j-memory", "RUNS_VIA", "execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
+    ("doc_artifact", "docs/04-reference/pipelines/chembl/05-activity-spec.md", "ASSERTS", "doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96"),
+    ("doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96", "ASSERTS_ABOUT", "file_surface", "configs/entities/chembl/activity.yaml"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/infrastructure/config/_base.py"),
     ("doc_artifact", "scripts/dev/README.md", "DESCRIBES", "execution_path", "bash scripts/dev/run_pytest.sh"),
     ("script_surface", "scripts/dev/run_pytest.sh", "PROVIDES", "execution_path", "bash scripts/dev/run_pytest.sh"),

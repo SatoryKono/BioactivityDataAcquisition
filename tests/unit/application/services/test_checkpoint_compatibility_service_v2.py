@@ -10,6 +10,9 @@ from bioetl.application.services.checkpoint_compatibility_service_v2 import (
     create_checkpoint_compatibility_service_v2,
 )
 
+HASH_A = "a" * 64
+HASH_B = "b" * 64
+
 
 def test_service_creation():
     """Test that service can be created."""
@@ -43,13 +46,13 @@ def test_identical_checkpoint_compatibility():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="a" * 64,
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="a" * 64,
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
@@ -68,13 +71,13 @@ def test_phase_incompatibility():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="a" * 64,
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.MERGE,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="a" * 64,
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.PREFLIGHT,  # Too early
         checkpoint_schema_version="1.0.0",
     )
@@ -91,13 +94,13 @@ def test_config_hash_incompatibility():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="a" * 64,
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="xyz789",  # Different hash
+        effective_config_hash=HASH_B,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
@@ -116,13 +119,13 @@ def test_schema_version_incompatibility():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="2.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="a" * 64,
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",  # Different major version
     )
@@ -141,13 +144,13 @@ def test_minor_schema_version_compatibility():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.1.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",  # Minor version difference
     )
@@ -164,13 +167,13 @@ def test_lenient_mode_compatibility():
     service = CheckpointCompatibilityServiceV2(config)
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.1.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
@@ -188,13 +191,13 @@ def test_legacy_mode_compatibility():
     service = CheckpointCompatibilityServiceV2(config)
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="2.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="xyz789",  # Different config
+        effective_config_hash=HASH_B,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",  # Different version
     )
@@ -211,13 +214,13 @@ def test_compatible_phase_transition():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.PREFLIGHT,  # Earlier phase
         checkpoint_schema_version="1.0.0",
     )
@@ -234,13 +237,13 @@ def test_incompatible_phase_transition():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.PREFLIGHT,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.MERGE,  # Later phase
         checkpoint_schema_version="1.0.0",
     )
@@ -256,13 +259,13 @@ def test_terminal_phase_compatibility():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.COMPLETED_SUCCESS,  # Terminal phase
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.COMPLETED_SUCCESS,
         checkpoint_schema_version="1.0.0",
     )
@@ -278,13 +281,13 @@ def test_recovery_suggestions():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.MERGE,
         checkpoint_schema_version="2.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="xyz789",
+        effective_config_hash=HASH_B,
         execution_phase=ExecutionPhase.PREFLIGHT,
         checkpoint_schema_version="1.0.0",
     )
@@ -306,14 +309,14 @@ def test_compatibility_details():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.1.0",
         composite_run_identity="run-001",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="xyz789",
+        effective_config_hash=HASH_B,
         execution_phase=ExecutionPhase.PREFLIGHT,
         checkpoint_schema_version="1.0.0",
         composite_run_identity="run-002",
@@ -345,7 +348,7 @@ def test_execution_fingerprint_takes_precedence_over_runtime_anchors():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
         execution_fingerprint="fp-current",
@@ -355,7 +358,7 @@ def test_execution_fingerprint_takes_precedence_over_runtime_anchors():
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
         execution_fingerprint="fp-checkpoint",
@@ -378,7 +381,7 @@ def test_runtime_anchor_fingerprint_is_used_when_execution_fingerprint_missing()
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
         manifest_id="manifest-a",
@@ -388,7 +391,7 @@ def test_runtime_anchor_fingerprint_is_used_when_execution_fingerprint_missing()
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
         manifest_id="manifest-b",
@@ -465,13 +468,13 @@ def test_schema_version_delta_config():
     service = CheckpointCompatibilityServiceV2(config)
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.3.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",  # Delta of 3
     )
@@ -491,13 +494,13 @@ def test_policy_override_suggestions():
     service = CheckpointCompatibilityServiceV2(config)
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="xyz789",  # Different config
+        effective_config_hash=HASH_B,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
@@ -515,13 +518,13 @@ def test_phase_specific_suggestions():
 
     # Test dependency execution phase
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="xyz789",
+        effective_config_hash=HASH_B,
         execution_phase=ExecutionPhase.PREFLIGHT,
         checkpoint_schema_version="1.0.0",
     )
@@ -535,13 +538,13 @@ def test_phase_specific_suggestions():
 
     # Test merge phase
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash=HASH_A,
         execution_phase=ExecutionPhase.MERGE,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="xyz789",
+        effective_config_hash=HASH_B,
         execution_phase=ExecutionPhase.CROSS_VALIDATION,
         checkpoint_schema_version="1.0.0",
     )

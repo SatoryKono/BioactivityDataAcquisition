@@ -122,7 +122,11 @@ profiles в BioETL.
   `python -m scripts.ops query-neo4j-memory workflow-gates tests`,
   `python -m scripts.ops query-neo4j-memory workflow-artifacts tests`,
   `python -m scripts.ops query-neo4j-memory storage-lineage silver/chembl/activity`,
-  `python -m scripts.ops query-neo4j-memory run-artifacts manifest-chain-smoke`.
+  `python -m scripts.ops query-neo4j-memory field-lineage silver/chembl/activity`,
+  `python -m scripts.ops query-neo4j-memory schema-drift silver/chembl/assay`,
+  `python -m scripts.ops query-neo4j-memory run-artifacts manifest-chain-smoke`,
+  `python -m scripts.ops query-neo4j-memory runtime-state all`,
+  `python -m scripts.ops query-neo4j-memory runtime-locks all`.
   Для поиска повторяющейся логики и кандидатов на вынос используй:
   `python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608`,
   `python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer`,

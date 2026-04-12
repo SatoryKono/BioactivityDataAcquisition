@@ -38,20 +38,20 @@ def record_health_check_metrics(
     for result in report.results:
         passed = 1.0 if result.status == HealthStatus.HEALTHY else 0.0
         host._metrics.set_gauge(
-            "pipeline_health_check_passed",
+            "bioetl_pipeline_health_check_passed",
             passed,
             {"pipeline": pipeline, "component": result.component},
         )
 
     validated = 1.0 if report.is_healthy else 0.0
     host._metrics.set_gauge(
-        "infrastructure_validated",
+        "bioetl_infrastructure_validated",
         validated,
         {"pipeline": pipeline},
     )
 
     host._metrics.observe_histogram(
-        "health_check_duration_seconds",
+        "bioetl_health_check_duration_seconds",
         duration,
         {"pipeline": pipeline},
     )

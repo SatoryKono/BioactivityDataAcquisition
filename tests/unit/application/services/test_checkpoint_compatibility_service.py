@@ -71,9 +71,10 @@ class TestCheckpointCompatibilityService:
         assert result.compatible is False
         assert result.dq_compatible is False
         assert result.pipeline_compatible is True
-        assert len(result.messages) == 2  # DQ mismatch + pipeline compatible messages
+        assert len(result.messages) == 3
         assert "DQ contract mismatch" in result.messages[0]
         assert "Pipeline versions are compatible" in result.messages[1]
+        assert "Canonical checkpoint execution identity mismatch" in result.messages[2]
 
         # Verify logging
         self.logger.warning.assert_called_once()
@@ -99,9 +100,10 @@ class TestCheckpointCompatibilityService:
         assert result.compatible is False
         assert result.dq_compatible is True
         assert result.pipeline_compatible is False
-        assert len(result.messages) == 2  # DQ compatible + pipeline mismatch messages
+        assert len(result.messages) == 3
         assert "DQ contracts are compatible" in result.messages[0]
         assert "Pipeline version mismatch" in result.messages[1]
+        assert "Canonical checkpoint execution identity mismatch" in result.messages[2]
 
     def test_validate_missing_dq_contract_info(self) -> None:
         """Test validation when DQ contract info is missing (backward compatibility)."""
@@ -142,12 +144,14 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
-        assert result.compatible is True
+        assert result.compatible is False
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
-        # When DQ info is missing, it should still be compatible
-        assert len(result.messages) == 1  # "Checkpoint is compatible for resume"
-        assert "Checkpoint is compatible for resume" in result.messages[0]
+        assert result.execution_identity_compatible is False
+        assert any(
+            "Canonical checkpoint execution identity mismatch" in msg
+            for msg in result.messages
+        )
 
     def test_validate_rule_bundle_version_change(self) -> None:
         """Test that rule bundle version changes are reported but don't block resume."""
@@ -194,7 +198,8 @@ class TestCheckpointCompatibilityService:
         assert result.compatible is False
         assert result.execution_identity_compatible is False
         assert any(
-            "Runtime anchor fingerprint mismatch" in msg for msg in result.messages
+            "Canonical checkpoint execution identity mismatch" in msg
+            for msg in result.messages
         )
         assert any("Effective config hash mismatch" in msg for msg in result.messages)
 
@@ -324,9 +329,14 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_minimum_compatibility(current, checkpoint)
 
-        assert result.compatible is True
+        assert result.compatible is False
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
+        assert result.execution_identity_compatible is False
+        assert any(
+            "Canonical checkpoint execution identity mismatch" in msg
+            for msg in result.messages
+        )
 
     def test_validate_minimum_compatibility_different_contracts(self) -> None:
         """Test lenient mode allows resume with different DQ contracts."""
@@ -344,13 +354,18 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_minimum_compatibility(current, checkpoint)
 
-        assert result.compatible is True  # Lenient mode allows this
+        assert result.compatible is False
         assert (
             result.dq_compatible is True
         )  # Still considered compatible in lenient mode
         assert result.pipeline_compatible is True
+        assert result.execution_identity_compatible is False
         assert any(
             "DQ contract changed (lenient mode)" in msg for msg in result.messages
+        )
+        assert any(
+            "Canonical checkpoint execution identity mismatch" in msg
+            for msg in result.messages
         )
 
     def test_validate_minimum_compatibility_major_version_change(self) -> None:
@@ -390,11 +405,16 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_minimum_compatibility(current, checkpoint)
 
-        assert result.compatible is True  # Lenient mode allows minor version changes
+        assert result.compatible is False
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
+        assert result.execution_identity_compatible is False
         assert any(
             "Minor pipeline version changed (lenient mode)" in msg
+            for msg in result.messages
+        )
+        assert any(
+            "Canonical checkpoint execution identity mismatch" in msg
             for msg in result.messages
         )
 
@@ -422,7 +442,7 @@ class TestCheckpointCompatibilityService:
 
         assert metrics.increment_counter.call_count == 2
         assert metrics.increment_counter.call_args_list[0].args == (
-            "bioetl_checkpoint_compatibility_events_total",
+            "checkpoint_compatibility_events_total",
             1,
             {
                 "pipeline": "chembl_activity",
@@ -430,7 +450,7 @@ class TestCheckpointCompatibilityService:
             },
         )
         assert metrics.increment_counter.call_args_list[1].args == (
-            "bioetl_checkpoint_compatibility_events_total",
+            "checkpoint_compatibility_events_total",
             1,
             {
                 "pipeline": "chembl_activity",

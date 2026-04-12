@@ -169,13 +169,12 @@ class CheckpointMetadata:
             run_context=data.get("run_context"),
         )
 
-    def runtime_anchor_payload(self) -> JsonDict:
-        """Return the normalized runtime-anchor compatibility payload.
+    def checkpoint_execution_identity_payload(self) -> JsonDict:
+        """Return the canonical checkpoint execution-identity fallback payload.
 
-        This payload is intentionally narrower than the full manifest execution
-        fingerprint contract and only contains resume-critical control-plane
-        anchors that remain meaningful when no persisted manifest fingerprint is
-        available.
+        This payload mirrors the canonical execution identity contract used by
+        manifest persistence, but only includes the checkpoint-resident anchors
+        that remain available during resume validation.
         """
 
         snapshot_fingerprint = (
@@ -203,13 +202,23 @@ class CheckpointMetadata:
             if value is not None
         }
 
-    def runtime_anchor_fingerprint(self) -> str | None:
-        """Return the deterministic runtime-anchor compatibility fingerprint."""
+    def checkpoint_execution_identity_fingerprint(self) -> str | None:
+        """Return the deterministic checkpoint execution-identity fingerprint."""
 
-        payload = self.runtime_anchor_payload()
+        payload = self.checkpoint_execution_identity_payload()
         if not payload:
             return None
         return compute_execution_identity_fingerprint(payload)
+
+    def runtime_anchor_payload(self) -> JsonDict:
+        """Backward-compatible alias for checkpoint execution-identity payload."""
+
+        return self.checkpoint_execution_identity_payload()
+
+    def runtime_anchor_fingerprint(self) -> str | None:
+        """Backward-compatible alias for checkpoint execution-identity fingerprint."""
+
+        return self.checkpoint_execution_identity_fingerprint()
 
 
 def _extract_manifest_id_from_run_context(data: JsonDict) -> str | None:

@@ -9,6 +9,7 @@ import base64
 import fnmatch
 import hashlib
 import http.client
+import itertools
 import json
 import os
 import re
@@ -110,10 +111,15 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "schema_field_surface",
     "workflow_surface",
     "workflow_job_surface",
+    "workflow_call_surface",
+    "workflow_matrix_variant_surface",
+    "workflow_output_surface",
     "workflow_action_surface",
     "workflow_artifact_surface",
     "workflow_secret_surface",
     "cli_command_surface",
+    "cli_option_surface",
+    "doc_claim_surface",
 )
 DEFAULT_FILE_STRUCTURE_REPO_ZONES: dict[str, tuple[str, ...]] = {
     "src": ("src",),
@@ -897,6 +903,9 @@ def _filtered_snapshot(
                 "project",
                 "workflow_surface",
                 "workflow_job_surface",
+                "workflow_call_surface",
+                "workflow_matrix_variant_surface",
+                "workflow_output_surface",
                 "workflow_action_surface",
                 "workflow_artifact_surface",
                 "workflow_secret_surface",
@@ -910,6 +919,9 @@ def _filtered_snapshot(
             (
                 ("HAS_WORKFLOW", frozenset({"project"}), frozenset({"workflow_surface"})),
                 ("CONTAINS", frozenset({"workflow_surface"}), frozenset({"workflow_job_surface"})),
+                ("CALLS_WORKFLOW", frozenset({"workflow_job_surface"}), frozenset({"workflow_call_surface"})),
+                ("HAS_MATRIX_VARIANT", frozenset({"workflow_job_surface"}), frozenset({"workflow_matrix_variant_surface"})),
+                ("EMITS_OUTPUT", frozenset({"workflow_surface", "workflow_job_surface"}), frozenset({"workflow_output_surface"})),
                 (
                     "RUNS_VIA",
                     frozenset({"workflow_job_surface"}),
@@ -922,8 +934,8 @@ def _filtered_snapshot(
                 ),
                 (
                     "DEPENDS_ON",
-                    frozenset({"workflow_job_surface"}),
-                    frozenset({"workflow_job_surface", "workflow_artifact_surface"}),
+                    frozenset({"workflow_job_surface", "workflow_call_surface"}),
+                    frozenset({"workflow_job_surface", "workflow_artifact_surface", "workflow_surface"}),
                 ),
                 (
                     "USES_ACTION",
@@ -948,6 +960,7 @@ def _filtered_snapshot(
                 "doc_source_surface",
                 "doc_artifact",
                 "policy_surface",
+                "doc_claim_surface",
                 "module_surface",
                 "script_surface",
                 "config_artifact",
@@ -963,6 +976,23 @@ def _filtered_snapshot(
                 (
                     "DESCRIBES",
                     frozenset({"doc_source_surface", "doc_artifact", "policy_surface"}),
+                    frozenset(
+                        {
+                            "module_surface",
+                            "script_surface",
+                            "config_artifact",
+                            "workflow_surface",
+                            "cli_command_surface",
+                            "file_surface",
+                            "directory_surface",
+                            "execution_path",
+                        }
+                    ),
+                ),
+                ("ASSERTS", frozenset({"doc_source_surface", "doc_artifact", "policy_surface"}), frozenset({"doc_claim_surface"})),
+                (
+                    "ASSERTS_ABOUT",
+                    frozenset({"doc_claim_surface"}),
                     frozenset(
                         {
                             "module_surface",
@@ -2710,11 +2740,16 @@ def _add_quality_and_scripts(snapshot: GraphSnapshot, root: Path, project: NodeK
 def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     execution_to_gates: dict[NodeKey, list[NodeKey]] = {}
     execution_to_scripts: dict[NodeKey, list[NodeKey]] = {}
+    command_side_effect_targets: dict[str, list[NodeKey]] = {}
     for relation in snapshot.relations.values():
         if relation.source.label == "execution_path" and relation.relation_type == "EXECUTES_GATE":
             execution_to_gates.setdefault(relation.source, []).append(relation.target)
         if relation.target.label == "execution_path" and relation.relation_type == "PROVIDES":
             execution_to_scripts.setdefault(relation.target, []).append(relation.source)
+        if relation.source.label in {"pipeline_surface", "runtime_evidence_surface"} and relation.relation_type == "WRITES_TO":
+            command_side_effect_targets.setdefault("bioetl run", []).append(relation.target)
+        if relation.source.label == "runtime_evidence_surface" and relation.relation_type in {"WRITES_TO", "EMITS_ARTIFACT"}:
+            command_side_effect_targets.setdefault("scripts.ops sync-neo4j-memory", []).append(relation.target)
 
     for execution in list(snapshot.nodes.values()):
         if execution.key.label != "execution_path":
@@ -2731,6 +2766,7 @@ def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             source_candidate = root / "src/bioetl/interfaces/cli/commands" / f"{command_suffix.replace('-', '_')}.py"
             if source_candidate.is_file():
                 source_path = _rel_path(root, source_candidate)
+        command_options = _extract_cli_options(execution.key.name)
         command = snapshot.add_node(
             "cli_command_surface",
             command_name,
@@ -2738,6 +2774,8 @@ def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             source_path=source_path,
             source_kind="cli_command_surface",
             platform=str(execution.properties.get("platform") or ""),
+            side_effect_class=_cli_side_effect_class(command_name),
+            command_options=list(command_options) if command_options else None,
             last_verified=today,
             ingest_wave="repo_sync_v1",
             confidence="high",
@@ -2748,6 +2786,23 @@ def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             snapshot.add_relation(command, "EXECUTES_GATE", gate, provenance="cli_command_graph")
         for script in backing_scripts:
             snapshot.add_relation(command, "DEPENDS_ON", script, provenance="cli_command_graph")
+        for option_name in command_options:
+            option = snapshot.add_node(
+                "cli_option_surface",
+                f"{command_name} {option_name}",
+                summary=f"Observed CLI option `{option_name}` for command `{command_name}`.",
+                source_path=source_path,
+                source_kind="cli_option_surface",
+                command=command_name,
+                option_name=option_name,
+                last_verified=today,
+                ingest_wave="repo_sync_v1",
+                confidence="medium",
+            )
+            snapshot.add_relation(command, "ACCEPTS_OPTION", option, provenance="cli_command_graph")
+        for target in command_side_effect_targets.get(command_name, []):
+            if target in snapshot.nodes:
+                snapshot.add_relation(command, "SIDE_EFFECTS_ON", target, provenance="cli_command_graph")
 
 
 def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
@@ -4101,6 +4156,49 @@ def _workflow_matrix_axes(job_payload: dict[str, object]) -> tuple[str, ...]:
     return tuple(sorted(str(key) for key in matrix_payload))
 
 
+def _workflow_matrix_variants(job_payload: dict[str, object]) -> tuple[dict[str, str], ...]:
+    strategy_payload = job_payload.get("strategy")
+    if not isinstance(strategy_payload, dict):
+        return ()
+    matrix_payload = strategy_payload.get("matrix")
+    if not isinstance(matrix_payload, dict):
+        return ()
+
+    base_axes: list[tuple[str, list[str]]] = []
+    for axis_name, axis_values in matrix_payload.items():
+        if axis_name in {"include", "exclude"}:
+            continue
+        if isinstance(axis_values, list):
+            normalized = [str(item) for item in axis_values]
+        else:
+            normalized = [str(axis_values)]
+        if not normalized:
+            return ()
+        base_axes.append((str(axis_name), normalized))
+    if not base_axes:
+        return ()
+
+    variants: list[dict[str, str]] = []
+    axis_names = [axis_name for axis_name, _ in base_axes]
+    axis_values_product = itertools.product(*(values for _, values in base_axes))
+    for values in axis_values_product:
+        variants.append(dict(zip(axis_names, values, strict=False)))
+        if len(variants) >= 16:
+            break
+
+    include_payload = matrix_payload.get("include")
+    if isinstance(include_payload, list):
+        for include_item in include_payload:
+            if not isinstance(include_item, dict):
+                continue
+            include_variant = {str(key): str(value) for key, value in include_item.items()}
+            if include_variant and include_variant not in variants:
+                variants.append(include_variant)
+                if len(variants) >= 16:
+                    break
+    return tuple(variants)
+
+
 def _workflow_secret_refs(payload: object) -> tuple[str, ...]:
     secret_pattern = re.compile(r"secrets\.([A-Za-z0-9_]+)")
     found: set[str] = set()
@@ -4124,6 +4222,53 @@ def _workflow_secret_refs(payload: object) -> tuple[str, ...]:
 
 def _workflow_action_key(uses_ref: str) -> str:
     return uses_ref.split("@", 1)[0]
+
+
+def _workflow_reusable_target(uses_ref: str) -> tuple[str | None, str]:
+    normalized = _workflow_action_key(uses_ref)
+    if normalized.startswith("./.github/workflows/"):
+        return Path(normalized).stem, "local_reusable_workflow"
+    if ".github/workflows/" in normalized:
+        workflow_name = Path(normalized.split(".github/workflows/", 1)[1]).stem
+        return workflow_name, "remote_reusable_workflow"
+    return None, "github_action"
+
+
+def _workflow_output_specs(
+    workflow_name: str,
+    owner_name: str,
+    outputs_payload: object,
+    *,
+    scope: str,
+) -> tuple[tuple[str, str | None], ...]:
+    if not isinstance(outputs_payload, dict):
+        return ()
+    output_specs: list[tuple[str, str | None]] = []
+    for output_name, output_value in outputs_payload.items():
+        expression: str | None = None
+        if isinstance(output_value, str):
+            expression = output_value
+        elif isinstance(output_value, dict):
+            raw_value = output_value.get("value")
+            if isinstance(raw_value, str):
+                expression = raw_value
+            else:
+                description = output_value.get("description")
+                if isinstance(description, str):
+                    expression = description
+        output_specs.append((f"{workflow_name}::{scope}::{owner_name}::{output_name}", expression))
+    return tuple(output_specs)
+
+
+def _workflow_concurrency_group(payload: dict[str, object]) -> str | None:
+    concurrency_payload = payload.get("concurrency")
+    if isinstance(concurrency_payload, str):
+        return concurrency_payload
+    if isinstance(concurrency_payload, dict):
+        group = concurrency_payload.get("group")
+        if isinstance(group, str):
+            return group
+    return None
 
 
 def _workflow_artifact_specs(
@@ -4177,20 +4322,48 @@ def _normalize_cli_command_name(raw_command: str) -> str | None:
     return None
 
 
+def _extract_cli_options(raw_command: str) -> tuple[str, ...]:
+    options = re.findall(r"(?<![A-Za-z0-9_-])(--[A-Za-z0-9][A-Za-z0-9-]*)", raw_command)
+    return tuple(sorted(dict.fromkeys(options)))
+
+
+def _cli_side_effect_class(command_name: str) -> str:
+    lowered = command_name.lower()
+    if any(token in lowered for token in (" check", " lint", " verify", "validate", "status", "show", "list")):
+        return "read_only"
+    if any(token in lowered for token in ("run", "sync", "generate", "update", "write", "create", "cleanup")):
+        return "mutating"
+    return "mixed"
+
+
+def _claim_modality(text: str) -> str:
+    lowered = text.lower()
+    if "must not" in lowered or "never" in lowered or "forbidden" in lowered or "should not" in lowered:
+        return "forbidden"
+    if "must" in lowered or "required" in lowered or "require" in lowered:
+        return "required"
+    return "guidance"
+
+
 def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     workflows_root = root / ".github" / "workflows"
     if not workflows_root.is_dir():
         return
 
+    workflow_files = sorted(workflows_root.glob("*.y*ml"))
+    workflow_name_by_relative_path = {
+        _rel_path(root, workflow_path): workflow_path.stem for workflow_path in workflow_files
+    }
     workflow_nodes: dict[str, NodeKey] = {}
     job_nodes: dict[tuple[str, str], NodeKey] = {}
-    for workflow_path in sorted(workflows_root.glob("*.y*ml")):
+    for workflow_path in workflow_files:
         payload = _read_yaml(workflow_path)
         workflow_name = workflow_path.stem
         title = payload.get("name") if isinstance(payload.get("name"), str) else workflow_name
         relative_path = _rel_path(root, workflow_path)
         workflow_family = _workflow_family(workflow_name, title)
         trigger_names = _workflow_trigger_names(payload)
+        concurrency_group = _workflow_concurrency_group(payload)
         workflow = snapshot.add_node(
             "workflow_surface",
             workflow_name,
@@ -4200,12 +4373,38 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             workflow_title=title,
             workflow_family=workflow_family,
             trigger_names=list(trigger_names) if trigger_names else None,
+            concurrency_group=concurrency_group,
             last_verified=today,
             ingest_wave="repo_sync_v1",
             confidence="high",
         )
         workflow_nodes[workflow_name] = workflow
         snapshot.add_relation(project, "HAS_WORKFLOW", workflow, provenance="workflow_graph")
+
+        workflow_call_payload = payload.get("on")
+        if isinstance(workflow_call_payload, dict):
+            reusable_workflow_payload = workflow_call_payload.get("workflow_call")
+            if isinstance(reusable_workflow_payload, dict):
+                for output_name, expression in _workflow_output_specs(
+                    workflow_name,
+                    workflow_name,
+                    reusable_workflow_payload.get("outputs"),
+                    scope="workflow_call_output",
+                ):
+                    output = snapshot.add_node(
+                        "workflow_output_surface",
+                        output_name,
+                        summary=f"Reusable workflow output `{output_name}`.",
+                        source_path=relative_path,
+                        source_kind="workflow_output_surface",
+                        workflow=workflow_name,
+                        output_scope="workflow_call",
+                        output_expression=expression,
+                        last_verified=today,
+                        ingest_wave="repo_sync_v1",
+                        confidence="high",
+                    )
+                    snapshot.add_relation(workflow, "EMITS_OUTPUT", output, provenance="workflow_graph")
 
         jobs = payload.get("jobs")
         if not isinstance(jobs, dict):
@@ -4225,7 +4424,9 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                 )
             secret_usage_hints = _workflow_secret_refs(job_payload)
             matrix_axes = _workflow_matrix_axes(job_payload)
+            matrix_variants = _workflow_matrix_variants(job_payload)
             environment_name = _workflow_environment_name(job_payload)
+            concurrency_group = _workflow_concurrency_group(job_payload)
             job_name = f"{workflow_name}::{job_id}"
             job = snapshot.add_node(
                 "workflow_job_surface",
@@ -4239,8 +4440,10 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                 inline_run_step_count=inline_run_step_count,
                 uses_step_count=uses_step_count,
                 matrix_axes=list(matrix_axes) if matrix_axes else None,
+                matrix_variant_count=len(matrix_variants) if matrix_variants else None,
                 environment_name=environment_name,
                 secret_usage_hints=list(secret_usage_hints) if secret_usage_hints else None,
+                concurrency_group=concurrency_group,
                 last_verified=today,
                 ingest_wave="repo_sync_v1",
                 confidence="high",
@@ -4251,6 +4454,7 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             reusable_workflow_ref = job_payload.get("uses")
             if isinstance(reusable_workflow_ref, str):
                 action_key = _workflow_action_key(reusable_workflow_ref)
+                target_workflow_name, reusable_kind = _workflow_reusable_target(reusable_workflow_ref)
                 action = snapshot.add_node(
                     "workflow_action_surface",
                     action_key,
@@ -4263,6 +4467,31 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                     confidence="high",
                 )
                 snapshot.add_relation(job, "USES_ACTION", action, provenance="workflow_graph")
+                if target_workflow_name is not None:
+                    workflow_call = snapshot.add_node(
+                        "workflow_call_surface",
+                        f"{job_name}::{action_key}",
+                        summary=f"Reusable workflow call `{action_key}` from job `{job_name}`.",
+                        source_path=relative_path,
+                        source_kind="workflow_call_surface",
+                        workflow=workflow_name,
+                        job_id=str(job_id),
+                        uses_ref=reusable_workflow_ref,
+                        reusable_kind=reusable_kind,
+                        target_workflow=target_workflow_name,
+                        last_verified=today,
+                        ingest_wave="repo_sync_v1",
+                        confidence="high",
+                    )
+                    snapshot.add_relation(job, "CALLS_WORKFLOW", workflow_call, provenance="workflow_graph")
+                    local_relative_path = _workflow_action_key(reusable_workflow_ref).removeprefix("./")
+                    target_key = workflow_nodes.get(target_workflow_name)
+                    if target_key is None:
+                        target_workflow = workflow_name_by_relative_path.get(local_relative_path)
+                        if target_workflow is not None:
+                            target_key = workflow_nodes.get(target_workflow)
+                    if target_key is not None:
+                        snapshot.add_relation(workflow_call, "DEPENDS_ON", target_key, provenance="workflow_graph")
 
             for secret_name in secret_usage_hints:
                 secret = snapshot.add_node(
@@ -4276,6 +4505,47 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                     confidence="high",
                 )
                 snapshot.add_relation(job, "REQUIRES_SECRET", secret, provenance="workflow_graph")
+
+            for variant_payload in matrix_variants:
+                variant_name = ", ".join(
+                    f"{axis}={value}" for axis, value in sorted(variant_payload.items())
+                )
+                matrix_variant = snapshot.add_node(
+                    "workflow_matrix_variant_surface",
+                    f"{job_name}[{variant_name}]",
+                    summary=f"Expanded matrix variant `{variant_name}` for workflow job `{job_name}`.",
+                    source_path=relative_path,
+                    source_kind="workflow_matrix_variant_surface",
+                    workflow=workflow_name,
+                    job_id=str(job_id),
+                    variant_axes=variant_payload,
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="high",
+                )
+                snapshot.add_relation(job, "HAS_MATRIX_VARIANT", matrix_variant, provenance="workflow_graph")
+
+            for output_name, expression in _workflow_output_specs(
+                workflow_name,
+                str(job_id),
+                job_payload.get("outputs"),
+                scope="job_output",
+            ):
+                output = snapshot.add_node(
+                    "workflow_output_surface",
+                    output_name,
+                    summary=f"Workflow output `{output_name}`.",
+                    source_path=relative_path,
+                    source_kind="workflow_output_surface",
+                    workflow=workflow_name,
+                    job_id=str(job_id),
+                    output_scope="job",
+                    output_expression=expression,
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="high",
+                )
+                snapshot.add_relation(job, "EMITS_OUTPUT", output, provenance="workflow_graph")
 
             if isinstance(steps, list):
                 for step in steps:
@@ -4461,6 +4731,52 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
                 section_anchor=section_anchor,
                 line_number=line_number,
             )
+        for line_number, raw_line in enumerate(text.splitlines(), start=1):
+            stripped = raw_line.strip()
+            if not stripped:
+                continue
+            lowered = stripped.lower()
+            if not any(token in lowered for token in ("must", "never", "must not", "should not", "required")):
+                continue
+            if len(stripped) < 12:
+                continue
+            clean_text = stripped.lstrip("-*0123456789. ").strip()
+            section_title, section_anchor = _markdown_heading_context(text, text.find(raw_line))
+            claim = snapshot.add_node(
+                "doc_claim_surface",
+                f"{source_path}#L{line_number}",
+                summary=f"Claim extracted from `{source_path}`.",
+                source_path=source_path,
+                source_kind="doc_claim_surface",
+                claim_text=clean_text,
+                modality=_claim_modality(clean_text),
+                section_title=section_title,
+                section_anchor=section_anchor,
+                line_number=line_number,
+                last_verified=str(date.today()),
+                ingest_wave="repo_sync_v1",
+                confidence="medium",
+            )
+            snapshot.add_relation(node.key, "ASSERTS", claim, provenance="docs_claims")
+            for claim_match in path_pattern.finditer(stripped):
+                normalized = _normalize_docs_repo_reference(claim_match.group(1))
+                if normalized is None:
+                    continue
+                target, evidence_kind, confidence = _resolve_docs_reference_target(snapshot, normalized)
+                if target is None or target == node.key:
+                    continue
+                snapshot.add_relation(
+                    claim,
+                    "ASSERTS_ABOUT",
+                    target,
+                    provenance="docs_claims",
+                    doc_reference=normalized,
+                    evidence_kind=evidence_kind,
+                    confidence=confidence,
+                    section_title=section_title,
+                    section_anchor=section_anchor,
+                    line_number=line_number,
+                )
 
 
 def _add_port_surfaces(
@@ -7301,10 +7617,15 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "schema_field_surface",
         "workflow_surface",
         "workflow_job_surface",
+        "workflow_call_surface",
+        "workflow_matrix_variant_surface",
+        "workflow_output_surface",
         "workflow_action_surface",
         "workflow_artifact_surface",
         "workflow_secret_surface",
         "cli_command_surface",
+        "cli_option_surface",
+        "doc_claim_surface",
     )
     required_relation_types = (
         "BACKS",
@@ -7331,6 +7652,13 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "HAS_WORKFLOW",
         "HAS_CLI_COMMAND",
         "HAS_SCHEMA_FIELD",
+        "CALLS_WORKFLOW",
+        "HAS_MATRIX_VARIANT",
+        "EMITS_OUTPUT",
+        "ACCEPTS_OPTION",
+        "SIDE_EFFECTS_ON",
+        "ASSERTS",
+        "ASSERTS_ABOUT",
         "EXECUTES_GATE",
         "EMITS_ARTIFACT",
         "MATERIALIZED_AS",
@@ -7556,6 +7884,24 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append("missing workflow_surface -> CONTAINS -> workflow_job_surface links")
 
     if not any(
+        source_label == "workflow_job_surface" and relation_type == "CALLS_WORKFLOW" and target_label == "workflow_call_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing workflow_job_surface -> CALLS_WORKFLOW -> workflow_call_surface links")
+
+    if not any(
+        source_label == "workflow_job_surface" and relation_type == "HAS_MATRIX_VARIANT" and target_label == "workflow_matrix_variant_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing workflow_job_surface -> HAS_MATRIX_VARIANT -> workflow_matrix_variant_surface links")
+
+    if not any(
+        source_label in {"workflow_surface", "workflow_job_surface"} and relation_type == "EMITS_OUTPUT" and target_label == "workflow_output_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing workflow/workflow_job -> EMITS_OUTPUT -> workflow_output_surface links")
+
+    if not any(
         source_label == "workflow_job_surface" and relation_type == "RUNS_VIA" and target_label in {"script_surface", "file_surface", "directory_surface"}
         for source_label, _, relation_type, target_label in relation_keys
     ):
@@ -7590,6 +7936,18 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing cli_command_surface -> RUNS_VIA -> execution_path links")
+
+    if not any(
+        source_label == "cli_command_surface" and relation_type == "ACCEPTS_OPTION" and target_label == "cli_option_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing cli_command_surface -> ACCEPTS_OPTION -> cli_option_surface links")
+
+    if not any(
+        source_label == "cli_command_surface" and relation_type == "SIDE_EFFECTS_ON"
+        for source_label, _, relation_type, _ in relation_keys
+    ):
+        issues.append("missing cli_command_surface side effect links")
 
     if not any(
         source_label == "storage_surface" and relation_type == "HAS_SCHEMA_FIELD" and target_label == "schema_field_surface"
@@ -7687,6 +8045,31 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing docs-to-code drift edges")
+
+    if not any(
+        source_label in {"doc_source_surface", "doc_artifact", "policy_surface"}
+        and relation_type == "ASSERTS"
+        and target_label == "doc_claim_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing doc claim extraction edges")
+
+    if not any(
+        source_label == "doc_claim_surface"
+        and relation_type == "ASSERTS_ABOUT"
+        and target_label in {
+            "module_surface",
+            "script_surface",
+            "config_artifact",
+            "workflow_surface",
+            "cli_command_surface",
+            "file_surface",
+            "directory_surface",
+            "execution_path",
+        }
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing doc claim traceability edges")
 
     if not any(
         source_label == "adapter_surface" and relation_type == "CONTAINS" and target_label == "adapter_impl_surface"
@@ -7850,6 +8233,72 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append(
             "workflow artifacts without job links: "
             + ", ".join(sorted(orphan_workflow_artifacts)[:10])
+        )
+
+    workflow_call_nodes = [
+        node.key for node in snapshot.nodes.values() if node.key.label == "workflow_call_surface"
+    ]
+    orphan_workflow_calls = [
+        key.name
+        for key in workflow_call_nodes
+        if not any(
+            (rel.target == key and rel.relation_type == "CALLS_WORKFLOW" and rel.source.label == "workflow_job_surface")
+            or (rel.source == key and rel.relation_type == "DEPENDS_ON" and rel.target.label == "workflow_surface")
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if orphan_workflow_calls:
+        issues.append(
+            "workflow calls without job/workflow links: "
+            + ", ".join(sorted(orphan_workflow_calls)[:10])
+        )
+
+    workflow_output_nodes = [
+        node.key for node in snapshot.nodes.values() if node.key.label == "workflow_output_surface"
+    ]
+    orphan_workflow_outputs = [
+        key.name
+        for key in workflow_output_nodes
+        if not any(
+            rel.target == key and rel.relation_type == "EMITS_OUTPUT" and rel.source.label in {"workflow_surface", "workflow_job_surface"}
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if orphan_workflow_outputs:
+        issues.append(
+            "workflow outputs without workflow/job links: "
+            + ", ".join(sorted(orphan_workflow_outputs)[:10])
+        )
+
+    cli_option_nodes = [node.key for node in snapshot.nodes.values() if node.key.label == "cli_option_surface"]
+    orphan_cli_options = [
+        key.name
+        for key in cli_option_nodes
+        if not any(
+            rel.target == key and rel.relation_type == "ACCEPTS_OPTION" and rel.source.label == "cli_command_surface"
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if orphan_cli_options:
+        issues.append(
+            "cli options without command links: "
+            + ", ".join(sorted(orphan_cli_options)[:10])
+        )
+
+    doc_claim_nodes = [node.key for node in snapshot.nodes.values() if node.key.label == "doc_claim_surface"]
+    unsupported_doc_claims = [
+        key.name
+        for key in doc_claim_nodes
+        if not any(
+            (rel.target == key and rel.relation_type == "ASSERTS" and rel.source.label in {"doc_source_surface", "doc_artifact", "policy_surface"})
+            or (rel.source == key and rel.relation_type == "ASSERTS_ABOUT")
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if unsupported_doc_claims:
+        issues.append(
+            "doc claims without doc/target links: "
+            + ", ".join(sorted(unsupported_doc_claims)[:10])
         )
 
     ignored_paths = [

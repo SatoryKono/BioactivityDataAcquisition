@@ -12,6 +12,7 @@ from bioetl.application.services.metadata_assemblers_helpers import (
     _build_gold_output,
     _build_gold_scd,
     _build_runtime_duration,
+    _build_silver_artifact_id,
     _build_silver_delta,
     _build_silver_dq_summary,
     _build_silver_lineage,
@@ -89,6 +90,10 @@ class SilverMetadataService:
         )
 
         output = BaseOutputMetadata(
+            artifact_id=_build_silver_artifact_id(
+                run_context=self.run_context,
+                input_data=input_data,
+            ),
             record_count=record_count,
             total_bytes=input_data.total_bytes,
             write_started_at=input_data.started_at,
@@ -174,6 +179,7 @@ class GoldMetadataService:
             lineage_created_at=input_data.lineage_created_at,
         )
         output = _build_gold_output(
+            run_context=self.run_context,
             input_data=input_data,
             record_count=record_count,
             composite_ext=composite_ext,
