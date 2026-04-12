@@ -2283,6 +2283,7 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_storage_data_surfaces(snapshot, root, project, today)
     _add_control_plane_runtime_evidence(snapshot, root, project, today)
     _add_ci_workflow_graph(snapshot, root, project, today)
+    _add_cli_command_graph(snapshot, root, project, today)
     _add_docs_to_code_drift_edges(snapshot, root)
     _add_retirement_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     _add_complexity_analysis_surfaces(snapshot, root, project, today, memory_mapping)
@@ -2733,9 +2734,6 @@ def _add_quality_and_scripts(snapshot: GraphSnapshot, root: Path, project: NodeK
                     NodeKey("quality_gate", gate_name),
                     provenance="curated_script_clusters",
                 )
-
-    _add_cli_command_graph(snapshot, root, project, today)
-
 
 def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     execution_to_gates: dict[NodeKey, list[NodeKey]] = {}

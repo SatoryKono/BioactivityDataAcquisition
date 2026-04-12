@@ -21,6 +21,8 @@ __all__ = [
     "LINEAGE_REFS_MISSING_TOTAL",
     "OBSERVABILITY_EVENTS_TOTAL",
     "PHASE_DURATION_SECONDS",
+    "POSTRUN_PHASE_DURATION_SECONDS",
+    "POSTRUN_PHASE_EVENTS_TOTAL",
     "PIPELINE_RUNS_TOTAL",
     "SHUTDOWN_COMPLETED",
     "SHUTDOWN_INITIATED",
@@ -43,6 +45,19 @@ PHASE_DURATION_SECONDS = Histogram(
     "Duration of pipeline lifecycle phases in seconds",
     ["pipeline", "phase", "status"],
     buckets=[0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0, 600.0],
+)
+
+POSTRUN_PHASE_EVENTS_TOTAL = Counter(
+    "bioetl_postrun_phase_events_total",
+    "Total bounded postrun phase outcomes by pipeline, phase, and status",
+    ["pipeline", "phase", "status"],
+)
+
+POSTRUN_PHASE_DURATION_SECONDS = Histogram(
+    "bioetl_postrun_phase_duration_seconds",
+    "Duration of postrun subphases in seconds",
+    ["pipeline", "phase", "status"],
+    buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0],
 )
 
 OBSERVABILITY_EVENTS_TOTAL = Counter(

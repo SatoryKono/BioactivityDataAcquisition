@@ -567,6 +567,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         {
             "event_type": "artifact_published",
             "stage": "silver",
+            "artifact_id": "silver:chembl.activity@1",
             "dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-1",
             "artifact_path": "/tmp/output/silver/chembl/activity",
@@ -577,6 +578,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         {
             "event_type": "artifact_published",
             "stage": "silver",
+            "artifact_id": "silver:chembl.activity@1",
             "dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-1",
             "artifact_path": "/tmp/output/silver/chembl/activity",
@@ -932,6 +934,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
         {
             "event_type": "artifact_published",
             "stage": "silver",
+            "artifact_id": "silver:chembl.activity@1",
             "dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-chain-1",
             "artifact_path": "data/output/silver/chembl/activity",
@@ -1153,6 +1156,72 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "Inspect failure classification and decide retry/quarantine/escalation.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
     ]
+
+
+def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000151"))
+    manifest = _make_manifest(manifest_id="manifest-gold-trace", run_id=run_id)
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-gold-trace-1",
+            manifest_id="manifest-gold-trace",
+            run_id=run_id,
+            event_type="artifact_published",
+            occurred_at=datetime(2025, 1, 1, tzinfo=UTC),
+            event_family="artifact",
+            status="success",
+            stage="gold",
+            dataset_ref="gold:chembl.activity",
+            lineage_fragment_id="gold:fragment-1",
+            details={
+                "artifact_path": "gold/chembl/activity",
+                "metadata_path": "gold/chembl/activity/chembl_activity_metadata.yaml",
+                "artifact_kind": "metadata_sidecar",
+                "pipeline_name": "chembl_activity",
+                "provider": "chembl",
+                "entity": "activity",
+                "run_id": str(run_id),
+                "manifest_id": "manifest-gold-trace",
+            },
+        )
+    )
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    result = service.show("manifest-gold-trace")
+
+    assert result.diagnostics["artifact_refs"] == [
+        {
+            "event_type": "artifact_published",
+            "stage": "gold",
+            "artifact_id": "gold:chembl.activity",
+            "dataset_ref": "gold:chembl.activity",
+            "lineage_fragment_id": "gold:fragment-1",
+            "artifact_path": "gold/chembl/activity",
+            "metadata_path": "gold/chembl/activity/chembl_activity_metadata.yaml",
+            "artifact_kind": "metadata_sidecar",
+            "pipeline_name": "chembl_activity",
+            "provider": "chembl",
+            "entity": "activity",
+            "run_id": str(run_id),
+            "manifest_id": "manifest-gold-trace",
+        }
+    ]
+    assert result.diagnostics["lineage_fragment_ids"] == ["gold:fragment-1"]
+    assert result.diagnostics["missing_artifact_links"] == 0
+    assert result.diagnostics["alert_signals"] == {
+        "run_failed": False,
+        "run_shutdown": False,
+        "artifact_linkage_gap": False,
+        "lineage_gap": False,
+        "dq_signal_present": False,
+        "cross_validation_signal_present": False,
+    }
 
 
 def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:

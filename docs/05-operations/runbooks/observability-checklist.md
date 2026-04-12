@@ -47,10 +47,28 @@ requirements, use:
 - [RULES.md](../../00-project/RULES.md)
 - [ADR-017](../../02-architecture/decisions/ADR-017-observability-architecture.md)
 
+Unified diagnostics discovery now starts here:
+
+```bash
+bioetl diagnostics guide
+```
+
+Use that command first when the symptom family is unclear, then branch into the
+specific operator-facing subcommand:
+
+- `bioetl diagnostics health`
+- `bioetl diagnostics run --run-id <run-id>`
+- `bioetl diagnostics checkpoint --pipeline <pipeline>`
+- `bioetl diagnostics manifest <run-id|manifest-id>`
+- `bioetl diagnostics quarantine --pipeline <pipeline>`
+
 ### 1. Metrics Endpoint / Scrape Surface
 
 - Confirm the local metrics endpoint responds and exports `bioetl_` metrics.
 - Confirm the active run publishes the expected pipeline/runtime series.
+- For postrun incidents, confirm the scrape surface includes:
+  - `bioetl_postrun_phase_events_total`
+  - `bioetl_postrun_phase_duration_seconds`
 
 ```bash
 curl http://localhost:8000/metrics | grep bioetl_
@@ -80,13 +98,17 @@ cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_name)'
   `BioETLControlPlaneReadFailureRate` is either firing or cleared, depending on
   whether control-plane reads have exceeded the 5% failure ratio limit in the
   last 30 minutes.
+- For postrun symptoms, validate bounded `phase`/`status` series for
+  `dq_evaluation`, `dq_reports`, `compaction`, `vacuum`, and `final_metadata`
+  before switching to trace-first debugging.
 - If dashboard data is missing, stop and verify metrics publication before
   troubleshooting alerts.
 
 ### 4. Alert-to-Diagnostics Route
 
 ```bash
-bioetl run-manifest show <run-id|manifest-id> --format json
+bioetl diagnostics guide
+bioetl diagnostics manifest <run-id|manifest-id> --format json
 ```
 
 - Confirm the returned diagnostics payload is sufficient for incident routing:
@@ -123,7 +145,8 @@ uv run python -m scripts.docs check-links --links --specs --configs
 - [ ] Metrics endpoint is reachable
 - [ ] Logs preserve correlation fields for the active run
 - [ ] Dashboard and alert-condition panels match the investigated symptom family
-- [ ] `run-manifest show` returns usable diagnostics
+- [ ] `bioetl diagnostics guide` points to an unambiguous next command
+- [ ] `bioetl diagnostics manifest` returns usable diagnostics
 - [ ] The next runbook in the incident path is unambiguous
 
 ## Compliance

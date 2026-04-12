@@ -80,6 +80,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         business_data = self._extract_business_data(prepared_record, primary_id)
         normalized_business_data = RecordNormalizationProcessor(
             provider=self.provider,
+            entity_type=self.entity_type,
         ).normalize_business_data(business_data)
         entity_id = _resolve_publication_term_entity_id(
             self,

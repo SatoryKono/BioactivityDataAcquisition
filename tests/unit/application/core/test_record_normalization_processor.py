@@ -14,6 +14,7 @@ from bioetl.application.core.config import (
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
+    NormalizationContractError,
     RecordNormalizationProcessor,
 )
 from bioetl.domain.transformations import generate_content_hash
@@ -221,6 +222,76 @@ def test_profile_auto_resolves_for_chembl_activity() -> None:
     assert normalized["activity_id"] == "CHEMBL25"
     assert normalized["publication_doi"] == "10.1000/abc"
     assert normalized["activity_properties"] == '[{"kind":"b","rank":2},{"kind":"a","rank":1}]'
+
+
+@pytest.mark.unit
+def test_profile_backed_processor_rejects_unprofiled_business_field_by_default() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+
+    with pytest.raises(NormalizationContractError, match="legacy_extra_field"):
+        processor.normalize_business_data(
+            {
+                "activity_id": "CHEMBL25",
+                "legacy_extra_field": "  needs explicit rule  ",
+            }
+        )
+
+
+@pytest.mark.unit
+def test_profile_backed_processor_can_enable_bounded_compatibility_fallback() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+        allow_compatibility_fallback=True,
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "activity_id": "CHEMBL25",
+            "legacy_extra_field": "  needs explicit rule  ",
+        }
+    )
+
+    assert normalized["legacy_extra_field"] == "needs explicit rule"
+
+
+@pytest.mark.unit
+def test_processor_without_profile_keeps_legacy_fallback_behavior() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="crossref",
+        entity_type="ad_hoc_publication_payload",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "publication_doi": " HTTPS://doi.org/10.1000/ABC ",
+            "legacy_extra_field": "  example value  ",
+        }
+    )
+
+    assert processor.profile is None
+    assert normalized["publication_doi"] == "10.1000/abc"
+    assert normalized["legacy_extra_field"] == "example value"
+
+
+@pytest.mark.unit
+def test_profile_backed_processor_keeps_internal_meta_passthrough() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "activity_id": "CHEMBL25",
+            "_legacy_token": " keep-me ",
+        }
+    )
+
+    assert normalized["_legacy_token"] == " keep-me "
 
 
 @pytest.mark.unit

@@ -18,6 +18,7 @@ _PUBLIC_COMMAND_MODULES = frozenset(
         "cleanup",
         "config",
         "config_dq",
+        "diagnostics",
         "debug",
         "export",
         "export_support",

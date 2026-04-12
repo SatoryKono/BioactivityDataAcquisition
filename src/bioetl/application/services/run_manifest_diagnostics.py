@@ -606,6 +606,7 @@ def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
     artifact_ref: dict[str, object] = {
         "event_type": entry.event_type,
         "stage": entry.stage,
+        "artifact_id": entry.dataset_ref,
         "dataset_ref": entry.dataset_ref,
         "lineage_fragment_id": entry.lineage_fragment_id,
         "artifact_path": None if artifact_path is None else str(artifact_path),

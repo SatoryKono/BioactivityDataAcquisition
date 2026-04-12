@@ -203,7 +203,8 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
             "PublicationMetadataStrategy", self
         )
         self._record_normalizer = record_normalizer or RecordNormalizationProcessor(
-            provider=provider
+            provider=provider,
+            entity_type=entity_type,
         )
 
     def pre_extract_validation(

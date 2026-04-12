@@ -5,7 +5,7 @@ Class: internal-published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-09'
+Last verified: '2026-04-12'
 ---
 
 # Neo4j Memory Configuration Guide
@@ -71,9 +71,13 @@ Last verified: '2026-04-09'
    `run_manifest` / `run_ledger` / `effective_config_artifact` / `lineage`,
    `control_plane_artifact_surface` nodes for artifact-level manifest / ledger /
    effective-config / lineage templates and indexes,
-   `workflow_surface` / `workflow_job_surface` from `.github/workflows/*.yml`,
-   and docs-to-code `DESCRIBES` drift edges from published docs/policies to
-   repo code/config/workflow targets.
+   `workflow_surface` / `workflow_job_surface` /
+   `workflow_call_surface` / `workflow_matrix_variant_surface` /
+   `workflow_output_surface` from `.github/workflows/*.yml`,
+   `cli_command_surface` / `cli_option_surface` for command/option semantics,
+   `doc_claim_surface` for claim-level documentation traceability,
+   and docs-to-code `DESCRIBES` / `ASSERTS_ABOUT` drift edges from published
+   docs/policies to repo code/config/workflow targets.
 
 8. When you intentionally want to remove stale repo-derived graph nodes from the
    current ingest wave, run the explicit prune mode:
@@ -175,6 +179,9 @@ Last verified: '2026-04-09'
     python -m scripts.ops query-neo4j-memory run-artifacts manifest-chain-smoke
     python -m scripts.ops query-neo4j-memory runtime-state all
     python -m scripts.ops query-neo4j-memory runtime-locks all
+    python -m scripts.ops query-neo4j-memory workflow-execution all
+    python -m scripts.ops query-neo4j-memory claim-trace all
+    python -m scripts.ops query-neo4j-memory cli-semantics "bioetl run"
     python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608
     python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer
     python -m scripts.ops query-neo4j-memory promotion-candidates all
@@ -235,9 +242,13 @@ Last verified: '2026-04-09'
     - `storage_surface` such as `silver/chembl/activity`
     - `runtime_evidence_surface` such as `run_manifest`
     - `control_plane_artifact_surface` such as `run_manifest::json`
-    - `workflow_surface` / `workflow_job_surface` such as `tests` and `tests::governance-preflight`
-    - `DESCRIBES` edges from `docs/04-reference/contracts/run-manifest-ledger.md`
-      to `src/bioetl/domain/control_plane/run_manifest.py`
+    - `workflow_surface` / `workflow_job_surface` / `workflow_call_surface`
+      such as `tests`, `tests::governance-preflight`, and reusable workflow
+      projections
+    - `cli_command_surface` / `cli_option_surface` such as `bioetl run`
+      and `--pipeline`
+    - `doc_claim_surface` and `ASSERTS_ABOUT` links from high-signal policy
+      lines to repo targets
 
 ## Memory Configuration Profiles
 

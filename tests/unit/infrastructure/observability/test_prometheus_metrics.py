@@ -212,6 +212,8 @@ class TestRequiredMetricsSmoke:
             CIRCUIT_BREAKER_STATE,
             OBSERVABILITY_EVENTS_TOTAL,
             PIPELINE_DURATION_SECONDS,
+            POSTRUN_PHASE_DURATION_SECONDS,
+            POSTRUN_PHASE_EVENTS_TOTAL,
         )
 
         # Pipeline duration should have these labels
@@ -232,6 +234,12 @@ class TestRequiredMetricsSmoke:
         assert "pipeline" in event_labels
         assert "severity" in event_labels
         assert "error_type" in event_labels
+
+        postrun_counter_labels = POSTRUN_PHASE_EVENTS_TOTAL._labelnames
+        assert postrun_counter_labels == ("pipeline", "phase", "status")
+
+        postrun_histogram_labels = POSTRUN_PHASE_DURATION_SECONDS._labelnames
+        assert postrun_histogram_labels == ("pipeline", "phase", "status")
 
 
 @pytest.mark.unit

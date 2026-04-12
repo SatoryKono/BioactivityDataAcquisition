@@ -89,6 +89,12 @@ major postrun phases:
 This keeps postrun diagnostics correlated without pushing high-cardinality
 identifiers into metric labels.
 
+Operator-facing postrun telemetry also exposes bounded low-cardinality signals
+for the same subphases through:
+
+- `bioetl_postrun_phase_events_total`
+- `bioetl_postrun_phase_duration_seconds`
+
 ### DQ contract use
 
 `DataQualityService` consumes typed `DQAnomaly` objects from `DQMonitorPort`
@@ -127,7 +133,7 @@ The infrastructure layer provides concrete adapters for the domain ports.
 - `PrometheusMetrics` implements `MetricsPort`
 - metric export names are defined centrally in
   `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`
-- the current exported catalog size is **86 metrics**
+- the current exported catalog size is **93 metrics**
 - provider health-check latency is standardized on seconds-based metric families
   (`bioetl_health_check_latency_seconds`,
   `bioetl_health_check_mode_latency_seconds`)

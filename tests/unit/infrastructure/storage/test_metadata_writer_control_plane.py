@@ -16,6 +16,8 @@ from bioetl.domain.models.metadata import (
     DQSummary,
     EnvironmentMetadata,
     FileOutputMetadata,
+    GoldMetadata,
+    GoldOutputExt,
     InputSnapshotRef,
     LineageMetadata,
     PipelineMetadata,
@@ -100,6 +102,45 @@ def _make_silver_metadata() -> SilverMetadata:
             lineage_fragment_id="silver:fragment-1",
         ),
         output_ext=SilverOutputExt(delta_version_after=7),
+        environment=EnvironmentMetadata(
+            hostname="host",
+            python_version="3.13.0",
+            bioetl_version="6.0.0",
+        ),
+    )
+
+
+def _make_gold_metadata() -> GoldMetadata:
+    return GoldMetadata(
+        version="1.1",
+        layer=Layer.GOLD,
+        runtime=RuntimeMetadata(
+            run_id=str(uuid4()),
+            manifest_id="manifest-1",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),
+        ),
+        pipeline=PipelineMetadata(
+            name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            version="1.0.0",
+        ),
+        lineage=LineageMetadata(),
+        delta=DeltaMetrics(
+            table_path="gold/chembl/activity",
+            operation="merge",
+            primary_key=["activity_id"],
+            version_after=3,
+        ),
+        dq_summary=DQSummary(total_records=7, valid_records=7),
+        output=BaseOutputMetadata(
+            artifact_id="gold:chembl.activity",
+            record_count=7,
+            total_bytes=4096,
+            lineage_fragment_id="gold:fragment-1",
+        ),
+        output_ext=GoldOutputExt(),
         environment=EnvironmentMetadata(
             hostname="host",
             python_version="3.13.0",
@@ -212,6 +253,40 @@ async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
     assert details["artifact_id"] == "silver:chembl.activity@7"
     assert details["dataset_ref"] == "silver:chembl.activity@7"
     assert details["lineage_fragment_id"] == "silver:fragment-1"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_gold_metadata_records_dataset_ref_and_fragment_id(
+    tmp_path,
+) -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+    captured: list[tuple[str, str, dict[str, object] | None]] = []
+    metadata = _make_gold_metadata()
+    writer.attach_artifact_recorder(
+        lambda layer, artifact_path, details=None: captured.append(
+            (layer, artifact_path, details)
+        )
+    )
+
+    base_path = tmp_path / "output" / "gold" / "chembl" / "activity"
+    result = await writer.write_gold_metadata(
+        base_path=base_path,
+        metadata=metadata,
+        table_name="chembl.activity",
+    )
+
+    assert result.endswith("chembl_activity_metadata.yaml")
+    assert len(captured) == 1
+    layer, artifact_path, details = captured[0]
+    assert layer == "gold"
+    assert artifact_path == str(base_path.resolve())
+    assert details is not None
+    assert details["run_id"] == str(metadata.runtime.run_id)
+    assert details["manifest_id"] == "manifest-1"
+    assert details["artifact_id"] == "gold:chembl.activity"
+    assert details["dataset_ref"] == "gold:chembl.activity"
+    assert details["lineage_fragment_id"] == "gold:fragment-1"
 
 
 @pytest.mark.unit

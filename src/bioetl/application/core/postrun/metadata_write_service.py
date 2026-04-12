@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.core.postrun._metadata_writes import (
     build_final_metadata_write_coroutines,
@@ -53,16 +53,18 @@ class PostrunMetadataWriteService:
         self,
         executor: ExecutorMetricsPort,
         dq_reports: DQReportResult | None,
-    ) -> None:
+    ) -> bool:
         """Finalize existing metadata sidecars when the writer is configured."""
         if not self._has_metadata_targets():
-            return
+            return False
         write_coroutines = self._build_write_coroutines(
             executor=executor,
             dq_reports=dq_reports,
         )
         if write_coroutines:
             await asyncio.gather(*write_coroutines)
+            return True
+        return False
 
     def _has_metadata_targets(self) -> bool:
         """Return whether postrun has enough collaborators to finalize sidecars."""
@@ -75,17 +77,20 @@ class PostrunMetadataWriteService:
         dq_reports: DQReportResult | None,
     ) -> list[Awaitable[object]]:
         """Build final metadata write coroutines for the current postrun flow."""
-        return build_final_metadata_write_coroutines(
-            metadata_coordinator=self._metadata_coordinator,
-            metadata_writer=self._metadata_writer,
-            storage=self._storage,
-            config=self._config,
-            runtime=self._runtime,
-            context=self._context,
-            stats=get_run_statistics(executor),
-            dq_reports=dq_reports,
-            completed_at=datetime.now(UTC),
-            resolve_delta_version=self._resolve_delta_version,
+        return cast(
+            list[Awaitable[object]],
+            build_final_metadata_write_coroutines(
+                metadata_coordinator=self._metadata_coordinator,
+                metadata_writer=self._metadata_writer,
+                storage=self._storage,
+                config=self._config,
+                runtime=self._runtime,
+                context=self._context,
+                stats=get_run_statistics(executor),
+                dq_reports=dq_reports,
+                completed_at=datetime.now(UTC),
+                resolve_delta_version=self._resolve_delta_version,
+            ),
         )
 
     def _resolve_delta_version(
@@ -94,10 +99,12 @@ class PostrunMetadataWriteService:
         layer: Literal["silver", "gold"],
     ) -> int | None:
         """Resolve the latest Delta version through the injected resolver."""
-        return self._metadata_version_resolver.resolve_delta_version(
-            table_path,
-            layer=layer,
+        return cast(
+            int | None,
+            self._metadata_version_resolver.resolve_delta_version(
+                table_path,
+                layer=layer,
+            ),
         )
-
 
 __all__ = ["PostrunMetadataWriteService"]

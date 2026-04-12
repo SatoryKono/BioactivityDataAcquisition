@@ -252,7 +252,10 @@ For the supported lineage MVP surface, the canonical operator path is:
    - `identity_graph.execution_fingerprint`
    - `manifest.source_refs`
    - `ledger_entries` for `artifact_published`
-4. Confirm that:
+4. Treat `diagnostics.artifact_refs[*].artifact_id` as the operator-facing alias
+   of the published `dataset_ref` so that sidecar `output.artifact_id`,
+   inspection diagnostics, and ledger linkage all use the same visible anchor.
+5. Confirm that:
    - the sidecar `artifact_id` matches the produced artifact referenced by the
      lineage fragment;
    - the sidecar `lineage_fragment_id` matches one of the published fragment
