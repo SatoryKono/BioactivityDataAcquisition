@@ -21,6 +21,23 @@ from bioetl.application.services.metrics_service import (
 )
 
 
+def _make_mock_tracer() -> MagicMock:
+    """Create a tracing port mock with an inspectable span context."""
+    mock_span = MagicMock()
+    mock_span.__enter__ = MagicMock(return_value=mock_span)
+    mock_span.__exit__ = MagicMock(return_value=None)
+    mock_span.set_attribute = MagicMock()
+    mock_span.record_exception = MagicMock()
+
+    mock_otel_tracer = MagicMock()
+    mock_otel_tracer.start_as_current_span = MagicMock(return_value=mock_span)
+
+    mock_tracer = MagicMock()
+    mock_tracer.get_tracer = MagicMock(return_value=mock_otel_tracer)
+    mock_tracer.flush = MagicMock()
+    return mock_tracer
+
+
 class TestMetricsServerError:
     """Tests for MetricsServerError exception."""
 
@@ -137,9 +154,23 @@ class TestMetricsService:
         return server
 
     @pytest.fixture
-    def service(self, mock_logger: MagicMock, mock_server: MagicMock) -> MetricsService:
+    def mock_tracer(self) -> MagicMock:
+        """Create mock tracing port."""
+        return _make_mock_tracer()
+
+    @pytest.fixture
+    def service(
+        self,
+        mock_logger: MagicMock,
+        mock_server: MagicMock,
+        mock_tracer: MagicMock,
+    ) -> MetricsService:
         """Create MetricsService with mocked dependencies."""
-        return MetricsService(logger=mock_logger, _server=mock_server)
+        return MetricsService(
+            logger=mock_logger,
+            tracer=mock_tracer,
+            _server=mock_server,
+        )
 
     def test_start_success(
         self, service: MetricsService, mock_server: MagicMock
@@ -233,6 +264,19 @@ class TestMetricsService:
             retry_delay=1.0,
         )
         assert result.addr == "127.0.0.1"
+
+    def test_start_creates_trace_span(
+        self,
+        service: MetricsService,
+        mock_tracer: MagicMock,
+    ) -> None:
+        """Metrics start should create a bounded operator span."""
+        service.start(port=8000)
+
+        mock_tracer.get_tracer.assert_called_once_with("bioetl.metrics_admin")
+        mock_tracer.get_tracer.return_value.start_as_current_span.assert_called_once()
+        args = mock_tracer.get_tracer.return_value.start_as_current_span.call_args
+        assert args[0][0] == "metrics.start"
 
     def test_get_status_running(
         self, service: MetricsService, mock_server: MagicMock

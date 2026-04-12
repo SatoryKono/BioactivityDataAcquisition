@@ -14,7 +14,7 @@ from bioetl.infrastructure.observability.metrics_server_adapter import (
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, TracingPort
 
 __all__ = ["create_metrics_service"]
 
@@ -22,11 +22,13 @@ __all__ = ["create_metrics_service"]
 def create_metrics_service(
     *,
     logger: LoggerPort | None = None,
+    tracer: TracingPort | None = None,
 ) -> MetricsService:
     """Build a metrics service with a composition-owned server adapter."""
     resolved_logger = logger if logger is not None else NoOpLogger()
     return MetricsService(
         logger=resolved_logger,
+        tracer=tracer,
         _server=MetricsServerAdapter(logger=resolved_logger),
         _publisher=MetricsPublisherAdapter(logger=resolved_logger),
     )
