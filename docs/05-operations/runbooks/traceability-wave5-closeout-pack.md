@@ -83,7 +83,8 @@ Last verified: '2026-04-02'
 
 1. Run `bioetl run-manifest show <run-id> --format json`.
 2. Record `run_id`, `manifest_id`, `pipeline_name`, `latest_status`, and `latest_event_type`.
-3. Review `event_family_counts`, `artifact_refs`, `missing_artifact_links`, and `alert_signals`.
+3. Review `event_family_counts`, `artifact_refs`, `artifact_refs[*].artifact_id`,
+   `missing_artifact_links`, and `alert_signals`.
 4. Choose routing owner and escalation path.
 5. State one decision: `retry`, `quarantine`, `rollback`, `monitor`, or `escalate`.
 6. Explain why that decision is safe under the runbook policy.
