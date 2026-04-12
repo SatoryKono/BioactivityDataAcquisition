@@ -58,8 +58,14 @@ runs. The runner orchestration uses it to emit:
 - phase duration metrics
 - structured lifecycle logs
 - preflight health-check results
+- preflight health summary metrics/logs
 - DQ anomaly signals
 - vacuum results
+
+`PreflightService` and `HealthAggregator` may still compute typed preflight
+reports/results, but they are not a parallel runtime publication path. For
+ordinary pipeline runs, `runner_execution_flow` owns the handoff from those
+reports into `PipelineObserver`.
 
 Current ordinary-run phase mapping:
 
@@ -97,6 +103,12 @@ ingestion anchor supplied by the application runtime (currently
 `PipelineContext.started_at`, mirrored into `_ingestion_ts` defaults during
 writes). Current dashboards and alerts derive operational lag as
 `time() - metric`.
+
+That same application-owned freshness anchor is the canonical timestamp source
+for `DQMonitorPort.check_quality(...)` and
+`DQMonitorPort.update_baseline_from_metrics(...)`. DQ anomaly timestamps and
+baseline-update decisions must therefore be reproducible from the runtime
+anchor rather than chosen ad hoc inside infrastructure adapters.
 
 ## Infrastructure Layer
 

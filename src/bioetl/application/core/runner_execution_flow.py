@@ -13,6 +13,7 @@ __all__ = [
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+import time
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.observability.observer import LifecyclePhase
@@ -275,8 +276,21 @@ async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
 
 async def validate_infrastructure(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Validate infrastructure health before pipeline execution."""
-    report = await host._preflight_service.validate_infrastructure(host._services)
+    start_time = time.perf_counter()
+    report = await host._preflight_service.validate_infrastructure(
+        host._services,
+        raise_on_unhealthy=False,
+    )
+    duration = time.perf_counter() - start_time
     _emit_preflight_health_results(host, report)
+    host._observer.emit_health_check_summary(
+        validated=report.is_healthy,
+        duration_seconds=duration,
+        overall_status=report.overall_status.value,
+        components_checked=len(report.results),
+        runner_stage=_PREFLIGHT_STAGE_NAME,
+    )
+    host._preflight_service.assert_infrastructure_healthy(report)
 
 
 async def prepare_medallion_layers(host: _PipelineRunnerExecutionHostProtocol) -> None:

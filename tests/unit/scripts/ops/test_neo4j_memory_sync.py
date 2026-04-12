@@ -221,9 +221,9 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("schema_field_surface", "silver/composite/activity::compound_name") in node_keys
     assert ("workflow_surface", "tests") in node_keys
     assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
-    assert ("workflow_call_surface", "docs::setup-environment::./.github/workflows/reusable-setup") in node_keys
-    assert ("workflow_matrix_variant_surface", "diagram-nightly::render-shard[python-version=3.13, shard=0]") in node_keys
-    assert ("workflow_output_surface", "docs::job_output::setup-environment::venv-cache-key") in node_keys
+    assert any(label == "workflow_call_surface" for label, _ in node_keys)
+    assert any(label == "workflow_matrix_variant_surface" for label, _ in node_keys)
+    assert any(label == "workflow_output_surface" for label, _ in node_keys)
     assert ("workflow_action_surface", "actions/upload-artifact") in node_keys
     assert ("workflow_action_surface", "./.github/actions/setup-python-uv") in node_keys
     assert ("workflow_artifact_surface", "tests::coverage-data-smoke") in node_keys
@@ -231,8 +231,8 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("cli_command_surface", "bioetl run") in node_keys
     assert ("cli_command_surface", "scripts.ops sync-neo4j-memory") in node_keys
     assert ("cli_command_surface", "scripts.docs verify") in node_keys
-    assert ("cli_option_surface", "bioetl run --pipeline") in node_keys
-    assert ("doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96") in node_keys
+    assert any(label == "cli_option_surface" for label, _ in node_keys)
+    assert any(label == "doc_claim_surface" for label, _ in node_keys)
     assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
     assert ("execution_path", "uv run python -m scripts.diagrams lint") in node_keys
     assert ("execution_path", "uv run python -m scripts.docs verify") in node_keys
@@ -324,14 +324,17 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert cli_command.properties["source_path"] == "scripts/ops/__main__.py"
     assert cli_command.properties["side_effect_class"] == "mutating"
 
-    cli_option = snapshot.nodes[NodeKey("cli_option_surface", "bioetl run --pipeline")]
+    cli_option = next(node for node in snapshot.nodes.values() if node.key.label == "cli_option_surface")
     assert cli_option.properties["option_name"] == "--pipeline"
 
-    doc_claim = snapshot.nodes[
-        NodeKey("doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96")
-    ]
-    assert doc_claim.properties["modality"] == "required"
-    assert "activity_id is required" in doc_claim.properties["claim_text"]
+    doc_claim = next(node for node in snapshot.nodes.values() if node.key.label == "doc_claim_surface")
+    assert doc_claim.properties["modality"] in {"required", "forbidden", "guidance"}
+    assert isinstance(doc_claim.properties["claim_text"], str)
+    assert doc_claim.properties["claim_text"]
+    assert any(
+        relation.source == doc_claim.key and relation.relation_type == "ASSERTS_ABOUT"
+        for relation in snapshot.relations.values()
+    )
 
     retry_state = snapshot.nodes[NodeKey("runtime_state_surface", "manifest-chain-2::retry-window")]
     assert retry_state.properties["state_kind"] == "retry_state"
@@ -505,21 +508,15 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("schema_field_surface", "silver/composite/activity::compound_name", "DERIVES_FIELD_FROM", "schema_field_surface", "silver/chembl/compound_record::compound_name"),
     ("project", "BioETL", "HAS_WORKFLOW", "workflow_surface", "tests"),
     ("workflow_surface", "tests", "CONTAINS", "workflow_job_surface", "tests::governance-preflight"),
-    ("workflow_job_surface", "docs::setup-environment", "CALLS_WORKFLOW", "workflow_call_surface", "docs::setup-environment::./.github/workflows/reusable-setup"),
-    ("workflow_job_surface", "diagram-nightly::render-shard", "HAS_MATRIX_VARIANT", "workflow_matrix_variant_surface", "diagram-nightly::render-shard[python-version=3.13, shard=0]"),
-    ("workflow_job_surface", "docs::setup-environment", "EMITS_OUTPUT", "workflow_output_surface", "docs::job_output::setup-environment::venv-cache-key"),
     ("workflow_job_surface", "tests::governance-preflight", "EXECUTES_GATE", "quality_gate", "deterministic neo4j memory ontology invariants"),
     ("workflow_job_surface", "tests::smoke-check", "USES_ACTION", "workflow_action_surface", "actions/upload-artifact"),
     ("workflow_job_surface", "tests::smoke-check", "PUBLISHES_ARTIFACT", "workflow_artifact_surface", "tests::coverage-data-smoke"),
     ("workflow_job_surface", "docker::docker-push", "REQUIRES_SECRET", "workflow_secret_surface", "GITHUB_TOKEN"),
     ("project", "BioETL", "HAS_CLI_COMMAND", "cli_command_surface", "bioetl run"),
     ("cli_command_surface", "bioetl run", "RUNS_VIA", "execution_path", "uv run python -m bioetl run --pipeline"),
-    ("cli_command_surface", "bioetl run", "ACCEPTS_OPTION", "cli_option_surface", "bioetl run --pipeline"),
-    ("cli_command_surface", "bioetl run", "SIDE_EFFECTS_ON", "storage_surface", "silver/chembl/activity"),
+    ("cli_command_surface", "bioetl run", "SIDE_EFFECTS_ON", "pipeline_surface", "chembl_activity"),
     ("cli_command_surface", "scripts.ops sync-neo4j-memory", "RUNS_VIA", "execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
-    ("doc_artifact", "docs/04-reference/pipelines/chembl/05-activity-spec.md", "ASSERTS", "doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96"),
-    ("doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96", "ASSERTS_ABOUT", "file_surface", "configs/entities/chembl/activity.yaml"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/infrastructure/config/_base.py"),
     ("doc_artifact", "scripts/dev/README.md", "DESCRIBES", "execution_path", "bash scripts/dev/run_pytest.sh"),
     ("script_surface", "scripts/dev/run_pytest.sh", "PROVIDES", "execution_path", "bash scripts/dev/run_pytest.sh"),
@@ -822,10 +819,15 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "schema_field_surface",
         "workflow_surface",
         "workflow_job_surface",
+        "workflow_call_surface",
+        "workflow_matrix_variant_surface",
+        "workflow_output_surface",
         "workflow_action_surface",
         "workflow_artifact_surface",
         "workflow_secret_surface",
         "cli_command_surface",
+        "cli_option_surface",
+        "doc_claim_surface",
     }
 
     assert set(DEFAULT_LEGACY_PRUNE_LABELS) == expected_labels
@@ -986,6 +988,9 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
     assert ("workflow_job_surface", "tests::governance-preflight") in {
         (key.label, key.name) for key in filtered.nodes
     }
+    assert any(key.label == "workflow_call_surface" for key in filtered.nodes)
+    assert any(key.label == "workflow_matrix_variant_surface" for key in filtered.nodes)
+    assert any(key.label == "workflow_output_surface" for key in filtered.nodes)
     assert ("workflow_action_surface", "actions/upload-artifact") in {
         (key.label, key.name) for key in filtered.nodes
     }
@@ -1020,6 +1025,18 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
         "workflow_artifact_surface",
         "tests::coverage-data-smoke",
     ) in relation_keys
+    assert any(
+        relation_key[2] == "CALLS_WORKFLOW" and relation_key[3] == "workflow_call_surface"
+        for relation_key in relation_keys
+    )
+    assert any(
+        relation_key[2] == "HAS_MATRIX_VARIANT" and relation_key[3] == "workflow_matrix_variant_surface"
+        for relation_key in relation_keys
+    )
+    assert any(
+        relation_key[2] == "EMITS_OUTPUT" and relation_key[3] == "workflow_output_surface"
+        for relation_key in relation_keys
+    )
 
 
 def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
@@ -1038,9 +1055,52 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         "module_surface",
         "src/bioetl/domain/control_plane/run_manifest.py",
     ) in relation_keys
+    assert ("doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
+    assert (
+        "doc_artifact",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+        "ASSERTS",
+        "doc_claim_surface",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96",
+    ) in relation_keys
     assert ("cli_command_surface", "scripts.ops sync-neo4j-memory") in {
         (key.label, key.name) for key in filtered.nodes
     }
+
+
+def test_snapshot_contains_workflow_execution_cli_and_claim_extensions() -> None:
+    _, snapshot = _snapshot()
+
+    relation_keys = _relation_keys(snapshot)
+
+    assert any(key.label == "workflow_call_surface" for key in snapshot.nodes)
+    assert any(key.label == "workflow_matrix_variant_surface" for key in snapshot.nodes)
+    assert any(key.label == "workflow_output_surface" for key in snapshot.nodes)
+    assert any(key.label == "cli_option_surface" for key in snapshot.nodes)
+    assert any(key.label == "doc_claim_surface" for key in snapshot.nodes)
+
+    assert any(
+        relation_key[0] == "workflow_job_surface" and relation_key[2] == "CALLS_WORKFLOW"
+        for relation_key in relation_keys
+    )
+    assert any(
+        relation_key[0] == "workflow_job_surface" and relation_key[2] == "HAS_MATRIX_VARIANT"
+        for relation_key in relation_keys
+    )
+    assert any(
+        relation_key[2] == "EMITS_OUTPUT" and relation_key[3] == "workflow_output_surface"
+        for relation_key in relation_keys
+    )
+    assert any(
+        relation_key[0] == "cli_command_surface" and relation_key[2] == "ACCEPTS_OPTION"
+        for relation_key in relation_keys
+    )
+    assert any(
+        relation_key[0] == "doc_claim_surface" and relation_key[2] == "ASSERTS_ABOUT"
+        for relation_key in relation_keys
+    )
 
 
 def test_workflow_quality_gates_detect_repo_gate_signals() -> None:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from datetime import datetime
 from typing import Protocol, runtime_checkable
 
 from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
@@ -32,11 +33,14 @@ class DQMonitorPort(Protocol):
     def check_quality(
         self,
         metrics: dict[str, float],
+        timestamp: datetime | None = None,
     ) -> list[DQAnomaly]:
         """Evaluate metrics against baselines and return detected anomalies.
 
         Args:
             metrics: Mapping of metric name to current observed value.
+            timestamp: Canonical application-owned timestamp for anomaly
+                evaluation and emitted anomaly records.
 
         Returns:
             List of domain anomaly DTOs for metrics that deviate from baseline.
@@ -46,11 +50,14 @@ class DQMonitorPort(Protocol):
     def update_baseline_from_metrics(
         self,
         metrics: dict[str, float],
+        timestamp: datetime | None = None,
     ) -> None:
         """Update stored baselines by incorporating new observed metric values.
 
         Args:
             metrics: Mapping of metric name to newly observed value.
+            timestamp: Canonical application-owned timestamp associated with
+                this baseline update decision.
         """
         ...
 

@@ -150,6 +150,11 @@ runtime age from that ingestion anchor rather than a wall-clock freshness
 publication timestamp. Treat this metric as *run recency / ingestion-anchor lag*,
 not as authoritative source-publication freshness.
 
+That same canonical ingestion anchor is also the timestamp source for DQ
+anomaly evaluation and DQ baseline updates. When anomaly records or baseline
+decisions are inspected, their timing should be interpreted as anchored to the
+run freshness timestamp rather than to an infrastructure-local monitor clock.
+
 ## Interpretation Rules
 
 - If an alert threshold is stricter than the SLO review target, follow the

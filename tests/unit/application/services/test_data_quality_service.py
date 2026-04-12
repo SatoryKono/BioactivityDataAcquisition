@@ -409,8 +409,47 @@ class TestDataQualityServiceAnomalyDetection:
 
         assert result.anomalies_count == 0
         assert result.has_critical is False
-        mock_dq_monitor.check_quality.assert_called_once_with(metrics)
-        mock_dq_monitor.update_baseline_from_metrics.assert_called_once_with(metrics)
+        mock_dq_monitor.check_quality.assert_called_once_with(metrics, None)
+        mock_dq_monitor.update_baseline_from_metrics.assert_called_once_with(
+            metrics,
+            None,
+        )
+
+    @pytest.mark.asyncio
+    async def test_anomaly_detection_propagates_canonical_anchor_timestamp(
+        self, mock_logger, mock_metrics, dq_config
+    ) -> None:
+        """DQ monitor calls should use the application-owned freshness anchor."""
+        mock_dq_monitor = MagicMock()
+        mock_dq_monitor.check_quality = MagicMock(return_value=[])
+        mock_dq_monitor.update_baseline_from_metrics = MagicMock()
+
+        service = DataQualityService(
+            dq_monitor=mock_dq_monitor,
+            config=dq_config,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+            entity_type="test_entity",
+        )
+
+        metrics = {
+            "record_count": 100.0,
+            "error_rate": 0.03,
+            "freshness_anchor_timestamp": 1_700_000_123.0,
+        }
+
+        service.evaluate(metrics)
+
+        expected_timestamp = datetime.fromtimestamp(1_700_000_123.0, UTC)
+        mock_dq_monitor.check_quality.assert_called_once_with(
+            metrics,
+            expected_timestamp,
+        )
+        mock_dq_monitor.update_baseline_from_metrics.assert_called_once_with(
+            metrics,
+            expected_timestamp,
+        )
 
     @pytest.mark.asyncio
     async def test_anomaly_detection_with_anomalies(

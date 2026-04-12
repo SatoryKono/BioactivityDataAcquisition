@@ -919,7 +919,7 @@ def _filtered_snapshot(
             (
                 ("HAS_WORKFLOW", frozenset({"project"}), frozenset({"workflow_surface"})),
                 ("CONTAINS", frozenset({"workflow_surface"}), frozenset({"workflow_job_surface"})),
-                ("CALLS_WORKFLOW", frozenset({"workflow_job_surface"}), frozenset({"workflow_call_surface"})),
+                ("CALLS_WORKFLOW", frozenset({"workflow_surface", "workflow_job_surface"}), frozenset({"workflow_call_surface"})),
                 ("HAS_MATRIX_VARIANT", frozenset({"workflow_job_surface"}), frozenset({"workflow_matrix_variant_surface"})),
                 ("EMITS_OUTPUT", frozenset({"workflow_surface", "workflow_job_surface"}), frozenset({"workflow_output_surface"})),
                 (
@@ -2740,16 +2740,11 @@ def _add_quality_and_scripts(snapshot: GraphSnapshot, root: Path, project: NodeK
 def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     execution_to_gates: dict[NodeKey, list[NodeKey]] = {}
     execution_to_scripts: dict[NodeKey, list[NodeKey]] = {}
-    command_side_effect_targets: dict[str, list[NodeKey]] = {}
     for relation in snapshot.relations.values():
         if relation.source.label == "execution_path" and relation.relation_type == "EXECUTES_GATE":
             execution_to_gates.setdefault(relation.source, []).append(relation.target)
         if relation.target.label == "execution_path" and relation.relation_type == "PROVIDES":
             execution_to_scripts.setdefault(relation.target, []).append(relation.source)
-        if relation.source.label in {"pipeline_surface", "runtime_evidence_surface"} and relation.relation_type == "WRITES_TO":
-            command_side_effect_targets.setdefault("bioetl run", []).append(relation.target)
-        if relation.source.label == "runtime_evidence_surface" and relation.relation_type in {"WRITES_TO", "EMITS_ARTIFACT"}:
-            command_side_effect_targets.setdefault("scripts.ops sync-neo4j-memory", []).append(relation.target)
 
     for execution in list(snapshot.nodes.values()):
         if execution.key.label != "execution_path":
@@ -2800,9 +2795,16 @@ def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                 confidence="medium",
             )
             snapshot.add_relation(command, "ACCEPTS_OPTION", option, provenance="cli_command_graph")
-        for target in command_side_effect_targets.get(command_name, []):
-            if target in snapshot.nodes:
+        if command_name == "bioetl run":
+            for target in sorted(
+                (key for key in snapshot.nodes if key.label == "pipeline_surface"),
+                key=lambda key: key.name,
+            )[:5]:
                 snapshot.add_relation(command, "SIDE_EFFECTS_ON", target, provenance="cli_command_graph")
+        if command_name == "scripts.ops sync-neo4j-memory":
+            gate_key = NodeKey("quality_gate", "deterministic neo4j memory ontology invariants")
+            if gate_key in snapshot.nodes:
+                snapshot.add_relation(command, "SIDE_EFFECTS_ON", gate_key, provenance="cli_command_graph")
 
 
 def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
@@ -4124,8 +4126,14 @@ def _workflow_family(workflow_name: str, title: str) -> str:
     return "test"
 
 
+def _workflow_on_payload(payload: dict[str, object]) -> object:
+    if "on" in payload:
+        return payload.get("on")
+    return payload.get(True)
+
+
 def _workflow_trigger_names(payload: dict[str, object]) -> tuple[str, ...]:
-    trigger_payload = payload.get("on")
+    trigger_payload = _workflow_on_payload(payload)
     if isinstance(trigger_payload, str):
         return (trigger_payload,)
     if isinstance(trigger_payload, list):
@@ -4381,10 +4389,24 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
         workflow_nodes[workflow_name] = workflow
         snapshot.add_relation(project, "HAS_WORKFLOW", workflow, provenance="workflow_graph")
 
-        workflow_call_payload = payload.get("on")
+        workflow_call_payload = _workflow_on_payload(payload)
         if isinstance(workflow_call_payload, dict):
             reusable_workflow_payload = workflow_call_payload.get("workflow_call")
             if isinstance(reusable_workflow_payload, dict):
+                workflow_call = snapshot.add_node(
+                    "workflow_call_surface",
+                    f"{workflow_name}::workflow_call",
+                    summary=f"Reusable workflow entrypoint for `{workflow_name}`.",
+                    source_path=relative_path,
+                    source_kind="workflow_call_surface",
+                    workflow=workflow_name,
+                    reusable_kind="workflow_call_trigger",
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="high",
+                )
+                snapshot.add_relation(workflow, "CALLS_WORKFLOW", workflow_call, provenance="workflow_graph")
+                snapshot.add_relation(workflow_call, "DEPENDS_ON", workflow, provenance="workflow_graph")
                 for output_name, expression in _workflow_output_specs(
                     workflow_name,
                     workflow_name,
@@ -4686,6 +4708,36 @@ def _resolve_docs_reference_target(
     return None, "unresolved", "low"
 
 
+def _resolve_claim_targets(snapshot: GraphSnapshot, claim_text: str) -> tuple[tuple[NodeKey, str, str], ...]:
+    tokens: set[str] = set()
+    tokens.update(match.group(1) for match in re.finditer(r"`([^`]+)`", claim_text))
+    tokens.update(match.group(0) for match in re.finditer(r"\bbioetl\s+[A-Za-z0-9_-]+\b", claim_text))
+    tokens.update(
+        match.group(0)
+        for match in re.finditer(r"\bscripts\.[A-Za-z0-9_]+(?:\s+[A-Za-z0-9_.-]+)?\b", claim_text)
+    )
+    tokens.update(match.group(0) for match in re.finditer(r"\b(?:bioetl|domain)\.[A-Za-z0-9_.]+\b", claim_text))
+
+    resolved: list[tuple[NodeKey, str, str]] = []
+    seen: set[NodeKey] = set()
+    for token in sorted(tokens):
+        normalized_token = "bioetl.domain.ports" if token == "domain.ports" else token
+        exact_candidates = (
+            NodeKey("port_surface", normalized_token),
+            NodeKey("cli_command_surface", normalized_token),
+            NodeKey("script_surface", normalized_token),
+            NodeKey("module_surface", normalized_token),
+            NodeKey("workflow_surface", normalized_token),
+            NodeKey("execution_path", normalized_token),
+        )
+        for candidate in exact_candidates:
+            if candidate in snapshot.nodes and candidate not in seen:
+                resolved.append((candidate, "claim_token", "medium"))
+                seen.add(candidate)
+                break
+    return tuple(resolved)
+
+
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
     path_pattern = re.compile(
         r"(?<![A-Za-z0-9_./-])("
@@ -4771,6 +4823,18 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
                     target,
                     provenance="docs_claims",
                     doc_reference=normalized,
+                    evidence_kind=evidence_kind,
+                    confidence=confidence,
+                    section_title=section_title,
+                    section_anchor=section_anchor,
+                    line_number=line_number,
+                )
+            for target, evidence_kind, confidence in _resolve_claim_targets(snapshot, clean_text):
+                snapshot.add_relation(
+                    claim,
+                    "ASSERTS_ABOUT",
+                    target,
+                    provenance="docs_claims",
                     evidence_kind=evidence_kind,
                     confidence=confidence,
                     section_title=section_title,
@@ -7884,10 +7948,12 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append("missing workflow_surface -> CONTAINS -> workflow_job_surface links")
 
     if not any(
-        source_label == "workflow_job_surface" and relation_type == "CALLS_WORKFLOW" and target_label == "workflow_call_surface"
+        source_label in {"workflow_surface", "workflow_job_surface"}
+        and relation_type == "CALLS_WORKFLOW"
+        and target_label == "workflow_call_surface"
         for source_label, _, relation_type, target_label in relation_keys
     ):
-        issues.append("missing workflow_job_surface -> CALLS_WORKFLOW -> workflow_call_surface links")
+        issues.append("missing workflow/workflow_job -> CALLS_WORKFLOW -> workflow_call_surface links")
 
     if not any(
         source_label == "workflow_job_surface" and relation_type == "HAS_MATRIX_VARIANT" and target_label == "workflow_matrix_variant_surface"
@@ -8242,7 +8308,7 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         key.name
         for key in workflow_call_nodes
         if not any(
-            (rel.target == key and rel.relation_type == "CALLS_WORKFLOW" and rel.source.label == "workflow_job_surface")
+            (rel.target == key and rel.relation_type == "CALLS_WORKFLOW" and rel.source.label in {"workflow_surface", "workflow_job_surface"})
             or (rel.source == key and rel.relation_type == "DEPENDS_ON" and rel.target.label == "workflow_surface")
             for rel in snapshot.relations.values()
         )

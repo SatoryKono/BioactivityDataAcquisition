@@ -47,9 +47,13 @@ def _attach_fragment_anchor(
     output = getattr(metadata, "output", None)
     if output is None or not hasattr(output, "lineage_fragment_id"):
         return
-    output.lineage_fragment_id = fragment_id
+    existing_fragment_id = str(getattr(output, "lineage_fragment_id", "") or "").strip()
+    if not existing_fragment_id:
+        output.lineage_fragment_id = fragment_id
     if hasattr(output, "artifact_id"):
-        output.artifact_id = artifact_id
+        existing_artifact_id = str(getattr(output, "artifact_id", "") or "").strip()
+        if not existing_artifact_id:
+            output.artifact_id = artifact_id
 
 
 def _validate_bundle_identity_contract(
@@ -75,6 +79,16 @@ def _validate_bundle_identity_contract(
     output = getattr(metadata, "output", None)
     if output is None:
         raise ValueError("Sidecar metadata must include output metadata")
+    output_fragment_id = str(getattr(output, "lineage_fragment_id", "") or "").strip()
+    if output_fragment_id and output_fragment_id != fragment.fragment_id:
+        raise ValueError(
+            "Sidecar output.lineage_fragment_id does not match lineage fragment fragment_id"
+        )
+    output_artifact_id = str(getattr(output, "artifact_id", "") or "").strip()
+    if output_artifact_id and output_artifact_id != artifact_id:
+        raise ValueError(
+            "Sidecar output.artifact_id does not match lineage fragment produced artifact"
+        )
     if not str(artifact_id).strip():
         raise ValueError("Sidecar metadata must resolve a canonical artifact_id")
 

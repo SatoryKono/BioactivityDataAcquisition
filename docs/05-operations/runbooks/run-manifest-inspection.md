@@ -93,7 +93,10 @@ Interpretation:
 
 - differences are computed over top-level manifest fields using canonical JSON comparison;
 - differences in `resolved_config`, `runtime_config`, `code_provenance`, `source_refs`, or `planned_artifacts` mean the runs are not reproducibly identical.
-- `execution_fingerprint` is the full normalized `RunManifest` identity contract.
+- `execution_fingerprint` is the canonical execution-identity fingerprint shared
+  across manifest, checkpoint, and runtime compatibility surfaces.
+- this fingerprint intentionally excludes occurrence-only anchors such as
+  `manifest_id`, ledger history, and operator-facing diagnostics.
 - checkpoint compatibility may also use a narrower runtime-anchor contract when a persisted manifest fingerprint is unavailable, but that contract is intentionally smaller and must not be read as a substitute for full manifest identity.
 
 ### 4. Inspect storage layout directly when needed
@@ -198,6 +201,19 @@ For interrupted or failing runs, inspect for:
 The `diagnostics` block from `bioetl run-manifest show --format json` is the
 fastest triage surface.
 
+The current supported Bronze -> Silver -> Gold lineage MVP surface is bounded
+to the representative `chembl.activity` family used by the reproducibility
+contract suite:
+
+- Bronze batch outputs emitted for the `chembl.activity` source path;
+- Silver dataset outputs with canonical artifact ids such as
+  `silver:chembl.activity@<version>`;
+- Gold dataset outputs with canonical artifact ids such as
+  `gold:chembl.activity`.
+
+Outside that documented MVP surface, lineage signals may still exist but are
+not yet the supported closure boundary for operator-grade trace/debug claims.
+
 Focus on:
 
 - `latest_status`, `latest_event_type`, `total_events`;
@@ -218,6 +234,33 @@ Interpretation examples:
 - `latest_status=success` with no `run_finished` is suspicious;
 - `artifact_published` with empty `artifact_refs` indicates traceability degradation;
 - `missing_artifact_links > 0` means artifact events are missing `dataset_ref` and/or `lineage_fragment_id` anchors;
+
+### 7a. Supported trace/debug path from output artifact to run context
+
+For the supported lineage MVP surface, the canonical operator path is:
+
+1. Start from the output sidecar (`*_metadata.yaml`) and read:
+   - `runtime.run_id`
+   - `runtime.manifest_id`
+   - `output.artifact_id`
+   - `output.lineage_fragment_id`
+2. Resolve the immutable run context:
+   - `bioetl run-manifest show <run_id|manifest_id> --format json`
+3. Inspect:
+   - `diagnostics.artifact_refs`
+   - `diagnostics.lineage_fragment_ids`
+   - `identity_graph.execution_fingerprint`
+   - `manifest.source_refs`
+   - `ledger_entries` for `artifact_published`
+4. Confirm that:
+   - the sidecar `artifact_id` matches the produced artifact referenced by the
+     lineage fragment;
+   - the sidecar `lineage_fragment_id` matches one of the published fragment
+     anchors for the run;
+   - `run_id` and `manifest_id` line up across sidecar, manifest, and ledger.
+
+If any of those anchors disagree, treat it as lineage integrity drift rather
+than silently accepting the bundle as canonical.
 - `persistence_profile.attained_profile=forensic_grade` means the run is both
   replay-ready and backed by ledger/artifact-lineage evidence suitable for
   stronger postmortem reconstruction;

@@ -552,6 +552,33 @@ class TestDQMonitorPortContract:
         params = sig.parameters
 
         assert "metrics" in params, "check_quality() MUST have metrics parameter"
+        assert "timestamp" in params, (
+            "check_quality() MUST accept the canonical application-owned "
+            "timestamp parameter"
+        )
+        assert params["timestamp"].default is None, (
+            "check_quality() timestamp parameter MUST remain optional for "
+            "graceful degradation"
+        )
+
+    def test_dq_monitor_port_update_baseline_accepts_timestamp(self) -> None:
+        """Baseline updates MUST accept the canonical application timestamp."""
+        import inspect
+
+        sig = inspect.signature(ports.DQMonitorPort.update_baseline_from_metrics)
+        params = sig.parameters
+
+        assert "metrics" in params, (
+            "update_baseline_from_metrics() MUST have metrics parameter"
+        )
+        assert "timestamp" in params, (
+            "update_baseline_from_metrics() MUST accept the canonical "
+            "application-owned timestamp parameter"
+        )
+        assert params["timestamp"].default is None, (
+            "update_baseline_from_metrics() timestamp parameter MUST remain "
+            "optional for graceful degradation"
+        )
 
     def test_dq_monitor_port_is_runtime_checkable(self) -> None:
         """DQMonitorPort MUST be @runtime_checkable for isinstance() checks."""

@@ -106,3 +106,75 @@ def test_metadata_lineage_bundle_requires_produced_artifact_node() -> None:
 
     with pytest.raises(ValueError, match="does not expose a produced artifact node"):
         MetadataLineageBundle(metadata=metadata, lineage_fragment=fragment)
+
+
+def test_metadata_lineage_bundle_rejects_preexisting_artifact_id_mismatch() -> None:
+    metadata = _make_bronze_metadata()
+    metadata.output.artifact_id = "bronze_batch:other-batch"
+    batch_node = LineageNodeRef(
+        node_type=LineageNodeType.BRONZE_BATCH,
+        node_id="bronze_batch:batch-1",
+        attributes={"batch_id": "batch-1"},
+    )
+    run_node = LineageNodeRef(
+        node_type=LineageNodeType.RUN,
+        node_id="run:run-1",
+        attributes={"run_id": "run-1"},
+    )
+    fragment = LineageGraphFragment(
+        fragment_id="fragment-1",
+        run_id="run-1",
+        manifest_id="manifest-1",
+        nodes=(batch_node, run_node),
+        edges=(
+            LineageEdge(
+                edge_type=LineageEdgeType.PRODUCED_BY,
+                source=batch_node,
+                target=run_node,
+                run_id="run-1",
+                manifest_id="manifest-1",
+            ),
+        ),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="Sidecar output.artifact_id does not match lineage fragment produced artifact",
+    ):
+        MetadataLineageBundle(metadata=metadata, lineage_fragment=fragment)
+
+
+def test_metadata_lineage_bundle_rejects_preexisting_fragment_id_mismatch() -> None:
+    metadata = _make_bronze_metadata()
+    metadata.output.lineage_fragment_id = "fragment-other"
+    batch_node = LineageNodeRef(
+        node_type=LineageNodeType.BRONZE_BATCH,
+        node_id="bronze_batch:batch-1",
+        attributes={"batch_id": "batch-1"},
+    )
+    run_node = LineageNodeRef(
+        node_type=LineageNodeType.RUN,
+        node_id="run:run-1",
+        attributes={"run_id": "run-1"},
+    )
+    fragment = LineageGraphFragment(
+        fragment_id="fragment-1",
+        run_id="run-1",
+        manifest_id="manifest-1",
+        nodes=(batch_node, run_node),
+        edges=(
+            LineageEdge(
+                edge_type=LineageEdgeType.PRODUCED_BY,
+                source=batch_node,
+                target=run_node,
+                run_id="run-1",
+                manifest_id="manifest-1",
+            ),
+        ),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="Sidecar output.lineage_fragment_id does not match lineage fragment fragment_id",
+    ):
+        MetadataLineageBundle(metadata=metadata, lineage_fragment=fragment)

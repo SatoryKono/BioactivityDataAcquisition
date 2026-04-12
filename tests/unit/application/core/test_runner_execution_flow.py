@@ -50,6 +50,7 @@ class _ExecutionHost:
         )
         self._preflight_service = SimpleNamespace(
             validate_infrastructure=self._validate_infrastructure,
+            assert_infrastructure_healthy=self._assert_infrastructure_healthy,
         )
         self._postrun_service = SimpleNamespace(run=self._run_postrun)
         self._lifecycle_service = SimpleNamespace(
@@ -61,11 +62,15 @@ class _ExecutionHost:
         self._observer.emit_health_check_result.side_effect = (
             self._emit_health_check_result
         )
+        self._observer.emit_health_check_summary.side_effect = (
+            self._emit_health_check_summary
+        )
         self._observer.emit_dq_anomaly.side_effect = self._emit_dq_anomaly
         self._observer.emit_vacuum_result.side_effect = self._emit_vacuum_result
         self.execute_calls: list[tuple[int | None, int | None, str | None]] = []
         self.postrun_calls: list[tuple[object, object]] = []
         self.health_components: list[str] = []
+        self.health_summaries: list[tuple[bool, str]] = []
         self.dq_metrics: list[str] = []
         self.vacuum_layers: list[str] = []
 
@@ -81,8 +86,14 @@ class _ExecutionHost:
         self.completed.append(stage)
         self.order.append(f"complete:{stage}")
 
-    async def _validate_infrastructure(self, services: object) -> HealthReport:
+    async def _validate_infrastructure(
+        self,
+        services: object,
+        *,
+        raise_on_unhealthy: bool = True,
+    ) -> HealthReport:
         assert services is self._services
+        assert raise_on_unhealthy is False
         self.order.append("validate_infrastructure")
         return HealthReport(
             results=[
@@ -98,6 +109,9 @@ class _ExecutionHost:
                 ),
             ]
         )
+
+    def _assert_infrastructure_healthy(self, report: HealthReport) -> None:
+        self.order.append(f"assert_infrastructure_healthy:{report.is_healthy}")
 
     async def _prepare_for_run(self, *, config: object, runtime: object) -> None:
         assert config is self._config
@@ -169,6 +183,16 @@ class _ExecutionHost:
         self.health_components.append(component)
         self.order.append(f"observer:health:{component}")
 
+    def _emit_health_check_summary(
+        self,
+        *,
+        validated: bool,
+        overall_status: str,
+        **_: object,
+    ) -> None:
+        self.health_summaries.append((validated, overall_status))
+        self.order.append(f"observer:health_summary:{validated}:{overall_status}")
+
     def _emit_dq_anomaly(self, metric_name: str, **_: object) -> None:
         self.dq_metrics.append(metric_name)
         self.order.append(f"observer:dq:{metric_name}")
@@ -193,6 +217,8 @@ async def test_run_managed_pipeline_preserves_canonical_stage_order() -> None:
         "validate_infrastructure",
         "observer:health:storage",
         "observer:health:data_source",
+        "observer:health_summary:True:DEGRADED",
+        "assert_infrastructure_healthy:True",
         "complete:preflight",
         "observer:complete:preflight:success",
         "start:prepare_medallion_layers",
@@ -221,6 +247,7 @@ async def test_run_managed_pipeline_preserves_canonical_stage_order() -> None:
         "observer:complete:cleanup:success",
     ]
     assert host.health_components == ["storage", "data_source"]
+    assert host.health_summaries == [(True, "DEGRADED")]
     assert host.dq_metrics == ["error_rate"]
     assert host.vacuum_layers == ["silver", "gold"]
 

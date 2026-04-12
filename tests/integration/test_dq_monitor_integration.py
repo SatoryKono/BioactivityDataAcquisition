@@ -467,8 +467,6 @@ class TestDataQualityServiceMetricsEmission:
     ) -> None:
         """Verify DataQualityService performs DQ check with monitor.
 
-        Note: DataQualityService.check_quality() doesn't pass timestamps
-        to the AnomalyDetector, so z-score based anomalies won't be detected.
         This test verifies:
         1. The check_quality call is made (duration > 0)
         2. Histogram for check duration is emitted
@@ -511,6 +509,50 @@ class TestDataQualityServiceMetricsEmission:
             "bioetl_dq_baseline_updated"
         )
         assert len(baseline_calls) == 2  # error_rate and record_count
+
+    @pytest.mark.asyncio
+    async def test_dq_service_uses_anchor_for_deterministic_anomaly_timing(
+        self,
+        recording_metrics: RecordingMetrics,
+        recording_logger: RecordingLogger,
+    ) -> None:
+        """Freshness anchor should drive anomaly timestamps and detection."""
+        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.domain.config import DQConfig
+        from bioetl.domain.value_objects.dq_anomaly import DQAnomalyType
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
+
+        config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
+        dq_monitor = DataQualityMonitorService(
+            logger=recording_logger, z_score_threshold=2.0
+        )  # type: ignore
+        for value in [980.0, 1000.0, 1020.0, 990.0, 1010.0]:
+            dq_monitor.update_baseline_from_metrics({"record_count": value})
+
+        service = DataQualityService(
+            dq_monitor=dq_monitor,
+            config=config,
+            logger=recording_logger,  # type: ignore
+            metrics=recording_metrics,
+            pipeline_name="test_integration_pipeline",
+            entity_type="test_entity",
+        )
+
+        result = service.evaluate(
+            {
+                "error_rate": 0.01,
+                "record_count": 100.0,
+                "freshness_anchor_timestamp": 1_700_000_123.0,
+            }
+        )
+
+        assert result.anomalies_count == 1
+        assert result.anomalies[0].anomaly_type == DQAnomalyType.DROP
+        assert result.anomalies[0].timestamp == datetime.fromtimestamp(
+            1_700_000_123.0, UTC
+        )
 
     @pytest.mark.asyncio
     async def test_baseline_updated_counter_emitted(
@@ -615,10 +657,6 @@ class TestDataQualityServiceMetricsEmission:
         1. Soft threshold warning with counter (via DQConfig)
         2. Check duration histogram (via DQ monitor)
         3. Baseline update counters (via DQ monitor)
-
-        Note: AnomalyRecord detection counters are NOT tested here because
-        DataQualityService doesn't pass timestamps to check_quality(),
-        which is required by AnomalyDetector for z-score based detection.
         """
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig

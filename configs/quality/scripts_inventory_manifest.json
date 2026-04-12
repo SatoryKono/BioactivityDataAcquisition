@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-12T13:43:50.596631+00:00",
+  "generated_at": "2026-04-12T13:59:18.148787+00:00",
   "summary": {
     "total_scripts": 292,
     "status_counts": {
@@ -4364,19 +4364,19 @@
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 117,
+          "line": 120,
           "source_group": "docs",
           "text": "| Matrix generation | [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) | Determin"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 199,
+          "line": 213,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py)"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 481,
+          "line": 500,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
         },
@@ -4565,7 +4565,7 @@
         },
         {
           "path": "scripts/ops/neo4j_memory_sync.py",
-          "line": 506,
+          "line": 512,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
         }
@@ -7861,13 +7861,13 @@
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 118,
+          "line": 121,
           "source_group": "docs",
           "text": "| Fallback inventory | [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/qa/report_normalization_fallback_inventory.py) | Reports `fallback_b"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 226,
+          "line": 240,
           "source_group": "docs",
           "text": "- fallback inventory report: [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/qa/report_normalization_fallback_inventory.py)"
         },

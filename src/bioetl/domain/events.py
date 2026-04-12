@@ -60,6 +60,7 @@ class PipelineEvent:
 
     # Health check events
     HEALTH_CHECK_COMPLETED = "health_check_completed"
+    HEALTH_CHECK_SUMMARY_RECORDED = "health_check_summary_recorded"
 
     # Data quality events
     DQ_ANOMALY_DETECTED = "dq_anomaly_detected"
