@@ -5,9 +5,9 @@ quarantine manager, and quarantine service. Used for CLI inspection
 and administrative operations.
 
 Note:
-    CLI diagnostics use NoOp logging/metrics by default, but tracing is
-    resolved through composition so operator workflows participate in spans
-    when tracing is enabled.
+    CLI diagnostics use NoOp logging by default. Metrics and tracing are
+    resolved through composition so operator workflows can publish bounded
+    observability signals when those capabilities are enabled.
 """
 
 from __future__ import annotations
@@ -30,14 +30,16 @@ from bioetl.application.services.admin_runtime_api import (
 from bioetl.composition.bootstrap.cli.run_manifest import (
     bootstrap_run_manifest_service,
 )
-from bioetl.composition.observability_resolution import resolve_tracing_port
+from bioetl.composition.observability_resolution import (
+    resolve_metrics_port,
+    resolve_tracing_port,
+)
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_compatibility_service,
     bootstrap_checkpoint_port,
     bootstrap_quarantine_port,
 )
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.composition.bootstrap.cli.noop import create_noop_metrics
 from bioetl.composition.factories.storage._audit import create_audit_port
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
@@ -161,12 +163,12 @@ def bootstrap_quarantine_service() -> QuarantineService:
     settings = get_settings()
     quarantine_port = bootstrap_quarantine_port()
     noop_logger = create_noop_logger()
-    noop_metrics = create_noop_metrics()
+    metrics = resolve_metrics_port(metrics=None, settings=settings)
 
     return QuarantineService(
         quarantine_port=quarantine_port,
         logger=noop_logger,
-        metrics=noop_metrics,
+        metrics=metrics,
         tracer=resolve_tracing_port(
             tracer=None,
             settings=settings,
