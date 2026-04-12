@@ -269,6 +269,35 @@ class TestPipelineRunnerTracing:
 
         assert has_stages, "PipelineRunner should track stages"
 
+    def test_composite_runner_uses_lifecycle_observer_seam(self):
+        """Composite runner should route lifecycle events through an observer seam."""
+        runner_path = Path("src/bioetl/application/composite/runner_pkg/runner.py")
+
+        if not runner_path.exists():
+            pytest.skip("Composite runner not found")
+
+        source = runner_path.read_text(encoding="utf-8")
+
+        assert "_observer" in source, "Composite runner should bind an observer seam"
+
+    def test_composite_phase_helpers_do_not_publish_via_logger_directly(self):
+        """Composite phase helpers should not own direct lifecycle publication."""
+        helper_paths = [
+            Path("src/bioetl/application/composite/runner_pkg/runner_stage_start_flow.py"),
+            Path("src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py"),
+            Path("src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py"),
+            Path("src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py"),
+            Path("src/bioetl/application/composite/runner_pkg/runner_support_flow.py"),
+        ]
+
+        for path in helper_paths:
+            if not path.exists():
+                pytest.skip(f"{path} not found")
+            source = path.read_text(encoding="utf-8")
+            assert "PipelineEvent." not in source, (
+                f"{path} should delegate lifecycle publication to composite observer"
+            )
+
 
 class TestObservabilityBootstrap:
     """Tests for observability bootstrap."""

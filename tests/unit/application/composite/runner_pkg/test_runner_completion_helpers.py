@@ -8,6 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
     CompositePipelineFinalizationRequest,
     CompositeResultBuildRequest,
@@ -73,6 +76,8 @@ class _FinalizationHost:
 @pytest.mark.unit
 def test_build_composite_result_marks_optional_failures_as_warnings() -> None:
     logger = MagicMock()
+    observer_logger = MagicMock()
+    observer = CompositeLifecycleObserverService(logger=observer_logger)
     request = _build_request(
         enrichment_results={
             "optional_a": EnrichmentResult(
@@ -82,10 +87,10 @@ def test_build_composite_result_marks_optional_failures_as_warnings() -> None:
         }
     )
 
-    result = build_composite_result(request=request, logger=logger)
+    result = build_composite_result(request=request, logger=logger, observer=observer)
 
     assert result.had_warnings is True
-    completion_call = logger.info.call_args_list[-1]
+    completion_call = observer_logger.info.call_args_list[-1]
     assert completion_call.kwargs["status"] == "completed_with_warnings"
     assert completion_call.kwargs["had_warnings"] is True
 

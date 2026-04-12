@@ -9,6 +9,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runner_pkg.runner import CompositeExecutionContext
 from bioetl.application.composite.runner_pkg.runner_support_mixin import (
     CompositeRunnerSupportMixin,
@@ -75,6 +78,8 @@ class _SupportMixinHarness(CompositeRunnerSupportMixin):
             force_enricher=None,
         )
         self._logger = MagicMock()
+        self._observer_logger = MagicMock()
+        self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
         self._run_id_str = "run-test-1"
         self._started_at: datetime | None = None
         self._checkpoint_manager = AsyncMock()
@@ -226,7 +231,7 @@ def test_build_composite_result_when_called_then_uses_named_artifacts() -> None:
     assert result.dependency_results is artifacts.dependency_results
     assert result.enrichment_results is artifacts.enrichment_results
     assert result.merge_result is artifacts.merge_result
-    harness._logger.info.assert_called_once()
+    harness._observer_logger.info.assert_called_once()
 
 
 @pytest.mark.unit
@@ -263,7 +268,7 @@ def test_build_composite_result_when_optional_failure_then_logs_warning_completi
     result = harness._build_composite_result(artifacts)
 
     assert result.had_warnings is True
-    info_kwargs = harness._logger.info.call_args.kwargs
+    info_kwargs = harness._observer_logger.info.call_args.kwargs
     assert info_kwargs["status"] == "completed_with_warnings"
     assert info_kwargs["had_warnings"] is True
 
