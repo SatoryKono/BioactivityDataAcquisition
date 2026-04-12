@@ -13,11 +13,14 @@ from scripts.ops.neo4j_memory_sync import (
     _build_normalization_pipeline_evidence,
     _build_diff_entries,
     _critical_analysis_audit_issues,
+    _duplication_analysis_config,
     _ensure_targeted_apply_prerequisites,
+    _family_for_path,
     _filtered_snapshot,
     _git_last_commit_age_days_bulk,
     _live_managed_node_counts,
     _live_managed_relation_counts,
+    _load_memory_mapping,
     _merge_storage_layer_config,
     _missing_managed_anchor_keys,
     _normalize_docs_repo_reference,
@@ -627,6 +630,25 @@ def test_apply_normalization_evidence_only_executes_batched_statements(monkeypat
     assert summary["batches"][0]["pipeline_end"] == "pubmed_publication"
 
 
+def test_duplication_analysis_config_excludes_normalization_registry_path() -> None:
+    root = Path(__file__).resolve().parents[4]
+    config = _duplication_analysis_config(_load_memory_mapping(root))
+
+    assert (
+        _family_for_path(
+            "src/bioetl/domain/normalization/profiles/registry.py",
+            config,
+        )
+        is None
+    )
+    family = _family_for_path(
+        "src/bioetl/domain/normalization/profiles/chembl_molecule.py",
+        config,
+    )
+    assert family is not None
+    assert family.name == "normalization_profiles"
+
+
 def _assert_relation_absence(relation_keys: set[RelationKey], forbidden: tuple[RelationKey, ...]) -> None:
     for relation_key in forbidden:
         assert relation_key not in relation_keys
@@ -704,6 +726,21 @@ def test_snapshot_contains_duplication_clusters_with_promotion_targets() -> None
         rel.relation_type == "COVERED_BY_TEST" and rel.source.label == "duplication_cluster"
         for rel in snapshot.relations.values()
     )
+
+
+def test_snapshot_excludes_normalization_registry_duplication_noise() -> None:
+    _, snapshot = _snapshot()
+
+    registry_members = [
+        rel.target
+        for rel in snapshot.relations.values()
+        if rel.source.label == "duplication_cluster"
+        and rel.relation_type == "CONTAINS"
+        and rel.target.label in {"function_surface", "method_surface"}
+        and "src.bioetl.domain.normalization.profiles.registry." in rel.target.name
+    ]
+
+    assert registry_members == []
 
 
 def test_snapshot_contains_complexity_candidates_with_simplification_links() -> None:
