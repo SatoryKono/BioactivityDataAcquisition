@@ -28,6 +28,9 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     control_plane_root as _shared_control_plane_root,
     to_serializable_mapping as _shared_to_serializable_mapping,
 )
+from bioetl.composition.runtime_builders._runner_builder_support import (
+    validate_required_persistence_profile,
+)
 from bioetl.composition.services.versioning import compute_config_hash, get_git_commit
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
@@ -51,11 +54,22 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
     control_plane = getattr(pipeline_settings, "control_plane", None)
     manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
     ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
+    required_profile = getattr(
+        control_plane,
+        "required_persistence_profile",
+        "degraded_observable",
+    )
     if not manifest_enabled:
         raise RuntimeError(
             "Composite execution requires run manifests; set "
             "pipeline.control_plane.run_manifest_enabled=true"
         )
+    validate_required_persistence_profile(
+        manifest_enabled=manifest_enabled,
+        ledger_enabled=ledger_enabled,
+        required_profile=required_profile,
+        execution_label="Composite execution",
+    )
     return True, ledger_enabled
 
 
