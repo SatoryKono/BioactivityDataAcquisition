@@ -128,8 +128,22 @@ COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
 }
 
 
-def _normalizer_name(normalizer: Any) -> str:
-    return getattr(normalizer, "__name__", type(normalizer).__name__)
+def _normalizer_name(
+    normalizer: Any,
+    *,
+    field_name: str,
+    notes: str | None,
+) -> str:
+    name = getattr(normalizer, "__name__", type(normalizer).__name__)
+    if name != "<lambda>":
+        return name
+
+    normalized_notes = (notes or "").casefold()
+    if field_name == "canonical_smiles" or "canonical smiles" in normalized_notes:
+        return "normalize_profile_canonical_smiles"
+    if field_name == "isomeric_smiles" or "isomeric smiles" in normalized_notes:
+        return "normalize_profile_isomeric_smiles"
+    return "lambda"
 
 
 def _entity_config_paths() -> list[Path]:
@@ -263,7 +277,11 @@ def _build_entity_rows_for_pipeline(
                     "field_name": field_name,
                     "field_type": field_type,
                     "normalization_source": "profile",
-                    "normalizer": _normalizer_name(profile_rule.normalizer),
+                    "normalizer": _normalizer_name(
+                        profile_rule.normalizer,
+                        field_name=field_name,
+                        notes=profile_rule.notes,
+                    ),
                     "normalization_summary": profile_rule.notes or "",
                     "include_in_content_hash": _render_bool(profile_rule.include_in_hash),
                     "set_like": _render_bool(profile_rule.set_like),
