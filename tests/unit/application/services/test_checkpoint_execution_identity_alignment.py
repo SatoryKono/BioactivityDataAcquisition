@@ -28,6 +28,8 @@ def _metadata(
     *,
     effective_config_hash: str = "a" * 64,
     execution_fingerprint: str | None = None,
+    dq_contract_compatibility_hash: str | None = None,
+    pipeline_version: str | None = None,
     manifest_id: str | None = None,
     contract_ref: str | None = None,
     contract_version: str | None = None,
@@ -35,8 +37,8 @@ def _metadata(
 ) -> CheckpointMetadata:
     return CheckpointMetadata(
         records_processed=100,
-        dq_contract_compatibility_hash="dq-same",
-        pipeline_version="1.0.0",
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        pipeline_version=pipeline_version,
         effective_config_hash=effective_config_hash,
         execution_fingerprint=execution_fingerprint,
         manifest_id=manifest_id,
@@ -153,10 +155,11 @@ def test_legacy_and_v2_align_when_runtime_anchor_fingerprint_mismatches() -> Non
     assert legacy_result.compatible is False
     assert legacy_result.execution_identity_compatible is False
     assert any(
-        "Runtime anchor fingerprint mismatch" in msg for msg in legacy_result.messages
+        "Degraded runtime-anchor fingerprint mismatch" in msg
+        for msg in legacy_result.messages
     )
     assert v2_result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
     assert (
         v2_result.details["execution_identity_compatibility"]["reason"]
-        == "runtime_anchor_fingerprint_mismatch"
+        == "degraded_runtime_anchor_fingerprint_mismatch"
     )

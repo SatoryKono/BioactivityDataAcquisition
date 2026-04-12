@@ -80,6 +80,11 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "runtime_evidence_surface",
         "title": "Runtime evidence ownership path",
     },
+    "owner-runtime-state": {
+        "mode": "owner",
+        "target_label": "runtime_state_surface",
+        "title": "Runtime state ownership path",
+    },
     "owner-workflow": {
         "mode": "owner",
         "target_label": "workflow_surface",
@@ -94,6 +99,11 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "mode": "owner",
         "target_label": "cli_command_surface",
         "title": "CLI command ownership path",
+    },
+    "owner-schema-field": {
+        "mode": "owner",
+        "target_label": "schema_field_surface",
+        "title": "Schema field ownership path",
     },
     "neighbors-contract": {
         "mode": "neighbors",
@@ -131,6 +141,12 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "runtime_evidence_surface",
         "title": "Runtime evidence semantic neighborhood",
         "relation_types": ("BACKED_BY", "DESCRIBED_IN", "WRITES_TO"),
+    },
+    "neighbors-runtime-state": {
+        "mode": "neighbors",
+        "target_label": "runtime_state_surface",
+        "title": "Runtime state semantic neighborhood",
+        "relation_types": ("DEPENDS_ON", "REFERENCES_ARTIFACT", "DESCRIBED_IN"),
     },
     "neighbors-workflow": {
         "mode": "neighbors",
@@ -176,10 +192,30 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "storage_surface",
         "title": "Storage lineage path",
     },
+    "field-lineage": {
+        "mode": "field_lineage",
+        "target_label": "schema_field_surface",
+        "title": "Field lineage path",
+    },
+    "schema-drift": {
+        "mode": "schema_drift",
+        "target_label": "schema_field_surface",
+        "title": "Schema drift evidence",
+    },
     "run-artifacts": {
         "mode": "run_artifacts",
         "target_label": "run_instance_surface",
         "title": "Run instance artifact chain",
+    },
+    "runtime-state": {
+        "mode": "runtime_state",
+        "target_label": "runtime_state_surface",
+        "title": "Runtime state summary",
+    },
+    "runtime-locks": {
+        "mode": "runtime_locks",
+        "target_label": "runtime_state_surface",
+        "title": "Runtime lock state",
     },
     "normalization-pipeline": {
         "mode": "normalization_pipeline",
@@ -611,6 +647,49 @@ def _storage_lineage_statement() -> str:
     )
 
 
+def _field_lineage_statement() -> str:
+    return (
+        "MATCH (field:schema_field_surface) "
+        "WHERE $name = 'all' OR field.name = $name OR field.field_name = $name OR field.storage_ref = $name OR field.contract_ref = $name "
+        "OPTIONAL MATCH (storage:storage_surface)-[:HAS_SCHEMA_FIELD]->(field) "
+        "OPTIONAL MATCH (contract:contract_surface)-[:HAS_SCHEMA_FIELD]->(field) "
+        "OPTIONAL MATCH (field)-[:DERIVES_FIELD_FROM]->(upstream:schema_field_surface) "
+        "OPTIONAL MATCH (field)-[:PROMOTES_FIELD_TO]->(downstream:schema_field_surface) "
+        "RETURN field.name AS field_surface_name, "
+        "field.field_name AS field_name, "
+        "field.field_group AS field_group, "
+        "field.storage_ref AS storage_ref, "
+        "field.contract_ref AS contract_ref, "
+        "field.required_in_quality AS required_in_quality, "
+        "field.validation_types AS validation_types, "
+        "field.drift_classification AS drift_classification, "
+        "collect(DISTINCT storage.name) AS storage_surfaces, "
+        "collect(DISTINCT contract.name) AS contracts, "
+        "collect(DISTINCT upstream.name) AS upstream_fields, "
+        "collect(DISTINCT downstream.name) AS downstream_fields "
+        "ORDER BY field.storage_ref ASC, field.field_name ASC"
+    )
+
+
+def _schema_drift_statement() -> str:
+    return (
+        "MATCH (field:schema_field_surface) "
+        "WHERE coalesce(field.drift_classification, '') <> '' "
+        "AND ($name = 'all' OR field.storage_ref = $name OR field.contract_ref = $name OR field.field_name = $name) "
+        "OPTIONAL MATCH (storage:storage_surface)-[:HAS_SCHEMA_FIELD]->(field) "
+        "RETURN field.name AS field_surface_name, "
+        "field.field_name AS field_name, "
+        "field.field_group AS field_group, "
+        "field.storage_ref AS storage_ref, "
+        "field.contract_ref AS contract_ref, "
+        "field.drift_classification AS drift_classification, "
+        "field.required_in_quality AS required_in_quality, "
+        "field.validation_types AS validation_types, "
+        "collect(DISTINCT storage.name) AS storage_surfaces "
+        "ORDER BY field.storage_ref ASC, field.field_name ASC"
+    )
+
+
 def _run_artifacts_statement() -> str:
     return (
         "MATCH (run:run_instance_surface) "
@@ -642,6 +721,44 @@ def _run_artifacts_statement() -> str:
     )
 
 
+def _runtime_state_statement(*, locks_only: bool = False) -> str:
+    filter_clause = (
+        "AND state.state_kind = 'lock_state' "
+        if locks_only
+        else ""
+    )
+    return (
+        "MATCH (state:runtime_state_surface) "
+        "WHERE ($name = 'all' OR state.name = $name OR state.state_kind = $name OR state.lock_key = $name OR state.manifest_id = $name) "
+        f"{filter_clause}"
+        "OPTIONAL MATCH (owner)-[:HAS_RUNTIME_STATE]->(state) "
+        "OPTIONAL MATCH (state)-[:DEPENDS_ON]->(dependency) "
+        "OPTIONAL MATCH (state)-[:REFERENCES_ARTIFACT]->(artifact:control_plane_artifact_surface) "
+        "RETURN state.name AS runtime_state_name, "
+        "state.state_kind AS state_kind, "
+        "state.state_status AS state_status, "
+        "state.manifest_id AS manifest_id, "
+        "state.retry_count AS retry_count, "
+        "state.retry_strategy AS retry_strategy, "
+        "state.lock_key AS lock_key, "
+        "state.lock_scope AS lock_scope, "
+        "state.owner_hint AS owner_hint, "
+        "collect(DISTINCT CASE "
+        "  WHEN owner.name IS NULL THEN NULL "
+        "  ELSE {name: owner.name, labels: labels(owner)} "
+        "END) AS owners, "
+        "collect(DISTINCT CASE "
+        "  WHEN dependency.name IS NULL THEN NULL "
+        "  ELSE {name: dependency.name, labels: labels(dependency)} "
+        "END) AS dependencies, "
+        "collect(DISTINCT CASE "
+        "  WHEN artifact.name IS NULL THEN NULL "
+        "  ELSE {name: artifact.name, labels: labels(artifact), artifact_family: artifact.artifact_family} "
+        "END) AS artifacts "
+        "ORDER BY state.state_kind ASC, state.name ASC"
+    )
+
+
 def _run_query(
     root: Path,
     profile: str,
@@ -666,8 +783,16 @@ def _run_query(
         statement = _workflow_artifacts_statement()
     elif profile_config["mode"] == "storage_lineage":
         statement = _storage_lineage_statement()
+    elif profile_config["mode"] == "field_lineage":
+        statement = _field_lineage_statement()
+    elif profile_config["mode"] == "schema_drift":
+        statement = _schema_drift_statement()
     elif profile_config["mode"] == "run_artifacts":
         statement = _run_artifacts_statement()
+    elif profile_config["mode"] == "runtime_state":
+        statement = _runtime_state_statement()
+    elif profile_config["mode"] == "runtime_locks":
+        statement = _runtime_state_statement(locks_only=True)
     elif profile_config["mode"] == "normalization_pipeline":
         statement = _normalization_pipeline_statement()
     elif profile_config["mode"] == "fallback_pipelines":
@@ -705,7 +830,11 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             "workflow_gates": "no workflow gate coverage found",
             "workflow_artifacts": "no workflow action or artifact coverage found",
             "storage_lineage": "no storage lineage found",
+            "field_lineage": "no field lineage found",
+            "schema_drift": "no schema drift evidence found",
             "run_artifacts": "no run instance artifact chain found",
+            "runtime_state": "no runtime state found",
+            "runtime_locks": "no runtime lock state found",
             "duplication_cluster": "no duplication cluster found",
             "normalization_pipeline": "no pipeline normalization evidence found",
             "fallback_pipelines": "no fallback-heavy pipelines found",
@@ -905,6 +1034,54 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             lines.append("- no storage lineage found")
         return "\n".join(lines)
 
+    if profile_config["mode"] == "field_lineage":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            field_name = str(row.get("field_name") or "")
+            storage_ref = str(row.get("storage_ref") or "")
+            if not field_name or not storage_ref:
+                continue
+            lines.append(
+                f"- storage={storage_ref} | field={field_name} | group={row.get('field_group') or ''!s} "
+                f"| drift={row.get('drift_classification') or ''!s} | required={row.get('required_in_quality')!s}"
+            )
+            validation_types = row.get("validation_types")
+            if isinstance(validation_types, list) and validation_types:
+                lines.append(f"  validations={','.join(str(item) for item in validation_types if item)}")
+            for field_name_key, prefix in (
+                ("upstream_fields", "upstream"),
+                ("downstream_fields", "downstream"),
+                ("contracts", "contract"),
+            ):
+                values = row.get(field_name_key)
+                if isinstance(values, list):
+                    for value in sorted({str(item) for item in values if item}):
+                        lines.append(f"  {prefix}={value}")
+        if len(lines) == 1:
+            lines.append("- no field lineage found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "schema_drift":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            field_name = str(row.get("field_name") or "")
+            storage_ref = str(row.get("storage_ref") or "")
+            drift = str(row.get("drift_classification") or "")
+            if not field_name or not storage_ref:
+                continue
+            validation_types = row.get("validation_types")
+            validation_suffix = (
+                f" | validations={','.join(str(item) for item in validation_types if item)}"
+                if isinstance(validation_types, list) and validation_types
+                else ""
+            )
+            lines.append(
+                f"- storage={storage_ref} | field={field_name} | drift={drift} | required={row.get('required_in_quality')!s}{validation_suffix}"
+            )
+        if len(lines) == 1:
+            lines.append("- no schema drift evidence found")
+        return "\n".join(lines)
+
     if profile_config["mode"] == "run_artifacts":
         lines = [f"{title}: `{name}`"]
         for row in rows:
@@ -954,6 +1131,42 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
                 lines.extend(sorted(normalized))
         if len(lines) == 1:
             lines.append("- no run instance artifact chain found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] in {"runtime_state", "runtime_locks"}:
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            state_name = str(row.get("runtime_state_name") or "")
+            if not state_name:
+                continue
+            lines.append(
+                f"- state={state_name} | kind={row.get('state_kind') or ''!s} | status={row.get('state_status') or ''!s} "
+                f"| manifest_id={row.get('manifest_id') or ''!s} | retry_count={row.get('retry_count')!s} | lock_key={row.get('lock_key') or ''!s}"
+            )
+            for field_name_key, prefix in (("owners", "owner"), ("dependencies", "dependency"), ("artifacts", "artifact")):
+                values = row.get(field_name_key)
+                if not isinstance(values, list):
+                    continue
+                normalized: set[str] = set()
+                for value in values:
+                    if not isinstance(value, dict):
+                        continue
+                    value_name = str(value.get("name") or "")
+                    if not value_name:
+                        continue
+                    labels = value.get("labels")
+                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                    artifact_family = str(value.get("artifact_family") or "")
+                    extras = []
+                    if label_str:
+                        extras.append(f"labels={label_str}")
+                    if artifact_family:
+                        extras.append(f"artifact_family={artifact_family}")
+                    suffix = f" | {' | '.join(extras)}" if extras else ""
+                    normalized.add(f"  {prefix}={value_name}{suffix}")
+                lines.extend(sorted(normalized))
+        if len(lines) == 1:
+            lines.append("- no runtime state found")
         return "\n".join(lines)
 
     if profile_config["mode"] == "duplication_cluster":

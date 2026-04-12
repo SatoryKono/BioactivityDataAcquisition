@@ -45,13 +45,19 @@ class CheckpointIdentityRecord:
     effective_config_hash: str
     execution_phase: ExecutionPhase
     checkpoint_schema_version: str
+    pipeline_name: str | None = None
+    run_type: str | None = None
+    pipeline_version: str | None = None
     source_freshness_markers: dict[str, object] | None = None
     composite_run_identity: str | None = None
     execution_fingerprint: str | None = None
     manifest_id: str | None = None
+    dq_contract_compatibility_hash: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
     effective_config_artifact_id: str | None = None
+    exact_replay: bool | None = None
+    input_snapshot_fingerprint: str | None = None
 
 
 @dataclass(frozen=True)
@@ -98,8 +104,20 @@ class CheckpointCompatibilityV2Service:
         execution_identity_compatibility = check_execution_identity_compatibility(
             current_execution_fingerprint=current_identity.execution_fingerprint,
             checkpoint_execution_fingerprint=checkpoint_identity.execution_fingerprint,
+            current_pipeline_name=current_identity.pipeline_name,
+            checkpoint_pipeline_name=checkpoint_identity.pipeline_name,
+            current_run_type=current_identity.run_type,
+            checkpoint_run_type=checkpoint_identity.run_type,
+            current_pipeline_version=current_identity.pipeline_version,
+            checkpoint_pipeline_version=checkpoint_identity.pipeline_version,
             current_manifest_id=current_identity.manifest_id,
             checkpoint_manifest_id=checkpoint_identity.manifest_id,
+            current_dq_contract_compatibility_hash=(
+                current_identity.dq_contract_compatibility_hash
+            ),
+            checkpoint_dq_contract_compatibility_hash=(
+                checkpoint_identity.dq_contract_compatibility_hash
+            ),
             current_contract_ref=current_identity.contract_ref,
             checkpoint_contract_ref=checkpoint_identity.contract_ref,
             current_contract_version=current_identity.contract_version,
@@ -108,6 +126,14 @@ class CheckpointCompatibilityV2Service:
             checkpoint_effective_config_hash=checkpoint_identity.effective_config_hash,
             current_effective_config_artifact_id=current_identity.effective_config_artifact_id,
             checkpoint_effective_config_artifact_id=checkpoint_identity.effective_config_artifact_id,
+            current_exact_replay=current_identity.exact_replay,
+            checkpoint_exact_replay=checkpoint_identity.exact_replay,
+            current_input_snapshot_fingerprint=(
+                current_identity.input_snapshot_fingerprint
+            ),
+            checkpoint_input_snapshot_fingerprint=(
+                checkpoint_identity.input_snapshot_fingerprint
+            ),
         )
         schema_compatibility = check_schema_compatibility(
             current_version=current_identity.checkpoint_schema_version,
@@ -138,10 +164,18 @@ class CheckpointCompatibilityV2Service:
             checkpoint_schema_version=current_identity.checkpoint_schema_version,
             composite_run_identity=current_identity.composite_run_identity,
             execution_fingerprint=current_identity.execution_fingerprint,
+            pipeline_name=current_identity.pipeline_name,
+            run_type=current_identity.run_type,
+            pipeline_version=current_identity.pipeline_version,
             manifest_id=current_identity.manifest_id,
+            dq_contract_compatibility_hash=(
+                current_identity.dq_contract_compatibility_hash
+            ),
             contract_ref=current_identity.contract_ref,
             contract_version=current_identity.contract_version,
             effective_config_artifact_id=current_identity.effective_config_artifact_id,
+            exact_replay=current_identity.exact_replay,
+            input_snapshot_fingerprint=current_identity.input_snapshot_fingerprint,
         )
         checkpoint_identity_details = build_identity_details(
             effective_config_hash=checkpoint_identity.effective_config_hash,
@@ -149,10 +183,18 @@ class CheckpointCompatibilityV2Service:
             checkpoint_schema_version=checkpoint_identity.checkpoint_schema_version,
             composite_run_identity=checkpoint_identity.composite_run_identity,
             execution_fingerprint=checkpoint_identity.execution_fingerprint,
+            pipeline_name=checkpoint_identity.pipeline_name,
+            run_type=checkpoint_identity.run_type,
+            pipeline_version=checkpoint_identity.pipeline_version,
             manifest_id=checkpoint_identity.manifest_id,
+            dq_contract_compatibility_hash=(
+                checkpoint_identity.dq_contract_compatibility_hash
+            ),
             contract_ref=checkpoint_identity.contract_ref,
             contract_version=checkpoint_identity.contract_version,
             effective_config_artifact_id=checkpoint_identity.effective_config_artifact_id,
+            exact_replay=checkpoint_identity.exact_replay,
+            input_snapshot_fingerprint=checkpoint_identity.input_snapshot_fingerprint,
         )
 
         return CheckpointCompatibilityResult(

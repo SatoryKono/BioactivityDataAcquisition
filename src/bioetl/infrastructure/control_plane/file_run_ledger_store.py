@@ -54,7 +54,7 @@ def _emit_ledger_append_metric(
     if metrics is None:
         return
     metrics.increment_counter(
-        "control_plane_ledger_appends_total",
+        "bioetl_control_plane_ledger_appends_total",
         1,
         {
             "pipeline": pipeline,

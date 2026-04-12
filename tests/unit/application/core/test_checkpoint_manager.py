@@ -126,7 +126,7 @@ class TestCheckpointManagerLoadCheckpoint:
 
         assert result is not None
         mock_metrics.increment_counter.assert_called_once_with(
-            "checkpoint_load_events_total",
+            "bioetl_checkpoint_load_events_total",
             1,
             {"pipeline": "test_pipeline", "status": "loaded"},
         )
@@ -170,7 +170,7 @@ class TestCheckpointManagerLoadCheckpoint:
 
         assert result is None
         mock_metrics.increment_counter.assert_called_once_with(
-            "checkpoint_load_events_total",
+            "bioetl_checkpoint_load_events_total",
             1,
             {"pipeline": "test_pipeline", "status": "missing"},
         )
@@ -291,7 +291,7 @@ class TestCheckpointManagerFullScanOnly:
 
         assert result is None
         mock_metrics.increment_counter.assert_called_once_with(
-            "checkpoint_load_events_total",
+            "bioetl_checkpoint_load_events_total",
             1,
             {"pipeline": "chembl_publication", "status": "blocked"},
         )
@@ -533,7 +533,7 @@ class TestCheckpointManagerCompatibilityPolicy:
         assert result is None
         mock_logger.warning.assert_called()
         mock_metrics.increment_counter.assert_called_once_with(
-            "checkpoint_load_events_total",
+            "bioetl_checkpoint_load_events_total",
             1,
             {"pipeline": "chembl_activity", "status": "incompatible"},
         )

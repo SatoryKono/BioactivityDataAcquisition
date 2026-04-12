@@ -65,13 +65,13 @@ def record_preflight_metrics(
     pipeline = host._config.pipeline_name
 
     host._metrics.set_gauge(
-        "preflight_medallion_policy_valid",
+        "bioetl_preflight_medallion_policy_valid",
         1.0 if report.medallion_policy_valid else 0.0,
         {"pipeline": pipeline},
     )
 
     host._metrics.set_gauge(
-        "preflight_config_errors_total",
+        "bioetl_preflight_config_errors_total",
         float(len(report.config_errors)),
         {"pipeline": pipeline},
     )

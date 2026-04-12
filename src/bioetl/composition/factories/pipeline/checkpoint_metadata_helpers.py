@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -10,8 +9,9 @@ from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import 
     build_cached_bronze_input_snapshot_refs,
 )
 from bioetl.domain.normalization import (
-    normalize_runtime_anchor_payload,
-    serialize_json_canonical,
+    build_execution_identity_payload,
+    compute_execution_identity_fingerprint,
+    compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.infrastructure.config import get_settings
@@ -36,14 +36,6 @@ def _coerce_optional_str(value: object | None) -> str | None:
     return text or None
 
 
-def _compute_execution_identity_fingerprint(
-    payload: dict[str, str | None],
-) -> str:
-    """Compute deterministic execution identity fingerprint for checkpoints."""
-    encoded = serialize_json_canonical(payload)
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
-
-
 def _normalize_execution_identity_payload(
     *,
     pipeline_name: str,
@@ -54,32 +46,23 @@ def _normalize_execution_identity_payload(
     manifest_id: str | None,
     contract_ref: str | None,
     contract_version: str | None,
+    effective_config_artifact_id: str | None,
     exact_replay: bool,
     input_snapshot_fingerprint: str | None,
 ) -> dict[str, str | None]:
     """Return the canonical checkpoint execution-identity payload."""
-    return normalize_runtime_anchor_payload(
-        {
-            "pipeline_name": pipeline_name,
-            "run_type": run_type,
-            "pipeline_version": pipeline_version,
-            "effective_config_hash": effective_config_hash,
-            "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
-            "manifest_id": manifest_id,
-            "contract_ref": contract_ref,
-            "contract_version": contract_version,
-            "exact_replay": str(exact_replay).lower(),
-            "input_snapshot_fingerprint": input_snapshot_fingerprint,
-        }
+    return build_execution_identity_payload(
+        pipeline_name=pipeline_name,
+        run_type=run_type,
+        pipeline_version=pipeline_version,
+        effective_config_hash=effective_config_hash,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        contract_ref=contract_ref,
+        contract_version=contract_version,
+        effective_config_artifact_id=effective_config_artifact_id,
+        exact_replay=exact_replay,
+        input_snapshot_fingerprint=input_snapshot_fingerprint,
     )
-
-
-def _compute_snapshot_identity_fingerprint(snapshot_ids: tuple[str, ...]) -> str | None:
-    """Compute a deterministic fingerprint for checkpoint snapshot anchors."""
-    if not snapshot_ids:
-        return None
-    encoded = serialize_json_canonical(list(snapshot_ids))
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
 def _resolve_input_snapshot_ids(pipeline: BasePipeline) -> tuple[str, ...]:
@@ -152,8 +135,8 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
     )
     exact_replay = bool(getattr(pipeline.runtime, "exact_replay", False))
     input_snapshot_ids = _resolve_input_snapshot_ids(pipeline)
-    input_snapshot_fingerprint = _compute_snapshot_identity_fingerprint(
-        input_snapshot_ids
+    input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
+        list(input_snapshot_ids)
     )
 
     run_type = pipeline.runtime.run_type
@@ -167,15 +150,16 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         manifest_id=manifest_id,
         contract_ref=contract_ref,
         contract_version=contract_version,
+        effective_config_artifact_id=effective_config_artifact_id,
         exact_replay=exact_replay,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
     )
-    execution_fingerprint = _compute_execution_identity_fingerprint(
-        identity_payload
-    )
+    execution_fingerprint = compute_execution_identity_fingerprint(identity_payload)
 
     return CheckpointMetadata(
         records_processed=0,
+        pipeline_name=pipeline.config.pipeline_name,
+        run_type=run_type_value,
         dq_contract_compatibility_hash=identity_payload["dq_contract_compatibility_hash"],
         pipeline_version=identity_payload["pipeline_version"],
         effective_config_hash=identity_payload["effective_config_hash"],
@@ -186,6 +170,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         contract_version=identity_payload["contract_version"],
         exact_replay=exact_replay,
         input_snapshot_ids=input_snapshot_ids,
+        input_snapshot_fingerprint=input_snapshot_fingerprint,
         run_context={
             "pipeline_name": pipeline.config.pipeline_name,
             "manifest_id": manifest_id,

@@ -91,7 +91,7 @@ def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
     # Verify metrics
     metrics_mock.observe_histogram.assert_called_once()
     call_args = metrics_mock.observe_histogram.call_args
-    assert call_args[0][0] == "pipeline_duration_seconds"
+    assert call_args[0][0] == "bioetl_pipeline_duration_seconds"
     assert isinstance(call_args[0][1], float)
     assert call_args[1]["labels"]["status"] == "success"
     assert call_args[1]["labels"]["pipeline"] == "test_pipeline"
@@ -180,7 +180,7 @@ def test_observer_records_duration(metrics_mock, logger_mock, run_id):
     call_args = metrics_mock.observe_histogram.call_args
 
     # Check metric name
-    assert call_args[0][0] == "pipeline_duration_seconds"
+    assert call_args[0][0] == "bioetl_pipeline_duration_seconds"
 
     # Check duration is a positive float
     duration = call_args[0][1]
@@ -256,7 +256,7 @@ def test_observer_graceful_shutdown(metrics_mock, logger_mock, tracer_mock, run_
     traced_run_calls = [
         call
         for call in metrics_mock.increment_counter.call_args_list
-        if call[0][0] == "traced_runs_total"
+        if call[0][0] == "bioetl_traced_runs_total"
     ]
     assert len(traced_run_calls) == 1
     assert traced_run_calls[0][1]["labels"] == {
@@ -313,7 +313,7 @@ def test_observer_does_not_emit_traced_run_metric_for_noop_tracing(
     traced_run_calls = [
         call
         for call in metrics_mock.increment_counter.call_args_list
-        if call[0][0] == "traced_runs_total"
+        if call[0][0] == "bioetl_traced_runs_total"
     ]
     assert traced_run_calls == []
 
@@ -375,7 +375,7 @@ class TestObserverEmitEvent:
         assert call_args[1]["custom_key"] == "custom_value"
 
         metrics_mock.increment_counter.assert_called_once_with(
-            "observability_events_total",
+            "bioetl_observability_events_total",
             1,
             labels={
                 "event": "custom_event",
@@ -563,7 +563,7 @@ class TestObserverHealthCheckEvents:
 
         logger_mock.info.assert_called()
         metrics_mock.set_gauge.assert_called_with(
-            "pipeline_health_check_passed",
+            "bioetl_pipeline_health_check_passed",
             1.0,
             {"pipeline": "test_pipeline", "component": "storage"},
         )
@@ -588,7 +588,7 @@ class TestObserverHealthCheckEvents:
 
         logger_mock.warning.assert_called()
         metrics_mock.set_gauge.assert_called_with(
-            "pipeline_health_check_passed",
+            "bioetl_pipeline_health_check_passed",
             0.0,
             {"pipeline": "test_pipeline", "component": "data_source"},
         )
@@ -617,7 +617,7 @@ class TestObserverDQEvents:
 
         logger_mock.warning.assert_called()
         metrics_mock.increment_counter.assert_called_with(
-            "dq_anomaly_detected",
+            "bioetl_dq_anomaly_detected",
             1,
             {
                 "pipeline": "test_pipeline",
@@ -671,7 +671,7 @@ class TestObserverVacuumEvents:
 
         logger_mock.info.assert_called()
         metrics_mock.increment_counter.assert_called_with(
-            "vacuum_files_removed_total",
+            "bioetl_vacuum_files_removed_total",
             42,
             {"table": "chembl_activity", "layer": "silver"},
         )
@@ -699,7 +699,7 @@ class TestObserverVacuumEvents:
         vacuum_calls = [
             call
             for call in metrics_mock.increment_counter.call_args_list
-            if call[0][0] == "vacuum_files_removed_total"
+            if call[0][0] == "bioetl_vacuum_files_removed_total"
         ]
         assert len(vacuum_calls) == 0
 
@@ -754,14 +754,16 @@ class TestObserverSmokeTest:
         # Verify health check gauges
         gauge_calls = metrics_mock.set_gauge.call_args_list
         health_gauges = [
-            c for c in gauge_calls if c[0][0] == "pipeline_health_check_passed"
+            c for c in gauge_calls if c[0][0] == "bioetl_pipeline_health_check_passed"
         ]
         assert len(health_gauges) == 2  # storage, data_source
 
         # Verify vacuum counter
         counter_calls = metrics_mock.increment_counter.call_args_list
         vacuum_counters = [
-            c for c in counter_calls if c[0][0] == "vacuum_files_removed_total"
+            c
+            for c in counter_calls
+            if c[0][0] == "bioetl_vacuum_files_removed_total"
         ]
         assert len(vacuum_counters) == 1
 
@@ -888,7 +890,7 @@ class TestObserverContractSchema:
         metric_calls = [
             call
             for call in metrics_mock.increment_counter.call_args_list
-            if call[0][0] == "observability_events_total"
+            if call[0][0] == "bioetl_observability_events_total"
         ]
         assert metric_calls
         required_metric_labels = {
@@ -934,7 +936,7 @@ def test_emit_domain_event_projects_pipeline_completed(
     metric_calls = [
         call
         for call in metrics_mock.increment_counter.call_args_list
-        if call[0][0] == "observability_events_total"
+        if call[0][0] == "bioetl_observability_events_total"
     ]
     assert len(metric_calls) == 1
     assert metric_calls[0][1]["labels"]["event"] == "pipeline_finished"

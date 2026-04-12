@@ -210,7 +210,7 @@ def _emit_retry_telemetry(
     )
     if metrics is not None:
         metrics.increment_counter(
-            "observability_events_total",
+            "bioetl_observability_events_total",
             1,
             {
                 "event": "metadata_atomic_replace_retry",
@@ -251,7 +251,7 @@ def _emit_final_telemetry(
         )
     if metrics is not None:
         metrics.increment_counter(
-            "observability_events_total",
+            "bioetl_observability_events_total",
             1,
             {
                 "event": "metadata_write_final",

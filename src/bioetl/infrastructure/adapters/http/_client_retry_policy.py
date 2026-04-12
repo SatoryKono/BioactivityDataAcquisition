@@ -37,17 +37,17 @@ def _record_request_metrics(
         "method": method.upper(),
         "status": str(status_code) if status_code else "error",
     }
-    metrics.observe_histogram("http_request_duration_seconds", duration, labels)
+    metrics.observe_histogram("bioetl_http_request_duration_seconds", duration, labels)
     if retries > 0:
         metrics.increment_counter(
-            "http_retries_total",
+            "bioetl_http_retries_total",
             retries,
             {"provider": provider, "method": method.upper()},
         )
     if last_error is not None or status_code >= 400:
         error_type = type(last_error).__name__ if last_error else f"http_{status_code}"
         metrics.increment_counter(
-            "http_request_errors_total",
+            "bioetl_http_request_errors_total",
             1,
             {
                 "provider": provider,

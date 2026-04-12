@@ -719,5 +719,5 @@ class TestMedallionLifecycleServiceFinalizeRun:
         # Should emit 1 metric for optimization
         assert mock_metrics.increment_counter.call_count == 1
         call_args = mock_metrics.increment_counter.call_args
-        assert call_args[0][0] == "storage_optimization_total"
+        assert call_args[0][0] == "bioetl_storage_optimization_total"
         assert call_args[0][2]["status"] == "success"

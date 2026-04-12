@@ -25,8 +25,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
 
 
-_QUARANTINE_OPERATOR_DURATION_METRIC = "quarantine_operator_duration_seconds"
-_QUARANTINE_OPERATOR_OPERATIONS_METRIC = "quarantine_operator_operations_total"
+_QUARANTINE_OPERATOR_DURATION_METRIC = "bioetl_quarantine_operator_duration_seconds"
+_QUARANTINE_OPERATOR_OPERATIONS_METRIC = (
+    "bioetl_quarantine_operator_operations_total"
+)
 
 
 @dataclass(frozen=True, slots=True)

@@ -172,7 +172,7 @@ async def test_write_cv_quarantine_when_payloads_written_then_logs_and_emits_met
     )
     harness._logger.info.assert_called_once()
     harness._metrics.increment_counter.assert_called_once_with(
-        "quarantine_records_total",
+        "bioetl_quarantine_records_total",
         2,
         {
             "pipeline": "composite:test_composite",

@@ -31,7 +31,7 @@ class PipelineMetricsRecorder:
         if self.metrics is None:
             return
         self.metrics.increment_counter(
-            "quarantine_records_total",
+            "bioetl_quarantine_records_total",
             count,
             {"pipeline": self.pipeline, "reason": reason},
         )
@@ -47,7 +47,7 @@ class PipelineMetricsRecorder:
         if self.metrics is None:
             return
         self.metrics.increment_counter(
-            "dq_validation_failures_total",
+            "bioetl_dq_validation_failures_total",
             count,
             {
                 "pipeline": self.pipeline,
@@ -69,7 +69,7 @@ class PipelineMetricsRecorder:
         if self.metrics is None:
             return
         self.metrics.increment_counter(
-            "silver_filter_rejections_total",
+            "bioetl_silver_filter_rejections_total",
             count,
             {
                 "pipeline": self.pipeline,

@@ -356,7 +356,7 @@ class TestHealthAggregatorMetrics:
         status_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
-            if call[0][0] == "health_check_status"
+            if call[0][0] == "bioetl_health_check_status"
         ]
         assert len(status_calls) == 2
 

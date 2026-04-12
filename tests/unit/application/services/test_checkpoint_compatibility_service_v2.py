@@ -43,13 +43,13 @@ def test_identical_checkpoint_compatibility():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash="a" * 64,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash="a" * 64,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
@@ -68,13 +68,13 @@ def test_phase_incompatibility():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash="a" * 64,
         execution_phase=ExecutionPhase.MERGE,
         checkpoint_schema_version="1.0.0",
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash="a" * 64,
         execution_phase=ExecutionPhase.PREFLIGHT,  # Too early
         checkpoint_schema_version="1.0.0",
     )
@@ -91,7 +91,7 @@ def test_config_hash_incompatibility():
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash="a" * 64,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
     )
@@ -122,7 +122,7 @@ def test_schema_version_incompatibility():
     )
 
     checkpoint_identity = CheckpointIdentity(
-        effective_config_hash="abc123",
+        effective_config_hash="a" * 64,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",  # Different major version
     )
@@ -334,8 +334,10 @@ def test_compatibility_details():
     # Check identity details
     assert details["current_identity"]["composite_run_identity"] == "run-001"
     assert details["checkpoint_identity"]["composite_run_identity"] == "run-002"
-    assert details["current_identity"]["runtime_anchor_fingerprint"]
-    assert details["checkpoint_identity"]["runtime_anchor_fingerprint"]
+    assert details["current_identity"]["canonical_execution_identity_payload"] == {}
+    assert details["checkpoint_identity"]["canonical_execution_identity_payload"] == {}
+    assert details["current_identity"]["degraded_runtime_anchor_fingerprint"]
+    assert details["checkpoint_identity"]["degraded_runtime_anchor_fingerprint"]
 
 
 def test_execution_fingerprint_takes_precedence_over_runtime_anchors():
@@ -400,7 +402,60 @@ def test_runtime_anchor_fingerprint_is_used_when_execution_fingerprint_missing()
     assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
     assert (
         result.details["execution_identity_compatibility"]["reason"]
-        == "runtime_anchor_fingerprint_mismatch"
+        == "degraded_runtime_anchor_fingerprint_mismatch"
+    )
+
+
+def test_canonical_checkpoint_execution_identity_fallback_is_used_when_available():
+    """Canonical checkpoint fallback should take precedence over degraded anchors."""
+    service = CheckpointCompatibilityServiceV2()
+
+    current_identity = CheckpointIdentity(
+        effective_config_hash="a" * 64,
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        pipeline_name="chembl_activity",
+        run_type="incremental",
+        pipeline_version="1.2.3",
+        dq_contract_compatibility_hash="dq-hash-a",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        exact_replay=True,
+        input_snapshot_fingerprint="snapshot-fp-a",
+        manifest_id="manifest-a",
+    )
+
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="a" * 64,
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        pipeline_name="chembl_activity",
+        run_type="incremental",
+        pipeline_version="1.2.3",
+        dq_contract_compatibility_hash="dq-hash-b",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        exact_replay=True,
+        input_snapshot_fingerprint="snapshot-fp-a",
+        manifest_id="manifest-a",
+    )
+
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert (
+        result.details["execution_identity_compatibility"]["reason"]
+        == "checkpoint_execution_identity_fallback_mismatch"
+    )
+    assert (
+        result.details["current_identity"][
+            "checkpoint_execution_identity_fallback_fingerprint"
+        ]
+    )
+    assert (
+        result.details["checkpoint_identity"][
+            "checkpoint_execution_identity_fallback_fingerprint"
+        ]
     )
 
 

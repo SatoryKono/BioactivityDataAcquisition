@@ -54,7 +54,7 @@ class CompositeCheckpointLoadService:
         if self._metrics is None:
             return
         self._metrics.increment_counter(
-            "checkpoint_load_events_total",
+            "bioetl_checkpoint_load_events_total",
             1,
             {
                 "pipeline": self._composite_name,

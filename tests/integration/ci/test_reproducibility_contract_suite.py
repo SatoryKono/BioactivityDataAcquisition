@@ -41,6 +41,8 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
 
 pytestmark = pytest.mark.integration
 
+_VALID_CONFIG_HASH = "a" * 64
+
 
 class _InMemoryRunManifestStore(RunManifestPort):
     def __init__(self) -> None:
@@ -105,7 +107,7 @@ def _make_manifest(
     manifest_id: str,
     run_id: RunID,
     execution_fingerprint: str,
-    config_hash: str = "deadbeef",
+    config_hash: str = _VALID_CONFIG_HASH,
 ) -> RunManifest:
     return RunManifest(
         manifest_id=manifest_id,

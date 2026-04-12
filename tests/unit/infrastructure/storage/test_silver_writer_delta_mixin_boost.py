@@ -575,7 +575,7 @@ class TestEmitMergeRetryTelemetry:
 
         metrics.increment_counter.assert_called_once()
         call_args = metrics.increment_counter.call_args
-        assert call_args[0][0] == "observability_events_total"
+        assert call_args[0][0] == "bioetl_observability_events_total"
         labels = call_args[0][2]
         assert labels["event"] == "silver_merge_retry"
         assert labels["pipeline"] == "table"

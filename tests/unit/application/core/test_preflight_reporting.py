@@ -35,7 +35,7 @@ def test_record_preflight_metrics_uses_only_pipeline_label_for_policy_gauge() ->
     record_preflight_metrics(host, report)
 
     host._metrics.set_gauge.assert_any_call(
-        "preflight_medallion_policy_valid",
+        "bioetl_preflight_medallion_policy_valid",
         1.0,
         {"pipeline": "chembl_activity"},
     )
@@ -57,7 +57,7 @@ def test_record_preflight_metrics_uses_only_pipeline_label_for_error_gauge() -> 
     record_preflight_metrics(host, report)
 
     host._metrics.set_gauge.assert_any_call(
-        "preflight_config_errors_total",
+        "bioetl_preflight_config_errors_total",
         2.0,
         {"pipeline": "pubmed_publication"},
     )

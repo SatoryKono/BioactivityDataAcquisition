@@ -45,8 +45,8 @@ if TYPE_CHECKING:
 P = ParamSpec("P")
 T = TypeVar("T")
 
-METRIC_CIRCUIT_BREAKER_STATE = "circuit_breaker_state"
-METRIC_CIRCUIT_BREAKER_TRIPS = "circuit_breaker_trips_total"
+METRIC_CIRCUIT_BREAKER_STATE = "bioetl_circuit_breaker_state"
+METRIC_CIRCUIT_BREAKER_TRIPS = "bioetl_circuit_breaker_trips_total"
 
 
 @dataclass

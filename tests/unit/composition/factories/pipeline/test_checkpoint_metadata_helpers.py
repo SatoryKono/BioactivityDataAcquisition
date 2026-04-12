@@ -6,12 +6,37 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 from uuid import uuid4
 
+from bioetl.application.services.run_manifest_service import (
+    RunManifestCreateRequest,
+    RunManifestService,
+)
+from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
+    build_cached_bronze_input_snapshot_refs,
+)
 from bioetl.composition.factories.pipeline.checkpoint_metadata_helpers import (
     build_current_checkpoint_metadata,
 )
 from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
+
+
+class _InMemoryRunManifestStore:
+    def save(self, manifest) -> None:  # pragma: no cover - trivial test stub
+        self._manifest = manifest
+
+    def get(self, manifest_id: str):
+        manifest = getattr(self, "_manifest", None)
+        if manifest is None or manifest.manifest_id != manifest_id:
+            return None
+        return manifest
+
+    def get_by_run_id(self, run_id):
+        manifest = getattr(self, "_manifest", None)
+        if manifest is None or manifest.run_id != run_id:
+            return None
+        return manifest
 
 
 def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> None:
@@ -54,9 +79,92 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
     metadata = build_current_checkpoint_metadata(pipeline)
 
     assert metadata.manifest_id == "manifest-1"
+    assert metadata.pipeline_name == "chembl_activity"
+    assert metadata.run_type == "incremental"
     assert metadata.contract_ref == "chembl.activity"
     assert metadata.contract_version == "1.0.0"
     assert metadata.exact_replay is True
     assert len(metadata.input_snapshot_ids) == 2
     assert metadata.input_snapshot_ids == tuple(sorted(metadata.input_snapshot_ids))
+    assert metadata.input_snapshot_fingerprint is not None
     assert metadata.execution_fingerprint is not None
+
+
+def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
+    tmp_path,
+) -> None:
+    """Checkpoint metadata should share the same canonical execution identity."""
+    bronze_root = tmp_path / "bronze-cache"
+    bronze_root.mkdir()
+    (bronze_root / "batch_0001.jsonl.zst").write_bytes(b'{"id":1}\n')
+    (bronze_root / "batch_0002.jsonl.zst").write_bytes(b'{"id":2}\n')
+
+    run_context = RunContext.create(
+        run_id=uuid4(),
+        run_type=RunType.INCREMENTAL,
+        started_at=datetime.now(UTC),
+        provider="chembl",
+        entity="activity",
+        pipeline_version="1.2.3",
+        config_hash="a" * 64,
+        manifest_id="manifest-1",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        dq_contract_compatibility_hash="dq-hash",
+        effective_config_artifact_id="artifact-1",
+    )
+    pipeline = SimpleNamespace(
+        config=SimpleNamespace(
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity_type="activity",
+        ),
+        runtime=SimpleNamespace(
+            run_type=RunType.INCREMENTAL,
+            exact_replay=True,
+            cached_bronze=CachedBronzeContext.from_options(path=str(bronze_root)),
+        ),
+        services=SimpleNamespace(
+            metadata_coordinator=SimpleNamespace(run_context=run_context)
+        ),
+    )
+
+    checkpoint_metadata = build_current_checkpoint_metadata(pipeline)
+    manifest_service = RunManifestService(
+        manifest_port=_InMemoryRunManifestStore(),
+        _manifest_id_factory=lambda: "manifest-1",
+    )
+    snapshot_refs = build_cached_bronze_input_snapshot_refs(
+        bronze_root=bronze_root,
+        bronze_date=None,
+        pipeline_name="chembl_activity",
+    )
+    manifest = manifest_service.create_manifest(
+        RunManifestCreateRequest(
+            run_id=run_context.run_id,
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context={"exact_replay": True},
+            runtime_config={"run_type": "incremental", "exact_replay": True},
+            resolved_config={"provider": "chembl", "entity_type": "activity"},
+            source_refs=(
+                RunSourceRef(
+                    provider="chembl",
+                    entity="activity",
+                    pipeline_name="chembl_activity",
+                    input_snapshots=snapshot_refs,
+                ),
+            ),
+            pipeline_version="1.2.3",
+            config_hash="a" * 64,
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            dq_contract_compatibility_hash="dq-hash",
+            effective_config_artifact_id="artifact-1",
+            replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        )
+    )
+
+    assert checkpoint_metadata.execution_fingerprint == manifest.execution_fingerprint

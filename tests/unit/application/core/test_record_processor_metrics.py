@@ -142,7 +142,7 @@ class TestRecordProcessorMetrics:
 
         # Verify batch size histogram
         mock_metrics.observe_histogram.assert_called_with(
-            "batch_size_records",
+            "bioetl_batch_size_records",
             2,
             {"pipeline": pipeline_label, "stage": "bronze"},
         )
@@ -153,21 +153,21 @@ class TestRecordProcessorMetrics:
 
         # Bronze count
         mock_metrics.increment_counter.assert_any_call(
-            "records_processed_total",
+            "bioetl_records_processed_total",
             2,
             {"pipeline": pipeline_label, "stage": "bronze", "run_type": run_type_label},
         )
 
         # Silver count
         mock_metrics.increment_counter.assert_any_call(
-            "records_processed_total",
+            "bioetl_records_processed_total",
             2,
             {"pipeline": pipeline_label, "stage": "silver", "run_type": run_type_label},
         )
 
         # Gold count
         mock_metrics.increment_counter.assert_any_call(
-            "records_processed_total",
+            "bioetl_records_processed_total",
             2,
             {"pipeline": pipeline_label, "stage": "gold", "run_type": run_type_label},
         )
@@ -218,7 +218,7 @@ class TestRecordProcessorMetrics:
 
         # Expect quarantined count
         mock_metrics.increment_counter.assert_any_call(
-            "records_processed_total",
+            "bioetl_records_processed_total",
             1,
             {
                 "pipeline": pipeline_label,
@@ -229,7 +229,7 @@ class TestRecordProcessorMetrics:
 
         # Expect error counter
         mock_metrics.increment_counter.assert_any_call(
-            "errors_total",
+            "bioetl_errors_total",
             1,
             {
                 "pipeline": pipeline_label,

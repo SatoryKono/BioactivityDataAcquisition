@@ -118,7 +118,7 @@ def test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics(
 
     counter_metric_names = [call.args[0] for call in metrics.increment_counter.call_args_list]
     histogram_metric_names = [call.args[0] for call in metrics.observe_histogram.call_args_list]
-    assert "control_plane_manifest_writes_total" in counter_metric_names
-    assert "control_plane_ledger_appends_total" in counter_metric_names
-    assert "control_plane_reads_total" in counter_metric_names
-    assert "control_plane_read_duration_seconds" in histogram_metric_names
+    assert "bioetl_control_plane_manifest_writes_total" in counter_metric_names
+    assert "bioetl_control_plane_ledger_appends_total" in counter_metric_names
+    assert "bioetl_control_plane_reads_total" in counter_metric_names
+    assert "bioetl_control_plane_read_duration_seconds" in histogram_metric_names

@@ -283,7 +283,7 @@ def mock_observer(mock_services, mock_logger):
 
         # Record metrics like the real observer
         mock_services.metrics.observe_histogram(
-            "pipeline_duration_seconds",
+            "bioetl_pipeline_duration_seconds",
             duration,
             labels={
                 "pipeline": "test_runner_pipeline",
@@ -549,7 +549,7 @@ class TestPipelineRunnerRun:
         pipeline_calls = [
             call
             for call in mock_services.metrics.observe_histogram.call_args_list
-            if call[0][0] == "pipeline_duration_seconds"
+            if call[0][0] == "bioetl_pipeline_duration_seconds"
         ]
         assert len(pipeline_calls) == 1
 
@@ -569,7 +569,7 @@ class TestPipelineRunnerRun:
         pipeline_calls = [
             call
             for call in mock_services.metrics.observe_histogram.call_args_list
-            if call[0][0] == "pipeline_duration_seconds"
+            if call[0][0] == "bioetl_pipeline_duration_seconds"
         ]
         assert len(pipeline_calls) == 1
         labels = pipeline_calls[0][1].get("labels") or pipeline_calls[0][0][2]

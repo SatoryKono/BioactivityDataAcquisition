@@ -141,7 +141,7 @@ class TestDataQualityServiceThresholds:
         assert exc_info.value.threshold == pytest.approx(0.20)
         mock_logger.error.assert_called_once()
         mock_metrics.increment_counter.assert_any_call(
-            "dq_validation_failures_total",
+            "bioetl_dq_validation_failures_total",
             1,
             {
                 "pipeline": "test_pipeline",
@@ -174,7 +174,7 @@ class TestDataQualityServiceThresholds:
             service.evaluate(metrics)
 
         mock_metrics.increment_counter.assert_any_call(
-            "dq_validation_failures_total",
+            "bioetl_dq_validation_failures_total",
             1,
             {
                 "pipeline": "test_pipeline",
@@ -209,7 +209,7 @@ class TestDataQualityServiceThresholds:
         assert result.status == DQEvaluationStatus.WARNING
         assert result.error_rate == pytest.approx(0.10)
         mock_metrics.set_gauge.assert_any_call(
-            "dq_monitor_enabled",
+            "bioetl_dq_monitor_enabled",
             0.0,
             {"pipeline": "test_pipeline", "entity": "test_entity"},
         )
@@ -217,12 +217,12 @@ class TestDataQualityServiceThresholds:
         assert "DQ soft threshold exceeded" in warning_events
         assert "dq_monitor_disabled" in warning_events
         mock_metrics.increment_counter.assert_any_call(
-            "dq_soft_threshold_exceeded",
+            "bioetl_dq_soft_threshold_exceeded",
             1,
             {"pipeline": "test_pipeline"},
         )
         mock_metrics.increment_counter.assert_any_call(
-            "dq_validation_failures_total",
+            "bioetl_dq_validation_failures_total",
             1,
             {
                 "pipeline": "test_pipeline",
@@ -261,13 +261,13 @@ class TestDataQualityServiceThresholds:
         soft_threshold_calls = [
             call
             for call in mock_metrics.increment_counter.call_args_list
-            if call.args and call.args[0] == "dq_soft_threshold_exceeded"
+            if call.args and call.args[0] == "bioetl_dq_soft_threshold_exceeded"
         ]
         assert len(soft_threshold_calls) == 1
         dq_failure_calls = [
             call
             for call in mock_metrics.increment_counter.call_args_list
-            if call.args and call.args[0] == "dq_validation_failures_total"
+            if call.args and call.args[0] == "bioetl_dq_validation_failures_total"
         ]
         assert len(dq_failure_calls) == 1
 
@@ -305,7 +305,7 @@ class TestDataQualityServiceThresholds:
         increment_counter_calls = mock_metrics.increment_counter.call_args_list
         assert increment_counter_calls == [
             call(
-                "dq_monitor_disabled_total",
+                "bioetl_dq_monitor_disabled_total",
                 1,
                 {"pipeline": "test_pipeline", "entity": "test_entity"},
             )
@@ -348,7 +348,7 @@ class TestDataQualityServiceGracefulDegradation:
             reason="dq_monitor_not_configured",
         )
         mock_metrics.increment_counter.assert_any_call(
-            "dq_monitor_disabled_total",
+            "bioetl_dq_monitor_disabled_total",
             1,
             {"pipeline": "test_pipeline", "entity": "test_entity"},
         )
@@ -535,7 +535,7 @@ class TestDataQualityServiceAnomalyDetection:
         assert result.check_duration_ms >= 0
         mock_metrics.observe_histogram.assert_called_once()
         call_args = mock_metrics.observe_histogram.call_args
-        assert call_args[0][0] == "dq_check_duration_ms"
+        assert call_args[0][0] == "bioetl_dq_check_duration_ms"
 
 
 @pytest.mark.unit
@@ -572,7 +572,7 @@ class TestDataQualityServiceBaselineUpdates:
         baseline_calls = [
             call
             for call in mock_metrics.increment_counter.call_args_list
-            if call[0][0] == "dq_baseline_updated"
+            if call[0][0] == "bioetl_dq_baseline_updated"
         ]
         assert len(baseline_calls) == 3
 
@@ -623,7 +623,7 @@ class TestDataQualityServiceBaselineUpdates:
         baseline_calls = [
             call
             for call in mock_metrics.increment_counter.call_args_list
-            if call[0][0] == "dq_baseline_updated"
+            if call[0][0] == "bioetl_dq_baseline_updated"
         ]
         assert len(baseline_calls) == 0
 
@@ -674,7 +674,7 @@ class TestDataQualityServiceFreshnessGauge:
         )
 
         mock_metrics.set_gauge.assert_any_call(
-            "data_freshness_seconds",
+            "bioetl_data_freshness_seconds",
             1_700_000_123.0,
             {"pipeline": "test_pipeline", "entity": "test_entity"},
         )
@@ -696,7 +696,7 @@ class TestDataQualityServiceFreshnessGauge:
         freshness_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
-            if call.args and call.args[0] == "data_freshness_seconds"
+            if call.args and call.args[0] == "bioetl_data_freshness_seconds"
         ]
         assert not freshness_calls
 

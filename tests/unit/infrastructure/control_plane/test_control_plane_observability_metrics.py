@@ -65,7 +65,7 @@ def test_manifest_and_ledger_emit_control_plane_counters(tmp_path: Path) -> None
     manifest_call, ledger_call = metrics.increment_counter.call_args_list
 
     manifest_labels = manifest_call.args[2]
-    assert manifest_call.args[0] == "control_plane_manifest_writes_total"
+    assert manifest_call.args[0] == "bioetl_control_plane_manifest_writes_total"
     assert manifest_labels == {
         "pipeline": manifest.pipeline_name,
         "run_type": manifest.run_type.value,
@@ -73,7 +73,7 @@ def test_manifest_and_ledger_emit_control_plane_counters(tmp_path: Path) -> None
     }
 
     ledger_labels = ledger_call.args[2]
-    assert ledger_call.args[0] == "control_plane_ledger_appends_total"
+    assert ledger_call.args[0] == "bioetl_control_plane_ledger_appends_total"
     assert ledger_labels == {
         "pipeline": manifest.pipeline_name,
         "event_type": "manifest_created",
@@ -150,10 +150,22 @@ def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
         "silver:chembl.activity@hash-123",
     }
     allowed_keys_by_metric = {
-        "control_plane_manifest_writes_total": {"pipeline", "run_type", "status"},
-        "control_plane_ledger_appends_total": {"pipeline", "event_type", "status"},
-        "control_plane_reads_total": {"store", "operation", "status"},
-        "control_plane_read_duration_seconds": {"store", "operation", "status"},
+        "bioetl_control_plane_manifest_writes_total": {
+            "pipeline",
+            "run_type",
+            "status",
+        },
+        "bioetl_control_plane_ledger_appends_total": {
+            "pipeline",
+            "event_type",
+            "status",
+        },
+        "bioetl_control_plane_reads_total": {"store", "operation", "status"},
+        "bioetl_control_plane_read_duration_seconds": {
+            "store",
+            "operation",
+            "status",
+        },
     }
 
     def _assert_labels(metric_name: str, labels: dict[str, object]) -> None:

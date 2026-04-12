@@ -8,6 +8,7 @@ from uuid import UUID
 import pytest
 
 from bioetl.domain.normalization.control_plane import (
+    normalize_execution_identity_payload,
     normalize_control_plane_opaque_hash_ref,
     normalize_control_plane_strict_sha256,
     normalize_runtime_anchor_payload,
@@ -156,6 +157,36 @@ def test_normalize_runtime_anchor_payload_coerces_canonical_contract_fields() ->
         "contract_version": "2.0.0",
         "manifest_id": "manifest-123",
         "composite_run_identity": "run-42",
+    }
+
+
+def test_normalize_execution_identity_payload_coerces_canonical_identity_fields() -> None:
+    normalized = normalize_execution_identity_payload(
+        {
+            "pipeline_name": " chembl_activity ",
+            "run_type": " INCREMENTAL ",
+            "pipeline_version": " 1.2.3 ",
+            "effective_config_hash": " SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+            "dq_contract_compatibility_hash": " DEADBEEF ",
+            "contract_ref": " ChemBL.Activity ",
+            "contract_version": " v2 ",
+            "effective_config_artifact_id": " artifact-42 ",
+            "exact_replay": True,
+            "input_snapshot_fingerprint": " FACE ",
+        }
+    )
+
+    assert normalized == {
+        "pipeline_name": "chembl_activity",
+        "run_type": "incremental",
+        "pipeline_version": "1.2.3",
+        "effective_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "dq_contract_compatibility_hash": "deadbeef",
+        "contract_ref": "chembl.activity",
+        "contract_version": "2.0.0",
+        "effective_config_artifact_id": "artifact-42",
+        "exact_replay": "true",
+        "input_snapshot_fingerprint": "face",
     }
 
 

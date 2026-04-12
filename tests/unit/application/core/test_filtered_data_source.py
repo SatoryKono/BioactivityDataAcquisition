@@ -754,7 +754,7 @@ class TestFilteredDataSourceMetrics:
         mock_metrics.increment_counter.assert_called()
         call_args = mock_metrics.increment_counter.call_args_list
         counter_names = [c[0][0] for c in call_args]
-        assert "filter_ids_loaded_total" in counter_names
+        assert "bioetl_filter_ids_loaded_total" in counter_names
 
     @pytest.mark.asyncio
     async def test_single_column_duplicate_metrics(
@@ -786,7 +786,7 @@ class TestFilteredDataSourceMetrics:
 
         call_args = mock_metrics.increment_counter.call_args_list
         counter_names = [c[0][0] for c in call_args]
-        assert "filter_ids_duplicates_total" in counter_names
+        assert "bioetl_filter_ids_duplicates_total" in counter_names
 
     @pytest.mark.asyncio
     async def test_no_metrics_when_metrics_is_none(
@@ -853,7 +853,7 @@ class TestFilteredDataSourceMetrics:
         calls = mock_metrics.increment_counter.call_args_list
         counter_names = [call.args[0] for call in calls]
         assert "filter_combinations_loaded_total" in counter_names
-        assert counter_names.count("filter_ids_loaded_total") == 2
+        assert counter_names.count("bioetl_filter_ids_loaded_total") == 2
 
 
 @pytest.mark.unit

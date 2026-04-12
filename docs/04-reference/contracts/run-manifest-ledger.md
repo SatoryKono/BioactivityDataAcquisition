@@ -142,6 +142,37 @@ The current replay-enabled resume path is implemented for composite checkpoints.
   `manifest_id`, runtime treats this as checkpoint incompatibility and raises a
   checkpoint conflict instead of silently continuing.
 
+## Persistence Profile Evaluation
+
+Inspection diagnostics classify each resolved run against one explicit
+persistence-profile taxonomy:
+
+- `forensic_grade`: the run is replay-ready and also retains ledger-backed
+  control-plane history plus complete artifact/lineage anchors for published
+  outputs;
+- `replay_ready`: immutable input snapshots, exact-replay capability, and the
+  effective-config artifact anchor are present, but richer forensic surfaces may
+  still be absent;
+- `degraded_observable`: the run remains inspectable through the persisted
+  manifest, but one or more mandatory replay-ready requirements are missing.
+
+The current diagnostics surface exposes:
+
+- `persistence_profile.attained_profile`;
+- `persistence_profile.claims`;
+- `persistence_profile.surfaces`;
+- `persistence_profile.replay_ready_missing_requirements`;
+- `persistence_profile.forensic_grade_missing_requirements`.
+
+Composite replay is additionally documented as a bounded reconstructability
+surface:
+
+- resume model: `checkpoint_snapshot_plus_ledger_suffix`;
+- reconstructed from persisted state: `state`, `seed_completed`,
+  `merge_completed`, `last_event_id`, `last_event_occurred_at`;
+- not reconstructed: per-provider result maps and other rich checkpoint
+  payloads.
+
 ## Observability & Metrics
 
 - Aggregated control-plane telemetry lives in `grafana/dashboards/bioetl-control-plane-v1.json`.

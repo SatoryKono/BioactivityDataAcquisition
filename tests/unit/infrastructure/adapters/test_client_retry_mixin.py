@@ -296,7 +296,7 @@ def test_record_request_metrics_observes_histogram(
     )
 
     client._metrics.observe_histogram.assert_called_once_with(
-        "http_request_duration_seconds",
+        "bioetl_http_request_duration_seconds",
         0.5,
         {"provider": "chembl", "method": "GET", "status": "200"},
     )
@@ -309,7 +309,7 @@ def test_record_request_metrics_records_retries(client: _ConcreteRetryClient) ->
     )
 
     client._metrics.increment_counter.assert_called_with(
-        "http_retries_total",
+        "bioetl_http_retries_total",
         2,
         {"provider": "chembl", "method": "GET"},
     )
@@ -324,7 +324,7 @@ def test_record_request_metrics_records_error_on_4xx(
     )
 
     calls = [call[0][0] for call in client._metrics.increment_counter.call_args_list]
-    assert "http_request_errors_total" in calls
+    assert "bioetl_http_request_errors_total" in calls
 
 
 def test_record_request_metrics_uses_exception_type_for_error_label(
@@ -338,7 +338,7 @@ def test_record_request_metrics_uses_exception_type_for_error_label(
 
     error_call = None
     for call in client._metrics.increment_counter.call_args_list:
-        if call[0][0] == "http_request_errors_total":
+        if call[0][0] == "bioetl_http_request_errors_total":
             error_call = call
             break
 
@@ -356,7 +356,7 @@ def test_record_request_metrics_skips_retry_counter_when_no_retries(
     )
 
     called_metrics = [c[0][0] for c in client._metrics.increment_counter.call_args_list]
-    assert "http_retries_total" not in called_metrics
+    assert "bioetl_http_retries_total" not in called_metrics
 
 
 # ---------------------------------------------------------------------------
@@ -519,7 +519,7 @@ async def test_request_with_retry_honors_retry_after_in_full_flow(
     assert response.status_code == 200
     mock_sleep.assert_awaited_once_with(pytest.approx(7.0))
     client._metrics.increment_counter.assert_any_call(
-        "http_retries_total",
+        "bioetl_http_retries_total",
         1,
         {"provider": "chembl", "method": "GET"},
     )
@@ -564,7 +564,7 @@ async def test_request_with_retry_finalizes_span_and_metrics_on_retry_exhausted(
     error_calls = [
         call
         for call in client._metrics.increment_counter.call_args_list
-        if call.args[0] == "http_request_errors_total"
+        if call.args[0] == "bioetl_http_request_errors_total"
     ]
     assert len(error_calls) == 1
     assert error_calls[0].args[2]["error_type"] == "ConnectError"

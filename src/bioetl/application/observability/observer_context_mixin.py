@@ -82,7 +82,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
         )
         self.span.__enter__()
         self._metrics.increment_counter(
-            "traced_runs_total",
+            "bioetl_traced_runs_total",
             1,
             labels={
                 "pipeline": self.pipeline_name,
@@ -129,7 +129,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
     def _record_pipeline_run_metrics(self, duration: float, status: str) -> None:
         """Emit pipeline duration/run metrics."""
         self._metrics.observe_histogram(
-            "pipeline_duration_seconds",
+            "bioetl_pipeline_duration_seconds",
             duration,
             labels={
                 "pipeline": self.pipeline_name,

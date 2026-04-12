@@ -316,7 +316,7 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
         """Emit optimization metric if metrics port is available."""
         if metrics:
             metrics.increment_counter(
-                "storage_optimization_total",
+                "bioetl_storage_optimization_total",
                 1,
                 {"pipeline": pipeline_name, "status": status},
             )

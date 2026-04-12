@@ -203,6 +203,9 @@ Focus on:
 - `latest_status`, `latest_event_type`, `total_events`;
 - `event_family_counts`, `event_type_counts`;
 - `artifact_refs`, `lineage_fragment_ids`, `missing_artifact_links`;
+- `persistence_profile.attained_profile`, `persistence_profile.surfaces`,
+  `persistence_profile.replay_ready_missing_requirements`,
+  `persistence_profile.forensic_grade_missing_requirements`;
 - `dq_rule_ids`, `dq_dispositions`, `dq_report_paths`, `dq_violation_kinds`;
 - `cross_validation_rule_ids`, `cross_validation_config_paths`, `cross_validation_signal_present`;
 - `execution_fingerprint` as the full manifest-identity anchor;
@@ -215,8 +218,19 @@ Interpretation examples:
 - `latest_status=success` with no `run_finished` is suspicious;
 - `artifact_published` with empty `artifact_refs` indicates traceability degradation;
 - `missing_artifact_links > 0` means artifact events are missing `dataset_ref` and/or `lineage_fragment_id` anchors;
+- `persistence_profile.attained_profile=forensic_grade` means the run is both
+  replay-ready and backed by ledger/artifact-lineage evidence suitable for
+  stronger postmortem reconstruction;
+- `persistence_profile.attained_profile=replay_ready` means exact replay anchors
+  are present but richer forensic surfaces are still incomplete;
+- `persistence_profile.attained_profile=degraded_observable` means manifest
+  inspection still works, but replay-ready requirements are missing and should
+  be read from `*_missing_requirements`;
 - `correlation_anchor_gaps.effective_config_hash > 0` means execution-critical ledger events lost effective config linkage;
 - `correlation_anchor_gaps.contract_version > 0` on failure-critical runs means contract traceability is incomplete.
+- `persistence_profile.composite_resume_reconstructability` states the current
+  composite replay boundary explicitly: lifecycle milestones and watermarks are
+  reconstructed from persisted state, but rich checkpoint payloads are not.
 
 ## Compliance
 

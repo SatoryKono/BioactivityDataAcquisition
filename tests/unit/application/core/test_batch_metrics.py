@@ -119,7 +119,7 @@ class TestTrackBatchSize:
         recorder.track_batch_size(stage="bronze", size=100)
 
         mock_metrics.observe_histogram.assert_called_once_with(
-            "batch_size_records",
+            "bioetl_batch_size_records",
             100,
             {"pipeline": "test_pipeline", "stage": "bronze"},
         )
@@ -175,7 +175,7 @@ class TestTrackProcessedRecords:
         recorder.track_processed_records(stage="bronze", count=200)
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "records_processed_total",
+            "bioetl_records_processed_total",
             200,
             {
                 "pipeline": "test_pipeline",
@@ -228,7 +228,7 @@ class TestTrackError:
         recorder.track_error(stage="transform", error_type=ErrorType.SCHEMA_VIOLATION)
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "errors_total",
+            "bioetl_errors_total",
             1,
             {
                 "pipeline": "test_pipeline",
@@ -256,7 +256,7 @@ class TestTrackSilverFilterRejection:
         )
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "silver_filter_rejections_total",
+            "bioetl_silver_filter_rejections_total",
             1,
             {
                 "pipeline": "test_pipeline",
@@ -280,7 +280,7 @@ class TestTrackSilverFilterRejection:
         )
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "silver_filter_rejections_total",
+            "bioetl_silver_filter_rejections_total",
             1,
             {
                 "pipeline": "test_pipeline",
@@ -350,7 +350,7 @@ class TestTrackDQValidationFailure:
         )
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "dq_validation_failures_total",
+            "bioetl_dq_validation_failures_total",
             5,
             {
                 "pipeline": "test_pipeline",
@@ -404,7 +404,7 @@ class TestTrackQuarantinedRecords:
         )
 
         mock_metrics.increment_counter.assert_any_call(
-            "dq_records_quarantined_total",
+            "bioetl_dq_records_quarantined_total",
             10,
             {
                 "pipeline": "test_pipeline",
@@ -420,7 +420,7 @@ class TestTrackQuarantinedRecords:
         recorder.track_quarantined_records(error_type=ErrorType.INVALID_DATA, count=3)
 
         mock_metrics.increment_counter.assert_any_call(
-            "quarantine_records_total",
+            "bioetl_quarantine_records_total",
             3,
             {
                 "pipeline": "test_pipeline",
@@ -445,7 +445,7 @@ class TestTrackQuarantinedRecords:
         quarantine_calls = [
             call
             for call in mock_metrics.increment_counter.call_args_list
-            if call.args and call.args[0] == "quarantine_records_total"
+            if call.args and call.args[0] == "bioetl_quarantine_records_total"
         ]
         assert quarantine_calls
         assert quarantine_calls[0].args[2]["reason"] == ErrorType.DATA_QUALITY.value
@@ -467,7 +467,7 @@ class TestTrackQuarantinedRecords:
         legacy_calls = [
             call
             for call in mock_metrics.increment_counter.call_args_list
-            if call.args and call.args[0] == "dq_records_quarantined_total"
+            if call.args and call.args[0] == "bioetl_dq_records_quarantined_total"
         ]
         assert legacy_calls
         counter_labels = legacy_calls[0].args[2]

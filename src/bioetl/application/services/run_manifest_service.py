@@ -17,7 +17,9 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.normalization import (
-    compute_manifest_execution_fingerprint,
+    build_execution_identity_payload,
+    compute_execution_identity_fingerprint,
+    compute_input_snapshot_identity_fingerprint,
     normalize_run_manifest_spec,
 )
 from bioetl.domain.ports import RunManifestPort
@@ -239,6 +241,36 @@ class RunManifestService:
             ),
         )
 
+    def _build_execution_identity_payload(
+        self,
+        *,
+        request: RunManifestCreateSpec,
+        code_provenance: RunCodeProvenance,
+        run_type: RunType,
+    ) -> dict[str, str | None]:
+        """Build the canonical execution-identity payload shared across layers."""
+        snapshot_ids = sorted(
+            snapshot.snapshot_id
+            for source_ref in request.source_refs
+            for snapshot in source_ref.input_snapshots
+        )
+        return build_execution_identity_payload(
+            pipeline_name=request.pipeline_name,
+            run_type=run_type.value,
+            pipeline_version=code_provenance.pipeline_version,
+            effective_config_hash=code_provenance.config_hash,
+            dq_contract_compatibility_hash=(
+                code_provenance.dq_contract_compatibility_hash
+            ),
+            contract_ref=code_provenance.contract_ref,
+            contract_version=code_provenance.contract_version,
+            effective_config_artifact_id=code_provenance.effective_config_artifact_id,
+            exact_replay=bool(request.launch_context.get("exact_replay")),
+            input_snapshot_fingerprint=(
+                compute_input_snapshot_identity_fingerprint(snapshot_ids)
+            ),
+        )
+
     def create_manifest(self, request: RunManifestCreateSpec) -> RunManifest:
         """Build fingerprinted manifest and persist it through the port."""
         created_at = datetime.now(UTC)
@@ -257,7 +289,11 @@ class RunManifestService:
             created_at=created_at,
             normalized_payload=normalized_payload,
             fingerprint=self._compute_execution_fingerprint(
-                payload=normalized_payload
+                payload=self._build_execution_identity_payload(
+                    request=request,
+                    code_provenance=code_provenance,
+                    run_type=normalized_run_type,
+                )
             ),
         )
         self.manifest_port.save(manifest)
@@ -344,7 +380,7 @@ class RunManifestService:
 
     def _compute_execution_fingerprint(self, *, payload: dict[str, object]) -> str:
         """Compute the canonical manifest execution fingerprint contract."""
-        return cast(str, compute_manifest_execution_fingerprint(payload))
+        return cast(str, compute_execution_identity_fingerprint(payload))
 
 
 RunManifestCreateRequest = RunManifestCreateSpec

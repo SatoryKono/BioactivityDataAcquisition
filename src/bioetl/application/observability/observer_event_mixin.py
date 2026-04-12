@@ -104,7 +104,7 @@ class _ObserverEventMixin:
     ) -> None:
         """Emit unified observability event metric with normalized labels."""
         self._metrics.increment_counter(
-            "observability_events_total",
+            "bioetl_observability_events_total",
             1,
             labels={
                 "event": self._normalize_metric_label(labels["event"]),

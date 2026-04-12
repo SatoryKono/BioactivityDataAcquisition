@@ -66,7 +66,7 @@ def test_file_store_emits_ledger_append_metric(tmp_path) -> None:
     store.append(entry)
 
     metrics.increment_counter.assert_called_once_with(
-        "control_plane_ledger_appends_total",
+        "bioetl_control_plane_ledger_appends_total",
         1,
         {
             "pipeline": "chembl_activity",
@@ -98,7 +98,7 @@ def test_file_store_emits_ledger_read_metric_on_list_success(tmp_path) -> None:
     assert store.list_entries("manifest-2") == [entry]
 
     metrics.increment_counter.assert_called_once_with(
-        "control_plane_reads_total",
+        "bioetl_control_plane_reads_total",
         1,
         {
             "store": "ledger",
@@ -119,7 +119,7 @@ def test_file_store_emits_ledger_read_metric_on_miss(tmp_path) -> None:
     assert store.list_entries("missing-manifest") == []
 
     metrics.increment_counter.assert_called_once_with(
-        "control_plane_reads_total",
+        "bioetl_control_plane_reads_total",
         1,
         {
             "store": "ledger",

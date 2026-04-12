@@ -55,7 +55,7 @@ def publish_domain_event_via_ports(
     log_method = getattr(logger, severity, logger.info)
     log_method(envelope.event_name, **log_context)
     metrics.increment_counter(
-        "observability_events_total",
+        "bioetl_observability_events_total",
         1,
         labels=payload.metric_labels,
     )

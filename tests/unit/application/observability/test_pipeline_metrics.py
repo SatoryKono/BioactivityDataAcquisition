@@ -17,7 +17,7 @@ def test_record_quarantine_records_uses_generic_counter() -> None:
     recorder.record_quarantine_records(reason="FILTERED_OUT_SILVER", count=2)
 
     metrics.increment_counter.assert_called_once_with(
-        "quarantine_records_total",
+        "bioetl_quarantine_records_total",
         2,
         {
             "pipeline": "chembl_activity",
@@ -34,7 +34,7 @@ def test_record_dq_validation_failures_uses_generic_counter() -> None:
     recorder.record_dq_validation_failures(stage="threshold", severity="soft_fail")
 
     metrics.increment_counter.assert_called_once_with(
-        "dq_validation_failures_total",
+        "bioetl_dq_validation_failures_total",
         1,
         {
             "pipeline": "chembl_activity",
@@ -58,7 +58,7 @@ def test_record_silver_filter_rejections_uses_generic_counter() -> None:
     )
 
     metrics.increment_counter.assert_called_once_with(
-        "silver_filter_rejections_total",
+        "bioetl_silver_filter_rejections_total",
         3,
         {
             "pipeline": "chembl_activity",

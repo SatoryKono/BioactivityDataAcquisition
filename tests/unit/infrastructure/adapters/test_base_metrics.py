@@ -27,7 +27,7 @@ class TestAdapterMetrics:
         # Verify histogram was observed
         mock_metrics.observe_histogram.assert_called_once()
         call_args = mock_metrics.observe_histogram.call_args
-        assert call_args[0][0] == "adapter_request_duration_seconds"
+        assert call_args[0][0] == "bioetl_adapter_request_duration_seconds"
         assert call_args[0][1] > 0  # Duration should be positive
         assert call_args[0][2] == {"provider": "chembl", "endpoint": "/activity"}
 
@@ -44,7 +44,7 @@ class TestAdapterMetrics:
         # Verify counter was incremented with success status
         mock_metrics.increment_counter.assert_called_once()
         call_args = mock_metrics.increment_counter.call_args
-        assert call_args[0][0] == "adapter_requests_total"
+        assert call_args[0][0] == "bioetl_adapter_requests_total"
         assert call_args[0][1] == 1
         assert call_args[0][2] == {
             "provider": "uniprot",
@@ -66,7 +66,7 @@ class TestAdapterMetrics:
         # Verify counter was incremented with error status
         mock_metrics.increment_counter.assert_called_once()
         call_args = mock_metrics.increment_counter.call_args
-        assert call_args[0][0] == "adapter_requests_total"
+        assert call_args[0][0] == "bioetl_adapter_requests_total"
         assert call_args[0][2]["status"] == "error"
 
     def test_measure_request_propagates_exception(self):
@@ -108,7 +108,7 @@ class TestAdapterMetrics:
         adapter_metrics.record_batch_size("/activity", 500)
 
         mock_metrics.observe_histogram.assert_called_once_with(
-            "adapter_batch_size",
+            "bioetl_adapter_batch_size",
             500.0,
             {"provider": "chembl", "endpoint": "/activity"},
         )
@@ -162,7 +162,7 @@ class TestAdapterMetrics:
 
         mock_metrics.set_gauge.assert_called_once()
         call_args = mock_metrics.set_gauge.call_args
-        assert call_args[0][0] == "adapter_request_p95_seconds"
+        assert call_args[0][0] == "bioetl_adapter_request_p95_seconds"
         assert call_args[0][2] == {"provider": "chembl", "endpoint": "/activity"}
         assert call_args[0][1] >= 0.0
 
@@ -198,12 +198,12 @@ class TestAdapterMetrics:
         assert mock_metrics.increment_counter.call_count == 2
         attempt_call = mock_metrics.increment_counter.call_args_list[0]
         hit_call = mock_metrics.increment_counter.call_args_list[1]
-        assert attempt_call[0][0] == "adapter_fallback_attempts_total"
+        assert attempt_call[0][0] == "bioetl_adapter_fallback_attempts_total"
         assert attempt_call[0][1] == 4
-        assert hit_call[0][0] == "adapter_fallback_hits_total"
+        assert hit_call[0][0] == "bioetl_adapter_fallback_hits_total"
         assert hit_call[0][1] == 3
         mock_metrics.set_gauge.assert_called_once_with(
-            "adapter_fallback_hit_rate",
+            "bioetl_adapter_fallback_hit_rate",
             0.75,
             {"provider": "pubmed", "operation": "fetch_filtered_with_fallback"},
         )

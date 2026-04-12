@@ -38,7 +38,7 @@ def _emit_lineage_fragment_metric(
     if metrics is None:
         return
     metrics.increment_counter(
-        "lineage_fragments_emitted_total",
+        "bioetl_lineage_fragments_emitted_total",
         1,
         {
             "pipeline": pipeline_name or "unknown",
@@ -60,7 +60,7 @@ def emit_lineage_refs_missing_metric(
     if metrics is None or missing_count <= 0:
         return
     metrics.increment_counter(
-        "lineage_refs_missing_total",
+        "bioetl_lineage_refs_missing_total",
         missing_count,
         {
             "pipeline": pipeline_name or "unknown",
@@ -123,7 +123,7 @@ def emit_composite_source_selection_metrics(
         records=records,
     ):
         metrics.increment_counter(
-            "composite_source_selection_total",
+            "bioetl_composite_source_selection_total",
             1,
             {
                 "pipeline": pipeline_name or "unknown",
@@ -134,7 +134,7 @@ def emit_composite_source_selection_metrics(
 
     for source, field_count in _collect_field_source_counts(records).items():
         metrics.increment_counter(
-            "composite_source_selection_total",
+            "bioetl_composite_source_selection_total",
             field_count,
             {
                 "pipeline": pipeline_name or "unknown",

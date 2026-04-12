@@ -11,7 +11,11 @@ from bioetl.application.services._run_manifest_diagnostics_helpers import (
     update_correlation_anchor_gaps,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunLedgerEntry, RunManifest
-from bioetl.domain.normalization import serialize_json_canonical
+from bioetl.domain.normalization import (
+    build_execution_identity_payload,
+    compute_execution_identity_fingerprint,
+    serialize_json_canonical,
+)
 
 
 def _build_base_summary(
@@ -45,6 +49,7 @@ def _build_base_summary(
         "execution_fingerprint": manifest.execution_fingerprint,
         "config_hash": code_provenance.config_hash,
         "effective_config_hash": code_provenance.config_hash,
+        "pipeline_version": code_provenance.pipeline_version,
         "contract_ref": code_provenance.contract_ref,
         "contract_version": code_provenance.contract_version,
         "dq_policy_ref": code_provenance.dq_policy_ref,
@@ -76,6 +81,13 @@ def _build_base_summary(
         ],
         "occurrence_only_diagnostics": [],
     }
+    summary["persistence_profile"] = _build_persistence_profile(
+        base_summary=summary,
+        ledger_entries_present=False,
+        artifact_refs=[],
+        lineage_fragment_ids=set(),
+        missing_link_count=0,
+    )
     return summary
 
 
@@ -269,6 +281,39 @@ def _build_final_summary(
         list[dict[str, object]],
         base_summary.get("planned_artifacts", []),
     )
+    canonical_execution_identity_payload = build_execution_identity_payload(
+        pipeline_name=manifest.pipeline_name,
+        run_type=manifest.run_type.value,
+        pipeline_version=cast("str | None", base_summary.get("pipeline_version")),
+        effective_config_hash=cast(
+            "str | None", base_summary.get("effective_config_hash")
+        ),
+        dq_contract_compatibility_hash=cast(
+            "str | None", base_summary.get("dq_contract_compatibility_hash")
+        ),
+        contract_ref=cast("str | None", base_summary.get("contract_ref")),
+        contract_version=cast("str | None", base_summary.get("contract_version")),
+        effective_config_artifact_id=cast(
+            "str | None", base_summary.get("effective_config_artifact_id")
+        ),
+        exact_replay=cast("bool | None", base_summary.get("requested_exact_replay")),
+        input_snapshot_fingerprint=cast(
+            "str | None", base_summary.get("input_snapshot_identity_fingerprint")
+        ),
+    )
+    degraded_runtime_anchor_payload = {
+        key: value
+        for key, value in {
+            "manifest_id": manifest.manifest_id,
+            "effective_config_hash": base_summary.get("effective_config_hash"),
+            "contract_ref": base_summary.get("contract_ref"),
+            "contract_version": base_summary.get("contract_version"),
+            "effective_config_artifact_id": base_summary.get(
+                "effective_config_artifact_id"
+            ),
+        }.items()
+        if value is not None
+    }
     identity_graph = {
         "run_id": str(manifest.run_id),
         "manifest_id": manifest.manifest_id,
@@ -289,6 +334,19 @@ def _build_final_summary(
         "input_snapshot_identity_fingerprint": base_summary.get(
             "input_snapshot_identity_fingerprint"
         ),
+        "canonical_execution_identity": {
+            "execution_fingerprint": manifest.execution_fingerprint,
+            "payload": canonical_execution_identity_payload,
+        },
+        "degraded_runtime_anchor": {
+            "compatibility_scope": "legacy_fallback_only",
+            "fingerprint": (
+                compute_execution_identity_fingerprint(degraded_runtime_anchor_payload)
+                if degraded_runtime_anchor_payload
+                else None
+            ),
+            "payload": degraded_runtime_anchor_payload,
+        },
         "planned_artifacts": planned_artifacts,
         "published_artifacts": artifact_refs,
         "occurrence_only_diagnostics": sorted(occurrence_only_diagnostic_scopes),
@@ -299,6 +357,13 @@ def _build_final_summary(
         identity_graph["input_snapshots"] = base_summary["input_snapshots"]
 
     summary = base_summary.copy()
+    persistence_profile = _build_persistence_profile(
+        base_summary=base_summary,
+        ledger_entries_present=bool(ledger_entries),
+        artifact_refs=artifact_refs,
+        lineage_fragment_ids=lineage_fragment_ids,
+        missing_link_count=missing_link_count,
+    )
     summary.update(
         {
             "total_events": len(ledger_entries),
@@ -331,11 +396,84 @@ def _build_final_summary(
                 and not any(correlation_anchor_gaps.values())
             ),
             "identity_graph": identity_graph,
+            "persistence_profile": persistence_profile,
             "alert_signals": alert_signals,
             "next_steps": next_steps,
         }
     )
     return summary
+
+
+def _build_persistence_profile(
+    *,
+    base_summary: dict[str, object],
+    ledger_entries_present: bool,
+    artifact_refs: list[dict[str, object]],
+    lineage_fragment_ids: set[str],
+    missing_link_count: int,
+) -> dict[str, object]:
+    """Classify the current run's persisted evidence against explicit profiles."""
+    effective_config_artifact_present = bool(
+        str(base_summary.get("effective_config_artifact_id") or "").strip()
+    )
+    immutable_input_snapshots_present = bool(base_summary.get("input_snapshot_ids", []))
+    exact_replay_supported = bool(base_summary.get("exact_replay_eligible", False))
+    artifact_lineage_links_complete = not artifact_refs or (
+        missing_link_count == 0 and bool(lineage_fragment_ids)
+    )
+
+    replay_ready_missing_requirements: list[str] = []
+    if not exact_replay_supported:
+        replay_ready_missing_requirements.append("exact_replay_capability")
+    if not immutable_input_snapshots_present:
+        replay_ready_missing_requirements.append("immutable_input_snapshots")
+    if not effective_config_artifact_present:
+        replay_ready_missing_requirements.append("effective_config_artifact")
+
+    forensic_grade_missing_requirements = list(replay_ready_missing_requirements)
+    if not ledger_entries_present:
+        forensic_grade_missing_requirements.append("run_ledger_history")
+    if not artifact_lineage_links_complete:
+        forensic_grade_missing_requirements.append("artifact_lineage_links")
+
+    attained_profile = "degraded_observable"
+    if not replay_ready_missing_requirements:
+        attained_profile = "replay_ready"
+    if not forensic_grade_missing_requirements:
+        attained_profile = "forensic_grade"
+
+    return {
+        "attained_profile": attained_profile,
+        "claims": {
+            "degraded_observable": True,
+            "replay_ready": not replay_ready_missing_requirements,
+            "forensic_grade": not forensic_grade_missing_requirements,
+        },
+        "surfaces": {
+            "control_plane_manifest": True,
+            "effective_config_artifact": effective_config_artifact_present,
+            "immutable_input_snapshots": immutable_input_snapshots_present,
+            "exact_replay_capability": exact_replay_supported,
+            "run_ledger_history": ledger_entries_present,
+            "artifact_lineage_links": artifact_lineage_links_complete,
+        },
+        "replay_ready_missing_requirements": replay_ready_missing_requirements,
+        "forensic_grade_missing_requirements": forensic_grade_missing_requirements,
+        "composite_resume_reconstructability": {
+            "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+            "reconstructs": [
+                "state",
+                "seed_completed",
+                "merge_completed",
+                "last_event_id",
+                "last_event_occurred_at",
+            ],
+            "does_not_reconstruct": [
+                "per_provider_result_maps",
+                "rich_checkpoint_payloads",
+            ],
+        },
+    }
 
 
 def _collect_input_snapshot_refs(manifest: RunManifest) -> list[dict[str, object]]:

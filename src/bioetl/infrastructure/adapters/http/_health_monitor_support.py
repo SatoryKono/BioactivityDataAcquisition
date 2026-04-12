@@ -106,7 +106,7 @@ def emit_provider_health_metric(
 ) -> None:
     """Emit provider health gauge for one provider state."""
     metrics.set_gauge(
-        "provider_health_status",
+        "bioetl_provider_health_status",
         state.status.to_metric_value(),
         labels={"provider": state.provider},
     )
@@ -119,30 +119,30 @@ def emit_health_check_observability(
 ) -> None:
     """Emit health-check latency, gauge, and outcome counters."""
     metrics.observe_histogram(
-        "health_check_latency_seconds",
+        "bioetl_health_check_latency_seconds",
         result.latency_ms / 1000.0,
         labels={"provider": result.provider},
     )
     metrics.set_gauge(
-        "provider_health_status",
+        "bioetl_provider_health_status",
         float(result.status.to_metric_value()),
         labels={"provider": result.provider},
     )
     if result.status == HealthStatus.HEALTHY:
         metrics.increment_counter(
-            "health_check_success_total",
+            "bioetl_health_check_success_total",
             1,
             labels={"provider": result.provider},
         )
     elif result.status == HealthStatus.DEGRADED:
         metrics.increment_counter(
-            "health_check_degraded_total",
+            "bioetl_health_check_degraded_total",
             1,
             labels={"provider": result.provider},
         )
     else:
         metrics.increment_counter(
-            "health_check_failures_total",
+            "bioetl_health_check_failures_total",
             1,
             labels={"provider": result.provider},
         )

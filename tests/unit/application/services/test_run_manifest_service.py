@@ -88,7 +88,7 @@ def _make_request() -> RunManifestCreateRequest:
         ),
         pipeline_version="1.2.3",
         git_commit="abc1234",
-        config_hash="deadbeef",
+        config_hash="a" * 64,
         contract_ref="chembl.activity",
         contract_version="1.0.0",
         contract_schema_hash="abc123",
@@ -229,7 +229,7 @@ def test_execution_fingerprint_matches_golden_value() -> None:
 
     assert (
         manifest.execution_fingerprint
-        == "b0d9b8785149f57cc60d7ed00f2170905981f607cdd4bac5c1f9a4469c6d0061"
+        == "5bc0cc26f2bd6ef5223410aa8b818d60398ac76f46f2b5853f59818dc310ede2"
     )
 
 

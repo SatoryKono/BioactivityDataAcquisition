@@ -157,6 +157,7 @@ Last verified: '2026-04-09'
     python -m scripts.ops query-neo4j-memory owner-runtime-evidence run_manifest
     python -m scripts.ops query-neo4j-memory owner-workflow tests
     python -m scripts.ops query-neo4j-memory owner-workflow-job tests::governance-preflight
+    python -m scripts.ops query-neo4j-memory owner-cli-command "scripts.ops sync-neo4j-memory"
     python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity
     python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed
     python -m scripts.ops query-neo4j-memory neighbors-storage silver/chembl/activity
@@ -164,8 +165,10 @@ Last verified: '2026-04-09'
     python -m scripts.ops query-neo4j-memory neighbors-run-instance manifest-chain-smoke
     python -m scripts.ops query-neo4j-memory neighbors-workflow tests
     python -m scripts.ops query-neo4j-memory neighbors-workflow-job tests::governance-preflight
+    python -m scripts.ops query-neo4j-memory neighbors-cli-command "bioetl run"
     python -m scripts.ops query-neo4j-memory docs-drift all
     python -m scripts.ops query-neo4j-memory workflow-gates tests
+    python -m scripts.ops query-neo4j-memory workflow-artifacts tests
     python -m scripts.ops query-neo4j-memory storage-lineage silver/chembl/activity
     python -m scripts.ops query-neo4j-memory run-artifacts manifest-chain-smoke
     python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608

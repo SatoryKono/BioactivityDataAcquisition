@@ -20,8 +20,14 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.domain.normalization import (
+    build_execution_identity_payload,
+    compute_execution_identity_fingerprint,
+)
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID, RunType
+
+_VALID_CONFIG_HASH = "a" * 64
 
 
 class _InMemoryRunLedgerStore(RunLedgerPort):
@@ -69,7 +75,7 @@ def _make_manifest() -> RunManifest:
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
             git_commit="abc1234",
-            config_hash="deadbeef",
+            config_hash=_VALID_CONFIG_HASH,
             contract_ref="chembl.activity",
             contract_version="1.2.0",
             dq_policy_ref="chembl_activity.gold",
@@ -78,6 +84,51 @@ def _make_manifest() -> RunManifest:
             effective_config_artifact_id="eca-123",
         ),
     )
+
+
+def _expected_canonical_execution_identity(manifest: RunManifest) -> dict[str, object]:
+    payload = build_execution_identity_payload(
+        pipeline_name=manifest.pipeline_name,
+        run_type=manifest.run_type.value,
+        pipeline_version=manifest.code_provenance.pipeline_version,
+        effective_config_hash=manifest.code_provenance.config_hash,
+        dq_contract_compatibility_hash=(
+            manifest.code_provenance.dq_contract_compatibility_hash
+        ),
+        contract_ref=manifest.code_provenance.contract_ref,
+        contract_version=manifest.code_provenance.contract_version,
+        effective_config_artifact_id=(
+            manifest.code_provenance.effective_config_artifact_id
+        ),
+        exact_replay=False,
+        input_snapshot_fingerprint=None,
+    )
+    return {
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "payload": payload,
+    }
+
+
+def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object]:
+    payload = {
+        "manifest_id": manifest.manifest_id,
+        "effective_config_hash": manifest.code_provenance.config_hash,
+        "contract_ref": manifest.code_provenance.contract_ref,
+        "contract_version": manifest.code_provenance.contract_version,
+        "effective_config_artifact_id": (
+            manifest.code_provenance.effective_config_artifact_id
+        ),
+    }
+    filtered_payload = {key: value for key, value in payload.items() if value is not None}
+    return {
+        "compatibility_scope": "legacy_fallback_only",
+        "fingerprint": (
+            compute_execution_identity_fingerprint(filtered_payload)
+            if filtered_payload
+            else None
+        ),
+        "payload": filtered_payload,
+    }
 
 
 def _build_ledger_entries(
@@ -138,8 +189,9 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "provider": "chembl",
         "entity": "activity",
         "execution_fingerprint": "fingerprint-diagnostics",
-        "config_hash": "deadbeef",
-        "effective_config_hash": "deadbeef",
+        "config_hash": _VALID_CONFIG_HASH,
+        "effective_config_hash": _VALID_CONFIG_HASH,
+        "pipeline_version": "1.0.0",
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "dq_policy_ref": "chembl_activity.gold",
@@ -159,6 +211,45 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "input_snapshots": [],
         "planned_artifacts": [],
         "occurrence_only_diagnostics": [],
+        "persistence_profile": {
+            "attained_profile": "degraded_observable",
+            "claims": {
+                "degraded_observable": True,
+                "replay_ready": False,
+                "forensic_grade": False,
+            },
+            "surfaces": {
+                "control_plane_manifest": True,
+                "effective_config_artifact": True,
+                "immutable_input_snapshots": False,
+                "exact_replay_capability": False,
+                "run_ledger_history": False,
+                "artifact_lineage_links": True,
+            },
+            "replay_ready_missing_requirements": [
+                "exact_replay_capability",
+                "immutable_input_snapshots",
+            ],
+            "forensic_grade_missing_requirements": [
+                "exact_replay_capability",
+                "immutable_input_snapshots",
+                "run_ledger_history",
+            ],
+            "composite_resume_reconstructability": {
+                "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+                "reconstructs": [
+                    "state",
+                    "seed_completed",
+                    "merge_completed",
+                    "last_event_id",
+                    "last_event_occurred_at",
+                ],
+                "does_not_reconstruct": [
+                    "per_provider_result_maps",
+                    "rich_checkpoint_payloads",
+                ],
+            },
+        },
     }
 
 
@@ -281,9 +372,13 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "run_id": str(manifest.run_id),
         "manifest_id": "manifest-diagnostics",
         "execution_fingerprint": "fingerprint-diagnostics",
-        "effective_config_hash": "deadbeef",
+        "effective_config_hash": _VALID_CONFIG_HASH,
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
+        "canonical_execution_identity": _expected_canonical_execution_identity(
+            manifest
+        ),
+        "degraded_runtime_anchor": _expected_degraded_runtime_anchor(manifest),
         "replay_capability": "rebuild_only",
         "requested_exact_replay": False,
         "replay_capability_reason": "immutable_input_snapshots_missing",
@@ -306,6 +401,44 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
             }
         ],
         "occurrence_only_diagnostics": [],
+    }
+    assert summary["persistence_profile"] == {
+        "attained_profile": "degraded_observable",
+        "claims": {
+            "degraded_observable": True,
+            "replay_ready": False,
+            "forensic_grade": False,
+        },
+        "surfaces": {
+            "control_plane_manifest": True,
+            "effective_config_artifact": True,
+            "immutable_input_snapshots": False,
+            "exact_replay_capability": False,
+            "run_ledger_history": True,
+            "artifact_lineage_links": True,
+        },
+        "replay_ready_missing_requirements": [
+            "exact_replay_capability",
+            "immutable_input_snapshots",
+        ],
+        "forensic_grade_missing_requirements": [
+            "exact_replay_capability",
+            "immutable_input_snapshots",
+        ],
+        "composite_resume_reconstructability": {
+            "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+            "reconstructs": [
+                "state",
+                "seed_completed",
+                "merge_completed",
+                "last_event_id",
+                "last_event_occurred_at",
+            ],
+            "does_not_reconstruct": [
+                "per_provider_result_maps",
+                "rich_checkpoint_payloads",
+            ],
+        },
     }
     assert summary["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
@@ -345,7 +478,7 @@ def test_build_diagnostics_summary_accepts_legacy_data_contract_version_alias() 
         details={
             "_diagnostic": {
                 "diagnostic_contract_version": "v1",
-                "effective_config_hash": "deadbeef",
+                "effective_config_hash": _VALID_CONFIG_HASH,
                 "contract_ref": "chembl.activity",
                 "data_contract_version": "1.2.0",
             }

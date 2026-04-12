@@ -334,7 +334,7 @@ class TestHealthAggregatorMetrics:
         status_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
-            if call[0][0] == "health_check_status"
+            if call[0][0] == "bioetl_health_check_status"
         ]
         assert len(status_calls) == 2
 
@@ -429,7 +429,7 @@ class TestHealthAggregatorMetrics:
         await health_aggregator_probe.check_all(mock_services)
 
         mock_metrics.increment_counter.assert_any_call(
-            "probe_mode_fallback_total",
+            "bioetl_probe_mode_fallback_total",
             1,
             {
                 "pipeline": "unknown",
@@ -451,7 +451,7 @@ class TestHealthAggregatorMetrics:
         await health_aggregator_probe.check_all(mock_services)
 
         mock_metrics.increment_counter.assert_any_call(
-            "probe_mode_fallback_total",
+            "bioetl_probe_mode_fallback_total",
             1,
             {
                 "pipeline": "unknown",

@@ -177,7 +177,7 @@ async def test_write_cv_quarantine_writes_records_and_emits_metric() -> None:
     )
     runner._logger.info.assert_called_once()
     runner._metrics.increment_counter.assert_called_once_with(
-        "quarantine_records_total",
+        "bioetl_quarantine_records_total",
         2,
         {
             "pipeline": "composite:publication",
@@ -230,7 +230,7 @@ async def test_write_cv_quarantine_handles_non_fatal_and_bioetl_errors() -> None
         },
     )
     runner._metrics.increment_counter.assert_called_once_with(
-        "quarantine_records_total",
+        "bioetl_quarantine_records_total",
         1,
         {
             "pipeline": "composite:publication",

@@ -110,7 +110,7 @@ class TestFlappingBehavior:
         trip_calls = [
             c
             for c in mock_metrics.increment_counter.call_args_list
-            if c[0][0] == "circuit_breaker_trips_total"
+            if c[0][0] == "bioetl_circuit_breaker_trips_total"
         ]
         assert len(trip_calls) == 1
 
