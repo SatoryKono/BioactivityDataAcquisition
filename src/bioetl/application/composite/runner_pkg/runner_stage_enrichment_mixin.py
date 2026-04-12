@@ -21,7 +21,6 @@ from bioetl.application.composite.runner_pkg.runner_stage_enrichment_types impor
 )
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import InvalidStateError
 
 
@@ -223,10 +222,10 @@ class _CompositeRunnerStageEnrichmentMixin:
             stage="enrichment_complete",
         )
         await self._call_save_checkpoint_safe(state, "enrichment_completed")
-        self._logger.info(
-            PipelineEvent.phase_completed("enrichment"),
-            composite=self._config.name,
+        self._observer.emit_phase_completed(
+            composite_name=self._config.name,
             run_id=self._run_id_str,
+            phase_name="enrichment",
         )
         return state
 

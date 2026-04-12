@@ -6,6 +6,9 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runner_pkg.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
 )
@@ -16,7 +19,6 @@ from bioetl.application.composite.runner_pkg.runner_support_types import (
     _PreparedCompositeResultContext,
 )
 from bioetl.domain.composite.result import CompositeResult
-from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
@@ -112,18 +114,15 @@ def log_composite_completion(
     *,
     request: CompositeResultBuildContext,
     context: _PreparedCompositeResultContext,
-    logger: LoggerPort,
+    observer: CompositeLifecycleObserverService,
 ) -> None:
-    """Emit the canonical completion log payload for composite runs."""
-    log_kwargs: dict[str, object] = {
-        "composite": request.composite_name,
-        "run_id": request.run_id,
-        "duration_seconds": context.total_duration,
-    }
-    if context.had_warnings:
-        log_kwargs["status"] = "completed_with_warnings"
-        log_kwargs["had_warnings"] = True
-    logger.info(PipelineEvent.COMPLETE, **log_kwargs)
+    """Emit the canonical completion event for composite runs."""
+    observer.emit_run_completed(
+        composite_name=request.composite_name,
+        run_id=request.run_id,
+        duration_seconds=context.total_duration,
+        had_warnings=context.had_warnings,
+    )
 
 
 def finalize_composite_result(
@@ -154,10 +153,11 @@ def build_composite_result(
     *,
     request: CompositeResultBuildContext,
     logger: LoggerPort,
+    observer: CompositeLifecycleObserverService,
 ) -> CompositeResult:
     """Prepare, log, and assemble the final composite result in one seam."""
     context = prepare_composite_result_context(request=request, logger=logger)
-    log_composite_completion(request=request, context=context, logger=logger)
+    log_composite_completion(request=request, context=context, observer=observer)
     return finalize_composite_result(request=request, context=context)
 
 

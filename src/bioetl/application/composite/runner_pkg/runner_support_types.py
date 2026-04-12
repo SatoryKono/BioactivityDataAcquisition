@@ -7,6 +7,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
     CompositeCheckpointState,
@@ -35,6 +38,7 @@ class _CompositeRunnerSupportHostProtocol(Protocol):
     _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
     _checkpoint_manager: CompositeCheckpointService
     _logger: LoggerPort
+    _observer: CompositeLifecycleObserverService
     _run_id_str: str
     _started_at: datetime | None
     _original_run_id: str | None

@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import datetime
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
     CompositeCheckpointState,
@@ -62,6 +65,7 @@ class CompositeRunnerSupportMixin:
     _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
     _checkpoint_manager: CompositeCheckpointService
     _logger: LoggerPort
+    _observer: CompositeLifecycleObserverService
     _run_id_str: str
     _started_at: datetime | None
     _original_run_id: str | None
@@ -80,6 +84,7 @@ class CompositeRunnerSupportMixin:
         return build_composite_result(
             request=self._create_result_build_request(artifacts),
             logger=self._logger,
+            observer=self._observer,
         )
 
     def _prepare_composite_result_context(
@@ -100,7 +105,7 @@ class CompositeRunnerSupportMixin:
         log_composite_completion(
             request=self._create_result_build_request(context.artifacts),
             context=context,
-            logger=self._logger,
+            observer=self._observer,
         )
 
     def _finalize_composite_result(

@@ -19,7 +19,6 @@ from bioetl.application.composite.runner_pkg.runner_stage_types import (
     _CompositeRunnerStageHostProtocol,
 )
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError
 
 
@@ -62,12 +61,14 @@ async def complete_dependencies_phase(
         succeeded=succeeded,
         failed=failed,
     )
-    host._logger.info(
-        PipelineEvent.phase_completed("dependencies"),
-        composite=host._config.name,
+    host._observer.emit_phase_completed(
+        composite_name=host._config.name,
         run_id=host._run_id_str,
-        succeeded=succeeded,
-        failed=failed,
+        phase_name="dependencies",
+        details={
+            "succeeded": succeeded,
+            "failed": failed,
+        },
     )
     await host._call_save_checkpoint_safe(completed_state, "dependencies_completed")
     return completed_state

@@ -22,7 +22,6 @@ from bioetl.application.composite.runner_pkg.runner_stage_support_types import (
 )
 from bioetl.domain.composite.result import DependencyResult, SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError, InvalidStateError
 
 
@@ -119,12 +118,14 @@ async def complete_seed_phase(
         records_extracted=seed_result.records_extracted,
         records_silver=seed_result.records_silver,
     )
-    host._logger.info(
-        PipelineEvent.phase_completed("seed"),
-        composite=host._config.name,
+    host._observer.emit_phase_completed(
+        composite_name=host._config.name,
         run_id=host._run_id_str,
-        records_extracted=seed_result.records_extracted,
-        records_silver=seed_result.records_silver,
+        phase_name="seed",
+        details={
+            "records_extracted": seed_result.records_extracted,
+            "records_silver": seed_result.records_silver,
+        },
     )
     await host._call_save_checkpoint_safe(completed_state, "seed_completed")
     host._record_seed_stage_completed(seed_result)

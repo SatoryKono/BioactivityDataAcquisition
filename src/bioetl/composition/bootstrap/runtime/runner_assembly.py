@@ -10,6 +10,7 @@ from uuid import uuid4
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.application.composite.runtime_wiring_api import (
     CompositeCheckpointService,
+    CompositeLifecycleObserverService,
     CompositePipelineRunnerService,
     CompositeRunnerDependencies,
     DependencyCoordinatorService,
@@ -76,6 +77,7 @@ class _CompositeRunnerServiceInputs:
     dependency_coordinator: DependencyCoordinatorService | None
     quarantine_port: QuarantinePort | None
     metrics: MetricsPort | None
+    observer: CompositeLifecycleObserverService
     manifest_id: str | None
     run_ledger_service: RunLedgerService | None
 
@@ -105,6 +107,7 @@ def _build_composite_runner_dependencies(
         dependency_coordinator=inputs.dependency_coordinator,
         quarantine_port=inputs.quarantine_port,
         metrics=inputs.metrics,
+        observer=inputs.observer,
         manifest_id=inputs.manifest_id,
         run_ledger_service=inputs.run_ledger_service,
     )
@@ -142,6 +145,7 @@ def _build_composite_runner_service_inputs(
         dependency_coordinator=support_services.dependency_coordinator,
         quarantine_port=support_services.quarantine_port,
         metrics=None,
+        observer=CompositeLifecycleObserverService(logger=logger),
         manifest_id=getattr(support_services, "manifest_id", None),
         run_ledger_service=getattr(support_services, "run_ledger_service", None),
     )
@@ -172,6 +176,7 @@ def _invoke_composite_runner_factory(
         dependency_coordinator=inputs.dependency_coordinator,
         quarantine_port=inputs.quarantine_port,
         metrics=inputs.metrics,
+        observer=inputs.observer,
         manifest_id=inputs.manifest_id,
         run_ledger_service=inputs.run_ledger_service,
     )
@@ -211,6 +216,7 @@ def create_composite_runner_service(
     dependency_coordinator: DependencyCoordinatorService | None = None,
     quarantine_port: QuarantinePort | None = None,
     metrics: MetricsPort | None = None,
+    observer: CompositeLifecycleObserverService | None = None,
     manifest_id: str | None = None,
     run_ledger_service: RunLedgerService | None = None,
 ) -> CompositePipelineRunnerService:
@@ -240,6 +246,7 @@ def create_composite_runner_service(
         dependency_coordinator=dependency_coordinator,
         quarantine_port=quarantine_port,
         metrics=metrics,
+        observer=observer or CompositeLifecycleObserverService(logger=logger),
         manifest_id=manifest_id,
         run_ledger_service=run_ledger_service,
     )

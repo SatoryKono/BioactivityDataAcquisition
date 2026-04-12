@@ -11,7 +11,6 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
 )
 from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError
 
 __all__ = [
@@ -53,10 +52,10 @@ async def start_merge_phase(
     merging_state = transition_to_merging_state(host, state)
     await host._call_save_checkpoint_safe(merging_state, "merging")
     host._record_merge_stage_started()
-    host._logger.info(
-        PipelineEvent.phase_started("merge"),
-        composite=host._config.name,
+    host._observer.emit_phase_started(
+        composite_name=host._config.name,
         run_id=host._run_id_str,
+        phase_name="merge",
     )
     return merging_state
 
@@ -169,11 +168,11 @@ async def handle_merge_success(
     merge_result: MergeResult,
 ) -> None:
     """Emit merge success observability and post-merge side effects."""
-    host._logger.info(
-        PipelineEvent.phase_completed("merge"),
-        composite=host._config.name,
+    host._observer.emit_phase_completed(
+        composite_name=host._config.name,
         run_id=host._run_id_str,
-        records_merged=merge_result.records_merged,
+        phase_name="merge",
+        details={"records_merged": merge_result.records_merged},
     )
     await host._call_generate_dq_reports(merge_result)
     await host._call_write_cv_quarantine(merge_result)

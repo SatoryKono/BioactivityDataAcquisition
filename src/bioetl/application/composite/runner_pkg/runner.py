@@ -8,6 +8,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runner_pkg.runner_control_plane_mixin import (
     CompositeRunnerControlPlaneMixin,
 )
@@ -78,6 +81,7 @@ class CompositePipelineRunner(
 
     _lock: LockPort
     _key_extractor: KeyExtractorService
+    _observer: CompositeLifecycleObserverService
 
     def __init__(
         self,
@@ -119,30 +123,27 @@ class CompositePipelineRunner(
         """Return composite configuration."""
         return self._config
 
-    def _log_failed_run(
+    def _emit_failed_run(
         self,
         error: Exception,
         *,
         reason_code: str,
         stage: str | None = None,
     ) -> None:
-        """Emit the canonical runner failure log payload."""
-        log_kwargs: dict[str, object] = {
-            "composite": self._config.name,
-            "run_id": self._run_id_str,
-            "error": str(error),
-            "error_type": type(error).__name__,
-            "reason_code": reason_code,
-        }
-        if stage is not None:
-            log_kwargs["stage"] = stage
-        self._logger.error(PipelineEvent.FAILED, **log_kwargs)
+        """Emit the canonical runner failure event through the observer seam."""
+        self._observer.emit_run_failed(
+            composite_name=self._config.name,
+            run_id=self._run_id_str,
+            error=error,
+            reason_code=reason_code,
+            stage=stage,
+        )
 
     def _handle_pipeline_execution_failure(self, error: Exception) -> None:
         """Map execution-phase failures to canonical runner diagnostics."""
         self._mark_finished(CompositePipelineState.FAILED)
         self._record_run_failed(error)
-        self._log_failed_run(
+        self._emit_failed_run(
             error,
             reason_code="composite_pipeline_execution_failed",
             stage="run_with_lock",
@@ -152,18 +153,16 @@ class CompositePipelineRunner(
         """Map unexpected BioETL failures to canonical runner diagnostics."""
         self._mark_finished(CompositePipelineState.FAILED)
         self._record_run_failed(error)
-        self._log_failed_run(error, reason_code="unexpected_bioetl_error")
+        self._emit_failed_run(error, reason_code="unexpected_bioetl_error")
 
     def _handle_shutdown(self, error: PipelineShutdownError) -> None:
         """Map graceful shutdown to canonical terminal ledger/log semantics."""
         self._mark_finished(CompositePipelineState.FAILED)
         self._record_run_shutdown()
-        self._logger.warning(
-            PipelineEvent.SHUTDOWN,
-            composite=self._config.name,
+        self._observer.emit_run_shutdown(
+            composite_name=self._config.name,
             run_id=self._run_id_str,
-            error=str(error),
-            error_type=type(error).__name__,
+            error=error,
             reason=str(error.reason.value),
             reason_code="composite_pipeline_shutdown",
         )
@@ -173,11 +172,9 @@ class CompositePipelineRunner(
         self._validate_config_consistency()
         self._run_preflight_validation()
         self._started_at = datetime.now(tz=UTC)
-        self._logger.info(
-            PipelineEvent.START,
-            composite=self._config.name,
+        self._observer.emit_run_started(
+            composite_name=self._config.name,
             run_id=self._run_id_str,
-            stage="composite_start",
         )
         self._record_run_started()
 
