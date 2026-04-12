@@ -7,7 +7,7 @@ import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.metadata_assemblers_helpers import (
+from bioetl.application.services.lineage.metadata_assemblers_helpers import (
     _resolve_source_batch_ids,
     _resolve_transform_metadata,
 )

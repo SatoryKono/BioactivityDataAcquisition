@@ -5,10 +5,10 @@ from __future__ import annotations
 from collections.abc import Coroutine
 from typing import Any, Protocol
 
-from bioetl.application.services.cli_run_orchestration_models import (
+from bioetl.application.services.execution.cli_run_orchestration_models import (
     RunExecutionRequest,
 )
-from bioetl.application.services.pipeline_runner_models import RunResult
+from bioetl.application.services.execution.pipeline_runner_models import RunResult
 
 __all__ = [
     "MetricsFlushCallable",

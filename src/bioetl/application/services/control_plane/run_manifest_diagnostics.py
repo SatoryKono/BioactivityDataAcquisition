@@ -6,7 +6,7 @@ import hashlib
 from collections import Counter
 from typing import cast
 
-from bioetl.application.services._run_manifest_diagnostics_helpers import (
+from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
     extract_dq_details,
     update_correlation_anchor_gaps,
 )

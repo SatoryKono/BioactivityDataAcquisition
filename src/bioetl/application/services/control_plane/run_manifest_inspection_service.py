@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import cast
 from uuid import UUID
 
-from bioetl.application.services.run_manifest_diagnostics import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics import (
     build_diagnostics_summary,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest

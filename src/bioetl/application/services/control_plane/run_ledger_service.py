@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from bioetl.application.services._run_ledger_diagnostic_support import (
+from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
     build_run_ledger_diagnostic_details,
     sync_manifest_contract_defaults,
     sync_manifest_runtime_defaults,

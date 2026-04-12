@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.metadata_lineage_node_builders import (
+from bioetl.application.services.lineage.metadata_lineage_node_builders import (
     bronze_batch_node_from_input,
     bronze_batch_nodes_for_silver,
     build_fragment_id,

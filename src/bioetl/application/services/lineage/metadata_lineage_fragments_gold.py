@@ -5,10 +5,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.metadata_lineage_composite import (
+from bioetl.application.services.lineage.metadata_lineage_composite import (
     _build_dataset_composite_lineage_components,
 )
-from bioetl.application.services.metadata_lineage_nodes import (
+from bioetl.application.services.lineage.metadata_lineage_nodes import (
     build_semantic_fragment_id,
     dedupe_nodes,
     fragment_timestamp,
