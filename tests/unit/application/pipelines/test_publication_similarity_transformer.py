@@ -255,7 +255,8 @@ class TestPublicationSimilarityTransformer:
         assert result is not None
         assert "_run_id" in result
         assert "_run_type" in result
-        assert "_source_batch_id" not in result
+        assert "_source_batch_id" in result
+        assert result["_source_batch_id"] is None
         assert "_ingestion_ts" in result
         assert "_index" in result
         assert result["_index"] == 0

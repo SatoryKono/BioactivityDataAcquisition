@@ -27,7 +27,6 @@ from bioetl.composition.bootstrap.cli.checkpoint import (
     bootstrap_quarantine_manager,
     bootstrap_quarantine_service,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.ports import (
     CheckpointPort,
     CompositeCheckpointPort,
@@ -328,17 +327,24 @@ class TestBootstrapQuarantineService:
         # QuarantineService uses quarantine_port attribute (dataclass)
         assert isinstance(result.quarantine_port, UnifiedQuarantineAdapter)
 
-    def test_bootstrap_quarantine_service_wires_noop_metrics(self):
-        """CLI quarantine service should inject an explicit NoOpMetrics port."""
-        with patch(
-            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
-        ) as mock_settings:
-            mock_settings.return_value = MagicMock(
-                quarantine_path=Path("/tmp/quarantine")
-            )
+    def test_bootstrap_quarantine_service_resolves_metrics_port(self):
+        """CLI quarantine service should resolve metrics through composition."""
+        resolved_metrics = MagicMock()
+        with (
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
+            ) as mock_settings,
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.resolve_metrics_port",
+                return_value=resolved_metrics,
+            ) as mock_resolve_metrics,
+        ):
+            settings = MagicMock(quarantine_path=Path("/tmp/quarantine"))
+            mock_settings.return_value = settings
             result = bootstrap_quarantine_service()
 
-        assert isinstance(result.metrics, NoOpMetrics)
+        assert result.metrics is resolved_metrics
+        mock_resolve_metrics.assert_called_once_with(metrics=None, settings=settings)
 
     def test_bootstrap_quarantine_service_wires_tracing_port(self):
         """CLI quarantine service should inject an explicit tracing port."""
