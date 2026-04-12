@@ -376,6 +376,34 @@ def test_effective_batch_size_prefers_probe_degradation_over_clean_circuit(
     assert adapter._get_effective_batch_size() == 500
 
 
+@pytest.mark.asyncio
+async def test_successful_fetch_clears_stale_probe_degraded_state(
+    adapter, mock_http_client
+) -> None:
+    """A successful data page should clear probe-only degraded state."""
+    adapter._last_probe_health_status = HealthStatus.DEGRADED
+    mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
+    mock_http_client.circuit_breaker.get_failure_count.return_value = 0
+
+    mock_response = MagicMock()
+    mock_response.json.return_value = {
+        "assays": [{"assay_chembl_id": "CHEMBL1"}],
+        "page_meta": {"next": None},
+    }
+    mock_http_client.get.return_value = mock_response
+
+    records, has_next = await adapter._fetch_page(
+        "https://www.ebi.ac.uk/chembl/api/data/assay",
+        {"format": "json", "limit": 500, "offset": 0},
+        "assay",
+    )
+
+    assert records == [{"assay_chembl_id": "CHEMBL1"}]
+    assert has_next is False
+    assert adapter._last_probe_health_status is None
+    assert adapter._get_effective_batch_size() == 1000
+
+
 @pytest.mark.unit
 class TestChemblAdapterErrorClassification:
     """Tests for error classification and handling."""

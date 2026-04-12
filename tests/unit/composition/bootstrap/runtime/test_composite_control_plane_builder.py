@@ -18,7 +18,12 @@ from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import
     build_composite_control_plane_bundle,
     resolve_composite_control_plane_flags,
 )
-from bioetl.domain.control_plane import ReplayCapability, RunArtifactRef, RunSourceRef
+from bioetl.domain.control_plane import (
+    ReplayCapability,
+    RunArtifactRef,
+    RunManifest,
+    RunSourceRef,
+)
 
 _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
 
@@ -241,12 +246,19 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
 
     assert isinstance(bundle.manifest_id, str)
     assert bundle.run_ledger_service is None
-    assert (
+    manifest_path = (
         tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
-    ).exists()
+    )
+    assert manifest_path.exists()
     assert not (
         tmp_path / "output" / "control" / "run_ledger" / f"{bundle.manifest_id}.jsonl"
     ).exists()
+    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
+    assert manifest.replay_capability == ReplayCapability.REBUILD_ONLY
+    assert (
+        manifest.launch_context["exact_replay_support_boundary"]
+        == "composite_execution_unsupported"
+    )
 
 
 def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade_profile(

@@ -407,7 +407,7 @@ class TestTemplateMethodPattern:
             )
 
         metrics.increment_counter.assert_any_call(
-            "structural_policy_shadow_comparisons_total",
+            "bioetl_structural_policy_shadow_comparisons_total",
             1,
             labels={
                 "provider": "test",
@@ -454,7 +454,7 @@ class TestTemplateMethodPattern:
 
         assert result is not None
         metrics.increment_counter.assert_any_call(
-            "structural_policy_events_total",
+            "bioetl_structural_policy_events_total",
             1,
             labels={
                 "provider": "test",
