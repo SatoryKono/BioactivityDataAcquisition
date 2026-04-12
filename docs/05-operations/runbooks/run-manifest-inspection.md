@@ -40,12 +40,14 @@ Verify the active rollout semantics:
 
 - `run_manifest_enabled`
 - `run_ledger_enabled`
+- `required_persistence_profile` with allowed values
+  `degraded_observable | replay_ready | forensic_grade`
 - `checkpoint_compatibility_policy` with allowed values `observe | soft_fail | hard_fail`
 
 Fast source-of-truth checks:
 
 ```bash
-rg -n "run_manifest_enabled|run_ledger_enabled|checkpoint_compatibility_policy" \
+rg -n "run_manifest_enabled|run_ledger_enabled|required_persistence_profile|checkpoint_compatibility_policy" \
   src/bioetl/infrastructure/config/_base.py \
   src/bioetl/composition/runtime_builders/runner_builder.py \
   src/bioetl/composition/factories/pipeline/checkpoint_policy_helpers.py \
@@ -57,6 +59,10 @@ Interpretation:
 - if `run_manifest_enabled=false`, no new control-plane artifact is expected for new runs;
 - if `run_manifest_enabled=true` and `run_ledger_enabled=false`, manifest inspection still works but ledger history is intentionally absent;
 - if `run_manifest_enabled=false`, runtime assembly also coerces ledger attachment off for new runs;
+- if `required_persistence_profile=replay_ready`, runtime bootstrap requires
+  `run_manifest_enabled=true`;
+- if `required_persistence_profile=forensic_grade`, runtime bootstrap requires
+  both `run_manifest_enabled=true` and `run_ledger_enabled=true`;
 - if resume is enabled, `checkpoint_compatibility_policy` controls checkpoint mismatch handling:
   `observe` may continue only for degraded non-identity signals, while canonical
   execution-identity mismatches still block resume.

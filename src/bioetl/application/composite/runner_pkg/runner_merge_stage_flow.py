@@ -116,7 +116,7 @@ async def run_prepared_merge_request(
 
 
 def _get_explicit_merger_method(
-    merger: Any,
+    merger: Any,  # Any: merger may be a protocol-compatible runtime object or test double.
     method_name: str,
 ) -> Callable[..., Awaitable[MergeResult]] | None:
     """Ignore autovivified mock attrs; accept real or explicitly assigned methods."""

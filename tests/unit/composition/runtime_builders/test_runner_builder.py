@@ -1036,6 +1036,74 @@ def test_build_pipeline_runner_can_disable_ledger_while_keeping_manifest(
     ).exists()
 
 
+def test_build_pipeline_runner_requires_ledger_for_forensic_grade_profile(
+    tmp_path: Path,
+) -> None:
+    """Forensic-grade runtime profile must fail closed when ledger is disabled."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="required persistence profile 'forensic_grade'",
+    ):
+        runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            ensure_providers_loaded_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=lambda: SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    heartbeat_interval=30,
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=False,
+                        required_persistence_profile="forensic_grade",
+                    ),
+                ),
+                test_mode=False,
+            ),
+            load_pipeline_config_fn=lambda _: SimpleNamespace(
+                provider="chembl",
+                entity_type="activity",
+                version="2.0.0",
+                maintenance=None,
+                input_filter=SimpleNamespace(),
+                business_primary_keys=["activity_id"],
+                technical_primary_key="entity_id",
+            ),
+            build_observability_bundle_fn=lambda **_: _namespace_observability(
+                SimpleNamespace(info=lambda *_, **__: None),
+            ),
+            assemble_vacuum_settings_fn=lambda **_: None,
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+            assemble_filter_config_fn=lambda **_: None,
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+        )
+
+    assert fake_factory.kwargs is None
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+
+
 def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
     tmp_path: Path,
 ) -> None:

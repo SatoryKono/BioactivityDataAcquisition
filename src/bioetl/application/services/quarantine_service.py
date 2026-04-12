@@ -16,13 +16,19 @@ from datetime import UTC, datetime
 from time import perf_counter
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.span_helpers import (
+    traced_async_operation,
+    traced_operation,
+)
 from bioetl.application.services._quarantine_service_filtered_mixin import (
     QuarantineServiceFilteredMixin,
 )
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
+    from opentelemetry.trace import Span
+
+    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort, TracingPort
 
 
 _QUARANTINE_OPERATOR_DURATION_METRIC = "bioetl_quarantine_operator_duration_seconds"
@@ -74,6 +80,37 @@ class QuarantineService(QuarantineServiceFilteredMixin):
     quarantine_port: QuarantinePort
     logger: LoggerPort
     metrics: MetricsPort | None = None
+    tracer: TracingPort | None = None
+    TRACER_NAME = "bioetl.quarantine_admin"
+
+    def _trace_attributes(
+        self,
+        *,
+        operation: str,
+        pipeline: str | None = None,
+        **extra: object,
+    ) -> dict[str, object]:
+        """Build bounded tracing attributes for quarantine admin operations."""
+        attributes: dict[str, object] = {
+            "bioetl.component": "quarantine_service",
+            "bioetl.operation": operation,
+        }
+        if pipeline is not None:
+            attributes["bioetl.pipeline"] = pipeline
+        attributes.update(extra)
+        return attributes
+
+    @staticmethod
+    def _set_trace_result(
+        span: Span,
+        *,
+        success: bool,
+        **extra: object,
+    ) -> None:
+        """Attach bounded result attributes to an active trace span."""
+        span.set_attribute("bioetl.success", success)
+        for key, value in extra.items():
+            span.set_attribute(key, value)
 
     def _record_operator_metrics(
         self,
@@ -114,6 +151,48 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             List of QuarantineRecord objects.
         """
         start_time = perf_counter()
+        if self.tracer is None:
+            return await self._inspect_impl(
+                pipeline=pipeline,
+                limit=limit,
+                error_code=error_code,
+                start_time=start_time,
+            )
+        async with traced_async_operation(
+            self.tracer,
+            "quarantine.inspect",
+            self._trace_attributes(
+                operation="inspect",
+                pipeline=pipeline,
+                **{
+                    "bioetl.limit": limit,
+                    "bioetl.has_error_code_filter": error_code is not None,
+                },
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            records = await self._inspect_impl(
+                pipeline=pipeline,
+                limit=limit,
+                error_code=error_code,
+                start_time=start_time,
+            )
+            self._set_trace_result(
+                span,
+                success=True,
+                **{"bioetl.record_count": len(records)},
+            )
+            return records
+
+    async def _inspect_impl(
+        self,
+        *,
+        pipeline: str,
+        limit: int,
+        error_code: str | None,
+        start_time: float,
+    ) -> list[QuarantineRecord]:
+        """Implement quarantine inspection without tracing concerns."""
         self.logger.debug(
             "Inspecting quarantine",
             pipeline=pipeline,
@@ -175,6 +254,38 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             Dictionary with quarantine statistics by error code.
         """
         start_time = perf_counter()
+        if self.tracer is None:
+            return await self._get_stats_impl(
+                pipeline=pipeline,
+                error_code=error_code,
+                start_time=start_time,
+            )
+        async with traced_async_operation(
+            self.tracer,
+            "quarantine.stats",
+            self._trace_attributes(
+                operation="stats",
+                pipeline=pipeline,
+                **{"bioetl.has_error_code_filter": error_code is not None},
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            stats = await self._get_stats_impl(
+                pipeline=pipeline,
+                error_code=error_code,
+                start_time=start_time,
+            )
+            self._set_trace_result(span, success=True)
+            return stats
+
+    async def _get_stats_impl(
+        self,
+        *,
+        pipeline: str,
+        error_code: str | None,
+        start_time: float,
+    ) -> JsonDict:
+        """Implement quarantine statistics lookup without tracing concerns."""
         self.logger.debug("Getting quarantine stats", pipeline=pipeline)
 
         try:
@@ -221,6 +332,51 @@ class QuarantineService(QuarantineServiceFilteredMixin):
         """
         now = datetime.now(tz=UTC)
         start_time = perf_counter()
+        if self.tracer is None:
+            return self._replay_impl(
+                pipeline=pipeline,
+                error_code=error_code,
+                max_age_days=max_age_days,
+                now=now,
+                start_time=start_time,
+            )
+        with traced_operation(
+            self.tracer,
+            "quarantine.replay",
+            self._trace_attributes(
+                operation="replay",
+                pipeline=pipeline,
+                **{
+                    "bioetl.has_error_code_filter": error_code is not None,
+                    "bioetl.max_age_days": max_age_days,
+                },
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            records = self._replay_impl(
+                pipeline=pipeline,
+                error_code=error_code,
+                max_age_days=max_age_days,
+                now=now,
+                start_time=start_time,
+            )
+            self._set_trace_result(
+                span,
+                success=True,
+                **{"bioetl.record_count": len(records)},
+            )
+            return records
+
+    def _replay_impl(
+        self,
+        *,
+        pipeline: str,
+        error_code: str | None,
+        max_age_days: int,
+        now: datetime,
+        start_time: float,
+    ) -> list[JsonDict]:
+        """Implement quarantine replay lookup without tracing concerns."""
         self.logger.info(
             "Replaying quarantine records",
             pipeline=pipeline,
@@ -275,12 +431,35 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             Number of records successfully marked.
         """
         start_time = perf_counter()
+        if self.tracer is None:
+            return self._mark_as_reprocessed_impl(records=records, start_time=start_time)
+        with traced_operation(
+            self.tracer,
+            "quarantine.mark_reprocessed",
+            self._trace_attributes(
+                operation="mark_reprocessed",
+                **{"bioetl.input_record_count": len(records)},
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            count = self._mark_as_reprocessed_impl(records=records, start_time=start_time)
+            self._set_trace_result(
+                span,
+                success=count == len(records),
+                **{"bioetl.updated_count": count},
+            )
+            return count
+
+    def _mark_as_reprocessed_impl(
+        self,
+        *,
+        records: list[JsonDict],
+        start_time: float,
+    ) -> int:
+        """Implement reprocessed status updates without tracing concerns."""
         count = 0
-        candidate_records = 0
         for rec in records:
             payload_hash = rec.get("payload_hash")
-            if payload_hash:
-                candidate_records += 1
             if payload_hash and self.quarantine_port.update_status(
                 payload_hash, QuarantineRecordStatus.REPROCESSED
             ):
@@ -317,6 +496,45 @@ class QuarantineService(QuarantineServiceFilteredMixin):
         """
         now = datetime.now(tz=UTC)
         start_time = perf_counter()
+        if self.tracer is None:
+            return self._purge_impl(
+                pipeline=pipeline,
+                older_than_days=older_than_days,
+                now=now,
+                start_time=start_time,
+            )
+        with traced_operation(
+            self.tracer,
+            "quarantine.purge",
+            self._trace_attributes(
+                operation="purge",
+                pipeline=pipeline,
+                **{"bioetl.older_than_days": older_than_days},
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            count = self._purge_impl(
+                pipeline=pipeline,
+                older_than_days=older_than_days,
+                now=now,
+                start_time=start_time,
+            )
+            self._set_trace_result(
+                span,
+                success=True,
+                **{"bioetl.records_purged": count},
+            )
+            return count
+
+    def _purge_impl(
+        self,
+        *,
+        pipeline: str,
+        older_than_days: int,
+        now: datetime,
+        start_time: float,
+    ) -> int:
+        """Implement purge flow without tracing concerns."""
         self.logger.info(
             "Purging old quarantine records",
             pipeline=pipeline,
@@ -368,6 +586,41 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             True if record was found and updated, False otherwise.
         """
         start_time = perf_counter()
+        if self.tracer is None:
+            return self._update_status_impl(
+                payload_hash=payload_hash,
+                new_status=new_status,
+                start_time=start_time,
+            )
+        with traced_operation(
+            self.tracer,
+            "quarantine.update_status",
+            self._trace_attributes(
+                operation="update_status",
+                **{"bioetl.new_status": new_status.value},
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            success = self._update_status_impl(
+                payload_hash=payload_hash,
+                new_status=new_status,
+                start_time=start_time,
+            )
+            self._set_trace_result(
+                span,
+                success=success,
+                **{"bioetl.status_found": success},
+            )
+            return success
+
+    def _update_status_impl(
+        self,
+        *,
+        payload_hash: str,
+        new_status: QuarantineRecordStatus,
+        start_time: float,
+    ) -> bool:
+        """Implement status update flow without tracing concerns."""
         self.logger.debug(
             "Updating quarantine status",
             payload_hash=payload_hash,

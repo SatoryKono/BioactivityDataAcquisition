@@ -53,7 +53,7 @@ def push_metrics_to_gateway(
     )
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> Any:  # Any: lazy export returns either classes or callables from multiple modules.
     """Resolve execution-oriented public exports lazily."""
     module_name = _PUBLIC_EXPORTS.get(name)
     if module_name is None:
