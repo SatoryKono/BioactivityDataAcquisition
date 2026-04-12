@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-12T15:14:24.882500+00:00",
+  "generated_at": "2026-04-12T15:19:24.128171+00:00",
   "summary": {
     "total_scripts": 292,
     "status_counts": {
@@ -4007,7 +4007,7 @@
         },
         {
           "path": "docs/00-project/governance/06-doc-publication-policy.md",
-          "line": 261,
+          "line": 304,
           "source_group": "docs",
           "text": "uv run bash scripts/docs/build_docs_site.sh --strict"
         },
@@ -4040,7 +4040,7 @@
         },
         {
           "path": "docs/00-project/governance/06-doc-publication-policy.md",
-          "line": 241,
+          "line": 284,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/check_doc_drift.py --freshness"
         },
