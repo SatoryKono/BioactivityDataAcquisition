@@ -78,7 +78,9 @@ async def test_transform_valid_record(chembl_pipeline, context):
     assert result is not None
     assert result["activity_id"] == "100"
     assert result["pchembl_value"] == 5.5
-    assert "_run_id" not in result
+    assert result["_run_id"] == str(context.run_id)
+    assert result["_run_type"] == context.run_type.value
+    assert "_ingestion_ts" in result
 
 
 @pytest.mark.asyncio

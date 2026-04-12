@@ -463,7 +463,7 @@ class TestCheckpointResumeCompatibilityPolicy:
             run_id=run_id,
             metadata={
                 "records_processed": 120,
-                "effective_config_hash": "cfg-old",
+                "effective_config_hash": "a" * 64,
             },
         )
 
@@ -478,7 +478,7 @@ class TestCheckpointResumeCompatibilityPolicy:
             ),
             current_metadata=CheckpointMetadata(
                 records_processed=0,
-                effective_config_hash="cfg-new",
+                effective_config_hash="b" * 64,
             ),
             compatibility_policy="observe",
         )
@@ -505,7 +505,7 @@ class TestCheckpointResumeCompatibilityPolicy:
             run_id=run_id,
             metadata={
                 "records_processed": 90,
-                "effective_config_hash": "cfg-old",
+                "effective_config_hash": "a" * 64,
             },
         )
 
@@ -520,7 +520,7 @@ class TestCheckpointResumeCompatibilityPolicy:
             ),
             current_metadata=CheckpointMetadata(
                 records_processed=0,
-                effective_config_hash="cfg-new",
+                effective_config_hash="b" * 64,
             ),
             compatibility_policy="soft_fail",
         )

@@ -215,6 +215,13 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("run_instance_surface", "manifest-composite-quarantine") in node_keys
     assert ("workflow_surface", "tests") in node_keys
     assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
+    assert ("workflow_action_surface", "actions/upload-artifact") in node_keys
+    assert ("workflow_action_surface", "./.github/actions/setup-python-uv") in node_keys
+    assert ("workflow_artifact_surface", "tests::coverage-data-smoke") in node_keys
+    assert ("workflow_secret_surface", "GITHUB_TOKEN") in node_keys
+    assert ("cli_command_surface", "bioetl run") in node_keys
+    assert ("cli_command_surface", "scripts.ops sync-neo4j-memory") in node_keys
+    assert ("cli_command_surface", "scripts.docs verify") in node_keys
     assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
     assert ("execution_path", "uv run python -m scripts.diagrams lint") in node_keys
     assert ("execution_path", "uv run python -m scripts.docs verify") in node_keys
@@ -290,6 +297,34 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     ]
     assert composite_quarantine.properties["lifecycle_status"] == "quarantined"
     assert composite_quarantine.properties["replay_contract"] == "excluded_from_exact_replay"
+
+    tests_workflow = snapshot.nodes[NodeKey("workflow_surface", "tests")]
+    assert tests_workflow.properties["workflow_family"] == "test"
+    assert "pull_request" in tests_workflow.properties["trigger_names"]
+
+    matrix_job = snapshot.nodes[NodeKey("workflow_job_surface", "tests::test-matrix")]
+    assert matrix_job.properties["matrix_axes"] == ["python-version", "suite"]
+
+    secret_job = snapshot.nodes[NodeKey("workflow_job_surface", "docker::docker-push")]
+    assert "GITHUB_TOKEN" in secret_job.properties["secret_usage_hints"]
+
+    cli_command = snapshot.nodes[NodeKey("cli_command_surface", "scripts.ops sync-neo4j-memory")]
+    assert cli_command.properties["source_path"] == "scripts/ops/__main__.py"
+
+    docs_drift_relation = snapshot.relations[
+        (
+            NodeKey("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md"),
+            "DESCRIBES",
+            NodeKey("module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
+        )
+    ]
+    assert docs_drift_relation.properties["doc_reference"] == "src/bioetl/domain/control_plane/run_manifest.py"
+    assert docs_drift_relation.properties["evidence_kind"] == "direct_path"
+    assert docs_drift_relation.properties["confidence"] == "high"
+    assert isinstance(docs_drift_relation.properties["line_number"], int)
+    assert docs_drift_relation.properties["line_number"] > 0
+    assert isinstance(docs_drift_relation.properties["section_title"], str)
+    assert docs_drift_relation.properties["section_title"]
 
 
 RelationKey = tuple[str, str, str, str, str]
@@ -418,6 +453,12 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("project", "BioETL", "HAS_WORKFLOW", "workflow_surface", "tests"),
     ("workflow_surface", "tests", "CONTAINS", "workflow_job_surface", "tests::governance-preflight"),
     ("workflow_job_surface", "tests::governance-preflight", "EXECUTES_GATE", "quality_gate", "deterministic neo4j memory ontology invariants"),
+    ("workflow_job_surface", "tests::smoke-check", "USES_ACTION", "workflow_action_surface", "actions/upload-artifact"),
+    ("workflow_job_surface", "tests::smoke-check", "PUBLISHES_ARTIFACT", "workflow_artifact_surface", "tests::coverage-data-smoke"),
+    ("workflow_job_surface", "docker::docker-push", "REQUIRES_SECRET", "workflow_secret_surface", "GITHUB_TOKEN"),
+    ("project", "BioETL", "HAS_CLI_COMMAND", "cli_command_surface", "bioetl run"),
+    ("cli_command_surface", "bioetl run", "RUNS_VIA", "execution_path", "uv run python -m bioetl run --pipeline"),
+    ("cli_command_surface", "scripts.ops sync-neo4j-memory", "RUNS_VIA", "execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/infrastructure/config/_base.py"),
     ("doc_artifact", "scripts/dev/README.md", "DESCRIBES", "execution_path", "bash scripts/dev/run_pytest.sh"),
@@ -719,6 +760,10 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "run_instance_surface",
         "workflow_surface",
         "workflow_job_surface",
+        "workflow_action_surface",
+        "workflow_artifact_surface",
+        "workflow_secret_surface",
+        "cli_command_surface",
     }
 
     assert set(DEFAULT_LEGACY_PRUNE_LABELS) == expected_labels
@@ -856,6 +901,12 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
     assert ("workflow_job_surface", "tests::governance-preflight") in {
         (key.label, key.name) for key in filtered.nodes
     }
+    assert ("workflow_action_surface", "actions/upload-artifact") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
+    assert ("workflow_artifact_surface", "tests::coverage-data-smoke") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
     assert (
         "workflow_job_surface",
         "tests::governance-preflight",
@@ -869,6 +920,20 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
         "RUNS_VIA",
         "script_surface",
         "scripts/qa/__main__.py",
+    ) in relation_keys
+    assert (
+        "workflow_job_surface",
+        "tests::smoke-check",
+        "USES_ACTION",
+        "workflow_action_surface",
+        "actions/upload-artifact",
+    ) in relation_keys
+    assert (
+        "workflow_job_surface",
+        "tests::smoke-check",
+        "PUBLISHES_ARTIFACT",
+        "workflow_artifact_surface",
+        "tests::coverage-data-smoke",
     ) in relation_keys
 
 
@@ -888,6 +953,9 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         "module_surface",
         "src/bioetl/domain/control_plane/run_manifest.py",
     ) in relation_keys
+    assert ("cli_command_surface", "scripts.ops sync-neo4j-memory") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
 
 
 def test_workflow_quality_gates_detect_repo_gate_signals() -> None:

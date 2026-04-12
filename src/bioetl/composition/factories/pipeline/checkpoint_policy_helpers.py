@@ -19,12 +19,12 @@ _ALLOWED_CHECKPOINT_COMPATIBILITY_POLICIES: tuple[
 )
 
 
-def resolve_checkpoint_compatibility_policy(
+def _resolve_requested_checkpoint_compatibility_policy(
     *,
     pipeline: BasePipeline,
     logger_port: LoggerPort,
 ) -> CheckpointCompatibilityPolicy:
-    """Resolve compatibility policy from pipeline runtime settings."""
+    """Resolve the operator-selected policy before strict replay coercion."""
     settings = getattr(pipeline, "settings", None)
     pipeline_settings = getattr(settings, "pipeline", None)
     control_plane = getattr(pipeline_settings, "control_plane", None)
@@ -43,3 +43,28 @@ def resolve_checkpoint_compatibility_policy(
             default=_DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY,
         )
     return _DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY
+
+
+def resolve_checkpoint_compatibility_policy(
+    *,
+    pipeline: BasePipeline,
+    logger_port: LoggerPort,
+) -> CheckpointCompatibilityPolicy:
+    """Resolve compatibility policy from pipeline runtime settings."""
+    requested_policy = _resolve_requested_checkpoint_compatibility_policy(
+        pipeline=pipeline,
+        logger_port=logger_port,
+    )
+    runtime = getattr(pipeline, "runtime", None)
+    exact_replay = bool(getattr(runtime, "exact_replay", False))
+    if exact_replay and requested_policy != "hard_fail":
+        logger_port.warning(
+            "Exact replay requires hard_fail checkpoint compatibility policy; "
+            "coercing requested policy.",
+            pipeline=pipeline.config.pipeline_name,
+            exact_replay=True,
+            requested_policy=requested_policy,
+            applied_policy="hard_fail",
+        )
+        return "hard_fail"
+    return requested_policy

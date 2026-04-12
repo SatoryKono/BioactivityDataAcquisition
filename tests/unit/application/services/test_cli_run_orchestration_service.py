@@ -95,6 +95,39 @@ class TestPrepareExecutionRequest:
         assert result.request.options.log_level == "DEBUG"
         assert result.request.options.use_cached_bronze is True
 
+    def test_prepare_execution_request_preserves_exact_replay_only_with_cached_bronze(
+        self,
+    ) -> None:
+        service = CliRunOrchestrationService()
+
+        result = service.prepare_execution_request(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            resume=False,
+            start_offset=None,
+            limit=25,
+            input_csv=None,
+            filter_column=None,
+            filter_field=None,
+            dry_run=False,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+            debug=False,
+            health_server=False,
+            health_port=8081,
+            use_cached_bronze=True,
+            cached_bronze_date="2026-03-12",
+            cached_bronze_path="/tmp/bronze",
+            exact_replay=True,
+        )
+
+        assert result.is_valid is True
+        assert result.request is not None
+        assert result.request.options.use_cached_bronze is True
+        assert result.request.options.cached_bronze_date == "2026-03-12"
+        assert result.request.options.cached_bronze_path == "/tmp/bronze"
+        assert result.request.options.exact_replay is True
+
     def test_invalid_start_offset_returns_error_without_request(self) -> None:
         service = CliRunOrchestrationService()
 

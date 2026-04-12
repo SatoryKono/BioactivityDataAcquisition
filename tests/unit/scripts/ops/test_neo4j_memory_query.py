@@ -11,6 +11,7 @@ from scripts.ops.neo4j_memory_query import (
     _run_artifacts_statement,
     _simplification_blockers_statement,
     _storage_lineage_statement,
+    _workflow_artifacts_statement,
     _workflow_gates_statement,
     QUERY_PROFILES,
     _duplication_cluster_statement,
@@ -31,6 +32,7 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["owner-runtime-evidence"]["target_label"] == "runtime_evidence_surface"
     assert QUERY_PROFILES["owner-workflow"]["target_label"] == "workflow_surface"
     assert QUERY_PROFILES["owner-workflow-job"]["target_label"] == "workflow_job_surface"
+    assert QUERY_PROFILES["owner-cli-command"]["target_label"] == "cli_command_surface"
     assert QUERY_PROFILES["neighbors-pipeline"]["mode"] == "neighbors"
     assert QUERY_PROFILES["neighbors-alert"]["target_label"] == "alert_surface"
     assert QUERY_PROFILES["neighbors-storage"]["relation_types"] == ("WRITES_TO", "PROMOTES_TO", "DEPENDS_ON", "DEFINED_BY")
@@ -38,8 +40,10 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["neighbors-workflow"]["target_label"] == "workflow_surface"
     assert QUERY_PROFILES["neighbors-workflow-job"]["target_label"] == "workflow_job_surface"
     assert QUERY_PROFILES["neighbors-run-instance"]["target_label"] == "run_instance_surface"
+    assert QUERY_PROFILES["neighbors-cli-command"]["target_label"] == "cli_command_surface"
     assert QUERY_PROFILES["docs-drift"]["mode"] == "docs_drift"
     assert QUERY_PROFILES["workflow-gates"]["mode"] == "workflow_gates"
+    assert QUERY_PROFILES["workflow-artifacts"]["mode"] == "workflow_artifacts"
     assert QUERY_PROFILES["storage-lineage"]["mode"] == "storage_lineage"
     assert QUERY_PROFILES["run-artifacts"]["mode"] == "run_artifacts"
     assert QUERY_PROFILES["normalization-pipeline"]["mode"] == "normalization_pipeline"
@@ -75,9 +79,11 @@ def test_neighbors_statement_uses_relation_filter_and_bidirectional_search() -> 
 def test_docs_drift_statement_matches_doc_like_surfaces_and_describes_edges() -> None:
     statement = _docs_drift_statement()
 
-    assert "MATCH (doc)-[:DESCRIBES]->(target)" in statement
+    assert "MATCH (doc)-[rel:DESCRIBES]->(target)" in statement
     assert "labels(doc) WHERE label IN ['doc_source_surface', 'doc_artifact', 'policy_surface']" in statement
     assert "$name = 'all' OR doc.name = $name OR target.name = $name" in statement
+    assert "coalesce(rel.evidence_kind, '') AS evidence_kind" in statement
+    assert "coalesce(rel.section_title, '') AS section_title" in statement
 
 
 def test_workflow_gates_statement_collects_gates_and_run_targets() -> None:
@@ -87,6 +93,15 @@ def test_workflow_gates_statement_collects_gates_and_run_targets() -> None:
     assert "(workflow)-[:CONTAINS]->(job:workflow_job_surface)" in statement
     assert "(job)-[:EXECUTES_GATE]->(gate:quality_gate)" in statement
     assert "(job)-[:RUNS_VIA]->(target)" in statement
+
+
+def test_workflow_artifacts_statement_collects_actions_artifacts_and_secrets() -> None:
+    statement = _workflow_artifacts_statement()
+
+    assert "MATCH (workflow:workflow_surface)" in statement
+    assert "(job)-[:USES_ACTION]->(action:workflow_action_surface)" in statement
+    assert "(job)-[artifact_rel:PUBLISHES_ARTIFACT|DEPENDS_ON]->(artifact:workflow_artifact_surface)" in statement
+    assert "(job)-[:REQUIRES_SECRET]->(secret:workflow_secret_surface)" in statement
 
 
 def test_storage_lineage_statement_collects_producers_and_promotions() -> None:
@@ -255,6 +270,8 @@ def test_format_rows_renders_docs_drift_summary() -> None:
     assert "Docs-to-code drift edges: `all`" in formatted
     assert "doc=run manifest contract | doc_labels=doc_source_surface" in formatted
     assert "target=src/bioetl/domain/control_plane/run_manifest.py | target_labels=module_surface" in formatted
+    assert "ref=src/bioetl/domain/control_plane/run_manifest.py | evidence_kind=direct_path | confidence=high" in formatted
+    assert "section=Purpose | anchor=purpose | line=24" in formatted
 
 
 def test_format_rows_renders_workflow_gates_summary() -> None:
@@ -278,6 +295,31 @@ def test_format_rows_renders_workflow_gates_summary() -> None:
     assert "workflow=tests | job=tests::governance-preflight" in formatted
     assert "gate=pytest" in formatted
     assert "runs_via=scripts/docs/__main__.py | labels=script_surface" in formatted
+
+
+def test_format_rows_renders_workflow_artifacts_summary() -> None:
+    formatted = _format_rows(
+        "workflow-artifacts",
+        "tests",
+        [
+            {
+                "workflow_name": "tests",
+                "job_name": "tests::smoke-check",
+                "actions": ["actions/upload-artifact", "./.github/actions/setup-python-uv"],
+                "artifacts": [
+                    {"name": "tests::coverage-data-smoke", "relation": "PUBLISHES_ARTIFACT"},
+                    {"name": "tests::coverage-data-fast", "relation": "DEPENDS_ON"},
+                ],
+                "secrets": ["GITHUB_TOKEN"],
+            }
+        ],
+    )
+
+    assert "Workflow actions, artifacts, and secrets: `tests`" in formatted
+    assert "workflow=tests | job=tests::smoke-check" in formatted
+    assert "action=actions/upload-artifact" in formatted
+    assert "artifact=tests::coverage-data-smoke | relation=PUBLISHES_ARTIFACT" in formatted
+    assert "secret=GITHUB_TOKEN" in formatted
 
 
 def test_format_rows_renders_storage_lineage_summary() -> None:
