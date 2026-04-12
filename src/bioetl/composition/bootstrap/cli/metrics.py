@@ -16,6 +16,8 @@ from bioetl.application.services.metrics_service import MetricsService
 from bioetl.composition.bootstrap.assembly.metrics_service import (
     create_metrics_service,
 )
+from bioetl.composition.observability_resolution import resolve_tracing_port
+from bioetl.infrastructure.config import get_settings
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -40,4 +42,10 @@ def bootstrap_metrics_service(
         >>> result = service.start(port=8000)
         >>> # result.success is True if server started
     """
-    return create_metrics_service(logger=logger)
+    settings = get_settings()
+    tracer = resolve_tracing_port(
+        tracer=None,
+        settings=settings,
+        service_name="bioetl.metrics_admin",
+    )
+    return create_metrics_service(logger=logger, tracer=tracer)

@@ -5,8 +5,9 @@ quarantine manager, and quarantine service. Used for CLI inspection
 and administrative operations.
 
 Note:
-    These functions use NoOp observability since CLI operations don't
-    require full runtime observability.
+    CLI diagnostics use NoOp logging/metrics by default, but tracing is
+    resolved through composition so operator workflows participate in spans
+    when tracing is enabled.
 """
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ from bioetl.application.services.admin_runtime_api import (
 from bioetl.composition.bootstrap.cli.run_manifest import (
     bootstrap_run_manifest_service,
 )
+from bioetl.composition.observability_resolution import resolve_tracing_port
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_compatibility_service,
     bootstrap_checkpoint_port,
@@ -132,6 +134,7 @@ def bootstrap_audit_inspection_service() -> AuditInspectionService:
 
 def bootstrap_observability_workflow_service() -> ObservabilityWorkflowService:
     """Bootstrap canonical audit/checkpoint diagnostics workflows."""
+    settings = get_settings()
     checkpoint_service = bootstrap_checkpoint_service()
     audit_service = bootstrap_audit_inspection_service()
     run_manifest_service: RunManifestInspectionService = bootstrap_run_manifest_service()
@@ -139,6 +142,11 @@ def bootstrap_observability_workflow_service() -> ObservabilityWorkflowService:
         audit_service=audit_service,
         checkpoint_service=checkpoint_service,
         run_manifest_service=run_manifest_service,
+        tracer=resolve_tracing_port(
+            tracer=None,
+            settings=settings,
+            service_name="bioetl.diagnostics",
+        ),
     )
 
 
@@ -150,6 +158,7 @@ def bootstrap_quarantine_service() -> QuarantineService:
     Returns:
         QuarantineService configured for CLI operations.
     """
+    settings = get_settings()
     quarantine_port = bootstrap_quarantine_port()
     noop_logger = create_noop_logger()
     noop_metrics = create_noop_metrics()
@@ -158,4 +167,9 @@ def bootstrap_quarantine_service() -> QuarantineService:
         quarantine_port=quarantine_port,
         logger=noop_logger,
         metrics=noop_metrics,
+        tracer=resolve_tracing_port(
+            tracer=None,
+            settings=settings,
+            service_name="bioetl.quarantine_admin",
+        ),
     )
