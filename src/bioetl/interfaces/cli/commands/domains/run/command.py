@@ -64,7 +64,7 @@ from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (
     dispatch_cli_callback,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
-from bioetl.interfaces.cli.formatters import echo_error
+from bioetl.interfaces.cli.formatters import echo_error, echo_warning
 
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions, RunResult
@@ -298,6 +298,11 @@ def _run_callback(
     exact_replay: bool = False,
 ) -> None:
     """Canonical callback implementation for the run Click command."""
+    if exact_replay and not use_cached_bronze:
+        echo_warning(
+            "Strict exact replay requires snapshot-backed cached Bronze inputs; "
+            "without --use-cached-bronze this run is outside the strict exact-replay boundary."
+        )
     cli_input_kwargs = {
         "pipeline": pipeline,
         "run_type": run_type,

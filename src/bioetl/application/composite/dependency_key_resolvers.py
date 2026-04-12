@@ -277,7 +277,11 @@ def create_seed_key_resolver(
     Returns:
         New SeedKeyResolver instance wired with the provided logger.
     """
-    return SeedKeyResolver(logger, normalization_policies=normalization_policies)
+    return _create_key_resolver(
+        SeedKeyResolver,
+        logger,
+        normalization_policies=normalization_policies,
+    )
 
 
 def create_chained_key_resolver(
@@ -294,7 +298,21 @@ def create_chained_key_resolver(
     Returns:
         New ChainedKeyResolver instance wired with the provided logger.
     """
-    return ChainedKeyResolver(logger, normalization_policies=normalization_policies)
+    return _create_key_resolver(
+        ChainedKeyResolver,
+        logger,
+        normalization_policies=normalization_policies,
+    )
+
+
+def _create_key_resolver[TResolver: SeedKeyResolver | ChainedKeyResolver](
+    resolver_type: type[TResolver],
+    logger: LoggerPort,
+    *,
+    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy],
+) -> TResolver:
+    """Build one dependency key resolver with the configured normalization policies."""
+    return resolver_type(logger, normalization_policies=normalization_policies)
 
 
 __all__ = [
