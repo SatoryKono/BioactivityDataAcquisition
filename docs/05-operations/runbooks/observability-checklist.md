@@ -1,5 +1,5 @@
 ---
-Version: 1.1.1
+Version: 1.1.2
 Status: active
 Class: published
 Owner: BioETL Team
@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P2
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-09'
+Last verified: '2026-04-12'
 ---
 
 # Observability Checklist
@@ -42,10 +42,20 @@ This checklist validates that operators can:
 For observability design rules, metric naming policy, and adapter implementation
 requirements, use:
 
+- [Observability Specification](../../04-reference/contracts/observability.md)
+- [Observability Layers](../../02-architecture/observability-layers.md)
 - [Monitoring Guide](../01-monitoring-guide.md)
 - [SLI/SLO Baseline](../sli-slo-baseline.md)
 - [RULES.md](../../00-project/RULES.md)
 - [ADR-017](../../02-architecture/decisions/ADR-017-observability-architecture.md)
+
+Compatibility note for operators:
+
+- `bioetl.interfaces.observability` may still exist as an interface-layer
+  facade, but canonical diagnostics/bootstrap discovery is
+  `bioetl.composition.observability_api`
+- runtime logs emit canonical `timestamp`; downstream tooling may still accept
+  `ts`, but `ts` is not the canonical emitted field name
 
 Unified diagnostics discovery now starts here:
 

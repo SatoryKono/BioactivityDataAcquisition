@@ -381,7 +381,7 @@ def _build_gold_scd(input_data: GoldMetadataInput) -> SCDMetadata | None:
 
 def _build_gold_output(
     *,
-    run_context: RunContext,
+    run_context: RunContext | None = None,
     input_data: GoldMetadataInput,
     record_count: int,
     composite_ext: CompositeOutputExt | None,
@@ -389,9 +389,13 @@ def _build_gold_output(
     """Build Gold base output metadata."""
     composite_run_id = composite_ext.composite_run_id if composite_ext else None
     return BaseOutputMetadata(
-        artifact_id=_build_gold_artifact_id(
-            run_context=run_context,
-            input_data=input_data,
+        artifact_id=(
+            _build_gold_artifact_id(
+                run_context=run_context,
+                input_data=input_data,
+            )
+            if run_context is not None
+            else None
         ),
         record_count=record_count,
         total_bytes=input_data.total_bytes,
