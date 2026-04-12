@@ -1,8 +1,8 @@
 %% BioETL — Observability Stack
 %% Logging, Metrics, Tracing architecture.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-04-12
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   24
@@ -21,7 +21,6 @@
 }}%%
 %% @uniform width=224 height=198 max_title_len=23 max_desc_lines=9
 graph TB
-%% keep-orphan: DQMP
     subgraph Ports["Domain Ports"]
         LP["LoggerPort (Protocol)<br/>bind + info/warn/error/debug/exception"]:::size-lg
         MP["MetricsPort (Protocol)<br/>observe_histogram + increment_counter<br/>set_gauge + close"]:::size-lg
@@ -29,63 +28,82 @@ graph TB
         DQMP["DQMonitorPort (Protocol)<br/>add_metric + check_quality<br/>update_baseline"]:::size-lg
     end
 
-    subgraph AppObserver["Application Observability"]
-        PO["PipelineObserver<br/>logger + metrics + tracing hooks"]:::size-lg
-        BMR["BatchMetricsRecorderService<br/>track size/processed/error/quarantine"]:::size-lg
-        BTM["BatchTracingManagerService<br/>start execution/batch/layer span<br/>end span"]:::size-lg
+    subgraph AppObserver["Application Emission"]
+        PO["PipelineObserver<br/>canonical lifecycle emitter<br/>ordinary runs"]:::size-lg
+        PMR["PipelineMetricsRecorder<br/>pipeline-scoped metric vocabulary"]:::size-lg
+        BMR["BatchMetricsRecorderService<br/>batch throughput/error/quarantine signals"]:::size-lg
+        BTM["BatchTracingManagerService<br/>execution/batch/layer span management"]:::size-lg
+        DQS["DataQualityService<br/>freshness anchor + anomaly monitor use"]:::size-lg
+        PRS["PostrunService<br/>bounded postrun metrics/logs + spans"]:::size-lg
+    end
+
+    subgraph Composition["Composition-Owned Seams"]
+        BOB["bootstrap_observability_bundle_impl<br/>runtime logger/metrics/tracer/DQ assembly"]:::size-lg
+        OAPI["observability_api<br/>public diagnostics + metrics server seam"]:::size-lg
+        IOBS["interfaces.observability<br/>compatibility facade"]:::size-lg
     end
 
     subgraph InfraLogging["Infrastructure: Logging"]
         UL["UnifiedLogger<br/>implements LoggerPort<br/>structured JSON + secret filtering"]:::size-lg
+        NOL["NoOpLogger<br/>adapter-level fallback"]:::size-lg
     end
 
     subgraph InfraMetrics["Infrastructure: Metrics"]
-        MC["MetricsCollector<br/>(implements MetricsPort)"]:::size-lg
         PM["PrometheusMetrics<br/>implements MetricsPort<br/>histogram/counter/gauge backend"]:::size-lg
-        MSA["MetricsServerAdapter<br/>HTTP server for /metrics"]:::size-lg
+        MSA["MetricsServerAdapter<br/>/metrics lifecycle via MetricsService"]:::size-lg
+        MPA["MetricsPublisherAdapter<br/>push gateway publication seam"]:::size-lg
+        NOM["NoOpMetrics<br/>domain null-object fallback"]:::size-lg
     end
 
     subgraph InfraTracing["Infrastructure: Tracing"]
         OTT["OpenTelemetryTracer<br/>implements TracingPort<br/>OTLP export + span management"]:::size-lg
+        NOT["NoOpTracing<br/>domain null-object fallback"]:::size-lg
     end
 
     subgraph InfraAnomaly["Infrastructure: Anomaly Detection"]
-        AD["AnomalyDetector"]:::size-lg
-        DS["DetectorStrategy (ABC)"]:::size-lg
-        ZSD["ZScoreDetector"]:::size-lg
-        DS --> ZSD
-        AD --> DS
+        DQM["DataQualityMonitorService<br/>implements DQMonitorPort"]:::size-lg
     end
 
     subgraph AdapterMetrics["Adapter-Level Metrics"]
-        AM["AdapterMetrics<br/>provider metrics<br/>measure_request context<br/>duration + total counters"]:::size-lg
+        AM["AdapterMetrics<br/>provider request metrics<br/>duration + retry/error counters"]:::size-lg
     end
 
     subgraph External["External Systems"]
-        PROM["Prometheus Server"]:::size-lg
-        GRAFANA["Grafana Dashboards"]:::size-lg
-        OTEL_COL["OpenTelemetry Collector"]:::size-lg
+        PROM["Prometheus + Grafana"]:::size-lg
+        OTEL_COL["OTLP collector / console exporter"]:::size-lg
     end
 
     %% Port implementations
-    LP -.-> UL & SL & NOL
-    MP -.-> MC & PM & NOM
-    TP -.-> OTT & NOT
+    LP -.implements.-> UL & NOL
+    MP -.implements.-> PM & NOM
+    TP -.implements.-> OTT & NOT
+    DQMP -.implements.-> DQM
 
-    %% Application usage
+    %% Application publication boundaries
     PO --> LP & MP & TP
-    BMR --> MP
+    PMR --> MP
+    BMR --> PMR
     BTM --> TP
+    DQS --> MP & DQMP
+    PRS --> LP & MP & TP
 
-    %% Adapter metrics
+    %% Composition-owned wiring and public seams
+    BOB --> UL & PM & OTT & DQM
+    BOB -.disabled mode.-> NOM & NOT
+    IOBS -.delegates to.-> OAPI
+    OAPI --> MSA & MPA
+
+    %% Adapter/provider metrics
     AM --> MP
 
     %% Infrastructure to external
-    PM --> MSA --> PROM --> GRAFANA
-    OTT --> OTEL_COL --> JAEGER
+    PM --> MSA --> PROM
+    MPA --> PROM
+    OTT --> OTEL_COL
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef comp fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
     classDef logging fill:#fefce8,stroke:#ca8a04
     classDef metrics fill:#f5f3ff,stroke:#7c3aed
     classDef tracing fill:#ffe4e6,stroke:#dc2626
@@ -93,9 +111,10 @@ graph TB
     classDef ext fill:#f1f5f9,stroke:#64748b
 
     class LP,MP,TP,DQMP port
-    class PO,BMR,BTM app
-    class UL,SL,NOL logging
-    class MC,PM,MSA,NOM,AM metrics
+    class PO,PMR,BMR,BTM,DQS,PRS,AM app
+    class BOB,OAPI,IOBS comp
+    class UL,NOL logging
+    class PM,MSA,MPA,NOM metrics
     class OTT,NOT tracing
-    class AD,DS,ZSD anomaly
-    class PROM,GRAFANA,OTEL_COL,JAEGER ext
+    class DQM anomaly
+    class PROM,OTEL_COL ext
