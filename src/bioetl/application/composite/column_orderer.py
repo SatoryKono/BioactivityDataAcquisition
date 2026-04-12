@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.column_orderer_group_flow import (
     apply_renames,
@@ -39,19 +39,20 @@ def sort_columns_by_provider(
     provider_order: tuple[str, ...],
 ) -> list[str]:
     """Sort columns by provider prefix order."""
+    provider_indices = {provider: idx for idx, provider in enumerate(provider_order)}
+    fallback_index = len(provider_order) + 1
 
     def sort_key(col: str) -> tuple[int, str]:
         """Return ``(provider_index, name)`` placing seed columns first."""
-        parts = col.split(".")
+        parts = col.split(".", maxsplit=2)
         if len(parts) < 3:
             return (0, col.lower())
 
         provider = parts[0].lower()
-        try:
-            idx = provider_order.index(provider)
+        idx = provider_indices.get(provider)
+        if idx is not None:
             return (idx + 1, col.lower())
-        except ValueError:
-            return (len(provider_order) + 1, col.lower())
+        return (fallback_index, col.lower())
 
     return sorted(columns, key=sort_key)
 
@@ -113,13 +114,15 @@ def collect_explicit_group_columns(
     ordered: list[str] = []
     used: set[str] = set()
 
+    extracted_cols = {col: extract_field_fn(col) for col in available}
+
     for field_name in group.fields:
         field_matches: list[str] = []
         aliases = resolve_aliases_fn(field_name)
         for column in available:
             if column in used:
                 continue
-            extracted = extract_field_fn(column)
+            extracted = extracted_cols[column]
             if extracted in aliases or column in aliases:
                 field_matches.append(column)
                 used.add(column)
