@@ -31,52 +31,19 @@ def _build_metrics_adapter(kind: str) -> MetricsPort:
 
 @pytest.mark.unit
 @pytest.mark.parametrize("kind", ["noop", "prometheus"])
-def test_metrics_adapters_accept_canonical_and_legacy_labels(kind: str) -> None:
-    """No-op and production metrics adapters should accept the same call styles."""
+def test_metrics_adapters_accept_canonical_labels(kind: str) -> None:
+    """No-op and production metrics adapters should accept canonical labels."""
     metrics = _build_metrics_adapter(kind)
     assert isinstance(metrics, MetricsPort)
 
     histogram_variants = (
         {"labels": {"provider": "chembl", "endpoint": "/molecule"}},
-        {"_labels": {"provider": "chembl", "endpoint": "/molecule"}},
-        {"tags": {"provider": "chembl", "endpoint": "/molecule"}},
-        {
-            "labels": {"provider": "canonical", "endpoint": "/molecule"},
-            "_labels": {"provider": "legacy_under", "endpoint": "/legacy"},
-            "tags": {"provider": "legacy_tags", "endpoint": "/legacy"},
-        },
     )
     counter_variants = (
         {"labels": {"provider": "chembl", "endpoint": "/molecule", "status": "success"}},
-        {"_labels": {"provider": "chembl", "endpoint": "/molecule", "status": "success"}},
-        {"tags": {"provider": "chembl", "endpoint": "/molecule", "status": "success"}},
-        {
-            "labels": {
-                "provider": "canonical",
-                "endpoint": "/molecule",
-                "status": "success",
-            },
-            "_labels": {
-                "provider": "legacy_under",
-                "endpoint": "/legacy",
-                "status": "failure",
-            },
-            "tags": {
-                "provider": "legacy_tags",
-                "endpoint": "/legacy",
-                "status": "failure",
-            },
-        },
     )
     gauge_variants = (
         {"labels": {"provider": "chembl"}},
-        {"_labels": {"provider": "chembl"}},
-        {"tags": {"provider": "chembl"}},
-        {
-            "labels": {"provider": "canonical"},
-            "_labels": {"provider": "legacy_under"},
-            "tags": {"provider": "legacy_tags"},
-        },
     )
 
     for kwargs in histogram_variants:
@@ -85,6 +52,26 @@ def test_metrics_adapters_accept_canonical_and_legacy_labels(kind: str) -> None:
         metrics.increment_counter("bioetl_adapter_requests_total", 1, **kwargs)
     for kwargs in gauge_variants:
         metrics.set_gauge("bioetl_provider_health_status", 1.0, **kwargs)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("kind", ["noop", "prometheus"])
+def test_metrics_adapters_reject_legacy_label_aliases(kind: str) -> None:
+    """No-op and production metrics adapters should fail on removed label aliases."""
+    metrics = _build_metrics_adapter(kind)
+
+    with pytest.raises(TypeError):
+        metrics.observe_histogram(
+            "bioetl_adapter_request_duration_seconds",
+            1.0,
+            _labels={"provider": "chembl", "endpoint": "/molecule"},
+        )
+    with pytest.raises(TypeError):
+        metrics.increment_counter(
+            "bioetl_adapter_requests_total",
+            1,
+            tags={"provider": "chembl", "endpoint": "/molecule", "status": "success"},
+        )
 
 
 @pytest.mark.unit

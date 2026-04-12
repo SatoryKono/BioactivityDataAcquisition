@@ -33,7 +33,6 @@ from bioetl.domain.normalization.fingerprints import (
     compute_degraded_runtime_anchor_fingerprint,
     compute_input_snapshot_identity_fingerprint,
     compute_manifest_execution_fingerprint,
-    compute_runtime_anchor_fingerprint,
 )
 from bioetl.domain.normalization.hash_identity import (
     normalize_hash_identity_record,
@@ -74,7 +73,6 @@ __all__ = [
     "compute_execution_identity_fingerprint",
     "compute_input_snapshot_identity_fingerprint",
     "compute_manifest_execution_fingerprint",
-    "compute_runtime_anchor_fingerprint",
     "extract_first_item",
     "extract_first_string",
     "format_date_parts",

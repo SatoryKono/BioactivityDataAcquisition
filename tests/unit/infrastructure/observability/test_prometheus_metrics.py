@@ -382,52 +382,8 @@ class TestObservabilityMetricContract:
 
 
 @pytest.mark.unit
-class TestMetricLabelAliasCompatibility:
-    """Compatibility tests for legacy metric label parameter aliases."""
-
-    def test_observe_histogram_accepts_legacy__labels(self, prometheus_metrics):
-        with patch.dict(
-            HISTOGRAMS, {"bioetl_pipeline_duration_seconds": MagicMock()}
-        ):
-            prometheus_metrics.observe_histogram(
-                name="bioetl_pipeline_duration_seconds",
-                value=1.0,
-                _labels={"pipeline": "test", "stage": "x", "status": "ok"},
-            )
-            HISTOGRAMS[
-                "bioetl_pipeline_duration_seconds"
-            ].labels.assert_called_once_with(
-                pipeline="test",
-                stage="x",
-                status="ok",
-            )
-
-    def test_set_gauge_accepts_legacy_tags(self, prometheus_metrics):
-        with patch.dict(GAUGES, {"bioetl_circuit_breaker_state": MagicMock()}):
-            prometheus_metrics.set_gauge(
-                name="bioetl_circuit_breaker_state",
-                value=1.0,
-                tags={"adapter": "chembl"},
-            )
-            GAUGES["bioetl_circuit_breaker_state"].labels.assert_called_once_with(
-                adapter="chembl"
-            )
-
-    def test_increment_counter_prefers_labels_over_legacy_aliases(
-        self,
-        prometheus_metrics,
-    ):
-        with patch.dict(COUNTERS, {"bioetl_records_processed_total": MagicMock()}):
-            prometheus_metrics.increment_counter(
-                name="bioetl_records_processed_total",
-                value=3,
-                labels={"pipeline": "canonical"},
-                _labels={"pipeline": "legacy_under"},
-                tags={"pipeline": "legacy_tags"},
-            )
-            COUNTERS["bioetl_records_processed_total"].labels.assert_called_once_with(
-                pipeline="canonical"
-            )
+class TestMetricLabelContract:
+    """Metrics adapters accept only canonical labels payloads."""
 
     def test_observability_counter_always_has_required_labels(self, prometheus_metrics):
         with patch.dict(
@@ -445,6 +401,22 @@ class TestMetricLabelAliasCompatibility:
                 pipeline="unknown",
                 severity="info",
                 error_type="none",
+            )
+
+    def test_observe_histogram_rejects_legacy__labels(self, prometheus_metrics):
+        with pytest.raises(TypeError):
+            prometheus_metrics.observe_histogram(
+                name="bioetl_pipeline_duration_seconds",
+                value=1.0,
+                _labels={"pipeline": "test", "stage": "x", "status": "ok"},
+            )
+
+    def test_set_gauge_rejects_legacy_tags(self, prometheus_metrics):
+        with pytest.raises(TypeError):
+            prometheus_metrics.set_gauge(
+                name="bioetl_circuit_breaker_state",
+                value=1.0,
+                tags={"adapter": "chembl"},
             )
 
 

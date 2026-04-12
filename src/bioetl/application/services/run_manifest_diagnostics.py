@@ -268,15 +268,6 @@ def _build_final_summary(
 ) -> dict[str, object]:
     """Build final summary with all processed data."""
     latest_entry = ledger_entries[-1]
-    alert_signals = _build_alert_signals(
-        latest_status=latest_entry.status,
-        artifact_refs=artifact_refs,
-        lineage_fragment_ids=lineage_fragment_ids,
-        missing_link_count=missing_link_count,
-        dq_signal_present=dq_signal_present,
-        cross_validation_signal_present=cross_validation_signal_present,
-    )
-    next_steps = _build_next_steps(alert_signals)
     planned_artifacts = cast(
         list[dict[str, object]],
         base_summary.get("planned_artifacts", []),
@@ -359,7 +350,6 @@ def _build_final_summary(
         identity_graph["input_snapshot_count"] = base_summary["input_snapshot_count"]
         identity_graph["input_snapshots"] = base_summary["input_snapshots"]
 
-    summary = base_summary.copy()
     persistence_profile = _build_persistence_profile(
         base_summary=base_summary,
         ledger_entries_present=bool(ledger_entries),
@@ -367,6 +357,24 @@ def _build_final_summary(
         lineage_fragment_ids=lineage_fragment_ids,
         missing_link_count=missing_link_count,
     )
+    alert_signals = _build_alert_signals(
+        latest_status=latest_entry.status,
+        artifact_refs=artifact_refs,
+        lineage_fragment_ids=lineage_fragment_ids,
+        missing_link_count=missing_link_count,
+        dq_signal_present=dq_signal_present,
+        cross_validation_signal_present=cross_validation_signal_present,
+        replay_ready_missing_requirements=cast(
+            "list[str]",
+            persistence_profile.get("replay_ready_missing_requirements", []),
+        ),
+        forensic_grade_missing_requirements=cast(
+            "list[str]",
+            persistence_profile.get("forensic_grade_missing_requirements", []),
+        ),
+    )
+    next_steps = _build_next_steps(alert_signals)
+    summary = base_summary.copy()
     summary.update(
         {
             "total_events": len(ledger_entries),
@@ -659,6 +667,8 @@ def _build_alert_signals(
     missing_link_count: int,
     dq_signal_present: bool,
     cross_validation_signal_present: bool,
+    replay_ready_missing_requirements: list[str],
+    forensic_grade_missing_requirements: list[str],
 ) -> dict[str, bool]:
     """Map diagnostics summary to alert-oriented boolean signals."""
     latest_status_normalized = (latest_status or "").strip().lower()
@@ -669,6 +679,8 @@ def _build_alert_signals(
         "run_shutdown": latest_status_normalized == "shutdown",
         "artifact_linkage_gap": missing_link_count > 0,
         "lineage_gap": has_artifact_refs and not lineage_fragment_ids,
+        "replay_ready_gap": bool(replay_ready_missing_requirements),
+        "forensic_grade_gap": bool(forensic_grade_missing_requirements),
         "dq_signal_present": dq_signal_present,
         "cross_validation_signal_present": cross_validation_signal_present,
     }
@@ -688,6 +700,14 @@ def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
     if alert_signals.get("lineage_gap", False):
         steps.append(
             "Investigate lineage persistence for published artifacts before restart."
+        )
+    if alert_signals.get("replay_ready_gap", False):
+        steps.append(
+            "Review replay-ready persistence requirements before treating this run as exact-replay capable."
+        )
+    if alert_signals.get("forensic_grade_gap", False):
+        steps.append(
+            "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
         )
     if alert_signals.get("dq_signal_present", False):
         steps.append(

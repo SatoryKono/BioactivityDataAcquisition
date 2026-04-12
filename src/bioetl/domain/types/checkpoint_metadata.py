@@ -211,16 +211,6 @@ class CheckpointMetadata:
             return None
         return compute_execution_identity_fingerprint(payload)
 
-    def runtime_anchor_payload(self) -> JsonDict:
-        """Backward-compatible alias for checkpoint execution-identity payload."""
-
-        return self.checkpoint_execution_identity_payload()
-
-    def runtime_anchor_fingerprint(self) -> str | None:
-        """Backward-compatible alias for checkpoint execution-identity fingerprint."""
-
-        return self.checkpoint_execution_identity_fingerprint()
-
 
 def _extract_manifest_id_from_run_context(data: JsonDict) -> str | None:
     """Backfill manifest_id from legacy run_context payloads when present."""

@@ -12,7 +12,6 @@ __all__ = [
     "compute_degraded_runtime_anchor_fingerprint",
     "compute_input_snapshot_identity_fingerprint",
     "compute_manifest_execution_fingerprint",
-    "compute_runtime_anchor_fingerprint",
 ]
 
 
@@ -59,11 +58,3 @@ def compute_degraded_runtime_anchor_fingerprint(
     """
 
     return compute_execution_identity_fingerprint(payload)
-
-
-def compute_runtime_anchor_fingerprint(
-    payload: Mapping[str, object | None],
-) -> str:
-    """Backward-compatible alias for the degraded runtime-anchor helper."""
-
-    return compute_degraded_runtime_anchor_fingerprint(payload)

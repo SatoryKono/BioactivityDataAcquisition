@@ -453,13 +453,16 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     assert isinstance(alert_signals, dict)
     assert alert_signals["artifact_linkage_gap"] is False
     assert alert_signals["lineage_gap"] is False
+    assert alert_signals["replay_ready_gap"] is True
+    assert alert_signals["forensic_grade_gap"] is True
     assert alert_signals["dq_signal_present"] is False
     assert alert_signals["cross_validation_signal_present"] is False
     if signal_key is None:
         assert alert_signals["run_failed"] is False
         assert alert_signals["run_shutdown"] is False
         assert summary["next_steps"] == [
-            "No alert signals detected; continue routine monitoring."
+            "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
+            "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ]
     else:
         assert alert_signals[signal_key] is True

@@ -22,6 +22,7 @@ _SERVER_LOCK = Lock()
 # Re-export for backward compatibility
 __all__ = [
     "MetricsServerError",
+    "is_metrics_server_running",
     "push_metrics_to_gateway",
     "reset_server_state",
     "start_metrics_server",
@@ -141,6 +142,11 @@ def start_metrics_server(
                 return _handle_unexpected_error(port, e, fail_fast, logger)
 
         return False
+
+
+def is_metrics_server_running() -> bool:
+    """Return the live in-process metrics server state."""
+    return _SERVER_STARTED
 
 
 def push_metrics_to_gateway(

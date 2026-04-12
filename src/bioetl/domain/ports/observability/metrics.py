@@ -9,29 +9,16 @@ MetricLabels = dict[str, str]
 
 def resolve_metric_labels(
     labels: MetricLabels | None = None,
-    *,
-    _labels: MetricLabels | None = None,
-    tags: MetricLabels | None = None,
 ) -> MetricLabels:
-    """Resolve canonical labels with legacy alias compatibility.
-
-    Precedence order is explicit ``labels`` > legacy ``_labels`` > legacy ``tags``.
+    """Resolve canonical metric labels.
 
     Args:
-        labels: Canonical metric labels dict (highest precedence).
-        _labels: Legacy ``_labels`` alias (second precedence).
-        tags: Legacy ``tags`` alias (lowest precedence).
+        labels: Canonical metric labels dict.
 
     Returns:
-        Resolved metric labels dict. Returns an empty dict if all inputs are None.
+        Resolved metric labels dict. Returns an empty dict if ``labels`` is None.
     """
-    if labels is not None:
-        return labels
-    if _labels is not None:
-        return _labels
-    if tags is not None:
-        return tags
-    return {}
+    return labels or {}
 
 
 @runtime_checkable
@@ -43,9 +30,6 @@ class MetricsPort(Protocol):
         name: str,
         value: float,
         labels: MetricLabels | None = None,
-        *,
-        _labels: MetricLabels | None = None,
-        tags: MetricLabels | None = None,
     ) -> None:
         """Record an observed value in a histogram metric.
 
@@ -53,8 +37,6 @@ class MetricsPort(Protocol):
             name: Histogram metric name.
             value: Observed numeric value to record.
             labels: Canonical metric labels.
-            _labels: Legacy labels alias (lower precedence than labels).
-            tags: Legacy tags alias (lowest precedence).
         """
         ...
 
@@ -63,9 +45,6 @@ class MetricsPort(Protocol):
         name: str,
         value: int,
         labels: MetricLabels | None = None,
-        *,
-        _labels: MetricLabels | None = None,
-        tags: MetricLabels | None = None,
     ) -> None:
         """Increment a counter metric by the given value.
 
@@ -73,8 +52,6 @@ class MetricsPort(Protocol):
             name: Counter metric name.
             value: Amount to increment the counter by.
             labels: Canonical metric labels.
-            _labels: Legacy labels alias (lower precedence than labels).
-            tags: Legacy tags alias (lowest precedence).
         """
         ...
 
@@ -83,9 +60,6 @@ class MetricsPort(Protocol):
         name: str,
         value: float,
         labels: MetricLabels | None = None,
-        *,
-        _labels: MetricLabels | None = None,
-        tags: MetricLabels | None = None,
     ) -> None:
         """Set a gauge metric to the given value.
 
@@ -93,8 +67,6 @@ class MetricsPort(Protocol):
             name: Gauge metric name.
             value: New gauge value to set.
             labels: Canonical metric labels.
-            _labels: Legacy labels alias (lower precedence than labels).
-            tags: Legacy tags alias (lowest precedence).
         """
         ...
 

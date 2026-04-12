@@ -275,6 +275,11 @@ than silently accepting the bundle as canonical.
 - `persistence_profile.attained_profile=degraded_observable` means manifest
   inspection still works, but replay-ready requirements are missing and should
   be read from `*_missing_requirements`;
+- `alert_signals.replay_ready_gap=true` means the run must not be treated as
+  exact-replay ready even if manifest inspection itself is available;
+- `alert_signals.forensic_grade_gap=true` means the run must not be treated as
+  full postmortem/trace reconstruction evidence without checking the listed
+  missing requirements;
 - `correlation_anchor_gaps.effective_config_hash > 0` means execution-critical ledger events lost effective config linkage;
 - `correlation_anchor_gaps.contract_version > 0` on failure-critical runs means contract traceability is incomplete.
 - `persistence_profile.composite_resume_reconstructability` states the current

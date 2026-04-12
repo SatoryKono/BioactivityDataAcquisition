@@ -277,6 +277,8 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "replay_ready_gap": False,
+        "forensic_grade_gap": False,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
@@ -560,6 +562,8 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "replay_ready_gap": False,
+        "forensic_grade_gap": False,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
@@ -714,6 +718,8 @@ def test_show_collects_dq_trace_anchors() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "replay_ready_gap": False,
+        "forensic_grade_gap": False,
         "dq_signal_present": True,
         "cross_validation_signal_present": False,
     }
@@ -1036,6 +1042,8 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "replay_ready_gap": False,
+        "forensic_grade_gap": False,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
@@ -1149,6 +1157,8 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "replay_ready_gap": False,
+        "forensic_grade_gap": False,
         "dq_signal_present": True,
         "cross_validation_signal_present": False,
     }
@@ -1219,6 +1229,8 @@ def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "replay_ready_gap": False,
+        "forensic_grade_gap": False,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
@@ -1288,6 +1300,8 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "replay_ready_gap": False,
+        "forensic_grade_gap": False,
         "dq_signal_present": True,
         "cross_validation_signal_present": True,
     }
