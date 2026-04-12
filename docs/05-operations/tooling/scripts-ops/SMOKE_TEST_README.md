@@ -222,4 +222,4 @@ docker rm bioetl-neo4j
 
 **Status After Test Passes**: ✅ Neo4j Memory MCP fully operational
 
-See [NEO4J-MCP-INDEX.md](../../docs/05-operations/deployment/NEO4J-MCP-INDEX.md) for more documentation.
+See [NEO4J-MCP-INDEX.md](../../deployment/NEO4J-MCP-INDEX.md) for more documentation.

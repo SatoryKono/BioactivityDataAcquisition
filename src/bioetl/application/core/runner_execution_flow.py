@@ -25,9 +25,8 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointManagerService,
     )
-    from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.core.postrun.service import PostrunService
+    from bioetl.application.core.postrun.service import PostrunResult, PostrunService
     from bioetl.application.core.preflight.service import PreflightService
     from bioetl.application.observability.observer import PipelineObserver
     from bioetl.application.services.medallion_lifecycle import (
@@ -35,7 +34,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.types import HealthReport
-    from bioetl.domain.value_objects import DQAnomaly
 
 
 _PREFLIGHT_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[0]

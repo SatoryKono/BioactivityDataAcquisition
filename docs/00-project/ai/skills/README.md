@@ -31,11 +31,15 @@ This directory stores published documentation for BioETL AI skills across suppor
 ## Canonical Source
 
 - Canonical Codex runtime skill source: `.codex/skills/`
+- Claude runtime-specific skill helpers remain under `.claude/skills/` for
+  Claude-only behavior and workflow support.
 - `docs/00-project/ai/skills/local/` is a published mirror layer and may retain
   compatibility entries for navigation
 - Edit runtime skill behavior in the runtime source first; do not treat
   `local/` as the primary authoring surface
 - When active docs and mirrors diverge, prefer current runtime orchestration guidance from `.codex/agents/ORCHESTRATION.md`
+- Cross-runtime ownership and sync rules are described in
+  [AI Runtime Mirror Ownership](../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 ## Layout
 

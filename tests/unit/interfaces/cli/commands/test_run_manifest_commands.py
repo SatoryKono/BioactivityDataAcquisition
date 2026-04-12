@@ -189,6 +189,38 @@ class _FakeRunManifestService:
                     "contract_version": 0,
                     "composite_run_id": 0,
                 },
+                "persistence_profile": {
+                    "attained_profile": "forensic_grade",
+                    "claims": {
+                        "degraded_observable": True,
+                        "replay_ready": True,
+                        "forensic_grade": True,
+                    },
+                    "surfaces": {
+                        "control_plane_manifest": True,
+                        "effective_config_artifact": True,
+                        "immutable_input_snapshots": True,
+                        "exact_replay_capability": True,
+                        "run_ledger_history": True,
+                        "artifact_lineage_links": True,
+                    },
+                    "replay_ready_missing_requirements": [],
+                    "forensic_grade_missing_requirements": [],
+                    "composite_resume_reconstructability": {
+                        "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+                        "reconstructs": [
+                            "state",
+                            "seed_completed",
+                            "merge_completed",
+                            "last_event_id",
+                            "last_event_occurred_at",
+                        ],
+                        "does_not_reconstruct": [
+                            "per_provider_result_maps",
+                            "rich_checkpoint_payloads",
+                        ],
+                    },
+                },
                 "alert_signals": {
                     "run_failed": False,
                     "run_shutdown": False,
@@ -411,6 +443,10 @@ class TestRunManifestCommands:
         assert "composite.cross_validation.quarantine" in result.output
         assert "cross_validation_config_paths" in result.output
         assert "correlation_anchor_gaps" in result.output
+        assert "persistence_profile" in result.output
+        assert "attained_profile" in result.output
+        assert "forensic_grade" in result.output
+        assert "composite_resume_reconstructability" in result.output
         assert "/tmp/reports/gold_dq.json" in result.output
         assert "/tmp/output/gold/chembl/activity" in result.output
         assert "/tmp/output/gold/chembl/activity/_metadata.yaml" in result.output

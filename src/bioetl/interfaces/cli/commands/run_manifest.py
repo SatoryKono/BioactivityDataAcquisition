@@ -247,6 +247,7 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                     "correlation_anchor_gaps",
                     diagnostics.get("correlation_anchor_gaps"),
                 ),
+                ("persistence_profile", diagnostics.get("persistence_profile")),
                 ("alert_signals", diagnostics.get("alert_signals")),
                 ("next_steps", diagnostics.get("next_steps")),
             ),

@@ -57,7 +57,9 @@ Interpretation:
 - if `run_manifest_enabled=false`, no new control-plane artifact is expected for new runs;
 - if `run_manifest_enabled=true` and `run_ledger_enabled=false`, manifest inspection still works but ledger history is intentionally absent;
 - if `run_manifest_enabled=false`, runtime assembly also coerces ledger attachment off for new runs;
-- if resume is enabled, `checkpoint_compatibility_policy` controls checkpoint identity mismatch handling.
+- if resume is enabled, `checkpoint_compatibility_policy` controls checkpoint mismatch handling:
+  `observe` may continue only for degraded non-identity signals, while canonical
+  execution-identity mismatches still block resume.
 
 ### 2. Resolve one run
 

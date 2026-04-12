@@ -27,6 +27,16 @@ supporting internal artifacts.
 - **Skills surface**: `docs/00-project/ai/skills/` хранит published mirrors,
   catalogs и reference mirrors для локальных/global skills.
 
+## Ownership Contract
+
+- `.codex/**` is the runtime source of truth for Codex behavior.
+- `.claude/**` is the runtime source of truth for Claude behavior.
+- `docs/00-project/ai/**` is the published/internal mirror and contributor
+  guidance surface; it does not redefine runtime behavior by itself.
+- Default sync direction is runtime tree first, docs mirror second.
+
+See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
+
 ## Reading Priority
 
 При чтении AI docs используй такой приоритет:
@@ -59,3 +69,5 @@ supporting internal artifacts.
 - Different runtimes may keep intentionally divergent orchestration docs.
 - Prompts, memory sheets and skill mirrors are support artifacts; they do not
   redefine project rules by themselves.
+- When contributors need to change runtime behavior, they SHOULD edit the
+  relevant runtime tree first and then refresh the docs mirror if needed.

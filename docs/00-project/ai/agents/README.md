@@ -27,6 +27,11 @@ ______________________________________________________________________
 - Логические профили `py-*` отображаются на native runtime mechanisms
   (`spawn_agent` roles в Codex, runtime-specific agent tools/registries в других
   средах).
+- Edit runtime behavior in `.codex/**` or `.claude/**` first; use this docs
+  surface for published mirrors, navigation, and contributor guidance.
+
+Ownership and sync rules are fixed in
+[AI Runtime Mirror Ownership](policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 ## BioETL Core (8 активных агентов)
 
@@ -49,3 +54,5 @@ ______________________________________________________________________
 - [AGENT.md](guides/AGENT.md) — Core Engineering Guide
 - [CLAUDE.md](guides/CLAUDE.md) — Claude CLI specific guide
 - [GEMINI.md](guides/GEMINI.md) — Gemini CLI specific guide
+- [AI Runtime Mirror Ownership](policy/AI_RUNTIME_MIRROR_OWNERSHIP.md) —
+  source-of-truth, sync direction, allowed divergence

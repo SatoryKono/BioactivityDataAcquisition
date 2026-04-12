@@ -120,7 +120,8 @@ bioetl run --pipeline chembl_activity --use-cached-bronze
 **Checkpoint resume policy (runtime setting):**
 
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=observe`
-  Продолжить resume, но записать warning при несовместимом checkpoint.
+  Degraded operator mode: продолжить можно только при несовместимостях вне
+  canonical execution identity; identity mismatch всё равно блокирует resume.
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=soft_fail`
   (по умолчанию) Заблокировать resume при несовместимости.
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=hard_fail`
@@ -280,6 +281,9 @@ Operational semantics:
 - `run_ledger_enabled=true` допустим только при `run_manifest_enabled=true`;
 - `checkpoint_compatibility_policy` принимает значения `observe`, `soft_fail`,
   `hard_fail` и управляет resume-поведением при checkpoint identity mismatch.
+- `observe` не является strict reproducibility mode: canonical
+  execution-identity mismatch всё равно блокирует resume, даже если другие
+  degraded signals могут быть только зафиксированы warning-ом.
 - при `run_manifest_enabled=false` runtime builder также эффективно отключает
   ledger attachment для новых запусков.
 
