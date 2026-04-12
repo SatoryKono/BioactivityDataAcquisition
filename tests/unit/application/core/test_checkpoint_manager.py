@@ -572,9 +572,52 @@ class TestCheckpointManagerCompatibilityPolicy:
 
         result = await manager.load_checkpoint()
 
+        assert result is None
+        mock_logger.warning.assert_called()
+        warning_call = mock_logger.warning.call_args
+        assert "resume blocked despite observe policy" in warning_call.args[0]
+        assert warning_call.kwargs["resume_rejected"] is True
+        assert warning_call.kwargs["execution_identity_compatible"] is False
+
+    async def test_observe_policy_still_allows_resume_on_non_identity_mismatch(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 84, "dq_contract_compatibility_hash": "old"},
+        )
+        compatibility_service = MagicMock()
+        compatibility_service.validate_checkpoint_compatibility.return_value = (
+            CheckpointCompatibilityResult.incompatible_result(
+                dq_compatible=False,
+                pipeline_compatible=True,
+                execution_identity_compatible=True,
+                messages=["dq mismatch"],
+            )
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=compatibility_service,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                dq_contract_compatibility_hash="new",
+            ),
+            compatibility_policy="observe",
+        )
+
+        result = await manager.load_checkpoint()
+
         assert result is not None
         assert result.records_processed == 84
-        mock_logger.warning.assert_called()
+        warning_call = mock_logger.warning.call_args
+        assert "resume continues" in warning_call.args[0]
+        assert warning_call.kwargs["resume_rejected"] is False
 
     async def test_hard_fail_policy_raises_on_incompatibility(
         self, mock_checkpoint_port, mock_logger

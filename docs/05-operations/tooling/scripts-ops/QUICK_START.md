@@ -67,9 +67,9 @@ In Codex interactive mode:
 
 ## If You Have Questions
 
-- **Quick reference**: `scripts/ops/CODEX_WSL_QUICK_REF.md`
-- **Detailed guide**: `scripts/ops/CODEX_WSL_SETUP.md`
-- **How to run**: `scripts/ops/HOW_TO_RUN.md`
+- **Quick reference**: `docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md`
+- **Detailed guide**: `docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md`
+- **How to run**: `docs/05-operations/tooling/scripts-ops/HOW_TO_RUN.md`
 
 ## Verification Commands
 

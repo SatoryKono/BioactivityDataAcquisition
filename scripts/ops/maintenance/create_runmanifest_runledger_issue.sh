@@ -8,7 +8,7 @@ API_ROOT="https://api.github.com/repos"
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/ops/create_runmanifest_runledger_issue.sh [--apply] [--owner NAME] [--repo NAME]
+  bash scripts/ops/maintenance/create_runmanifest_runledger_issue.sh [--apply] [--owner NAME] [--repo NAME]
 
 Options:
   --apply        Create the issue in GitHub. Default mode is dry-run.

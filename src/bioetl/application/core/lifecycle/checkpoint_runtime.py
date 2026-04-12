@@ -118,13 +118,20 @@ def handle_incompatible_checkpoint(
     pipeline_name: str,
     compatibility_policy: CheckpointCompatibilityPolicy,
     checkpoint_metadata: CheckpointMetadata,
+    execution_identity_compatible: bool,
     messages: list[str],
 ) -> CheckpointMetadata | None:
     """Apply configured policy to an incompatible checkpoint."""
+    forced_resume_rejection = (
+        compatibility_policy == "observe" and not execution_identity_compatible
+    )
     payload = {
         "pipeline": pipeline_name,
         "compatibility_policy": compatibility_policy,
-        "resume_rejected": compatibility_policy != "observe",
+        "resume_rejected": compatibility_policy != "observe"
+        or forced_resume_rejection,
+        "execution_identity_compatible": execution_identity_compatible,
+        "identity_mismatch_forces_rejection": forced_resume_rejection,
         "messages": messages,
         "checkpoint_metadata": checkpoint_metadata.to_dict(),
         "checkpoint_identity": {
@@ -135,6 +142,13 @@ def handle_incompatible_checkpoint(
             "input_snapshot_ids": list(checkpoint_metadata.input_snapshot_ids),
         },
     }
+    if forced_resume_rejection:
+        logger.warning(
+            "Checkpoint execution identity mismatch observed; resume blocked "
+            "despite observe policy.",
+            **payload,
+        )
+        return None
     if compatibility_policy == "observe":
         logger.warning(
             "Checkpoint compatibility mismatch observed; resume continues.",

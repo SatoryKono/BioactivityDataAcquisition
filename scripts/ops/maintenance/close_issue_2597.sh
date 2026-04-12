@@ -10,7 +10,7 @@ ISSUE_NUMBER="2597"
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/ops/close_issue_2597.sh [--apply] [--owner NAME] [--repo NAME]
+  bash scripts/ops/maintenance/close_issue_2597.sh [--apply] [--owner NAME] [--repo NAME]
 
 Options:
   --apply        Post the closing comment and close the issue. Default mode is dry-run.

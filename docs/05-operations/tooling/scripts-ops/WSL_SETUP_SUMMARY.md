@@ -44,7 +44,7 @@ Your project has existing Codex scripts for Windows:
 
 ### Documentation
 
-5. **`scripts/ops/CODEX_WSL_SETUP.md`** (detailed guide)
+5. **`docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md`** (detailed guide)
    - Complete setup instructions
    - Prerequisites and verification steps
    - Proxy configuration for VPN access
@@ -53,7 +53,7 @@ Your project has existing Codex scripts for Windows:
    - Advanced configuration options
    - Best practices
 
-6. **`scripts/ops/CODEX_WSL_QUICK_REF.md`** (quick reference)
+6. **`docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md`** (quick reference)
    - One-page quick start
    - Command cheat sheet
    - Common prompts and tasks

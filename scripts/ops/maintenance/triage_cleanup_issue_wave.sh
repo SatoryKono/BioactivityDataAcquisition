@@ -8,7 +8,7 @@ API="https://api.github.com/repos/${OWNER}/${REPO}"
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/ops/triage_cleanup_issue_wave.sh [--dry-run]
+  bash scripts/ops/maintenance/triage_cleanup_issue_wave.sh [--dry-run]
 
 Environment:
   GITHUB_PERSONAL_ACCESS_TOKEN   Fine-grained or classic token with issue write access

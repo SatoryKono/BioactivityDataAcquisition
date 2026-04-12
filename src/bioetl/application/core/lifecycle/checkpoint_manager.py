@@ -153,6 +153,9 @@ class CheckpointManagerService:
                                 pipeline_name=self._pipeline_name,
                                 compatibility_policy=self._compatibility_policy,
                                 checkpoint_metadata=checkpoint_metadata,
+                                execution_identity_compatible=(
+                                    compatibility_result.execution_identity_compatible
+                                ),
                                 messages=compatibility_result.messages,
                             )
                         except Exception:

@@ -7,7 +7,7 @@ DEFAULT_REPO="BioactivityDataAcquisition"
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/ops/update_github_issue.sh --issue NUMBER [options]
+  bash scripts/ops/maintenance/update_github_issue.sh --issue NUMBER [options]
 
 Options:
   --issue NUMBER         GitHub issue number to update (required)
@@ -29,17 +29,17 @@ Environment:
   GITHUB_TOKEN                   Alternative token env var
 
 Examples:
-  bash scripts/ops/update_github_issue.sh \
+  bash scripts/ops/maintenance/update_github_issue.sh \
     --issue 2594 \
     --comment "Schema drift gate implemented" \
     --state closed
 
-  bash scripts/ops/update_github_issue.sh \
+  bash scripts/ops/maintenance/update_github_issue.sh \
     --issue 2594 \
     --comment-file /tmp/comment.md \
     --state closed
 
-  bash scripts/ops/update_github_issue.sh \
+  bash scripts/ops/maintenance/update_github_issue.sh \
     --issue 2511 \
     --title-file /tmp/title.txt \
     --body-file /tmp/body.md

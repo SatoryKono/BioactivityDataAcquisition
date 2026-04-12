@@ -451,7 +451,7 @@ class TestCheckpointResumeCompatibilityPolicy:
     """Integration checks for resume behavior under compatibility policies."""
 
     @pytest.mark.asyncio
-    async def test_observe_policy_allows_resume_on_execution_identity_mismatch(
+    async def test_observe_policy_blocks_resume_on_execution_identity_mismatch(
         self,
     ) -> None:
         checkpoint_port = _InMemoryCheckpointPort()
@@ -485,12 +485,14 @@ class TestCheckpointResumeCompatibilityPolicy:
 
         result = await manager.load_checkpoint()
 
-        assert result is not None
-        assert result.records_processed == 120
+        assert result is None
         warning_messages = [
             call.args[0] for call in logger.warning.call_args_list if call.args
         ]
-        assert any("resume continues" in message for message in warning_messages)
+        assert any(
+            "resume blocked despite observe policy" in message
+            for message in warning_messages
+        )
 
     @pytest.mark.asyncio
     async def test_soft_fail_policy_blocks_resume_on_execution_identity_mismatch(

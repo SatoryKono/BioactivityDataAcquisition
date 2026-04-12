@@ -101,7 +101,7 @@ NEO4J_DATABASE=neo4j
 | `scripts/ops/smoke_test_neo4j_mcp_knowall.sh` | ⭐ Verify setup (run second) |
 | `scripts/ops/mcp_neo4j_memory_wrapper.sh` | MCP wrapper (@knowall-ai) |
 | `.env.local` | WSL-specific config (auto-created) |
-| `scripts/ops/load_repo_env.sh` | Env variable loader |
+| `scripts/ops/support/load_repo_env.sh` | Env variable loader |
 
 ---
 

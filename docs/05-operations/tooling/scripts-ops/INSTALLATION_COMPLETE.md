@@ -165,8 +165,8 @@ chmod +x ./scripts/ops/codex-exec.sh
    ```
 
 2. **Read the documentation**
-   - Quick: `scripts/ops/CODEX_WSL_QUICK_REF.md`
-   - Full: `scripts/ops/CODEX_WSL_SETUP.md`
+   - Quick: `docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md`
+   - Full: `docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md`
 
 3. **Integrate into your workflow**
    - Use for code reviews
