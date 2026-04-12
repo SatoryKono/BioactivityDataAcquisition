@@ -90,6 +90,11 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "workflow_job_surface",
         "title": "Workflow job ownership path",
     },
+    "owner-cli-command": {
+        "mode": "owner",
+        "target_label": "cli_command_surface",
+        "title": "CLI command ownership path",
+    },
     "neighbors-contract": {
         "mode": "neighbors",
         "target_label": "contract_surface",
@@ -145,6 +150,12 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "title": "Run instance semantic neighborhood",
         "relation_types": ("REFERENCES_ARTIFACT", "DEPENDS_ON", "DESCRIBED_IN"),
     },
+    "neighbors-cli-command": {
+        "mode": "neighbors",
+        "target_label": "cli_command_surface",
+        "title": "CLI command semantic neighborhood",
+        "relation_types": ("RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"),
+    },
     "docs-drift": {
         "mode": "docs_drift",
         "target_label": "doc_surface",
@@ -154,6 +165,11 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "mode": "workflow_gates",
         "target_label": "workflow_surface",
         "title": "Workflow gates and executed targets",
+    },
+    "workflow-artifacts": {
+        "mode": "workflow_artifacts",
+        "target_label": "workflow_surface",
+        "title": "Workflow actions, artifacts, and secrets",
     },
     "storage-lineage": {
         "mode": "storage_lineage",
@@ -507,7 +523,7 @@ def _simplification_blockers_statement() -> str:
 
 def _docs_drift_statement() -> str:
     return (
-        "MATCH (doc)-[:DESCRIBES]->(target) "
+        "MATCH (doc)-[rel:DESCRIBES]->(target) "
         "WHERE any(label IN labels(doc) WHERE label IN ['doc_source_surface', 'doc_artifact', 'policy_surface']) "
         "AND ($name = 'all' OR doc.name = $name OR target.name = $name OR coalesce(doc.source_path, '') = $name) "
         "RETURN doc.name AS doc_name, "
@@ -515,7 +531,13 @@ def _docs_drift_statement() -> str:
         "coalesce(doc.source_path, '') AS doc_source_path, "
         "target.name AS target_name, "
         "labels(target) AS target_labels, "
-        "coalesce(target.source_path, '') AS target_source_path "
+        "coalesce(target.source_path, '') AS target_source_path, "
+        "coalesce(rel.doc_reference, '') AS doc_reference, "
+        "coalesce(rel.evidence_kind, '') AS evidence_kind, "
+        "coalesce(rel.confidence, '') AS confidence, "
+        "coalesce(rel.section_title, '') AS section_title, "
+        "coalesce(rel.section_anchor, '') AS section_anchor, "
+        "coalesce(rel.line_number, 0) AS line_number "
         "ORDER BY doc.name ASC, target.name ASC"
     )
 
@@ -534,6 +556,26 @@ def _workflow_gates_statement() -> str:
         "  WHEN target.name IS NULL THEN NULL "
         "  ELSE {name: target.name, labels: labels(target)} "
         "END) AS run_targets "
+        "ORDER BY workflow.name ASC, job.name ASC"
+    )
+
+
+def _workflow_artifacts_statement() -> str:
+    return (
+        "MATCH (workflow:workflow_surface) "
+        "WHERE $name = 'all' OR workflow.name = $name "
+        "MATCH (workflow)-[:CONTAINS]->(job:workflow_job_surface) "
+        "OPTIONAL MATCH (job)-[:USES_ACTION]->(action:workflow_action_surface) "
+        "OPTIONAL MATCH (job)-[artifact_rel:PUBLISHES_ARTIFACT|DEPENDS_ON]->(artifact:workflow_artifact_surface) "
+        "OPTIONAL MATCH (job)-[:REQUIRES_SECRET]->(secret:workflow_secret_surface) "
+        "RETURN workflow.name AS workflow_name, "
+        "job.name AS job_name, "
+        "collect(DISTINCT action.name) AS actions, "
+        "collect(DISTINCT CASE "
+        "  WHEN artifact.name IS NULL THEN NULL "
+        "  ELSE {name: artifact.name, relation: type(artifact_rel)} "
+        "END) AS artifacts, "
+        "collect(DISTINCT secret.name) AS secrets "
         "ORDER BY workflow.name ASC, job.name ASC"
     )
 
@@ -620,6 +662,8 @@ def _run_query(
         statement = _docs_drift_statement()
     elif profile_config["mode"] == "workflow_gates":
         statement = _workflow_gates_statement()
+    elif profile_config["mode"] == "workflow_artifacts":
+        statement = _workflow_artifacts_statement()
     elif profile_config["mode"] == "storage_lineage":
         statement = _storage_lineage_statement()
     elif profile_config["mode"] == "run_artifacts":
@@ -659,6 +703,7 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             "neighbors": "no semantic neighbors found",
             "docs_drift": "no docs-to-code drift edges found",
             "workflow_gates": "no workflow gate coverage found",
+            "workflow_artifacts": "no workflow action or artifact coverage found",
             "storage_lineage": "no storage lineage found",
             "run_artifacts": "no run instance artifact chain found",
             "duplication_cluster": "no duplication cluster found",
@@ -717,11 +762,23 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             target_label_str = ",".join(str(label) for label in target_labels) if isinstance(target_labels, list) else ""
             doc_path = str(row.get("doc_source_path") or "")
             target_path = str(row.get("target_source_path") or "")
+            doc_reference = str(row.get("doc_reference") or "")
+            evidence_kind = str(row.get("evidence_kind") or "")
+            confidence = str(row.get("confidence") or "")
+            section_title = str(row.get("section_title") or "")
+            section_anchor = str(row.get("section_anchor") or "")
+            line_number = int(row.get("line_number") or 0)
             path_suffix = f" | doc_path={doc_path}" if doc_path else ""
             target_path_suffix = f" | target_path={target_path}" if target_path else ""
+            evidence_suffix = f" | ref={doc_reference}" if doc_reference else ""
+            evidence_suffix += f" | evidence_kind={evidence_kind}" if evidence_kind else ""
+            evidence_suffix += f" | confidence={confidence}" if confidence else ""
+            evidence_suffix += f" | section={section_title}" if section_title else ""
+            evidence_suffix += f" | anchor={section_anchor}" if section_anchor else ""
+            evidence_suffix += f" | line={line_number}" if line_number else ""
             lines.append(
                 f"- doc={doc_name} | doc_labels={doc_label_str} | target={target_name} | "
-                f"target_labels={target_label_str}{path_suffix}{target_path_suffix}"
+                f"target_labels={target_label_str}{path_suffix}{target_path_suffix}{evidence_suffix}"
             )
         if len(lines) == 1:
             lines.append("- no docs-to-code drift edges found")
@@ -755,6 +812,39 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
                 lines.extend(sorted(normalized_targets))
         if len(lines) == 1:
             lines.append("- no workflow gate coverage found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "workflow_artifacts":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            workflow_name = str(row.get("workflow_name") or "")
+            job_name = str(row.get("job_name") or "")
+            if not workflow_name or not job_name:
+                continue
+            lines.append(f"- workflow={workflow_name} | job={job_name}")
+            actions = row.get("actions")
+            if isinstance(actions, list):
+                for action_name in sorted({str(item) for item in actions if item}):
+                    lines.append(f"  action={action_name}")
+            artifacts = row.get("artifacts")
+            if isinstance(artifacts, list):
+                normalized_artifacts: set[str] = set()
+                for artifact in artifacts:
+                    if not isinstance(artifact, dict):
+                        continue
+                    artifact_name = str(artifact.get("name") or "")
+                    if not artifact_name:
+                        continue
+                    relation_name = str(artifact.get("relation") or "")
+                    relation_suffix = f" | relation={relation_name}" if relation_name else ""
+                    normalized_artifacts.add(f"  artifact={artifact_name}{relation_suffix}")
+                lines.extend(sorted(normalized_artifacts))
+            secrets = row.get("secrets")
+            if isinstance(secrets, list):
+                for secret_name in sorted({str(item) for item in secrets if item}):
+                    lines.append(f"  secret={secret_name}")
+        if len(lines) == 1:
+            lines.append("- no workflow action or artifact coverage found")
         return "\n".join(lines)
 
     if profile_config["mode"] == "storage_lineage":

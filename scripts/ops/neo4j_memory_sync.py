@@ -107,6 +107,10 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "run_instance_surface",
     "workflow_surface",
     "workflow_job_surface",
+    "workflow_action_surface",
+    "workflow_artifact_surface",
+    "workflow_secret_surface",
+    "cli_command_surface",
 )
 DEFAULT_FILE_STRUCTURE_REPO_ZONES: dict[str, tuple[str, ...]] = {
     "src": ("src",),
@@ -869,6 +873,9 @@ def _filtered_snapshot(
                 "project",
                 "workflow_surface",
                 "workflow_job_surface",
+                "workflow_action_surface",
+                "workflow_artifact_surface",
+                "workflow_secret_surface",
                 "script_surface",
                 "file_surface",
                 "directory_surface",
@@ -892,7 +899,22 @@ def _filtered_snapshot(
                 (
                     "DEPENDS_ON",
                     frozenset({"workflow_job_surface"}),
+                    frozenset({"workflow_job_surface", "workflow_artifact_surface"}),
+                ),
+                (
+                    "USES_ACTION",
                     frozenset({"workflow_job_surface"}),
+                    frozenset({"workflow_action_surface"}),
+                ),
+                (
+                    "PUBLISHES_ARTIFACT",
+                    frozenset({"workflow_job_surface"}),
+                    frozenset({"workflow_artifact_surface"}),
+                ),
+                (
+                    "REQUIRES_SECRET",
+                    frozenset({"workflow_job_surface"}),
+                    frozenset({"workflow_secret_surface"}),
                 ),
             )
         )
@@ -906,6 +928,7 @@ def _filtered_snapshot(
                 "script_surface",
                 "config_artifact",
                 "workflow_surface",
+                "cli_command_surface",
                 "file_surface",
                 "directory_surface",
                 "execution_path",
@@ -922,6 +945,7 @@ def _filtered_snapshot(
                             "script_surface",
                             "config_artifact",
                             "workflow_surface",
+                            "cli_command_surface",
                             "file_surface",
                             "directory_surface",
                             "execution_path",
@@ -2656,6 +2680,51 @@ def _add_quality_and_scripts(snapshot: GraphSnapshot, root: Path, project: NodeK
                     provenance="curated_script_clusters",
                 )
 
+    _add_cli_command_graph(snapshot, project, today)
+
+
+def _add_cli_command_graph(snapshot: GraphSnapshot, project: NodeKey, today: str) -> None:
+    execution_to_gates: dict[NodeKey, list[NodeKey]] = {}
+    execution_to_scripts: dict[NodeKey, list[NodeKey]] = {}
+    for relation in snapshot.relations.values():
+        if relation.source.label == "execution_path" and relation.relation_type == "EXECUTES_GATE":
+            execution_to_gates.setdefault(relation.source, []).append(relation.target)
+        if relation.target.label == "execution_path" and relation.relation_type == "PROVIDES":
+            execution_to_scripts.setdefault(relation.target, []).append(relation.source)
+
+    for execution in list(snapshot.nodes.values()):
+        if execution.key.label != "execution_path":
+            continue
+        command_name = _normalize_cli_command_name(execution.key.name)
+        if command_name is None:
+            continue
+        backing_scripts = execution_to_scripts.get(execution.key, [])
+        source_path = None
+        if backing_scripts:
+            source_path = backing_scripts[0].name
+        elif command_name.startswith("bioetl "):
+            command_suffix = command_name.split(" ", 1)[1]
+            source_candidate = Path("src/bioetl/interfaces/cli/commands") / f"{command_suffix.replace('-', '_')}.py"
+            if source_candidate.is_file():
+                source_path = _rel_path(DEFAULT_ROOT, source_candidate)
+        command = snapshot.add_node(
+            "cli_command_surface",
+            command_name,
+            summary=f"CLI command surface `{command_name}`.",
+            source_path=source_path,
+            source_kind="cli_command_surface",
+            platform=str(execution.properties.get("platform") or ""),
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(project, "HAS_CLI_COMMAND", command, provenance="cli_command_graph")
+        snapshot.add_relation(command, "RUNS_VIA", execution.key, provenance="cli_command_graph")
+        for gate in execution_to_gates.get(execution.key, []):
+            snapshot.add_relation(command, "EXECUTES_GATE", gate, provenance="cli_command_graph")
+        for script in backing_scripts:
+            snapshot.add_relation(command, "DEPENDS_ON", script, provenance="cli_command_graph")
+
 
 def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     tests_root = root / "tests"
@@ -3647,6 +3716,127 @@ def _workflow_quality_gates(run_text: str) -> tuple[str, ...]:
     return tuple(dict.fromkeys(gates))
 
 
+def _workflow_family(workflow_name: str, title: str) -> str:
+    lowered = f"{workflow_name} {title}".lower()
+    if "release" in lowered or "publish" in lowered:
+        return "release"
+    if "docs" in lowered or "doc" in lowered:
+        return "docs"
+    if "governance" in lowered or "schema" in lowered or "quality" in lowered:
+        return "governance"
+    if "docker" in lowered:
+        return "docker"
+    return "test"
+
+
+def _workflow_trigger_names(payload: dict[str, object]) -> tuple[str, ...]:
+    trigger_payload = payload.get("on")
+    if isinstance(trigger_payload, str):
+        return (trigger_payload,)
+    if isinstance(trigger_payload, list):
+        return tuple(sorted(str(item) for item in trigger_payload if isinstance(item, str)))
+    if isinstance(trigger_payload, dict):
+        return tuple(sorted(str(key) for key in trigger_payload))
+    return ()
+
+
+def _workflow_environment_name(job_payload: dict[str, object]) -> str | None:
+    environment_payload = job_payload.get("environment")
+    if isinstance(environment_payload, str):
+        return environment_payload
+    if isinstance(environment_payload, dict):
+        name = environment_payload.get("name")
+        if isinstance(name, str):
+            return name
+    return None
+
+
+def _workflow_matrix_axes(job_payload: dict[str, object]) -> tuple[str, ...]:
+    strategy_payload = job_payload.get("strategy")
+    if not isinstance(strategy_payload, dict):
+        return ()
+    matrix_payload = strategy_payload.get("matrix")
+    if not isinstance(matrix_payload, dict):
+        return ()
+    return tuple(sorted(str(key) for key in matrix_payload))
+
+
+def _workflow_secret_refs(payload: object) -> tuple[str, ...]:
+    secret_pattern = re.compile(r"secrets\.([A-Za-z0-9_]+)")
+    found: set[str] = set()
+
+    def _visit(value: object) -> None:
+        if isinstance(value, str):
+            for match in secret_pattern.finditer(value):
+                found.add(match.group(1))
+            return
+        if isinstance(value, dict):
+            for nested in value.values():
+                _visit(nested)
+            return
+        if isinstance(value, list):
+            for nested in value:
+                _visit(nested)
+
+    _visit(payload)
+    return tuple(sorted(found))
+
+
+def _workflow_action_key(uses_ref: str) -> str:
+    return uses_ref.split("@", 1)[0]
+
+
+def _workflow_artifact_specs(
+    workflow_name: str,
+    job_id: str,
+    step: dict[str, object],
+) -> tuple[tuple[str, str, str | None], ...]:
+    uses_ref = step.get("uses")
+    if not isinstance(uses_ref, str):
+        return ()
+    normalized_uses = uses_ref.lower()
+    if "upload-artifact" not in normalized_uses and "download-artifact" not in normalized_uses:
+        return ()
+    relation_type = "PUBLISHES_ARTIFACT" if "upload-artifact" in normalized_uses else "DEPENDS_ON"
+    with_payload = step.get("with")
+    artifact_name = None
+    artifact_path = None
+    if isinstance(with_payload, dict):
+        raw_name = with_payload.get("name")
+        if isinstance(raw_name, str):
+            artifact_name = raw_name
+        raw_path = with_payload.get("path")
+        if isinstance(raw_path, str):
+            artifact_path = raw_path
+    if artifact_name is None:
+        step_name = step.get("name")
+        if isinstance(step_name, str) and step_name:
+            artifact_name = step_name
+        else:
+            artifact_name = f"{job_id}-artifact"
+    return ((f"{workflow_name}::{artifact_name}", relation_type, artifact_path),)
+
+
+def _normalize_cli_command_name(raw_command: str) -> str | None:
+    lowered = raw_command.lower()
+    if " -m bioetl " in lowered:
+        match = re.search(r"-m\s+bioetl\s+([A-Za-z0-9_-]+)", raw_command)
+        if match:
+            return f"bioetl {match.group(1)}"
+        return "bioetl"
+    script_module_match = re.search(r"-m\s+scripts\.([A-Za-z0-9_]+)(?:\s+([A-Za-z0-9_.-]+))?", raw_command)
+    if script_module_match:
+        module_name = script_module_match.group(1)
+        subcommand = script_module_match.group(2)
+        if subcommand and not subcommand.startswith("-"):
+            return f"scripts.{module_name} {subcommand}"
+        return f"scripts.{module_name}"
+    script_path_match = re.search(r"scripts/([A-Za-z0-9_]+)/([A-Za-z0-9_.-]+)", raw_command)
+    if script_path_match:
+        return f"scripts.{script_path_match.group(1)} {script_path_match.group(2)}"
+    return None
+
+
 def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     workflows_root = root / ".github" / "workflows"
     if not workflows_root.is_dir():
@@ -3659,6 +3849,8 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
         workflow_name = workflow_path.stem
         title = payload.get("name") if isinstance(payload.get("name"), str) else workflow_name
         relative_path = _rel_path(root, workflow_path)
+        workflow_family = _workflow_family(workflow_name, title)
+        trigger_names = _workflow_trigger_names(payload)
         workflow = snapshot.add_node(
             "workflow_surface",
             workflow_name,
@@ -3666,6 +3858,8 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             source_path=relative_path,
             source_kind="github_actions_workflow",
             workflow_title=title,
+            workflow_family=workflow_family,
+            trigger_names=list(trigger_names) if trigger_names else None,
             last_verified=today,
             ingest_wave="repo_sync_v1",
             confidence="high",
@@ -3689,6 +3883,9 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                 uses_step_count = sum(
                     1 for step in steps if isinstance(step, dict) and isinstance(step.get("uses"), str)
                 )
+            secret_usage_hints = _workflow_secret_refs(job_payload)
+            matrix_axes = _workflow_matrix_axes(job_payload)
+            environment_name = _workflow_environment_name(job_payload)
             job_name = f"{workflow_name}::{job_id}"
             job = snapshot.add_node(
                 "workflow_job_surface",
@@ -3701,6 +3898,9 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                 runs_on=str(job_payload.get("runs-on")) if job_payload.get("runs-on") is not None else None,
                 inline_run_step_count=inline_run_step_count,
                 uses_step_count=uses_step_count,
+                matrix_axes=list(matrix_axes) if matrix_axes else None,
+                environment_name=environment_name,
+                secret_usage_hints=list(secret_usage_hints) if secret_usage_hints else None,
                 last_verified=today,
                 ingest_wave="repo_sync_v1",
                 confidence="high",
@@ -3708,10 +3908,72 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             job_nodes[(workflow_name, str(job_id))] = job
             snapshot.add_relation(workflow, "CONTAINS", job, provenance="workflow_graph")
 
+            reusable_workflow_ref = job_payload.get("uses")
+            if isinstance(reusable_workflow_ref, str):
+                action_key = _workflow_action_key(reusable_workflow_ref)
+                action = snapshot.add_node(
+                    "workflow_action_surface",
+                    action_key,
+                    summary=f"Workflow action or reusable workflow `{action_key}`.",
+                    source_path=relative_path,
+                    source_kind="github_actions_uses",
+                    uses_ref=reusable_workflow_ref,
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="high",
+                )
+                snapshot.add_relation(job, "USES_ACTION", action, provenance="workflow_graph")
+
+            for secret_name in secret_usage_hints:
+                secret = snapshot.add_node(
+                    "workflow_secret_surface",
+                    secret_name,
+                    summary=f"GitHub Actions secret usage hint `{secret_name}`.",
+                    source_path=relative_path,
+                    source_kind="github_actions_secret",
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="high",
+                )
+                snapshot.add_relation(job, "REQUIRES_SECRET", secret, provenance="workflow_graph")
+
             if isinstance(steps, list):
                 for step in steps:
                     if not isinstance(step, dict):
                         continue
+                    uses_ref = step.get("uses")
+                    if isinstance(uses_ref, str):
+                        action_key = _workflow_action_key(uses_ref)
+                        action = snapshot.add_node(
+                            "workflow_action_surface",
+                            action_key,
+                            summary=f"Workflow action `{action_key}`.",
+                            source_path=relative_path,
+                            source_kind="github_actions_uses",
+                            uses_ref=uses_ref,
+                            last_verified=today,
+                            ingest_wave="repo_sync_v1",
+                            confidence="high",
+                        )
+                        snapshot.add_relation(job, "USES_ACTION", action, provenance="workflow_graph")
+                        for artifact_name, artifact_relation, artifact_path in _workflow_artifact_specs(
+                            workflow_name,
+                            str(job_id),
+                            step,
+                        ):
+                            artifact = snapshot.add_node(
+                                "workflow_artifact_surface",
+                                artifact_name,
+                                summary=f"Workflow artifact `{artifact_name}`.",
+                                source_path=relative_path,
+                                source_kind="github_actions_artifact",
+                                artifact_path=artifact_path,
+                                workflow=workflow_name,
+                                last_verified=today,
+                                ingest_wave="repo_sync_v1",
+                                confidence="high",
+                            )
+                            snapshot.add_relation(job, artifact_relation, artifact, provenance="workflow_graph")
                     run_text = step.get("run")
                     if not isinstance(run_text, str):
                         continue
@@ -3722,6 +3984,18 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                         gate_key = NodeKey("quality_gate", gate_name)
                         if gate_key in snapshot.nodes:
                             snapshot.add_relation(job, "EXECUTES_GATE", gate_key, provenance="workflow_graph")
+                    for secret_name in _workflow_secret_refs(step):
+                        secret = snapshot.add_node(
+                            "workflow_secret_surface",
+                            secret_name,
+                            summary=f"GitHub Actions secret usage hint `{secret_name}`.",
+                            source_path=relative_path,
+                            source_kind="github_actions_secret",
+                            last_verified=today,
+                            ingest_wave="repo_sync_v1",
+                            confidence="high",
+                        )
+                        snapshot.add_relation(job, "REQUIRES_SECRET", secret, provenance="workflow_graph")
 
         for job_id, job_payload in jobs.items():
             if not isinstance(job_payload, dict):
@@ -3760,28 +4034,46 @@ def _normalize_docs_repo_reference(raw_ref: str) -> str | None:
     return None
 
 
+def _heading_anchor_slug(title: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    return slug or "section"
+
+
+def _markdown_heading_context(text: str, offset: int) -> tuple[str | None, str | None]:
+    heading_pattern = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
+    current_title: str | None = None
+    current_anchor: str | None = None
+    for match in heading_pattern.finditer(text):
+        if match.start() > offset:
+            break
+        current_title = match.group(2).strip()
+        current_anchor = _heading_anchor_slug(current_title)
+    return current_title, current_anchor
+
+
 def _resolve_docs_reference_target(
     snapshot: GraphSnapshot,
     ref: str,
-) -> NodeKey | None:
+) -> tuple[NodeKey | None, str, str]:
     exact_candidates = (
         NodeKey("module_surface", ref),
         NodeKey("script_surface", ref),
         NodeKey("test_artifact", ref),
         NodeKey("config_artifact", ref),
         NodeKey("workflow_surface", Path(ref).stem if ref.startswith(".github/workflows/") else ref),
+        NodeKey("cli_command_surface", _normalize_cli_command_name(ref) or ref),
         NodeKey("file_surface", ref),
         NodeKey("directory_surface", ref),
     )
     for candidate in exact_candidates:
         if candidate in snapshot.nodes:
-            return candidate
+            return candidate, "direct_path", "high"
 
     for node in snapshot.nodes.values():
         source_path = node.properties.get("source_path")
         if isinstance(source_path, str) and source_path == ref:
-            return node.key
-    return None
+            return node.key, "source_path_match", "medium"
+    return None, "unresolved", "low"
 
 
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
@@ -3802,14 +4094,33 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
         if not doc_path.is_file():
             continue
         text = _read_text(doc_path)
-        for match in sorted(set(path_pattern.findall(text))):
+        seen_matches: set[tuple[str, str]] = set()
+        for path_match in path_pattern.finditer(text):
+            match = path_match.group(1)
             normalized = _normalize_docs_repo_reference(match)
             if normalized is None:
                 continue
-            target = _resolve_docs_reference_target(snapshot, normalized)
+            target, evidence_kind, confidence = _resolve_docs_reference_target(snapshot, normalized)
             if target is None or target == node.key:
                 continue
-            snapshot.add_relation(node.key, "DESCRIBES", target, provenance="docs_code_drift")
+            dedupe_key = (normalized, target.name)
+            if dedupe_key in seen_matches:
+                continue
+            seen_matches.add(dedupe_key)
+            section_title, section_anchor = _markdown_heading_context(text, path_match.start())
+            line_number = text.count("\n", 0, path_match.start()) + 1
+            snapshot.add_relation(
+                node.key,
+                "DESCRIBES",
+                target,
+                provenance="docs_code_drift",
+                doc_reference=normalized,
+                evidence_kind=evidence_kind,
+                confidence=confidence,
+                section_title=section_title,
+                section_anchor=section_anchor,
+                line_number=line_number,
+            )
 
 
 def _add_port_surfaces(
@@ -6648,6 +6959,10 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "run_instance_surface",
         "workflow_surface",
         "workflow_job_surface",
+        "workflow_action_surface",
+        "workflow_artifact_surface",
+        "workflow_secret_surface",
+        "cli_command_surface",
     )
     required_relation_types = (
         "BACKS",
@@ -6671,10 +6986,14 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "HAS_CONTROL_PLANE_ARTIFACT",
         "HAS_RUN_INSTANCE",
         "HAS_WORKFLOW",
+        "HAS_CLI_COMMAND",
         "EXECUTES_GATE",
         "EMITS_ARTIFACT",
         "MATERIALIZED_AS",
         "REFERENCES_ARTIFACT",
+        "USES_ACTION",
+        "PUBLISHES_ARTIFACT",
+        "REQUIRES_SECRET",
     )
     for label in required_labels:
         if int(stats["labels"].get(label, 0)) <= 0:
@@ -6873,6 +7192,12 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append("missing project -> HAS_WORKFLOW -> workflow_surface links")
 
     if not any(
+        source_label == "project" and relation_type == "HAS_CLI_COMMAND" and target_label == "cli_command_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing project -> HAS_CLI_COMMAND -> cli_command_surface links")
+
+    if not any(
         source_label == "workflow_surface" and relation_type == "CONTAINS" and target_label == "workflow_job_surface"
         for source_label, _, relation_type, target_label in relation_keys
     ):
@@ -6889,6 +7214,30 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing workflow_job_surface -> EXECUTES_GATE -> quality_gate links")
+
+    if not any(
+        source_label == "workflow_job_surface" and relation_type == "USES_ACTION" and target_label == "workflow_action_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing workflow_job_surface -> USES_ACTION -> workflow_action_surface links")
+
+    if not any(
+        source_label == "workflow_job_surface" and relation_type == "PUBLISHES_ARTIFACT" and target_label == "workflow_artifact_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing workflow_job_surface -> PUBLISHES_ARTIFACT -> workflow_artifact_surface links")
+
+    if not any(
+        source_label == "workflow_job_surface" and relation_type == "REQUIRES_SECRET" and target_label == "workflow_secret_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing workflow_job_surface -> REQUIRES_SECRET -> workflow_secret_surface links")
+
+    if not any(
+        source_label == "cli_command_surface" and relation_type == "RUNS_VIA" and target_label == "execution_path"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing cli_command_surface -> RUNS_VIA -> execution_path links")
 
     if not any(
         source_label == "pipeline_surface" and relation_type == "WRITES_TO" and target_label == "storage_surface"
@@ -6934,6 +7283,7 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
             "script_surface",
             "config_artifact",
             "workflow_surface",
+            "cli_command_surface",
             "file_surface",
             "directory_surface",
             "execution_path",
@@ -7037,6 +7387,39 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append(
             "workflow jobs without workflow parent links: "
             + ", ".join(sorted(workflow_jobs_without_parent)[:10])
+        )
+
+    cli_command_nodes = [node.key for node in snapshot.nodes.values() if node.key.label == "cli_command_surface"]
+    unsupported_cli_commands = [
+        key.name
+        for key in cli_command_nodes
+        if not any(
+            (rel.source == key and rel.relation_type in {"RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"})
+            or (rel.target == key and rel.relation_type == "HAS_CLI_COMMAND" and rel.source.label == "project")
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if unsupported_cli_commands:
+        issues.append(
+            "cli command surfaces without runtime/support links: "
+            + ", ".join(sorted(unsupported_cli_commands)[:10])
+        )
+
+    workflow_artifact_nodes = [
+        node.key for node in snapshot.nodes.values() if node.key.label == "workflow_artifact_surface"
+    ]
+    orphan_workflow_artifacts = [
+        key.name
+        for key in workflow_artifact_nodes
+        if not any(
+            (rel.target == key and rel.relation_type in {"PUBLISHES_ARTIFACT", "DEPENDS_ON"} and rel.source.label == "workflow_job_surface")
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if orphan_workflow_artifacts:
+        issues.append(
+            "workflow artifacts without job links: "
+            + ", ".join(sorted(orphan_workflow_artifacts)[:10])
         )
 
     ignored_paths = [

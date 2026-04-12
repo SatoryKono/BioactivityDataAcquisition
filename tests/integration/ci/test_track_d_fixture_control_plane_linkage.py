@@ -246,3 +246,59 @@ async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
 
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
+
+
+@pytest.mark.integration
+@pytest.mark.no_api
+@pytest.mark.asyncio
+async def test_exact_replay_without_materialized_cached_bronze_batches_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Exact replay must fail closed and avoid publishing a manifest without snapshots."""
+    cached_root = tmp_path / "cached_bronze" / "chembl" / "activity"
+    (cached_root / "2026-03-25").mkdir(parents=True, exist_ok=True)
+
+    data_dir = tmp_path / "runtime_data"
+    monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
+    monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+    run_id = RunID(uuid4())
+    context = PipelineRunContext(
+        pipeline_name=_PIPELINE_NAME,
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        resume=False,
+        limit=5,
+        exact_replay=True,
+        cached_bronze=CachedBronzeContext.from_options(
+            path=str(cached_root),
+            date="2026-03-25",
+        ),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            "Cached Bronze execution requires at least one persisted batch file "
+            "for snapshot provenance"
+        ),
+    ):
+        bootstrap_pipeline_runner(context)
+
+    manifest_index = (
+        data_dir
+        / "output"
+        / "control"
+        / "run_manifest"
+        / "_by_run_id"
+        / f"{run_id}.txt"
+    )
+    assert not manifest_index.exists()
+
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()

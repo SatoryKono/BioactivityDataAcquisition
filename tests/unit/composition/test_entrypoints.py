@@ -275,6 +275,31 @@ class TestBuildPipelineContext:
 
         assert ctx.vacuum.enabled is None  # Tri-state: use YAML default
 
+    def test_context_rejects_exact_replay_without_cached_bronze(self):
+        """Legacy entrypoint must preserve exact-replay guardrails."""
+        options = RunOptions(exact_replay=True)
+
+        with pytest.raises(
+            ValueError,
+            match="exact replay currently requires --use-cached-bronze",
+        ):
+            build_pipeline_context("chembl_activity", options)
+
+    def test_context_propagates_exact_replay_with_cached_bronze(self):
+        """Legacy entrypoint should preserve replay intent when cache mode is enabled."""
+        options = RunOptions(
+            use_cached_bronze=True,
+            cached_bronze_path="/tmp/bronze",
+            cached_bronze_date="2026-03-12",
+            exact_replay=True,
+        )
+        ctx = build_pipeline_context("chembl_activity", options)
+
+        assert ctx.exact_replay is True
+        assert ctx.cached_bronze.enabled is True
+        assert ctx.cached_bronze.bronze_path == "/tmp/bronze"
+        assert ctx.cached_bronze.bronze_date == "2026-03-12"
+
 
 @pytest.mark.unit
 class TestCompositeBootstrapFacade:

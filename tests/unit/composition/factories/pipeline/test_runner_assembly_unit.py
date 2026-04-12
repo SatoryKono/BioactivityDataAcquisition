@@ -45,6 +45,7 @@ def _make_pipeline() -> SimpleNamespace:
     runtime = SimpleNamespace(
         resume=False,
         run_type="incremental",
+        exact_replay=False,
         effective_lock_ttl=60,
         wait_for_lock=False,
         lock_wait_timeout=10,
@@ -211,3 +212,65 @@ def test_build_checkpoint_manager_fallbacks_to_soft_fail_on_invalid_policy() -> 
 
     assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "soft_fail"
     logger.warning.assert_called_once()
+
+
+@pytest.mark.unit
+def test_build_checkpoint_manager_coerces_observe_to_hard_fail_for_exact_replay() -> None:
+    pipeline = cast(Any, _make_pipeline())
+    logger = MagicMock()
+    pipeline.runtime.exact_replay = True
+    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = "observe"
+
+    with (
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".CheckpointCompatibilityService",
+            return_value=MagicMock(),
+        ),
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".ServicesBuilder.create_checkpoint_manager",
+            return_value=MagicMock(),
+        ) as mock_create_manager,
+    ):
+        _build_checkpoint_manager(
+            pipeline=pipeline,
+            logger_port=logger,
+        )
+
+    assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "hard_fail"
+    logger.warning.assert_called_once()
+    assert "Exact replay requires hard_fail" in logger.warning.call_args.args[0]
+
+
+@pytest.mark.unit
+def test_build_checkpoint_manager_coerces_soft_fail_to_hard_fail_for_exact_replay() -> None:
+    pipeline = cast(Any, _make_pipeline())
+    logger = MagicMock()
+    pipeline.runtime.exact_replay = True
+    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = (
+        "soft_fail"
+    )
+
+    with (
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".CheckpointCompatibilityService",
+            return_value=MagicMock(),
+        ),
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".ServicesBuilder.create_checkpoint_manager",
+            return_value=MagicMock(),
+        ) as mock_create_manager,
+    ):
+        _build_checkpoint_manager(
+            pipeline=pipeline,
+            logger_port=logger,
+        )
+
+    assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "hard_fail"
+    logger.warning.assert_called_once()
+    warning_kwargs = logger.warning.call_args.kwargs
+    assert warning_kwargs["requested_policy"] == "soft_fail"
+    assert warning_kwargs["applied_policy"] == "hard_fail"

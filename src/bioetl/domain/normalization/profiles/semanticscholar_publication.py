@@ -51,9 +51,9 @@ _META_FIELDS = frozenset(
 )
 _TITLE_FIELDS = frozenset({"title"})
 _ABSTRACT_FIELDS = frozenset({"abstract", "tldr"})
-_DOI_FIELDS = frozenset({"doi"})
-_PMID_FIELDS = frozenset({"pmid"})
-_PMC_ID_FIELDS = frozenset({"pmc_id"})
+_DOI_FIELDS = frozenset({"doi", "publication_doi"})
+_PMID_FIELDS = frozenset({"pmid", "publication_pmid"})
+_PMC_ID_FIELDS = frozenset({"pmc_id", "publication_pmc_id"})
 _DATE_FIELDS = frozenset({"publication_date"})
 _INT_FIELDS = frozenset(
     {
