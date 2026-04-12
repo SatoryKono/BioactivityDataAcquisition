@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import patch
 
 import pytest
 
@@ -32,6 +33,7 @@ def _build_request(
     *,
     enrichment_results: dict[str, EnrichmentResult] | None = None,
 ) -> CompositeResultBuildRequest:
+    started_at = datetime(2026, 4, 12, 12, 0, tzinfo=UTC)
     return CompositeResultBuildRequest(
         artifacts=SimpleNamespace(
             seed_result=SeedResult(
@@ -53,7 +55,8 @@ def _build_request(
         ),
         composite_name="test_composite",
         run_id="run-123",
-        started_at=datetime.now(tz=UTC),
+        start_time=100.0,
+        started_at=started_at,
         original_run_id="original-run-1",
         required_enrichers=frozenset(),
         required_dependencies=frozenset({"dep_a"}),
@@ -87,12 +90,41 @@ def test_build_composite_result_marks_optional_failures_as_warnings() -> None:
         }
     )
 
-    result = build_composite_result(request=request, logger=logger, observer=observer)
+    with patch(
+        "bioetl.application.composite.runner_pkg.runner_completion_helpers.time.monotonic",
+        return_value=112.5,
+    ):
+        result = build_composite_result(
+            request=request,
+            logger=logger,
+            observer=observer,
+        )
 
     assert result.had_warnings is True
+    assert result.completed_at == request.started_at + timedelta(seconds=12.5)
     completion_call = observer_logger.info.call_args_list[-1]
     assert completion_call.kwargs["status"] == "completed_with_warnings"
     assert completion_call.kwargs["had_warnings"] is True
+
+
+@pytest.mark.unit
+def test_build_composite_result_requires_captured_start_context() -> None:
+    logger = MagicMock()
+    observer = CompositeLifecycleObserverService(logger=MagicMock())
+    request = _build_request()
+    request = CompositeResultBuildRequest(
+        artifacts=request.artifacts,
+        composite_name=request.composite_name,
+        run_id=request.run_id,
+        start_time=None,
+        started_at=request.started_at,
+        original_run_id=request.original_run_id,
+        required_enrichers=request.required_enrichers,
+        required_dependencies=request.required_dependencies,
+    )
+
+    with pytest.raises(RuntimeError, match="captured start context"):
+        build_composite_result(request=request, logger=logger, observer=observer)
 
 
 @pytest.mark.unit

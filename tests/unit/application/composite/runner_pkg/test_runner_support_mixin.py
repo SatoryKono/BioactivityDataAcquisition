@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import patch
 
 import pytest
 
@@ -81,7 +82,8 @@ class _SupportMixinHarness(CompositeRunnerSupportMixin):
         self._observer_logger = MagicMock()
         self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
         self._run_id_str = "run-test-1"
-        self._started_at: datetime | None = None
+        self._start_time: float | None = 100.0
+        self._started_at: datetime | None = datetime(2026, 4, 12, 12, 0, tzinfo=UTC)
         self._checkpoint_manager = AsyncMock()
         self._checkpoint_manager.save = AsyncMock()
         self._seed_runner_factory = MagicMock()
@@ -225,7 +227,11 @@ def test_build_composite_result_when_called_then_uses_named_artifacts() -> None:
         }
     )
 
-    result = harness._build_composite_result(artifacts)
+    with patch(
+        "bioetl.application.composite.runner_pkg.runner_completion_helpers.time.monotonic",
+        return_value=105.0,
+    ):
+        result = harness._build_composite_result(artifacts)
 
     assert result.seed_result is artifacts.seed_result
     assert result.dependency_results is artifacts.dependency_results
@@ -241,9 +247,14 @@ def test_prepare_composite_result_context_when_called_then_preserves_artifacts()
     harness = _SupportMixinHarness()
     artifacts = _build_execution_artifacts()
 
-    context = harness._prepare_composite_result_context(artifacts)
+    with patch(
+        "bioetl.application.composite.runner_pkg.runner_completion_helpers.time.monotonic",
+        return_value=103.0,
+    ):
+        context = harness._prepare_composite_result_context(artifacts)
 
     assert context.artifacts is artifacts
+    assert context.total_duration == 3.0
 
 
 @pytest.mark.unit
@@ -265,7 +276,11 @@ def test_build_composite_result_when_optional_failure_then_logs_warning_completi
         }
     )
 
-    result = harness._build_composite_result(artifacts)
+    with patch(
+        "bioetl.application.composite.runner_pkg.runner_completion_helpers.time.monotonic",
+        return_value=107.0,
+    ):
+        result = harness._build_composite_result(artifacts)
 
     assert result.had_warnings is True
     info_kwargs = harness._observer_logger.info.call_args.kwargs

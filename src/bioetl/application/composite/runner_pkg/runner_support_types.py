@@ -40,6 +40,7 @@ class _CompositeRunnerSupportHostProtocol(Protocol):
     _logger: LoggerPort
     _observer: CompositeLifecycleObserverService
     _run_id_str: str
+    _start_time: float | None
     _started_at: datetime | None
     _original_run_id: str | None
     _preflight_validator: CompositePreflightValidationService | None

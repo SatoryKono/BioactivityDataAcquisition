@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+import time
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.lifecycle_observer_service import (
@@ -82,6 +83,7 @@ class CompositeResultBuildContext:
     artifacts: CompositeExecutionContext
     composite_name: str
     run_id: str
+    start_time: float | None
     started_at: datetime | None
     original_run_id: str | None
     required_enrichers: frozenset[str]
@@ -94,7 +96,7 @@ def prepare_composite_result_context(
     logger: LoggerPort,
 ) -> _PreparedCompositeResultContext:
     """Resolve completion metadata before final CompositeResult assembly."""
-    completed_at = datetime.now(tz=UTC)
+    completed_at = _resolve_completed_at(request)
     started = request.started_at or completed_at
     had_warnings = calculate_had_warnings(
         request.artifacts.enrichment_results,
@@ -123,6 +125,17 @@ def log_composite_completion(
         duration_seconds=context.total_duration,
         had_warnings=context.had_warnings,
     )
+
+
+def _resolve_completed_at(request: CompositeResultBuildContext) -> datetime:
+    """Derive deterministic completion timestamp from captured start context."""
+    if request.started_at is None or request.start_time is None:
+        raise RuntimeError(
+            "Composite result timestamp requires captured start context. "
+            "CompositePipelineRunner must set wall and monotonic start times before completion."
+        )
+    duration_seconds = time.monotonic() - request.start_time
+    return request.started_at + timedelta(seconds=duration_seconds)
 
 
 def finalize_composite_result(

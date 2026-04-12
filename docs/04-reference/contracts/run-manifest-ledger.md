@@ -218,6 +218,13 @@ provenance.
 | `source_refs`           | `array`    |       no | Canonical input/source references                |
 | `planned_artifacts`     | `array`    |       no | Intended output locations by layer               |
 
+`launch_context` is also the persisted support-boundary surface for exact replay:
+
+- `execution_context` distinguishes ordinary source execution from composite execution;
+- `exact_replay_support_boundary` publishes the strict replay boundary for that execution context:
+  - `snapshot_backed_source_runs_only` for ordinary source execution;
+  - `composite_execution_unsupported` for composite execution.
+
 ### `RunCodeProvenance` field set
 
 `code_provenance` currently includes these optional anchors:
