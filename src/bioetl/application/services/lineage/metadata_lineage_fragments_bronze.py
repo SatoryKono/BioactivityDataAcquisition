@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.metadata_lineage_nodes import (
+from bioetl.application.services.lineage.metadata_lineage_nodes import (
     bronze_batch_node_from_input,
     build_semantic_fragment_id,
     dedupe_nodes,

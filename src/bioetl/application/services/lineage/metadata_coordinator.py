@@ -25,18 +25,20 @@ from functools import cached_property
 from typing import ClassVar, Final
 
 from bioetl import __version__ as BIOETL_VERSION
-from bioetl.application.services._metadata_coordinator_helpers import (
+from bioetl.application.services.lineage._metadata_coordinator_helpers import (
     build_bronze_file_output_metadata,
     build_bronze_source_metadata,
     create_metadata_bundle,
     validate_records_present,
 )
-from bioetl.application.services.metadata_assemblers import (
+from bioetl.application.services.lineage.metadata_assemblers import (
     GoldMetadataAssembler,
     SilverMetadataAssembler,
 )
-from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
-from bioetl.application.services.metadata_lineage_fragments import (
+from bioetl.application.services.lineage.metadata_lineage_bundle import (
+    MetadataLineageBundle,
+)
+from bioetl.application.services.lineage.metadata_lineage_fragments import (
     build_bronze_lineage_fragment,
     build_gold_lineage_fragment,
     build_silver_lineage_fragment,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.metadata_assemblers_helpers import (
+from bioetl.application.services.lineage.metadata_assemblers_helpers import (
     PipelineMetadataProtocol,
     RuntimeMetadataProtocol,
     _build_dataset_content_hash,
