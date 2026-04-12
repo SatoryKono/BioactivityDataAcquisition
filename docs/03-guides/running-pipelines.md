@@ -202,6 +202,13 @@ Resume-совместимость checkpoint управляется через
 Policy применяется к execution identity checkpoint, включая effective config hash
 и execution fingerprint.
 
+Machine-readable checkpoint load statuses distinguish:
+
+- `observe_blocked_identity` — `observe` mode still blocked resume because the
+  canonical execution identity mismatched.
+- `observe_loaded_degraded` — `observe` mode resumed only after a non-identity
+  compatibility warning.
+
 Supported resume modes:
 
 - ordinary `bioetl run --resume` uses checkpoint snapshot state and compatibility

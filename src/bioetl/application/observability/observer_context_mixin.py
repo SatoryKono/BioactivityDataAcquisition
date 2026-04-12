@@ -212,9 +212,12 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
         wall_start_time: datetime | None,
         duration_seconds: float,
     ) -> datetime:
-        """Return terminal event timestamp derived from captured wall-clock start."""
+        """Return deterministic terminal event timestamp from the captured start."""
         if wall_start_time is None:
-            return datetime.now(tz=UTC)
+            raise RuntimeError(
+                "PipelineObserver terminal event timestamp requires wall_start_time. "
+                "The observer context manager must capture startup time before teardown."
+            )
         return wall_start_time + timedelta(seconds=duration_seconds)
 
     def _close_span_safely(

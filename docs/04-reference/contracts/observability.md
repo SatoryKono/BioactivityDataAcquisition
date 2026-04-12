@@ -132,6 +132,9 @@ Cross-links for canonical observability governance:
   compaction, DQ evaluation, DQ report generation, vacuum и final metadata
 - `AuditPort` остаётся отдельным traceability/observability port и
   инжектируется в Bronze/Silver/Gold runtime wiring из composition layer
+- terminal Domain Event timestamps MUST be derived from the observer's captured
+  `wall_start_time` plus monotonic duration; missing `wall_start_time` is an
+  explicit observer invariant violation, not a trigger for `datetime.now()`
 
 ## 3. Runtime Metrics Contract
 
@@ -151,7 +154,7 @@ Cross-links for canonical observability governance:
 | `bioetl_control_plane_manifest_writes_total`   | Counter   | `pipeline,run_type,status`               | Попытки записи immutable run manifest                                              |
 | `bioetl_control_plane_ledger_appends_total`    | Counter   | `pipeline,event_type,status`             | Попытки append в run ledger                                                        |
 | `bioetl_checkpoint_compatibility_events_total` | Counter   | `pipeline,disposition`                   | Итоги resume/checkpoint compatibility policy                                       |
-| `bioetl_checkpoint_load_events_total`          | Counter   | `pipeline,status`                        | Bounded checkpoint load decisions (`loaded`, `missing`, `blocked`, `incompatible`, `failed`) |
+| `bioetl_checkpoint_load_events_total`          | Counter   | `pipeline,status`                        | Bounded checkpoint load decisions (`loaded`, `missing`, `blocked`, `incompatible`, `observe_blocked_identity`, `observe_loaded_degraded`, `incompatible_hard_fail`, `failed`) |
 | `bioetl_lineage_fragments_emitted_total`       | Counter   | `pipeline,layer,status`                  | Попытки публикации lineage fragments                                               |
 | `bioetl_lineage_refs_missing_total`            | Counter   | `pipeline,layer,ref_type`                | Missing upstream lineage references detected during persistence                    |
 | `bioetl_composite_source_selection_total`      | Counter   | `pipeline,decision_type,selected_source` | Low-cardinality composite source-selection decisions recorded during persistence   |

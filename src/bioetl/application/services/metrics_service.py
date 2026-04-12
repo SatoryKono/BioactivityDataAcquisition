@@ -330,7 +330,7 @@ class MetricsService:
         Returns:
             True if server is running, False otherwise.
         """
-        return self._server.is_running()
+        return bool(self._server.is_running())
 
     def push_to_gateway(
         self,

@@ -319,6 +319,21 @@ def test_observer_does_not_emit_traced_run_metric_for_noop_tracing(
     assert traced_run_calls == []
 
 
+def test_pipeline_result_timestamp_is_deterministic() -> None:
+    """Terminal event timestamps should derive from captured wall-clock start."""
+    wall_start = datetime(2026, 4, 12, 10, 0, 0, tzinfo=UTC)
+
+    result = PipelineObserver._build_pipeline_result_timestamp(wall_start, 2.5)
+
+    assert result == datetime(2026, 4, 12, 10, 0, 2, 500000, tzinfo=UTC)
+
+
+def test_pipeline_result_timestamp_requires_wall_start_time() -> None:
+    """Missing wall_start_time should fail closed instead of using now()."""
+    with pytest.raises(RuntimeError, match="requires wall_start_time"):
+        PipelineObserver._build_pipeline_result_timestamp(None, 1.0)
+
+
 # ==================== Unified Observability: Lifecycle Event Tests ====================
 
 
