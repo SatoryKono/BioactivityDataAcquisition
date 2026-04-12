@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Callable
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.deduplication import (
+    deduplicate_preserving_order,
+)
 
 __all__ = ["UniProtFallbackPolicy"]
 
@@ -123,14 +126,6 @@ class UniProtFallbackPolicy:
         entries: list[str],
         fallback_mapping: dict[str, str],
     ) -> list[str]:
-        fallback_ids: list[str] = []
-        seen_ids: set[str] = set()
-        for entry in entries:
-            fallback_id = entry if entry in fallback_mapping else ""
-            if fallback_id not in fallback_mapping:
-                continue
-            if fallback_id in seen_ids:
-                continue
-            seen_ids.add(fallback_id)
-            fallback_ids.append(fallback_id)
-        return fallback_ids
+        return deduplicate_preserving_order(
+            entry for entry in entries if entry in fallback_mapping
+        )

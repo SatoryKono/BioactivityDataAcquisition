@@ -5,20 +5,11 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.application.core.runtime_wiring_api import (
-    BatchProcessingComponents,
-    CheckpointManagerService,
-)
+from bioetl.application.core.runtime_wiring_api import BatchProcessingComponents, CheckpointManagerService
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
-from bioetl.composition.factories.services.pipeline_batch_executor_builder import (
-    create_batch_executor_from_pipeline as build_batch_executor_from_pipeline,
-)
-from bioetl.composition.factories.services.pipeline_processing_components_builder import (
-    create_batch_processing_components as build_batch_processing_components,
-)
-from bioetl.composition.factories.services.pipeline_record_processor_builder import (
-    create_record_processor_from_pipeline as build_record_processor_from_pipeline,
-)
+from bioetl.composition.factories.services.pipeline_batch_executor_builder import create_batch_executor_from_pipeline as build_batch_executor_from_pipeline
+from bioetl.composition.factories.services.pipeline_processing_components_builder import create_batch_processing_components as build_batch_processing_components
+from bioetl.composition.factories.services.pipeline_record_processor_builder import create_record_processor_from_pipeline as build_record_processor_from_pipeline
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -50,8 +41,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types import GoldSchemaType, RunID
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-
-
 def create_batch_processing_components(
     *,
     services: PipelineService,
@@ -80,8 +69,6 @@ def create_batch_processing_components(
         domain_event_emitter=domain_event_emitter,
         lock_validator=lock_validator,
     )
-
-
 def create_checkpoint_manager(
     checkpoint_port: CheckpointPort,
     logger: LoggerPort,
@@ -108,8 +95,6 @@ def create_checkpoint_manager(
         current_metadata=current_metadata,
         compatibility_policy=compatibility_policy,
     )
-
-
 def create_record_processor_from_pipeline(
     *,
     pipeline: BasePipeline,
@@ -132,8 +117,6 @@ def create_record_processor_from_pipeline(
         lock_validator=lock_validator,
         tracer=tracer,
     )
-
-
 def create_batch_executor_from_pipeline(
     *,
     pipeline: BasePipeline,
@@ -176,12 +159,4 @@ def create_batch_executor_from_pipeline(
         batch_id_factory=batch_id_factory,
         domain_event_emitter=domain_event_emitter,
     )
-
-
-__all__ = [
-    "BatchProcessingComponents",
-    "create_batch_executor_from_pipeline",
-    "create_batch_processing_components",
-    "create_checkpoint_manager",
-    "create_record_processor_from_pipeline",
-]
+__all__ = ["BatchProcessingComponents", "create_batch_executor_from_pipeline", "create_batch_processing_components", "create_checkpoint_manager", "create_record_processor_from_pipeline"]

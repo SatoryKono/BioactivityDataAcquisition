@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports.noop import NoOpMetadataWriter
+from bioetl.domain.ports.noop import NoOpMetadataWriter, NoOpTracing
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
@@ -89,10 +89,7 @@ def create_silver_writer(
         else NoOpMetadataWriter()
     )
     if tracing is None:
-        raise TypeError(
-            "SilverWriter requires explicit tracing injection. "
-            "Build NoOpTracing in composition when tracing is disabled."
-        )
+        tracing = NoOpTracing()
     runtime_services = build_silver_writer_runtime_services(
         csv_exporter=csv_exporter,
         tracing=tracing,

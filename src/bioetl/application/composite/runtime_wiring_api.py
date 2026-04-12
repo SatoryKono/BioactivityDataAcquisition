@@ -56,10 +56,8 @@ from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeSer
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidator,
 )
-from bioetl.application.composite.runner_pkg import (
-    CompositePipelineRunnerService,
-    CompositeRunnerDependencies,
-)
+from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
+from bioetl.application.composite.runtime_models import CompositeRunnerDependencies
 from bioetl.application.core.runner import PipelineRunner
 
 __all__ = [

@@ -126,7 +126,10 @@ def _build_manifest_create_request(
         rule_bundle_version=rule_bundle_version,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,
-        replay_capability=_resolve_replay_capability(source_refs),
+        replay_capability=_resolve_replay_capability(
+            source_refs=source_refs,
+            resume_requested=bool(getattr(ctx, "resume", False)),
+        ),
     )
 
 def create_run_manifest(

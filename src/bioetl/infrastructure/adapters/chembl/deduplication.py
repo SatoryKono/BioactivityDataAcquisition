@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.common.deduplication import register_record_dedup_key
 
 __all__ = [
     "compute_composite_key",
@@ -60,21 +61,19 @@ def is_duplicate_record_composite(
     Returns:
         True if record is a duplicate.
     """
-    comp_key = compute_composite_key(record, pk_fields)
-    # Skip records with empty composite key (missing required fields)
-    if not comp_key or comp_key == "|".join([""] * len(pk_fields)):
-        return False
-    if comp_key in seen_keys:
-        logger.debug(
-            "skipping_duplicate_record",
+    return (
+        register_record_dedup_key(
+            record=record,
+            seen_keys=seen_keys,
+            primary_field=pk_fields[0],
+            composite_fields=pk_fields,
+            composite_key_builder=compute_composite_key,
             entity_type=entity_type,
-            pk_fields=pk_fields,
-            composite_key=comp_key,
+            logger=logger,
+            metrics=metrics,
         )
-        metrics.record_dropped_duplicates(entity_type)
-        return True
-    seen_keys.add(comp_key)
-    return False
+        == "duplicate"
+    )
 
 
 def is_duplicate_record(
@@ -98,17 +97,14 @@ def is_duplicate_record(
     Returns:
         True if the condition is met, False otherwise.
     """
-    record_id = str(record.get(pk_field, ""))
-    if not record_id:
-        return False
-    if record_id in seen_ids:
-        logger.debug(
-            "skipping_duplicate_record",
+    return (
+        register_record_dedup_key(
+            record=record,
+            seen_keys=seen_ids,
+            primary_field=pk_field,
             entity_type=entity_type,
-            pk_field=pk_field,
-            record_id=record_id,
+            logger=logger,
+            metrics=metrics,
         )
-        metrics.record_dropped_duplicates(entity_type)
-        return True
-    seen_ids.add(record_id)
-    return False
+        == "duplicate"
+    )

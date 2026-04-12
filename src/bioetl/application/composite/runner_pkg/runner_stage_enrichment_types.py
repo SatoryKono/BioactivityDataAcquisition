@@ -11,7 +11,7 @@ import polars as pl
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult
 from bioetl.domain.composite.state import CompositePipelineState

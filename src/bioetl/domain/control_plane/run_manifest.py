@@ -33,6 +33,7 @@ class ReplayCapability(str, Enum):
     """Exact-replay capability classification for one manifested run."""
 
     EXACT_REPLAY_SUPPORTED = "exact_replay_supported"
+    RESUME_ONLY = "resume_only"
     REBUILD_ONLY = "rebuild_only"
 
 

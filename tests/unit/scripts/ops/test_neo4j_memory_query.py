@@ -3,11 +3,14 @@ from __future__ import annotations
 from scripts.ops.neo4j_memory_query import (
     _current_cycle_code_statement,
     _dead_code_candidates_statement,
+    _docs_drift_statement,
     _fallback_pipelines_statement,
     _normalization_pipeline_statement,
     _overengineered_candidates_statement,
     _removable_complexity_statement,
     _simplification_blockers_statement,
+    _storage_lineage_statement,
+    _workflow_gates_statement,
     QUERY_PROFILES,
     _duplication_cluster_statement,
     _format_rows,
@@ -23,8 +26,19 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["owner-doc-artifact"]["target_label"] == "doc_artifact"
     assert QUERY_PROFILES["owner-pipeline"]["target_label"] == "pipeline_surface"
     assert QUERY_PROFILES["owner-alert"]["target_label"] == "alert_surface"
+    assert QUERY_PROFILES["owner-storage"]["target_label"] == "storage_surface"
+    assert QUERY_PROFILES["owner-runtime-evidence"]["target_label"] == "runtime_evidence_surface"
+    assert QUERY_PROFILES["owner-workflow"]["target_label"] == "workflow_surface"
+    assert QUERY_PROFILES["owner-workflow-job"]["target_label"] == "workflow_job_surface"
     assert QUERY_PROFILES["neighbors-pipeline"]["mode"] == "neighbors"
     assert QUERY_PROFILES["neighbors-alert"]["target_label"] == "alert_surface"
+    assert QUERY_PROFILES["neighbors-storage"]["relation_types"] == ("WRITES_TO", "PROMOTES_TO", "DEPENDS_ON", "DEFINED_BY")
+    assert QUERY_PROFILES["neighbors-runtime-evidence"]["target_label"] == "runtime_evidence_surface"
+    assert QUERY_PROFILES["neighbors-workflow"]["target_label"] == "workflow_surface"
+    assert QUERY_PROFILES["neighbors-workflow-job"]["target_label"] == "workflow_job_surface"
+    assert QUERY_PROFILES["docs-drift"]["mode"] == "docs_drift"
+    assert QUERY_PROFILES["workflow-gates"]["mode"] == "workflow_gates"
+    assert QUERY_PROFILES["storage-lineage"]["mode"] == "storage_lineage"
     assert QUERY_PROFILES["normalization-pipeline"]["mode"] == "normalization_pipeline"
     assert QUERY_PROFILES["fallback-pipelines"]["mode"] == "fallback_pipelines"
     assert QUERY_PROFILES["duplication-cluster"]["target_label"] == "duplication_cluster"
@@ -53,6 +67,33 @@ def test_neighbors_statement_uses_relation_filter_and_bidirectional_search() -> 
     assert "MATCH (target)-[rel]->(neighbor)" in statement
     assert "MATCH (neighbor)-[rel]->(target)" in statement
     assert "direction" in statement
+
+
+def test_docs_drift_statement_matches_doc_like_surfaces_and_describes_edges() -> None:
+    statement = _docs_drift_statement()
+
+    assert "MATCH (doc)-[:DESCRIBES]->(target)" in statement
+    assert "labels(doc) WHERE label IN ['doc_source_surface', 'doc_artifact', 'policy_surface']" in statement
+    assert "$name = 'all' OR doc.name = $name OR target.name = $name" in statement
+
+
+def test_workflow_gates_statement_collects_gates_and_run_targets() -> None:
+    statement = _workflow_gates_statement()
+
+    assert "MATCH (workflow:workflow_surface)" in statement
+    assert "(workflow)-[:CONTAINS]->(job:workflow_job_surface)" in statement
+    assert "(job)-[:EXECUTES_GATE]->(gate:quality_gate)" in statement
+    assert "(job)-[:RUNS_VIA]->(target)" in statement
+
+
+def test_storage_lineage_statement_collects_producers_and_promotions() -> None:
+    statement = _storage_lineage_statement()
+
+    assert "MATCH (storage:storage_surface)" in statement
+    assert "(producer)-[:WRITES_TO]->(storage)" in statement
+    assert "(storage)-[:PROMOTES_TO]->(downstream:storage_surface)" in statement
+    assert "(upstream:storage_surface)-[:PROMOTES_TO]->(storage)" in statement
+    assert "(storage)-[:DEFINED_BY]->(config)" in statement
 
 
 def test_duplication_cluster_statement_uses_cluster_targets_members_and_tests() -> None:
@@ -177,6 +218,78 @@ def test_format_rows_renders_neighbors_summary() -> None:
     assert "Pipeline semantic neighborhood: `chembl_activity`" in formatted
     assert "direction=outgoing | relation=DEPENDS_ON | neighbor=chembl.activity" in formatted
     assert "labels=contract_surface" in formatted
+
+
+def test_format_rows_renders_docs_drift_summary() -> None:
+    formatted = _format_rows(
+        "docs-drift",
+        "all",
+        [
+            {
+                "doc_name": "run manifest contract",
+                "doc_labels": ["doc_source_surface"],
+                "doc_source_path": "docs/04-reference/contracts/run-manifest-ledger.md",
+                "target_name": "src/bioetl/domain/control_plane/run_manifest.py",
+                "target_labels": ["module_surface"],
+                "target_source_path": "src/bioetl/domain/control_plane/run_manifest.py",
+            }
+        ],
+    )
+
+    assert "Docs-to-code drift edges: `all`" in formatted
+    assert "doc=run manifest contract | doc_labels=doc_source_surface" in formatted
+    assert "target=src/bioetl/domain/control_plane/run_manifest.py | target_labels=module_surface" in formatted
+
+
+def test_format_rows_renders_workflow_gates_summary() -> None:
+    formatted = _format_rows(
+        "workflow-gates",
+        "tests",
+        [
+            {
+                "workflow_name": "tests",
+                "job_name": "tests::governance-preflight",
+                "gates": ["pytest", "docs verification"],
+                "run_targets": [
+                    {"name": "scripts/docs/__main__.py", "labels": ["script_surface"]},
+                    {"name": ".github/workflows/tests.yml", "labels": ["file_surface"]},
+                ],
+            }
+        ],
+    )
+
+    assert "Workflow gates and executed targets: `tests`" in formatted
+    assert "workflow=tests | job=tests::governance-preflight" in formatted
+    assert "gate=pytest" in formatted
+    assert "runs_via=scripts/docs/__main__.py | labels=script_surface" in formatted
+
+
+def test_format_rows_renders_storage_lineage_summary() -> None:
+    formatted = _format_rows(
+        "storage-lineage",
+        "silver/chembl/activity",
+        [
+            {
+                "storage_name": "silver/chembl/activity",
+                "layer": "silver",
+                "storage_kind": "entity_layer_output",
+                "producers": [
+                    {"name": "chembl_activity", "labels": ["pipeline_surface"]},
+                    {"name": "chembl_activity", "labels": ["entity_config"]},
+                ],
+                "upstream_surfaces": ["bronze/chembl/activity"],
+                "downstream_surfaces": ["gold/chembl/activity"],
+                "defining_configs": ["configs/entities/chembl/activity.yaml"],
+            }
+        ],
+    )
+
+    assert "Storage lineage path: `silver/chembl/activity`" in formatted
+    assert "storage=silver/chembl/activity | layer=silver | storage_kind=entity_layer_output" in formatted
+    assert "producer=chembl_activity | labels=pipeline_surface" in formatted
+    assert "upstream=bronze/chembl/activity" in formatted
+    assert "downstream=gold/chembl/activity" in formatted
+    assert "defined_by=configs/entities/chembl/activity.yaml" in formatted
 
 
 def test_format_rows_renders_duplication_cluster_summary() -> None:
@@ -444,6 +557,24 @@ def test_format_rows_handles_missing_neighbors() -> None:
     formatted = _format_rows("neighbors-alert", "BioETLPipelineRunFailed", [])
 
     assert formatted == "Alert semantic neighborhood: no semantic neighbors found for `BioETLPipelineRunFailed`."
+
+
+def test_format_rows_handles_missing_docs_drift() -> None:
+    formatted = _format_rows("docs-drift", "missing-doc", [])
+
+    assert formatted == "Docs-to-code drift edges: no docs-to-code drift edges found for `missing-doc`."
+
+
+def test_format_rows_handles_missing_workflow_gates() -> None:
+    formatted = _format_rows("workflow-gates", "missing-workflow", [])
+
+    assert formatted == "Workflow gates and executed targets: no workflow gate coverage found for `missing-workflow`."
+
+
+def test_format_rows_handles_missing_storage_lineage() -> None:
+    formatted = _format_rows("storage-lineage", "missing-storage", [])
+
+    assert formatted == "Storage lineage path: no storage lineage found for `missing-storage`."
 
 
 def test_format_rows_handles_missing_duplication_cluster() -> None:

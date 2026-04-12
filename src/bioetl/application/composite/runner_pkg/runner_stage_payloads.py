@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from bioetl.application.composite.runner_pkg.runner_models import (
+from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
 )
 from bioetl.domain.composite.result import (

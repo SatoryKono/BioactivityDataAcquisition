@@ -11,17 +11,53 @@ from bioetl.domain.normalization.profiles.chembl_assay import (
     CHEMBL_ASSAY_PROFILE,
     CHEMBL_ASSAY_SCHEMA_FIELDS,
 )
+from bioetl.domain.normalization.profiles.chembl_assay_parameters import (
+    CHEMBL_ASSAY_PARAMETERS_PROFILE,
+    CHEMBL_ASSAY_PARAMETERS_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.chembl_cell_line import (
+    CHEMBL_CELL_LINE_PROFILE,
+    CHEMBL_CELL_LINE_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.chembl_compound_record import (
+    CHEMBL_COMPOUND_RECORD_PROFILE,
+    CHEMBL_COMPOUND_RECORD_SCHEMA_FIELDS,
+)
 from bioetl.domain.normalization.profiles.chembl_molecule import (
     CHEMBL_MOLECULE_PROFILE,
     CHEMBL_MOLECULE_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.chembl_protein_class import (
+    CHEMBL_PROTEIN_CLASS_PROFILE,
+    CHEMBL_PROTEIN_CLASS_SCHEMA_FIELDS,
 )
 from bioetl.domain.normalization.profiles.chembl_publication import (
     CHEMBL_PUBLICATION_PROFILE,
     CHEMBL_PUBLICATION_SCHEMA_FIELDS,
 )
+from bioetl.domain.normalization.profiles.chembl_publication_similarity import (
+    CHEMBL_PUBLICATION_SIMILARITY_PROFILE,
+    CHEMBL_PUBLICATION_SIMILARITY_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.chembl_publication_term import (
+    CHEMBL_PUBLICATION_TERM_PROFILE,
+    CHEMBL_PUBLICATION_TERM_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.chembl_subcellular_fraction import (
+    CHEMBL_SUBCELLULAR_FRACTION_PROFILE,
+    CHEMBL_SUBCELLULAR_FRACTION_SCHEMA_FIELDS,
+)
 from bioetl.domain.normalization.profiles.chembl_target import (
     CHEMBL_TARGET_PROFILE,
     CHEMBL_TARGET_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.chembl_target_component import (
+    CHEMBL_TARGET_COMPONENT_PROFILE,
+    CHEMBL_TARGET_COMPONENT_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.chembl_tissue import (
+    CHEMBL_TISSUE_PROFILE,
+    CHEMBL_TISSUE_SCHEMA_FIELDS,
 )
 from bioetl.domain.normalization.profiles.crossref_publication import (
     CROSSREF_PUBLICATION_PROFILE,
@@ -63,12 +99,30 @@ __all__ = [
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
     "CHEMBL_ASSAY_PROFILE",
     "CHEMBL_ASSAY_SCHEMA_FIELDS",
+    "CHEMBL_ASSAY_PARAMETERS_PROFILE",
+    "CHEMBL_ASSAY_PARAMETERS_SCHEMA_FIELDS",
+    "CHEMBL_CELL_LINE_PROFILE",
+    "CHEMBL_CELL_LINE_SCHEMA_FIELDS",
+    "CHEMBL_COMPOUND_RECORD_PROFILE",
+    "CHEMBL_COMPOUND_RECORD_SCHEMA_FIELDS",
     "CHEMBL_MOLECULE_PROFILE",
     "CHEMBL_MOLECULE_SCHEMA_FIELDS",
+    "CHEMBL_PROTEIN_CLASS_PROFILE",
+    "CHEMBL_PROTEIN_CLASS_SCHEMA_FIELDS",
     "CHEMBL_PUBLICATION_PROFILE",
     "CHEMBL_PUBLICATION_SCHEMA_FIELDS",
+    "CHEMBL_PUBLICATION_SIMILARITY_PROFILE",
+    "CHEMBL_PUBLICATION_SIMILARITY_SCHEMA_FIELDS",
+    "CHEMBL_PUBLICATION_TERM_PROFILE",
+    "CHEMBL_PUBLICATION_TERM_SCHEMA_FIELDS",
+    "CHEMBL_SUBCELLULAR_FRACTION_PROFILE",
+    "CHEMBL_SUBCELLULAR_FRACTION_SCHEMA_FIELDS",
     "CHEMBL_TARGET_PROFILE",
     "CHEMBL_TARGET_SCHEMA_FIELDS",
+    "CHEMBL_TARGET_COMPONENT_PROFILE",
+    "CHEMBL_TARGET_COMPONENT_SCHEMA_FIELDS",
+    "CHEMBL_TISSUE_PROFILE",
+    "CHEMBL_TISSUE_SCHEMA_FIELDS",
     "CROSSREF_PUBLICATION_PROFILE",
     "CROSSREF_PUBLICATION_SCHEMA_FIELDS",
     "NORMALIZATION_PROFILE_REGISTRY",

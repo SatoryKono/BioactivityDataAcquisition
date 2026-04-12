@@ -11,6 +11,10 @@ from click.testing import CliRunner
 
 from bioetl.interfaces.cli.main import cli
 
+_SNAPSHOT_IDENTITY_FINGERPRINT = (
+    "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
+)
+
 
 class _FakeInspectionResult:
     def __init__(self, payload: dict[str, object]) -> None:
@@ -51,8 +55,16 @@ class _FakeWorkflowService:
                     "manifest": {
                         "manifest_id": "manifest-1",
                         "pipeline_name": "chembl_activity",
+                    },
+                    "diagnostics": {
                         "replay_capability": "exact_replay_supported",
-                    }
+                        "replay_capability_reason": "immutable_input_snapshots_present",
+                        "exact_replay_blockers": [],
+                        "input_snapshot_ids": ["snapshot-1"],
+                        "input_snapshot_identity_fingerprint": (
+                            _SNAPSHOT_IDENTITY_FINGERPRINT
+                        ),
+                    },
                 },
             }
         )
@@ -208,6 +220,12 @@ class TestCheckpointCommands:
         assert result.exit_code == 0
         assert "Audit Run Diagnostics" in result.output
         assert "manifest_id: manifest-1" in result.output
+        assert (
+            "replay_capability_reason: immutable_input_snapshots_present"
+            in result.output
+        )
+        assert "input_snapshot_ids: ['snapshot-1']" in result.output
+        assert _SNAPSHOT_IDENTITY_FINGERPRINT in result.output
         assert "silver/chembl.activity merge" in result.output
         assert service.audit_run_calls == [
             ("00000000-0000-0000-0000-000000000001", 100)

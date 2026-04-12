@@ -291,6 +291,14 @@ class TestQuarantinePortProtocol:
             ) -> dict[str, Any] | None:
                 return None
 
+            def get_record(
+                self,
+                *,
+                payload_hash: str,
+                pipeline: str | None = None,
+            ) -> dict[str, Any] | None:
+                return None
+
             async def get_filtered_stats(
                 self,
                 *,

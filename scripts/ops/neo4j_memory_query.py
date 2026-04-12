@@ -7,7 +7,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Final, TypedDict
+from typing import Final, NotRequired, TypedDict
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 if str(DEFAULT_ROOT) not in sys.path:
@@ -41,6 +41,7 @@ class QueryProfile(TypedDict):
     mode: str
     target_label: str
     title: str
+    relation_types: NotRequired[tuple[str, ...]]
 
 
 QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
@@ -69,6 +70,26 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "target_label": "alert_surface",
         "title": "Alert ownership path",
     },
+    "owner-storage": {
+        "mode": "owner",
+        "target_label": "storage_surface",
+        "title": "Storage ownership path",
+    },
+    "owner-runtime-evidence": {
+        "mode": "owner",
+        "target_label": "runtime_evidence_surface",
+        "title": "Runtime evidence ownership path",
+    },
+    "owner-workflow": {
+        "mode": "owner",
+        "target_label": "workflow_surface",
+        "title": "Workflow ownership path",
+    },
+    "owner-workflow-job": {
+        "mode": "owner",
+        "target_label": "workflow_job_surface",
+        "title": "Workflow job ownership path",
+    },
     "neighbors-contract": {
         "mode": "neighbors",
         "target_label": "contract_surface",
@@ -93,6 +114,45 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "mode": "neighbors",
         "target_label": "alert_surface",
         "title": "Alert semantic neighborhood",
+    },
+    "neighbors-storage": {
+        "mode": "neighbors",
+        "target_label": "storage_surface",
+        "title": "Storage semantic neighborhood",
+        "relation_types": ("WRITES_TO", "PROMOTES_TO", "DEPENDS_ON", "DEFINED_BY"),
+    },
+    "neighbors-runtime-evidence": {
+        "mode": "neighbors",
+        "target_label": "runtime_evidence_surface",
+        "title": "Runtime evidence semantic neighborhood",
+        "relation_types": ("BACKED_BY", "DESCRIBED_IN", "WRITES_TO"),
+    },
+    "neighbors-workflow": {
+        "mode": "neighbors",
+        "target_label": "workflow_surface",
+        "title": "Workflow semantic neighborhood",
+        "relation_types": ("CONTAINS", "RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"),
+    },
+    "neighbors-workflow-job": {
+        "mode": "neighbors",
+        "target_label": "workflow_job_surface",
+        "title": "Workflow job semantic neighborhood",
+        "relation_types": ("CONTAINS", "RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"),
+    },
+    "docs-drift": {
+        "mode": "docs_drift",
+        "target_label": "doc_surface",
+        "title": "Docs-to-code drift edges",
+    },
+    "workflow-gates": {
+        "mode": "workflow_gates",
+        "target_label": "workflow_surface",
+        "title": "Workflow gates and executed targets",
+    },
+    "storage-lineage": {
+        "mode": "storage_lineage",
+        "target_label": "storage_surface",
+        "title": "Storage lineage path",
     },
     "normalization-pipeline": {
         "mode": "normalization_pipeline",
@@ -434,6 +494,61 @@ def _simplification_blockers_statement() -> str:
     )
 
 
+def _docs_drift_statement() -> str:
+    return (
+        "MATCH (doc)-[:DESCRIBES]->(target) "
+        "WHERE any(label IN labels(doc) WHERE label IN ['doc_source_surface', 'doc_artifact', 'policy_surface']) "
+        "AND ($name = 'all' OR doc.name = $name OR target.name = $name OR coalesce(doc.source_path, '') = $name) "
+        "RETURN doc.name AS doc_name, "
+        "labels(doc) AS doc_labels, "
+        "coalesce(doc.source_path, '') AS doc_source_path, "
+        "target.name AS target_name, "
+        "labels(target) AS target_labels, "
+        "coalesce(target.source_path, '') AS target_source_path "
+        "ORDER BY doc.name ASC, target.name ASC"
+    )
+
+
+def _workflow_gates_statement() -> str:
+    return (
+        "MATCH (workflow:workflow_surface) "
+        "WHERE $name = 'all' OR workflow.name = $name "
+        "MATCH (workflow)-[:CONTAINS]->(job:workflow_job_surface) "
+        "OPTIONAL MATCH (job)-[:EXECUTES_GATE]->(gate:quality_gate) "
+        "OPTIONAL MATCH (job)-[:RUNS_VIA]->(target) "
+        "RETURN workflow.name AS workflow_name, "
+        "job.name AS job_name, "
+        "collect(DISTINCT gate.name) AS gates, "
+        "collect(DISTINCT CASE "
+        "  WHEN target.name IS NULL THEN NULL "
+        "  ELSE {name: target.name, labels: labels(target)} "
+        "END) AS run_targets "
+        "ORDER BY workflow.name ASC, job.name ASC"
+    )
+
+
+def _storage_lineage_statement() -> str:
+    return (
+        "MATCH (storage:storage_surface) "
+        "WHERE $name = 'all' OR storage.name = $name "
+        "OPTIONAL MATCH (producer)-[:WRITES_TO]->(storage) "
+        "OPTIONAL MATCH (storage)-[:PROMOTES_TO]->(downstream:storage_surface) "
+        "OPTIONAL MATCH (upstream:storage_surface)-[:PROMOTES_TO]->(storage) "
+        "OPTIONAL MATCH (storage)-[:DEFINED_BY]->(config) "
+        "RETURN storage.name AS storage_name, "
+        "storage.layer AS layer, "
+        "storage.storage_kind AS storage_kind, "
+        "collect(DISTINCT CASE "
+        "  WHEN producer.name IS NULL THEN NULL "
+        "  ELSE {name: producer.name, labels: labels(producer)} "
+        "END) AS producers, "
+        "collect(DISTINCT upstream.name) AS upstream_surfaces, "
+        "collect(DISTINCT downstream.name) AS downstream_surfaces, "
+        "collect(DISTINCT config.name) AS defining_configs "
+        "ORDER BY storage.name ASC"
+    )
+
+
 def _run_query(
     root: Path,
     profile: str,
@@ -448,8 +563,14 @@ def _run_query(
         "target_label": profile_config["target_label"],
     }
     if profile_config["mode"] == "neighbors":
-        params["relation_types"] = list(DEFAULT_NEIGHBOR_RELATION_TYPES)
+        params["relation_types"] = list(profile_config.get("relation_types", DEFAULT_NEIGHBOR_RELATION_TYPES))
         statement = _neighbors_statement()
+    elif profile_config["mode"] == "docs_drift":
+        statement = _docs_drift_statement()
+    elif profile_config["mode"] == "workflow_gates":
+        statement = _workflow_gates_statement()
+    elif profile_config["mode"] == "storage_lineage":
+        statement = _storage_lineage_statement()
     elif profile_config["mode"] == "normalization_pipeline":
         statement = _normalization_pipeline_statement()
     elif profile_config["mode"] == "fallback_pipelines":
@@ -483,6 +604,9 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
         empty_suffix = {
             "owner": "no ownership path found",
             "neighbors": "no semantic neighbors found",
+            "docs_drift": "no docs-to-code drift edges found",
+            "workflow_gates": "no workflow gate coverage found",
+            "storage_lineage": "no storage lineage found",
             "duplication_cluster": "no duplication cluster found",
             "normalization_pipeline": "no pipeline normalization evidence found",
             "fallback_pipelines": "no fallback-heavy pipelines found",
@@ -519,6 +643,100 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             )
         if len(lines) == 1:
             lines.append("- no semantic edges found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "docs_drift":
+        lines = [f"{title}: `{name}`"]
+        seen: set[tuple[str, str]] = set()
+        for row in rows:
+            doc_name = str(row.get("doc_name") or "")
+            target_name = str(row.get("target_name") or "")
+            if not doc_name or not target_name:
+                continue
+            key = (doc_name, target_name)
+            if key in seen:
+                continue
+            seen.add(key)
+            doc_labels = row.get("doc_labels")
+            target_labels = row.get("target_labels")
+            doc_label_str = ",".join(str(label) for label in doc_labels) if isinstance(doc_labels, list) else ""
+            target_label_str = ",".join(str(label) for label in target_labels) if isinstance(target_labels, list) else ""
+            doc_path = str(row.get("doc_source_path") or "")
+            target_path = str(row.get("target_source_path") or "")
+            path_suffix = f" | doc_path={doc_path}" if doc_path else ""
+            target_path_suffix = f" | target_path={target_path}" if target_path else ""
+            lines.append(
+                f"- doc={doc_name} | doc_labels={doc_label_str} | target={target_name} | "
+                f"target_labels={target_label_str}{path_suffix}{target_path_suffix}"
+            )
+        if len(lines) == 1:
+            lines.append("- no docs-to-code drift edges found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "workflow_gates":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            workflow_name = str(row.get("workflow_name") or "")
+            job_name = str(row.get("job_name") or "")
+            if not workflow_name or not job_name:
+                continue
+            lines.append(f"- workflow={workflow_name} | job={job_name}")
+            gates = row.get("gates")
+            if isinstance(gates, list):
+                for gate_name in sorted({str(item) for item in gates if item}):
+                    lines.append(f"  gate={gate_name}")
+            run_targets = row.get("run_targets")
+            if isinstance(run_targets, list):
+                normalized_targets: set[str] = set()
+                for target in run_targets:
+                    if not isinstance(target, dict):
+                        continue
+                    target_name = str(target.get("name") or "")
+                    if not target_name:
+                        continue
+                    labels = target.get("labels")
+                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                    label_suffix = f" | labels={label_str}" if label_str else ""
+                    normalized_targets.add(f"  runs_via={target_name}{label_suffix}")
+                lines.extend(sorted(normalized_targets))
+        if len(lines) == 1:
+            lines.append("- no workflow gate coverage found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "storage_lineage":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            storage_name = str(row.get("storage_name") or "")
+            if not storage_name:
+                continue
+            lines.append(
+                f"- storage={storage_name} | layer={row.get('layer') or ''!s} | storage_kind={row.get('storage_kind') or ''!s}"
+            )
+            producers = row.get("producers")
+            if isinstance(producers, list):
+                normalized_producers: set[str] = set()
+                for producer in producers:
+                    if not isinstance(producer, dict):
+                        continue
+                    producer_name = str(producer.get("name") or "")
+                    if not producer_name:
+                        continue
+                    labels = producer.get("labels")
+                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                    label_suffix = f" | labels={label_str}" if label_str else ""
+                    normalized_producers.add(f"  producer={producer_name}{label_suffix}")
+                lines.extend(sorted(normalized_producers))
+            for field_name, prefix in (
+                ("upstream_surfaces", "upstream"),
+                ("downstream_surfaces", "downstream"),
+                ("defining_configs", "defined_by"),
+            ):
+                values = row.get(field_name)
+                if isinstance(values, list):
+                    for value in sorted({str(item) for item in values if item}):
+                        lines.append(f"  {prefix}={value}")
+        if len(lines) == 1:
+            lines.append("- no storage lineage found")
         return "\n".join(lines)
 
     if profile_config["mode"] == "duplication_cluster":

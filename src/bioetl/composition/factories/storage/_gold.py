@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports.noop import NoOpMetadataWriter
+from bioetl.domain.ports.noop import NoOpMetadataWriter, NoOpTracing
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
@@ -64,10 +64,7 @@ def create_gold_writer(
         MetadataWriter(logger=logger) if save_metadata else NoOpMetadataWriter()
     )
     if tracing is None:
-        raise TypeError(
-            "GoldWriter requires explicit tracing injection. "
-            "Build NoOpTracing in composition when tracing is disabled."
-        )
+        tracing = NoOpTracing()
     return writer_cls(
         base_path=base_path,
         logger=logger,

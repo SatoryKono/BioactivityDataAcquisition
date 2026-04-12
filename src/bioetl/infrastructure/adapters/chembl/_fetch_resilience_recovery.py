@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
 from bioetl.domain.types import BronzeRecord
@@ -14,47 +14,48 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
 
+    class _ChemblRecoveryHost:
+        """Type-only host contract required by ChEMBL recovery helpers."""
 
-class _ChemblRecoveryHost(Protocol):
-    """Minimal host contract required by ChEMBL recovery helpers."""
+        _logger: LoggerPort
+        provider_name: str
 
-    _logger: LoggerPort
-    provider_name: str
+        def _is_retry_exhausted_error(self, error: Exception) -> bool: ...
 
-    def _is_retry_exhausted_error(self, error: Exception) -> bool: ...
+        def _fetch_batch_with_reduction(
+            self,
+            entity_type: str,
+            id_batch: list[str],
+            filter_field: str,
+            limit: int | None,
+            seen_ids: set[str],
+            pk_field: str,
+            pk_fields: tuple[str, ...] | None = None,
+        ) -> AsyncIterator[BronzeRecord]: ...
 
-    def _fetch_batch_with_reduction(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        limit: int | None,
-        seen_ids: set[str],
-        pk_field: str,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[BronzeRecord]: ...
+        def _yield_single_id_fallback(
+            self,
+            entity_type: str,
+            id_batch: list[str],
+            filter_field: str,
+            seen_ids: set[str],
+            pk_field: str,
+            error: Exception,
+            pk_fields: tuple[str, ...] | None = None,
+        ) -> AsyncIterator[BronzeRecord]: ...
 
-    def _yield_single_id_fallback(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        seen_ids: set[str],
-        pk_field: str,
-        error: Exception,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[BronzeRecord]: ...
-
-    def _yield_deduplicated_filtered_records(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        limit: int | None,
-        seen_ids: set[str],
-        pk_field: str,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[BronzeRecord]: ...
+        def _yield_deduplicated_filtered_records(
+            self,
+            entity_type: str,
+            id_batch: list[str],
+            filter_field: str,
+            limit: int | None,
+            seen_ids: set[str],
+            pk_field: str,
+            pk_fields: tuple[str, ...] | None = None,
+        ) -> AsyncIterator[BronzeRecord]: ...
+else:
+    _ChemblRecoveryHost = object
 
 
 def _log_batch_reduction_retry(

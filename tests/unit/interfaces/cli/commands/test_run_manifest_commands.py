@@ -23,6 +23,10 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.types import RunID, RunType
 from bioetl.interfaces.cli.main import cli
 
+_SNAPSHOT_IDENTITY_FINGERPRINT = (
+    "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
+)
+
 
 class _FakeRunManifestService:
     def __init__(self) -> None:
@@ -75,6 +79,11 @@ class _FakeRunManifestService:
                 "rule_bundle_version": "2026.03",
                 "effective_config_artifact_id": "eca-123",
                 "dq_contract_compatibility_hash": "compat-hash-1",
+                "replay_capability_reason": "immutable_input_snapshots_present",
+                "exact_replay_blockers": [],
+                "input_snapshot_ids": ["snapshot-1"],
+                "input_snapshot_content_hashes": ["sha256:snapshot-1"],
+                "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
                 "replay_mode": "exact_replay",
                 "input_snapshot_count": 1,
                 "input_snapshots": [
@@ -118,6 +127,15 @@ class _FakeRunManifestService:
                     "effective_config_hash": "deadbeef",
                     "contract_ref": "chembl_activity",
                     "contract_version": "1.2.0",
+                    "replay_capability": "exact_replay_supported",
+                    "replay_capability_reason": "immutable_input_snapshots_present",
+                    "exact_replay_eligible": True,
+                    "exact_replay_blockers": [],
+                    "input_snapshot_ids": ["snapshot-1"],
+                    "input_snapshot_content_hashes": ["sha256:snapshot-1"],
+                    "input_snapshot_identity_fingerprint": (
+                        _SNAPSHOT_IDENTITY_FINGERPRINT
+                    ),
                     "replay_mode": "exact_replay",
                     "input_snapshot_count": 1,
                     "input_snapshots": [
@@ -190,6 +208,13 @@ class _FakeRunManifestService:
                 "effective_config_hash": "deadbeef",
                 "contract_ref": "chembl_activity",
                 "contract_version": "1.2.0",
+                "replay_capability": "exact_replay_supported",
+                "replay_capability_reason": "immutable_input_snapshots_present",
+                "exact_replay_eligible": True,
+                "exact_replay_blockers": [],
+                "input_snapshot_ids": ["snapshot-1"],
+                "input_snapshot_content_hashes": ["sha256:snapshot-1"],
+                "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
                 "replay_mode": "exact_replay",
                 "input_snapshot_count": 1,
                 "input_snapshots": [
@@ -357,6 +382,12 @@ class TestRunManifestCommands:
         assert "latest_status: success" in result.output
         assert "contract_version: 1.2.0" in result.output
         assert "dq_policy_ref: chembl_activity.gold" in result.output
+        assert (
+            "replay_capability_reason: immutable_input_snapshots_present"
+            in result.output
+        )
+        assert "input_snapshot_ids" in result.output
+        assert "input_snapshot_identity_fingerprint" in result.output
         assert "event_family_counts" in result.output
         assert "event_type_counts" in result.output
         assert "planned_artifact_count: 1" in result.output

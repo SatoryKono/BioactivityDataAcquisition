@@ -177,6 +177,23 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                     "dq_contract_compatibility_hash",
                     diagnostics.get("dq_contract_compatibility_hash"),
                 ),
+                (
+                    "replay_capability_reason",
+                    diagnostics.get("replay_capability_reason"),
+                ),
+                (
+                    "exact_replay_blockers",
+                    diagnostics.get("exact_replay_blockers"),
+                ),
+                ("input_snapshot_ids", diagnostics.get("input_snapshot_ids")),
+                (
+                    "input_snapshot_content_hashes",
+                    diagnostics.get("input_snapshot_content_hashes"),
+                ),
+                (
+                    "input_snapshot_identity_fingerprint",
+                    diagnostics.get("input_snapshot_identity_fingerprint"),
+                ),
                 ("replay_mode", diagnostics.get("replay_mode")),
                 ("input_snapshot_count", diagnostics.get("input_snapshot_count")),
                 ("input_snapshots", diagnostics.get("input_snapshots")),
@@ -249,6 +266,22 @@ def _render_identity_graph_section(identity_graph: object) -> list[str]:
             ("effective_config_hash", identity_graph.get("effective_config_hash")),
             ("contract_ref", identity_graph.get("contract_ref")),
             ("contract_version", identity_graph.get("contract_version")),
+            ("replay_capability", identity_graph.get("replay_capability")),
+            (
+                "replay_capability_reason",
+                identity_graph.get("replay_capability_reason"),
+            ),
+            ("exact_replay_eligible", identity_graph.get("exact_replay_eligible")),
+            ("exact_replay_blockers", identity_graph.get("exact_replay_blockers")),
+            ("input_snapshot_ids", identity_graph.get("input_snapshot_ids")),
+            (
+                "input_snapshot_content_hashes",
+                identity_graph.get("input_snapshot_content_hashes"),
+            ),
+            (
+                "input_snapshot_identity_fingerprint",
+                identity_graph.get("input_snapshot_identity_fingerprint"),
+            ),
             ("replay_mode", identity_graph.get("replay_mode")),
             ("input_snapshot_count", identity_graph.get("input_snapshot_count")),
             ("input_snapshots", identity_graph.get("input_snapshots")),

@@ -9,6 +9,9 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Callable
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.deduplication import (
+    deduplicate_preserving_order,
+)
 from bioetl.infrastructure.adapters.uniprot.fallback_policy import (
     UniProtFallbackPolicy,
 )
@@ -179,22 +182,6 @@ class UniProtFilteringAdapterMixin:
             fallback_mapping=fallback_mapping,
         )
 
-    @staticmethod
-    def _deduplicate_filter_ids(filter_ids: list[str]) -> list[str]:
-        """Deduplicate IDs while preserving original order.
-
-        Returns:
-            List of unique IDs with original order preserved.
-        """
-        unique_ids: list[str] = []
-        seen_ids: set[str] = set()
-        for filter_id in filter_ids:
-            if filter_id in seen_ids:
-                continue
-            seen_ids.add(filter_id)
-            unique_ids.append(filter_id)
-        return unique_ids
-
     async def fetch_filtered_with_fallback(
         self,
         entity_type: str,
@@ -207,7 +194,7 @@ class UniProtFilteringAdapterMixin:
         if not filter_ids:
             return
 
-        requested_ids = self._deduplicate_filter_ids(filter_ids)
+        requested_ids = deduplicate_preserving_order(filter_ids)
         fallback_handler = UniProtFallbackPolicy(
             entity_type=entity_type,
             resolve_missing_ids=self._should_do_fallback,

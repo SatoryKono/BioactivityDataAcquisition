@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from collections import Counter
 from typing import cast
 
@@ -9,7 +10,8 @@ from bioetl.application.services._run_manifest_diagnostics_helpers import (
     extract_dq_details,
     update_correlation_anchor_gaps,
 )
-from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.control_plane import ReplayCapability, RunLedgerEntry, RunManifest
+from bioetl.domain.normalization import serialize_json_canonical
 
 
 def _build_base_summary(
@@ -18,7 +20,22 @@ def _build_base_summary(
     """Build base summary from manifest code provenance."""
     code_provenance = manifest.code_provenance
     exact_replay = bool(manifest.launch_context.get("exact_replay"))
+    resume_requested = bool(manifest.launch_context.get("resume"))
     input_snapshots = _collect_input_snapshot_refs(manifest)
+    replay_mode = _resolve_replay_mode(
+        manifest=manifest,
+        exact_replay=exact_replay,
+        resume_requested=resume_requested,
+    )
+    replay_capability_reason = _resolve_replay_capability_reason(
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+        resume_requested=resume_requested,
+    )
+    exact_replay_blockers = _resolve_exact_replay_blockers(
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+    )
     summary: dict[str, object] = {
         "manifest_id": manifest.manifest_id,
         "run_id": str(manifest.run_id),
@@ -37,8 +54,17 @@ def _build_base_summary(
         ),
         "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
         "replay_capability": manifest.replay_capability.value,
+        "replay_capability_reason": replay_capability_reason,
         "exact_replay_eligible": (
             manifest.replay_capability.value == "exact_replay_supported"
+        ),
+        "exact_replay_blockers": exact_replay_blockers,
+        "input_snapshot_ids": _collect_input_snapshot_ids(input_snapshots),
+        "input_snapshot_content_hashes": _collect_input_snapshot_content_hashes(
+            input_snapshots
+        ),
+        "input_snapshot_identity_fingerprint": (
+            _compute_input_snapshot_identity_fingerprint(input_snapshots)
         ),
         "planned_artifacts": [
             {"layer": artifact.layer, "path": artifact.path}
@@ -46,15 +72,63 @@ def _build_base_summary(
         ],
         "occurrence_only_diagnostics": [],
     }
-    if exact_replay or input_snapshots:
+    if replay_mode != "live_fetch" or input_snapshots:
         summary.update(
             {
-                "replay_mode": "exact_replay" if exact_replay else "live_fetch",
+                "replay_mode": replay_mode,
                 "input_snapshot_count": len(input_snapshots),
                 "input_snapshots": input_snapshots,
             }
         )
     return summary
+
+
+def _resolve_replay_mode(
+    *,
+    manifest: RunManifest,
+    exact_replay: bool,
+    resume_requested: bool,
+) -> str:
+    """Resolve operator-facing replay mode from manifest intent and capability."""
+    if (
+        exact_replay
+        or manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
+        return "exact_replay"
+    if resume_requested or manifest.replay_capability == ReplayCapability.RESUME_ONLY:
+        return "resume"
+    return "live_fetch"
+
+
+def _resolve_replay_capability_reason(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    resume_requested: bool,
+) -> str:
+    """Return one operator-facing explanation for replay capability."""
+    if (
+        manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+        and input_snapshots
+    ):
+        return "immutable_input_snapshots_present"
+    if manifest.replay_capability == ReplayCapability.RESUME_ONLY or resume_requested:
+        return "resume_requested_without_snapshot_backed_inputs"
+    return "immutable_input_snapshots_missing"
+
+
+def _resolve_exact_replay_blockers(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+) -> list[str]:
+    """Return explicit blockers preventing exact replay eligibility."""
+    if manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        return []
+    blockers: list[str] = []
+    if not input_snapshots:
+        blockers.append("immutable_input_snapshots_missing")
+    return blockers
 
 
 def _process_ledger_entries(
@@ -205,7 +279,17 @@ def _build_final_summary(
         "contract_ref": base_summary.get("contract_ref"),
         "contract_version": base_summary.get("contract_version"),
         "replay_capability": base_summary.get("replay_capability"),
+        "replay_capability_reason": base_summary.get("replay_capability_reason"),
         "exact_replay_eligible": base_summary.get("exact_replay_eligible"),
+        "exact_replay_blockers": base_summary.get("exact_replay_blockers", []),
+        "input_snapshot_ids": base_summary.get("input_snapshot_ids", []),
+        "input_snapshot_content_hashes": base_summary.get(
+            "input_snapshot_content_hashes",
+            [],
+        ),
+        "input_snapshot_identity_fingerprint": base_summary.get(
+            "input_snapshot_identity_fingerprint"
+        ),
         "planned_artifacts": planned_artifacts,
         "published_artifacts": artifact_refs,
         "occurrence_only_diagnostics": sorted(occurrence_only_diagnostic_scopes),
@@ -286,6 +370,41 @@ def _collect_input_snapshot_refs(manifest: RunManifest) -> list[dict[str, object
         )
     )
     return refs
+
+
+def _collect_input_snapshot_ids(input_snapshots: list[dict[str, object]]) -> list[str]:
+    """Return deterministic snapshot identities for resume/exact-replay anchors."""
+    return [
+        str(snapshot_id)
+        for snapshot_id in (
+            snapshot.get("snapshot_id") for snapshot in input_snapshots
+        )
+        if snapshot_id is not None
+    ]
+
+
+def _collect_input_snapshot_content_hashes(
+    input_snapshots: list[dict[str, object]],
+) -> list[str]:
+    """Return deterministic snapshot content hashes for operator inspection."""
+    return [
+        str(content_hash)
+        for content_hash in (
+            snapshot.get("content_hash") for snapshot in input_snapshots
+        )
+        if content_hash is not None
+    ]
+
+
+def _compute_input_snapshot_identity_fingerprint(
+    input_snapshots: list[dict[str, object]],
+) -> str | None:
+    """Compute the same stable replay-anchor fingerprint shape used by checkpoints."""
+    snapshot_ids = _collect_input_snapshot_ids(input_snapshots)
+    if not snapshot_ids:
+        return None
+    encoded = serialize_json_canonical(snapshot_ids)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
 def build_diagnostics_summary(

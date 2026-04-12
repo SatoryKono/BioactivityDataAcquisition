@@ -37,6 +37,7 @@ class QuarantineWriteRequest(TypedDict):
     bronze_batch_id: BatchID
     ingestion_ts: datetime
     run_id: NotRequired[RunID | None]
+    entry_id: NotRequired[str | None]
     metadata: NotRequired[MetaDict | None]
 
 
@@ -148,6 +149,15 @@ class QuarantinePort(Protocol):
         pipeline: str | None = None,
     ) -> MetaDict | None:
         """Return one Silver-filter record including detail payload."""
+        ...
+
+    def get_record(
+        self,
+        *,
+        payload_hash: str,
+        pipeline: str | None = None,
+    ) -> MetaDict | None:
+        """Return one quarantine record including payload and metadata."""
         ...
 
     async def get_filtered_stats(

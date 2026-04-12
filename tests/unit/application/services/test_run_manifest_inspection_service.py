@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
@@ -30,6 +31,10 @@ from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
+
+_SNAPSHOT_IDENTITY_FINGERPRINT = (
+    "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
+)
 
 
 class _InMemoryRunManifestStore(RunManifestPort):
@@ -175,7 +180,12 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
         "replay_capability": "exact_replay_supported",
+        "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
+        "exact_replay_blockers": [],
+        "input_snapshot_ids": ["snapshot-1"],
+        "input_snapshot_content_hashes": ["sha256:snapshot-1"],
+        "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
         "input_snapshot_count": 1,
         "input_snapshots": [
@@ -232,7 +242,12 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
         "replay_capability": "exact_replay_supported",
+        "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
+        "exact_replay_blockers": [],
+        "input_snapshot_ids": ["snapshot-1"],
+        "input_snapshot_content_hashes": ["sha256:snapshot-1"],
+        "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
         "input_snapshot_count": 1,
         "input_snapshots": [
@@ -266,7 +281,12 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
         "replay_capability": "exact_replay_supported",
+        "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
+        "exact_replay_blockers": [],
+        "input_snapshot_ids": ["snapshot-1"],
+        "input_snapshot_content_hashes": ["sha256:snapshot-1"],
+        "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
         "input_snapshot_count": 1,
         "input_snapshots": [
@@ -291,6 +311,49 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "planned_artifacts": [],
         "occurrence_only_diagnostics": [],
     }
+
+
+def test_show_resume_only_manifest_reports_resume_mode() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = RunID(uuid4())
+    manifest = replace(
+        _make_manifest(manifest_id="manifest-resume", run_id=run_id),
+        launch_context={"limit": 100, "resume": True, "exact_replay": False},
+        runtime_config={"run_type": "incremental", "limit": 100},
+        replay_capability=ReplayCapability.RESUME_ONLY,
+        source_refs=(),
+    )
+    manifest_store.save(manifest)
+    service = RunManifestInspectionService(manifest_port=manifest_store)
+
+    result = service.show("manifest-resume")
+
+    assert result.diagnostics["replay_capability"] == "resume_only"
+    assert (
+        result.diagnostics["replay_capability_reason"]
+        == "resume_requested_without_snapshot_backed_inputs"
+    )
+    assert result.diagnostics["exact_replay_eligible"] is False
+    assert result.diagnostics["exact_replay_blockers"] == [
+        "immutable_input_snapshots_missing"
+    ]
+    assert result.diagnostics["input_snapshot_ids"] == []
+    assert result.diagnostics["input_snapshot_content_hashes"] == []
+    assert result.diagnostics["input_snapshot_identity_fingerprint"] is None
+    assert result.diagnostics["replay_mode"] == "resume"
+    assert result.identity_graph["replay_capability"] == "resume_only"
+    assert (
+        result.identity_graph["replay_capability_reason"]
+        == "resume_requested_without_snapshot_backed_inputs"
+    )
+    assert result.identity_graph["replay_mode"] == "resume"
+    assert result.identity_graph["exact_replay_blockers"] == [
+        "immutable_input_snapshots_missing"
+    ]
+    assert result.identity_graph["input_snapshot_ids"] == []
+    assert result.identity_graph["input_snapshot_content_hashes"] == []
+    assert result.identity_graph["input_snapshot_identity_fingerprint"] is None
+    assert result.identity_graph["input_snapshot_count"] == 0
 
 
 def test_show_collects_artifact_diagnostic_links() -> None:

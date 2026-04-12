@@ -10,6 +10,7 @@ import itertools
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.deduplication import iter_deduplicated_records
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -60,17 +61,23 @@ class ChemblFetchMultiFilterMixin:
     ) -> AsyncIterator[BronzeRecord]:
         """Paginate through a single filter combination, deduplicating records."""
         offset = 0
+        logger = getattr(self, "_logger", None)
+        metrics = getattr(self, "_adapter_metrics", None)
         while True:
             params = self._build_params(offset, entity_type)
             params.update(filter_params)
             records, has_next = await self._fetch_page(url, params, entity_type)
             if not records:
                 break
-            for record in records:
-                if not self._is_duplicate_record(
-                    record, pk_field, seen_ids, entity_type
-                ):
-                    yield record
+            for record in iter_deduplicated_records(
+                records,
+                seen_keys=seen_ids,
+                primary_field=pk_field,
+                entity_type=entity_type,
+                logger=logger,
+                metrics=metrics,
+            ):
+                yield record
             if not has_next:
                 break
             offset += len(records)

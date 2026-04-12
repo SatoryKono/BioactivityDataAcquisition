@@ -282,6 +282,33 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         )
         return True
 
+    def get_record(
+        self,
+        *,
+        payload_hash: str,
+        pipeline: str | None = None,
+    ) -> JsonDict | None:
+        """Return one quarantine record including payload and metadata."""
+        try:
+            dt = DeltaTable(self.base_path)
+        except TableNotFoundError:
+            return None
+
+        filters: list[tuple[str, str, object]] = [("payload_hash", "=", payload_hash)]
+        partitions: list[tuple[str, str, object]] | None = None
+        if pipeline:
+            partitions = [("pipeline", "=", pipeline)]
+
+        arrow_table = dt.to_pyarrow_table(
+            partitions=partitions,
+            filters=filters,
+        )
+        records: list[JsonDict] = arrow_table.to_pylist()
+        if not records:
+            return None
+        records.sort(key=lambda row: str(row.get("ingestion_ts", "")), reverse=True)
+        return records[0]
+
     async def get_stats(
         self,
         pipeline: str,

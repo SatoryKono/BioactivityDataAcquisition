@@ -41,7 +41,9 @@ def bootstrap_tracer_port(
     Returns:
         Configured TracingPort, or NoOpTracing if tracing is disabled.
     """
-    if settings.observability.tracing_enabled:
+    observability = getattr(settings, "observability", None)
+    tracing_enabled = bool(getattr(observability, "tracing_enabled", False))
+    if tracing_enabled:
         factory = tracer_factory or _default_tracer_factory
         return factory(service_name)
     return NoOpTracing()

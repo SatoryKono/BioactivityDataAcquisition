@@ -1,29 +1,31 @@
 @echo off
 setlocal EnableExtensions
 
-REM Launch Codex CLI through WSL2
-REM Codex will use the current working directory context
+REM Launch Codex CLI through WSL2 using the project bootstrap script.
 
-set WSL_DISTRO=Ubuntu
-set "PATH=C:\Windows\System32;C:\Windows"
+set "WSL_DISTRO=Ubuntu"
+set "SCRIPT_DIR=%~dp0"
 
-REM Check Codex is installed
-wsl -d %WSL_DISTRO% -- command -v codex >/dev/null 2>&1
-if errorlevel 1 (
-    echo [ERROR] Codex CLI not found
-    echo [INFO] Install: npm install -g @openai/codex
+pushd "%SCRIPT_DIR%..\..\" >nul || (
+    echo [codex] ERROR: Unable to resolve repository root
+    exit /b 1
+)
+set "REPO_WIN=%CD%"
+popd >nul
+
+for /f "usebackq delims=" %%I in (`wsl -d %WSL_DISTRO% -- wslpath -a "%REPO_WIN%" 2^>nul`) do set "REPO_WSL=%%I"
+
+if not defined REPO_WSL (
+    echo [codex] ERROR: Unable to convert repository path for WSL
     exit /b 1
 )
 
-REM Launch Codex
-REM Note: Without -C flag, Codex uses user's default working directory
-REM For best results, run from project root or specify directory via --add-dir
 if "%~1"=="" (
     echo [codex] Starting interactive mode...
-    wsl -d %WSL_DISTRO% -- codex
+    wsl -d %WSL_DISTRO% -- bash "%REPO_WSL%/scripts/ops/codex.sh"
 ) else (
     echo [codex] Prompt: %*
-    wsl -d %WSL_DISTRO% -- codex %*
+    wsl -d %WSL_DISTRO% -- bash "%REPO_WSL%/scripts/ops/codex.sh" %*
 )
 
 exit /b %errorlevel%

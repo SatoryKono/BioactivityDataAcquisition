@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 import httpx
 
@@ -15,6 +15,9 @@ from bioetl.domain.exceptions import (
     RetryExhaustedError,
 )
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.deduplication import (
+    register_record_dedup_key,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
@@ -29,6 +32,27 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
+    class _ChemblFallbackHost:
+        """Type-only host contract required by ChEMBL fallback helpers."""
+
+        _logger: LoggerPort
+        provider_name: str
+        _mapper: ChemblEntityMapper
+        _adapter_metrics: AdapterMetricsRecorder
+        _http_client: UnifiedHTTPClient
+        _request_collector: APIRequestCollector
+        _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]
+
+        def _fetch_with_filter(
+            self,
+            entity_type: str,
+            id_batch: list[str],
+            filter_field: str,
+            limit: int | None,
+        ) -> AsyncIterator[BronzeRecord]: ...
+else:
+    _ChemblFallbackHost = object
+
 CHEMBL_FALLBACK_ERRORS = (
     BioETLError,
     ExternalServiceError,
@@ -42,27 +66,6 @@ CHEMBL_FALLBACK_ERRORS = (
     AttributeError,
     Exception,
 )
-
-
-class _ChemblFallbackHost(Protocol):
-    """Minimal host contract required by ChEMBL fallback helpers."""
-
-    _logger: LoggerPort
-    provider_name: str
-    _mapper: ChemblEntityMapper
-    _adapter_metrics: AdapterMetricsRecorder
-    _http_client: UnifiedHTTPClient
-    _request_collector: APIRequestCollector
-    _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]
-
-    def _fetch_with_filter(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]: ...
-
 
 def _log_single_id_failure(
     logger: LoggerPort,
@@ -131,20 +134,16 @@ def mark_record_as_seen(
     pk_fields: tuple[str, ...] | None = None,
 ) -> bool:
     """Return True when record is new and register its dedup key."""
-    use_composite = pk_fields is not None and len(pk_fields) > 1
-    if use_composite:
-        assert pk_fields is not None
-        composite_key = host._compute_composite_key(record, pk_fields)
-        if not composite_key or composite_key in seen_ids:
-            return False
-        seen_ids.add(composite_key)
-        return True
-
-    record_id = str(record.get(pk_field, ""))
-    if not record_id or record_id in seen_ids:
-        return False
-    seen_ids.add(record_id)
-    return True
+    return (
+        register_record_dedup_key(
+            record=record,
+            seen_keys=seen_ids,
+            primary_field=pk_field,
+            composite_fields=pk_fields,
+            composite_key_builder=host._compute_composite_key,
+        )
+        == "new"
+    )
 
 
 async def yield_deduplicated_filtered_records(

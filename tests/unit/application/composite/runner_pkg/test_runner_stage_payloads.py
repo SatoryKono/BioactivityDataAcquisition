@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.composite.runner_pkg.runner_models import (
-    CompositeExecutionContext,
-)
+from bioetl.application.composite.runtime_models import CompositeExecutionContext
 from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
     build_composite_run_completion_metrics,
     build_dependency_stage_details,

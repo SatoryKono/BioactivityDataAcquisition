@@ -20,7 +20,7 @@ from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
     log_composite_completion,
     prepare_composite_result_context,
 )
-from bioetl.application.composite.runner_pkg.runner_models import (
+from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
     CompositeRuntimeConfig,
 )
