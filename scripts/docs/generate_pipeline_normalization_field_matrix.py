@@ -7,8 +7,10 @@ import argparse
 import csv
 import io
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 import yaml
 
@@ -20,6 +22,11 @@ if __package__ in {None, ""}:
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
 )
+from bioetl.application.composite.checkpoint._service_support import (
+    create_expected_checkpoint_context,
+    merge_expected_anchors,
+)
+from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.application.core.normalization_fallbacks import (
     is_date_field,
     is_doi_field,
@@ -27,6 +34,13 @@ from bioetl.application.core.normalization_fallbacks import (
     is_smiles_field,
 )
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
+from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.normalization import (
+    build_execution_identity_payload,
+    normalize_run_ledger_payload,
+    normalize_run_manifest_spec,
+    normalize_runtime_anchor_payload,
+)
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
@@ -75,6 +89,11 @@ CSV_COLUMNS = (
 FALLBACK_BUSINESS = "fallback_business"
 FALLBACK_TECHNICAL_PASSTHROUGH = "fallback_technical_passthrough"
 EXPLICIT_PROFILE_COVERAGE_KPI = "explicit_profile_coverage_pct"
+COMPOSITE_JOIN_KEY_COVERAGE_KPI = "composite_join_key_policy_coverage_pct"
+CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI = "control_plane_normalization_coverage_pct"
+ENTITY_RECORD_SURFACE = "entity_record"
+COMPOSITE_JOIN_KEY_SURFACE = "composite_join_key"
+CONTROL_PLANE_REPRODUCIBILITY_SURFACE = "control_plane_reproducibility"
 
 ENTITY_SILVER_SCHEMA_REGISTRY: dict[str, Any] = {
     "chembl_activity": CHEMBL_ACTIVITY_SCHEMA,
@@ -328,6 +347,10 @@ def _iter_composite_join_keys(payload: dict[str, object]) -> set[str]:
     return keys
 
 
+def _iter_composite_join_key_occurrences(payload: dict[str, object]) -> list[str]:
+    return sorted(_iter_composite_join_keys(payload))
+
+
 def _build_composite_rows_for_pipeline(
     *,
     pipeline_name: str,
@@ -433,12 +456,193 @@ def build_entity_profile_coverage_kpi(
         2,
     )
     return {
+        "surface": ENTITY_RECORD_SURFACE,
         "name": EXPLICIT_PROFILE_COVERAGE_KPI,
-        "description": "Percent of shipped entity fields covered by explicit normalization profiles.",
+        "description": "Percent of shipped entity-record fields covered by explicit normalization profiles.",
         "numerator": explicit_profile_field_count,
         "denominator": entity_field_count,
         "value_pct": value_pct,
     }
+
+
+def build_composite_join_key_policy_coverage_kpi() -> dict[str, object]:
+    total_join_key_fields = 0
+    explicit_policy_fields = 0
+    for config_path in _composite_config_paths():
+        payload = _load_yaml(config_path)
+        join_keys = _iter_composite_join_key_occurrences(payload)
+        total_join_key_fields += len(join_keys)
+        explicit_policy_fields += sum(
+            1 for key in join_keys if key in JOIN_KEY_NORMALIZATION_POLICIES
+        )
+    value_pct = round(
+        (explicit_policy_fields * 100 / total_join_key_fields)
+        if total_join_key_fields
+        else 0.0,
+        2,
+    )
+    return {
+        "surface": COMPOSITE_JOIN_KEY_SURFACE,
+        "name": COMPOSITE_JOIN_KEY_COVERAGE_KPI,
+        "description": (
+            "Percent of configured composite join-key fields covered by explicit "
+            "join-key normalization policies."
+        ),
+        "numerator": explicit_policy_fields,
+        "denominator": total_join_key_fields,
+        "value_pct": value_pct,
+    }
+
+
+def _control_plane_surface_statuses() -> list[dict[str, object]]:
+    occurred_at = datetime(2026, 4, 8, 12, 53, 47, tzinfo=UTC)
+    manifest_status = normalize_run_manifest_spec(
+        {
+            "code_provenance": {"config_hash": "DEADBEEF"},
+            "source_refs": [
+                {
+                    "pipeline_name": "chembl_activity",
+                    "input_snapshots": [
+                        {"snapshot_id": "b"},
+                        {"snapshot_id": "a"},
+                    ],
+                }
+            ],
+            "planned_artifacts": [
+                {"path": "b", "layer": "gold"},
+                {"path": "a", "layer": "bronze"},
+            ],
+        }
+    )
+    ledger_status = normalize_run_ledger_payload(
+        {
+            "run_id": UUID("11111111-1111-1111-1111-111111111111"),
+            "occurred_at": occurred_at,
+            "metrics_snapshot": {"records_b": 2, "records_a": 1},
+        }
+    )
+    execution_identity_status = build_execution_identity_payload(
+        pipeline_name=" chembl_activity ",
+        run_type=" INCREMENTAL ",
+        pipeline_version=" 1.2.3 ",
+        effective_config_hash=" SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+        dq_contract_compatibility_hash=" DEADBEEF ",
+        contract_ref=" ChemBL.Activity ",
+        contract_version=" v2 ",
+        effective_config_artifact_id=" artifact-42 ",
+        exact_replay=True,
+        input_snapshot_fingerprint=" FACE ",
+    )
+    runtime_anchor_status = normalize_runtime_anchor_payload(
+        {
+            "effective_config_hash": " SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+            "contract_ref": " ChemBL.Activity ",
+            "contract_version": " v2 ",
+            "manifest_id": " manifest-123 ",
+            "composite_run_identity": " run-42 ",
+        }
+    )
+    checkpoint_context = create_expected_checkpoint_context(
+        effective_config_hash=" SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+        contract_ref=" ChemBL.Activity ",
+        contract_version=" v2 ",
+        manifest_id=" manifest-123 ",
+        composite_run_identity=" run-42 ",
+    )
+    merged_checkpoint = merge_expected_anchors(
+        CompositeCheckpointState(
+            composite_name="composite_publication",
+            run_id="run-1",
+            state=CompositePipelineState.RUNNING,
+        ),
+        checkpoint_context,
+    )
+
+    return [
+        {
+            "seam": "run_manifest_spec",
+            "covered": (
+                manifest_status["code_provenance"] == {"config_hash": "deadbeef"}
+                and manifest_status["planned_artifacts"][0]["layer"] == "bronze"
+                and manifest_status["source_refs"][0]["input_snapshots"][0]["snapshot_id"]
+                == "a"
+            ),
+        },
+        {
+            "seam": "run_ledger_payload",
+            "covered": (
+                ledger_status["run_id"] == "11111111-1111-1111-1111-111111111111"
+                and ledger_status["occurred_at"] == "2026-04-08T12:53:47Z"
+                and ledger_status["metrics_snapshot"] == {"records_a": 1, "records_b": 2}
+            ),
+        },
+        {
+            "seam": "execution_identity_payload",
+            "covered": (
+                execution_identity_status["contract_ref"] == "chembl.activity"
+                and execution_identity_status["contract_version"] == "2.0.0"
+                and execution_identity_status["exact_replay"] == "true"
+            ),
+        },
+        {
+            "seam": "runtime_anchor_payload",
+            "covered": (
+                runtime_anchor_status["effective_config_hash"]
+                == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                and runtime_anchor_status["contract_ref"] == "chembl.activity"
+                and runtime_anchor_status["contract_version"] == "2.0.0"
+            ),
+        },
+        {
+            "seam": "checkpoint_expected_context",
+            "covered": (
+                checkpoint_context.effective_config_hash
+                == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                and checkpoint_context.contract_ref == "chembl.activity"
+                and checkpoint_context.contract_version == "2.0.0"
+            ),
+        },
+        {
+            "seam": "checkpoint_anchor_merge",
+            "covered": (
+                merged_checkpoint.effective_config_hash
+                == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                and merged_checkpoint.contract_ref == "chembl.activity"
+                and merged_checkpoint.contract_version == "2.0.0"
+                and merged_checkpoint.manifest_id == "manifest-123"
+                and merged_checkpoint.composite_run_identity == "run-42"
+            ),
+        },
+    ]
+
+
+def build_control_plane_normalization_coverage_kpi() -> dict[str, object]:
+    statuses = _control_plane_surface_statuses()
+    covered = sum(1 for status in statuses if bool(status["covered"]))
+    total = len(statuses)
+    value_pct = round((covered * 100 / total) if total else 0.0, 2)
+    return {
+        "surface": CONTROL_PLANE_REPRODUCIBILITY_SURFACE,
+        "name": CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI,
+        "description": (
+            "Percent of governed control-plane and reproducibility normalization seams "
+            "covered by canonical normalization contracts."
+        ),
+        "numerator": covered,
+        "denominator": total,
+        "value_pct": value_pct,
+    }
+
+
+def build_surface_coverage_kpis(
+    rows: list[dict[str, str]] | None = None,
+) -> list[dict[str, object]]:
+    matrix_rows = build_field_matrix_rows() if rows is None else rows
+    return [
+        build_entity_profile_coverage_kpi(matrix_rows),
+        build_composite_join_key_policy_coverage_kpi(),
+        build_control_plane_normalization_coverage_kpi(),
+    ]
 
 
 def render_csv(rows: list[dict[str, str]]) -> str:

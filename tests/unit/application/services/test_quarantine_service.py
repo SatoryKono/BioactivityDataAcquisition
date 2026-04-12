@@ -116,12 +116,12 @@ class TestQuarantineServiceInspect:
             error_code=None,
         )
         quarantine_service.metrics.increment_counter.assert_called_with(
-            "quarantine_operator_operations_total",
+            "bioetl_quarantine_operator_operations_total",
             1,
             labels={"operation": "inspect", "status": "success"},
         )
         quarantine_service.metrics.observe_histogram.assert_called_with(
-            "quarantine_operator_duration_seconds",
+            "bioetl_quarantine_operator_duration_seconds",
             pytest.approx(0.0, abs=1.0),
             labels={"operation": "inspect", "status": "success"},
         )
@@ -257,7 +257,7 @@ class TestQuarantineServiceFilteredExplorer:
             pipeline="pipeline1",
         )
         quarantine_service.metrics.increment_counter.assert_called_with(
-            "quarantine_operator_operations_total",
+            "bioetl_quarantine_operator_operations_total",
             1,
             labels={"operation": "filtered_get", "status": "not_found"},
         )
@@ -429,7 +429,7 @@ class TestQuarantineServiceMarkAsReprocessed:
         assert count == 1
         assert mock_quarantine_port.update_status.call_count == 1
         quarantine_service.metrics.increment_counter.assert_called_with(
-            "quarantine_operator_operations_total",
+            "bioetl_quarantine_operator_operations_total",
             1,
             labels={"operation": "mark_reprocessed", "status": "partial"},
         )
@@ -485,7 +485,7 @@ class TestQuarantineServiceUpdateStatus:
 
         assert result is False
         quarantine_service.metrics.increment_counter.assert_called_with(
-            "quarantine_operator_operations_total",
+            "bioetl_quarantine_operator_operations_total",
             1,
             labels={"operation": "update_status", "status": "not_found"},
         )

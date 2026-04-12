@@ -14,6 +14,7 @@ __all__ = [
 
 import json
 from collections.abc import Callable
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
@@ -191,7 +192,9 @@ def build_dq_report_context(
             for rule in dq_config.key_nullability_rules
         ]
 
-    dq_timestamp = context.replay_timestamp_anchor or context.started_at
+    replay_timestamp_anchor = getattr(context, "replay_timestamp_anchor", None)
+    started_at = getattr(context, "started_at", datetime.now(UTC))
+    dq_timestamp = replay_timestamp_anchor or started_at
     current_date_str = dq_timestamp.strftime("%Y-%m-%d")
     dq_entity = extract_dq_entity(config)
 

@@ -183,6 +183,7 @@ def build_run_ledger_diagnostic_details(
         diagnostic["error_type"] = error_type
     if dataset_ref is not None:
         diagnostic["dataset_ref"] = dataset_ref
+        diagnostic["artifact_id"] = dataset_ref
     if lineage_fragment_id is not None:
         diagnostic["lineage_fragment_id"] = lineage_fragment_id
 
