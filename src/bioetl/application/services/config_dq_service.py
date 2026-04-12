@@ -7,7 +7,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, Protocol, cast
 
-from bioetl.application.services.effective_config_service import EffectiveConfigService
+from bioetl.application.services.control_plane.effective_config_service import (
+    EffectiveConfigService,
+)
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,

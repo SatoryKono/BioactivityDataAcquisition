@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.application.services.cli_run_orchestration_service import (
+    from bioetl.application.services.execution.cli_run_orchestration_service import (
         CliRunOrchestrationService,
     )
 
@@ -16,7 +16,7 @@ def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
     """Return process-local run orchestration service (lazy cached accessor seam)."""
     global _cli_run_orchestration_service
     if _cli_run_orchestration_service is None:
-        from bioetl.application.services.cli_run_orchestration_service import (
+        from bioetl.application.services.execution.cli_run_orchestration_service import (
             CliRunOrchestrationService,
         )
 

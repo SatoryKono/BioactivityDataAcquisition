@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.checkpoint_service import CheckpointService
     from bioetl.application.services.health_service import HealthService
-    from bioetl.application.services.lineage_inspection_service import (
+    from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
     )
     from bioetl.application.services.metrics_service import MetricsService
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
         ObservabilityWorkflowService,
     )
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.application.services.run_manifest_inspection_service import (
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
 

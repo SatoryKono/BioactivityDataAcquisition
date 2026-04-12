@@ -25,7 +25,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
-    from bioetl.application.services.run_manifest_inspection_service import (
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
     from bioetl.composition.observability_api import ObservabilityDiagnosticsBundle

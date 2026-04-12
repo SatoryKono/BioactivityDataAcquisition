@@ -14,7 +14,7 @@ from bioetl.application.services.checkpoint_service import (
     CheckpointInfo,
     CheckpointService,
 )
-from bioetl.application.services.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionResult,
     RunManifestInspectionService,
 )

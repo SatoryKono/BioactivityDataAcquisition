@@ -5,10 +5,10 @@ from __future__ import annotations
 from contextlib import AbstractAsyncContextManager
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.cli_run_orchestration_models import (
+from bioetl.application.services.execution.cli_run_orchestration_models import (
     RunExecutionRequest,
 )
-from bioetl.application.services.pipeline_runner_models import RunOptions, RunResult
+from bioetl.application.services.execution.pipeline_runner_models import RunOptions, RunResult
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started,
 )
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
     from typing import Protocol
 
-    from bioetl.application.services.cli_run_orchestration_contracts import (
+    from bioetl.application.services.execution.cli_run_orchestration_contracts import (
         RunPreparedPipelineCallable,
     )
     from bioetl.composition.registry_api import PipelineRegistry

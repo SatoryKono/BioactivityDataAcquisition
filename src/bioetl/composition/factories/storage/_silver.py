@@ -14,7 +14,7 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,

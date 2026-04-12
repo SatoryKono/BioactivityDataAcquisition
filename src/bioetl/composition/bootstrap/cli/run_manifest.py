@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from bioetl.application.services.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics

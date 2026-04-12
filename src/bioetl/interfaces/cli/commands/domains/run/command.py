@@ -68,10 +68,10 @@ from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions, RunResult
-    from bioetl.application.services.cli_run_orchestration_models import (
+    from bioetl.application.services.execution.cli_run_orchestration_models import (
         RunExecutionRequest,
     )
-    from bioetl.application.services.cli_run_orchestration_service import (
+    from bioetl.application.services.execution.cli_run_orchestration_service import (
         CliRunOrchestrationService,
     )
     from bioetl.composition.registry_api import PipelineRegistry

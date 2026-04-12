@@ -5,14 +5,14 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.pipeline_runner_models import (
+from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunOptions,
     RunResult,
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.pipeline_run_execution_service import (
+    from bioetl.application.services.execution.pipeline_run_execution_service import (
         PipelineExecutionResult,
     )
     from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort

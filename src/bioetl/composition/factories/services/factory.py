@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.wiring.factory import PipelineService
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.dq.context_resolver import (
     create_dq_services as _create_dq_services_impl,
 )

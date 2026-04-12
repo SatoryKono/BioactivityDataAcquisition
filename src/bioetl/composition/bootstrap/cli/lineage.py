@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from bioetl.application.services.lineage_inspection_service import (
+from bioetl.application.services.lineage.lineage_inspection_service import (
     LineageInspectionService,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics

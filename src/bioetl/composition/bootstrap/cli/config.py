@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services import ConfigService
 from bioetl.application.services.config_dq_service import ConfigDQService
-from bioetl.application.services.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config_service import (
     create_effective_config_service,
 )
 from bioetl.composition import get_default_registry

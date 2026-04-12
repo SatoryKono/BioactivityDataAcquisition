@@ -14,7 +14,7 @@ from bioetl.infrastructure.storage.gold.runtime_helpers import (
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
 if TYPE_CHECKING:
-    from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
     from bioetl.infrastructure.schemas.pipeline_config import SinkLayerConfig

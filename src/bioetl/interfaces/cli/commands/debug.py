@@ -18,7 +18,7 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_info
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions, RunResult
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
-    from bioetl.application.services.pipeline_runner_service import (
+    from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
     from bioetl.composition.registry_api import PipelineRegistry

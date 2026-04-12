@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
-from bioetl.application.services.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config_service import (
     create_effective_config_service,
 )
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef

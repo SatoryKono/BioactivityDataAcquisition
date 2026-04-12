@@ -36,7 +36,7 @@ if TYPE_CHECKING:
         PipelineRunner,
     )
     from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.application.services.run_ledger_service import RunLedgerService
+    from bioetl.application.services.control_plane.run_ledger_service import RunLedgerService
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )

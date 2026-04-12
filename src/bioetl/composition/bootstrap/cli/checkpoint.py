@@ -20,7 +20,7 @@ from bioetl.application.services.observability_workflow_service import (
     ObservabilityWorkflowService,
 )
 from bioetl.application.services.quarantine_service import QuarantineService
-from bioetl.application.services.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.application.services.admin_runtime_api import (

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.run_ledger_service import RunLedgerService
-from bioetl.application.services.run_manifest_service import (
+from bioetl.application.services.control_plane.run_ledger_service import RunLedgerService
+from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestCreateRequest,
     RunManifestService,
 )
@@ -59,7 +59,7 @@ def _create_ledger_service(
     ctx: PipelineRunContext,
 ) -> RunLedgerService | None:
     """Create ledger service if enabled."""
-    from bioetl.application.services.run_ledger_service import RunLedgerService
+    from bioetl.application.services.control_plane.run_ledger_service import RunLedgerService
     from bioetl.infrastructure.control_plane import FileRunLedgerStore
 
     return RunLedgerService(

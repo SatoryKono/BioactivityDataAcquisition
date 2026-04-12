@@ -70,7 +70,7 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_info
 from bioetl.interfaces.cli.registry_helpers import build_cli_registry
 
 if TYPE_CHECKING:
-    from bioetl.application.services.pipeline_runner_service import (
+    from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
     from bioetl.composition.registry_api import PipelineRegistry

@@ -13,7 +13,7 @@ from bioetl.interfaces.cli.commands._inspection_output import (
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
-    from bioetl.application.services.lineage_inspection_service import (
+    from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
     )
 

@@ -15,7 +15,7 @@ from bioetl.interfaces.cli.commands._inspection_output import (
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
-    from bioetl.application.services.run_manifest_inspection_service import (
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
 
