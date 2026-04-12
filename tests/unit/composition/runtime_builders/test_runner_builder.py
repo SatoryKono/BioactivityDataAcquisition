@@ -480,6 +480,77 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     assert ledger_payload["event_type"] == "manifest_created"
 
 
+def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_bronze_batches(
+    tmp_path: Path,
+) -> None:
+    """Exact replay must fail closed when cached-Bronze snapshots are missing."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    empty_bronze_root = tmp_path / "cached_bronze" / "chembl" / "activity"
+    empty_bronze_root.mkdir(parents=True)
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        exact_replay=True,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="Cached Bronze execution requires at least one persisted batch file for snapshot provenance",
+    ):
+        runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            ensure_providers_loaded_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=lambda: SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(heartbeat_interval=30),
+                test_mode=False,
+            ),
+            load_pipeline_config_fn=lambda _: SimpleNamespace(
+                provider="chembl",
+                entity_type="activity",
+                version="2.0.0",
+                maintenance=SimpleNamespace(
+                    auto_vacuum=False,
+                    vacuum_retention_days=7,
+                ),
+                input_filter=SimpleNamespace(),
+                business_primary_keys=["activity_id"],
+                technical_primary_key="entity_id",
+            ),
+            build_observability_bundle_fn=lambda **_: _namespace_observability(
+                SimpleNamespace(info=lambda *_, **__: None),
+            ),
+            assemble_vacuum_settings_fn=lambda **_: "vacuum",
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental",
+                limit=25,
+                exact_replay=True,
+            ),
+            assemble_filter_config_fn=lambda **_: None,
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=True,
+                bronze_path=str(empty_bronze_root),
+                bronze_date="2026-01-01",
+            ),
+        )
+
+    assert fake_factory.kwargs is None
+
+
 def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enabled(
     tmp_path: Path,
 ) -> None:

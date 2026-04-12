@@ -27,28 +27,19 @@ class _ChemblFetchPagingFilteredMixin:
         pk_fields: tuple[str, ...] | None = None,
     ) -> Iterator[BronzeRecord]:
         """Yield records while tracking seen IDs for deduplication."""
-        use_composite = pk_fields is not None and len(pk_fields) > 1
+        composite_fields = pk_fields if pk_fields is not None and len(pk_fields) > 1 else None
         logger = getattr(self, "_logger", None)
         metrics = getattr(self, "_adapter_metrics", None)
-        if use_composite:
-            assert pk_fields is not None
-            yield from iter_deduplicated_records(
-                records,
-                seen_keys=seen_ids,
-                primary_field=pk_fields[0],
-                composite_fields=pk_fields,
-                composite_key_builder=self._compute_composite_key,
-                entity_type=entity_type,
-                logger=logger,
-                metrics=metrics,
-                log_context={"filter_field": filter_field},
-            )
-            return
-
         yield from iter_deduplicated_records(
             records,
             seen_keys=seen_ids,
-            primary_field=pk_field,
+            primary_field=(
+                composite_fields[0] if composite_fields is not None else pk_field
+            ),
+            composite_fields=composite_fields,
+            composite_key_builder=(
+                self._compute_composite_key if composite_fields is not None else None
+            ),
             entity_type=entity_type,
             logger=logger,
             metrics=metrics,

@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.adapters.common.deduplication import register_record_dedup_key
+from bioetl.infrastructure.adapters.common.deduplication import (
+    compute_composite_dedup_key,
+    is_duplicate_record as is_duplicate_record_shared,
+)
 
 __all__ = [
     "compute_composite_key",
@@ -23,21 +26,8 @@ def compute_composite_key(
     record: JsonDict,  # Any: untyped API JSON record
     pk_fields: tuple[str, ...],
 ) -> str:
-    """Compute composite key string from multiple fields.
-
-    Args:
-        record: Record dictionary.
-        pk_fields: Tuple of field names forming the composite key.
-
-    Returns:
-        Serialized composite key string (fields joined with '|').
-    """
-    parts = []
-    for pk_field in pk_fields:
-        value = record.get(pk_field, "")
-        # Normalize to string and handle None
-        parts.append(str(value) if value is not None else "")
-    return "|".join(parts)
+    """Compute composite key string from multiple fields."""
+    return compute_composite_dedup_key(record, pk_fields)
 
 
 def is_duplicate_record_composite(
@@ -61,18 +51,15 @@ def is_duplicate_record_composite(
     Returns:
         True if record is a duplicate.
     """
-    return (
-        register_record_dedup_key(
-            record=record,
-            seen_keys=seen_keys,
-            primary_field=pk_fields[0],
-            composite_fields=pk_fields,
-            composite_key_builder=compute_composite_key,
-            entity_type=entity_type,
-            logger=logger,
-            metrics=metrics,
-        )
-        == "duplicate"
+    return is_duplicate_record_shared(
+        record=record,
+        seen_keys=seen_keys,
+        primary_field=pk_fields[0],
+        composite_fields=pk_fields,
+        composite_key_builder=compute_composite_key,
+        entity_type=entity_type,
+        logger=logger,
+        metrics=metrics,
     )
 
 
@@ -97,14 +84,11 @@ def is_duplicate_record(
     Returns:
         True if the condition is met, False otherwise.
     """
-    return (
-        register_record_dedup_key(
-            record=record,
-            seen_keys=seen_ids,
-            primary_field=pk_field,
-            entity_type=entity_type,
-            logger=logger,
-            metrics=metrics,
-        )
-        == "duplicate"
+    return is_duplicate_record_shared(
+        record=record,
+        seen_keys=seen_ids,
+        primary_field=pk_field,
+        entity_type=entity_type,
+        logger=logger,
+        metrics=metrics,
     )

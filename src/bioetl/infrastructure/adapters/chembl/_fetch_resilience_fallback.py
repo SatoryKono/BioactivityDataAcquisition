@@ -16,7 +16,8 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common.deduplication import (
-    register_record_dedup_key,
+    async_iter_deduplicated_records,
+    is_new_record,
 )
 
 if TYPE_CHECKING:
@@ -135,15 +136,12 @@ def mark_record_as_seen(
     pk_fields: tuple[str, ...] | None = None,
 ) -> bool:
     """Return True when record is new and register its dedup key."""
-    return bool(
-        register_record_dedup_key(
-            record=record,
-            seen_keys=seen_ids,
-            primary_field=pk_field,
-            composite_fields=pk_fields,
-            composite_key_builder=host._compute_composite_key,
-        )
-        == "new"
+    return is_new_record(
+        record=record,
+        seen_keys=seen_ids,
+        primary_field=pk_field,
+        composite_fields=pk_fields,
+        composite_key_builder=host._compute_composite_key,
     )
 
 
@@ -158,14 +156,19 @@ async def yield_deduplicated_filtered_records(
     pk_fields: tuple[str, ...] | None = None,
 ) -> AsyncIterator[BronzeRecord]:
     """Yield filtered records while deduplicating by configured keys."""
-    async for record in host._fetch_with_filter(
-        entity_type,
-        id_batch,
-        filter_field,
-        limit,
+    async for record in async_iter_deduplicated_records(
+        host._fetch_with_filter(
+            entity_type,
+            id_batch,
+            filter_field,
+            limit,
+        ),
+        seen_keys=seen_ids,
+        primary_field=pk_field,
+        composite_fields=pk_fields,
+        composite_key_builder=host._compute_composite_key,
     ):
-        if mark_record_as_seen(host, record, seen_ids, pk_field, pk_fields):
-            yield record
+        yield record
 
 
 async def yield_single_id_fallback(

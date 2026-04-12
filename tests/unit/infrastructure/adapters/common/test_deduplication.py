@@ -1,12 +1,21 @@
+# mypy: disable-error-code=untyped-decorator
+
 """Tests for shared adapter deduplication helpers."""
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from unittest.mock import MagicMock
 
+import pytest
+
 from bioetl.infrastructure.adapters.common.deduplication import (
+    async_iter_deduplicated_records,
     build_record_dedup_key,
+    compute_composite_dedup_key,
     deduplicate_preserving_order,
+    is_duplicate_record,
+    is_new_record,
     iter_deduplicated_records,
     register_record_dedup_key,
 )
@@ -34,6 +43,12 @@ def test_build_record_dedup_key_supports_simple_and_composite_keys() -> None:
         )
         is None
     )
+
+
+def test_compute_composite_dedup_key_preserves_field_order_and_missing_values() -> None:
+    key = compute_composite_dedup_key({"left": "A", "right": None}, ("left", "right"))
+
+    assert key == "A|"
 
 
 def test_register_record_dedup_key_logs_and_records_metrics_for_duplicates() -> None:
@@ -80,6 +95,27 @@ def test_register_record_dedup_key_supports_custom_composite_builder() -> None:
     assert seen_keys == {"A::B"}
 
 
+def test_duplicate_and_new_record_predicates_reflect_registration_status() -> None:
+    seen_keys: set[str] = set()
+
+    assert (
+        is_new_record(
+            record={"record_id": "R1"},
+            seen_keys=seen_keys,
+            primary_field="record_id",
+        )
+        is True
+    )
+    assert (
+        is_duplicate_record(
+            record={"record_id": "R1"},
+            seen_keys=seen_keys,
+            primary_field="record_id",
+        )
+        is True
+    )
+
+
 def test_register_record_dedup_key_marks_missing_keys_explicitly() -> None:
     assert (
         register_record_dedup_key(
@@ -110,6 +146,35 @@ def test_iter_deduplicated_records_skips_duplicates_but_keeps_missing_keys() -> 
             metrics=metrics,
         )
     )
+
+    assert records == [{"record_id": "R1"}, {"other_field": "no-key"}]
+    logger.debug.assert_called_once()
+    metrics.record_dropped_duplicates.assert_called_once_with("assay")
+
+
+@pytest.mark.asyncio
+async def test_async_iter_deduplicated_records_skips_duplicates_but_keeps_missing_keys() -> (
+    None
+):
+    logger = MagicMock()
+    metrics = MagicMock()
+
+    async def _records() -> AsyncIterator[dict[str, str]]:
+        yield {"record_id": "R1"}
+        yield {"record_id": "R1"}
+        yield {"other_field": "no-key"}
+
+    records = [
+        record
+        async for record in async_iter_deduplicated_records(
+            _records(),
+            seen_keys=set(),
+            primary_field="record_id",
+            entity_type="assay",
+            logger=logger,
+            metrics=metrics,
+        )
+    ]
 
     assert records == [{"record_id": "R1"}, {"other_field": "no-key"}]
     logger.debug.assert_called_once()

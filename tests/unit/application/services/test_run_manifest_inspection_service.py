@@ -180,6 +180,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
         "replay_capability": "exact_replay_supported",
+        "requested_exact_replay": True,
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
@@ -242,6 +243,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
         "replay_capability": "exact_replay_supported",
+        "requested_exact_replay": True,
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
@@ -281,6 +283,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
         "replay_capability": "exact_replay_supported",
+        "requested_exact_replay": True,
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
@@ -329,6 +332,7 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     result = service.show("manifest-resume")
 
     assert result.diagnostics["replay_capability"] == "resume_only"
+    assert result.diagnostics["requested_exact_replay"] is False
     assert (
         result.diagnostics["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"
@@ -342,6 +346,7 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     assert result.diagnostics["input_snapshot_identity_fingerprint"] is None
     assert result.diagnostics["replay_mode"] == "resume"
     assert result.identity_graph["replay_capability"] == "resume_only"
+    assert result.identity_graph["requested_exact_replay"] is False
     assert (
         result.identity_graph["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"
@@ -354,6 +359,62 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     assert result.identity_graph["input_snapshot_content_hashes"] == []
     assert result.identity_graph["input_snapshot_identity_fingerprint"] is None
     assert result.identity_graph["input_snapshot_count"] == 0
+
+
+def test_show_snapshot_backed_manifest_reports_non_replay_snapshot_mode() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = RunID(uuid4())
+    manifest = replace(
+        _make_manifest(manifest_id="manifest-snapshot-backed", run_id=run_id),
+        launch_context={"limit": 100, "resume": False, "exact_replay": False},
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-1",
+                        content_hash="sha256:snapshot-1",
+                        immutable_uri="file:///tmp/bronze/batch_1.jsonl.zst",
+                    ),
+                ),
+            ),
+        ),
+    )
+    manifest_store.save(manifest)
+    service = RunManifestInspectionService(manifest_port=manifest_store)
+
+    result = service.show("manifest-snapshot-backed")
+
+    assert result.diagnostics["replay_capability"] == "exact_replay_supported"
+    assert result.diagnostics["requested_exact_replay"] is False
+    assert result.diagnostics["exact_replay_eligible"] is True
+    assert result.diagnostics["replay_mode"] == "snapshot_backed_run"
+    assert result.identity_graph["requested_exact_replay"] is False
+    assert result.identity_graph["replay_mode"] == "snapshot_backed_run"
+
+
+def test_show_does_not_report_exact_replay_from_intent_alone() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = RunID(uuid4())
+    manifest = replace(
+        _make_manifest(manifest_id="manifest-requested-replay", run_id=run_id),
+        launch_context={"limit": 100, "resume": False, "exact_replay": True},
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+        source_refs=(),
+    )
+    manifest_store.save(manifest)
+    service = RunManifestInspectionService(manifest_port=manifest_store)
+
+    result = service.show("manifest-requested-replay")
+
+    assert result.diagnostics["requested_exact_replay"] is True
+    assert result.diagnostics["exact_replay_eligible"] is False
+    assert result.diagnostics["replay_mode"] == "live_fetch"
+    assert result.identity_graph["requested_exact_replay"] is True
+    assert result.identity_graph["replay_mode"] == "live_fetch"
 
 
 def test_show_collects_artifact_diagnostic_links() -> None:

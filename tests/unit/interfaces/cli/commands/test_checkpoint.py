@@ -58,6 +58,7 @@ class _FakeWorkflowService:
                     },
                     "diagnostics": {
                         "replay_capability": "exact_replay_supported",
+                        "requested_exact_replay": True,
                         "replay_capability_reason": "immutable_input_snapshots_present",
                         "exact_replay_blockers": [],
                         "input_snapshot_ids": ["snapshot-1"],
@@ -220,6 +221,7 @@ class TestCheckpointCommands:
         assert result.exit_code == 0
         assert "Audit Run Diagnostics" in result.output
         assert "manifest_id: manifest-1" in result.output
+        assert "requested_exact_replay: True" in result.output
         assert (
             "replay_capability_reason: immutable_input_snapshots_present"
             in result.output

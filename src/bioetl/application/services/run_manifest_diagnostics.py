@@ -19,12 +19,12 @@ def _build_base_summary(
 ) -> dict[str, object]:
     """Build base summary from manifest code provenance."""
     code_provenance = manifest.code_provenance
-    exact_replay = bool(manifest.launch_context.get("exact_replay"))
+    requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
     resume_requested = bool(manifest.launch_context.get("resume"))
     input_snapshots = _collect_input_snapshot_refs(manifest)
     replay_mode = _resolve_replay_mode(
         manifest=manifest,
-        exact_replay=exact_replay,
+        requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
     )
     replay_capability_reason = _resolve_replay_capability_reason(
@@ -54,6 +54,7 @@ def _build_base_summary(
         ),
         "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
         "replay_capability": manifest.replay_capability.value,
+        "requested_exact_replay": requested_exact_replay,
         "replay_capability_reason": replay_capability_reason,
         "exact_replay_eligible": (
             manifest.replay_capability.value == "exact_replay_supported"
@@ -66,35 +67,32 @@ def _build_base_summary(
         "input_snapshot_identity_fingerprint": (
             _compute_input_snapshot_identity_fingerprint(input_snapshots)
         ),
+        "replay_mode": replay_mode,
+        "input_snapshot_count": len(input_snapshots),
+        "input_snapshots": input_snapshots,
         "planned_artifacts": [
             {"layer": artifact.layer, "path": artifact.path}
             for artifact in manifest.planned_artifacts
         ],
         "occurrence_only_diagnostics": [],
     }
-    if replay_mode != "live_fetch" or input_snapshots:
-        summary.update(
-            {
-                "replay_mode": replay_mode,
-                "input_snapshot_count": len(input_snapshots),
-                "input_snapshots": input_snapshots,
-            }
-        )
     return summary
 
 
 def _resolve_replay_mode(
     *,
     manifest: RunManifest,
-    exact_replay: bool,
+    requested_exact_replay: bool,
     resume_requested: bool,
 ) -> str:
     """Resolve operator-facing replay mode from manifest intent and capability."""
     if (
-        exact_replay
-        or manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+        requested_exact_replay
+        and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
     ):
         return "exact_replay"
+    if manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        return "snapshot_backed_run"
     if resume_requested or manifest.replay_capability == ReplayCapability.RESUME_ONLY:
         return "resume"
     return "live_fetch"
@@ -279,6 +277,7 @@ def _build_final_summary(
         "contract_ref": base_summary.get("contract_ref"),
         "contract_version": base_summary.get("contract_version"),
         "replay_capability": base_summary.get("replay_capability"),
+        "requested_exact_replay": base_summary.get("requested_exact_replay"),
         "replay_capability_reason": base_summary.get("replay_capability_reason"),
         "exact_replay_eligible": base_summary.get("exact_replay_eligible"),
         "exact_replay_blockers": base_summary.get("exact_replay_blockers", []),
