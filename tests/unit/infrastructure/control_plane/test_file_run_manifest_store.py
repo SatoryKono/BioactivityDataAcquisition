@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -248,7 +249,7 @@ def test_file_store_hides_orphan_manifest_without_run_index(tmp_path) -> None:
     )
     store.base_path.mkdir(parents=True, exist_ok=True)
     (store.base_path / f"{manifest.manifest_id}.json").write_text(
-        __import__("json").dumps(manifest.to_dict(), sort_keys=True),
+        json.dumps(manifest.to_dict(), sort_keys=True),
         encoding="utf-8",
     )
 
