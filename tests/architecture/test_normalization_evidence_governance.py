@@ -28,3 +28,6 @@ def test_normalization_plan_references_governed_evidence_surfaces() -> None:
     assert "pipeline_normalization_field_matrix.md" in plan_text
     assert "join_keys.py" in plan_text
     assert "join_key_normalization.py" in plan_text
+    assert "explicit_profile_coverage_pct" in plan_text
+    assert "composite_join_key_policy_coverage_pct" in plan_text
+    assert "control_plane_normalization_coverage_pct" in plan_text

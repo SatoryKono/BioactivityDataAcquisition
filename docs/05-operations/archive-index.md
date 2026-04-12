@@ -37,6 +37,7 @@ Last verified: '2026-04-02'
 - [Deployment & Tooling Extras](deployment/README.md)
 - [MCP Neo4j Memory Summary](deployment/mcp-neo4j-memory-summary.md)
 - [MCP Neo4j Memory Final Summary](deployment/mcp-neo4j-memory-final-summary.md)
+- [Neo4j Root Status Wave (2026-04)](../99-archive/operations/neo4j-root-status-2026-04/README.md)
 
 ## Archive Rules
 
@@ -53,4 +54,3 @@ Last verified: '2026-04-02'
   - [Operations Runbooks](runbooks/index.md)
   - [Monitoring Guide](01-monitoring-guide.md)
   - [VACUUM Retention](vacuum-retention.md)
-

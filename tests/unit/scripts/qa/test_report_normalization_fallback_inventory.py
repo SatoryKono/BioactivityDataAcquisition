@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
+from typing import cast
 
 from scripts.qa.report_normalization_fallback_inventory import (
     _build_payload,
@@ -42,29 +44,56 @@ def test_build_payload_summarizes_fallback_rows() -> None:
             },
         ],
         coverage_kpi={
+            "surface": "entity_record",
             "name": "explicit_profile_coverage_pct",
             "numerator": 7,
             "denominator": 10,
             "value_pct": 70.0,
         },
+        surface_kpis=[
+            {
+                "surface": "entity_record",
+                "name": "explicit_profile_coverage_pct",
+                "numerator": 7,
+                "denominator": 10,
+                "value_pct": 70.0,
+                "description": "Entity coverage.",
+            },
+            {
+                "surface": "composite_join_key",
+                "name": "composite_join_key_policy_coverage_pct",
+                "numerator": 4,
+                "denominator": 4,
+                "value_pct": 100.0,
+                "description": "Composite coverage.",
+            },
+        ],
     )
 
-    assert payload["coverage_kpi"]["name"] == "explicit_profile_coverage_pct"
+    coverage_kpi = cast(dict[str, object], payload["coverage_kpi"])
+    surface_kpis = cast(list[dict[str, object]], payload["surface_kpis"])
+    pipelines = cast(list[dict[str, object]], payload["pipelines"])
+    normalizers = cast(list[dict[str, object]], payload["normalizers"])
+    sources = cast(list[dict[str, object]], payload["sources"])
+
+    assert payload["scope"] == "entity_record_fallback_only"
+    assert coverage_kpi["name"] == "explicit_profile_coverage_pct"
+    assert len(surface_kpis) == 2
     assert payload["fallback_field_count"] == 3
     assert payload["fallback_business_field_count"] == 2
     assert payload["fallback_technical_passthrough_field_count"] == 1
     assert payload["pipelines_with_fallback_count"] == 1
-    assert payload["pipelines"][0] == {
+    assert pipelines[0] == {
         "pipeline_name": "openalex_publication",
         "fallback_field_count": 3,
         "fallback_business_field_count": 2,
         "fallback_technical_passthrough_field_count": 1,
     }
-    assert payload["normalizers"][0] == {
+    assert normalizers[0] == {
         "normalizer": "normalize_doi",
         "field_count": 1,
     }
-    assert payload["sources"][0] == {
+    assert sources[0] == {
         "normalization_source": "fallback_business",
         "field_count": 2,
     }
@@ -74,11 +103,38 @@ def test_render_markdown_mentions_top_fallback_entries() -> None:
     markdown = _render_markdown(
         {
             "coverage_kpi": {
+                "surface": "entity_record",
                 "name": "explicit_profile_coverage_pct",
                 "numerator": 7,
                 "denominator": 10,
                 "value_pct": 70.0,
             },
+            "surface_kpis": [
+                {
+                    "surface": "entity_record",
+                    "name": "explicit_profile_coverage_pct",
+                    "numerator": 7,
+                    "denominator": 10,
+                    "value_pct": 70.0,
+                    "description": "Entity coverage.",
+                },
+                {
+                    "surface": "composite_join_key",
+                    "name": "composite_join_key_policy_coverage_pct",
+                    "numerator": 4,
+                    "denominator": 4,
+                    "value_pct": 100.0,
+                    "description": "Composite coverage.",
+                },
+                {
+                    "surface": "control_plane_reproducibility",
+                    "name": "control_plane_normalization_coverage_pct",
+                    "numerator": 6,
+                    "denominator": 6,
+                    "value_pct": 100.0,
+                    "description": "Control-plane coverage.",
+                },
+            ],
             "fallback_field_count": 2,
             "fallback_business_field_count": 1,
             "fallback_technical_passthrough_field_count": 1,
@@ -118,7 +174,14 @@ def test_render_markdown_mentions_top_fallback_entries() -> None:
     )
 
     assert "# Normalization Fallback Inventory" in markdown
-    assert "- explicit_profile_coverage_pct: `70.00%`" in markdown
+    assert "- scope: `entity_record_fallback_only`" in markdown
+    assert "Fallback inventory tracks only entity-record fallback normalization debt." in markdown
+    assert "## Surface Coverage Context" in markdown
+    assert "- entity_record / explicit_profile_coverage_pct: `70.00%` (`7` / `10`)" in markdown
+    assert (
+        "- composite_join_key / composite_join_key_policy_coverage_pct: `100.00%` "
+        "(`4` / `4`) Composite coverage."
+    ) in markdown
     assert "`fallback_business` covers `1` fields" in markdown
     assert (
         "`openalex_publication` has `2` fallback fields "
@@ -130,7 +193,7 @@ def test_render_markdown_mentions_top_fallback_entries() -> None:
     )
 
 
-def test_main_writes_deterministic_artifacts(tmp_path) -> None:
+def test_main_writes_deterministic_artifacts(tmp_path: Path) -> None:
     json_out = tmp_path / "fallback.json"
     markdown_out = tmp_path / "fallback.md"
 
@@ -162,13 +225,18 @@ def test_main_writes_deterministic_artifacts(tmp_path) -> None:
     assert json_out.read_text(encoding="utf-8") == first_json
     assert markdown_out.read_text(encoding="utf-8") == first_md
     assert json.loads(first_json)["mode"] == "report-only"
+    assert json.loads(first_json)["scope"] == "entity_record_fallback_only"
 
 
 def test_main_returns_non_zero_when_fallback_business_budget_is_exceeded() -> None:
-    current_budget = int(build_fallback_inventory_payload()["fallback_business_field_count"])
+    current_budget = int(
+        cast(int, build_fallback_inventory_payload()["fallback_business_field_count"])
+    )
     assert main(["--max-fallback-business-fields", str(current_budget - 1)]) == 1
 
 
 def test_main_accepts_current_fallback_business_budget() -> None:
-    current_budget = str(build_fallback_inventory_payload()["fallback_business_field_count"])
+    current_budget = str(
+        cast(int, build_fallback_inventory_payload()["fallback_business_field_count"])
+    )
     assert main(["--max-fallback-business-fields", current_budget]) == 0

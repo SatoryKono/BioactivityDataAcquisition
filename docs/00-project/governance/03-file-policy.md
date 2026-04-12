@@ -10,7 +10,7 @@ Last verified: '2026-03-29'
 
 # Политика файлов и директорий
 
-*Синхронизировано с RULES.md v6.1 | Последнее обновление: 2026-03-20*
+*Синхронизировано с RULES.md v6.1 | Последнее обновление: 2026-04-12*
 
 ----------------------------------------------------------------------
 
@@ -25,9 +25,17 @@ Last verified: '2026-03-29'
 ## 0. Политика корня репозитория
 
 - Root-level tracked файлы MUST соответствовать `.github/root-allowlist.txt`.
+- Root-level tracked markdown и txt артефакты MUST быть ограничены canonical
+  root entrypoints. Операционные quick-reference материалы SHOULD жить в
+  `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
+  MUST архивироваться под `docs/99-archive/`.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and project surfaces: `.ai`, `.aiassistant`, `.codex`, `.gemini`, `.github`, `.jules`, `.junie`, `assets`, `configs`, `data`, `docs`, `grafana`, `reports`, `scripts`, `src`, `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Локальные tooling-каталоги (например, `.idea/`, `.vscode/`, `.cursor/`, `.trae/`, `.windsurf/`) MAY существовать в рабочем дереве, но MUST оставаться untracked и игнорироваться `.gitignore`.
+
+Root allowlist интерпретируется как policy surface, а не как временный склад.
+Если новый root-level файл существует только для инцидента, ручной проверки или
+финального статуса волны, он не должен закрепляться в корне.
 
 Проверка:
 
@@ -35,6 +43,12 @@ Last verified: '2026-03-29'
 python3 scripts/repo/audit_root_cleanliness.py
 python3 scripts/diagnostics/audit_structure.py --path .
 ```
+
+Дополнительные правила маршрутизации:
+
+- active deployment / verification / runbook docs → `docs/05-operations/`
+- repo-only evidence and historical status artifacts → `docs/99-archive/`
+- generated working outputs → `reports/`
 
 ----------------------------------------------------------------------
 

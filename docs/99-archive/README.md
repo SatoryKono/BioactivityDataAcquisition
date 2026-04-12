@@ -33,6 +33,7 @@ ______________________________________________________________________
 - `data-model/` — historical model migration notes; not retained as published pages in this workspace snapshot.
 - `decisions/` — superseded decision records; not retained as published pages in this workspace snapshot.
 - `plans/` — archived planning artifacts; retained only through references and summaries in the current snapshot.
+- `operations/` — archived operational status, recovery, and verification waves that no longer represent the default operator workflow.
 - `reports/` — archived reports from earlier cycles; not retained as published pages in this workspace snapshot.
 
 ______________________________________________________________________
@@ -90,6 +91,10 @@ ______________________________________________________________________
 
 - `plans/optimize-config-deduplication.md` — historical path no longer retained as a published archive page
 - `plans/rf-fs-2026-03/README.md` — historical path no longer retained as a published archive page
+
+### Operations
+
+- [operations/neo4j-root-status-2026-04/README.md](operations/neo4j-root-status-2026-04/README.md) — archived Neo4j / Windows / MCP recovery and status wave moved out of repository root
 
 ### Reports
 

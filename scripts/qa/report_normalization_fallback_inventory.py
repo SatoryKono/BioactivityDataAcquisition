@@ -8,6 +8,7 @@ import json
 import sys
 from collections import Counter
 from pathlib import Path
+from typing import Any, cast
 
 if __package__ in {None, ""}:
     repo_root = Path(__file__).resolve().parents[2]
@@ -16,6 +17,7 @@ if __package__ in {None, ""}:
 
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
     build_entity_profile_coverage_kpi,
+    build_surface_coverage_kpis,
     FALLBACK_BUSINESS,
     FALLBACK_TECHNICAL_PASSTHROUGH,
     build_field_matrix_rows,
@@ -44,6 +46,7 @@ def _build_payload(
     rows: list[dict[str, str]],
     *,
     coverage_kpi: dict[str, object] | None = None,
+    surface_kpis: list[dict[str, object]] | None = None,
 ) -> dict[str, object]:
     per_pipeline = Counter(row["pipeline_name"] for row in rows)
     per_pipeline_source = Counter(
@@ -53,7 +56,9 @@ def _build_payload(
     per_source = Counter(row["normalization_source"] for row in rows)
     return {
         "mode": "report-only",
+        "scope": "entity_record_fallback_only",
         "coverage_kpi": coverage_kpi or {},
+        "surface_kpis": surface_kpis or [],
         "fallback_field_count": len(rows),
         "fallback_business_field_count": per_source[FALLBACK_BUSINESS],
         "fallback_technical_passthrough_field_count": per_source[
@@ -103,38 +108,61 @@ def build_fallback_inventory_payload() -> dict[str, object]:
     return _build_payload(
         fallback_rows,
         coverage_kpi=build_entity_profile_coverage_kpi(all_rows),
+        surface_kpis=build_surface_coverage_kpis(all_rows),
     )
 
 
 def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
-    fallback_field_count = int(payload["fallback_field_count"])
-    pipelines = payload["pipelines"]
-    normalizers = payload["normalizers"]
-    entries = payload["entries"]
+    fallback_field_count = int(cast(int, payload["fallback_field_count"]))
+    pipelines = cast(list[dict[str, object]], payload["pipelines"])
+    normalizers = cast(list[dict[str, object]], payload["normalizers"])
+    entries = cast(list[dict[str, object]], payload["entries"])
 
     lines = [
         "# Normalization Fallback Inventory",
         "",
         "- mode: report-only",
-        f"- {payload['coverage_kpi'].get('name', 'coverage_kpi')}: `{float(payload['coverage_kpi'].get('value_pct', 0.0)):.2f}%`",
+        "- scope: `entity_record_fallback_only`",
         (
-            "- explicit_profile_field_count: "
-            f"`{payload['coverage_kpi'].get('numerator', 0)}` / "
-            f"`{payload['coverage_kpi'].get('denominator', 0)}` shipped entity fields"
+            "- scope_note: Fallback inventory tracks only entity-record fallback "
+            "normalization debt. Composite join-key and control-plane surfaces are "
+            "reported separately in the matrix surface coverage summary."
         ),
-        f"- fallback_field_count: `{fallback_field_count}`",
-        f"- fallback_business_field_count: `{payload['fallback_business_field_count']}`",
-        f"- fallback_technical_passthrough_field_count: `{payload['fallback_technical_passthrough_field_count']}`",
-        f"- pipelines_with_fallback_count: `{payload['pipelines_with_fallback_count']}`",
+        "",
+        "## Surface Coverage Context",
         "",
     ]
+    surface_kpis = cast(list[dict[str, Any]], payload.get("surface_kpis", []))
+    if not surface_kpis and payload.get("coverage_kpi"):
+        surface_kpis = [cast(dict[str, Any], payload["coverage_kpi"])]
+    for kpi in surface_kpis:
+        lines.append(
+            f"- {kpi.get('surface', 'entity_record')} / {kpi.get('name', 'coverage_kpi')}: "
+            f"`{float(kpi.get('value_pct', 0.0)):.2f}%` "
+            f"(`{kpi.get('numerator', 0)}` / `{kpi.get('denominator', 0)}`) "
+            f"{kpi.get('description', '')}".rstrip()
+        )
+    lines.extend(
+        [
+            "",
+            "## Entity Fallback Summary",
+            "",
+            f"- fallback_field_count: `{fallback_field_count}`",
+            f"- fallback_business_field_count: `{payload['fallback_business_field_count']}`",
+            f"- fallback_technical_passthrough_field_count: `{payload['fallback_technical_passthrough_field_count']}`",
+            f"- pipelines_with_fallback_count: `{payload['pipelines_with_fallback_count']}`",
+            "",
+        ]
+    )
 
     if fallback_field_count == 0:
-        lines.append("All pipeline fields are covered by explicit normalization contracts.")
+        lines.append(
+            "All entity-record fields are covered by explicit normalization contracts."
+        )
         return "\n".join(lines)
 
     lines.extend(["## Fallback Categories", ""])
-    for item in list(payload["sources"])[:limit]:
+    for item in cast(list[dict[str, object]], payload["sources"])[:limit]:
         lines.append(
             f"- `{item['normalization_source']}` covers `{item['field_count']}` fields"
         )
@@ -212,7 +240,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(markdown)
     if args.max_fallback_business_fields is not None:
-        actual = int(payload["fallback_business_field_count"])
+        actual = int(cast(int, payload["fallback_business_field_count"]))
         budget = args.max_fallback_business_fields
         if actual > budget:
             print(

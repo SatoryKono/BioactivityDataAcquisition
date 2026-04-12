@@ -553,7 +553,7 @@ def _control_plane_surface_statuses() -> list[dict[str, object]]:
         CompositeCheckpointState(
             composite_name="composite_publication",
             run_id="run-1",
-            state=CompositePipelineState.RUNNING,
+            state=CompositePipelineState.SEED_RUNNING,
         ),
         checkpoint_context,
     )
@@ -659,7 +659,7 @@ def render_csv(rows: list[dict[str, str]]) -> str:
 
 def render_markdown(rows: list[dict[str, str]]) -> str:
     headers = list(CSV_COLUMNS)
-    coverage_kpi = build_entity_profile_coverage_kpi(rows)
+    surface_kpis = build_surface_coverage_kpis(rows)
     lines = [
         "# Pipeline Normalization Field Matrix",
         "",
@@ -669,14 +669,23 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         "Occurrence-scoped provenance fields may appear here because normalization or config policy still references them,",
         "but canonical Silver/Gold row contracts are defined by provider references and Gold contract exports.",
         "",
-        "## Headline KPI",
+        "## Surface Coverage Summary",
         "",
-        f"- {coverage_kpi['name']}: `{coverage_kpi['value_pct']:.2f}%`",
-        f"- explicit_profile_field_count: `{coverage_kpi['numerator']}` / `{coverage_kpi['denominator']}` shipped entity fields",
+        "Entity coverage is entity-scoped only; composite join-key and control-plane surfaces are reported separately below.",
         "",
-        "| " + " | ".join(headers) + " |",
-        "| " + " | ".join("---" for _ in headers) + " |",
     ]
+    for kpi in surface_kpis:
+        lines.append(
+            f"- {kpi['surface']} / {kpi['name']}: `{kpi['value_pct']:.2f}%` "
+            f"(`{kpi['numerator']}` / `{kpi['denominator']}`) {kpi['description']}"
+        )
+    lines.extend(
+        [
+            "",
+            "| " + " | ".join(headers) + " |",
+            "| " + " | ".join("---" for _ in headers) + " |",
+        ]
+    )
     for row in rows:
         lines.append("| " + " | ".join(row[header] for header in headers) + " |")
     lines.append("")
@@ -695,13 +704,14 @@ def write_artifacts(out_dir: Path) -> dict[str, object]:
     out_dir.mkdir(parents=True, exist_ok=True)
     artifacts = build_artifacts()
     rows = build_field_matrix_rows()
-    coverage_kpi = build_entity_profile_coverage_kpi(rows)
+    surface_kpis = build_surface_coverage_kpis(rows)
     for name, payload in artifacts.items():
         (out_dir / name).write_text(payload, encoding="utf-8")
     return {
         "out_dir": str(out_dir),
         "rows": len(rows),
-        "coverage_kpi": coverage_kpi,
+        "coverage_kpi": surface_kpis[0],
+        "surface_kpis": surface_kpis,
     }
 
 

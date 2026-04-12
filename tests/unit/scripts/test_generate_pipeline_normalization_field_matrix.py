@@ -3,14 +3,21 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
     CSV_NAME,
+    COMPOSITE_JOIN_KEY_COVERAGE_KPI,
+    CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI,
     DEFAULT_OUT_DIR,
+    ENTITY_RECORD_SURFACE,
     MD_NAME,
     build_artifacts,
+    build_composite_join_key_policy_coverage_kpi,
+    build_control_plane_normalization_coverage_kpi,
     build_entity_profile_coverage_kpi,
     build_field_matrix_rows,
+    build_surface_coverage_kpis,
     check_artifacts,
     render_markdown,
     write_artifacts,
@@ -117,13 +124,47 @@ def test_build_entity_profile_coverage_kpi_summarizes_entity_rows() -> None:
         ]
     )
 
+    assert kpi["surface"] == ENTITY_RECORD_SURFACE
     assert kpi["name"] == "explicit_profile_coverage_pct"
     assert kpi["numerator"] == 2
     assert kpi["denominator"] == 3
     assert kpi["value_pct"] == 66.67
 
 
-def test_render_markdown_mentions_headline_coverage_kpi() -> None:
+def test_build_composite_join_key_policy_coverage_kpi_reports_configured_keys() -> None:
+    kpi = build_composite_join_key_policy_coverage_kpi()
+
+    assert kpi["surface"] == "composite_join_key"
+    assert kpi["name"] == COMPOSITE_JOIN_KEY_COVERAGE_KPI
+    assert int(cast(int, kpi["denominator"])) > 0
+    assert float(cast(float, kpi["value_pct"])) == 100.0
+
+
+def test_build_control_plane_normalization_coverage_kpi_reports_governed_seams() -> None:
+    kpi = build_control_plane_normalization_coverage_kpi()
+
+    assert kpi["surface"] == "control_plane_reproducibility"
+    assert kpi["name"] == CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI
+    assert int(cast(int, kpi["denominator"])) == 6
+    assert float(cast(float, kpi["value_pct"])) == 100.0
+
+
+def test_build_surface_coverage_kpis_lists_entity_composite_and_control_plane() -> None:
+    kpis = build_surface_coverage_kpis(
+        [
+            {"pipeline_kind": "entity", "normalization_source": "profile"},
+            {"pipeline_kind": "entity", "normalization_source": "fallback_business"},
+        ]
+    )
+
+    assert [kpi["surface"] for kpi in kpis] == [
+        "entity_record",
+        "composite_join_key",
+        "control_plane_reproducibility",
+    ]
+
+
+def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
     markdown = render_markdown(
         [
             {
@@ -153,8 +194,17 @@ def test_render_markdown_mentions_headline_coverage_kpi() -> None:
         ]
     )
 
-    assert "## Headline KPI" in markdown
-    assert "- explicit_profile_coverage_pct: `50.00%`" in markdown
+    assert "## Surface Coverage Summary" in markdown
+    assert "Entity coverage is entity-scoped only" in markdown
+    assert (
+        "- entity_record / explicit_profile_coverage_pct: `50.00%` (`1` / `2`)"
+        in markdown
+    )
+    assert "composite_join_key / composite_join_key_policy_coverage_pct" in markdown
+    assert (
+        "control_plane_reproducibility / control_plane_normalization_coverage_pct"
+        in markdown
+    )
 
 
 def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:

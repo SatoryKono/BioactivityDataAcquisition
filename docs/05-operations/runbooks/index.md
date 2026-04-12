@@ -62,6 +62,7 @@ ______________________________________________________________________
 | Runbook                                         | Description                                                          | Priority |
 | ----------------------------------------------- | -------------------------------------------------------------------- | -------- |
 | [Checkpoint Debugging](checkpoint-debugging.md) | Debugging checkpoint issues                                          | P2       |
+| [Neo4j Complete Recovery Guide](neo4j-complete-recovery-guide.md) | Recovery path for local Neo4j memory backend and audit instance | P2       |
 | [Stale Lock](stale-lock.md)                     | Handling stale lock situations                                       | P1       |
 | [Vacuum Procedures](vacuum-procedures.md)       | Delta Lake vacuum maintenance                                        | P2       |
 | [Scaling and Performance Tuning](scaling.md)    | Local-only performance tuning (vertical scaling + Delta maintenance) | P3       |
