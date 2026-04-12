@@ -12,7 +12,7 @@ __all__ = ["MetricsServerAdapter"]
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.server import (
-    _SERVER_STARTED,
+    is_metrics_server_running,
     reset_server_state,
     start_metrics_server,
 )
@@ -79,8 +79,7 @@ class MetricsServerAdapter:
         Returns:
             True if server is running, False otherwise.
         """
-        # Access the module-level state
-        return _SERVER_STARTED
+        return is_metrics_server_running()
 
     def reset(self) -> None:
         """Reset server state (for testing purposes only).

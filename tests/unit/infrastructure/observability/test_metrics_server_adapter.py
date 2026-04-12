@@ -5,6 +5,7 @@ Verifies the MetricsServerAdapter implementation.
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -18,11 +19,13 @@ from bioetl.infrastructure.observability.metrics_server_adapter import (
 class TestMetricsServerAdapter:
     """Tests for MetricsServerAdapter class."""
 
-    @pytest.fixture(autouse=True)
-    def reset_server_state(self) -> None:
+    @pytest.fixture(autouse=True)  # type: ignore[untyped-decorator]
+    def reset_server_state(self) -> Generator[None, None, None]:
         """Reset server state before each test."""
         from bioetl.infrastructure.observability.server import reset_server_state
 
+        reset_server_state()
+        yield
         reset_server_state()
 
     def test_init_without_logger(self) -> None:
@@ -51,6 +54,7 @@ class TestMetricsServerAdapter:
             assert result is True
             mock_start.assert_called_once_with(
                 port=9000,
+                addr="0.0.0.0",
                 fail_fast=False,
                 retry_count=3,
                 retry_delay=1.0,
@@ -76,6 +80,7 @@ class TestMetricsServerAdapter:
             assert result is True
             mock_start.assert_called_once_with(
                 port=8080,
+                addr="0.0.0.0",
                 fail_fast=True,
                 retry_count=5,
                 retry_delay=2.0,
@@ -105,15 +110,20 @@ class TestMetricsServerAdapter:
         adapter = MetricsServerAdapter()
 
         with patch(
-            "bioetl.infrastructure.observability.metrics_server_adapter.start_metrics_server"
-        ) as mock_start:
-            mock_start.return_value = True
-            # Simulate server started state
-            with patch(
-                "bioetl.infrastructure.observability.metrics_server_adapter._SERVER_STARTED",
-                True,
-            ):
-                assert adapter.is_running() is True
+            "bioetl.infrastructure.observability.metrics_server_adapter.is_metrics_server_running"
+        ) as mock_is_running:
+            mock_is_running.return_value = True
+            assert adapter.is_running() is True
+            mock_is_running.assert_called_once_with()
+
+    def test_is_running_reads_live_server_state(self) -> None:
+        """Test is_running reads the current state from the server module."""
+        from bioetl.infrastructure.observability import server as obs_server
+
+        adapter = MetricsServerAdapter()
+        obs_server._SERVER_STARTED = True
+
+        assert adapter.is_running() is True
 
     def test_reset_calls_reset_server_state(self) -> None:
         """Test reset method calls reset_server_state."""

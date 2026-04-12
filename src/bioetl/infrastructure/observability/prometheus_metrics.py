@@ -84,24 +84,15 @@ class PrometheusMetrics(MetricsPort):
         name: str,
         value: float,
         labels: MetricLabels | None = None,
-        *,
-        _labels: MetricLabels | None = None,
-        tags: MetricLabels | None = None,
     ) -> None:
         """Record a histogram observation for the named metric.
 
         Args:
             name: Identifier name.
             value: Input value.
-            labels: Labels dict (primary parameter).
-            _labels: Alias for labels (backward compatibility).
-            tags: Alias for labels (alternative naming convention).
+            labels: Canonical labels dict.
         """
-        resolved_labels = resolve_metric_labels(
-            labels,
-            _labels=_labels,
-            tags=tags,
-        )
+        resolved_labels = resolve_metric_labels(labels)
         histogram: _HistogramMetric = _require_registered_metric(
             name=name,
             registry=HISTOGRAMS,
@@ -116,24 +107,15 @@ class PrometheusMetrics(MetricsPort):
         name: str,
         value: int,
         labels: MetricLabels | None = None,
-        *,
-        _labels: MetricLabels | None = None,
-        tags: MetricLabels | None = None,
     ) -> None:
         """Increment a counter metric by the given value.
 
         Args:
             name: Identifier name.
             value: Input value.
-            labels: Labels dict (primary parameter).
-            _labels: Alias for labels (backward compatibility).
-            tags: Alias for labels (alternative naming convention).
+            labels: Canonical labels dict.
         """
-        resolved_labels = resolve_metric_labels(
-            labels,
-            _labels=_labels,
-            tags=tags,
-        )
+        resolved_labels = resolve_metric_labels(labels)
         counter: _CounterMetric = _require_registered_metric(
             name=name,
             registry=COUNTERS,
@@ -148,24 +130,15 @@ class PrometheusMetrics(MetricsPort):
         name: str,
         value: float,
         labels: MetricLabels | None = None,
-        *,
-        _labels: MetricLabels | None = None,
-        tags: MetricLabels | None = None,
     ) -> None:
         """Set a gauge metric to the given value.
 
         Args:
             name: Identifier name.
             value: Input value.
-            labels: Labels dict (primary parameter).
-            _labels: Alias for labels (backward compatibility).
-            tags: Alias for labels (alternative naming convention).
+            labels: Canonical labels dict.
         """
-        resolved_labels = resolve_metric_labels(
-            labels,
-            _labels=_labels,
-            tags=tags,
-        )
+        resolved_labels = resolve_metric_labels(labels)
         gauge: _GaugeMetric = _require_registered_metric(
             name=name,
             registry=GAUGES,
