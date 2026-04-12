@@ -31,7 +31,8 @@ class CheckpointMetadata:
         pipeline_version: Version of the pipeline configuration.
         effective_config_hash: Canonical effective-config hash for execution identity.
         effective_config_artifact_id: Effective-config artifact reference for provenance.
-        execution_fingerprint: Full manifest-derived execution identity fingerprint.
+        execution_fingerprint: Canonical execution-identity fingerprint shared
+            across manifest, checkpoint, and runtime compatibility surfaces.
         manifest_id: Persisted run-manifest identifier for resume identity checks.
         contract_ref: Canonical contract reference for checkpoint compatibility.
         contract_version: Canonical contract version for checkpoint compatibility.

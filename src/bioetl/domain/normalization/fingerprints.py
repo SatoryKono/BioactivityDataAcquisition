@@ -35,11 +35,12 @@ def compute_input_snapshot_identity_fingerprint(snapshot_ids: list[str]) -> str 
 
 
 def compute_manifest_execution_fingerprint(payload: Mapping[str, object]) -> str:
-    """Compute the canonical RunManifest execution fingerprint.
+    """Backward-compatible alias for the canonical execution-identity helper.
 
-    This is the full manifest-identity contract used for replay/equivalence
-    checks. Callers are expected to pass the already-normalized manifest
-    payload produced by `normalize_run_manifest_spec()`.
+    Historically this helper was described as a full RunManifest fingerprint.
+    The canonical contract is now the execution-identity payload shared across
+    manifest, checkpoint, and runtime compatibility surfaces. Callers are still
+    expected to pass an already-normalized payload.
     """
 
     return compute_execution_identity_fingerprint(payload)
