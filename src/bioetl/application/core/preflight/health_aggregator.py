@@ -50,7 +50,8 @@ class HealthAggregator:
         # Metrics/logging publication for ordinary runs is observer-owned.
         # Keep these compatibility params in the constructor so composition and
         # older tests can instantiate the helper without a broad signature churn.
-        _ = metrics, logger, pipeline_name
+        _ = metrics, pipeline_name
+        self._logger = logger
         self._health_monitor = health_monitor
         self._health_check_mode = health_check_mode
 
@@ -173,8 +174,6 @@ class HealthAggregator:
                 duration_seconds=duration,
                 exception_message=exception_message,
             )
-            if self._health_check_mode == "probe":
-                fallback_reason = "exception"
         return result
 
     def assert_healthy(self, report: HealthReport) -> None:

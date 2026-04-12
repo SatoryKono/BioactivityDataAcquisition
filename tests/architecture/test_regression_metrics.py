@@ -525,23 +525,23 @@ def test_e2e_workflow_slo_configured() -> None:
 
 
 def test_probe_mode_fallback_counter_exists() -> None:
-    """PROBE_MODE_FALLBACK_TOTAL counter must be defined and used."""
+    """PROBE_MODE_FALLBACK_TOTAL counter must be defined and observer-owned."""
     metrics_defs = Path(
         "src/bioetl/infrastructure/observability/metrics_definitions.py"
     )
-    aggregator = Path("src/bioetl/application/core/preflight/health_aggregator.py")
+    observer = Path("src/bioetl/application/observability/observer.py")
 
     assert metrics_defs.exists(), "metrics_definitions.py not found"
-    assert aggregator.exists(), "preflight_health_aggregator.py not found"
+    assert observer.exists(), "observer.py not found"
 
     defs_content = metrics_defs.read_text(encoding="utf-8")
     assert "PROBE_MODE_FALLBACK_TOTAL" in defs_content, (
         "PROBE_MODE_FALLBACK_TOTAL counter not defined in metrics_definitions.py"
     )
 
-    agg_content = aggregator.read_text(encoding="utf-8")
-    assert "bioetl_probe_mode_fallback_total" in agg_content, (
-        "bioetl_probe_mode_fallback_total not instrumented in preflight_health_aggregator.py"
+    observer_content = observer.read_text(encoding="utf-8")
+    assert "bioetl_probe_mode_fallback_total" in observer_content, (
+        "bioetl_probe_mode_fallback_total not instrumented in observer-owned path"
     )
 
 

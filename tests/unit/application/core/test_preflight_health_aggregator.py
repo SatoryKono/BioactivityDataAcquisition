@@ -314,61 +314,75 @@ class TestHealthAggregatorCheckAll:
 
 
 # ---------------------------------------------------------------------------
-# Tests: Metrics Recording
+# Tests: publication boundary
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-class TestHealthAggregatorMetrics:
-    """Tests for metrics recording in _HealthAggregator."""
+class TestHealthAggregatorPublicationBoundary:
+    """_HealthAggregator must stay a pure report producer."""
 
     @pytest.mark.asyncio
-    async def test_set_gauge_called_for_each_component(
+    async def test_check_all_does_not_emit_direct_metrics(
         self,
         health_aggregator: _HealthAggregator,
         mock_services: MagicMock,
         mock_metrics: MagicMock,
     ) -> None:
-        """Test that base health status gauge is called once per component."""
+        """Observer-owned metrics must not be emitted by the helper."""
         await health_aggregator.check_all(mock_services)
-        status_calls = [
-            call
-            for call in mock_metrics.set_gauge.call_args_list
-            if call[0][0] == "bioetl_health_check_status"
-        ]
-        assert len(status_calls) == 2
+        mock_metrics.set_gauge.assert_not_called()
+        mock_metrics.observe_histogram.assert_not_called()
+        mock_metrics.increment_counter.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_gauge_includes_component_label(
+    async def test_check_all_does_not_emit_direct_logs(
         self,
         health_aggregator: _HealthAggregator,
         mock_services: MagicMock,
-        mock_metrics: MagicMock,
+        mock_logger: MagicMock,
     ) -> None:
-        """Test that gauge call includes correct component labels."""
+        """Structured runtime logs must be emitted through the observer."""
         await health_aggregator.check_all(mock_services)
-
-        calls = mock_metrics.set_gauge.call_args_list
-        components = [c[0][2]["component"] for c in calls]
-        assert "storage" in components
-        assert "data_source" in components
+        mock_logger.info.assert_not_called()
+        mock_logger.warning.assert_not_called()
+        mock_logger.error.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_gauge_value_matches_status_metric_value(
+    async def test_report_preserves_enhanced_probe_metadata(
         self,
-        health_aggregator: _HealthAggregator,
-        mock_services: MagicMock,
         mock_metrics: MagicMock,
+        mock_logger: MagicMock,
         mock_storage: MagicMock,
+        mock_data_source_enhanced: MagicMock,
     ) -> None:
-        """Test gauge value matches HealthStatus.to_metric_value()."""
-        mock_storage.health_check.return_value = HealthStatus.DEGRADED
+        """Enhanced probe metadata must survive for observer emission."""
+        mock_data_source_enhanced.check_health = AsyncMock(
+            return_value=_make_health_check_result(
+                status=HealthStatus.UNHEALTHY,
+                provider="stub_provider",
+                latency_ms=42.0,
+                last_error="provider unhealthy",
+            )
+        )
+        aggregator = _HealthAggregator(
+            metrics=mock_metrics,
+            logger=mock_logger,
+            pipeline_name="probe_health_pipeline",
+            health_check_mode="probe",
+        )
+        services = MagicMock()
+        services.storage = mock_storage
+        services.data_source = mock_data_source_enhanced
 
-        await health_aggregator.check_all(mock_services)
-
-        calls = mock_metrics.set_gauge.call_args_list
-        storage_call = next(c for c in calls if c[0][2]["component"] == "storage")
-        assert storage_call[0][1] == float(HealthStatus.DEGRADED.to_metric_value())
+        report = await aggregator.check_all(services)
+        data_source_result = next(
+            result for result in report.results if result.component == "data_source"
+        )
+        assert data_source_result.status == HealthStatus.DEGRADED
+        assert data_source_result.provider == "stub_provider"
+        assert data_source_result.latency_ms == 42.0
+        assert data_source_result.probe_fallback_reason == "status_downgrade"
 
     @pytest.mark.asyncio
     async def test_no_metrics_when_metrics_is_none(
@@ -376,148 +390,19 @@ class TestHealthAggregatorMetrics:
         health_aggregator_no_metrics: _HealthAggregator,
         mock_services: MagicMock,
     ) -> None:
-        """Test that no exception is raised when metrics is None."""
+        """Compatibility constructor args may still be omitted safely."""
         report = await health_aggregator_no_metrics.check_all(mock_services)
         assert isinstance(report, HealthReport)
 
-    @pytest.mark.asyncio
-    async def test_observe_histogram_called_for_enhanced_data_source(
-        self,
-        mock_metrics: MagicMock,
-        mock_logger: MagicMock,
-        mock_storage: MagicMock,
-        mock_data_source_enhanced: MagicMock,
-    ) -> None:
-        """Enhanced check_health records both base and mode latency histograms."""
-        aggregator = _HealthAggregator(metrics=mock_metrics, logger=mock_logger)
-        services = MagicMock()
-        services.storage = mock_storage
-        services.data_source = mock_data_source_enhanced
-
-        await aggregator.check_all(services)
-
-        assert mock_metrics.observe_histogram.call_count == 2
-
-    @pytest.mark.asyncio
-    async def test_observe_histogram_not_called_for_legacy_data_source(
-        self,
-        mock_metrics: MagicMock,
-        mock_logger: MagicMock,
-        mock_storage: MagicMock,
-        mock_data_source_legacy: MagicMock,
-    ) -> None:
-        """Test that latency histogram is NOT recorded for legacy health_check."""
-        aggregator = _HealthAggregator(metrics=mock_metrics, logger=mock_logger)
-        services = MagicMock()
-        services.storage = mock_storage
-        services.data_source = mock_data_source_legacy
-
-        await aggregator.check_all(services)
-
-        mock_metrics.observe_histogram.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_probe_mode_exception_increments_probe_fallback_counter(
-        self,
-        health_aggregator_probe: _HealthAggregator,
-        mock_services: MagicMock,
-        mock_data_source_legacy: MagicMock,
-        mock_metrics: MagicMock,
-    ) -> None:
-        mock_data_source_legacy.health_check.side_effect = OSError("API down")
-
-        await health_aggregator_probe.check_all(mock_services)
-
-        mock_metrics.increment_counter.assert_any_call(
-            "bioetl_probe_mode_fallback_total",
-            1,
-            {
-                "pipeline": "unknown",
-                "component": "data_source",
-                "reason": "exception",
-            },
-        )
-
-    @pytest.mark.asyncio
-    async def test_probe_mode_status_downgrade_increments_probe_fallback_counter(
-        self,
-        health_aggregator_probe: _HealthAggregator,
-        mock_services: MagicMock,
-        mock_data_source_legacy: MagicMock,
-        mock_metrics: MagicMock,
-    ) -> None:
-        mock_data_source_legacy.health_check.return_value = HealthStatus.UNHEALTHY
-
-        await health_aggregator_probe.check_all(mock_services)
-
-        mock_metrics.increment_counter.assert_any_call(
-            "bioetl_probe_mode_fallback_total",
-            1,
-            {
-                "pipeline": "unknown",
-                "component": "data_source",
-                "reason": "status_downgrade",
-            },
-        )
-
 
 # ---------------------------------------------------------------------------
-# Tests: Logging
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.unit
-class TestHealthAggregatorLogging:
-    """Tests for logging behavior in _HealthAggregator."""
-
-    @pytest.mark.asyncio
-    async def test_info_logged_for_healthy_component(
-        self,
-        health_aggregator: _HealthAggregator,
-        mock_services: MagicMock,
-        mock_logger: MagicMock,
-    ) -> None:
-        """Test that info is logged for HEALTHY components."""
-        await health_aggregator.check_all(mock_services)
-        assert mock_logger.info.called
-
-    @pytest.mark.asyncio
-    async def test_warning_logged_for_degraded_component(
-        self,
-        health_aggregator: _HealthAggregator,
-        mock_services: MagicMock,
-        mock_storage: MagicMock,
-        mock_logger: MagicMock,
-    ) -> None:
-        """Test that warning is logged for DEGRADED components."""
-        mock_storage.health_check.return_value = HealthStatus.DEGRADED
-
-        await health_aggregator.check_all(mock_services)
-
-        mock_logger.warning.assert_called()
-
-    @pytest.mark.asyncio
-    async def test_error_logged_for_unhealthy_component(
-        self,
-        health_aggregator: _HealthAggregator,
-        mock_services: MagicMock,
-        mock_storage: MagicMock,
-        mock_logger: MagicMock,
-    ) -> None:
-        """Test that error is logged for UNHEALTHY components."""
-        mock_storage.health_check.return_value = HealthStatus.UNHEALTHY
-
-        await health_aggregator.check_all(mock_services)
-
-        mock_logger.error.assert_called()
-
     @pytest.mark.asyncio
     async def test_no_logging_when_logger_is_none(
         self,
         health_aggregator_no_logger: _HealthAggregator,
         mock_services: MagicMock,
     ) -> None:
-        """Test that no exception is raised when logger is None."""
+        """Compatibility constructor args may still be omitted safely."""
         report = await health_aggregator_no_logger.check_all(mock_services)
         assert isinstance(report, HealthReport)
 

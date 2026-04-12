@@ -88,7 +88,9 @@ Current rollout semantics:
 1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes.
 1. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
 1. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
-   `observe` logs and continues, `soft_fail` blocks resume, `hard_fail` raises an error.
+   `observe` remains a degraded operator mode for non-identity signals, but canonical
+   execution-identity mismatches still block resume; `soft_fail` blocks resume;
+   `hard_fail` raises an error.
 
 ## Supported Resume Modes
 
@@ -191,7 +193,7 @@ provenance.
 | Field                   | Type       | Required | Notes                                            |
 | ----------------------- | ---------- | -------: | ------------------------------------------------ |
 | `manifest_id`           | `str`      |      yes | Stable identifier of the manifest record         |
-| `execution_fingerprint` | `str`      |      yes | Digest of the full normalized `RunManifest` identity contract; narrower checkpoint/runtime anchors are validated separately and do not replace this field |
+| `execution_fingerprint` | `str`      |      yes | Canonical execution-identity fingerprint derived from normalized semantic anchors; occurrence-only values such as `manifest_id` and ledger history are intentionally excluded |
 | `schema_version`        | `str`      |      yes | Control-plane schema version                     |
 | `created_at`            | `datetime` |      yes | Manifest creation timestamp                      |
 | `run_id`                | `uuid`     |      yes | Execution run identifier                         |
@@ -226,7 +228,7 @@ Checkpoint / resume compatibility may additionally rely on a narrower
 runtime-anchor contract derived from a subset of control-plane fields such as
 `manifest_id`, `effective_config_hash`, `contract_ref`, `contract_version`, and
 `effective_config_artifact_id`. That runtime-anchor contract is intentionally
-not the same thing as the full manifest `execution_fingerprint`.
+not the same thing as the canonical `execution_fingerprint`.
 
 ## Run Ledger Contract
 

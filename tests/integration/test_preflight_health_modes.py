@@ -104,21 +104,9 @@ async def test_strict_mode_blocks_on_data_source_health_exception() -> None:
 
     with pytest.raises(InfrastructureError, match="data_source"):
         await service.validate_infrastructure(services)
-
-    fallback_calls = [
-        call
-        for call in metrics.increment_counter.call_args_list
-        if call[0][0] == "bioetl_probe_mode_fallback_total"
-    ]
-    assert fallback_calls == []
-
-    mode_status_calls = [
-        call
-        for call in metrics.set_gauge.call_args_list
-        if call[0][0] == "bioetl_health_check_mode_status"
-    ]
-    assert mode_status_calls
-    assert all(call[0][2]["mode"] == "strict" for call in mode_status_calls)
+    metrics.increment_counter.assert_not_called()
+    metrics.set_gauge.assert_not_called()
+    metrics.observe_histogram.assert_not_called()
 
 
 @pytest.mark.integration
@@ -144,18 +132,10 @@ async def test_probe_mode_downgrades_exception_and_counts_fallback() -> None:
     assert report.is_healthy
     assert data_source_result.status == HealthStatus.DEGRADED
     assert data_source_result.error_message == "probe_mode_fallback: upstream timeout"
-
-    fallback_calls = [
-        call
-        for call in metrics.increment_counter.call_args_list
-        if call[0][0] == "bioetl_probe_mode_fallback_total"
-    ]
-    assert len(fallback_calls) == 1
-    assert fallback_calls[0][0][2] == {
-        "pipeline": "probe_health_pipeline",
-        "component": "data_source",
-        "reason": "exception",
-    }
+    assert data_source_result.probe_fallback_reason == "exception"
+    metrics.increment_counter.assert_not_called()
+    metrics.set_gauge.assert_not_called()
+    metrics.observe_histogram.assert_not_called()
 
 
 @pytest.mark.integration
@@ -185,26 +165,9 @@ async def test_probe_mode_downgrades_unhealthy_status_with_deterministic_reason(
     assert data_source_result.error_message == (
         "probe_mode_fallback: stub provider unhealthy"
     )
-
-    fallback_calls = [
-        call
-        for call in metrics.increment_counter.call_args_list
-        if call[0][0] == "bioetl_probe_mode_fallback_total"
-    ]
-    assert len(fallback_calls) == 1
-    assert fallback_calls[0][0][2] == {
-        "pipeline": "probe_status_pipeline",
-        "component": "data_source",
-        "reason": "status_downgrade",
-    }
-
-    mode_latency_calls = [
-        call
-        for call in metrics.observe_histogram.call_args_list
-            if call[0][0] == "bioetl_health_check_mode_latency_seconds"
-    ]
-    assert len(mode_latency_calls) == 1
-    assert mode_latency_calls[0][0][2] == {
-        "provider": "stub_provider",
-        "mode": "probe",
-    }
+    assert data_source_result.provider == "stub_provider"
+    assert data_source_result.latency_ms == 42.0
+    assert data_source_result.probe_fallback_reason == "status_downgrade"
+    metrics.increment_counter.assert_not_called()
+    metrics.set_gauge.assert_not_called()
+    metrics.observe_histogram.assert_not_called()

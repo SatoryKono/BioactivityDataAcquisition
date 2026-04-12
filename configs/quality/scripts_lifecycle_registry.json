@@ -140,11 +140,35 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded WSL troubleshooting helper for reaching the Windows-hosted Docker Desktop Neo4j backend from mounted checkouts; either fold it into a canonical cross-platform setup flow or remove it once the mixed Windows-WSL path is stable."
     },
+    "scripts/ops/smoke_test_neo4j_mcp.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded end-to-end local Neo4j MCP smoke helper while the graph-memory setup remains an operator troubleshooting workflow; either fold it into a canonical verification command or remove it once the setup path is stabilized."
+    },
+    "scripts/ops/test_codex_basic.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded local Codex environment smoke helper while the mixed Windows-WSL Codex setup remains operator-maintained; either promote it into a documented verification command or remove it once the bootstrap path is stable."
+    },
     "scripts/ops/test_env_loading.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded local smoke helper for validating repo .env loading in Neo4j/MCP setup flows; either fold this check into a canonical verification command or remove it once manual troubleshooting is no longer needed."
+    },
+    "scripts/ops/codex-wsl.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin Windows launcher that forwards to the canonical Codex bootstrap path for mixed WSL usage; do not expand it into a primary contributor workflow without stronger in-repo call-site evidence."
+    },
+    "scripts/ops/start-codex.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a convenience Windows launcher for the mixed WSL Codex bootstrap flow while operators still use batch entrypoints; prefer documented canonical setup commands for normal contributor workflows."
     },
     "scripts/ops/smoke_test_final.ps1": {
       "owner": "@bioetl-platform",

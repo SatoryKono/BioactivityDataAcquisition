@@ -65,6 +65,11 @@ class _FakeWorkflowService:
                         "input_snapshot_identity_fingerprint": (
                             _SNAPSHOT_IDENTITY_FINGERPRINT
                         ),
+                        "persistence_profile": {
+                            "attained_profile": "forensic_grade",
+                            "replay_ready_missing_requirements": [],
+                            "forensic_grade_missing_requirements": [],
+                        },
                     },
                 },
             }
@@ -228,6 +233,9 @@ class TestCheckpointCommands:
         )
         assert "input_snapshot_ids: ['snapshot-1']" in result.output
         assert _SNAPSHOT_IDENTITY_FINGERPRINT in result.output
+        assert "persistence_profile: forensic_grade" in result.output
+        assert "replay_ready_missing_requirements: []" in result.output
+        assert "forensic_grade_missing_requirements: []" in result.output
         assert "silver/chembl.activity merge" in result.output
         assert service.audit_run_calls == [
             ("00000000-0000-0000-0000-000000000001", 100)

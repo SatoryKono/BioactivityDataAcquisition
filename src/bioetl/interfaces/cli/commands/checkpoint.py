@@ -100,6 +100,12 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
                 ]
             )
         if isinstance(replay_view, dict):
+            persistence_profile = replay_view.get("persistence_profile")
+            attained_profile = (
+                persistence_profile.get("attained_profile")
+                if isinstance(persistence_profile, dict)
+                else None
+            )
             lines.extend(
                 [
                     f"  replay_capability: {replay_view.get('replay_capability')}",
@@ -108,6 +114,11 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
                     f"  exact_replay_blockers: {replay_view.get('exact_replay_blockers')}",
                     f"  input_snapshot_ids: {replay_view.get('input_snapshot_ids')}",
                     f"  input_snapshot_identity_fingerprint: {replay_view.get('input_snapshot_identity_fingerprint')}",
+                    f"  persistence_profile: {attained_profile}",
+                    f"  replay_ready_missing_requirements: "
+                    f"{persistence_profile.get('replay_ready_missing_requirements') if isinstance(persistence_profile, dict) else None}",
+                    f"  forensic_grade_missing_requirements: "
+                    f"{persistence_profile.get('forensic_grade_missing_requirements') if isinstance(persistence_profile, dict) else None}",
                 ]
             )
     lines.extend(["", "Audit Entries"])

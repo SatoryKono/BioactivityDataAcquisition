@@ -111,6 +111,16 @@ consistency, а этот документ задаёт правила публи
   `docs/00-project/ai/skills/local/**` -> `internal-generated`
 - `reports/**` and `reports/evidence/**` -> `repo-only`
 
+AI runtime ownership note:
+
+- `.codex/**` and `.claude/**` remain runtime-owned trees and are not
+  reclassified by docs publication policy.
+- `docs/00-project/ai/**` is the published/internal mirror surface for AI
+  guidance and discoverability.
+- Runtime behavior MUST be authored in the runtime-owned trees first; mirrors in
+  `docs/00-project/ai/**` SHOULD follow them and MUST NOT silently override
+  runtime source-of-truth.
+
 Для этих семейств отсутствие per-file frontmatter не считается policy violation,
 если entrypoint и surrounding policy остаются актуальными.
 
