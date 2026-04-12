@@ -92,6 +92,17 @@ class ChemblHealthMixin:
             return circuit_status
         return self._max_health_status(circuit_status, probe_status)
 
+    def _clear_probe_degraded_state_on_success(self) -> None:
+        """Drop stale probe degradation after a successful data request.
+
+        The active `/status` probe is only an early-warning signal. Once a real
+        data endpoint request succeeds, retaining a previous probe-only
+        DEGRADED state keeps the adapter on a reduced batch size path longer
+        than necessary.
+        """
+        if getattr(self, "_last_probe_health_status", None) == HealthStatus.DEGRADED:
+            self._last_probe_health_status = None
+
     async def _probe_health(self) -> HealthStatus:
         """Perform ChEMBL-specific health probe.
 

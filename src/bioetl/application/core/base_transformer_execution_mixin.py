@@ -160,7 +160,7 @@ class _BaseTransformerExecutionMixin:
         owner = cast("_TransformerExecutionOwner", self)
         if action is not None:
             owner._metrics.increment_counter(
-                "structural_policy_events_total",
+                "bioetl_structural_policy_events_total",
                 1,
                 labels={
                     "provider": owner.provider,
@@ -170,7 +170,7 @@ class _BaseTransformerExecutionMixin:
             )
         if shadow_comparison is not None:
             owner._metrics.increment_counter(
-                "structural_policy_shadow_comparisons_total",
+                "bioetl_structural_policy_shadow_comparisons_total",
                 1,
                 labels={
                     "provider": owner.provider,

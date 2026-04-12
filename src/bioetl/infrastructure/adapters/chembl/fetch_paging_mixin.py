@@ -87,6 +87,7 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
                 self._request_collector.record_from_response(response, duration_ms)
 
             records, has_next = self._process_response(response, entity_type)
+            self._clear_probe_degraded_state_on_success()
             return records, has_next
         except CHEMBL_ADAPTER_ERRORS as error:
             handle_error = cast("Callable[[Exception], NoReturn]", self._handle_error)
