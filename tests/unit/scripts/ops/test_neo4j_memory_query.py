@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from scripts.ops.neo4j_memory_query import (
+    _claim_trace_statement,
+    _cli_semantics_statement,
     _current_cycle_code_statement,
     _dead_code_candidates_statement,
     _docs_drift_statement,
@@ -15,6 +17,7 @@ from scripts.ops.neo4j_memory_query import (
     _simplification_blockers_statement,
     _storage_lineage_statement,
     _workflow_artifacts_statement,
+    _workflow_execution_statement,
     _workflow_gates_statement,
     QUERY_PROFILES,
     _duplication_cluster_statement,
@@ -36,7 +39,10 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["owner-runtime-state"]["target_label"] == "runtime_state_surface"
     assert QUERY_PROFILES["owner-workflow"]["target_label"] == "workflow_surface"
     assert QUERY_PROFILES["owner-workflow-job"]["target_label"] == "workflow_job_surface"
+    assert QUERY_PROFILES["owner-workflow-call"]["target_label"] == "workflow_call_surface"
+    assert QUERY_PROFILES["owner-workflow-output"]["target_label"] == "workflow_output_surface"
     assert QUERY_PROFILES["owner-cli-command"]["target_label"] == "cli_command_surface"
+    assert QUERY_PROFILES["owner-cli-option"]["target_label"] == "cli_option_surface"
     assert QUERY_PROFILES["owner-schema-field"]["target_label"] == "schema_field_surface"
     assert QUERY_PROFILES["neighbors-pipeline"]["mode"] == "neighbors"
     assert QUERY_PROFILES["neighbors-alert"]["target_label"] == "alert_surface"
@@ -50,12 +56,15 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["docs-drift"]["mode"] == "docs_drift"
     assert QUERY_PROFILES["workflow-gates"]["mode"] == "workflow_gates"
     assert QUERY_PROFILES["workflow-artifacts"]["mode"] == "workflow_artifacts"
+    assert QUERY_PROFILES["workflow-execution"]["mode"] == "workflow_execution"
     assert QUERY_PROFILES["storage-lineage"]["mode"] == "storage_lineage"
     assert QUERY_PROFILES["field-lineage"]["mode"] == "field_lineage"
     assert QUERY_PROFILES["schema-drift"]["mode"] == "schema_drift"
     assert QUERY_PROFILES["run-artifacts"]["mode"] == "run_artifacts"
     assert QUERY_PROFILES["runtime-state"]["mode"] == "runtime_state"
     assert QUERY_PROFILES["runtime-locks"]["mode"] == "runtime_locks"
+    assert QUERY_PROFILES["claim-trace"]["mode"] == "claim_trace"
+    assert QUERY_PROFILES["cli-semantics"]["mode"] == "cli_semantics"
     assert QUERY_PROFILES["normalization-pipeline"]["mode"] == "normalization_pipeline"
     assert QUERY_PROFILES["fallback-pipelines"]["mode"] == "fallback_pipelines"
     assert QUERY_PROFILES["duplication-cluster"]["target_label"] == "duplication_cluster"
@@ -114,6 +123,16 @@ def test_workflow_artifacts_statement_collects_actions_artifacts_and_secrets() -
     assert "(job)-[:REQUIRES_SECRET]->(secret:workflow_secret_surface)" in statement
 
 
+def test_workflow_execution_statement_collects_calls_variants_and_outputs() -> None:
+    statement = _workflow_execution_statement()
+
+    assert "MATCH (workflow:workflow_surface)" in statement
+    assert "(job)-[:CALLS_WORKFLOW]->(call:workflow_call_surface)" in statement
+    assert "(job)-[:HAS_MATRIX_VARIANT]->(variant:workflow_matrix_variant_surface)" in statement
+    assert "(workflow)-[:EMITS_OUTPUT]->(workflow_output:workflow_output_surface)" in statement
+    assert "(job)-[:EMITS_OUTPUT]->(job_output:workflow_output_surface)" in statement
+
+
 def test_storage_lineage_statement_collects_producers_and_promotions() -> None:
     statement = _storage_lineage_statement()
 
@@ -162,6 +181,22 @@ def test_runtime_state_statement_collects_runtime_states_and_locks() -> None:
     assert "(owner)-[:HAS_RUNTIME_STATE]->(state)" in statement
     assert "(state)-[:REFERENCES_ARTIFACT]->(artifact:control_plane_artifact_surface)" in statement
     assert "state.state_kind = 'lock_state'" in locks_statement
+
+
+def test_claim_trace_statement_collects_claims_and_targets() -> None:
+    statement = _claim_trace_statement()
+
+    assert "MATCH (doc)-[:ASSERTS]->(claim:doc_claim_surface)" in statement
+    assert "(claim)-[:ASSERTS_ABOUT]->(target)" in statement
+    assert "claim.claim_text AS claim_text" in statement
+
+
+def test_cli_semantics_statement_collects_options_and_side_effects() -> None:
+    statement = _cli_semantics_statement()
+
+    assert "MATCH (command:cli_command_surface)" in statement
+    assert "(command)-[:ACCEPTS_OPTION]->(option:cli_option_surface)" in statement
+    assert "(command)-[:SIDE_EFFECTS_ON]->(target)" in statement
 
 
 def test_duplication_cluster_statement_uses_cluster_targets_members_and_tests() -> None:
@@ -359,6 +394,44 @@ def test_format_rows_renders_workflow_artifacts_summary() -> None:
     assert "secret=GITHUB_TOKEN" in formatted
 
 
+def test_format_rows_renders_workflow_execution_summary() -> None:
+    formatted = _format_rows(
+        "workflow-execution",
+        "tests",
+        [
+            {
+                "workflow_name": "tests",
+                "workflow_concurrency_group": "tests-${{ github.ref }}",
+                "job_name": "tests::test-matrix",
+                "job_concurrency_group": "",
+                "reusable_calls": [
+                    {
+                        "name": "tests::docs::./.github/workflows/reusable-setup",
+                        "target_workflow": "reusable-setup",
+                        "reusable_kind": "local_reusable_workflow",
+                    }
+                ],
+                "matrix_variants": [
+                    {"name": "tests::test-matrix[python-version=3.13, suite=unit]", "variant_axes": {"python-version": "3.13", "suite": "unit"}}
+                ],
+                "workflow_outputs": [
+                    {"name": "tests::workflow_call_output::tests::venv-cache-key", "scope": "workflow_call", "expression": "cache-key"}
+                ],
+                "job_outputs": [
+                    {"name": "tests::job_output::test-matrix::coverage-artifact", "scope": "job", "expression": "${{ steps.coverage.outputs.path }}"}
+                ],
+            }
+        ],
+    )
+
+    assert "Workflow execution semantics: `tests`" in formatted
+    assert "workflow=tests | job=tests::test-matrix | workflow_concurrency=tests-${{ github.ref }}" in formatted
+    assert "call=tests::docs::./.github/workflows/reusable-setup | target_workflow=reusable-setup | kind=local_reusable_workflow" in formatted
+    assert "matrix=tests::test-matrix[python-version=3.13, suite=unit] | axes=python-version=3.13,suite=unit" in formatted
+    assert "workflow_output=tests::workflow_call_output::tests::venv-cache-key | scope=workflow_call | expression=cache-key" in formatted
+    assert "job_output=tests::job_output::test-matrix::coverage-artifact | scope=job | expression=${{ steps.coverage.outputs.path }}" in formatted
+
+
 def test_format_rows_renders_storage_lineage_summary() -> None:
     formatted = _format_rows(
         "storage-lineage",
@@ -531,6 +604,56 @@ def test_format_rows_renders_runtime_state_summary() -> None:
     assert "owner=manifest-chain-2 | labels=run_instance_surface" in formatted
     assert "dependency=chembl_activity | labels=pipeline_surface" in formatted
     assert "artifact=run_ledger::jsonl | labels=control_plane_artifact_surface | artifact_family=run_ledger" in formatted
+
+
+def test_format_rows_renders_claim_trace_summary() -> None:
+    formatted = _format_rows(
+        "claim-trace",
+        "all",
+        [
+            {
+                "doc_name": "run manifest contract",
+                "claim_name": "docs/04-reference/contracts/run-manifest-ledger.md#L24",
+                "claim_text": "activity_id is required",
+                "modality": "required",
+                "section_title": "Field Requirements",
+                "section_anchor": "field-requirements",
+                "line_number": 24,
+                "targets": [
+                    {"name": "src/bioetl/domain/control_plane/run_manifest.py", "labels": ["module_surface"]}
+                ],
+            }
+        ],
+    )
+
+    assert "Claim-level documentation traceability: `all`" in formatted
+    assert "doc=run manifest contract | claim=docs/04-reference/contracts/run-manifest-ledger.md#L24 | modality=required" in formatted
+    assert "text=activity_id is required" in formatted
+    assert "target=src/bioetl/domain/control_plane/run_manifest.py | labels=module_surface" in formatted
+
+
+def test_format_rows_renders_cli_semantics_summary() -> None:
+    formatted = _format_rows(
+        "cli-semantics",
+        "bioetl run",
+        [
+            {
+                "command_name": "bioetl run",
+                "side_effect_class": "mutating",
+                "options": ["--limit", "--pipeline"],
+                "gates": ["pytest"],
+                "side_effect_targets": [
+                    {"name": "silver/chembl/activity", "labels": ["storage_surface"]}
+                ],
+            }
+        ],
+    )
+
+    assert "CLI options and side-effect semantics: `bioetl run`" in formatted
+    assert "command=bioetl run | side_effect_class=mutating" in formatted
+    assert "option=--limit" in formatted
+    assert "gate=pytest" in formatted
+    assert "side_effect_target=silver/chembl/activity | labels=storage_surface" in formatted
 
 
 def test_format_rows_renders_duplication_cluster_summary() -> None:

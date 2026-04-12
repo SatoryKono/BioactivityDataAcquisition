@@ -16,12 +16,11 @@ def test_batch_metrics_quarantined_tracking():
     recorder.track_quarantined_records(ErrorType.DATA_QUALITY, 5)
 
     mock_metrics.increment_counter.assert_called_with(
-        "bioetl_dq_records_quarantined_total",
+        "bioetl_quarantine_records_total",
         5,
         {
             "pipeline": "pipeline_test",
-            "error_type": "DATA_QUALITY",
-            "run_type": "incremental",
+            "reason": "DATA_QUALITY",
         },
     )
 

@@ -28,10 +28,10 @@ class TestPrometheusMetrics:
         """Test observe_histogram with a valid metric name."""
         with patch.dict(
             HISTOGRAMS,
-            {"pipeline_duration_seconds": MagicMock()},
+            {"bioetl_pipeline_duration_seconds": MagicMock()},
         ):
             prometheus_metrics.observe_histogram(
-                name="pipeline_duration_seconds",
+                name="bioetl_pipeline_duration_seconds",
                 value=123.45,
                 labels={
                     "pipeline_name": "test",
@@ -40,11 +40,11 @@ class TestPrometheusMetrics:
                 },
             )
 
-            HISTOGRAMS["pipeline_duration_seconds"].labels.assert_called_once_with(
+            HISTOGRAMS["bioetl_pipeline_duration_seconds"].labels.assert_called_once_with(
                 pipeline_name="test", status="success", run_type="full"
             )
             HISTOGRAMS[
-                "pipeline_duration_seconds"
+                "bioetl_pipeline_duration_seconds"
             ].labels().observe.assert_called_once_with(123.45)
 
     def test_observe_histogram_unknown_metric(self, prometheus_metrics):
@@ -60,18 +60,18 @@ class TestPrometheusMetrics:
         """Test increment_counter with a valid metric name."""
         with patch.dict(
             COUNTERS,
-            {"records_processed_total": MagicMock()},
+            {"bioetl_records_processed_total": MagicMock()},
         ):
             prometheus_metrics.increment_counter(
-                name="records_processed_total",
+                name="bioetl_records_processed_total",
                 value=100,
                 labels={"pipeline_name": "test", "status": "success"},
             )
 
-            COUNTERS["records_processed_total"].labels.assert_called_once_with(
+            COUNTERS["bioetl_records_processed_total"].labels.assert_called_once_with(
                 pipeline_name="test", status="success"
             )
-            COUNTERS["records_processed_total"].labels().inc.assert_called_once_with(
+            COUNTERS["bioetl_records_processed_total"].labels().inc.assert_called_once_with(
                 100
             )
 
@@ -106,18 +106,20 @@ class TestPrometheusMetricsGauge:
         """Test set_gauge with a valid metric name."""
         with patch.dict(
             GAUGES,
-            {"circuit_breaker_state": MagicMock()},
+            {"bioetl_circuit_breaker_state": MagicMock()},
         ):
             prometheus_metrics.set_gauge(
-                name="circuit_breaker_state",
+                name="bioetl_circuit_breaker_state",
                 value=1.0,
                 labels={"adapter": "chembl"},
             )
 
-            GAUGES["circuit_breaker_state"].labels.assert_called_once_with(
+            GAUGES["bioetl_circuit_breaker_state"].labels.assert_called_once_with(
                 adapter="chembl"
             )
-            GAUGES["circuit_breaker_state"].labels().set.assert_called_once_with(1.0)
+            GAUGES["bioetl_circuit_breaker_state"].labels().set.assert_called_once_with(
+                1.0
+            )
 
     def test_set_gauge_unknown_metric(self, prometheus_metrics):
         """Unknown gauge names must fail loudly."""
@@ -249,23 +251,25 @@ class TestPrometheusCounterLabelNormalization:
     """Tests for bounded-label normalization via generic dispatch."""
 
     def test_quarantine_records_total_normalizes_reason(self, prometheus_metrics):
-        with patch.dict(COUNTERS, {"quarantine_records_total": MagicMock()}):
+        with patch.dict(COUNTERS, {"bioetl_quarantine_records_total": MagicMock()}):
             prometheus_metrics.increment_counter(
-                "quarantine_records_total",
+                "bioetl_quarantine_records_total",
                 2,
                 {"pipeline": "chembl_activity", "reason": "Unbounded Random Reason"},
             )
 
-            COUNTERS["quarantine_records_total"].labels.assert_called_once_with(
+            COUNTERS["bioetl_quarantine_records_total"].labels.assert_called_once_with(
                 pipeline="chembl_activity",
                 reason="other",
             )
-            COUNTERS["quarantine_records_total"].labels().inc.assert_called_once_with(2)
+            COUNTERS["bioetl_quarantine_records_total"].labels().inc.assert_called_once_with(2)
 
     def test_dq_validation_failures_total_normalizes_labels(self, prometheus_metrics):
-        with patch.dict(COUNTERS, {"dq_validation_failures_total": MagicMock()}):
+        with patch.dict(
+            COUNTERS, {"bioetl_dq_validation_failures_total": MagicMock()}
+        ):
             prometheus_metrics.increment_counter(
-                "dq_validation_failures_total",
+                "bioetl_dq_validation_failures_total",
                 1,
                 {
                     "pipeline": "chembl_activity",
@@ -274,19 +278,23 @@ class TestPrometheusCounterLabelNormalization:
                 },
             )
 
-            COUNTERS["dq_validation_failures_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_dq_validation_failures_total"
+            ].labels.assert_called_once_with(
                 pipeline="chembl_activity",
                 stage="threshold",
                 severity="soft_fail",
             )
             COUNTERS[
-                "dq_validation_failures_total"
+                "bioetl_dq_validation_failures_total"
             ].labels().inc.assert_called_once_with(1)
 
     def test_silver_filter_rejections_total_normalizes_labels(self, prometheus_metrics):
-        with patch.dict(COUNTERS, {"silver_filter_rejections_total": MagicMock()}):
+        with patch.dict(
+            COUNTERS, {"bioetl_silver_filter_rejections_total": MagicMock()}
+        ):
             prometheus_metrics.increment_counter(
-                "silver_filter_rejections_total",
+                "bioetl_silver_filter_rejections_total",
                 3,
                 {
                     "pipeline": "chembl_activity",
@@ -297,7 +305,9 @@ class TestPrometheusCounterLabelNormalization:
                 },
             )
 
-            COUNTERS["silver_filter_rejections_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_silver_filter_rejections_total"
+            ].labels.assert_called_once_with(
                 pipeline="chembl_activity",
                 run_type="incremental",
                 reason_code="other",
@@ -305,7 +315,7 @@ class TestPrometheusCounterLabelNormalization:
                 field="other",
             )
             COUNTERS[
-                "silver_filter_rejections_total"
+                "bioetl_silver_filter_rejections_total"
             ].labels().inc.assert_called_once_with(3)
 
 
@@ -314,9 +324,11 @@ class TestObservabilityMetricContract:
     """Tests for observability_events_total label schema normalization."""
 
     def test_observability_counter_ignores_legacy_labels(self, prometheus_metrics):
-        with patch.dict(COUNTERS, {"observability_events_total": MagicMock()}):
+        with patch.dict(
+            COUNTERS, {"bioetl_observability_events_total": MagicMock()}
+        ):
             prometheus_metrics.increment_counter(
-                name="observability_events_total",
+                name="bioetl_observability_events_total",
                 value=1,
                 labels={
                     "event_name": "pipeline_started",
@@ -326,7 +338,7 @@ class TestObservabilityMetricContract:
                 },
             )
 
-            COUNTERS["observability_events_total"].labels.assert_called_once_with(
+            COUNTERS["bioetl_observability_events_total"].labels.assert_called_once_with(
                 event="unknown_event",
                 provider="unknown",
                 pipeline="unknown",
@@ -337,9 +349,11 @@ class TestObservabilityMetricContract:
     def test_observability_counter_normalizes_path_like_pipeline_labels(
         self, prometheus_metrics
     ) -> None:
-        with patch.dict(COUNTERS, {"observability_events_total": MagicMock()}):
+        with patch.dict(
+            COUNTERS, {"bioetl_observability_events_total": MagicMock()}
+        ):
             prometheus_metrics.increment_counter(
-                name="observability_events_total",
+                name="bioetl_observability_events_total",
                 value=1,
                 labels={
                     "event": "silver_merge_retry",
@@ -350,7 +364,7 @@ class TestObservabilityMetricContract:
                 },
             )
 
-            COUNTERS["observability_events_total"].labels.assert_called_once_with(
+            COUNTERS["bioetl_observability_events_total"].labels.assert_called_once_with(
                 event="silver_merge_retry",
                 provider="storage",
                 pipeline="chembl_activity",
@@ -364,26 +378,30 @@ class TestMetricLabelAliasCompatibility:
     """Compatibility tests for legacy metric label parameter aliases."""
 
     def test_observe_histogram_accepts_legacy__labels(self, prometheus_metrics):
-        with patch.dict(HISTOGRAMS, {"pipeline_duration_seconds": MagicMock()}):
+        with patch.dict(
+            HISTOGRAMS, {"bioetl_pipeline_duration_seconds": MagicMock()}
+        ):
             prometheus_metrics.observe_histogram(
-                name="pipeline_duration_seconds",
+                name="bioetl_pipeline_duration_seconds",
                 value=1.0,
                 _labels={"pipeline": "test", "stage": "x", "status": "ok"},
             )
-            HISTOGRAMS["pipeline_duration_seconds"].labels.assert_called_once_with(
+            HISTOGRAMS[
+                "bioetl_pipeline_duration_seconds"
+            ].labels.assert_called_once_with(
                 pipeline="test",
                 stage="x",
                 status="ok",
             )
 
     def test_set_gauge_accepts_legacy_tags(self, prometheus_metrics):
-        with patch.dict(GAUGES, {"circuit_breaker_state": MagicMock()}):
+        with patch.dict(GAUGES, {"bioetl_circuit_breaker_state": MagicMock()}):
             prometheus_metrics.set_gauge(
-                name="circuit_breaker_state",
+                name="bioetl_circuit_breaker_state",
                 value=1.0,
                 tags={"adapter": "chembl"},
             )
-            GAUGES["circuit_breaker_state"].labels.assert_called_once_with(
+            GAUGES["bioetl_circuit_breaker_state"].labels.assert_called_once_with(
                 adapter="chembl"
             )
 
@@ -391,59 +409,63 @@ class TestMetricLabelAliasCompatibility:
         self,
         prometheus_metrics,
     ):
-        with patch.dict(COUNTERS, {"records_processed_total": MagicMock()}):
+        with patch.dict(COUNTERS, {"bioetl_records_processed_total": MagicMock()}):
             prometheus_metrics.increment_counter(
-                name="records_processed_total",
+                name="bioetl_records_processed_total",
                 value=3,
                 labels={"pipeline": "canonical"},
                 _labels={"pipeline": "legacy_under"},
                 tags={"pipeline": "legacy_tags"},
             )
-            COUNTERS["records_processed_total"].labels.assert_called_once_with(
+            COUNTERS["bioetl_records_processed_total"].labels.assert_called_once_with(
                 pipeline="canonical"
             )
 
-    def test_observability_counter_prefers_canonical_over_legacy(
-        self, prometheus_metrics
-    ):
-        with patch.dict(COUNTERS, {"observability_events_total": MagicMock()}):
-            prometheus_metrics.increment_counter(
-                name="observability_events_total",
-                value=1,
-                labels={
-                    "event": "pipeline_started",
-                    "provider": "chembl",
-                    "pipeline": "chembl_activity",
-                    "severity": "info",
-                    "event_name": "legacy_event",
-                    "provider_name": "legacy_provider",
-                    "pipeline_name": "legacy_pipeline",
-                    "log_level": "warning",
-                },
-            )
-
-            COUNTERS["observability_events_total"].labels.assert_called_once_with(
-                event="pipeline_started",
-                provider="chembl",
-                pipeline="chembl_activity",
-                severity="info",
-                error_type="none",
-            )
-
     def test_observability_counter_always_has_required_labels(self, prometheus_metrics):
-        with patch.dict(COUNTERS, {"observability_events_total": MagicMock()}):
+        with patch.dict(
+            COUNTERS, {"bioetl_observability_events_total": MagicMock()}
+        ):
             prometheus_metrics.increment_counter(
-                name="observability_events_total",
+                name="bioetl_observability_events_total",
                 value=1,
                 labels={},
             )
 
-            COUNTERS["observability_events_total"].labels.assert_called_once_with(
+            COUNTERS["bioetl_observability_events_total"].labels.assert_called_once_with(
                 event="unknown_event",
                 provider="unknown",
                 pipeline="unknown",
                 severity="info",
                 error_type="none",
+            )
+
+
+@pytest.mark.unit
+class TestLegacyMetricNameRetirement:
+    """Legacy metric identifiers must fail instead of being canonicalized silently."""
+
+    def test_legacy_histogram_name_fails_loudly(self, prometheus_metrics):
+        with pytest.raises(ValueError, match="Unknown Prometheus histogram metric"):
+            prometheus_metrics.observe_histogram(
+                name="pipeline_duration_seconds",
+                value=1.0,
+                labels={"pipeline": "x"},
+            )
+
+    def test_legacy_counter_name_fails_loudly(self, prometheus_metrics):
+        with pytest.raises(ValueError, match="Unknown Prometheus counter metric"):
+            prometheus_metrics.increment_counter(
+                name="records_processed_total",
+                value=1,
+                labels={"pipeline": "x"},
+            )
+
+    def test_legacy_gauge_name_fails_loudly(self, prometheus_metrics):
+        with pytest.raises(ValueError, match="Unknown Prometheus gauge metric"):
+            prometheus_metrics.set_gauge(
+                name="circuit_breaker_state",
+                value=1.0,
+                labels={"adapter": "chembl"},
             )
 
 

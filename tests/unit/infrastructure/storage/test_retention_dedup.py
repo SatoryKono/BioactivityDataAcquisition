@@ -8,7 +8,14 @@ import pyarrow as pa
 import pytest
 from deltalake import write_deltalake
 
-from bioetl.infrastructure.storage.support.retention import RetentionPolicy
+from bioetl.domain.normalization import (
+    normalize_hash_identity_record,
+    serialize_hash_identity_canonical_json,
+)
+from bioetl.infrastructure.storage.support.retention import (
+    RetentionPolicy,
+    _content_identity,
+)
 
 
 @pytest.fixture
@@ -264,3 +271,17 @@ async def test_deduplicate_prefers_content_hash_over_ingestion_timestamp(
             "_ingestion_ts": "2024-01-01T00:00:00Z",
         }
     ]
+
+
+def test_content_identity_fallback_uses_canonical_hash_identity_contract() -> None:
+    """Retention fallback must reuse the canonical hash-identity seam."""
+    row = {
+        "activity_id": "1",
+        "value": 10.0,
+        "measured_at": " 2025-01-01 ",
+        "_ingestion_ts": "2026-01-01T00:00:00Z",
+    }
+
+    assert _content_identity(row) == serialize_hash_identity_canonical_json(
+        normalize_hash_identity_record(row)
+    )

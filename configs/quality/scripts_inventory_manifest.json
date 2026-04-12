@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-12T13:30:36.403821+00:00",
+  "generated_at": "2026-04-12T13:43:50.596631+00:00",
   "summary": {
     "total_scripts": 292,
     "status_counts": {
@@ -4698,7 +4698,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 121,
+      "reference_count": 129,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",

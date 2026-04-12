@@ -9,9 +9,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Protocol, TypeVar
 
-from bioetl.domain.observability_metric_names import (
-    canonicalize_observability_metric_name,
-)
 from bioetl.domain.ports import MetricLabels, MetricsPort, resolve_metric_labels
 from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
     normalize_metric_dispatch_labels,
@@ -50,20 +47,6 @@ class _GaugeMetric(Protocol):
 
 
 _MetricT = TypeVar("_MetricT")
-
-
-def _resolve_registered_metric_name(
-    *,
-    name: str,
-    registry: Mapping[str, object],
-) -> str:
-    """Resolve one metric name against canonical and legacy registry keys."""
-    if name in registry:
-        return name
-    canonical_name = canonicalize_observability_metric_name(name)
-    if canonical_name in registry:
-        return canonical_name
-    return name
 
 
 def _require_registered_metric(
@@ -119,15 +102,14 @@ class PrometheusMetrics(MetricsPort):
             _labels=_labels,
             tags=tags,
         )
-        resolved_name = _resolve_registered_metric_name(name=name, registry=HISTOGRAMS)
         histogram: _HistogramMetric = _require_registered_metric(
-            name=resolved_name,
+            name=name,
             registry=HISTOGRAMS,
             metric_kind="histogram",
         )
-        histogram.labels(
-            **normalize_metric_dispatch_labels(resolved_name, resolved_labels)
-        ).observe(value)
+        histogram.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).observe(
+            value
+        )
 
     def increment_counter(
         self,
@@ -152,15 +134,14 @@ class PrometheusMetrics(MetricsPort):
             _labels=_labels,
             tags=tags,
         )
-        resolved_name = _resolve_registered_metric_name(name=name, registry=COUNTERS)
         counter: _CounterMetric = _require_registered_metric(
-            name=resolved_name,
+            name=name,
             registry=COUNTERS,
             metric_kind="counter",
         )
-        counter.labels(
-            **normalize_metric_dispatch_labels(resolved_name, resolved_labels)
-        ).inc(value)
+        counter.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).inc(
+            value
+        )
 
     def set_gauge(
         self,
@@ -185,15 +166,14 @@ class PrometheusMetrics(MetricsPort):
             _labels=_labels,
             tags=tags,
         )
-        resolved_name = _resolve_registered_metric_name(name=name, registry=GAUGES)
         gauge: _GaugeMetric = _require_registered_metric(
-            name=resolved_name,
+            name=name,
             registry=GAUGES,
             metric_kind="gauge",
         )
-        gauge.labels(
-            **normalize_metric_dispatch_labels(resolved_name, resolved_labels)
-        ).set(value)
+        gauge.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).set(
+            value
+        )
 
     def close(self) -> None:
         """Mark the metrics adapter as closed (idempotent)."""

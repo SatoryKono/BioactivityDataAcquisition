@@ -24,8 +24,11 @@ from typing import TYPE_CHECKING, Any, cast
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.transformations import canonical_json_dumps, normalize_for_hash
 from bioetl.domain.exceptions import TableNotFoundError
+from bioetl.domain.normalization import (
+    normalize_hash_identity_record,
+    serialize_hash_identity_canonical_json,
+)
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -46,7 +49,10 @@ def _content_identity(row: JsonDict) -> str:
     content_hash = row.get("content_hash")
     if content_hash is not None:
         return str(content_hash)
-    return cast(str, canonical_json_dumps(normalize_for_hash(row)))
+    return cast(
+        str,
+        serialize_hash_identity_canonical_json(normalize_hash_identity_record(row)),
+    )
 
 
 class RetentionPolicy:

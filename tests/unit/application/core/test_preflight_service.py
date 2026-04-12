@@ -204,7 +204,7 @@ class TestPreflightServiceValidation:
         gauge_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
-            if call[0][0] == "infrastructure_validated"
+            if call[0][0] == "bioetl_infrastructure_validated"
         ]
         assert len(gauge_calls) == 1
         # Should be 1.0 for healthy
@@ -222,7 +222,7 @@ class TestPreflightServiceValidation:
         histogram_calls = [
             call
             for call in mock_metrics.observe_histogram.call_args_list
-            if call[0][0] == "health_check_duration_seconds"
+            if call[0][0] == "bioetl_health_check_duration_seconds"
             and "pipeline" in call[0][2]  # Overall duration has pipeline label
         ]
         assert len(histogram_calls) == 1
@@ -337,11 +337,11 @@ class TestPreflightServiceMetrics:
         with pytest.raises(InfrastructureError):
             await service.validate_infrastructure(unhealthy_services)
 
-        # Check that infrastructure_validated was set to 0.0
+        # Check that bioetl_infrastructure_validated was set to 0.0
         gauge_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
-            if call[0][0] == "infrastructure_validated"
+            if call[0][0] == "bioetl_infrastructure_validated"
         ]
         assert len(gauge_calls) == 1
         assert gauge_calls[0][0][1] == 0.0
@@ -1051,7 +1051,7 @@ class TestValidatePreflight:
         gauge_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
-            if call[0][0] == "preflight_medallion_policy_valid"
+            if call[0][0] == "bioetl_preflight_medallion_policy_valid"
         ]
         assert len(gauge_calls) == 1
         assert gauge_calls[0][0][1] == 1.0  # Valid

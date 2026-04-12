@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization import compute_manifest_execution_fingerprint
-from bioetl.domain.normalization import compute_runtime_anchor_fingerprint
+from bioetl.domain.normalization import compute_degraded_runtime_anchor_fingerprint
 from bioetl.domain.normalization import normalize_run_manifest_spec
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
@@ -113,6 +113,8 @@ def test_runtime_anchor_fingerprint_is_deterministic_for_equivalent_payloads() -
         "effective_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
-    assert compute_runtime_anchor_fingerprint(
+    assert compute_degraded_runtime_anchor_fingerprint(
         normalize_runtime_anchor_payload(payload)
-    ) == compute_runtime_anchor_fingerprint(normalize_runtime_anchor_payload(reordered))
+    ) == compute_degraded_runtime_anchor_fingerprint(
+        normalize_runtime_anchor_payload(reordered)
+    )

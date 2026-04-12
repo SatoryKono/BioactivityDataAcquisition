@@ -27,10 +27,16 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.domain.ports import RunManifestPort
-from bioetl.domain.ports.metadata.coordinator import BronzeMetadataInput
+from bioetl.domain.ports.metadata.coordinator import (
+    BronzeMetadataInput,
+    GoldMetadataInput,
+    SilverMetadataInput,
+    SilverRef,
+)
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.value_objects.run_context import RunContext
@@ -258,6 +264,79 @@ def test_reproducibility_contract_bronze_bundle_has_canonical_artifact_identity(
 
     assert bundle.metadata.output.artifact_id == "bronze_batch:batch-1"
     assert bundle.metadata.output.lineage_fragment_id == bundle.lineage_fragment.fragment_id
+
+
+def test_reproducibility_contract_silver_bundle_keeps_sidecar_and_fragment_identity_aligned() -> None:
+    started_at = datetime(2025, 1, 1, tzinfo=UTC)
+    context = RunContext.create(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=started_at,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+    )
+    coordinator = MetadataCoordinator(context)
+
+    bundle = coordinator.create_silver_metadata_bundle(
+        SilverMetadataInput(
+            table_path="silver/chembl/activity",
+            primary_keys=["activity_id"],
+            mode=SilverWriteMode.MERGE,
+            records=[
+                {"activity_id": 1, "_source_batch_id": "batch-a"},
+                {"activity_id": 2, "_source_batch_id": "batch-b"},
+            ],
+            version_after=4,
+            started_at=started_at,
+            completed_at=started_at + timedelta(seconds=2),
+        )
+    )
+
+    assert bundle.metadata.output.artifact_id == "silver:chembl.activity@4"
+    assert bundle.metadata.output.lineage_fragment_id == bundle.lineage_fragment.fragment_id
+    assert any(
+        node.node_id == bundle.metadata.output.artifact_id
+        for node in bundle.lineage_fragment.nodes
+    )
+
+
+def test_reproducibility_contract_gold_bundle_keeps_sidecar_and_fragment_identity_aligned() -> None:
+    started_at = datetime(2025, 1, 1, tzinfo=UTC)
+    context = RunContext.create(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=started_at,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+    )
+    coordinator = MetadataCoordinator(context)
+
+    bundle = coordinator.create_gold_metadata_bundle(
+        GoldMetadataInput(
+            table_path="gold/chembl/activity",
+            table_name="chembl.activity",
+            mode=GoldWriteMode.OVERWRITE,
+            records=[{"activity_id": 1}],
+            silver_refs=[
+                SilverRef(
+                    table_name="chembl.activity",
+                    table_path="silver/chembl/activity",
+                    delta_version=4,
+                )
+            ],
+            started_at=started_at,
+            completed_at=started_at + timedelta(seconds=3),
+        )
+    )
+
+    assert bundle.metadata.output.artifact_id == "gold:chembl.activity"
+    assert bundle.metadata.output.lineage_fragment_id == bundle.lineage_fragment.fragment_id
+    assert any(
+        node.node_id == bundle.metadata.output.artifact_id
+        for node in bundle.lineage_fragment.nodes
+    )
 
 
 def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> None:

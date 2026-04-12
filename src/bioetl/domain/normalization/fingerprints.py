@@ -9,6 +9,7 @@ from bioetl.domain.normalization.json import serialize_json_canonical
 
 __all__ = [
     "compute_execution_identity_fingerprint",
+    "compute_degraded_runtime_anchor_fingerprint",
     "compute_input_snapshot_identity_fingerprint",
     "compute_manifest_execution_fingerprint",
     "compute_runtime_anchor_fingerprint",
@@ -44,16 +45,24 @@ def compute_manifest_execution_fingerprint(payload: Mapping[str, object]) -> str
     return compute_execution_identity_fingerprint(payload)
 
 
-def compute_runtime_anchor_fingerprint(
+def compute_degraded_runtime_anchor_fingerprint(
     payload: Mapping[str, object | None],
 ) -> str:
-    """Compute the canonical runtime-anchor compatibility fingerprint.
+    """Compute the explicitly degraded runtime-anchor compatibility fingerprint.
 
-    This is intentionally narrower than the full manifest execution
-    fingerprint. It covers the normalized control-plane anchor payload used
-    for checkpoint/resume compatibility when a full manifest fingerprint is
-    unavailable. Callers are expected to pass the already-normalized payload
-    produced by `normalize_runtime_anchor_payload()`.
+    This helper is intentionally narrower than the canonical execution identity.
+    It exists only for legacy compatibility paths when a full execution
+    fingerprint or canonical checkpoint-execution payload is unavailable.
+    Callers are expected to pass the already-normalized payload produced by
+    `normalize_runtime_anchor_payload()`.
     """
 
     return compute_execution_identity_fingerprint(payload)
+
+
+def compute_runtime_anchor_fingerprint(
+    payload: Mapping[str, object | None],
+) -> str:
+    """Backward-compatible alias for the degraded runtime-anchor helper."""
+
+    return compute_degraded_runtime_anchor_fingerprint(payload)
