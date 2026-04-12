@@ -187,6 +187,9 @@ Hash-identity note:
 - `content_hash` and content-aware dedup now share one explicit contract.
 - This contract is intentionally distinct from control-plane datetime normalization.
 - `datetime` currently collapses to `date().isoformat()` inside hash identity to preserve historical `content_hash` stability until a deliberate migration is approved.
+- 2026-04 evaluation outcome: keep this split in place; any convergence toward
+  UTC ISO-8601 `Z` datetime semantics must be treated as a separate
+  breaking-change migration with explicit versioning and validation.
 
 Fields that currently participate in `content_hash`:
 
