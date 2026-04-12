@@ -15,8 +15,8 @@ EXPECTED_GRAFANA_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_grafana_wrapper.sh"
 EXPECTED_BRAVE_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_brave_search_wrapper.sh"
 EXPECTED_NEO4J_CYPHER_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_neo4j_cypher_wrapper.sh"
 EXPECTED_NEO4J_MEMORY_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_neo4j_memory_wrapper.sh"
-# shellcheck source=./load_repo_env.sh
-source "${SCRIPT_DIR}/load_repo_env.sh"
+# shellcheck source=./support/load_repo_env.sh
+source "${SCRIPT_DIR}/support/load_repo_env.sh"
 
 load_repo_env_if_present
 

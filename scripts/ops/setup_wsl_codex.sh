@@ -17,7 +17,7 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-ENSURE_SCRIPT="${SCRIPT_DIR}/ensure_codex_cli.sh"
+ENSURE_SCRIPT="${SCRIPT_DIR}/support/ensure_codex_cli.sh"
 
 # Step 1: Update package manager (with retry logic)
 echo "[1/5] Updating package manager..."

@@ -3,8 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
-# shellcheck source=./load_repo_env.sh
-source "${SCRIPT_DIR}/load_repo_env.sh"
+# shellcheck source=./support/load_repo_env.sh
+source "${SCRIPT_DIR}/support/load_repo_env.sh"
 
 MODE="report"
 ASSUME_YES=0

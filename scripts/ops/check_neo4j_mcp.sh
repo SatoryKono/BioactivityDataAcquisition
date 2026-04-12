@@ -34,8 +34,8 @@ section() {
   printf "\n${BLUE}=== %s ===${NC}\n" "$1"
 }
 
-# shellcheck source=./load_repo_env.sh
-source "${SCRIPT_DIR}/load_repo_env.sh"
+# shellcheck source=./support/load_repo_env.sh
+source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present
 
 status=0

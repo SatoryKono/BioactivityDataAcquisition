@@ -29,13 +29,17 @@ Last verified: '2026-03-29'
   root entrypoints. Операционные quick-reference материалы SHOULD жить в
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
   MUST архивироваться под `docs/99-archive/`.
-- Root-level tracked директории MUST ограничиваться approved runtime/tooling and project surfaces: `.ai`, `.aiassistant`, `.codex`, `.gemini`, `.github`, `.jules`, `.junie`, `assets`, `configs`, `data`, `docs`, `grafana`, `reports`, `scripts`, `src`, `tests`.
+- Root-level tracked директории MUST ограничиваться approved runtime/tooling and project surfaces: `.ai`, `.aiassistant`, `.claude`, `.codex`, `.codex_tmp`, `.gemini`, `.github`, `.jules`, `.junie`, `.python-user`, `.vibe`, `assets`, `configs`, `data`, `docs`, `grafana`, `reports`, `scripts`, `src`, `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Локальные tooling-каталоги (например, `.idea/`, `.vscode/`, `.cursor/`, `.trae/`, `.windsurf/`) MAY существовать в рабочем дереве, но MUST оставаться untracked и игнорироваться `.gitignore`.
 
 Root allowlist интерпретируется как policy surface, а не как временный склад.
 Если новый root-level файл существует только для инцидента, ручной проверки или
 финального статуса волны, он не должен закрепляться в корне.
+
+`.codex_tmp`, `.python-user`, и `.vibe` currently remain as tracked transitional
+tooling surfaces. They are allowed explicitly so root-hygiene stays truthful,
+not because they are preferred long-term root placements.
 
 Проверка:
 

@@ -138,7 +138,7 @@ fi
 # ============================================================================
 header "TEST 4: Environment Configuration"
 
-source "${SCRIPT_DIR}/load_repo_env.sh" 2>/dev/null || true
+source "${SCRIPT_DIR}/support/load_repo_env.sh" 2>/dev/null || true
 load_repo_env_if_present 2>/dev/null || true
 
 NEO4J_URI="${NEO4J_URI:-bolt://localhost:7687}"

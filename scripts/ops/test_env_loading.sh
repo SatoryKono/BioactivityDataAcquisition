@@ -5,7 +5,7 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")"/../.. || exit 1
 
-source scripts/ops/load_repo_env.sh
+source scripts/ops/support/load_repo_env.sh
 load_repo_env_if_present
 
 echo "=== Environment Variables Loaded ==="
