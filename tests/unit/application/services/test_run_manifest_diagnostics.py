@@ -252,6 +252,21 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
                 ],
             },
         },
+        "alert_signals": {
+            "run_failed": False,
+            "run_shutdown": False,
+            "artifact_linkage_gap": False,
+            "lineage_gap": False,
+            "strict_replay_boundary_gap": False,
+            "replay_ready_gap": True,
+            "forensic_grade_gap": True,
+            "dq_signal_present": False,
+            "cross_validation_signal_present": False,
+        },
+        "next_steps": [
+            "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
+            "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
+        ],
     }
 
 
@@ -460,6 +475,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     assert isinstance(alert_signals, dict)
     assert alert_signals["artifact_linkage_gap"] is False
     assert alert_signals["lineage_gap"] is False
+    assert alert_signals["strict_replay_boundary_gap"] is False
     assert alert_signals["replay_ready_gap"] is True
     assert alert_signals["forensic_grade_gap"] is True
     assert alert_signals["dq_signal_present"] is False
@@ -541,4 +557,10 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "strict_replay_execution_context_support",
         "exact_replay_capability",
         "immutable_input_snapshots",
+    ]
+    assert summary["alert_signals"]["strict_replay_boundary_gap"] is True
+    assert summary["next_steps"] == [
+        "Treat this execution context as outside the strict exact-replay support boundary; use rebuild/resume semantics instead of exact replay.",
+        "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
+        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]

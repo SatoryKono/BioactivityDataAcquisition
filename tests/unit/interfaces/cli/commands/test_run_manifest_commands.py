@@ -80,6 +80,7 @@ class _FakeRunManifestService:
                 "effective_config_artifact_id": "eca-123",
                 "dq_contract_compatibility_hash": "compat-hash-1",
                 "requested_exact_replay": True,
+                "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
                 "replay_capability_reason": "immutable_input_snapshots_present",
                 "exact_replay_blockers": [],
                 "input_snapshot_ids": ["snapshot-1"],
@@ -131,6 +132,7 @@ class _FakeRunManifestService:
                     "contract_version": "1.2.0",
                     "replay_capability": "exact_replay_supported",
                     "requested_exact_replay": True,
+                    "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
                     "replay_capability_reason": "immutable_input_snapshots_present",
                     "exact_replay_eligible": True,
                     "exact_replay_blockers": [],
@@ -226,6 +228,7 @@ class _FakeRunManifestService:
                     "run_shutdown": False,
                     "artifact_linkage_gap": False,
                     "lineage_gap": False,
+                    "strict_replay_boundary_gap": False,
                     "dq_signal_present": True,
                     "cross_validation_signal_present": True,
                 },
@@ -421,6 +424,10 @@ class TestRunManifestCommands:
         assert "dq_policy_ref: chembl_activity.gold" in result.output
         assert (
             "requested_exact_replay: true"
+            in result.output
+        )
+        assert (
+            "exact_replay_support_boundary: snapshot_backed_source_runs_only"
             in result.output
         )
         assert (
