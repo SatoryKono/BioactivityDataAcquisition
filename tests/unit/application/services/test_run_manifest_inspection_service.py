@@ -242,6 +242,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "degraded_runtime_anchor": _expected_degraded_runtime_anchor(manifest),
         "replay_capability": "exact_replay_supported",
         "requested_exact_replay": True,
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
@@ -315,6 +316,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "degraded_runtime_anchor": _expected_degraded_runtime_anchor(manifest),
         "replay_capability": "exact_replay_supported",
         "requested_exact_replay": True,
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
@@ -362,6 +364,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "contract_version": "1.2.0",
         "replay_capability": "exact_replay_supported",
         "requested_exact_replay": True,
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
@@ -402,6 +405,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
             "surfaces": {
                 "control_plane_manifest": True,
                 "effective_config_artifact": True,
+                "strict_replay_execution_context_support": True,
                 "immutable_input_snapshots": True,
                 "exact_replay_capability": True,
                 "run_ledger_history": False,
@@ -445,6 +449,10 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     assert result.diagnostics["replay_capability"] == "resume_only"
     assert result.diagnostics["requested_exact_replay"] is False
     assert (
+        result.diagnostics["exact_replay_support_boundary"]
+        == "snapshot_backed_source_runs_only"
+    )
+    assert (
         result.diagnostics["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"
     )
@@ -458,6 +466,10 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     assert result.diagnostics["replay_mode"] == "resume"
     assert result.identity_graph["replay_capability"] == "resume_only"
     assert result.identity_graph["requested_exact_replay"] is False
+    assert (
+        result.identity_graph["exact_replay_support_boundary"]
+        == "snapshot_backed_source_runs_only"
+    )
     assert (
         result.identity_graph["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"

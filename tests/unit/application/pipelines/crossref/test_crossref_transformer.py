@@ -183,9 +183,9 @@ async def test_transform_full_record(transformer, pipeline_context, sample_publi
     assert result["journal_name_short"] == "J Test Sci"
     assert result["_source"] == "crossref"
     # Check lineage fields
-    assert "_run_id" not in result
-    assert "_run_type" not in result
-    assert "_ingestion_ts" not in result
+    assert "_run_id" in result
+    assert "_run_type" in result
+    assert "_ingestion_ts" in result
     assert "content_hash" in result
 
 
@@ -658,9 +658,9 @@ async def test_transform_includes_run_metadata(transformer, pipeline_context):
     result = await transformer.transform(pipeline_context, publication, index=0)
 
     assert result is not None
-    assert "_run_id" not in result
-    assert "_run_type" not in result
-    assert "_ingestion_ts" not in result
+    assert "_run_id" in result
+    assert "_run_type" in result
+    assert "_ingestion_ts" in result
 
 
 def test_extract_business_data_date_formatting(transformer):
