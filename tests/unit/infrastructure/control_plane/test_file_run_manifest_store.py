@@ -93,7 +93,7 @@ def test_file_store_emits_manifest_write_metric(tmp_path) -> None:
     store.save(manifest)
 
     metrics.increment_counter.assert_called_once_with(
-        "control_plane_manifest_writes_total",
+        "bioetl_control_plane_manifest_writes_total",
         1,
         {
             "pipeline": "chembl_activity",
@@ -132,7 +132,7 @@ def test_file_store_emits_manifest_read_metric_on_get_success(tmp_path) -> None:
     assert store.get("manifest-3") == manifest
 
     metrics.increment_counter.assert_called_once_with(
-        "control_plane_reads_total",
+        "bioetl_control_plane_reads_total",
         1,
         {
             "store": "manifest",
@@ -142,7 +142,7 @@ def test_file_store_emits_manifest_read_metric_on_get_success(tmp_path) -> None:
     )
     metrics.observe_histogram.assert_called_once()
     args, kwargs = metrics.observe_histogram.call_args
-    assert args[0] == "control_plane_read_duration_seconds"
+    assert args[0] == "bioetl_control_plane_read_duration_seconds"
     assert isinstance(args[1], float)
     assert args[2] == {
         "store": "manifest",
@@ -170,7 +170,7 @@ def test_file_store_emits_manifest_read_metric_on_get_failure(tmp_path) -> None:
         raise AssertionError("Expected malformed manifest payload to raise ValueError")
 
     metrics.increment_counter.assert_called_once_with(
-        "control_plane_reads_total",
+        "bioetl_control_plane_reads_total",
         1,
         {
             "store": "manifest",

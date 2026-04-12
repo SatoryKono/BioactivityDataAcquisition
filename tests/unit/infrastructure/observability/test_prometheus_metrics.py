@@ -90,12 +90,12 @@ class TestPrometheusMetricsRegistries:
     """Tests for metric registries."""
 
     def test_histograms_registry_has_pipeline_duration(self):
-        """Test HISTOGRAMS registry contains pipeline_duration_seconds."""
-        assert "pipeline_duration_seconds" in HISTOGRAMS
+        """Test HISTOGRAMS registry contains bioetl_pipeline_duration_seconds."""
+        assert "bioetl_pipeline_duration_seconds" in HISTOGRAMS
 
     def test_counters_registry_has_records_processed(self):
-        """Test COUNTERS registry contains records_processed_total."""
-        assert "records_processed_total" in COUNTERS
+        """Test COUNTERS registry contains bioetl_records_processed_total."""
+        assert "bioetl_records_processed_total" in COUNTERS
 
 
 @pytest.mark.unit
@@ -141,13 +141,13 @@ class TestRequiredMetricsSmoke:
         """Verify all MUST pipeline metrics are in registries."""
         # MUST metrics from docs/contracts/observability.md
         required_histograms = [
-            "pipeline_duration_seconds",
-            "batch_size_records",
+            "bioetl_pipeline_duration_seconds",
+            "bioetl_batch_size_records",
         ]
         required_counters = [
-            "records_processed_total",
-            "errors_total",
-            "dq_records_quarantined_total",
+            "bioetl_records_processed_total",
+            "bioetl_errors_total",
+            "bioetl_dq_records_quarantined_total",
         ]
 
         for metric in required_histograms:
@@ -164,12 +164,12 @@ class TestRequiredMetricsSmoke:
         """Verify Circuit Breaker metrics are registered (per ADR-007)."""
         # MUST metrics per ADR-007
         cb_counters = [
-            "circuit_breaker_trips_total",
-            "circuit_breaker_success_total",
-            "circuit_breaker_failure_total",
+            "bioetl_circuit_breaker_trips_total",
+            "bioetl_circuit_breaker_success_total",
+            "bioetl_circuit_breaker_failure_total",
         ]
         cb_gauges = [
-            "circuit_breaker_state",
+            "bioetl_circuit_breaker_state",
         ]
 
         for metric in cb_counters:
@@ -185,13 +185,13 @@ class TestRequiredMetricsSmoke:
     def test_required_adapter_operational_metrics_registered(self):
         """Verify adapter p95/fallback/error taxonomy metrics are registered."""
         required_counters = [
-            "adapter_fallback_attempts_total",
-            "adapter_fallback_hits_total",
-            "adapter_error_taxonomy_total",
+            "bioetl_adapter_fallback_attempts_total",
+            "bioetl_adapter_fallback_hits_total",
+            "bioetl_adapter_error_taxonomy_total",
         ]
         required_gauges = [
-            "adapter_request_p95_seconds",
-            "adapter_fallback_hit_rate",
+            "bioetl_adapter_request_p95_seconds",
+            "bioetl_adapter_fallback_hit_rate",
         ]
 
         for metric in required_counters:

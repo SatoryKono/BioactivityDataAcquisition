@@ -23,8 +23,8 @@ from bioetl.infrastructure.observability.circuit_breaker_mapping import (
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
 
-METRIC_CIRCUIT_BREAKER_SUCCESS = "circuit_breaker_success_total"
-METRIC_CIRCUIT_BREAKER_FAILURE = "circuit_breaker_failure_total"
+METRIC_CIRCUIT_BREAKER_SUCCESS = "bioetl_circuit_breaker_success_total"
+METRIC_CIRCUIT_BREAKER_FAILURE = "bioetl_circuit_breaker_failure_total"
 
 CALL_OPERATION_ERRORS: tuple[type[Exception], ...] = (
     BioETLError,

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-12T13:13:00.669812+00:00",
+  "generated_at": "2026-04-12T13:30:36.403821+00:00",
   "summary": {
     "total_scripts": 292,
     "status_counts": {
@@ -4565,7 +4565,7 @@
         },
         {
           "path": "scripts/ops/neo4j_memory_sync.py",
-          "line": 503,
+          "line": 506,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
         }
@@ -4698,7 +4698,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 115,
+      "reference_count": 121,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",

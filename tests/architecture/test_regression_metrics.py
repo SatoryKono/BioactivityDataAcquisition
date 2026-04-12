@@ -540,8 +540,8 @@ def test_probe_mode_fallback_counter_exists() -> None:
     )
 
     agg_content = aggregator.read_text(encoding="utf-8")
-    assert "probe_mode_fallback_total" in agg_content, (
-        "probe_mode_fallback_total not instrumented in preflight_health_aggregator.py"
+    assert "bioetl_probe_mode_fallback_total" in agg_content, (
+        "bioetl_probe_mode_fallback_total not instrumented in preflight_health_aggregator.py"
     )
 
 

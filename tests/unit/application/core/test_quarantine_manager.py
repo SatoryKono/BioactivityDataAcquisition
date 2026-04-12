@@ -68,7 +68,7 @@ class TestQuarantineManagerBulkWrites:
         assert requests[0]["metadata"]["quarantine_category"] == "silver_filter"
         assert "quasi_quarantine" not in requests[0]["metadata"]
         metrics.increment_counter.assert_any_call(
-            "quarantine_records_total",
+            "bioetl_quarantine_records_total",
             2,
             {
                 "pipeline": "chembl_activity",
@@ -150,7 +150,7 @@ class TestQuarantineManagerBulkWrites:
         requests = quarantine_port.write_many.await_args.args[0]
         assert requests[0]["run_id"] == run_id
         metrics.increment_counter.assert_any_call(
-            "quarantine_records_total",
+            "bioetl_quarantine_records_total",
             2,
             {
                 "pipeline": "chembl_activity",
@@ -158,7 +158,7 @@ class TestQuarantineManagerBulkWrites:
             },
         )
         metrics.increment_counter.assert_any_call(
-            "quarantine_records_total",
+            "bioetl_quarantine_records_total",
             1,
             {
                 "pipeline": "chembl_activity",

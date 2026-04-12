@@ -228,7 +228,7 @@ class TestProviderHealthMonitorMetrics:
         monitor.record_error("chembl")
 
         mock_metrics.set_gauge.assert_called_with(
-            "provider_health_status",
+            "bioetl_provider_health_status",
             1,  # DEGRADED = 1
             labels={"provider": "chembl"},
         )
@@ -240,7 +240,7 @@ class TestProviderHealthMonitorMetrics:
         monitor.record_success("chembl")
 
         mock_metrics.set_gauge.assert_called_with(
-            "provider_health_status",
+            "bioetl_provider_health_status",
             2,  # HEALTHY = 2
             labels={"provider": "chembl"},
         )
@@ -252,7 +252,7 @@ class TestProviderHealthMonitorMetrics:
         monitor.record_health_check_result("chembl", HealthStatus.UNHEALTHY)
 
         mock_metrics.set_gauge.assert_called_with(
-            "provider_health_status",
+            "bioetl_provider_health_status",
             0,  # UNHEALTHY = 0
             labels={"provider": "chembl"},
         )
@@ -291,7 +291,7 @@ class TestHealthCheckObservabilityCounters:
             (
                 c
                 for c in mock_metrics.increment_counter.call_args_list
-                if c[0][0] == "health_check_degraded_total"
+                if c[0][0] == "bioetl_health_check_degraded_total"
             ),
             None,
         )
@@ -299,7 +299,7 @@ class TestHealthCheckObservabilityCounters:
             (
                 c
                 for c in mock_metrics.increment_counter.call_args_list
-                if c[0][0] == "health_check_success_total"
+                if c[0][0] == "bioetl_health_check_success_total"
             ),
             None,
         )
@@ -325,7 +325,7 @@ class TestHealthCheckObservabilityCounters:
             (
                 c
                 for c in mock_metrics.increment_counter.call_args_list
-                if c[0][0] == "health_check_failures_total"
+                if c[0][0] == "bioetl_health_check_failures_total"
             ),
             None,
         )
@@ -347,12 +347,12 @@ class TestHealthCheckObservabilityCounters:
         )
 
         mock_metrics.observe_histogram.assert_called_with(
-            "health_check_latency_seconds",
+            "bioetl_health_check_latency_seconds",
             0.0455,
             labels={"provider": "chembl"},
         )
         observed_metric_names = [call.args[0] for call in mock_metrics.observe_histogram.call_args_list]
-        assert "health_check_latency_ms" not in observed_metric_names
+        assert "bioetl_health_check_latency_ms" not in observed_metric_names
 
 
 class TestProviderHealthMonitorAdaptiveParams:
@@ -608,7 +608,7 @@ class TestProviderHealthMonitorUpdateFromResult:
 
         # Should have called observe_histogram for latency
         mock_metrics.observe_histogram.assert_called_with(
-            "health_check_latency_seconds",
+            "bioetl_health_check_latency_seconds",
             0.0455,
             labels={"provider": "chembl"},
         )

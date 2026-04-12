@@ -19,7 +19,7 @@ class TestPrometheusMetrics:
         """Test observing a value for a valid histogram."""
         metrics = PrometheusMetrics()
 
-        hist = HISTOGRAMS["pipeline_duration_seconds"]
+        hist = HISTOGRAMS["bioetl_pipeline_duration_seconds"]
         # Correct labels based on metrics.py definition: ["pipeline", "stage", "status", "run_type"]
         labels = {
             "pipeline": "test_pipe",
@@ -32,7 +32,7 @@ class TestPrometheusMetrics:
         # Capture start value
         start_val = hist.labels(**labels)._sum.get()
 
-        metrics.observe_histogram("pipeline_duration_seconds", val, labels)
+        metrics.observe_histogram("bioetl_pipeline_duration_seconds", val, labels)
 
         # Verify delta
         end_val = hist.labels(**labels)._sum.get()
@@ -41,13 +41,13 @@ class TestPrometheusMetrics:
     def test_increment_counter_success(self):
         """Test incrementing a counter."""
         metrics = PrometheusMetrics()
-        counter = COUNTERS["records_processed_total"]
+        counter = COUNTERS["bioetl_records_processed_total"]
 
         # Correct labels based on metrics.py definition: ["pipeline", "stage", "run_type"]
         labels = {"pipeline": "test_pipe", "stage": "bronze", "run_type": "scheduled"}
         start_val = counter.labels(**labels)._value.get()
 
-        metrics.increment_counter("records_processed_total", 5, labels)
+        metrics.increment_counter("bioetl_records_processed_total", 5, labels)
 
         end_val = counter.labels(**labels)._value.get()
         assert end_val == start_val + 5

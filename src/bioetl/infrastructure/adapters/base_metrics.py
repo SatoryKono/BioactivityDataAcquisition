@@ -109,13 +109,13 @@ class AdapterMetricsRecorder:
             labels = {"provider": self.provider, "endpoint": normalized_endpoint}
             if self.metrics is not None:
                 self.metrics.observe_histogram(
-                    "adapter_request_duration_seconds",
+                    "bioetl_adapter_request_duration_seconds",
                     duration,
                     labels,
                 )
 
                 self.metrics.increment_counter(
-                    "adapter_requests_total",
+                    "bioetl_adapter_requests_total",
                     1,
                     {**labels, "status": status},
                 )
@@ -139,7 +139,7 @@ class AdapterMetricsRecorder:
             return
         normalized_endpoint = normalize_adapter_endpoint_label(endpoint)
         self.metrics.observe_histogram(
-            "adapter_batch_size",
+            "bioetl_adapter_batch_size",
             float(size),
             {"provider": self.provider, "endpoint": normalized_endpoint},
         )
@@ -162,7 +162,7 @@ class AdapterMetricsRecorder:
         if self.metrics is None:
             return
         self.metrics.increment_counter(
-            "adapter_dropped_duplicates_total",
+            "bioetl_adapter_dropped_duplicates_total",
             count,
             {"provider": self.provider, "entity_type": entity_type},
         )
@@ -198,19 +198,19 @@ class AdapterMetricsRecorder:
 
         if total_candidates > 0:
             self.metrics.increment_counter(
-                "adapter_fallback_attempts_total",
+                "bioetl_adapter_fallback_attempts_total",
                 total_candidates,
                 labels,
             )
         if total_hits > 0:
             self.metrics.increment_counter(
-                "adapter_fallback_hits_total",
+                "bioetl_adapter_fallback_hits_total",
                 total_hits,
                 labels,
             )
 
         hit_rate = (total_hits / total_candidates) if total_candidates else 0.0
-        self.metrics.set_gauge("adapter_fallback_hit_rate", hit_rate, labels)
+        self.metrics.set_gauge("bioetl_adapter_fallback_hit_rate", hit_rate, labels)
 
     def _record_request_p95(self, endpoint: str, duration_seconds: float) -> None:
         """Update rolling p95 latency gauge for provider+endpoint.
@@ -230,7 +230,7 @@ class AdapterMetricsRecorder:
         if self.metrics is None:
             return
         self.metrics.set_gauge(
-            "adapter_request_p95_seconds",
+            "bioetl_adapter_request_p95_seconds",
             p95_value,
             {"provider": self.provider, "endpoint": normalized_endpoint},
         )

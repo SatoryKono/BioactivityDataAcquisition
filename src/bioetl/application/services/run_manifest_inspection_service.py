@@ -11,6 +11,10 @@ from bioetl.application.services.run_manifest_diagnostics import (
     build_diagnostics_summary,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.normalization import (
+    build_execution_identity_payload,
+    compute_execution_identity_fingerprint,
+)
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
@@ -179,6 +183,36 @@ class RunManifestInspectionService:
             return existing
 
         code_provenance = manifest.code_provenance
+        canonical_execution_identity = build_execution_identity_payload(
+            pipeline_name=manifest.pipeline_name,
+            run_type=manifest.run_type.value,
+            pipeline_version=code_provenance.pipeline_version,
+            effective_config_hash=code_provenance.config_hash,
+            dq_contract_compatibility_hash=(
+                code_provenance.dq_contract_compatibility_hash
+            ),
+            contract_ref=code_provenance.contract_ref,
+            contract_version=code_provenance.contract_version,
+            effective_config_artifact_id=code_provenance.effective_config_artifact_id,
+            exact_replay=bool(manifest.launch_context.get("exact_replay")),
+            input_snapshot_fingerprint=cast(
+                "str | None",
+                diagnostics.get("input_snapshot_identity_fingerprint"),
+            ),
+        )
+        degraded_runtime_anchor_payload = {
+            key: value
+            for key, value in {
+                "manifest_id": manifest.manifest_id,
+                "effective_config_hash": code_provenance.config_hash,
+                "contract_ref": code_provenance.contract_ref,
+                "contract_version": code_provenance.contract_version,
+                "effective_config_artifact_id": (
+                    code_provenance.effective_config_artifact_id
+                ),
+            }.items()
+            if value is not None
+        }
         return {
             "run_id": str(manifest.run_id),
             "manifest_id": manifest.manifest_id,
@@ -186,6 +220,21 @@ class RunManifestInspectionService:
             "effective_config_hash": code_provenance.config_hash,
             "contract_ref": code_provenance.contract_ref,
             "contract_version": code_provenance.contract_version,
+            "canonical_execution_identity": {
+                "execution_fingerprint": manifest.execution_fingerprint,
+                "payload": canonical_execution_identity,
+            },
+            "degraded_runtime_anchor": {
+                "compatibility_scope": "legacy_fallback_only",
+                "fingerprint": (
+                    compute_execution_identity_fingerprint(
+                        degraded_runtime_anchor_payload
+                    )
+                    if degraded_runtime_anchor_payload
+                    else None
+                ),
+                "payload": degraded_runtime_anchor_payload,
+            },
             "replay_capability": diagnostics.get(
                 "replay_capability",
                 manifest.replay_capability.value,

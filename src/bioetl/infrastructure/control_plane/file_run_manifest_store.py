@@ -35,7 +35,7 @@ def _emit_manifest_write_metric(
     if metrics is None:
         return
     metrics.increment_counter(
-        "control_plane_manifest_writes_total",
+        "bioetl_control_plane_manifest_writes_total",
         1,
         {
             "pipeline": pipeline,

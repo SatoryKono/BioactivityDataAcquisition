@@ -322,10 +322,10 @@ class TestDataQualityServiceMetricsEmission:
         recording_metrics: RecordingMetrics,
         recording_logger: RecordingLogger,
     ) -> None:
-        """Verify dq_soft_threshold_exceeded counter is emitted.
+        """Verify bioetl_dq_soft_threshold_exceeded counter is emitted.
 
         When error_rate exceeds soft threshold (5%) but below hard (20%),
-        the service MUST emit the dq_soft_threshold_exceeded counter.
+        the service MUST emit the bioetl_dq_soft_threshold_exceeded counter.
         """
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
@@ -348,11 +348,11 @@ class TestDataQualityServiceMetricsEmission:
 
         # Verify counter was emitted
         counter_calls = recording_metrics.get_counter_calls(
-            "dq_soft_threshold_exceeded"
+            "bioetl_dq_soft_threshold_exceeded"
         )
         assert len(counter_calls) == 1
         name, value, labels = counter_calls[0]
-        assert name == "dq_soft_threshold_exceeded"
+        assert name == "bioetl_dq_soft_threshold_exceeded"
         assert value == 1
         assert labels == {"pipeline": "test_integration_pipeline"}
 
@@ -362,7 +362,7 @@ class TestDataQualityServiceMetricsEmission:
         recording_metrics: RecordingMetrics,
         recording_logger: RecordingLogger,
     ) -> None:
-        """Verify dq_check_duration_ms histogram is emitted.
+        """Verify bioetl_dq_check_duration_ms histogram is emitted.
 
         When DQ monitor is present and runs anomaly detection,
         the service MUST emit check duration histogram.
@@ -389,10 +389,12 @@ class TestDataQualityServiceMetricsEmission:
         result = service.evaluate({"error_rate": 0.01, "record_count": 100.0})
 
         # Verify histogram was emitted
-        histogram_calls = recording_metrics.get_histogram_calls("dq_check_duration_ms")
+        histogram_calls = recording_metrics.get_histogram_calls(
+            "bioetl_dq_check_duration_ms"
+        )
         assert len(histogram_calls) == 1
         name, value, labels = histogram_calls[0]
-        assert name == "dq_check_duration_ms"
+        assert name == "bioetl_dq_check_duration_ms"
         assert value >= 0  # Duration should be non-negative
         assert labels == {"pipeline": "test_integration_pipeline"}
 
@@ -427,27 +429,31 @@ class TestDataQualityServiceMetricsEmission:
             }
         )
 
-        score_calls = recording_metrics.get_gauge_calls("dq_validation_score")
-        count_calls = recording_metrics.get_gauge_calls("dq_validation_record_count")
-        freshness_calls = recording_metrics.get_gauge_calls("data_freshness_seconds")
+        score_calls = recording_metrics.get_gauge_calls("bioetl_dq_validation_score")
+        count_calls = recording_metrics.get_gauge_calls(
+            "bioetl_dq_validation_record_count"
+        )
+        freshness_calls = recording_metrics.get_gauge_calls(
+            "bioetl_data_freshness_seconds"
+        )
 
         assert score_calls == [
             (
-                "dq_validation_score",
+                "bioetl_dq_validation_score",
                 0.98,
                 {"pipeline": "test_integration_pipeline", "entity": "test_entity"},
             )
         ]
         assert count_calls == [
             (
-                "dq_validation_record_count",
+                "bioetl_dq_validation_record_count",
                 250.0,
                 {"pipeline": "test_integration_pipeline", "entity": "test_entity"},
             )
         ]
         assert freshness_calls == [
             (
-                "data_freshness_seconds",
+                "bioetl_data_freshness_seconds",
                 1_700_000_123.0,
                 {"pipeline": "test_integration_pipeline", "entity": "test_entity"},
             )
@@ -495,11 +501,15 @@ class TestDataQualityServiceMetricsEmission:
         assert result.check_duration_ms >= 0
 
         # Verify histogram was emitted for check duration
-        histogram_calls = recording_metrics.get_histogram_calls("dq_check_duration_ms")
+        histogram_calls = recording_metrics.get_histogram_calls(
+            "bioetl_dq_check_duration_ms"
+        )
         assert len(histogram_calls) == 1
 
         # Verify baseline update counter was emitted
-        baseline_calls = recording_metrics.get_counter_calls("dq_baseline_updated")
+        baseline_calls = recording_metrics.get_counter_calls(
+            "bioetl_dq_baseline_updated"
+        )
         assert len(baseline_calls) == 2  # error_rate and record_count
 
     @pytest.mark.asyncio
@@ -508,7 +518,7 @@ class TestDataQualityServiceMetricsEmission:
         recording_metrics: RecordingMetrics,
         recording_logger: RecordingLogger,
     ) -> None:
-        """Verify dq_baseline_updated counter is emitted.
+        """Verify bioetl_dq_baseline_updated counter is emitted.
 
         When baseline is updated after successful DQ check,
         the service MUST emit baseline update counter for each metric.
@@ -541,12 +551,14 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Verify baseline_updated counter was emitted for each metric
-        counter_calls = recording_metrics.get_counter_calls("dq_baseline_updated")
+        counter_calls = recording_metrics.get_counter_calls(
+            "bioetl_dq_baseline_updated"
+        )
         assert len(counter_calls) == 3  # One per metric
 
         # Check all have correct pipeline label
         for name, value, labels in counter_calls:
-            assert name == "dq_baseline_updated"
+            assert name == "bioetl_dq_baseline_updated"
             assert value == 1
             assert labels["pipeline"] == "test_integration_pipeline"
             assert "metric" in labels
@@ -564,7 +576,7 @@ class TestDataQualityServiceMetricsEmission:
         """Verify no threshold counters emitted when below soft threshold.
 
         When error_rate is below soft threshold (5%),
-        the service MUST NOT emit dq_soft_threshold_exceeded counter.
+        the service MUST NOT emit bioetl_dq_soft_threshold_exceeded counter.
         """
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
@@ -587,7 +599,7 @@ class TestDataQualityServiceMetricsEmission:
 
         # Verify NO counter was emitted
         counter_calls = recording_metrics.get_counter_calls(
-            "dq_soft_threshold_exceeded"
+            "bioetl_dq_soft_threshold_exceeded"
         )
         assert len(counter_calls) == 0
 
@@ -637,15 +649,25 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Verify soft threshold counter
-        soft_calls = recording_metrics.get_counter_calls("dq_soft_threshold_exceeded")
-        assert len(soft_calls) == 1, "dq_soft_threshold_exceeded should be emitted"
+        soft_calls = recording_metrics.get_counter_calls(
+            "bioetl_dq_soft_threshold_exceeded"
+        )
+        assert len(soft_calls) == 1, (
+            "bioetl_dq_soft_threshold_exceeded should be emitted"
+        )
 
         # Verify check duration histogram
-        duration_calls = recording_metrics.get_histogram_calls("dq_check_duration_ms")
-        assert len(duration_calls) == 1, "dq_check_duration_ms should be emitted"
+        duration_calls = recording_metrics.get_histogram_calls(
+            "bioetl_dq_check_duration_ms"
+        )
+        assert len(duration_calls) == 1, (
+            "bioetl_dq_check_duration_ms should be emitted"
+        )
 
         # Verify baseline update counters
-        baseline_calls = recording_metrics.get_counter_calls("dq_baseline_updated")
+        baseline_calls = recording_metrics.get_counter_calls(
+            "bioetl_dq_baseline_updated"
+        )
         assert len(baseline_calls) == 2, (
-            "dq_baseline_updated should be emitted for each metric"
+            "bioetl_dq_baseline_updated should be emitted for each metric"
         )

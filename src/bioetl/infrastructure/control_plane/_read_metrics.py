@@ -26,9 +26,9 @@ def emit_control_plane_read_metrics(
         "operation": operation,
         "status": status,
     }
-    metrics.increment_counter("control_plane_reads_total", 1, labels)
+    metrics.increment_counter("bioetl_control_plane_reads_total", 1, labels)
     metrics.observe_histogram(
-        "control_plane_read_duration_seconds",
+        "bioetl_control_plane_read_duration_seconds",
         max(duration_seconds, 0.0),
         labels,
     )

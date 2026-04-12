@@ -329,7 +329,7 @@ class TestLoadResume:
         assert state.state == CompositePipelineState.SEED_COMPLETED
         assert state.seed_completed is True
         metrics.increment_counter.assert_called_once_with(
-            "checkpoint_load_events_total",
+            "bioetl_checkpoint_load_events_total",
             1,
             {"pipeline": "my_composite", "status": "loaded"},
         )
@@ -369,7 +369,7 @@ class TestLoadResume:
 
         assert state.state == CompositePipelineState.NOT_STARTED
         metrics.increment_counter.assert_called_once_with(
-            "checkpoint_load_events_total",
+            "bioetl_checkpoint_load_events_total",
             1,
             {"pipeline": "my_composite", "status": "missing"},
         )
@@ -415,7 +415,7 @@ class TestLoadResume:
         # Graceful degradation: returns fresh NOT_STARTED state
         assert state.state == CompositePipelineState.NOT_STARTED
         metrics.increment_counter.assert_called_once_with(
-            "checkpoint_load_events_total",
+            "bioetl_checkpoint_load_events_total",
             1,
             {"pipeline": "my_composite", "status": "failed"},
         )

@@ -86,7 +86,7 @@ def record_retry_metrics(
         return
 
     metrics.increment_counter(
-        "data_source_retries_total",
+        "bioetl_data_source_retries_total",
         retries,
         {
             "provider": provider_name,
@@ -106,7 +106,7 @@ def record_exhaustion_metrics(
         return
 
     metrics.increment_counter(
-        "data_source_retry_exhausted_total",
+        "bioetl_data_source_retry_exhausted_total",
         1,
         {
             "provider": provider_name,

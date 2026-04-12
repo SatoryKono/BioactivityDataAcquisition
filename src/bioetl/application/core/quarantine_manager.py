@@ -105,7 +105,7 @@ class QuarantineManagerService:
             track_quarantined_records(error_type, count)
 
         self._metrics.increment_counter(
-            "dq_records_quarantined_total",
+            "bioetl_dq_records_quarantined_total",
             count,
             {"pipeline": self._pipeline_name, "error_type": error_type.value},
         )
@@ -126,7 +126,7 @@ class QuarantineManagerService:
             track_processed_records("quarantined", count)
 
         self._metrics.increment_counter(
-            "records_processed_total",
+            "bioetl_records_processed_total",
             count,
             {"pipeline": self._pipeline_name, "stage": "quarantined"},
         )

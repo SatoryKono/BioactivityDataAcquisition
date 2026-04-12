@@ -252,7 +252,7 @@ def _emit_merge_retry_event(
     )
     if metrics is not None:
         metrics.increment_counter(
-            "observability_events_total",
+            "bioetl_observability_events_total",
             1,
             {
                 "event": "silver_merge_retry",
@@ -280,7 +280,7 @@ def _emit_merge_final_event(
     )
     if metrics is not None:
         metrics.increment_counter(
-            "observability_events_total",
+            "bioetl_observability_events_total",
             1,
             {
                 "event": "silver_merge_final",

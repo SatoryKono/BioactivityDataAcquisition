@@ -5,9 +5,12 @@ from __future__ import annotations
 import re
 
 from bioetl.domain.observability_contract import normalize_observability_metric_labels
+from bioetl.domain.observability_metric_names import (
+    canonicalize_observability_metric_name,
+)
 from bioetl.domain.ports import MetricLabels
 
-OBSERVABILITY_EVENTS_COUNTER_NAME = "observability_events_total"
+OBSERVABILITY_EVENTS_COUNTER_NAME = "bioetl_observability_events_total"
 
 _ALLOWED_REASON_LABELS = frozenset(
     {
@@ -162,14 +165,15 @@ def normalize_metric_dispatch_labels(
     labels: MetricLabels,
 ) -> MetricLabels:
     """Normalize metric labels for metrics with stricter label contracts."""
-    if name == OBSERVABILITY_EVENTS_COUNTER_NAME:
+    canonical_name = canonicalize_observability_metric_name(name)
+    if canonical_name == OBSERVABILITY_EVENTS_COUNTER_NAME:
         return normalize_observability_metric_labels(labels)
-    if name == "quarantine_records_total":
+    if canonical_name == "bioetl_quarantine_records_total":
         return {
             **labels,
             "reason": normalize_quarantine_reason(str(labels.get("reason", "other"))),
         }
-    if name == "dq_validation_failures_total":
+    if canonical_name == "bioetl_dq_validation_failures_total":
         return {
             **labels,
             "stage": normalize_dq_stage(str(labels.get("stage", "other"))),
@@ -177,7 +181,7 @@ def normalize_metric_dispatch_labels(
                 str(labels.get("severity", "other"))
             ),
         }
-    if name == "silver_filter_rejections_total":
+    if canonical_name == "bioetl_silver_filter_rejections_total":
         return {
             **labels,
             "reason_code": normalize_silver_filter_reason_code(
@@ -194,12 +198,12 @@ def normalize_metric_dispatch_labels(
                 labels.get("field") if isinstance(labels.get("field"), str) else None
             ),
         }
-    if name == "structural_policy_events_total":
+    if canonical_name == "bioetl_structural_policy_events_total":
         return {
             **labels,
             "action": normalize_structural_action(labels.get("action", "other")),
         }
-    if name == "structural_policy_shadow_comparisons_total":
+    if canonical_name == "bioetl_structural_policy_shadow_comparisons_total":
         return {
             **labels,
             "comparison": normalize_structural_comparison(

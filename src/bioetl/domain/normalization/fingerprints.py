@@ -8,6 +8,8 @@ from collections.abc import Mapping
 from bioetl.domain.normalization.json import serialize_json_canonical
 
 __all__ = [
+    "compute_execution_identity_fingerprint",
+    "compute_input_snapshot_identity_fingerprint",
     "compute_manifest_execution_fingerprint",
     "compute_runtime_anchor_fingerprint",
 ]
@@ -19,6 +21,18 @@ def _hash_canonical_payload(payload: Mapping[str, object]) -> str:
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def compute_execution_identity_fingerprint(payload: Mapping[str, object]) -> str:
+    """Compute the canonical execution-identity fingerprint contract."""
+    return _hash_canonical_payload(payload)
+
+
+def compute_input_snapshot_identity_fingerprint(snapshot_ids: list[str]) -> str | None:
+    """Compute a deterministic fingerprint for a canonical snapshot-id set."""
+    if not snapshot_ids:
+        return None
+    return _hash_canonical_payload({"snapshot_ids": snapshot_ids})
+
+
 def compute_manifest_execution_fingerprint(payload: Mapping[str, object]) -> str:
     """Compute the canonical RunManifest execution fingerprint.
 
@@ -27,7 +41,7 @@ def compute_manifest_execution_fingerprint(payload: Mapping[str, object]) -> str
     payload produced by `normalize_run_manifest_spec()`.
     """
 
-    return _hash_canonical_payload(payload)
+    return compute_execution_identity_fingerprint(payload)
 
 
 def compute_runtime_anchor_fingerprint(
@@ -42,4 +56,4 @@ def compute_runtime_anchor_fingerprint(
     produced by `normalize_runtime_anchor_payload()`.
     """
 
-    return _hash_canonical_payload(payload)
+    return compute_execution_identity_fingerprint(payload)

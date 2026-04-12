@@ -422,7 +422,7 @@ class TestCheckpointCompatibilityService:
 
         assert metrics.increment_counter.call_count == 2
         assert metrics.increment_counter.call_args_list[0].args == (
-            "checkpoint_compatibility_events_total",
+            "bioetl_checkpoint_compatibility_events_total",
             1,
             {
                 "pipeline": "chembl_activity",
@@ -430,7 +430,7 @@ class TestCheckpointCompatibilityService:
             },
         )
         assert metrics.increment_counter.call_args_list[1].args == (
-            "checkpoint_compatibility_events_total",
+            "bioetl_checkpoint_compatibility_events_total",
             1,
             {
                 "pipeline": "chembl_activity",

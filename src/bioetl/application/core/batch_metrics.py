@@ -72,7 +72,7 @@ class BatchMetricsRecorderService:
         """
         if self._metrics:
             self._metrics.observe_histogram(
-                "batch_size_records",
+                "bioetl_batch_size_records",
                 size,
                 {"pipeline": self._pipeline_label, "stage": stage},
             )
@@ -90,7 +90,7 @@ class BatchMetricsRecorderService:
         """
         if self._metrics:
             self._metrics.increment_counter(
-                "records_processed_total",
+                "bioetl_records_processed_total",
                 count,
                 {
                     "pipeline": self._pipeline_label,
@@ -112,7 +112,7 @@ class BatchMetricsRecorderService:
         """
         if self._metrics:
             self._metrics.increment_counter(
-                "errors_total",
+                "bioetl_errors_total",
                 1,
                 {
                     "pipeline": self._pipeline_label,
@@ -147,7 +147,7 @@ class BatchMetricsRecorderService:
         """
         if self._metrics:
             self._metrics.increment_counter(
-                "dq_records_quarantined_total",
+                "bioetl_dq_records_quarantined_total",
                 count,
                 {
                     "pipeline": self._pipeline_label,

@@ -221,7 +221,8 @@ class TestHealthCheckLogging:
         # Verify failure metric was incremented (via HealthCheckMixin)
         calls = mock_metrics.increment_counter.call_args_list
         failure_call = next(
-            (c for c in calls if c[0][0] == "health_check_failures_total"), None
+            (c for c in calls if c[0][0] == "bioetl_health_check_failures_total"),
+            None,
         )
         assert failure_call is not None
         assert failure_call[0][1] == 1
@@ -260,7 +261,8 @@ class TestHealthCheckLogging:
         # Success metric should be incremented
         calls = mock_metrics.increment_counter.call_args_list
         success_call = next(
-            (c for c in calls if c[0][0] == "health_check_success_total"), None
+            (c for c in calls if c[0][0] == "bioetl_health_check_success_total"),
+            None,
         )
         assert success_call is not None
         assert success_call[0][2] == {"provider": "test_provider"}
@@ -291,7 +293,7 @@ class TestHealthCheckLogging:
             (
                 c
                 for c in mock_metrics.increment_counter.call_args_list
-                if c[0][0] == "health_check_degraded_total"
+                if c[0][0] == "bioetl_health_check_degraded_total"
             ),
             None,
         )
@@ -299,7 +301,7 @@ class TestHealthCheckLogging:
             (
                 c
                 for c in mock_metrics.increment_counter.call_args_list
-                if c[0][0] == "health_check_success_total"
+                if c[0][0] == "bioetl_health_check_success_total"
             ),
             None,
         )
@@ -334,7 +336,7 @@ class TestHealthCheckLogging:
         # Verify histogram was observed (via HealthCheckMixin)
         mock_metrics.observe_histogram.assert_called_once()
         call_args = mock_metrics.observe_histogram.call_args
-        assert call_args[0][0] == "health_check_latency_seconds"
+        assert call_args[0][0] == "bioetl_health_check_latency_seconds"
         assert isinstance(call_args[0][1], float)  # latency value
         assert call_args[0][2] == {"provider": "test_provider"}
 

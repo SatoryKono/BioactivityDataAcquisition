@@ -213,6 +213,12 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("run_instance_surface", "manifest-chain-smoke") in node_keys
     assert ("run_instance_surface", "manifest-chain-2") in node_keys
     assert ("run_instance_surface", "manifest-composite-quarantine") in node_keys
+    assert ("runtime_state_surface", "manifest-left::active-window") in node_keys
+    assert ("runtime_state_surface", "manifest-chain-2::retry-window") in node_keys
+    assert ("runtime_state_surface", "chembl_activity::composite-lock") in node_keys
+    assert ("schema_field_surface", "silver/chembl/activity::activity_id") in node_keys
+    assert ("schema_field_surface", "gold/chembl/assay::_version") in node_keys
+    assert ("schema_field_surface", "silver/composite/activity::compound_name") in node_keys
     assert ("workflow_surface", "tests") in node_keys
     assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
     assert ("workflow_action_surface", "actions/upload-artifact") in node_keys
@@ -310,6 +316,29 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
 
     cli_command = snapshot.nodes[NodeKey("cli_command_surface", "scripts.ops sync-neo4j-memory")]
     assert cli_command.properties["source_path"] == "scripts/ops/__main__.py"
+
+    retry_state = snapshot.nodes[NodeKey("runtime_state_surface", "manifest-chain-2::retry-window")]
+    assert retry_state.properties["state_kind"] == "retry_state"
+    assert retry_state.properties["state_status"] == "retrying"
+    assert retry_state.properties["retry_count"] == 1
+
+    lock_state = snapshot.nodes[NodeKey("runtime_state_surface", "chembl_activity::composite-lock")]
+    assert lock_state.properties["state_kind"] == "lock_state"
+    assert lock_state.properties["lock_scope"] == "cross_validation_quarantine"
+    assert lock_state.properties["lock_key"] == "composite:activity:cross_validation"
+
+    assay_version_field = snapshot.nodes[NodeKey("schema_field_surface", "gold/chembl/assay::_version")]
+    assert assay_version_field.properties["field_name"] == "_version"
+    assert assay_version_field.properties["drift_classification"] == "gold_only"
+
+    activity_field = snapshot.nodes[NodeKey("schema_field_surface", "silver/chembl/activity::activity_id")]
+    assert activity_field.properties["required_in_quality"] is True
+    assert activity_field.properties["contract_ref"] == "chembl.activity"
+    assert activity_field.properties["drift_classification"] == "silver_only"
+
+    composite_field = snapshot.nodes[NodeKey("schema_field_surface", "silver/composite/activity::compound_name")]
+    assert composite_field.properties["drift_classification"] == "inherited_field"
+    assert "silver/chembl/compound_record" in composite_field.properties["source_storage_refs"]
 
     docs_drift_relation = snapshot.relations[
         (
@@ -450,6 +479,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("run_instance_surface", "manifest-chain-smoke", "REFERENCES_ARTIFACT", "control_plane_artifact_surface", "run_ledger::jsonl"),
     ("run_instance_surface", "manifest-chain-2", "DESCRIBED_IN", "test_artifact", "tests/unit/application/services/test_run_manifest_inspection_service.py"),
     ("run_instance_surface", "manifest-composite-quarantine", "DEPENDS_ON", "contract_surface", "chembl.activity"),
+    ("project", "BioETL", "HAS_RUNTIME_STATE", "runtime_state_surface", "manifest-chain-2::retry-window"),
+    ("run_instance_surface", "manifest-chain-2", "HAS_RUNTIME_STATE", "runtime_state_surface", "manifest-chain-2::retry-window"),
+    ("runtime_state_surface", "manifest-chain-2::retry-window", "DEPENDS_ON", "pipeline_surface", "chembl_activity"),
+    ("runtime_state_surface", "manifest-chain-2::retry-window", "REFERENCES_ARTIFACT", "control_plane_artifact_surface", "run_ledger::jsonl"),
+    ("storage_surface", "silver/chembl/activity", "HAS_SCHEMA_FIELD", "schema_field_surface", "silver/chembl/activity::activity_id"),
+    ("contract_surface", "chembl.activity", "HAS_SCHEMA_FIELD", "schema_field_surface", "silver/chembl/activity::activity_id"),
+    ("schema_field_surface", "silver/chembl/assay::assay_id", "PROMOTES_FIELD_TO", "schema_field_surface", "gold/chembl/assay::assay_id"),
+    ("schema_field_surface", "silver/composite/activity::compound_name", "DERIVES_FIELD_FROM", "schema_field_surface", "silver/chembl/compound_record::compound_name"),
     ("project", "BioETL", "HAS_WORKFLOW", "workflow_surface", "tests"),
     ("workflow_surface", "tests", "CONTAINS", "workflow_job_surface", "tests::governance-preflight"),
     ("workflow_job_surface", "tests::governance-preflight", "EXECUTES_GATE", "quality_gate", "deterministic neo4j memory ontology invariants"),
@@ -758,6 +795,8 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "runtime_evidence_surface",
         "control_plane_artifact_surface",
         "run_instance_surface",
+        "runtime_state_surface",
+        "schema_field_surface",
         "workflow_surface",
         "workflow_job_surface",
         "workflow_action_surface",
@@ -839,6 +878,12 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
     assert ("run_instance_surface", "manifest-chain-smoke") in {
         (key.label, key.name) for key in filtered.nodes
     }
+    assert ("runtime_state_surface", "manifest-chain-2::retry-window") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
+    assert ("schema_field_surface", "silver/chembl/activity::activity_id") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
     assert (
         "pipeline_surface",
         "chembl_activity",
@@ -860,6 +905,13 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
         "control_plane_artifact_surface",
         "run_ledger::jsonl",
     ) in relation_keys
+    assert (
+        "storage_surface",
+        "silver/chembl/activity",
+        "HAS_SCHEMA_FIELD",
+        "schema_field_surface",
+        "silver/chembl/activity::activity_id",
+    ) in relation_keys
 
 
 def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_links() -> None:
@@ -870,6 +922,9 @@ def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_link
 
     assert ("runtime_evidence_surface", "run_manifest") in {(key.label, key.name) for key in filtered.nodes}
     assert ("run_instance_surface", "manifest-chain-2") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
+    assert ("runtime_state_surface", "manifest-chain-2::retry-window") in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert ("module_surface", "src/bioetl/domain/control_plane/run_manifest.py") in {
@@ -888,6 +943,13 @@ def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_link
         "DESCRIBED_IN",
         "test_artifact",
         "tests/unit/application/services/test_run_manifest_inspection_service.py",
+    ) in relation_keys
+    assert (
+        "run_instance_surface",
+        "manifest-chain-2",
+        "HAS_RUNTIME_STATE",
+        "runtime_state_surface",
+        "manifest-chain-2::retry-window",
     ) in relation_keys
 
 
@@ -1708,3 +1770,37 @@ def test_snapshot_invariants_require_run_instance_artifact_links() -> None:
 
     assert "missing run_instance_surface -> REFERENCES_ARTIFACT -> control_plane_artifact_surface links" in issues
     assert any(issue.startswith("run instance surfaces without support links:") for issue in issues)
+
+
+def test_snapshot_invariants_require_runtime_state_links() -> None:
+    _, snapshot = _snapshot()
+    keys_to_delete = [
+        key
+        for key, relation in snapshot.relations.items()
+        if relation.target.label == "runtime_state_surface"
+        and relation.relation_type == "HAS_RUNTIME_STATE"
+    ]
+    for key in keys_to_delete:
+        snapshot.relations.pop(key)
+
+    issues = snapshot_invariant_issues(snapshot)
+
+    assert "missing project -> HAS_RUNTIME_STATE -> runtime_state_surface links" in issues
+    assert any(issue.startswith("runtime state surfaces without support links:") for issue in issues)
+
+
+def test_snapshot_invariants_require_schema_field_links() -> None:
+    _, snapshot = _snapshot()
+    keys_to_delete = [
+        key
+        for key, relation in snapshot.relations.items()
+        if relation.target.label == "schema_field_surface"
+        and relation.relation_type == "HAS_SCHEMA_FIELD"
+    ]
+    for key in keys_to_delete:
+        snapshot.relations.pop(key)
+
+    issues = snapshot_invariant_issues(snapshot)
+
+    assert "missing storage_surface -> HAS_SCHEMA_FIELD -> schema_field_surface links" in issues
+    assert any(issue.startswith("schema fields without storage/contract/lineage links:") for issue in issues)

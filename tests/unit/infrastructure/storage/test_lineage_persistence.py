@@ -107,7 +107,7 @@ async def test_persist_lineage_fragment_if_present_emits_metric() -> None:
     )
 
     metrics.increment_counter.assert_called_once_with(
-        "lineage_fragments_emitted_total",
+        "bioetl_lineage_fragments_emitted_total",
         1,
         {
             "pipeline": "chembl_activity",
@@ -129,7 +129,7 @@ def test_emit_lineage_refs_missing_metric_uses_expected_labels() -> None:
     )
 
     metrics.increment_counter.assert_called_once_with(
-        "lineage_refs_missing_total",
+        "bioetl_lineage_refs_missing_total",
         1,
         {
             "pipeline": "chembl_activity",
@@ -166,7 +166,7 @@ def test_emit_composite_source_selection_metrics_aggregates_sources_and_fields()
     metrics.increment_counter.assert_has_calls(
         [
             call(
-                "composite_source_selection_total",
+                "bioetl_composite_source_selection_total",
                 1,
                 {
                     "pipeline": "composite_publication",
@@ -175,7 +175,7 @@ def test_emit_composite_source_selection_metrics_aggregates_sources_and_fields()
                 },
             ),
             call(
-                "composite_source_selection_total",
+                "bioetl_composite_source_selection_total",
                 1,
                 {
                     "pipeline": "composite_publication",
@@ -184,7 +184,7 @@ def test_emit_composite_source_selection_metrics_aggregates_sources_and_fields()
                 },
             ),
             call(
-                "composite_source_selection_total",
+                "bioetl_composite_source_selection_total",
                 1,
                 {
                     "pipeline": "composite_publication",
@@ -193,7 +193,7 @@ def test_emit_composite_source_selection_metrics_aggregates_sources_and_fields()
                 },
             ),
             call(
-                "composite_source_selection_total",
+                "bioetl_composite_source_selection_total",
                 2,
                 {
                     "pipeline": "composite_publication",
@@ -202,7 +202,7 @@ def test_emit_composite_source_selection_metrics_aggregates_sources_and_fields()
                 },
             ),
             call(
-                "composite_source_selection_total",
+                "bioetl_composite_source_selection_total",
                 1,
                 {
                     "pipeline": "composite_publication",

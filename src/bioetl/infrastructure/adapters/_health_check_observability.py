@@ -42,7 +42,7 @@ def handle_health_check_result(
         )
         if metrics is not None:
             metrics.increment_counter(
-                "health_check_success_total",
+                "bioetl_health_check_success_total",
                 1,
                 labels,
             )
@@ -56,7 +56,7 @@ def handle_health_check_result(
         )
         if metrics is not None:
             metrics.increment_counter(
-                "health_check_degraded_total",
+                "bioetl_health_check_degraded_total",
                 1,
                 labels,
             )
@@ -70,13 +70,13 @@ def handle_health_check_result(
         )
         if metrics is not None:
             metrics.increment_counter(
-                "health_check_failures_total",
+                "bioetl_health_check_failures_total",
                 1,
                 labels,
             )
     if metrics is not None:
         metrics.observe_histogram(
-            "health_check_latency_seconds",
+            "bioetl_health_check_latency_seconds",
             elapsed,
             labels,
         )
@@ -103,12 +103,12 @@ def handle_health_check_failure(
 
     if metrics is not None:
         metrics.increment_counter(
-            "health_check_failures_total",
+            "bioetl_health_check_failures_total",
             1,
             labels,
         )
         metrics.observe_histogram(
-            "health_check_latency_seconds",
+            "bioetl_health_check_latency_seconds",
             elapsed,
             labels,
         )

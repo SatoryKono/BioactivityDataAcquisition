@@ -316,7 +316,7 @@ def load_checkpoint_state(
         )
         if metrics is not None:
             metrics.increment_counter(
-                "checkpoint_load_events_total",
+                "bioetl_checkpoint_load_events_total",
                 1,
                 {
                     "pipeline": composite_name,
@@ -334,7 +334,7 @@ def load_checkpoint_state(
         )
         if metrics is not None:
             metrics.increment_counter(
-                "checkpoint_load_events_total",
+                "bioetl_checkpoint_load_events_total",
                 1,
                 {
                     "pipeline": composite_name,
@@ -351,7 +351,7 @@ def load_checkpoint_state(
         )
         if metrics is not None:
             metrics.increment_counter(
-                "checkpoint_load_events_total",
+                "bioetl_checkpoint_load_events_total",
                 1,
                 {
                     "pipeline": composite_name,

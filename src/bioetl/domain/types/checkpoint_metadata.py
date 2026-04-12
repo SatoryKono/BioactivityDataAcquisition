@@ -10,8 +10,9 @@ from dataclasses import dataclass
 from typing import cast
 
 from bioetl.domain.normalization import (
-    compute_runtime_anchor_fingerprint,
-    normalize_runtime_anchor_payload,
+    compute_execution_identity_fingerprint,
+    compute_input_snapshot_identity_fingerprint,
+    normalize_execution_identity_payload,
 )
 from bioetl.domain.types import JsonDict
 
@@ -25,6 +26,8 @@ class CheckpointMetadata:
         dq_contract_compatibility_hash: Hash of DQ contract for compatibility checking.
         dq_policy_hash: Hash of DQ policy configuration.
         dq_rule_bundle_version: Version of DQ rule bundle.
+        pipeline_name: Canonical pipeline name used for execution identity.
+        run_type: Canonical run type used for execution identity.
         pipeline_version: Version of the pipeline configuration.
         effective_config_hash: Canonical effective-config hash for execution identity.
         effective_config_artifact_id: Effective-config artifact reference for provenance.
@@ -41,6 +44,8 @@ class CheckpointMetadata:
     dq_contract_compatibility_hash: str | None = None
     dq_policy_hash: str | None = None
     dq_rule_bundle_version: str | None = None
+    pipeline_name: str | None = None
+    run_type: str | None = None
     pipeline_version: str | None = None
     effective_config_hash: str | None = None
     effective_config_artifact_id: str | None = None
@@ -50,6 +55,7 @@ class CheckpointMetadata:
     contract_version: str | None = None
     exact_replay: bool | None = None
     input_snapshot_ids: tuple[str, ...] = ()
+    input_snapshot_fingerprint: str | None = None
     run_context: JsonDict | None = None  # Any: run context has heterogeneous values
 
     @staticmethod
@@ -69,6 +75,8 @@ class CheckpointMetadata:
             ),
             dq_policy_hash=legacy_metadata.get("dq_policy_hash"),
             dq_rule_bundle_version=legacy_metadata.get("dq_rule_bundle_version"),
+            pipeline_name=cast("str | None", legacy_metadata.get("pipeline_name")),
+            run_type=cast("str | None", legacy_metadata.get("run_type")),
             pipeline_version=legacy_metadata.get("pipeline_version"),
             effective_config_hash=legacy_metadata.get("effective_config_hash"),
             effective_config_artifact_id=legacy_metadata.get(
@@ -89,6 +97,9 @@ class CheckpointMetadata:
             input_snapshot_ids=_coerce_snapshot_ids(
                 legacy_metadata.get("input_snapshot_ids")
             ),
+            input_snapshot_fingerprint=cast(
+                "str | None", legacy_metadata.get("input_snapshot_fingerprint")
+            ),
             run_context=legacy_metadata.get("run_context"),
         )
 
@@ -103,6 +114,8 @@ class CheckpointMetadata:
             ("dq_contract_compatibility_hash", self.dq_contract_compatibility_hash),
             ("dq_policy_hash", self.dq_policy_hash),
             ("dq_rule_bundle_version", self.dq_rule_bundle_version),
+            ("pipeline_name", self.pipeline_name),
+            ("run_type", self.run_type),
             ("pipeline_version", self.pipeline_version),
             ("effective_config_hash", self.effective_config_hash),
             ("effective_config_artifact_id", self.effective_config_artifact_id),
@@ -112,6 +125,7 @@ class CheckpointMetadata:
             ("contract_version", self.contract_version),
             ("exact_replay", self.exact_replay),
             ("input_snapshot_ids", list(self.input_snapshot_ids)),
+            ("input_snapshot_fingerprint", self.input_snapshot_fingerprint),
             ("run_context", self.run_context),
         )
         for key, value in optional_values:
@@ -135,6 +149,8 @@ class CheckpointMetadata:
             dq_contract_compatibility_hash=data.get("dq_contract_compatibility_hash"),
             dq_policy_hash=data.get("dq_policy_hash"),
             dq_rule_bundle_version=data.get("dq_rule_bundle_version"),
+            pipeline_name=cast("str | None", data.get("pipeline_name")),
+            run_type=cast("str | None", data.get("run_type")),
             pipeline_version=data.get("pipeline_version"),
             effective_config_hash=data.get("effective_config_hash"),
             effective_config_artifact_id=data.get("effective_config_artifact_id"),
@@ -147,6 +163,9 @@ class CheckpointMetadata:
             contract_version=cast("str | None", data.get("contract_version")),
             exact_replay=cast("bool | None", data.get("exact_replay")),
             input_snapshot_ids=_coerce_snapshot_ids(data.get("input_snapshot_ids")),
+            input_snapshot_fingerprint=cast(
+                "str | None", data.get("input_snapshot_fingerprint")
+            ),
             run_context=data.get("run_context"),
         )
 
@@ -159,13 +178,23 @@ class CheckpointMetadata:
         available.
         """
 
-        normalized_payload = normalize_runtime_anchor_payload(
+        snapshot_fingerprint = (
+            self.input_snapshot_fingerprint
+            if self.input_snapshot_fingerprint is not None
+            else compute_input_snapshot_identity_fingerprint(list(self.input_snapshot_ids))
+        )
+        normalized_payload = normalize_execution_identity_payload(
             {
-                "manifest_id": self.manifest_id,
+                "pipeline_name": self.pipeline_name,
+                "run_type": self.run_type,
+                "pipeline_version": self.pipeline_version,
                 "effective_config_hash": self.effective_config_hash,
+                "dq_contract_compatibility_hash": self.dq_contract_compatibility_hash,
                 "contract_ref": self.contract_ref,
                 "contract_version": self.contract_version,
                 "effective_config_artifact_id": self.effective_config_artifact_id,
+                "exact_replay": self.exact_replay,
+                "input_snapshot_fingerprint": snapshot_fingerprint,
             }
         )
         return {
@@ -180,7 +209,7 @@ class CheckpointMetadata:
         payload = self.runtime_anchor_payload()
         if not payload:
             return None
-        return compute_runtime_anchor_fingerprint(payload)
+        return compute_execution_identity_fingerprint(payload)
 
 
 def _extract_manifest_id_from_run_context(data: JsonDict) -> str | None:

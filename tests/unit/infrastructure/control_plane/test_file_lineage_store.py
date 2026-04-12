@@ -108,7 +108,7 @@ def test_file_store_emits_lineage_read_metric_on_manifest_lookup(tmp_path) -> No
     assert store.list_by_manifest_id("manifest-2") == [fragment]
 
     metrics.increment_counter.assert_called_once_with(
-        "control_plane_reads_total",
+        "bioetl_control_plane_reads_total",
         1,
         {
             "store": "lineage",

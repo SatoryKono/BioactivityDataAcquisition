@@ -4,11 +4,14 @@ from scripts.ops.neo4j_memory_query import (
     _current_cycle_code_statement,
     _dead_code_candidates_statement,
     _docs_drift_statement,
+    _field_lineage_statement,
     _fallback_pipelines_statement,
     _normalization_pipeline_statement,
     _overengineered_candidates_statement,
     _removable_complexity_statement,
     _run_artifacts_statement,
+    _runtime_state_statement,
+    _schema_drift_statement,
     _simplification_blockers_statement,
     _storage_lineage_statement,
     _workflow_artifacts_statement,
@@ -30,13 +33,16 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["owner-alert"]["target_label"] == "alert_surface"
     assert QUERY_PROFILES["owner-storage"]["target_label"] == "storage_surface"
     assert QUERY_PROFILES["owner-runtime-evidence"]["target_label"] == "runtime_evidence_surface"
+    assert QUERY_PROFILES["owner-runtime-state"]["target_label"] == "runtime_state_surface"
     assert QUERY_PROFILES["owner-workflow"]["target_label"] == "workflow_surface"
     assert QUERY_PROFILES["owner-workflow-job"]["target_label"] == "workflow_job_surface"
     assert QUERY_PROFILES["owner-cli-command"]["target_label"] == "cli_command_surface"
+    assert QUERY_PROFILES["owner-schema-field"]["target_label"] == "schema_field_surface"
     assert QUERY_PROFILES["neighbors-pipeline"]["mode"] == "neighbors"
     assert QUERY_PROFILES["neighbors-alert"]["target_label"] == "alert_surface"
     assert QUERY_PROFILES["neighbors-storage"]["relation_types"] == ("WRITES_TO", "PROMOTES_TO", "DEPENDS_ON", "DEFINED_BY")
     assert QUERY_PROFILES["neighbors-runtime-evidence"]["target_label"] == "runtime_evidence_surface"
+    assert QUERY_PROFILES["neighbors-runtime-state"]["target_label"] == "runtime_state_surface"
     assert QUERY_PROFILES["neighbors-workflow"]["target_label"] == "workflow_surface"
     assert QUERY_PROFILES["neighbors-workflow-job"]["target_label"] == "workflow_job_surface"
     assert QUERY_PROFILES["neighbors-run-instance"]["target_label"] == "run_instance_surface"
@@ -45,7 +51,11 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["workflow-gates"]["mode"] == "workflow_gates"
     assert QUERY_PROFILES["workflow-artifacts"]["mode"] == "workflow_artifacts"
     assert QUERY_PROFILES["storage-lineage"]["mode"] == "storage_lineage"
+    assert QUERY_PROFILES["field-lineage"]["mode"] == "field_lineage"
+    assert QUERY_PROFILES["schema-drift"]["mode"] == "schema_drift"
     assert QUERY_PROFILES["run-artifacts"]["mode"] == "run_artifacts"
+    assert QUERY_PROFILES["runtime-state"]["mode"] == "runtime_state"
+    assert QUERY_PROFILES["runtime-locks"]["mode"] == "runtime_locks"
     assert QUERY_PROFILES["normalization-pipeline"]["mode"] == "normalization_pipeline"
     assert QUERY_PROFILES["fallback-pipelines"]["mode"] == "fallback_pipelines"
     assert QUERY_PROFILES["duplication-cluster"]["target_label"] == "duplication_cluster"
@@ -117,6 +127,23 @@ def test_storage_lineage_statement_collects_producers_and_promotions() -> None:
     assert "storage.versioning_mode AS versioning_mode" in statement
 
 
+def test_field_lineage_statement_collects_schema_fields_and_lineage_edges() -> None:
+    statement = _field_lineage_statement()
+
+    assert "MATCH (field:schema_field_surface)" in statement
+    assert "(storage:storage_surface)-[:HAS_SCHEMA_FIELD]->(field)" in statement
+    assert "(field)-[:DERIVES_FIELD_FROM]->(upstream:schema_field_surface)" in statement
+    assert "(field)-[:PROMOTES_FIELD_TO]->(downstream:schema_field_surface)" in statement
+
+
+def test_schema_drift_statement_filters_field_level_drift() -> None:
+    statement = _schema_drift_statement()
+
+    assert "MATCH (field:schema_field_surface)" in statement
+    assert "coalesce(field.drift_classification, '') <> ''" in statement
+    assert "field.storage_ref = $name" in statement
+
+
 def test_run_artifacts_statement_collects_artifacts_dependencies_and_support_links() -> None:
     statement = _run_artifacts_statement()
 
@@ -125,6 +152,16 @@ def test_run_artifacts_statement_collects_artifacts_dependencies_and_support_lin
     assert "(run)-[:REFERENCES_ARTIFACT]->(artifact:control_plane_artifact_surface)" in statement
     assert "(run)-[:DEPENDS_ON]->(dependency)" in statement
     assert "(run)-[:DESCRIBED_IN]->(support)" in statement
+
+
+def test_runtime_state_statement_collects_runtime_states_and_locks() -> None:
+    statement = _runtime_state_statement()
+    locks_statement = _runtime_state_statement(locks_only=True)
+
+    assert "MATCH (state:runtime_state_surface)" in statement
+    assert "(owner)-[:HAS_RUNTIME_STATE]->(state)" in statement
+    assert "(state)-[:REFERENCES_ARTIFACT]->(artifact:control_plane_artifact_surface)" in statement
+    assert "state.state_kind = 'lock_state'" in locks_statement
 
 
 def test_duplication_cluster_statement_uses_cluster_targets_members_and_tests() -> None:
@@ -364,6 +401,59 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
     assert "defined_by=configs/entities/chembl/activity.yaml" in formatted
 
 
+def test_format_rows_renders_field_lineage_summary() -> None:
+    formatted = _format_rows(
+        "field-lineage",
+        "silver/chembl/activity",
+        [
+            {
+                "field_surface_name": "silver/chembl/activity::activity_id",
+                "field_name": "activity_id",
+                "field_group": "business",
+                "storage_ref": "silver/chembl/activity",
+                "contract_ref": "chembl.activity",
+                "required_in_quality": True,
+                "validation_types": ["required"],
+                "drift_classification": "projected_to_gold",
+                "storage_surfaces": ["silver/chembl/activity"],
+                "contracts": ["chembl.activity"],
+                "upstream_fields": ["bronze/chembl/activity::activity_id"],
+                "downstream_fields": ["gold/chembl/activity::activity_id"],
+            }
+        ],
+    )
+
+    assert "Field lineage path: `silver/chembl/activity`" in formatted
+    assert "storage=silver/chembl/activity | field=activity_id | group=business | drift=projected_to_gold | required=True" in formatted
+    assert "validations=required" in formatted
+    assert "upstream=bronze/chembl/activity::activity_id" in formatted
+    assert "downstream=gold/chembl/activity::activity_id" in formatted
+    assert "contract=chembl.activity" in formatted
+
+
+def test_format_rows_renders_schema_drift_summary() -> None:
+    formatted = _format_rows(
+        "schema-drift",
+        "silver/chembl/assay",
+        [
+            {
+                "field_surface_name": "silver/chembl/assay::_dq_failed",
+                "field_name": "_dq_failed",
+                "field_group": "dq",
+                "storage_ref": "silver/chembl/assay",
+                "contract_ref": "chembl.assay",
+                "drift_classification": "silver_only",
+                "required_in_quality": False,
+                "validation_types": [],
+                "storage_surfaces": ["silver/chembl/assay"],
+            }
+        ],
+    )
+
+    assert "Schema drift evidence: `silver/chembl/assay`" in formatted
+    assert "storage=silver/chembl/assay | field=_dq_failed | drift=silver_only | required=False" in formatted
+
+
 def test_format_rows_renders_run_artifacts_summary() -> None:
     formatted = _format_rows(
         "run-artifacts",
@@ -409,6 +499,38 @@ def test_format_rows_renders_run_artifacts_summary() -> None:
         "support=tests/unit/application/services/test_run_manifest_inspection_service.py | labels=test_artifact"
         in formatted
     )
+
+
+def test_format_rows_renders_runtime_state_summary() -> None:
+    formatted = _format_rows(
+        "runtime-state",
+        "all",
+        [
+            {
+                "runtime_state_name": "manifest-chain-2::retry-window",
+                "state_kind": "retry_state",
+                "state_status": "retrying",
+                "manifest_id": "manifest-chain-2",
+                "retry_count": 1,
+                "lock_key": "",
+                "owners": [{"name": "manifest-chain-2", "labels": ["run_instance_surface"]}],
+                "dependencies": [{"name": "chembl_activity", "labels": ["pipeline_surface"]}],
+                "artifacts": [
+                    {
+                        "name": "run_ledger::jsonl",
+                        "labels": ["control_plane_artifact_surface"],
+                        "artifact_family": "run_ledger",
+                    }
+                ],
+            }
+        ],
+    )
+
+    assert "Runtime state summary: `all`" in formatted
+    assert "state=manifest-chain-2::retry-window | kind=retry_state | status=retrying | manifest_id=manifest-chain-2 | retry_count=1" in formatted
+    assert "owner=manifest-chain-2 | labels=run_instance_surface" in formatted
+    assert "dependency=chembl_activity | labels=pipeline_surface" in formatted
+    assert "artifact=run_ledger::jsonl | labels=control_plane_artifact_surface | artifact_family=run_ledger" in formatted
 
 
 def test_format_rows_renders_duplication_cluster_summary() -> None:

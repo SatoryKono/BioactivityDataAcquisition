@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import InfrastructureError
+from bioetl.domain.observability_metric_names import (
+    canonicalize_observability_metric_name,
+)
 from bioetl.domain.types import HealthReport, HealthStatus
 
 if TYPE_CHECKING:
@@ -37,6 +40,12 @@ def record_health_metrics(
 
     component_labels = {"component": component}
     metric_value = float(result.status.to_metric_value())
+    canonical_health_status = canonicalize_observability_metric_name(
+        metric_health_status
+    )
+    canonical_health_mode_status = canonicalize_observability_metric_name(
+        metric_health_mode_status
+    )
 
     metrics.set_gauge(
         metric_health_status,
@@ -48,6 +57,18 @@ def record_health_metrics(
         metric_value,
         {"component": component, "mode": health_check_mode},
     )
+    if canonical_health_status != metric_health_status:
+        metrics.set_gauge(
+            canonical_health_status,
+            metric_value,
+            component_labels,
+        )
+    if canonical_health_mode_status != metric_health_mode_status:
+        metrics.set_gauge(
+            canonical_health_mode_status,
+            metric_value,
+            {"component": component, "mode": health_check_mode},
+        )
 
     if health_result is None:
         return
@@ -78,15 +99,16 @@ def record_probe_mode_fallback(
     if metrics is None:
         return
 
-    metrics.increment_counter(
-        metric_name,
-        1,
-        {
-            "pipeline": pipeline_name,
-            "component": component,
-            "reason": reason,
-        },
-    )
+    labels = {
+        "pipeline": pipeline_name,
+        "component": component,
+        "reason": reason,
+    }
+    metrics.increment_counter(metric_name, 1, labels)
+
+    canonical_metric_name = canonicalize_observability_metric_name(metric_name)
+    if canonical_metric_name != metric_name:
+        metrics.increment_counter(canonical_metric_name, 1, labels)
 
 
 def log_health_report(

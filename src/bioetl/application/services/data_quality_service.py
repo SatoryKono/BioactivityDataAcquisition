@@ -107,19 +107,27 @@ class DataQualityService:
             labels = {"pipeline": self._pipeline_name, "entity": self._entity_type}
             record_count = max(metrics.get("record_count", 0.0), 0.0)
             self._metrics.set_gauge(
-                "dq_monitor_enabled",
+                "bioetl_dq_monitor_enabled",
                 1.0 if self._dq_monitor is not None else 0.0,
                 labels,
             )
-            self._metrics.set_gauge("dq_validation_score", 1.0 - error_rate, labels)
-            self._metrics.set_gauge("dq_validation_record_count", record_count, labels)
+            self._metrics.set_gauge(
+                "bioetl_dq_validation_score",
+                1.0 - error_rate,
+                labels,
+            )
+            self._metrics.set_gauge(
+                "bioetl_dq_validation_record_count",
+                record_count,
+                labels,
+            )
             freshness_anchor = self._resolve_freshness_anchor_timestamp(metrics)
             if freshness_anchor is not None:
                 # Store the canonical ingestion/publication anchor timestamp in
                 # seconds. Dashboards and alerts derive lag via:
                 #   time() - bioetl_data_freshness_seconds
                 self._metrics.set_gauge(
-                    "data_freshness_seconds",
+                    "bioetl_data_freshness_seconds",
                     freshness_anchor,
                     labels,
                 )
@@ -214,7 +222,7 @@ class DataQualityService:
         )
         if self._metrics:
             self._metrics.increment_counter(
-                "dq_soft_threshold_exceeded",
+                "bioetl_dq_soft_threshold_exceeded",
                 1,
                 {"pipeline": self._pipeline_name},
             )
@@ -275,7 +283,7 @@ class DataQualityService:
         """
         if self._metrics:
             self._metrics.observe_histogram(
-                "dq_check_duration_ms",
+                "bioetl_dq_check_duration_ms",
                 duration_ms,
                 {"pipeline": self._pipeline_name},
             )
@@ -322,7 +330,7 @@ class DataQualityService:
 
         if self._metrics:
             self._metrics.increment_counter(
-                "dq_anomaly_detected",
+                "bioetl_dq_anomaly_detected",
                 1,
                 {
                     "pipeline": self._pipeline_name,
@@ -353,7 +361,7 @@ class DataQualityService:
 
         for metric_name in metrics:
             self._metrics.increment_counter(
-                "dq_baseline_updated",
+                "bioetl_dq_baseline_updated",
                 1,
                 {"pipeline": self._pipeline_name, "metric": metric_name},
             )
@@ -369,7 +377,7 @@ class DataQualityService:
         if self._metrics is None:
             return
         self._metrics.increment_counter(
-            "dq_monitor_disabled_total",
+            "bioetl_dq_monitor_disabled_total",
             1,
             {"pipeline": self._pipeline_name, "entity": self._entity_type},
         )

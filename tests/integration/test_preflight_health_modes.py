@@ -108,7 +108,7 @@ async def test_strict_mode_blocks_on_data_source_health_exception() -> None:
     fallback_calls = [
         call
         for call in metrics.increment_counter.call_args_list
-        if call[0][0] == "probe_mode_fallback_total"
+        if call[0][0] == "bioetl_probe_mode_fallback_total"
     ]
     assert fallback_calls == []
 
@@ -148,7 +148,7 @@ async def test_probe_mode_downgrades_exception_and_counts_fallback() -> None:
     fallback_calls = [
         call
         for call in metrics.increment_counter.call_args_list
-        if call[0][0] == "probe_mode_fallback_total"
+        if call[0][0] == "bioetl_probe_mode_fallback_total"
     ]
     assert len(fallback_calls) == 1
     assert fallback_calls[0][0][2] == {
@@ -189,7 +189,7 @@ async def test_probe_mode_downgrades_unhealthy_status_with_deterministic_reason(
     fallback_calls = [
         call
         for call in metrics.increment_counter.call_args_list
-        if call[0][0] == "probe_mode_fallback_total"
+        if call[0][0] == "bioetl_probe_mode_fallback_total"
     ]
     assert len(fallback_calls) == 1
     assert fallback_calls[0][0][2] == {

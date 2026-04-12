@@ -105,7 +105,8 @@ profiles в BioETL.
   `python -m scripts.ops query-neo4j-memory owner-storage silver/chembl/activity`,
   `python -m scripts.ops query-neo4j-memory owner-runtime-evidence run_manifest`,
   `python -m scripts.ops query-neo4j-memory owner-workflow tests`,
-  `python -m scripts.ops query-neo4j-memory owner-workflow-job tests::governance-preflight`.
+  `python -m scripts.ops query-neo4j-memory owner-workflow-job tests::governance-preflight`,
+  `python -m scripts.ops query-neo4j-memory owner-cli-command "scripts.ops sync-neo4j-memory"`.
   Для ближайших semantic edges используй `neighbors-*` профили, например:
   `python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity`,
   `python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed`,
@@ -114,10 +115,12 @@ profiles в BioETL.
   `python -m scripts.ops query-neo4j-memory neighbors-runtime-evidence run_manifest`,
   `python -m scripts.ops query-neo4j-memory neighbors-run-instance manifest-chain-smoke`,
   `python -m scripts.ops query-neo4j-memory neighbors-workflow tests`,
-  `python -m scripts.ops query-neo4j-memory neighbors-workflow-job tests::governance-preflight`.
+  `python -m scripts.ops query-neo4j-memory neighbors-workflow-job tests::governance-preflight`,
+  `python -m scripts.ops query-neo4j-memory neighbors-cli-command "bioetl run"`.
   Для новых surface-specific shortcuts используй:
   `python -m scripts.ops query-neo4j-memory docs-drift all`,
   `python -m scripts.ops query-neo4j-memory workflow-gates tests`,
+  `python -m scripts.ops query-neo4j-memory workflow-artifacts tests`,
   `python -m scripts.ops query-neo4j-memory storage-lineage silver/chembl/activity`,
   `python -m scripts.ops query-neo4j-memory run-artifacts manifest-chain-smoke`.
   Для поиска повторяющейся логики и кандидатов на вынос используй:

@@ -23,6 +23,8 @@ class TestCheckpointMetadata:
             dq_contract_compatibility_hash="abc123",
             dq_policy_hash="def456",
             dq_rule_bundle_version="2024.1",
+            pipeline_name="chembl_activity",
+            run_type="incremental",
             pipeline_version="1.0.0",
             effective_config_hash="cfg_hash",
             effective_config_artifact_id="artifact-42",
@@ -32,6 +34,7 @@ class TestCheckpointMetadata:
             contract_version="1.2.3",
             exact_replay=True,
             input_snapshot_ids=("snap-a", "snap-b"),
+            input_snapshot_fingerprint="snap-fingerprint",
             run_context={"test": "value"},
         )
 
@@ -39,6 +42,8 @@ class TestCheckpointMetadata:
         assert metadata.dq_contract_compatibility_hash == "abc123"
         assert metadata.dq_policy_hash == "def456"
         assert metadata.dq_rule_bundle_version == "2024.1"
+        assert metadata.pipeline_name == "chembl_activity"
+        assert metadata.run_type == "incremental"
         assert metadata.pipeline_version == "1.0.0"
         assert metadata.effective_config_hash == "cfg_hash"
         assert metadata.effective_config_artifact_id == "artifact-42"
@@ -48,6 +53,7 @@ class TestCheckpointMetadata:
         assert metadata.contract_version == "1.2.3"
         assert metadata.exact_replay is True
         assert metadata.input_snapshot_ids == ("snap-a", "snap-b")
+        assert metadata.input_snapshot_fingerprint == "snap-fingerprint"
         assert metadata.run_context == {"test": "value"}
 
     def test_checkpoint_metadata_minimal(self) -> None:
@@ -58,6 +64,8 @@ class TestCheckpointMetadata:
         assert metadata.dq_contract_compatibility_hash is None
         assert metadata.dq_policy_hash is None
         assert metadata.dq_rule_bundle_version is None
+        assert metadata.pipeline_name is None
+        assert metadata.run_type is None
         assert metadata.pipeline_version is None
         assert metadata.effective_config_hash is None
         assert metadata.effective_config_artifact_id is None
@@ -97,6 +105,8 @@ class TestCheckpointMetadata:
         metadata = CheckpointMetadata(
             records_processed=200,
             dq_contract_compatibility_hash="hash123",
+            pipeline_name="chembl_activity",
+            run_type="incremental",
             pipeline_version="1.1.0",
             exact_replay=False,
         )
@@ -105,6 +115,8 @@ class TestCheckpointMetadata:
 
         assert metadata_dict["records_processed"] == 200
         assert metadata_dict["dq_contract_compatibility_hash"] == "hash123"
+        assert metadata_dict["pipeline_name"] == "chembl_activity"
+        assert metadata_dict["run_type"] == "incremental"
         assert metadata_dict["pipeline_version"] == "1.1.0"
         assert metadata_dict["exact_replay"] is False
         assert "dq_policy_hash" not in metadata_dict
@@ -120,6 +132,8 @@ class TestCheckpointMetadata:
             "records_processed": 300,
             "dq_contract_compatibility_hash": "dict_hash",
             "dq_rule_bundle_version": "2025.1",
+            "pipeline_name": "chembl_activity",
+            "run_type": "incremental",
             "effective_config_hash": "cfg_hash_2",
             "effective_config_artifact_id": "artifact-2",
             "execution_fingerprint": "fingerprint-2",
@@ -136,6 +150,8 @@ class TestCheckpointMetadata:
         assert metadata.records_processed == 300
         assert metadata.dq_contract_compatibility_hash == "dict_hash"
         assert metadata.dq_rule_bundle_version == "2025.1"
+        assert metadata.pipeline_name == "chembl_activity"
+        assert metadata.run_type == "incremental"
         assert metadata.effective_config_hash == "cfg_hash_2"
         assert metadata.effective_config_artifact_id == "artifact-2"
         assert metadata.execution_fingerprint == "fingerprint-2"
@@ -177,6 +193,9 @@ class TestCheckpointMetadata:
         """Malformed runtime-anchor contract refs should fail during normalization."""
         metadata = CheckpointMetadata(
             records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            pipeline_version="1.0.0",
             contract_ref="ChemBL Activity/Bad",
             contract_version="1.0.0",
             effective_config_hash="a" * 64,
@@ -189,6 +208,9 @@ class TestCheckpointMetadata:
         """Malformed effective_config_hash values should fail during runtime-anchor normalization."""
         metadata = CheckpointMetadata(
             records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            pipeline_version="1.0.0",
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             effective_config_hash="sha256:not-hex",

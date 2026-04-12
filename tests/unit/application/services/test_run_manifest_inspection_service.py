@@ -31,10 +31,65 @@ from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
+from bioetl.domain.normalization import (
+    build_execution_identity_payload,
+    compute_execution_identity_fingerprint,
+)
 
+_VALID_CONFIG_HASH = "a" * 64
 _SNAPSHOT_IDENTITY_FINGERPRINT = (
     "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
 )
+
+
+def _expected_canonical_execution_identity(
+    manifest: RunManifest,
+    *,
+    requested_exact_replay: bool,
+    snapshot_fingerprint: str | None,
+) -> dict[str, object]:
+    payload = build_execution_identity_payload(
+        pipeline_name=manifest.pipeline_name,
+        run_type=manifest.run_type.value,
+        pipeline_version=manifest.code_provenance.pipeline_version,
+        effective_config_hash=manifest.code_provenance.config_hash,
+        dq_contract_compatibility_hash=(
+            manifest.code_provenance.dq_contract_compatibility_hash
+        ),
+        contract_ref=manifest.code_provenance.contract_ref,
+        contract_version=manifest.code_provenance.contract_version,
+        effective_config_artifact_id=(
+            manifest.code_provenance.effective_config_artifact_id
+        ),
+        exact_replay=requested_exact_replay,
+        input_snapshot_fingerprint=snapshot_fingerprint,
+    )
+    return {
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "payload": payload,
+    }
+
+
+def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object]:
+    payload = {
+        "manifest_id": manifest.manifest_id,
+        "effective_config_hash": manifest.code_provenance.config_hash,
+        "contract_ref": manifest.code_provenance.contract_ref,
+        "contract_version": manifest.code_provenance.contract_version,
+        "effective_config_artifact_id": (
+            manifest.code_provenance.effective_config_artifact_id
+        ),
+    }
+    filtered_payload = {key: value for key, value in payload.items() if value is not None}
+    return {
+        "compatibility_scope": "legacy_fallback_only",
+        "fingerprint": (
+            compute_execution_identity_fingerprint(filtered_payload)
+            if filtered_payload
+            else None
+        ),
+        "payload": filtered_payload,
+    }
 
 
 class _InMemoryRunManifestStore(RunManifestPort):
@@ -86,7 +141,7 @@ def _make_manifest(
     manifest_id: str,
     run_id: RunID,
     run_type: RunType = RunType.INCREMENTAL,
-    config_hash: str = "deadbeef",
+    config_hash: str = _VALID_CONFIG_HASH,
     limit: int = 100,
     execution_fingerprint: str | None = None,
     created_at: datetime | None = None,
@@ -169,16 +224,22 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     assert result.diagnostics["event_family_counts"] == {"pipeline.lifecycle": 1}
     assert result.diagnostics["manifest_id"] == "manifest-1"
     assert result.diagnostics["run_id"] == str(run_id)
-    assert result.diagnostics["config_hash"] == "deadbeef"
+    assert result.diagnostics["config_hash"] == _VALID_CONFIG_HASH
     assert result.diagnostics["contract_ref"] == "chembl_activity"
     assert result.diagnostics["contract_version"] == "1.2.0"
     assert result.identity_graph == {
         "run_id": str(run_id),
         "manifest_id": "manifest-1",
         "execution_fingerprint": "fingerprint-manifest-1",
-        "effective_config_hash": "deadbeef",
+        "effective_config_hash": _VALID_CONFIG_HASH,
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "canonical_execution_identity": _expected_canonical_execution_identity(
+            manifest,
+            requested_exact_replay=True,
+            snapshot_fingerprint=_SNAPSHOT_IDENTITY_FINGERPRINT,
+        ),
+        "degraded_runtime_anchor": _expected_degraded_runtime_anchor(manifest),
         "replay_capability": "exact_replay_supported",
         "requested_exact_replay": True,
         "replay_capability_reason": "immutable_input_snapshots_present",
@@ -219,6 +280,8 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
+    assert result.diagnostics["persistence_profile"]["attained_profile"] == "forensic_grade"
+    assert result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is True
     assert result.diagnostics["next_steps"] == [
         "No alert signals detected; continue routine monitoring."
     ]
@@ -239,9 +302,15 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "run_id": str(run_id),
         "manifest_id": "manifest-no-ledger",
         "execution_fingerprint": manifest.execution_fingerprint,
-        "effective_config_hash": "deadbeef",
+        "effective_config_hash": _VALID_CONFIG_HASH,
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "canonical_execution_identity": _expected_canonical_execution_identity(
+            manifest,
+            requested_exact_replay=True,
+            snapshot_fingerprint=_SNAPSHOT_IDENTITY_FINGERPRINT,
+        ),
+        "degraded_runtime_anchor": _expected_degraded_runtime_anchor(manifest),
         "replay_capability": "exact_replay_supported",
         "requested_exact_replay": True,
         "replay_capability_reason": "immutable_input_snapshots_present",
@@ -271,6 +340,12 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "published_artifacts": [],
         "occurrence_only_diagnostics": [],
     }
+    assert result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
+    assert result.diagnostics["persistence_profile"]["claims"]["replay_ready"] is True
+    assert (
+        result.diagnostics["persistence_profile"]["forensic_grade_missing_requirements"]
+        == ["run_ledger_history"]
+    )
     assert result.diagnostics == {
         "manifest_id": "manifest-no-ledger",
         "run_id": str(run_id),
@@ -278,8 +353,9 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "provider": "chembl",
         "entity": "activity",
         "execution_fingerprint": manifest.execution_fingerprint,
-        "config_hash": "deadbeef",
-        "effective_config_hash": "deadbeef",
+        "config_hash": _VALID_CONFIG_HASH,
+        "effective_config_hash": _VALID_CONFIG_HASH,
+        "pipeline_version": "1.0.0",
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
         "replay_capability": "exact_replay_supported",
@@ -313,6 +389,38 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "effective_config_artifact_id": "eca-123",
         "planned_artifacts": [],
         "occurrence_only_diagnostics": [],
+        "persistence_profile": {
+            "attained_profile": "replay_ready",
+            "claims": {
+                "degraded_observable": True,
+                "replay_ready": True,
+                "forensic_grade": False,
+            },
+            "surfaces": {
+                "control_plane_manifest": True,
+                "effective_config_artifact": True,
+                "immutable_input_snapshots": True,
+                "exact_replay_capability": True,
+                "run_ledger_history": False,
+                "artifact_lineage_links": True,
+            },
+            "replay_ready_missing_requirements": [],
+            "forensic_grade_missing_requirements": ["run_ledger_history"],
+            "composite_resume_reconstructability": {
+                "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+                "reconstructs": [
+                    "state",
+                    "seed_completed",
+                    "merge_completed",
+                    "last_event_id",
+                    "last_event_occurred_at",
+                ],
+                "does_not_reconstruct": [
+                    "per_provider_result_maps",
+                    "rich_checkpoint_payloads",
+                ],
+            },
+        },
     }
 
 
@@ -502,6 +610,8 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
     result = service.show("manifest-3")
 
     assert result.diagnostics["missing_artifact_links"] == 1
+    assert result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
+    assert result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is False
     assert result.diagnostics["alert_signals"]["artifact_linkage_gap"] is True
     assert result.diagnostics["next_steps"] == [
         "Validate artifact publication metadata and repair dataset/lineage links.",
@@ -860,7 +970,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
             resolved_config={"provider": "chembl", "entity_type": "activity"},
             pipeline_version="1.0.0",
             git_commit="abc1234",
-            config_hash="hash-smoke",
+            config_hash="a" * 64,
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             dq_policy_ref="chembl.activity.dq",

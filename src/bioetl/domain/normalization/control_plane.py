@@ -18,6 +18,8 @@ from bioetl.domain.normalization._control_plane_primitives import (
 )
 
 __all__ = [
+    "build_execution_identity_payload",
+    "normalize_execution_identity_payload",
     "normalize_contract_ref",
     "normalize_contract_version",
     "normalize_control_plane_datetime",
@@ -45,6 +47,13 @@ _RUNTIME_ANCHOR_SHA256_FIELDS = frozenset(
         "contract_schema_hash",
         "dq_contract_compatibility_hash",
         "effective_config_hash",
+    }
+)
+_EXECUTION_IDENTITY_SHA256_FIELDS = frozenset(
+    {
+        "dq_contract_compatibility_hash",
+        "effective_config_hash",
+        "input_snapshot_fingerprint",
     }
 )
 _SEMVER_PARTS = 3
@@ -129,6 +138,54 @@ def normalize_runtime_anchor_payload(
     }
 
 
+def normalize_execution_identity_payload(
+    payload: Mapping[str, object | None],
+) -> dict[str, str | None]:
+    """Normalize canonical execution-identity fields to stable comparable strings.
+
+    This payload is shared by manifest creation, checkpoint metadata assembly,
+    and runtime-compatibility fallback anchors. Callers may provide a sparse
+    subset of fields; missing keys simply remain absent from the normalized
+    payload.
+    """
+
+    return {
+        key: _normalize_execution_identity_value(key, value)
+        for key, value in payload.items()
+    }
+
+
+def build_execution_identity_payload(
+    *,
+    pipeline_name: str | None,
+    run_type: str | None,
+    pipeline_version: str | None,
+    effective_config_hash: str | None,
+    dq_contract_compatibility_hash: str | None,
+    contract_ref: str | None,
+    contract_version: str | None,
+    effective_config_artifact_id: str | None,
+    exact_replay: bool | str | None,
+    input_snapshot_fingerprint: str | None,
+) -> dict[str, str | None]:
+    """Build the canonical execution-identity payload shared across layers."""
+
+    return normalize_execution_identity_payload(
+        {
+            "pipeline_name": pipeline_name,
+            "run_type": run_type,
+            "pipeline_version": pipeline_version,
+            "effective_config_hash": effective_config_hash,
+            "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+            "contract_ref": contract_ref,
+            "contract_version": contract_version,
+            "effective_config_artifact_id": effective_config_artifact_id,
+            "exact_replay": exact_replay,
+            "input_snapshot_fingerprint": input_snapshot_fingerprint,
+        }
+    )
+
+
 def _strip_contract_version_prefix(value: str) -> str:
     """Remove the optional leading v-prefix from contract versions."""
     if value.lower().startswith("v"):
@@ -171,6 +228,44 @@ def _normalize_runtime_anchor_value(key: str, value: object | None) -> str | Non
     if key == "contract_version":
         return normalize_contract_version(value)
     return _normalize_optional_text(value)
+
+
+def _normalize_execution_identity_value(
+    key: str,
+    value: object | None,
+) -> str | None:
+    """Normalize one canonical execution-identity field."""
+    if key == "effective_config_hash":
+        return normalize_runtime_anchor_effective_config_hash(value)
+    if key in _EXECUTION_IDENTITY_SHA256_FIELDS:
+        return normalize_control_plane_opaque_hash_ref(value)
+    if key == "contract_ref":
+        return normalize_contract_ref(value)
+    if key == "contract_version":
+        return normalize_contract_version(value)
+    if key == "exact_replay":
+        return _normalize_optional_bool_token(value)
+    if key == "run_type":
+        normalized = _normalize_optional_text(value)
+        return None if normalized is None else normalized.lower()
+    return _normalize_optional_text(value)
+
+
+def _normalize_optional_bool_token(value: object | None) -> str | None:
+    """Return canonical lowercase bool tokens for execution-identity fields."""
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    normalized = _normalize_optional_text(value)
+    if normalized is None:
+        return None
+    lowered = normalized.lower()
+    if lowered in {"true", "false"}:
+        return lowered
+    raise ValueError(
+        "Invalid exact_replay format: expected a boolean or 'true'/'false' token"
+    )
 
 
 def _strip_optional_sha256_prefix(value: str) -> str:

@@ -72,42 +72,53 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 89
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 91
 
 
 @pytest.mark.unit
 def test_bronze_runtime_write_metrics_are_registered() -> None:
-    assert "bronze_write_attempts_total" in COUNTERS
-    assert "bronze_write_total_duration_seconds" in HISTOGRAMS
+    assert "bioetl_bronze_write_attempts_total" in COUNTERS
+    assert "bioetl_bronze_write_total_duration_seconds" in HISTOGRAMS
 
 
 @pytest.mark.unit
 def test_control_plane_and_lineage_metrics_are_registered() -> None:
-    assert "health_check_degraded_total" in COUNTERS
-    assert "control_plane_manifest_writes_total" in COUNTERS
-    assert "control_plane_ledger_appends_total" in COUNTERS
-    assert "control_plane_reads_total" in COUNTERS
-    assert "traced_runs_total" in COUNTERS
-    assert "checkpoint_compatibility_events_total" in COUNTERS
-    assert "checkpoint_load_events_total" in COUNTERS
-    assert "structural_policy_events_total" in COUNTERS
-    assert "structural_policy_shadow_comparisons_total" in COUNTERS
-    assert "control_plane_read_duration_seconds" in HISTOGRAMS
-    assert "lineage_fragments_emitted_total" in COUNTERS
-    assert "lineage_refs_missing_total" in COUNTERS
-    assert "composite_source_selection_total" in COUNTERS
+    assert "bioetl_health_check_degraded_total" in COUNTERS
+    assert "bioetl_control_plane_manifest_writes_total" in COUNTERS
+    assert "bioetl_control_plane_ledger_appends_total" in COUNTERS
+    assert "bioetl_control_plane_reads_total" in COUNTERS
+    assert "bioetl_traced_runs_total" in COUNTERS
+    assert "bioetl_checkpoint_compatibility_events_total" in COUNTERS
+    assert "bioetl_checkpoint_load_events_total" in COUNTERS
+    assert "bioetl_structural_policy_events_total" in COUNTERS
+    assert "bioetl_structural_policy_shadow_comparisons_total" in COUNTERS
+    assert "bioetl_control_plane_read_duration_seconds" in HISTOGRAMS
+    assert "bioetl_lineage_fragments_emitted_total" in COUNTERS
+    assert "bioetl_lineage_refs_missing_total" in COUNTERS
+    assert "bioetl_composite_source_selection_total" in COUNTERS
 
 
 @pytest.mark.unit
 def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> None:
     expected_labels = {
-        "control_plane_manifest_writes_total": {"pipeline", "run_type", "status"},
-        "control_plane_ledger_appends_total": {"pipeline", "event_type", "status"},
-        "checkpoint_compatibility_events_total": {"pipeline", "disposition"},
-        "checkpoint_load_events_total": {"pipeline", "status"},
-        "lineage_fragments_emitted_total": {"pipeline", "layer", "status"},
-        "lineage_refs_missing_total": {"pipeline", "layer", "ref_type"},
-        "composite_source_selection_total": {
+        "bioetl_control_plane_manifest_writes_total": {
+            "pipeline",
+            "run_type",
+            "status",
+        },
+        "bioetl_control_plane_ledger_appends_total": {
+            "pipeline",
+            "event_type",
+            "status",
+        },
+        "bioetl_checkpoint_compatibility_events_total": {
+            "pipeline",
+            "disposition",
+        },
+        "bioetl_checkpoint_load_events_total": {"pipeline", "status"},
+        "bioetl_lineage_fragments_emitted_total": {"pipeline", "layer", "status"},
+        "bioetl_lineage_refs_missing_total": {"pipeline", "layer", "ref_type"},
+        "bioetl_composite_source_selection_total": {
             "pipeline",
             "decision_type",
             "selected_source",

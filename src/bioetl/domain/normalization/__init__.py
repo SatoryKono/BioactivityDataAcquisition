@@ -8,6 +8,8 @@ from bioetl.domain.normalization.authors import (
     parse_authors_to_list,
 )
 from bioetl.domain.normalization.control_plane import (
+    build_execution_identity_payload,
+    normalize_execution_identity_payload,
     normalize_contract_ref,
     normalize_contract_version,
     normalize_control_plane_datetime,
@@ -27,6 +29,8 @@ from bioetl.domain.normalization.dates import (
     validate_publication_year,
 )
 from bioetl.domain.normalization.fingerprints import (
+    compute_execution_identity_fingerprint,
+    compute_input_snapshot_identity_fingerprint,
     compute_manifest_execution_fingerprint,
     compute_runtime_anchor_fingerprint,
 )
@@ -58,7 +62,10 @@ from bioetl.domain.normalization.text import (
 __all__ = [
     "JOIN_KEY_NORMALIZATION_POLICIES",
     "JoinKeyNormalizationPolicy",
+    "build_execution_identity_payload",
     "canonicalize_json_string",
+    "compute_execution_identity_fingerprint",
+    "compute_input_snapshot_identity_fingerprint",
     "compute_manifest_execution_fingerprint",
     "compute_runtime_anchor_fingerprint",
     "extract_first_item",
@@ -73,6 +80,7 @@ __all__ = [
     "normalize_control_plane_strict_sha256",
     "normalize_control_plane_uuid",
     "normalize_doi",
+    "normalize_execution_identity_payload",
     "normalize_join_key_scalar",
     "normalize_join_key_text",
     "normalize_partial_date",

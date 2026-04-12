@@ -177,13 +177,13 @@ def _record_filter_metrics(state: _FilteredDataSourceState) -> None:
 
     source_file = state._filter_config.source_path or "unknown"
     state._metrics.increment_counter(
-        "filter_ids_loaded_total",
+        "bioetl_filter_ids_loaded_total",
         state._filter_result.unique_count,
         {"pipeline": state._pipeline_name, "source_file": source_file},
     )
     if state._filter_result.has_duplicates:
         state._metrics.increment_counter(
-            "filter_ids_duplicates_total",
+            "bioetl_filter_ids_duplicates_total",
             state._filter_result.duplicate_count,
             {"pipeline": state._pipeline_name, "source_file": source_file},
         )
@@ -197,14 +197,14 @@ def _record_multi_filter_metrics(state: _FilteredDataSourceState) -> None:
     source_file = state._filter_config.source_path or "unknown"
     if state._valid_combinations:
         state._metrics.increment_counter(
-            "filter_combinations_loaded_total",
+            "bioetl_filter_combinations_loaded_total",
             len(state._valid_combinations),
             {"pipeline": state._pipeline_name, "source_file": source_file},
         )
 
     for field, ids in state._filter_result.column_ids.items():
         state._metrics.increment_counter(
-            "filter_ids_loaded_total",
+            "bioetl_filter_ids_loaded_total",
             len(ids),
             {
                 "pipeline": state._pipeline_name,

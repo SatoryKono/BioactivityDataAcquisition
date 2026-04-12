@@ -443,7 +443,7 @@ class TestUnifiedHTTPClientObservability:
         # Verify histogram was observed
         mock_metrics.observe_histogram.assert_called_once()
         call_args = mock_metrics.observe_histogram.call_args
-        assert call_args[0][0] == "http_request_duration_seconds"
+        assert call_args[0][0] == "bioetl_http_request_duration_seconds"
         assert call_args[0][1] > 0  # duration
         labels = call_args[0][2]
         assert labels["provider"] == "test_provider"
@@ -473,7 +473,7 @@ class TestUnifiedHTTPClientObservability:
         counter_calls = [
             c
             for c in mock_metrics.increment_counter.call_args_list
-            if c[0][0] == "http_retries_total"
+            if c[0][0] == "bioetl_http_retries_total"
         ]
         assert len(counter_calls) == 1
         assert counter_calls[0][0][1] == 1  # 1 retry
@@ -496,7 +496,7 @@ class TestUnifiedHTTPClientObservability:
         error_calls = [
             c
             for c in mock_metrics.increment_counter.call_args_list
-            if c[0][0] == "http_request_errors_total"
+            if c[0][0] == "bioetl_http_request_errors_total"
         ]
         assert len(error_calls) == 1
         labels = error_calls[0][0][2]

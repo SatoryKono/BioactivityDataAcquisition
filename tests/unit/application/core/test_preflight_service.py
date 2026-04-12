@@ -190,7 +190,7 @@ class TestPreflightServiceValidation:
         gauge_calls = [
             call
             for call in mock_metrics.set_gauge.call_args_list
-            if call[0][0] == "pipeline_health_check_passed"
+            if call[0][0] == "bioetl_pipeline_health_check_passed"
         ]
         assert len(gauge_calls) == 2  # storage + data_source
 

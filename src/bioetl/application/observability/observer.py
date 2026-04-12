@@ -231,7 +231,7 @@ class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
         )
 
         self._metrics.set_gauge(
-            "pipeline_health_check_passed",
+            "bioetl_pipeline_health_check_passed",
             1.0 if healthy else 0.0,
             {"pipeline": self.pipeline_name, "component": component},
         )
@@ -269,7 +269,7 @@ class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
         )
 
         self._metrics.increment_counter(
-            "dq_anomaly_detected",
+            "bioetl_dq_anomaly_detected",
             1,
             {
                 "pipeline": self.pipeline_name,
@@ -309,7 +309,7 @@ class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
 
         if success:
             self._metrics.increment_counter(
-                "vacuum_files_removed_total",
+                "bioetl_vacuum_files_removed_total",
                 files_removed,
                 {"table": table, "layer": layer},
             )
