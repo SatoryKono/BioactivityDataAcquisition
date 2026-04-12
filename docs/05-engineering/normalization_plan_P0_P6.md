@@ -114,7 +114,7 @@ UUID-like values normalize through canonical string conversion.
 | Ledger persist payload | [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_ledger_service.py) | Calls `normalize_run_ledger_payload()` before append |
 | Record-level normalization | [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py) | Uses `NormalizationProfile` when available, otherwise falls back to legacy heuristics |
 | Profile framework | [base.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/base.py) | Defines `FieldRule` and `NormalizationProfile` with `include_in_hash` and `set_like` |
-| Shipped profile registry | [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) | Registers shipped profiles for `chembl.activity`, `chembl.assay`, `chembl.molecule`, `chembl.publication`, `chembl.target`, `crossref.publication`, `openalex.publication`, `pubchem.compound`, `pubmed.publication`, `semanticscholar.publication`, `uniprot.idmapping`, and `uniprot.protein` |
+| Shipped profile registry | [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) | Registers shipped profiles for `chembl.activity`, `chembl.assay`, `chembl.assay_parameters`, `chembl.cell_line`, `chembl.compound_record`, `chembl.molecule`, `chembl.protein_class`, `chembl.publication`, `chembl.publication_similarity`, `chembl.publication_term`, `chembl.subcellular_fraction`, `chembl.target`, `chembl.target_component`, `chembl.tissue`, `crossref.publication`, `openalex.publication`, `pubchem.compound`, `pubmed.publication`, `semanticscholar.publication`, `uniprot.idmapping`, and `uniprot.protein` |
 | Join-key domain policies | [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) | Pure scalar join-key policies for canonical trim/casing behavior |
 | Join-key application adapters | [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py) | Applies canonical join-key policies to composite runtime/config and DataFrame-oriented flows |
 | Matrix generation | [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams |
@@ -245,8 +245,10 @@ Governance rules:
 - the canonical plan must describe the currently shipped profile registry
 - the published matrix must be reproducible from code
 - fallback inventory must classify business debt separately from technical passthrough
-- the headline normalization KPI is `explicit_profile_coverage_pct`, defined as
-  `explicit_profile_field_count / shipped_entity_field_count * 100`
+- normalization governance must publish surface-scoped KPIs instead of one blended headline:
+  `explicit_profile_coverage_pct` for entity-record coverage,
+  `composite_join_key_policy_coverage_pct` for composite join-key coverage, and
+  `control_plane_normalization_coverage_pct` for control-plane / reproducibility coverage
 - join-key policies must remain part of the same normalization evidence story as entity profiles
 - drift between plan, registry, matrix, and fallback inventory is a governance defect
 
@@ -400,9 +402,18 @@ Use explicit profiles as canonical contracts for covered pipeline schemas.
 - shipped profiles currently include:
   - `chembl.activity`
   - `chembl.assay`
+  - `chembl.assay_parameters`
+  - `chembl.cell_line`
+  - `chembl.compound_record`
   - `chembl.molecule`
+  - `chembl.protein_class`
   - `chembl.publication`
+  - `chembl.publication_similarity`
+  - `chembl.publication_term`
+  - `chembl.subcellular_fraction`
   - `chembl.target`
+  - `chembl.target_component`
+  - `chembl.tissue`
   - `crossref.publication`
   - `openalex.publication`
   - `pubchem.compound`
@@ -510,9 +521,9 @@ profiles, fallback seams, and composite join-key policies.
 - DOCX/PDF remain optional
 - output order is deterministic
 - the artifact reflects shipped profile coverage, fallback coverage, and join-key normalization seams
-- the published matrix should surface the headline KPI
-  `explicit_profile_coverage_pct` so maintainers can track explicit profile
-  adoption over time without recomputing ad hoc totals
+- the published matrix should surface the normalized coverage split across
+  entity-record, composite join-key, and control-plane / reproducibility seams
+  so maintainers can track each normalization surface without overstating repo-wide closure
 
 ### Acceptance
 

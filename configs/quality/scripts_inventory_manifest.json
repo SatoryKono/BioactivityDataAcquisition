@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-12T14:26:46.941482+00:00",
+  "generated_at": "2026-04-12T15:02:29.469729+00:00",
   "summary": {
     "total_scripts": 292,
     "status_counts": {
@@ -4376,7 +4376,7 @@
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 504,
+          "line": 515,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
         },

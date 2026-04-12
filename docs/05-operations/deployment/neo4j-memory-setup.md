@@ -12,6 +12,19 @@ Last verified: '2026-04-12'
 
 > Scope note: This guide is for auxiliary Neo4j/MCP tooling only. It is not BioETL runtime deployment guidance and does not change ADR-010 Local-Only policy.
 
+## Related Neo4j Operator Docs
+
+- [Neo4j Audit Instance Guide](neo4j-audit-instance-guide.md)
+- [Neo4j Audit Instance Quick Start](neo4j-audit-instance-quick-start.md)
+- [Neo4j Audit Instance Implementation](neo4j-audit-instance-implementation.md)
+- [Neo4j Complete Recovery Guide](../runbooks/neo4j-complete-recovery-guide.md)
+- [Neo4j Memory Windows Verification](../verification/neo4j-memory-windows-verification.md)
+- [Neo4j Memory QA Examples](../verification/neo4j-memory-qa-examples.md)
+
+Root-level Neo4j recovery/status notes from the 2026-04 cleanup wave were moved
+out of the repository root and archived under
+`docs/99-archive/operations/neo4j-root-status-2026-04/`.
+
 ## Quick Start
 
 1. Copy .env.example to .env:
