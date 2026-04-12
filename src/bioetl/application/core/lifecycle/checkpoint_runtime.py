@@ -8,6 +8,12 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 CheckpointCompatibilityPolicy = Literal["observe", "soft_fail", "hard_fail"]
+CheckpointCompatibilityDisposition = Literal[
+    "observe_blocked_identity",
+    "observe_loaded_degraded",
+    "soft_fail_blocked",
+    "hard_fail_raised",
+]
 
 
 def validate_compatibility_policy(
@@ -122,12 +128,15 @@ def handle_incompatible_checkpoint(
     messages: list[str],
 ) -> CheckpointMetadata | None:
     """Apply configured policy to an incompatible checkpoint."""
-    forced_resume_rejection = (
-        compatibility_policy == "observe" and not execution_identity_compatible
+    disposition = resolve_incompatible_checkpoint_disposition(
+        compatibility_policy=compatibility_policy,
+        execution_identity_compatible=execution_identity_compatible,
     )
+    forced_resume_rejection = disposition == "observe_blocked_identity"
     payload = {
         "pipeline": pipeline_name,
         "compatibility_policy": compatibility_policy,
+        "compatibility_disposition": disposition,
         "resume_rejected": compatibility_policy != "observe"
         or forced_resume_rejection,
         "execution_identity_compatible": execution_identity_compatible,
@@ -142,20 +151,20 @@ def handle_incompatible_checkpoint(
             "input_snapshot_ids": list(checkpoint_metadata.input_snapshot_ids),
         },
     }
-    if forced_resume_rejection:
+    if disposition == "observe_blocked_identity":
         logger.warning(
             "Checkpoint execution identity mismatch observed; resume blocked "
             "despite observe policy.",
             **payload,
         )
         return None
-    if compatibility_policy == "observe":
+    if disposition == "observe_loaded_degraded":
         logger.warning(
             "Checkpoint compatibility mismatch observed; resume continues.",
             **payload,
         )
         return checkpoint_metadata
-    if compatibility_policy == "soft_fail":
+    if disposition == "soft_fail_blocked":
         logger.warning(
             "Checkpoint compatibility mismatch; resume blocked by soft_fail policy.",
             **payload,
@@ -167,10 +176,27 @@ def handle_incompatible_checkpoint(
     )
 
 
+def resolve_incompatible_checkpoint_disposition(
+    *,
+    compatibility_policy: CheckpointCompatibilityPolicy,
+    execution_identity_compatible: bool,
+) -> CheckpointCompatibilityDisposition:
+    """Return the bounded incompatibility disposition for telemetry and logging."""
+    if compatibility_policy == "observe":
+        if execution_identity_compatible:
+            return "observe_loaded_degraded"
+        return "observe_blocked_identity"
+    if compatibility_policy == "soft_fail":
+        return "soft_fail_blocked"
+    return "hard_fail_raised"
+
+
 __all__ = [
     "CheckpointCompatibilityPolicy",
+    "CheckpointCompatibilityDisposition",
     "enrich_metadata_with_execution_identity",
     "handle_incompatible_checkpoint",
     "resolve_current_metadata",
+    "resolve_incompatible_checkpoint_disposition",
     "validate_compatibility_policy",
 ]

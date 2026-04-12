@@ -438,6 +438,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             "quarantine.mark_reprocessed",
             self._trace_attributes(
                 operation="mark_reprocessed",
+                pipeline=None,
                 **{"bioetl.input_record_count": len(records)},
             ),
             tracer_name=self.TRACER_NAME,
@@ -566,7 +567,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             duration_seconds=perf_counter() - start_time,
         )
 
-        return count
+        return int(count)
 
     def update_status(
         self,
@@ -654,7 +655,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
             status="success" if success else "not_found",
             duration_seconds=perf_counter() - start_time,
         )
-        return success
+        return bool(success)
 
     async def aclose(self) -> None:
         """Close the service and release resources."""

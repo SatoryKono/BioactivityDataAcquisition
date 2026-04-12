@@ -17,6 +17,23 @@ from bioetl.application.services.quarantine_service import (
 from bioetl.domain.types import QuarantineRecordStatus
 
 
+def _make_mock_tracer() -> MagicMock:
+    """Create a tracing port mock with an inspectable span context."""
+    mock_span = MagicMock()
+    mock_span.__enter__ = MagicMock(return_value=mock_span)
+    mock_span.__exit__ = MagicMock(return_value=None)
+    mock_span.set_attribute = MagicMock()
+    mock_span.record_exception = MagicMock()
+
+    mock_otel_tracer = MagicMock()
+    mock_otel_tracer.start_as_current_span = MagicMock(return_value=mock_span)
+
+    mock_tracer = MagicMock()
+    mock_tracer.get_tracer = MagicMock(return_value=mock_otel_tracer)
+    mock_tracer.flush = MagicMock()
+    return mock_tracer
+
+
 @pytest.fixture
 def mock_logger():
     """Create a mock logger."""
@@ -66,12 +83,19 @@ def mock_metrics():
 
 
 @pytest.fixture
-def quarantine_service(mock_quarantine_port, mock_logger, mock_metrics):
+def mock_tracer():
+    """Create a mock tracing port."""
+    return _make_mock_tracer()
+
+
+@pytest.fixture
+def quarantine_service(mock_quarantine_port, mock_logger, mock_metrics, mock_tracer):
     """Create a QuarantineService instance."""
     return QuarantineService(
         quarantine_port=mock_quarantine_port,
         logger=mock_logger,
         metrics=mock_metrics,
+        tracer=mock_tracer,
     )
 
 
@@ -170,6 +194,15 @@ class TestQuarantineServiceInspect:
             limit=10,
             error_code="DQ_MISSING_FIELD",
         )
+
+    @pytest.mark.asyncio
+    async def test_inspect_creates_trace_span(self, quarantine_service, mock_tracer):
+        """Inspect should create a bounded admin trace span."""
+        await quarantine_service.inspect("pipeline1", limit=10)
+
+        mock_tracer.get_tracer.assert_called_once_with("bioetl.quarantine_admin")
+        args = mock_tracer.get_tracer.return_value.start_as_current_span.call_args
+        assert args[0][0] == "quarantine.inspect"
 
 
 @pytest.mark.unit

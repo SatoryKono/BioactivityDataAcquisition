@@ -9,6 +9,7 @@ from bioetl.application.core.lifecycle.checkpoint_runtime import (
     enrich_metadata_with_execution_identity,
     handle_incompatible_checkpoint,
     resolve_current_metadata,
+    resolve_incompatible_checkpoint_disposition,
     validate_compatibility_policy,
 )
 from bioetl.domain.medallion import LoadingStrategy
@@ -147,6 +148,12 @@ class CheckpointManagerService:
                     )
 
                     if not compatibility_result.compatible:
+                        disposition = resolve_incompatible_checkpoint_disposition(
+                            compatibility_policy=self._compatibility_policy,
+                            execution_identity_compatible=(
+                                compatibility_result.execution_identity_compatible
+                            ),
+                        )
                         try:
                             result = handle_incompatible_checkpoint(
                                 logger=self._logger,
@@ -159,12 +166,24 @@ class CheckpointManagerService:
                                 messages=compatibility_result.messages,
                             )
                         except Exception:
-                            self._emit_checkpoint_load_status("incompatible")
+                            self._emit_checkpoint_load_status(
+                                "incompatible_hard_fail"
+                                if disposition == "hard_fail_raised"
+                                else "incompatible"
+                            )
                             raise
                         if result is None:
-                            self._emit_checkpoint_load_status("incompatible")
+                            self._emit_checkpoint_load_status(
+                                "observe_blocked_identity"
+                                if disposition == "observe_blocked_identity"
+                                else "incompatible"
+                            )
                             return None
-                        self._emit_checkpoint_load_status("loaded")
+                        self._emit_checkpoint_load_status(
+                            "observe_loaded_degraded"
+                            if disposition == "observe_loaded_degraded"
+                            else "loaded"
+                        )
                         return result
                     else:
                         self._logger.info(
