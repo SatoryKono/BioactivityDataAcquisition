@@ -177,7 +177,7 @@ adapter-level fallback in infrastructure.
 
 ```python
 # Testing: explicit opt-out, no warning
-metrics = NoOpMetrics(warn - on - use=False)
+metrics = NoOpMetrics(warn_on_use=False)
 
 # Production: warning if accidentally used
 metrics = NoOpMetrics()  # Emits UserWarning
