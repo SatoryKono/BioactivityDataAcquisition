@@ -139,6 +139,12 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "title": "Workflow job semantic neighborhood",
         "relation_types": ("CONTAINS", "RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"),
     },
+    "neighbors-run-instance": {
+        "mode": "neighbors",
+        "target_label": "run_instance_surface",
+        "title": "Run instance semantic neighborhood",
+        "relation_types": ("REFERENCES_ARTIFACT", "DEPENDS_ON", "DESCRIBED_IN"),
+    },
     "docs-drift": {
         "mode": "docs_drift",
         "target_label": "doc_surface",
@@ -153,6 +159,11 @@ QUERY_PROFILES: Final[dict[str, QueryProfile]] = {
         "mode": "storage_lineage",
         "target_label": "storage_surface",
         "title": "Storage lineage path",
+    },
+    "run-artifacts": {
+        "mode": "run_artifacts",
+        "target_label": "run_instance_surface",
+        "title": "Run instance artifact chain",
     },
     "normalization-pipeline": {
         "mode": "normalization_pipeline",
@@ -538,6 +549,15 @@ def _storage_lineage_statement() -> str:
         "RETURN storage.name AS storage_name, "
         "storage.layer AS layer, "
         "storage.storage_kind AS storage_kind, "
+        "storage.storage_roles AS storage_roles, "
+        "storage.format AS storage_format, "
+        "storage.config_version AS config_version, "
+        "storage.quality_version AS quality_version, "
+        "storage.schema_present AS schema_present, "
+        "storage.partition_by AS partition_by, "
+        "storage.sort_by AS sort_by, "
+        "storage.versioning_mode AS versioning_mode, "
+        "storage.version_column AS version_column, "
         "collect(DISTINCT CASE "
         "  WHEN producer.name IS NULL THEN NULL "
         "  ELSE {name: producer.name, labels: labels(producer)} "
@@ -546,6 +566,37 @@ def _storage_lineage_statement() -> str:
         "collect(DISTINCT downstream.name) AS downstream_surfaces, "
         "collect(DISTINCT config.name) AS defining_configs "
         "ORDER BY storage.name ASC"
+    )
+
+
+def _run_artifacts_statement() -> str:
+    return (
+        "MATCH (run:run_instance_surface) "
+        "WHERE $name = 'all' OR run.name = $name OR run.manifest_id = $name OR run.run_id = $name "
+        "OPTIONAL MATCH (run)-[:REFERENCES_ARTIFACT]->(artifact:control_plane_artifact_surface) "
+        "OPTIONAL MATCH (run)-[:DEPENDS_ON]->(dependency) "
+        "OPTIONAL MATCH (run)-[:DESCRIBED_IN]->(support) "
+        "RETURN run.name AS run_instance_name, "
+        "run.manifest_id AS manifest_id, "
+        "run.run_id AS run_id, "
+        "run.lifecycle_status AS lifecycle_status, "
+        "run.contract_ref AS contract_ref, "
+        "run.contract_version AS contract_version, "
+        "run.effective_config_artifact_id AS effective_config_artifact_id, "
+        "run.lineage_fragment_id AS lineage_fragment_id, "
+        "collect(DISTINCT CASE "
+        "  WHEN artifact.name IS NULL THEN NULL "
+        "  ELSE {name: artifact.name, labels: labels(artifact), artifact_family: artifact.artifact_family} "
+        "END) AS artifacts, "
+        "collect(DISTINCT CASE "
+        "  WHEN dependency.name IS NULL THEN NULL "
+        "  ELSE {name: dependency.name, labels: labels(dependency)} "
+        "END) AS dependencies, "
+        "collect(DISTINCT CASE "
+        "  WHEN support.name IS NULL THEN NULL "
+        "  ELSE {name: support.name, labels: labels(support)} "
+        "END) AS support_links "
+        "ORDER BY run.name ASC"
     )
 
 
@@ -571,6 +622,8 @@ def _run_query(
         statement = _workflow_gates_statement()
     elif profile_config["mode"] == "storage_lineage":
         statement = _storage_lineage_statement()
+    elif profile_config["mode"] == "run_artifacts":
+        statement = _run_artifacts_statement()
     elif profile_config["mode"] == "normalization_pipeline":
         statement = _normalization_pipeline_statement()
     elif profile_config["mode"] == "fallback_pipelines":
@@ -607,6 +660,7 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             "docs_drift": "no docs-to-code drift edges found",
             "workflow_gates": "no workflow gate coverage found",
             "storage_lineage": "no storage lineage found",
+            "run_artifacts": "no run instance artifact chain found",
             "duplication_cluster": "no duplication cluster found",
             "normalization_pipeline": "no pipeline normalization evidence found",
             "fallback_pipelines": "no fallback-heavy pipelines found",
@@ -709,9 +763,31 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
             storage_name = str(row.get("storage_name") or "")
             if not storage_name:
                 continue
+            storage_roles = row.get("storage_roles")
+            roles_str = ",".join(str(item) for item in storage_roles) if isinstance(storage_roles, list) else ""
+            partition_by = row.get("partition_by")
+            partition_str = ",".join(str(item) for item in partition_by) if isinstance(partition_by, list) else ""
+            sort_by = row.get("sort_by")
+            sort_str = ",".join(str(item) for item in sort_by) if isinstance(sort_by, list) else ""
             lines.append(
-                f"- storage={storage_name} | layer={row.get('layer') or ''!s} | storage_kind={row.get('storage_kind') or ''!s}"
+                f"- storage={storage_name} | layer={row.get('layer') or ''!s} | storage_kind={row.get('storage_kind') or ''!s} "
+                f"| format={row.get('storage_format') or ''!s} | roles={roles_str or ''} | schema_present={row.get('schema_present') or False!s}"
             )
+            versioning_mode = str(row.get("versioning_mode") or "")
+            version_column = str(row.get("version_column") or "")
+            config_version = str(row.get("config_version") or "")
+            quality_version = str(row.get("quality_version") or "")
+            detail_parts = [
+                f"config_version={config_version}" if config_version else "",
+                f"quality_version={quality_version}" if quality_version else "",
+                f"partition_by={partition_str}" if partition_str else "",
+                f"sort_by={sort_str}" if sort_str else "",
+                f"versioning_mode={versioning_mode}" if versioning_mode else "",
+                f"version_column={version_column}" if version_column else "",
+            ]
+            detail_line = " | ".join(part for part in detail_parts if part)
+            if detail_line:
+                lines.append(f"  {detail_line}")
             producers = row.get("producers")
             if isinstance(producers, list):
                 normalized_producers: set[str] = set()
@@ -737,6 +813,57 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
                         lines.append(f"  {prefix}={value}")
         if len(lines) == 1:
             lines.append("- no storage lineage found")
+        return "\n".join(lines)
+
+    if profile_config["mode"] == "run_artifacts":
+        lines = [f"{title}: `{name}`"]
+        for row in rows:
+            run_instance_name = str(row.get("run_instance_name") or "")
+            if not run_instance_name:
+                continue
+            lines.append(
+                f"- run_instance={run_instance_name} | lifecycle_status={row.get('lifecycle_status') or ''!s} "
+                f"| manifest_id={row.get('manifest_id') or ''!s} | run_id={row.get('run_id') or ''!s}"
+            )
+            detail_parts = [
+                f"contract_ref={row.get('contract_ref') or ''!s}" if row.get("contract_ref") else "",
+                f"contract_version={row.get('contract_version') or ''!s}" if row.get("contract_version") else "",
+                f"effective_config_artifact_id={row.get('effective_config_artifact_id') or ''!s}"
+                if row.get("effective_config_artifact_id")
+                else "",
+                f"lineage_fragment_id={row.get('lineage_fragment_id') or ''!s}" if row.get("lineage_fragment_id") else "",
+            ]
+            detail_line = " | ".join(part for part in detail_parts if part)
+            if detail_line:
+                lines.append(f"  {detail_line}")
+            for field_name, prefix in (
+                ("artifacts", "artifact"),
+                ("dependencies", "depends_on"),
+                ("support_links", "support"),
+            ):
+                values = row.get(field_name)
+                if not isinstance(values, list):
+                    continue
+                normalized: set[str] = set()
+                for value in values:
+                    if not isinstance(value, dict):
+                        continue
+                    value_name = str(value.get("name") or "")
+                    if not value_name:
+                        continue
+                    labels = value.get("labels")
+                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                    artifact_family = str(value.get("artifact_family") or "")
+                    extras = []
+                    if label_str:
+                        extras.append(f"labels={label_str}")
+                    if artifact_family:
+                        extras.append(f"artifact_family={artifact_family}")
+                    suffix = f" | {' | '.join(extras)}" if extras else ""
+                    normalized.add(f"  {prefix}={value_name}{suffix}")
+                lines.extend(sorted(normalized))
+        if len(lines) == 1:
+            lines.append("- no run instance artifact chain found")
         return "\n".join(lines)
 
     if profile_config["mode"] == "duplication_cluster":
