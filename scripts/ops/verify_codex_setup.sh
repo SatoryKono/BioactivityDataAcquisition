@@ -46,7 +46,7 @@ echo ""
 
 # Check Codex
 echo "[4/5] Checking Codex CLI..."
-ENSURE_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ensure_codex_cli.sh"
+ENSURE_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/support/ensure_codex_cli.sh"
 if [[ -x "${ENSURE_SCRIPT}" ]]; then
     CODEX_BIN="$("${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
 else

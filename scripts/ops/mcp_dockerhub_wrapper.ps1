@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
-. (Join-Path $PSScriptRoot "load_repo_env.ps1")
+. (Join-Path $PSScriptRoot "support/load_repo_env.ps1")
 Import-BioetlRepoEnv -RepoRoot $repoRoot
 
 if (-not $env:DOCKERHUB_USERNAME) {

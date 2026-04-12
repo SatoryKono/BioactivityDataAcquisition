@@ -1,3 +1,14 @@
+---
+Version: 1.0.0
+Status: active
+Class: internal-published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Priority: Informational
+Last verified: '2026-04-12'
+---
+
 # Neo4j MCP Backend - Recovery Guide
 
 ## Problem Summary
