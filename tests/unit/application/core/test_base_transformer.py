@@ -296,15 +296,15 @@ class TestTemplateMethodPattern:
     async def test_transform_calls_transform_impl(
         self, transformer: ConcreteTransformer, mock_context: PipelineContext
     ) -> None:
-        """Test transform() delegates to _transform_impl()."""
+        """Test transform() delegates to _transform_impl() without mutating payload."""
         record = {"id": "123", "value": "test"}
         result = await transformer.transform(mock_context, record, index=0)
         assert result["id"] == "123"
         assert result["value"] == "test"
-        assert "_run_id" in result
-        assert "_run_type" in result
+        assert "_run_id" not in result
+        assert "_run_type" not in result
         assert "_source_batch_id" not in result
-        assert "_ingestion_ts" in result
+        assert "_ingestion_ts" not in result
 
     @pytest.mark.asyncio
     async def test_transform_handles_transformation_error(

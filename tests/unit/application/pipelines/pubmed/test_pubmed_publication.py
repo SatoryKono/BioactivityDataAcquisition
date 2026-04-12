@@ -174,8 +174,9 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
     assert silver_record["language"] == "eng"
     assert silver_record["country"] == "United States"
     # Metadata
-    assert "_ingestion_ts" not in silver_record
-    assert "_run_id" not in silver_record
+    assert "_ingestion_ts" in silver_record
+    assert silver_record["_run_id"] == str(pipeline_context.run_id)
+    assert silver_record["_run_type"] == pipeline_context.run_type.value
 
 
 @pytest.mark.asyncio

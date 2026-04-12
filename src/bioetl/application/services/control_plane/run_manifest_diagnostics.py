@@ -83,12 +83,32 @@ def _build_base_summary(
         ],
         "occurrence_only_diagnostics": [],
     }
-    summary["persistence_profile"] = _build_persistence_profile(
+    persistence_profile = _build_persistence_profile(
         base_summary=summary,
         ledger_entries_present=False,
         artifact_refs=[],
         lineage_fragment_ids=set(),
         missing_link_count=0,
+    )
+    summary["persistence_profile"] = persistence_profile
+    summary["alert_signals"] = _build_alert_signals(
+        latest_status=None,
+        artifact_refs=[],
+        lineage_fragment_ids=set(),
+        missing_link_count=0,
+        dq_signal_present=False,
+        cross_validation_signal_present=False,
+        replay_ready_missing_requirements=cast(
+            "list[str]",
+            persistence_profile.get("replay_ready_missing_requirements", []),
+        ),
+        forensic_grade_missing_requirements=cast(
+            "list[str]",
+            persistence_profile.get("forensic_grade_missing_requirements", []),
+        ),
+    )
+    summary["next_steps"] = _build_next_steps(
+        cast("dict[str, bool]", summary["alert_signals"])
     )
     return summary
 
@@ -333,6 +353,9 @@ def _build_final_summary(
         "contract_version": base_summary.get("contract_version"),
         "replay_capability": base_summary.get("replay_capability"),
         "requested_exact_replay": base_summary.get("requested_exact_replay"),
+        "exact_replay_support_boundary": base_summary.get(
+            "exact_replay_support_boundary"
+        ),
         "replay_capability_reason": base_summary.get("replay_capability_reason"),
         "exact_replay_eligible": base_summary.get("exact_replay_eligible"),
         "exact_replay_blockers": base_summary.get("exact_replay_blockers", []),
@@ -707,11 +730,16 @@ def _build_alert_signals(
     latest_status_normalized = (latest_status or "").strip().lower()
     artifact_ref_count = len(artifact_refs)
     has_artifact_refs = artifact_ref_count > 0
+    strict_replay_boundary_gap = (
+        "strict_replay_execution_context_support"
+        in replay_ready_missing_requirements
+    )
     return {
         "run_failed": latest_status_normalized == "failed",
         "run_shutdown": latest_status_normalized == "shutdown",
         "artifact_linkage_gap": missing_link_count > 0,
         "lineage_gap": has_artifact_refs and not lineage_fragment_ids,
+        "strict_replay_boundary_gap": strict_replay_boundary_gap,
         "replay_ready_gap": bool(replay_ready_missing_requirements),
         "forensic_grade_gap": bool(forensic_grade_missing_requirements),
         "dq_signal_present": dq_signal_present,
@@ -733,6 +761,10 @@ def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
     if alert_signals.get("lineage_gap", False):
         steps.append(
             "Investigate lineage persistence for published artifacts before restart."
+        )
+    if alert_signals.get("strict_replay_boundary_gap", False):
+        steps.append(
+            "Treat this execution context as outside the strict exact-replay support boundary; use rebuild/resume semantics instead of exact replay."
         )
     if alert_signals.get("replay_ready_gap", False):
         steps.append(

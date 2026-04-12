@@ -281,6 +281,12 @@ than silently accepting the bundle as canonical.
 - `persistence_profile.attained_profile=degraded_observable` means manifest
   inspection still works, but replay-ready requirements are missing and should
   be read from `*_missing_requirements`;
+- `exact_replay_support_boundary=snapshot_backed_source_runs_only` means only
+  snapshot-backed source runs can become strict-replayable in the current
+  model;
+- `exact_replay_support_boundary=composite_execution_unsupported` means the
+  current composite execution path must not be interpreted as exact-replayable
+  even when cached Bronze inputs are used;
 - `alert_signals.replay_ready_gap=true` means the run must not be treated as
   exact-replay ready even if manifest inspection itself is available;
 - `alert_signals.forensic_grade_gap=true` means the run must not be treated as

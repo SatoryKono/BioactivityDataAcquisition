@@ -409,6 +409,9 @@ surface:
 
 - `requested_exact_replay` reports launch-time operator intent from
   `launch_context.exact_replay`;
+- `exact_replay_support_boundary` reports whether the manifested execution
+  context can ever be strict-replayable. Current published values are
+  `snapshot_backed_source_runs_only` and `composite_execution_unsupported`;
 - `replay_capability` and `exact_replay_eligible` report what the persisted
   immutable input snapshot set actually proves about the run;
 - `exact_replay_blockers` explains why a run is not exact-replay eligible;
@@ -416,6 +419,11 @@ surface:
   and the manifest carries immutable input snapshots;
 - snapshot-backed runs that captured immutable inputs without being launched as
   exact replay are rendered as `replay_mode=snapshot_backed_run`.
+
+Composite execution is currently outside the strict exact-replay support
+boundary. Composite manifests therefore publish
+`exact_replay_support_boundary=composite_execution_unsupported` and remain
+`rebuild_only` even when they consume cached Bronze inputs.
 
 For replay-safe runs the published inspection surface MUST expose compact replay
 anchors derived from manifest source refs:
