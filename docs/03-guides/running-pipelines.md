@@ -243,6 +243,11 @@ bioetl run --pipeline chembl_activity --cached-bronze-date 2026-01-20
 bioetl run --pipeline chembl_activity --cached-bronze-path ./my-cache
 ```
 
+Если пользователь запрашивает `bioetl run --exact-replay` без
+`--use-cached-bronze`, CLI теперь заранее предупреждает, что такой запуск
+находится **вне strict exact-replay boundary**. Exact replay для ordinary
+pipeline path по-прежнему требует snapshot-backed cached Bronze inputs.
+
 ### Фильтрация по CSV
 
 Обрабатывать только записи с указанными ID:

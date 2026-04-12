@@ -93,26 +93,14 @@ def resolve_join_key_names(
     parse_pipeline_name: Callable[[str], tuple[str, str]],
 ) -> tuple[str, str, str | None]:
     """Resolve qualified join keys for the common symmetric join case."""
-    seed_join_key_qualified = build_qualified_join_key(
+    return _resolve_join_key_names_internal(
+        left_key=primary_key,
+        right_key=primary_key,
+        left_pipeline=seed_pipeline,
+        right_pipeline=enricher_pipeline,
+        merged_columns=merged_columns,
         parse_pipeline_name=parse_pipeline_name,
-        pipeline=seed_pipeline,
-        key=primary_key,
     )
-    seed_join_key = (
-        seed_join_key_qualified
-        if seed_join_key_qualified is not None
-        and seed_join_key_qualified in merged_columns
-        else primary_key
-    )
-    enricher_join_key = (
-        build_qualified_join_key(
-            parse_pipeline_name=parse_pipeline_name,
-            pipeline=enricher_pipeline,
-            key=primary_key,
-        )
-        or primary_key
-    )
-    return seed_join_key, enricher_join_key, seed_join_key_qualified
 
 
 def resolve_join_key_names_asymmetric(
@@ -125,6 +113,26 @@ def resolve_join_key_names_asymmetric(
     parse_pipeline_name: Callable[[str], tuple[str, str]],
 ) -> tuple[str, str, str | None]:
     """Resolve qualified join keys when left/right key names differ."""
+    return _resolve_join_key_names_internal(
+        left_key=left_key,
+        right_key=right_key,
+        left_pipeline=left_pipeline,
+        right_pipeline=right_pipeline,
+        merged_columns=merged_columns,
+        parse_pipeline_name=parse_pipeline_name,
+    )
+
+
+def _resolve_join_key_names_internal(
+    *,
+    left_key: str,
+    right_key: str,
+    left_pipeline: str | None,
+    right_pipeline: str,
+    merged_columns: list[str],
+    parse_pipeline_name: Callable[[str], tuple[str, str]],
+) -> tuple[str, str, str | None]:
+    """Resolve one qualified left/right join-key pair with optional asymmetry."""
     left_join_key_qualified = build_qualified_join_key(
         parse_pipeline_name=parse_pipeline_name,
         pipeline=left_pipeline,

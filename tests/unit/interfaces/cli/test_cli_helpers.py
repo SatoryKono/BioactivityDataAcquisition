@@ -404,6 +404,58 @@ class TestCliCommands:
         assert isinstance(options, RunOptions)
         assert options.resume is True
 
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
+    def test_run_exact_replay_without_cached_bronze_warns_boundary(
+        self, mock_asyncio_run, mock_register, cli_runner, mock_registry
+    ):
+        """Exact replay without cached Bronze warns that the run is outside the boundary."""
+        from bioetl.application.services import PipelineRunResult, RunResult
+
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
+        )
+
+        result = cli_runner.invoke(
+            cli, ["run", "--pipeline", "chembl_activity", "--exact-replay"]
+        )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
+        assert "outside the strict exact-replay boundary" in result.output
+        assert "without --use-cached-bronze" in result.output
+
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
+    def test_run_exact_replay_with_cached_bronze_omits_boundary_warning(
+        self, mock_asyncio_run, mock_register, cli_runner, mock_registry
+    ):
+        """Snapshot-backed exact-replay intent should not emit the no-cache warning."""
+        from bioetl.application.services import PipelineRunResult, RunResult
+
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
+        )
+
+        result = cli_runner.invoke(
+            cli,
+            [
+                "run",
+                "--pipeline",
+                "chembl_activity",
+                "--exact-replay",
+                "--use-cached-bronze",
+            ],
+        )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
+        assert "without --use-cached-bronze" not in result.output
+
 
 # =============================================================================
 # Main entry point test
