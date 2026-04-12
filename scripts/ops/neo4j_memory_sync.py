@@ -1095,6 +1095,7 @@ class DuplicateFamilyConfig:
     roots: tuple[str, ...]
     package_family: str
     promotion_targets: tuple[NodeKey, ...]
+    excluded_paths: tuple[str, ...] = ()
 
 
 @dataclass
@@ -1360,17 +1361,18 @@ def _duplication_analysis_config(memory_mapping: dict[str, object]) -> dict[str,
     families: list[DuplicateFamilyConfig] = []
     if isinstance(raw_families, dict):
         for family_name, family_payload in raw_families.items():
-            if not isinstance(family_payload, dict):
-                continue
-            roots = tuple(_as_string_list(family_payload.get("roots")))
-            package_family = str(family_payload.get("package_family", "")).strip()
-            if not roots or not package_family:
-                continue
-            promotion_targets: list[NodeKey] = []
-            raw_targets = family_payload.get("promotion_targets", [])
-            if isinstance(raw_targets, list):
-                for raw_target in raw_targets:
-                    if not isinstance(raw_target, dict):
+        if not isinstance(family_payload, dict):
+            continue
+        roots = tuple(_as_string_list(family_payload.get("roots")))
+        package_family = str(family_payload.get("package_family", "")).strip()
+        if not roots or not package_family:
+            continue
+        excluded_paths = tuple(sorted(set(_as_string_list(family_payload.get("excluded_paths")))))
+        promotion_targets: list[NodeKey] = []
+        raw_targets = family_payload.get("promotion_targets", [])
+        if isinstance(raw_targets, list):
+            for raw_target in raw_targets:
+                if not isinstance(raw_target, dict):
                         continue
                     label = str(raw_target.get("label", "")).strip()
                     name = str(raw_target.get("name", "")).strip()
@@ -1382,6 +1384,7 @@ def _duplication_analysis_config(memory_mapping: dict[str, object]) -> dict[str,
                     roots=roots,
                     package_family=package_family,
                     promotion_targets=tuple(promotion_targets),
+                    excluded_paths=excluded_paths,
                 )
             )
 
@@ -1841,6 +1844,8 @@ def _family_for_path(relative_path: str, config: dict[str, object]) -> Duplicate
     best: DuplicateFamilyConfig | None = None
     for family in families:
         if not isinstance(family, DuplicateFamilyConfig):
+            continue
+        if relative_path in family.excluded_paths:
             continue
         if any(relative_path == root or relative_path.startswith(f"{root}/") for root in family.roots):
             if best is None or max(len(root) for root in family.roots) > max(len(root) for root in best.roots):
